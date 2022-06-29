@@ -18,6 +18,6 @@ CUSTOM_DB_TYPE_TO_SA_CLASS = frozendict(
         PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE: datetime.TIMESTAMP_WITHOUT_TIME_ZONE,
         MathesarCustomType.URI: uri.URI,
         MathesarCustomType.MATHESAR_JSON_OBJECT: json_object.MathesarJsonObject,
-        MathesarCustomType.MATHESAR_JSON_ARRAY:  json_array.MathesarJsonArray,
+        MathesarCustomType.MATHESAR_JSON_ARRAY: json_array.MathesarJsonArray,
     }
 )

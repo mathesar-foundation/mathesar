@@ -114,9 +114,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 INVALID: [],
             },
             PostgresType.CHARACTER: {
-                VALID: [
-                    ({'key1': 'val1'}, "{'key1': 'val1'}")
-                ],
+                VALID: [],
                 INVALID: [],
             },
             PostgresType.CHARACTER_VARYING: {
@@ -134,9 +132,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             MathesarCustomType.MATHESAR_JSON_ARRAY: {
                 VALID: [
-                    ([1,2,3], [1,2,3])
+                    ([1, 2, 3], [1, 2, 3])
                 ],
-                INVALID: [{'key1': 'val1'}],
+                INVALID: ["{'key1': 'val1'}"],
             },
         },
     },
@@ -164,9 +162,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 INVALID: [],
             },
             PostgresType.CHARACTER: {
-                VALID: [
-                    ({'key1': 'val1'}, "{'key1': 'val1'}")
-                ],
+                VALID: [],
                 INVALID: [],
             },
             PostgresType.CHARACTER_VARYING: {
@@ -184,9 +180,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             MathesarCustomType.MATHESAR_JSON_ARRAY: {
                 VALID: [
-                    ([1,2,3], [1,2,3])
+                    ([1, 2, 3], [1, 2, 3])
                 ],
-                INVALID: [{'key1': 'val1'}],
+                INVALID: [],
             },
         },
     },
@@ -194,31 +190,29 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             PostgresType.JSONB: {
                 VALID: [
-                    ({"key1": "val1"}, {"key1": "val1"})
+                    ('{"key1": "val1"}', {"key1": "val1"})
                 ],
                 INVALID: [],
             },
             PostgresType.JSON: {
                 VALID: [
-                    ({"key1": "val1"}, {"key1": "val1"}),
+                    ('{"key1": "val1"}', {"key1": "val1"}),
                 ],
                 INVALID: [],
             },
             PostgresType.TEXT: {
                 VALID: [
-                    ({"key1": "val1"}, '{"key1": "val1"}')
+                    ('{"key1": "val1"}', '{"key1": "val1"}')
                 ],
                 INVALID: [],
             },
             PostgresType.CHARACTER: {
-                VALID: [
-                    ({'key1': 'val1'}, "{'key1': 'val1'}")
-                ],
+                VALID: [],
                 INVALID: [],
             },
             PostgresType.CHARACTER_VARYING: {
                 VALID: [
-                    ({"key1": "val1"}, '{"key1": "val1"}'),
+                    ('{"key1": "val1"}', '{"key1": "val1"}'),
                 ],
                 INVALID: [],
             },
@@ -236,31 +230,29 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             PostgresType.JSONB: {
                 VALID: [
-                    ([1,2,3], [1,2,3])
+                    ('[1, 2, 3]', [1, 2, 3])
                 ],
                 INVALID: [],
             },
             PostgresType.JSON: {
                 VALID: [
-                    ([1,2,3], [1,2,3])
+                    ('[1, 2, 3]', [1, 2, 3])
                 ],
                 INVALID: [],
             },
             PostgresType.TEXT: {
                 VALID: [
-                    ([1,2,3], '[1,2,3]')
+                    ('[1, 2, 3]', '[1, 2, 3]')
                 ],
                 INVALID: [],
             },
             PostgresType.CHARACTER: {
-                VALID: [
-                    ([1,2,3], "[1,2,3]")
-                ],
+                VALID: [],
                 INVALID: [],
             },
             PostgresType.CHARACTER_VARYING: {
                 VALID: [
-                    ([1,2,3], '[1,2,3]')
+                    ('[1, 2, 3]', '[1, 2, 3]')
                 ],
                 INVALID: [],
             },
@@ -286,28 +278,20 @@ MASTER_DB_TYPE_MAP_SPEC = {
             MathesarCustomType.MATHESAR_MONEY: {VALID: []},
             PostgresType.MONEY: {VALID: []},
             PostgresType.JSON: {
-                VALID: [
-                    ("{'key1': 'val1'}", {'key1': 'val1'})
-                ],
+                VALID: [],
                 INVALID: [],
             },
             PostgresType.JSONB: {
-                VALID: [
-                    ("{'key1': 'val1'}", {'key1': 'val1'})
-                ],
+                VALID: [],
                 INVALID: [],
             },
             MathesarCustomType.MATHESAR_JSON_OBJECT: {
-                VALID: [
-                    ("{'key1': 'val1'}", {'key1': 'val1'})
-                ],
-                INVALID: ["{key",],
+                VALID: [],
+                INVALID: [],
             },
             MathesarCustomType.MATHESAR_JSON_ARRAY: {
-                VALID: [
-                    ('[1,2,3]', [1,2,3])
-                ],
-                INVALID: ["{key",],
+                VALID: [],
+                INVALID: [],
             },
             MathesarCustomType.MULTICURRENCY_MONEY: {
                 VALID: [
@@ -716,7 +700,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     ('{"key1": "val1"}', json.loads('{"key1": "val1"}')),
                     ('{"key2": "val2"}', json.loads('{"key2": "val2"}'))
                 ],
-                INVALID:  [],
+                INVALID: [],
             },
             MathesarCustomType.MATHESAR_JSON_OBJECT: {
                 VALID: [
@@ -728,7 +712,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [
                     ('[1, 2, 3]', [1, 2, 3])
                 ],
-                INVALID: ['{"key1',],
+                INVALID: [],
             },
             PostgresType.DOUBLE_PRECISION: {
                 VALID: [("1.234", 1.234)],
@@ -895,7 +879,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     ('{"key2": "val2"}', json.loads('{"key2": "val2"}'))
                 ],
                 INVALID: [],
-            },            
+            },
             MathesarCustomType.MATHESAR_JSON_OBJECT: {
                 VALID: [
                     ('{"key1": "val1"}', {"key1": "val1"})
@@ -906,7 +890,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [
                     ('[1, 2, 3]', [1, 2, 3])
                 ],
-                INVALID: ['{key1'],
+                INVALID: [],
             },
             PostgresType.DOUBLE_PRECISION: {
                 VALID: [("1.234", 1.234)],
