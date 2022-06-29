@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.models import Schema
+from mathesar.models.base import Schema
 
 
 class ModelNameField(serializers.CharField):

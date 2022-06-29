@@ -1,4 +1,4 @@
-from mathesar.models import Database
+from mathesar.models.base import Database
 from mathesar.filters.base import get_available_filters
 
 

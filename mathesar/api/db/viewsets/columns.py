@@ -19,7 +19,7 @@ from db.records.exceptions import UndefinedFunction
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
-from mathesar.models import Column
+from mathesar.models.base import Column
 
 
 class ColumnViewSet(viewsets.ModelViewSet):

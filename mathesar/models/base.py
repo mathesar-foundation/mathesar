@@ -1,10 +1,11 @@
 from bidict import bidict
-from django.contrib.auth.models import User
+
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
 from django.utils.functional import cached_property
-from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -26,6 +27,7 @@ from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tables.operations.split import extract_columns_from_table
+
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
@@ -414,6 +416,7 @@ class Column(ReflectionManagerMixin, BaseModel):
     def _sa_engine(self):
         return self.table._sa_engine
 
+    # TODO probably shouldn't be private: a lot of code already references it.
     @cached_property
     def _sa_column(self):
         return self.table.sa_columns[self.name]
