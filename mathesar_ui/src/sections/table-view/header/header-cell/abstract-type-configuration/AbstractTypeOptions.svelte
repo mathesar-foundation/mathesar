@@ -9,8 +9,6 @@
   import type { DbType } from '@mathesar/AppTypes';
   import type { Column } from '@mathesar/stores/table-data/types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
-
-  import DbOptionsForm from './db-options-form/DbOptionsForm.svelte';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
   import TypeOptionTab from './TypeOptionTab.svelte';
@@ -109,7 +107,9 @@
   </ul>
   <div class="type-options-content">
     {#if selectedTab === 'database'}
-      <DbOptionsForm bind:selectedDbType {selectedAbstractType} {dbForm} />
+      {#if dbForm}
+        <FormBuilder form={dbForm} />
+      {/if}
       <SetDefaultValue
         bind:defaultValue
         bind:defaultValueHasError

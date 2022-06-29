@@ -35,6 +35,18 @@ export interface NumberCellProps
   extends CellTypeProps<string | number>,
     NumberCellExternalProps {}
 
+// Money
+
+export interface MoneyCellExternalProps
+  extends Partial<NumberFormatterOptions> {
+  currencySymbol: string;
+  currencySymbolLocation: 'after-minus' | 'end-with-space';
+}
+
+export interface MoneyCellProps
+  extends CellTypeProps<string | number>,
+    MoneyCellExternalProps {}
+
 // Checkbox
 
 export type CheckBoxCellExternalProps = Record<string, never>;
