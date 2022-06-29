@@ -9,8 +9,8 @@ from db.columns.operations.select import get_columns_attnum_from_names
 from db.types.base import PostgresType, MathesarCustomType
 
 from mathesar import reflection
-from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.models import base as models_base
 from mathesar.models.base import Column, Table, DataFile
 
 
@@ -666,7 +666,7 @@ def test_table_delete(create_patents_table, client):
     table = create_patents_table(table_name)
     table_count = len(Table.objects.all())
 
-    with patch.object(models, 'drop_table') as mock_delete:
+    with patch.object(models_base, 'drop_table') as mock_delete:
         response = client.delete(f'/api/db/v0/tables/{table.id}/')
     assert response.status_code == 204
 

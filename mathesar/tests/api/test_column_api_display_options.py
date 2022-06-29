@@ -1,6 +1,6 @@
 import pytest
 
-from sqlalchemy import INTEGER, BOOLEAN, TEXT, TIMESTAMP, Column, Table as SATable, MetaData, TIME, DATE
+from sqlalchemy import INTEGER, BOOLEAN, TEXT, TIMESTAMP, Column as SAColumn, Table as SATable, MetaData, TIME, DATE
 
 from db.columns.operations.alter import alter_column_type
 from db.columns.operations.select import get_column_attnum_from_name
@@ -8,22 +8,22 @@ from db.tables.operations.select import get_oid_from_table
 from db.types.base import PostgresType, MathesarCustomType
 from db.types.custom.money import MathesarMoney
 
-from mathesar import models
+from mathesar.models.base import Table, Column
 
 
 @pytest.fixture
 def column_test_table_with_service_layer_options(patent_schema):
     engine = patent_schema._sa_engine
     column_list_in = [
-        Column("mycolumn0", INTEGER, primary_key=True),
-        Column("mycolumn1", BOOLEAN),
-        Column("mycolumn2", INTEGER),
-        Column("mycolumn3", TEXT),
-        Column("mycolumn4", TEXT),
-        Column("mycolumn5", MathesarMoney),
-        Column("mycolumn6", TIMESTAMP),
-        Column("mycolumn7", TIME),
-        Column("mycolumn8", DATE),
+        SAColumn("mycolumn0", INTEGER, primary_key=True),
+        SAColumn("mycolumn1", BOOLEAN),
+        SAColumn("mycolumn2", INTEGER),
+        SAColumn("mycolumn3", TEXT),
+        SAColumn("mycolumn4", TEXT),
+        SAColumn("mycolumn5", MathesarMoney),
+        SAColumn("mycolumn6", TIMESTAMP),
+        SAColumn("mycolumn7", TIME),
+        SAColumn("mycolumn8", DATE),
     ]
     column_data_list = [
         {},
@@ -62,12 +62,12 @@ def column_test_table_with_service_layer_options(patent_schema):
     )
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     service_columns = []
     for column_data in zip(column_list_in, column_data_list):
         attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
         service_columns.append(
-            models.Column.current_objects.get_or_create(
+            Column.current_objects.get_or_create(
                 table=table,
                 attnum=attnum,
                 display_options=column_data[1].get('display_options', None)

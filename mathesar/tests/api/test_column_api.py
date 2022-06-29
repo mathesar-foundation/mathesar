@@ -8,7 +8,7 @@ from sqlalchemy import select
 from db.constants import COLUMN_NAME_TEMPLATE
 from db.types.base import PostgresType, MathesarCustomType
 
-from mathesar import models
+from mathesar.models import base as models_base
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.tests.api.test_table_api import check_columns_response
 
@@ -567,7 +567,7 @@ def test_column_duplicate(column_test_table, client):
         "copy_source_data": False,
         "copy_source_constraints": False,
     }
-    with patch.object(models, "duplicate_column") as mock_infer:
+    with patch.object(models_base, "duplicate_column") as mock_infer:
         mock_infer.return_value = target_col
         response = client.post(
             f"/api/db/v0/tables/{column_test_table.id}/columns/",
