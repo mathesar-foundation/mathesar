@@ -11,7 +11,7 @@ from db.types.base import PostgresType, MathesarCustomType
 from mathesar import reflection
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models import Column, Table, DataFile
+from mathesar.models.base import Column, Table, DataFile
 
 
 @pytest.fixture

@@ -17,7 +17,7 @@ from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import (
     SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer, TableSerializer,
 )
-from mathesar.models import Table
+from mathesar.models.base import Table
 from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
 from mathesar.utils.tables import (
     get_table_column_types

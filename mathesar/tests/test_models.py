@@ -4,7 +4,7 @@ from django.core.cache import cache
 
 from mathesar import models
 from mathesar import reflection
-from mathesar.models import Database
+from mathesar.models.base import Database
 from mathesar.utils.models import attempt_dumb_query
 
 

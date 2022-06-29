@@ -1,6 +1,6 @@
 from django.urls import reverse
 from rest_framework import serializers
-from mathesar.models import Query
+from mathesar.models.query import UIQuery
 
 
 class QuerySerializer(serializers.ModelSerializer):
@@ -8,11 +8,11 @@ class QuerySerializer(serializers.ModelSerializer):
     columns_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = Query
+        model = UIQuery
         fields = '__all__'
 
     def get_records_url(self, obj):
-        if isinstance(obj, Query):
+        if isinstance(obj, UIQuery):
             # Only get records if we are serializing an existing table
             request = self.context['request']
             return request.build_absolute_uri(reverse('query-records', kwargs={'pk': obj.pk}))
@@ -20,7 +20,7 @@ class QuerySerializer(serializers.ModelSerializer):
             return None
 
     def get_columns_url(self, obj):
-        if isinstance(obj, Query):
+        if isinstance(obj, UIQuery):
             # Only get columns if we are serializing an existing table
             request = self.context['request']
             return request.build_absolute_uri(reverse('query-columns', kwargs={'pk': obj.pk}))

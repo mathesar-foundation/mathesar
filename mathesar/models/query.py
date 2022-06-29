@@ -1,16 +1,12 @@
-from collections import namedtuple
-
-from sqlalchemy import select, join
-
 from django.db import models
 from django.utils.functional import cached_property
 
-from db.columns.base import MathesarColumn
+from db.queries.base import DBQuery, JoinParams, InitialColumn
 
-from mathesar.models.base import BaseModel, Column
+from mathesar.models.base import BaseModel, Column, Table
 
 
-class Query(BaseModel):
+class UIQuery(BaseModel):
     name = models.CharField(
         max_length=128,
         unique=True,
@@ -29,27 +25,13 @@ class Query(BaseModel):
     )
 
     # dict of column ids/aliases to display options
-    display_options = models.JSONField()
+    display_options = models.JSONField(
+        null=True,
+        blank=True,
+    )
 
-    @cached_property
-    def sa_relation(self):
-        """
-        A query describes a relation. This property is the result of parsing a query into a
-        relation.
-        """
-        initial_relation = _get_initial_relation(self)
-        transformed = _apply_transformations(initial_relation, self.transformations)
-        return transformed
-
-    @cached_property
-    def sa_output_columns(self):
-        """
-        Sequence of SQLAlchemy columns representing the output columns of the relation described
-        by this query.
-        """
-        regular_sa_columns = self.sa_relation.columns
-        enriched_sa_columns = tuple(MathesarColumn.from_column(col) for col in regular_sa_columns)
-        return enriched_sa_columns
+    def get_records(self):
+        return self.db_query.get_records()
 
     @cached_property
     def get_output_columns_described(self):
@@ -66,127 +48,61 @@ class Query(BaseModel):
                 'display_options': self._get_display_options_for_sa_col(sa_col),
             }
             for sa_col
-            in self.sa_output_columns
+            in self.db_query.sa_output_columns
         )
+
+    @cached_property
+    def db_query(self):
+        return DBQuery(
+            base_table=self.sa_base_table,
+            initial_columns=self._db_initial_columns(self),
+            transformations=self._db_transformations(self),
+            name=self.name,
+        )
+
+    @cached_property
+    def _db_initial_columns(self):
+        return tuple(
+            _db_initial_column_from_json(json_initial_column)
+            for json_initial_column
+            in self.initial_columns
+        )
+
+    @cached_property
+    def _db_transformations(self):
+        return
 
     def _get_display_options_for_sa_col(self, sa_col):
         if self.display_options is not None:
             return self.display_options.get(sa_col.name)
 
-    def get_records(self):
-        pass
 
-    @cached_property
-    def sa_base_table(self):
-        pass
-
-
-class JoinParams(
-        namedtuple(
-            'JoinParams',
-            [
-                'left_table',
-                'right_table',
-                'left_column',
-                'right_column',
-            ]
-        )
-    ):
-
-    def flip(self):
-        return JoinParams(
-            left_table=self.right_table,
-            right_table=self.left_table,
-            left_column=self.right_column,
-            right_column=self.left_column,
-        )
-
-    @staticmethod
-    def from_json(json):
-        return JoinParams(
-            left_table=json['left_table'],
-            right_table=json['foreign_table'],
-            left_column=json['native_column'],
-            right_column=json['foreign_column'],
-        )
-
-
-def _apply_transformations(initial_relation, transformations):
-    return initial_relation
-
-
-def _get_initial_relation(query):
-
-    nested_join = None
-    sa_columns_to_select = []
-    for initial_column in query.initial_columns:
-        nested_join, sa_column_to_select = _process_initial_column(
-            initial_column=initial_column,
-            nested_join=nested_join,
-        )
-        sa_columns_to_select.append(sa_column_to_select)
-
-    select_target = nested_join or query.sa_base_table
-    stmt = select(*sa_columns_to_select).select_from(select_target)
-    return stmt
-
-
-def _process_initial_column(initial_column, nested_join):
-    if _is_base_column(initial_column):
-        col_to_select = _get_sa_col_from_initial_col(initial_column)
-    else:
-        jp_path = _get_jp_path(initial_column)
-
-        target_sa_column = _get_sa_col_from_initial_col(initial_column)
-        nested_join, col_to_select = _process_jp_path(
-            jp_path=jp_path,
-            nested_join=nested_join,
-            target_sa_column=target_sa_column,
-        )
-    # Give an alias/label to this column, since that's how it will be referenced in transforms.
-    aliased_col_to_select = col_to_select.label(initial_column.alias)
-    return nested_join, aliased_col_to_select
-
-
-def _process_jp_path(jp_path, nested_join, target_sa_column):
-    rightmost_table_alias = None
-    for i, jp in enumerate(reversed(jp_path)):
-        is_last_jp = i == 0
-        if is_last_jp:
-            rightmost_table_alias = jp.right_table.alias()
-            right_table = rightmost_table_alias
-        else:
-            right_table = nested_join
-
-        nested_join = join(
-            jp.left_table, right_table,
-            jp.left_column == jp.right_column
-        )
-    sa_col_to_select = _access_column_on_aliased_relation(
-        rightmost_table_alias,
-        target_sa_column,
+def _db_initial_column_from_json(json):
+    sa_column = _get_sa_col_by_id(json['id']),
+    json_jp_path = json['jp_path'],
+    jp_path = tuple(
+        join_params_from_json(json_jp)
+        for json_jp
+        in json_jp_path
     )
-    return nested_join, sa_col_to_select
+    return InitialColumn(
+        column=sa_column,
+        jp_path=jp_path,
+    )
 
 
-def _access_column_on_aliased_relation(aliased_relation, sa_column):
-    column_name = sa_column.name
-    return getattr(aliased_relation.c, column_name)
+def join_params_from_json(json_jp):
+    return JoinParams(
+        left_table=_get_sa_table_by_id(json_jp[0][0]),
+        right_table=_get_sa_table_by_id(json_jp[1][0]),
+        left_column=_get_sa_col_by_id(json_jp[0][1]),
+        right_column=_get_sa_col_by_id(json_jp[1][1]),
+    )
 
 
-def _get_sa_col_from_initial_col(initial_column):
-    dj_id = _get_initial_column_id(initial_column)
+def _get_sa_col_by_id(dj_id):
     return Column.objects.get(pk=dj_id)._sa_column
 
 
-def _get_jp_path(initial_column):
-    json = initial_column['jp_path']
-    return JoinParams.from_json(json)
-
-
-def _get_initial_column_id(initial_column):
-    return initial_column['id']
-
-
-def _is_base_column(initial_column):
-    return _get_jp_path(initial_column) is not None
+def _get_sa_table_by_id(dj_id):
+    return Table.objects.get(pk=dj_id)._sa_table

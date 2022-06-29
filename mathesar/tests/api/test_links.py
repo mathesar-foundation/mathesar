@@ -8,7 +8,7 @@ from db.tables.operations.select import get_oid_from_table
 from db.tables.utils import get_primary_key_column
 
 from mathesar import models
-from mathesar.models import Constraint, Table
+from mathesar.models.base import Constraint, Table
 
 
 @pytest.fixture

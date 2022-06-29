@@ -17,9 +17,9 @@ from db.columns.operations.select import get_column_attnum_from_name
 from db.schemas.utils import get_schema_oid_from_name
 
 import mathesar.tests.conftest
-from mathesar.models import Schema, Table, Database, DataFile
+from mathesar.models.base import Schema, Table, Database, DataFile
 from mathesar.imports.csv import create_table_from_csv
-from mathesar.models import Column as mathesar_model_column
+from mathesar.models.base import Column as mathesar_model_column
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
