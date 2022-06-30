@@ -4,9 +4,10 @@ from django.utils.functional import cached_property
 from db.queries.base import DBQuery, JoinParams, InitialColumn
 
 from mathesar.models.base import BaseModel, Column, Table
+from mathesar.models.relation import Relation
 
 
-class UIQuery(BaseModel):
+class UIQuery(BaseModel, Relation):
     name = models.CharField(
         max_length=128,
         unique=True,
@@ -30,8 +31,13 @@ class UIQuery(BaseModel):
         blank=True,
     )
 
-    def get_records(self):
-        return self.db_query.get_records()
+    # TODO add engine from base_table.schema._sa_engine
+    def get_records(self, **kwargs):
+        return self.db_query.get_records(**kwargs)
+
+    # TODO add engine from base_table.schema._sa_engine
+    def sa_num_records(self, **kwargs):
+        return self.db_query.get_count(**kwargs)
 
     @cached_property
     def get_output_columns_described(self):

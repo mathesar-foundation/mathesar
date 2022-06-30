@@ -29,6 +29,7 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from db.tables.operations.split import extract_columns_from_table
 
 from mathesar import reflection
+from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
@@ -168,7 +169,7 @@ class Schema(DatabaseObject):
         cache.delete(cache_key)
 
 
-class Table(DatabaseObject):
+class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
     MODEL_FIELDS = ['import_verified']
 
@@ -293,6 +294,7 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
+    # TODO consider using **kwargs instead of forwarding params one-by-one
     def get_records(
         self,
         limit=None,

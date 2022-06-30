@@ -5,7 +5,7 @@ from sqlalchemy import select, join
 from django.utils.functional import cached_property
 
 from db.columns.base import MathesarColumn
-
+from db.records.operations import select as records_select
 
 class DBQuery:
     def __init__(
@@ -21,8 +21,13 @@ class DBQuery:
         self.name = name
         return self
 
-    def get_records(self):
-        pass
+    # mirrors a method in db.records.operations.select
+    def get_records(self, **kwargs):
+        return records_select.get_records(table=self.sa_relation, **kwargs)
+
+    # mirrors a method in db.records.operations.select
+    def get_count(self, **kwargs):
+        return records_select.get_count(table=self.sa_relation, **kwargs)
 
     @cached_property
     def sa_output_columns(self):
