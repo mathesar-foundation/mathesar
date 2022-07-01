@@ -11,6 +11,7 @@ BASE = 'base'
 DEPTH = 'depth'
 PATH = 'path'
 TARGET = 'target'
+MULTIPLE_RESULTS = 'multiple_results'
 
 
 def reflect_table(name, schema, engine, metadata=None, connection_to_use=None):
@@ -72,7 +73,7 @@ def get_oid_from_table(name, schema, engine):
     return inspector.get_table_oid(name, schema=schema)
 
 
-def get_joinable_tables(base_table_oid, engine, max_depth=3):
+def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
     LEFT_REL = 'left_rel'
     RIGHT_REL = 'right_rel'
     LEFT_COL = 'left_col'
@@ -93,6 +94,7 @@ def get_joinable_tables(base_table_oid, engine, max_depth=3):
         cast(pg_constraint.c.confrelid, Integer).label(RIGHT_REL),
         cast(pg_constraint.c.conkey[1], Integer).label(LEFT_COL),
         cast(pg_constraint.c.confkey[1], Integer).label(RIGHT_COL),
+        literal(False).label(MULTIPLE_RESULTS)
     ).where(
         and_(
             pg_constraint.c.contype == 'f',
@@ -104,6 +106,7 @@ def get_joinable_tables(base_table_oid, engine, max_depth=3):
             cast(pg_constraint.c.conrelid, Integer).label(RIGHT_REL),
             cast(pg_constraint.c.confkey[1], Integer).label(LEFT_COL),
             cast(pg_constraint.c.conkey[1], Integer).label(RIGHT_COL),
+            literal(True).label(MULTIPLE_RESULTS),
         ).where(
             and_(
                 pg_constraint.c.contype == 'f',
@@ -132,7 +135,8 @@ def get_joinable_tables(base_table_oid, engine, max_depth=3):
                 )
             ),
             JSONB
-        ).label(PATH)
+        ).label(PATH),
+        symmetric_fkeys.columns[MULTIPLE_RESULTS],
     ).cte(name=SEARCH_FKEY_GRAPH, recursive=True)
 
     search_fkey_graph = search_fkey_graph.union_all(
@@ -156,6 +160,10 @@ def get_joinable_tables(base_table_oid, engine, max_depth=3):
                     )
                 ),
                 JSONB
+            ),
+            func.greatest(
+                search_fkey_graph.columns[MULTIPLE_RESULTS],
+                symmetric_fkeys.columns[MULTIPLE_RESULTS]
             )
         ).where(
             and_(
@@ -179,7 +187,8 @@ def get_joinable_tables(base_table_oid, engine, max_depth=3):
         cast(search_fkey_graph.columns[PATH][0][0][0], Integer).label(BASE),
         cast(search_fkey_graph.columns[PATH][-1][-1][0], Integer).label(TARGET),
         search_fkey_graph.columns[PATH].label(PATH),
-        search_fkey_graph.columns[DEPTH].label(DEPTH)
+        search_fkey_graph.columns[DEPTH].label(DEPTH),
+        search_fkey_graph.columns[MULTIPLE_RESULTS].label(MULTIPLE_RESULTS)
     ).cte(name=OUTPUT_CTE)
 
     if base_table_oid is not None:

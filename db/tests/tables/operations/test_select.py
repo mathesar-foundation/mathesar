@@ -28,13 +28,14 @@ BASE = ma_sel.BASE
 DEPTH = ma_sel.DEPTH
 PATH = ma_sel.PATH
 TARGET = ma_sel.TARGET
+MULTIPLE_RESULTS = ma_sel.MULTIPLE_RESULTS
 
 
 def _transform_row_to_names(row, engine):
     output_dict = {
-        ma_sel.BASE: ma_sel.reflect_table_from_oid(row[ma_sel.BASE], engine).name,
-        ma_sel.TARGET: ma_sel.reflect_table_from_oid(row[ma_sel.TARGET], engine).name,
-        ma_sel.PATH: [
+        BASE: ma_sel.reflect_table_from_oid(row[BASE], engine).name,
+        TARGET: ma_sel.reflect_table_from_oid(row[TARGET], engine).name,
+        PATH: [
             [
                 [
                     ma_sel.reflect_table_from_oid(oid, engine).name,
@@ -42,9 +43,10 @@ def _transform_row_to_names(row, engine):
                 ]
                 for oid, attnum in edge
             ]
-            for edge in row[ma_sel.PATH]
+            for edge in row[PATH]
         ],
-        ma_sel.DEPTH: row[ma_sel.DEPTH]
+        DEPTH: row[DEPTH],
+        MULTIPLE_RESULTS: row[MULTIPLE_RESULTS]
     }
     return output_dict
 
@@ -55,27 +57,32 @@ L1_JOINABLE_TABLES_DICT = {
             BASE: ACADEMICS,
             TARGET: UNIVERSITIES,
             PATH: [[[ACADEMICS, INSTITUTION], [UNIVERSITIES, ID]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: False,
         }, {
             BASE: ACADEMICS,
             TARGET: ACADEMICS,
             PATH: [[[ACADEMICS, ADVISOR], [ACADEMICS, ID]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: False,
         }, {
             BASE: ACADEMICS,
             TARGET: ACADEMICS,
             PATH: [[[ACADEMICS, ID], [ACADEMICS, ADVISOR]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: True,
         }, {
             BASE: ACADEMICS,
             TARGET: ARTICLES,
             PATH: [[[ACADEMICS, ID], [ARTICLES, PRIMARY_AUTHOR]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: True,
         }, {
             BASE: ACADEMICS,
             TARGET: ARTICLES,
             PATH: [[[ACADEMICS, ID], [ARTICLES, SECONDARY_AUTHOR]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: True,
         },
     ],
     ARTICLES: [
@@ -83,17 +90,20 @@ L1_JOINABLE_TABLES_DICT = {
             BASE: ARTICLES,
             TARGET: ACADEMICS,
             PATH: [[[ARTICLES, PRIMARY_AUTHOR], [ACADEMICS, ID]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: False,
         }, {
             BASE: ARTICLES,
             TARGET: ACADEMICS,
             PATH: [[[ARTICLES, SECONDARY_AUTHOR], [ACADEMICS, ID]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: False,
         }, {
             BASE: ARTICLES,
             TARGET: JOURNALS,
             PATH: [[[ARTICLES, JOURNAL], [JOURNALS, ID]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: False,
         },
     ],
     JOURNALS: [
@@ -101,17 +111,20 @@ L1_JOINABLE_TABLES_DICT = {
             BASE: JOURNALS,
             TARGET: UNIVERSITIES,
             PATH: [[[JOURNALS, INSTITUTION], [UNIVERSITIES, ID]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: False,
         }, {
             BASE: JOURNALS,
             TARGET: PUBLISHERS,
             PATH: [[[JOURNALS, PUBLISHER], [PUBLISHERS, ID]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: False,
         }, {
             BASE: JOURNALS,
             TARGET: ARTICLES,
             PATH: [[[JOURNALS, ID], [ARTICLES, JOURNAL]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: True,
         },
     ],
     PUBLISHERS: [
@@ -119,7 +132,8 @@ L1_JOINABLE_TABLES_DICT = {
             BASE: PUBLISHERS,
             TARGET: JOURNALS,
             PATH: [[[PUBLISHERS, ID], [JOURNALS, PUBLISHER]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: True,
         }
     ],
     UNIVERSITIES: [
@@ -127,12 +141,14 @@ L1_JOINABLE_TABLES_DICT = {
             BASE: UNIVERSITIES,
             TARGET: ACADEMICS,
             PATH: [[[UNIVERSITIES, ID], [ACADEMICS, INSTITUTION]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: True,
         }, {
             BASE: UNIVERSITIES,
             TARGET: JOURNALS,
             PATH: [[[UNIVERSITIES, ID], [JOURNALS, INSTITUTION]]],
-            DEPTH: 1
+            DEPTH: 1,
+            MULTIPLE_RESULTS: True,
         },
     ],
 }
@@ -148,7 +164,8 @@ def _get_expect_joinable_tables(base, depth):
                 BASE: row[BASE],
                 TARGET: target_row[TARGET],
                 PATH: row[PATH] + target_row[PATH],
-                DEPTH: row[DEPTH] + target_row[DEPTH]
+                DEPTH: row[DEPTH] + target_row[DEPTH],
+                MULTIPLE_RESULTS: row[MULTIPLE_RESULTS] or target_row[MULTIPLE_RESULTS]
             }
             for row in l1_paths
             for target_row in _get_expect_joinable_tables(row[TARGET], depth - 1)
@@ -162,12 +179,12 @@ JOINABLE_TABLES_PARAMS = [
 
 
 @pytest.mark.parametrize('table,depth', JOINABLE_TABLES_PARAMS)
-def test_get_joinable_tables_query_paths(
-        engine_with_academics, table, depth
-):
+def test_get_joinable_tables_query_paths(engine_with_academics, table, depth):
     engine, schema = engine_with_academics
     academics_oid = ma_sel.get_oid_from_table(table, schema, engine)
-    joinable_tables = ma_sel.get_joinable_tables(academics_oid, engine, max_depth=depth)
+    joinable_tables = ma_sel.get_joinable_tables(
+        engine, base_table_oid=academics_oid, max_depth=depth
+    )
     all_row_lists = [
         _get_expect_joinable_tables(table, d) for d in range(1, depth + 1)
     ]
