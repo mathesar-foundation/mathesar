@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 
 from mathesar.errors import URLDownloadError
 from mathesar.imports.csv import get_sv_dialect, get_file_encoding
-from mathesar.models import DataFile
+from mathesar.models.base import DataFile
 
 
 def _download_datafile(url):
