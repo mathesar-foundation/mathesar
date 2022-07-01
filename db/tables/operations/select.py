@@ -1,7 +1,7 @@
 import warnings
 
 from sqlalchemy import (
-    Table, MetaData, select, join, inspect, and_, cast, func, Integer, literal
+    Table, MetaData, select, join, inspect, and_, cast, func, Integer, literal, or_
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -161,7 +161,7 @@ def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
                 ),
                 JSONB
             ),
-            func.greatest(
+            or_(
                 search_fkey_graph.columns[MULTIPLE_RESULTS],
                 symmetric_fkeys.columns[MULTIPLE_RESULTS]
             )
