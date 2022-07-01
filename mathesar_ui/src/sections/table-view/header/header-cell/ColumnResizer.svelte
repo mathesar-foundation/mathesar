@@ -1,15 +1,14 @@
 <script lang="ts">
-  import type { TabularDataStore } from '@mathesar/stores/table-data/types';
-  import { getContext } from 'svelte';
   import { get } from 'svelte/store';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
 
   const MIN_COLUMN_WIDTH = 50;
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   export let columnId: number;
 
   $: ({ display } = $tabularData);
-  $: ({ customizedColumnWidths, columnWidths } = display);
+  $: ({ customizedColumnWidths, columnPlacements } = display);
 
   let isResizing = false;
   let startingPointerX: number | undefined;
@@ -33,6 +32,18 @@
     customizedColumnWidths.set(columnId, newColumnWidth);
   }
 
+  function getColumnWidth(_columnId: number): number {
+    const customizedWidth = customizedColumnWidths.getValue(_columnId);
+    if (customizedWidth) {
+      return customizedWidth;
+    }
+    const placement = get(columnPlacements).get(_columnId);
+    if (!placement) {
+      return 0;
+    }
+    return placement.width;
+  }
+
   function stopColumnResize() {
     isResizing = false;
     startingPointerX = undefined;
@@ -47,9 +58,7 @@
 
   function startColumnResize(e: MouseEvent | TouchEvent) {
     isResizing = true;
-    startingColumnWidth =
-      customizedColumnWidths.getValue(columnId) ??
-      get(columnWidths).get(columnId);
+    startingColumnWidth = getColumnWidth(columnId);
     startingPointerX = getPointerX(e);
     window.addEventListener('mousemove', resize, true);
     window.addEventListener('touchmove', resize, true);

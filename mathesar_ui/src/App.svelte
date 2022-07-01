@@ -5,9 +5,13 @@
   import Schemas from '@mathesar/pages/schemas/Schemas.svelte';
   import Header from '@mathesar/header/Header.svelte';
   import { toast } from '@mathesar/stores/toast';
+  import { setNewRecordSelectorControllerInContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { confirmationController } from '@mathesar/stores/confirmation';
+  import { getTableName } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { beginUpdatingUrlWhenSchemaChanges } from './utils/routing';
+  import { modal } from './stores/modal';
+  import RecordSelectorModal from './systems/record-selector/RecordSelectorModal.svelte';
 
   // Why is this function called at such a high level, and not handled closer to
   // the code point related to saving tab data or the code point related to
@@ -16,10 +20,16 @@
   // Because we need to place this at a high level in order to avoid circular
   // imports.
   beginUpdatingUrlWhenSchemaChanges(currentSchemaId);
+
+  const recordSelectorController = setNewRecordSelectorControllerInContext({
+    modal: modal.spawnModalController(),
+    getTableName,
+  });
 </script>
 
 <ToastPresenter entries={toast.entries} />
 <Confirmation controller={confirmationController} />
+<RecordSelectorModal controller={recordSelectorController} />
 
 <Header />
 

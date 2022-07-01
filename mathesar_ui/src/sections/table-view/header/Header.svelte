@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { onMount, getContext } from 'svelte';
-  import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data';
-  import type {
-    TabularDataStore,
-    Column,
-  } from '@mathesar/stores/table-data/types';
+  import { onMount } from 'svelte';
+  import {
+    getTabularDataStoreFromContext,
+    ROW_CONTROL_COLUMN_WIDTH,
+  } from '@mathesar/stores/table-data';
+  import type { Column } from '@mathesar/stores/table-data/types';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
   import type { ProcessedTableColumnMap } from '../utils';
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   $: ({ columnsDataStore, meta, display, constraintsDataStore } = $tabularData);
   $: ({ horizontalScrollOffset } = display);

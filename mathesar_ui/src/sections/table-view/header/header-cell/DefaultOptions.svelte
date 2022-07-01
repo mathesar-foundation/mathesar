@@ -20,6 +20,7 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { SortDirection } from '@mathesar/stores/table-data';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
 
   const dispatch = createEventDispatcher();
 
@@ -38,12 +39,8 @@
   $: allowsNull = column.nullable;
   $: ({ uniqueColumns } = constraintsDataStore);
   $: allowsDuplicates = !(column.primary_key || $uniqueColumns.has(column.id));
-  $: tableLinkConstraints = $constraintsDataStore.constraints.filter(
-    (constraint) =>
-      constraint.type === 'foreignkey' &&
-      constraint.columns.length === 1 && // only single-column foreign keys
-      constraint.columns.includes(column.id),
-  );
+  $: ({ constraints } = $constraintsDataStore);
+  $: tableLinkConstraints = findFkConstraintsForColumn(constraints, column.id);
   $: hasTableLink = tableLinkConstraints.length > 0;
   $: isRequestingRemoveTableLink = false;
 

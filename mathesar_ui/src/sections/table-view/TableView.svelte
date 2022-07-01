@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { setContext } from 'svelte';
   import { writable } from 'svelte/store';
+  import { setTabularDataStoreInContext } from '@mathesar/stores/table-data';
   import type { TabularData } from '@mathesar/stores/table-data/types';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import ActionsPane from './actions-pane/ActionsPane.svelte';
@@ -12,10 +12,10 @@
   export let tabularData: TabularData;
 
   const tabularDataContextStore = writable(tabularData);
-  setContext('tabularData', tabularDataContextStore);
+  setTabularDataStoreInContext(tabularDataContextStore);
 
   $: tabularDataContextStore.set(tabularData);
-  $: ({ columnsDataStore } = tabularData);
+  $: ({ columnsDataStore, constraintsDataStore } = tabularData);
 
   /**
    * This would ideally be part of the context. But since, we'd be
@@ -25,6 +25,7 @@
    */
   $: processedTableColumnsMap = getProcessedColumnsMap(
     $columnsDataStore.columns,
+    $constraintsDataStore.constraints,
     $currentDbAbstractTypes.data,
   );
 </script>

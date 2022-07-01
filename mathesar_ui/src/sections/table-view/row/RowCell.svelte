@@ -1,14 +1,15 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { faBackspace } from '@fortawesome/free-solid-svg-icons';
-
   import {
     ContextMenu,
     MenuItem,
     WritableMap,
   } from '@mathesar-component-library';
   import {
+    getCellStyle,
     isCellActive,
+    ROW_CONTROL_COLUMN_WIDTH,
     scrollBasedOnActiveCell,
   } from '@mathesar/stores/table-data';
   import type {
@@ -28,8 +29,6 @@
 
   export let recordsData: RecordsData;
   export let display: Display;
-  export let columnWidth = 0;
-  export let columnPosition = 0;
   export let row: Row;
   export let rowIsSelected = false;
   export let rowIsProcessing = false;
@@ -42,7 +41,7 @@
 
   $: recordsDataState = recordsData.state;
   $: ({ column } = processedColumn);
-  $: ({ activeCell } = display);
+  $: ({ activeCell, columnPlacements } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
@@ -97,10 +96,7 @@
   class:is-active={isActive}
   class:is-processing={isProcessing}
   class:is-pk={column.primary_key}
-  style="
-      width:{columnWidth}px;
-      left:{columnPosition}px;
-    "
+  style={getCellStyle($columnPlacements, column.id, ROW_CONTROL_COLUMN_WIDTH)}
 >
   <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
   <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />

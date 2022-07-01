@@ -9,7 +9,10 @@
     InputGroup,
     InputGroupText,
   } from '@mathesar-component-library';
-  import { DEFAULT_ROW_RIGHT_PADDING } from '@mathesar/stores/table-data';
+  import {
+    DEFAULT_ROW_RIGHT_PADDING,
+    ROW_CONTROL_COLUMN_WIDTH,
+  } from '@mathesar/stores/table-data';
   import type { Display, Column } from '@mathesar/stores/table-data/types';
 
   const dispatch = createEventDispatcher();
@@ -43,7 +46,7 @@
   class="cell new-column"
   style="
   width:{DEFAULT_ROW_RIGHT_PADDING}px;
-  left:{$rowWidth - DEFAULT_ROW_RIGHT_PADDING}px"
+  left:{$rowWidth + ROW_CONTROL_COLUMN_WIDTH}px"
 >
   <Dropdown
     closeOnInnerClick={false}

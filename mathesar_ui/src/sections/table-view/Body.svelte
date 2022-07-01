@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { beforeUpdate, getContext, tick } from 'svelte';
+  import { beforeUpdate, tick } from 'svelte';
   import { get } from 'svelte/store';
-  import type {
-    TabularDataStore,
-    Row,
-  } from '@mathesar/stores/table-data/types';
-  import type {
+  import type { Row } from '@mathesar/stores/table-data/types';
+  import {
     Sorting,
     Filtering,
     Grouping,
     Pagination,
+    getTabularDataStoreFromContext,
+    DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/table-data';
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
   import type { ProcessedTableColumnMap } from './utils';
+  import { rowHeightPx } from './geometry';
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   let virtualListRef: VirtualList;
 
@@ -72,14 +72,13 @@
   $: void resetIndex($displayableRecords);
 
   function getItemSize(index: number) {
-    const defaultRowHeight = 30;
     const allRecords = get(displayableRecords);
     if (allRecords?.[index]?.isNewHelpText) {
       return 24;
     }
 
     // TODO: Check and set extra height for group. Needs UX rethought.
-    return defaultRowHeight;
+    return rowHeightPx;
   }
 
   function checkAndResetActiveCell(e: Event) {
@@ -119,18 +118,18 @@
         bind:horizontalScrollOffset={$horizontalScrollOffset}
         bind:scrollOffset={$scrollOffset}
         {height}
-        width={$rowWidth}
+        width={$rowWidth + DEFAULT_ROW_RIGHT_PADDING}
         itemCount={$displayableRecords.length}
         paddingBottom={30}
         itemSize={getItemSize}
         itemKey={(index) => recordsData.getIterationKey(index)}
         let:items
       >
-        {#each items as it (it?.key || it)}
-          {#if it && $displayableRecords[it.index]}
+        {#each items as item (item?.key || item)}
+          {#if item && $displayableRecords[item.index]}
             <RowComponent
-              style={it.style}
-              bind:row={$displayableRecords[it.index]}
+              style={item.style}
+              bind:row={$displayableRecords[item.index]}
               {processedTableColumnsMap}
             />
           {/if}

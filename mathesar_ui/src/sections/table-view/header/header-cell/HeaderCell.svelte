@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getContext, tick } from 'svelte';
+  import { tick } from 'svelte';
   import {
     faCog,
     faChevronRight,
@@ -13,15 +13,17 @@
     TextInput,
     SpinnerArea,
   } from '@mathesar-component-library';
-  import type {
-    ConstraintsDataStore,
-    TabularDataStore,
-  } from '@mathesar/stores/table-data/types';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { focusAndSelectAll } from '@mathesar/utils/domUtils';
   import type {
     Meta,
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
+  import {
+    getCellStyle,
+    ROW_CONTROL_COLUMN_WIDTH,
+  } from '@mathesar/stores/table-data/display';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import DefaultOptions from './DefaultOptions.svelte';
@@ -29,7 +31,7 @@
   import type { ProcessedTableColumn } from '../../utils';
   import ColumnResizer from './ColumnResizer.svelte';
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   export let processedColumn: ProcessedTableColumn;
   export let meta: Meta;
@@ -38,7 +40,7 @@
 
   $: ({ column, abstractTypeOfColumn } = processedColumn);
   $: ({ display } = $tabularData);
-  $: ({ columnWidths, columnPositions } = display);
+  $: ({ columnPlacements } = display);
 
   let menuIsOpen = false;
   let renamingInputElement: HTMLInputElement | undefined;
@@ -138,10 +140,7 @@
 
 <div
   class="cell header-cell"
-  style="
-    width:{$columnWidths.get(column.id) ?? 0}px;
-    left:{$columnPositions.get(column.id) ?? 0}px;
-  "
+  style={getCellStyle($columnPlacements, column.id, ROW_CONTROL_COLUMN_WIDTH)}
 >
   {#if isRenaming}
     <SpinnerArea isSpinning={isSubmittingRename} hasOverlay={false}>

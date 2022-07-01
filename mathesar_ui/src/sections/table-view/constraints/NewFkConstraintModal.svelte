@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
   import type { ModalController } from '@mathesar-component-library';
   import {
     CancelOrProceedButtonPair,
@@ -16,11 +15,12 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import SelectColumn from '@mathesar/components/SelectColumn.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
-  import { ColumnsDataStore, TabularType } from '@mathesar/stores/table-data';
-  import type {
-    Column,
-    TabularDataStore,
-  } from '@mathesar/stores/table-data/types';
+  import {
+    ColumnsDataStore,
+    getTabularDataStoreFromContext,
+    TabularType,
+  } from '@mathesar/stores/table-data';
+  import type { Column } from '@mathesar/stores/table-data/types';
   import { tables as tablesStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { States } from '@mathesar/utils/api';
@@ -37,7 +37,7 @@
   ]);
   const namingStrategies = [...namingStrategyLabelMap.keys()];
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   function getSuggestedName(
     _tableName: string,

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, getContext, onMount } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import {
     Button,
     Spinner,
@@ -9,10 +9,8 @@
   import { toast } from '@mathesar/stores/toast';
 
   import type { DbType } from '@mathesar/AppTypes';
-  import type {
-    Column,
-    TabularDataStore,
-  } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/stores/table-data/types';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 
   import AbstractTypeOptions from './AbstractTypeOptions.svelte';
@@ -20,7 +18,7 @@
 
   const dispatch = createEventDispatcher();
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);
 
   export let column: Column;
