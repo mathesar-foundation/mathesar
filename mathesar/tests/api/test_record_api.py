@@ -127,9 +127,9 @@ def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, cli
     referrer_table_column_ids = [referrer_column.id for referrer_column in referrer_table_columns]
     Column.objects.filter(id__in=referrer_table_column_ids).update(display_options={'show_fk_preview': False})
     referrer_table_pk = referrer_table_columns[0]
-    referrer_column_1 = referrer_table_columns[1]
-    referrer_column_1.display_options = {'show_fk_preview': True}
-    referrer_column_1.save()
+    referrer_column_with_fk_preview = referrer_table_columns[1]
+    referrer_column_with_fk_preview.display_options = {'show_fk_preview': True}
+    referrer_column_with_fk_preview.save()
     referrer_column_2 = referrer_table_columns[2]
     self_referential_column = referrer_table_columns[3]
 
@@ -137,7 +137,7 @@ def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, cli
     referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
     referrer_table.add_constraint(ForeignKeyConstraint(None,
                                                        referrer_table.oid,
-                                                       [referrer_column_1.attnum],
+                                                       [referrer_column_with_fk_preview.attnum],
                                                        referent_table.oid,
                                                        [referent_column.attnum], {}))
     referrer_table.add_constraint(ForeignKeyConstraint(None,
@@ -156,7 +156,7 @@ def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, cli
     referred_value = '1'
     default_template_column = referent_table.get_columns_by_name(['Id'])[0]
     assert len(response_data['previews'].keys()) == 1
-    assert response_data['previews'][str(referrer_column_1.id)][str(referred_value)] == {str(default_template_column.id): referred_value}
+    assert response_data['previews'][str(referrer_column_with_fk_preview.id)][str(referred_value)] == {str(default_template_column.id): referred_value}
 
 
 def test_record_list_filter(create_patents_table, client):

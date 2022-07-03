@@ -1,4 +1,6 @@
-from sqlalchemy import select, func
+from collections import defaultdict
+
+from sqlalchemy import select, func, or_
 from sqlalchemy_filters import apply_sort
 
 from db.functions.operations.apply import apply_db_function_spec_as_filter
@@ -60,23 +62,6 @@ def get_query(
         selectable = selectable.cte()
         selectable = select(*columns_to_select).select_from(selectable)
 
-    if preview_columns:
-        for preview_column, referent_obj in preview_columns.items():
-            referent_table = referent_obj['table'].alias(f"{preview_column}_fk_table")
-            referent_column = referent_obj['referent_column']
-            selectable = selectable.join(
-                referent_table,
-                table.c[preview_column] == referent_table.c[referent_column],
-                isouter=True
-            )
-            data_columns = referent_obj['columns']
-            if data_columns:
-                selectable_columns = [
-                    referent_table.c[column_name].label(preview_column_key(preview_column, column_name))
-                    for column_name in data_columns
-                ]
-                selectable = selectable.add_columns(*selectable_columns)
-
     selectable = selectable.limit(limit).offset(offset)
     return selectable
 
@@ -89,6 +74,44 @@ def get_record(table, engine, id_value):
     return result[0] if result else None
 
 
+def get_records_preview_data(
+    records,
+    engine,
+    preview_columns
+):
+    if preview_columns:
+        preview_filters = defaultdict(lambda: defaultdict(lambda: set()))
+        for record in records:
+            for referent_table_name, referent_obj in preview_columns.items():
+                constraint_columns = referent_obj['constraint_columns']
+                for constraint_column in constraint_columns:
+                    constrained_column = constraint_column['constrained_column']
+                    constrained_column_value = record[constrained_column]
+                    if constrained_column_value is not None:
+                        referent_column = constraint_column['referent_column']
+                        preview_filters[referent_table_name][referent_column].add(constrained_column_value)
+        preview_data = []
+        for referent_table_name, referent_columns in preview_filters.items():
+            referent_table = preview_columns[referent_table_name]['table']
+            query = get_query(
+                    table=referent_table,
+                    limit=None,
+                    offset=None,
+                    order_by=None
+            )
+            filters = []
+            for referent_column, constrained_values in referent_columns.items():
+                filters.append(referent_table.c[referent_column].in_(constrained_values))
+            query = query.where(or_(*filters))
+            preview_records = execute_query(engine, query)
+            preview_obj = {
+                'table': referent_table,
+                'data': preview_records
+            }
+            preview_data.append(preview_obj)
+        return preview_data
+
+
 def get_records(
     table,
     engine,
@@ -97,8 +120,7 @@ def get_records(
     order_by=[],
     filter=None,
     group_by=None,
-    duplicate_only=None,
-    preview_columns=None
+    duplicate_only=None
 ):
     """
     Returns annotated records from a table.
@@ -139,7 +161,6 @@ def get_records(
         filter=filter,
         group_by=group_by,
         duplicate_only=duplicate_only,
-        preview_columns=preview_columns
     )
     return execute_query(engine, query)
 

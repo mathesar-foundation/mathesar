@@ -6,6 +6,10 @@ from db.records.operations.select import preview_column_key
 def extract_preview_metadata(
         record_dictionaries, preview_columns
 ):
+    """
+    Extracts the joined foreign key columns data from the records and moves them into a separate list
+    return:
+    """
     preview_data = defaultdict(lambda: defaultdict(lambda: {}))
     for index, record in enumerate(record_dictionaries):
         for preview_column, referent_obj in preview_columns.items():
