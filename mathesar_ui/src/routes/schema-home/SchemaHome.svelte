@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Route } from 'tinro';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { constructTabularTabLink } from '@mathesar/stores/tabs/tabDataSaver';
@@ -7,6 +8,7 @@
   import type { TableEntry } from '@mathesar/AppTypes';
 
   import DataScape from './routes/datascape/Datascape.svelte';
+  import DataExplorer from './routes/data-explorer/DataExplorer.svelte';
   import EmptyState from './EmptyState.svelte';
   import LeftPane from './LeftPane.svelte';
 
@@ -50,11 +52,17 @@
 />
 
 <section class="workarea">
-  {#if $tabs?.length > 0}
-    <DataScape {database} {schemaId} />
-  {:else}
-    <EmptyState />
-  {/if}
+  <!-- TODO: Discuss if we should keep all route information in one place. Eg., only in App.svelte -->
+  <Route path="/">
+    {#if $tabs?.length > 0}
+      <DataScape {database} {schemaId} />
+    {:else}
+      <EmptyState />
+    {/if}
+  </Route>
+  <Route path="/queries/*" firstmatch>
+    <DataExplorer />
+  </Route>
 </section>
 
 <style global lang="scss">
