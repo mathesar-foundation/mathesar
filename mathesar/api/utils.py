@@ -25,7 +25,7 @@ def get_table_or_404(pk):
     return table
 
 
-def process_annotated_records(record_list, column_name_id_map, preview_columns):
+def process_annotated_records(record_list, column_name_id_map):
 
     RESULT_IDX = 'result_indices'
 
@@ -45,9 +45,6 @@ def process_annotated_records(record_list, column_name_id_map, preview_columns):
         *tuple(tuple(d.values()) for d in combined_records)
     )
     previews = None
-    if preview_columns:
-        converted_preview_columns = convert_preview_data_to_db_identifier(preview_columns)
-        previews, processed_records = extract_preview_metadata(processed_records, converted_preview_columns)
 
     def _replace_column_names_with_ids(group_metadata_item, table_column_name_id_map):
         try:
@@ -58,13 +55,13 @@ def process_annotated_records(record_list, column_name_id_map, preview_columns):
             processed_group_metadata_item = group_metadata_item
         return processed_group_metadata_item
 
-    if preview_columns is not None:
-        previews = _replace_column_names_with_ids(previews, column_name_id_map)
-        for preview_column, preview_obj in preview_columns.items():
-            preview = previews[preview_column.id]
-            referent_column_name_id_map = preview_obj['table'].get_column_name_id_bidirectional_map()
-            for reference_key, preview_data in preview.items():
-                previews[preview_column.id][reference_key] = _replace_column_names_with_ids(preview_data, referent_column_name_id_map)
+    # if preview_columns is not None:
+    #     previews = _replace_column_names_with_ids(previews, column_name_id_map)
+    #     for preview_column, preview_obj in preview_columns.items():
+    #         preview = previews[preview_column.id]
+    #         referent_column_name_id_map = preview_obj['table'].get_column_name_id_bidirectional_map()
+    #         for reference_key, preview_data in preview.items():
+    #             previews[preview_column.id][reference_key] = _replace_column_names_with_ids(preview_data, referent_column_name_id_map)
 
     if groups is not None:
         groups_by_id = {

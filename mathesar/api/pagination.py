@@ -4,7 +4,9 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from db.records.operations.group import GroupBy
+from db.records.operations.select import get_records_preview_data
 from mathesar.api.utils import get_table_or_404, process_annotated_records
+from mathesar.utils.conversion import convert_preview_data_to_db_identifier
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
@@ -46,7 +48,6 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         order_by=[],
         group_by=None,
         duplicate_only=None,
-        preview_columns=None
     ):
         self.limit = self.get_limit(request)
         if self.limit is None:
@@ -63,7 +64,6 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
-            preview_columns=preview_columns
         )
 
 
@@ -101,14 +101,14 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
-            preview_columns=preview_columns
         )
 
         if records:
+            identifier_converted_preview_data = convert_preview_data_to_db_identifier(preview_columns)
+            preview_data = get_records_preview_data(records, table._sa_engine, identifier_converted_preview_data)
             processed_records, groups, preview_data = process_annotated_records(
                 records,
                 column_name_id_bidirectional_map,
-                preview_columns
             )
         else:
             processed_records, groups, preview_data = None, None, None
