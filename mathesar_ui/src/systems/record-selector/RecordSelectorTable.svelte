@@ -2,13 +2,14 @@
   import { writable } from 'svelte/store';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import type { Row } from '@mathesar/stores/table-data/records';
-  import { getProcessedColumnsMap } from '@mathesar/sections/table-view/utils';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     setTabularDataStoreInContext,
     TabularData,
   } from '@mathesar/stores/table-data/tabularData';
-  import ColumnResizer from '@mathesar/sections/table-view/header/header-cell/ColumnResizer.svelte';
+  // TODO: Remove route dependency in systems
+  import { getProcessedColumnsMap } from '@mathesar/routes/schema-home/routes/datascape/table-view/utils';
+  import ColumnResizer from '@mathesar/routes/schema-home/routes/datascape/table-view/header/header-cell/ColumnResizer.svelte';
   import DataTypeBasedInput from '@mathesar/components/cell/DataTypeBasedInput.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';

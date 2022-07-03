@@ -1,22 +1,16 @@
 <script lang="ts">
   import { faTable } from '@fortawesome/free-solid-svg-icons';
   import { TabContainer, Icon } from '@mathesar-component-library';
-  import { currentDBName } from '@mathesar/stores/databases';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
-  import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
   import {
     getTabsForSchema,
     tabIsTabular,
     TabType,
   } from '@mathesar/stores/tabs';
   import { constructTabularTabLink } from '@mathesar/stores/tabs/tabDataSaver';
-  import { TabularType } from '@mathesar/stores/table-data';
-  import type { TableEntry } from '@mathesar/AppTypes';
+  import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
 
   import ImportData from './import-data/ImportData.svelte';
   import TableView from './table-view/TableView.svelte';
-  import EmptyState from './empty-state/EmptyState.svelte';
-  import LeftPane from './left-pane/LeftPane.svelte';
 
   export let database: string;
   export let schemaId: number;
@@ -24,18 +18,6 @@
   let tabList: TabList;
   $: tabList = getTabsForSchema(database, schemaId);
   $: ({ tabs, activeTab } = tabList);
-
-  function changeCurrentSchema(_database: string, _schemaId: number) {
-    if ($currentDBName !== _database) {
-      $currentDBName = _database;
-    }
-    if ($currentSchemaId !== _schemaId) {
-      $currentSchemaId = _schemaId;
-    }
-  }
-
-  // TODO: Move this entire logic to data layer without involving view layer
-  $: changeCurrentSchema(database, schemaId);
 
   function getTabLink(tab: MathesarTab): string | undefined {
     if (!tabIsTabular(tab)) {
@@ -49,15 +31,6 @@
     );
   }
 
-  function getLeftPaneLink(entry: TableEntry) {
-    return constructTabularTabLink(
-      database,
-      schemaId,
-      TabularType.Table,
-      entry.id,
-    );
-  }
-
   function tabRemoved(e: { detail: { removedTab: MathesarTab } }) {
     tabList.removeTabAndItsData(e.detail.removedTab);
   }
@@ -67,19 +40,8 @@
   const getLink__withTypeCoercion: (arg0: unknown) => string = getTabLink;
 </script>
 
-<svelte:head>
-  <title>Mathesar - {$activeTab?.label || 'Home'}</title>
-</svelte:head>
-
-<LeftPane
-  getLink={getLeftPaneLink}
-  {database}
-  {schemaId}
-  activeTab={$activeTab}
-/>
-
-<section class="table-section">
-  {#if $tabs?.length > 0}
+{#if $tabs?.length > 0}
+  <div class="datascape">
     <TabContainer
       bind:tabs={$tabs}
       bind:activeTab={$activeTab}
@@ -101,11 +63,61 @@
         {/if}
       {/if}
     </TabContainer>
-  {:else}
-    <EmptyState />
-  {/if}
-</section>
+  </div>
+{/if}
 
 <style global lang="scss">
-  @import 'Base.scss';
+  .datascape {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: auto;
+
+    .tab-container {
+      position: absolute;
+      left: 5px;
+      right: 5px;
+      bottom: 5px;
+      top: 5px;
+
+      .tabs {
+        .tab {
+          > a {
+            > span {
+              display: flex;
+              align-items: center;
+              overflow: hidden;
+
+              > span {
+                margin-left: 6px;
+                display: block;
+                flex-grow: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+            }
+          }
+        }
+      }
+
+      .tab-content-holder {
+        flex-grow: 1;
+        background: #fff;
+
+        > div {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        }
+      }
+    }
+  }
 </style>

@@ -1,8 +1,6 @@
 <script lang="ts">
   import { Route } from 'tinro';
   import { ToastPresenter, Confirmation } from '@mathesar-component-library';
-  import Base from '@mathesar/sections/Base.svelte';
-  import Schemas from '@mathesar/pages/schemas/Schemas.svelte';
   import Header from '@mathesar/header/Header.svelte';
   import { toast } from '@mathesar/stores/toast';
   import { setNewRecordSelectorControllerInContext } from '@mathesar/systems/record-selector/RecordSelectorController';
@@ -12,6 +10,9 @@
   import { beginUpdatingUrlWhenSchemaChanges } from './utils/routing';
   import { modal } from './stores/modal';
   import RecordSelectorModal from './systems/record-selector/RecordSelectorModal.svelte';
+  // Routes
+  import SchemaHome from './routes/schema-home/SchemaHome.svelte';
+  import SchemaListing from './routes/schema-listing/SchemaListing.svelte';
 
   // Why is this function called at such a high level, and not handled closer to
   // the code point related to saving tab data or the code point related to
@@ -36,10 +37,10 @@
 <section class="content-section">
   <Route path="/*" firstmatch>
     <Route path="/:db/schemas" let:meta>
-      <Schemas database={meta.params.db} />
+      <SchemaListing database={meta.params.db} />
     </Route>
-    <Route path="/:db/:schema" let:meta>
-      <Base
+    <Route path="/:db/:schema/*" let:meta>
+      <SchemaHome
         database={meta.params.db}
         schemaId={parseInt(meta.params.schema, 10)}
       />

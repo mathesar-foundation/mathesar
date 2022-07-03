@@ -104,6 +104,30 @@
   </nav>
 </aside>
 
-<style global lang="scss">
-  @import 'LeftPane.scss';
+<style lang="scss">
+  aside {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    border-right: 1px solid #dfdfdf;
+    transition: left 0.2s ease-out;
+    z-index: 3;
+    overflow-y: auto;
+    width: var(--side-bar-width);
+
+    nav {
+      margin: 15px 0;
+
+      .tree {
+        li {
+          a.item {
+            span {
+              margin-left: 6px;
+            }
+          }
+        }
+      }
+    }
+  }
 </style>

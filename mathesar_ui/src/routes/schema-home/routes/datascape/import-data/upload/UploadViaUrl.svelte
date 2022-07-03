@@ -1,7 +1,7 @@
 <script lang="ts">
   import { SpinnerButton, TextInput } from '@mathesar/component-library';
   import type { FileImport } from '@mathesar/stores/fileImports';
-  import { importFromURL } from '@mathesar/sections/import-data/importUtils';
+  import { importFromURL } from '../importUtils';
 
   export let fileImportStore: FileImport;
 

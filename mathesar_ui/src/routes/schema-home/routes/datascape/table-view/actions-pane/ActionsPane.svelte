@@ -27,9 +27,8 @@
   import { getTabsForSchema } from '@mathesar/stores/tabs';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
-  import LinkTableModal from '@mathesar/sections/table-view/link-table/LinkTableModal.svelte';
-  import TableConstraints from '@mathesar/sections/table-view/constraints/TableConstraints.svelte';
-  // import DisplayGroup from '@mathesar/sections/table-view/display-options/DisplayGroup.svelte';
+  import LinkTableModal from '../link-table/LinkTableModal.svelte';
+  import TableConstraints from '../constraints/TableConstraints.svelte';
   import Sort from './record-operations/Sort.svelte';
   import Filter from './record-operations/Filter.svelte';
   import RenameTableModal from './RenameTableModal.svelte';
