@@ -7,8 +7,12 @@
     TabType,
   } from '@mathesar/stores/tabs';
   import { constructTabularTabLink } from '@mathesar/stores/tabs/tabDataSaver';
+  import { TabularType } from '@mathesar/stores/table-data';
   import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
+  import type { TableEntry } from '@mathesar/AppTypes';
 
+  import LeftPane from './LeftPane.svelte';
+  import EmptyState from './EmptyState.svelte';
   import ImportData from './import-data/ImportData.svelte';
   import TableView from './table-view/TableView.svelte';
 
@@ -18,6 +22,15 @@
   let tabList: TabList;
   $: tabList = getTabsForSchema(database, schemaId);
   $: ({ tabs, activeTab } = tabList);
+
+  function getLeftPaneLink(entry: TableEntry) {
+    return constructTabularTabLink(
+      database,
+      schemaId,
+      TabularType.Table,
+      entry.id,
+    );
+  }
 
   function getTabLink(tab: MathesarTab): string | undefined {
     if (!tabIsTabular(tab)) {
@@ -40,8 +53,15 @@
   const getLink__withTypeCoercion: (arg0: unknown) => string = getTabLink;
 </script>
 
-{#if $tabs?.length > 0}
-  <div class="datascape">
+<LeftPane
+  getLink={getLeftPaneLink}
+  {database}
+  {schemaId}
+  activeTab={$activeTab}
+/>
+
+<div class="datascape">
+  {#if $tabs?.length > 0}
     <TabContainer
       bind:tabs={$tabs}
       bind:activeTab={$activeTab}
@@ -63,8 +83,10 @@
         {/if}
       {/if}
     </TabContainer>
-  </div>
-{/if}
+  {:else}
+    <EmptyState />
+  {/if}
+</div>
 
 <style global lang="scss">
   .datascape {
@@ -72,7 +94,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    left: 0;
+    left: var(--side-bar-width);
     overflow: auto;
 
     .tab-container {

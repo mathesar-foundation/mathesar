@@ -2,21 +2,16 @@
   import { Route } from 'tinro';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
-  import { constructTabularTabLink } from '@mathesar/stores/tabs/tabDataSaver';
   import { getTabsForSchema } from '@mathesar/stores/tabs';
-  import { TabularType } from '@mathesar/stores/table-data';
-  import type { TableEntry } from '@mathesar/AppTypes';
 
   import DataScape from './routes/datascape/Datascape.svelte';
   import DataExplorer from './routes/data-explorer/DataExplorer.svelte';
-  import EmptyState from './EmptyState.svelte';
-  import LeftPane from './LeftPane.svelte';
 
   export let database: string;
   export let schemaId: number;
 
   $: tabList = getTabsForSchema(database, schemaId);
-  $: ({ tabs, activeTab } = tabList);
+  $: ({ activeTab } = tabList);
 
   function changeCurrentSchema(_database: string, _schemaId: number) {
     if ($currentDBName !== _database) {
@@ -29,36 +24,16 @@
 
   // TODO: Move this entire logic to data layer without involving view layer
   $: changeCurrentSchema(database, schemaId);
-
-  function getLeftPaneLink(entry: TableEntry) {
-    return constructTabularTabLink(
-      database,
-      schemaId,
-      TabularType.Table,
-      entry.id,
-    );
-  }
 </script>
 
 <svelte:head>
   <title>Mathesar - {$activeTab?.label || 'Home'}</title>
 </svelte:head>
 
-<LeftPane
-  getLink={getLeftPaneLink}
-  {database}
-  {schemaId}
-  activeTab={$activeTab}
-/>
-
 <section class="workarea">
   <!-- TODO: Discuss if we should keep all route information in one place. Eg., only in App.svelte -->
   <Route path="/">
-    {#if $tabs?.length > 0}
-      <DataScape {database} {schemaId} />
-    {:else}
-      <EmptyState />
-    {/if}
+    <DataScape {database} {schemaId} />
   </Route>
   <Route path="/queries/*" firstmatch>
     <DataExplorer />
@@ -69,10 +44,9 @@
   section.workarea {
     position: absolute;
     top: 0;
-    left: var(--side-bar-width);
+    left: 0;
     right: 0;
     bottom: 0;
     overflow: auto;
-    background: #f6f7fdaa;
   }
 </style>
