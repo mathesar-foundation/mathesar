@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { ProcessedTableColumnMap } from '@mathesar/sections/table-view/utils';
+  // TODO: Remove route dependency in systems
+  import type { ProcessedTableColumnMap } from '@mathesar/routes/schema-home/routes/datascape/table-view/utils';
   import { Display, getCellStyle } from '@mathesar/stores/table-data';
 
   export let display: Display;

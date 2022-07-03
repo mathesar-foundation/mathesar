@@ -84,5 +84,5 @@
 <AddEditSchema controller={addEditModal} schema={activeSchema} />
 
 <style global lang="scss">
-  @import 'Schemas.scss';
+  @import 'SchemaListing.scss';
 </style>

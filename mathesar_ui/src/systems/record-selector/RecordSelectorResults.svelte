@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { ProcessedTableColumnMap } from '@mathesar/sections/table-view/utils';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
   import type { Row } from '@mathesar/stores/table-data/records';
   import Cell from '@mathesar/components/cell/Cell.svelte';
-  import RowCellBackgrounds from '@mathesar/sections/table-view/row/RowCellBackgrounds.svelte';
-  import { rowHeightPx } from '@mathesar/sections/table-view/geometry';
+  // TODO: Remove route dependency in systems
+  import type { ProcessedTableColumnMap } from '@mathesar/routes/schema-home/routes/datascape/table-view/utils';
+  import RowCellBackgrounds from '@mathesar/routes/schema-home/routes/datascape/table-view/row/RowCellBackgrounds.svelte';
+  import { rowHeightPx } from '@mathesar/routes/schema-home/routes/datascape/table-view/geometry';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
 

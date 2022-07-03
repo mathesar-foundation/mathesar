@@ -1,7 +1,7 @@
 <script lang="ts">
   import { SpinnerButton, TextArea } from '@mathesar/component-library';
   import type { FileImport } from '@mathesar/stores/fileImports';
-  import { importFromText } from '@mathesar/sections/import-data/importUtils';
+  import { importFromText } from '../importUtils';
 
   export let fileImportStore: FileImport;
 

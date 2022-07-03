@@ -5,7 +5,7 @@
     uploadNewFile,
     getFileUploadInfo,
     loadPreview,
-  } from '@mathesar/sections/import-data/importUtils';
+  } from '../importUtils';
 
   export let fileImportStore: FileImport;
 
