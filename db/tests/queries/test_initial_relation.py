@@ -56,11 +56,39 @@ def test_shallow_link(engine, academics_tables):
     assert records == [(1, 'uni1'), (2, 'uni1')]
 
 
-@pytest.mark.skip(reason="not implemented")
-def test_deep_link():
-    pass
+def test_deep_link(engine, academics_tables):
+    art_table = academics_tables['articles']
+    acad_table = academics_tables['academics']
+    uni_table = academics_tables['universities']
+    initial_columns = [
+        InitialColumn(
+            alias='title',
+            column=art_table.c.title,
+        ),
+        InitialColumn(
+            alias='primary_author_institution_name',
+            column=uni_table.c.name,
+            jp_path=[
+                JoinParams(
+                    left_column=art_table.c.primary_author,
+                    right_column=acad_table.c.id,
+                ),
+                JoinParams(
+                    left_column=acad_table.c.institution,
+                    right_column=uni_table.c.id,
+                ),
+            ],
+        ),
+    ]
+    dbq = DBQuery(
+        base_table=art_table,
+        initial_columns=initial_columns,
+    )
+    records = dbq.get_records(engine=engine)
+    assert records == [('article1', 'uni1'), ('article2', 'uni1')]
 
 
 @pytest.mark.skip(reason="not implemented")
 def test_self_referencing_table():
+    # test academics advisor
     pass
