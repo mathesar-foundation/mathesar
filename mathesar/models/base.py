@@ -403,6 +403,11 @@ class Column(ReflectionManagerMixin, BaseModel):
     attnum = models.IntegerField()
     display_options = JSONField(null=True, default=None)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["attnum", "table"], name="unique_column")
+        ]
+
     def __str__(self):
         return f"{self.__class__.__name__}: {self.table_id}-{self.attnum}"
 
