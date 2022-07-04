@@ -1,5 +1,5 @@
 from mathesar.database.types import UIType
-from mathesar.models import Database
+from mathesar.models.base import Database
 from db.types.base import known_db_types
 
 

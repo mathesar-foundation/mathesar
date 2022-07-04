@@ -8,6 +8,7 @@ from sqlalchemy.exc import DataError, IntegrityError
 
 from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
+from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.exceptions.database_exceptions import (
     base_exceptions as database_base_api_exceptions,
@@ -15,10 +16,11 @@ from mathesar.api.exceptions.database_exceptions import (
 )
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import (
-    MoveTableRequestSerializer, SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer,
-    TableSerializer,
+    MoveTableRequestSerializer,
+    SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer, TableSerializer,
+    TableImportSerializer, MoveTableRequestSerializer
 )
-from mathesar.models import Table
+from mathesar.models.base import Table
 from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
 from mathesar.utils.tables import (
     get_table_column_types
@@ -174,4 +176,28 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             }
         )
 
+        return Response(table_data)
+
+    @action(methods=['post'], detail=True)
+    def existing_import(self, request, pk=None):
+        temp_table = self.get_object()
+        serializer = TableImportSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        existing_table_id = serializer.validated_data['table_to_import_to']
+        mappings = serializer.validated_data['mappings']
+        existing_table = get_table_or_404(existing_table_id)
+
+        try:
+            temp_table.insert_records_to_existing_table(
+                existing_table, temp_table, mappings
+            )
+        except Exception as e:
+            # ToDo raise specific exceptions.
+            raise e
+        # Reload the table to avoid cached properties
+        existing_table = get_table_or_404(existing_table_id)
+        serializer = TableSerializer(
+            existing_table, context={'request': request}
+        )
+        table_data = serializer.data
         return Response(table_data)

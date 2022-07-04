@@ -1,3 +1,4 @@
+import { getContext, setContext } from 'svelte';
 import type { Writable } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { TerseMetaProps, MetaProps } from './meta';
@@ -110,4 +111,12 @@ export class TabularData {
   }
 }
 
-export type TabularDataStore = Writable<TabularData>;
+const tabularDataStoreContextKey = {};
+
+export function setTabularDataStoreInContext(s: Writable<TabularData>): void {
+  setContext(tabularDataStoreContextKey, s);
+}
+
+export function getTabularDataStoreFromContext(): Writable<TabularData> {
+  return getContext(tabularDataStoreContextKey);
+}

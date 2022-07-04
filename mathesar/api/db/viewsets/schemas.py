@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from mathesar.api.dj_filters import SchemaFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.schemas import SchemaSerializer
-from mathesar.models import Schema
+from mathesar.models.base import Schema
 from mathesar.utils.schemas import create_schema_and_object
 
 

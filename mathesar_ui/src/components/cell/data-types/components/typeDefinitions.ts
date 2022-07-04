@@ -3,6 +3,7 @@ import type {
   NumberFormatterOptions,
   SelectProps,
 } from '@mathesar-component-library/types';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
 
 export interface CellTypeProps<Value> {
@@ -10,6 +11,19 @@ export interface CellTypeProps<Value> {
   isActive: boolean;
   disabled: boolean;
 }
+
+// Foreign key
+
+export type ForeignKeyCellValue = string | number | null;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface LinkedRecordCellExternalProps {
+  tableId: DBObjectEntry['id'];
+}
+
+export interface LinkedRecordCellProps
+  extends CellTypeProps<ForeignKeyCellValue>,
+    LinkedRecordCellExternalProps {}
 
 // TextBox
 
@@ -34,6 +48,18 @@ export type NumberCellExternalProps = Partial<NumberFormatterOptions>;
 export interface NumberCellProps
   extends CellTypeProps<string | number>,
     NumberCellExternalProps {}
+
+// Money
+
+export interface MoneyCellExternalProps
+  extends Partial<NumberFormatterOptions> {
+  currencySymbol: string;
+  currencySymbolLocation: 'after-minus' | 'end-with-space';
+}
+
+export interface MoneyCellProps
+  extends CellTypeProps<string | number>,
+    MoneyCellExternalProps {}
 
 // Checkbox
 

@@ -16,7 +16,7 @@ from mathesar.api.exceptions.validation_exceptions import base_exceptions as bas
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
-from mathesar.models import Column, Table, DataFile
+from mathesar.models.base import Column, Table, DataFile
 from mathesar.utils.tables import gen_table_name, create_table_from_datafile, create_empty_table
 
 
@@ -175,3 +175,13 @@ class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Seriali
 class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     extracted_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
     remainder_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+
+
+class MappingSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    # TBD
+    pass
+
+
+class TableImportSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    table_to_import_to = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all(), required=True)
+    mappings = MappingSerializer(required=True)
