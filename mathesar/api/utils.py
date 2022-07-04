@@ -24,13 +24,27 @@ def get_table_or_404(pk):
 
 
 def process_preview_data(preview_objs, preview_table_info):
+
+    def _convert_record_name_key_to_id(record, column_map):
+        record = record._asdict()
+        processed_preview_records = {column_map[column_name]: column_value for column_name, column_value in record.items()}
+        return processed_preview_records
+
+    name_keyed_preview_table_info = {
+                v['table'].name: v for k, v in preview_table_info.items()
+            }
     identifier_converted_preview_objs = []
     for preview_obj in preview_objs:
-        table_name = preview_obj['table']
-        table_id = preview_table_info[table_name].table.id
-        referent_column_name_id_map = preview_table_info[table_name].table.get_column_name_id_bidirectional_map()
+        table_name = preview_obj['table'].name
+        table = name_keyed_preview_table_info[table_name]['table']
+        table_id = table.id
+        referent_column_name_id_map = table.get_column_name_id_bidirectional_map()
         records = preview_obj['data']
-        processed_preview_records = process_annotated_records(records, referent_column_name_id_map)
+        column_map = referent_column_name_id_map
+        processed_preview_records = [
+            record_dict
+            for record_dict in (_convert_record_name_key_to_id(record, column_map) for record in records)
+    ]
         processed_preview_obj = {
             'table': table_id,
             'data': processed_preview_records

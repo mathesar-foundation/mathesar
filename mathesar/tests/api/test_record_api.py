@@ -114,8 +114,13 @@ def test_foreign_key_record_api_all_column_previews(two_foreign_key_tables, clie
     response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'all'})
     response_data = response.json()
     referred_value = '1'
-    default_template_column = referent_table.get_columns_by_name(['Id'])[0]
-    assert response_data['previews'][str(referrer_column_1.id)][str(referred_value)] == {str(default_template_column.id): referred_value}
+    preview_response = response_data['previews']
+    expected_preview = next((preview for preview in preview_response if preview['table'] == referent_table.id), None)
+    assert expected_preview is not None
+    assert str(referent_column.id) in expected_preview['data'][0]
+    expected_preview = next((data for data in expected_preview['data'] if data[str(referent_column.id)] == referred_value),
+                            None)
+    assert expected_preview is not None
 
 
 def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, client):
@@ -155,8 +160,13 @@ def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, cli
     response_data = response.json()
     referred_value = '1'
     default_template_column = referent_table.get_columns_by_name(['Id'])[0]
-    assert len(response_data['previews'].keys()) == 1
-    assert response_data['previews'][str(referrer_column_with_fk_preview.id)][str(referred_value)] == {str(default_template_column.id): referred_value}
+    preview_response = response_data['previews']
+    expected_preview = next((preview for preview in preview_response if preview['table'] == referent_table.id), None)
+    assert expected_preview is not None
+    assert str(referent_column.id) in expected_preview['data'][0]
+    expected_preview = next((data for data in expected_preview['data'] if data[str(referent_column.id)] == referred_value),
+                            None)
+    assert expected_preview is not None
 
 
 def test_record_list_filter(create_patents_table, client):
