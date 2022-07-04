@@ -10,11 +10,10 @@ from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
-from mathesar.models.base import db_get_records
+from mathesar.models.base import db_get_records, Table
 from mathesar.models import base as models_base
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models import Table
 
 
 def test_record_list(create_patents_table, client):
