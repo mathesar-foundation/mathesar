@@ -24,7 +24,8 @@ CREATE TABLE academics (
 
 INSERT INTO "academics" VALUES
 (1,'academic1',1,2),
-(2,'academic2',1,NULL);
+(2,'academic2',1,3),
+(3,'academic3',2,NULL);
 
 CREATE TABLE publishers (
     id integer PRIMARY KEY,

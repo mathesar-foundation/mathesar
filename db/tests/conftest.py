@@ -31,6 +31,13 @@ def engine_with_academics(engine_with_schema):
 
 @pytest.fixture
 def academics_tables(engine_with_academics):
+    def make_table(table_name):
+        return Table(
+            table_name,
+            metadata,
+            schema=schema,
+            autoload_with=engine,
+        )
     engine, schema = engine_with_academics
     metadata = MetaData(bind=engine)
     table_names = {
@@ -40,13 +47,6 @@ def academics_tables(engine_with_academics):
         'publishers',
         'universities',
     }
-    def make_table(table_name):
-        return Table(
-            table_name,
-            metadata,
-            schema=schema,
-            autoload_with=engine,
-        )
     return {
         table_name: make_table(table_name)
         for table_name

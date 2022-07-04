@@ -7,6 +7,7 @@ from django.utils.functional import cached_property
 from db.columns.base import MathesarColumn
 from db.records.operations import select as records_select
 
+
 class DBQuery:
     def __init__(
         self,
@@ -105,69 +106,67 @@ def _apply_transformations(initial_relation, transformations):
 
 
 def _get_initial_relation(query):
-    nested_join = None
     sa_columns_to_select = []
+    from_clause = query.base_table
     for initial_column in query.initial_columns:
-        nested_join, sa_column_to_select = _process_initial_column(
+        from_clause, sa_column_to_select = _process_initial_column(
             initial_column=initial_column,
-            nested_join=nested_join,
+            from_clause=from_clause,
         )
         sa_columns_to_select.append(sa_column_to_select)
-
-    if nested_join is not None:
-        select_target = nested_join
-    else:
-        select_target = query.base_table
-
-    stmt = select(*sa_columns_to_select).select_from(select_target)
+    stmt = select(*sa_columns_to_select).select_from(from_clause)
     return stmt.cte()
 
 
-def _process_initial_column(initial_column, nested_join):
+def _process_initial_column(initial_column, from_clause):
     if initial_column.is_base_column:
         col_to_select = initial_column.column
     else:
-        nested_join, col_to_select = _nest_a_join(
+        from_clause, col_to_select = _nest_a_join(
             initial_column=initial_column,
-            nested_join=nested_join,
+            from_clause=from_clause,
         )
     # Give an alias/label to this column, since that's how it will be referenced in transforms.
     aliased_col_to_select = col_to_select.label(initial_column.alias)
-    return nested_join, aliased_col_to_select
+    return from_clause, aliased_col_to_select
 
 
-def _nest_a_join(nested_join, initial_column):
+def _nest_a_join(from_clause, initial_column):
     jp_path = initial_column.jp_path
     target_sa_column = initial_column.column
     rightmost_table_alias = None
-    for i, jp in enumerate(reversed(jp_path)):
-        is_last_jp = i == 0
+    ix_of_last_jp = len(jp_path) - 1
+    for i, jp in enumerate(jp_path):
+        is_last_jp = i == ix_of_last_jp
+        # We want to alias the right-most table in the JP path, so that we can select from it later
         if is_last_jp:
             rightmost_table_alias = jp.right_table.alias()
             right_table = rightmost_table_alias
             right_column_reference = (
-                # If we give the right table an alias, we have to use that alias everywhere.
+                # If we give the right table an alias, we have to use that alias whenever we
+                # reference it
                 _access_column_on_aliased_relation(
                     rightmost_table_alias,
                     jp.right_column,
                 )
             )
         else:
-            right_table = nested_join
+            right_table = jp.right_table
             right_column_reference = jp.right_column
-
+        left_table = from_clause
         left_column_reference = jp.left_column
-        nested_join = join(
-            jp.left_table, right_table,
+        from_clause = join(
+            left_table, right_table,
             left_column_reference == right_column_reference
         )
+    # Here we produce the actual reference to the column we want to join in
     rightmost_table_target_column_reference = (
         _access_column_on_aliased_relation(
             rightmost_table_alias,
             target_sa_column,
         )
     )
-    return nested_join, rightmost_table_target_column_reference
+    return from_clause, rightmost_table_target_column_reference
 
 
 def _access_column_on_aliased_relation(aliased_relation, sa_column):

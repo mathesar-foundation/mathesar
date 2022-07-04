@@ -1,5 +1,3 @@
-import pytest
-
 # A query's initial relation is the SQL construct built from a query's initial_columns list.
 # It defines the starting point on which transformations will be applied.
 
@@ -26,7 +24,7 @@ def test_local_columns(engine, academics_tables):
         initial_columns=initial_columns,
     )
     records = dbq.get_records(engine=engine)
-    assert records == [(1, 1), (2, 1)]
+    assert records == [(1, 1), (2, 1), (3, 2)]
 
 
 def test_shallow_link(engine, academics_tables):
@@ -53,7 +51,7 @@ def test_shallow_link(engine, academics_tables):
         initial_columns=initial_columns,
     )
     records = dbq.get_records(engine=engine)
-    assert records == [(1, 'uni1'), (2, 'uni1')]
+    assert records == [(1, 'uni1'), (2, 'uni1'), (3, 'uni2')]
 
 
 def test_deep_link(engine, academics_tables):
@@ -88,7 +86,37 @@ def test_deep_link(engine, academics_tables):
     assert records == [('article1', 'uni1'), ('article2', 'uni1')]
 
 
-@pytest.mark.skip(reason="not implemented")
-def test_self_referencing_table():
-    # test academics advisor
-    pass
+def test_self_referencing_table(engine, academics_tables):
+    acad_table = academics_tables['academics']
+    initial_columns = [
+        InitialColumn(
+            alias='id',
+            column=acad_table.c.id,
+        ),
+        InitialColumn(
+            alias='advisor name',
+            column=acad_table.c.name,
+            jp_path=[
+                JoinParams(
+                    left_column=acad_table.c.advisor,
+                    right_column=acad_table.c.id,
+                ),
+            ],
+        ),
+        InitialColumn(
+            alias='advisee name',
+            column=acad_table.c.name,
+            jp_path=[
+                JoinParams(
+                    left_column=acad_table.c.id,
+                    right_column=acad_table.c.advisor,
+                ),
+            ],
+        ),
+    ]
+    dbq = DBQuery(
+        base_table=acad_table,
+        initial_columns=initial_columns,
+    )
+    records = dbq.get_records(engine=engine)
+    assert records == [(2, 'academic3', 'academic1')]
