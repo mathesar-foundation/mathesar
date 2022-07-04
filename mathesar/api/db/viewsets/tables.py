@@ -16,9 +16,12 @@ from mathesar.api.exceptions.database_exceptions import (
 )
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import (
-    MoveTableRequestSerializer,
-    SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer, TableSerializer,
-    TableImportSerializer, MoveTableRequestSerializer
+    SplitTableRequestSerializer,
+    SplitTableResponseSerializer,
+    TablePreviewSerializer,
+    TableSerializer,
+    TableImportSerializer,
+    MoveTableRequestSerializer
 )
 from mathesar.models.base import Table
 from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
