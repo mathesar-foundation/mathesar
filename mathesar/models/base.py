@@ -3,7 +3,7 @@ from bidict import bidict
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import JSONField
+from django.db.models import JSONField, Deferrable
 from django.utils.functional import cached_property
 from django.contrib.auth.models import User
 
@@ -405,7 +405,7 @@ class Column(ReflectionManagerMixin, BaseModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["attnum", "table"], name="unique_column")
+            models.UniqueConstraint(fields=["attnum", "table"], name="unique_column", deferrable=Deferrable.DEFERRED)
         ]
 
     def __str__(self):
