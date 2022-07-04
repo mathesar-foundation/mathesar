@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, MetaData
 from sqlalchemy import Table as SATable
 
 from db.tables.operations.select import get_oid_from_table
-from mathesar import models
+from mathesar.models import base as models_base
 
 
 @pytest.fixture
@@ -17,8 +17,7 @@ def schema(create_schema, schema_name):
 
 
 @pytest.fixture
-def column_test_table(patent_schema):
-    engine = patent_schema._sa_engine
+def column_test_table(patent_schema, engine):
     column_list_in = [
         Column("mycolumn0", Integer, primary_key=True),
         Column("mycolumn1", Integer, nullable=False),
@@ -31,7 +30,7 @@ def column_test_table(patent_schema):
     )
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    table = models_base.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     return table
 
 
@@ -66,7 +65,7 @@ def test_create_empty_table_settings(client, schema, empty_nasa_table, schema_na
 
 
 def test_update_table_settings(client, column_test_table):
-    columns = models.Column.objects.filter(table=column_test_table).values_list('id', flat=True)
+    columns = models_base.Column.objects.filter(table=column_test_table).values_list('id', flat=True)
     preview_template = ','.join(f'{{{ column }}}' for column in columns)
     settings_id = column_test_table.settings.id
     data = {
