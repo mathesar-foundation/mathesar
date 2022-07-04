@@ -1,14 +1,12 @@
 import json
 
 import pytest
-from unittest.mock import patch
 
 from sqlalchemy import select
 
 from db.constants import COLUMN_NAME_TEMPLATE
 from db.types.base import PostgresType, MathesarCustomType
 
-from mathesar.models import base as models_base
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.tests.api.test_table_api import check_columns_response
 
