@@ -2,9 +2,7 @@ from rest_framework.exceptions import NotFound
 import re
 
 from db.records.operations import group
-from db.records.operations.preview import extract_preview_metadata
 from mathesar.models import Table
-from mathesar.utils.conversion import convert_preview_data_to_db_identifier
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
@@ -23,6 +21,22 @@ def get_table_or_404(pk):
     except Table.DoesNotExist:
         raise NotFound
     return table
+
+
+def process_preview_data(preview_objs, preview_table_info):
+    identifier_converted_preview_objs = []
+    for preview_obj in preview_objs:
+        table_name = preview_obj['table']
+        table_id = preview_table_info[table_name].table.id
+        referent_column_name_id_map = preview_table_info[table_name].table.get_column_name_id_bidirectional_map()
+        records = preview_obj['data']
+        processed_preview_records = process_annotated_records(records, referent_column_name_id_map)
+        processed_preview_obj = {
+            'table': table_id,
+            'data': processed_preview_records
+        }
+        identifier_converted_preview_objs.append(processed_preview_obj)
+    return identifier_converted_preview_objs
 
 
 def process_annotated_records(record_list, column_name_id_map):
@@ -44,7 +58,6 @@ def process_annotated_records(record_list, column_name_id_map):
     processed_records, record_metadata = zip(
         *tuple(tuple(d.values()) for d in combined_records)
     )
-    previews = None
 
     def _replace_column_names_with_ids(group_metadata_item, table_column_name_id_map):
         try:
@@ -54,14 +67,6 @@ def process_annotated_records(record_list, column_name_id_map):
         except AttributeError:
             processed_group_metadata_item = group_metadata_item
         return processed_group_metadata_item
-
-    # if preview_columns is not None:
-    #     previews = _replace_column_names_with_ids(previews, column_name_id_map)
-    #     for preview_column, preview_obj in preview_columns.items():
-    #         preview = previews[preview_column.id]
-    #         referent_column_name_id_map = preview_obj['table'].get_column_name_id_bidirectional_map()
-    #         for reference_key, preview_data in preview.items():
-    #             previews[preview_column.id][reference_key] = _replace_column_names_with_ids(preview_data, referent_column_name_id_map)
 
     if groups is not None:
         groups_by_id = {
@@ -79,7 +84,7 @@ def process_annotated_records(record_list, column_name_id_map):
     else:
         output_groups = None
 
-    return processed_records, output_groups, previews
+    return processed_records, output_groups
 
 
 def follows_json_number_spec(number):

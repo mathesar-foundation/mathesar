@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from db.records.operations.group import GroupBy
 from db.records.operations.select import get_records_preview_data
-from mathesar.api.utils import get_table_or_404, process_annotated_records
+from mathesar.api.utils import get_table_or_404, process_annotated_records, process_preview_data
 from mathesar.utils.conversion import convert_preview_data_to_db_identifier
 
 
@@ -106,16 +106,15 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         if records:
             identifier_converted_preview_data = convert_preview_data_to_db_identifier(preview_columns)
             preview_data = get_records_preview_data(records, table._sa_engine, identifier_converted_preview_data)
-            processed_records, groups, preview_data = process_annotated_records(
+            processed_preview_data = process_preview_data(preview_data)
+            processed_records, groups = process_annotated_records(
                 records,
                 column_name_id_bidirectional_map,
             )
         else:
-            processed_records, groups, preview_data = None, None, None
+            processed_records, processed_preview_data, groups = None, None, None
         if preview_columns:
-            self.preview_data = preview_data
-        else:
-            self.preview_data = None
+            self.preview_data = processed_preview_data
         if group_by:
             self.grouping = {
                 'columns': [column_name_id_bidirectional_map[n] for n in group_by.columns],
