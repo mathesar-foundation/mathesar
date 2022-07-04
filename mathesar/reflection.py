@@ -6,8 +6,8 @@ from db.columns.operations.select import get_column_attnums_from_table
 from db.constraints.operations.select import get_constraints_with_oids
 from db.schemas.operations.select import get_mathesar_schemas_with_oids
 from db.tables.operations.select import get_table_oids_from_schema
-# We import the entire models module to avoid a circular import error
-from mathesar import models
+# We import the entire models.base module to avoid a circular import error
+from mathesar.models import base as models
 from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer, \
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY
 from mathesar.database.base import create_mathesar_engine

@@ -1,6 +1,5 @@
 <script lang="ts">
-  import type { Size } from '../types';
-  import type { ModalCloseAction } from './modalTypes';
+  import type { ModalCloseAction, ModalWidth } from './modalTypes';
   import IndependentModal from './IndependentModal.svelte';
   import type ModalController from './ModalController';
 
@@ -9,7 +8,7 @@
   let classes = '';
   export { classes as class };
   export let style = '';
-  export let size: Size | undefined = undefined;
+  export let size: ModalWidth | undefined = undefined;
   export let allowClose = true;
   export let closeOn: ModalCloseAction[] = ['button'];
 

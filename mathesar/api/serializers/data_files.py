@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.errors import URLNotReachable, URLInvalidContentTypeError
-from mathesar.models import DataFile
+from mathesar.models.base import DataFile
 
 SUPPORTED_URL_CONTENT_TYPES = {'text/csv', 'text/plain'}
 
