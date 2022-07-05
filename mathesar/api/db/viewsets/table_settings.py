@@ -2,7 +2,7 @@ from rest_framework.viewsets import ModelViewSet
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.table_settings import TableSettingsSerializer
 from mathesar.api.utils import get_table_or_404
-from mathesar.models import TableSettings
+from mathesar.models.base import TableSettings
 
 
 class TableSettingsViewSet(ModelViewSet):

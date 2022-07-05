@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 
-from mathesar.models import PreviewColumnSettings, TableSettings
+from mathesar.models.base import PreviewColumnSettings, TableSettings
 
 
 class PreviewColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
