@@ -393,6 +393,10 @@ class Table(DatabaseObject):
             column_objs.append(column)
         Column.current_objects.bulk_update(column_objs, fields=['table_id', 'attnum'])
 
+    def insert_records_to_existing_table(existing_table, temp_table, mappings):
+        # TBD
+        pass
+
 
 class Column(ReflectionManagerMixin, BaseModel):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='columns')
