@@ -58,7 +58,7 @@ class RecordViewSet(viewsets.ViewSet):
             group_by_columns_names = [column_ids_to_names[column_id] for column_id in grouping['columns']]
             name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
         name_converted_order_by = [{**column, 'field': column_ids_to_names[column['field']]} for column in order_by]
-        name_converted_search = [{**search_fuzzy, 'column': column_ids_to_names[column['field']]} for column in search_fuzzy]
+        name_converted_search = [{**column, 'column': column_ids_to_names[column['field']]} for column in search_fuzzy]
 
         try:
 

@@ -3,7 +3,7 @@ from sqlalchemy_filters import apply_sort
 
 from db.functions.operations.apply import apply_db_function_spec_as_filter
 from db.columns.base import MathesarColumn
-from db.records.operations import group
+from db.records.operations import group, relevance
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.types.base import get_db_type_enum_from_id
@@ -34,11 +34,12 @@ def get_query(
     limit,
     offset,
     order_by,
+    engine,
     filter=None,
     columns_to_select=None,
     group_by=None,
-    search={},
-    duplicate_only=None
+    search=[],
+    duplicate_only=None,
 ):
     if duplicate_only:
         select_target = _get_duplicate_only_cte(table, duplicate_only)
@@ -51,6 +52,10 @@ def get_query(
         selectable = select(select_target)
 
     selectable = _sort_and_filter(selectable, order_by, filter)
+    if search:
+        selectable = selectable.cte()
+        search_params = {search_obj['column']: search_obj['literal'] for search_obj in search}
+        selectable = relevance.get_rank_and_filter_rows_query(selectable, search_params, engine, limit)
 
     if columns_to_select:
         selectable = selectable.cte()
@@ -76,7 +81,7 @@ def get_records(
     order_by=[],
     filter=None,
     group_by=None,
-    search={},
+    search=[],
     duplicate_only=None,
 ):
     """
@@ -118,12 +123,13 @@ def get_records(
         filter=filter,
         group_by=group_by,
         search=search,
-        duplicate_only=duplicate_only
+        duplicate_only=duplicate_only,
+        engine=engine
     )
     return execute_query(engine, query)
 
 
-def get_count(table, engine, filter=None):
+def get_count(table, engine, filter=None, search=[]):
     col_name = "_count"
     columns_to_select = [func.count().label(col_name)]
     query = get_query(
@@ -132,7 +138,9 @@ def get_count(table, engine, filter=None):
         offset=None,
         order_by=None,
         filter=filter,
-        columns_to_select=columns_to_select
+        search=search,
+        columns_to_select=columns_to_select,
+        engine=engine
     )
     return execute_query(engine, query)[0][col_name]
 
