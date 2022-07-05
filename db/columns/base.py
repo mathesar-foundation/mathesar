@@ -54,6 +54,17 @@ class MathesarColumn(Column):
         )
 
     @classmethod
+    def _constructor(cls, *args, **kwargs):
+        """
+        Needed to support Column.copy().
+
+        See https://docs.sqlalchemy.org/en/14/changelog/changelog_07.html?highlight=_constructor#change-de8c32a6729c83da17177f6a13979717
+        """
+        return MathesarColumn.from_column(
+            Column(*args, **kwargs)
+        )
+
+    @classmethod
     def from_column(cls, column):
         """
         This alternate init method creates a new column (a copy) of the

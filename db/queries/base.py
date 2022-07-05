@@ -1,11 +1,12 @@
 from collections import namedtuple
 
+import sqlalchemy
 from sqlalchemy import select, join, Column as SAColumn, Table as SATable
 
 from django.utils.functional import cached_property
 
-from db.columns.base import MathesarColumn
 from db.records.operations import select as records_select
+from db.columns.base import MathesarColumn
 
 
 class DBQuery:
@@ -26,7 +27,10 @@ class DBQuery:
 
     # mirrors a method in db.records.operations.select
     def get_records(self, **kwargs):
-        return records_select.get_records(table=self.sa_relation, **kwargs)
+        return records_select.get_records(
+            table=self.sa_relation,
+            **kwargs,
+        )
 
     # mirrors a method in db.records.operations.select
     def get_count(self, **kwargs):
@@ -38,9 +42,7 @@ class DBQuery:
         Sequence of SQLAlchemy columns representing the output columns of the relation described
         by this query.
         """
-        regular_sa_columns = self.sa_relation.columns
-        enriched_sa_columns = tuple(MathesarColumn.from_column(col) for col in regular_sa_columns)
-        return enriched_sa_columns
+        return self.sa_relation.columns
 
     @cached_property
     def sa_relation(self):
@@ -67,6 +69,8 @@ class InitialColumn:
                 assert isinstance(jp, JoinParams)
         self.jp_path = jp_path
         assert isinstance(column, SAColumn)
+        if not isinstance(column, MathesarColumn):
+            column = MathesarColumn.from_column(column)
         self.column = column
 
     @property
@@ -115,12 +119,20 @@ def _get_initial_relation(query):
         )
         sa_columns_to_select.append(sa_column_to_select)
     stmt = select(*sa_columns_to_select).select_from(from_clause)
+    import logging
+    logger = logging.getLogger(f'_get_initial_relation')
+    logger.debug(stmt)
     return stmt.cte()
 
 
 def _process_initial_column(initial_column, from_clause):
     if initial_column.is_base_column:
-        col_to_select = initial_column.column
+        # for some reason using actual Column instances here can cause "duplicate aliases" psycopg
+        # exception. so, we reduce a Column instance into a ColumnClause instance using
+        # sqlalchemy.column.
+        column_name = initial_column.column.name
+        column_fixed = sqlalchemy.column(column_name)
+        col_to_select = column_fixed
     else:
         from_clause, col_to_select = _nest_a_join(
             initial_column=initial_column,

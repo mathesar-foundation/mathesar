@@ -33,11 +33,17 @@ class UIQuery(BaseModel, Relation):
 
     # TODO add engine from base_table.schema._sa_engine
     def get_records(self, **kwargs):
-        return self.db_query.get_records(**kwargs)
+        return self.db_query.get_records(
+            engine=self._sa_engine,
+            **kwargs,
+        )
 
     # TODO add engine from base_table.schema._sa_engine
     def sa_num_records(self, **kwargs):
-        return self.db_query.get_count(**kwargs)
+        return self.db_query.get_count(
+            engine=self._sa_engine,
+            **kwargs,
+        )
 
     @cached_property
     def get_output_columns_described(self):
@@ -60,9 +66,9 @@ class UIQuery(BaseModel, Relation):
     @cached_property
     def db_query(self):
         return DBQuery(
-            base_table=self.sa_base_table,
-            initial_columns=self._db_initial_columns(self),
-            transformations=self._db_transformations(self),
+            base_table=self.base_table._sa_table,
+            initial_columns=self._db_initial_columns,
+            transformations=self._db_transformations,
             name=self.name,
         )
 
@@ -82,18 +88,27 @@ class UIQuery(BaseModel, Relation):
         if self.display_options is not None:
             return self.display_options.get(sa_col.name)
 
+    @property
+    def _sa_engine(self):
+        return self.base_table._sa_engine
+
 
 def _db_initial_column_from_json(json):
-    sa_column = _get_sa_col_by_id(json['id']),
-    json_jp_path = json['jp_path'],
-    jp_path = tuple(
-        join_params_from_json(json_jp)
-        for json_jp
-        in json_jp_path
-    )
+    alias = json['alias']
+    sa_column = _get_sa_col_by_id(json['id'])
+    json_jp_path = json.get('jp_path')
+    if json_jp_path:
+        jp_path = tuple(
+            join_params_from_json(json_jp)
+            for json_jp
+            in json_jp_path
+        )
+    else:
+        jp_path = None
     return InitialColumn(
         column=sa_column,
         jp_path=jp_path,
+        alias=alias,
     )
 
 

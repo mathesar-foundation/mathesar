@@ -348,6 +348,11 @@ class Table(DatabaseObject, Relation):
         columns_map = bidict({column.name: column.id for column in columns})
         return columns_map
 
+    def get_column_by_name(self, name):
+        columns = self.get_columns_by_name(name_list=[name])
+        if len(columns) > 0:
+            return columns[0]
+
     def get_columns_by_name(self, name_list):
         columns_by_name_dict = {
             col.name: col
