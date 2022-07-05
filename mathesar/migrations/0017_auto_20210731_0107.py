@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-from mathesar.models import DataFile
+from mathesar.models.base import DataFile
 
 
 class Migration(migrations.Migration):

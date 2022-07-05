@@ -6,7 +6,7 @@ from sqlalchemy import Table as SATable
 
 from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table
-from mathesar.models import Table, DataFile, Column as ServiceLayerColumn
+from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
 
 
 @pytest.fixture

@@ -15,7 +15,7 @@ from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
-from mathesar.models import Table
+from mathesar.models.base import Table
 from mathesar.utils.json import MathesarJSONRenderer
 
 

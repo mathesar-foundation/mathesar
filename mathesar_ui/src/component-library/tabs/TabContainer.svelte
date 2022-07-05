@@ -72,7 +72,7 @@
 
   function getTabURL(tab: Tab): string {
     // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-    return getLink ? getLink(tab) : (tab[linkKey] as string) || null;
+    return getLink ? getLink(tab) : (tab[linkKey] as string) ?? undefined;
   }
 </script>
 
