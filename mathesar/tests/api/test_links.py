@@ -32,7 +32,6 @@ def column_test_table(patent_schema):
 
 
 def test_one_to_one_link_create(column_test_table, client, create_patents_table):
-    cache.clear()
     table_2 = create_patents_table('Table 2')
     data = {
         "link_type": "one-to-one",
@@ -68,7 +67,6 @@ def test_one_to_one_link_create(column_test_table, client, create_patents_table)
 
 
 def test_one_to_many_link_create(column_test_table, client, create_patents_table):
-    cache.clear()
     table_2 = create_patents_table('Table 2')
     data = {
         "link_type": "one-to-many",
@@ -97,7 +95,6 @@ def test_one_to_many_link_create(column_test_table, client, create_patents_table
 
 
 def test_one_to_many_self_referential_link_create(column_test_table, client):
-    cache.clear()
     data = {
         "link_type": "one-to-many",
         "reference_column_name": "col_1",
@@ -127,7 +124,6 @@ def test_one_to_many_self_referential_link_create(column_test_table, client):
 def test_many_to_many_self_referential_link_create(column_test_table, client):
     schema = column_test_table.schema
     engine = schema._sa_engine
-    cache.clear()
     data = {
         "link_type": "many-to-many",
         "mapping_table_name": "map_table",
@@ -148,7 +144,6 @@ def test_many_to_many_self_referential_link_create(column_test_table, client):
 
 
 def test_many_to_many_link_create(column_test_table, client, create_patents_table):
-    cache.clear()
     table_2 = create_patents_table('Table 2')
     data = {
         "link_type": "many-to-many",
