@@ -3,7 +3,7 @@ from io import TextIOWrapper
 import clevercsv as csv
 
 from mathesar.database.base import create_mathesar_engine
-from mathesar.models import Table
+from mathesar.models.base import Table
 from db.records.operations.insert import insert_records_from_csv
 from db.tables.operations.create import create_string_column_table
 from db.tables.operations.select import get_oid_from_table

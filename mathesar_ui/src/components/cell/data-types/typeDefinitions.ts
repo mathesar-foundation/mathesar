@@ -11,6 +11,7 @@ export type CellDataType =
   | 'uri'
   | 'duration'
   | 'date'
+  | 'money'
   | 'time'
   | 'datetime';
 
