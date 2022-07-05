@@ -2,7 +2,7 @@ import pytest
 from django.core.cache import cache
 
 from mathesar.reflection import reflect_db_objects
-from mathesar.models import Table, Schema, Database
+from mathesar.models.base import Table, Schema, Database
 
 
 @pytest.fixture(scope="module")

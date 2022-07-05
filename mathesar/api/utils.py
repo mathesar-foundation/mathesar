@@ -2,7 +2,7 @@ from rest_framework.exceptions import NotFound
 import re
 
 from db.records.operations import group
-from mathesar.models import Table
+from mathesar.models.base import Table
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'

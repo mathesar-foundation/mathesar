@@ -19,7 +19,7 @@ from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
-from mathesar.models import Constraint, Table, Column, TableSettings
+from mathesar.models.base import Constraint, Table, Column, TableSettings
 from mathesar.utils.json import MathesarJSONRenderer
 
 
@@ -86,6 +86,7 @@ class RecordViewSet(viewsets.ViewSet):
                 preview_columns[referent_table_setting.table_id]['preview_columns'] = preview_data_columns
                 preview_columns[referent_table_setting.table_id]['table'] = referent_table_setting.table
         try:
+
             records = paginator.paginate_queryset(
                 self.get_queryset(), request, table, column_names_to_ids,
                 filters=filter_processed,

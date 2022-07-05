@@ -7,7 +7,7 @@ import mathesar.api.exceptions.database_exceptions.exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.errors import InvalidTableError
-from mathesar.models import DataFile
+from mathesar.models.base import DataFile
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.data_files import DataFileSerializer
 from mathesar.utils.datafiles import create_datafile
