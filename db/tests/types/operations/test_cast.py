@@ -128,7 +128,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [
                     ({'key1': 'val1'}, {'key1': 'val1'})
                 ],
-                INVALID: [[1,2,3]],
+                INVALID: [[1, 2, 3]],
             },
             MathesarCustomType.MATHESAR_JSON_ARRAY: {
                 VALID: [
@@ -176,7 +176,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [
                     ({'key1': 'val1'}, {'key1': 'val1'})
                 ],
-                INVALID: [[1,2,3]],
+                INVALID: [[1, 2, 3]],
             },
             MathesarCustomType.MATHESAR_JSON_ARRAY: {
                 VALID: [

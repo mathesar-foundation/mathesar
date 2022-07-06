@@ -25,4 +25,3 @@ def install(engine):
         conn.execute(text(create_domain_query))
         conn.commit()
 
-
