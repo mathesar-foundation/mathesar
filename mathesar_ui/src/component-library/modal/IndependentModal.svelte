@@ -2,9 +2,8 @@
   import { createEventDispatcher, tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
   import { faTimes } from '@fortawesome/free-solid-svg-icons';
-  import type { Size } from '@mathesar-component-library-dir/types';
   import { Button, Icon, portal } from '@mathesar-component-library';
-  import type { ModalCloseAction } from './modalTypes';
+  import type { ModalCloseAction, ModalWidth } from './modalTypes';
 
   const dispatch = createEventDispatcher();
 
@@ -13,7 +12,7 @@
   let classes = '';
   export { classes as class };
   export let style = '';
-  export let size: Size = 'medium';
+  export let size: ModalWidth = 'medium';
   export let allowClose = true;
   export let hasOverlay = true;
   export let closeOn: ModalCloseAction[] = ['button'];

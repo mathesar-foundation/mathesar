@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
-from mathesar.models import Database, Schema, Table
+from mathesar.models.base import Database, Schema, Table
 from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer

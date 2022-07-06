@@ -1,0 +1,105 @@
+.datascape .tab-container .table-data {
+  flex-grow: 1;
+  overflow: hidden;
+  position: relative;
+
+  .table-content {
+    --header-height: 32px;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: #f7f8f8;
+    &.has-foreign-keys {
+      // We increase the height of the header to account for the description of
+      // the referent.
+      --header-height: 42px;
+    }
+
+    .cell {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      border-bottom: var(--cell-border-horizontal);
+      border-right: var(--cell-border-vertical);
+      left: 0;
+      top: 0;
+      height: 100%;
+
+      &.row-control {
+        font-size: 12px;
+        padding: 7px 14px;
+        color: #959595;
+        left: 0;
+        position: sticky;
+        z-index: 10;
+        display: inline-flex;
+        align-items: center;
+        height: 100%;
+
+        .checkbox {
+          display: none;
+        }
+      }
+    }
+
+    .header {
+      height: var(--header-height);
+      min-width: 100%;
+      position: relative;
+      background: #f9f9f9;
+      border-bottom: 1px solid #e5e5e5;
+      user-select: none;
+      overflow: hidden;
+
+      .cell {
+        border-bottom: none;
+
+        &.row-control {
+          background: #f9f9f9;
+        }
+      }
+    }
+
+    .body {
+      position: absolute;
+      top: var(--header-height);
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+      overflow: hidden;
+    }
+  }
+}
+
+.delete-modal {
+  .header {
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+
+  .help-text {
+    color: #606066;
+    line-height: 1.4rem;
+  }
+
+  .sub-text {
+    margin-top: 10px;
+
+    &.error {
+      color: #f47171;
+    }
+    &.success {
+      color: #1bc47d;
+    }
+  }
+  .footer {
+    text-align: right;
+    button + button {
+      margin-left: 6px;
+    }
+  }
+}

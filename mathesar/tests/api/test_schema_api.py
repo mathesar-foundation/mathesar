@@ -3,7 +3,8 @@ from sqlalchemy import text
 from unittest.mock import patch
 
 from db.schemas.utils import get_mathesar_schemas, get_schema_oid_from_name
-from mathesar import models
+from mathesar.models import base as models_base
+from mathesar.models.base import Schema
 from mathesar import reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
@@ -58,7 +59,7 @@ def test_schema_list_filter(client, create_db_schema, FUN_create_dj_db, MOD_engi
     cache.clear()
 
     schemas = {
-        schema_param: models.Schema.objects.get(
+        schema_param: Schema.objects.get(
             oid=get_schema_oid_from_name(
                 schema_param[0],
                 MOD_engine_cache(schema_param[1])
@@ -207,7 +208,7 @@ def test_schema_create(client, FUN_create_dj_db, MOD_engine_cache):
     db_name = "some_db1"
     FUN_create_dj_db(db_name)
 
-    schema_count_before = models.Schema.objects.count()
+    schema_count_before = Schema.objects.count()
 
     schema_name = 'Test Schema'
     data = {
@@ -218,9 +219,9 @@ def test_schema_create(client, FUN_create_dj_db, MOD_engine_cache):
     response_schema = response.json()
 
     assert response.status_code == 201
-    schema_count_after = models.Schema.objects.count()
+    schema_count_after = Schema.objects.count()
     assert schema_count_after == schema_count_before + 1
-    schema = models.Schema.objects.get(id=response_schema['id'])
+    schema = Schema.objects.get(id=response_schema['id'])
     check_schema_response(MOD_engine_cache, response_schema, schema, schema_name, db_name, 0)
 
 
@@ -247,7 +248,7 @@ def test_schema_partial_update(create_schema, client, test_db_name, MOD_engine_c
     assert response.status_code == 200
     check_schema_response(MOD_engine_cache, response_schema, schema, new_schema_name, test_db_name,)
 
-    schema = models.Schema.objects.get(oid=schema.oid)
+    schema = Schema.objects.get(oid=schema.oid)
     assert schema.name == new_schema_name
 
 
@@ -267,7 +268,7 @@ def test_schema_patch_same_name(create_schema, client, test_db_name, MOD_engine_
         schema_name,
         test_db_name
     )
-    schema = models.Schema.objects.get(oid=schema.oid)
+    schema = Schema.objects.get(oid=schema.oid)
     assert schema.name == schema_name
 
 
@@ -275,12 +276,12 @@ def test_schema_delete(create_schema, client):
     schema_name = 'NASA Schema Delete'
     schema = create_schema(schema_name)
 
-    with patch.object(models, 'drop_schema') as mock_infer:
+    with patch.object(models_base, 'drop_schema') as mock_infer:
         response = client.delete(f'/api/db/v0/schemas/{schema.id}/')
     assert response.status_code == 204
 
     # Ensure the Django model was deleted
-    existing_oids = {schema.oid for schema in models.Schema.objects.all()}
+    existing_oids = {schema.oid for schema in Schema.objects.all()}
     assert schema.oid not in existing_oids
 
     # Ensure the backend schema would have been deleted
