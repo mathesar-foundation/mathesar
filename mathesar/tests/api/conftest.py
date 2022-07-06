@@ -6,7 +6,7 @@ from sqlalchemy import Table as SATable
 
 from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table
-from mathesar.models import Table, DataFile, Column as ServiceLayerColumn
+from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
 
 
 @pytest.fixture
@@ -142,8 +142,8 @@ def column_test_table_with_service_layer_options(patent_schema):
         Column("mycolumn6", TIMESTAMP),
     ]
     column_data_list = [{},
-                        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
-                        {'display_options': {"show_as_percentage": True, "locale": "en_US"}},
+                        {'display_options': {'input': "dropdown", 'custom_labels': {"TRUE": "yes", "FALSE": "no"}}},
+                        {'display_options': {'show_as_percentage': True, 'number_format': 'english'}},
                         {},
                         {},
                         {},

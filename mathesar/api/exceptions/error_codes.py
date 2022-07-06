@@ -41,3 +41,4 @@ class ErrorCodes(Enum):
     UnknownDBType = 4408
     InvalidLinkChoice = 4409
     IncompatibleFractionDigitValues = 4410
+    RemainderTableNameRequired = 4411

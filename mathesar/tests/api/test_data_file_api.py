@@ -7,7 +7,7 @@ from django.core.files import File
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.imports import csv
-from mathesar.models import DataFile
+from mathesar.models.base import DataFile
 from mathesar.errors import InvalidTableError
 
 

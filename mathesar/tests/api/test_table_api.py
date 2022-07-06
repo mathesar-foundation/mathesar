@@ -5,12 +5,13 @@ from django.core.cache import cache
 from django.core.files.base import File, ContentFile
 from sqlalchemy import text
 
+from db.columns.operations.select import get_columns_attnum_from_names
 from db.types.base import PostgresType, MathesarCustomType
 
 from mathesar import reflection
-from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models import Table, DataFile
+from mathesar.models import base as models_base
+from mathesar.models.base import Column, Table, DataFile
 
 
 @pytest.fixture
@@ -665,7 +666,7 @@ def test_table_delete(create_patents_table, client):
     table = create_patents_table(table_name)
     table_count = len(Table.objects.all())
 
-    with patch.object(models, 'drop_table') as mock_delete:
+    with patch.object(models_base, 'drop_table') as mock_delete:
         response = client.delete(f'/api/db/v0/tables/{table.id}/')
     assert response.status_code == 204
 
@@ -1286,3 +1287,117 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
     # The table should not have changed
     original_column_data = _get_data_types_column_data(table)
     _check_columns(current_table_response.json()['columns'], original_column_data)
+
+
+def test_table_extract_columns_retain_original_table(create_patents_table, client):
+    table_name = 'Patents'
+    table = create_patents_table(table_name)
+    column_name_id_map = table.get_column_name_id_bidirectional_map()
+    existing_columns = table.columns.all()
+    existing_columns = [existing_column.name for existing_column in existing_columns]
+    column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
+    column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
+
+    extract_table_name = "Patent Info"
+    remainder_table_name = "Patent Status"
+    split_data = {
+        'extract_columns': column_ids_to_extract,
+        'extracted_table_name': extract_table_name,
+        "remainder_table_name": remainder_table_name,
+        'drop_original_table': False
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
+    assert current_table_response.status_code == 201
+    response_data = current_table_response.json()
+    extracted_table_id = response_data['extracted_table']
+    extracted_table = Table.objects.get(id=extracted_table_id)
+    assert extract_table_name == extracted_table.name
+    remainder_table_id = response_data['remainder_table']
+    remainder_table = Table.objects.get(id=remainder_table_id)
+    assert remainder_table_name == remainder_table.name
+    assert remainder_table.id != table.id
+    assert Table.objects.filter(id=table.id).count() == 1
+    extracted_columns = extracted_table.columns.all()
+    extracted_column_names = [extracted_column.name for extracted_column in extracted_columns]
+    expected_extracted_column_names = ['id'] + column_names_to_extract
+    assert expected_extracted_column_names == extracted_column_names
+
+    remainder_columns = remainder_table.columns.all()
+    remainder_column_names = [remainder_column.name for remainder_column in remainder_columns]
+    expected_remainder_columns = (set(existing_columns) - set(column_names_to_extract)) | {'Patent Info_id'}
+    assert set(expected_remainder_columns) == set(remainder_column_names)
+
+
+def test_table_extract_columns_drop_original_table(create_patents_table, client):
+    table_name = 'Patents'
+    table = create_patents_table(table_name)
+    column_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
+    column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
+    existing_columns = table.columns.all()
+    existing_columns = [existing_column.name for existing_column in existing_columns]
+    remainder_column_names = (set(existing_columns) - set(column_names_to_extract))
+
+    extract_table_name = "Patent Info"
+    remainder_table_name = "Patent Status"
+    split_data = {
+        'extract_columns': column_ids_to_extract,
+        'extracted_table_name': extract_table_name,
+        "remainder_table_name": remainder_table_name,
+        'drop_original_table': True
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
+    assert current_table_response.status_code == 201
+    response_data = current_table_response.json()
+    extracted_table_id = response_data['extracted_table']
+    extracted_table = Table.objects.get(id=extracted_table_id)
+    remainder_table_id = response_data['remainder_table']
+    remainder_table = Table.objects.get(id=remainder_table_id)
+
+    remainder_columns = remainder_table.columns.all()
+    remainder_columns_map = {column.name: column for column in remainder_columns}
+    columns_with_attnum = get_columns_attnum_from_names(remainder_table.oid, remainder_column_names, remainder_table._sa_engine, return_as_name_map=True)
+    for remainder_column_name in remainder_column_names:
+        remainder_column = remainder_columns_map[remainder_column_name]
+        assert remainder_column.attnum == columns_with_attnum[remainder_column.name]
+        assert remainder_column.id == column_name_id_map[remainder_column.name]
+
+    extracted_columns = extracted_table.columns.all()
+    columns_with_attnum = get_columns_attnum_from_names(extracted_table.oid, column_names_to_extract, extracted_table._sa_engine, return_as_name_map=True)
+    for extracted_column in extracted_columns:
+        if extracted_column.name != 'id':
+            assert extracted_column.attnum == columns_with_attnum[extracted_column.name]
+            assert extracted_column.id == column_name_id_map[extracted_column.name]
+
+
+def test_table_extract_columns_with_display_options(create_patents_table, client):
+    table_name = 'Patents'
+    table = create_patents_table(table_name)
+    column_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
+    column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
+    column_name_with_display_options = column_names_to_extract[0]
+    column_id_with_display_options = column_name_id_map[column_name_with_display_options]
+
+    column_display_options = {'show_as_percentage': True, 'number_format': 'english'}
+    column_with_display_options = Column.objects.get(id=column_id_with_display_options)
+    column_with_display_options.display_options = column_display_options
+    column_with_display_options.save()
+
+    extract_table_name = "Patent Info"
+    remainder_table_name = "Patent Status"
+    split_data = {
+        'extract_columns': column_ids_to_extract,
+        'extracted_table_name': extract_table_name,
+        "remainder_table_name": remainder_table_name,
+        'drop_original_table': True
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
+    assert current_table_response.status_code == 201
+    response_data = current_table_response.json()
+    extracted_table_id = response_data['extracted_table']
+    extracted_table = Table.objects.get(id=extracted_table_id)
+    extracted_column_id = extracted_table.get_column_name_id_bidirectional_map()[column_name_with_display_options]
+    extracted_column = Column.objects.get(id=extracted_column_id)
+    assert extracted_column.id == extracted_column_id
+    assert extracted_column.display_options == column_with_display_options.display_options

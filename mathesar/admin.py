@@ -1,5 +1,5 @@
 from django.contrib import admin
-from mathesar.models import Table, Schema, DataFile
+from mathesar.models.base import Table, Schema, DataFile
 
 
 admin.site.register(Table)

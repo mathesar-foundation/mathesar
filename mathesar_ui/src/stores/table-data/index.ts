@@ -5,6 +5,7 @@ export {
   Display,
   isCellActive,
   scrollBasedOnActiveCell,
+  getCellStyle,
   ROW_CONTROL_COLUMN_WIDTH,
   DEFAULT_ROW_RIGHT_PADDING,
 } from './display';
@@ -20,5 +21,10 @@ export { getRowKey } from './records';
 export { getCellKey } from './utils';
 
 export { initTabularData, removeTabularData } from './manager';
-export { makeTabularDataProps, makeTerseTabularDataProps } from './tabularData';
+export {
+  makeTabularDataProps,
+  makeTerseTabularDataProps,
+  setTabularDataStoreInContext,
+  getTabularDataStoreFromContext,
+} from './tabularData';
 export { TabularType } from './TabularType';
