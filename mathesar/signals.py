@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from mathesar.models import Table
+from mathesar.models.base import Table
 from mathesar.reflection import reflect_new_table_constraints
 
 

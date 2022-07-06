@@ -5,7 +5,7 @@ from db.tables.operations.select import get_oid_from_table
 from db.tables.operations.infer_types import infer_table_column_types
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
-from mathesar.models import Table
+from mathesar.models.base import Table
 from mathesar.reflection import reflect_columns_from_table
 
 TABLE_NAME_TEMPLATE = 'Table'

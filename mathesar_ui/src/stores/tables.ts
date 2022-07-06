@@ -10,7 +10,11 @@ import {
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
-import type { SchemaEntry, TableEntry } from '@mathesar/AppTypes';
+import type {
+  DBObjectEntry,
+  SchemaEntry,
+  TableEntry,
+} from '@mathesar/AppTypes';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -171,3 +175,7 @@ export const tables: Readable<DBTablesStoreData> = derived(
     };
   },
 );
+
+export function getTableName(id: DBObjectEntry['id']): string | undefined {
+  return get(tables).data.get(id)?.name;
+}

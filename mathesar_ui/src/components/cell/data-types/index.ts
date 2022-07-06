@@ -1,6 +1,7 @@
 import string from './string';
 import boolean from './boolean';
 import number from './number';
+import money from './money';
 import uri from './uri';
 import duration from './duration';
 import date from './date';
@@ -12,6 +13,7 @@ const dataTypeComponentFactories: Record<CellDataType, CellComponentFactory> = {
   string,
   boolean,
   number,
+  money,
   uri,
   duration,
   date,
