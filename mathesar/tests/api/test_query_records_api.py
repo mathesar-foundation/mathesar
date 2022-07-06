@@ -22,6 +22,7 @@ def patents_query(create_patents_table, get_uid):
     )
     return ui_query
 
+
 @pytest.mark.parametrize("limit", [None, 100, 500])
 def test_pagination(client, patents_query, limit):
     ui_query = patents_query
@@ -37,11 +38,12 @@ def test_pagination(client, patents_query, limit):
         total_rows_in_table
     )
 
+
 def _assert_well_formed_records(
-        response_json,
-        expected_result_count,
-        total_rows_in_table
-    ):
+    response_json,
+    expected_result_count,
+    total_rows_in_table
+):
     assert isinstance(response_json, dict)
     assert response_json['count'] == total_rows_in_table
     results = response_json.get('results')

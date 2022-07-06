@@ -1,7 +1,6 @@
 import pytest
 from sqlalchemy import Column, Integer, MetaData, String
 from sqlalchemy import Table as SATable
-from django.core.cache import cache
 
 from db.constraints.utils import ConstraintType
 from db.tables.operations.select import get_oid_from_table

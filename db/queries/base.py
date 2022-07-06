@@ -119,9 +119,6 @@ def _get_initial_relation(query):
         )
         sa_columns_to_select.append(sa_column_to_select)
     stmt = select(*sa_columns_to_select).select_from(from_clause)
-    import logging
-    logger = logging.getLogger(f'_get_initial_relation')
-    logger.debug(stmt)
     return stmt.cte()
 
 
