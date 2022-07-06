@@ -1,5 +1,7 @@
-from sqlalchemy import MetaData, Table, any_, case, column, exists, func, select, text, true, union
+from array import array
+from sqlalchemy import MetaData, Table, any_, case, column, distinct, exists, func, literal, literal_column, select, text, true, union
 from db.tables.operations.select import get_oid_from_table
+from sqlalchemy.dialects.postgresql import array
 
 
 # CTEs for getting dependents of a specific type
@@ -18,6 +20,7 @@ def _get_table_dependents(foreign_key_dependents, pg_constraint):
 
     return select(
         pg_constraint.c.conrelid.label('objid'),
+        foreign_key_dependents.c.refobjid,
         foreign_key_dependents.c.column_number,
         pg_identify_object.c.name,
         pg_identify_object.c.schema,
@@ -30,6 +33,7 @@ def _get_table_dependents(foreign_key_dependents, pg_constraint):
     .where(pg_constraint.c.confrelid != 0) \
     .group_by(
         pg_constraint.c.conrelid,
+        foreign_key_dependents.c.refobjid,
         foreign_key_dependents.c.column_number,
         pg_identify_object.c.type,
         pg_identify_object.c.name,
@@ -60,13 +64,17 @@ def get_dependents_hierarchy(name, schema, engine):
     referenced_object_id = get_oid_from_table(name, schema, engine)
     pg_depend = _get_pg_depend(engine)
     pg_identify_object = _get_pg_identify_object_lateral(pg_depend)
-    all = _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object)
+    all = _get_all_dependent_objects_statement_v2(name, schema, engine)
     all_cte = all.cte(recursive=True, name='all')
 
-    topq = select(all_cte).where(all_cte.c.refobjid == referenced_object_id)
+    topq = select(all_cte,
+        literal(0).label('level'),
+        array([all_cte.c.objid]).label('chain')).where(all_cte.c.refobjid == referenced_object_id)
     topq = topq.cte('cte')
 
-    bottomq = select(all_cte)
+    bottomq = select(all_cte,
+        literal_column('cte.level + 1').label('level'),
+        topq.c.chain + array([all_cte.c.objid])).where(topq.c.level < 10).where(all_cte.c.objid != any_(topq.c.chain))
     bottomq = bottomq.join(topq, all_cte.c.refobjid == topq.c.objid)
 
     recursive_q = topq.union(bottomq)
@@ -159,14 +167,14 @@ def _get_dependency_case(pg_depend):
 
 # Callers
 
-def _get_all_dependent_objects_stmt(name, schema, engine):
+def _get_all_dependent_objects_statement_v2(name, schema, engine):
     referenced_object_id = get_oid_from_table(name, schema, engine)
     
     pg_depend = _get_pg_depend(engine)
     pg_identify_object = _get_pg_identify_object_lateral(pg_depend)
     pg_constraint = _get_pg_constraint(engine)
 
-    base_stmt = _get_dependent_objects_by_id_base_statement(pg_depend, pg_identify_object, referenced_object_id)
+    base_stmt = _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object)
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, base_stmt).cte('foreign_key_constraint_dependents')
     table_dependents = _get_table_dependents(foreign_key_constraint_dependents, pg_constraint).cte('table_dependents')
 
