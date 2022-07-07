@@ -78,7 +78,7 @@ If you don't have your editor configured to auto-format your code, then you'll n
 - Format a specific file
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npx prettier --write src/sections/Base.svelte
+  docker exec -it -w /code/mathesar_ui mathesar_service npx prettier --write src/App.svelte
   ```
 
 ## Linting
@@ -94,7 +94,7 @@ We use [ESLint](https://eslint.org/) to help spot more complex issues within cod
 - Lint a specific file:
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npx eslint src/sections/Base.svelte
+  docker exec -it -w /code/mathesar_ui mathesar_service npx eslint src/App.svelte
   ```
 
 ## Testing
