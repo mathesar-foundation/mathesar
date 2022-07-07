@@ -9,7 +9,9 @@ from db.utils import execute_statement
 
 BASE = 'base'
 DEPTH = 'depth'
-PATH = 'path'
+JP_PATH = 'jp_path'
+FK_PATH = 'fk_path'
+REVERSE = 'reverse'
 TARGET = 'target'
 MULTIPLE_RESULTS = 'multiple_results'
 
@@ -74,6 +76,7 @@ def get_oid_from_table(name, schema, engine):
 
 
 def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
+    FK_OID = 'fk_oid'
     LEFT_REL = 'left_rel'
     RIGHT_REL = 'right_rel'
     LEFT_COL = 'left_col'
@@ -90,11 +93,13 @@ def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
         pg_constraint = Table("pg_constraint", MetaData(), autoload_with=engine)
 
     symmetric_fkeys = select(
+        cast(pg_constraint.c.oid, Integer).label(FK_OID),
         cast(pg_constraint.c.conrelid, Integer).label(LEFT_REL),
         cast(pg_constraint.c.confrelid, Integer).label(RIGHT_REL),
         cast(pg_constraint.c.conkey[1], Integer).label(LEFT_COL),
         cast(pg_constraint.c.confkey[1], Integer).label(RIGHT_COL),
-        literal(False).label(MULTIPLE_RESULTS)
+        literal(False).label(MULTIPLE_RESULTS),
+        literal(False).label(REVERSE),
     ).where(
         and_(
             pg_constraint.c.contype == 'f',
@@ -102,11 +107,13 @@ def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
         )
     ).union_all(
         select(
+            cast(pg_constraint.c.oid, Integer).label(FK_OID),
             cast(pg_constraint.c.confrelid, Integer).label(LEFT_REL),
             cast(pg_constraint.c.conrelid, Integer).label(RIGHT_REL),
             cast(pg_constraint.c.confkey[1], Integer).label(LEFT_COL),
             cast(pg_constraint.c.conkey[1], Integer).label(RIGHT_COL),
             literal(True).label(MULTIPLE_RESULTS),
+            literal(True).label(REVERSE),
         ).where(
             and_(
                 pg_constraint.c.contype == 'f',
@@ -135,7 +142,16 @@ def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
                 )
             ),
             JSONB
-        ).label(PATH),
+        ).label(JP_PATH),
+        cast(
+            jba(
+                jba(
+                    symmetric_fkeys.columns[FK_OID],
+                    symmetric_fkeys.columns[REVERSE],
+                )
+            ),
+            JSONB
+        ).label(FK_PATH),
         symmetric_fkeys.columns[MULTIPLE_RESULTS],
     ).cte(name=SEARCH_FKEY_GRAPH, recursive=True)
 
@@ -146,7 +162,7 @@ def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
             symmetric_fkeys.columns[LEFT_COL],
             symmetric_fkeys.columns[RIGHT_COL],
             search_fkey_graph.columns[DEPTH] + 1,
-            search_fkey_graph.columns[PATH] + cast(
+            search_fkey_graph.columns[JP_PATH] + cast(
                 jba(
                     jba(
                         jba(
@@ -161,6 +177,15 @@ def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
                 ),
                 JSONB
             ),
+            search_fkey_graph.columns[FK_PATH] + cast(
+                jba(
+                    jba(
+                        symmetric_fkeys.columns[FK_OID],
+                        symmetric_fkeys.columns[REVERSE],
+                    )
+                ),
+                JSONB
+            ),
             or_(
                 search_fkey_graph.columns[MULTIPLE_RESULTS],
                 symmetric_fkeys.columns[MULTIPLE_RESULTS]
@@ -169,7 +194,7 @@ def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
             and_(
                 symmetric_fkeys.columns[LEFT_REL] == search_fkey_graph.columns[RIGHT_REL],
                 search_fkey_graph.columns[DEPTH] < max_depth,
-                search_fkey_graph.columns[PATH][-1] != jba(
+                search_fkey_graph.columns[JP_PATH][-1] != jba(
                     jba(
                         symmetric_fkeys.columns[RIGHT_REL],
                         symmetric_fkeys.columns[RIGHT_COL]
@@ -184,9 +209,10 @@ def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
     )
 
     output_cte = select(
-        cast(search_fkey_graph.columns[PATH][0][0][0], Integer).label(BASE),
-        cast(search_fkey_graph.columns[PATH][-1][-1][0], Integer).label(TARGET),
-        search_fkey_graph.columns[PATH].label(PATH),
+        cast(search_fkey_graph.columns[JP_PATH][0][0][0], Integer).label(BASE),
+        cast(search_fkey_graph.columns[JP_PATH][-1][-1][0], Integer).label(TARGET),
+        search_fkey_graph.columns[JP_PATH].label(JP_PATH),
+        search_fkey_graph.columns[FK_PATH].label(FK_PATH),
         search_fkey_graph.columns[DEPTH].label(DEPTH),
         search_fkey_graph.columns[MULTIPLE_RESULTS].label(MULTIPLE_RESULTS)
     ).cte(name=OUTPUT_CTE)

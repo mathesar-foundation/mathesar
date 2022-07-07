@@ -14,25 +14,27 @@ restrictions in either way.
 
 WITH RECURSIVE symmetric_fkeys AS (
   SELECT
-    c.oid,
+    c.oid fkey_oid,
     c.conrelid::INTEGER left_rel,
     c.confrelid::INTEGER right_rel,
     c.conkey[1]::INTEGER left_col,
-    c.confkey[1]::INTEGER right_col
+    c.confkey[1]::INTEGER right_col,
+    false reversed
   FROM pg_constraint c
   WHERE c.contype='f' and array_length(c.conkey, 1)=1
 UNION ALL
   SELECT
-    c.oid,
+    c.oid fkey_oid,
     c.confrelid::INTEGER left_rel,
     c.conrelid::INTEGER right_rel,
     c.confkey[1]::INTEGER left_col,
-    c.conkey[1]::INTEGER right_col
+    c.conkey[1]::INTEGER right_col,
+    true reversed
   FROM pg_constraint c
   WHERE c.contype='f' and array_length(c.conkey, 1)=1
 ),
 
-search_fkey_graph(left_rel, right_rel, left_col, right_col, depth, path) AS (
+search_fkey_graph(left_rel, right_rel, left_col, right_col, depth, join_path, fkey_path) AS (
   SELECT
     sfk.left_rel,
     sfk.right_rel,
@@ -44,7 +46,8 @@ search_fkey_graph(left_rel, right_rel, left_col, right_col, depth, path) AS (
         jsonb_build_array(sfk.left_rel, sfk.left_col),
         jsonb_build_array(sfk.right_rel, sfk.right_col)
       )
-    )
+    ),
+    jsonb_build_array(jsonb_build_array(sfk.fkey_oid, sfk.reversed))
   FROM symmetric_fkeys sfk
 UNION ALL
   SELECT
@@ -53,25 +56,28 @@ UNION ALL
     sfk.left_col,
     sfk.right_col,
     sg.depth + 1,
-    path || jsonb_build_array(
+    join_path || jsonb_build_array(
       jsonb_build_array(
         jsonb_build_array(sfk.left_rel, sfk.left_col),
         jsonb_build_array(sfk.right_rel, sfk.right_col)
       )
-    )
+    ),
+    fkey_path || jsonb_build_array(jsonb_build_array(sfk.fkey_oid, sfk.reversed))
   FROM symmetric_fkeys sfk, search_fkey_graph sg
   WHERE
     sfk.left_rel=sg.right_rel
     AND depth<3
-    AND (path -> -1) != jsonb_build_array(
+    AND (join_path -> -1) != jsonb_build_array(
       jsonb_build_array(sfk.right_rel, sfk.right_col),
       jsonb_build_array(sfk.left_rel, sfk.left_col)
     )
 ), output_cte AS (
   SELECT
-    (path#>'{0, 0, 0}')::INTEGER base,
-    (path#>'{-1, -1, 0}')::INTEGER target,
-    path
+    (join_path#>'{0, 0, 0}')::INTEGER base,
+    (join_path#>'{-1, -1, 0}')::INTEGER target,
+    join_path,
+    fkey_path,
+    depth
   FROM search_fkey_graph
 )
 SELECT * FROM output_cte;
