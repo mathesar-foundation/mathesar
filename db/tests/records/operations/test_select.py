@@ -3,7 +3,7 @@ from collections import Counter
 
 from sqlalchemy import Column, VARCHAR
 
-from db.records.operations.select import get_records, get_column_cast_records
+from db.records.operations.select import get_records, get_column_cast_records, get_records_preview_data
 from db.tables.operations.create import create_mathesar_table
 from db.types.base import PostgresType
 
@@ -110,14 +110,32 @@ def test_foreign_key_record(relation_table_obj):
     preview_columns = {}
     referent_table, referrer_table, engine = relation_table_obj
     fk_column_name = "person"
-    preview_columns[fk_column_name] = {'table': referent_table, 'referent_column': 'id', 'columns': ["Name", "Email"]}
+    preview_columns[referent_table.name] = {'table': referent_table, 'preview_columns': ["Name"],
+                                            'constraint_columns': [
+                                                {'referent_column': 'id',
+                                                 'constrained_column': fk_column_name
+                                                 }
+                                            ]}
     records = get_records(
         referrer_table,
         engine,
         order_by=[{'field': "id", 'direction': "asc"}],
-        preview_columns=preview_columns
     )
-    expected_record_data = (1, 1, 6, None, 'Physics', 43, 'Stephanie Norris', 'stephanienorris@hotmail.com')
+    preview_records = get_records_preview_data(records, engine, preview_columns)
+    expected_preview = [
+        {
+            'table': referent_table.name,
+            'data': [
+                ('Stephanie Norris'),
+                ('Shannon Ramos'),
+                ('Tyler Harris'),
+                ('Lee Henderson'),
+                ('Christopher Bell')
+            ]
+        }
+    ]
+    assert preview_records == expected_preview
+    expected_record_data = (1, 1, 6, None, 'Physics', 43)
     assert records[0] == expected_record_data
 
 

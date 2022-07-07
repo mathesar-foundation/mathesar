@@ -35,7 +35,7 @@ def process_preview_data(preview_objs, preview_table_info):
             }
     identifier_converted_preview_objs = []
     for preview_obj in preview_objs:
-        table_name = preview_obj['table'].name
+        table_name = preview_obj['table']
         table = name_keyed_preview_table_info[table_name]['table']
         table_id = table.id
         referent_column_name_id_map = table.get_column_name_id_bidirectional_map()
