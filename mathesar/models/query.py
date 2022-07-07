@@ -48,7 +48,7 @@ class UIQuery(BaseModel, Relation):
         )
 
     @cached_property
-    def get_output_columns_described(self):
+    def output_columns_described(self):
         """
         Returns columns' description, which is to be returned verbatim by the
         `queries/[id]/columns` endpoint.
@@ -62,7 +62,7 @@ class UIQuery(BaseModel, Relation):
                 'display_options': self._get_display_options_for_sa_col(sa_col),
             }
             for sa_col
-            in self.db_query.sa_output_columns
+            in self.db_query.sa_output_columns(engine=self._sa_engine)
         )
 
     @cached_property

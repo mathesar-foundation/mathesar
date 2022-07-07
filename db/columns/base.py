@@ -29,6 +29,7 @@ class MathesarColumn(Column):
             nullable=True,
             autoincrement=False,
             server_default=None,
+            engine=None,
     ):
         """
         Construct a new ``MathesarColumn`` object.
@@ -42,7 +43,7 @@ class MathesarColumn(Column):
         nullable -- Boolean giving whether the column is nullable.
         server_default -- String or DefaultClause giving the default value
         """
-        self.engine = None
+        self.engine = engine
         super().__init__(
             *foreign_keys,
             name=name,
@@ -65,7 +66,7 @@ class MathesarColumn(Column):
         )
 
     @classmethod
-    def from_column(cls, column):
+    def from_column(cls, column, engine=None):
         """
         This alternate init method creates a new column (a copy) of the
         given column.  It respects only the properties in the __init__
@@ -80,6 +81,7 @@ class MathesarColumn(Column):
             nullable=column.nullable,
             autoincrement=column.autoincrement,
             server_default=column.server_default,
+            engine=engine,
         )
         new_column.original_table = column.table
         return new_column

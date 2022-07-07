@@ -4,7 +4,7 @@ from mathesar.models.query import UIQuery
 
 
 @pytest.fixture
-def patents_query(create_patents_table, get_uid):
+def minimal_patents_query(create_patents_table, get_uid):
     base_table = create_patents_table(table_name=get_uid())
     initial_columns = [
         {
@@ -24,8 +24,8 @@ def patents_query(create_patents_table, get_uid):
 
 
 @pytest.mark.parametrize("limit", [None, 100, 500])
-def test_pagination(client, patents_query, limit):
-    ui_query = patents_query
+def test_pagination(client, minimal_patents_query, limit):
+    ui_query = minimal_patents_query
     total_rows_in_table = 1393
     default_limit = 50
     response = client.get(f'/api/db/v0/queries/{ui_query.id}/records/?limit={limit}')

@@ -21,7 +21,7 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
     @action(methods=['get'], detail=True)
     def columns(self, request, pk=None):
         query = self.get_object()
-        output_col_desc = query.get_output_columns_described()
+        output_col_desc = query.output_columns_described
         return Response(output_col_desc)
 
     @action(methods=['get'], detail=True)

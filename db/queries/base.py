@@ -35,13 +35,16 @@ class DBQuery:
     def get_count(self, **kwargs):
         return records_select.get_count(table=self.sa_relation, **kwargs)
 
-    @cached_property
-    def sa_output_columns(self):
+    def sa_output_columns(self, engine):
         """
         Sequence of SQLAlchemy columns representing the output columns of the relation described
         by this query.
         """
-        return self.sa_relation.columns
+        return tuple(
+            MathesarColumn.from_column(sa_col, engine=engine)
+            for sa_col
+            in self.sa_relation.columns
+        )
 
     @cached_property
     def sa_relation(self):
