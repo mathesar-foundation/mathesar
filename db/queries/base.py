@@ -1,6 +1,5 @@
 from collections import namedtuple
 
-import sqlalchemy
 from sqlalchemy import select, join, Column as SAColumn, Table as SATable
 
 from django.utils.functional import cached_property
@@ -62,15 +61,27 @@ class InitialColumn:
         column,
         jp_path=None,
     ):
+        # alias mustn't be an empty string
         assert isinstance(alias, str) and alias.strip() != ""
         self.alias = alias
+
         if jp_path is not None:
+            # jp_path must be made up of JoinParams
             for jp in jp_path:
                 assert isinstance(jp, JoinParams)
         self.jp_path = jp_path
+
+        # column must be SA Column, and not MathesarColumn (MathesarColumn is incompatible with some
+        # of SA's joining mechanics).
         assert isinstance(column, SAColumn)
-        if not isinstance(column, MathesarColumn):
-            column = MathesarColumn.from_column(column)
+        assert not isinstance(column, MathesarColumn)
+
+        # column must have a table with a schema associated.
+        table = column.table
+        assert table is not None
+        schema_name = table.schema
+        assert schema_name is not None
+
         self.column = column
 
     @property
@@ -124,12 +135,7 @@ def _get_initial_relation(query):
 
 def _process_initial_column(initial_column, from_clause):
     if initial_column.is_base_column:
-        # for some reason using actual Column instances here can cause "duplicate aliases" psycopg
-        # exception. so, we reduce a Column instance into a ColumnClause instance using
-        # sqlalchemy.column.
-        column_name = initial_column.column.name
-        column_fixed = sqlalchemy.column(column_name)
-        col_to_select = column_fixed
+        col_to_select = initial_column.column
     else:
         from_clause, col_to_select = _nest_a_join(
             initial_column=initial_column,
@@ -154,7 +160,7 @@ def _nest_a_join(from_clause, initial_column):
             right_column_reference = (
                 # If we give the right table an alias, we have to use that alias whenever we
                 # reference it
-                _access_column_on_aliased_relation(
+                _access_column_on_relation(
                     rightmost_table_alias,
                     jp.right_column,
                 )
@@ -170,7 +176,7 @@ def _nest_a_join(from_clause, initial_column):
         )
     # Here we produce the actual reference to the column we want to join in
     rightmost_table_target_column_reference = (
-        _access_column_on_aliased_relation(
+        _access_column_on_relation(
             rightmost_table_alias,
             target_sa_column,
         )
@@ -178,6 +184,6 @@ def _nest_a_join(from_clause, initial_column):
     return from_clause, rightmost_table_target_column_reference
 
 
-def _access_column_on_aliased_relation(aliased_relation, sa_column):
+def _access_column_on_relation(relation, sa_column):
     column_name = sa_column.name
-    return getattr(aliased_relation.c, column_name)
+    return getattr(relation.c, column_name)

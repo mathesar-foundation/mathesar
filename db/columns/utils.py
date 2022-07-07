@@ -19,6 +19,7 @@ def get_type_options(column):
     return MathesarColumn.from_column(column).type_options
 
 
+# TODO problema cia, reikia kad nebutu sukuriamos atsitiktines Table
 def get_enriched_column_table(table, engine=None):
     table_columns = [MathesarColumn.from_column(c) for c in table.columns]
     if engine is not None:

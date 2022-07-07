@@ -84,6 +84,17 @@ class MathesarColumn(Column):
         new_column.original_table = column.table
         return new_column
 
+    def to_sa_column(self):
+        """
+        MathesarColumn sometimes is not interchangeable with SQLAlchemy's Column.
+        For use in those situations, this method attempts to recreate an SA Column.
+
+        NOTE: this method is incomplete: it does not account for all properties of MathesarColumn.
+        """
+        sa_column = Column(name=self.name, type_=self.type)
+        sa_column.table = self.table_
+        return sa_column
+
     @property
     def table_(self):
         """
