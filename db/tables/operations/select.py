@@ -75,7 +75,9 @@ def get_oid_from_table(name, schema, engine):
     return inspector.get_table_oid(name, schema=schema)
 
 
-def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
+def get_joinable_tables(
+        engine, base_table_oid=None, max_depth=3, limit=None, offset=None
+):
     FK_OID = 'fk_oid'
     LEFT_REL = 'left_rel'
     RIGHT_REL = 'right_rel'
@@ -225,6 +227,6 @@ def get_joinable_tables(engine, base_table_oid=None, max_depth=3):
         final_sel = select(output_cte)
 
     with engine.begin() as conn:
-        results = conn.execute(final_sel).fetchall()
+        results = conn.execute(final_sel.limit(limit).offset(offset)).fetchall()
 
     return results
