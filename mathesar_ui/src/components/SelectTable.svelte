@@ -5,11 +5,12 @@
   export let tables: TableEntry[];
   export let table: TableEntry | undefined = undefined;
   export let prependBlank = false;
+
+  $: tableList = prependBlank ? [undefined, ...tables] : tables;
 </script>
 
 <Select
-  options={tables}
-  {prependBlank}
+  options={tableList}
   labelKey="name"
   valuesAreEqual={(a, b) => a?.id === b?.id}
   bind:value={table}
