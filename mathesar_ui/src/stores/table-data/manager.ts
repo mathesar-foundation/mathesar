@@ -1,4 +1,5 @@
-import type { DBObjectEntry, TableEntry, ViewEntry } from '@mathesar/AppTypes';
+import type { DBObjectEntry, ViewEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/tables/tableList';
 import type { TabularDataProps } from './tabularData';
 import { TabularData } from './tabularData';
 import { TabularType } from './TabularType';

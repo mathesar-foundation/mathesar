@@ -1,9 +1,9 @@
 import type {
   Database,
   SchemaResponse,
-  TableEntry,
   AbstractTypeResponse,
 } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/tables/tableList';
 
 interface CommonData {
   databases: Database[];

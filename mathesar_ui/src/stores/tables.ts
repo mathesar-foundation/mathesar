@@ -10,11 +10,8 @@ import {
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
-import type {
-  DBObjectEntry,
-  SchemaEntry,
-  TableEntry,
-} from '@mathesar/AppTypes';
+import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/tables/tableList';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 

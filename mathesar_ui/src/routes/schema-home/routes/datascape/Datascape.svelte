@@ -9,7 +9,7 @@
   import { constructTabularTabLink } from '@mathesar/stores/tabs/tabDataSaver';
   import { TabularType } from '@mathesar/stores/table-data';
   import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
-  import type { TableEntry } from '@mathesar/AppTypes';
+  import type { TableEntry } from '@mathesar/api/tables/tableList';
 
   import LeftPane from './LeftPane.svelte';
   import EmptyState from './EmptyState.svelte';
