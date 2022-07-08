@@ -95,17 +95,27 @@ def get_records(
         duplicate_only:  list of column names; only rows that have duplicates across those rows
                          will be returned
     """
+    from sqlalchemy.sql.base import ColumnSet as SAColumnSet
     if not order_by:
         # Set default ordering if none was requested
-        if len(table.primary_key.columns) > 0:
+        relation_has_pk = hasattr(table, 'primary_key')
+        if relation_has_pk:
+            pk = table.primary_key
+            pk_cols = None
+            if hasattr(pk, 'columns'):
+                pk_cols = pk.columns
+            elif isinstance(pk, SAColumnSet):
+                pk_cols = pk
             # If there are primary keys, order by all primary keys
-            order_by = [{'field': str(col.name), 'direction': 'asc'}
-                        for col in table.primary_key.columns]
-        else:
+            if pk_cols is not None and len(pk_cols) > 0:
+                order_by = [
+                    {'field': str(col.name), 'direction': 'asc'}
+                    for col in pk_cols
+                ]
+        if not order_by:
             # If there aren't primary keys, order by all columns
             order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
-
     query = get_query(
         table=table,
         limit=limit,
