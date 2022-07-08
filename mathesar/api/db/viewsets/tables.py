@@ -20,9 +20,8 @@ from mathesar.api.serializers.tables import (
 )
 from mathesar.models.base import Table
 from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
-from mathesar.utils.tables import (
-    get_table_column_types
-)
+from mathesar.utils.tables import get_table_column_types
+from mathesar.utils.joins import get_processed_joinable_tables
 
 
 class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewsets.GenericViewSet):
@@ -52,6 +51,17 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         table.delete_sa_table()
         table.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['get'], detail=True)
+    def joinable_tables(self, request, pk=None):
+        table = self.get_object()
+        limit = request.query_params.get('limit')
+        offset = request.query_params.get('offset')
+        max_depth = request.query_params.get('max_depth', 2)
+        processed_joinable_tables = get_processed_joinable_tables(
+            table, limit=limit, offset=offset, max_depth=max_depth
+        )
+        return Response(processed_joinable_tables)
 
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
