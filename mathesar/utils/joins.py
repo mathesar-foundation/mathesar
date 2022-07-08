@@ -35,7 +35,7 @@ def get_processed_joinable_tables(table, limit=None, offset=None, max_depth=2):
         )
         column_info.update(
             {
-                col.id: {NAME: col.name, TYPE: col.ui_type.display_name}
+                col.id: {NAME: col.name, TYPE: col.db_type.id}
                 for col in columns
             }
         )
