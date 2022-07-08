@@ -6,6 +6,11 @@ FK_PATH = 'fk_path'
 JP_PATH = 'jp_path'
 DEPTH = 'depth'
 MULTIPLE_RESULTS = 'multiple_results'
+NAME = 'name'
+COLUMNS = 'columns'
+TABLES = 'tables'
+JOINABLE_TABLES = 'joinable_tables'
+TYPE = 'type'
 
 
 def get_processed_joinable_tables(table, limit=None, offset=None, max_depth=2):
@@ -16,9 +21,31 @@ def get_processed_joinable_tables(table, limit=None, offset=None, max_depth=2):
         limit=limit,
         offset=offset
     )
+    table_info = {}
+    column_info = {}
+
+    def _prefetch_metadata_side_effector(table):
+        columns = table.columns.all()
+        table_info.update(
+            {
+                table.id: {
+                    NAME: table.name, COLUMNS: [col.id for col in columns]
+                }
+            }
+        )
+        column_info.update(
+            {
+                col.id: {NAME: col.name, TYPE: col.ui_type.display_name}
+                for col in columns
+            }
+        )
+        return table.id
+
     joinable_tables = [
         {
-            TARGET: Table.objects.get(oid=row[ma_sel.TARGET]).id,
+            TARGET: _prefetch_metadata_side_effector(
+                Table.objects.get(oid=row[ma_sel.TARGET])
+            ),
             JP_PATH: [
                 [
                     Column.objects.get(table__oid=oid, attnum=attnum).id
@@ -35,4 +62,8 @@ def get_processed_joinable_tables(table, limit=None, offset=None, max_depth=2):
         }
         for row in raw_joinable_tables
     ]
-    return joinable_tables
+    return {
+        JOINABLE_TABLES: joinable_tables,
+        TABLES: table_info,
+        COLUMNS: column_info,
+    }
