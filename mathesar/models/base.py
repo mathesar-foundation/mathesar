@@ -98,13 +98,16 @@ class Database(ReflectionManagerMixin, BaseModel):
 
     @property
     def _sa_engine(self):
+        global _engine_cache
         # We're caching this since the engine is used frequently.
-        was_cached = self.name in _engine_cache
+        db_name = self.name
+        was_cached = db_name in _engine_cache
         if was_cached:
-            engine = _engine_cache.get(self.name)
+            engine = _engine_cache.get(db_name)
             model_utils.ensure_cached_engine_ready(engine)
         else:
-            engine = create_mathesar_engine(db_name=self.name)
+            engine = create_mathesar_engine(db_name=db_name)
+            _engine_cache[db_name] = engine
         return engine
 
     @property
