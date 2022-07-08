@@ -55,8 +55,8 @@ class UIQuery(BaseModel, Relation):
         """
         return tuple(
             {
-                'name': None,
                 'alias': sa_col.name,
+                'name': self._get_display_name_for_sa_col(sa_col),
                 'type': sa_col.db_type.id,
                 'type_options': sa_col.type_options,
                 'display_options': self._get_display_options_for_sa_col(sa_col),
@@ -90,9 +90,21 @@ class UIQuery(BaseModel, Relation):
     def _db_transformations(self):
         return
 
+    def _get_display_name_for_sa_col(self, sa_col):
+        return self._alias_to_display_name.get(sa_col.name)
+
     def _get_display_options_for_sa_col(self, sa_col):
         if self.display_options is not None:
             return self.display_options.get(sa_col.name)
+
+    @cached_property
+    def _alias_to_display_name(self):
+        return {
+            initial_column['alias']: initial_column['name']
+            for initial_column
+            in self.initial_columns
+            if 'name' in initial_column
+        }
 
     @property
     def _sa_engine(self):
