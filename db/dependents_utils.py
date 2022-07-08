@@ -74,7 +74,7 @@ def get_dependents_hierarchy(name, schema, engine):
 
     bottomq = select(all_cte,
         literal_column('cte.level + 1').label('level'),
-        topq.c.chain + array([all_cte.c.objid])).where(topq.c.level < 10).where(all_cte.c.objid != any_(topq.c.chain))
+        topq.c.chain + array([all_cte.c.objid])).where(topq.c.level < 10).where(all_cte.c.objid != any_(topq.c.chain)).where(all_cte.c.objid != all_cte.c.refobjid)
     bottomq = bottomq.join(topq, all_cte.c.refobjid == topq.c.objid)
 
     recursive_q = topq.union(bottomq)
