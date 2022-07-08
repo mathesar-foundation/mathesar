@@ -11,6 +11,10 @@ CREATE TABLE universities (
     name text
 );
 
+INSERT INTO "universities" VALUES
+(1,'uni1'),
+(2,'uni2');
+
 CREATE TABLE academics (
     id integer PRIMARY KEY,
     name text,
@@ -18,10 +22,19 @@ CREATE TABLE academics (
     advisor integer REFERENCES academics(id) -- self-referencing fkey
 );
 
+INSERT INTO "academics" VALUES
+(1,'academic1',1,2),
+(2,'academic2',1,3),
+(3,'academic3',2,NULL);
+
 CREATE TABLE publishers (
     id integer PRIMARY KEY,
     name text NOT NULL
 );
+
+INSERT INTO "publishers" VALUES
+(1,'publisher1'),
+(2,'publisher2');
 
 CREATE TABLE journals (
     id integer PRIMARY KEY,
@@ -30,6 +43,10 @@ CREATE TABLE journals (
     publisher integer REFERENCES publishers(id)
 );
 
+INSERT INTO "journals" VALUES
+(1,'journal1',1,1),
+(2,'journal2',2,2);
+
 CREATE TABLE articles (
     id integer PRIMARY KEY,
     title text NOT NULL,
@@ -37,3 +54,7 @@ CREATE TABLE articles (
     secondary_author integer REFERENCES academics(id),
     journal integer REFERENCES journals(id)
 );
+
+INSERT INTO "articles" VALUES
+(1,'article1',1,2,1),
+(2,'article2',2,1,1);
