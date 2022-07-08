@@ -57,8 +57,8 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         self.request = request
 
         return table.get_records(
-            self.limit,
-            self.offset,
+            limit=self.limit,
+            offset=self.offset,
             filter=filters,
             order_by=order_by,
             group_by=group_by,
@@ -93,9 +93,9 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
     ):
         group_by = GroupBy(**grouping) if grouping else None
         records = super().paginate_queryset(
-            queryset,
-            request,
-            table,
+            queryset=queryset,
+            request=request,
+            table=table,
             filters=filters,
             order_by=order_by,
             group_by=group_by,

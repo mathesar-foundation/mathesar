@@ -651,7 +651,6 @@ def test_record_list_groups(
 
     group_by = GroupBy(**grouping)
     grouping_dict = response_data['grouping']
-    print(grouping_dict)
     assert grouping_dict['columns'] == [
         columns_name_id_map[colname] for colname in group_by.columns
     ]
