@@ -26,8 +26,8 @@
 
   const { query } = queryManager;
 
-  $: currentTable = $query.baseTable
-    ? $tablesDataStore.data.get($query.baseTable)
+  $: currentTable = $query.base_table
+    ? $tablesDataStore.data.get($query.base_table)
     : undefined;
 
   function onBaseTableChange(event: CustomEvent<TableEntry | undefined>) {
@@ -85,7 +85,7 @@
       />
     </div>
     <div class="result">
-      {#each $query.columns as column (column.alias)}
+      {#each $query.initial_columns as column (column.alias)}
         Column: {column.column}:{column.alias}
       {/each}
     </div>
@@ -155,6 +155,9 @@
         width: 22rem;
         border-right: 1px solid #efefef;
         padding: 0.75rem;
+        flex-shrink: 0;
+        flex-grow: 0;
+        flex-basis: 22rem;
       }
       .result {
       }

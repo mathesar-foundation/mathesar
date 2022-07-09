@@ -16,10 +16,10 @@ export interface QueryInitialColumn {
 }
 
 interface QueryModelInterface {
-  readonly baseTable?: number;
+  readonly base_table?: number;
   readonly id?: number;
   readonly name?: string;
-  readonly columns?: {
+  readonly initial_columns?: {
     alias: string;
     column: Column['id'];
     jpPath?: JpPath;
@@ -27,25 +27,25 @@ interface QueryModelInterface {
 }
 
 export default class QueryModel implements QueryModelInterface {
-  baseTable;
+  base_table;
 
   id;
 
   name;
 
-  columns;
+  initial_columns;
 
   constructor(model?: QueryModelInterface) {
-    this.baseTable = model?.baseTable;
+    this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
-    this.columns = model?.columns ?? [];
+    this.initial_columns = model?.initial_columns ?? [];
   }
 
-  setBaseTable(baseTable?: number): QueryModel {
+  setBaseTable(base_table?: number): QueryModel {
     return new QueryModel({
       name: this.name,
-      baseTable,
+      base_table,
     });
   }
 
@@ -65,13 +65,13 @@ export default class QueryModel implements QueryModelInterface {
 
   addColumn(column: QueryInitialColumn): QueryModel {
     const baseAlias = `${column.tableName}_${column.name}`;
-    const allAliases = new Set(this.columns.map((c) => c.alias));
+    const allAliases = new Set(this.initial_columns.map((c) => c.alias));
     const alias = getAvailableName(baseAlias, allAliases);
 
     return new QueryModel({
       ...this,
-      columns: [
-        ...this.columns,
+      initial_columns: [
+        ...this.initial_columns,
         {
           alias,
           column: column.id,
@@ -86,16 +86,11 @@ export default class QueryModel implements QueryModelInterface {
   // }
 
   isSaveable(): boolean {
-    return !!this.baseTable && this.columns.length > 0;
+    return !!this.base_table && this.initial_columns.length > 0;
   }
 
   serialize(): string {
-    return JSON.stringify({
-      baseTable: this.baseTable,
-      id: this.id,
-      name: this.name,
-      columns: this.columns,
-    });
+    return JSON.stringify(this);
   }
 
   // TODO: Implement better type safety here

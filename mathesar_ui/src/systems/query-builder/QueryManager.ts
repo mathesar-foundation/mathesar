@@ -1,6 +1,7 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import { CancellablePromise } from '@mathesar-component-library';
+import type { CancellablePromise } from '@mathesar-component-library';
+import { postAPI, putAPI } from '@mathesar/utils/api';
 import type QueryModel from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
 
@@ -21,16 +22,27 @@ export default class QueryManager {
 
   // results: Writable<[]>;
 
+  querySavePromise: CancellablePromise<QueryModel> | undefined;
+
   constructor(query: QueryModel) {
     this.query = writable(query);
     this.undoRedoManager = new QueryUndoRedoManager(get(this.query));
   }
 
-  save(): CancellablePromise<void> {
+  async save(): Promise<QueryModel> {
     const q = get(this.query);
-    return new CancellablePromise((resolve, reject) => {
-      resolve();
-    });
+    if (q.isSaveable()) {
+      this.querySavePromise?.cancel();
+      if (q.id) {
+        this.querySavePromise = putAPI(`/api/db/v0/queries/${q.id}/`, q);
+      } else {
+        this.querySavePromise = postAPI('/api/db/v0/queries/', q);
+      }
+      const result = await this.querySavePromise;
+      this.query.update((q) => q.setId(result.id));
+      return result;
+    }
+    return q;
   }
 
   // fetchResults(): void {
