@@ -19,6 +19,14 @@ export default class QueryUndoRedoManager {
     return newNext;
   }
 
+  isUndoPossible(): boolean {
+    return this.current.prev !== null;
+  }
+
+  isRedoPossible(): boolean {
+    return this.current.next !== null;
+  }
+
   undo(): QueryModel | undefined {
     if (this.current.prev !== null) {
       this.current = this.current.prev;

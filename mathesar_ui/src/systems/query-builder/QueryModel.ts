@@ -15,7 +15,7 @@ export interface QueryInitialColumn {
   jpPath?: JpPath;
 }
 
-interface QueryModelInterface {
+export interface QueryModelRawData {
   readonly base_table?: number;
   readonly id?: number;
   readonly name?: string;
@@ -26,7 +26,7 @@ interface QueryModelInterface {
   }[];
 }
 
-export default class QueryModel implements QueryModelInterface {
+export default class QueryModel implements QueryModelRawData {
   base_table;
 
   id;
@@ -35,7 +35,7 @@ export default class QueryModel implements QueryModelInterface {
 
   initial_columns;
 
-  constructor(model?: QueryModelInterface) {
+  constructor(model?: QueryModelRawData) {
     this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
