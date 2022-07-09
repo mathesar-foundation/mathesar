@@ -31,10 +31,11 @@ export type TablesList = PaginatedResponse<TableEntry>;
 
 type ForeignKeyId = number;
 type IsLinkReversed = boolean;
+export type JpPath = [Column['id'], Column['id']][];
 
 export interface JoinableTable {
   target: TableEntry['id']; // baseTableId
-  jp_path: [Column['id'], Column['id']][];
+  jp_path: JpPath;
   fk_path: [ForeignKeyId, IsLinkReversed][];
   depth: number;
   multiple_results: boolean;

@@ -16,10 +16,10 @@
         </div>
       </div>
       <div class="column-list" slot="content">
-        <svelte:self columnsWithLinks={column.linksTo.columns} />
+        <svelte:self columnsWithLinks={column.linksTo.columns} on:add />
       </div>
     </Collapsible>
   {:else}
-    <SelectableColumn {column} />
+    <SelectableColumn {column} on:add />
   {/if}
 {/each}

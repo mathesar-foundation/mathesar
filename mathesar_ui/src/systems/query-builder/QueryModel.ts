@@ -4,13 +4,25 @@
  * TODO: Move interface to /api
  */
 
+import { getAvailableName } from '@mathesar/utils/db';
+import type { TableEntry, JpPath } from '@mathesar/api/tables/tableList';
+import type { Column } from '@mathesar/api/tables/columns';
+
+export interface QueryInitialColumn {
+  id: Column['id'];
+  name: Column['name'];
+  tableName: TableEntry['name'];
+  jpPath?: JpPath;
+}
+
 interface QueryModelInterface {
   readonly baseTable?: number;
   readonly id?: number;
   readonly name?: string;
   readonly columns?: {
-    column: number;
-    jpPath?: [number, number][];
+    alias: string;
+    column: Column['id'];
+    jpPath?: JpPath;
   }[];
 }
 
@@ -51,9 +63,23 @@ export default class QueryModel implements QueryModelInterface {
     });
   }
 
-  // addColumn() {
+  addColumn(column: QueryInitialColumn): QueryModel {
+    const baseAlias = `${column.tableName}_${column.name}`;
+    const allAliases = new Set(this.columns.map((c) => c.alias));
+    const alias = getAvailableName(baseAlias, allAliases);
 
-  // }
+    return new QueryModel({
+      ...this,
+      columns: [
+        ...this.columns,
+        {
+          alias,
+          column: column.id,
+          jpPath: column.jpPath,
+        },
+      ],
+    });
+  }
 
   // deleteColumn() {
 

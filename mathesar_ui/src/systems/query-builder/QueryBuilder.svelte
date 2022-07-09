@@ -17,6 +17,7 @@
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import type { TableEntry } from '@mathesar/api/tables/tableList';
   import type QueryManager from './QueryManager';
+  import type { QueryInitialColumn } from './QueryModel';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
 
   const dispatch = createEventDispatcher();
@@ -34,6 +35,10 @@
     void queryManager.update((q) =>
       q.setBaseTable(tableEntry ? tableEntry.id : undefined),
     );
+  }
+
+  function addColumn(column: QueryInitialColumn) {
+    void queryManager.update((q) => q.addColumn(column));
   }
 </script>
 
@@ -74,9 +79,16 @@
           />
         </LabeledInput>
       </div>
-      <ColumnSelectionPane baseTable={currentTable} />
+      <ColumnSelectionPane
+        baseTable={currentTable}
+        on:add={(e) => addColumn(e.detail)}
+      />
     </div>
-    <div class="result" />
+    <div class="result">
+      {#each $query.columns as column (column.alias)}
+        Column: {column.column}:{column.alias}
+      {/each}
+    </div>
     <div class="output-config-sidebar" />
   </div>
 </div>

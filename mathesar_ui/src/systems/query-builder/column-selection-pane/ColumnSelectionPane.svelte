@@ -58,7 +58,7 @@
 
 <div class="column-selection-pane">
   {#if requestStatus.state === 'success'}
-    <SelectableColumnTree columnsWithLinks={baseTableColumns} />
+    <SelectableColumnTree columnsWithLinks={baseTableColumns} on:add />
     {#if tablesThatReferenceBaseTable.length > 0}
       <div data-id="referenced-by-tables">
         {#each tablesThatReferenceBaseTable as table (table.id)}
@@ -70,7 +70,7 @@
               </div>
             </div>
             <div class="column-list" slot="content">
-              <SelectableColumnTree columnsWithLinks={table.columns} />
+              <SelectableColumnTree columnsWithLinks={table.columns} on:add />
             </div>
           </Collapsible>
         {/each}

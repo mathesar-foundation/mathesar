@@ -3,12 +3,11 @@ import type {
   JoinableTableResult,
 } from '@mathesar/api/tables/tableList';
 import type { Column } from '@mathesar/api/tables/columns';
+import type { QueryInitialColumn } from '../QueryModel';
 
-export interface ColumnWithLink {
-  id: Column['id'];
-  name: Column['name'];
+export interface ColumnWithLink extends QueryInitialColumn {
   type: Column['type'];
-  linksTo: LinkedTable | undefined;
+  linksTo?: LinkedTable;
 }
 
 export interface LinkedTable {
@@ -47,9 +46,10 @@ export function getLinkFromColumn(
     throw new Error(`Multiple links present for the same column: ${columnId}`);
   }
   const link = validLinks[0];
+  const toTableInfo = result.tables[link.target];
   const toTable = {
     id: link.target,
-    name: result.tables[link.target].name,
+    name: toTableInfo.name,
   };
   const toColumnId = link.jp_path[depth - 1][1];
   const toColumn = {
@@ -59,13 +59,15 @@ export function getLinkFromColumn(
   return {
     ...toTable,
     linkedToColumn: toColumn,
-    columns: result.tables[link.target].columns.map((columnIdInLinkedTable) => {
+    columns: toTableInfo.columns.map((columnIdInLinkedTable) => {
       const columnInLinkedTable = result.columns[columnIdInLinkedTable];
       return {
         id: columnIdInLinkedTable,
         name: columnInLinkedTable.name,
+        tableName: toTableInfo.name,
         type: columnInLinkedTable.type,
         linksTo: getLinkFromColumn(result, columnIdInLinkedTable, depth + 1),
+        jpPath: link.jp_path,
       };
     }),
   };
@@ -79,6 +81,7 @@ export function getBaseTableColumnsWithLinks(
     id: column.id,
     name: column.name,
     type: column.type,
+    tableName: baseTable.name,
     linksTo: getLinkFromColumn(result, column.id, 1),
   }));
 }
@@ -119,7 +122,9 @@ export function getTablesThatReferenceBaseTable(
             id: columnIdInTable,
             name: columnInTable.name,
             type: columnInTable.type,
+            tableName: table.name,
             linksTo: getLinkFromColumn(result, columnIdInTable, 2),
+            jpPath: reference.jp_path,
           };
         }),
     });
