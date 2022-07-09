@@ -10,7 +10,7 @@ interface QueryModelInterface {
   readonly name?: string;
   readonly columns?: {
     column: number;
-    jpPath?: [number, number][]
+    jpPath?: [number, number][];
   }[];
 }
 
@@ -30,9 +30,9 @@ export default class QueryModel implements QueryModelInterface {
     this.columns = model?.columns ?? [];
   }
 
-  setBaseTable(baseTable: number): QueryModel {
+  setBaseTable(baseTable?: number): QueryModel {
     return new QueryModel({
-      ...this,
+      name: this.name,
       baseTable,
     });
   }
@@ -65,7 +65,10 @@ export default class QueryModel implements QueryModelInterface {
 
   serialize(): string {
     return JSON.stringify({
+      baseTable: this.baseTable,
       id: this.id,
+      name: this.name,
+      columns: this.columns,
     });
   }
 

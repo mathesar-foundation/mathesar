@@ -21,6 +21,7 @@
     position: relative;
     overflow: hidden;
     display: inline-flex;
+    min-width: 3rem;
 
     > span {
       position: relative;
@@ -34,7 +35,6 @@
     :global(input) {
       position: absolute;
       top: 0;
-      min-width: 3rem;
       background: #fff;
     }
     :global(input.text-input:not(:hover):not(:focus)) {

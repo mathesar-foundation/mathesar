@@ -1,14 +1,40 @@
 <script lang="ts">
-  import { Icon, LabeledInput } from '@mathesar-component-library';
-  import { faFileContract } from '@fortawesome/free-solid-svg-icons';
+  import { createEventDispatcher } from 'svelte';
+  import {
+    Icon,
+    LabeledInput,
+    InputGroup,
+    Button,
+  } from '@mathesar-component-library';
+  import {
+    faFileContract,
+    faUndo,
+    faRedo,
+  } from '@fortawesome/free-solid-svg-icons';
   import EditableTitle from '@mathesar/components/EditableTitle.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
+  import { tables as tablesDataStore } from '@mathesar/stores/tables';
+  import type { TableEntry } from '@mathesar/api/tables/tableList';
   import type QueryManager from './QueryManager';
+  import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
+
+  const dispatch = createEventDispatcher();
 
   export let queryManager: QueryManager;
 
   const { query } = queryManager;
+
+  $: currentTable = $query.baseTable
+    ? $tablesDataStore.data.get($query.baseTable)
+    : undefined;
+
+  function onBaseTableChange(event: CustomEvent<TableEntry | undefined>) {
+    const tableEntry = event.detail;
+    void queryManager.update((q) =>
+      q.setBaseTable(tableEntry ? tableEntry.id : undefined),
+    );
+  }
 </script>
 
 <div class="query-builder">
@@ -17,26 +43,38 @@
       <Icon data={faFileContract} size="2em" />
     </div>
     <div class="name">
-      <EditableTitle value={$query.name} size={1.3}/>
-      <SaveStatusIndicator status="new"/>
+      <EditableTitle bind:value={$query.name} size={1.3} />
+      <SaveStatusIndicator status="new" />
     </div>
-    <!-- Save status -->
     <div class="toolbar">
-      <!--
-        Undo
-        Redo
-        View SQL
-        Close
-      -->
+      <InputGroup>
+        <Button appearance="plain" on:click={() => queryManager.undo()}>
+          <Icon data={faUndo} />
+          <span>Undo</span>
+        </Button>
+        <Button appearance="plain" on:click={() => queryManager.redo()}>
+          <Icon data={faRedo} />
+          <span>Redo</span>
+        </Button>
+        <Button appearance="plain">View SQL</Button>
+        <Button appearance="plain" on:click={() => dispatch('close')}
+          >Close</Button
+        >
+      </InputGroup>
     </div>
   </div>
   <div class="content-pane">
     <div class="input-sidebar">
       <div>
         <LabeledInput label="Select Base Table" layout="stacked">
-          <SelectTableWithinCurrentSchema prependBlank />
+          <SelectTableWithinCurrentSchema
+            prependBlank
+            table={currentTable}
+            on:change={onBaseTableChange}
+          />
         </LabeledInput>
       </div>
+      <ColumnSelectionPane baseTable={currentTable} />
     </div>
     <div class="result" />
     <div class="output-config-sidebar" />
@@ -81,6 +119,17 @@
           flex-shrink: 0;
         }
       }
+
+      .toolbar {
+        flex-shrink: 0;
+        padding-right: 1rem;
+        :global(button) {
+          flex-shrink: 0;
+        }
+        :global(button .fa-icon) {
+          padding-right: 0.2rem;
+        }
+      }
     }
     .content-pane {
       display: flex;
@@ -91,15 +140,13 @@
       right: 0;
 
       .input-sidebar {
-        width: 19rem;
+        width: 22rem;
         border-right: 1px solid #efefef;
-        padding: 0.6rem;
+        padding: 0.75rem;
       }
       .result {
-
       }
       .output-config-sidebar {
-
       }
     }
   }

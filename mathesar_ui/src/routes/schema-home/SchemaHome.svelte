@@ -36,7 +36,7 @@
     <DataScape {database} {schemaId} />
   </Route>
   <Route path="/queries/*" firstmatch>
-    <DataExplorer />
+    <DataExplorer {database} {schemaId} />
   </Route>
 </section>
 

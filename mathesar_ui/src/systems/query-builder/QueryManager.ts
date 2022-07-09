@@ -39,7 +39,7 @@ export default class QueryManager {
 
   async update(
     callback: (queryModel: QueryModel) => QueryModel,
-    opts: { reversible: boolean },
+    opts?: { reversible: boolean },
   ): Promise<void> {
     this.query.update((q) => callback(q));
     this.undoRedoManager.pushState(get(this.query));
