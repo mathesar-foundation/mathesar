@@ -2,7 +2,6 @@
   import { createEventDispatcher } from 'svelte';
   import { faCaretRight } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-component-library';
-  import { IconRotate } from '@mathesar-component-library-dir/types';
   import type { TreeItem } from './TreeTypes';
 
   const dispatch = createEventDispatcher();
@@ -57,10 +56,7 @@
 {#if entry[childKey]}
   <li aria-level={level + 1} role="treeitem" tabindex="-1">
     <Button appearance="plain" class="item parent" on:click={toggle}>
-      <Icon
-        data={faCaretRight}
-        rotate={isOpen ? IconRotate.NINETY : undefined}
-      />
+      <Icon data={faCaretRight} rotate={isOpen ? 90 : undefined} />
       <span>{entry[labelKey]}</span>
     </Button>
 
