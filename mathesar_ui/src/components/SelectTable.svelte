@@ -2,6 +2,8 @@
   import { Select } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/tables/tableList';
 
+  type $$Events = Select<TableEntry | undefined>['$$events_def'];
+
   export let tables: TableEntry[];
   export let table: TableEntry | undefined = undefined;
   export let prependBlank = false;

@@ -24,14 +24,13 @@
 
   export let queryManager: QueryManager;
 
-  const { query } = queryManager;
+  const { query, state } = queryManager;
 
   $: currentTable = $query.base_table
     ? $tablesDataStore.data.get($query.base_table)
     : undefined;
 
-  function onBaseTableChange(event: CustomEvent<TableEntry | undefined>) {
-    const tableEntry = event.detail;
+  function onBaseTableChange(tableEntry: TableEntry | undefined) {
     void queryManager.update((q) =>
       q.setBaseTable(tableEntry ? tableEntry.id : undefined),
     );
@@ -39,6 +38,14 @@
 
   function addColumn(column: QueryInitialColumn) {
     void queryManager.update((q) => q.addColumn(column));
+  }
+
+  function handleQueryNameChange(e: Event) {
+    const target = e.target as HTMLInputElement;
+    if (target.value.trim() === '') {
+      target.value = 'Untitled file';
+    }
+    void queryManager.update((q) => q.setName(target.value));
   }
 </script>
 
@@ -48,16 +55,28 @@
       <Icon data={faFileContract} size="2em" />
     </div>
     <div class="name">
-      <EditableTitle bind:value={$query.name} size={1.3} />
-      <SaveStatusIndicator status="new" />
+      <EditableTitle
+        value={$query.name}
+        size={1.3}
+        on:change={handleQueryNameChange}
+      />
+      <SaveStatusIndicator status={$state.saveState?.state} />
     </div>
     <div class="toolbar">
       <InputGroup>
-        <Button appearance="plain" on:click={() => queryManager.undo()}>
+        <Button
+          appearance="plain"
+          disabled={!$state.isUndoPossible}
+          on:click={() => queryManager.undo()}
+        >
           <Icon data={faUndo} />
           <span>Undo</span>
         </Button>
-        <Button appearance="plain" on:click={() => queryManager.redo()}>
+        <Button
+          appearance="plain"
+          disabled={!$state.isRedoPossible}
+          on:click={() => queryManager.redo()}
+        >
           <Icon data={faRedo} />
           <span>Redo</span>
         </Button>
@@ -75,7 +94,7 @@
           <SelectTableWithinCurrentSchema
             prependBlank
             table={currentTable}
-            on:change={onBaseTableChange}
+            on:change={(e) => onBaseTableChange(e.detail)}
           />
         </LabeledInput>
       </div>

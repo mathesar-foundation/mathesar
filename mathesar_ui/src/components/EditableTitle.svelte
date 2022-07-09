@@ -13,7 +13,7 @@
   style="font-size:{size}rem;height:{size + 1.15 + 0.125}rem"
 >
   <span style={paddingStyle}>{value}</span>
-  <TextInput bind:value style={paddingStyle} />
+  <TextInput bind:value style={paddingStyle} on:input on:change />
 </div>
 
 <style lang="scss">

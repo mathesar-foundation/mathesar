@@ -1,15 +1,15 @@
 <script lang="ts">
-  export let status: 'new' | 'processing' | 'success' | 'failure' | undefined;
+  export let status: 'processing' | 'success' | 'failure' | undefined;
 </script>
 
 <div
   class="save-status"
-  class:new={status === 'new'}
+  class:new={!status}
   class:saved={status === 'success'}
   class:saving={status === 'processing'}
   class:error={status === 'failure'}
 >
-  {#if status === 'new'}
+  {#if !status}
     *Unsaved
   {:else if status === 'success'}
     All changes saved
