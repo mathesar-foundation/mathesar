@@ -29,13 +29,16 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     type_suggestions_url = serializers.SerializerMethodField()
     previews_url = serializers.SerializerMethodField()
     name = serializers.CharField(required=False, allow_blank=True, default='')
+    table_to_import_to = serializers.PrimaryKeyRelatedField(
+        required=False, allow_null=True, queryset=Table.objects.all()
+    )
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
     )
 
     class Meta:
         model = Table
-        fields = ['id', 'name', 'schema', 'created_at', 'updated_at', 'import_verified',
+        fields = ['id', 'name', 'table_to_import_to', 'schema', 'created_at', 'updated_at', 'import_verified',
                   'columns', 'records_url', 'constraints_url', 'columns_url',
                   'joinable_tables_url', 'type_suggestions_url', 'previews_url',
                   'data_files', 'has_dependencies']
