@@ -26,8 +26,11 @@ def post_minimal_query(client, create_patents_table, get_uid):
     "expected,actual,should_throw",
     [
         [[1, 2, 3], [1, 2, 3], False],
+        [[1, 2, 4], [1, 2, 3], True],
         [3, 3, False],
+        [3, 4, True],
         [dict(a=1, b=2), dict(a=1, b=2), False],
+        [dict(a=1, c=2), dict(a=1, b=2), True],
         [dict(a=[1, 2, 3], b=2, c=dict(a=[1])), dict(a=[1, 2, 3], b=2, c=dict(a=[1])), False],
         [dict(a=[1, 2, 5], b=2, c=dict(a=[1])), dict(a=[1, 2, 3], b=2, c=dict(a=[1])), True],
     ]

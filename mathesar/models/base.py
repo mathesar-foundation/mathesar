@@ -29,6 +29,7 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from db.tables.operations.split import extract_columns_from_table
 
 from mathesar import reflection
+from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
@@ -86,7 +87,7 @@ class DatabaseObject(ReflectionManagerMixin, BaseModel):
 
 # TODO: Replace with a proper form of caching
 # See: https://github.com/centerofci/mathesar/issues/280
-_engines = {}
+_engine_cache = {}
 
 
 class Database(ReflectionManagerMixin, BaseModel):
@@ -97,16 +98,17 @@ class Database(ReflectionManagerMixin, BaseModel):
 
     @property
     def _sa_engine(self):
-        global _engines
+        global _engine_cache
         # We're caching this since the engine is used frequently.
-        if self.name not in _engines:
-            engine = create_mathesar_engine(self.name)
-            _engines[self.name] = engine
-            return engine
-        else:
-            engine = _engines[self.name]
+        db_name = self.name
+        was_cached = db_name in _engine_cache
+        if was_cached:
+            engine = _engine_cache.get(db_name)
             model_utils.ensure_cached_engine_ready(engine)
-            return engine
+        else:
+            engine = create_mathesar_engine(db_name=db_name)
+            _engine_cache[db_name] = engine
+        return engine
 
     @property
     def supported_ui_types(self):
@@ -168,7 +170,7 @@ class Schema(DatabaseObject):
         cache.delete(cache_key)
 
 
-class Table(DatabaseObject):
+class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
     MODEL_FIELDS = ['import_verified']
 
@@ -195,14 +197,13 @@ class Table(DatabaseObject):
         super().save(*args, **kwargs)
 
     @cached_property
-    def _sa_engine(self):
-        return self.schema._sa_engine
-
-    @cached_property
     def _sa_table(self):
+        # We're caching since we want different Django Table instances to return the same SA
+        # Table, when they're referencing the same Postgres table.
         try:
-            table = reflect_table_from_oid(
-                self.oid, self.schema._sa_engine,
+            sa_table = reflect_table_from_oid(
+                oid=self.oid,
+                engine=self._sa_engine,
             )
         # We catch these errors, since it lets us decouple the cadence of
         # overall DB reflection from the cadence of cache expiration for
@@ -210,30 +211,37 @@ class Table(DatabaseObject):
         # been altered, as opposed to other reasons for a 404 when
         # requesting a table.
         except (TypeError, IndexError):
-            table = table_utils.get_empty_table("MISSING")
-        return table
+            sa_table = table_utils.get_empty_table("MISSING")
+        return sa_table
 
+    # NOTE: it's a problem that we hve both _sa_table and _enriched_column_sa_table. at the moment
+    # it has to be this way because enriched column is not always interachangeable with sa column.
     @cached_property
     def _enriched_column_sa_table(self):
         return column_utils.get_enriched_column_table(
-            self._sa_table, engine=self._sa_engine,
+            table=self._sa_table,
+            engine=self._sa_engine,
         )
-
-    @cached_property
-    def name(self):
-        return self._sa_table.name
 
     @cached_property
     def sa_columns(self):
         return self._enriched_column_sa_table.columns
 
-    @property
-    def sa_constraints(self):
-        return self._sa_table.constraints
+    @cached_property
+    def _sa_engine(self):
+        return self.schema._sa_engine
+
+    @cached_property
+    def name(self):
+        return self._sa_table.name
 
     @property
     def sa_column_names(self):
         return self.sa_columns.keys()
+
+    @property
+    def sa_constraints(self):
+        return self._sa_table.constraints
 
     # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
@@ -293,6 +301,7 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
+    # TODO consider using **kwargs instead of forwarding params one-by-one
     def get_records(
         self,
         limit=None,
@@ -345,6 +354,11 @@ class Table(DatabaseObject):
         columns = Column.objects.filter(table_id=self.id)
         columns_map = bidict({column.name: column.id for column in columns})
         return columns_map
+
+    def get_column_by_name(self, name):
+        columns = self.get_columns_by_name(name_list=[name])
+        if len(columns) > 0:
+            return columns[0]
 
     def get_columns_by_name(self, name_list):
         columns_by_name_dict = {
@@ -428,7 +442,7 @@ class Column(ReflectionManagerMixin, BaseModel):
         return self.table._sa_engine
 
     # TODO probably shouldn't be private: a lot of code already references it.
-    @cached_property
+    @property
     def _sa_column(self):
         return self.table.sa_columns[self.name]
 
