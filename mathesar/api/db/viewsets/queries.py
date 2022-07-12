@@ -18,7 +18,6 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
     def get_queryset(self):
         return UIQuery.objects.all().order_by('-created_at')
 
-
     @action(methods=['get'], detail=True)
     def records(self, request, pk=None):
         paginator = TableLimitOffsetGroupPagination()
@@ -31,6 +30,7 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
                 column_name_id_bidirectional_map=dict(),
             )
             return paginator.get_paginated_response(records)
+
     @action(methods=['get'], detail=True)
     def columns(self, request, pk=None):
         query = self.get_object()

@@ -14,6 +14,7 @@ class UIQuery(BaseModel, Relation):
         null=True,
         blank=True,
     )
+
     base_table = models.ForeignKey(
         'Table', on_delete=models.CASCADE,
         null=True,
