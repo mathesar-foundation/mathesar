@@ -1,10 +1,12 @@
-from sqlalchemy import case, func, and_
+from sqlalchemy import case, func, and_, cast
 from sqlalchemy.dialects.postgresql import DATE as SA_DATE
-from sqlalchemy.dialects.postgresql import INTERVAL
+from sqlalchemy.dialects.postgresql import INTERVAL, INTEGER
 from sqlalchemy.dialects.postgresql import TIME as SA_TIME
 from sqlalchemy.dialects.postgresql import TIMESTAMP as SA_TIMESTAMP
 from sqlalchemy.types import TypeDecorator
 
+from db.functions import hints as db_hints
+from db.functions.base import DBFunction, sa_call_sql_function
 from db.types.exceptions import InvalidTypeParameters
 
 
@@ -254,3 +256,33 @@ class Interval(TypeDecorator):
                 'S',
             )
         )
+
+
+class TruncateToYear(DBFunction):
+    id = 'truncate_to_year'
+    name = 'Truncate to Year'
+    hints = tuple([db_hints.parameter_count(1)])  # TODO extend hints
+
+    @staticmethod
+    def to_sa_expression(col):
+        return sa_call_sql_function('to_char', col, 'YYYY')
+
+
+class TruncateToMonth(DBFunction):
+    id = 'truncate_to_month'
+    name = 'Truncate to Month'
+    hints = tuple([db_hints.parameter_count(1)])  # TODO extend hints
+
+    @staticmethod
+    def to_sa_expression(col):
+        return sa_call_sql_function('to_char', col, 'YYYY-MM')
+
+
+class TruncateToDay(DBFunction):
+    id = 'truncate_to_day'
+    name = 'Truncate to Day'
+    hints = tuple([db_hints.parameter_count(1)])  # TODO extend hints
+
+    @staticmethod
+    def to_sa_expression(col):
+        return sa_call_sql_function('to_char', col, 'YYYY-MM-DD')
