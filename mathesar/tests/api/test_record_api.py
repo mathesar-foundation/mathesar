@@ -12,7 +12,7 @@ from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
-from mathesar.models.base import db_get_records, Table
+from mathesar.models.base import db_get_records, Table, Column
 from mathesar.models import base as models_base
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
@@ -159,7 +159,6 @@ def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, cli
     assert response.status_code == 200
     response_data = response.json()
     referred_value = '1'
-    default_template_column = referent_table.get_columns_by_name(['Id'])[0]
     preview_response = response_data['previews']
     expected_preview = next((preview for preview in preview_response if preview['table'] == referent_table.id), None)
     assert expected_preview is not None

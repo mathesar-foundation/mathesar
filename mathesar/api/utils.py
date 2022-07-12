@@ -24,15 +24,18 @@ def get_table_or_404(pk):
 
 
 def process_preview_data(preview_objs, preview_table_info):
-
     def _convert_record_name_key_to_id(record, column_map):
         record = record._asdict()
-        processed_preview_records = {column_map[column_name]: column_value for column_name, column_value in record.items()}
+        processed_preview_records = {
+            column_map[column_name]: column_value
+            for column_name, column_value in
+            record.items()
+        }
         return processed_preview_records
 
     name_keyed_preview_table_info = {
-                v['table'].name: v for k, v in preview_table_info.items()
-            }
+        v['table'].name: v for k, v in preview_table_info.items()
+    }
     identifier_converted_preview_objs = []
     for preview_obj in preview_objs:
         table_name = preview_obj['table']
@@ -44,7 +47,7 @@ def process_preview_data(preview_objs, preview_table_info):
         processed_preview_records = [
             record_dict
             for record_dict in (_convert_record_name_key_to_id(record, column_map) for record in records)
-    ]
+        ]
         processed_preview_obj = {
             'table': table_id,
             'data': processed_preview_records
@@ -54,7 +57,6 @@ def process_preview_data(preview_objs, preview_table_info):
 
 
 def process_annotated_records(record_list, column_name_id_map):
-
     RESULT_IDX = 'result_indices'
 
     def _get_record_dict(record):

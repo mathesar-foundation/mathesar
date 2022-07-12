@@ -92,13 +92,12 @@ def get_records_preview_data(
         preview_data = []
         for referent_table_name, referent_columns in preview_filters.items():
             referent_table = preview_columns[referent_table_name]['table']
-            preview_data_columns = [referent_table.c[column_name] for column_name in preview_columns[referent_table_name]['preview_columns']]
             query = get_query(
-                    table=referent_table,
-                    columns_to_select=preview_data_columns,
-                    limit=None,
-                    offset=None,
-                    order_by=None
+                table=referent_table,
+                columns_to_select=None,
+                limit=None,
+                offset=None,
+                order_by=None
             )
             filters = []
             for referent_column, constrained_values in referent_columns.items():

@@ -52,9 +52,9 @@ INSERT INTO "Person" VALUES
 
 INSERT INTO "Subject" VALUES
 (1, 1, 6, NULL, 'Physics', 43),
-(2, 1, 7, 1, 'P.E.', 37),
+(2, 1, 8, 1, 'P.E.', 37),
 (3, 1, 8, NULL, 'Chemistry', 55),
-(4, 1, 7, NULL, 'Biology', 41),
+(4, 1, 8, NULL, 'Biology', 41),
 (5, 1, 6, NULL, 'Physics', 62),
 (6, 2, 6, NULL, 'Math', 44),
 (7, 2, 9, NULL, 'Reading', 56),
