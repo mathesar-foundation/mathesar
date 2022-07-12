@@ -32,7 +32,8 @@ def process_preview_data(preview_objs, preview_table_info):
             record.items()
         }
         return processed_preview_records
-
+    if preview_table_info is None:
+        return None
     name_keyed_preview_table_info = {
         v['table'].name: v for k, v in preview_table_info.items()
     }

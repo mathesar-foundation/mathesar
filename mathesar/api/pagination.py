@@ -115,6 +115,8 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             processed_records, processed_preview_data, groups = None, None, None
         if preview_columns:
             self.preview_data = processed_preview_data
+        else:
+            self.preview_data = None
         if group_by:
             self.grouping = {
                 'columns': [column_name_id_bidirectional_map[n] for n in group_by.columns],
