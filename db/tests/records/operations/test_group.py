@@ -140,6 +140,15 @@ def test_GB_validate_passes_valid_kwargs_prefix():
     gb.validate()
 
 
+def test_GB_validate_passes_valid_kwargs_extract_field():
+    gb = group.GroupBy(
+        columns=['col1'],
+        mode=group.GroupMode.EXTRACT.value,
+        extract_field='year'
+    )
+    gb.validate()
+
+
 def test_GB_validate_fails_invalid_mode():
     with pytest.raises(records_exceptions.InvalidGroupType):
         group.GroupBy(
@@ -188,6 +197,23 @@ def test_GB_validate_fails_multi_cols_prefix():
             columns=['col1', 'col2'],
             mode=group.GroupMode.PREFIX.value,
             prefix_length=3
+        )
+
+
+def test_GB_validate_fails_missing_extract_field():
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        group.GroupBy(
+            columns=['col1'],
+            mode=group.GroupMode.EXTRACT.value,
+        )
+
+
+def test_GB_validate_fails_multi_cols_extract():
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        group.GroupBy(
+            columns=['col1', 'col2'],
+            mode=group.GroupMode.EXTRACT.value,
+            extract_field='year'
         )
 
 
@@ -366,6 +392,25 @@ def test_smoke_get_group_augmented_records_query_uris_preproc(uris_table_obj, pr
         )
 
 
+def test_smoke_get_group_augmented_records_query_extract(times_table_obj):
+    roster, engine = times_table_obj
+    group_by = group.GroupBy(
+        ['date'],
+        mode=group.GroupMode.EXTRACT.value,
+        extract_field='month',
+    )
+    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+    for row in res:
+        assert all(
+            [
+                metadata_field.value in row[group.MATHESAR_GROUP_METADATA]
+                for metadata_field in group.GroupMetadataField
+            ]
+        )
+
+
 datetime_trunc_tests_def = [
     ('date', 'truncate_to_year', 3),
     ('timestamp', 'truncate_to_year', 3),
@@ -385,6 +430,31 @@ def test_get_group_augmented_records_query_datetimes_preproc(
         [col],
         mode=group.GroupMode.DISTINCT.value,
         preproc=[preproc]
+    )
+    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+
+    assert max([_group_id(row) for row in res]) == num
+
+
+datetime_extract_tests_def = [
+    ('date', 'year', 3),
+    ('timestamp', 'year', 3),
+    ('date', 'month', 2),
+    ('timestamp', 'month', 2),
+    ('date', 'day', 3),
+    ('timestamp', 'day', 3),
+]
+
+
+@pytest.mark.parametrize('col,field,num', datetime_extract_tests_def)
+def test_get_group_augmented_records_query_datetimes_extract(
+        times_table_obj, col, field, num
+):
+    roster, engine = times_table_obj
+    group_by = group.GroupBy(
+        [col], mode=group.GroupMode.EXTRACT.value, extract_field=field
     )
     augmented_query = group.get_group_augmented_records_query(roster, group_by)
     with engine.begin() as conn:

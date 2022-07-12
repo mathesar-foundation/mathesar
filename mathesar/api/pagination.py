@@ -118,6 +118,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
                 'global_max': group_by.global_max,
                 'preproc': group_by.preproc,
                 'prefix_length': group_by.prefix_length,
+                'extract_field': group_by.extract_field,
                 'ranged': group_by.ranged,
                 'groups': groups,
             }
