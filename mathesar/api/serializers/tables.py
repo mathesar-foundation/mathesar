@@ -167,6 +167,11 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
         return columns
 
 
+class MoveTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    move_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
+    target_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+
+
 class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     extract_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
     extracted_table_name = serializers.CharField()
