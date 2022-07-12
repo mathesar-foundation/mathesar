@@ -1,22 +1,25 @@
 from sqlalchemy import text
+from sqlalchemy import func
 from sqlalchemy.types import UserDefinedType
-
+from sqlalchemy.dialects.postgresql import JSONB as SA_JSONB
+from sqlalchemy.types import TypeDecorator
 from db.types.base import MathesarCustomType
+from sqlalchemy.ext.compiler import compiles
 
 DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
 
 
-class MathesarJsonArray(UserDefinedType):
-    impl = postgresql.JSONB
+class MathesarJsonArray(TypeDecorator):
+    impl = SA_JSONB
     cache_ok = True
-    def get_col_spec(self, **_):
-        return DB_TYPE.upper()
-
     def get_col_spec(self, **_):
         return DB_TYPE.upper()
     
     def column_expression(self, column):
-        return func.to_char(column)
+        return func.cast(column, String)
+
+    def coerce_compared_value(self, op, value):
+        return self.impl.coerce_compared_value(op, value)
 
 @compiles(MathesarJsonArray, 'postgresql')
 def _compile_mathesarjsonobject(element, compiler, **kw):
