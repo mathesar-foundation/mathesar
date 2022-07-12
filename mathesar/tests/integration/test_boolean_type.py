@@ -1,4 +1,5 @@
 import re
+import pytest
 from playwright.sync_api import expect
 from mathesar.tests.integration.utils.table_actions import open_column_options_and_verify_type, get_cell_selector
 from mathesar.tests.integration.utils.component_actions import change_select_input_value

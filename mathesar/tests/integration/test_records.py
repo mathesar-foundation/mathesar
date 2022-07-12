@@ -1,5 +1,6 @@
 import re
 
+import pytest
 from playwright.sync_api import expect
 
 first_pk_cell_in_table = ".row .cell.is-pk >> nth=0"

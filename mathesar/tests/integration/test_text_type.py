@@ -1,4 +1,5 @@
 import re
+import pytest
 from playwright.sync_api import expect
 from mathesar.tests.integration.utils.table_actions import open_column_options_and_verify_type
 from mathesar.tests.integration.utils.validators import expect_tab_to_be_visible
