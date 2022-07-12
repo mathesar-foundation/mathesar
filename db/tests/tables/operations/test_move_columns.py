@@ -1,6 +1,7 @@
 from sqlalchemy import MetaData
 
 from db.tables.operations.move_columns import move_columns_between_related_tables
+from db.tables.operations.select import get_oid_from_table
 
 
 def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster, roster_extracted_cols):
@@ -14,9 +15,11 @@ def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster, r
     expect_remainder_cols = remainder_cols + [moving_col]
     extracted_name = extracted.name
     remainder_name = remainder.name
+    extracted_oid = get_oid_from_table(extracted_name, schema, engine)
+    remainder_oid = get_oid_from_table(remainder_name, schema, engine)
     move_columns_between_related_tables(
-        extracted_name,
-        remainder_name,
+        extracted_oid,
+        remainder_oid,
         [moving_col],
         schema,
         engine,
@@ -42,9 +45,11 @@ def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
     expect_extracted_cols = extracted_cols + [moving_col]
     extracted_name = extracted.name
     remainder_name = remainder.name
+    extracted_oid = get_oid_from_table(extracted_name, schema, engine)
+    remainder_oid = get_oid_from_table(remainder_name, schema, engine)
     move_columns_between_related_tables(
-        remainder_name,
-        extracted_name,
+        remainder_oid,
+        extracted_oid,
         [moving_col],
         schema,
         engine,
