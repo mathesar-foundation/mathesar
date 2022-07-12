@@ -30,7 +30,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     previews_url = serializers.SerializerMethodField()
     name = serializers.CharField(required=False, allow_blank=True, default='')
     table_to_import_to = serializers.PrimaryKeyRelatedField(
-        required=False, allow_null=True, queryset=Table.objects.all()
+        required=False, allow_null=True, queryset=Table.current_objects.all()
     )
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
