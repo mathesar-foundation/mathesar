@@ -276,7 +276,7 @@ def _get_extract_group_select(table, grouping_columns, extract_field):
     window_def = GroupingWindowDefinition(
         order_by=grouping_columns, partition_by=grouping_columns
     )
-    processed_columns=[extract(extract_field, grouping_columns[0])]
+    processed_columns = [extract(extract_field, grouping_columns[0])]
     group_id_expr = func.dense_rank().over(
         order_by=processed_columns, range_=window_def.range_
     )
