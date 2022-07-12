@@ -103,7 +103,8 @@ class UIQuery(BaseModel, Relation):
 
     @cached_property
     def _db_transformations(self):
-        return
+        """No processing necessary."""
+        return self.transformations
 
     def _get_display_name_for_sa_col(self, sa_col):
         return self._alias_to_display_name.get(sa_col.name)
