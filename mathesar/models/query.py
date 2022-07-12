@@ -14,10 +14,18 @@ class UIQuery(BaseModel, Relation):
         null=True,
         blank=True,
     )
-    base_table = models.ForeignKey('Table', on_delete=models.CASCADE)
+
+    base_table = models.ForeignKey(
+        'Table', on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     # sequence of dicts
-    initial_columns = models.JSONField()
+    initial_columns = models.JSONField(
+        null=True,
+        blank=True,
+    )
 
     # sequence of dicts
     transformations = models.JSONField(
@@ -32,6 +40,13 @@ class UIQuery(BaseModel, Relation):
     )
 
     __table_cache = {}
+
+    @property
+    def not_partial(self):
+        return (
+            (self.base_table is not None)
+            and (self.initial_columns is not None)
+        )
 
     # TODO add engine from base_table.schema._sa_engine
     def get_records(self, **kwargs):

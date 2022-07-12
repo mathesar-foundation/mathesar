@@ -2,7 +2,13 @@ import pytest
 
 
 @pytest.fixture
-def post_minimal_query(client, create_patents_table, get_uid):
+def post_empty_query(_post_query):
+    request_data = {}
+    return _post_query(request_data)
+
+
+@pytest.fixture
+def post_minimal_query(_post_query, create_patents_table, get_uid):
     base_table = create_patents_table(table_name=get_uid())
     request_data = {
         "base_table": base_table.id,
@@ -17,9 +23,16 @@ def post_minimal_query(client, create_patents_table, get_uid):
             },
         ],
     }
-    response = client.post('/api/db/v0/queries/', data=request_data)
-    assert response.status_code == 201
-    return request_data, response
+    return _post_query(request_data)
+
+
+@pytest.fixture
+def _post_query(client):
+    def _f(request_data):
+        response = client.post('/api/db/v0/queries/', data=request_data)
+        assert response.status_code == 201
+        return request_data, response
+    return _f
 
 
 @pytest.mark.parametrize(
@@ -41,6 +54,12 @@ def test_deep_equality_assert(expected, actual, should_throw):
             _deep_equality_assert(expected=expected, actual=actual)
     else:
         _deep_equality_assert(expected=expected, actual=actual)
+
+
+def test_create_empty(post_empty_query):
+    request_data, response = post_empty_query
+    response_json = response.json()
+    _deep_equality_assert(expected=request_data, actual=response_json)
 
 
 def test_create(post_minimal_query):
