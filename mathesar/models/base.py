@@ -290,8 +290,8 @@ class Table(DatabaseObject, Relation):
     def sa_all_records(self):
         return db_get_records(self._sa_table, self.schema._sa_engine)
 
-    def sa_num_records(self, filter=None):
-        return get_count(self._sa_table, self.schema._sa_engine, filter=filter)
+    def sa_num_records(self, filter=None, search=[]):
+        return get_count(self._sa_table, self.schema._sa_engine, filter=filter, search=search)
 
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
@@ -310,6 +310,7 @@ class Table(DatabaseObject, Relation):
         filter=None,
         order_by=[],
         group_by=None,
+        search=[],
         duplicate_only=None,
     ):
         return db_get_records(
@@ -320,6 +321,7 @@ class Table(DatabaseObject, Relation):
             filter=filter,
             order_by=order_by,
             group_by=group_by,
+            search=search,
             duplicate_only=duplicate_only,
         )
 
