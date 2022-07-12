@@ -375,6 +375,7 @@ datetime_trunc_tests_def = [
     ('timestamp', 'truncate_to_day', 6),
 ]
 
+
 @pytest.mark.parametrize('col,preproc,num', datetime_trunc_tests_def)
 def test_get_group_augmented_records_query_datetimes_preproc(
         times_table_obj, col, preproc, num

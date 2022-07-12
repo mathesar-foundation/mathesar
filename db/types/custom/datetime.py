@@ -1,6 +1,6 @@
-from sqlalchemy import case, func, and_, cast
+from sqlalchemy import case, func, and_
 from sqlalchemy.dialects.postgresql import DATE as SA_DATE
-from sqlalchemy.dialects.postgresql import INTERVAL, INTEGER
+from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.dialects.postgresql import TIME as SA_TIME
 from sqlalchemy.dialects.postgresql import TIMESTAMP as SA_TIMESTAMP
 from sqlalchemy.types import TypeDecorator
