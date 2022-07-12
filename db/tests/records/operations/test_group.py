@@ -366,6 +366,32 @@ def test_smoke_get_group_augmented_records_query_uris_preproc(uris_table_obj, pr
         )
 
 
+datetime_trunc_tests_def = [
+    ('date', 'truncate_to_year', 3),
+    ('timestamp', 'truncate_to_year', 3),
+    ('date', 'truncate_to_month', 4),
+    ('timestamp', 'truncate_to_month', 4),
+    ('date', 'truncate_to_day', 6),
+    ('timestamp', 'truncate_to_day', 6),
+]
+
+@pytest.mark.parametrize('col,preproc,num', datetime_trunc_tests_def)
+def test_get_group_augmented_records_query_datetimes_preproc(
+        times_table_obj, col, preproc, num
+):
+    roster, engine = times_table_obj
+    group_by = group.GroupBy(
+        [col],
+        mode=group.GroupMode.DISTINCT.value,
+        preproc=[preproc]
+    )
+    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+
+    assert max([_group_id(row) for row in res]) == num
+
+
 single_col_number_modes = [
     group.GroupMode.MAGNITUDE.value,
     group.GroupMode.COUNT_BY.value,
