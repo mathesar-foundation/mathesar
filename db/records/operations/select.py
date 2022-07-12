@@ -1,5 +1,6 @@
 from sqlalchemy import select, func
 from sqlalchemy_filters import apply_sort
+from sqlalchemy.sql.base import ColumnSet as SAColumnSet
 
 from db.functions.operations.apply import apply_db_function_spec_as_filter
 from db.columns.base import MathesarColumn
@@ -39,6 +40,8 @@ def get_query(
     group_by=None,
     duplicate_only=None
 ):
+    order_by = _process_order_by(table, order_by)
+
     if duplicate_only:
         select_target = _get_duplicate_only_cte(table, duplicate_only)
     else:
@@ -95,7 +98,19 @@ def get_records(
         duplicate_only:  list of column names; only rows that have duplicates across those rows
                          will be returned
     """
-    from sqlalchemy.sql.base import ColumnSet as SAColumnSet
+    query = get_query(
+        table=table,
+        limit=limit,
+        offset=offset,
+        order_by=order_by,
+        filter=filter,
+        group_by=group_by,
+        duplicate_only=duplicate_only
+    )
+    return execute_query(engine, query)
+
+
+def _process_order_by(table, order_by):
     if not order_by:
         # Set default ordering if none was requested
         relation_has_pk = hasattr(table, 'primary_key')
@@ -116,16 +131,7 @@ def get_records(
             # If there aren't primary keys, order by all columns
             order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
-    query = get_query(
-        table=table,
-        limit=limit,
-        offset=offset,
-        order_by=order_by,
-        filter=filter,
-        group_by=group_by,
-        duplicate_only=duplicate_only
-    )
-    return execute_query(engine, query)
+    return order_by
 
 
 def get_count(table, engine, filter=None):
