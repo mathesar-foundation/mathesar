@@ -11,57 +11,6 @@ from db.types.base import get_db_type_enum_from_id
 from db.utils import execute_query
 
 
-def _get_duplicate_only_cte(table, duplicate_columns):
-    DUPLICATE_LABEL = "_is_dupe"
-    duplicate_flag_cte = (
-        select(
-            *table.c,
-            (func.count(1).over(partition_by=duplicate_columns) > 1).label(DUPLICATE_LABEL),
-        ).select_from(table)
-    ).cte()
-    return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
-
-
-def _sort_and_filter(query, order_by, filter):
-    if order_by is not None:
-        query = apply_sort(query, order_by)
-    if filter is not None:
-        query = apply_db_function_spec_as_filter(query, filter)
-    return query
-
-
-def get_query(
-    table,
-    limit,
-    offset,
-    order_by,
-    filter=None,
-    columns_to_select=None,
-    group_by=None,
-    duplicate_only=None
-):
-    order_by = _process_order_by(table, order_by)
-
-    if duplicate_only:
-        select_target = _get_duplicate_only_cte(table, duplicate_only)
-    else:
-        select_target = table
-
-    if isinstance(group_by, group.GroupBy):
-        selectable = group.get_group_augmented_records_query(select_target, group_by)
-    else:
-        selectable = select(select_target)
-
-    selectable = _sort_and_filter(selectable, order_by, filter)
-
-    if columns_to_select:
-        selectable = selectable.cte()
-        selectable = select(*columns_to_select).select_from(selectable)
-
-    selectable = selectable.limit(limit).offset(offset)
-    return selectable
-
-
 def get_record(table, engine, id_value):
     primary_key_column = get_primary_key_column(table)
     query = select(table).where(primary_key_column == id_value)
@@ -110,6 +59,52 @@ def get_records(
     return execute_query(engine, query)
 
 
+def get_count(table, engine, filter=None):
+    col_name = "_count"
+    columns_to_select = [func.count().label(col_name)]
+    query = get_query(
+        table=table,
+        limit=None,
+        offset=None,
+        order_by=None,
+        filter=filter,
+        columns_to_select=columns_to_select
+    )
+    return execute_query(engine, query)[0][col_name]
+
+
+def get_query(
+    table,
+    limit,
+    offset,
+    order_by,
+    filter=None,
+    columns_to_select=None,
+    group_by=None,
+    duplicate_only=None
+):
+    order_by = _process_order_by(table, order_by)
+
+    if duplicate_only:
+        select_target = _get_duplicate_only_cte(table, duplicate_only)
+    else:
+        select_target = table
+
+    if isinstance(group_by, group.GroupBy):
+        selectable = group.get_group_augmented_records_query(select_target, group_by)
+    else:
+        selectable = select(select_target)
+
+    selectable = _sort_and_filter(selectable, order_by, filter)
+
+    if columns_to_select:
+        selectable = selectable.cte()
+        selectable = select(*columns_to_select).select_from(selectable)
+
+    selectable = selectable.limit(limit).offset(offset)
+    return selectable
+
+
 def _process_order_by(table, order_by):
     if not order_by:
         # Set default ordering if none was requested
@@ -134,18 +129,23 @@ def _process_order_by(table, order_by):
     return order_by
 
 
-def get_count(table, engine, filter=None):
-    col_name = "_count"
-    columns_to_select = [func.count().label(col_name)]
-    query = get_query(
-        table=table,
-        limit=None,
-        offset=None,
-        order_by=None,
-        filter=filter,
-        columns_to_select=columns_to_select
-    )
-    return execute_query(engine, query)[0][col_name]
+def _get_duplicate_only_cte(table, duplicate_columns):
+    DUPLICATE_LABEL = "_is_dupe"
+    duplicate_flag_cte = (
+        select(
+            *table.c,
+            (func.count(1).over(partition_by=duplicate_columns) > 1).label(DUPLICATE_LABEL),
+        ).select_from(table)
+    ).cte()
+    return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
+
+
+def _sort_and_filter(query, order_by, filter):
+    if order_by is not None:
+        query = apply_sort(query, order_by)
+    if filter is not None:
+        query = apply_db_function_spec_as_filter(query, filter)
+    return query
 
 
 def get_column_cast_records(engine, table, column_definitions, num_records=20):
