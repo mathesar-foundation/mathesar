@@ -24,6 +24,9 @@ def get_table_or_404(pk):
 
 
 def process_preview_data(preview_objs, preview_table_info):
+    """
+    Convert database identifiers into Mathesar model identifiers
+    """
     def _convert_record_name_key_to_id(record, column_map):
         record = record._asdict()
         processed_preview_records = {

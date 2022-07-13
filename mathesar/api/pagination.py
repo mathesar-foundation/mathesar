@@ -90,7 +90,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         order_by=[],
         grouping={},
         duplicate_only=None,
-        preview_columns=None
+        preview_info=None
     ):
         group_by = GroupBy(**grouping) if grouping else None
         records = super().paginate_queryset(
@@ -104,16 +104,16 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         )
 
         if records:
-            identifier_converted_preview_data = convert_preview_data_to_db_identifier(preview_columns)
+            identifier_converted_preview_data = convert_preview_data_to_db_identifier(preview_info)
             preview_data = get_records_preview_data(records, table._sa_engine, identifier_converted_preview_data)
-            processed_preview_data = process_preview_data(preview_data, preview_columns)
+            processed_preview_data = process_preview_data(preview_data, preview_info)
             processed_records, groups = process_annotated_records(
                 records,
                 column_name_id_bidirectional_map,
             )
         else:
             processed_records, processed_preview_data, groups = None, None, None
-        if preview_columns:
+        if preview_info:
             self.preview_data = processed_preview_data
         else:
             self.preview_data = None

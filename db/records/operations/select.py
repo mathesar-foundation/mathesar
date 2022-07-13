@@ -79,16 +79,7 @@ def get_records_preview_data(
     preview_columns
 ):
     if preview_columns:
-        preview_filters = defaultdict(lambda: defaultdict(lambda: set()))
-        for record in records:
-            for referent_table_name, referent_obj in preview_columns.items():
-                constraint_columns = referent_obj['constraint_columns']
-                for constraint_column in constraint_columns:
-                    constrained_column = constraint_column['constrained_column']
-                    constrained_column_value = record[constrained_column]
-                    if constrained_column_value is not None:
-                        referent_column = constraint_column['referent_column']
-                        preview_filters[referent_table_name][referent_column].add(constrained_column_value)
+        preview_filters = _get_preview_values(preview_columns, records)
         preview_data = []
         for referent_table_name, referent_columns in preview_filters.items():
             referent_table = preview_columns[referent_table_name]['table']
@@ -110,6 +101,20 @@ def get_records_preview_data(
             }
             preview_data.append(preview_obj)
         return preview_data
+
+
+def _get_preview_values(preview_columns, records):
+    preview_filters = defaultdict(lambda: defaultdict(lambda: set()))
+    for record in records:
+        for referent_table_name, referent_obj in preview_columns.items():
+            constraint_columns = referent_obj['constraint_columns']
+            for constraint_column in constraint_columns:
+                constrained_column = constraint_column['constrained_column']
+                constrained_column_value = record[constrained_column]
+                if constrained_column_value is not None:
+                    referent_column = constraint_column['referent_column']
+                    preview_filters[referent_table_name][referent_column].add(constrained_column_value)
+    return preview_filters
 
 
 def get_records(

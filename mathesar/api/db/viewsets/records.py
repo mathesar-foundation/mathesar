@@ -1,6 +1,3 @@
-import re
-from collections import defaultdict
-
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.renderers import BrowsableAPIRenderer
@@ -8,7 +5,6 @@ from rest_framework.response import Response
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
-from db.constraints.utils import ConstraintType
 from db.functions.exceptions import (
     BadDBFunctionFormat, ReferencedColumnsDontExist, UnknownDBFunctionID
 )
@@ -19,8 +15,9 @@ from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
-from mathesar.models.base import Constraint, Table, Column, TableSettings
+from mathesar.models.base import Table
 from mathesar.utils.json import MathesarJSONRenderer
+from mathesar.utils.preview import filter_preview_enabled_columns, get_preview_info
 
 
 class RecordViewSet(viewsets.ViewSet):
@@ -62,29 +59,10 @@ class RecordViewSet(viewsets.ViewSet):
             group_by_columns_names = [column_ids_to_names[column_id] for column_id in grouping['columns']]
             name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
         name_converted_order_by = [{**column, 'field': column_ids_to_names[column['field']]} for column in order_by]
-        preview_columns = None
+        preview_info = None
         if fk_previews:
-            table_constraints = Constraint.objects.filter(table__id=self.kwargs['table_pk'])
-            fk_constraints = [table_constraint for table_constraint in table_constraints if table_constraint.type == ConstraintType.FOREIGN_KEY.value]
-            preview_columns = defaultdict(lambda: {'constraint_columns': [], 'preview_columns': []})
-            for fk_constraint in fk_constraints:
-                # For now only single column foreign key is used.
-                constrained_column = fk_constraint.columns[0]
-                if fk_previews == 'auto' and not constrained_column.display_options['show_fk_preview']:
-                    continue
-                referent_column = fk_constraint.referent_columns[0]
-                referent_table_id = referent_column.table_id
-                constraint_columns = {'referent_column': referent_column, 'constrained_column': constrained_column}
-                preview_columns[referent_table_id]['constraint_columns'].append(constraint_columns)
-            referent_table_ids = preview_columns.keys()
-            referent_table_settings = TableSettings.objects.filter(table_id__in=referent_table_ids).select_related('preview_settings', 'table')
-            for referent_table_setting in referent_table_settings:
-                preview_template = referent_table_setting.preview_settings.template
-                preview_columns_extraction_regex = r'\{(.*?)\}'
-                preview_data_column_ids = re.findall(preview_columns_extraction_regex, preview_template)
-                preview_data_columns = Column.objects.filter(id__in=preview_data_column_ids)
-                preview_columns[referent_table_setting.table_id]['preview_columns'] = preview_data_columns
-                preview_columns[referent_table_setting.table_id]['table'] = referent_table_setting.table
+            table_pk = self.kwargs['table_pk']
+            preview_info = get_preview_info(filter_preview_enabled_columns, fk_previews, table_pk)
         try:
 
             records = paginator.paginate_queryset(
@@ -93,7 +71,7 @@ class RecordViewSet(viewsets.ViewSet):
                 order_by=name_converted_order_by,
                 grouping=name_converted_group_by,
                 duplicate_only=serializer.validated_data['duplicate_only'],
-                preview_columns=preview_columns
+                preview_info=preview_info
             )
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
             raise database_api_exceptions.BadFilterAPIException(
