@@ -1,3 +1,4 @@
+import sqlalchemy
 from sqlalchemy import select, func
 from sqlalchemy_filters import apply_sort
 from sqlalchemy.sql.base import ColumnSet as SAColumnSet
@@ -50,7 +51,7 @@ def get_records(
         duplicate_only:  list of column names; only rows that have duplicates across those rows
                          will be returned
     """
-    pg_query = get_pg_query(
+    relation = apply_transformations_deprecated(
         table=table,
         limit=limit,
         offset=offset,
@@ -59,25 +60,28 @@ def get_records(
         group_by=group_by,
         duplicate_only=duplicate_only
     )
-    return execute_pg_query(engine, pg_query)
+    executable = _to_executable(relation)
+    return execute_pg_query(engine, executable)
 
 
 def get_count(table, engine, filter=None):
     col_name = "_count"
     columns_to_select = [func.count().label(col_name)]
-    pg_query = get_pg_query(
+    relation = apply_transformations_deprecated(
         table=table,
         limit=None,
         offset=None,
+        # TODO does it make sense to order, when we're only interested in row count?
         order_by=None,
         filter=filter,
-        columns_to_select=columns_to_select
+        columns_to_select=columns_to_select,
     )
-    return execute_pg_query(engine, pg_query)[0][col_name]
+    executable = _to_executable(relation)
+    return execute_pg_query(engine, executable)[0][col_name]
 
 
 # NOTE deprecated; this will be replaced with apply_transformations
-def get_pg_query(
+def apply_transformations_deprecated(
     table,
     limit=None,
     offset=None,
@@ -88,34 +92,45 @@ def get_pg_query(
     duplicate_only=None,
     aggregate=None,
 ):
-    # TODO do we really have to do this step ahead of all other steps? preferably we'd do it when
-    # actually sorting
-    # TODO can be solved by converting this into an implict transformation that's always applied first
-    order_by = _process_order_by(table, order_by)
+    # TODO rename the actual method parameter
+    relation = table
 
-    selectable = table
+    _enforce_relation_type_expectations(relation)
 
     if duplicate_only:
-        selectable = _get_duplicate_only_cte(selectable, duplicate_only)
+        relation = _get_duplicate_only_cte(relation, duplicate_only)
     if group_by or aggregate:
-        selectable = _group_aggregate(selectable, group_by, aggregate)
+        relation = _group_aggregate(relation, group_by, aggregate)
     if order_by:
-        selectable = _sort(selectable, order_by)
+        relation = _sort(relation, order_by)
     if filter:
-        selectable = _filter(selectable, filter)
+        relation = _filter(relation, filter)
     if columns_to_select:
-        selectable = _select_subset_of_columns(
-            selectable,
+        relation = _select_subset_of_columns(
+            relation,
             columns_to_select,)
     if limit:
-        selectable = selectable.limit(limit)
+        relation = _limit(relation, limit)
     if offset:
-        selectable = selectable.offset(offset)
-    return selectable
+        relation = _offset(relation, offset)
+    return relation
 
 
-# NOTE in this file, the terms relation and selectable are used interchangeably
+def _enforce_relation_type_expectations(relation):
+    """
+    The convention being enforced is to pass around instances of Selectables that are not
+    Executables. We need to do it one way, for the sake of uniformity and compatibility.
+    It's not the other way around, because if you pass around Executables, composition sometimes
+    works differently.
+
+    This method is a development tool mostly, probably shouldn't exist in actual production.
+    """
+    assert isinstance(relation, sqlalchemy.sql.expression.Selectable)
+    assert not isinstance(relation, sqlalchemy.sql.expression.Executable)
+
+
 def apply_transformations(relation, transformations):
+    _enforce_relation_type_expectations(relation)
     for transform in transformations:
         relation = _apply_transform(relation, transform)
     return relation
@@ -124,86 +139,137 @@ def apply_transformations(relation, transformations):
 def _apply_transform(relation, transform):
     transform_type = transform['type']
     if transform_type == 'filter':
-        filter_spec = transform.spec
-        relation = _filter(relation, filter_spec)
+        spec = transform['spec']
+        relation = _filter(relation, spec)
     elif transform_type == 'order':
-        order_spec = transform.spec
-        relation = _sort(relation, order_spec)
+        spec = transform['spec']
+        relation = _sort(relation, spec)
     elif transform_type == 'group-agg':
         group_by_spec = transform.get('group_by')
         agg_spec = transform.get('agg')
         group_agged = _group_aggregate(relation, group_by_spec, agg_spec)
         relation = group_agged
+    elif transform_type == 'limit':
+        spec = transform['spec']
+        relation = _limit(relation, spec)
+    elif transform_type == 'offset':
+        spec = transform['spec']
+        relation = _offset(relation, spec)
+    elif transform_type == 'select':
+        spec = transform['spec']
+        relation = _select_subset_of_columns(
+            relation,
+            spec,)
     else:
         # TODO handle other transform types
         raise Exception("unexpected or tbd")
+    _enforce_relation_type_expectations(relation)
     return relation
 
 
+def _limit(relation, limit):
+    executable = _to_executable(relation)
+    executable = executable.limit(limit)
+    return _to_non_executable(executable)
+
+
+def _offset(relation, offset):
+    executable = _to_executable(relation)
+    executable = executable.offset(offset)
+    return _to_non_executable(executable)
+
+
 # TODO do aggregation
-def _group_aggregate(selectable, group_by, aggregate):
+def _group_aggregate(relation, group_by, aggregate):
     # TODO maybe keep this as json, and convert to GroupBy at last moment?
     # other transform specs are json at this point in the pipeline
+    executable = _to_executable(relation)
     if isinstance(group_by, group.GroupBy):
-        selectable = group.get_group_augmented_records_pg_query(selectable, group_by)
-    else:
-        # TODO get rid of this branch
-        selectable = select(selectable)
-    return selectable
+        executable = group.get_group_augmented_records_pg_query(executable, group_by)
+    return _to_non_executable(executable)
 
 
-def _select_subset_of_columns(selectable, columns_to_select):
+def _select_subset_of_columns(relation, columns_to_select):
     if columns_to_select:
-        selectable = selectable.cte()
-        selectable = select(*columns_to_select).select_from(selectable)
-    return selectable
+        executable = _to_executable(relation)
+        processed_columns_to_select = tuple(
+            _make_sure_column_expression(column)
+            for column
+            in columns_to_select
+        )
+        executable = select(*processed_columns_to_select).select_from(executable)
+        return _to_non_executable(executable)
+    else:
+        return relation
 
 
-def _process_order_by(table, order_by):
+def _make_sure_column_expression(input):
+    if isinstance(input, str):
+        return sqlalchemy.column(input)
+    else:
+        return input
+
+
+def get_default_order_by(table, order_by):
+    # Set default ordering if none was requested
+    relation_has_pk = hasattr(table, 'primary_key')
+    if relation_has_pk:
+        pk = table.primary_key
+        pk_cols = None
+        if hasattr(pk, 'columns'):
+            pk_cols = pk.columns
+        elif isinstance(pk, SAColumnSet):
+            pk_cols = pk
+        # If there are primary keys, order by all primary keys
+        if pk_cols is not None and len(pk_cols) > 0:
+            order_by = [
+                {'field': str(col.name), 'direction': 'asc'}
+                for col
+                in pk_cols
+            ]
     if not order_by:
-        # Set default ordering if none was requested
-        relation_has_pk = hasattr(table, 'primary_key')
-        if relation_has_pk:
-            pk = table.primary_key
-            pk_cols = None
-            if hasattr(pk, 'columns'):
-                pk_cols = pk.columns
-            elif isinstance(pk, SAColumnSet):
-                pk_cols = pk
-            # If there are primary keys, order by all primary keys
-            if pk_cols is not None and len(pk_cols) > 0:
-                order_by = [
-                    {'field': str(col.name), 'direction': 'asc'}
-                    for col in pk_cols
-                ]
-        if not order_by:
-            # If there aren't primary keys, order by all columns
-            order_by = [{'field': col, 'direction': 'asc'}
-                        for col in table.columns]
+        # If there aren't primary keys, order by all columns
+        order_by = [
+            {'field': col, 'direction': 'asc'}
+            for col
+            in table.columns
+        ]
     return order_by
 
 
-def _get_duplicate_only_cte(table, duplicate_columns):
+def _get_duplicate_only_cte(relation, duplicate_columns):
+    _enforce_relation_type_expectations(relation)
     DUPLICATE_LABEL = "_is_dupe"
     duplicate_flag_cte = (
         select(
-            *table.c,
-            (func.count(1).over(partition_by=duplicate_columns) > 1).label(DUPLICATE_LABEL),
-        ).select_from(table)
+            *relation.c,
+            (func
+                .count(1)
+                .over(partition_by=duplicate_columns) > 1
+            ).label(DUPLICATE_LABEL),
+        ).select_from(relation)
     ).cte()
-    return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
+    executable = (
+        select(duplicate_flag_cte)
+        .where(duplicate_flag_cte.c[DUPLICATE_LABEL])
+    )
+    return _to_non_executable(executable)
 
 
-def _sort(pg_query, order_by):
+def _sort(relation, order_by):
+    _enforce_relation_type_expectations(relation)
+    executable = _to_executable(relation)
     if order_by is not None:
-        pg_query = apply_sort(pg_query, order_by)
-    return pg_query
+        executable = apply_sort(executable, order_by)
+    return _to_non_executable(executable)
 
 
-def _filter(pg_query, filter):
+def _filter(relation, filter):
+    _enforce_relation_type_expectations(relation)
+    executable = _to_executable(relation)
     if filter is not None:
-        pg_query = apply_db_function_spec_as_filter(pg_query, filter)
-    return pg_query
+        executable = apply_db_function_spec_as_filter(executable, filter)
+    return _to_non_executable(executable)
 
 
 def get_column_cast_records(engine, table, column_definitions, num_records=20):
@@ -242,3 +308,23 @@ def _get_column_cast_expression_or_column(column, col_def, engine):
         )
     else:
         return column
+
+
+def _to_executable(relation):
+    """
+    We want the relations to be in the form of executables in between transformations.
+    Executables are a subset of selectables.
+    """
+    assert isinstance(relation, sqlalchemy.sql.expression.Selectable)
+    if isinstance(relation, sqlalchemy.sql.expression.Executable):
+        return relation
+    else:
+        return select(relation)
+
+
+def _to_non_executable(relation):
+    assert isinstance(relation, sqlalchemy.sql.expression.Selectable)
+    if isinstance(relation, sqlalchemy.sql.expression.Executable):
+        return relation.cte()
+    else:
+        return relation

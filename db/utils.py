@@ -1,6 +1,7 @@
 from db.records import exceptions
 from sqlalchemy.exc import ProgrammingError
 from psycopg2.errors import UndefinedFunction
+import sqlalchemy
 
 
 def execute_statement(engine, statement, connection_to_use=None):
@@ -19,6 +20,9 @@ def execute_statement(engine, statement, connection_to_use=None):
 
 
 def execute_pg_query(engine, query, connection_to_use=None):
+    # If `query` doesn't have `Executable` mixed in, it's not the correct type.
+    # NOTE A basic way to convert a non-Executable Selectable into Executable is to do select(query)
+    assert isinstance(query, sqlalchemy.sql.expression.Executable)
     return execute_statement(engine, query, connection_to_use=connection_to_use).fetchall()
 
 
