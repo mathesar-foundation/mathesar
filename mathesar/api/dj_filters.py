@@ -1,7 +1,7 @@
 from django_filters import BooleanFilter, DateTimeFromToRangeFilter, OrderingFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter, PropertyOrderingFilter
 
-from mathesar.models import Schema, Table, Database
+from mathesar.models.base import Schema, Table, Database
 
 
 class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):

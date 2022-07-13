@@ -3,7 +3,7 @@ from sqlalchemy_filters import apply_sort
 
 from db.functions.operations.apply import apply_db_function_spec_as_filter
 from db.columns.base import MathesarColumn
-from db.records.operations import group
+from db.records.operations import group, relevance
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.types.base import get_db_type_enum_from_id
@@ -34,10 +34,12 @@ def get_query(
     limit,
     offset,
     order_by,
+    engine,
     filter=None,
     columns_to_select=None,
     group_by=None,
-    duplicate_only=None
+    search=[],
+    duplicate_only=None,
 ):
     if duplicate_only:
         select_target = _get_duplicate_only_cte(table, duplicate_only)
@@ -50,6 +52,10 @@ def get_query(
         selectable = select(select_target)
 
     selectable = _sort_and_filter(selectable, order_by, filter)
+    if search:
+        selectable = selectable.cte()
+        search_params = {search_obj['column']: search_obj['literal'] for search_obj in search}
+        selectable = relevance.get_rank_and_filter_rows_query(selectable, search_params, engine, limit)
 
     if columns_to_select:
         selectable = selectable.cte()
@@ -75,6 +81,7 @@ def get_records(
     order_by=[],
     filter=None,
     group_by=None,
+    search=[],
     duplicate_only=None,
 ):
     """
@@ -87,6 +94,8 @@ def get_records(
         offset:          int, gives number of rows to skip
         order_by:        list of dictionaries, where each dictionary has a 'field' and
                          'direction' field.
+        search:          list of dictionaries, where each dictionary has a 'column' and
+                         'literal' field.
                          See: https://github.com/centerofci/sqlalchemy-filters#sort-format
         filter:          a dictionary with one key-value pair, where the key is the filter id and
                          the value is a list of parameters; supports composition/nesting.
@@ -95,17 +104,27 @@ def get_records(
         duplicate_only:  list of column names; only rows that have duplicates across those rows
                          will be returned
     """
+    from sqlalchemy.sql.base import ColumnSet as SAColumnSet
     if not order_by:
         # Set default ordering if none was requested
-        if len(table.primary_key.columns) > 0:
+        relation_has_pk = hasattr(table, 'primary_key')
+        if relation_has_pk:
+            pk = table.primary_key
+            pk_cols = None
+            if hasattr(pk, 'columns'):
+                pk_cols = pk.columns
+            elif isinstance(pk, SAColumnSet):
+                pk_cols = pk
             # If there are primary keys, order by all primary keys
-            order_by = [{'field': str(col.name), 'direction': 'asc'}
-                        for col in table.primary_key.columns]
-        else:
+            if pk_cols is not None and len(pk_cols) > 0:
+                order_by = [
+                    {'field': str(col.name), 'direction': 'asc'}
+                    for col in pk_cols
+                ]
+        if not order_by:
             # If there aren't primary keys, order by all columns
             order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
-
     query = get_query(
         table=table,
         limit=limit,
@@ -113,12 +132,14 @@ def get_records(
         order_by=order_by,
         filter=filter,
         group_by=group_by,
-        duplicate_only=duplicate_only
+        search=search,
+        duplicate_only=duplicate_only,
+        engine=engine
     )
     return execute_query(engine, query)
 
 
-def get_count(table, engine, filter=None):
+def get_count(table, engine, filter=None, search=[]):
     col_name = "_count"
     columns_to_select = [func.count().label(col_name)]
     query = get_query(
@@ -127,7 +148,9 @@ def get_count(table, engine, filter=None):
         offset=None,
         order_by=None,
         filter=filter,
-        columns_to_select=columns_to_select
+        search=search,
+        columns_to_select=columns_to_select,
+        engine=engine
     )
     return execute_query(engine, query)[0][col_name]
 

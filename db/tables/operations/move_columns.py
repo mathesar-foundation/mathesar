@@ -2,7 +2,7 @@ from db.columns.base import MathesarColumn
 from db import constants
 from db.tables.operations.split import extract_columns_from_table
 from db.tables.operations.merge import merge_tables
-from db.tables.operations.select import reflect_table
+from db.tables.operations.select import reflect_table, reflect_table_from_oid
 
 
 def _find_table_relationship(table_one, table_two):
@@ -53,8 +53,10 @@ def _get_column_moving_extraction_args(relationship, target_table, target_table_
     return extracted_table_name, remainder_table_name, extraction_columns
 
 
-def move_columns_between_related_tables(source_table_name, target_table_name, column_names, schema, engine):
+def move_columns_between_related_tables(source_table_oid, target_table_oid, column_names, schema, engine):
     TEMP_MERGED_TABLE_NAME = f"{constants.MATHESAR_PREFIX}_temp_merge_table"
+    source_table_name = reflect_table_from_oid(source_table_oid, engine).name
+    target_table_name = reflect_table_from_oid(target_table_oid, engine).name
     source_table = reflect_table(source_table_name, schema, engine)
     target_table = reflect_table(
         target_table_name, schema, engine, metadata=source_table.metadata
