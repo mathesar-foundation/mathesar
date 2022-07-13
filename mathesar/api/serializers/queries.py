@@ -33,6 +33,11 @@ class QuerySerializer(serializers.ModelSerializer):
 
     def validate_transformations(self, transforms):
         _raise_if_not_list_of_dicts("transformations", transforms)
+        for transform in transforms:
+            if "type" not in transform:
+                raise serializers.ValidationError(f"Each 'transformations' sub-dict must have a 'type' key.")
+            if "spec" not in transform:
+                raise serializers.ValidationError(f"Each 'transformations' sub-dict must have a 'spec' key.")
         return transforms
 
     def validate_display_options(self, display_options):
