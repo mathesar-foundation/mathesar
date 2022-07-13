@@ -18,6 +18,28 @@ from mathesar.functions.operations.convert import rewrite_db_function_spec_colum
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
+def _test_preview_response(preview_response, referent_table, referent_column, referred_value):
+    expected_preview_obj = next(
+        (
+            preview
+            for preview in preview_response
+            if preview['table'] == referent_table.id
+        ),
+        None
+    )
+    assert expected_preview_obj is not None
+    expected_preview_records = expected_preview_obj['data']
+    assert str(referent_column.id) in expected_preview_records[0]
+    expected_preview = next(
+        (
+            data for data in expected_preview_records
+            if data[str(referent_column.id)] == referred_value
+        ),
+        None
+    )
+    assert expected_preview is not None
+
+
 def test_record_list(create_patents_table, client):
     """
     Desired format:
@@ -89,12 +111,12 @@ def test_foreign_key_record_api_all_column_previews(two_foreign_key_tables, clie
     referrer_table_columns = referrer_table.get_columns_by_name(
         ["Id", "Center", "Affiliated Center", "Original Patent"]
     )
-    referrer_table_pk = referrer_table_columns[0]
+    referrer_table_pk_column = referrer_table_columns[0]
     referrer_column_1 = referrer_table_columns[1]
     referrer_column_2 = referrer_table_columns[2]
     self_referential_column = referrer_table_columns[3]
 
-    referrer_table.add_constraint(UniqueConstraint(None, referrer_table.oid, [referrer_table_pk.attnum]))
+    referrer_table.add_constraint(UniqueConstraint(None, referrer_table.oid, [referrer_table_pk_column.attnum]))
     referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
     referrer_table.add_constraint(ForeignKeyConstraint(None,
                                                        referrer_table.oid,
@@ -110,17 +132,15 @@ def test_foreign_key_record_api_all_column_previews(two_foreign_key_tables, clie
                                                        referrer_table.oid,
                                                        [self_referential_column.attnum],
                                                        referrer_table.oid,
-                                                       [referrer_table_pk.attnum], {}))
+                                                       [referrer_table_pk_column.attnum], {}))
     response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'all'})
     response_data = response.json()
-    referred_value = '1'
+    results = response_data['results']
+    column1_referred_value = results[0][str(referrer_column_1.id)]
+    self_referred_column_referred_value = results[1][str(self_referential_column.id)]
     preview_response = response_data['previews']
-    expected_preview = next((preview for preview in preview_response if preview['table'] == referent_table.id), None)
-    assert expected_preview is not None
-    assert str(referent_column.id) in expected_preview['data'][0]
-    expected_preview = next((data for data in expected_preview['data'] if data[str(referent_column.id)] == referred_value),
-                            None)
-    assert expected_preview is not None
+    _test_preview_response(preview_response, referent_table, referent_column, column1_referred_value)
+    _test_preview_response(preview_response, referrer_table, referrer_table_pk_column, self_referred_column_referred_value)
 
 
 def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, client):
@@ -160,12 +180,7 @@ def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, cli
     response_data = response.json()
     referred_value = '1'
     preview_response = response_data['previews']
-    expected_preview = next((preview for preview in preview_response if preview['table'] == referent_table.id), None)
-    assert expected_preview is not None
-    assert str(referent_column.id) in expected_preview['data'][0]
-    expected_preview = next((data for data in expected_preview['data'] if data[str(referent_column.id)] == referred_value),
-                            None)
-    assert expected_preview is not None
+    _test_preview_response(preview_response, referent_table, referent_column, referred_value)
 
 
 def test_record_list_filter(create_patents_table, client):
