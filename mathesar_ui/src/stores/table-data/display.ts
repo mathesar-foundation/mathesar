@@ -1,15 +1,16 @@
 import { writable, get, derived } from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
 import { WritableMap } from '@mathesar-component-library';
+import type { Column } from '@mathesar/api/tables/columns';
 import type { Meta } from './meta';
-import type { ColumnsDataStore, Column } from './columns';
+import type { ColumnsDataStore } from './columns';
 import type { Row, RecordsData } from './records';
 
 // TODO: Select active cell using primary key instead of index
 // Checkout scenarios with pk consisting multiple columns
 export interface ActiveCell {
   rowIndex: number;
-  columnIndex: number;
+  columnId: number;
 }
 
 export const ROW_CONTROL_COLUMN_WIDTH = 70;
@@ -31,7 +32,7 @@ export function isCellActive(
 ): boolean {
   return (
     activeCell &&
-    activeCell?.columnIndex === column.__columnIndex &&
+    activeCell?.columnId === column.id &&
     activeCell.rowIndex === row.rowIndex
   );
 }
@@ -193,8 +194,7 @@ export class Display {
     this.activeCell.set({
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       rowIndex: row.rowIndex,
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      columnIndex: column.__columnIndex,
+      columnId: column.id,
     });
   }
 
@@ -232,13 +232,13 @@ export class Display {
             break;
           case 'ArrowRight':
           case 'Tab':
-            if (existing.columnIndex < columns.length - 1) {
-              newActiveCell.columnIndex += 1;
+            if (existing.columnId < columns.length - 1) {
+              newActiveCell.columnId += 1;
             }
             break;
           case 'ArrowLeft':
-            if (existing.columnIndex > 0) {
-              newActiveCell.columnIndex -= 1;
+            if (existing.columnId > 0) {
+              newActiveCell.columnId -= 1;
             }
             break;
           default:

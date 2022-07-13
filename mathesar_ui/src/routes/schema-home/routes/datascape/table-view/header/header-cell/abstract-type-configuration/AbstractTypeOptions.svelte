@@ -7,8 +7,9 @@
   } from '@mathesar-component-library';
   import type { FormValues } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/AppTypes';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
   import TypeOptionTab from './TypeOptionTab.svelte';
@@ -19,7 +20,9 @@
   export let typeOptions: Column['type_options'];
   export let displayOptions: Column['display_options'];
   export let defaultValue: Column['default'];
-  export let column: Column;
+  export let processedColumn: ProcessedColumn;
+
+  $: ({ column } = processedColumn);
 
   let selectedTab: 'database' | 'display' = 'database';
   let dbFormHasError = false;

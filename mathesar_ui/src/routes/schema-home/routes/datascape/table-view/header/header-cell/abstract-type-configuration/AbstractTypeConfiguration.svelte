@@ -9,9 +9,10 @@
   import { toast } from '@mathesar/stores/toast';
 
   import type { DbType } from '@mathesar/AppTypes';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
 
   import AbstractTypeOptions from './AbstractTypeOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
@@ -21,8 +22,10 @@
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);
 
-  export let column: Column;
-  export let abstractTypeOfColumn: AbstractType | undefined;
+  export let processedColumn: ProcessedColumn;
+  export let abstractType: AbstractType | undefined;
+
+  $: ({ column } = processedColumn);
 
   let selectedAbstractType: AbstractType | undefined;
   let selectedDbType: DbType | undefined;
@@ -43,7 +46,7 @@
     typeOptions = { ...(column.type_options ?? {}) };
     displayOptions = { ...(column.display_options ?? {}) };
     defaultValue = column.default ? { ...column.default } : null;
-    selectedAbstractType = abstractTypeOfColumn;
+    selectedAbstractType = abstractType;
   }
   resetAbstractType();
 
@@ -53,18 +56,18 @@
     defaultValue = null;
   }
 
-  function selectAbstractType(abstractType: AbstractType) {
-    if (selectedAbstractType !== abstractType) {
-      if (abstractType.identifier === abstractTypeOfColumn?.identifier) {
+  function selectAbstractType(_abstractType: AbstractType) {
+    if (selectedAbstractType !== _abstractType) {
+      if (_abstractType.identifier === _abstractType?.identifier) {
         resetAbstractType();
-      } else if (abstractType.defaultDbType) {
-        selectedDbType = abstractType.defaultDbType;
+      } else if (_abstractType.defaultDbType) {
+        selectedDbType = _abstractType.defaultDbType;
         clearTypeRelatedOptions();
-      } else if (abstractType.dbTypes.size > 0) {
-        [selectedDbType] = abstractType.dbTypes;
+      } else if (_abstractType.dbTypes.size > 0) {
+        [selectedDbType] = _abstractType.dbTypes;
         clearTypeRelatedOptions();
       }
-      selectedAbstractType = abstractType;
+      selectedAbstractType = _abstractType;
     }
   }
 
@@ -114,7 +117,7 @@
         bind:typeOptions
         bind:displayOptions
         bind:defaultValue
-        {column}
+        {processedColumn}
       />
     {/key}
   {/if}

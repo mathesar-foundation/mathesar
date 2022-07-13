@@ -22,8 +22,8 @@
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import CellErrors from './CellErrors.svelte';
-  import type { ProcessedTableColumn } from '../utils';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
@@ -35,7 +35,7 @@
   export let rowHasErrors = false;
   export let key: CellKey;
   export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
-  export let processedColumn: ProcessedTableColumn;
+  export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
 
@@ -114,7 +114,7 @@
   {/if}
 
   <Cell
-    sheetColumn={processedColumn}
+    {processedColumn}
     {isActive}
     {value}
     showAsSkeleton={$recordsDataState === States.Loading}

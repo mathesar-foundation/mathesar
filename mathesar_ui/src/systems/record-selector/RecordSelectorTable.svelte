@@ -2,15 +2,13 @@
   import { writable } from 'svelte/store';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import type { Row } from '@mathesar/stores/table-data/records';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     setTabularDataStoreInContext,
     TabularData,
   } from '@mathesar/stores/table-data/tabularData';
   // TODO: Remove route dependency in systems
-  import { getProcessedColumnsMap } from '@mathesar/routes/schema-home/routes/datascape/table-view/utils';
   import ColumnResizer from '@mathesar/routes/schema-home/routes/datascape/table-view/header/header-cell/ColumnResizer.svelte';
-  import DataTypeBasedInput from '@mathesar/components/cell/DataTypeBasedInput.svelte';
+  import DynamicInput from '@mathesar/components/cell/DynamicInput.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
   import CellArranger from './CellArranger.svelte';
@@ -23,14 +21,9 @@
   setTabularDataStoreInContext(tabularDataStore);
 
   $: tabularDataStore.set(tabularData);
-  $: ({ columnsDataStore, constraintsDataStore, display } = tabularData);
+  $: ({ columnsDataStore, display } = tabularData);
   $: ({ columns } = $columnsDataStore);
   $: pkColumn = columns.find((c) => c.primary_key);
-  $: processedTableColumnsMap = getProcessedColumnsMap(
-    $columnsDataStore.columns,
-    $constraintsDataStore.constraints,
-    $currentDbAbstractTypes.data,
-  );
 
   function getPkValue(row: Row): string | number {
     if (!pkColumn) {
@@ -54,12 +47,7 @@
 
 <div class="record-selector-table">
   <div class="row">
-    <CellArranger
-      {processedTableColumnsMap}
-      {display}
-      let:style
-      let:processedColumn
-    >
+    <CellArranger {display} let:style let:processedColumn>
       <CellWrapper header {style}>
         <ColumnName column={processedColumn.column} />
         <ColumnResizer columnId={processedColumn.column.id} />
@@ -68,28 +56,23 @@
   </div>
 
   <div class="row inputs">
-    <CellArranger
-      {processedTableColumnsMap}
-      {display}
-      let:style
-      let:processedColumn
-    >
+    <CellArranger {display} let:style let:processedColumn>
       <CellWrapper {style}>
-        <DataTypeBasedInput column={processedColumn.column} value={null} />
+        <DynamicInput
+          componentAndProps={processedColumn.inputComponentAndProps}
+          value={null}
+        />
       </CellWrapper>
     </CellArranger>
   </div>
 
   <div class="divider">
-    <CellArranger {processedTableColumnsMap} {display} let:style>
+    <CellArranger {display} let:style>
       <CellWrapper {style} divider />
     </CellArranger>
   </div>
 
-  <RecordSelectorResults
-    {processedTableColumnsMap}
-    submit={handleSubmitRecord}
-  />
+  <RecordSelectorResults submit={handleSubmitRecord} />
 </div>
 
 <style>

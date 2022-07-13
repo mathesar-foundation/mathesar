@@ -4,17 +4,20 @@
     getTabularDataStoreFromContext,
     ROW_CONTROL_COLUMN_WIDTH,
   } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
-  import type { ProcessedTableColumnMap } from '../utils';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ columnsDataStore, meta, display, constraintsDataStore } = $tabularData);
+  $: ({
+    columnsDataStore,
+    meta,
+    display,
+    constraintsDataStore,
+    processedColumns,
+  } = $tabularData);
   $: ({ horizontalScrollOffset } = display);
-
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   let headerRef: HTMLElement;
 
@@ -55,7 +58,7 @@
 <div bind:this={headerRef} class="header">
   <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;" />
 
-  {#each [...processedTableColumnsMap] as [columnId, processedColumn] (columnId)}
+  {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
     <HeaderCell
       {processedColumn}
       {meta}
