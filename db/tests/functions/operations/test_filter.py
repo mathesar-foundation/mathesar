@@ -1,7 +1,7 @@
 import re
 import pytest
 
-from db.utils import execute_query
+from db.utils import execute_pg_query
 
 from db.functions.base import (
     ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains, StartsWithCaseInsensitive, ContainsCaseInsensitive
@@ -112,7 +112,7 @@ def test_filter_with_db_functions(
 
     query = apply_db_function_as_filter(relation, db_function)
 
-    record_list = execute_query(engine, query)
+    record_list = execute_pg_query(engine, query)
 
     if column_name == "array" and value is not None and op not in ["any", "not_any"]:
         value = [int(c) for c in value[1:-1].split(",")]
@@ -153,7 +153,7 @@ def test_filter_boolean_ops(
 
     query = apply_db_function_as_filter(relation, db_function)
 
-    record_list = execute_query(engine, query)
+    record_list = execute_pg_query(engine, query)
 
     assert len(record_list) == res_len
     for record in record_list:
@@ -183,7 +183,7 @@ def test_filtering_nested_boolean_ops(filter_sort_table_obj):
 
     query = apply_db_function_as_filter(relation, db_function)
 
-    record_list = execute_query(engine, query)
+    record_list = execute_pg_query(engine, query)
 
     assert len(record_list) == 2
     for record in record_list:
@@ -231,5 +231,5 @@ def _filters_as_expected(table_engine, column_name, main_db_function, literal_pa
         Literal([literal_param]),
     ])
     query = apply_db_function_as_filter(selectable, db_function)
-    record_list = execute_query(engine, query)
+    record_list = execute_pg_query(engine, query)
     assert len(record_list) == expected_count

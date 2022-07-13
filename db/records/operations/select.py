@@ -8,17 +8,20 @@ from db.records.operations import group
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.types.base import get_db_type_enum_from_id
-from db.utils import execute_query
+from db.utils import execute_pg_query
 
 
 def get_record(table, engine, id_value):
     primary_key_column = get_primary_key_column(table)
-    query = select(table).where(primary_key_column == id_value)
-    result = execute_query(engine, query)
+    pg_query = select(table).where(primary_key_column == id_value)
+    result = execute_pg_query(engine, pg_query)
     assert len(result) <= 1
     return result[0] if result else None
 
 
+# TODO change interface to where transformations is a sequence of transform steps
+# first change should be made on the viewset level, where transform steps are currently assigned
+# to named parameters.
 def get_records(
     table,
     engine,
@@ -47,7 +50,7 @@ def get_records(
         duplicate_only:  list of column names; only rows that have duplicates across those rows
                          will be returned
     """
-    query = get_query(
+    pg_query = get_pg_query(
         table=table,
         limit=limit,
         offset=offset,
@@ -56,13 +59,13 @@ def get_records(
         group_by=group_by,
         duplicate_only=duplicate_only
     )
-    return execute_query(engine, query)
+    return execute_pg_query(engine, pg_query)
 
 
 def get_count(table, engine, filter=None):
     col_name = "_count"
     columns_to_select = [func.count().label(col_name)]
-    query = get_query(
+    pg_query = get_pg_query(
         table=table,
         limit=None,
         offset=None,
@@ -70,38 +73,89 @@ def get_count(table, engine, filter=None):
         filter=filter,
         columns_to_select=columns_to_select
     )
-    return execute_query(engine, query)[0][col_name]
+    return execute_pg_query(engine, pg_query)[0][col_name]
 
 
-def get_query(
+# NOTE deprecated; this will be replaced with apply_transformations
+def get_pg_query(
     table,
-    limit,
-    offset,
-    order_by,
+    limit=None,
+    offset=None,
+    order_by=None,
     filter=None,
     columns_to_select=None,
     group_by=None,
-    duplicate_only=None
+    duplicate_only=None,
+    aggregate=None,
 ):
+    # TODO do we really have to do this step ahead of all other steps? preferably we'd do it when
+    # actually sorting
+    # TODO can be solved by converting this into an implict transformation that's always applied first
     order_by = _process_order_by(table, order_by)
 
+    selectable = table
+
     if duplicate_only:
-        select_target = _get_duplicate_only_cte(table, duplicate_only)
-    else:
-        select_target = table
+        selectable = _get_duplicate_only_cte(selectable, duplicate_only)
+    if group_by or aggregate:
+        selectable = _group_aggregate(selectable, group_by, aggregate)
+    if order_by:
+        selectable = _sort(selectable, order_by)
+    if filter:
+        selectable = _filter(selectable, filter)
+    if columns_to_select:
+        selectable = _select_subset_of_columns(
+            selectable,
+            columns_to_select,)
+    if limit:
+        selectable = selectable.limit(limit)
+    if offset:
+        selectable = selectable.offset(offset)
+    return selectable
 
+
+# NOTE in this file, the terms relation and selectable are used interchangeably
+def apply_transformations(relation, transformations):
+    for transform in transformations:
+        relation = _apply_transform(relation, transform)
+    return relation
+
+
+def _apply_transform(relation, transform):
+    transform_type = transform['type']
+    if transform_type == 'filter':
+        filter_spec = transform.spec
+        relation = _filter(relation, filter_spec)
+    elif transform_type == 'order':
+        order_spec = transform.spec
+        relation = _sort(relation, order_spec)
+    elif transform_type == 'group-agg':
+        group_by_spec = transform.get('group_by')
+        agg_spec = transform.get('agg')
+        group_agged = _group_aggregate(relation, group_by_spec, agg_spec)
+        relation = group_agged
+    else:
+        # TODO handle other transform types
+        raise Exception("unexpected or tbd")
+    return relation
+
+
+# TODO do aggregation
+def _group_aggregate(selectable, group_by, aggregate):
+    # TODO maybe keep this as json, and convert to GroupBy at last moment?
+    # other transform specs are json at this point in the pipeline
     if isinstance(group_by, group.GroupBy):
-        selectable = group.get_group_augmented_records_query(select_target, group_by)
+        selectable = group.get_group_augmented_records_pg_query(selectable, group_by)
     else:
-        selectable = select(select_target)
+        # TODO get rid of this branch
+        selectable = select(selectable)
+    return selectable
 
-    selectable = _sort_and_filter(selectable, order_by, filter)
 
+def _select_subset_of_columns(selectable, columns_to_select):
     if columns_to_select:
         selectable = selectable.cte()
         selectable = select(*columns_to_select).select_from(selectable)
-
-    selectable = selectable.limit(limit).offset(offset)
     return selectable
 
 
@@ -140,12 +194,16 @@ def _get_duplicate_only_cte(table, duplicate_columns):
     return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
 
 
-def _sort_and_filter(query, order_by, filter):
+def _sort(pg_query, order_by):
     if order_by is not None:
-        query = apply_sort(query, order_by)
+        pg_query = apply_sort(pg_query, order_by)
+    return pg_query
+
+
+def _filter(pg_query, filter):
     if filter is not None:
-        query = apply_db_function_spec_as_filter(query, filter)
-    return query
+        pg_query = apply_db_function_spec_as_filter(pg_query, filter)
+    return pg_query
 
 
 def get_column_cast_records(engine, table, column_definitions, num_records=20):

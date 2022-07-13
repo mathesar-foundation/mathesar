@@ -18,7 +18,7 @@ def execute_statement(engine, statement, connection_to_use=None):
             raise e
 
 
-def execute_query(engine, query, connection_to_use=None):
+def execute_pg_query(engine, query, connection_to_use=None):
     return execute_statement(engine, query, connection_to_use=connection_to_use).fetchall()
 
 
