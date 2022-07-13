@@ -7,14 +7,14 @@
     getInitialValue,
   } from './utils';
   import type {
-    DynamicInputDataType,
-    DynamicInputSelectElement,
+    DataTypeBasedInputType,
+    DataTypeBasedInputSelectElement,
     EnumSelectOption,
   } from './types';
 
-  export let dataType: DynamicInputDataType;
+  export let dataType: DataTypeBasedInputType;
   export let enumValues: unknown[] | undefined = undefined;
-  export let options: DynamicInputSelectElement['options'] = undefined;
+  export let options: DataTypeBasedInputSelectElement['options'] = undefined;
   export let triggerAppearance: Appearance = 'default';
   export let value = getInitialValue(dataType, enumValues);
 
