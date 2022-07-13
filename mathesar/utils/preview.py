@@ -16,13 +16,8 @@ def add_preview_columns(preview_info, referent_table_settings):
     return preview_info
 
 
-def get_constrained_columns_by_referent_table(referrer_table_pk):
-    table_constraints = Constraint.objects.filter(table__id=referrer_table_pk)
-    fk_constraints = [
-        table_constraint
-        for table_constraint in table_constraints
-        if table_constraint.type == ConstraintType.FOREIGN_KEY.value
-    ]
+def get_constrained_columns_by_referent_table(fk_constraints):
+
     preview_info = defaultdict(lambda: {'constraint_columns': []})
     for fk_constraint in fk_constraints:
         # For now only single column foreign key is used.
@@ -34,13 +29,20 @@ def get_constrained_columns_by_referent_table(referrer_table_pk):
     return preview_info
 
 
-def get_preview_info(filter_preview_enabled_columns, fk_previews, referrer_table_pk):
-    constrained_columns_by_referent_table = get_constrained_columns_by_referent_table(referrer_table_pk)
+def get_preview_info(fk_previews, referrer_table_pk):
+    table_constraints = Constraint.objects.filter(table__id=referrer_table_pk)
+    fk_constraints = [
+        table_constraint
+        for table_constraint in table_constraints
+        if table_constraint.type == ConstraintType.FOREIGN_KEY.value
+    ]
     if fk_previews == 'auto':
-        constrained_columns_by_referent_table = filter(
-            filter_preview_enabled_columns,
-            constrained_columns_by_referent_table
+        fk_constraints = filter(
+            _filter_preview_enabled_columns,
+            fk_constraints
         )
+    constrained_columns_by_referent_table = get_constrained_columns_by_referent_table(fk_constraints)
+
     referent_table_ids = constrained_columns_by_referent_table.keys()
     referent_table_settings = TableSettings.objects.filter(table_id__in=referent_table_ids).select_related(
         'preview_settings',
@@ -53,6 +55,6 @@ def get_preview_info(filter_preview_enabled_columns, fk_previews, referrer_table
     return preview_info
 
 
-def filter_preview_enabled_columns(column_constraints):
-    constrained_column = column_constraints['constrained_columns']
+def _filter_preview_enabled_columns(fk_constraint):
+    constrained_column = fk_constraint.columns[0]
     return constrained_column.display_options['show_fk_preview']

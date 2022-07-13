@@ -17,7 +17,7 @@ from mathesar.api.utils import get_table_or_404
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.models.base import Table
 from mathesar.utils.json import MathesarJSONRenderer
-from mathesar.utils.preview import filter_preview_enabled_columns, get_preview_info
+from mathesar.utils.preview import get_preview_info
 
 
 class RecordViewSet(viewsets.ViewSet):
@@ -62,7 +62,7 @@ class RecordViewSet(viewsets.ViewSet):
         preview_info = None
         if fk_previews:
             table_pk = self.kwargs['table_pk']
-            preview_info = get_preview_info(filter_preview_enabled_columns, fk_previews, table_pk)
+            preview_info = get_preview_info(fk_previews, table_pk)
         try:
 
             records = paginator.paginate_queryset(
