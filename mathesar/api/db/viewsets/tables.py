@@ -56,7 +56,8 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     @action(methods=['get'], detail=True)
     def dependents(self, request, pk=None):
         table = self.get_object()
-        return Response(table.dependents())
+        table_dependents = table.dependents()
+        return Response(table_dependents)
 
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):

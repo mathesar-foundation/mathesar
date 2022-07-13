@@ -70,3 +70,6 @@ def get_constraint_name(engine, constraint_type, table_oid, column_0_attnum, con
     if constraint_type == ConstraintType.CHECK.value:
         return naming_convention['ck'] % data
     return None
+
+def get_constraint_oid(engine):
+    pass

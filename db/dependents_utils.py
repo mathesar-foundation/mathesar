@@ -68,13 +68,16 @@ def get_dependents_hierarchy(name, schema, engine):
     all_cte = all.cte(recursive=True, name='all')
 
     topq = select(all_cte,
-        literal(0).label('level'),
-        array([all_cte.c.objid]).label('chain')).where(all_cte.c.refobjid == referenced_object_id)
+        literal(1).label('level'),
+        array([all_cte.c.refobjid]).label('chain')).where(all_cte.c.refobjid == referenced_object_id).where(all_cte.c.objid != referenced_object_id)
     topq = topq.cte('cte')
 
     bottomq = select(all_cte,
         literal_column('cte.level + 1').label('level'),
-        topq.c.chain + array([all_cte.c.objid])).where(topq.c.level < 10).where(all_cte.c.objid != any_(topq.c.chain)).where(all_cte.c.objid != all_cte.c.refobjid)
+        topq.c.chain + array([all_cte.c.objid])) \
+        .where(topq.c.level < 10) \
+        .where(all_cte.c.objid != any_(topq.c.chain)) \
+        .where(all_cte.c.objid != all_cte.c.refobjid)
     bottomq = bottomq.join(topq, all_cte.c.refobjid == topq.c.objid)
 
     recursive_q = topq.union(bottomq)
