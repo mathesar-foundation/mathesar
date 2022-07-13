@@ -7,3 +7,10 @@ export interface SheetColumn {
   abstractTypeOfColumn: AbstractType;
   cellCap: ReturnType<typeof getCellCap>; // CAP refers to ComponentAndProps
 }
+
+export interface SheetVirtualRowsApi {
+  scrollToTop: () => void;
+  scrollToBottom: () => void;
+  scrollToPosition: (vScrollOffset: number, hScrollOffset: number) => void;
+  recalculateHeightsAfterIndex: (index: number) => void;
+}

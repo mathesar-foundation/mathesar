@@ -76,3 +76,36 @@
 <div class="sheet">
   <slot />
 </div>
+
+<style lang="scss">
+  .sheet {
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+
+    :global([data-sheet-element='cell']) {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      border-bottom: var(--cell-border-horizontal);
+      border-right: var(--cell-border-vertical);
+      left: 0;
+      top: 0;
+      height: 100%;
+    }
+
+    :global([data-sheet-element='cell'][data-cell-static='true']) {
+      position: sticky;
+      z-index: 5;
+    }
+
+    :global([data-sheet-element='row']) {
+      transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+</style>

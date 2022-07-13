@@ -224,7 +224,7 @@ function getItemsInfo(props: Props): ItemInfo {
   const { itemKey, itemCount, isScrolling } = props;
   const [startIndex, stopIndex] = getRangeToRender(props);
   const items: Item[] = [];
-  if (startIndex < stopIndex) {
+  if (startIndex <= stopIndex) {
     items.length = stopIndex - startIndex + 1;
   }
 

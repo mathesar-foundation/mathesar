@@ -35,6 +35,24 @@
   });
 </script>
 
-<div bind:this={headerRef} class="header">
+<div bind:this={headerRef} data-sheet-element="header">
   <slot />
 </div>
+
+<style lang="scss">
+  [data-sheet-element='header'] {
+    height: var(--sheet-header-height, 32px);
+    min-width: 100%;
+    position: relative;
+    flex-grow: 0;
+    flex-shrink: 0;
+    border-bottom: 1px solid #e5e5e5;
+    user-select: none;
+    overflow: hidden;
+
+    :global([data-sheet-element='cell']) {
+      border-bottom: none;
+      background: #f9f9f9;
+    }
+  }
+</style>

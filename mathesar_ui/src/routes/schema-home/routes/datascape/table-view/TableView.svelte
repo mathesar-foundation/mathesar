@@ -46,19 +46,16 @@
 <ActionsPane {processedTableColumnsMap} />
 
 <div class="table-data">
-  <div class="table-content">
-    {#if processedTableColumnsMap.size}
-      <Sheet
-        columns={sheetColumns}
-        getColumnIdentifier={(entry) => entry.column.id}
-        {columnWidths}
-      >
-        <Header {processedTableColumnsMap} />
-        <!-- We'd eventually replace Body with Sheet -->
-        <Body {processedTableColumnsMap} />
-      </Sheet>
-    {/if}
-  </div>
+  {#if processedTableColumnsMap.size}
+    <Sheet
+      columns={sheetColumns}
+      getColumnIdentifier={(entry) => entry.column.id}
+      {columnWidths}
+    >
+      <Header {processedTableColumnsMap} />
+      <Body {processedTableColumnsMap} />
+    </Sheet>
+  {/if}
 </div>
 
 <StatusPane />

@@ -20,7 +20,7 @@
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
-  import { SheetRowCell } from '@mathesar/components/sheet';
+  import { SheetCell } from '@mathesar/components/sheet';
   import CellErrors from './CellErrors.svelte';
   import type { ProcessedTableColumn } from '../utils';
   import CellBackground from './CellBackground.svelte';
@@ -88,7 +88,7 @@
   }
 </script>
 
-<SheetRowCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
+<SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
   <div
     class="cell editable-cell"
     class:error={hasError}
@@ -137,17 +137,16 @@
       <CellErrors {errors} forceShowErrors={isActive} />
     {/if}
   </div>
-</SheetRowCell>
+</SheetCell>
 
 <style lang="scss">
   .editable-cell.cell {
     user-select: none;
-    position: relative;
     background: var(--cell-bg-color-base);
 
     &.is-active {
       z-index: 5;
-      border: none;
+      border-color: transparent;
       min-height: 100%;
       height: auto !important;
     }

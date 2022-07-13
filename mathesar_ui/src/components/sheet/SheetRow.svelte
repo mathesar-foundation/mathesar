@@ -10,9 +10,6 @@
     _style: { [key: string]: string | number },
     width: number,
   ) {
-    if (!_style) {
-      return '';
-    }
     return (
       `position:${_style.position};left:${_style.left}px;` +
       `top:${_style.top}px;height:${_style.height}px;` +
@@ -22,9 +19,9 @@
 
   $: styleString = calculateStyle(style, $rowWidth);
 
-  $: htmlAttributes = {
+  const htmlAttributes = {
     'data-sheet-element': 'row',
-    'data-sheet-section': 'rows',
+    'data-sheet-section': 'body',
   };
 </script>
 

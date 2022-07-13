@@ -1,7 +1,5 @@
-.datascape .tab-container .table-data .body {
+.datascape .tab-container .table-data [data-sheet-element='body'] {
   .row {
-    transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
-
     &.processing {
       pointer-events: none;
     }
@@ -13,7 +11,7 @@
     &:not(.group) {
       &:hover,
       &.selected {
-        .cell.row-control {
+        .row-control {
           .checkbox {
             display: inline-flex;
           }
@@ -31,28 +29,6 @@
         .sheet-cell .cell-wrapper > * {
           visibility: hidden;
         }
-      }
-    }
-
-    .cell.row-control {
-      display: flex;
-      align-items: center;
-      position: relative;
-
-      .control {
-        display: inline-flex;
-        align-items: center;
-        min-width: 16px;
-        position: relative;
-      }
-
-      .mod-indicator {
-        margin-left: 5px;
-      }
-
-      &.group-control {
-        background: none;
-        border-right: 0;
       }
     }
 

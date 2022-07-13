@@ -45,7 +45,7 @@
   }
 </script>
 
-<SheetRow {style} let:styleString>
+<SheetRow {style} let:htmlAttributes let:styleString>
   <div
     class="row"
     class:selected={isSelected}
@@ -56,6 +56,7 @@
     class:new={row.isNew}
     class:is-group-header={row.isGroupHeader}
     class:is-add-placeholder={row.isAddPlaceholder}
+    {...htmlAttributes}
     style={styleString}
     data-identifier={row.identifier}
     on:mousedown={checkAndCreateEmptyRow}
