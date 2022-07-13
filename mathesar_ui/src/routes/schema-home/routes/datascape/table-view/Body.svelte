@@ -10,15 +10,14 @@
     getTabularDataStoreFromContext,
     DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/table-data';
+  import { SheetVirtualRows } from '@mathesar/components/sheet';
   import RowComponent from './row/Row.svelte';
-  import Resizer from './virtual-list/Resizer.svelte';
-  import VirtualList from './virtual-list/VirtualList.svelte';
   import type { ProcessedTableColumnMap } from './utils';
   import { rowHeightPx } from './geometry';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  let virtualListRef: VirtualList;
+  // let virtualListRef: VirtualList;
 
   $: ({ id, recordsData, display, meta } = $tabularData);
   $: ({ sorting, filtering, grouping, pagination } = meta);
@@ -47,7 +46,7 @@
       initialGrouping !== $grouping ||
       initialPagination !== $pagination
     ) {
-      virtualListRef?.ScrollToTop();
+      // virtualListRef?.ScrollToTop();
     }
   }
 
@@ -61,11 +60,11 @@
       await tick();
       if (previousNewRecordsCount < newRecordLength) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        virtualListRef?.scrollToBottom();
+        // virtualListRef?.scrollToBottom();
       }
       previousNewRecordsCount = newRecordLength;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      virtualListRef?.resetAfterIndex(index);
+      // virtualListRef?.resetAfterIndex(index);
     }
   }
 
@@ -110,31 +109,24 @@
   on:mousedown={checkAndResetActiveCell}
 />
 
-<div class="body" tabindex="-1">
-  <Resizer let:height>
-    {#key id}
-      <VirtualList
-        bind:this={virtualListRef}
-        bind:horizontalScrollOffset={$horizontalScrollOffset}
-        bind:scrollOffset={$scrollOffset}
-        {height}
-        width={$rowWidth + DEFAULT_ROW_RIGHT_PADDING}
-        itemCount={$displayableRecords.length}
-        paddingBottom={30}
-        itemSize={getItemSize}
-        itemKey={(index) => recordsData.getIterationKey(index)}
-        let:items
-      >
-        {#each items as item (item?.key || item)}
-          {#if item && $displayableRecords[item.index]}
-            <RowComponent
-              style={item.style}
-              bind:row={$displayableRecords[item.index]}
-              {processedTableColumnsMap}
-            />
-          {/if}
-        {/each}
-      </VirtualList>
-    {/key}
-  </Resizer>
-</div>
+{#key id}
+  <SheetVirtualRows
+    bind:horizontalScrollOffset={$horizontalScrollOffset}
+    bind:scrollOffset={$scrollOffset}
+    width={$rowWidth + DEFAULT_ROW_RIGHT_PADDING}
+    itemCount={$displayableRecords.length}
+    paddingBottom={30}
+    itemSize={getItemSize}
+    itemKey={(index) => recordsData.getIterationKey(index)}
+    let:itemIndex
+    let:style
+  >
+    {#if $displayableRecords[itemIndex]}
+      <RowComponent
+        {style}
+        bind:row={$displayableRecords[itemIndex]}
+        {processedTableColumnsMap}
+      />
+    {/if}
+  </SheetVirtualRows>
+{/key}

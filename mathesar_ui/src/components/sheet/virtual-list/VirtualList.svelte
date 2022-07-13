@@ -249,7 +249,7 @@
     }
   }
 
-  export function ScrollToTop(): void {
+  export function scrollToTop(): void {
     if (outerRef && psRef) {
       outerRef.scrollTop = 0;
       psRef.update();
