@@ -15,6 +15,7 @@ db_router.register(r'data_files', db_viewsets.DataFileViewSet, basename='data-fi
 
 db_table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table')
 db_table_router.register(r'records', db_viewsets.RecordViewSet, basename='table-record')
+db_table_router.register(r'settings', db_viewsets.TableSettingsViewSet, basename='table-setting')
 db_table_router.register(r'columns', db_viewsets.ColumnViewSet, basename='table-column')
 db_table_router.register(r'constraints', db_viewsets.ConstraintViewSet, basename='table-constraint')
 

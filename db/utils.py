@@ -1,6 +1,7 @@
 from db.records import exceptions
 from sqlalchemy.exc import ProgrammingError
 from psycopg2.errors import UndefinedFunction
+import sqlalchemy
 
 
 def execute_statement(engine, statement, connection_to_use=None):
@@ -18,8 +19,12 @@ def execute_statement(engine, statement, connection_to_use=None):
             raise e
 
 
-def execute_query(engine, query, connection_to_use=None):
-    return execute_statement(engine, query, connection_to_use=connection_to_use).fetchall()
+def execute_pg_query(engine, query, connection_to_use=None):
+    if isinstance(query, sqlalchemy.sql.expression.Executable):
+        executable = query
+    else:
+        executable = sqlalchemy.select(query)
+    return execute_statement(engine, executable, connection_to_use=connection_to_use).fetchall()
 
 
 # TODO refactor to use @functools.total_ordering
