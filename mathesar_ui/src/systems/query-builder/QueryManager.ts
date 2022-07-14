@@ -3,13 +3,9 @@ import type { Writable } from 'svelte/store';
 import type { CancellablePromise } from '@mathesar-component-library';
 import { postAPI, putAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
+import type { QueryInstance } from '@mathesar/api/queries/queryList';
 import type QueryModel from './QueryModel';
-import type { QueryModelRawData } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
-
-interface SavedQueryModelRawData extends QueryModelRawData {
-  id: number;
-}
 
 export default class QueryManager {
   query: Writable<QueryModel>;
@@ -32,14 +28,14 @@ export default class QueryManager {
 
   // results: Writable<[]>;
 
-  querySavePromise: CancellablePromise<SavedQueryModelRawData> | undefined;
+  querySavePromise: CancellablePromise<QueryInstance> | undefined;
 
   constructor(query: QueryModel) {
     this.query = writable(query);
     this.undoRedoManager = new QueryUndoRedoManager(get(this.query));
   }
 
-  async save(): Promise<SavedQueryModelRawData | undefined> {
+  async save(): Promise<QueryInstance | undefined> {
     const q = get(this.query);
     if (q.isSaveable()) {
       try {

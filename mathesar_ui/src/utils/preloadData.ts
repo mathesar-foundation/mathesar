@@ -4,11 +4,13 @@ import type {
   AbstractTypeResponse,
 } from '@mathesar/AppTypes';
 import type { TableEntry } from '@mathesar/api/tables/tableList';
+import type { QueryInstance } from '@mathesar/api/queries/queryList';
 
 interface CommonData {
   databases: Database[];
   schemas: SchemaResponse[];
   tables: TableEntry[];
+  queries: QueryInstance[];
   current_db: string;
   current_schema: number;
   abstract_types: AbstractTypeResponse[];

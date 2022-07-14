@@ -4,7 +4,9 @@ from mathesar.models.base import Database, Schema, Table
 from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer
+from mathesar.api.serializers.queries import QuerySerializer
 from mathesar.database.types import UIType
+from mathesar.models.query import UIQuery
 
 
 def get_schema_list(request, database):
@@ -36,6 +38,17 @@ def get_table_list(request, schema):
     return table_serializer.data
 
 
+def get_queries_list(request, schema):
+    if schema is None:
+        return []
+    query_serializer = QuerySerializer(
+        UIQuery.objects.all(),
+        many=True,
+        context={'request': request}
+    )
+    return query_serializer.data
+
+
 def get_ui_type_list(request, database):
     if database is None:
         return []
@@ -54,6 +67,7 @@ def get_common_data(request, database, schema=None):
         'schemas': get_schema_list(request, database),
         'databases': get_database_list(request),
         'tables': get_table_list(request, schema),
+        'queries': get_queries_list(request, schema),
         'abstract_types': get_ui_type_list(request, database)
     }
 

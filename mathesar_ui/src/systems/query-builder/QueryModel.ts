@@ -5,6 +5,7 @@
  */
 
 import { getAvailableName } from '@mathesar/utils/db';
+import type { QueryInstance } from '@mathesar/api/queries/queryList';
 import type { TableEntry, JpPath } from '@mathesar/api/tables/tableList';
 import type { Column } from '@mathesar/api/tables/columns';
 
@@ -15,18 +16,11 @@ export interface QueryInitialColumn {
   jpPath?: JpPath;
 }
 
-export interface QueryModelRawData {
-  readonly base_table?: number;
-  readonly id?: number;
-  readonly name?: string;
-  readonly initial_columns?: {
-    alias: string;
-    column: Column['id'];
-    jpPath?: JpPath;
-  }[];
-}
+export interface UnsavedQueryInstance
+  extends Omit<QueryInstance, 'id' | 'name'>,
+    Pick<Partial<QueryInstance>, 'id' | 'name'> {}
 
-export default class QueryModel implements QueryModelRawData {
+export default class QueryModel implements UnsavedQueryInstance {
   base_table;
 
   id;
@@ -35,7 +29,7 @@ export default class QueryModel implements QueryModelRawData {
 
   initial_columns;
 
-  constructor(model?: QueryModelRawData) {
+  constructor(model?: UnsavedQueryInstance) {
     this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
