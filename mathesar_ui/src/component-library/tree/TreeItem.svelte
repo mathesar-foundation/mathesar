@@ -2,32 +2,40 @@
   import { createEventDispatcher } from 'svelte';
   import { faCaretRight } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-component-library';
-  import type { TreeItem } from './TreeTypes';
 
-  const dispatch = createEventDispatcher();
+  type TreeItem = $$Generic;
 
-  export let entry: TreeItem = {};
-  export let idKey = 'id';
-  export let labelKey = 'label';
-  export let childKey = 'children';
-  export let linkKey = 'href';
-  export let getLink: (arg0: unknown, arg1: number) => string;
+  const dispatch = createEventDispatcher<{
+    nodeSelected: {
+      node: TreeItem;
+      level: number;
+      link?: string;
+      originalEvent: Event;
+    };
+  }>();
+
+  export let entry: TreeItem;
+  export let getId: (entry: TreeItem) => unknown;
+  export let getLabel: (entry: TreeItem) => string;
+  export let getAndSetChildren:
+    | {
+        get: (entry: TreeItem) => TreeItem[] | undefined;
+        set: (entry: TreeItem, children?: TreeItem[]) => TreeItem;
+      }
+    | undefined;
+  export let getLink: (arg0: TreeItem) => string | undefined;
 
   export let searchText = '';
   export let level = 0;
   export let expandedItems = new Set();
   export let selectedItems = new Set();
 
-  let link: string | undefined;
-  $: link = getLink
-    ? getLink(entry, level)
-    : (entry[linkKey] as string) ?? undefined;
-
-  $: id = entry[idKey] as string;
-  $: children = entry[childKey] as TreeItem[];
+  $: link = getLink ? getLink(entry) : undefined;
+  $: id = getId(entry);
+  $: childrenOfEntry = getAndSetChildren?.get(entry) ?? undefined;
 
   $: isOpen = searchText?.trim() || expandedItems.has(id);
-  $: activeClass = selectedItems.has(entry[idKey]) ? 'active' : '';
+  $: activeClass = selectedItems.has(getId(entry)) ? 'active' : '';
   $: padding = 12 + 12 * level;
 
   function toggle() {
@@ -53,23 +61,22 @@
   }
 </script>
 
-{#if entry[childKey]}
+{#if childrenOfEntry}
   <li aria-level={level + 1} role="treeitem" tabindex="-1">
     <Button appearance="plain" class="item parent" on:click={toggle}>
       <Icon data={faCaretRight} rotate={isOpen ? 90 : undefined} />
-      <span>{entry[labelKey]}</span>
+      <span>{getLabel(entry)}</span>
     </Button>
 
     {#if isOpen}
       <ul role="group">
-        {#each children as child (child[idKey] || child)}
+        {#each childrenOfEntry as child (getId(child) || child)}
           <svelte:self
-            {idKey}
-            {labelKey}
-            {childKey}
-            {linkKey}
-            entry={child}
+            {getId}
+            {getLabel}
+            {getAndSetChildren}
             {getLink}
+            entry={child}
             level={level + 1}
             on:nodeSelected
             let:level={innerLevel}

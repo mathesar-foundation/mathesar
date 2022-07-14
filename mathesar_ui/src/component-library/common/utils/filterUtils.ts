@@ -1,21 +1,30 @@
-function recursiveFilter(
-  tree: Record<string, unknown>[],
-  childKey: string,
-  conditionFn: (entry: unknown) => boolean,
-): Record<string, unknown>[] {
-  const filteredTree: Record<string, unknown>[] = [];
+function recursiveFilter<T>(
+  tree: T[],
+  getAndSetChildren:
+    | {
+        get: (entry: T) => T[] | undefined;
+        set: (entry: T, children?: T[]) => T;
+      }
+    | undefined = undefined,
+  conditionFn: (entry: T) => boolean,
+): T[] {
+  const filteredTree: T[] = [];
   tree.forEach((entry) => {
-    if (entry[childKey]) {
-      const childTree = recursiveFilter(
-        entry[childKey] as Record<string, unknown>[],
-        childKey,
+    const childTree = getAndSetChildren?.get(entry);
+    if (childTree) {
+      const filteredChildTree = recursiveFilter(
+        childTree,
+        getAndSetChildren,
         conditionFn,
       );
-      if (childTree.length > 0) {
-        filteredTree.push({
-          ...entry,
-          [childKey]: childTree,
-        });
+      if (filteredChildTree.length > 0 && getAndSetChildren) {
+        const filteredEntry = getAndSetChildren.set(
+          {
+            ...entry,
+          },
+          filteredChildTree,
+        );
+        filteredTree.push(filteredEntry);
       }
     } else if (conditionFn(entry)) {
       filteredTree.push(entry);
@@ -24,22 +33,26 @@ function recursiveFilter(
   return filteredTree;
 }
 
-export function filterTree(
-  tree: Record<string, unknown>[],
-  searchKey: string,
-  childKey: string,
+export function filterTree<T>(
+  tree: T[],
+  getValueToSearchBy: (entry: T) => string,
+  getAndSetChildren:
+    | {
+        get: (entry: T) => T[] | undefined;
+        set: (entry: T, children?: T[]) => T;
+      }
+    | undefined = undefined,
   searchTerm: string,
-): Record<string, unknown>[] {
+): T[] {
   const filterText = searchTerm?.trim();
   if (!filterText) {
     return tree;
   }
   return recursiveFilter(
     tree,
-    childKey,
-    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-    (entry: Record<string, unknown>) =>
-      (entry[searchKey] as string)
+    getAndSetChildren,
+    (entry: T) =>
+      getValueToSearchBy(entry)
         ?.toLowerCase()
         .indexOf(searchTerm.toLowerCase()) > -1,
   );

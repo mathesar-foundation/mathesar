@@ -7,9 +7,7 @@
     TabType,
   } from '@mathesar/stores/tabs';
   import { constructTabularTabLink } from '@mathesar/stores/tabs/tabDataSaver';
-  import { TabularType } from '@mathesar/stores/table-data';
   import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
 
   import LeftPane from './LeftPane.svelte';
   import EmptyState from './EmptyState.svelte';
@@ -22,15 +20,6 @@
   let tabList: TabList;
   $: tabList = getTabsForSchema(database, schemaId);
   $: ({ tabs, activeTab } = tabList);
-
-  function getLeftPaneLink(entry: TableEntry) {
-    return constructTabularTabLink(
-      database,
-      schemaId,
-      TabularType.Table,
-      entry.id,
-    );
-  }
 
   function getTabLink(tab: MathesarTab): string | undefined {
     if (!tabIsTabular(tab)) {
@@ -53,12 +42,7 @@
   const getLink__withTypeCoercion: (arg0: unknown) => string = getTabLink;
 </script>
 
-<LeftPane
-  getLink={getLeftPaneLink}
-  {database}
-  {schemaId}
-  activeTab={$activeTab}
-/>
+<LeftPane {database} {schemaId} activeTab={$activeTab} />
 
 <div class="datascape">
   {#if $tabs?.length > 0}
