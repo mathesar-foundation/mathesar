@@ -2,8 +2,14 @@ import { setContext, getContext } from 'svelte';
 import type { Readable } from 'svelte/store';
 import type { ImmutableMap } from '@mathesar-component-library/types';
 
+export interface ColumnPosition {
+  left: number;
+  width: number;
+  styleString: string;
+}
+
 export interface SheetContextStores<SheetColumnType, SheetColumnIdentifierKey> {
-  columnStyleMap: Readable<Map<SheetColumnIdentifierKey, string>>;
+  columnStyleMap: Readable<Map<SheetColumnIdentifierKey, ColumnPosition>>;
   rowWidth: Readable<number>;
 }
 
@@ -31,14 +37,18 @@ export function calculateColumnStyleMapAndRowWidth<
   customizedColumnWidths: ImmutableMap<SheetColumnIdentifierKey, number>,
 ): {
   rowWidth: number;
-  columnStyleMap: Map<SheetColumnIdentifierKey, string>;
+  columnStyleMap: Map<SheetColumnIdentifierKey, ColumnPosition>;
 } {
   let left = 0;
-  const map = new Map<SheetColumnIdentifierKey, string>();
+  const map = new Map<SheetColumnIdentifierKey, ColumnPosition>();
   columns.forEach((column) => {
     const key = getColumnIdentifier(column);
     const width = customizedColumnWidths.get(key) ?? DEFAULT_COLUMN_WIDTH;
-    map.set(key, `width: ${width}px; left: ${left}px;`);
+    map.set(key, {
+      left,
+      width,
+      styleString: `width: ${width}px; left: ${left}px;`,
+    });
     left += width;
   });
   return { columnStyleMap: map, rowWidth: left };

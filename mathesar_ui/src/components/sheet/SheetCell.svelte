@@ -8,7 +8,7 @@
 
   export let columnIdentifierKey: SheetColumnIdentifierKey;
 
-  $: style = $columnStyleMap.get(columnIdentifierKey);
+  $: styleMap = $columnStyleMap.get(columnIdentifierKey);
 
   export let isStatic = false;
 
@@ -18,4 +18,4 @@
   };
 </script>
 
-<slot {htmlAttributes} {style} />
+<slot {htmlAttributes} style={styleMap?.styleString} />

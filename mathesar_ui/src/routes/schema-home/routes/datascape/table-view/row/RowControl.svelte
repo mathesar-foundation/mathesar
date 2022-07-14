@@ -1,7 +1,6 @@
 <script lang="ts">
   import { faSync, faPlus } from '@fortawesome/free-solid-svg-icons';
   import { Checkbox, Icon } from '@mathesar-component-library';
-  import { SheetCell } from '@mathesar/components/sheet';
   import { getRowKey } from '@mathesar/stores/table-data';
   import type {
     Meta,
@@ -42,57 +41,35 @@
   }
 </script>
 
-<SheetCell columnIdentifierKey={-1} isStatic let:htmlAttributes let:style>
-  <div class="row-control" {...htmlAttributes} {style}>
-    <CellBackground color="var(--cell-bg-color-header)" />
-    <RowCellBackgrounds {isSelected} {hasErrors} />
-    <div class="control">
-      {#if row.isAddPlaceholder}
-        <Icon data={faPlus} />
-      {:else}
-        {#if typeof row.rowIndex === 'number'}
-          <span class="number">
-            {row.rowIndex +
-              (row.isNew
-                ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
-                : $pagination.offset) +
-              1}
-            {#if row.isNew}
-              *
-            {/if}
-          </span>
+<CellBackground color="var(--cell-bg-color-header)" />
+<RowCellBackgrounds {isSelected} {hasErrors} />
+<div class="control">
+  {#if row.isAddPlaceholder}
+    <Icon data={faPlus} />
+  {:else}
+    {#if typeof row.rowIndex === 'number'}
+      <span class="number">
+        {row.rowIndex +
+          (row.isNew
+            ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
+            : $pagination.offset) +
+          1}
+        {#if row.isNew}
+          *
         {/if}
-
-        {#if primaryKeyValue}
-          <Checkbox checked={isRowSelected} on:change={selectionChanged} />
-        {/if}
-      {/if}
-    </div>
-
-    {#if state === 'processing'}
-      <Icon class="mod-indicator" size="0.9em" data={faSync} spin={true} />
+      </span>
     {/if}
 
-    {#if errors.length}
-      <CellErrors {errors} />
+    {#if primaryKeyValue}
+      <Checkbox checked={isRowSelected} on:change={selectionChanged} />
     {/if}
-  </div>
-</SheetCell>
+  {/if}
+</div>
 
-<style lang="scss">
-  .row-control {
-    font-size: 12px;
-    padding: 7px 14px;
-    color: #959595;
-    left: 0;
-    position: sticky;
-    z-index: 10;
-    display: inline-flex;
-    align-items: center;
-    height: 100%;
+{#if state === 'processing'}
+  <Icon class="mod-indicator" size="0.9em" data={faSync} spin={true} />
+{/if}
 
-    :global(.checkbox) {
-      display: none;
-    }
-  }
-</style>
+{#if errors.length}
+  <CellErrors {errors} />
+{/if}

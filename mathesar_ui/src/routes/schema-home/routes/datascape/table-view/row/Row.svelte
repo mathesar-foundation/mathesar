@@ -5,11 +5,11 @@
   } from '@mathesar/stores/table-data';
   import type { Row } from '@mathesar/stores/table-data/types';
   import { getRowKey } from '@mathesar/stores/table-data';
-  import { SheetRow } from '@mathesar/components/sheet';
+  import { SheetRow, SheetCell } from '@mathesar/components/sheet';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
-  import GroupHeader from './GroupHeader.svelte';
-  import RowPlaceholder from './RowPlaceholder.svelte';
+  // import GroupHeader from './GroupHeader.svelte';
+  import NewRecordMessage from './NewRecordMessage.svelte';
   import type { ProcessedTableColumnMap } from '../utils';
 
   export let row: Row;
@@ -61,25 +61,31 @@
     data-identifier={row.identifier}
     on:mousedown={checkAndCreateEmptyRow}
   >
+    <SheetCell columnIdentifierKey={-1} isStatic let:htmlAttributes let:style>
+      <div class="row-control" {...htmlAttributes} {style}>
+        {#if row.record}
+          <RowControl
+            {primaryKeyColumnId}
+            {row}
+            {meta}
+            {recordsData}
+            {isSelected}
+            hasErrors={hasAnyErrors}
+          />
+        {/if}
+      </div>
+    </SheetCell>
+
     {#if row.isNewHelpText}
-      <RowPlaceholder rowWidth={100} />
+      <NewRecordMessage columnCount={processedTableColumnsMap.size} />
     {:else if row.isGroupHeader && $grouping && row.group}
-      <GroupHeader
+      <!-- <GroupHeader
         {row}
         rowWidth={100}
         grouping={$grouping}
         group={row.group}
-      />
+      /> -->
     {:else if row.record}
-      <RowControl
-        {primaryKeyColumnId}
-        {row}
-        {meta}
-        {recordsData}
-        {isSelected}
-        hasErrors={hasAnyErrors}
-      />
-
       {#each [...processedTableColumnsMap] as [columnId, processedColumn] (columnId)}
         <RowCell
           {display}
@@ -98,6 +104,53 @@
   </div>
 </SheetRow>
 
-<style global lang="scss">
-  @import 'Row.scss';
+<style lang="scss">
+  .row {
+    &.processing {
+      pointer-events: none;
+    }
+
+    &:not(:hover) :global(.cell-bg-row-hover) {
+      display: none;
+    }
+
+    .row-control {
+      font-size: 12px;
+      padding: 7px 14px;
+      color: #959595;
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
+
+      :global(.checkbox) {
+        display: none;
+      }
+    }
+
+    &:not(.group) {
+      &:hover,
+      &.selected {
+        .row-control {
+          :global(.checkbox) {
+            display: inline-flex;
+          }
+
+          :global(.number) {
+            display: none;
+          }
+        }
+      }
+    }
+
+    &.is-add-placeholder {
+      cursor: pointer;
+
+      :global([data-sheet-element='cell']:not(.is-active)
+          .sheet-cell
+          .cell-wrapper
+          > *) {
+        visibility: hidden;
+      }
+    }
+  }
 </style>
