@@ -16,6 +16,8 @@
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import { queries } from '@mathesar/stores/queries';
+  import { getAvailableName } from '@mathesar/utils/db';
   import type QueryManager from './QueryManager';
   import type { QueryInitialColumn } from './QueryModel';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
@@ -44,7 +46,10 @@
   function handleQueryNameChange(e: Event) {
     const target = e.target as HTMLInputElement;
     if (target.value.trim() === '') {
-      target.value = 'Untitled file';
+      target.value = getAvailableName(
+        'New_Query',
+        new Set([...$queries.data.values()].map((q) => q.name)),
+      );
     }
     void queryManager.update((q) => q.withName(target.value));
   }
@@ -81,7 +86,6 @@
           <Icon data={faRedo} />
           <span>Redo</span>
         </Button>
-        <Button appearance="plain">View SQL</Button>
         <Button appearance="plain" on:click={() => dispatch('close')}
           >Close</Button
         >

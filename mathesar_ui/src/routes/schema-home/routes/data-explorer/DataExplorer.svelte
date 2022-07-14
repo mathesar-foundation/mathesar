@@ -5,8 +5,11 @@
   import QueryBuilder from '@mathesar/systems/query-builder/QueryBuilder.svelte';
   import QueryManager from '@mathesar/systems/query-builder/QueryManager';
   import QueryModel from '@mathesar/systems/query-builder/QueryModel';
-  import type { UnsavedQueryInstance } from '@mathesar/systems/query-builder/QueryModel';
-  import { queries } from '@mathesar/stores/queries';
+  import { queries, getQuery } from '@mathesar/stores/queries';
+  import type { CancellablePromise } from '@mathesar/component-library';
+  import type { QueryInstance } from '@mathesar/api/queries/queryList';
+  import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+  import { getAvailableName } from '@mathesar/utils/db';
 
   export let database: string;
   export let schemaId: number;
@@ -17,6 +20,7 @@
 
   let queryManager: QueryManager | undefined;
   let urlUpdateUnsubscriber: () => void;
+  let queryLoadPromise: CancellablePromise<QueryInstance | undefined>;
 
   function createQueryManager(queryInstance: UnsavedQueryInstance) {
     urlUpdateUnsubscriber?.();
@@ -46,10 +50,15 @@
       // An unsaved query is already open
       return;
     }
-    createQueryManager({ name: 'Untitled(0)' });
+    createQueryManager({
+      name: getAvailableName(
+        'New_Query',
+        new Set([...$queries.data.values()].map((e) => e.name)),
+      ),
+    });
   }
 
-  function loadSavedQuery(meta: TinroRouteMeta) {
+  async function loadSavedQuery(meta: TinroRouteMeta) {
     const queryId = parseInt(meta.params.queryId, 10);
     if (!Number.isNaN(queryId)) {
       if (queryManager && queryManager.getQueryModelData().id === queryId) {
@@ -57,8 +66,9 @@
         return;
       }
 
-      // Send request!
-      const queryInstance = $queries.data.get(queryId);
+      queryLoadPromise?.cancel();
+      queryLoadPromise = getQuery(queryId);
+      const queryInstance = await queryLoadPromise;
       if (queryInstance) {
         createQueryManager(queryInstance);
         return;

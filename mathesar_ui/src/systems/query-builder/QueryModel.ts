@@ -1,14 +1,8 @@
-/**
- * Column: Needs alias, display_name
- * Needs Transformations
- * TODO: Move interface to /api
- */
-
 import { getAvailableName } from '@mathesar/utils/db';
-import type { QueryInstance } from '@mathesar/api/queries/queryList';
 import type { TableEntry, JpPath } from '@mathesar/api/tables/tableList';
 import type { Column } from '@mathesar/api/tables/columns';
 import { isDefinedNonNullable } from '@mathesar-component-library';
+import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 
 export interface QueryInitialColumn {
   id: Column['id'];
@@ -16,10 +10,6 @@ export interface QueryInitialColumn {
   tableName: TableEntry['name'];
   jpPath?: JpPath;
 }
-
-export interface UnsavedQueryInstance
-  extends Omit<QueryInstance, 'id' | 'name'>,
-    Pick<Partial<QueryInstance>, 'id' | 'name'> {}
 
 export default class QueryModel implements UnsavedQueryInstance {
   base_table;

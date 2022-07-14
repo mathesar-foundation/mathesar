@@ -2,13 +2,14 @@ import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import { EventHandler } from '@mathesar-component-library';
 import type { CancellablePromise } from '@mathesar-component-library';
-import { getAPI, postAPI, putAPI } from '@mathesar/utils/api';
+import { getAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
 import type {
   QueryInstance,
   QueryResultColumns,
   QueryResultRecords,
 } from '@mathesar/api/queries/queryList';
+import { createQuery, putQuery } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
 import type QueryModel from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
@@ -49,6 +50,7 @@ export default class QueryManager extends EventHandler<{
     super();
     this.query = writable(query);
     this.undoRedoManager = new QueryUndoRedoManager(get(this.query));
+    void Promise.all([this.fetchColumns(), this.fetchResults()]);
   }
 
   async save(): Promise<QueryInstance | undefined> {
@@ -61,9 +63,11 @@ export default class QueryManager extends EventHandler<{
         }));
         this.querySavePromise?.cancel();
         if (q.id) {
-          this.querySavePromise = putAPI(`/api/db/v0/queries/${q.id}/`, q);
+          // TODO: Find cause
+          // Typescript does not seem to identify q assignable to QueryInstance
+          this.querySavePromise = putQuery(q as QueryInstance);
         } else {
-          this.querySavePromise = postAPI('/api/db/v0/queries/', q);
+          this.querySavePromise = createQuery(q);
         }
         const result = await this.querySavePromise;
         this.query.update((qr) => qr.withId(result.id));

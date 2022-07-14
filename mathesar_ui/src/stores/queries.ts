@@ -1,16 +1,20 @@
 import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-import { getAPI } from '@mathesar/utils/api';
+import { getAPI, postAPI, putAPI } from '@mathesar/utils/api';
 import type { RequestStatus, PaginatedResponse } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { SchemaEntry } from '@mathesar/AppTypes';
 import type { QueryInstance } from '@mathesar/api/queries/queryList';
-import type { CancellablePromise } from '@mathesar-component-library';
+import { CancellablePromise } from '@mathesar-component-library';
 
 import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
+
+export interface UnsavedQueryInstance
+  extends Omit<QueryInstance, 'id' | 'name'>,
+    Pick<Partial<QueryInstance>, 'id' | 'name'> {}
 
 export interface QueriesStoreSubstance {
   requestStatus: RequestStatus;
@@ -146,3 +150,69 @@ export const queries: Readable<QueriesStoreSubstance> = derived(
     };
   },
 );
+
+export function createQuery(
+  newQuery: UnsavedQueryInstance,
+): CancellablePromise<QueryInstance> {
+  const promise = postAPI<QueryInstance>('/api/db/v0/queries/', newQuery);
+  void promise.then(() => {
+    // TODO: Get schemaId as a query property
+    const schemaId = get(currentSchemaId);
+    if (schemaId) {
+      void refetchQueriesForSchema(schemaId);
+    }
+    return undefined;
+  });
+  return promise;
+}
+
+export function putQuery(
+  query: QueryInstance,
+): CancellablePromise<QueryInstance> {
+  const promise = putAPI<QueryInstance>(
+    `/api/db/v0/queries/${query.id}/`,
+    query,
+  );
+  void promise.then(() => {
+    // TODO: Get schemaId as a query property
+    const schemaId = get(currentSchemaId);
+    if (schemaId) {
+      void refetchQueriesForSchema(schemaId);
+    }
+    return undefined;
+  });
+  return promise;
+}
+
+export function getQuery(
+  queryId: QueryInstance['id'],
+): CancellablePromise<QueryInstance | undefined> {
+  // TODO: Get schemaId as a query property
+  const schemaId = get(currentSchemaId);
+  let innerRequest: CancellablePromise<QueryInstance>;
+  if (schemaId) {
+    return new CancellablePromise<QueryInstance | undefined>(
+      (resolve) => {
+        const store = schemasCacheManager.get(schemaId);
+        if (store) {
+          const storeSubstance = get(store);
+          const queryResponse = storeSubstance.data.get(queryId);
+          if (queryResponse) {
+            resolve(queryResponse);
+            return;
+          }
+          if (storeSubstance.requestStatus.state !== 'success') {
+            innerRequest = getAPI<QueryInstance>(
+              `/api/db/v0/queries/${queryId}/`,
+            );
+            void innerRequest.then((result) => resolve(result));
+          }
+        }
+      },
+      () => {
+        innerRequest?.cancel();
+      },
+    );
+  }
+  return new CancellablePromise((resolve) => resolve());
+}
