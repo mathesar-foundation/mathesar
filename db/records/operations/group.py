@@ -1,7 +1,7 @@
 from enum import Enum
 import json
 import logging
-from sqlalchemy import select, func, and_, case, literal, cast, TEXT
+from sqlalchemy import select, func, and_, case, literal, cast, TEXT, extract
 
 from db.functions.operations.deserialize import get_db_function_subclass_by_id
 from db.records import exceptions as records_exceptions
@@ -16,6 +16,7 @@ MATHESAR_GROUP_METADATA = '__mathesar_group_metadata'
 class GroupMode(Enum):
     DISTINCT = 'distinct'
     ENDPOINTS = 'endpoints'  # intended for internal use at the moment
+    EXTRACT = 'extract'
     MAGNITUDE = 'magnitude'
     COUNT_BY = 'count_by'
     PERCENTILE = 'percentile'
@@ -45,6 +46,7 @@ class GroupBy:
             global_min=None,
             global_max=None,
             prefix_length=None,
+            extract_field=None,
     ):
         self._columns = tuple(columns) if type(columns) != str else tuple([columns])
         self._mode = mode
@@ -60,6 +62,7 @@ class GroupBy:
         self._global_min = global_min
         self._global_max = global_max
         self._prefix_length = prefix_length
+        self._extract_field = extract_field
         self._ranged = bool(mode != GroupMode.DISTINCT.value)
         self.validate()
 
@@ -101,6 +104,10 @@ class GroupBy:
     @property
     def prefix_length(self):
         return self._prefix_length
+
+    @property
+    def extract_field(self):
+        return self._extract_field
 
     @property
     def ranged(self):
@@ -148,7 +155,7 @@ class GroupBy:
         ):
             raise records_exceptions.BadGroupFormat(
                 f'{GroupMode.PREFIX.value} mode requires prefix_length,'
-                ' and only works for single columns'
+                ' and only works for single columns.'
             )
         elif (
                 self.mode == GroupMode.COUNT_BY.value
@@ -163,6 +170,14 @@ class GroupBy:
                 f'{GroupMode.COUNT_BY.value} mode requires'
                 ' count_by, global_min, and global_max.'
                 ' further, it works only for single columns.'
+            )
+        elif (
+                self.mode == GroupMode.EXTRACT.value
+                and (not len(self.columns) == 1 or self._extract_field is None)
+        ):
+            raise records_exceptions.BadGroupFormat(
+                f'{GroupMode.EXTRACT.value} requires extract_field,'
+                ' and only works for single columns.'
             )
 
         for col in self.columns:
@@ -227,6 +242,8 @@ def get_group_augmented_records_query(table, group_by):
         query = _get_distinct_group_select(table, grouping_columns, group_by.preproc)
     elif group_by.mode == GroupMode.PREFIX.value:
         query = _get_prefix_group_select(table, grouping_columns, group_by.prefix_length)
+    elif group_by.mode == GroupMode.EXTRACT.value:
+        query = _get_extract_group_select(table, grouping_columns, group_by.extract_field)
     else:
         raise records_exceptions.BadGroupFormat("Unknown error")
     return query
@@ -249,6 +266,21 @@ def _get_distinct_group_select(table, grouping_columns, preproc):
     group_id_expr = func.dense_rank().over(
         order_by=processed_columns, range_=window_def.range_
     )
+    return select(
+        table,
+        _get_group_metadata_definition(window_def, grouping_columns, group_id_expr)
+    )
+
+
+def _get_extract_group_select(table, grouping_columns, extract_field):
+    window_def = GroupingWindowDefinition(
+        order_by=grouping_columns, partition_by=grouping_columns
+    )
+    processed_columns = [extract(extract_field, grouping_columns[0])]
+    group_id_expr = func.dense_rank().over(
+        order_by=processed_columns, range_=window_def.range_
+    )
+
     return select(
         table,
         _get_group_metadata_definition(window_def, grouping_columns, group_id_expr)
