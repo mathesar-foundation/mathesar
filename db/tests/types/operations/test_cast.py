@@ -126,13 +126,13 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             MathesarCustomType.MATHESAR_JSON_OBJECT: {
                 VALID: [
-                    ({'key1': 'val1'}, {'key1': 'val1'})
+                    ({'key1': 'val1'}, json.dumps({'key1': 'val1'}))
                 ],
                 INVALID: [[1, 2, 3]],
             },
             MathesarCustomType.MATHESAR_JSON_ARRAY: {
                 VALID: [
-                    ([1, 2, 3], [1, 2, 3])
+                    ([1, 2, 3], "[1, 2, 3]")
                 ],
                 INVALID: ["{'key1': 'val1'}"],
             },
@@ -174,13 +174,13 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             MathesarCustomType.MATHESAR_JSON_OBJECT: {
                 VALID: [
-                    ({'key1': 'val1'}, {'key1': 'val1'})
+                    ({'key1': 'val1'}, json.dumps({'key1': 'val1'}))
                 ],
                 INVALID: [[1, 2, 3]],
             },
             MathesarCustomType.MATHESAR_JSON_ARRAY: {
                 VALID: [
-                    ([1, 2, 3], [1, 2, 3])
+                    ([1, 2, 3], "[1, 2, 3]")
                 ],
                 INVALID: [],
             },
@@ -190,19 +190,19 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             PostgresType.JSONB: {
                 VALID: [
-                    ('{"key1": "val1"}', {"key1": "val1"})
+                    ({"key1": "val1"}, {"key1": "val1"})
                 ],
                 INVALID: [],
             },
             PostgresType.JSON: {
                 VALID: [
-                    ('{"key1": "val1"}', {"key1": "val1"}),
+                    ({"key1": "val1"}, {"key1": "val1"}),
                 ],
                 INVALID: [],
             },
             PostgresType.TEXT: {
                 VALID: [
-                    ('{"key1": "val1"}', '{"key1": "val1"}')
+                    ({"key1": "val1"}, '{"key1": "val1"}'),
                 ],
                 INVALID: [],
             },
@@ -212,7 +212,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             PostgresType.CHARACTER_VARYING: {
                 VALID: [
-                    ('{"key1": "val1"}', '{"key1": "val1"}'),
+                    ({"key1": "val1"}, '{"key1": "val1"}'),
                 ],
                 INVALID: [],
             },
@@ -230,19 +230,19 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             PostgresType.JSONB: {
                 VALID: [
-                    ('[1, 2, 3]', [1, 2, 3])
+                    ([1, 2, 3], [1, 2, 3])
                 ],
                 INVALID: [],
             },
             PostgresType.JSON: {
                 VALID: [
-                    ('[1, 2, 3]', [1, 2, 3])
+                    ([1, 2, 3], [1, 2, 3])
                 ],
                 INVALID: [],
             },
             PostgresType.TEXT: {
                 VALID: [
-                    ('[1, 2, 3]', '[1, 2, 3]')
+                    ([1, 2, 3], '[1, 2, 3]')
                 ],
                 INVALID: [],
             },
@@ -252,7 +252,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             PostgresType.CHARACTER_VARYING: {
                 VALID: [
-                    ('[1, 2, 3]', '[1, 2, 3]')
+                    ([1, 2, 3], '[1, 2, 3]')
                 ],
                 INVALID: [],
             },
@@ -704,13 +704,13 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             MathesarCustomType.MATHESAR_JSON_OBJECT: {
                 VALID: [
-                    ('{"key1": "val1"}', {"key1": "val1"})
+                    ('{"key1": "val1"}', json.dumps({"key1": "val1"}))
                 ],
                 INVALID: [],
             },
             MathesarCustomType.MATHESAR_JSON_ARRAY: {
                 VALID: [
-                    ('[1, 2, 3]', [1, 2, 3])
+                    ('[1, 2, 3]', '[1, 2, 3]')
                 ],
                 INVALID: [],
             },
@@ -882,13 +882,13 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             MathesarCustomType.MATHESAR_JSON_OBJECT: {
                 VALID: [
-                    ('{"key1": "val1"}', {"key1": "val1"})
+                    ('{"key1": "val1"}', json.dumps({"key1": "val1"}))
                 ],
                 INVALID: [],
             },
             MathesarCustomType.MATHESAR_JSON_ARRAY: {
                 VALID: [
-                    ('[1, 2, 3]', [1, 2, 3])
+                    ('[1, 2, 3]', '[1, 2, 3]')
                 ],
                 INVALID: [],
             },
