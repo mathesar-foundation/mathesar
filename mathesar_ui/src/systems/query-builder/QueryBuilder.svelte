@@ -19,12 +19,13 @@
   import type QueryManager from './QueryManager';
   import type { QueryInitialColumn } from './QueryModel';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
+  import ResultPane from './ResultPane.svelte';
 
   const dispatch = createEventDispatcher();
 
   export let queryManager: QueryManager;
 
-  const { query, state } = queryManager;
+  $: ({ query, state } = queryManager);
 
   $: currentTable = $query.base_table
     ? $tablesDataStore.data.get($query.base_table)
@@ -32,7 +33,7 @@
 
   function onBaseTableChange(tableEntry: TableEntry | undefined) {
     void queryManager.update((q) =>
-      q.setBaseTable(tableEntry ? tableEntry.id : undefined),
+      q.withBaseTable(tableEntry ? tableEntry.id : undefined),
     );
   }
 
@@ -45,7 +46,7 @@
     if (target.value.trim() === '') {
       target.value = 'Untitled file';
     }
-    void queryManager.update((q) => q.setName(target.value));
+    void queryManager.update((q) => q.withName(target.value));
   }
 </script>
 
@@ -103,11 +104,7 @@
         on:add={(e) => addColumn(e.detail)}
       />
     </div>
-    <div class="result">
-      {#each $query.initial_columns as column (column.alias)}
-        Column: {column.column}:{column.alias}
-      {/each}
-    </div>
+    <ResultPane {queryManager} />
     <div class="output-config-sidebar" />
   </div>
 </div>
@@ -186,8 +183,6 @@
           flex-grow: 0;
           flex-shrink: 0;
         }
-      }
-      .result {
       }
       .output-config-sidebar {
       }

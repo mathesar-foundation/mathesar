@@ -1,10 +1,17 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
   import type { TinroRouteMeta } from 'tinro';
 
-  const dispatch = createEventDispatcher<{ routeUpdated: TinroRouteMeta }>();
+  const dispatch = createEventDispatcher<{
+    routeUpdated: TinroRouteMeta;
+    routeLoaded: TinroRouteMeta;
+  }>();
 
   export let meta: TinroRouteMeta;
 
   $: dispatch('routeUpdated', $meta);
+
+  onMount(() => {
+    dispatch('routeLoaded', meta);
+  });
 </script>

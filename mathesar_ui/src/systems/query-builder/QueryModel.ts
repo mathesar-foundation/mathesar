@@ -33,24 +33,25 @@ export default class QueryModel implements UnsavedQueryInstance {
     this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
-    this.initial_columns = model?.initial_columns ?? [];
+    this.initial_columns = model?.initial_columns;
   }
 
-  setBaseTable(base_table?: number): QueryModel {
+  withBaseTable(base_table?: number): QueryModel {
     return new QueryModel({
-      name: this.name,
       base_table,
+      id: this.id,
+      name: this.name,
     });
   }
 
-  setId(id: number): QueryModel {
+  withId(id: number): QueryModel {
     return new QueryModel({
       ...this,
       id,
     });
   }
 
-  setName(name: string): QueryModel {
+  withName(name: string): QueryModel {
     return new QueryModel({
       ...this,
       name,
@@ -59,13 +60,14 @@ export default class QueryModel implements UnsavedQueryInstance {
 
   addColumn(column: QueryInitialColumn): QueryModel {
     const baseAlias = `${column.tableName}_${column.name}`;
-    const allAliases = new Set(this.initial_columns.map((c) => c.alias));
+    const initialColumns = this.initial_columns ?? [];
+    const allAliases = new Set(initialColumns.map((c) => c.alias));
     const alias = getAvailableName(baseAlias, allAliases);
 
     return new QueryModel({
       ...this,
       initial_columns: [
-        ...this.initial_columns,
+        ...initialColumns,
         {
           alias,
           column: column.id,
@@ -80,7 +82,7 @@ export default class QueryModel implements UnsavedQueryInstance {
   // }
 
   isSaveable(): boolean {
-    return !!this.base_table && this.initial_columns.length > 0;
+    return typeof this.name !== 'undefined' && this.name.trim() !== '';
   }
 
   serialize(): string {

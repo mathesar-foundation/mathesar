@@ -28,8 +28,7 @@ function getData<T>(selector: string, retainData = false): T | undefined {
     }
     return data;
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(err);
+    console.error(err);
   }
   return undefined;
 }

@@ -5,43 +5,88 @@
   import QueryBuilder from '@mathesar/systems/query-builder/QueryBuilder.svelte';
   import QueryManager from '@mathesar/systems/query-builder/QueryManager';
   import QueryModel from '@mathesar/systems/query-builder/QueryModel';
+  import type { UnsavedQueryInstance } from '@mathesar/systems/query-builder/QueryModel';
+  import { queries } from '@mathesar/stores/queries';
 
   export let database: string;
   export let schemaId: number;
 
-  const queryManager = new QueryManager(
-    new QueryModel({ name: 'Untitled(0)' }),
-  );
+  $: schemaURL = `/${database}/${String(schemaId)}/`;
 
-  function newQuery() {
-    // Create new manager
+  let is404 = false;
+
+  let queryManager: QueryManager | undefined;
+  let urlUpdateUnsubscriber: () => void;
+
+  function createQueryManager(queryInstance: UnsavedQueryInstance) {
+    urlUpdateUnsubscriber?.();
+    queryManager = new QueryManager(new QueryModel(queryInstance));
+    is404 = false;
+    urlUpdateUnsubscriber = queryManager.on('save', async (instance) => {
+      try {
+        const url = `${String(schemaURL)}queries/${instance.id}/`;
+        router.goto(url, true);
+      } catch (err) {
+        console.error('There was an error when updating the URL', err);
+      }
+    });
   }
 
-  function loadQueryById() {
-    // Check query Id
-    // If it doesn't match, fetch the correct one and create new manager for it
+  function removeQueryManager(): void {
+    urlUpdateUnsubscriber?.();
+    is404 = true;
+    queryManager = undefined;
   }
 
-  function newQueryRouteLoaded(meta: TinroRouteMeta) {
-    // console.log('NEW query route loaded', meta.params);
+  function createNewQuery() {
+    if (
+      queryManager &&
+      typeof queryManager.getQueryModelData().id === 'undefined'
+    ) {
+      // An unsaved query is already open
+      return;
+    }
+    createQueryManager({ name: 'Untitled(0)' });
   }
 
-  function savedQueryRouteLoaded(meta: TinroRouteMeta) {
-    // console.log('SAVED query route loaded', meta.params);
+  function loadSavedQuery(meta: TinroRouteMeta) {
+    const queryId = parseInt(meta.params.queryId, 10);
+    if (!Number.isNaN(queryId)) {
+      if (queryManager && queryManager.getQueryModelData().id === queryId) {
+        // The requested query is already open
+        return;
+      }
+
+      // Send request!
+      const queryInstance = $queries.data.get(queryId);
+      if (queryInstance) {
+        createQueryManager(queryInstance);
+        return;
+      }
+    }
+    removeQueryManager();
   }
 
   function gotoSchema() {
-    router.goto(`/${database}/${String(schemaId)}/`);
+    router.goto(schemaURL);
   }
 </script>
 
 <EventfulRoute
-  path="/"
-  on:routeUpdated={(e) => newQueryRouteLoaded(e.detail)}
+  path="/:queryId"
+  on:routeUpdated={(e) => loadSavedQuery(e.detail)}
+  on:routeLoaded={(e) => loadSavedQuery(e.detail)}
 />
 <EventfulRoute
-  path="/:queryId"
-  on:routeUpdated={(e) => savedQueryRouteLoaded(e.detail)}
+  path="/"
+  on:routeUpdated={createNewQuery}
+  on:routeLoaded={createNewQuery}
 />
 
-<QueryBuilder {queryManager} on:close={gotoSchema} />
+{#if queryManager}
+  <QueryBuilder {queryManager} on:close={gotoSchema} />
+{:else if is404}
+  404 - Query not found
+{:else}
+  Loading
+{/if}
