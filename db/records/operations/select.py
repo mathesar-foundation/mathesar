@@ -221,10 +221,9 @@ def _group_aggregate(relation, group_by, aggregate):
     # TODO maybe keep this as json, and convert to GroupBy at last moment?
     # other transform specs are json at this point in the pipeline
     if isinstance(group_by, group.GroupBy):
-        executable = group.get_group_augmented_records_pg_query(relation, group_by)
-        return _to_non_executable(executable)
-    else:
-        relation
+        relation = group.get_group_augmented_records_relation(relation, group_by)
+
+    return relation
 
 
 def _select_subset_of_columns(relation, columns_to_select):

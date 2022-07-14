@@ -215,7 +215,7 @@ class GroupingWindowDefinition:
         return self._range
 
 
-def get_group_augmented_records_pg_query(table, group_by):
+def get_group_augmented_records_relation(table, group_by):
     """
     Returns counts by specified groupings
 
@@ -246,7 +246,7 @@ def get_group_augmented_records_pg_query(table, group_by):
         pg_query = _get_extract_group_select(table, grouping_columns, group_by.extract_field)
     else:
         raise records_exceptions.BadGroupFormat("Unknown error")
-    return pg_query
+    return pg_query.cte()
 
 
 def _get_distinct_group_select(table, grouping_columns, preproc):
