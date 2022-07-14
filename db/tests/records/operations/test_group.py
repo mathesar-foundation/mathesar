@@ -392,16 +392,16 @@ def test_smoke_get_group_augmented_records_pg_query_uris_preproc(uris_table_obj,
         )
 
 
-def test_smoke_get_group_augmented_records_query_extract(times_table_obj):
+def test_smoke_get_group_augmented_records_pg_query_extract(times_table_obj):
     roster, engine = times_table_obj
     group_by = group.GroupBy(
         ['date'],
         mode=group.GroupMode.EXTRACT.value,
         extract_field='month',
     )
-    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -422,7 +422,7 @@ datetime_trunc_tests_def = [
 
 
 @pytest.mark.parametrize('col,preproc,num', datetime_trunc_tests_def)
-def test_get_group_augmented_records_query_datetimes_preproc(
+def test_get_group_augmented_records_pg_query_datetimes_preproc(
         times_table_obj, col, preproc, num
 ):
     roster, engine = times_table_obj
@@ -431,9 +431,9 @@ def test_get_group_augmented_records_query_datetimes_preproc(
         mode=group.GroupMode.DISTINCT.value,
         preproc=[preproc]
     )
-    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     assert max([_group_id(row) for row in res]) == num
 
@@ -449,16 +449,16 @@ datetime_extract_tests_def = [
 
 
 @pytest.mark.parametrize('col,field,num', datetime_extract_tests_def)
-def test_get_group_augmented_records_query_datetimes_extract(
+def test_get_group_augmented_records_pg_query_datetimes_extract(
         times_table_obj, col, field, num
 ):
     roster, engine = times_table_obj
     group_by = group.GroupBy(
         [col], mode=group.GroupMode.EXTRACT.value, extract_field=field
     )
-    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     assert max([_group_id(row) for row in res]) == num
 

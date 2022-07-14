@@ -129,7 +129,12 @@ def apply_transformations_deprecated(
     if filter:
         relation = _filter(relation, filter)
     if search:
-        relation = _search(relation, search, limit, engine)
+        relation = _search(
+            relation=relation,
+            engine=engine,
+            search=search,
+            limit=limit
+        )
     if columns_to_select:
         relation = _select_subset_of_columns(
             relation,
@@ -205,7 +210,7 @@ def _offset(relation, offset):
     return _to_non_executable(executable)
 
 
-def _search(relation, search, engine, limit):
+def _search(relation, engine, search, limit):
     search_params = {search_obj['column']: search_obj['literal'] for search_obj in search}
     relation = relevance.get_rank_and_filter_rows_query(relation, search_params, engine, limit)
     return relation
