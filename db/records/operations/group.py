@@ -215,7 +215,7 @@ class GroupingWindowDefinition:
         return self._range
 
 
-def get_group_augmented_records_query(table, group_by):
+def get_group_augmented_records_pg_query(table, group_by):
     """
     Returns counts by specified groupings
 
@@ -226,27 +226,27 @@ def get_group_augmented_records_query(table, group_by):
     grouping_columns = group_by.get_validated_group_by_columns(table)
 
     if group_by.mode == GroupMode.PERCENTILE.value:
-        query = _get_percentile_range_group_select(
+        pg_query = _get_percentile_range_group_select(
             table, grouping_columns, group_by.num_groups
         )
     elif (
             group_by.mode == GroupMode.ENDPOINTS.value
             or group_by.mode == GroupMode.COUNT_BY.value
     ):
-        query = _get_custom_endpoints_range_group_select(
+        pg_query = _get_custom_endpoints_range_group_select(
             table, grouping_columns, group_by.bound_tuples
         )
     elif group_by.mode == GroupMode.MAGNITUDE.value:
-        query = _get_tens_powers_range_group_select(table, grouping_columns)
+        pg_query = _get_tens_powers_range_group_select(table, grouping_columns)
     elif group_by.mode == GroupMode.DISTINCT.value:
-        query = _get_distinct_group_select(table, grouping_columns, group_by.preproc)
+        pg_query = _get_distinct_group_select(table, grouping_columns, group_by.preproc)
     elif group_by.mode == GroupMode.PREFIX.value:
-        query = _get_prefix_group_select(table, grouping_columns, group_by.prefix_length)
+        pg_query = _get_prefix_group_select(table, grouping_columns, group_by.prefix_length)
     elif group_by.mode == GroupMode.EXTRACT.value:
-        query = _get_extract_group_select(table, grouping_columns, group_by.extract_field)
+        pg_query = _get_extract_group_select(table, grouping_columns, group_by.extract_field)
     else:
         raise records_exceptions.BadGroupFormat("Unknown error")
-    return query
+    return pg_query
 
 
 def _get_distinct_group_select(table, grouping_columns, preproc):

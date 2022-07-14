@@ -247,6 +247,9 @@ def get_available_known_db_types(engine):
     )
 
 
+# NOTE it is confusing to need an instance of engine here, since we usually use engines for making
+# actual queries; it's a smell to see an engine being needed where we don't make a query.
+# TODO consider alternatives.
 def get_db_type_enum_from_class(sa_type, engine):
     if not inspect.isclass(sa_type):
         # Instead of extracting classes from instances, we're supporting a single type of parameter
