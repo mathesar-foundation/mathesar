@@ -23,11 +23,11 @@
   }
 
   function newQueryRouteLoaded(meta: TinroRouteMeta) {
-    console.log('NEW query route loaded', meta.params);
+    // console.log('NEW query route loaded', meta.params);
   }
 
   function savedQueryRouteLoaded(meta: TinroRouteMeta) {
-    console.log('SAVED query route loaded', meta.params);
+    // console.log('SAVED query route loaded', meta.params);
   }
 
   function gotoSchema() {
@@ -44,4 +44,4 @@
   on:routeUpdated={(e) => savedQueryRouteLoaded(e.detail)}
 />
 
-<QueryBuilder {queryManager} on:close={gotoSchema}/>
+<QueryBuilder {queryManager} on:close={gotoSchema} />

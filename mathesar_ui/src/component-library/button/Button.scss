@@ -25,8 +25,10 @@ button.btn {
     background: #fff;
     border-color: #dfdfdf;
 
-    &:focus {
-      border-color: #39a0f5;
+    &:not(:disabled) {
+      &:focus {
+        border-color: #39a0f5;
+      }
     }
   }
 
@@ -35,12 +37,14 @@ button.btn {
     border-color: #39a0f5;
     color: #fff;
 
-    &:hover {
-      background: #3995e0;
-    }
+    &:not(:disabled) {
+      &:hover {
+        background: #3995e0;
+      }
 
-    &:active {
-      background: #3288ce;
+      &:active {
+        background: #3288ce;
+      }
     }
   }
 
@@ -49,12 +53,14 @@ button.btn {
     border-color: #434a57;
     color: #fff;
 
-    &:hover {
-      background: #333c4b;
-    }
+    &:not(:disabled) {
+      &:hover {
+        background: #333c4b;
+      }
 
-    &:active {
-      background: #1d222c;
+      &:active {
+        background: #1d222c;
+      }
     }
   }
 
@@ -75,17 +81,19 @@ button.btn {
 
   &.btn-default,
   &.btn-plain {
-    &:hover {
-      background: #f3f4f5;
-    }
+    &:not(:disabled) {
+      &:hover {
+        background: #f3f4f5;
+      }
 
-    &:active,
-    &:focus {
-      box-shadow: 0 0 0 2px #2087e633 !important;
-    }
+      &:active,
+      &:focus {
+        box-shadow: 0 0 0 2px #2087e633 !important;
+      }
 
-    &:active {
-      background: #e7e7e7;
+      &:active {
+        background: #e7e7e7;
+      }
     }
   }
 

@@ -89,7 +89,7 @@
   </div>
   <div class="content-pane">
     <div class="input-sidebar">
-      <div>
+      <div class="base-table-selector">
         <LabeledInput label="Select Base Table" layout="stacked">
           <SelectTableWithinCurrentSchema
             prependBlank
@@ -173,10 +173,19 @@
       .input-sidebar {
         width: 22rem;
         border-right: 1px solid #efefef;
-        padding: 0.75rem;
         flex-shrink: 0;
         flex-grow: 0;
         flex-basis: 22rem;
+        display: flex;
+        flex-direction: column;
+
+        .base-table-selector {
+          border-bottom: 1px solid #efefef;
+          padding: 1rem 0.75rem 1.4rem;
+          background: #f7f8f8;
+          flex-grow: 0;
+          flex-shrink: 0;
+        }
       }
       .result {
       }

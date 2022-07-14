@@ -86,6 +86,9 @@
 <style lang="scss">
   .column-selection-pane {
     position: relative;
+    padding: 0.75rem;
+    flex-grow: 1;
+    overflow: auto;
 
     :global(.collapsible) {
       margin: 0.7rem 0;
