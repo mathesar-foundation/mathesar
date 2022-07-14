@@ -1,6 +1,10 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
-  import { setTabularDataStoreInContext } from '@mathesar/stores/table-data';
+  import {
+    setTabularDataStoreInContext,
+    ID_ROW_CONTROL_COLUMN,
+    ID_ADD_NEW_COLUMN,
+  } from '@mathesar/stores/table-data';
   import type { TabularData } from '@mathesar/stores/table-data/types';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { ImmutableMap } from '@mathesar/component-library';
@@ -32,14 +36,14 @@
   );
 
   $: sheetColumns = [
-    { column: { id: -1, name: 'ROW_CONTROL' } },
+    { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
     ...processedTableColumnsMap.values(),
-    { column: { id: -2, name: 'ADD_NEW_COLUMN_PHANTOM' } },
+    { column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW_COLUMN_PHANTOM' } },
   ];
 
   const columnWidths = new ImmutableMap([
-    [-1, 70],
-    [-2, 100],
+    [ID_ROW_CONTROL_COLUMN, 70],
+    [ID_ADD_NEW_COLUMN, 100],
   ]);
 </script>
 

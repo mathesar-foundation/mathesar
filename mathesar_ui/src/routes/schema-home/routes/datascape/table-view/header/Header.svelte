@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    getTabularDataStoreFromContext,
+    ID_ADD_NEW_COLUMN,
+    ID_ROW_CONTROL_COLUMN,
+  } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/stores/table-data/types';
   import {
     SheetHeader,
@@ -23,7 +27,12 @@
 </script>
 
 <SheetHeader bind:horizontalScrollOffset={$horizontalScrollOffset}>
-  <SheetCell columnIdentifierKey={-1} isStatic let:htmlAttributes let:style>
+  <SheetCell
+    columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+    isStatic
+    let:htmlAttributes
+    let:style
+  >
     <div {...htmlAttributes} {style} />
   </SheetCell>
 
@@ -41,7 +50,11 @@
     </SheetCell>
   {/each}
 
-  <SheetCell columnIdentifierKey={-2} let:htmlAttributes let:style>
+  <SheetCell
+    columnIdentifierKey={ID_ADD_NEW_COLUMN}
+    let:htmlAttributes
+    let:style
+  >
     <div {...htmlAttributes} {style}>
       <NewColumnCell
         columns={$columnsDataStore.columns}

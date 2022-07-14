@@ -9,10 +9,10 @@
   } from '@mathesar/stores/table-data/tabularData';
   // TODO: Remove route dependency in systems
   import { getProcessedColumnsMap } from '@mathesar/routes/schema-home/routes/datascape/table-view/utils';
-  import ColumnResizer from '@mathesar/routes/schema-home/routes/datascape/table-view/header/header-cell/ColumnResizer.svelte';
   import DataTypeBasedInput from '@mathesar/components/cell/DataTypeBasedInput.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
+  import ColumnResizer from './ColumnResizer.svelte';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
 

@@ -4,7 +4,10 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import type { Row } from '@mathesar/stores/table-data/types';
-  import { getRowKey } from '@mathesar/stores/table-data';
+  import {
+    getRowKey,
+    ID_ROW_CONTROL_COLUMN,
+  } from '@mathesar/stores/table-data';
   import { SheetRow, SheetCell } from '@mathesar/components/sheet';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
@@ -61,7 +64,12 @@
     data-identifier={row.identifier}
     on:mousedown={checkAndCreateEmptyRow}
   >
-    <SheetCell columnIdentifierKey={-1} isStatic let:htmlAttributes let:style>
+    <SheetCell
+      columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+      isStatic
+      let:htmlAttributes
+      let:style
+    >
       <div class="row-control" {...htmlAttributes} {style}>
         {#if row.record}
           <RowControl

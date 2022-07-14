@@ -12,8 +12,7 @@ export interface ActiveCell {
   columnIndex: number;
 }
 
-export const ROW_CONTROL_COLUMN_WIDTH = 70;
-export const DEFAULT_ROW_RIGHT_PADDING = 100;
+// @deprecated
 export const DEFAULT_COLUMN_WIDTH = 160;
 
 const movementKeys = new Set([
@@ -108,6 +107,7 @@ export class Display {
   activeCell: Writable<ActiveCell | undefined>;
 
   /**
+   * @deprecated
    * Keys are column ids. Values are column widths in px.
    *
    * `customizedColumnWidths` is separate from `columnPlacements` to keep the
@@ -120,10 +120,10 @@ export class Display {
    */
   customizedColumnWidths: WritableMap<number, number>;
 
-  /** Keys are column ids. */
+  /** @deprecated Keys are column ids. */
   columnPlacements: Readable<Map<number, ColumnPlacement>>;
 
-  /** In px */
+  /** @deprecated In px */
   rowWidth: Readable<number>;
 
   displayableRecords: Readable<Row[]>;
