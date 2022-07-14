@@ -442,8 +442,14 @@ class Column(ReflectionManagerMixin, BaseModel):
     def __getattribute__(self, name):
         try:
             return super().__getattribute__(name)
-        except AttributeError:
-            return getattr(self._sa_column, name)
+        except AttributeError as e:
+            # Blacklist Django attribute names that cause recursion by trying to fetch an invalid cache.
+            # TODO Find a better way to avoid finding Django related columns
+            blacklisted_attribute_names = ['resolve_expression']
+            if name not in blacklisted_attribute_names:
+                return getattr(self._sa_column, name)
+            else:
+                raise e
 
     @property
     def _sa_engine(self):
@@ -551,3 +557,13 @@ class DataFile(BaseModel):
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
+
+
+class PreviewColumnSettings(BaseModel):
+    customized = models.BooleanField()
+    template = models.CharField(max_length=255)
+
+
+class TableSettings(ReflectionManagerMixin, BaseModel):
+    preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
+    table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
