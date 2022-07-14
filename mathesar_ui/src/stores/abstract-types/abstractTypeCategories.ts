@@ -1,6 +1,7 @@
 import type { DbType } from '@mathesar/AppTypes';
 import { abstractTypeCategory } from './constants';
 import Text from './type-configs/text';
+import Money from './type-configs/money';
 import Email from './type-configs/email';
 import Number from './type-configs/number';
 import Boolean from './type-configs/boolean';
@@ -28,6 +29,7 @@ const abstractTypeCategories: Partial<
   Record<AbstractTypeCategoryIdentifier, AbstractTypeConfiguration>
 > = {
   [abstractTypeCategory.Text]: Text,
+  [abstractTypeCategory.Money]: Money,
   [abstractTypeCategory.Email]: Email,
   [abstractTypeCategory.Number]: Number,
   [abstractTypeCategory.Boolean]: Boolean,

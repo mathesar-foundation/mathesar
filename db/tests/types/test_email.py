@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy import text, select, Table, Column, MetaData
 from sqlalchemy.exc import IntegrityError
 from db.types.custom import email
-from db.utils import execute_query
+from db.utils import execute_pg_query
 from db.functions.base import ColumnName, Literal, sa_call_sql_function
 from db.functions.operations.apply import apply_db_function_as_filter
 
@@ -105,5 +105,5 @@ def test_email_db_functions(roster_table_obj, main_db_function, literal_param, e
         Literal([literal_param]),
     ])
     query = apply_db_function_as_filter(selectable, db_function)
-    record_list = execute_query(engine, query)
+    record_list = execute_pg_query(engine, query)
     assert len(record_list) == expected_count

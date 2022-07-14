@@ -8,6 +8,7 @@ from sqlalchemy.exc import DataError, IntegrityError
 
 from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
+from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.exceptions.database_exceptions import (
     base_exceptions as database_base_api_exceptions,
@@ -15,13 +16,17 @@ from mathesar.api.exceptions.database_exceptions import (
 )
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import (
-    SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer, TableSerializer,
+    SplitTableRequestSerializer,
+    SplitTableResponseSerializer,
+    TablePreviewSerializer,
+    TableSerializer,
+    TableImportSerializer,
+    MoveTableRequestSerializer
 )
-from mathesar.models import Table
+from mathesar.models.base import Table
 from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
-from mathesar.utils.tables import (
-    get_table_column_types
-)
+from mathesar.utils.tables import get_table_column_types
+from mathesar.utils.joins import get_processed_joinable_tables
 
 
 class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewsets.GenericViewSet):
@@ -51,6 +56,17 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         table.delete_sa_table()
         table.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['get'], detail=True)
+    def joinable_tables(self, request, pk=None):
+        table = self.get_object()
+        limit = request.query_params.get('limit')
+        offset = request.query_params.get('offset')
+        max_depth = request.query_params.get('max_depth', 2)
+        processed_joinable_tables = get_processed_joinable_tables(
+            table, limit=limit, offset=offset, max_depth=max_depth
+        )
+        return Response(processed_joinable_tables)
 
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
@@ -107,6 +123,39 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], detail=True)
+    def move_columns(self, request, pk=None):
+        table = self.get_object()
+        column_names_id_map = table.get_column_name_id_bidirectional_map()
+        serializer = MoveTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
+        if serializer.is_valid(True):
+            target_table = serializer.validated_data['target_table']
+            move_columns = serializer.validated_data['move_columns']
+            column_names_to_move = [column.name for column in move_columns]
+            target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
+            extracted_sa_table, remainder_sa_table = table.move_columns(
+                move_columns,
+                target_table,
+            )
+            engine = table._sa_engine
+            extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
+            remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
+
+            target_table.oid = extracted_table_oid
+            target_table.save()
+            # Refresh existing target table columns to use correct attnum preventing conflicts with the moved column
+            existing_target_column_names = target_columns_name_id_map.keys()
+            target_table.update_column_reference(existing_target_column_names, target_columns_name_id_map)
+            # Add the moved column
+            target_table.update_column_reference(column_names_to_move, column_names_id_map)
+
+            table.oid = remainder_table_oid
+            table.save()
+            remainder_column_names = column_names_id_map.keys() - column_names_to_move
+            table.update_column_reference(remainder_column_names, column_names_id_map)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    @action(methods=['post'], detail=True)
     def previews(self, request, pk=None):
         table = self.get_object()
         serializer = TablePreviewSerializer(data=request.data, context={"request": request, 'table': table})
@@ -145,4 +194,28 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             }
         )
 
+        return Response(table_data)
+
+    @action(methods=['post'], detail=True)
+    def existing_import(self, request, pk=None):
+        temp_table = self.get_object()
+        serializer = TableImportSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        existing_table_id = serializer.validated_data['table_to_import_to']
+        mappings = serializer.validated_data['mappings']
+        existing_table = get_table_or_404(existing_table_id)
+
+        try:
+            temp_table.insert_records_to_existing_table(
+                existing_table, temp_table, mappings
+            )
+        except Exception as e:
+            # ToDo raise specific exceptions.
+            raise e
+        # Reload the table to avoid cached properties
+        existing_table = get_table_or_404(existing_table_id)
+        serializer = TableSerializer(
+            existing_table, context={'request': request}
+        )
+        table_data = serializer.data
         return Response(table_data)

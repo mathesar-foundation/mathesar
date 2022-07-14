@@ -9,7 +9,7 @@ from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
     ReadWritePolymorphicSerializerMappingMixin,
 )
-from mathesar.models import Table
+from mathesar.models.base import Table
 
 
 class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):

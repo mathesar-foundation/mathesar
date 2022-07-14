@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from mathesar.api.display_options import DISPLAY_OPTIONS_BY_UI_TYPE
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.models import Database
+from mathesar.models.base import Database
 
 
 class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):

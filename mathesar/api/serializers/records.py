@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.models import Column
+from mathesar.models.base import Column
 from mathesar.api.utils import follows_json_number_spec
 from mathesar.database.types import UIType
 
@@ -15,6 +15,7 @@ class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Seria
     order_by = serializers.JSONField(required=False, default=[])
     grouping = serializers.JSONField(required=False, default={})
     duplicate_only = serializers.JSONField(required=False, default=None)
+    search_fuzzy = serializers.JSONField(required=False, default=[])
 
 
 class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
