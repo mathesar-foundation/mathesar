@@ -1,5 +1,3 @@
-import type { GetRequestParams } from '@mathesar/api/tables/records';
-
 const DEFAULT_PAGE_SIZE = 500;
 
 /**
@@ -7,7 +5,7 @@ const DEFAULT_PAGE_SIZE = 500;
  */
 export type TersePagination = [number, number];
 
-export class Pagination {
+export default class Pagination {
   /** The first page is page 1 */
   readonly page: number;
 
@@ -22,7 +20,7 @@ export class Pagination {
     this.offset = (this.page - 1) * this.size;
   }
 
-  recordsRequestParams(): Pick<GetRequestParams, 'limit' | 'offset'> {
+  recordsRequestParams(): { limit: number; offset: number } {
     return {
       limit: this.size,
       offset: this.offset,

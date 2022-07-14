@@ -4,10 +4,8 @@
     Select,
   } from '@mathesar-component-library';
   import { States } from '@mathesar/utils/api';
-  import {
-    getTabularDataStoreFromContext,
-    Pagination,
-  } from '@mathesar/stores/table-data';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import Pagination from '@mathesar/utils/Pagination';
 
   const tabularData = getTabularDataStoreFromContext();
 

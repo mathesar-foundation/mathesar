@@ -4,11 +4,11 @@
     Sorting,
     Filtering,
     Grouping,
-    Pagination,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import type { Row } from '@mathesar/stores/table-data/types';
   import type { SheetVirtualRowsApi } from '@mathesar/components/sheet/types';
+  import type Pagination from '@mathesar/utils/Pagination';
 
   const tabularData = getTabularDataStoreFromContext();
 

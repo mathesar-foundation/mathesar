@@ -7,10 +7,10 @@ import { TabularData } from '@mathesar/stores/table-data/tabularData';
 import {
   Filtering,
   Grouping,
-  Pagination,
   Sorting,
   TabularType,
 } from '@mathesar/stores/table-data';
+import Pagination from '@mathesar/utils/Pagination';
 
 interface RecordSelectorControllerProps {
   modal: ModalController;
