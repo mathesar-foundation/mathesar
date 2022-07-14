@@ -194,9 +194,9 @@ def test_filtering_nested_boolean_ops(filter_sort_table_obj):
 @pytest.mark.parametrize("column_name,main_db_function,literal_param,expected_count", [
     ("time", Equal, "06:05:06.789", 1),
     ("date", Equal, "1999-01-08", 1),
-    ("time", LesserOrEqual, "04:05:06.789", 2),
+    ("time", LesserOrEqual, "04:05:06.789", 5),
     ("timestamp", Greater, "1995-01-08", 1),
-    ("interval", Greater, "P1Y2M3DT4H5M6S", 2),
+    ("interval", Greater, "P1Y2M3DT4H5M6S", 5),
 ])
 def test_filtering_time_types(times_table_obj, column_name, main_db_function, literal_param, expected_count):
     _filters_as_expected(times_table_obj, column_name, main_db_function, literal_param, expected_count)

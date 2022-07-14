@@ -5,7 +5,7 @@ from sqlalchemy.sql.base import ColumnSet as SAColumnSet
 
 from db.functions.operations.apply import apply_db_function_spec_as_filter
 from db.columns.base import MathesarColumn
-from db.records.operations import group
+from db.records.operations import group, relevance
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.types.base import get_db_type_enum_from_id
@@ -47,6 +47,7 @@ def get_records(
     order_by=[],
     filter=None,
     group_by=None,
+    search=[],
     duplicate_only=None,
 ):
     """
@@ -59,6 +60,8 @@ def get_records(
         offset:          int, gives number of rows to skip
         order_by:        list of dictionaries, where each dictionary has a 'field' and
                          'direction' field.
+        search:          list of dictionaries, where each dictionary has a 'column' and
+                         'literal' field.
                          See: https://github.com/centerofci/sqlalchemy-filters#sort-format
         filter:          a dictionary with one key-value pair, where the key is the filter id and
                          the value is a list of parameters; supports composition/nesting.
@@ -74,22 +77,26 @@ def get_records(
         order_by=order_by,
         filter=filter,
         group_by=group_by,
-        duplicate_only=duplicate_only
+        search=search,
+        duplicate_only=duplicate_only,
+        engine=engine,
     )
     return execute_pg_query(engine, relation)
 
 
-def get_count(table, engine, filter=None):
+def get_count(table, engine, filter=None, search=[]):
     col_name = "_count"
     columns_to_select = [func.count().label(col_name)]
     relation = apply_transformations_deprecated(
         table=table,
+        engine=engine,
         limit=None,
         offset=None,
         # TODO does it make sense to order, when we're only interested in row count?
         order_by=None,
         filter=filter,
         columns_to_select=columns_to_select,
+        search=search,
     )
     return execute_pg_query(engine, relation)[0][col_name]
 
@@ -97,6 +104,7 @@ def get_count(table, engine, filter=None):
 # NOTE deprecated; this will be replaced with apply_transformations
 def apply_transformations_deprecated(
     table,
+    engine,
     limit=None,
     offset=None,
     order_by=None,
@@ -105,6 +113,7 @@ def apply_transformations_deprecated(
     group_by=None,
     duplicate_only=None,
     aggregate=None,
+    search=[],
 ):
     # TODO rename the actual method parameter
     relation = table
@@ -119,6 +128,8 @@ def apply_transformations_deprecated(
         relation = _sort(relation, order_by)
     if filter:
         relation = _filter(relation, filter)
+    if search:
+        relation = _search(relation, search, limit, engine)
     if columns_to_select:
         relation = _select_subset_of_columns(
             relation,
@@ -192,6 +203,12 @@ def _offset(relation, offset):
     executable = _to_executable(relation)
     executable = executable.offset(offset)
     return _to_non_executable(executable)
+
+
+def _search(relation, search, engine, limit):
+    search_params = {search_obj['column']: search_obj['literal'] for search_obj in search}
+    relation = relevance.get_rank_and_filter_rows_query(relation, search_params, engine, limit)
+    return relation
 
 
 # TODO do aggregation

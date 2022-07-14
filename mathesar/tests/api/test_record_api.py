@@ -3,6 +3,7 @@ import json
 from unittest.mock import patch
 
 import pytest
+
 from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
@@ -175,7 +176,8 @@ def test_filter_with_added_columns(create_patents_table, client):
         new_column_type = new_column.get("type")
         table.add_column({"name": new_column_name, "type": new_column_type})
         row_values_list = []
-
+        # Get a new instance with clean cache, so that the new column is added to the _sa_column list
+        table = models_base.Table.objects.get(oid=table.oid)
         response_data = client.get(f'/api/db/v0/tables/{table.id}/records/').json()
         existing_records = response_data['results']
 
@@ -240,6 +242,26 @@ def test_record_list_sort(create_patents_table, client):
 
     assert mock_get.call_args is not None
     assert mock_get.call_args[1]['order_by'] == order_by
+
+
+def test_record_search(create_patents_table, client):
+    table_name = 'NASA Record List Search'
+    table = create_patents_table(table_name)
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    search_columns = [
+        {'field': columns_name_id_map['Title'], 'literal': 'A Direct-To Controller Tool'},
+    ]
+
+    json_search_fuzzy = json.dumps(search_columns)
+
+    response = client.get(
+        f'/api/db/v0/tables/{table.id}/records/?search_fuzzy={json_search_fuzzy}'
+    )
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == 1
 
 
 grouping_params = [
@@ -642,6 +664,7 @@ def test_record_list_groups(
     assert grouping_dict['global_max'] == group_by.global_max
     assert grouping_dict['preproc'] == group_by.preproc
     assert grouping_dict['prefix_length'] == group_by.prefix_length
+    assert grouping_dict['extract_field'] == group_by.extract_field
     assert grouping_dict['ranged'] == group_by.ranged
     _test_group_equality(grouping_dict['groups'], expected_groups)
 
