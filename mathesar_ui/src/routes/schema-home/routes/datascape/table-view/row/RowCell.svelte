@@ -64,7 +64,7 @@
     event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
   ) {
     const { originalEvent } = event.detail;
-    const type = display.handleKeyEventsOnActiveCell(event.detail.key);
+    const type = display.handleKeyEventsOnActiveCell(originalEvent);
     if (type) {
       originalEvent.stopPropagation();
       originalEvent.preventDefault();

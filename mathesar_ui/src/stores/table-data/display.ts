@@ -17,13 +17,56 @@ export const ROW_CONTROL_COLUMN_WIDTH = 70;
 export const DEFAULT_ROW_RIGHT_PADDING = 100;
 export const DEFAULT_COLUMN_WIDTH = 160;
 
-const movementKeys = new Set([
-  'ArrowDown',
-  'ArrowUp',
-  'ArrowRight',
-  'ArrowLeft',
-  'Tab',
-]);
+enum Direction {
+  Up = 'up',
+  Down = 'down',
+  Left = 'left',
+  Right = 'right',
+}
+
+function getDirection(event: KeyboardEvent): Direction | undefined {
+  const { key } = event;
+  const shift = event.shiftKey;
+  switch (true) {
+    case shift && key === 'Tab':
+      return Direction.Left;
+    case shift:
+      return undefined;
+    case key === 'ArrowUp':
+      return Direction.Up;
+    case key === 'ArrowDown':
+      return Direction.Down;
+    case key === 'ArrowLeft':
+      return Direction.Left;
+    case key === 'ArrowRight':
+    case key === 'Tab':
+      return Direction.Right;
+    default:
+      return undefined;
+  }
+}
+
+function getHorizontalDelta(direction: Direction): number {
+  switch (direction) {
+    case Direction.Left:
+      return -1;
+    case Direction.Right:
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+function getVerticalDelta(direction: Direction): number {
+  switch (direction) {
+    case Direction.Up:
+      return -1;
+    case Direction.Down:
+      return 1;
+    default:
+      return 0;
+  }
+}
 
 export function isCellActive(
   activeCell: ActiveCell,
@@ -198,57 +241,70 @@ export class Display {
     });
   }
 
-  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | undefined {
-    const { columns } = this.columnsDataStore.get();
-    const totalCount = get(this.recordsData.totalCount);
-    const savedRecords = get(this.recordsData.savedRecords);
-    const newRecords = get(this.recordsData.newRecords);
-    const pagination = get(this.meta.pagination);
-    const { offset } = pagination;
-    const pageSize = pagination.size;
-    const minRowIndex = 0;
-    const maxRowIndex =
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      Math.min(pageSize, totalCount - offset, savedRecords.length) +
-      newRecords.length;
-    const activeCell = get(this.activeCell);
-
-    if (movementKeys.has(key) && activeCell) {
-      this.activeCell.update((existing) => {
-        if (!existing) {
-          return undefined;
-        }
-        const newActiveCell = { ...existing };
-        switch (key) {
-          case 'ArrowDown':
-            if (existing.rowIndex < maxRowIndex) {
-              newActiveCell.rowIndex += 1;
-            }
-            break;
-          case 'ArrowUp':
-            if (existing.rowIndex > minRowIndex) {
-              newActiveCell.rowIndex -= 1;
-            }
-            break;
-          case 'ArrowRight':
-          case 'Tab':
-            if (existing.columnId < columns.length - 1) {
-              newActiveCell.columnId += 1;
-            }
-            break;
-          case 'ArrowLeft':
-            if (existing.columnId > 0) {
-              newActiveCell.columnId -= 1;
-            }
-            break;
-          default:
-            break;
-        }
-        return newActiveCell;
-      });
-      return 'moved';
+  private getAdjacentCell(
+    activeCell: ActiveCell,
+    direction: Direction,
+  ): ActiveCell | undefined {
+    const rowIndex = (() => {
+      const delta = getVerticalDelta(direction);
+      if (delta === 0) {
+        return activeCell.rowIndex;
+      }
+      const totalCount = get(this.recordsData.totalCount) ?? 0;
+      const savedRecords = get(this.recordsData.savedRecords);
+      const newRecords = get(this.recordsData.newRecords);
+      const pagination = get(this.meta.pagination);
+      const { offset } = pagination;
+      const pageSize = pagination.size;
+      const minRowIndex = 0;
+      const maxRowIndex =
+        Math.min(pageSize, totalCount - offset, savedRecords.length) +
+        newRecords.length;
+      const newRowIndex = activeCell.rowIndex + delta;
+      if (newRowIndex < minRowIndex || newRowIndex > maxRowIndex) {
+        return undefined;
+      }
+      return newRowIndex;
+    })();
+    if (rowIndex === undefined) {
+      return undefined;
     }
 
-    return undefined;
+    const columnId = (() => {
+      const delta = getHorizontalDelta(direction);
+      if (delta === 0) {
+        return activeCell.columnId;
+      }
+      const { columns } = this.columnsDataStore.get();
+      const index = columns.findIndex((c) => c.id === activeCell.columnId);
+      const target = columns[index + delta] as Column | undefined;
+      return target?.id;
+    })();
+    if (columnId === undefined) {
+      return undefined;
+    }
+
+    return { rowIndex, columnId };
+  }
+
+  handleKeyEventsOnActiveCell(key: KeyboardEvent): 'moved' | undefined {
+    const direction = getDirection(key);
+    if (!direction) {
+      return undefined;
+    }
+    let moved = false;
+    this.activeCell.update((activeCell) => {
+      if (!activeCell) {
+        return undefined;
+      }
+      const adjacentCell = this.getAdjacentCell(activeCell, direction);
+      if (adjacentCell) {
+        moved = true;
+        return adjacentCell;
+      }
+      return activeCell;
+    });
+
+    return moved ? 'moved' : undefined;
   }
 }
