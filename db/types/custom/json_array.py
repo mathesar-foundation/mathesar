@@ -12,6 +12,7 @@ DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
 class MathesarJsonArray(TypeDecorator):
     impl = SA_JSONB
     cache_ok = True
+
     def get_col_spec(self, **_):
         return DB_TYPE.upper()
 
@@ -21,6 +22,7 @@ class MathesarJsonArray(TypeDecorator):
     def coerce_compared_value(self, op, value):
         return self.impl.coerce_compared_value(op, value)
 
+
 @compiles(MathesarJsonArray, 'postgresql')
 def _compile_mathesarjsonobject(element, compiler, **kw):
     unchanged_compiled_string = compiler.visit_JSONB(element, **kw)
@@ -28,6 +30,7 @@ def _compile_mathesarjsonobject(element, compiler, **kw):
     changed_id = MathesarCustomType.MATHESAR_JSON_ARRAY.id.upper()
     changed_compiled_string = unchanged_compiled_string.replace(unchanged_id, changed_id)
     return changed_compiled_string
+
 
 def install(engine):
     drop_domain_query = f"""

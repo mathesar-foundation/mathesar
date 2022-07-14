@@ -23,6 +23,7 @@ class MathesarJsonObject(TypeDecorator):
     def coerce_compared_value(self, op, value):
         return self.impl.coerce_compared_value(op, value)
 
+
 @compiles(MathesarJsonObject, 'postgresql')
 def _compile_mathesarjsonobject(element, compiler, **kw):
     unchanged_compiled_string = compiler.visit_JSONB(element, **kw)
@@ -30,6 +31,7 @@ def _compile_mathesarjsonobject(element, compiler, **kw):
     changed_id = MathesarCustomType.MATHESAR_JSON_OBJECT.id.upper()
     changed_compiled_string = unchanged_compiled_string.replace(unchanged_id, changed_id)
     return changed_compiled_string
+
 
 def install(engine):
     drop_domain_query = f"""
