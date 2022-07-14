@@ -1,41 +1,19 @@
 <script lang="ts">
-  import {
-    Pagination as PaginationComponent,
-    Select,
-  } from '@mathesar-component-library';
+  import { getPaginationPageCount } from '@mathesar-component-library';
   import { States } from '@mathesar/utils/api';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import Pagination from '@mathesar/utils/Pagination';
+  import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ recordsData, meta } = $tabularData);
   $: ({ selectedRows, pagination } = meta);
-  $: ({ size: pageSize, page, offset } = $pagination);
+  $: ({ size: pageSize, offset } = $pagination);
   $: ({ totalCount, state, newRecords } = recordsData);
   $: recordState = $state;
 
-  const pageSizeOpts = [100, 200, 500];
-
-  let pageCount: number;
+  $: pageCount = getPaginationPageCount($totalCount ?? 0, pageSize);
   $: max = Math.min($totalCount ?? 0, offset + pageSize);
-
-  function handlePageChange(event: {
-    detail: {
-      currentPage: number;
-    };
-  }) {
-    pagination.update(
-      (p) => new Pagination({ ...p, page: event.detail.currentPage }),
-    );
-  }
-
-  function setPageSize(event: CustomEvent<number | undefined>) {
-    const newPageSize = event.detail;
-    if (typeof newPageSize !== 'undefined' && pageSize !== newPageSize) {
-      $pagination = new Pagination({ page: 1, size: newPageSize });
-    }
-  }
 </script>
 
 <div class="status-pane">
@@ -54,23 +32,10 @@
     {/if}
   </div>
 
-  <div class="pagination-group">
-    {#if $totalCount}
-      <PaginationComponent
-        total={$totalCount}
-        {pageSize}
-        bind:pageCount
-        currentPage={page}
-        on:change={handlePageChange}
-      />
-      <Select
-        triggerAppearance="plain"
-        options={pageSizeOpts}
-        value={pageSize}
-        on:change={setPageSize}
-      />
-    {/if}
-  </div>
+  <PaginationGroup
+    bind:pagination={$pagination}
+    totalCount={$totalCount ?? 0}
+  />
 </div>
 
 <style global lang="scss">

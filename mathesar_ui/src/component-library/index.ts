@@ -1,4 +1,6 @@
+// Utils
 export * from './common/utils';
+export { getPageCount as getPaginationPageCount } from './pagination/paginationUtils';
 
 // Actions
 export { default as clickOffBounds } from './common/actions/clickOffBounds';
