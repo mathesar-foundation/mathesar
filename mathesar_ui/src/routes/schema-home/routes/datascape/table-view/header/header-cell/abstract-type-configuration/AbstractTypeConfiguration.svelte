@@ -41,14 +41,14 @@
     validationContext.validate();
   });
 
-  function resetAbstractType() {
-    selectedDbType = column.type;
-    typeOptions = { ...(column.type_options ?? {}) };
-    displayOptions = { ...(column.display_options ?? {}) };
-    defaultValue = column.default ? { ...column.default } : null;
+  function resetAbstractType(_column: Column) {
     selectedAbstractType = abstractType;
+    selectedDbType = _column.type;
+    typeOptions = { ...(_column.type_options ?? {}) };
+    displayOptions = { ...(_column.display_options ?? {}) };
+    defaultValue = _column.default ? { ..._column.default } : null;
   }
-  resetAbstractType();
+  $: resetAbstractType(column);
 
   function clearTypeRelatedOptions() {
     typeOptions = {};
@@ -59,7 +59,7 @@
   function selectAbstractType(_abstractType: AbstractType) {
     if (selectedAbstractType !== _abstractType) {
       if (_abstractType.identifier === _abstractType?.identifier) {
-        resetAbstractType();
+        resetAbstractType(column);
       } else if (_abstractType.defaultDbType) {
         selectedDbType = _abstractType.defaultDbType;
         clearTypeRelatedOptions();
@@ -72,7 +72,7 @@
   }
 
   function close() {
-    resetAbstractType();
+    resetAbstractType(column);
     typeChangeState = States.Done;
     dispatch('close');
   }

@@ -8,7 +8,11 @@
   import type { FormValues } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/AppTypes';
   import type { Column } from '@mathesar/api/tables/columns';
-  import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+  import type {
+    AbstractType,
+    AbstractTypeDbConfig,
+    AbstractTypeDisplayConfig,
+  } from '@mathesar/stores/abstract-types/types';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
@@ -22,25 +26,20 @@
   export let defaultValue: Column['default'];
   export let processedColumn: ProcessedColumn;
 
-  $: ({ column } = processedColumn);
-
   let selectedTab: 'database' | 'display' = 'database';
   let dbFormHasError = false;
   let displayFormHasError = false;
   let defaultValueHasError = false;
   let showDefaultValueErrorIndication = false;
 
-  // Why are the following not reactive?
-  // The whole component gets re-rendered when selectedAbstractType changes,
-  // so these do not have to be reactive.
-  // Also, these functions should not be reactive for changes in selectedDbType and column.
-  const { dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
+  $: ({ column } = processedColumn);
+  $: ({ dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
     selectedAbstractType,
     selectedDbType,
     column,
-  );
-  const { displayOptionsConfig, displayForm, displayFormValues } =
-    constructDisplayForm(selectedAbstractType, selectedDbType, column);
+  ));
+  $: ({ displayOptionsConfig, displayForm, displayFormValues } =
+    constructDisplayForm(selectedAbstractType, selectedDbType, column));
 
   const validationContext = getValidationContext();
   validationContext.addValidator('AbstractTypeConfigValidator', () => {
@@ -58,9 +57,12 @@
     return isValid;
   });
 
-  function onDbFormValuesChange(dbFormValueSubstance: FormValues) {
-    if (dbOptionsConfig) {
-      const determinedResult = dbOptionsConfig.determineDbTypeAndOptions(
+  function onDbFormValuesChange(
+    dbFormValueSubstance: FormValues,
+    _dbOptionsConfig: AbstractTypeDbConfig | undefined,
+  ) {
+    if (_dbOptionsConfig) {
+      const determinedResult = _dbOptionsConfig.determineDbTypeAndOptions(
         dbFormValueSubstance,
         column.type,
       );
@@ -70,18 +72,21 @@
     }
   }
 
-  function onDisplayFormValuesChange(displayFormValueSubstance: FormValues) {
-    if (displayOptionsConfig) {
+  function onDisplayFormValuesChange(
+    displayFormValueSubstance: FormValues,
+    _displayOptionsConfig: AbstractTypeDisplayConfig | undefined,
+  ) {
+    if (_displayOptionsConfig) {
       displayOptions =
-        displayOptionsConfig?.determineDisplayOptions(
+        _displayOptionsConfig?.determineDisplayOptions(
           displayFormValueSubstance,
         ) ?? {};
       validationContext.validate();
     }
   }
 
-  $: onDbFormValuesChange($dbFormValues);
-  $: onDisplayFormValuesChange($displayFormValues);
+  $: onDbFormValuesChange($dbFormValues, dbOptionsConfig);
+  $: onDisplayFormValuesChange($displayFormValues, displayOptionsConfig);
 </script>
 
 <div class="type-options">
