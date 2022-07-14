@@ -5,7 +5,7 @@ export default class CacheManager<Key, Value> {
 
   constructor(maxEntries: number, initialValues?: Map<Key, Value>) {
     this.maxEntries = maxEntries;
-    this.cache = new Map(initialValues);
+    this.cache = new Map(initialValues ?? []);
   }
 
   set(key: Key, value: Value): void {

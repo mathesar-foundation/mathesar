@@ -2,9 +2,14 @@ import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import { EventHandler } from '@mathesar-component-library';
 import type { CancellablePromise } from '@mathesar-component-library';
-import { postAPI, putAPI } from '@mathesar/utils/api';
+import { getAPI, postAPI, putAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
-import type { QueryInstance } from '@mathesar/api/queries/queryList';
+import type {
+  QueryInstance,
+  QueryResultColumns,
+  QueryResultRecords,
+} from '@mathesar/api/queries/queryList';
+import Pagination from '@mathesar/utils/Pagination';
 import type QueryModel from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
 
@@ -19,7 +24,8 @@ export default class QueryManager extends EventHandler<{
 
   state: Writable<{
     saveState?: RequestStatus;
-    resultFetchState?: RequestStatus;
+    columnsFetchState?: RequestStatus;
+    recordsFetchState?: RequestStatus;
     isUndoPossible: boolean;
     isRedoPossible: boolean;
   }> = writable({
@@ -27,11 +33,17 @@ export default class QueryManager extends EventHandler<{
     isRedoPossible: false,
   });
 
-  // columns: Writable<[]>;
+  pagination: Writable<Pagination> = writable(new Pagination());
 
-  // results: Writable<[]>;
+  columns: Writable<QueryResultColumns> = writable([]);
+
+  records: Writable<QueryResultRecords> = writable({ count: 0, results: [] });
 
   querySavePromise: CancellablePromise<QueryInstance> | undefined;
+
+  queryColumnsFetchPromise: CancellablePromise<QueryResultColumns> | undefined;
+
+  queryRecordsFetchPromise: CancellablePromise<QueryResultRecords> | undefined;
 
   constructor(query: QueryModel) {
     super();
@@ -85,30 +97,102 @@ export default class QueryManager extends EventHandler<{
     }));
   }
 
-  // fetchResults(): void {
+  async fetchColumns(): Promise<QueryResultColumns | undefined> {
+    const q = this.getQueryModelData();
 
-  // }
+    if (!q.id) {
+      this.state.update((_state) => ({
+        ..._state,
+        columnsFetchState: { state: 'success' },
+      }));
+      this.columns.set([]);
+      return undefined;
+    }
 
-  async silentUpdate(
-    callback: (queryModel: QueryModel) => QueryModel,
-  ): Promise<void> {
-    this.query.update((q) => callback(q));
-    this.undoRedoManager.pushState(this.getQueryModelData());
-    this.setUndoRedoStates();
-    await this.save();
+    try {
+      this.state.update((_state) => ({
+        ..._state,
+        columnsFetchState: { state: 'processing' },
+      }));
+      this.queryColumnsFetchPromise?.cancel();
+      this.queryColumnsFetchPromise = getAPI(
+        `/api/db/v0/queries/${q.id}/columns/`,
+      );
+      const result = await this.queryColumnsFetchPromise;
+      this.columns.set(result);
+      this.state.update((_state) => ({
+        ..._state,
+        columnsFetchState: { state: 'success' },
+      }));
+      return result;
+    } catch (err) {
+      this.state.update((_state) => ({
+        ..._state,
+        columnsFetchState: {
+          state: 'failure',
+          errors:
+            err instanceof Error
+              ? [err.message]
+              : ['An error occurred while trying to fetch query columns'],
+        },
+      }));
+    }
+    return undefined;
+  }
+
+  async fetchResults(): Promise<QueryResultRecords | undefined> {
+    const q = this.getQueryModelData();
+
+    if (!q.id) {
+      this.state.update((_state) => ({
+        ..._state,
+        recordsFetchState: { state: 'success' },
+      }));
+      this.records.set({ count: 0, results: [] });
+      return undefined;
+    }
+
+    try {
+      this.state.update((_state) => ({
+        ..._state,
+        recordsFetchState: { state: 'processing' },
+      }));
+      this.queryRecordsFetchPromise?.cancel();
+      this.queryRecordsFetchPromise = getAPI(
+        `/api/db/v0/queries/${q.id}/records/`,
+      );
+      const result = await this.queryRecordsFetchPromise;
+      this.records.set(result);
+      this.state.update((_state) => ({
+        ..._state,
+        recordsFetchState: { state: 'success' },
+      }));
+      return result;
+    } catch (err) {
+      this.state.update((_state) => ({
+        ..._state,
+        recordsFetchState: {
+          state: 'failure',
+          errors:
+            err instanceof Error
+              ? [err.message]
+              : ['An error occurred while trying to fetch query records'],
+        },
+      }));
+    }
+    return undefined;
   }
 
   async update(
     callback: (queryModel: QueryModel) => QueryModel,
     opts?: { reversible: boolean },
   ): Promise<void> {
-    await this.silentUpdate(callback);
-    // this.fetchResults();
+    this.query.update((q) => callback(q));
+    this.undoRedoManager.pushState(this.getQueryModelData());
+    this.setUndoRedoStates();
+    await this.save();
+    await Promise.all([this.fetchColumns(), this.fetchResults()]);
   }
-
-  // async delete() {
-
-  // }
 
   async performUndoRedoSync(query?: QueryModel): Promise<void> {
     if (query) {
@@ -119,6 +203,7 @@ export default class QueryManager extends EventHandler<{
       }
       this.query.set(queryToSet);
       await this.save();
+      await Promise.all([this.fetchColumns(), this.fetchResults()]);
     }
     this.setUndoRedoStates();
   }

@@ -8,6 +8,7 @@ import { getAvailableName } from '@mathesar/utils/db';
 import type { QueryInstance } from '@mathesar/api/queries/queryList';
 import type { TableEntry, JpPath } from '@mathesar/api/tables/tableList';
 import type { Column } from '@mathesar/api/tables/columns';
+import { isDefinedNonNullable } from '@mathesar-component-library';
 
 export interface QueryInitialColumn {
   id: Column['id'];
@@ -33,7 +34,7 @@ export default class QueryModel implements UnsavedQueryInstance {
     this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
-    this.initial_columns = model?.initial_columns;
+    this.initial_columns = model?.initial_columns ?? [];
   }
 
   withBaseTable(base_table?: number): QueryModel {
@@ -70,7 +71,7 @@ export default class QueryModel implements UnsavedQueryInstance {
         ...initialColumns,
         {
           alias,
-          column: column.id,
+          id: column.id,
           jpPath: column.jpPath,
         },
       ],
@@ -82,7 +83,7 @@ export default class QueryModel implements UnsavedQueryInstance {
   // }
 
   isSaveable(): boolean {
-    return typeof this.name !== 'undefined' && this.name.trim() !== '';
+    return isDefinedNonNullable(this.name) && this.name.trim() !== '';
   }
 
   serialize(): string {

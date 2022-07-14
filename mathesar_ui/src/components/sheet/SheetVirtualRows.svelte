@@ -12,7 +12,7 @@
   export let itemSize: VirtualListProps['itemSize'];
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
-  export let itemKey: VirtualListProps['itemKey'];
+  export let itemKey: VirtualListProps['itemKey'] | undefined = undefined;
 </script>
 
 <div data-sheet-element="body" tabindex="-1">

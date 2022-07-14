@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  export let horizontalScrollOffset: number;
+  export let horizontalScrollOffset = 0;
 
   let headerRef: HTMLElement;
 

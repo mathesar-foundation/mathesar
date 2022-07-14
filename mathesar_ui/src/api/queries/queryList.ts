@@ -12,7 +12,7 @@ export interface QueryInstance {
   readonly base_table?: number;
   readonly initial_columns?: {
     alias: string;
-    column: Column['id'];
+    id: Column['id'];
     jpPath?: JpPath;
   }[];
 }
@@ -22,3 +22,23 @@ export interface QueryInstance {
  */
 
 export type QueriesList = PaginatedResponse<QueryInstance>;
+
+/**
+ * endpoint: /api/db/v0/queries/<query_id>/records/
+ */
+
+export type QueryResultRecords = PaginatedResponse<Record<string, unknown>>;
+
+/**
+ * endpoint: /api/db/v0/queries/<query_id>/columns/
+ */
+
+export interface QueryResultColumn {
+  alias: string;
+  name: string | null;
+  type: Column['type'];
+  type_options: Column['type_options'];
+  display_options: Column['display_options'];
+}
+
+export type QueryResultColumns = QueryResultColumn[];

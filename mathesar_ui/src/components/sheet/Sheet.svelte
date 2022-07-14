@@ -74,7 +74,9 @@
 </script>
 
 <div class="sheet">
-  <slot />
+  {#if columns.length}
+    <slot />
+  {/if}
 </div>
 
 <style lang="scss">

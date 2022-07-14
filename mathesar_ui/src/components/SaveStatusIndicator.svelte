@@ -1,24 +1,31 @@
 <script lang="ts">
-  export let status: 'processing' | 'success' | 'failure' | undefined;
+  export let status:
+    | 'unsaved'
+    | 'processing'
+    | 'success'
+    | 'failure'
+    | undefined;
 </script>
 
-<div
-  class="save-status"
-  class:new={!status}
-  class:saved={status === 'success'}
-  class:saving={status === 'processing'}
-  class:error={status === 'failure'}
->
-  {#if !status}
-    *Unsaved
-  {:else if status === 'success'}
-    All changes saved
-  {:else if status === 'processing'}
-    Saving changes...
-  {:else if status === 'failure'}
-    ! Couldn't save changes
-  {/if}
-</div>
+{#if status}
+  <div
+    class="save-status"
+    class:unsaved={status === 'unsaved'}
+    class:saved={status === 'success'}
+    class:saving={status === 'processing'}
+    class:error={status === 'failure'}
+  >
+    {#if !status}
+      *Unsaved
+    {:else if status === 'success'}
+      All changes saved
+    {:else if status === 'processing'}
+      Saving changes...
+    {:else if status === 'failure'}
+      ! Couldn't save changes
+    {/if}
+  </div>
+{/if}
 
 <style lang="scss">
   .save-status {
