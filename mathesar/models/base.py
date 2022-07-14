@@ -19,7 +19,7 @@ from db.constraints import utils as constraint_utils
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
-from db.records.operations.select import get_records_with_default_order as db_get_records_with_default_order, get_default_order_by
+from db.records.operations.select import get_records_with_default_order as db_get_records_with_default_order
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils

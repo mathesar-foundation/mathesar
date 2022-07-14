@@ -39,9 +39,9 @@ class QuerySerializer(serializers.ModelSerializer):
         _raise_if_not_list_of_dicts("transformations", transforms)
         for transform in transforms:
             if "type" not in transform:
-                raise serializers.ValidationError(f"Each 'transformations' sub-dict must have a 'type' key.")
+                raise serializers.ValidationError("Each 'transformations' sub-dict must have a 'type' key.")
             if "spec" not in transform:
-                raise serializers.ValidationError(f"Each 'transformations' sub-dict must have a 'spec' key.")
+                raise serializers.ValidationError("Each 'transformations' sub-dict must have a 'spec' key.")
         return transforms
 
     # TODO consider moving to UIQuery field validation:

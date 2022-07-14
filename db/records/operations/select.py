@@ -259,7 +259,8 @@ def _get_duplicate_only_cte(relation, duplicate_columns):
     duplicate_flag_cte = (
         select(
             *relation.c,
-            (func
+            (
+                func
                 .count(1)
                 .over(partition_by=duplicate_columns) > 1
             ).label(DUPLICATE_LABEL),

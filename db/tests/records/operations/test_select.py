@@ -5,7 +5,7 @@ from collections import Counter
 
 from sqlalchemy import Column, VARCHAR
 
-from db.records.operations.select import get_records, get_records_with_default_order, get_column_cast_records, apply_transformations
+from db.records.operations.select import get_records, get_column_cast_records, apply_transformations
 from db.tables.operations.create import create_mathesar_table
 from db.types.base import PostgresType
 
