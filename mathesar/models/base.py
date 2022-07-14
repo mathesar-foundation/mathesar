@@ -19,7 +19,7 @@ from db.constraints import utils as constraint_utils
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
-from db.records.operations.select import get_records as db_get_records, get_default_order_by
+from db.records.operations.select import get_records_with_default_order as db_get_records_with_default_order, get_default_order_by
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils
@@ -289,7 +289,10 @@ class Table(DatabaseObject, Relation):
     # TODO unused? delete if so
     @property
     def sa_all_records(self):
-        return db_get_records(self._sa_table, self.schema._sa_engine)
+        return db_get_records_with_default_order(
+            table=self._sa_table,
+            engine=self.schema._sa_engine,
+        )
 
     def sa_num_records(self, filter=None):
         return get_count(self._sa_table, self.schema._sa_engine, filter=filter)
@@ -313,13 +316,11 @@ class Table(DatabaseObject, Relation):
         group_by=None,
         duplicate_only=None,
     ):
-        if not order_by:
-            order_by = get_default_order_by(self._sa_table, order_by)
-        return db_get_records(
-            self._sa_table,
-            self.schema._sa_engine,
-            limit,
-            offset,
+        return db_get_records_with_default_order(
+            table=self._sa_table,
+            engine=self.schema._sa_engine,
+            limit=limit,
+            offset=offset,
             filter=filter,
             order_by=order_by,
             group_by=group_by,

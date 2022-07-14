@@ -298,7 +298,7 @@ def test_get_group_augmented_records_pg_query_metadata_fields(roster_table_obj, 
     )
     augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -317,7 +317,7 @@ def test_smoke_get_group_augmented_records_pg_query_prefix(roster_table_obj):
     )
     augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -336,7 +336,7 @@ def test_smoke_get_group_augmented_records_pg_query_email_preproc(roster_table_o
     )
     augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -356,7 +356,7 @@ def test_smoke_get_group_augmented_records_pg_query_uris_preproc(uris_table_obj,
     )
     augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -384,7 +384,7 @@ def test_smoke_get_group_augmented_records_pg_query_magnitude(magnitude_table_ob
     )
     augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -470,7 +470,7 @@ def test_get_distinct_group_select_correct_num_group_id(
     roster, engine = roster_table_obj
     augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     assert max([_group_id(row) for row in res]) == num
 
@@ -495,7 +495,7 @@ def test_group_select_correct_num_group_id_magnitude(
     )
     augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     assert max([_group_id(row) for row in res]) == num
 
@@ -525,7 +525,7 @@ def test_group_select_correct_num_group_id_count_by(
     )
     augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     assert max([_group_id(row) for row in res]) == num
 
@@ -539,7 +539,7 @@ def test_magnitude_group_select_bounds_chain(magnitude_table_obj, col_name):
     )
     augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     for i in range(len(res) - 1):
         assert (
@@ -560,7 +560,7 @@ def test_magnitude_group_select_bounds_pretty(magnitude_table_obj, col_name):
     )
     augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     for row in res:
         assert (
@@ -578,7 +578,7 @@ def test_magnitude_group_select_inside_bounds(magnitude_table_obj, col_name):
     )
     augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     for row in res:
         assert (

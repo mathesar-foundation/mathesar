@@ -20,6 +20,22 @@ def get_record(table, engine, id_value):
     return result[0] if result else None
 
 
+def get_records_with_default_order(
+        table,
+        engine,
+        order_by=[],
+        **kwargs,
+):
+    if not order_by:
+        order_by = get_default_order_by(table, order_by)
+    return get_records(
+        table=table,
+        engine=engine,
+        order_by=order_by,
+        **kwargs
+    )
+
+
 # TODO change interface to where transformations is a sequence of transform steps
 # first change should be made on the viewset level, where transform steps are currently assigned
 # to named parameters.
@@ -60,8 +76,7 @@ def get_records(
         group_by=group_by,
         duplicate_only=duplicate_only
     )
-    executable = _to_executable(relation)
-    return execute_pg_query(engine, executable)
+    return execute_pg_query(engine, relation)
 
 
 def get_count(table, engine, filter=None):
@@ -76,8 +91,7 @@ def get_count(table, engine, filter=None):
         filter=filter,
         columns_to_select=columns_to_select,
     )
-    executable = _to_executable(relation)
-    return execute_pg_query(engine, executable)[0][col_name]
+    return execute_pg_query(engine, relation)[0][col_name]
 
 
 # NOTE deprecated; this will be replaced with apply_transformations
@@ -109,10 +123,10 @@ def apply_transformations_deprecated(
         relation = _select_subset_of_columns(
             relation,
             columns_to_select,)
-    if limit:
-        relation = _limit(relation, limit)
     if offset:
         relation = _offset(relation, offset)
+    if limit:
+        relation = _limit(relation, limit)
     return relation
 
 
@@ -145,8 +159,9 @@ def _apply_transform(relation, transform):
         spec = transform['spec']
         relation = _sort(relation, spec)
     elif transform_type == 'group-agg':
-        group_by_spec = transform.get('group_by')
-        agg_spec = transform.get('agg')
+        spec = transform['spec']
+        group_by_spec = spec.get('group_by')
+        agg_spec = spec.get('agg')
         group_agged = _group_aggregate(relation, group_by_spec, agg_spec)
         relation = group_agged
     elif transform_type == 'limit':
@@ -183,10 +198,11 @@ def _offset(relation, offset):
 def _group_aggregate(relation, group_by, aggregate):
     # TODO maybe keep this as json, and convert to GroupBy at last moment?
     # other transform specs are json at this point in the pipeline
-    executable = _to_executable(relation)
     if isinstance(group_by, group.GroupBy):
-        executable = group.get_group_augmented_records_pg_query(executable, group_by)
-    return _to_non_executable(executable)
+        executable = group.get_group_augmented_records_pg_query(relation, group_by)
+        return _to_non_executable(executable)
+    else:
+        relation
 
 
 def _select_subset_of_columns(relation, columns_to_select):

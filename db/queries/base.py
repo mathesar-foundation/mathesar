@@ -56,11 +56,15 @@ class DBQuery:
         relation.
         """
         initial_relation = _get_initial_relation(self)
-        transformed = records_select.apply_transformations(
-            initial_relation,
-            self.transformations,
-        )
-        return transformed
+        transformations = self.transformations
+        if transformations:
+            transformed = records_select.apply_transformations(
+                initial_relation,
+                transformations,
+            )
+            return transformed
+        else:
+            return initial_relation
 
 
 class InitialColumn:

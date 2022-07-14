@@ -27,10 +27,14 @@ class QuerySerializer(serializers.ModelSerializer):
         else:
             return None
 
+    # TODO consider moving to UIQuery field validation:
+    # see https://docs.djangoproject.com/en/4.0/ref/validators/
     def validate_initial_columns(self, cols):
         _raise_if_not_list_of_dicts("initial_columns", cols)
         return cols
 
+    # TODO consider moving to UIQuery field validation:
+    # see https://docs.djangoproject.com/en/4.0/ref/validators/
     def validate_transformations(self, transforms):
         _raise_if_not_list_of_dicts("transformations", transforms)
         for transform in transforms:
@@ -40,6 +44,8 @@ class QuerySerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"Each 'transformations' sub-dict must have a 'spec' key.")
         return transforms
 
+    # TODO consider moving to UIQuery field validation:
+    # see https://docs.djangoproject.com/en/4.0/ref/validators/
     def validate_display_options(self, display_options):
         if not isinstance(display_options, dict):
             raise serializers.ValidationError("display_options should be a dict.")
