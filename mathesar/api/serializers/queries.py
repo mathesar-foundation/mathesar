@@ -4,12 +4,18 @@ from mathesar.models.query import UIQuery
 
 
 class QuerySerializer(serializers.ModelSerializer):
-    records_url = serializers.SerializerMethodField()
-    columns_url = serializers.SerializerMethodField()
+    records_url = serializers.SerializerMethodField('get_records_url')
+    columns_url = serializers.SerializerMethodField('get_columns_url')
+    schema = serializers.SerializerMethodField('get_schema')
 
     class Meta:
         model = UIQuery
         fields = '__all__'
+
+    def get_schema(self, uiquery):
+        base_table = uiquery.base_table
+        if base_table:
+            return base_table.schema.id
 
     def get_records_url(self, obj):
         if isinstance(obj, UIQuery):
