@@ -2,6 +2,8 @@ from sqlalchemy import exists, func, literal, select
 
 from db import constants
 from db.columns.base import MathesarColumn
+from db.columns.operations.alter import batch_update_columns
+from db.columns.operations.select import get_columns_attnum_from_names
 from db.links.operations.create import create_foreign_key_link
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
@@ -32,7 +34,7 @@ def _create_split_tables(extracted_table_name, extracted_columns, remainder_tabl
     return extracted_table, remainder_table_with_fk_key, fk_column_name
 
 
-def _create_split_insert_stmt(old_table, extracted_table, extracted_columns, remainder_table, remainder_fk_name):
+def _create_split_insert_stmt(old_table, extracted_table, extracted_columns, remainder_fk_name):
     SPLIT_ID = f"{constants.MATHESAR_PREFIX}_split_column_alias"
     extracted_column_names = [col.name for col in extracted_columns]
     split_cte = select(
@@ -58,10 +60,9 @@ def _create_split_insert_stmt(old_table, extracted_table, extracted_columns, rem
     )
     fk_update_dict = {remainder_fk_name: split_cte.c[SPLIT_ID]}
     split_ins = (
-        remainder_table
-        .update().
-        values(**fk_update_dict).
-        where(remainder_table.c[constants.ID] == split_cte.c[constants.ID],
+        old_table
+        .update().values(**fk_update_dict).
+        where(old_table.c[constants.ID] == split_cte.c[constants.ID],
               exists(extract_ins_cte.select()))
     )
     return split_ins
@@ -80,7 +81,7 @@ def extract_columns_from_table(old_table_name, extracted_column_names, extracted
         extracted_table, remainder_table_with_fk_column, fk_column_name = _create_split_tables(
             extracted_table_name,
             extracted_columns,
-            remainder_table_name,
+            old_table_name,
             schema,
             engine,
         )
@@ -88,10 +89,13 @@ def extract_columns_from_table(old_table_name, extracted_column_names, extracted
             old_table,
             extracted_table,
             extracted_columns,
-            old_table,
             fk_column_name,
         )
         conn.execute(split_ins)
+        remainder_table_oid = get_oid_from_table(remainder_table_with_fk_column.name, schema, engine)
+        column_attnums = get_columns_attnum_from_names(remainder_table_oid, extracted_column_names, engine, conn)
+        deletion_column_data = {'attnum': column_attnum for column_attnum in column_attnums}
+        batch_update_columns(remainder_table_oid, engine, deletion_column_data)
     if drop_original_table:
         old_table.drop()
 
