@@ -7,6 +7,7 @@
   } from '@mathesar/api/tables/tableList';
   import { getAPI } from '@mathesar/utils/api';
   import type { RequestStatus } from '@mathesar/utils/api';
+  import CacheManager from '@mathesar/utils/CacheManager';
   import {
     getBaseTableColumnsWithLinks,
     getTablesThatReferenceBaseTable,
@@ -21,35 +22,56 @@
   let baseTableColumns: ColumnWithLink[] = [];
   let tablesThatReferenceBaseTable: ReferencedByTable[];
 
+  const cacheManager = new CacheManager<
+    number,
+    {
+      baseTableColumns: ColumnWithLink[];
+      tablesThatReferenceBaseTable: ReferencedByTable[];
+    }
+  >(5);
+
   async function generateTree(_baseTable: TableEntry | undefined) {
     fetchPromise?.cancel();
-    baseTableColumns = [];
-    tablesThatReferenceBaseTable = [];
-    if (_baseTable) {
-      try {
-        requestStatus = { state: 'processing' };
-        fetchPromise = getAPI<JoinableTableResult>(
-          `/api/db/v0/tables/${_baseTable.id}/joinable_tables/`,
-        );
-        const result = await fetchPromise;
-        baseTableColumns = getBaseTableColumnsWithLinks(result, _baseTable);
-        tablesThatReferenceBaseTable = getTablesThatReferenceBaseTable(
-          result,
-          _baseTable,
-        );
-        requestStatus = { state: 'success' };
-      } catch (err: unknown) {
-        const error =
-          err instanceof Error
-            ? err.message
-            : 'There was an error fetching joinable links';
-        requestStatus = {
-          state: 'failure',
-          errors: [error],
-        };
-      }
-    } else {
+
+    if (!_baseTable) {
+      baseTableColumns = [];
+      tablesThatReferenceBaseTable = [];
       requestStatus = { state: 'success' };
+      return;
+    }
+
+    const cachedResult = cacheManager.get(_baseTable.id);
+    if (cachedResult) {
+      ({ baseTableColumns, tablesThatReferenceBaseTable } = cachedResult);
+      requestStatus = { state: 'success' };
+      return;
+    }
+
+    try {
+      requestStatus = { state: 'processing' };
+      fetchPromise = getAPI<JoinableTableResult>(
+        `/api/db/v0/tables/${_baseTable.id}/joinable_tables/`,
+      );
+      const result = await fetchPromise;
+      baseTableColumns = getBaseTableColumnsWithLinks(result, _baseTable);
+      tablesThatReferenceBaseTable = getTablesThatReferenceBaseTable(
+        result,
+        _baseTable,
+      );
+      cacheManager.set(_baseTable.id, {
+        baseTableColumns,
+        tablesThatReferenceBaseTable,
+      });
+      requestStatus = { state: 'success' };
+    } catch (err: unknown) {
+      const error =
+        err instanceof Error
+          ? err.message
+          : 'There was an error fetching joinable links';
+      requestStatus = {
+        state: 'failure',
+        errors: [error],
+      };
     }
   }
 

@@ -33,7 +33,7 @@ const requestMap: Map<
 > = new Map();
 
 function sortedQueryEntries(queryEntries: QueryInstance[]): QueryInstance[] {
-  return [...queryEntries].sort((a, b) => a.name.localeCompare(b.name));
+  return [...queryEntries].sort((a, b) => a.name?.localeCompare(b.name));
 }
 
 function setSchemaQueriesStore(
@@ -173,11 +173,13 @@ export function putQuery(
     `/api/db/v0/queries/${query.id}/`,
     query,
   );
-  void promise.then(() => {
+  void promise.then((result) => {
     // TODO: Get schemaId as a query property
     const schemaId = get(currentSchemaId);
     if (schemaId) {
-      void refetchQueriesForSchema(schemaId);
+      const store = getQueriesStoreForSchema(schemaId);
+      get(store).data.set(query.id, result);
+      setSchemaQueriesStore(schemaId, [...get(store).data.values()]);
     }
     return undefined;
   });
