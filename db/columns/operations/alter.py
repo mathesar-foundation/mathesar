@@ -219,7 +219,7 @@ def _batch_alter_table_rename_columns(table_oid, column_data_list, connection, e
                 )
 
 
-def _batch_alter_table_drop_columns(table_oid, column_data_list, connection, engine):
+def batch_alter_table_drop_columns(table_oid, column_data_list, connection, engine):
     table = reflect_table_from_oid(table_oid, engine, connection)
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
@@ -237,4 +237,4 @@ def batch_update_columns(table_oid, engine, column_data_list):
     with engine.begin() as conn:
         _batch_update_column_types(table_oid, column_data_list, conn, engine)
         _batch_alter_table_rename_columns(table_oid, column_data_list, conn, engine)
-        _batch_alter_table_drop_columns(table_oid, column_data_list, conn, engine)
+        batch_alter_table_drop_columns(table_oid, column_data_list, conn, engine)
