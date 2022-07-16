@@ -1,8 +1,9 @@
 import { getContext, setContext } from 'svelte';
-import type { Writable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 import { derived } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { States } from '@mathesar/utils/api';
 import type { TerseMetaProps, MetaProps } from './meta';
 import { makeMetaProps, makeTerseMetaProps, Meta } from './meta';
 import type { ColumnsData } from './columns';
@@ -62,6 +63,8 @@ export class TabularData {
 
   display: Display;
 
+  isLoading: Readable<boolean>;
+
   constructor(props: TabularDataProps, abstractTypeMap: AbstractTypesMap) {
     this.type = props.type;
     this.id = props.id;
@@ -89,6 +92,18 @@ export class TabularData {
             processColumn(column, constraintsData.constraints, abstractTypeMap),
           ]),
         ),
+    );
+
+    this.isLoading = derived(
+      [
+        this.columnsDataStore,
+        this.constraintsDataStore,
+        this.recordsData.state,
+      ],
+      ([columnsData, constraintsData, recordsDataState]) =>
+        columnsData.state === States.Loading ||
+        constraintsData.state === States.Loading ||
+        recordsDataState === States.Loading,
     );
 
     this.columnsDataStore.on('columnRenamed', async () => {

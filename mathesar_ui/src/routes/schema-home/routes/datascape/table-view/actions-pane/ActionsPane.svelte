@@ -40,16 +40,12 @@
   const linkTableModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
 
-  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
+  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore, isLoading } =
     $tabularData);
   $: ({ columns } = $columnsDataStore);
   $: ({ filtering, sorting, grouping, selectedRows, sheetState } = meta);
   $: recordState = recordsData.state;
 
-  $: isLoading =
-    $columnsDataStore.state === States.Loading ||
-    $recordState === States.Loading ||
-    $constraintsDataStore.state === States.Loading;
   $: isError =
     $columnsDataStore.state === States.Error ||
     $recordState === States.Error ||
@@ -153,7 +149,7 @@
   <div class="divider" />
 
   <Button
-    disabled={isLoading}
+    disabled={$isLoading}
     size="small"
     on:click={() => recordsData.addEmptyRecord()}
   >
@@ -164,7 +160,7 @@
   <div class="divider" />
 
   <Button
-    disabled={isLoading}
+    disabled={$isLoading}
     size="small"
     on:click={() => linkTableModal.open()}
   >
@@ -187,13 +183,13 @@
   {/if}
 
   <div class="loading-info">
-    <Button size="small" disabled={isLoading} on:click={refresh}>
+    <Button size="small" disabled={$isLoading} on:click={refresh}>
       <Icon
         {...isError && !isLoading ? iconError : iconRefresh}
-        spin={isLoading}
+        spin={$isLoading}
       />
       <span>
-        {#if isLoading}
+        {#if $isLoading}
           Loading
         {:else if isError}
           Retry

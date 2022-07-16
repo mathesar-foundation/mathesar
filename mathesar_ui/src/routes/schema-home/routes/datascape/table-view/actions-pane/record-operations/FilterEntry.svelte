@@ -26,7 +26,8 @@
   export let value: FilterEntry['value'] | undefined;
   export let noOfFilters: number;
 
-  $: ({ processedColumns } = $tabularData);
+  $: ({ processedColumns, constraintsDataStore } = $tabularData);
+  $: ({ constraints } = $constraintsDataStore);
   $: columnIds = [...$processedColumns].map(([_columnId]) => _columnId);
   $: processedSelectedColumn = columnId
     ? $processedColumns.get(columnId)
@@ -93,12 +94,15 @@
   }
 
   function calculateInputCap(
-    _selectedCondition?: AbstractTypeFilterDefinition,
-    _processedSelectedColumn?: ProcessedColumn,
+    _selectedCondition: AbstractTypeFilterDefinition | undefined,
+    _processedColumn: ProcessedColumn | undefined,
   ): ComponentAndProps | undefined {
+    if (!_processedColumn) {
+      return undefined;
+    }
     const parameterTypeId = _selectedCondition?.parameters[0];
     // If there are no parameters, show no input. eg., isEmpty
-    if (typeof parameterTypeId === 'undefined') {
+    if (parameterTypeId === undefined) {
       return undefined;
     }
 
@@ -106,15 +110,19 @@
     // Check if the type is same as column's type.
     // If yes, pass down column's calculated cap.
     // If no, pass down the type directly.
-    const abstractTypeId = _processedSelectedColumn?.abstractType.identifier;
+    const abstractTypeId = _processedColumn?.abstractType.identifier;
     if (abstractTypeId === parameterTypeId && selectedColumnInputCap) {
       return selectedColumnInputCap;
     }
-    return getDbTypeBasedInputCap({
-      type: parameterTypeId,
-      type_options: {},
-      display_options: {},
-    });
+    return getDbTypeBasedInputCap(
+      {
+        ..._processedColumn.column,
+        type: parameterTypeId,
+        type_options: {},
+        display_options: {},
+      },
+      constraints,
+    );
   }
 
   $: inputCap = calculateInputCap(selectedCondition, processedSelectedColumn);

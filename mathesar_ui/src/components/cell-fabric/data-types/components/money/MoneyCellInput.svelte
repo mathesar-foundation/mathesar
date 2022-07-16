@@ -32,6 +32,7 @@
   {...$$restProps}
   value={childValue}
   on:blur
+  on:focus
   on:keydown
   on:input={({ detail: newChildValue }) => {
     parentValue = newChildValue;

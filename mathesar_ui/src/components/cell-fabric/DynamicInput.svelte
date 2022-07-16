@@ -20,6 +20,12 @@ during Sheet component creation.
     value: unknown;
     hasError?: boolean;
     componentAndProps: ComponentAndProps;
+
+    /**
+     * From `LinkedRecordInput`. Perhaps there's a better way to specify this
+     * property here.
+     */
+    containerClass?: string;
   }
 
   export let value: unknown;
@@ -38,4 +44,7 @@ during Sheet component creation.
   on:change
   on:focus
   on:blur
+  on:recordSelectorOpen
+  on:recordSelectorCancel
+  on:recordSelectorSubmit
 />
