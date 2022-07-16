@@ -34,11 +34,9 @@
   import FormField from '@mathesar/components/FormField.svelte';
   import DynamicInput from '@mathesar/components/cell/DynamicInput.svelte';
   import type { Column } from '@mathesar/api/tables/columns';
-  import { getDbTypeBasedInputCap } from '@mathesar/components/cell/utils';
+  import type { ComponentAndProps } from '@mathesar/component-library/types';
 
-  export let selectedDbType: Column['type'];
-  export let typeOptions: Column['type_options'];
-  export let displayOptions: Column['display_options'];
+  export let inputComponentAndProps: ComponentAndProps;
   export let defaultValue: Column['default'];
   export let defaultValueHasError = false;
 
@@ -65,11 +63,6 @@
       (typeof value === 'undefined' || value === null || value === '');
     validationContext.validate();
   }
-  $: inputComponentAndProps = getDbTypeBasedInputCap({
-    type: selectedDbType,
-    type_options: typeOptions,
-    display_options: displayOptions,
-  });
 
   // Show error to the user only after user modifies value
   export let showError = false;

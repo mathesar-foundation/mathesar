@@ -59,6 +59,7 @@
   {formatter}
   {inputmode}
   on:blur
+  on:focus
   on:keydown
   on:input
 />

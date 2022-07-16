@@ -15,5 +15,9 @@
 </script>
 
 {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-  <slot {processedColumn} style={getCellStyle($columnPlacements, columnId)} />
+  <slot
+    {processedColumn}
+    {columnId}
+    style={getCellStyle($columnPlacements, columnId)}
+  />
 {/each}

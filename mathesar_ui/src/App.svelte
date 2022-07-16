@@ -5,11 +5,10 @@
   import { toast } from '@mathesar/stores/toast';
   import { setNewRecordSelectorControllerInContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { confirmationController } from '@mathesar/stores/confirmation';
-  import { getTableName } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { beginUpdatingUrlWhenSchemaChanges } from './utils/routing';
   import { modal } from './stores/modal';
-  import RecordSelectorModal from './systems/record-selector/RecordSelectorModal.svelte';
+  import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   // Routes
   import SchemaHome from './routes/schema-home/SchemaHome.svelte';
   import SchemaListing from './routes/schema-listing/SchemaListing.svelte';
@@ -22,15 +21,19 @@
   // imports.
   beginUpdatingUrlWhenSchemaChanges(currentSchemaId);
 
+  const recordSelectorModal = modal.spawnModalController();
   const recordSelectorController = setNewRecordSelectorControllerInContext({
-    modal: modal.spawnModalController(),
-    getTableName,
+    onOpen: () => recordSelectorModal.open(),
+    onClose: () => recordSelectorModal.close(),
   });
 </script>
 
 <ToastPresenter entries={toast.entries} />
 <Confirmation controller={confirmationController} />
-<RecordSelectorModal controller={recordSelectorController} />
+<ModalRecordSelector
+  {recordSelectorController}
+  modalController={recordSelectorModal}
+/>
 
 <Header />
 

@@ -1,7 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import type { Readable } from 'svelte/store';
 import { get, derived, writable } from 'svelte/store';
-import type { ModalController } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import { TabularData } from '@mathesar/stores/table-data/tabularData';
 import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
@@ -14,14 +13,18 @@ import {
 import Pagination from '@mathesar/utils/Pagination';
 
 interface RecordSelectorControllerProps {
-  modal: ModalController;
-  getTableName: (id: DBObjectEntry['id']) => string | undefined;
+  onOpen?: () => void;
+  onClose?: () => void;
 }
 
 type FkCellValue = string | number;
 
 export class RecordSelectorController {
-  modal: ModalController;
+  private onOpen: () => void;
+
+  private onClose: () => void;
+
+  isOpen = writable(false);
 
   submit: (v: FkCellValue) => void = () => {};
 
@@ -31,10 +34,9 @@ export class RecordSelectorController {
 
   tabularData: Readable<TabularData | undefined>;
 
-  tableName: Readable<string | undefined>;
-
-  constructor(props: RecordSelectorControllerProps) {
-    this.modal = props.modal;
+  constructor(props: RecordSelectorControllerProps = {}) {
+    this.onOpen = props.onOpen ?? (() => {});
+    this.onClose = props.onClose ?? (() => {});
 
     this.tabularData = derived(this.tableId, (tableId) => {
       if (!tableId) {
@@ -55,10 +57,6 @@ export class RecordSelectorController {
         abstractTypesMap,
       );
     });
-
-    this.tableName = derived(this.tableId, (id) =>
-      id === undefined ? undefined : props.getTableName(id),
-    );
   }
 
   acquireUserInput({
@@ -67,7 +65,8 @@ export class RecordSelectorController {
     tableId: DBObjectEntry['id'];
   }): Promise<FkCellValue | undefined> {
     this.tableId.set(tableId);
-    this.modal.open();
+    this.isOpen.set(true);
+    this.onOpen();
     return new Promise((resolve) => {
       this.submit = (v) => {
         resolve(v);
@@ -80,17 +79,18 @@ export class RecordSelectorController {
     });
   }
 
-  close(): void {
+  private close(): void {
     this.submit = () => {};
     this.cancel = () => {};
-    this.modal.close();
+    this.isOpen.set(false);
+    this.onClose();
   }
 }
 
 const contextKey = {};
 
 export function setNewRecordSelectorControllerInContext(
-  props: RecordSelectorControllerProps,
+  props: RecordSelectorControllerProps = {},
 ): RecordSelectorController {
   const recordSelectorController = new RecordSelectorController(props);
   setContext(contextKey, recordSelectorController);

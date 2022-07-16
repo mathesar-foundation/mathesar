@@ -68,7 +68,11 @@ export function processColumn(
     linkFk: findFkConstraintsForColumn(exclusiveConstraints, column.id)[0],
     abstractType,
     cellComponentAndProps: getCellCap(column, constraints, abstractType.cell),
-    inputComponentAndProps: getDbTypeBasedInputCap(column, abstractType.cell),
+    inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      constraints,
+      abstractType.cell,
+    ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
   };
 }

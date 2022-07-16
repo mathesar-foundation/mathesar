@@ -31,6 +31,7 @@
   }
 
   function submitRecord(index: number) {
+    selectionIndex = 0;
     submit(records[index]);
   }
 

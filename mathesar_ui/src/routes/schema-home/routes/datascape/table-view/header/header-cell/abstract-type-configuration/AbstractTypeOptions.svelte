@@ -14,6 +14,7 @@
     AbstractTypeDisplayConfig,
   } from '@mathesar/stores/abstract-types/types';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import { getDbTypeBasedInputCap } from '@mathesar/components/cell/utils';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
   import TypeOptionTab from './TypeOptionTab.svelte';
@@ -32,7 +33,7 @@
   let defaultValueHasError = false;
   let showDefaultValueErrorIndication = false;
 
-  $: ({ column } = processedColumn);
+  $: ({ column, exclusiveConstraints } = processedColumn);
   $: ({ dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
     selectedAbstractType,
     selectedDbType,
@@ -87,6 +88,16 @@
 
   $: onDbFormValuesChange($dbFormValues, dbOptionsConfig);
   $: onDisplayFormValuesChange($displayFormValues, displayOptionsConfig);
+
+  $: defaultInputComponentAndProps = getDbTypeBasedInputCap(
+    {
+      ...column,
+      type: selectedDbType,
+      type_options: typeOptions,
+      display_options: displayOptions,
+    },
+    exclusiveConstraints,
+  );
 </script>
 
 <div class="type-options">
@@ -122,9 +133,7 @@
         bind:defaultValue
         bind:defaultValueHasError
         bind:showError={showDefaultValueErrorIndication}
-        {selectedDbType}
-        {typeOptions}
-        {displayOptions}
+        inputComponentAndProps={defaultInputComponentAndProps}
       />
       <DbTypeIndicator {selectedDbType} />
     {:else if displayForm}
