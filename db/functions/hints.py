@@ -121,6 +121,8 @@ date = _make_hint("date")
 
 literal = _make_hint("literal")
 
+json = _make_hint("json")
+
 
 # Meant to mark a DBFunction for the filtering API to use.
 mathesar_filter = _make_hint("mathesar_filter")

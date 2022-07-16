@@ -26,6 +26,9 @@ class DBQuery:
 
     # mirrors a method in db.records.operations.select
     def get_records(self, **kwargs):
+        # NOTE how through this method you can perform a second batch of transformations.
+        # this reflects fact that we can form a query, and then apply temporary transforms on it,
+        # like how you can apply temporary transforms to a table when in a table view.
         return records_select.get_records(
             table=self.sa_relation,
             **kwargs,
@@ -53,8 +56,15 @@ class DBQuery:
         relation.
         """
         initial_relation = _get_initial_relation(self)
-        transformed = _apply_transformations(initial_relation, self.transformations)
-        return transformed
+        transformations = self.transformations
+        if transformations:
+            transformed = records_select.apply_transformations(
+                initial_relation,
+                transformations,
+            )
+            return transformed
+        else:
+            return initial_relation
 
 
 class InitialColumn:
@@ -117,10 +127,6 @@ class JoinParams(
     @property
     def right_table(self):
         return self.right_column.table
-
-
-def _apply_transformations(initial_relation, transformations):
-    return initial_relation
 
 
 def _get_initial_relation(query):

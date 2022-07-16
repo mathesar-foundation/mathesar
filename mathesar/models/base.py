@@ -19,7 +19,7 @@ from db.constraints import utils as constraint_utils
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
-from db.records.operations.select import get_records as db_get_records
+from db.records.operations.select import get_records_with_default_order as db_get_records_with_default_order
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils
@@ -286,12 +286,21 @@ class Table(DatabaseObject, Relation):
             self.schema._sa_engine, self._sa_table, column_definitions
         )
 
+    # TODO unused? delete if so
     @property
     def sa_all_records(self):
-        return db_get_records(self._sa_table, self.schema._sa_engine)
+        return db_get_records_with_default_order(
+            table=self._sa_table,
+            engine=self.schema._sa_engine,
+        )
 
-    def sa_num_records(self, filter=None):
-        return get_count(self._sa_table, self.schema._sa_engine, filter=filter)
+    def sa_num_records(self, filter=None, search=[]):
+        return get_count(
+            table=self._sa_table,
+            engine=self.schema._sa_engine,
+            filter=filter,
+            search=search,
+        )
 
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
@@ -310,16 +319,18 @@ class Table(DatabaseObject, Relation):
         filter=None,
         order_by=[],
         group_by=None,
+        search=[],
         duplicate_only=None,
     ):
-        return db_get_records(
-            self._sa_table,
-            self.schema._sa_engine,
-            limit,
-            offset,
+        return db_get_records_with_default_order(
+            table=self._sa_table,
+            engine=self.schema._sa_engine,
+            limit=limit,
+            offset=offset,
             filter=filter,
             order_by=order_by,
             group_by=group_by,
+            search=search,
             duplicate_only=duplicate_only,
         )
 
@@ -440,8 +451,14 @@ class Column(ReflectionManagerMixin, BaseModel):
     def __getattribute__(self, name):
         try:
             return super().__getattribute__(name)
-        except AttributeError:
-            return getattr(self._sa_column, name)
+        except AttributeError as e:
+            # Blacklist Django attribute names that cause recursion by trying to fetch an invalid cache.
+            # TODO Find a better way to avoid finding Django related columns
+            blacklisted_attribute_names = ['resolve_expression']
+            if name not in blacklisted_attribute_names:
+                return getattr(self._sa_column, name)
+            else:
+                raise e
 
     @property
     def _sa_engine(self):
@@ -549,3 +566,13 @@ class DataFile(BaseModel):
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
+
+
+class PreviewColumnSettings(BaseModel):
+    customized = models.BooleanField()
+    template = models.CharField(max_length=255)
+
+
+class TableSettings(ReflectionManagerMixin, BaseModel):
+    preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
+    table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
