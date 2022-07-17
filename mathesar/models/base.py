@@ -178,6 +178,7 @@ class Table(DatabaseObject, Relation):
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
+    import_target = models.IntegerField(blank=True, null=True)
     is_temp = models.BooleanField(blank=True, null=True)
 
     class Meta:
