@@ -144,22 +144,20 @@ def roster_fkey_col(teachers_table_name):
 
 
 @pytest.fixture
-def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_extracted_cols, teachers_table_name, roster_no_teachers_table_name):
+def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_extracted_cols, teachers_table_name):
     engine, schema = engine_with_roster
     extract_columns_from_table(
         roster_table_name,
         roster_extracted_cols,
         teachers_table_name,
-        roster_no_teachers_table_name,
         schema,
         engine,
     )
     metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
     teachers = metadata.tables[f"{schema}.{teachers_table_name}"]
-    roster_no_teachers = metadata.tables[f"{schema}.{roster_no_teachers_table_name}"]
-    roster = metadata.tables[f"{schema}.{roster_table_name}"]
-    return teachers, roster_no_teachers, roster, engine, schema
+    roster_no_teachers = metadata.tables[f"{schema}.{roster_table_name}"]
+    return teachers, roster_no_teachers, engine, schema
 
 
 @pytest.fixture
