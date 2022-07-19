@@ -1,4 +1,3 @@
-from tkinter import CASCADE
 from bidict import bidict
 
 from django.core.cache import cache
