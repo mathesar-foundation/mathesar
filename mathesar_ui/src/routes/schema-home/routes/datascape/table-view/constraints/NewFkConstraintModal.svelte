@@ -20,7 +20,7 @@
     getTabularDataStoreFromContext,
     TabularType,
   } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import { tables as tablesStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { States } from '@mathesar/utils/api';

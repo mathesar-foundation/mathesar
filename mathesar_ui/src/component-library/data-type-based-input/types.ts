@@ -1,4 +1,4 @@
-export type DynamicInputDataType =
+export type DataTypeBasedInputType =
   | 'boolean'
   | 'integer'
   | 'float'
@@ -7,7 +7,7 @@ export type DynamicInputDataType =
   | 'datetime'
   | 'time';
 
-export type DynamicInputInterfaceType =
+export type DataTypeBasedInputInterface =
   | 'text'
   | 'textarea'
   | 'number'
@@ -15,7 +15,7 @@ export type DynamicInputInterfaceType =
   | 'toggle'
   | 'select';
 
-export interface DynamicInputSelectElement {
+export interface DataTypeBasedInputSelectElement {
   interfaceType: 'select';
   options?: Record<
     string,

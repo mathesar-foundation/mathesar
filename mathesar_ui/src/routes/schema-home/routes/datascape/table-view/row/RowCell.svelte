@@ -21,8 +21,8 @@
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import CellErrors from './CellErrors.svelte';
-  import type { ProcessedTableColumn } from '../utils';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
@@ -34,7 +34,7 @@
   export let rowHasErrors = false;
   export let key: CellKey;
   export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
-  export let processedColumn: ProcessedTableColumn;
+  export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
 
@@ -63,7 +63,7 @@
     event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
   ) {
     const { originalEvent } = event.detail;
-    const type = display.handleKeyEventsOnActiveCell(event.detail.key);
+    const type = display.handleKeyEventsOnActiveCell(originalEvent);
     if (type) {
       originalEvent.stopPropagation();
       originalEvent.preventDefault();
@@ -115,7 +115,7 @@
     {/if}
 
     <Cell
-      sheetColumn={processedColumn}
+      {processedColumn}
       {isActive}
       {value}
       showAsSkeleton={$recordsDataState === States.Loading}

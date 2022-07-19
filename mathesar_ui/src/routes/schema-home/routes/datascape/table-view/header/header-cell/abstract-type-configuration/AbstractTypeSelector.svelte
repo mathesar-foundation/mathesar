@@ -6,7 +6,7 @@
     getAbstractTypesForDbTypeList,
   } from '@mathesar/stores/abstract-types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import TypeIcon from '@mathesar/components/TypeIcon.svelte';
 
   const dispatch = createEventDispatcher();

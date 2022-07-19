@@ -4,7 +4,7 @@
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
   } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import {
     SheetHeader,
     SheetCell,
@@ -12,14 +12,17 @@
   } from '@mathesar/components/sheet';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
-  import type { ProcessedTableColumnMap } from '../utils';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ columnsDataStore, meta, display, constraintsDataStore } = $tabularData);
+  $: ({
+    columnsDataStore,
+    meta,
+    display,
+    constraintsDataStore,
+    processedColumns,
+  } = $tabularData);
   $: ({ horizontalScrollOffset } = display);
-
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   function addColumn(e: CustomEvent<Partial<Column>>) {
     void columnsDataStore.add(e.detail);
@@ -36,7 +39,7 @@
     <div {...htmlAttributes} {style} />
   </SheetCell>
 
-  {#each [...processedTableColumnsMap] as [columnId, processedColumn] (columnId)}
+  {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
     <SheetCell columnIdentifierKey={columnId} let:htmlAttributes let:style>
       <div {...htmlAttributes} {style}>
         <HeaderCell

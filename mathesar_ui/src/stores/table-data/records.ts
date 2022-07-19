@@ -18,12 +18,13 @@ import type {
   GroupingMode,
   GetRequestParams as ApiGetRequestParams,
 } from '@mathesar/api/tables/records';
+import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
 import type { Meta } from './meta';
 import type { RowKey } from './utils';
 import { validateRow, getCellKey } from './utils';
-import type { ColumnsDataStore, Column } from './columns';
+import type { ColumnsDataStore } from './columns';
 import type { Sorting } from './sorting';
 import type { Grouping as GroupingTODORename } from './grouping';
 import type { Filtering } from './filtering';

@@ -3,15 +3,12 @@
   import { SheetVirtualRows } from '@mathesar/components/sheet';
   import RowComponent from './row/Row.svelte';
   import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
-  import type { ProcessedTableColumnMap } from './utils';
   import { rowHeightPx } from './geometry';
 
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ id, recordsData, display } = $tabularData);
   $: ({ horizontalScrollOffset, scrollOffset, displayableRecords } = display);
-
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   function getItemSize(index: number) {
     const allRecords = $displayableRecords;
@@ -69,7 +66,6 @@
         <RowComponent
           style={item.style}
           bind:row={$displayableRecords[item.index]}
-          {processedTableColumnsMap}
         />
       {/if}
     {/each}

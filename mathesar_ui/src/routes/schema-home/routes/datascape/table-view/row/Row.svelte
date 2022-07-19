@@ -13,15 +13,14 @@
   import RowCell from './RowCell.svelte';
   // import GroupHeader from './GroupHeader.svelte';
   import NewRecordMessage from './NewRecordMessage.svelte';
-  import type { ProcessedTableColumnMap } from '../utils';
 
   export let row: Row;
   export let style: { [key: string]: string | number };
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ recordsData, columnsDataStore, meta, display } = $tabularData);
+  $: ({ recordsData, columnsDataStore, meta, display, processedColumns } =
+    $tabularData);
   $: ({
     selectedRows,
     rowStatus,
@@ -85,7 +84,7 @@
     </SheetCell>
 
     {#if row.isNewHelpText}
-      <NewRecordMessage columnCount={processedTableColumnsMap.size} />
+      <NewRecordMessage columnCount={$processedColumns.size} />
     {:else if row.isGroupHeader && $grouping && row.group}
       <!-- <GroupHeader
         {row}
@@ -94,7 +93,7 @@
         group={row.group}
       /> -->
     {:else if row.record}
-      {#each [...processedTableColumnsMap] as [columnId, processedColumn] (columnId)}
+      {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
           {display}
           {row}

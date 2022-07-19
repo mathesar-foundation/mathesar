@@ -13,7 +13,10 @@
     TextInput,
     SpinnerArea,
   } from '@mathesar-component-library';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
+  import type {
+    ConstraintsDataStore,
+    ProcessedColumn,
+  } from '@mathesar/stores/table-data/types';
   import { focusAndSelectAll } from '@mathesar/utils/domUtils';
   import type {
     Meta,
@@ -23,14 +26,13 @@
   import { getErrorMessage } from '@mathesar/utils/errors';
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
-  import type { ProcessedTableColumn } from '../../utils';
 
-  export let processedColumn: ProcessedTableColumn;
+  export let processedColumn: ProcessedColumn;
   export let meta: Meta;
   export let columnsDataStore: ColumnsDataStore;
   export let constraintsDataStore: ConstraintsDataStore;
 
-  $: ({ column, abstractTypeOfColumn } = processedColumn);
+  $: ({ column, abstractType } = processedColumn);
 
   let menuIsOpen = false;
   let renamingInputElement: HTMLInputElement | undefined;
@@ -159,7 +161,7 @@
               appearance="plain"
               on:click={setTypeView}
             >
-              <span>{abstractTypeOfColumn?.name}</span>
+              <span>{abstractType.name}</span>
               <Icon size="0.8em" data={faCog} />
               <Icon size="0.7em" data={faChevronRight} />
             </Button>
@@ -192,8 +194,8 @@
             />
           {:else if view === 'type'}
             <AbstractTypeConfiguration
-              {column}
-              {abstractTypeOfColumn}
+              {processedColumn}
+              {abstractType}
               on:close={closeMenu}
             />
           {/if}

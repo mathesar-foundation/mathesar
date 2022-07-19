@@ -9,7 +9,7 @@
     InputGroup,
     InputGroupText,
   } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
 
   const dispatch = createEventDispatcher();
   export let columns: Column[];
