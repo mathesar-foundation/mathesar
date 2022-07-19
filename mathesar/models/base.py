@@ -389,18 +389,14 @@ class Table(DatabaseObject, Relation):
             self,
             columns_to_extract,
             extracted_table_name,
-            remainder_table_name,
-            drop_original_table
     ):
         columns_name_to_extract = [column.name for column in columns_to_extract]
         return extract_columns_from_table(
             self.name,
             columns_name_to_extract,
             extracted_table_name,
-            remainder_table_name,
             self.schema.name,
-            self._sa_engine,
-            drop_original_table=drop_original_table
+            self._sa_engine
         )
 
     def update_column_reference(self, columns_name, column_name_id_map):

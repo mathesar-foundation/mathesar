@@ -1299,12 +1299,9 @@ def test_table_extract_columns_retain_original_table(create_patents_table, clien
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
 
     extract_table_name = "Patent Info"
-    remainder_table_name = "Patent Status"
     split_data = {
         'extract_columns': column_ids_to_extract,
         'extracted_table_name': extract_table_name,
-        "remainder_table_name": remainder_table_name,
-        'drop_original_table': False
     }
     current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
     assert current_table_response.status_code == 201
@@ -1314,10 +1311,8 @@ def test_table_extract_columns_retain_original_table(create_patents_table, clien
     assert extract_table_name == extracted_table.name
     remainder_table_id = response_data['remainder_table']
     remainder_table = Table.objects.get(id=remainder_table_id)
-    assert remainder_table_name == remainder_table.name
-    assert remainder_table.id != table.id
     assert Table.objects.filter(id=table.id).count() == 1
-    extracted_columns = extracted_table.columns.all()
+    extracted_columns = extracted_table.columns.all().order_by('attnum')
     extracted_column_names = [extracted_column.name for extracted_column in extracted_columns]
     expected_extracted_column_names = ['id'] + column_names_to_extract
     assert expected_extracted_column_names == extracted_column_names
@@ -1339,12 +1334,9 @@ def test_table_extract_columns_drop_original_table(create_patents_table, client)
     remainder_column_names = (set(existing_columns) - set(column_names_to_extract))
 
     extract_table_name = "Patent Info"
-    remainder_table_name = "Patent Status"
     split_data = {
         'extract_columns': column_ids_to_extract,
         'extracted_table_name': extract_table_name,
-        "remainder_table_name": remainder_table_name,
-        'drop_original_table': True
     }
     current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
     assert current_table_response.status_code == 201
@@ -1385,12 +1377,9 @@ def test_table_extract_columns_with_display_options(create_patents_table, client
     column_with_display_options.save()
 
     extract_table_name = "Patent Info"
-    remainder_table_name = "Patent Status"
     split_data = {
         'extract_columns': column_ids_to_extract,
         'extracted_table_name': extract_table_name,
-        "remainder_table_name": remainder_table_name,
-        'drop_original_table': True
     }
     current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
     assert current_table_response.status_code == 201
@@ -1411,12 +1400,9 @@ def test_table_move_columns_after_extracting(create_patents_table, client):
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
 
     extract_table_name = "Patent Info"
-    remainder_table_name = "Patent Status"
     split_data = {
         'extract_columns': column_ids_to_extract,
         'extracted_table_name': extract_table_name,
-        "remainder_table_name": remainder_table_name,
-        'drop_original_table': False
     }
     current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
     assert current_table_response.status_code == 201

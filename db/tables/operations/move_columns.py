@@ -86,9 +86,7 @@ def move_columns_between_related_tables(source_table_oid, target_table_oid, colu
         TEMP_MERGED_TABLE_NAME,
         [c.name for c in extraction_columns],
         extracted_table_name,
-        remainder_table_name,
         schema,
         engine,
-        drop_original_table=True,
     )
     return extracted_table, remainder_table
