@@ -1,9 +1,9 @@
 export default class QueryListEntry {
   serializedQuery: string;
 
-  next: QueryListEntry | null = null;
+  next: QueryListEntry | undefined = undefined;
 
-  prev: QueryListEntry | null = null;
+  prev: QueryListEntry | undefined = undefined;
 
   constructor(serializedQuery: string) {
     this.serializedQuery = serializedQuery;

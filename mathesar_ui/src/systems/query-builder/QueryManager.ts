@@ -49,7 +49,9 @@ export default class QueryManager extends EventHandler<{
   constructor(query: QueryModel) {
     super();
     this.query = writable(query);
-    this.undoRedoManager = new QueryUndoRedoManager(get(this.query));
+    this.undoRedoManager = new QueryUndoRedoManager(
+      query.isSaveable() ? query : undefined,
+    );
     void Promise.all([this.fetchColumns(), this.fetchResults()]);
   }
 
@@ -192,7 +194,10 @@ export default class QueryManager extends EventHandler<{
     opts?: { reversible: boolean },
   ): Promise<void> {
     this.query.update((q) => callback(q));
-    this.undoRedoManager.pushState(this.getQueryModelData());
+    const queryModelData = this.getQueryModelData();
+    if (queryModelData.isSaveable()) {
+      this.undoRedoManager.pushState(queryModelData);
+    }
     this.setUndoRedoStates();
     await this.save();
     await Promise.all([this.fetchColumns(), this.fetchResults()]);
@@ -200,10 +205,10 @@ export default class QueryManager extends EventHandler<{
 
   async performUndoRedoSync(query?: QueryModel): Promise<void> {
     if (query) {
-      const currentQuery = this.getQueryModelData();
+      const currentQueryModelData = this.getQueryModelData();
       let queryToSet = query;
-      if (currentQuery?.id) {
-        queryToSet = query.withId(currentQuery.id);
+      if (currentQueryModelData?.id) {
+        queryToSet = query.withId(currentQueryModelData.id);
       }
       this.query.set(queryToSet);
       await this.save();

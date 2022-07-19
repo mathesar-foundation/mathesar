@@ -9,7 +9,7 @@ import type { JpPath } from '@mathesar/api/tables/tableList';
 export interface QueryInstance {
   readonly id: number;
   readonly name: string;
-  readonly base_table?: number;
+  readonly base_table: number;
   readonly initial_columns?: {
     alias: string;
     id: Column['id'];

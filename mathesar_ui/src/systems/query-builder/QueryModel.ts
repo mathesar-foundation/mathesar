@@ -73,7 +73,11 @@ export default class QueryModel implements UnsavedQueryInstance {
   // }
 
   isSaveable(): boolean {
-    return isDefinedNonNullable(this.name) && this.name.trim() !== '';
+    return (
+      isDefinedNonNullable(this.base_table) &&
+      isDefinedNonNullable(this.name) &&
+      this.name.trim() !== ''
+    );
   }
 
   serialize(): string {

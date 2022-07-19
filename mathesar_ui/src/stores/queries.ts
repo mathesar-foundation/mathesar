@@ -12,9 +12,7 @@ import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
 
-export interface UnsavedQueryInstance
-  extends Omit<QueryInstance, 'id' | 'name'>,
-    Pick<Partial<QueryInstance>, 'id' | 'name'> {}
+export type UnsavedQueryInstance = Partial<QueryInstance>;
 
 export interface QueriesStoreSubstance {
   requestStatus: RequestStatus;
