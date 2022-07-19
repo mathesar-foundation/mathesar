@@ -100,10 +100,13 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
         schema = validated_data['schema']
         data_files = validated_data.get('data_files')
         name = validated_data.get('name') or gen_table_name(schema, data_files)
+        import_target = validated_data.get('import_target', None)
 
         try:
             if data_files:
                 table = create_table_from_datafile(data_files, name, schema)
+                if import_target:
+                    table.is_temp = True
             else:
                 table = create_empty_table(name, schema)
         except ProgrammingError as e:
