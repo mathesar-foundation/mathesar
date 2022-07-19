@@ -16,7 +16,11 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
     filter_backends = (filters.DjangoFilterBackend,)
 
     def get_queryset(self):
-        return UIQuery.objects.all().order_by('-created_at')
+        queryset = UIQuery.objects.all()
+        schema_id = self.request.query_params.get('schema')
+        if schema_id:
+            queryset = queryset.filter(base_table__schema=schema_id)
+        return queryset.order_by('-created_at')
 
     @action(methods=['get'], detail=True)
     def records(self, request, pk=None):
