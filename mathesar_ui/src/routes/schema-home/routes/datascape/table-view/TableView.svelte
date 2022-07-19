@@ -36,14 +36,16 @@
 <ActionsPane />
 
 <div class="table-data">
-  <Sheet
-    columns={sheetColumns}
-    getColumnIdentifier={(entry) => entry.column.id}
-    {columnWidths}
-  >
-    <Header />
-    <Body />
-  </Sheet>
+  {#if $processedColumns.size}
+    <Sheet
+      columns={sheetColumns}
+      getColumnIdentifier={(entry) => entry.column.id}
+      {columnWidths}
+    >
+      <Header />
+      <Body />
+    </Sheet>
+  {/if}
 </div>
 
 <StatusPane />
