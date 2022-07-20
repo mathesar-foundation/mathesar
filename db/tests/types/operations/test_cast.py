@@ -126,7 +126,6 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             MathesarCustomType.MATHESAR_JSON_OBJECT: {
                 VALID: [
-
                     ({'key1': 'val1'}, json.dumps({'key1': 'val1'}))
                 ],
                 INVALID: [[1, 2, 3]],
