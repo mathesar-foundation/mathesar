@@ -26,7 +26,6 @@ class MathesarJsonArray(TypeDecorator):
 @compiles(MathesarJsonArray, 'postgresql')
 def _compile_mathesarjsonobject(element, compiler, **kw):
     unchanged_compiled_string = compiler.visit_JSONB(element, **kw)
-
     unchanged_id = "JSONB"
     changed_id = MathesarCustomType.MATHESAR_JSON_ARRAY.id.upper()
     changed_compiled_string = unchanged_compiled_string.replace(unchanged_id, changed_id)
