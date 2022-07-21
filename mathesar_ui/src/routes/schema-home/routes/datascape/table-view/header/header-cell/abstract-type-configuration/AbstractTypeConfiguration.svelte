@@ -56,18 +56,18 @@
     defaultValue = null;
   }
 
-  function selectAbstractType(_abstractType: AbstractType) {
-    if (selectedAbstractType !== _abstractType) {
-      if (_abstractType.identifier === _abstractType?.identifier) {
+  function selectAbstractType(newAbstractType: AbstractType) {
+    if (selectedAbstractType !== newAbstractType) {
+      if (newAbstractType.identifier === abstractType?.identifier) {
         resetAbstractType(column);
-      } else if (_abstractType.defaultDbType) {
-        selectedDbType = _abstractType.defaultDbType;
+      } else if (newAbstractType.defaultDbType) {
+        selectedDbType = newAbstractType.defaultDbType;
         clearTypeRelatedOptions();
-      } else if (_abstractType.dbTypes.size > 0) {
-        [selectedDbType] = _abstractType.dbTypes;
+      } else if (newAbstractType.dbTypes.size > 0) {
+        [selectedDbType] = newAbstractType.dbTypes;
         clearTypeRelatedOptions();
       }
-      selectedAbstractType = _abstractType;
+      selectedAbstractType = newAbstractType;
     }
   }
 
