@@ -1,7 +1,9 @@
 import { faStopwatch } from '@fortawesome/free-solid-svg-icons';
 import type { FormValues } from '@mathesar-component-library/types';
-import type { Column } from '@mathesar/stores/table-data/types';
-import type { DurationDisplayOptions } from '@mathesar/api/tables/columns';
+import type {
+  DurationDisplayOptions,
+  Column,
+} from '@mathesar/api/tables/columns';
 import { DurationSpecification } from '@mathesar/utils/duration';
 import type {
   AbstractTypeConfigForm,

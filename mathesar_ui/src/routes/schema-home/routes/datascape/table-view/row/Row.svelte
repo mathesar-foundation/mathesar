@@ -11,15 +11,14 @@
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
   import RowPlaceholder from './RowPlaceholder.svelte';
-  import type { ProcessedTableColumnMap } from '../utils';
 
   export let row: Row;
   export let style: { [key: string]: string | number };
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ recordsData, columnsDataStore, meta, display } = $tabularData);
+  $: ({ recordsData, columnsDataStore, meta, display, processedColumns } =
+    $tabularData);
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
   $: fullRowWidth =
@@ -90,7 +89,7 @@
       hasErrors={hasAnyErrors}
     />
 
-    {#each [...processedTableColumnsMap] as [columnId, processedColumn] (columnId)}
+    {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
       <RowCell
         {display}
         {row}

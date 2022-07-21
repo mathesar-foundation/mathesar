@@ -1,9 +1,9 @@
 <script lang="ts">
   import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
-  import type { DynamicInputInterfaceType } from './types';
+  import type { DataTypeBasedInputInterface } from './types';
 
   export let value = false;
-  export let interfaceType: DynamicInputInterfaceType = 'checkbox';
+  export let interfaceType: DataTypeBasedInputInterface = 'checkbox';
 </script>
 
 {#if interfaceType === 'toggle'}
