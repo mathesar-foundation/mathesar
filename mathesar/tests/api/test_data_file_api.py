@@ -1,13 +1,13 @@
 import os
 
 import pytest
-import requests
+from mathesar.errors import URLNotReachable
 from unittest.mock import patch
 from django.core.files import File
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.imports import csv
-from mathesar.models import DataFile
+from mathesar.models.base import DataFile
 from mathesar.errors import InvalidTableError
 
 
@@ -30,8 +30,8 @@ def verify_data_file_data(data_file, data_file_dict):
 
 
 @pytest.fixture
-def data_file(csv_filename):
-    with open(csv_filename, 'rb') as csv_file:
+def data_file(patents_csv_filepath):
+    with open(patents_csv_filepath, 'rb') as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))
     return data_file
 
@@ -123,13 +123,13 @@ def test_data_file_detail(client, data_file):
 
 
 @pytest.mark.parametrize('header', [True, False])
-def test_data_file_create_csv(client, csv_filename, header):
+def test_data_file_create_csv(client, patents_csv_filepath, header):
     num_data_files = DataFile.objects.count()
 
-    with open(csv_filename, 'rb') as csv_file:
+    with open(patents_csv_filepath, 'rb') as csv_file:
         data = {'file': csv_file, 'header': header}
         response = client.post('/api/db/v0/data_files/', data, format='multipart')
-    with open(csv_filename, 'r') as csv_file:
+    with open(patents_csv_filepath, 'r') as csv_file:
         correct_dialect = csv.get_sv_dialect(csv_file)
     check_create_data_file_response(
         response, num_data_files, 'file', 'patents', correct_dialect.delimiter,
@@ -137,8 +137,8 @@ def test_data_file_create_csv(client, csv_filename, header):
     )
 
 
-def test_data_file_create_csv_long_name(client, csv_filename):
-    with open(csv_filename, 'rb') as csv_file:
+def test_data_file_create_csv_long_name(client, patents_csv_filepath):
+    with open(patents_csv_filepath, 'rb') as csv_file:
         with patch.object(os.path, 'basename', lambda _: '0' * 101):
             data = {'file': csv_file}
             response = client.post('/api/db/v0/data_files/', data, format='multipart')
@@ -215,8 +215,8 @@ def test_data_file_create_invalid_file(client):
     assert response_dict[0]['message'] == 'Unable to tabulate data'
 
 
-def test_data_file_create_non_unicode_file(client, non_unicode_csv_filename):
-    with open(non_unicode_csv_filename, 'rb') as non_unicode_file:
+def test_data_file_create_non_unicode_file(client, non_unicode_csv_filepath):
+    with open(non_unicode_csv_filepath, 'rb') as non_unicode_file:
         response = client.post('/api/db/v0/data_files/', data={'file': non_unicode_file}, format='multipart')
     assert response.status_code == 201
 
@@ -232,7 +232,7 @@ def test_data_file_create_url_invalid_format(client):
 
 def test_data_file_create_url_invalid_address(client):
     url = 'https://www.test.invalid'
-    with patch('requests.head', side_effect=requests.exceptions.ConnectionError):
+    with patch('requests.head', side_effect=URLNotReachable):
         response = client.post('/api/db/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400
@@ -259,10 +259,10 @@ def test_data_file_create_url_invalid_content_type(client):
     assert response_dict[0]['message'] == "URL resource 'text/html' not a valid type."
 
 
-def test_data_file_create_multiple_source_fields(client, csv_filename, paste_filename):
+def test_data_file_create_multiple_source_fields(client, patents_csv_filepath, paste_filename):
     with open(paste_filename, 'r') as paste_file:
         paste_text = paste_file.read()
-    with open(csv_filename, 'rb') as csv_file:
+    with open(patents_csv_filepath, 'rb') as csv_file:
         data = {'file': csv_file, 'paste': paste_text}
         response = client.post('/api/db/v0/data_files/', data, format='multipart')
         response_dict = response.json()

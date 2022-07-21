@@ -1,10 +1,12 @@
-from db.types import base, email, money, multicurrency, uri
+from db.types.custom import email, money, multicurrency, uri, json_array, json_object
+from db.types.base import SCHEMA
 from db.schemas.operations.create import create_schema
+from db.schemas.operations.drop import drop_schema
 from db.types.operations.cast import install_all_casts
 
 
 def create_type_schema(engine):
-    create_schema(base.SCHEMA, engine)
+    create_schema(SCHEMA, engine)
 
 
 def install_mathesar_on_database(engine):
@@ -14,4 +16,14 @@ def install_mathesar_on_database(engine):
     multicurrency.install(engine)
     uri.install(engine)
     uri.install_tld_lookup_table(engine)
+    json_array.install(engine)
+    json_object.install(engine)
     install_all_casts(engine)
+
+
+def uninstall_mathesar_from_database(engine):
+    _cascade_type_schema(engine)
+
+
+def _cascade_type_schema(engine):
+    drop_schema(SCHEMA, engine, cascade=True)

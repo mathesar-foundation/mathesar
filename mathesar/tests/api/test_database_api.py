@@ -1,39 +1,15 @@
 import pytest
-from django.conf import settings
 from django.core.cache import cache
 
 from mathesar.reflection import reflect_db_objects
-from mathesar.models import Table, Schema, Database
-from db.tests.types import fixtures
+from mathesar.models.base import Table, Schema, Database
 
 
-engine_with_types = fixtures.engine_with_types
-temporary_testing_schema = fixtures.temporary_testing_schema
-engine_email_type = fixtures.engine_email_type
-
-
-TEST_DB = "test_database_api_db"
-
-
-@pytest.fixture
-def database_api_db(test_db_name):
-    settings.DATABASES[TEST_DB] = settings.DATABASES[test_db_name]
-    yield TEST_DB
-    if TEST_DB in settings.DATABASES:
-        del settings.DATABASES[TEST_DB]
-
-
-@pytest.fixture
-def create_database(test_db_name, request):
-    def _create_database(db_name):
-        settings.DATABASES[db_name] = settings.DATABASES[test_db_name]
-        request.addfinalizer(lambda: (settings.DATABASES.pop(db_name, None)))
-    return _create_database
-
-
-@pytest.fixture(autouse=True)
-def clear_cache():
-    cache.clear()
+@pytest.fixture(scope="module")
+def database_api_db(MOD_create_dj_db, get_uid):
+    db_name = "test_database_api_db_" + get_uid()
+    MOD_create_dj_db(db_name)
+    return db_name
 
 
 def test_database_reflection_new(database_api_db):
@@ -41,19 +17,19 @@ def test_database_reflection_new(database_api_db):
     assert Database.objects.filter(name=database_api_db).exists()
 
 
-def test_database_reflection_delete(database_api_db):
+def test_database_reflection_delete(database_api_db, FUN_dj_databases):
     reflect_db_objects()
     db = Database.objects.get(name=database_api_db)
     assert db.deleted is False
 
-    del settings.DATABASES[database_api_db]
+    del FUN_dj_databases[database_api_db]
     cache.clear()
     reflect_db_objects()
     db.refresh_from_db()
     assert db.deleted is True
 
 
-def test_database_reflection_delete_schema(database_api_db):
+def test_database_reflection_delete_schema(database_api_db, FUN_dj_databases):
     reflect_db_objects()
     db = Database.objects.get(name=database_api_db)
 
@@ -61,13 +37,13 @@ def test_database_reflection_delete_schema(database_api_db):
     # We expect the test schema + 'public'
     assert Schema.objects.filter(database=db).count() == 2
 
-    del settings.DATABASES[database_api_db]
+    del FUN_dj_databases[database_api_db]
     cache.clear()
     reflect_db_objects()
     assert Schema.objects.filter(database=db).count() == 0
 
 
-def test_database_reflection_delete_table(database_api_db):
+def test_database_reflection_delete_table(database_api_db, FUN_dj_databases):
     reflect_db_objects()
     db = Database.objects.get(name=database_api_db)
 
@@ -75,7 +51,7 @@ def test_database_reflection_delete_table(database_api_db):
     Table.objects.create(oid=2, schema=schema)
     assert Table.objects.filter(schema__database=db).count() == 1
 
-    del settings.DATABASES[database_api_db]
+    del FUN_dj_databases[database_api_db]
     cache.clear()
     reflect_db_objects()
     assert Table.objects.filter(schema__database=db).count() == 0
@@ -107,9 +83,9 @@ def test_database_list(client, test_db_name, database_api_db):
         check_database(expected_database, response_database)
 
 
-def test_database_list_deleted(client, test_db_name, database_api_db):
+def test_database_list_deleted(client, test_db_name, database_api_db, FUN_dj_databases):
     reflect_db_objects()
-    del settings.DATABASES[database_api_db]
+    del FUN_dj_databases[database_api_db]
 
     cache.clear()
     response = client.get('/api/db/v0/databases/')
@@ -129,17 +105,17 @@ def test_database_list_deleted(client, test_db_name, database_api_db):
 
 
 @pytest.mark.parametrize('deleted', [True, False])
-def test_database_list_filter_deleted(client, deleted, test_db_name, database_api_db):
+def test_database_list_filter_deleted(client, deleted, test_db_name, database_api_db, FUN_dj_databases):
     reflect_db_objects()
-    del settings.DATABASES[database_api_db]
+    del FUN_dj_databases[database_api_db]
 
     cache.clear()
     response = client.get(f'/api/db/v0/databases/?deleted={deleted}')
     response_data = response.json()
 
     expected_databases = {
-        False: Database.objects.get(name=test_db_name),
-        True: Database.objects.get(name=database_api_db),
+        False: Database.current_objects.get(name=test_db_name),
+        True: Database.current_objects.get(name=database_api_db),
     }
 
     assert response.status_code == 200
@@ -151,50 +127,39 @@ def test_database_list_filter_deleted(client, deleted, test_db_name, database_ap
     check_database(expected_database, response_database)
 
 
-def test_database_list_ordered_by_id(client, test_db_name, database_api_db, create_database):
+@pytest.mark.parametrize('sort_field', ['id', 'name'])
+def test_database_list_sorted_by(client, test_db_name, database_api_db, FUN_create_dj_db, sort_field, get_uid):
+    """
+    Notice that we must pull in databases that are already setup in this scope.
+    """
     reflect_db_objects()
-    test_db_name_1 = "mathesar_db_test_1"
-    create_database(test_db_name_1)
-    cache.clear()
-    expected_databases = [
-        Database.objects.get(name=test_db_name),
-        Database.objects.get(name=database_api_db),
-        Database.objects.get(name=test_db_name_1),
-    ]
-    sort_field = "id"
-    response = client.get(f'/api/db/v0/databases/?sort_by={sort_field}')
-    response_data = response.json()
-    response_databases = response_data['results']
-    comparison_tuples = zip(expected_databases, response_databases)
-    for comparison_tuple in comparison_tuples:
-        check_database(comparison_tuple[0], comparison_tuple[1])
 
+    # I appended a lowercase letter in front of the random string, because I suspected that Python
+    # and Postgres might be sorting multi-case string sets differently.
+    test_db_name_2 = 'a' + get_uid()
 
-def test_database_list_ordered_by_name(client, test_db_name, database_api_db, create_database):
-    reflect_db_objects()
-    test_db_name_1 = "mathesar_db_test_1"
-    test_db_name_2 = "mathesar_db_test_2"
-    create_database(test_db_name_1)
-    create_database(test_db_name_2)
+    FUN_create_dj_db(test_db_name_2)
 
     cache.clear()
+
     expected_databases = [
         Database.objects.get(name=test_db_name),
-        Database.objects.get(name=test_db_name_1),
         Database.objects.get(name=test_db_name_2),
         Database.objects.get(name=database_api_db),
     ]
-    sort_field = "name"
+    expected_databases = sorted(expected_databases, key=lambda db: getattr(db, sort_field))
+
     response = client.get(f'/api/db/v0/databases/?sort_by={sort_field}')
     response_data = response.json()
     response_databases = response_data['results']
+
     comparison_tuples = zip(expected_databases, response_databases)
     for comparison_tuple in comparison_tuples:
         check_database(comparison_tuple[0], comparison_tuple[1])
 
 
 def test_database_detail(client):
-    expected_database = Database.objects.get()
+    expected_database = Database.objects.all().first()
 
     response = client.get(f'/api/db/v0/databases/{expected_database.id}/')
     response_database = response.json()

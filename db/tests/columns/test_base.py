@@ -1,17 +1,16 @@
 import re
 
 import pytest
-from sqlalchemy import (CHAR, ForeignKey, Integer, Numeric, String, VARCHAR)
+from sqlalchemy import (
+    INTEGER, ForeignKey, VARCHAR, CHAR, NUMERIC, ARRAY, JSON
+)
+from sqlalchemy.sql.sqltypes import NullType
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
 from db.columns.utils import get_default_mathesar_column_list
-from db.tests.types import fixtures
-from db.types import datetime, email
-
-engine_with_types = fixtures.engine_with_types
-temporary_testing_schema = fixtures.temporary_testing_schema
-engine_email_type = fixtures.engine_email_type
+from db.types.custom import email, datetime
+from db.types.base import MathesarCustomType, PostgresType, UnknownDbTypeId
 
 
 def init_column(*args, **kwargs):
@@ -34,13 +33,13 @@ column_builder_list = [init_column, from_column_column]
 @pytest.mark.parametrize("column_builder", column_builder_list)
 def test_MC_inits_with_name(column_builder):
     name = "mycol"
-    col = column_builder(name, String)
+    col = column_builder(name, VARCHAR)
     assert col.name == name
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
 def test_MC_inits_with_sa_type(column_builder):
-    sa_type = String
+    sa_type = VARCHAR
     col = column_builder("anycol", sa_type)
     actual_cls = col.type.__class__
     assert actual_cls == sa_type
@@ -48,31 +47,31 @@ def test_MC_inits_with_sa_type(column_builder):
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
 def test_MC_inits_default_not_primary_key(column_builder):
-    col = column_builder("anycol", String)
+    col = column_builder("anycol", VARCHAR)
     assert not col.primary_key
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
 def test_MC_inits_with_primary_key_true(column_builder):
-    col = column_builder("anycol", String, primary_key=True)
+    col = column_builder("anycol", VARCHAR, primary_key=True)
     assert col.primary_key
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
 def test_MC_inits_default_nullable(column_builder):
-    col = column_builder("a_col", String)
+    col = column_builder("a_col", VARCHAR)
     assert col.nullable
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
 def test_MC_inits_with_nullable_false(column_builder):
-    col = column_builder("a_col", String, nullable=False)
+    col = column_builder("a_col", VARCHAR, nullable=False)
     assert not col.nullable
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
 def test_MC_inits_with_foreign_keys_empty(column_builder):
-    col = column_builder("some_col", String)
+    col = column_builder("some_col", VARCHAR)
     assert not col.foreign_keys
 
 
@@ -80,7 +79,7 @@ def test_MC_inits_with_foreign_keys_empty(column_builder):
 def test_MC_inits_with_non_empty_foreign_keys(column_builder):
     fk_target = "some_schema.some_table.a_column"
     col = column_builder(
-        "anew_col", String, foreign_keys={ForeignKey(fk_target)},
+        "anew_col", VARCHAR, foreign_keys={ForeignKey(fk_target)},
     )
     fk_names = [fk.target_fullname for fk in col.foreign_keys]
     assert len(fk_names) == 1 and fk_names[0] == fk_target
@@ -88,19 +87,25 @@ def test_MC_inits_with_non_empty_foreign_keys(column_builder):
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
 def test_MC_inits_with_autoincrement_false(column_builder):
-    col = column_builder("anycol", String)
+    col = column_builder("anycol", VARCHAR)
     assert not col.autoincrement
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
 def test_MC_inits_with_autoincrement_true(column_builder):
-    col = column_builder("anycol", String, autoincrement=True)
+    col = column_builder("anycol", VARCHAR, autoincrement=True)
     assert col.autoincrement
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
 def test_MC_inits_with_server_default_none(column_builder):
-    col = column_builder("some_col", String)
+    col = column_builder("some_col", VARCHAR)
+    assert col.server_default is None
+
+
+@pytest.mark.parametrize("column_builder", column_builder_list)
+def test_MC_inits_with_engine_empty(column_builder):
+    col = column_builder("some_col", VARCHAR)
     assert col.server_default is None
 
 
@@ -124,7 +129,7 @@ def test_MC_is_default_when_false_for_name():
 def test_MC_is_default_when_false_for_type():
     for default_col in DEFAULT_COLUMNS:
         dc_definition = DEFAULT_COLUMNS[default_col]
-        changed_type = Integer if dc_definition["sa_type"] == String else String
+        changed_type = INTEGER if dc_definition["sa_type"] == VARCHAR else VARCHAR
         col = MathesarColumn(
             default_col,
             changed_type,
@@ -148,48 +153,60 @@ def test_MC_is_default_when_false_for_pk():
 
 
 def test_MC_valid_target_types_no_engine():
-    mc = MathesarColumn('testable_col', String)
+    mc = MathesarColumn('testable_col', VARCHAR)
     assert mc.valid_target_types is None
 
 
 def test_MC_valid_target_types_default_engine(engine):
-    mc = MathesarColumn('testable_col', String)
+    mc = MathesarColumn('testable_col', PostgresType.CHARACTER_VARYING.get_sa_class(engine))
     mc.add_engine(engine)
-    assert "VARCHAR" in mc.valid_target_types
+    assert mc.valid_target_types is not None
+    assert PostgresType.CHARACTER_VARYING in mc.valid_target_types
 
 
-def test_MC_valid_target_types_custom_engine(engine_with_types):
-    mc = MathesarColumn('testable_col', String)
-    mc.add_engine(engine_with_types)
-    assert "MATHESAR_TYPES.EMAIL" in mc.valid_target_types
-
-
-def test_MC_plain_type_no_opts(engine):
-    mc = MathesarColumn('acolumn', String)
+def test_MC_valid_target_types_custom_engine(engine):
+    mc = MathesarColumn('testable_col', VARCHAR)
     mc.add_engine(engine)
-    assert mc.plain_type == "VARCHAR"
+    assert mc.valid_target_types is not None
+    assert MathesarCustomType.EMAIL in mc.valid_target_types
 
 
-def test_MC_plain_type_no_opts_custom_type(engine_with_types):
-    mc = MathesarColumn('testable_col', email.Email)
-    mc.add_engine(engine_with_types)
-    assert mc.plain_type == "MATHESAR_TYPES.EMAIL"
-
-
-def test_MC_plain_type_numeric_opts(engine):
-    mc = MathesarColumn('testable_col', Numeric(5, 2))
+def test_MC_type_no_opts(engine):
+    mc = MathesarColumn('acolumn', VARCHAR)
     mc.add_engine(engine)
-    assert mc.plain_type == "NUMERIC"
+    assert mc.db_type == PostgresType.CHARACTER_VARYING
+
+
+@pytest.mark.parametrize(
+    "sa_type,db_type",
+    [
+        (email.Email, MathesarCustomType.EMAIL),
+        (NUMERIC(5, 2), PostgresType.NUMERIC),
+        (NullType(), None),
+        (ARRAY(INTEGER), None),
+        (JSON(), None),
+    ]
+)
+def test_MC_db_type_no_opts_custom_type(
+    engine, sa_type, db_type
+):
+    mc = MathesarColumn('testable_col', sa_type)
+    mc.add_engine(engine)
+    if db_type is not None:
+        assert mc.db_type == db_type
+    else:
+        with pytest.raises(UnknownDbTypeId):
+            mc.db_type
 
 
 def test_MC_type_options_no_opts(engine):
-    mc = MathesarColumn('testable_col', Numeric)
+    mc = MathesarColumn('testable_col', NUMERIC)
     mc.add_engine(engine)
     assert mc.type_options is None
 
 
 def test_MC_type_options(engine):
-    mc = MathesarColumn('testable_col', Numeric(5, 2))
+    mc = MathesarColumn('testable_col', NUMERIC(5, 2))
     mc.add_engine(engine)
     assert mc.type_options == {'precision': 5, 'scale': 2}
 

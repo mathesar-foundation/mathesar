@@ -18,7 +18,10 @@ import type {
   GroupingMode,
   GetRequestParams as ApiGetRequestParams,
 } from '@mathesar/api/tables/records';
+import { getErrorMessage } from '@mathesar/utils/errors';
 import type { Meta } from './meta';
+import type { RowKey } from './utils';
+import { validateRow, getCellKey } from './utils';
 import type { ColumnsDataStore, Column } from './columns';
 import type { Pagination } from './pagination';
 import type { Sorting } from './sorting';
@@ -90,7 +93,6 @@ export interface Row {
   isGroupHeader?: boolean;
   group?: Group;
   rowIndex?: number;
-  state?: string;
   groupValues?: Record<string, unknown>;
 }
 
@@ -102,16 +104,17 @@ export interface TableRecordsData {
   grouping?: Grouping;
 }
 
-export function getRowKey(
-  row: Row,
-  primaryKeyColumnId?: Column['id'],
-): unknown {
-  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-  let key: unknown = row.record?.[primaryKeyColumnId];
-  if (!key && row?.isNew) {
-    key = row?.identifier;
+export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
+  if (row.record && primaryKeyColumnId !== undefined) {
+    const primaryKeyCellValue = row.record[primaryKeyColumnId];
+    if (primaryKeyCellValue) {
+      return String(primaryKeyCellValue);
+    }
   }
-  return key;
+  if (row.isNew) {
+    return row.identifier;
+  }
+  return '';
 }
 
 function generateRowIdentifier(
@@ -158,7 +161,6 @@ function preprocessRecords({
       if (index === 0) {
         isGroup = true;
       } else {
-        // eslint-disable-next-line no-restricted-syntax
         for (const id of groupingColumnIds) {
           if (records[index - 1][id] !== records[index][id]) {
             isGroup = true;
@@ -174,7 +176,6 @@ function preprocessRecords({
           group: recordIndexToGroupMap.get(index),
           identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
           groupValues: record,
-          state: 'done',
         });
         groupIndex += 1;
       }
@@ -184,7 +185,6 @@ function preprocessRecords({
       record,
       identifier: generateRowIdentifier('normal', offset, existingRecordIndex),
       rowIndex: index,
-      state: 'done',
     });
     index += 1;
     existingRecordIndex += 1;
@@ -231,8 +231,6 @@ export class RecordsData {
 
   private requestParamsUnsubscriber: Unsubscriber;
 
-  private columnPatchUnsubscriber: () => void;
-
   constructor(
     type: TabularType,
     parentId: number,
@@ -262,10 +260,6 @@ export class RecordsData {
       this.meta.recordsRequestParamsData.subscribe(() => {
         void this.fetch();
       });
-    this.columnPatchUnsubscriber = this.columnsDataStore.on(
-      'columnPatched',
-      () => this.fetch(),
-    );
   }
 
   async fetch(
@@ -295,10 +289,13 @@ export class RecordsData {
       return data;
     });
     this.error.set(undefined);
-    this.state.set(States.Loading);
     if (!retainExistingRows) {
+      this.state.set(States.Loading);
       this.newRecords.set([]);
-      this.meta.clearAllRecordModificationStates();
+      this.meta.cellClientSideErrors.clear();
+      this.meta.cellModificationStatus.clear();
+      this.meta.rowCreationStatus.clear();
+      this.meta.rowDeletionStatus.clear();
     }
 
     try {
@@ -338,86 +335,86 @@ export class RecordsData {
   }
 
   async deleteSelected(): Promise<void> {
-    const pkSet = getStoreValue(this.meta.selectedRecords);
+    const rowKeys = [...this.meta.selectedRows.getValues()];
 
-    if (pkSet.size > 0) {
-      this.meta.setMultipleRecordModificationStates([...pkSet], 'delete');
+    if (rowKeys.length > 0) {
+      this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
 
-      try {
-        const successSet: Set<unknown> = new Set();
-        const failed: unknown[] = [];
-        // TODO: Convert this to single request
-        const promises = [...pkSet].map((pk) =>
-          deleteAPI<unknown>(`${this.url}${pk as string}/`)
-            .then(() => {
-              successSet.add(pk);
-              return successSet;
-            })
-            .catch(() => {
-              failed.push(pk);
-              return failed;
-            }),
+      const successRowKeys = new Set<RowKey>();
+      /** Values are error messages */
+      const failures = new Map<RowKey, string>();
+      // TODO: Convert this to single request
+      const promises = rowKeys.map((pk) =>
+        deleteAPI<RowKey>(`${this.url}${pk}/`)
+          .then(() => {
+            successRowKeys.add(pk);
+            return successRowKeys;
+          })
+          .catch((error: unknown) => {
+            failures.set(pk, getErrorMessage(error));
+            return failures;
+          }),
+      );
+      await Promise.all(promises);
+      await this.fetch(true);
+
+      const { offset } = getStoreValue(this.meta.pagination);
+      const savedRecords = getStoreValue(this.savedRecords);
+      const savedRecordsLength = savedRecords?.length || 0;
+      const pkColumnId = this.columnsDataStore.get()?.primaryKeyColumnId;
+      const savedRecordKeys = new Set(
+        savedRecords.map((row) => getRowKey(row, pkColumnId)),
+      );
+
+      this.newRecords.update((existing) => {
+        let retained = existing.filter(
+          (row) => !successRowKeys.has(getRowKey(row, pkColumnId)),
         );
-        await Promise.all(promises);
-        await this.fetch(true);
+        retained = retained.filter(
+          (row) => !savedRecordKeys.has(getRowKey(row, pkColumnId)),
+        );
 
-        const { offset } = getStoreValue(this.meta.pagination);
-        const savedRecords = getStoreValue(this.savedRecords);
-        const savedRecordsLength = savedRecords?.length || 0;
-
-        this.newRecords.update((existing) => {
-          let retained = existing.filter(
-            (entry) =>
-              !successSet.has(
-                getRowKey(
-                  entry,
-                  this.columnsDataStore.get()?.primaryKeyColumnId,
-                ),
-              ),
-          );
-          if (retained.length === existing.length) {
-            return existing;
-          }
-          let index = -1;
-          retained = retained.map((entry) => {
-            index += 1;
-            return {
-              ...entry,
-              rowIndex: savedRecordsLength + index,
-              identifier: generateRowIdentifier('new', offset, index),
-            };
-          });
-          return retained;
+        if (retained.length === existing.length) {
+          return existing;
+        }
+        let index = -1;
+        retained = retained.map((row) => {
+          index += 1;
+          return {
+            ...row,
+            rowIndex: savedRecordsLength + index,
+            identifier: generateRowIdentifier('new', offset, index),
+          };
         });
-        this.meta.clearMultipleRecordModificationStates([...successSet]);
-        this.meta.setMultipleRecordModificationStates(failed, 'deleteFailed');
-      } catch (err) {
-        this.meta.setMultipleRecordModificationStates(
-          [...pkSet],
-          'deleteFailed',
-        );
-      } finally {
-        this.meta.clearSelectedRecords();
-      }
+        return retained;
+      });
+      this.meta.rowCreationStatus.delete([...savedRecordKeys]);
+      this.meta.rowCreationStatus.delete([...successRowKeys]);
+      this.meta.rowDeletionStatus.delete([...successRowKeys]);
+      this.meta.selectedRows.delete([...successRowKeys]);
+      this.meta.rowDeletionStatus.setEntries(
+        [...failures.entries()].map(([rowKey, errorMsg]) => [
+          rowKey,
+          { state: 'failure', errors: [errorMsg] },
+        ]),
+      );
     }
   }
 
-  /**
-   * TODO:
-   * - Handle states where cell update and row update happen in parallel
-   * - Reduce code duplication between `updateCell` and `updateRecord`
-   */
-  async updateCell(row: Row, column: Column): Promise<void> {
+  // TODO: It would be better to throw errors instead of silently failing
+  // and returning a value.
+  async updateCell(row: Row, column: Column): Promise<Row> {
+    // TODO compute and validate client side errors before saving
     const { record } = row;
     if (!record) {
       console.error('Unable to update row that does not have a record');
-      return;
+      return row;
     }
     const { primaryKeyColumnId } = this.columnsDataStore.get();
     if (!primaryKeyColumnId) {
       // eslint-disable-next-line no-console
       console.error('Unable to update record for a row without a primary key');
-      return;
+      return row;
     }
     const primaryKeyValue = record[primaryKeyColumnId];
     if (primaryKeyValue === undefined) {
@@ -425,14 +422,13 @@ export class RecordsData {
       console.error(
         'Unable to update record for a row with a missing primary key value',
       );
-      return;
+      return row;
     }
     const rowKey = getRowKey(row, primaryKeyColumnId);
-    const rowKeyString = String(rowKey);
-    const cellKey = `${rowKeyString}::${column.id}`;
-    this.meta.setCellUpdateState(rowKey, cellKey, 'update');
+    const cellKey = getCellKey(rowKey, column.id);
+    this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
-    const promise = patchAPI<unknown>(
+    const promise = patchAPI<ApiRecord>(
       `${this.url}${String(primaryKeyValue)}/`,
       { [column.id]: record[column.id] },
     );
@@ -442,63 +438,23 @@ export class RecordsData {
     this.updatePromises.set(cellKey, promise);
 
     try {
-      await promise;
-      this.meta.setCellUpdateState(rowKey, cellKey, 'updated');
+      const result = await promise;
+      this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
+      return {
+        ...row,
+        record: result,
+      };
     } catch (err) {
-      this.meta.setCellUpdateState(rowKey, cellKey, 'updateFailed');
+      this.meta.cellModificationStatus.set(cellKey, {
+        state: 'failure',
+        errors: [`Unable to save cell. ${getErrorMessage(err)}`],
+      });
     } finally {
       if (this.updatePromises.get(cellKey) === promise) {
         this.updatePromises.delete(cellKey);
       }
     }
-  }
-
-  /**
-   * TODO:
-   * - Reduce code duplication between `updateCell` and `updateRecord`
-   */
-  async updateRecord(row: Row): Promise<void> {
-    const { record } = row;
-    if (!record) {
-      console.error('Unable to update row that does not have a record');
-      return;
-    }
-    const { primaryKeyColumnId } = this.columnsDataStore.get();
-    if (!primaryKeyColumnId) {
-      // eslint-disable-next-line no-console
-      console.error('Unable to update record for a row without a primary key');
-      return;
-    }
-    const primaryKeyValue = record[primaryKeyColumnId];
-    if (primaryKeyValue === undefined) {
-      // eslint-disable-next-line no-console
-      console.error(
-        'Unable to update record for a row with a missing primary key value',
-      );
-      return;
-    }
-    const rowKey = getRowKey(row, primaryKeyColumnId);
-    this.meta.setRecordModificationState(rowKey, 'update');
-    this.updatePromises?.get(rowKey)?.cancel();
-    const promise = patchAPI<unknown>(
-      `${this.url}${String(primaryKeyValue)}/`,
-      prepareRowForRequest(row),
-    );
-    if (!this.updatePromises) {
-      this.updatePromises = new Map();
-    }
-    this.updatePromises.set(rowKey, promise);
-
-    try {
-      await promise;
-      this.meta.setRecordModificationState(rowKey, 'updated');
-    } catch (err) {
-      this.meta.setRecordModificationState(rowKey, 'updateFailed');
-    } finally {
-      if (this.updatePromises.get(rowKey) === promise) {
-        this.updatePromises.delete(rowKey);
-      }
-    }
+    return row;
   }
 
   getNewEmptyRecord(): Row {
@@ -511,26 +467,41 @@ export class RecordsData {
       offset,
       existingNewRecords.length,
     );
-    const newRecord: Row = {
-      record: {},
+    const record = Object.fromEntries(
+      getStoreValue(this.columnsDataStore)
+        .columns.filter((column) => column.default === null)
+        .map((column) => [String(column.id), null]),
+    );
+    const newRow: Row = {
+      record,
       identifier,
-      state: States.Done,
       isNew: true,
       rowIndex: existingNewRecords.length + savedRecordsLength,
     };
-    return newRecord;
+    return newRow;
   }
 
-  async createRecord(row: Row): Promise<void> {
-    const { primaryKeyColumnId: primaryKey } = this.columnsDataStore.get();
-    const rowKey = getRowKey(row, primaryKey);
-    this.meta.setRecordModificationState(rowKey, 'create');
-    this.createPromises?.get(rowKey)?.cancel();
+  async createRecord(row: Row): Promise<Row> {
+    const { primaryKeyColumnId, columns } = this.columnsDataStore.get();
+    const rowKey = getRowKey(row, primaryKeyColumnId);
+    validateRow({
+      row,
+      rowKey,
+      columns,
+      cellClientSideErrors: this.meta.cellClientSideErrors,
+    });
+    if (getStoreValue(this.meta.rowsWithClientSideErrors).has(rowKey)) {
+      return row;
+    }
+
+    const rowKeyOfBlankRow = getRowKey(row, primaryKeyColumnId);
+    this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
+    this.createPromises?.get(rowKeyOfBlankRow)?.cancel();
     const promise = postAPI<ApiRecord>(this.url, prepareRowForRequest(row));
     if (!this.createPromises) {
       this.createPromises = new Map();
     }
-    this.createPromises.set(rowKey, promise);
+    this.createPromises.set(rowKeyOfBlankRow, promise);
 
     try {
       const record = await promise;
@@ -539,9 +510,9 @@ export class RecordsData {
         record,
         isAddPlaceholder: false,
       };
-      const updatedRowKey = getRowKey(newRow, primaryKey);
-      this.meta.clearRecordModificationState(rowKey);
-      this.meta.setRecordModificationState(updatedRowKey, 'created');
+      const rowKeyWithRecord = getRowKey(newRow, primaryKeyColumnId);
+      this.meta.rowCreationStatus.delete(rowKeyOfBlankRow);
+      this.meta.rowCreationStatus.set(rowKeyWithRecord, { state: 'success' });
       this.newRecords.update((existing) =>
         existing.map((entry) => {
           if (entry.identifier === row.identifier) {
@@ -551,16 +522,21 @@ export class RecordsData {
         }),
       );
       this.totalCount.update((count) => (count ?? 0) + 1);
+      return newRow;
     } catch (err) {
-      this.meta.setRecordModificationState(rowKey, 'creationFailed');
+      this.meta.rowCreationStatus.set(rowKeyOfBlankRow, {
+        state: 'failure',
+        errors: [getErrorMessage(err)],
+      });
     } finally {
-      if (this.createPromises.get(rowKey) === promise) {
-        this.createPromises.delete(rowKey);
+      if (this.createPromises.get(rowKeyOfBlankRow) === promise) {
+        this.createPromises.delete(rowKeyOfBlankRow);
       }
     }
+    return row;
   }
 
-  async createOrUpdateRecord(row: Row, column?: Column): Promise<void> {
+  async createOrUpdateRecord(row: Row, column: Column): Promise<Row> {
     const { primaryKeyColumnId } = this.columnsDataStore.get();
 
     // Row may not have been updated yet in view when additional request is made.
@@ -579,24 +555,24 @@ export class RecordsData {
       });
     }
 
+    let result = row;
     if (
       primaryKeyColumnId &&
       !existingNewRecordRow?.record?.[primaryKeyColumnId] &&
       row.isNew &&
       !row.record?.[primaryKeyColumnId]
     ) {
-      await this.createRecord(row);
-    } else if (column) {
-      await this.updateCell(row, column);
+      result = await this.createRecord(row);
     } else {
-      await this.updateRecord(row);
+      result = await this.updateCell(row, column);
     }
+    return result;
   }
 
   async addEmptyRecord(): Promise<void> {
-    const newRecord = this.getNewEmptyRecord();
-    this.newRecords.update((existing) => existing.concat(newRecord));
-    await this.createRecord(newRecord);
+    const row = this.getNewEmptyRecord();
+    this.newRecords.update((existing) => existing.concat(row));
+    await this.createRecord(row);
   }
 
   getIterationKey(index: number): string {
@@ -617,6 +593,5 @@ export class RecordsData {
     this.promise = undefined;
 
     this.requestParamsUnsubscriber();
-    this.columnPatchUnsubscriber();
   }
 }

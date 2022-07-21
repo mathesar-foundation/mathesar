@@ -1,34 +1,54 @@
 import type { DbType } from '@mathesar/AppTypes';
-import { abstractTypeCategory, unknownAbstractTypeResponse } from './constants';
+import { abstractTypeCategory } from './constants';
 import Text from './type-configs/text';
+import Money from './type-configs/money';
+import Email from './type-configs/email';
 import Number from './type-configs/number';
 import Boolean from './type-configs/boolean';
-import Unknown from './type-configs/unknown';
+import Uri from './type-configs/uri';
+import Duration from './type-configs/duration';
+import Date from './type-configs/date';
+import Time from './type-configs/time';
+import DateTime from './type-configs/datetime';
+import Fallback from './type-configs/fallback';
 import type {
   AbstractType,
   AbstractTypesMap,
   AbstractTypeResponse,
   AbstractTypeConfiguration,
+  AbstractTypeCategoryIdentifier,
 } from './types';
 
 /**
  * This is meant to be serializable and replaced by an API
  * at a later point
  */
-const abstractTypeCategories = {
+const abstractTypeCategories: Partial<
+  Record<AbstractTypeCategoryIdentifier, AbstractTypeConfiguration>
+> = {
   [abstractTypeCategory.Text]: Text,
+  [abstractTypeCategory.Money]: Money,
+  [abstractTypeCategory.Email]: Email,
   [abstractTypeCategory.Number]: Number,
   [abstractTypeCategory.Boolean]: Boolean,
-  [abstractTypeCategory.Other]: Unknown,
+  [abstractTypeCategory.Uri]: Uri,
+  [abstractTypeCategory.Duration]: Duration,
+  [abstractTypeCategory.Date]: Date,
+  [abstractTypeCategory.Time]: Time,
+  [abstractTypeCategory.DateTime]: DateTime,
+  [abstractTypeCategory.Other]: Fallback,
+};
+
+export const unknownAbstractTypeResponse: AbstractTypeResponse = {
+  name: 'Other',
+  identifier: 'other',
+  db_types: [],
 };
 
 function getAbstractTypeConfiguration(
   identifier: AbstractType['identifier'],
 ): AbstractTypeConfiguration {
-  return (
-    abstractTypeCategories[identifier] ||
-    abstractTypeCategories[abstractTypeCategory.Other]
-  );
+  return abstractTypeCategories[identifier] || Fallback;
 }
 
 function constructAbstractTypeFromResponse(
@@ -71,7 +91,6 @@ export function getAbstractTypesForDbTypeList(
     let isUnknownTypeRequired = false;
     dbTypes.forEach((dbType) => {
       let isKnownType = false;
-      // eslint-disable-next-line no-restricted-syntax
       for (const [, abstractType] of abstractTypesMap) {
         if (abstractType.dbTypes.has(dbType)) {
           abstractTypeSet.add(abstractType);

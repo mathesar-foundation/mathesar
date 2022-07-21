@@ -6,8 +6,11 @@ from db.columns.operations.select import (
 )
 from db.tables.operations.select import get_oid_from_table
 from db.types.operations.cast import get_full_cast_map
+from db.types.base import get_db_type_enum_from_class
 
 
+# TODO consider renaming to DbColumn or DatabaseColumn
+# We are attempting to reserve the term Mathesar for types in the mathesar namespace.
 class MathesarColumn(Column):
     """
     This class constrains the possible arguments, enabling us to include
@@ -26,6 +29,7 @@ class MathesarColumn(Column):
             nullable=True,
             autoincrement=False,
             server_default=None,
+            engine=None,
     ):
         """
         Construct a new ``MathesarColumn`` object.
@@ -39,7 +43,7 @@ class MathesarColumn(Column):
         nullable -- Boolean giving whether the column is nullable.
         server_default -- String or DefaultClause giving the default value
         """
-        self.engine = None
+        self.engine = engine
         super().__init__(
             *foreign_keys,
             name=name,
@@ -51,7 +55,18 @@ class MathesarColumn(Column):
         )
 
     @classmethod
-    def from_column(cls, column):
+    def _constructor(cls, *args, **kwargs):
+        """
+        Needed to support Column.copy().
+
+        See https://docs.sqlalchemy.org/en/14/changelog/changelog_07.html?highlight=_constructor#change-de8c32a6729c83da17177f6a13979717
+        """
+        return MathesarColumn.from_column(
+            Column(*args, **kwargs)
+        )
+
+    @classmethod
+    def from_column(cls, column, engine=None):
         """
         This alternate init method creates a new column (a copy) of the
         given column.  It respects only the properties in the __init__
@@ -66,9 +81,21 @@ class MathesarColumn(Column):
             nullable=column.nullable,
             autoincrement=column.autoincrement,
             server_default=column.server_default,
+            engine=engine,
         )
         new_column.original_table = column.table
         return new_column
+
+    def to_sa_column(self):
+        """
+        MathesarColumn sometimes is not interchangeable with SQLAlchemy's Column.
+        For use in those situations, this method attempts to recreate an SA Column.
+
+        NOTE: this method is incomplete: it does not account for all properties of MathesarColumn.
+        """
+        sa_column = Column(name=self.name, type_=self.type)
+        sa_column.table = self.table_
+        return sa_column
 
     @property
     def table_(self):
@@ -111,14 +138,19 @@ class MathesarColumn(Column):
         Returns a set of valid types to which the type of the column can be
         altered.
         """
-        if self.engine is not None and not self.is_default:
-            db_type = self.plain_type
+        if (
+            self.engine is not None
+            and not self.is_default
+            and self.db_type is not None
+        ):
+            db_type = self.db_type
             valid_target_types = sorted(
                 list(
                     set(
                         get_full_cast_map(self.engine).get(db_type, [])
                     )
-                )
+                ),
+                key=lambda db_type: db_type.id
             )
             return valid_target_types if valid_target_types else None
 
@@ -157,11 +189,12 @@ class MathesarColumn(Column):
             return get_column_default(self.table_oid, self.column_attnum, self.engine)
 
     @property
-    def plain_type(self):
+    def db_type(self):
         """
-        Get the type name without arguments
+        Get this column's database type enum.
         """
-        return self.type.__class__().compile(self.engine.dialect)
+        self._assert_that_engine_is_present()
+        return get_db_type_enum_from_class(self.type.__class__, self.engine)
 
     @property
     def type_options(self):
@@ -173,3 +206,7 @@ class MathesarColumn(Column):
         }
         _type_options = {k: v for k, v in full_type_options.items() if v is not None}
         return _type_options if _type_options else None
+
+    def _assert_that_engine_is_present(self):
+        if self.engine is None:
+            raise Exception("Engine should not be None.")

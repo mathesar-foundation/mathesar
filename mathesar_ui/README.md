@@ -78,7 +78,7 @@ If you don't have your editor configured to auto-format your code, then you'll n
 - Format a specific file
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npx prettier --write src/sections/Base.svelte
+  docker exec -it -w /code/mathesar_ui mathesar_service npx prettier --write src/App.svelte
   ```
 
 ## Linting
@@ -94,7 +94,7 @@ We use [ESLint](https://eslint.org/) to help spot more complex issues within cod
 - Lint a specific file:
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npx eslint src/sections/Base.svelte
+  docker exec -it -w /code/mathesar_ui mathesar_service npx eslint src/App.svelte
   ```
 
 ## Testing
@@ -169,7 +169,7 @@ If you want to add or remove packages, or basically run any npm action, **always
    cd mathesar_ui
    ```
 
-1. Perform any action from within it.
+1. Add or remove packages.
 
    ```bash
    root@c273da65c52d:/code/mathesar_ui$ ls
@@ -180,6 +180,20 @@ If you want to add or remove packages, or basically run any npm action, **always
 
    root@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
    ```
+
+1. Before committing the `package-lock.json` file, run `npm install --unsafe-perm` in the container.
+
+   ```bash
+   root@c273da65c52d:/code/mathesar_ui$ npm install --unsafe-perm
+   ```
+
+   Reason:
+
+   - We force resolutions of certain packages which have vulnerabilities, using the [`npm-force-resolutions` package](https://www.npmjs.com/package/npm-force-resolutions).
+   - These resolutions are mentioned in the package.json file. They are only to be used when nested dependencies have severe vulnerabilities but our direct dependencies do not use the vulnerability free versions. Extra care should be taken here to make sure the direct dependencies do not break.
+   - This needs to run during the `preinstall` lifecycle.
+   - After every package action (add/remove), the `npm install` command needs to be run additionally to enforce these resolutions.
+   - Since our node instance runs as root in the container, the [`--unsafe-perm` flag](https://docs.npmjs.com/cli/v6/using-npm/config#unsafe-perm) needs to be specified.
 
 ## Components
 

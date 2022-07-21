@@ -16,7 +16,11 @@ export { default as Icon } from './icon/Icon.svelte';
 export { InputGroup, InputGroupText } from './input-group';
 export { default as Label } from './label/Label.svelte';
 export { default as LabeledInput } from './labeled-input/LabeledInput.svelte';
-export { default as NumberInput } from './number-input/NumberInput.svelte';
+export {
+  NumberInput,
+  StringifiedNumberInput,
+  StringifiedNumberFormatter,
+} from './number-input';
 export { default as Progress } from './progress/Progress.svelte';
 export { default as Radio } from './radio/Radio.svelte';
 export { default as RadioGroup } from './radio-group/RadioGroup.svelte';
@@ -30,11 +34,14 @@ export { default as TextAvatar } from './text-avatar/TextAvatar.svelte';
 export { default as TextInput } from './text-input/TextInput.svelte';
 
 // Compound Components (Ordered)
-export { default as Dropdown } from './dropdown/Dropdown.svelte';
+export { AttachableDropdown, Dropdown } from './dropdown';
+export { DatePicker, InlineDateTimePicker } from './date-time-picker';
 export { default as DropdownMenu } from './dropdown-menu/DropdownMenu.svelte';
 export { default as DynamicInput } from './dynamic-input/DynamicInput.svelte';
 export { default as FileUpload } from './file-upload/FileUpload.svelte';
+export { default as FormattedInput } from './formatted-input/FormattedInput.svelte';
 export { default as Notification } from './notification/Notification.svelte';
+export { ListBox, ListBoxOptions } from './list-box';
 export { default as Pagination } from './pagination/Pagination.svelte';
 export { default as Select } from './select/Select.svelte';
 export { default as TabContainer } from './tabs/TabContainer.svelte';

@@ -1,54 +1,95 @@
 import pytest
 from unittest.mock import call, patch
-from sqlalchemy import Column, MetaData, Table, select
-from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR
+from sqlalchemy import Column, MetaData, Table, select, VARCHAR
 
 from db.columns.operations.infer_types import infer_column_type
 from db.tables.operations import infer_types as infer_operations
 from db.tables.operations.create import create_mathesar_table
-from db.tests.types import fixtures
-from db.types import email, uri, datetime, money
-
-
-# We need to set these variables when the file loads, or pytest can't
-# properly detect the fixtures.  Importing them directly results in a
-# flake8 unused import error, and a bunch of flake8 F811 errors
-engine_with_types = fixtures.engine_with_types
-engine_email_type = fixtures.engine_email_type
-temporary_testing_schema = fixtures.temporary_testing_schema
+from db.types.base import PostgresType, MathesarCustomType, get_db_type_enum_from_class
 
 
 type_data_list = [
-    (Numeric, [0, 2, 1, 0], NUMERIC),
-    (Numeric, [0, 1, 1, 0], BOOLEAN),
-    (String, ["t", "false", "true", "f", "f"], BOOLEAN),
-    (String, ["t", "false", "2", "0"], VARCHAR),
-    (String, ["a", "cat", "mat", "bat"], VARCHAR),
-    (String, ["2", "1", "0", "0"], NUMERIC),
-    (String, ["$2", "$1", "$0"], money.MathesarMoney),
     (
-        String,
+        PostgresType.TEXT,
+        [
+            "3.14",
+            "1,41",
+            "149,600,000.00",
+            "4.543.000.000,005",
+            "13 800 000 000,00",
+            "7,53,00,00,000.0",
+            "140'004'453.0",
+            "-3.14",
+            "-1,41",
+            "-149,600,000.00",
+            "-4.543.000.000,005",
+            "-13 800 000 000,00",
+            "-7,53,00,00,000.0",
+            "-140'004'453.0"
+        ],
+        PostgresType.NUMERIC),
+    (
+        PostgresType.NUMERIC,
+        [0, 2, 1, 0],
+        PostgresType.NUMERIC
+    ),
+    (
+        PostgresType.NUMERIC,
+        [0, 1, 1, 0],
+        PostgresType.BOOLEAN
+    ),
+    (
+        PostgresType.TEXT,
+        ["t", "false", "true", "f", "f"],
+        PostgresType.BOOLEAN
+    ),
+    (
+        PostgresType.TEXT,
+        ["t", "false", "2", "0"],
+        PostgresType.TEXT
+    ),
+    (
+        PostgresType.TEXT,
+        ["a", "cat", "mat", "bat"],
+        PostgresType.TEXT
+    ),
+    (
+        PostgresType.TEXT,
+        ["2", "1", "0", "0"],
+        PostgresType.NUMERIC
+    ),
+    (
+        PostgresType.TEXT,
+        ["$2", "$1", "$0"],
+        MathesarCustomType.MATHESAR_MONEY
+    ),
+    (
+        PostgresType.TEXT,
         ["2000-01-12", "6/23/2004", "May-2007-29", "May-2007-29 00:00:00+0", "20200909"],
-        datetime.DATE
+        PostgresType.DATE
     ),
-    (String, ["9:24+01", "23:12", "03:04:05", "3:4:5"], datetime.TIME_WITHOUT_TIME_ZONE),
     (
-        String,
+        PostgresType.TEXT,
+        ["9:24+01", "23:12", "03:04:05", "3:4:5"],
+        PostgresType.TIME_WITHOUT_TIME_ZONE
+    ),
+    (
+        PostgresType.TEXT,
         ["2000-01-12 9:24", "6/23/2004 23:12", "May-2007-29 03:04:05", "May-2007-29 5:00:00+0", "May-2007-29", "20200909 3:4:5"],
-        datetime.TIMESTAMP_WITHOUT_TIME_ZONE
+        PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE
     ),
     (
-        String,
+        PostgresType.TEXT,
         ["2000-01-12 9:24-3", "6/23/2004 23:12+01", "May-2007-29 03:04:05", "May-2007-29", "20200909 3:4:5+01:30"],
-        datetime.TIMESTAMP_WITH_TIME_ZONE
+        PostgresType.TIMESTAMP_WITH_TIME_ZONE
     ),
     (
-        String,
+        PostgresType.TEXT,
         ["alice@example.com", "bob@example.com", "jon.doe@example.ca"],
-        email.Email
+        MathesarCustomType.EMAIL
     ),
     (
-        String,
+        PostgresType.TEXT,
         [
             "https://centerofci.org",
             "ldap://[2001:db8::7]/c=GB?objectClass?one"
@@ -62,17 +103,18 @@ type_data_list = [
             "lwn.net",
             "github.com",
         ],
-        uri.URI
+        MathesarCustomType.URI
     ),
 ]
 
 
 def create_test_table(engine, schema, table_name, column_name, column_type, values):
     metadata = MetaData(bind=engine)
+    column_sa_type = column_type.get_sa_class(engine)
     input_table = Table(
         table_name,
         metadata,
-        Column(column_name, column_type),
+        Column(column_name, column_sa_type),
         schema=schema
     )
     input_table.create()
@@ -83,13 +125,13 @@ def create_test_table(engine, schema, table_name, column_name, column_type, valu
     return input_table
 
 
-@pytest.mark.parametrize("type_,value_list,expect_type", type_data_list)
-def test_type_inference(engine_email_type, type_, value_list, expect_type):
-    engine, schema = engine_email_type
+@pytest.mark.parametrize("initial_type,value_list,expected_type", type_data_list)
+def test_type_inference(engine_with_schema, initial_type, value_list, expected_type):
+    engine, schema = engine_with_schema
     TEST_TABLE = "test_table"
     TEST_COLUMN = "test_column"
     create_test_table(
-        engine, schema, TEST_TABLE, TEST_COLUMN, type_, value_list
+        engine, schema, TEST_TABLE, TEST_COLUMN, initial_type, value_list
     )
 
     infer_column_type(
@@ -101,19 +143,20 @@ def test_type_inference(engine_email_type, type_, value_list, expect_type):
 
     with engine.begin():
         metadata = MetaData(bind=engine, schema=schema)
-        actual_type = Table(
+        reflected_type_sa_class = Table(
             TEST_TABLE, metadata, schema=schema, autoload_with=engine,
         ).columns[TEST_COLUMN].type.__class__
-    assert actual_type == expect_type
+        reflected_type = get_db_type_enum_from_class(reflected_type_sa_class, engine)
+    assert reflected_type == expected_type
 
 
-@pytest.mark.parametrize("type_,value_list,expect_type", type_data_list)
-def test_table_inference(engine_email_type, type_, value_list, expect_type):
-    engine, schema = engine_email_type
-    TEST_TABLE = "test_table"
-    TEST_COLUMN = "test_column"
+@pytest.mark.parametrize("initial_type,value_list,expected_type", type_data_list)
+def test_table_inference(engine_with_schema, initial_type, value_list, expected_type):
+    engine, schema = engine_with_schema
+    test_table = "test_table"
+    test_column = "test_column"
     input_table = create_test_table(
-        engine, schema, TEST_TABLE, TEST_COLUMN, type_, value_list
+        engine, schema, test_table, test_column, initial_type, value_list
     )
 
     with engine.begin() as conn:
@@ -122,10 +165,10 @@ def test_table_inference(engine_email_type, type_, value_list, expect_type):
 
     inferred_types = infer_operations.infer_table_column_types(
         schema,
-        TEST_TABLE,
+        test_table,
         engine
     )
-    assert inferred_types == [expect_type]
+    assert inferred_types == (expected_type,)
 
     # Ensure the original table is untouced
     with engine.begin() as conn:
@@ -134,33 +177,33 @@ def test_table_inference(engine_email_type, type_, value_list, expect_type):
     assert original_table == new_table
 
 
-def test_table_inference_drop_temp(engine_email_type):
-    engine, schema = engine_email_type
-    TEST_TABLE = "test_table"
-    TEST_COLUMN = "test_column"
-    TYPE = Numeric
-    VALUES = [0, 1, 2, 3, 4]
-    create_test_table(engine, schema, TEST_TABLE, TEST_COLUMN, TYPE, VALUES)
+def test_table_inference_drop_temp(engine_with_schema):
+    engine, schema = engine_with_schema
+    test_table = "test_table"
+    test_column = "test_column"
+    db_type = PostgresType.NUMERIC
+    values = [0, 1, 2, 3, 4]
+    create_test_table(engine, schema, test_table, test_column, db_type, values)
 
     # Ensure that the temp table is deleted even when the function errors
     with patch.object(infer_operations, "infer_column_type") as mock_infer:
         mock_infer.side_effect = Exception()
         with pytest.raises(Exception):
-            infer_operations.infer_table_column_types(schema, TEST_TABLE, engine)
-    infer_operations.infer_table_column_types(schema, TEST_TABLE, engine)
+            infer_operations.infer_table_column_types(schema, test_table, engine)
+    infer_operations.infer_table_column_types(schema, test_table, engine)
 
 
-def test_table_inference_same_name(engine_email_type):
-    engine, schema = engine_email_type
-    TEST_TABLE = "temp_table"
-    TEST_COLUMN = "test_column"
-    TYPE = Numeric
-    VALUES = [0, 1, 2, 3, 4]
-    table = create_test_table(engine, schema, TEST_TABLE, TEST_COLUMN, TYPE, VALUES)
+def test_table_inference_same_name(engine_with_schema):
+    engine, schema = engine_with_schema
+    test_table = "temp_table"
+    test_column = "test_column"
+    db_type = PostgresType.NUMERIC
+    values = [0, 1, 2, 3, 4]
+    table = create_test_table(engine, schema, test_table, test_column, db_type, values)
     with engine.begin() as conn:
         results = conn.execute(select(table))
     original_table = results.fetchall()
-    infer_operations.infer_table_column_types(schema, TEST_TABLE, engine)
+    infer_operations.infer_table_column_types(schema, test_table, engine)
     with engine.begin() as conn:
         results = conn.execute(select(table))
     new_table = results.fetchall()
@@ -184,8 +227,8 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
 
 
 def test_update_table_column_types_infers_non_default_types(engine_with_schema):
-    col1 = Column("col1", String)
-    col2 = Column("col2", String)
+    col1 = Column("col1", VARCHAR)
+    col2 = Column("col2", VARCHAR)
     column_list = [col1, col2]
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
@@ -216,7 +259,7 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
 
 
 def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
-    column_list = [Column("checkcol", String, primary_key=True)]
+    column_list = [Column("checkcol", VARCHAR, primary_key=True)]
     engine, schema = engine_with_schema
     table_name = "t1"
     create_mathesar_table(

@@ -1,7 +1,11 @@
 <script lang="ts">
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
+  import type { TextAreaProps } from '@mathesar-component-library-dir/text-area/TextAreaTypes';
+
+  type $$Props = TextAreaProps;
 
   let textareaRef: HTMLTextAreaElement;
+
   // Id for the input
   export let id: string | undefined = undefined;
 
@@ -13,9 +17,17 @@
 
   export let addNewLineOnAllEnterKeyCombinations = false;
 
-  export function handleInputKeydown(e: KeyboardEvent) {}
-
+  /**
+   * Value of the input. Use bind tag for two-way binding.
+   * Refer Svelte docs for more info on binding form input values.
+   */
   export let value: string | undefined | null = '';
+
+  export let element: $$Props['element'] = undefined;
+
+  export let hasError = false;
+
+  export function handleInputKeydown(e: KeyboardEvent) {}
 
   function handleKeyDown(
     e: KeyboardEvent,
@@ -37,17 +49,15 @@
       handler(e);
     }
   }
-  /**
-   * Value of the input. Use bind tag for two-way binding.
-   * Refer Svelte docs for more info on binding form input values.
-   */
 </script>
 
 <BaseInput {...$$restProps} bind:id {disabled} />
 
 <textarea
+  bind:this={element}
   {...$$restProps}
   class="input-element text-area {classes}"
+  class:has-error={hasError}
   {id}
   {disabled}
   bind:this={textareaRef}

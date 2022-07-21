@@ -44,13 +44,15 @@ def mathesar_exception_handler(exc, context):
     # DRF default exception handler does not handle non Api errors,
     # So we convert it to proper api response
     if not response:
-        if getattr(settings, 'MATHESAR_CAPTURE_UNHANDLED_EXCEPTION', False):
-            # Check if we have an equivalent Api exception that is able to convert the exception to proper error
-            exception_mapper = exception_map.get(exc.__class__, get_default_api_exception)
-            api_exception = exception_mapper(exc)
-            response = exception_handler(api_exception, context)
-        else:
-            raise exc
+        # Check if we have an equivalent Api exception that is able to convert the exception to proper error
+        mapped_exception_class = exception_map.get(exc.__class__)
+        if mapped_exception_class is None:
+            if getattr(settings, 'MATHESAR_CAPTURE_UNHANDLED_EXCEPTION', False):
+                mapped_exception_class = get_default_api_exception
+            else:
+                raise exc
+        api_exception = mapped_exception_class(exc)
+        response = exception_handler(api_exception, context)
 
     if response is not None:
         # Check if conforms to the api spec

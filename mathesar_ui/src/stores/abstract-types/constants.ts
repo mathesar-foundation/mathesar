@@ -1,5 +1,7 @@
 export const abstractTypeCategory = {
   Boolean: 'boolean',
+  Date: 'date',
+  Time: 'time',
   DateTime: 'datetime',
   Duration: 'duration',
   Email: 'email',
@@ -8,10 +10,4 @@ export const abstractTypeCategory = {
   Text: 'text',
   Uri: 'uri',
   Other: 'other',
-};
-
-export const unknownAbstractTypeResponse = {
-  name: 'Other',
-  identifier: 'other',
-  db_types: [],
-};
+} as const;

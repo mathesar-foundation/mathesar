@@ -77,6 +77,10 @@
     bind:value={richValue}
     isInline
     label="Rich text"
+    getRadioLabel={(o) => ({
+      component: o.labelComponent,
+      props: o.labelComponentProps,
+    })}
   />
 </Story>
 

@@ -1,17 +1,13 @@
+import pytest
+
 from decimal import Decimal
 from collections import Counter
 
-from sqlalchemy import Column
-from sqlalchemy import String
+from sqlalchemy import Column, VARCHAR
 
-from db.records.operations.select import get_records, get_column_cast_records
+from db.records.operations.select import get_records, get_column_cast_records, apply_transformations
 from db.tables.operations.create import create_mathesar_table
-from db.tests.types import fixtures
-
-
-engine_with_types = fixtures.engine_with_types
-temporary_testing_schema = fixtures.temporary_testing_schema
-engine_email_type = fixtures.engine_email_type
+from db.types.base import PostgresType
 
 
 def test_get_records_gets_all_records(roster_table_obj):
@@ -33,13 +29,13 @@ def test_get_records_gets_limited_offset_records(roster_table_obj):
     assert len(offset_records) == 10 and offset_records[0] == base_records[5]
 
 
-def test_get_column_cast_records(engine_email_type):
+def test_get_column_cast_records(engine_with_schema):
     COL1 = "col1"
     COL2 = "col2"
-    col1 = Column(COL1, String)
-    col2 = Column(COL2, String)
+    col1 = Column(COL1, VARCHAR)
+    col2 = Column(COL2, VARCHAR)
     column_list = [col1, col2]
-    engine, schema = engine_email_type
+    engine, schema = engine_with_schema
     table_name = "table_with_columns"
     table = create_mathesar_table(
         table_name, schema, column_list, engine
@@ -52,9 +48,9 @@ def test_get_column_cast_records(engine_email_type):
     COL1_MOD = COL1 + "_mod"
     COL2_MOD = COL2 + "_mod"
     column_definitions = [
-        {"name": "id", "type": "INTEGER"},
-        {"name": COL1_MOD, "type": "VARCHAR"},
-        {"name": COL2_MOD, "type": "NUMERIC"},
+        {"name": "id", "type": PostgresType.INTEGER.id},
+        {"name": COL1_MOD, "type": PostgresType.CHARACTER_VARYING.id},
+        {"name": COL2_MOD, "type": PostgresType.NUMERIC.id},
     ]
     records = get_column_cast_records(engine, table, column_definitions)
     for record in records:
@@ -64,13 +60,13 @@ def test_get_column_cast_records(engine_email_type):
         )
 
 
-def test_get_column_cast_records_options(engine_email_type):
+def test_get_column_cast_records_options(engine_with_schema):
     COL1 = "col1"
     COL2 = "col2"
-    col1 = Column(COL1, String)
-    col2 = Column(COL2, String)
+    col1 = Column(COL1, VARCHAR)
+    col2 = Column(COL2, VARCHAR)
     column_list = [col1, col2]
-    engine, schema = engine_email_type
+    engine, schema = engine_with_schema
     table_name = "table_with_columns"
     table = create_mathesar_table(
         table_name, schema, column_list, engine
@@ -83,9 +79,9 @@ def test_get_column_cast_records_options(engine_email_type):
     COL1_MOD = COL1 + "_mod"
     COL2_MOD = COL2 + "_mod"
     column_definitions = [
-        {"name": "id", "type": "INTEGER"},
-        {"name": COL1_MOD, "type": "VARCHAR"},
-        {"name": COL2_MOD, "type": "NUMERIC", "type_options": {"precision": 5, "scale": 2}},
+        {"name": "id", "type": PostgresType.INTEGER.id},
+        {"name": COL1_MOD, "type": PostgresType.CHARACTER_VARYING.id},
+        {"name": COL2_MOD, "type": PostgresType.NUMERIC.id, "type_options": {"precision": 5, "scale": 2}},
     ]
     records = get_column_cast_records(engine, table, column_definitions)
     for record in records:
@@ -110,3 +106,83 @@ def test_get_records_duplicate_only(roster_table_obj):
     all_counter = {k: v for k, v in all_counter.items() if v > 1}
     got_counter = Counter(tuple(r[c] for c in duplicate_only) for r in dupe_record_list)
     assert all_counter == got_counter
+
+
+@pytest.mark.parametrize(
+    "transformations,expected_records",
+    [
+        [
+            [
+                dict(
+                    type="filter",
+                    spec=dict(
+                        contains=[
+                            dict(column_name=["Student Name"]),
+                            dict(literal=["son"]),
+                        ]
+                    ),
+                ),
+                dict(
+                    type="order",
+                    spec=[{"field": "Teacher Email", "direction": "asc"}],
+                ),
+                dict(
+                    type="limit",
+                    spec=5,
+                ),
+                dict(
+                    type="select",
+                    spec=["id"],
+                ),
+            ],
+            [
+                (978,),
+                (194,),
+                (99,),
+                (155,),
+                (192,),
+            ]
+        ],
+        [
+            [
+                dict(
+                    type="limit",
+                    spec=50,
+                ),
+                dict(
+                    type="filter",
+                    spec=dict(
+                        contains=[
+                            dict(column_name=["Student Name"]),
+                            dict(literal=["son"]),
+                        ]
+                    ),
+                ),
+                dict(
+                    type="order",
+                    spec=[{"field": "Teacher Email", "direction": "asc"}],
+                ),
+                dict(
+                    type="limit",
+                    spec=5,
+                ),
+                dict(
+                    type="select",
+                    spec=["id"],
+                ),
+            ],
+            [
+                (31,),
+                (16,),
+                (18,),
+                (24,),
+                (33,),
+            ]
+        ],
+    ]
+)
+def test_transformations(roster_table_obj, transformations, expected_records):
+    roster, engine = roster_table_obj
+    relation = apply_transformations(roster, transformations)
+    records = get_records(relation, engine)
+    assert records == expected_records

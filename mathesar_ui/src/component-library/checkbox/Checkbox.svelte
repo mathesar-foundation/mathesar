@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{ change: boolean }>();
 
   /**
    * When `allowIndeterminate={true}`, then setting `checked={null}` will put
@@ -28,12 +28,9 @@
 
   $: indeterminate = allowIndeterminate && checked === null;
 
-  function onChange(e: Event) {
+  function onChange() {
     checked = !checked;
-    dispatch('change', {
-      checked,
-      originalEvent: e,
-    });
+    dispatch('change', checked);
   }
 </script>
 

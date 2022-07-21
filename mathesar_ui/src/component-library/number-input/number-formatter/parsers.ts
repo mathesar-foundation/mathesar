@@ -1,11 +1,11 @@
-import type { ParseResult } from '@mathesar-component-library-dir/formatted-input/InputFormatter';
+import type { ParseResult } from '@mathesar-component-library-dir/formatted-input/FormattedInputTypes';
 import { factoryToNormalize, factoryToSimplify } from './cleaners';
 import {
   formatToNormalizedForm,
   makeFormatter,
   factoryToFormatSimplifiedInputForLocale,
 } from './formatter';
-import { inferOptsFromSimplifiedInput } from './inference';
+import { fractionDigitCount, hasTrailingDecimal } from './inference';
 import type { DerivedOptions } from './options';
 
 function parseNumber(simplifiedInput: string): number | undefined {
@@ -61,8 +61,7 @@ export function makeUniversalNumberParser(
   opts: DerivedOptions,
 ): UniversalNumberParser {
   function parse(input: string): UniversalNumberParseResult {
-    const simplify = factoryToSimplify(opts);
-    const simplifiedInput = simplify(input);
+    const simplifiedInput = factoryToSimplify(opts)(input);
     const numberValue = parseNumber(simplifiedInput);
     if (numberValue === undefined) {
       return {
@@ -70,22 +69,31 @@ export function makeUniversalNumberParser(
         intermediateDisplay: simplifiedInput,
       };
     }
-    const normalize = factoryToNormalize(opts);
-    const normalizedInput = normalize(input);
-    const intermediateDisplay = makeFormatter({
-      ...opts,
-      ...inferOptsFromSimplifiedInput(simplifiedInput),
-    })(numberValue);
-    if (formatToNormalizedForm(numberValue) === normalizedInput) {
+    const normalizedInput = factoryToNormalize(opts)(input);
+
+    const canReformatWithoutLossOfPrecision =
+      formatToNormalizedForm(numberValue) === normalizedInput;
+    if (canReformatWithoutLossOfPrecision) {
+      const roundedNumberValue = Object.is(numberValue, -0)
+        ? -0 // Because `toFixed` converts `-0` to `"0"`.
+        : parseFloat(numberValue.toFixed(opts.maximumFractionDigits));
       return {
         value: {
           type: 'number',
-          numericalValue: numberValue,
-          normalizedStringifiedNumber: normalizedInput,
+          numericalValue: roundedNumberValue,
+          normalizedStringifiedNumber: roundedNumberValue.toString(),
         },
-        intermediateDisplay,
+        intermediateDisplay: makeFormatter({
+          ...opts,
+          forceTrailingDecimal: hasTrailingDecimal(simplifiedInput),
+          minimumFractionDigits: Math.min(
+            fractionDigitCount(simplifiedInput),
+            opts.maximumFractionDigits,
+          ),
+        })(roundedNumberValue),
       };
     }
+
     const bigIntValue = parseBigInt(simplifiedInput);
     if (bigIntValue !== undefined) {
       return {
@@ -94,9 +102,15 @@ export function makeUniversalNumberParser(
           numericalValue: bigIntValue,
           normalizedStringifiedNumber: normalizedInput,
         },
-        intermediateDisplay,
+        intermediateDisplay: makeFormatter({
+          ...opts,
+          forceTrailingDecimal: false,
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        })(bigIntValue),
       };
     }
+
     return {
       value: {
         type: 'bigfloat',

@@ -4,7 +4,13 @@
     "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
-    "types": ["svelte", "jest", "@testing-library/jest-dom", "js-cookie"],
+    "types": [
+      "svelte",
+      "jest",
+      "@testing-library/jest-dom",
+      "js-cookie",
+      "svelte2tsx/svelte-jsx"
+    ],
     "importsNotUsedAsValues": "error",
     "strict": true,
     "isolatedModules": true,

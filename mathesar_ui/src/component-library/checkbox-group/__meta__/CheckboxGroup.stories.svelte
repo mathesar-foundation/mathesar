@@ -61,11 +61,11 @@
     bind:values={simpleValue}
     label="Simple options"
   />
-  <p>Values: [{simpleValue}]</p>
+  <p>Values: {JSON.stringify(simpleValue)}</p>
   <p>
     <Button
       on:click={() => {
-        simpleValue = [2];
+        simpleValue = [simpleOptions[1]];
       }}>Set to [2]</Button
     >
   </p>
@@ -86,6 +86,10 @@
     bind:values={richValue}
     isInline
     label="Rich text"
+    getCheckboxLabel={(o) => ({
+      component: o.labelComponent,
+      props: o.labelComponentProps,
+    })}
   />
 </Story>
 

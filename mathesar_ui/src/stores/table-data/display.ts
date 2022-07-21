@@ -1,16 +1,9 @@
 import { writable, get, derived } from 'svelte/store';
-import { States } from '@mathesar/utils/api';
-import type { Writable, Readable, Unsubscriber } from 'svelte/store';
+import type { Writable, Readable } from 'svelte/store';
+import { WritableMap } from '@mathesar-component-library';
 import type { Meta } from './meta';
 import type { ColumnsDataStore, Column } from './columns';
 import type { Row, RecordsData } from './records';
-
-export interface ColumnPosition {
-  width: number;
-  left: number;
-}
-/** keys are column ids */
-export type ColumnPositionMap = Map<number, ColumnPosition>;
 
 // TODO: Select active cell using primary key instead of index
 // Checkout scenarios with pk consisting multiple columns
@@ -30,48 +23,6 @@ const movementKeys = new Set([
   'ArrowLeft',
   'Tab',
 ]);
-
-/**
- * This value is used as a key in a `ColumnPositionMap` where each entry
- * corresponds to the position of the column, as indexed by the column id.
- * However, the entry indexed by `ROW_POSITION_INDEX` consists of the total
- * width & left values (i.e the position) of the row. It's placed within
- * `ColumnPositionMap` in order to avoid calculation within the component, which
- * will run for each row. Thus, `ROW_POSITION_INDEX` should have the same type
- * as a column id but needs to have a value that no column id will ever have.
- * That's why we're using -1.
- *
- * We could use a dedicated store for it or even a new class containing both
- * columnPosition and row width.
- *
- * Pavish put it within ColumnPositionMap because we were passing around a lot
- * of props to the child components and he wanted to reduce the number of props.
- * Now, it is all passed down using context, so that's no longer an issue.
- */
-export const ROW_POSITION_INDEX = -1;
-
-function recalculateColumnPositions(
-  columnPositionMap: ColumnPositionMap,
-  columns: Column[],
-) {
-  let left = ROW_CONTROL_COLUMN_WIDTH;
-  const newColumnPositionMap: ColumnPositionMap = new Map();
-  columns.forEach((column) => {
-    const columnWidth = columnPositionMap.get(column.id)?.width;
-    const isColumnWidthValid = typeof columnWidth === 'number';
-    const newWidth = isColumnWidthValid ? columnWidth : DEFAULT_COLUMN_WIDTH;
-    newColumnPositionMap.set(column.id, {
-      left,
-      width: newWidth,
-    });
-    left += newWidth;
-  });
-  newColumnPositionMap.set(ROW_POSITION_INDEX, {
-    width: left,
-    left: 0,
-  });
-  return newColumnPositionMap;
-}
 
 export function isCellActive(
   activeCell: ActiveCell,
@@ -123,6 +74,26 @@ export function scrollBasedOnActiveCell(): void {
   }
 }
 
+export interface ColumnPlacement {
+  /** CSS value in px */
+  width: number;
+  /** CSS value in px */
+  left: number;
+}
+
+function cellStyle(placement: ColumnPlacement, leftOffset: number): string {
+  return `width: ${placement.width}px; left: ${leftOffset + placement.left}px;`;
+}
+
+export function getCellStyle(
+  placements: Map<number, ColumnPlacement>,
+  columnId: number,
+  leftOffset = 0,
+): string {
+  const placement = placements.get(columnId) ?? { width: 0, left: 0 };
+  return cellStyle(placement, leftOffset);
+}
+
 export class Display {
   private meta: Meta;
 
@@ -130,15 +101,30 @@ export class Display {
 
   private recordsData: RecordsData;
 
-  private columnPositionMapUnsubscriber: Unsubscriber;
+  scrollOffset: Writable<number>;
 
   horizontalScrollOffset: Writable<number>;
 
-  columnPositionMap: Writable<ColumnPositionMap>;
-
   activeCell: Writable<ActiveCell | undefined>;
 
-  rowWidth: Writable<number>;
+  /**
+   * Keys are column ids. Values are column widths in px.
+   *
+   * `customizedColumnWidths` is separate from `columnPlacements` to keep the
+   * column resizing decoupled from the columns data until we determine how the
+   * column widths will be persisted. At some point we will likely read/write
+   * the column widths through the columns API, which will make both
+   * `customizedColumnWidths` and `columnPlacements` irrelevant. Until then,
+   * this decouple design keeps the column resizing logic isolated from other
+   * code.
+   */
+  customizedColumnWidths: WritableMap<number, number>;
+
+  /** Keys are column ids. */
+  columnPlacements: Readable<Map<number, ColumnPlacement>>;
+
+  /** In px */
+  rowWidth: Readable<number>;
 
   displayableRecords: Readable<Row[]>;
 
@@ -151,22 +137,30 @@ export class Display {
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
     this.horizontalScrollOffset = writable(0);
-    this.columnPositionMap = writable(new Map() as ColumnPositionMap);
+    this.scrollOffset = writable(0);
     this.activeCell = writable<ActiveCell | undefined>(undefined);
-    this.rowWidth = writable(0);
 
-    // subscribers
-    this.columnPositionMapUnsubscriber = this.columnsDataStore.subscribe(
-      (columnData) => {
-        this.columnPositionMap.update((map) =>
-          recalculateColumnPositions(map, columnData.columns),
-        );
-        const width = get(this.columnPositionMap).get(
-          ROW_POSITION_INDEX,
-        )?.width;
-        const widthWithPadding = width ? width + DEFAULT_ROW_RIGHT_PADDING : 0;
-        this.rowWidth.set(widthWithPadding);
+    this.customizedColumnWidths = new WritableMap();
+
+    this.columnPlacements = derived(
+      [this.columnsDataStore, this.customizedColumnWidths],
+      ([columnsData, customizedColumnWidths]) => {
+        let left = 0;
+        const map = new Map<number, ColumnPlacement>();
+        columnsData.columns.forEach(({ id }) => {
+          const width = customizedColumnWidths.get(id) ?? DEFAULT_COLUMN_WIDTH;
+          map.set(id, { width, left });
+          left += width;
+        });
+        return map;
       },
+    );
+
+    this.rowWidth = derived(this.columnPlacements, (placements) =>
+      [...placements.values()].reduce(
+        (width, placement) => width + placement.width,
+        0,
+      ),
     );
 
     const { savedRecords, newRecords } = this.recordsData;
@@ -179,7 +173,6 @@ export class Display {
             .concat({
               identifier: '__new_help_text',
               isNewHelpText: true,
-              state: States.Done,
             })
             .concat($newRecords);
         }
@@ -203,17 +196,6 @@ export class Display {
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       columnIndex: column.__columnIndex,
     });
-  }
-
-  editCell(row: Row, column: Column): void {
-    if (!column.primary_key) {
-      this.activeCell.set({
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        rowIndex: row.rowIndex,
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        columnIndex: column.__columnIndex,
-      });
-    }
   }
 
   handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | undefined {
@@ -268,9 +250,5 @@ export class Display {
     }
 
     return undefined;
-  }
-
-  destroy(): void {
-    this.columnPositionMapUnsubscriber();
   }
 }

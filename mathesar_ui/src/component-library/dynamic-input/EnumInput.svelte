@@ -23,7 +23,7 @@
 
   // TODO: Handle indeterminate state for boolean
 
-  function onChange(e: CustomEvent<EnumSelectOption>) {
+  function onChange(e: CustomEvent<EnumSelectOption | undefined>) {
     value = e.detail?.value;
   }
 </script>

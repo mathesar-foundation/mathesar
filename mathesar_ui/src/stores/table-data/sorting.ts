@@ -33,8 +33,10 @@ const directionLabels = new Map([
   [SortDirection.A, 'asc'],
   [SortDirection.D, 'desc'],
 ]);
-export function getDirectionLabel(direction: SortDirection): string {
-  return directionLabels.get(direction) ?? '';
+export function getDirectionLabel(
+  direction: SortDirection | undefined,
+): string {
+  return direction ? directionLabels.get(direction) ?? '' : '';
 }
 
 /**

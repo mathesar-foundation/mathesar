@@ -1,53 +1,68 @@
 <script lang="ts">
-  import { createEventDispatcher, tick } from 'svelte';
-  import { Dropdown } from '@mathesar-component-library';
+  import { createEventDispatcher } from 'svelte';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
+  import {
+    ListBox,
+    ListBoxOptions,
+  } from '@mathesar-component-library-dir/list-box';
+  import { Dropdown } from '@mathesar-component-library-dir/dropdown';
   import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
-  import type { Appearance } from '@mathesar-component-library-dir/types';
-
-  const dispatch = createEventDispatcher();
+  import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
+  import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
+  import type { SelectProps } from './SelectTypes';
 
   type Option = $$Generic;
+  type $$Props = SelectProps<Option>;
+  type DefinedProps = Required<$$Props>;
 
-  export let id: string | undefined = undefined;
+  const dispatch = createEventDispatcher<{ change: Option | undefined }>();
 
-  export let disabled = false;
+  export let id: DefinedProps['id'] = getGloballyUniqueId();
+  export let disabled: DefinedProps['disabled'] = false;
 
   /**
    * Specifies the key on which the options label is stored.
    */
-  export let labelKey = 'label';
+  export let labelKey: DefinedProps['labelKey'] = 'label';
+
+  export let getLabel: DefinedProps['getLabel'] = (o: Option | undefined) =>
+    defaultGetLabel(o, labelKey);
 
   /**
    * List of options to select from. Must be an array of SelectOption.
    * @required
    */
-  export let options: Option[] = [];
+  export let options: DefinedProps['options'];
 
-  export let value: Option | undefined = undefined;
+  export let prependBlank: DefinedProps['prependBlank'] = false;
+
+  export let value: $$Props['value'] = undefined;
 
   /**
    * Classes to apply to the content (each of the options).
    */
-  export let contentClass = '';
+  export let contentClass: DefinedProps['contentClass'] = '';
 
   /**
    * Classes to apply to the trigger button (the dropdown button).
    */
-  export let triggerClass = '';
+  export let triggerClass: DefinedProps['triggerClass'] = '';
+
+  /**
+   * Classes to apply to both content and trigger.
+   */
+  let classes: DefinedProps['class'] = '';
+  export { classes as class };
 
   /**
    * Appearance of the trigger button. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
    */
-  export let triggerAppearance: Appearance = 'plain';
+  export let triggerAppearance: DefinedProps['triggerAppearance'] = 'default';
 
   /**
    * The ARIA label for this select component.
    */
-  export let ariaLabel: string | undefined = undefined;
-
-  export let getLabel: (value: Option, labelKey?: string) => string =
-    defaultGetLabel;
+  export let ariaLabel: $$Props['ariaLabel'] = undefined;
 
   /**
    * By default, options will be compared by equality. If you're using objects as
@@ -59,153 +74,62 @@
    * valuesAreEqual={(a, b) => a.id === b.id}
    * ```
    */
-  export let valuesAreEqual: (
-    optionToCompare: Option,
-    selectedOption: Option | undefined,
-  ) => boolean = (a, b) => a === b;
+  export let valuesAreEqual: DefinedProps['valuesAreEqual'] = (a, b) => a === b;
 
-  let isOpen = false;
-  let currentIndex = 0;
-  let parentHoverElem: HTMLElement;
-
-  function setValue(opt?: Option) {
-    value = opt;
+  function setValueFromArray(values: (Option | undefined)[]) {
+    [value] = values;
     dispatch('change', value);
-    isOpen = false;
   }
 
-  function setOptions(opts: Option[]) {
+  function setValueOnOptionChange(opts: Option[]) {
     if (opts.length > 0) {
-      if (!value) {
-        setValue(opts[0]);
-      } else if (!opts.find((entry) => value && valuesAreEqual(entry, value))) {
-        setValue(opts[0]);
+      if (
+        typeof value === 'undefined' ||
+        !opts.some((entry) => valuesAreEqual(entry, value))
+      ) {
+        setValueFromArray(opts);
       }
     } else {
-      setValue(undefined);
+      setValueFromArray([]);
     }
   }
 
-  function scrollBehavior(): void {
-    if (parentHoverElem) {
-      const hoveredElem: HTMLElement | null =
-        parentHoverElem.querySelector('.hovered');
-      const container = parentHoverElem.parentElement as HTMLDivElement;
-      if (hoveredElem && container) {
-        if (
-          hoveredElem.offsetTop + hoveredElem.clientHeight >
-          container.scrollTop + container.clientHeight
-        ) {
-          const offsetValue: number =
-            container.getBoundingClientRect().bottom -
-            hoveredElem.getBoundingClientRect().bottom;
-          container.scrollTop -= offsetValue;
-        } else if (hoveredElem.offsetTop < container.scrollTop) {
-          container.scrollTop = hoveredElem.offsetTop;
-        }
-      }
-    }
-  }
-
-  function setSelectedItem() {
-    const index = options.findIndex((opt) => valuesAreEqual(opt, value));
-    if (index > -1) {
-      currentIndex = index;
-    }
-  }
-
-  async function hoveredItem(index: number): Promise<void> {
-    if (currentIndex === options.length - 1 && index > 0) {
-      currentIndex = 0;
-    } else if (currentIndex === 0 && index < 0) {
-      currentIndex = options.length - 1;
-    } else {
-      currentIndex += index;
-    }
-    await tick();
-    scrollBehavior();
-  }
-
-  function keyAccessibility(e: KeyboardEvent): void {
-    if (isOpen) {
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault();
-          void hoveredItem(1);
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          void hoveredItem(-1);
-          break;
-        case 'Escape':
-          e.preventDefault();
-          isOpen = false;
-          break;
-        case 'Enter':
-          e.preventDefault();
-          if (options.length === 0) break;
-          setValue(options[currentIndex]);
-          break;
-        default:
-          break;
-      }
-    } else {
-      switch (e.key) {
-        case 'Enter':
-        case 'ArrowDown':
-        case 'ArrowUp':
-          e.preventDefault();
-          isOpen = true;
-          break;
-        default:
-          break;
-      }
-    }
-  }
-
-  $: setOptions(options);
+  $: fullOptions = prependBlank ? [undefined, ...options] : options;
+  $: setValueOnOptionChange(options);
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled} />
+<BaseInput {...$$restProps} {id} {disabled} />
 
-<Dropdown
-  ariaControls="{id}-select-options"
-  {ariaLabel}
-  bind:isOpen
-  {disabled}
-  {id}
-  contentClass="select {contentClass}"
-  {triggerAppearance}
-  {triggerClass}
-  on:keydown={keyAccessibility}
-  on:open={setSelectedItem}
+<ListBox
+  selectionType="single"
+  options={fullOptions}
+  value={typeof value !== 'undefined' ? [value] : []}
+  on:change={(e) => setValueFromArray(e.detail)}
+  {labelKey}
+  {getLabel}
+  checkEquality={valuesAreEqual}
+  let:api
+  let:isOpen
 >
-  <svelte:fragment slot="trigger">
-    {#if typeof value !== 'undefined'}
-      {getLabel(value, labelKey)}
-    {:else}
-      No option selected
-    {/if}
-  </svelte:fragment>
+  <Dropdown
+    ariaControls="{id}-select-options"
+    {ariaLabel}
+    {isOpen}
+    {disabled}
+    {id}
+    contentClass={['select', classes, contentClass].join(' ')}
+    {triggerAppearance}
+    triggerClass={['select full-width', classes, triggerClass].join(' ')}
+    on:open={() => api.open()}
+    on:close={() => api.close()}
+    on:keydown={(e) => api.handleKeyDown(e)}
+  >
+    <svelte:fragment slot="trigger">
+      <StringOrComponent arg={getLabel(value)} />
+    </svelte:fragment>
 
-  <svelte:fragment slot="content">
-    <ul
-      bind:this={parentHoverElem}
-      id="{id}-select-options"
-      tabindex="0"
-      role="listbox"
-      aria-expanded="true"
-    >
-      {#each options as option (option)}
-        <li
-          role="option"
-          class:selected={value && valuesAreEqual(option, value)}
-          class:hovered={valuesAreEqual(option, options[currentIndex])}
-          on:click={() => setValue(option)}
-        >
-          <span>{getLabel(option, labelKey)}</span>
-        </li>
-      {/each}
-    </ul>
-  </svelte:fragment>
-</Dropdown>
+    <svelte:fragment slot="content">
+      <ListBoxOptions id="{id}-select-options" />
+    </svelte:fragment>
+  </Dropdown>
+</ListBox>

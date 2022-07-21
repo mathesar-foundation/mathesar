@@ -1,3 +1,8 @@
+import { faHashtag } from '@fortawesome/free-solid-svg-icons';
+import type {
+  NumberDisplayOptions,
+  NumberFormat,
+} from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/stores/table-data/types';
@@ -8,13 +13,13 @@ import type {
 } from '../types';
 
 const DB_TYPES = {
-  DECIMAL: 'DECIMAL',
-  NUMERIC: 'NUMERIC',
-  INTEGER: 'INTEGER',
-  SMALLINT: 'SMALLINT',
-  BIGINT: 'BIGINT',
-  REAL: 'REAL',
-  DOUBLE_PRECISION: 'DOUBLE PRECISION',
+  DECIMAL: 'decimal',
+  NUMERIC: 'numeric',
+  INTEGER: 'integer',
+  SMALLINT: 'smallint',
+  BIGINT: 'bigint',
+  REAL: 'real',
+  DOUBLE_PRECISION: 'double precision',
 };
 
 const dbForm: AbstractTypeConfigForm = {
@@ -196,20 +201,20 @@ function constructDbFormValuesFromTypeOptions(
   }
 }
 
-interface NumberDisplayOptions {
-  show_as_percentage?: boolean | null;
-  locale?: string | null;
-}
-
 const displayForm: AbstractTypeConfigForm = {
   variables: {
-    showAsPercentage: {
-      type: 'boolean',
-      default: false,
+    decimalPlaces: {
+      type: 'integer',
+      default: null,
     },
-    format: {
+    useGrouping: {
       type: 'string',
-      enum: ['none', 'af', 'ar-DZ', 'bg', 'bn', 'de-CH'],
+      enum: ['true', 'false', 'auto'],
+      default: 'auto',
+    },
+    numberFormat: {
+      type: 'string',
+      enum: ['none', 'english', 'german', 'french', 'hindi', 'swiss'],
       default: 'none',
     },
   },
@@ -218,20 +223,30 @@ const displayForm: AbstractTypeConfigForm = {
     elements: [
       {
         type: 'input',
-        variable: 'showAsPercentage',
-        label: 'Show as Percentage',
+        variable: 'decimalPlaces',
+        label: 'Decimal Places',
       },
       {
         type: 'input',
-        variable: 'format',
+        variable: 'useGrouping',
+        label: 'Digit Grouping',
+        options: {
+          true: { label: 'On' },
+          false: { label: 'Off' },
+          auto: { label: 'Auto' },
+        },
+      },
+      {
+        type: 'input',
+        variable: 'numberFormat',
         label: 'Format',
         options: {
           none: { label: 'Use browser locale' },
-          af: { label: '1,234,567.89' },
-          'ar-DZ': { label: '1.234.567,89' },
-          bg: { label: '1 234 567,89' },
-          bn: { label: '12,34,567.89' },
-          'de-CH': { label: "1'234'567.89" },
+          english: { label: '1,234,567.89' },
+          german: { label: '1.234.567,89' },
+          french: { label: '1 234 567,89' },
+          hindi: { label: '12,34,567.89' },
+          swiss: { label: "1'234'567.89" },
         },
       },
     ],
@@ -239,32 +254,69 @@ const displayForm: AbstractTypeConfigForm = {
 };
 
 function determineDisplayOptions(
-  dispFormValues: FormValues,
+  formValues: FormValues,
 ): Column['display_options'] {
-  const displayOptions: Column['display_options'] = {
-    show_as_percentage: dispFormValues.showAsPercentage,
+  const decimalPlaces = formValues.decimalPlaces as number | null;
+  const opts: Partial<NumberDisplayOptions> = {
+    number_format:
+      formValues.numberFormat === 'none'
+        ? undefined
+        : (formValues.numberFormat as NumberFormat),
+    use_grouping:
+      (formValues.useGrouping as
+        | NumberDisplayOptions['use_grouping']
+        | undefined) ?? 'auto',
+    minimum_fraction_digits: decimalPlaces ?? undefined,
+    maximum_fraction_digits: decimalPlaces ?? undefined,
   };
-  if (dispFormValues.format !== 'none') {
-    displayOptions.locale = dispFormValues.format;
+  return opts;
+}
+
+export function getDecimalPlaces(
+  minimumFractionDigits: number | null,
+  maximumFractionDigits: number | null,
+): number | null {
+  if (minimumFractionDigits === null && maximumFractionDigits === null) {
+    return null;
   }
-  return displayOptions;
+  if (minimumFractionDigits === null) {
+    return maximumFractionDigits;
+  }
+  if (maximumFractionDigits === null) {
+    return minimumFractionDigits;
+  }
+  return Math.max(minimumFractionDigits, maximumFractionDigits);
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
   columnDisplayOpts: Column['display_options'],
 ): FormValues {
   const displayOptions = columnDisplayOpts as NumberDisplayOptions | null;
-  const dispFormValues: FormValues = {
-    showAsPercentage: displayOptions?.show_as_percentage ?? false,
-    format: displayOptions?.locale ?? 'none',
+  const decimalPlaces = getDecimalPlaces(
+    displayOptions?.minimum_fraction_digits ?? null,
+    displayOptions?.maximum_fraction_digits ?? null,
+  );
+  const formValues: FormValues = {
+    numberFormat: displayOptions?.number_format ?? 'none',
+    useGrouping: displayOptions?.use_grouping ?? 'auto',
+    decimalPlaces,
   };
-  return dispFormValues;
+  return formValues;
 }
 
 const numberType: AbstractTypeConfiguration = {
-  icon: '#',
-  input: {
-    type: 'integer',
+  icon: { data: faHashtag, label: 'Number' },
+  cell: {
+    type: 'number',
+    conditionalConfig: {
+      [DB_TYPES.DECIMAL]: { floatAllowanceStrategy: 'scale-based' },
+      [DB_TYPES.NUMERIC]: { floatAllowanceStrategy: 'scale-based' },
+      [DB_TYPES.INTEGER]: { floatAllowanceStrategy: 'never' },
+      [DB_TYPES.SMALLINT]: { floatAllowanceStrategy: 'never' },
+      [DB_TYPES.BIGINT]: { floatAllowanceStrategy: 'never' },
+      [DB_TYPES.REAL]: { floatAllowanceStrategy: 'always' },
+      [DB_TYPES.DOUBLE_PRECISION]: { floatAllowanceStrategy: 'always' },
+    },
   },
   defaultDbType: DB_TYPES.NUMERIC,
   getDbConfig: () => ({

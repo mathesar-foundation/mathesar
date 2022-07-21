@@ -4,7 +4,7 @@ from django.core.files import File
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import text
 
-from mathesar.models import DataFile, Schema
+from mathesar.models.base import DataFile, Schema
 from mathesar.errors import InvalidTableError
 from mathesar.imports.csv import create_table_from_csv, get_sv_dialect, get_sv_reader
 from db.schemas.operations.create import create_schema
@@ -15,29 +15,29 @@ TEST_SCHEMA = "import_csv_schema"
 
 
 @pytest.fixture
-def data_file(csv_filename):
-    with open(csv_filename, "rb") as csv_file:
+def data_file(patents_csv_filepath):
+    with open(patents_csv_filepath, "rb") as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))
     return data_file
 
 
 @pytest.fixture
-def headerless_data_file(headerless_csv_filename):
-    with open(headerless_csv_filename, "rb") as csv_file:
+def headerless_data_file(headerless_patents_csv_filepath):
+    with open(headerless_patents_csv_filepath, "rb") as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file), header=False)
     return data_file
 
 
 @pytest.fixture
-def col_names_with_spaces_data_file(col_names_with_spaces_csv_filename):
-    with open(col_names_with_spaces_csv_filename, "rb") as csv_file:
+def col_names_with_spaces_data_file(col_names_with_spaces_csv_filepath):
+    with open(col_names_with_spaces_csv_filepath, "rb") as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))
     return data_file
 
 
 @pytest.fixture
-def col_headers_empty_data_file(col_headers_empty_csv_filename):
-    with open(col_headers_empty_csv_filename, "rb") as csv_file:
+def col_headers_empty_data_file(col_headers_empty_csv_filepath):
+    with open(col_headers_empty_csv_filepath, "rb") as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))
     return data_file
 

@@ -1,5 +1,12 @@
-import { writable, derived, get } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
+import {
+  ImmutableMap,
+  ImmutableSet,
+  WritableMap,
+  WritableSet,
+} from '@mathesar-component-library';
+import type { RequestStatus } from '@mathesar/utils/api';
 import type { TerseFiltering } from './filtering';
 import { Filtering } from './filtering';
 import type { TerseSorting } from './sorting';
@@ -9,105 +16,28 @@ import { Pagination } from './pagination';
 import type { TerseGrouping } from './grouping';
 import { Grouping } from './grouping';
 import type { RecordsRequestParamsData } from './records';
+import type { CellKey, RowKey } from './utils';
+import { getRowStatus, getSheetState, extractRowKeyFromCellKey } from './utils';
 
-export const RECORD_COMBINED_STATE_KEY = '__combined';
+/**
+ * Unlike in `RequestStatus`, here the state and the error messages are
+ * disentangled. That's because it's possible to have a `wholeRowState` of
+ * `'success'` (if the row has been added) and still have error messages to
+ * display (if the user has attempted to update a _cell_ within the row, but
+ * that update has failed.)
+ */
+export interface RowStatus {
+  /**
+   * The combined state of the most recent "creation" or "deletion" request. We
+   * use this to set the background color for all cells and the row header.
+   */
+  wholeRowState?: RequestStatus['state'];
 
-export type UpdateModificationType = 'update' | 'updated' | 'updateFailed';
-
-export type ModificationType =
-  | 'create'
-  | 'created'
-  | 'creationFailed'
-  | UpdateModificationType
-  | 'delete'
-  | 'deleteFailed';
-
-export type ModificationStatus = 'inprocess' | 'complete' | 'error' | 'idle';
-export type ModificationStateMap = Map<unknown, Map<unknown, ModificationType>>;
-
-const inProgressSet: Set<ModificationType> = new Set([
-  'create',
-  'update',
-  'delete',
-]);
-const completeSet: Set<ModificationType> = new Set(['created', 'updated']);
-const errorSet: Set<ModificationType> = new Set([
-  'creationFailed',
-  'updateFailed',
-  'deleteFailed',
-]);
-
-export function getGenericModificationStatusByPK(
-  recordModificationState: ModificationStateMap,
-  primaryKeyValue: unknown,
-): ModificationStatus {
-  const type = recordModificationState
-    .get(primaryKeyValue)
-    ?.get(RECORD_COMBINED_STATE_KEY);
-  if (!type) {
-    return 'idle';
-  }
-  if (inProgressSet.has(type)) {
-    return 'inprocess';
-  }
-  if (completeSet.has(type)) {
-    return 'complete';
-  }
-  if (errorSet.has(type)) {
-    return 'error';
-  }
-  return 'idle';
-}
-
-function getCombinedUpdateState(
-  cellMap: Map<unknown, ModificationType>,
-): UpdateModificationType {
-  let state: UpdateModificationType = 'updated';
-  // eslint-disable-next-line no-restricted-syntax
-  for (const [key, value] of cellMap) {
-    if (key !== RECORD_COMBINED_STATE_KEY) {
-      if (value === 'update') {
-        state = 'update';
-        break;
-      } else if (value === 'updateFailed') {
-        state = 'updateFailed';
-        break;
-      }
-    }
-  }
-  return state;
-}
-
-function getCombinedModificationState(
-  recordModificationState: Readable<ModificationStateMap>,
-) {
-  return derived(
-    recordModificationState,
-    ($recordModificationState, set) => {
-      if ($recordModificationState.size === 0) {
-        set('idle');
-      } else {
-        let finalState: ModificationStatus = 'idle';
-        // eslint-disable-next-line no-restricted-syntax
-        for (const value of $recordModificationState.values()) {
-          const rowState = value?.get(RECORD_COMBINED_STATE_KEY);
-          if (rowState) {
-            if (inProgressSet.has(rowState)) {
-              finalState = 'inprocess';
-              break;
-            }
-            if (errorSet.has(rowState)) {
-              finalState = 'error';
-            } else if (completeSet.has(rowState) && finalState === 'idle') {
-              finalState = 'complete';
-            }
-          }
-        }
-        set(finalState);
-      }
-    },
-    'idle' as ModificationStatus,
-  );
+  /**
+   * The triangle error popover indicator will display whenever this array
+   * contains errors -- even if `wholeRowState` is `'success'`.
+   */
+  errorsFromWholeRowAndCells: string[];
 }
 
 export interface MetaProps {
@@ -168,12 +98,34 @@ export class Meta {
 
   filtering: Writable<Filtering>;
 
-  selectedRecords: Writable<Set<unknown>>;
+  selectedRows = new WritableSet<RowKey>();
 
-  // Row -> Cell -> Type
-  recordModificationState: Writable<ModificationStateMap>;
+  cellClientSideErrors = new WritableMap<CellKey, string[]>();
 
-  combinedModificationState: Readable<ModificationStatus>;
+  rowsWithClientSideErrors: Readable<ImmutableSet<RowKey>>;
+
+  /**
+   * For each cell, the status of the most recent request to update the cell. If
+   * no request has been made, then no entry will be present in the map.
+   */
+  cellModificationStatus = new WritableMap<CellKey, RequestStatus>();
+
+  /**
+   * For each row, the status of the most recent request to delete the row. If
+   * no request has been made, then no entry will be present in the map.
+   */
+  rowDeletionStatus = new WritableMap<RowKey, RequestStatus>();
+
+  /**
+   * For each newly added row, the status of the most recent request to add
+   * the row. If no request has been made, then no entry will be present in the
+   * map. Rows that are not newly added rows will never have entries here.
+   */
+  rowCreationStatus = new WritableMap<RowKey, RequestStatus>();
+
+  rowStatus: Readable<ImmutableMap<RowKey, RowStatus>>;
+
+  sheetState: Readable<RequestStatus['state'] | undefined>;
 
   /**
    * Allows us to save and re-create Meta, e.g. from data stored in the tab
@@ -194,11 +146,44 @@ export class Meta {
     this.grouping = writable(props.grouping);
     this.filtering = writable(props.filtering);
 
-    this.selectedRecords = writable(new Set());
-    this.recordModificationState = writable(new Map() as ModificationStateMap);
+    this.rowsWithClientSideErrors = derived(
+      this.cellClientSideErrors,
+      (e) => new ImmutableSet([...e.keys()].map(extractRowKeyFromCellKey)),
+    );
 
-    this.combinedModificationState = getCombinedModificationState(
-      this.recordModificationState,
+    this.rowStatus = derived(
+      [
+        this.cellClientSideErrors,
+        this.cellModificationStatus,
+        this.rowDeletionStatus,
+        this.rowCreationStatus,
+      ],
+      ([
+        cellClientSideErrors,
+        cellModificationStatus,
+        rowDeletionStatus,
+        rowCreationStatus,
+      ]) =>
+        getRowStatus({
+          cellClientSideErrors,
+          cellModificationStatus,
+          rowDeletionStatus,
+          rowCreationStatus,
+        }),
+    );
+
+    this.sheetState = derived(
+      [
+        this.cellModificationStatus,
+        this.rowDeletionStatus,
+        this.rowCreationStatus,
+      ],
+      ([cellModificationStatus, rowDeletionStatus, rowCreationStatus]) =>
+        getSheetState({
+          cellModificationStatus,
+          rowDeletionStatus,
+          rowCreationStatus,
+        }),
     );
 
     // Why do `this.props` and `this.recordsRequestParamsData` look identical?
@@ -227,100 +212,5 @@ export class Meta {
         filtering,
       }),
     );
-  }
-
-  clearSelectedRecords(): void {
-    this.selectedRecords.set(new Set());
-  }
-
-  selectRecordByPrimaryKey(primaryKeyValue: unknown): void {
-    if (!get(this.selectedRecords).has(primaryKeyValue)) {
-      this.selectedRecords.update((existingSet) => {
-        const newSet = new Set(existingSet);
-        newSet.add(primaryKeyValue);
-        return newSet;
-      });
-    }
-  }
-
-  deSelectRecordByPrimaryKey(primaryKeyValue: unknown): void {
-    if (get(this.selectedRecords).has(primaryKeyValue)) {
-      this.selectedRecords.update((existingSet) => {
-        const newSet = new Set(existingSet);
-        newSet.delete(primaryKeyValue);
-        return newSet;
-      });
-    }
-  }
-
-  setRecordModificationState(key: unknown, state: ModificationType): void {
-    this.recordModificationState.update((existingMap) => {
-      const newMap = new Map(existingMap);
-      let cellMap = newMap.get(key);
-      if (!cellMap) {
-        cellMap = new Map();
-        newMap.set(key, cellMap);
-      }
-      cellMap.set(RECORD_COMBINED_STATE_KEY, state);
-      return newMap;
-    });
-  }
-
-  clearRecordModificationState(key: unknown): void {
-    this.recordModificationState.update((existingMap) => {
-      const newMap = new Map(existingMap);
-      newMap.delete(key);
-      return newMap;
-    });
-  }
-
-  clearAllRecordModificationStates(): void {
-    this.recordModificationState.set(new Map());
-  }
-
-  setCellUpdateState(
-    recordKey: unknown,
-    cellKey: unknown,
-    state: UpdateModificationType,
-  ): void {
-    this.recordModificationState.update((existingMap) => {
-      const newMap = new Map(existingMap);
-      let cellMap = newMap.get(recordKey);
-      if (!cellMap) {
-        cellMap = new Map();
-        newMap.set(recordKey, cellMap);
-      }
-      cellMap.set(cellKey, state);
-      cellMap.set(RECORD_COMBINED_STATE_KEY, getCombinedUpdateState(cellMap));
-      return newMap;
-    });
-  }
-
-  setMultipleRecordModificationStates(
-    keys: unknown[],
-    state: ModificationType,
-  ): void {
-    this.recordModificationState.update((existingMap) => {
-      const newMap = new Map(existingMap);
-      keys.forEach((rowKey) => {
-        let cellMap = newMap.get(rowKey);
-        if (!cellMap) {
-          cellMap = new Map();
-          newMap.set(rowKey, cellMap);
-        }
-        cellMap.set(RECORD_COMBINED_STATE_KEY, state);
-      });
-      return newMap;
-    });
-  }
-
-  clearMultipleRecordModificationStates(keys: unknown[]): void {
-    this.recordModificationState.update((existingMap) => {
-      const newMap = new Map(existingMap);
-      keys.forEach((value) => {
-        newMap.delete(value);
-      });
-      return newMap;
-    });
   }
 }

@@ -1,0 +1,50 @@
+ul.list-box-options {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+
+  li {
+    position: relative;
+    padding: 6px 12px;
+    cursor: default;
+    box-sizing: content-box;
+    line-height: 1.2;
+    min-height: 1.2em;
+
+    // Disable text selection. Without this, if I inadvertently drag my mouse
+    // over some blank space in the option, then I select text outside the
+    // ListBox.
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    &:hover {
+      background: #f3f4f5;
+    }
+
+    &.in-focus {
+      background: #f3f4f5;
+    }
+  }
+
+  &.multiple {
+    li {
+      border: 1px solid transparent;
+
+      &.selected {
+        border: 1px solid #39a0f5;
+        background: #39a0f530;
+      }
+    }
+  }
+
+  &.truncate {
+    li {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+}

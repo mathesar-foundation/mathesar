@@ -19,7 +19,7 @@ from db.records.exceptions import UndefinedFunction
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
-from mathesar.models import Column
+from mathesar.models.base import Column
 
 
 class ColumnViewSet(viewsets.ModelViewSet):
@@ -27,14 +27,19 @@ class ColumnViewSet(viewsets.ModelViewSet):
     pagination_class = DefaultLimitOffsetPagination
 
     def get_queryset(self):
-        return Column.objects.filter(table=self.kwargs['table_pk'])
+        return Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
         # We only support adding a single column through the API.
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-
+        type_options = request.data.get('type_options', None)
+        if type_options is not None:
+            scale = type_options.get('scale', None)
+            precision = type_options.get('precision', None)
+            if scale is not None and precision is None:
+                request.data['type_options']['precision'] = 1000
         if 'source_column' in serializer.validated_data:
             column = table.duplicate_column(
                 serializer.validated_data['source_column'],
@@ -44,6 +49,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
             )
         else:
             try:
+                # TODO Refactor add_column to user serializer validated date instead of request data
                 column = table.add_column(request.data)
             except ProgrammingError as e:
                 if type(e.orig) == DuplicateColumn:
@@ -114,6 +120,9 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except IndexError as e:
                 raise base_api_exceptions.NotFoundAPIException(e)
             except TypeError as e:
+                # TODO this error is actually much more general than just badly specified
+                # type_options problems. e.g. if a bad keyword argument is passed to a function,
+                # TypeError will be raised.
                 raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,
                     message="Unknown type_option passed",

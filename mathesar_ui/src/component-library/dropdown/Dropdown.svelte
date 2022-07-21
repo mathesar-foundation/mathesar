@@ -1,23 +1,14 @@
 <script lang="ts">
   import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
   import type { Placement } from '@popperjs/core/lib/enums';
-  import {
-    createEventDispatcher,
-    getContext,
-    onDestroy,
-    setContext,
-    tick,
-  } from 'svelte';
-  import { derived } from 'svelte/store';
-  import type { Appearance, Size } from '@mathesar-component-library-dir/types';
+  import type {
+    Appearance,
+    Size,
+  } from '@mathesar-component-library-dir/commonTypes';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import portal from '@mathesar-component-library-dir/common/actions/portal';
-  import popper from '@mathesar-component-library-dir/common/actions/popper';
-  import clickOffBounds from '@mathesar-component-library-dir/common/actions/clickOffBounds';
-  import { AccompanyingElements } from './AccompanyingElements';
 
-  const dispatch = createEventDispatcher();
+  import AttachableDropdown from './AttachableDropdown.svelte';
 
   export let triggerClass = '';
   export let triggerAppearance: Appearance = 'default';
@@ -31,40 +22,6 @@
   export let size: Size = 'medium';
 
   let triggerElement: HTMLElement | undefined;
-  let contentElement: HTMLElement | undefined;
-
-  const parentAccompanyingElements = getContext<
-    AccompanyingElements | undefined
-  >('dropdownAccompanyingElements');
-  async function setThisContentToAccompanyParent() {
-    if (!contentElement) {
-      await tick();
-    }
-    if (!contentElement) {
-      return;
-    }
-    parentAccompanyingElements?.add(contentElement);
-  }
-  async function unsetThisContentToAccompanyParent() {
-    if (!contentElement) {
-      await tick();
-    }
-    if (!contentElement) {
-      return;
-    }
-    parentAccompanyingElements?.delete(contentElement);
-  }
-  onDestroy(unsetThisContentToAccompanyParent);
-
-  const accompanyingElements = new AccompanyingElements(
-    parentAccompanyingElements,
-  );
-  setContext('dropdownAccompanyingElements', accompanyingElements);
-
-  const clickOffBoundsReferences = derived(
-    accompanyingElements,
-    (_accompanyingElements) => [triggerElement, ..._accompanyingElements],
-  );
 
   function calculateTriggerClass(
     _triggerClass: string,
@@ -89,23 +46,6 @@
   function close() {
     isOpen = false;
   }
-
-  function watchIsOpen(_isOpen: boolean) {
-    if (_isOpen) {
-      dispatch('open');
-      void setThisContentToAccompanyParent();
-    } else {
-      dispatch('close');
-      void unsetThisContentToAccompanyParent();
-    }
-  }
-  $: watchIsOpen(isOpen);
-
-  function checkAndCloseOnInnerClick() {
-    if (closeOnInnerClick) {
-      close();
-    }
-  }
 </script>
 
 <Button
@@ -118,6 +58,8 @@
   aria-label={ariaLabel}
   {size}
   on:keydown
+  on:focus
+  on:blur
   {...$$restProps}
 >
   <span class="label">
@@ -130,23 +72,15 @@
   {/if}
 </Button>
 
-{#if isOpen}
-  <div
-    class={['dropdown content', contentClass].join(' ')}
-    bind:this={contentElement}
-    use:portal
-    use:popper={{
-      /* @ts-ignore: https://github.com/centerofci/mathesar/issues/1055 */
-      reference: triggerElement,
-      options: { placement },
-    }}
-    use:clickOffBounds={{
-      callback: close,
-      /* @ts-ignore: https://github.com/centerofci/mathesar/issues/1055 */
-      references: clickOffBoundsReferences,
-    }}
-    on:click={checkAndCloseOnInnerClick}
-  >
-    <slot name="content" />
-  </div>
-{/if}
+<AttachableDropdown
+  trigger={triggerElement}
+  {isOpen}
+  {placement}
+  class={contentClass}
+  {closeOnInnerClick}
+  on:close={close}
+  on:open
+  on:close
+>
+  <slot name="content" />
+</AttachableDropdown>

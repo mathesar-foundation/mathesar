@@ -11,6 +11,7 @@
   display: block;
   width: 100%;
   box-sizing: border-box;
+  text-align: var(--input-element-text-align, 'left');
 
   &:focus {
     border-color: #489ee4;

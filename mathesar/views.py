@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
-from mathesar.models import Database, Schema, Table
+from mathesar.models.base import Database, Schema, Table
 from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer
+from mathesar.database.types import UIType
 
 
 def get_schema_list(request, database):
@@ -35,11 +36,11 @@ def get_table_list(request, schema):
     return table_serializer.data
 
 
-def get_type_list(request, database):
+def get_ui_type_list(request, database):
     if database is None:
         return []
     type_serializer = TypeSerializer(
-        database.supported_types,
+        UIType,
         many=True,
         context={'request': request}
     )
@@ -53,7 +54,7 @@ def get_common_data(request, database, schema=None):
         'schemas': get_schema_list(request, database),
         'databases': get_database_list(request),
         'tables': get_table_list(request, schema),
-        'abstract_types': get_type_list(request, database)
+        'abstract_types': get_ui_type_list(request, database)
     }
 
 

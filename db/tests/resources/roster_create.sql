@@ -2,9 +2,9 @@ CREATE TABLE "Roster" (
     id integer NOT NULL,
     "Student Number" uuid,
     "Student Name" character varying(100),
-    "Student Email" character varying(150),
+    "Student Email" mathesar_types.email,
     "Teacher" character varying(100),
-    "Teacher Email" character varying(150),
+    "Teacher Email" mathesar_types.email,
     "Subject" character varying(20),
     "Grade" integer
 );

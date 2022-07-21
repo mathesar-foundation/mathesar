@@ -1,3 +1,4 @@
+import { getContext, setContext } from 'svelte';
 import type { Writable } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { TerseMetaProps, MetaProps } from './meta';
@@ -59,7 +60,7 @@ export class TabularData {
     this.type = props.type;
     this.id = props.id;
     this.meta = new Meta(props.metaProps);
-    this.columnsDataStore = new ColumnsDataStore(this.type, this.id, this.meta);
+    this.columnsDataStore = new ColumnsDataStore(this.type, this.id);
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
       this.type,
@@ -73,8 +74,20 @@ export class TabularData {
       this.recordsData,
     );
 
-    this.columnsDataStore.on('columnRenamed', () => this.refresh());
-    this.columnsDataStore.on('columnAdded', () => this.recordsData.fetch());
+    this.columnsDataStore.on('columnRenamed', async () => {
+      await this.refresh();
+    });
+    this.columnsDataStore.on('columnAdded', async () => {
+      await this.recordsData.fetch();
+    });
+    this.columnsDataStore.on('columnDeleted', async (columnId) => {
+      this.meta.sorting.update((s) => s.without(columnId));
+      this.meta.grouping.update((g) => g.without(columnId));
+      this.meta.filtering.update((f) => f.withoutColumn(columnId));
+    });
+    this.columnsDataStore.on('columnPatched', async () => {
+      await this.recordsData.fetch();
+    });
   }
 
   refresh(): Promise<
@@ -92,11 +105,18 @@ export class TabularData {
   }
 
   destroy(): void {
-    this.display.destroy();
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
   }
 }
 
-export type TabularDataStore = Writable<TabularData>;
+const tabularDataStoreContextKey = {};
+
+export function setTabularDataStoreInContext(s: Writable<TabularData>): void {
+  setContext(tabularDataStoreContextKey, s);
+}
+
+export function getTabularDataStoreFromContext(): Writable<TabularData> {
+  return getContext(tabularDataStoreContextKey);
+}

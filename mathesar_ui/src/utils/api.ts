@@ -1,6 +1,11 @@
 import Cookies from 'js-cookie';
 import { CancellablePromise } from '@mathesar-component-library';
+import { ApiMultiError } from './errors';
 
+/**
+ * @deprecated in favor of `RequestStatus` which also stores info about the
+ * errors.
+ */
 export enum States {
   /** Before any requests have been made */
   Idle = 'idle',
@@ -8,6 +13,49 @@ export enum States {
   /** After a request has completed successfully */
   Done = 'done',
   Error = 'error',
+}
+
+export type RequestStatus =
+  | { state: 'processing' }
+  | { state: 'success' }
+  | { state: 'failure'; errors: string[] };
+
+/**
+ * When multiple states are present, the one listed highest here is considered
+ * the most important.
+ */
+const requestStatusStatesByImportance: RequestStatus['state'][] = [
+  'processing',
+  'failure',
+  'success',
+];
+const paramountRequestStatusState = requestStatusStatesByImportance[0];
+
+function pickMostImportantRequestStatusState(
+  a: RequestStatus['state'],
+  b: RequestStatus['state'],
+): RequestStatus['state'] {
+  for (const state of requestStatusStatesByImportance) {
+    if (a === state || b === state) {
+      return state;
+    }
+  }
+  throw new Error('Invalid RequestStatus states.');
+}
+
+export function getMostImportantRequestStatusState(
+  statuses: Iterable<RequestStatus>,
+): RequestStatus['state'] | undefined {
+  let result: RequestStatus['state'] | undefined;
+  for (const { state } of statuses) {
+    if (state === paramountRequestStatusState) {
+      return state;
+    }
+    result = result
+      ? pickMostImportantRequestStatusState(state, result)
+      : state;
+  }
+  return result;
 }
 
 export interface UploadCompletionOpts {
@@ -53,21 +101,14 @@ function sendXHRRequest<T>(
               : (JSON.parse(request.response) as T);
           resolve(result);
         } else {
-          let errorMessage = 'An unexpected error has occurred';
           try {
-            // TODO: Follow a proper error message structure
-            const message = JSON.parse(request.response) as string | string[];
-            if (Array.isArray(message)) {
-              errorMessage = message
-                .map((msg) => JSON.stringify(msg))
-                .join(', ');
-            } else if (typeof message === 'string') {
-              errorMessage = message;
-            } else if (message) {
-              errorMessage = JSON.stringify(message);
-            }
-          } finally {
-            reject(new Error(errorMessage));
+            reject(new ApiMultiError(JSON.parse(request.response)));
+          } catch {
+            const msg = [
+              'When making an XHR request, the server responded with an',
+              'error, but the response body was not valid JSON.',
+            ].join(' ');
+            reject(new Error(msg));
           }
         }
       });

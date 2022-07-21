@@ -33,7 +33,12 @@ class ErrorCodes(Enum):
     ColumnSizeMismatch = 4401
     DistinctColumnNameRequired = 4402
     MultipleDataFiles = 4400
+    MoneyDisplayOptionConflict = 4407
     UnsupportedAlter = 4403
     URLDownloadError = 4404
     URLNotReachableError = 4405
     URLInvalidContentType = 4406
+    UnknownDBType = 4408
+    InvalidLinkChoice = 4409
+    IncompatibleFractionDigitValues = 4410
+    RemainderTableNameRequired = 4411

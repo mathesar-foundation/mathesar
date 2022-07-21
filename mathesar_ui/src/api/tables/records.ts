@@ -20,18 +20,16 @@ export interface SortingEntry {
   direction: SortDirection;
 }
 export type FilterCombination = 'and' | 'or';
-export type FilterOperation = 'eq' | 'ne' | 'get_duplicates';
-export interface FilterCondition {
-  /** column id */
-  field: number;
-  op: FilterOperation;
-  value: unknown;
-}
+export type FilterConditionParams = [
+  { column_id: [number] },
+  ...{ literal: [unknown] }[]
+];
+export type FilterCondition = Record<string, FilterConditionParams>;
 type MakeFilteringOption<U> = U extends string
-  ? { [k in U]: FilterCondition[] }
+  ? { [k in U]: FilterRequest[] }
   : never;
-export type Filtering =
-  | FilterCondition[]
+export type FilterRequest =
+  | FilterCondition
   | MakeFilteringOption<FilterCombination>;
 
 export interface GetRequestParams {
@@ -39,7 +37,7 @@ export interface GetRequestParams {
   offset?: number;
   order_by?: SortingEntry[];
   grouping?: Pick<Grouping, 'columns'>;
-  filters?: Filtering;
+  filter?: FilterRequest;
 }
 
 export type ResultValue = string | number | boolean | null;

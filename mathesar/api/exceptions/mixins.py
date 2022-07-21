@@ -1,4 +1,4 @@
-from rest_framework.serializers import Serializer
+from rest_framework.serializers import ListSerializer, Serializer
 from rest_framework.utils.serializer_helpers import ReturnList
 from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -19,6 +19,13 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         2. Add field to the pretty exception body if raised by field validation method
         """
         pretty = []
+        if self.is_pretty(errors):
+            # DRF serializers supports error any of the following format, error string, list of error strings or {'field': [error strings]}
+            # Since our exception is an object instead of a string, the object properties are mistaken to be fields of a serializer,
+            # and it gets converted into {'field': [error strings]} by DRF
+            # We need to convert it to dictionary of list of object and return it instead of passing it down the line
+            scalar_errors = dict(map(lambda item: (item[0], item[1][0] if type(item[1]) == list else item[1]), errors.items()))
+            return [scalar_errors]
         for error_type in errors:
             error = errors[error_type]
             if error_type == 'non_field_errors':
@@ -27,11 +34,27 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                 else:
                     pretty.extend(self.get_non_field_error_entries(errors[error_type]))
             else:
-                field = self.fields.fields[error_type]
+                field = self.get_serializer_fields(self.initial_data).fields[error_type]
                 if isinstance(field, Serializer) and type(errors[error_type]) == dict:
                     field.initial_data = self.initial_data[error_type]
                     child_errors = field.build_pretty_errors(errors[error_type])
                     pretty += child_errors
+                    continue
+                if isinstance(field, ListSerializer) and type(errors[error_type]) == list:
+                    pretty_child_errors = []
+                    for index, child_error in enumerate(errors[error_type]):
+                        child_field = field.child
+                        initial_data = self.initial_data.get(error_type, None)
+                        if initial_data is not None:
+                            child_field.initial_data = self.initial_data[error_type][index]
+                        else:
+                            child_field.initial_data = None
+                        if isinstance(child_error, str):
+                            pretty_child_errors.append(self.get_field_error_entry(child_error, field))
+                        else:
+                            child_errors = child_field.build_pretty_errors(child_error)
+                            pretty_child_errors.extend(child_errors)
+                    pretty.extend(pretty_child_errors)
                     continue
                 if self.is_pretty(error):
                     if 'field' not in error or error['field'] is None or str(error['field']) == 'None':
@@ -42,6 +65,9 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         if pretty:
             return pretty
         return []
+
+    def get_serializer_fields(self, data):
+        return self.fields
 
     def _run_validator(self, validator, field, message):
         """
