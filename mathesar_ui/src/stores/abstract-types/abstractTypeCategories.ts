@@ -11,8 +11,8 @@ import Date from './type-configs/date';
 import Time from './type-configs/time';
 import DateTime from './type-configs/datetime';
 import Fallback from './type-configs/fallback';
-import Array from './type-configs/json_array';
-import Object from './type-configs/json_object';
+import Array from './type-configs/jsonArray';
+import Object from './type-configs/jsonObject';
 import type {
   AbstractType,
   AbstractTypesMap,
