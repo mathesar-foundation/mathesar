@@ -1,5 +1,6 @@
 <script lang="ts">
   import { TextArea, optionalNonNullable } from '@mathesar-component-library';
+  import type { TextAreaProcessedKeyDown } from '@mathesar-component-library/types';
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { TextAreaCellProps } from '../typeDefinitions';
 
@@ -12,7 +13,17 @@
   // Db options
   export let length: $$Props['length'] = undefined;
 
-  const addNewLineOnAllEnterKeyCombinations = true;
+  function handleKeyDown(
+    e: TextAreaProcessedKeyDown,
+    handler: (e: KeyboardEvent) => void,
+  ) {
+    const { type, originalEvent } = e;
+    if (type === 'newlineWithEnterKeyCombination') {
+      originalEvent.stopPropagation();
+    } else {
+      handler(originalEvent);
+    }
+  }
 </script>
 
 <SteppedInputCell
@@ -32,8 +43,7 @@
     {disabled}
     bind:value
     on:blur={handleInputBlur}
-    on:keydown
-    {addNewLineOnAllEnterKeyCombinations}
-    {handleInputKeydown}
+    addNewLineOnEnterKeyCombinations={true}
+    on:processedKeyDown={(e) => handleKeyDown(e.detail, handleInputKeydown)}
   />
 </SteppedInputCell>

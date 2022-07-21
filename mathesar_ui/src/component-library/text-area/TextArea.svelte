@@ -1,10 +1,15 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
-  import type { TextAreaProps } from '@mathesar-component-library-dir/text-area/TextAreaTypes';
+  import type {
+    TextAreaProps,
+    TextAreaProcessedKeyDown,
+  } from '@mathesar-component-library-dir/text-area/TextAreaTypes';
+
+  const dispatch =
+    createEventDispatcher<{ processedKeyDown: TextAreaProcessedKeyDown }>();
 
   type $$Props = TextAreaProps;
-
-  let textareaRef: HTMLTextAreaElement;
 
   // Id for the input
   export let id: string | undefined = undefined;
@@ -15,7 +20,7 @@
   let classes = '';
   export { classes as class };
 
-  export let addNewLineOnAllEnterKeyCombinations = false;
+  export let addNewLineOnEnterKeyCombinations = false;
 
   /**
    * Value of the input. Use bind tag for two-way binding.
@@ -27,27 +32,29 @@
 
   export let hasError = false;
 
-  export function handleInputKeydown(e: KeyboardEvent) {}
-
-  function handleKeyDown(
-    e: KeyboardEvent,
-    handler: (e: KeyboardEvent) => void,
-  ) {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      if (addNewLineOnAllEnterKeyCombinations) {
-        let pos = textareaRef.selectionStart;
-        const front = textareaRef.value.substring(0, pos);
-        const back = textareaRef.value.substring(pos, textareaRef.value.length);
-        textareaRef.value = `${front}\n${back}`;
-        value = textareaRef.value;
+  function handleKeyDown(e: KeyboardEvent) {
+    let type: TextAreaProcessedKeyDown['type'] = 'normal';
+    if (
+      element &&
+      e.key === 'Enter' &&
+      (e.ctrlKey || e.metaKey || e.shiftKey)
+    ) {
+      if (addNewLineOnEnterKeyCombinations && !e.shiftKey) {
+        let pos = element.selectionStart;
+        const front = element.value.substring(0, pos);
+        const back = element.value.substring(pos, element.value.length);
+        element.value = `${front}\n${back}`;
+        value = element.value;
         pos += 1;
-        textareaRef.selectionStart = pos;
-        textareaRef.selectionEnd = pos;
-        e.stopPropagation();
+        element.selectionStart = pos;
+        element.selectionEnd = pos;
       }
-    } else {
-      handler(e);
+      type = 'newlineWithEnterKeyCombination';
     }
+    dispatch('processedKeyDown', {
+      type,
+      originalEvent: e,
+    });
   }
 </script>
 
@@ -60,10 +67,10 @@
   class:has-error={hasError}
   {id}
   {disabled}
-  bind:this={textareaRef}
   bind:value
   on:input
   on:focus
   on:blur
-  on:keydown={(e) => handleKeyDown(e, handleInputKeydown)}
+  on:keydown={handleKeyDown}
+  on:keydown
 />
