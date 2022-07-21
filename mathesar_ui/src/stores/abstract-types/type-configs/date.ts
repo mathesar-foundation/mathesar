@@ -1,9 +1,9 @@
 import { faCalendarDay } from '@fortawesome/free-solid-svg-icons';
 import type { FormValues } from '@mathesar-component-library/types';
-import type { Column } from '@mathesar/stores/table-data/types';
 import type {
   DateDisplayOptions,
   DateFormat,
+  Column,
 } from '@mathesar/api/tables/columns';
 import type {
   AbstractTypeConfigForm,

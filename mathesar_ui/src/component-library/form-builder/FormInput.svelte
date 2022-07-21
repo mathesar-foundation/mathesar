@@ -1,15 +1,15 @@
 <script lang="ts">
   // TODO: Use FormField component here
   import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
-  import DynamicInput from '@mathesar-component-library-dir/dynamic-input/DynamicInput.svelte';
-  import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types';
+  import DataTypeBasedInput from '@mathesar/component-library/data-type-based-input/DataTypeBasedInput.svelte';
+  import type { DataTypeBasedInputType } from '@mathesar/component-library/data-type-based-input/types';
   import type {
     FormInputElement,
     FormValueStore,
     FormValidationCheck,
   } from './types';
 
-  export let type: DynamicInputDataType;
+  export let type: DataTypeBasedInputType;
   export let label: FormInputElement['label'] = undefined;
   export let store: FormValueStore;
   export let validationErrors: FormValidationCheck[];
@@ -20,7 +20,7 @@
     {label}
     layout={type === 'boolean' ? 'inline-input-first' : 'stacked'}
   >
-    <DynamicInput
+    <DataTypeBasedInput
       {...$$restProps}
       dataType={type}
       {label}

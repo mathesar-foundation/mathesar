@@ -13,7 +13,8 @@
     DEFAULT_ROW_RIGHT_PADDING,
     ROW_CONTROL_COLUMN_WIDTH,
   } from '@mathesar/stores/table-data';
-  import type { Display, Column } from '@mathesar/stores/table-data/types';
+  import type { Display } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
 
   const dispatch = createEventDispatcher();
   export let columns: Column[];

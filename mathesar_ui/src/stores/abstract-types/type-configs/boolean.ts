@@ -1,7 +1,9 @@
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 import type { FormValues } from '@mathesar-component-library/types';
-import type { Column } from '@mathesar/stores/table-data/types';
-import type { BooleanDisplayOptions } from '@mathesar/api/tables/columns';
+import type {
+  BooleanDisplayOptions,
+  Column,
+} from '@mathesar/api/tables/columns';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
