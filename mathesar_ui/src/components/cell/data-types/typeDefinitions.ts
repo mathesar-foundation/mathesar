@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/stores/table-data/types';
+import type { Column } from '@mathesar/api/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 // The types here are frontend types and are
@@ -24,9 +24,9 @@ export interface CellComponentFactory {
   get(
     column: CellColumnLike,
     config?: Record<string, unknown>,
-  ): ComponentAndProps<unknown>;
+  ): ComponentAndProps;
   getInput(
     column: CellColumnLike,
     config?: Record<string, unknown>,
-  ): ComponentAndProps<unknown>;
+  ): ComponentAndProps;
 }

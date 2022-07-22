@@ -4,7 +4,6 @@
   import type { Row } from '@mathesar/stores/table-data/records';
   import Cell from '@mathesar/components/cell/Cell.svelte';
   // TODO: Remove route dependency in systems
-  import type { ProcessedTableColumnMap } from '@mathesar/routes/schema-home/routes/datascape/table-view/utils';
   import RowCellBackgrounds from '@mathesar/routes/schema-home/routes/datascape/table-view/row/RowCellBackgrounds.svelte';
   import { rowHeightPx } from '@mathesar/routes/schema-home/routes/datascape/table-view/geometry';
   import CellArranger from './CellArranger.svelte';
@@ -12,7 +11,6 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
   export let submit: (record: Row) => void;
 
   let selectionIndex = 0;
@@ -70,15 +68,10 @@
   {#each records as row, index}
     {#if row.record}
       <div class="row" style={rowStyle} on:click={() => submitRecord(index)}>
-        <CellArranger
-          {processedTableColumnsMap}
-          {display}
-          let:style
-          let:processedColumn
-        >
+        <CellArranger {display} let:style let:processedColumn>
           <CellWrapper {style}>
             <Cell
-              sheetColumn={processedColumn}
+              {processedColumn}
               value={row.record[processedColumn.column.id]}
               disabled
             />

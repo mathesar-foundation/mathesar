@@ -3,13 +3,14 @@
   import type { Writable } from 'svelte/store';
   import { Button } from '@mathesar-component-library';
   import type { Filtering } from '@mathesar/stores/table-data';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/api/tables/records';
   import FilterEntries from './FilterEntries.svelte';
-  import type { ProcessedTableColumnMap } from '../../utils';
   import { validateFilterEntry, deepCloneFiltering } from './utils';
 
+  const tabularData = getTabularDataStoreFromContext();
+
   export let filtering: Writable<Filtering>;
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   // This component is not reactive towards $filtering
   // to avoid having to sync states and handle unnecessary set calls.
@@ -17,11 +18,12 @@
   // everytime the dropdown reopens.
   const internalFiltering = writable(deepCloneFiltering($filtering));
 
+  $: ({ processedColumns } = $tabularData);
   $: filterCount = $internalFiltering.entries.length;
 
   function checkAndSetExternalFiltering() {
     const isValid = $internalFiltering.entries.every((filter) => {
-      const column = processedTableColumnsMap.get(filter.columnId);
+      const column = $processedColumns.get(filter.columnId);
       const condition = column?.allowedFiltersMap.get(filter.conditionId);
       if (condition) {
         return validateFilterEntry(condition, filter.value);
@@ -34,7 +36,7 @@
   }
 
   function addFilter() {
-    const firstColumn = [...processedTableColumnsMap.values()][0];
+    const firstColumn = [...$processedColumns.values()][0];
     if (!firstColumn) {
       return;
     }
@@ -79,13 +81,12 @@
     <FilterEntries
       bind:entries={$internalFiltering.entries}
       bind:filterCombination={$internalFiltering.combination}
-      {processedTableColumnsMap}
       on:remove={(e) => removeFilter(e.detail)}
       on:update={updateFilter}
       on:updateCombination={(e) => setCombination(e.detail)}
     />
 
-    {#if processedTableColumnsMap.size}
+    {#if $processedColumns.size}
       <div class="footer">
         <Button on:click={addFilter}>Add new filter</Button>
       </div>
