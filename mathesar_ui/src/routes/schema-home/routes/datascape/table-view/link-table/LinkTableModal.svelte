@@ -163,17 +163,17 @@
       case 'one-to-many':
         const oneToOneOrOneToMany: OneToOne | OneToMany = {
           link_type: relationshipType,
-          reference_table: thisTable.id,
-          reference_column_name: thisNewColumnName,
-          referent_table: thatTable.id,
+          reference_table: thatTable.id,
+          reference_column_name: thatNewColumnName,
+          referent_table: thisTable.id,
         };
         return oneToOneOrOneToMany;
       case 'many-to-one':
         const oneToMany: OneToMany = {
           link_type: 'one-to-many',
-          reference_table: thatTable.id,
-          reference_column_name: thatNewColumnName,
-          referent_table: thisTable.id,
+          reference_table: thisTable.id,
+          reference_column_name: thisNewColumnName,
+          referent_table: thatTable.id,
         };
         return oneToMany;
       case 'many-to-many':
