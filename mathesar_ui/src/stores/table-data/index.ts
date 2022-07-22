@@ -20,7 +20,7 @@ export { Pagination } from './pagination';
 export { getRowKey } from './records';
 export { getCellKey } from './utils';
 
-export { initTabularData, removeTabularData } from './manager';
+export { getTabularData, initTabularData, removeTabularData } from './manager';
 export {
   makeTabularDataProps,
   makeTerseTabularDataProps,

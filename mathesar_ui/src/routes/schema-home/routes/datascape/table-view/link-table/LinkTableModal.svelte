@@ -27,6 +27,7 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { refetchTablesForSchema, tables } from '@mathesar/stores/tables';
   import {
+    getTabularData,
     ColumnsDataStore,
     getTabularDataStoreFromContext,
     TabularType,
@@ -43,7 +44,6 @@
   } from './linkTableUtils';
   import RelationshipDiagram from './RelationshipDiagram.svelte';
   import TableName from './TableName.svelte';
-  import { getTabularData } from '@mathesar/stores/table-data/manager';
 
   const dispatch = createEventDispatcher();
   const tabularData = getTabularDataStoreFromContext();
@@ -160,7 +160,7 @@
     }
     switch (relationshipType) {
       case 'one-to-one':
-      case 'one-to-many':
+      case 'one-to-many': {
         const oneToOneOrOneToMany: OneToOne | OneToMany = {
           link_type: relationshipType,
           reference_table: thatTable.id,
@@ -168,7 +168,8 @@
           referent_table: thisTable.id,
         };
         return oneToOneOrOneToMany;
-      case 'many-to-one':
+      }
+      case 'many-to-one': {
         const oneToMany: OneToMany = {
           link_type: 'one-to-many',
           reference_table: thisTable.id,
@@ -176,7 +177,8 @@
           referent_table: thatTable.id,
         };
         return oneToMany;
-      case 'many-to-many':
+      }
+      case 'many-to-many': {
         const manyToMany: ManyToMany = {
           link_type: relationshipType,
           mapping_table_name: mappingTableName,
@@ -192,6 +194,7 @@
           ],
         };
         return manyToMany;
+      }
       default:
         throw new Error('Unknown relationship type.');
     }
@@ -212,7 +215,7 @@
       id: tableWithNewColumn.id,
     });
     if (tabularDataWithNewColumn) {
-      tabularDataWithNewColumn.refresh();
+      void tabularDataWithNewColumn.refresh();
     }
   }
 
