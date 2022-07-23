@@ -32,15 +32,12 @@
   import Sort from './record-operations/Sort.svelte';
   import Filter from './record-operations/Filter.svelte';
   import RenameTableModal from './RenameTableModal.svelte';
-  import type { ProcessedTableColumnMap } from '../utils';
 
   const tabularData = getTabularDataStoreFromContext();
 
   const tableConstraintsModal = modal.spawnModalController();
   const linkTableModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
-
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
     $tabularData);
@@ -123,7 +120,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <Filter {processedTableColumnsMap} filtering={meta.filtering} />
+      <Filter filtering={meta.filtering} />
     </svelte:fragment>
   </Dropdown>
 

@@ -48,7 +48,7 @@ def _build_db_types_hinted():
     _add_to_db_type_hintsets(categories.DATETIME_TYPES, (hints.date, hints.time,))
     _add_to_db_type_hintsets(categories.DURATION_TYPES, (hints.duration,))
     _add_to_db_type_hintsets(categories.COMPARABLE_TYPES, (hints.comparable,))
-
+    _add_to_db_type_hintsets(categories.JSON_TYPES, (hints.json,))
     return frozendict(db_types_hinted)
 
 

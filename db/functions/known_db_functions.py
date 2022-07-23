@@ -10,8 +10,9 @@ import inspect
 
 import db.functions.base
 import db.functions.packed
-import db.types.custom.uri
+import db.types.custom.datetime
 import db.types.custom.email
+import db.types.custom.uri
 
 from db.functions.base import DBFunction
 
@@ -42,8 +43,9 @@ def _is_concrete_db_function_subclass(member):
 _modules_to_search_in = tuple([
     db.functions.base,
     db.functions.packed,
-    db.types.custom.uri,
+    db.types.custom.datetime,
     db.types.custom.email,
+    db.types.custom.uri,
 ])
 
 

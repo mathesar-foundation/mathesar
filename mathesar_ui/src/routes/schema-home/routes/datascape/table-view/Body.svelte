@@ -13,7 +13,6 @@
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
-  import type { ProcessedTableColumnMap } from './utils';
   import { rowHeightPx } from './geometry';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -25,8 +24,6 @@
   $: ({ newRecords } = recordsData);
   $: ({ rowWidth, horizontalScrollOffset, scrollOffset, displayableRecords } =
     display);
-
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   let initialSorting: Sorting;
   let initialFiltering: Filtering;
@@ -130,7 +127,6 @@
             <RowComponent
               style={item.style}
               bind:row={$displayableRecords[item.index]}
-              {processedTableColumnsMap}
             />
           {/if}
         {/each}

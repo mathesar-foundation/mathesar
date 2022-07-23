@@ -2,6 +2,8 @@
   import { createEventDispatcher } from 'svelte';
   import Default from '@mathesar/components/Default.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
+  // TODO remove the dependency cycle below
+  // eslint-disable-next-line import/no-cycle
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import CellWrapper from '../CellWrapper.svelte';
   import type { LinkedRecordCellProps } from '../typeDefinitions';

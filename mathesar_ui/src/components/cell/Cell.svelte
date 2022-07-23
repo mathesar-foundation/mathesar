@@ -1,18 +1,25 @@
-<script lang="ts">
-  // TODO: Move this component within Sheet
-  // This component is meant to be common for tables, views, and for import preview
-  import type { SheetColumn } from '@mathesar/components/sheet/types';
+<!--
+  @component
 
-  export let sheetColumn: SheetColumn;
+  TODO: Move this component within Sheet
+
+  This component is meant to be common for tables, views, and for import preview
+-->
+<script lang="ts">
+  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+
+  export let processedColumn: ProcessedColumn;
   export let value: unknown;
   export let isActive = false;
   export let disabled = false;
   export let showAsSkeleton = false;
 
-  $: ({ component, props } = sheetColumn.cellCap);
+  $: ({ cellComponentAndProps } = processedColumn);
+  $: ({ component } = cellComponentAndProps);
+  $: props = cellComponentAndProps.props as Record<string, unknown>;
 </script>
 
-<div class="sheet-cell" data-column-id={sheetColumn.column.id}>
+<div class="sheet-cell" data-column-id={processedColumn.column.id}>
   <svelte:component
     this={component}
     {...props}

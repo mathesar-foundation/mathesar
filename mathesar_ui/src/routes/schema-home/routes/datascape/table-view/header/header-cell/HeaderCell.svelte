@@ -16,7 +16,10 @@
     TextInput,
     SpinnerArea,
   } from '@mathesar-component-library';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
+  import type {
+    ConstraintsDataStore,
+    ProcessedColumn,
+  } from '@mathesar/stores/table-data/types';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { focusAndSelectAll } from '@mathesar/utils/domUtils';
   import type {
@@ -33,17 +36,16 @@
   import { getErrorMessage } from '@mathesar/utils/errors';
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
-  import type { ProcessedTableColumn } from '../../utils';
   import ColumnResizer from './ColumnResizer.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  export let processedColumn: ProcessedTableColumn;
+  export let processedColumn: ProcessedColumn;
   export let meta: Meta;
   export let columnsDataStore: ColumnsDataStore;
   export let constraintsDataStore: ConstraintsDataStore;
 
-  $: ({ column, abstractTypeOfColumn } = processedColumn);
+  $: ({ column, abstractType } = processedColumn);
   $: fkConstraint = $constraintsDataStore.constraints.find(
     (c) => c.type === 'foreignkey' && c.columns.includes(column.id),
   ) as FkConstraint | undefined;
@@ -195,7 +197,7 @@
               appearance="plain"
               on:click={setTypeView}
             >
-              <span>{abstractTypeOfColumn?.name}</span>
+              <span>{abstractType.name}</span>
               <Icon size="0.8em" data={faCog} />
               <Icon size="0.7em" data={faChevronRight} />
             </Button>
@@ -228,8 +230,8 @@
             />
           {:else if view === 'type'}
             <AbstractTypeConfiguration
-              {column}
-              {abstractTypeOfColumn}
+              {processedColumn}
+              {abstractType}
               on:close={closeMenu}
             />
           {/if}

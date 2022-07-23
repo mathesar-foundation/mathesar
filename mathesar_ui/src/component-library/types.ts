@@ -9,7 +9,7 @@ export type { PartiallyMissingOrUndefined } from './common/types/utilityTypes';
 export * from './icon/IconTypes';
 export * from './file-upload/FileUploadTypes';
 export * from './formatted-input/FormattedInputTypes';
-export * from './dynamic-input/types';
+export * from './data-type-based-input/types';
 export * from './form-builder/types';
 export * from './cancel-or-proceed-button-pair/CancelOrProceedButtonPairTypes';
 export * from './list-box/ListBoxTypes';
