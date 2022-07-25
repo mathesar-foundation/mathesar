@@ -16,13 +16,17 @@ from mathesar.api.exceptions.database_exceptions import (
 )
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import (
-    SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer, TableSerializer, TableImportSerializer
+    SplitTableRequestSerializer,
+    SplitTableResponseSerializer,
+    TablePreviewSerializer,
+    TableSerializer,
+    TableImportSerializer,
+    MoveTableRequestSerializer
 )
-from mathesar.models import Table
+from mathesar.models.base import Table
 from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
-from mathesar.utils.tables import (
-    get_table_column_types
-)
+from mathesar.utils.tables import get_table_column_types
+from mathesar.utils.joins import get_processed_joinable_tables
 
 
 class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewsets.GenericViewSet):
@@ -58,6 +62,17 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         table = self.get_object()
         table_dependents = table.dependents()
         return Response(table_dependents)
+
+    @action(methods=['get'], detail=True)
+    def joinable_tables(self, request, pk=None):
+        table = self.get_object()
+        limit = request.query_params.get('limit')
+        offset = request.query_params.get('offset')
+        max_depth = request.query_params.get('max_depth', 2)
+        processed_joinable_tables = get_processed_joinable_tables(
+            table, limit=limit, offset=offset, max_depth=max_depth
+        )
+        return Response(processed_joinable_tables)
 
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
@@ -112,6 +127,39 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             response_serializer = SplitTableResponseSerializer(data=split_table_response)
             response_serializer.is_valid(True)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['post'], detail=True)
+    def move_columns(self, request, pk=None):
+        table = self.get_object()
+        column_names_id_map = table.get_column_name_id_bidirectional_map()
+        serializer = MoveTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
+        if serializer.is_valid(True):
+            target_table = serializer.validated_data['target_table']
+            move_columns = serializer.validated_data['move_columns']
+            column_names_to_move = [column.name for column in move_columns]
+            target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
+            extracted_sa_table, remainder_sa_table = table.move_columns(
+                move_columns,
+                target_table,
+            )
+            engine = table._sa_engine
+            extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
+            remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
+
+            target_table.oid = extracted_table_oid
+            target_table.save()
+            # Refresh existing target table columns to use correct attnum preventing conflicts with the moved column
+            existing_target_column_names = target_columns_name_id_map.keys()
+            target_table.update_column_reference(existing_target_column_names, target_columns_name_id_map)
+            # Add the moved column
+            target_table.update_column_reference(column_names_to_move, column_names_id_map)
+
+            table.oid = remainder_table_oid
+            table.save()
+            remainder_column_names = column_names_id_map.keys() - column_names_to_move
+            table.update_column_reference(remainder_column_names, column_names_id_map)
+
+        return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], detail=True)
     def previews(self, request, pk=None):

@@ -1,5 +1,8 @@
+import { getContext, setContext } from 'svelte';
 import type { Writable } from 'svelte/store';
+import { derived } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type { TerseMetaProps, MetaProps } from './meta';
 import { makeMetaProps, makeTerseMetaProps, Meta } from './meta';
 import type { ColumnsData } from './columns';
@@ -10,6 +13,8 @@ import { Display } from './display';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
 import type { TabularType } from './TabularType';
+import type { ProcessedColumnsStore } from './processedColumns';
+import { processColumn } from './processedColumns';
 
 export interface TabularDataProps {
   type: TabularType;
@@ -49,13 +54,15 @@ export class TabularData {
 
   columnsDataStore: ColumnsDataStore;
 
+  processedColumns: ProcessedColumnsStore;
+
   constraintsDataStore: ConstraintsDataStore;
 
   recordsData: RecordsData;
 
   display: Display;
 
-  constructor(props: TabularDataProps) {
+  constructor(props: TabularDataProps, abstractTypeMap: AbstractTypesMap) {
     this.type = props.type;
     this.id = props.id;
     this.meta = new Meta(props.metaProps);
@@ -71,6 +78,17 @@ export class TabularData {
       this.meta,
       this.columnsDataStore,
       this.recordsData,
+    );
+
+    this.processedColumns = derived(
+      [this.columnsDataStore, this.constraintsDataStore],
+      ([columnsData, constraintsData]) =>
+        new Map(
+          columnsData.columns.map((column) => [
+            column.id,
+            processColumn(column, constraintsData.constraints, abstractTypeMap),
+          ]),
+        ),
     );
 
     this.columnsDataStore.on('columnRenamed', async () => {
@@ -110,4 +128,12 @@ export class TabularData {
   }
 }
 
-export type TabularDataStore = Writable<TabularData>;
+const tabularDataStoreContextKey = {};
+
+export function setTabularDataStoreInContext(s: Writable<TabularData>): void {
+  setContext(tabularDataStoreContextKey, s);
+}
+
+export function getTabularDataStoreFromContext(): Writable<TabularData> {
+  return getContext(tabularDataStoreContextKey);
+}

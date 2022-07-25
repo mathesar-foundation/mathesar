@@ -41,7 +41,7 @@ function getAllowFloat(
   return true;
 }
 
-function getUseGrouping(
+export function getUseGrouping(
   apiUseGrouping: NumberDisplayOptions['use_grouping'],
 ): NumberCellExternalProps['useGrouping'] {
   switch (apiUseGrouping) {

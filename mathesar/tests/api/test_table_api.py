@@ -9,9 +9,9 @@ from db.columns.operations.select import get_columns_attnum_from_names
 from db.types.base import PostgresType, MathesarCustomType
 
 from mathesar import reflection
-from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models import Column, Table, DataFile
+from mathesar.models import base as models_base
+from mathesar.models.base import Column, Table, DataFile
 
 
 @pytest.fixture
@@ -666,7 +666,7 @@ def test_table_delete(create_patents_table, client):
     table = create_patents_table(table_name)
     table_count = len(Table.objects.all())
 
-    with patch.object(models, 'drop_table') as mock_delete:
+    with patch.object(models_base, 'drop_table') as mock_delete:
         response = client.delete(f'/api/db/v0/tables/{table.id}/')
     assert response.status_code == 204
 
@@ -1396,6 +1396,46 @@ def test_table_extract_columns_with_display_options(create_patents_table, client
     assert current_table_response.status_code == 201
     response_data = current_table_response.json()
     extracted_table_id = response_data['extracted_table']
+    extracted_table = Table.objects.get(id=extracted_table_id)
+    extracted_column_id = extracted_table.get_column_name_id_bidirectional_map()[column_name_with_display_options]
+    extracted_column = Column.objects.get(id=extracted_column_id)
+    assert extracted_column.id == extracted_column_id
+    assert extracted_column.display_options == column_with_display_options.display_options
+
+
+def test_table_move_columns_after_extracting(create_patents_table, client):
+    table_name = 'Patents'
+    table = create_patents_table(table_name)
+    column_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_names_to_extract = ['Title', 'Patent Expiration Date']
+    column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
+
+    extract_table_name = "Patent Info"
+    remainder_table_name = "Patent Status"
+    split_data = {
+        'extract_columns': column_ids_to_extract,
+        'extracted_table_name': extract_table_name,
+        "remainder_table_name": remainder_table_name,
+        'drop_original_table': False
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
+    assert current_table_response.status_code == 201
+    remainder_table_id = current_table_response.json()['remainder_table']
+    extracted_table_id = current_table_response.json()['extracted_table']
+    column_names_to_move = ['Patent Number']
+    column_ids_to_move = [column_name_id_map[name] for name in column_names_to_move]
+    column_display_options = {'show_as_percentage': True, 'number_format': 'english'}
+    column_name_with_display_options = column_names_to_move[0]
+    column_id_with_display_options = column_name_id_map[column_name_with_display_options]
+    column_with_display_options = Column.objects.get(id=column_id_with_display_options)
+    column_with_display_options.display_options = column_display_options
+    column_with_display_options.save()
+    move_data = {
+        'move_columns': column_ids_to_move,
+        'target_table': extracted_table_id,
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{remainder_table_id}/move_columns/', data=move_data)
+    assert current_table_response.status_code == 201
     extracted_table = Table.objects.get(id=extracted_table_id)
     extracted_column_id = extracted_table.get_column_name_id_bidirectional_map()[column_name_with_display_options]
     extracted_column = Column.objects.get(id=extracted_column_id)

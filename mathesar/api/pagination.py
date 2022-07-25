@@ -45,6 +45,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         filters=None,
         order_by=[],
         group_by=None,
+        search=[],
         duplicate_only=None,
     ):
         self.limit = self.get_limit(request)
@@ -52,15 +53,16 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             self.limit = self.default_limit
         self.offset = self.get_offset(request)
         # TODO: Cache count value somewhere, since calculating it is expensive.
-        self.count = table.sa_num_records(filter=filters)
+        self.count = table.sa_num_records(filter=filters, search=search)
         self.request = request
 
         return table.get_records(
-            self.limit,
-            self.offset,
+            limit=self.limit,
+            offset=self.offset,
             filter=filters,
             order_by=order_by,
             group_by=group_by,
+            search=search,
             duplicate_only=duplicate_only,
         )
 
@@ -86,16 +88,18 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         filters=None,
         order_by=[],
         grouping={},
+        search=[],
         duplicate_only=None,
     ):
         group_by = GroupBy(**grouping) if grouping else None
         records = super().paginate_queryset(
-            queryset,
-            request,
-            table,
+            queryset=queryset,
+            request=request,
+            table=table,
             filters=filters,
             order_by=order_by,
             group_by=group_by,
+            search=search,
             duplicate_only=duplicate_only,
         )
 
@@ -118,6 +122,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
                 'global_max': group_by.global_max,
                 'preproc': group_by.preproc,
                 'prefix_length': group_by.prefix_length,
+                'extract_field': group_by.extract_field,
                 'ranged': group_by.ranged,
                 'groups': groups,
             }

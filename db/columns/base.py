@@ -29,6 +29,7 @@ class MathesarColumn(Column):
             nullable=True,
             autoincrement=False,
             server_default=None,
+            engine=None,
     ):
         """
         Construct a new ``MathesarColumn`` object.
@@ -42,7 +43,7 @@ class MathesarColumn(Column):
         nullable -- Boolean giving whether the column is nullable.
         server_default -- String or DefaultClause giving the default value
         """
-        self.engine = None
+        self.engine = engine
         super().__init__(
             *foreign_keys,
             name=name,
@@ -54,7 +55,18 @@ class MathesarColumn(Column):
         )
 
     @classmethod
-    def from_column(cls, column):
+    def _constructor(cls, *args, **kwargs):
+        """
+        Needed to support Column.copy().
+
+        See https://docs.sqlalchemy.org/en/14/changelog/changelog_07.html?highlight=_constructor#change-de8c32a6729c83da17177f6a13979717
+        """
+        return MathesarColumn.from_column(
+            Column(*args, **kwargs)
+        )
+
+    @classmethod
+    def from_column(cls, column, engine=None):
         """
         This alternate init method creates a new column (a copy) of the
         given column.  It respects only the properties in the __init__
@@ -69,9 +81,21 @@ class MathesarColumn(Column):
             nullable=column.nullable,
             autoincrement=column.autoincrement,
             server_default=column.server_default,
+            engine=engine,
         )
         new_column.original_table = column.table
         return new_column
+
+    def to_sa_column(self):
+        """
+        MathesarColumn sometimes is not interchangeable with SQLAlchemy's Column.
+        For use in those situations, this method attempts to recreate an SA Column.
+
+        NOTE: this method is incomplete: it does not account for all properties of MathesarColumn.
+        """
+        sa_column = Column(name=self.name, type_=self.type)
+        sa_column.table = self.table_
+        return sa_column
 
     @property
     def table_(self):

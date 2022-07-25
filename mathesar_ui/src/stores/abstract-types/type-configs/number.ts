@@ -2,10 +2,10 @@ import { faHashtag } from '@fortawesome/free-solid-svg-icons';
 import type {
   NumberDisplayOptions,
   NumberFormat,
+  Column,
 } from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/AppTypes';
-import type { Column } from '@mathesar/stores/table-data/types';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -272,24 +272,30 @@ function determineDisplayOptions(
   return opts;
 }
 
+export function getDecimalPlaces(
+  minimumFractionDigits: number | null,
+  maximumFractionDigits: number | null,
+): number | null {
+  if (minimumFractionDigits === null && maximumFractionDigits === null) {
+    return null;
+  }
+  if (minimumFractionDigits === null) {
+    return maximumFractionDigits;
+  }
+  if (maximumFractionDigits === null) {
+    return minimumFractionDigits;
+  }
+  return Math.max(minimumFractionDigits, maximumFractionDigits);
+}
+
 function constructDisplayFormValuesFromDisplayOptions(
   columnDisplayOpts: Column['display_options'],
 ): FormValues {
   const displayOptions = columnDisplayOpts as NumberDisplayOptions | null;
-  const decimalPlaces = (() => {
-    const min = displayOptions?.minimum_fraction_digits ?? null;
-    const max = displayOptions?.maximum_fraction_digits ?? null;
-    if (min === null && max === null) {
-      return null;
-    }
-    if (min === null) {
-      return max;
-    }
-    if (max === null) {
-      return min;
-    }
-    return Math.max(min, max);
-  })();
+  const decimalPlaces = getDecimalPlaces(
+    displayOptions?.minimum_fraction_digits ?? null,
+    displayOptions?.maximum_fraction_digits ?? null,
+  );
   const formValues: FormValues = {
     numberFormat: displayOptions?.number_format ?? 'none',
     useGrouping: displayOptions?.use_grouping ?? 'auto',
