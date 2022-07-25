@@ -112,7 +112,7 @@ def apply_transformations_deprecated(
     columns_to_select=None,
     group_by=None,
     duplicate_only=None,
-    aggregate=None,
+    summarize=None,
     search=[],
 ):
     # TODO rename the actual method parameter
@@ -122,8 +122,8 @@ def apply_transformations_deprecated(
 
     if duplicate_only:
         relation = _get_duplicate_only_cte(relation, duplicate_only)
-    if group_by or aggregate:
-        relation = _group_aggregate(relation, group_by, aggregate)
+    if group_by:
+        relation = _grouping_metadata(relation, group_by)
     if order_by:
         relation = _sort(relation, order_by)
     if filter:
@@ -174,12 +174,10 @@ def _apply_transform(relation, transform):
     elif transform_type == 'order':
         spec = transform['spec']
         relation = _sort(relation, spec)
-    elif transform_type == 'group-agg':
+    elif transform_type == 'grouping':
         spec = transform['spec']
         group_by_spec = spec.get('group_by')
-        agg_spec = spec.get('agg')
-        group_agged = _group_aggregate(relation, group_by_spec, agg_spec)
-        relation = group_agged
+        relation = _grouping_metadata(relation, group_by_spec)
     elif transform_type == 'limit':
         spec = transform['spec']
         relation = _limit(relation, spec)
@@ -216,8 +214,7 @@ def _search(relation, engine, search, limit):
     return relation
 
 
-# TODO do aggregation
-def _group_aggregate(relation, group_by, aggregate):
+def _grouping_metadata(relation, group_by):
     # TODO maybe keep this as json, and convert to GroupBy at last moment?
     # other transform specs are json at this point in the pipeline
     if isinstance(group_by, group.GroupBy):
