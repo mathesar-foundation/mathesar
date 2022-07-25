@@ -9,12 +9,12 @@ def test_table_dependents(engine_with_schema):
     metadata = MetaData(schema=schema, bind=engine)
     t1 = Table(
         't1', metadata,
-        Column('id', Integer, primary_key = True)
+        Column('id', Integer, primary_key=True)
     )
     t1.create()
     t2 = Table(
         't2', metadata,
-        Column('id', Integer, primary_key = True),
+        Column('id', Integer, primary_key=True),
         Column('t1_id', Integer, ForeignKey(t1.c.id))
     )
     t2.create()
@@ -48,13 +48,13 @@ def test_max_level_graph(engine_with_schema):
     metadata = MetaData(schema=schema, bind=engine)
     t0 = Table(
         't0', metadata,
-        Column('id', Integer, primary_key = True))
+        Column('id', Integer, primary_key=True))
     t0.create()
 
     for i in range(10):
         t = Table(
             f"t{i+1}", metadata,
-            Column('id', Integer, primary_key = True),
+            Column('id', Integer, primary_key=True),
             Column(f't{i}_id', Integer, ForeignKey(f"t{i}.id")))
         t.create()
 
@@ -81,7 +81,7 @@ def test_specific_objects_in_dependents(engine_with_schema):
     t2_fk_name = "t2_fk_name"
     t2 = Table(
         't2', metadata,
-        Column('id', Integer, primary_key = True),
+        Column('id', Integer, primary_key=True),
         Column('t1_id', Integer, ForeignKey(t1.c.id, name=t2_fk_name)))
     t2.create()
 
@@ -103,13 +103,13 @@ def test_circular_referene(engine_with_schema):
     metadata = MetaData(schema=schema, bind=engine)
     t1 = Table(
         't1', metadata,
-        Column('id', Integer, primary_key = True)
+        Column('id', Integer, primary_key=True)
     )
-    
+
     t1.create()
     t2 = Table(
         't2', metadata,
-        Column('id', Integer, primary_key = True),
+        Column('id', Integer, primary_key=True),
         Column('t1_id', Integer, ForeignKey(t1.c.id))
     )
     t2.create()
