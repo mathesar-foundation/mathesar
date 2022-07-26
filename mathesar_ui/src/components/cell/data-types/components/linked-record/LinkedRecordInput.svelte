@@ -3,6 +3,8 @@
   import { faBackspace, faSearchPlus } from '@fortawesome/free-solid-svg-icons';
   import { Icon } from '@mathesar/component-library';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
+  // TODO remove dependency cycle
+  // eslint-disable-next-line import/no-cycle
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import type { LinkedRecordCellProps } from '../typeDefinitions';
 
