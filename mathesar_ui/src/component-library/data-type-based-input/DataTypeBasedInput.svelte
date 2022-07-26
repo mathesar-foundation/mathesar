@@ -4,15 +4,15 @@
   import StringInput from './StringInput.svelte';
   import BooleanInput from './BooleanInput.svelte';
   import type {
-    DynamicInputDataType,
-    DynamicInputInterfaceType,
-    DynamicInputSelectElement,
+    DataTypeBasedInputType,
+    DataTypeBasedInputInterface,
+    DataTypeBasedInputSelectElement,
   } from './types';
 
   /**
    * Type of input, one of: 'boolean', 'integer', 'float', 'string', 'date', 'datetime', 'time'
    */
-  export let dataType: DynamicInputDataType = 'string';
+  export let dataType: DataTypeBasedInputType = 'string';
 
   /**
    * Value of input. Depends on type.
@@ -26,7 +26,7 @@
    * string -> text, textarea, select. Default: text.
    */
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-  export let interfaceType: DynamicInputInterfaceType = undefined;
+  export let interfaceType: DataTypeBasedInputInterface = undefined;
 
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   let enumValues: unknown[] = undefined;
@@ -40,7 +40,7 @@
    * Applies when interfaceType is select. Additional configuration for options
    * that are displayed.
    */
-  export let options: DynamicInputSelectElement['options'] = undefined;
+  export let options: DataTypeBasedInputSelectElement['options'] = undefined;
 </script>
 
 {#if enumValues || interfaceType === 'select'}

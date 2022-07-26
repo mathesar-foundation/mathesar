@@ -7,6 +7,14 @@ from mathesar.tests.integration.utils.locators import get_table_entry
 from mathesar.utils.tables import create_empty_table
 
 
+TIMEOUT_HACK = {
+    "timeout": 30000,
+}
+"""
+See https://github.com/centerofci/mathesar/issues/1285
+"""
+
+
 @pytest.fixture(autouse=True)
 def clear_cache():
     cache.clear()
