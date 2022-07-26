@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
   import type { Grouping, Group } from '@mathesar/stores/table-data/records';
   import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data';
   import type { Row } from '@mathesar/stores/table-data/types';
@@ -30,4 +30,4 @@
     >
   {/each}
   <span class="tag count"><span class="label">count:</span> {group.count}</span>
-</div>
+</div> -->

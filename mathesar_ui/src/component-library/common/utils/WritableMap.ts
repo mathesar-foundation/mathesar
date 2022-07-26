@@ -7,10 +7,8 @@ import type {
 import { writable, get, derived } from 'svelte/store';
 import ImmutableMap from './ImmutableMap';
 
-export default class WritableMap<
-  Key extends string | number | boolean | null,
-  Value,
-> implements Readable<ImmutableMap<Key, Value>>
+export default class WritableMap<Key, Value>
+  implements Readable<ImmutableMap<Key, Value>>
 {
   map: Writable<ImmutableMap<Key, Value>>;
 
