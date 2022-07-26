@@ -21,6 +21,13 @@ def test_get_records_gets_ordered_records_num_col(roster_table_obj):
     assert record_list[0][7] == 25
 
 
+def test_json_sort_array(json_table_obj):
+    roster, engine = json_table_obj
+    order_list = [{"field": "json_array", "direction": "asc"}]
+    record_list = get_records(roster, engine, order_by=order_list)
+    assert record_list[2][0] == 2
+
+
 def test_get_records_gets_ordered_records_str_col_obj(roster_table_obj):
     roster, engine = roster_table_obj
     order_list = [{"field": roster.columns["Teacher"], "direction": "asc"}]
