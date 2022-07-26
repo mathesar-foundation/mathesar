@@ -194,6 +194,7 @@ def _db_initial_column_from_json(table_cache, json):
         alias=alias,
     )
 
+
 def join_params_from_json(json_jp):
     return JoinParams(
         left_table=_get_sa_table_by_id(json_jp[0][0]),
