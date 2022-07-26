@@ -17,23 +17,15 @@
     ConstraintsDataStore,
     ProcessedColumn,
   } from '@mathesar/stores/table-data/types';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { focusAndSelectAll } from '@mathesar/utils/domUtils';
   import type {
     Meta,
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
-  import {
-    getCellStyle,
-    ROW_CONTROL_COLUMN_WIDTH,
-  } from '@mathesar/stores/table-data/display';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
-  import ColumnResizer from './ColumnResizer.svelte';
-
-  const tabularData = getTabularDataStoreFromContext();
 
   export let processedColumn: ProcessedColumn;
   export let meta: Meta;
@@ -41,8 +33,6 @@
   export let constraintsDataStore: ConstraintsDataStore;
 
   $: ({ column, abstractType } = processedColumn);
-  $: ({ display } = $tabularData);
-  $: ({ columnPlacements } = display);
 
   let menuIsOpen = false;
   let renamingInputElement: HTMLInputElement | undefined;
@@ -140,86 +130,80 @@
   }
 </script>
 
-<div
-  class="cell header-cell"
-  style={getCellStyle($columnPlacements, column.id, ROW_CONTROL_COLUMN_WIDTH)}
->
-  {#if isRenaming}
-    <SpinnerArea isSpinning={isSubmittingRename} hasOverlay={false}>
-      <TextInput
-        bind:value={newName}
-        bind:element={renamingInputElement}
-        disabled={isSubmittingRename}
-        hasError={!!newNameValidationErrors.length}
-        aria-label="Column name"
-        on:keydown={handleColumnRenameInputKeydown}
-        on:blur={() => submitRename({ allowRetry: false })}
-      />
-    </SpinnerArea>
-  {:else}
-    <Dropdown
-      bind:isOpen={menuIsOpen}
-      triggerClass="column-opts"
-      triggerAppearance="plain"
-      contentClass="no-max-height column-opts-content"
-      on:close={setDefaultView}
-    >
-      <ColumnName slot="trigger" {column} />
-      <svelte:fragment slot="content">
-        <div class="container">
-          <div class="section type-header">
-            {#if view === 'default'}
-              <h6 class="category">Data Type</h6>
+{#if isRenaming}
+  <SpinnerArea isSpinning={isSubmittingRename} hasOverlay={false}>
+    <TextInput
+      bind:value={newName}
+      bind:element={renamingInputElement}
+      disabled={isSubmittingRename}
+      hasError={!!newNameValidationErrors.length}
+      aria-label="Column name"
+      on:keydown={handleColumnRenameInputKeydown}
+      on:blur={() => submitRename({ allowRetry: false })}
+    />
+  </SpinnerArea>
+{:else}
+  <Dropdown
+    bind:isOpen={menuIsOpen}
+    triggerClass="column-opts"
+    triggerAppearance="plain"
+    contentClass="no-max-height column-opts-content"
+    on:close={setDefaultView}
+  >
+    <ColumnName slot="trigger" {column} />
+    <svelte:fragment slot="content">
+      <div class="container">
+        <div class="section type-header">
+          {#if view === 'default'}
+            <h6 class="category">Data Type</h6>
+            <Button
+              class="type-switch"
+              appearance="plain"
+              on:click={setTypeView}
+            >
+              <span>{abstractType.name}</span>
+              <Icon size="0.8em" data={faCog} />
+              <Icon size="0.7em" data={faChevronRight} />
+            </Button>
+          {:else if view === 'type'}
+            <h6 class="category">
               <Button
-                class="type-switch"
+                size="small"
                 appearance="plain"
-                on:click={setTypeView}
+                class="padding-zero"
+                on:click={setDefaultView}
               >
-                <span>{abstractType.name}</span>
-                <Icon size="0.8em" data={faCog} />
-                <Icon size="0.7em" data={faChevronRight} />
+                <Icon data={faChevronLeft} />
+                Go back
               </Button>
-            {:else if view === 'type'}
-              <h6 class="category">
-                <Button
-                  size="small"
-                  appearance="plain"
-                  class="padding-zero"
-                  on:click={setDefaultView}
-                >
-                  <Icon data={faChevronLeft} />
-                  Go back
-                </Button>
-              </h6>
-            {/if}
-          </div>
+            </h6>
+          {/if}
+        </div>
 
-          <div class="divider" />
+        <div class="divider" />
 
-          <div class="section">
-            {#if view === 'default'}
-              <DefaultOptions
-                {meta}
-                {column}
-                {columnsDataStore}
-                {constraintsDataStore}
-                on:close={closeMenu}
-                on:rename={handleStartRenaming}
-              />
-            {:else if view === 'type'}
-              <AbstractTypeConfiguration
-                {processedColumn}
-                {abstractType}
-                on:close={closeMenu}
-              />
-            {/if}
-          </div>
-        </div></svelte:fragment
-      >
-    </Dropdown>
-  {/if}
-  <ColumnResizer columnId={column.id} />
-</div>
+        <div class="section">
+          {#if view === 'default'}
+            <DefaultOptions
+              {meta}
+              {column}
+              {columnsDataStore}
+              {constraintsDataStore}
+              on:close={closeMenu}
+              on:rename={handleStartRenaming}
+            />
+          {:else if view === 'type'}
+            <AbstractTypeConfiguration
+              {processedColumn}
+              {abstractType}
+              on:close={closeMenu}
+            />
+          {/if}
+        </div>
+      </div></svelte:fragment
+    >
+  </Dropdown>
+{/if}
 
 <style global lang="scss">
   @import 'HeaderCell.scss';

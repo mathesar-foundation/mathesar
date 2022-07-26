@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { router } from 'tinro';
   import { get } from 'svelte/store';
   import {
     faDragon,
@@ -6,6 +7,7 @@
     faPlus,
     faUpload,
     faTable,
+    faFileContract,
   } from '@fortawesome/free-solid-svg-icons';
   import { createTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
@@ -40,6 +42,10 @@
       getTabsForSchema($currentDBName, $currentSchemaId).add(tab);
     }
   }
+
+  function redirectToNewQueryRoute() {
+    router.goto(`/${$currentDBName}/${String($currentSchemaId)}/queries/`);
+  }
 </script>
 
 <header>
@@ -58,12 +64,16 @@
 
     {#if $currentSchemaId}
       <div class="quick-links">
-        <DropdownMenu label="New Table" icon={{ data: faPlus }}>
+        <DropdownMenu label="New" icon={{ data: faPlus }}>
           <MenuItem on:click={handleCreateEmptyTable} icon={{ data: faTable }}>
-            Empty Table
+            New Empty Table
           </MenuItem>
+          <MenuItem
+            on:click={redirectToNewQueryRoute}
+            icon={{ data: faFileContract }}>New Query</MenuItem
+          >
           <MenuItem on:click={beginDataImport} icon={{ data: faUpload }}>
-            Import Data
+            Import Data into New Table
           </MenuItem>
         </DropdownMenu>
       </div>

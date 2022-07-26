@@ -224,20 +224,14 @@ function getItemsInfo(props: Props): ItemInfo {
   const { itemKey, itemCount, isScrolling } = props;
   const [startIndex, stopIndex] = getRangeToRender(props);
   const items: Item[] = [];
-  if (startIndex < stopIndex) {
-    items.length = stopIndex - startIndex + 1;
-  }
-
   if (itemCount > 0) {
-    let i = 0;
     for (let index = startIndex; index <= stopIndex; index += 1) {
-      items[i] = {
+      items.push({
         key: itemKey(index),
         index,
         isScrolling,
         style: getItemStyle(props, index),
-      };
-      i += 1;
+      });
     }
   }
   return {

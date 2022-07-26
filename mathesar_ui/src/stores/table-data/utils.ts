@@ -13,6 +13,9 @@ import type { Row } from './records';
 export type CellKey = string;
 export type RowKey = string;
 
+export const ID_ROW_CONTROL_COLUMN = -1;
+export const ID_ADD_NEW_COLUMN = -2;
+
 const CELL_KEY_SEPARATOR = '::';
 
 export function getCellKey(rowKey: RowKey, columnId: string | number): CellKey {

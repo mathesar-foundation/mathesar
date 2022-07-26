@@ -20,11 +20,11 @@ import type {
 } from '@mathesar/api/tables/records';
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
+import type Pagination from '@mathesar/utils/Pagination';
 import type { Meta } from './meta';
 import type { RowKey } from './utils';
 import { validateRow, getCellKey } from './utils';
 import type { ColumnsDataStore } from './columns';
-import type { Pagination } from './pagination';
 import type { Sorting } from './sorting';
 import type { Grouping as GroupingTODORename } from './grouping';
 import type { Filtering } from './filtering';
