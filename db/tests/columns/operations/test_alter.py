@@ -116,7 +116,7 @@ def test_rename_column_foreign_keys(engine_with_schema):
     columns_list = [Column("Filler 1", INTEGER), Column("Filler 2", INTEGER)]
     create_mathesar_table(table_name, schema, columns_list, engine)
     extracted, remainder, fk_name = extract_columns_from_table(
-        table_name, ["Filler 1"], "Extracted", "Remainder", schema, engine
+        table_name, ["Filler 1"], "Extracted", schema, engine
     )
     new_fk_name = "new_" + fk_name
     remainder = _rename_column_and_assert(remainder, fk_name, new_fk_name, engine)

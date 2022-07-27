@@ -275,7 +275,7 @@ def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
 
 
 def test_update_table_column_types_skips_fkey_columns(extracted_remainder_roster, roster_fkey_col):
-    _, remainder, _, engine, schema = extracted_remainder_roster
+    _, remainder, engine, schema = extracted_remainder_roster
     with patch.object(infer_operations, "infer_column_type") as mock_infer:
         infer_operations.update_table_column_types(
             schema,
