@@ -375,12 +375,12 @@ class Table(DatabaseObject, Relation):
         ]
 
     def move_columns(self, columns_to_move, target_table):
-        columns_name_to_move = [column.name for column in columns_to_move]
+        columns_attnum_to_move = [column.attnum for column in columns_to_move]
         target_table_oid = target_table.oid
         return move_columns_between_related_tables(
             self.oid,
             target_table_oid,
-            columns_name_to_move,
+            columns_attnum_to_move,
             self.schema.name,
             self._sa_engine
         )
@@ -390,10 +390,10 @@ class Table(DatabaseObject, Relation):
             columns_to_extract,
             extracted_table_name,
     ):
-        columns_name_to_extract = [column.name for column in columns_to_extract]
+        columns_attnum_to_extract = [column.attnum for column in columns_to_extract]
         return extract_columns_from_table(
-            self.name,
-            columns_name_to_extract,
+            self.oid,
+            columns_attnum_to_extract,
             extracted_table_name,
             self.schema.name,
             self._sa_engine

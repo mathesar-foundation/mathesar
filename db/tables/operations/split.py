@@ -3,10 +3,10 @@ from sqlalchemy import exists, func, literal, select
 from db import constants
 from db.columns.base import MathesarColumn
 from db.columns.operations.alter import batch_alter_table_drop_columns
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import get_columns_name_from_attnums
 from db.links.operations.create import create_foreign_key_link
 from db.tables.operations.create import create_mathesar_table
-from db.tables.operations.select import get_oid_from_table, reflect_table
+from db.tables.operations.select import get_oid_from_table, reflect_table, reflect_table_from_oid
 
 
 def _split_column_list(columns_, extracted_column_names):
@@ -68,12 +68,14 @@ def _create_split_insert_stmt(old_table, extracted_table, extracted_columns, rem
     return split_ins
 
 
-def extract_columns_from_table(old_table_name, extracted_column_names, extracted_table_name, schema, engine,):
+def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracted_table_name, schema, engine,):
+    old_table_name = reflect_table_from_oid(old_table_oid, engine).name
     old_table = reflect_table(old_table_name, schema, engine)
     old_columns = (MathesarColumn.from_column(col) for col in old_table.columns)
     old_non_default_columns = [
         col for col in old_columns if not col.is_default
     ]
+    extracted_column_names = get_columns_name_from_attnums(old_table_oid, extracted_column_attnums, engine)
     extracted_columns, remainder_columns = _split_column_list(
         old_non_default_columns, extracted_column_names,
     )
@@ -93,7 +95,6 @@ def extract_columns_from_table(old_table_name, extracted_column_names, extracted
         )
         conn.execute(split_ins)
         remainder_table_oid = get_oid_from_table(remainder_table_with_fk_column.name, schema, engine)
-        column_attnums = get_columns_attnum_from_names(remainder_table_oid, extracted_column_names, engine, conn)
-        deletion_column_data = [{'attnum': column_attnum} for column_attnum in column_attnums]
+        deletion_column_data = [{'attnum': column_attnum} for column_attnum in extracted_column_attnums]
         batch_alter_table_drop_columns(remainder_table_oid, deletion_column_data, conn, engine)
     return extracted_table, remainder_table_with_fk_column, fk_column_name

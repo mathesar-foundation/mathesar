@@ -2,16 +2,19 @@ from sqlalchemy import MetaData, select
 
 from db import constants
 from db.columns.defaults import DEFAULT_COLUMNS
-from db.tables.operations.select import reflect_table
+from db.columns.operations.select import get_columns_attnum_from_names
+from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
 
 
 def test_extract_columns_from_table_creates_tables(engine_with_roster, roster_table_name, teachers_table_name, roster_extracted_cols):
     engine, schema = engine_with_roster
     teachers = "Teachers"
+    roster_table_oid = get_oid_from_table(roster_table_name, schema, engine)
+    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine)
     extract_columns_from_table(
-        roster_table_name,
-        roster_extracted_cols,
+        roster_table_oid,
+        roster_extracted_col_attnums,
         teachers,
         schema,
         engine,
@@ -77,7 +80,8 @@ def test_extract_columns_extracts_correct_data(engine_with_roster, roster_table_
     # extracted column list is correct
     engine, schema = engine_with_roster
     roster = reflect_table(roster_table_name, schema, engine)
-
+    roster_table_oid = get_oid_from_table(roster_table_name, schema, engine)
+    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine)
     expect_tuple_sel = (
         select([roster.columns[name] for name in roster_extracted_cols])
         .distinct()
@@ -85,8 +89,8 @@ def test_extract_columns_extracts_correct_data(engine_with_roster, roster_table_
     with engine.begin() as conn:
         expect_tuples = conn.execute(expect_tuple_sel).fetchall()
     extract_columns_from_table(
-        roster_table_name,
-        roster_extracted_cols,
+        roster_table_oid,
+        roster_extracted_col_attnums,
         teachers_table_name,
         schema,
         engine,
@@ -108,7 +112,8 @@ def test_extract_columns_leaves_correct_data(engine_with_roster, roster_table_na
     # remainder column list is correct
     engine, schema = engine_with_roster
     roster = reflect_table(roster_table_name, schema, engine)
-
+    roster_table_oid = get_oid_from_table(roster_table_name, schema, engine)
+    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine)
     remainder_column_names = [
         col.name for col in roster.columns
         if col.name not in DEFAULT_COLUMNS
@@ -119,9 +124,10 @@ def test_extract_columns_leaves_correct_data(engine_with_roster, roster_table_na
             [roster.columns[name] for name in remainder_column_names]
         )
         expect_tuples = conn.execute(expect_tuple_sel).fetchall()
+
     extract_columns_from_table(
-        roster_table_name,
-        roster_extracted_cols,
+        roster_table_oid,
+        roster_extracted_col_attnums,
         teachers_table_name,
         schema,
         engine,

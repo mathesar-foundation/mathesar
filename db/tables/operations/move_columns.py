@@ -3,7 +3,7 @@ from sqlalchemy import select
 from db.columns.base import MathesarColumn
 from db.columns.operations.alter import batch_alter_table_drop_columns
 from db.columns.operations.create import bulk_create_mathesar_column
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import get_columns_name_from_attnums
 from db.tables.operations.select import reflect_table, reflect_table_from_oid
 
 
@@ -29,14 +29,14 @@ def _find_table_relationship(table_one, table_two):
     return relationship
 
 
-def _check_columns(relationship, source_table, moving_columns):
+def _check_columns(relationship, moving_columns):
     return (
         relationship is not None
         and all([not c.foreign_keys for c in moving_columns])
     )
 
 
-def _get_column_moving_extraction_args(relationship, target_table, source_table):
+def _get_column_moving_extraction_args(relationship, target_table):
     constraint = relationship['constraint']
     referrer_column = constraint.columns[0]
     referent_column = constraint.elements[0].column
@@ -49,7 +49,13 @@ def _get_column_moving_extraction_args(relationship, target_table, source_table)
     return source_table_reference_column, target_table_reference_column
 
 
-def move_columns_between_related_tables(source_table_oid, target_table_oid, column_names, schema, engine):
+def move_columns_between_related_tables(
+        source_table_oid,
+        target_table_oid,
+        column_attnums_to_move,
+        schema,
+        engine
+):
     source_table_name = reflect_table_from_oid(source_table_oid, engine).name
     target_table_name = reflect_table_from_oid(target_table_oid, engine).name
     source_table = reflect_table(source_table_name, schema, engine)
@@ -57,12 +63,12 @@ def move_columns_between_related_tables(source_table_oid, target_table_oid, colu
         target_table_name, schema, engine, metadata=source_table.metadata
     )
     relationship = _find_table_relationship(source_table, target_table)
-    moving_columns = [source_table.columns[n] for n in column_names]
-    assert _check_columns(relationship, source_table, moving_columns)
+    column_names_to_move = get_columns_name_from_attnums(source_table_oid, column_attnums_to_move, engine)
+    moving_columns = [source_table.columns[n] for n in column_names_to_move]
+    assert _check_columns(relationship, moving_columns)
     source_table_reference_column, target_table_reference_column = _get_column_moving_extraction_args(
         relationship,
-        target_table,
-        source_table
+        target_table
     )
     extracted_columns = [MathesarColumn.from_column(col) for col in moving_columns]
     bulk_create_mathesar_column(engine, target_table_oid, extracted_columns, schema)
@@ -78,8 +84,7 @@ def move_columns_between_related_tables(source_table_oid, target_table_oid, colu
     )
     with engine.begin() as conn:
         conn.execute(extracted_columns_update_stmt)
-        extracted_column_attnums = get_columns_attnum_from_names(source_table_oid, column_names, engine, conn)
-        deletion_column_data = [{'attnum': column_attnum} for column_attnum in extracted_column_attnums]
+        deletion_column_data = [{'attnum': column_attnum} for column_attnum in column_attnums_to_move]
         batch_alter_table_drop_columns(source_table_oid, deletion_column_data, conn, engine)
     source_table = reflect_table(
         source_table_name, schema, engine, metadata=source_table.metadata
