@@ -3,9 +3,9 @@ import {
   Grouping,
   Sorting,
   Filtering,
-  Pagination,
   SortDirection,
 } from '@mathesar/stores/table-data';
+import Pagination from '@mathesar/utils/Pagination';
 import type { SavableTabData } from '../tabDataSaver';
 import {
   serializeSavableTabData,

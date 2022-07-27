@@ -16,14 +16,6 @@ export interface SchemaEntry extends DBObjectEntry {
   has_dependencies: boolean;
 }
 
-export interface TableEntry extends DBObjectEntry {
-  schema: SchemaEntry['id'];
-  import_verified: boolean;
-  data_files?: number[];
-  // TODO: Verify if order is stored in table model or column model
-  columns: { name: string }[];
-}
-
 export interface ViewEntry extends DBObjectEntry {
   // TODO: Temporary, update when view endpoints are ready.
   columns: { name: string }[];

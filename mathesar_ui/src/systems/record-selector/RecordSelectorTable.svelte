@@ -6,11 +6,10 @@
     setTabularDataStoreInContext,
     TabularData,
   } from '@mathesar/stores/table-data/tabularData';
-  // TODO: Remove route dependency in systems
-  import ColumnResizer from '@mathesar/routes/schema-home/routes/datascape/table-view/header/header-cell/ColumnResizer.svelte';
   import DynamicInput from '@mathesar/components/cell/DynamicInput.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
+  import ColumnResizer from './ColumnResizer.svelte';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
 

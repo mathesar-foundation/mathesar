@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/AppTypes';
+  import type { TableEntry } from '@mathesar/api/tables/tableList';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import SelectTable from './SelectTable.svelte';
 
@@ -9,4 +9,4 @@
   $: tables = [...$tablesDataStore.data.values()];
 </script>
 
-<SelectTable {tables} bind:table {prependBlank} />
+<SelectTable {tables} bind:table {prependBlank} on:change />

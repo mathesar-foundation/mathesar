@@ -1,20 +1,17 @@
 <script lang="ts">
+  import { Route } from 'tinro';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
-  import { constructTabularTabLink } from '@mathesar/stores/tabs/tabDataSaver';
   import { getTabsForSchema } from '@mathesar/stores/tabs';
-  import { TabularType } from '@mathesar/stores/table-data';
-  import type { TableEntry } from '@mathesar/AppTypes';
 
   import DataScape from './routes/datascape/Datascape.svelte';
-  import EmptyState from './EmptyState.svelte';
-  import LeftPane from './LeftPane.svelte';
+  import DataExplorer from './routes/data-explorer/DataExplorer.svelte';
 
   export let database: string;
   export let schemaId: number;
 
   $: tabList = getTabsForSchema(database, schemaId);
-  $: ({ tabs, activeTab } = tabList);
+  $: ({ activeTab } = tabList);
 
   function changeCurrentSchema(_database: string, _schemaId: number) {
     if ($currentDBName !== _database) {
@@ -27,44 +24,29 @@
 
   // TODO: Move this entire logic to data layer without involving view layer
   $: changeCurrentSchema(database, schemaId);
-
-  function getLeftPaneLink(entry: TableEntry) {
-    return constructTabularTabLink(
-      database,
-      schemaId,
-      TabularType.Table,
-      entry.id,
-    );
-  }
 </script>
 
 <svelte:head>
   <title>Mathesar - {$activeTab?.label || 'Home'}</title>
 </svelte:head>
 
-<LeftPane
-  getLink={getLeftPaneLink}
-  {database}
-  {schemaId}
-  activeTab={$activeTab}
-/>
-
 <section class="workarea">
-  {#if $tabs?.length > 0}
+  <!-- TODO: Discuss if we should keep all route information in one place. Eg., only in App.svelte -->
+  <Route path="/">
     <DataScape {database} {schemaId} />
-  {:else}
-    <EmptyState />
-  {/if}
+  </Route>
+  <Route path="/queries/*" firstmatch>
+    <DataExplorer {database} {schemaId} />
+  </Route>
 </section>
 
 <style global lang="scss">
   section.workarea {
     position: absolute;
     top: 0;
-    left: var(--side-bar-width);
+    left: 0;
     right: 0;
     bottom: 0;
     overflow: auto;
-    background: #f6f7fdaa;
   }
 </style>

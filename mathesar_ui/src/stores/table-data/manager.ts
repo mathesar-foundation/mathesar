@@ -1,5 +1,6 @@
 import { get } from 'svelte/store';
-import type { DBObjectEntry, TableEntry, ViewEntry } from '@mathesar/AppTypes';
+import type { DBObjectEntry, ViewEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/tables/tableList';
 import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
 import type { TabularDataProps } from './tabularData';
 import { TabularData } from './tabularData';

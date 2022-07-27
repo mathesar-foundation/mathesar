@@ -7,9 +7,7 @@
     WritableMap,
   } from '@mathesar-component-library';
   import {
-    getCellStyle,
     isCellActive,
-    ROW_CONTROL_COLUMN_WIDTH,
     scrollBasedOnActiveCell,
   } from '@mathesar/stores/table-data';
   import type {
@@ -22,6 +20,7 @@
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
+  import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import CellErrors from './CellErrors.svelte';
   import CellBackground from './CellBackground.svelte';
@@ -41,7 +40,7 @@
 
   $: recordsDataState = recordsData.state;
   $: ({ column } = processedColumn);
-  $: ({ activeCell, columnPlacements } = display);
+  $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
@@ -89,63 +88,65 @@
   }
 </script>
 
-<div
-  class="cell editable-cell"
-  class:error={hasError}
-  class:modified={modificationStatus?.state === 'success'}
-  class:is-active={isActive}
-  class:is-processing={isProcessing}
-  class:is-pk={column.primary_key}
-  style={getCellStyle($columnPlacements, column.id, ROW_CONTROL_COLUMN_WIDTH)}
->
-  <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
-  <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
-  {#if !(isEditable && isActive)}
-    <!--
+<SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
+  <div
+    class="cell editable-cell"
+    class:error={hasError}
+    class:modified={modificationStatus?.state === 'success'}
+    class:is-active={isActive}
+    class:is-processing={isProcessing}
+    class:is-pk={column.primary_key}
+    {...htmlAttributes}
+    {style}
+  >
+    <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
+    <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
+    {#if !(isEditable && isActive)}
+      <!--
       We hide these backgrounds when the cell is editable and active because a
       white background better communicates that the user can edit the active
       cell.
     -->
-    <RowCellBackgrounds
-      isSelected={rowIsSelected}
-      isProcessing={rowIsProcessing}
-      hasErrors={rowHasErrors}
-    />
-  {/if}
+      <RowCellBackgrounds
+        isSelected={rowIsSelected}
+        isProcessing={rowIsProcessing}
+        hasErrors={rowHasErrors}
+      />
+    {/if}
 
-  <Cell
-    {processedColumn}
-    {isActive}
-    {value}
-    showAsSkeleton={$recordsDataState === States.Loading}
-    disabled={!isEditable}
-    on:movementKeyDown={moveThroughCells}
-    on:activate={() => display.selectCell(row, column)}
-    on:update={valueUpdated}
-  />
-  <ContextMenu>
-    <MenuItem
-      icon={{ data: faBackspace }}
-      disabled={!canSetNull}
-      on:click={() => setValue(null)}
-    >
-      Set to <Null />
-    </MenuItem>
-  </ContextMenu>
-  {#if errors.length}
-    <CellErrors {errors} forceShowErrors={isActive} />
-  {/if}
-</div>
+    <Cell
+      {processedColumn}
+      {isActive}
+      {value}
+      showAsSkeleton={$recordsDataState === States.Loading}
+      disabled={!isEditable}
+      on:movementKeyDown={moveThroughCells}
+      on:activate={() => display.selectCell(row, column)}
+      on:update={valueUpdated}
+    />
+    <ContextMenu>
+      <MenuItem
+        icon={{ data: faBackspace }}
+        disabled={!canSetNull}
+        on:click={() => setValue(null)}
+      >
+        Set to <Null />
+      </MenuItem>
+    </ContextMenu>
+    {#if errors.length}
+      <CellErrors {errors} forceShowErrors={isActive} />
+    {/if}
+  </div>
+</SheetCell>
 
 <style lang="scss">
   .editable-cell.cell {
     user-select: none;
-    position: relative;
     background: var(--cell-bg-color-base);
 
     &.is-active {
       z-index: 5;
-      border: none;
+      border-color: transparent;
       min-height: 100%;
       height: auto !important;
     }
