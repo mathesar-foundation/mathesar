@@ -9,7 +9,7 @@
     Spinner,
     TextInput,
   } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/AppTypes';
+  import type { TableEntry } from '@mathesar/api/tables/tableList';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -20,7 +20,7 @@
     getTabularDataStoreFromContext,
     TabularType,
   } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import { tables as tablesStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { States } from '@mathesar/utils/api';

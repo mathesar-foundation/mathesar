@@ -140,6 +140,15 @@ def test_GB_validate_passes_valid_kwargs_prefix():
     gb.validate()
 
 
+def test_GB_validate_passes_valid_kwargs_extract_field():
+    gb = group.GroupBy(
+        columns=['col1'],
+        mode=group.GroupMode.EXTRACT.value,
+        extract_field='year'
+    )
+    gb.validate()
+
+
 def test_GB_validate_fails_invalid_mode():
     with pytest.raises(records_exceptions.InvalidGroupType):
         group.GroupBy(
@@ -188,6 +197,23 @@ def test_GB_validate_fails_multi_cols_prefix():
             columns=['col1', 'col2'],
             mode=group.GroupMode.PREFIX.value,
             prefix_length=3
+        )
+
+
+def test_GB_validate_fails_missing_extract_field():
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        group.GroupBy(
+            columns=['col1'],
+            mode=group.GroupMode.EXTRACT.value,
+        )
+
+
+def test_GB_validate_fails_multi_cols_extract():
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        group.GroupBy(
+            columns=['col1', 'col2'],
+            mode=group.GroupMode.EXTRACT.value,
+            extract_field='year'
         )
 
 
@@ -284,7 +310,7 @@ basic_group_modes = [
 
 
 @pytest.mark.parametrize('group_mode', basic_group_modes)
-def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, group_mode):
+def test_get_group_augmented_records_pg_query_metadata_fields(roster_table_obj, group_mode):
     roster, engine = roster_table_obj
     group_by = group.GroupBy(
         ['Student Number', 'Student Name'],
@@ -296,9 +322,9 @@ def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, gro
             ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'Zachary'),
         ]
     )
-    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -308,16 +334,16 @@ def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, gro
         )
 
 
-def test_smoke_get_group_augmented_records_query_prefix(roster_table_obj):
+def test_smoke_get_group_augmented_records_pg_query_prefix(roster_table_obj):
     roster, engine = roster_table_obj
     group_by = group.GroupBy(
         ['Student Number'],
         mode=group.GroupMode.PREFIX.value,
         prefix_length=1,
     )
-    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -327,16 +353,16 @@ def test_smoke_get_group_augmented_records_query_prefix(roster_table_obj):
         )
 
 
-def test_smoke_get_group_augmented_records_query_email_preproc(roster_table_obj):
+def test_smoke_get_group_augmented_records_pg_query_email_preproc(roster_table_obj):
     roster, engine = roster_table_obj
     group_by = group.GroupBy(
         ['Student Email'],
         mode=group.GroupMode.DISTINCT.value,
         preproc=['extract_email_domain']
     )
-    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -347,16 +373,16 @@ def test_smoke_get_group_augmented_records_query_email_preproc(roster_table_obj)
 
 
 @pytest.mark.parametrize('preproc', ['extract_uri_authority', 'extract_uri_scheme'])
-def test_smoke_get_group_augmented_records_query_uris_preproc(uris_table_obj, preproc):
+def test_smoke_get_group_augmented_records_pg_query_uris_preproc(uris_table_obj, preproc):
     roster, engine = uris_table_obj
     group_by = group.GroupBy(
         ['uri'],
         mode=group.GroupMode.DISTINCT.value,
         preproc=[preproc]
     )
-    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -366,6 +392,77 @@ def test_smoke_get_group_augmented_records_query_uris_preproc(uris_table_obj, pr
         )
 
 
+def test_smoke_get_group_augmented_records_pg_query_extract(times_table_obj):
+    roster, engine = times_table_obj
+    group_by = group.GroupBy(
+        ['date'],
+        mode=group.GroupMode.EXTRACT.value,
+        extract_field='month',
+    )
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_pg_query).fetchall()
+    for row in res:
+        assert all(
+            [
+                metadata_field.value in row[group.MATHESAR_GROUP_METADATA]
+                for metadata_field in group.GroupMetadataField
+            ]
+        )
+
+
+datetime_trunc_tests_def = [
+    ('date', 'truncate_to_year', 3),
+    ('timestamp', 'truncate_to_year', 3),
+    ('date', 'truncate_to_month', 4),
+    ('timestamp', 'truncate_to_month', 4),
+    ('date', 'truncate_to_day', 6),
+    ('timestamp', 'truncate_to_day', 6),
+]
+
+
+@pytest.mark.parametrize('col,preproc,num', datetime_trunc_tests_def)
+def test_get_group_augmented_records_pg_query_datetimes_preproc(
+        times_table_obj, col, preproc, num
+):
+    roster, engine = times_table_obj
+    group_by = group.GroupBy(
+        [col],
+        mode=group.GroupMode.DISTINCT.value,
+        preproc=[preproc]
+    )
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_pg_query).fetchall()
+
+    assert max([_group_id(row) for row in res]) == num
+
+
+datetime_extract_tests_def = [
+    ('date', 'year', 3),
+    ('timestamp', 'year', 3),
+    ('date', 'month', 2),
+    ('timestamp', 'month', 2),
+    ('date', 'day', 3),
+    ('timestamp', 'day', 3),
+]
+
+
+@pytest.mark.parametrize('col,field,num', datetime_extract_tests_def)
+def test_get_group_augmented_records_pg_query_datetimes_extract(
+        times_table_obj, col, field, num
+):
+    roster, engine = times_table_obj
+    group_by = group.GroupBy(
+        [col], mode=group.GroupMode.EXTRACT.value, extract_field=field
+    )
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_pg_query).fetchall()
+
+    assert max([_group_id(row) for row in res]) == num
+
+
 single_col_number_modes = [
     group.GroupMode.MAGNITUDE.value,
     group.GroupMode.COUNT_BY.value,
@@ -373,7 +470,7 @@ single_col_number_modes = [
 
 
 @pytest.mark.parametrize('mode', single_col_number_modes)
-def test_smoke_get_group_augmented_records_query_magnitude(magnitude_table_obj, mode):
+def test_smoke_get_group_augmented_records_pg_query_magnitude(magnitude_table_obj, mode):
     magnitude, engine = magnitude_table_obj
     group_by = group.GroupBy(
         ['big_num'],
@@ -382,9 +479,9 @@ def test_smoke_get_group_augmented_records_query_magnitude(magnitude_table_obj, 
         global_min=0,
         global_max=1000
     )
-    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
     for row in res:
         assert all(
             [
@@ -468,9 +565,9 @@ def test_get_distinct_group_select_correct_num_group_id(
         roster_table_obj, group_by, num
 ):
     roster, engine = roster_table_obj
-    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(roster, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     assert max([_group_id(row) for row in res]) == num
 
@@ -493,9 +590,9 @@ def test_group_select_correct_num_group_id_magnitude(
         [col_name],
         mode=group.GroupMode.MAGNITUDE.value,
     )
-    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     assert max([_group_id(row) for row in res]) == num
 
@@ -523,9 +620,9 @@ def test_group_select_correct_num_group_id_count_by(
         global_min=global_min,
         global_max=global_max,
     )
-    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     assert max([_group_id(row) for row in res]) == num
 
@@ -537,9 +634,9 @@ def test_magnitude_group_select_bounds_chain(magnitude_table_obj, col_name):
         [col_name],
         mode=group.GroupMode.MAGNITUDE.value,
     )
-    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     for i in range(len(res) - 1):
         assert (
@@ -558,9 +655,9 @@ def test_magnitude_group_select_bounds_pretty(magnitude_table_obj, col_name):
         [col_name],
         mode=group.GroupMode.MAGNITUDE.value,
     )
-    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     for row in res:
         assert (
@@ -576,9 +673,9 @@ def test_magnitude_group_select_inside_bounds(magnitude_table_obj, col_name):
         [col_name],
         mode=group.GroupMode.MAGNITUDE.value,
     )
-    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    augmented_pg_query = group.get_group_augmented_records_pg_query(magnitude, group_by)
     with engine.begin() as conn:
-        res = conn.execute(augmented_query).fetchall()
+        res = conn.execute(augmented_pg_query).fetchall()
 
     for row in res:
         assert (

@@ -2,9 +2,10 @@ import pytest
 
 
 @pytest.fixture
-def post_minimal_query(client, create_patents_table, get_uid):
+def post_minimal_query(_post_query, create_patents_table, get_uid):
     base_table = create_patents_table(table_name=get_uid())
     request_data = {
+        "name": get_uid(),
         "base_table": base_table.id,
         # TODO use actual columns
         "initial_columns": [
@@ -17,9 +18,16 @@ def post_minimal_query(client, create_patents_table, get_uid):
             },
         ],
     }
-    response = client.post('/api/db/v0/queries/', data=request_data)
-    assert response.status_code == 201
-    return request_data, response
+    return _post_query(request_data)
+
+
+@pytest.fixture
+def _post_query(client):
+    def _f(request_data):
+        response = client.post('/api/db/v0/queries/', data=request_data)
+        assert response.status_code == 201
+        return request_data, response
+    return _f
 
 
 @pytest.mark.parametrize(
@@ -79,6 +87,28 @@ def test_list(post_minimal_query, client):
         request_data,
     ]
     _deep_equality_assert(expected=expected, actual=actual)
+
+
+def test_filter(post_minimal_query, client):
+    request_data, response = post_minimal_query
+
+    # check that filtering on the right schema_id works
+    query = response.json()
+    schema_id = query['schema']  # get schema_id from output_only field
+    response = client.get(f'/api/db/v0/queries/?schema={schema_id}')
+    assert response.status_code == 200
+    expected = [
+        request_data,
+    ]
+    actual = response.json()['results']
+    _deep_equality_assert(expected=expected, actual=actual)
+
+    # check that filtering on the wrong schema_id returns nothing
+    wrong_schema_id = schema_id + 1
+    response = client.get(f'/api/db/v0/queries/?schema={wrong_schema_id}')
+    response_json = response.json()
+    assert response.status_code == 200
+    assert not response_json['results']
 
 
 def test_get(post_minimal_query, client):
