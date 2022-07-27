@@ -12,10 +12,10 @@
   import { Icon, Button, Checkbox } from '@mathesar-component-library';
   import type {
     Meta,
-    Column,
     ColumnsDataStore,
     ConstraintsDataStore,
   } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import { toast } from '@mathesar/stores/toast';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { SortDirection } from '@mathesar/stores/table-data';

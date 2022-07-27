@@ -1,7 +1,4 @@
-export default class ImmutableMap<
-  Key extends string | number | boolean | null,
-  Value,
-> {
+export default class ImmutableMap<Key, Value> {
   private map: Map<Key, Value>;
 
   constructor(i: Iterable<[Key, Value]> = []) {

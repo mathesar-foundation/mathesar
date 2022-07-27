@@ -4,7 +4,7 @@ from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import DropConstraint
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
-from db.records.operations.select import get_records
+from db.records.operations.select import get_records, get_records_with_default_order
 
 
 def test_get_records_gets_ordered_records_str_col_name(roster_table_obj):
@@ -94,7 +94,7 @@ def check_multi_field_ordered(record_list, field_dir_pairs):
 def test_get_records_default_order_single_primary_key(roster_table_obj):
     roster, engine = roster_table_obj
     primary_column = roster.primary_key.columns[0].name
-    record_list = get_records(roster, engine)
+    record_list = get_records_with_default_order(roster, engine)
     check_single_field_ordered(record_list, primary_column, 'asc')
 
 

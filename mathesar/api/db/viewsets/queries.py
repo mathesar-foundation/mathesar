@@ -16,22 +16,28 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
     filter_backends = (filters.DjangoFilterBackend,)
 
     def get_queryset(self):
-        return UIQuery.objects.all().order_by('-created_at')
-
-    @action(methods=['get'], detail=True)
-    def columns(self, request, pk=None):
-        query = self.get_object()
-        output_col_desc = query.output_columns_described
-        return Response(output_col_desc)
+        queryset = UIQuery.objects.all()
+        schema_id = self.request.query_params.get('schema')
+        if schema_id:
+            queryset = queryset.filter(base_table__schema=schema_id)
+        return queryset.order_by('-created_at')
 
     @action(methods=['get'], detail=True)
     def records(self, request, pk=None):
         paginator = TableLimitOffsetGroupPagination()
         query = self.get_object()
-        records = paginator.paginate_queryset(
-            queryset=self.get_queryset(),
-            request=request,
-            table=query,
-            column_name_id_bidirectional_map=dict(),
-        )
-        return paginator.get_paginated_response(records)
+        if query.not_partial:
+            records = paginator.paginate_queryset(
+                queryset=self.get_queryset(),
+                request=request,
+                table=query,
+                column_name_id_bidirectional_map=dict(),
+            )
+            return paginator.get_paginated_response(records)
+
+    @action(methods=['get'], detail=True)
+    def columns(self, request, pk=None):
+        query = self.get_object()
+        if query.not_partial:
+            output_col_desc = query.output_columns_described
+            return Response(output_col_desc)

@@ -305,3 +305,42 @@ class ToLowercase(DBFunction):
     @staticmethod
     def to_sa_expression(string):
         return func.lower(string)
+
+
+class CurrentDate(DBFunction):
+    id = 'current_date'
+    name = 'current date'
+    hints = tuple([
+        hints.returns(hints.date),
+        hints.parameter_count(0),
+    ])
+
+    @staticmethod
+    def to_sa_expression():
+        return func.current_date()
+
+
+class CurrentTime(DBFunction):
+    id = 'current_time'
+    name = 'current time'
+    hints = tuple([
+        hints.returns(hints.time),
+        hints.parameter_count(0),
+    ])
+
+    @staticmethod
+    def to_sa_expression():
+        return func.current_time()
+
+
+class CurrentDateTime(DBFunction):
+    id = 'current_datetime'
+    name = 'current datetime'
+    hints = tuple([
+        hints.returns(hints.date, hints.time),
+        hints.parameter_count(0),
+    ])
+
+    @staticmethod
+    def to_sa_expression():
+        return func.current_timestamp()

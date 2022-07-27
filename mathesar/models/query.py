@@ -11,13 +11,17 @@ class UIQuery(BaseModel, Relation):
     name = models.CharField(
         max_length=128,
         unique=True,
+    )
+
+    base_table = models.ForeignKey(
+        'Table', on_delete=models.CASCADE,
+    )
+
+    # sequence of dicts
+    initial_columns = models.JSONField(
         null=True,
         blank=True,
     )
-    base_table = models.ForeignKey('Table', on_delete=models.CASCADE)
-
-    # sequence of dicts
-    initial_columns = models.JSONField()
 
     # sequence of dicts
     transformations = models.JSONField(
@@ -32,6 +36,13 @@ class UIQuery(BaseModel, Relation):
     )
 
     __table_cache = {}
+
+    @property
+    def not_partial(self):
+        return (
+            (self.base_table is not None)
+            and (self.initial_columns is not None)
+        )
 
     # TODO add engine from base_table.schema._sa_engine
     def get_records(self, **kwargs):
@@ -88,7 +99,8 @@ class UIQuery(BaseModel, Relation):
 
     @cached_property
     def _db_transformations(self):
-        return
+        """No processing necessary."""
+        return self.transformations
 
     def _get_display_name_for_sa_col(self, sa_col):
         return self._alias_to_display_name.get(sa_col.name)

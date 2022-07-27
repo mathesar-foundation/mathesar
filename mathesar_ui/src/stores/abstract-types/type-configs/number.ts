@@ -2,10 +2,10 @@ import { faHashtag } from '@fortawesome/free-solid-svg-icons';
 import type {
   NumberDisplayOptions,
   NumberFormat,
+  Column,
 } from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/AppTypes';
-import type { Column } from '@mathesar/stores/table-data/types';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,

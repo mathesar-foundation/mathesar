@@ -1,6 +1,6 @@
 export {
   getAbstractTypeForDbType,
-  getAbstractTypesForDbTypeList,
+  getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
 } from './abstractTypeCategories';
 export { currentDbAbstractTypes, refetchTypesForDb } from './store';
 export {

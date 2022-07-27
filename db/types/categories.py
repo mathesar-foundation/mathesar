@@ -81,3 +81,10 @@ COMPARABLE_TYPES = frozenset({
     *MONEY_TYPES,
     *TIME_RELATED_TYPES,
 })
+
+JSON_TYPES = frozenset({
+    PostgresType.JSON,
+    PostgresType.JSONB,
+    MathesarCustomType.MATHESAR_JSON_OBJECT,
+    MathesarCustomType.MATHESAR_JSON_ARRAY
+})

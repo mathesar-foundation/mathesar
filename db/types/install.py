@@ -1,4 +1,4 @@
-from db.types.custom import email, money, multicurrency, uri
+from db.types.custom import email, money, multicurrency, uri, json_array, json_object
 from db.types.base import SCHEMA
 from db.schemas.operations.create import create_schema
 from db.schemas.operations.drop import drop_schema
@@ -16,6 +16,8 @@ def install_mathesar_on_database(engine):
     multicurrency.install(engine)
     uri.install(engine)
     uri.install_tld_lookup_table(engine)
+    json_array.install(engine)
+    json_object.install(engine)
     install_all_casts(engine)
 
 

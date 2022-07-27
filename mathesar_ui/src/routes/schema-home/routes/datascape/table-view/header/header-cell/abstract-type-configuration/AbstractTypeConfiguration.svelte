@@ -9,9 +9,10 @@
   import { toast } from '@mathesar/stores/toast';
 
   import type { DbType } from '@mathesar/AppTypes';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
 
   import AbstractTypeOptions from './AbstractTypeOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
@@ -21,8 +22,10 @@
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);
 
-  export let column: Column;
-  export let abstractTypeOfColumn: AbstractType | undefined;
+  export let processedColumn: ProcessedColumn;
+  export let abstractType: AbstractType | undefined;
+
+  $: ({ column } = processedColumn);
 
   let selectedAbstractType: AbstractType | undefined;
   let selectedDbType: DbType | undefined;
@@ -38,14 +41,14 @@
     validationContext.validate();
   });
 
-  function resetAbstractType() {
-    selectedDbType = column.type;
-    typeOptions = { ...(column.type_options ?? {}) };
-    displayOptions = { ...(column.display_options ?? {}) };
-    defaultValue = column.default ? { ...column.default } : null;
-    selectedAbstractType = abstractTypeOfColumn;
+  function resetAbstractType(_column: Column) {
+    selectedAbstractType = abstractType;
+    selectedDbType = _column.type;
+    typeOptions = { ...(_column.type_options ?? {}) };
+    displayOptions = { ...(_column.display_options ?? {}) };
+    defaultValue = _column.default ? { ..._column.default } : null;
   }
-  resetAbstractType();
+  $: resetAbstractType(column);
 
   function clearTypeRelatedOptions() {
     typeOptions = {};
@@ -53,23 +56,23 @@
     defaultValue = null;
   }
 
-  function selectAbstractType(abstractType: AbstractType) {
-    if (selectedAbstractType !== abstractType) {
-      if (abstractType.identifier === abstractTypeOfColumn?.identifier) {
-        resetAbstractType();
-      } else if (abstractType.defaultDbType) {
-        selectedDbType = abstractType.defaultDbType;
+  function selectAbstractType(newAbstractType: AbstractType) {
+    if (selectedAbstractType !== newAbstractType) {
+      if (newAbstractType.identifier === abstractType?.identifier) {
+        resetAbstractType(column);
+      } else if (newAbstractType.defaultDbType) {
+        selectedDbType = newAbstractType.defaultDbType;
         clearTypeRelatedOptions();
-      } else if (abstractType.dbTypes.size > 0) {
-        [selectedDbType] = abstractType.dbTypes;
+      } else if (newAbstractType.dbTypes.size > 0) {
+        [selectedDbType] = newAbstractType.dbTypes;
         clearTypeRelatedOptions();
       }
-      selectedAbstractType = abstractType;
+      selectedAbstractType = newAbstractType;
     }
   }
 
   function close() {
-    resetAbstractType();
+    resetAbstractType(column);
     typeChangeState = States.Done;
     dispatch('close');
   }
@@ -114,7 +117,7 @@
         bind:typeOptions
         bind:displayOptions
         bind:defaultValue
-        {column}
+        {processedColumn}
       />
     {/key}
   {/if}
