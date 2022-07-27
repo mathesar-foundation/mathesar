@@ -72,6 +72,15 @@ def create_column(engine, table_oid, column_data):
     )
 
 
+def bulk_create_mathesar_column(engine, table_oid, columns, schema):
+    table = reflect_table_from_oid(table_oid, engine)
+    with engine.begin() as conn:
+        ctx = MigrationContext.configure(conn)
+        op = Operations(ctx)
+        for column in columns:
+            op.add_column(table.name, column, schema=schema)
+
+
 def gen_col_name(table):
     base_name = constants.COLUMN_NAME_TEMPLATE
     col_num = len(table.c)
