@@ -5,7 +5,7 @@ from db.tables.operations.select import get_oid_from_table
 
 
 def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster, roster_extracted_cols):
-    extracted, remainder, _, engine, schema = extracted_remainder_roster
+    extracted, remainder, engine, schema = extracted_remainder_roster
     moving_col = roster_extracted_cols[0]
     extracted_cols = [col.name for col in extracted.columns]
     remainder_cols = [col.name for col in remainder.columns]
@@ -35,7 +35,7 @@ def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster, r
 
 
 def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
-    extracted, remainder, _, engine, schema = extracted_remainder_roster
+    extracted, remainder, engine, schema = extracted_remainder_roster
     extracted_cols = [col.name for col in extracted.columns]
     remainder_cols = [col.name for col in remainder.columns]
     moving_col = "Grade"
