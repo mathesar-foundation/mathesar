@@ -20,6 +20,7 @@ FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 MAGNITUDE_SQL = os.path.join(RESOURCES, "magnitude_testing_create.sql")
 JSON_SQL = os.path.join(RESOURCES, "json_sort.sql")
 
+
 @pytest.fixture
 def engine_with_academics(engine_with_schema):
     engine, schema = engine_with_schema
@@ -88,6 +89,7 @@ def engine_with_json(engine_with_schema):
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
     yield engine, schema
+
 
 @pytest.fixture
 def engine_with_booleans(engine_with_schema):

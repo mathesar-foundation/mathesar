@@ -25,7 +25,10 @@ def test_json_sort_array(json_table_obj):
     roster, engine = json_table_obj
     order_list = [{"field": "json_array", "direction": "asc"}]
     record_list = get_records(roster, engine, order_by=order_list)
-    assert record_list[2][0] == 2
+    assert record_list[0][0] == 1 and record_list[1][0] == 4 and record_list[2][0] == 12 and record_list[3][0] == 14 \
+        and record_list[4][0] == 13 and record_list[5][0] == 2 and record_list[6][0] == 6 and record_list[7][0] == 8 \
+            and record_list[8][0] == 9 and record_list[9][0] == 7 and record_list[10][0] == 10 and record_list[11][0] == 11 \
+            and record_list[12][0] == 5 and record_list[13][0] == 3
 
 
 def test_get_records_gets_ordered_records_str_col_obj(roster_table_obj):
