@@ -34,8 +34,6 @@
    */
   export let options: DefinedProps['options'];
 
-  export let prependBlank: DefinedProps['prependBlank'] = false;
-
   export let value: $$Props['value'] = undefined;
 
   /**
@@ -94,7 +92,6 @@
     }
   }
 
-  $: fullOptions = prependBlank ? [undefined, ...options] : options;
   $: setValueOnOptionChange(options);
 </script>
 
@@ -102,7 +99,7 @@
 
 <ListBox
   selectionType="single"
-  options={fullOptions}
+  {options}
   value={typeof value !== 'undefined' ? [value] : []}
   on:change={(e) => setValueFromArray(e.detail)}
   {labelKey}

@@ -8,7 +8,6 @@ export interface SelectProps<Option> extends BaseInputProps {
   value?: Option;
   labelKey?: string;
   getLabel?: LabelGetter<Option | undefined>;
-  prependBlank?: boolean;
   contentClass?: string;
   triggerClass?: string;
   class?: string;

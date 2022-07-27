@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
-  import type { IconFlip, IconRotate } from './IconTypes';
+  import type { IconProps } from './IconTypes';
 
   // NOTE:
   // The type definition for the props here are duplicated in `Icon.d.ts` too.
@@ -22,10 +22,10 @@
   export let pulse = false;
 
   // Flips the icon. Allowed values are 'vertical', 'horizontal' or 'both'.
-  export let flip: IconFlip | undefined = undefined;
+  export let flip: IconProps['flip'] | undefined = undefined;
 
   // Rotates the icon to a specified angle. Allowed values are '90', '180', '270'.
-  export let rotate: IconRotate | undefined = undefined;
+  export let rotate: IconProps['rotate'] | undefined = undefined;
 
   // Additional classes
   let classes = '';
@@ -36,8 +36,8 @@
 
   function concatClasses(
     _classes?: string,
-    _flip?: IconFlip,
-    _rotate?: IconRotate,
+    _flip?: IconProps['flip'],
+    _rotate?: IconProps['rotate'],
   ): string {
     const faClass = ['fa-icon'];
     if (_classes) {

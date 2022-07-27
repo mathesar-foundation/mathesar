@@ -27,6 +27,7 @@
   import { getTabsForSchema } from '@mathesar/stores/tabs';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
+  import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import Sort from './record-operations/Sort.svelte';
@@ -187,15 +188,7 @@
 
   {#if $sheetState}
     <div class="divider" />
-    <div class="save-status">
-      {#if $sheetState === 'processing'}
-        Saving changes
-      {:else if $sheetState === 'failure'}
-        <span class="error">! Couldn't save changes</span>
-      {:else if $sheetState === 'success'}
-        All changes saved
-      {/if}
-    </div>
+    <SaveStatusIndicator status={$sheetState} />
   {/if}
 
   <div class="loading-info">
