@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import { getColumnIconProps } from './cell/utils';
   import TypeIcon from './TypeIcon.svelte';
 

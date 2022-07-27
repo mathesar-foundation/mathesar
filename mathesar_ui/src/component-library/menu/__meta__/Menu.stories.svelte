@@ -12,7 +12,6 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
-  import { IconRotate } from '@mathesar-component-library-dir/icon/IconTypes';
   import Menu from '../Menu.svelte';
   import MenuItem from '../MenuItem.svelte';
   import MenuDivider from '../MenuDivider.svelte';
@@ -36,7 +35,7 @@
       Consectetur adipiscing
     </MenuItem>
     <MenuItem icon={{ data: faHammer }}>Labore et dolore magna</MenuItem>
-    <MenuItem icon={{ data: faMagnet, rotate: IconRotate.NINETY }}>
+    <MenuItem icon={{ data: faMagnet, rotate: 90 }}>
       Sed do <em>eiusmod</em>
     </MenuItem>
     <MenuItem icon={{ data: faVideo }}>Minim veniam</MenuItem>

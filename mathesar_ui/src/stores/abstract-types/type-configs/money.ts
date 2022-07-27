@@ -2,9 +2,9 @@ import { faDollarSign } from '@fortawesome/free-solid-svg-icons';
 import type {
   MoneyDisplayOptions,
   NumberFormat,
+  Column,
 } from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
-import type { Column } from '@mathesar/stores/table-data/types';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,

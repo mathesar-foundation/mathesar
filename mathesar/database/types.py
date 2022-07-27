@@ -98,6 +98,20 @@ class UIType(Enum):
             MathesarCustomType.URI,
         }
     )
+    JSON_ARRAY = (
+        'jsonlist',
+        'JSON List',
+        {
+            MathesarCustomType.MATHESAR_JSON_ARRAY,
+        }
+    )
+    JSON_OBJECT = (
+        'map',
+        'Map',
+        {
+            MathesarCustomType.MATHESAR_JSON_OBJECT,
+        }
+    )
     # These are default Postgres types that we don't have specific behavior for yet in the UI.
     OTHER = (
         'other',

@@ -3,7 +3,7 @@
   // import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
   // import type { Grouping } from '@mathesar/stores/table-data';
   // import { Button, Icon } from '@mathesar-component-library';
-  // import type { Column } from '@mathesar/stores/table-data/types';
+  // import type { Column } from '@mathesar/api/tables/columns';
   // import SelectColumn from '@mathesar/components/SelectColumn.svelte';
 
   // export let grouping: Writable<Grouping>;
