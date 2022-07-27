@@ -40,7 +40,7 @@ def test_json_sort_array(json_table_obj):
         '[true, true, false]',
         '["BMW", "Ford", "Fiat", "Fiat"]',
         '["Ram", "Shyam", "Radhika", "Akshay", "Prashant", "Varun"]'
-        ]
+    ]
 
 
 def test_get_records_gets_ordered_records_str_col_obj(roster_table_obj):
