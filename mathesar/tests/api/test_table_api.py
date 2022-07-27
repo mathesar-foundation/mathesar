@@ -1317,7 +1317,7 @@ def test_table_extract_columns_retain_original_table(create_patents_table, clien
     expected_extracted_column_names = ['id'] + column_names_to_extract
     assert expected_extracted_column_names == extracted_column_names
 
-    remainder_columns = remainder_table.columns.all()
+    remainder_columns = remainder_table.columns.all().order_by('attnum')
     remainder_column_names = [remainder_column.name for remainder_column in remainder_columns]
     expected_remainder_columns = (set(existing_columns) - set(column_names_to_extract)) | {'Patent Info_id'}
     assert set(expected_remainder_columns) == set(remainder_column_names)
@@ -1329,7 +1329,7 @@ def test_table_extract_columns_drop_original_table(create_patents_table, client)
     column_name_id_map = table.get_column_name_id_bidirectional_map()
     column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
-    existing_columns = table.columns.all()
+    existing_columns = table.columns.all().order_by('attnum')
     existing_columns = [existing_column.name for existing_column in existing_columns]
     remainder_column_names = (set(existing_columns) - set(column_names_to_extract))
 
