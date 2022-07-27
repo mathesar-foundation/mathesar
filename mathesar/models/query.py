@@ -6,6 +6,7 @@ from db.queries.base import DBQuery, JoinParams, InitialColumn
 from mathesar.models.base import BaseModel, Column, Table
 from mathesar.models.relation import Relation
 from django.core.exceptions import ValidationError
+from db.transforms.operations.deserialize import deserialize_transformation
 
 
 def _validate_list_of_dicts(value):
@@ -139,7 +140,12 @@ class UIQuery(BaseModel, Relation):
     @cached_property
     def _db_transformations(self):
         """No processing necessary."""
-        return self.transformations
+        if self.transformations:
+            return tuple(
+                deserialize_transformation(json)
+                for json
+                in self.transformations
+            )
 
     def _get_display_name_for_sa_col(self, sa_col):
         return self._alias_to_display_name.get(sa_col.name)
@@ -182,7 +188,7 @@ def _db_initial_column_from_json(table_cache, json):
     json_jp_path = json.get('jp_path')
     if json_jp_path:
         jp_path = tuple(
-            join_params_from_json(json_jp)
+            join_params_from_json(table_cache, json_jp)
             for json_jp
             in json_jp_path
         )
@@ -195,12 +201,10 @@ def _db_initial_column_from_json(table_cache, json):
     )
 
 
-def join_params_from_json(json_jp):
+def join_params_from_json(table_cache, json_jp):
     return JoinParams(
-        left_table=_get_sa_table_by_id(json_jp[0][0]),
-        right_table=_get_sa_table_by_id(json_jp[1][0]),
-        left_column=_get_sa_col_by_id(json_jp[0][1]),
-        right_column=_get_sa_col_by_id(json_jp[1][1]),
+        left_column=_get_sa_col_by_id(table_cache, json_jp[0][1]),
+        right_column=_get_sa_col_by_id(table_cache, json_jp[1][1]),
     )
 
 
