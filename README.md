@@ -34,19 +34,9 @@ We actively encourage contribution! [Join our community](https://wiki.mathesar.o
 
 First, [ensure that you have Docker installed](https://docs.docker.com/get-docker/).
 
-Clone the repository and then copy the `.env.example` file to `.env` like so:
+Clone the repository and then run the following command to perform the initial setup:
 ```
-cp .env.example .env
-```
-
-From the repository's root directory, run:
-```
-docker-compose up
-```
-
-If it's your first time running the application, you'll also need to run database migrations and install Mathesar types and functions:
-```
-docker exec mathesar_service sh -c "python manage.py migrate && python install.py"
+make init
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 
