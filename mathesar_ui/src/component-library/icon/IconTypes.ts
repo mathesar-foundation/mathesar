@@ -1,17 +1,5 @@
 import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
 
-export enum IconFlip {
-  VERTICAL = 'vertical',
-  HORIZONTAL = 'horizontal',
-  BOTH = 'both',
-}
-
-export enum IconRotate {
-  NINETY = '90',
-  ONE_EIGHTY = '180',
-  TWO_SEVENTY = '270',
-}
-
 /**
  * NOTE:
  * This interface represents all the props listed in `Icon.svelte`.
@@ -24,7 +12,7 @@ export interface IconProps {
   size?: string;
   spin?: boolean;
   pulse?: boolean;
-  flip?: IconFlip;
-  rotate?: IconRotate;
+  flip?: 'vertical' | 'horizontal' | 'both';
+  rotate?: 90 | 180 | 270;
   label?: string;
 }

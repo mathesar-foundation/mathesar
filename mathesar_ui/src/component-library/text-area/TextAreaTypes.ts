@@ -4,4 +4,10 @@ import type { SimplifiedInputProps } from '@mathesar-component-library-dir/commo
 export interface TextAreaProps extends SimplifiedInputProps, BaseInputProps {
   value?: string | null;
   element?: HTMLTextAreaElement;
+  addNewLineOnEnterKeyCombinations?: boolean;
+}
+
+export interface TextAreaProcessedKeyDown {
+  type: 'normal' | 'newlineWithEnterKeyCombination';
+  originalEvent: KeyboardEvent;
 }

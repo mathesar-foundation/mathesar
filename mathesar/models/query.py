@@ -11,14 +11,10 @@ class UIQuery(BaseModel, Relation):
     name = models.CharField(
         max_length=128,
         unique=True,
-        null=True,
-        blank=True,
     )
 
     base_table = models.ForeignKey(
         'Table', on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
 
     # sequence of dicts

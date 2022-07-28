@@ -1,16 +1,17 @@
 import { getContext, setContext } from 'svelte';
 import type { Readable } from 'svelte/store';
-import { derived, writable } from 'svelte/store';
+import { get, derived, writable } from 'svelte/store';
 import type { ModalController } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import { TabularData } from '@mathesar/stores/table-data/tabularData';
+import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
 import {
   Filtering,
   Grouping,
-  Pagination,
   Sorting,
   TabularType,
 } from '@mathesar/stores/table-data';
+import Pagination from '@mathesar/utils/Pagination';
 
 interface RecordSelectorControllerProps {
   modal: ModalController;
@@ -39,16 +40,20 @@ export class RecordSelectorController {
       if (!tableId) {
         return undefined;
       }
-      return new TabularData({
-        type: TabularType.Table,
-        id: tableId,
-        metaProps: {
-          pagination: new Pagination({ size: 10 }),
-          sorting: new Sorting(),
-          grouping: new Grouping(),
-          filtering: new Filtering(),
+      const abstractTypesMap = get(currentDbAbstractTypes).data;
+      return new TabularData(
+        {
+          type: TabularType.Table,
+          id: tableId,
+          metaProps: {
+            pagination: new Pagination({ size: 10 }),
+            sorting: new Sorting(),
+            grouping: new Grouping(),
+            filtering: new Filtering(),
+          },
         },
-      });
+        abstractTypesMap,
+      );
     });
 
     this.tableName = derived(this.tableId, (id) =>

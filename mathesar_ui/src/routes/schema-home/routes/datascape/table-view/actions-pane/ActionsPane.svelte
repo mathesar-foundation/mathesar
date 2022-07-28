@@ -27,20 +27,18 @@
   import { getTabsForSchema } from '@mathesar/stores/tabs';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
+  import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import Sort from './record-operations/Sort.svelte';
   import Filter from './record-operations/Filter.svelte';
   import RenameTableModal from './RenameTableModal.svelte';
-  import type { ProcessedTableColumnMap } from '../utils';
 
   const tabularData = getTabularDataStoreFromContext();
 
   const tableConstraintsModal = modal.spawnModalController();
   const linkTableModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
-
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
     $tabularData);
@@ -123,7 +121,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <Filter {processedTableColumnsMap} filtering={meta.filtering} />
+      <Filter filtering={meta.filtering} />
     </svelte:fragment>
   </Dropdown>
 
@@ -190,15 +188,7 @@
 
   {#if $sheetState}
     <div class="divider" />
-    <div class="save-status">
-      {#if $sheetState === 'processing'}
-        Saving changes
-      {:else if $sheetState === 'failure'}
-        <span class="error">! Couldn't save changes</span>
-      {:else if $sheetState === 'success'}
-        All changes saved
-      {/if}
-    </div>
+    <SaveStatusIndicator status={$sheetState} />
   {/if}
 
   <div class="loading-info">

@@ -1,6 +1,6 @@
 import type { SvelteComponent } from 'svelte';
 import type { Readable, Writable } from 'svelte/store';
-import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types';
+import type { DataTypeBasedInputType } from '@mathesar-component-library-dir/data-type-based-input/types';
 
 export interface FormInputBaseElement {
   type: 'input';
@@ -68,7 +68,7 @@ export interface FormLayout {
 export type FormValidationCheck = 'isEmpty' | 'isInvalid';
 
 export interface FormConfigurationVariable {
-  type: DynamicInputDataType | 'custom';
+  type: DataTypeBasedInputType | 'custom';
   default?: unknown;
   enum?: unknown[];
   validation?: {
