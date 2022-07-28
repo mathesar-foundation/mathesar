@@ -34,7 +34,7 @@ We actively encourage contribution! [Join our community](https://wiki.mathesar.o
 
 First, [ensure that you have Docker installed](https://docs.docker.com/get-docker/).
 
-Clone the repository and then run the following command to perform the initial setup:
+Clone the repository and then run the following command for performing initial setup:
 ```
 make init
 ```
