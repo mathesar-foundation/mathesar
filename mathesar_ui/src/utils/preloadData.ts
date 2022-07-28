@@ -1,14 +1,16 @@
 import type {
   Database,
   SchemaResponse,
-  TableEntry,
   AbstractTypeResponse,
 } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/tables/tableList';
+import type { QueryInstance } from '@mathesar/api/queries/queryList';
 
 interface CommonData {
   databases: Database[];
   schemas: SchemaResponse[];
   tables: TableEntry[];
+  queries: QueryInstance[];
   current_db: string;
   current_schema: number;
   abstract_types: AbstractTypeResponse[];
@@ -26,8 +28,7 @@ function getData<T>(selector: string, retainData = false): T | undefined {
     }
     return data;
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(err);
+    console.error(err);
   }
   return undefined;
 }

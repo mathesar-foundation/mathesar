@@ -9,7 +9,7 @@ import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_ex
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.constraints import ConstraintSerializer
 from mathesar.api.utils import get_table_or_404
-from mathesar.models import Constraint
+from mathesar.models.base import Constraint
 
 
 class ConstraintViewSet(ListModelMixin, RetrieveModelMixin, CreateModelMixin, viewsets.GenericViewSet):

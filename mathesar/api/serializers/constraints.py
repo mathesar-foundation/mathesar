@@ -11,7 +11,7 @@ from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
     ReadWritePolymorphicSerializerMappingMixin,
 )
-from mathesar.models import Column, Constraint
+from mathesar.models.base import Column, Constraint
 
 
 class Table_Filtered_Column_queryset(serializers.PrimaryKeyRelatedField):

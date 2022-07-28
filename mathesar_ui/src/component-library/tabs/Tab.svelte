@@ -21,7 +21,7 @@
 >
   <a
     role="tab"
-    href={getTabURL(tab) ?? '#'}
+    href={getTabURL(tab)}
     tabindex="0"
     aria-selected={isActive}
     aria-disabled={!!tab.disabled}

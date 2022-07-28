@@ -18,12 +18,13 @@ import type {
   GroupingMode,
   GetRequestParams as ApiGetRequestParams,
 } from '@mathesar/api/tables/records';
+import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
+import type Pagination from '@mathesar/utils/Pagination';
 import type { Meta } from './meta';
 import type { RowKey } from './utils';
-import { getCellKey } from './utils';
-import type { ColumnsDataStore, Column } from './columns';
-import type { Pagination } from './pagination';
+import { validateRow, getCellKey } from './utils';
+import type { ColumnsDataStore } from './columns';
 import type { Sorting } from './sorting';
 import type { Grouping as GroupingTODORename } from './grouping';
 import type { Filtering } from './filtering';
@@ -404,6 +405,7 @@ export class RecordsData {
   // TODO: It would be better to throw errors instead of silently failing
   // and returning a value.
   async updateCell(row: Row, column: Column): Promise<Row> {
+    // TODO compute and validate client side errors before saving
     const { record } = row;
     if (!record) {
       console.error('Unable to update row that does not have a record');
@@ -466,17 +468,33 @@ export class RecordsData {
       offset,
       existingNewRecords.length,
     );
-    const newRecord: Row = {
-      record: {},
+    const record = Object.fromEntries(
+      getStoreValue(this.columnsDataStore)
+        .columns.filter((column) => column.default === null)
+        .map((column) => [String(column.id), null]),
+    );
+    const newRow: Row = {
+      record,
       identifier,
       isNew: true,
       rowIndex: existingNewRecords.length + savedRecordsLength,
     };
-    return newRecord;
+    return newRow;
   }
 
   async createRecord(row: Row): Promise<Row> {
-    const { primaryKeyColumnId } = this.columnsDataStore.get();
+    const { primaryKeyColumnId, columns } = this.columnsDataStore.get();
+    const rowKey = getRowKey(row, primaryKeyColumnId);
+    validateRow({
+      row,
+      rowKey,
+      columns,
+      cellClientSideErrors: this.meta.cellClientSideErrors,
+    });
+    if (getStoreValue(this.meta.rowsWithClientSideErrors).has(rowKey)) {
+      return row;
+    }
+
     const rowKeyOfBlankRow = getRowKey(row, primaryKeyColumnId);
     this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
     this.createPromises?.get(rowKeyOfBlankRow)?.cancel();
@@ -553,9 +571,9 @@ export class RecordsData {
   }
 
   async addEmptyRecord(): Promise<void> {
-    const newRecord = this.getNewEmptyRecord();
-    this.newRecords.update((existing) => existing.concat(newRecord));
-    await this.createRecord(newRecord);
+    const row = this.getNewEmptyRecord();
+    this.newRecords.update((existing) => existing.concat(row));
+    await this.createRecord(row);
   }
 
   getIterationKey(index: number): string {

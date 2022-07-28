@@ -1,4 +1,6 @@
+// Utils
 export * from './common/utils';
+export { getPageCount as getPaginationPageCount } from './pagination/paginationUtils';
 
 // Actions
 export { default as clickOffBounds } from './common/actions/clickOffBounds';
@@ -10,6 +12,7 @@ export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
 export { default as CheckboxGroup } from './checkbox-group/CheckboxGroup.svelte';
+export { default as Collapsible } from './collapsible/Collapsible.svelte';
 export { default as ContextMenu } from './context-menu/ContextMenu.svelte';
 export { default as Help } from './help/Help.svelte';
 export { default as Icon } from './icon/Icon.svelte';
@@ -35,8 +38,9 @@ export { default as TextInput } from './text-input/TextInput.svelte';
 
 // Compound Components (Ordered)
 export { AttachableDropdown, Dropdown } from './dropdown';
+export { DatePicker, InlineDateTimePicker } from './date-time-picker';
 export { default as DropdownMenu } from './dropdown-menu/DropdownMenu.svelte';
-export { default as DynamicInput } from './dynamic-input/DynamicInput.svelte';
+export { default as DataTypeBasedInput } from './data-type-based-input/DataTypeBasedInput.svelte';
 export { default as FileUpload } from './file-upload/FileUpload.svelte';
 export { default as FormattedInput } from './formatted-input/FormattedInput.svelte';
 export { default as Notification } from './notification/Notification.svelte';

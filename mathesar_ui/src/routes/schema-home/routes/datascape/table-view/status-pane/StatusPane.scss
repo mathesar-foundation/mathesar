@@ -1,0 +1,11 @@
+.datascape .status-pane {
+  padding: 3px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #efefef;
+  position: relative;
+  flex-shrink: 0;
+  flex-basis: 35px;
+  background: #f7f8f8;
+}

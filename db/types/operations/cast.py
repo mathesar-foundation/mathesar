@@ -10,6 +10,7 @@ from db.types.base import PostgresType, MathesarCustomType, get_available_known_
 from db.types import categories
 
 MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
+NUMERIC_ARR_FUNC_NAME = "get_numeric_array"
 
 
 def get_column_cast_expression(column, target_type, engine, type_options={}):
@@ -51,6 +52,8 @@ def install_all_casts(engine):
     create_multicurrency_money_casts(engine)
     create_textual_casts(engine)
     create_uri_casts(engine)
+    create_numeric_casts(engine)
+    create_json_casts(engine)
 
 
 def create_boolean_casts(engine):
@@ -61,6 +64,13 @@ def create_boolean_casts(engine):
 def create_date_casts(engine):
     type_body_map = _get_date_type_body_map()
     create_cast_functions(PostgresType.DATE, type_body_map, engine)
+
+
+def create_json_casts(engine):
+    json_types = categories.JSON_TYPES
+    for db_type in json_types:
+        type_body_map = _get_json_type_body_map(db_type)
+        create_cast_functions(db_type, type_body_map, engine)
 
 
 def create_decimal_number_casts(engine):
@@ -133,6 +143,14 @@ def create_uri_casts(engine):
     create_cast_functions(MathesarCustomType.URI, type_body_map, engine)
 
 
+def create_numeric_casts(engine):
+    numeric_array_create = _build_numeric_array_function()
+    with engine.begin() as conn:
+        conn.execute(text(numeric_array_create))
+    type_body_map = _get_numeric_type_body_map()
+    create_cast_functions(PostgresType.NUMERIC, type_body_map, engine)
+
+
 # TODO find more descriptive name
 def get_full_cast_map(engine):
     """
@@ -144,6 +162,10 @@ def get_full_cast_map(engine):
         PostgresType.CHARACTER: _get_textual_type_body_map(engine),
         PostgresType.CHARACTER_VARYING: _get_textual_type_body_map(engine),
         PostgresType.DATE: _get_date_type_body_map(),
+        PostgresType.JSON: _get_json_type_body_map(target_type=PostgresType.JSON),
+        PostgresType.JSONB: _get_json_type_body_map(target_type=PostgresType.JSONB),
+        MathesarCustomType.MATHESAR_JSON_ARRAY: _get_json_type_body_map(target_type=MathesarCustomType.MATHESAR_JSON_ARRAY),
+        MathesarCustomType.MATHESAR_JSON_OBJECT: _get_json_type_body_map(target_type=MathesarCustomType.MATHESAR_JSON_OBJECT),
         PostgresType.DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type=PostgresType.DOUBLE_PRECISION),
         MathesarCustomType.EMAIL: _get_email_type_body_map(),
         PostgresType.INTEGER: _get_integer_type_body_map(target_type=PostgresType.INTEGER),
@@ -244,6 +266,19 @@ def _escape_illegal_characters(sql_name):
     for old, new in replacement_mapping.items():
         resulting_string = resulting_string.replace(old, new)
     return resulting_string
+
+
+def _get_json_type_body_map(target_type):
+    """
+    Allow casting from text, primitive json types and Mathesar custom json types.
+    Target types include primitive json, jsonb, Mathesar json object and Mathesar json array
+    """
+    default_behavior_source_types = categories.STRING_TYPES | frozenset([PostgresType.JSON, PostgresType.JSONB, MathesarCustomType.MATHESAR_JSON_ARRAY, MathesarCustomType.MATHESAR_JSON_OBJECT])
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, target_type
+    )
+
+    return type_body_map
 
 
 def _get_boolean_type_body_map():
@@ -378,7 +413,7 @@ def _get_integer_type_body_map(target_type=PostgresType.INTEGER):
     etc.
     """
     default_behavior_source_types = categories.INTEGER_TYPES | categories.STRING_TYPES
-    no_rounding_source_types = categories.DECIMAL_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES
+    no_rounding_source_types = categories.DECIMAL_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES | frozenset([PostgresType.NUMERIC])
     target_type_str = target_type.id
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
@@ -861,6 +896,132 @@ def _get_uri_type_body_map():
 
     source_types = frozenset([MathesarCustomType.URI]) | categories.STRING_TYPES
     return {type_: _get_text_uri_type_body_map() for type_ in source_types}
+
+
+def _get_numeric_type_body_map():
+    """
+    Get SQL strings that create various functions for casting different
+    types to numeric.
+    We allow casting any textual type to locale-agnostic numeric.
+    """
+    default_behavior_source_types = categories.NUMERIC_TYPES | frozenset([PostgresType.MONEY])
+    text_source_types = categories.STRING_TYPES
+
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, PostgresType.NUMERIC
+    )
+    type_body_map.update(
+        {
+            text_type: _get_text_to_numeric_cast()
+            for text_type in text_source_types
+        }
+    )
+    type_body_map.update({PostgresType.BOOLEAN: _get_boolean_to_number_cast(PostgresType.NUMERIC)})
+    return type_body_map
+
+
+def _get_text_to_numeric_cast():
+    text_db_type_id = PostgresType.TEXT.id
+    numeric_db_type_id = PostgresType.NUMERIC.id
+
+    numeric_array_function = get_qualified_name(NUMERIC_ARR_FUNC_NAME)
+    cast_exception_str = (
+        f"RAISE EXCEPTION '% cannot be cast to {PostgresType.NUMERIC}', $1;"
+    )
+    return rf"""
+    DECLARE decimal_point {text_db_type_id};
+    DECLARE is_negative {PostgresType.BOOLEAN.id};
+    DECLARE numeric_arr {text_db_type_id}[];
+    DECLARE numeric {text_db_type_id};
+    BEGIN
+        SELECT {numeric_array_function}($1::{text_db_type_id}) INTO numeric_arr;
+        IF numeric_arr IS NULL THEN
+            {cast_exception_str}
+        END IF;
+
+        SELECT numeric_arr[1] INTO numeric;
+        SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
+        SELECT $1::text ~ '^-.*$' INTO is_negative;
+
+        IF numeric_arr[2] IS NOT NULL THEN
+            SELECT regexp_replace(numeric, numeric_arr[2], '', 'gq') INTO numeric;
+        END IF;
+        IF numeric_arr[3] IS NOT NULL THEN
+            SELECT regexp_replace(numeric, numeric_arr[3], decimal_point, 'q') INTO numeric;
+        END IF;
+        IF is_negative THEN
+            RETURN ('-' || numeric)::{numeric_db_type_id};
+        END IF;
+        RETURN numeric::{numeric_db_type_id};
+    END;
+    """
+
+
+def _build_numeric_array_function():
+    """
+    The main reason for this function to be separate is for testing. This
+    does have some performance impact; we should consider inlining later.
+    """
+    qualified_function_name = get_qualified_name(NUMERIC_ARR_FUNC_NAME)
+
+    no_separator_big = r"[0-9]{4,}(?:([,.])[0-9]+)?"
+    no_separator_small = r"[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?"
+    comma_separator_req_decimal = r"[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+"
+    period_separator_req_decimal = r"[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+"
+    comma_separator_opt_decimal = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?"
+    period_separator_opt_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?"
+    space_separator_opt_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?"
+    comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?"
+    single_quote_separator_opt_decimal = r"[0-9]{1,3}(?:(\'')[0-9]{3})+(?:([.])[0-9]+)?"
+
+    inner_number_tree = "|".join(
+        [
+            no_separator_big,
+            no_separator_small,
+            comma_separator_req_decimal,
+            period_separator_req_decimal,
+            comma_separator_opt_decimal,
+            period_separator_opt_decimal,
+            space_separator_opt_decimal,
+            comma_separator_lakh_system,
+            single_quote_separator_opt_decimal
+        ])
+    numeric_finding_regex = f"^(?:[+-]?({inner_number_tree}))$"
+
+    actual_number_indices = [1]
+    group_divider_indices = [4, 6, 8, 10, 12, 14, 16]
+    decimal_point_indices = [2, 3, 5, 7, 9, 11, 13, 15, 17]
+    actual_numbers_str = ','.join([f'raw_arr[{idx}]' for idx in actual_number_indices])
+    group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
+    decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])
+
+    text_db_type_id = PostgresType.TEXT.id
+    return rf"""
+    CREATE OR REPLACE FUNCTION {qualified_function_name}({text_db_type_id}) RETURNS {text_db_type_id}[]
+    AS $$
+      DECLARE
+        raw_arr {text_db_type_id}[];
+        actual_number_arr {text_db_type_id}[];
+        group_divider_arr {text_db_type_id}[];
+        decimal_point_arr {text_db_type_id}[];
+        actual_number {text_db_type_id};
+        group_divider {text_db_type_id};
+        decimal_point {text_db_type_id};
+      BEGIN
+        SELECT regexp_matches($1, '{numeric_finding_regex}') INTO raw_arr;
+        IF raw_arr IS NULL THEN
+          RETURN NULL;
+        END IF;
+        SELECT array_remove(ARRAY[{actual_numbers_str}], null) INTO actual_number_arr;
+        SELECT array_remove(ARRAY[{group_dividers_str}], null) INTO group_divider_arr;
+        SELECT array_remove(ARRAY[{decimal_points_str}], null) INTO decimal_point_arr;
+        SELECT actual_number_arr[1] INTO actual_number;
+        SELECT group_divider_arr[1] INTO group_divider;
+        SELECT decimal_point_arr[1] INTO decimal_point;
+        RETURN ARRAY[actual_number, group_divider, decimal_point];
+      END;
+    $$ LANGUAGE plpgsql;
+    """
 
 
 def _get_default_type_body_map(source_types, target_type):

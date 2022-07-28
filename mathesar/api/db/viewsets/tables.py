@@ -1,24 +1,32 @@
 from django_filters import rest_framework as filters
-from psycopg2.errors import InvalidTextRepresentation, CheckViolation
+from psycopg2.errors import CheckViolation, InvalidTextRepresentation
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from sqlalchemy.exc import DataError, IntegrityError
 
-from mathesar.api.exceptions.database_exceptions import (
-    exceptions as database_api_exceptions,
-    base_exceptions as database_base_api_exceptions,
-)
-from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
+from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
+from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
-from mathesar.api.pagination import DefaultLimitOffsetPagination
-from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
-from mathesar.models import Table
-from mathesar.utils.tables import (
-    get_table_column_types
+from mathesar.api.exceptions.database_exceptions import (
+    base_exceptions as database_base_api_exceptions,
+    exceptions as database_api_exceptions,
 )
+from mathesar.api.pagination import DefaultLimitOffsetPagination
+from mathesar.api.serializers.tables import (
+    SplitTableRequestSerializer,
+    SplitTableResponseSerializer,
+    TablePreviewSerializer,
+    TableSerializer,
+    TableImportSerializer,
+    MoveTableRequestSerializer
+)
+from mathesar.models.base import Table
+from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
+from mathesar.utils.tables import get_table_column_types
+from mathesar.utils.joins import get_processed_joinable_tables
 
 
 class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewsets.GenericViewSet):
@@ -31,27 +39,12 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         return Table.objects.all().order_by('-created_at')
 
     def partial_update(self, request, pk=None):
+        table = self.get_object()
         serializer = TableSerializer(
-            data=request.data, context={'request': request}, partial=True
+            table, data=request.data, context={'request': request}, partial=True
         )
         serializer.is_valid(raise_exception=True)
-        table = self.get_object()
-
-        # Save the fields that are stored in the model.
-        present_model_fields = []
-        for model_field in table.MODEL_FIELDS:
-            if model_field in serializer.validated_data:
-                setattr(table, model_field, serializer.validated_data[model_field])
-                present_model_fields.append(model_field)
-        table.save(update_fields=present_model_fields)
-        for key in present_model_fields:
-            del serializer.validated_data[key]
-
-        # Save the fields that are stored in the underlying DB.
-        try:
-            table.update_sa_table(serializer.validated_data)
-        except ValueError as e:
-            raise base_api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
         # Reload the table to avoid cached properties
         table = self.get_object()
@@ -65,10 +58,102 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
+    def joinable_tables(self, request, pk=None):
+        table = self.get_object()
+        limit = request.query_params.get('limit')
+        offset = request.query_params.get('offset')
+        max_depth = request.query_params.get('max_depth', 2)
+        processed_joinable_tables = get_processed_joinable_tables(
+            table, limit=limit, offset=offset, max_depth=max_depth
+        )
+        return Response(processed_joinable_tables)
+
+    @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
         table = self.get_object()
         col_types = get_table_column_types(table)
         return Response(col_types)
+
+    @action(methods=['post'], detail=True)
+    def split_table(self, request, pk=None):
+        table = self.get_object()
+        column_names_id_map = table.get_column_name_id_bidirectional_map()
+        serializer = SplitTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
+        if serializer.is_valid(True):
+            # We need to get the column names before splitting the table,
+            # as they are the only reference to the new column after it is moved to a new table
+            extracted_column_names = [column.name for column in serializer.validated_data['extract_columns']]
+            remainder_column_names = column_names_id_map.keys() - extracted_column_names
+            extracted_table_name = serializer.validated_data['extracted_table_name']
+            remainder_table_name = serializer.validated_data['remainder_table_name']
+            drop_original_table = serializer.validated_data['drop_original_table']
+            engine = table._sa_engine
+            extracted_sa_table, remainder_sa_table, remainder_fk = table.split_table(
+                serializer.validated_data['extract_columns'],
+                extracted_table_name,
+                remainder_table_name,
+                drop_original_table=drop_original_table
+            )
+            extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
+            remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
+
+            if drop_original_table:
+                table.oid = remainder_table_oid
+                table.save()
+            # Reflect tables so that the newly created/extracted tables objects are created
+            reflect_tables_from_schema(table.schema)
+
+            if drop_original_table:
+                extracted_table = Table.current_objects.get(oid=extracted_table_oid)
+                # Update attnum as it would have changed due to columns moving to a new table.
+                extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
+
+            remainder_table = Table.current_objects.get(oid=remainder_table_oid)
+            remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
+
+            reflect_db_objects(skip_cache_check=True)
+            extracted_table = Table.objects.get(oid=extracted_table_oid)
+            remainder_table_obj = Table.objects.get(oid=remainder_table_oid)
+            split_table_response = {
+                'extracted_table': extracted_table.id,
+                'remainder_table': remainder_table_obj.id
+            }
+            response_serializer = SplitTableResponseSerializer(data=split_table_response)
+            response_serializer.is_valid(True)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['post'], detail=True)
+    def move_columns(self, request, pk=None):
+        table = self.get_object()
+        column_names_id_map = table.get_column_name_id_bidirectional_map()
+        serializer = MoveTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
+        if serializer.is_valid(True):
+            target_table = serializer.validated_data['target_table']
+            move_columns = serializer.validated_data['move_columns']
+            column_names_to_move = [column.name for column in move_columns]
+            target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
+            extracted_sa_table, remainder_sa_table = table.move_columns(
+                move_columns,
+                target_table,
+            )
+            engine = table._sa_engine
+            extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
+            remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
+
+            target_table.oid = extracted_table_oid
+            target_table.save()
+            # Refresh existing target table columns to use correct attnum preventing conflicts with the moved column
+            existing_target_column_names = target_columns_name_id_map.keys()
+            target_table.update_column_reference(existing_target_column_names, target_columns_name_id_map)
+            # Add the moved column
+            target_table.update_column_reference(column_names_to_move, column_names_id_map)
+
+            table.oid = remainder_table_oid
+            table.save()
+            remainder_column_names = column_names_id_map.keys() - column_names_to_move
+            table.update_column_reference(remainder_column_names, column_names_id_map)
+
+        return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], detail=True)
     def previews(self, request, pk=None):
@@ -109,4 +194,28 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             }
         )
 
+        return Response(table_data)
+
+    @action(methods=['post'], detail=True)
+    def existing_import(self, request, pk=None):
+        temp_table = self.get_object()
+        serializer = TableImportSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        existing_table_id = serializer.validated_data['table_to_import_to']
+        mappings = serializer.validated_data['mappings']
+        existing_table = get_table_or_404(existing_table_id)
+
+        try:
+            temp_table.insert_records_to_existing_table(
+                existing_table, temp_table, mappings
+            )
+        except Exception as e:
+            # ToDo raise specific exceptions.
+            raise e
+        # Reload the table to avoid cached properties
+        existing_table = get_table_or_404(existing_table_id)
+        serializer = TableSerializer(
+            existing_table, context={'request': request}
+        )
+        table_data = serializer.data
         return Response(table_data)

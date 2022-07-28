@@ -1,14 +1,12 @@
 import pytest
 from sqlalchemy import Column, Integer, MetaData, String
 from sqlalchemy import Table as SATable
-from django.core.cache import cache
 
 from db.constraints.utils import ConstraintType
 from db.tables.operations.select import get_oid_from_table
 from db.tables.utils import get_primary_key_column
 
-from mathesar import models
-from mathesar.models import Constraint, Table
+from mathesar.models.base import Constraint, Table
 
 
 @pytest.fixture
@@ -28,12 +26,11 @@ def column_test_table(patent_schema):
     )
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     return table
 
 
 def test_one_to_one_link_create(column_test_table, client, create_patents_table):
-    cache.clear()
     table_2 = create_patents_table('Table 2')
     data = {
         "link_type": "one-to-one",
@@ -69,7 +66,6 @@ def test_one_to_one_link_create(column_test_table, client, create_patents_table)
 
 
 def test_one_to_many_link_create(column_test_table, client, create_patents_table):
-    cache.clear()
     table_2 = create_patents_table('Table 2')
     data = {
         "link_type": "one-to-many",
@@ -98,7 +94,6 @@ def test_one_to_many_link_create(column_test_table, client, create_patents_table
 
 
 def test_one_to_many_self_referential_link_create(column_test_table, client):
-    cache.clear()
     data = {
         "link_type": "one-to-many",
         "reference_column_name": "col_1",
@@ -128,7 +123,6 @@ def test_one_to_many_self_referential_link_create(column_test_table, client):
 def test_many_to_many_self_referential_link_create(column_test_table, client):
     schema = column_test_table.schema
     engine = schema._sa_engine
-    cache.clear()
     data = {
         "link_type": "many-to-many",
         "mapping_table_name": "map_table",
@@ -149,7 +143,6 @@ def test_many_to_many_self_referential_link_create(column_test_table, client):
 
 
 def test_many_to_many_link_create(column_test_table, client, create_patents_table):
-    cache.clear()
     table_2 = create_patents_table('Table 2')
     data = {
         "link_type": "many-to-many",

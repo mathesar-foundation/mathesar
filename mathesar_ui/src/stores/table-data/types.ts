@@ -1,11 +1,14 @@
 export type {
   TabularData,
-  TabularDataStore,
   TabularDataProps,
   TerseTabularDataProps,
 } from './tabularData';
 export type { RecordsData, Row } from './records';
-export type { Column, ColumnsData, ColumnsDataStore } from './columns';
+export type { ColumnsData, ColumnsDataStore } from './columns';
+export type {
+  ProcessedColumn,
+  ProcessedColumnsStore,
+} from './processedColumns';
 export type { Filtering, FilterEntry } from './filtering';
 export type {
   Constraint,

@@ -4,7 +4,7 @@ from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import DropConstraint
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
-from db.records.operations.select import get_records
+from db.records.operations.select import get_records, get_records_with_default_order
 
 
 def test_get_records_gets_ordered_records_str_col_name(roster_table_obj):
@@ -19,6 +19,28 @@ def test_get_records_gets_ordered_records_num_col(roster_table_obj):
     order_list = [{"field": "Grade", "direction": "asc"}]
     record_list = get_records(roster, engine, order_by=order_list)
     assert record_list[0][7] == 25
+
+
+def test_json_sort_array(json_table_obj):
+    roster, engine = json_table_obj
+    order_list = [{"field": "json_array", "direction": "asc"}]
+    record_list = get_records(roster, engine, order_by=order_list)
+    assert [row["json_array"] for row in record_list] == [
+        '[]',
+        '["BMW", "Ford", "Fiat"]',
+        '["BMW", "Ford", [1, 2]]',
+        '["BMW", "Ford", ["Akshay", "Prashant", "Varun"]]',
+        '["BMW", "Ford", [1, 2, 3]]',
+        '["Ford", "BMW", "Fiat"]',
+        '[1, 2, 3]',
+        '[1, 2, false]',
+        '[1, 2, true]',
+        '[2, 3, 4]',
+        '[false, false, false]',
+        '[true, true, false]',
+        '["BMW", "Ford", "Fiat", "Fiat"]',
+        '["Ram", "Shyam", "Radhika", "Akshay", "Prashant", "Varun"]'
+    ]
 
 
 def test_get_records_gets_ordered_records_str_col_obj(roster_table_obj):
@@ -94,7 +116,7 @@ def check_multi_field_ordered(record_list, field_dir_pairs):
 def test_get_records_default_order_single_primary_key(roster_table_obj):
     roster, engine = roster_table_obj
     primary_column = roster.primary_key.columns[0].name
-    record_list = get_records(roster, engine)
+    record_list = get_records_with_default_order(roster, engine)
     check_single_field_ordered(record_list, primary_column, 'asc')
 
 

@@ -1,6 +1,6 @@
 import pytest
 
-from sqlalchemy import INTEGER, BOOLEAN, TEXT, TIMESTAMP, Column, Table as SATable, MetaData, TIME, DATE
+from sqlalchemy import INTEGER, BOOLEAN, TEXT, TIMESTAMP, Column as SAColumn, Table as SATable, MetaData, TIME, DATE
 
 from db.columns.operations.alter import alter_column_type
 from db.columns.operations.select import get_column_attnum_from_name
@@ -8,27 +8,36 @@ from db.tables.operations.select import get_oid_from_table
 from db.types.base import PostgresType, MathesarCustomType
 from db.types.custom.money import MathesarMoney
 
-from mathesar import models
+from mathesar.models.base import Table, Column
 
 
 @pytest.fixture
 def column_test_table_with_service_layer_options(patent_schema):
     engine = patent_schema._sa_engine
     column_list_in = [
-        Column("mycolumn0", INTEGER, primary_key=True),
-        Column("mycolumn1", BOOLEAN),
-        Column("mycolumn2", INTEGER),
-        Column("mycolumn3", TEXT),
-        Column("mycolumn4", TEXT),
-        Column("mycolumn5", MathesarMoney),
-        Column("mycolumn6", TIMESTAMP),
-        Column("mycolumn7", TIME),
-        Column("mycolumn8", DATE),
+        SAColumn("mycolumn0", INTEGER, primary_key=True),
+        SAColumn("mycolumn1", BOOLEAN),
+        SAColumn("mycolumn2", INTEGER),
+        SAColumn("mycolumn3", TEXT),
+        SAColumn("mycolumn4", TEXT),
+        SAColumn("mycolumn5", MathesarMoney),
+        SAColumn("mycolumn6", TIMESTAMP),
+        SAColumn("mycolumn7", TIME),
+        SAColumn("mycolumn8", DATE),
     ]
     column_data_list = [
         {},
         {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}, 'show_fk_preview': True},
-        {'display_options': {'show_as_percentage': True, 'number_format': "english", 'show_fk_preview': True}},
+        {
+            'display_options': {
+                'show_as_percentage': True,
+                'number_format': "english",
+                'show_fk_preview': True,
+                "use_grouping": 'auto',
+                "minimum_fraction_digits": None,
+                "maximum_fraction_digits": None,
+            }
+        },
         {'display_options': None},
         {},
         {
@@ -53,12 +62,12 @@ def column_test_table_with_service_layer_options(patent_schema):
     )
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     service_columns = []
     for column_data in zip(column_list_in, column_data_list):
         attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
         service_columns.append(
-            models.Column.current_objects.get_or_create(
+            Column.current_objects.get_or_create(
                 table=table,
                 attnum=attnum,
                 display_options=column_data[1].get('display_options', None)
@@ -91,18 +100,71 @@ _create_display_options_test_list = [
     ),
     (
         PostgresType.MONEY,
-        {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus'},
-        {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english", 'show_fk_preview': True}
+        {
+            'number_format': "english",
+            'currency_symbol': '$',
+            'currency_symbol_location': 'after-minus',
+            'use_grouping': 'true',
+            "minimum_fraction_digits": 2,
+            "maximum_fraction_digits": 2,
+        },
+        {
+            'currency_symbol': '$',
+            'currency_symbol_location': 'after-minus',
+            'number_format': "english",
+            'use_grouping': 'true',
+            'show_fk_preview': True,
+            "minimum_fraction_digits": 2,
+            "maximum_fraction_digits": 2,
+        },
     ),
     (
         PostgresType.NUMERIC,
-        {"show_as_percentage": True, 'number_format': None},
-        {"show_as_percentage": True, 'number_format': None, 'show_fk_preview': True}
+        {},
+        {
+            "show_as_percentage": False,
+            'number_format': None,
+            'use_grouping': 'auto',
+            'show_fk_preview': True,
+            "minimum_fraction_digits": None,
+            "maximum_fraction_digits": None,
+        },
     ),
     (
         PostgresType.NUMERIC,
-        {"show_as_percentage": True, 'number_format': "english"},
-        {"show_as_percentage": True, 'number_format': "english", 'show_fk_preview': True}
+        {
+            "show_as_percentage": True,
+            'number_format': None,
+            'use_grouping': 'false',
+            "minimum_fraction_digits": 2,
+            "maximum_fraction_digits": 20,
+        },
+        {
+            "show_as_percentage": True,
+            'number_format': None,
+            'use_grouping': 'false',
+            'show_fk_preview': True,
+            "minimum_fraction_digits": 2,
+            "maximum_fraction_digits": 20,
+        },
+    ),
+    (
+        PostgresType.NUMERIC,
+        {
+            "show_as_percentage": True,
+            'number_format': "english",
+            'use_grouping': 'auto',
+            "minimum_fraction_digits": None,
+            "maximum_fraction_digits": None,
+        },
+        {
+            "show_as_percentage": True,
+            'number_format': "english",
+            'use_grouping': 'auto',
+            'show_fk_preview': True,
+            "minimum_fraction_digits": None,
+            "maximum_fraction_digits": None,
+        },
     ),
     (
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
@@ -193,6 +255,28 @@ _create_display_options_invalid_test_list = [
         PostgresType.NUMERIC,
         {'number_format': "wrong"}
     ),
+
+    # Out of range values
+    (PostgresType.NUMERIC, {'minimum_fraction_digits': -1}),
+    (PostgresType.NUMERIC, {'maximum_fraction_digits': -1}),
+    (PostgresType.NUMERIC, {'minimum_fraction_digits': 21}),
+    (PostgresType.NUMERIC, {'maximum_fraction_digits': 21}),
+
+    # Incorrect types
+    (PostgresType.NUMERIC, {'minimum_fraction_digits': 1.5}),
+    (PostgresType.NUMERIC, {'maximum_fraction_digits': 1.5}),
+    (PostgresType.NUMERIC, {'minimum_fraction_digits': "can't be a string"}),
+    (PostgresType.NUMERIC, {'maximum_fraction_digits': "can't be a string"}),
+
+    # Values in conflict. Max must be greater or equal to min.
+    (
+        PostgresType.NUMERIC,
+        {
+            'minimum_fraction_digits': 4,
+            'maximum_fraction_digits': 3,
+        },
+    ),
+
     (
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
         {'format': []}

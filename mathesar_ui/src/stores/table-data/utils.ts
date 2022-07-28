@@ -1,11 +1,20 @@
 import { concat } from 'iter-tools';
-import { ImmutableMap, ImmutableSet } from '@mathesar-component-library';
+import {
+  ImmutableMap,
+  ImmutableSet,
+  WritableMap,
+} from '@mathesar-component-library';
+import type { Column } from '@mathesar/api/tables/columns';
 import type { RequestStatus } from '@mathesar/utils/api';
 import { getMostImportantRequestStatusState } from '@mathesar/utils/api';
 import type { RowStatus } from './meta';
+import type { Row } from './records';
 
 export type CellKey = string;
 export type RowKey = string;
+
+export const ID_ROW_CONTROL_COLUMN = -1;
+export const ID_ADD_NEW_COLUMN = -2;
 
 const CELL_KEY_SEPARATOR = '::';
 
@@ -23,17 +32,25 @@ export function extractRowKeyFromCellKey(cellKey: CellKey): RowKey {
 export const ROW_HAS_CELL_ERROR_MSG = 'This row contains a cell with an error.';
 
 export function getRowStatus({
+  cellClientSideErrors,
   cellModificationStatus,
   rowCreationStatus,
   rowDeletionStatus,
 }: {
+  cellClientSideErrors: ImmutableMap<CellKey, string[]>;
   cellModificationStatus: ImmutableMap<CellKey, RequestStatus>;
   rowCreationStatus: ImmutableMap<RowKey, RequestStatus>;
   rowDeletionStatus: ImmutableMap<RowKey, RequestStatus>;
 }): ImmutableMap<RowKey, RowStatus> {
   type PartialResult = ImmutableMap<RowKey, Partial<RowStatus>>;
 
-  const keysOfRowsWithCellErrors = [...cellModificationStatus].reduce(
+  const keysOfRowsWithClientCellErrors = [...cellClientSideErrors.keys()].map(
+    extractRowKeyFromCellKey,
+  );
+
+  const keysOfRowsWithCellModificationErrors = [
+    ...cellModificationStatus,
+  ].reduce(
     (rows, [cellKey, cellStatus]) =>
       cellStatus.state === 'failure'
         ? rows.with(extractRowKeyFromCellKey(cellKey))
@@ -42,7 +59,10 @@ export function getRowStatus({
   );
 
   const statusFromCells: PartialResult = new ImmutableMap(
-    [...keysOfRowsWithCellErrors].map((rowKey) => [
+    [
+      ...keysOfRowsWithClientCellErrors,
+      ...keysOfRowsWithCellModificationErrors,
+    ].map((rowKey) => [
       rowKey,
       { errorsFromWholeRowAndCells: [ROW_HAS_CELL_ERROR_MSG] },
     ]),
@@ -93,4 +113,58 @@ export function getSheetState(props: {
     props.rowDeletionStatus.values(),
   );
   return getMostImportantRequestStatusState(allStatuses);
+}
+
+export function getClientSideCellErrors(
+  cellValue: unknown,
+  column: Column,
+): string[] {
+  const errors = [];
+  if (cellValue === null && !column.nullable) {
+    errors.push('Cell value cannot be NULL for this column.');
+  }
+  if (cellValue === undefined && !column.default) {
+    errors.push('This column requires an initial value.');
+  }
+  return errors;
+}
+
+export function validateCell({
+  cellValue,
+  column,
+  cellKey,
+  cellClientSideErrors,
+}: {
+  cellValue: unknown;
+  column: Column;
+  cellKey: CellKey;
+  cellClientSideErrors: WritableMap<CellKey, string[]>;
+}): void {
+  const errors = getClientSideCellErrors(cellValue, column);
+  if (errors.length) {
+    cellClientSideErrors.set(cellKey, errors);
+  } else {
+    cellClientSideErrors.delete(cellKey);
+  }
+}
+
+export function validateRow({
+  row,
+  rowKey,
+  columns,
+  cellClientSideErrors,
+}: {
+  row: Row;
+  rowKey: RowKey;
+  columns: Column[];
+  cellClientSideErrors: WritableMap<CellKey, string[]>;
+}): void {
+  columns.forEach((column) => {
+    validateCell({
+      cellValue: row.record?.[String(column.id)],
+      column,
+      cellKey: getCellKey(rowKey, column.id),
+      cellClientSideErrors,
+    });
+  });
 }

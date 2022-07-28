@@ -8,7 +8,8 @@ import type {
 } from '@mathesar/utils/api';
 import type { FileUpload } from '@mathesar-component-library/types';
 import type { CancellablePromise } from '@mathesar-component-library';
-import type { Database, SchemaEntry, TableEntry } from '@mathesar/AppTypes';
+import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/tables/tableList';
 
 export const Stages = {
   UPLOAD: 1,

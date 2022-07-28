@@ -19,14 +19,15 @@ interface FormattedNumberDisplayOptions {
   number_format: NumberFormat | null;
 
   /**
-   * PLANNED FOR FUTURE IMPLEMENTATION POST-ALPHA.
-   *
    * - "true": display grouping separators even if the locale prefers otherwise.
    * - "false": do not display grouping separators.
    * - "auto": display grouping separators based on the locale preference, which
    *   may also be dependent on the currency"
    */
-  // use_grouping: 'true' | 'false' | 'auto';
+  use_grouping: 'true' | 'false' | 'auto';
+
+  minimum_fraction_digits: number | null;
+  maximum_fraction_digits: number | null;
 }
 
 export interface NumberDisplayOptions
@@ -83,6 +84,23 @@ export interface DurationDisplayOptions extends Record<string, unknown> {
   show_units: boolean | null;
 }
 
+export type DateFormat = 'none' | 'us' | 'eu' | 'friendly' | 'iso';
+
+export interface DateDisplayOptions extends Record<string, unknown> {
+  format: DateFormat | null;
+}
+
+export type TimeFormat = '24hr' | '12hr' | '24hrLong' | '12hrLong';
+
+export interface TimeDisplayOptions extends Record<string, unknown> {
+  format: TimeFormat | null;
+}
+
+export interface TimeStampDisplayOptions extends Record<string, unknown> {
+  date_format: DateDisplayOptions['format'];
+  time_format: TimeDisplayOptions['format'];
+}
+
 export interface BaseColumn {
   id: number;
   name: string;
@@ -108,6 +126,20 @@ export interface Column extends BaseColumn {
   type_options: Record<string, unknown> | null;
   display_options: Record<string, unknown> | null;
 }
+
+export interface MathesarMoneyColumn extends Column {
+  type: 'MATHESAR_TYPES.MATHESAR_MONEY';
+  type_options: Partial<NumberTypeOptions> | null;
+  display_options: Partial<MoneyDisplayOptions> | null;
+}
+
+export interface PostgresMoneyColumn extends Column {
+  type: 'MONEY';
+  type_options: null;
+  display_options: Partial<MoneyDisplayOptions> | null;
+}
+
+export type MoneyColumn = MathesarMoneyColumn | PostgresMoneyColumn;
 
 // TODO: Remove specification DB types here
 export interface NumberColumn extends Column {

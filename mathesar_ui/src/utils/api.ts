@@ -142,6 +142,10 @@ export function patchAPI<T>(url: string, data: unknown): CancellablePromise<T> {
   return sendXHRRequest('PATCH', url, data);
 }
 
+export function putAPI<T>(url: string, data: unknown): CancellablePromise<T> {
+  return sendXHRRequest('PUT', url, data);
+}
+
 export function deleteAPI<T>(url: string): CancellablePromise<T> {
   return sendXHRRequest('DELETE', url);
 }

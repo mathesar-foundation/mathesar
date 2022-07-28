@@ -9,7 +9,6 @@
   } from '@fortawesome/free-solid-svg-icons';
   import Icon from '../Icon.svelte';
   import IconDocs from './Icon.mdx';
-  import { IconFlip, IconRotate } from '../IconTypes';
 
   const meta = {
     title: 'Components/Icon',
@@ -80,8 +79,8 @@
 <Story name="Customizations" parameters={disabledAddons}>
   <Icon data={faCat} size="25px" />
 
-  <Icon data={faCat} flip={IconFlip.VERTICAL} />
-  <Icon data={faCat} rotate={IconRotate.ONE_EIGHTY} />
+  <Icon data={faCat} flip="vertical" />
+  <Icon data={faCat} rotate={180} />
 
   <Icon data={faDog} class="color-red" size="20px" />
   <Icon data={faHippo} style="color:blue" size="24px" />

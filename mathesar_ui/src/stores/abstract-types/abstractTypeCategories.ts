@@ -1,11 +1,18 @@
 import type { DbType } from '@mathesar/AppTypes';
 import { abstractTypeCategory } from './constants';
 import Text from './type-configs/text';
+import Money from './type-configs/money';
+import Email from './type-configs/email';
 import Number from './type-configs/number';
 import Boolean from './type-configs/boolean';
 import Uri from './type-configs/uri';
 import Duration from './type-configs/duration';
+import Date from './type-configs/date';
+import Time from './type-configs/time';
+import DateTime from './type-configs/datetime';
 import Fallback from './type-configs/fallback';
+import Array from './type-configs/jsonArray';
+import Object from './type-configs/jsonObject';
 import type {
   AbstractType,
   AbstractTypesMap,
@@ -22,10 +29,17 @@ const abstractTypeCategories: Partial<
   Record<AbstractTypeCategoryIdentifier, AbstractTypeConfiguration>
 > = {
   [abstractTypeCategory.Text]: Text,
+  [abstractTypeCategory.Money]: Money,
+  [abstractTypeCategory.Email]: Email,
   [abstractTypeCategory.Number]: Number,
   [abstractTypeCategory.Boolean]: Boolean,
   [abstractTypeCategory.Uri]: Uri,
   [abstractTypeCategory.Duration]: Duration,
+  [abstractTypeCategory.Date]: Date,
+  [abstractTypeCategory.Time]: Time,
+  [abstractTypeCategory.DateTime]: DateTime,
+  [abstractTypeCategory.Array]: Array,
+  [abstractTypeCategory.Object]: Object,
   [abstractTypeCategory.Other]: Fallback,
 };
 
@@ -57,12 +71,34 @@ export function constructAbstractTypeMapFromResponse(
 ): AbstractTypesMap {
   const abstractTypesMap: AbstractTypesMap = new Map();
   abstractTypesResponse.forEach((entry) => {
-    abstractTypesMap.set(
-      entry.identifier,
-      constructAbstractTypeFromResponse(entry),
-    );
+    /**
+     * Ignore "Other" type sent in response.
+     * This is a failsafe to ensure that the frontend does not
+     * break when the "Other" type does not contain db_types which
+     * are either the type or valid_target_type for any column.
+     */
+    if (entry.identifier !== 'other') {
+      abstractTypesMap.set(
+        entry.identifier,
+        constructAbstractTypeFromResponse(entry),
+      );
+    }
   });
   return abstractTypesMap;
+}
+
+function identifyAbstractTypeForDbType(
+  dbType: DbType,
+  abstractTypesMap: AbstractTypesMap,
+): AbstractType | undefined {
+  let abstractTypeOfDbType;
+  for (const [, abstractType] of abstractTypesMap) {
+    if (abstractType.dbTypes.has(dbType)) {
+      abstractTypeOfDbType = abstractType;
+      break;
+    }
+  }
+  return abstractTypeOfDbType;
 }
 
 /**
@@ -72,45 +108,54 @@ export function constructAbstractTypeMapFromResponse(
  *
  * However, it is not handled here yet, since it requires additional confirmation.
  */
-export function getAbstractTypesForDbTypeList(
-  dbTypes: DbType[],
+export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
+  dbType: DbType,
+  targetDbTypes: DbType[],
   abstractTypesMap: AbstractTypesMap,
 ): AbstractType[] {
-  if (dbTypes && abstractTypesMap) {
-    const abstractTypeSet: Set<AbstractType> = new Set();
-    let isUnknownTypeRequired = false;
-    dbTypes.forEach((dbType) => {
-      let isKnownType = false;
-      for (const [, abstractType] of abstractTypesMap) {
-        if (abstractType.dbTypes.has(dbType)) {
-          abstractTypeSet.add(abstractType);
-          isKnownType = true;
-          break;
-        }
-      }
-      if (!isKnownType) {
-        isUnknownTypeRequired = true;
-      }
-    });
-    const abstractTypeList = [...abstractTypeSet].sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
-    if (isUnknownTypeRequired) {
-      abstractTypeList.push(
-        constructAbstractTypeFromResponse(unknownAbstractTypeResponse),
-      );
-    }
-    return abstractTypeList;
+  const abstractTypeSet: Set<AbstractType> = new Set();
+
+  const abstractTypeOfDbType = identifyAbstractTypeForDbType(
+    dbType,
+    abstractTypesMap,
+  );
+  if (abstractTypeOfDbType) {
+    abstractTypeSet.add(abstractTypeOfDbType);
   }
-  return [];
+
+  targetDbTypes.forEach((targetDbType) => {
+    const abstractType = identifyAbstractTypeForDbType(
+      targetDbType,
+      abstractTypesMap,
+    );
+    if (abstractType) {
+      abstractTypeSet.add(abstractType);
+    }
+  });
+  const abstractTypeList = [...abstractTypeSet].sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+
+  if (!abstractTypeOfDbType) {
+    abstractTypeList.push(
+      constructAbstractTypeFromResponse(unknownAbstractTypeResponse),
+    );
+  }
+  return abstractTypeList;
 }
 
 export function getAbstractTypeForDbType(
   dbType: DbType,
   abstractTypesMap: AbstractTypesMap,
 ): AbstractType {
-  return (
-    getAbstractTypesForDbTypeList([dbType], abstractTypesMap)[0] ||
-    constructAbstractTypeFromResponse(unknownAbstractTypeResponse)
+  let abstractTypeOfDbType = identifyAbstractTypeForDbType(
+    dbType,
+    abstractTypesMap,
   );
+  if (!abstractTypeOfDbType) {
+    abstractTypeOfDbType = constructAbstractTypeFromResponse(
+      unknownAbstractTypeResponse,
+    );
+  }
+  return abstractTypeOfDbType;
 }

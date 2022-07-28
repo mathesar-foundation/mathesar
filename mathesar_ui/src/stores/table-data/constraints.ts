@@ -11,7 +11,7 @@ import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { Constraint as ApiConstraint } from '@mathesar/api/tables/constraints';
-import type { Column } from './columns';
+import type { Column } from '@mathesar/api/tables/columns';
 
 /**
  * When representing a constraint on the front end, we directly use the object

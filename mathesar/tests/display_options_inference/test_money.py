@@ -2,7 +2,7 @@ import pytest
 from django.core.files.base import File
 
 from db.columns.operations.select import get_column_attnum_from_name
-from mathesar.models import DataFile, Table
+from mathesar.models.base import DataFile, Table
 from mathesar.utils.display_options_inference import infer_mathesar_money_display_options
 
 create_display_options_test_list = [
