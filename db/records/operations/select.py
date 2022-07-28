@@ -174,9 +174,9 @@ def _apply_transform(relation, transform):
     elif transform_type == 'order':
         spec = transform['spec']
         relation = _sort(relation, spec)
-    elif transform_type == 'grouping':
+    elif transform_type == 'add_grouping_column':
         spec = transform['spec']
-        group_by_spec = spec.get('group_by')
+        group_by_spec = spec.get('grouping')
         relation = _grouping_metadata(relation, group_by_spec)
     elif transform_type == 'limit':
         spec = transform['spec']
@@ -219,8 +219,12 @@ def _grouping_metadata(relation, group_by):
     # other transform specs are json at this point in the pipeline
     if isinstance(group_by, group.GroupBy):
         relation = group.get_group_augmented_records_relation(relation, group_by)
-
     return relation
+
+
+def _summarize(relation, summarize_spec):
+    grouping_cols = summarize_spec.get('grouping_cols')
+    aggregations = summarize_spec['aggregations']
 
 
 def _select_subset_of_columns(relation, columns_to_select):

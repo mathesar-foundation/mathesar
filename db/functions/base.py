@@ -344,3 +344,12 @@ class CurrentDateTime(DBFunction):
     @staticmethod
     def to_sa_expression():
         return func.current_timestamp()
+
+
+class Label(DBFunction):
+    id = 'label'
+    name = 'label'
+
+    @staticmethod
+    def to_sa_expression(col_expr, col_label):
+        return col_expr.label(col_label)
