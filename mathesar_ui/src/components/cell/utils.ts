@@ -10,7 +10,7 @@ import type {
 } from '@mathesar-component-library/types';
 import type { Constraint } from '@mathesar/stores/table-data/constraints';
 import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
-import type { Column } from '@mathesar/stores/table-data/columns';
+import type { Column } from '@mathesar/api/tables/columns';
 import DataTypes from './data-types';
 import type { CellColumnLike } from './data-types/typeDefinitions';
 import type { LinkedRecordCellExternalProps } from './data-types/components/typeDefinitions';
@@ -46,7 +46,7 @@ export function getCellCap(
   column: Column,
   constraints: Constraint[],
   cellInfo: AbstractTypeConfiguration['cell'],
-): ComponentAndProps<unknown> {
+): ComponentAndProps {
   const fks = findFkConstraintsForColumn(constraints, column.id);
   if (fks.length) {
     const props: LinkedRecordCellExternalProps = {
@@ -64,7 +64,7 @@ export function getCellCap(
 export function getDbTypeBasedInputCap(
   column: CellColumnLike,
   cellInfoConfig?: AbstractTypeConfiguration['cell'],
-): ComponentAndProps<unknown> {
+): ComponentAndProps {
   const cellInfo = cellInfoConfig ?? getCellInfo(column.type);
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);

@@ -36,6 +36,7 @@ module.exports = {
     '@typescript-eslint/comma-spacing': 'off',
     'array-bracket-spacing': 'off',
     'no-restricted-syntax': 0,
+    '@typescript-eslint/require-await': 'off',
   },
   overrides: [
     {
@@ -108,7 +109,6 @@ module.exports = {
         'space-in-parens': 'off',
         'no-confusing-arrow': 'off',
         'no-constant-condition': 'off',
-        '@typescript-eslint/require-await': 'off',
       },
     },
     {

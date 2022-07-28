@@ -39,7 +39,7 @@
     <Route path="/:db/schemas" let:meta>
       <SchemaListing database={meta.params.db} />
     </Route>
-    <Route path="/:db/:schema/*" let:meta>
+    <Route path="/:db/:schema/*" let:meta firstmatch>
       <SchemaHome
         database={meta.params.db}
         schemaId={parseInt(meta.params.schema, 10)}

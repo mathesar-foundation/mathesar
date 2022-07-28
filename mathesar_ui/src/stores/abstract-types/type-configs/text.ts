@@ -2,7 +2,7 @@ import { faAlignLeft } from '@fortawesome/free-solid-svg-icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
 import type { DbType } from '@mathesar/AppTypes';
-import type { Column } from '@mathesar/stores/table-data/types';
+import type { Column } from '@mathesar/api/tables/columns';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
