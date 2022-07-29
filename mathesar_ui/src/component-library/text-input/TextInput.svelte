@@ -38,4 +38,5 @@
   on:blur
   on:keydown
   on:beforeinput
+  on:change
 />

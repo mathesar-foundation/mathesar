@@ -1,0 +1,15 @@
+.collapsible {
+  .collapsible-header {
+    display: flex;
+    width: 100%;
+    text-align: left;
+
+    .collapsible-header-title {
+      flex-grow: 1;
+    }
+    svg {
+      flex-shrink: 0;
+      flex-grow: 0;
+    }
+  }
+}

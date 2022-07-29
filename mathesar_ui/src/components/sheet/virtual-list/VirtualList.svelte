@@ -30,6 +30,7 @@
   import { cancelTimeout, requestTimeout } from './timer';
   import listUtils from './listUtils';
   import type { Props, ItemInfo } from './listUtils';
+  import type { SheetVirtualRowsApi } from '../types';
 
   const dispatch = createEventDispatcher();
 
@@ -208,12 +209,12 @@
     }
   });
 
-  export function resetAfterIndex(index: number): void {
+  export function recalculateHeightsAfterIndex(index: number): void {
     instanceProps = {
       ...instanceProps,
       lastMeasuredIndex: Math.min(
         instanceProps.lastMeasuredIndex,
-        (index || 0) - 1,
+        (index ?? 0) - 1,
       ),
       styleCache: {},
     };
@@ -249,12 +250,19 @@
     }
   }
 
-  export function ScrollToTop(): void {
+  export function scrollToTop(): void {
     if (outerRef && psRef) {
       outerRef.scrollTop = 0;
       psRef.update();
     }
   }
+
+  const api: SheetVirtualRowsApi = {
+    scrollToTop,
+    scrollToBottom,
+    scrollToPosition,
+    recalculateHeightsAfterIndex,
+  };
 </script>
 
 <div
@@ -263,7 +271,7 @@
   bind:this={outerRef}
 >
   <div style={innerStyle}>
-    <slot {items} />
+    <slot {items} {api} />
   </div>
 </div>
 
