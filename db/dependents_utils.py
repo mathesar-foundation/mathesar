@@ -33,8 +33,9 @@ def get_dependents_graph(referenced_object_id, engine):
     final = []
     for r in result:
         d = {}
+        d['level'] = r.level
         d['obj'] = {'objid': r.objid, 'type': r.type}
-        d['parent'] = {'refobjid': r.refobjid}
+        d['parent_obj'] = {'objid': r.refobjid}
         final.append(d)
 
     return final

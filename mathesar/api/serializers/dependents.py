@@ -49,4 +49,4 @@ class BaseDependentObjectSerializer(
 
 class DependentSerializer(serializers.Serializer):
     obj = BaseDependentObjectSerializer()
-    parent = BaseDependentObjectSerializer()
+    parent_obj = BaseDependentObjectSerializer()

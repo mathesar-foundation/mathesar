@@ -21,23 +21,23 @@ def test_table_dependents(engine_with_schema):
 
     t1_oid = get_oid_from_table(t1.name, schema, engine)
     t2_oid = get_oid_from_table(t2.name, schema, engine)
-    t1_dependents_graph = get_dependents_graph(t1_oid, engine).fetchall()
+    t1_dependents_graph = get_dependents_graph(t1_oid, engine)
 
-    t1_dependents = list(filter(lambda x: x.refobjid == t1_oid, t1_dependents_graph))
-    t2_dependents = list(filter(lambda x: x.refobjid == t2_oid, t1_dependents_graph))
+    t1_dependents = list(filter(lambda x: x['parent_obj']['objid'] == t1_oid, t1_dependents_graph))
+    t2_dependents = list(filter(lambda x: x['parent_obj']['objid'] == t2_oid, t1_dependents_graph))
 
     assert len(t1_dependents_graph) == 5
     assert len(t1_dependents) == 3
     assert len(t2_dependents) == 2
     assert all(
         [
-            r.level == 1
+            r['level'] == 1
             for r in t1_dependents
         ]
     )
     assert all(
         [
-            r.level == 2
+            r['level'] == 2
             for r in t2_dependents
         ]
     )
@@ -59,12 +59,26 @@ def test_response_format(engine_with_schema):
     t2.create()
 
     t1_oid = get_oid_from_table(t1.name, schema, engine)
-    t1_dependents_graph = get_dependents_graph(t1_oid, engine).fetchall()
+    t1_dependents_graph = get_dependents_graph(t1_oid, engine)
 
-    expected_attrs = ['objid', 'refobjid', 'type', 'level', 'identity']
+    dependent_expected_attrs = ['obj', 'parent_obj', 'level']
+    obj_expected_attrs = ['objid', 'type']
+    parent_expected_attrs = ['objid']  # TODO: add type when it's returned for the parent obj
     assert all(
         [
-            all([hasattr(dependent, attr) for attr in expected_attrs])
+            all(attr in dependent for attr in dependent_expected_attrs)
+            for dependent in t1_dependents_graph
+        ]
+    )
+    assert all(
+        [
+            all(attr in dependent['obj'] for attr in obj_expected_attrs)
+            for dependent in t1_dependents_graph
+        ]
+    )
+    assert all(
+        [
+            all(attr in dependent['parent_obj'] for attr in parent_expected_attrs)
             for dependent in t1_dependents_graph
         ]
     )
@@ -86,14 +100,14 @@ def test_graph_max_level(engine_with_schema):
         t.create()
 
     t0_oid = get_oid_from_table(t0.name, schema, engine)
-    dependents = get_dependents_graph(t0_oid, engine).fetchall()
+    dependents = get_dependents_graph(t0_oid, engine)
 
     tables_count = len(metadata.tables.keys())
     assert tables_count == 11
 
-    dependents_by_level = sorted(dependents, key=lambda x: x.level, reverse=True)
-    assert dependents_by_level[-1].level == 1
-    assert dependents_by_level[0].level == 10
+    dependents_by_level = sorted(dependents, key=lambda x: x['level'], reverse=True)
+    assert dependents_by_level[-1]['level'] == 1
+    assert dependents_by_level[0]['level'] == 10
 
 
 def test_specific_object_types(engine_with_schema):
@@ -115,12 +129,12 @@ def test_specific_object_types(engine_with_schema):
     t2.create()
 
     t1_oid = get_oid_from_table(t1.name, schema, engine)
-    dependents = get_dependents_graph(t1_oid, engine).fetchall()
+    dependents = get_dependents_graph(t1_oid, engine)
 
     t1_pk_oid = get_constraint_oid_by_name_and_table_oid(t1_pk_name, t1_oid, engine)
     t2_oid = get_oid_from_table(t2.name, schema, engine)
     t2_fk_oid = get_constraint_oid_by_name_and_table_oid(t2_fk_name, t2_oid, engine)
-    t1_dependent_oids = [d.objid for d in list(filter(lambda x: x.refobjid == t1_oid, dependents))]
+    t1_dependent_oids = [d['obj']['objid'] for d in list(filter(lambda x: x['parent_obj']['objid'] == t1_oid, dependents))]
 
     assert t1_pk_oid in t1_dependent_oids
     assert t2_oid in t1_dependent_oids
@@ -146,11 +160,11 @@ def test_circular_referene(engine_with_schema):
 
     t1_oid = get_oid_from_table(t1.name, schema, engine)
     t2_oid = get_oid_from_table(t2.name, schema, engine)
-    t1_dependents_graph = get_dependents_graph(t1_oid, engine).fetchall()
+    t1_dependents_graph = get_dependents_graph(t1_oid, engine)
 
-    t2_dependents = list(filter(lambda x: x.refobjid == t2_oid, t1_dependents_graph))
-    t2_dependent_oids = [d.objid for d in list(filter(lambda x: x.refobjid == t1_oid, t2_dependents))]
+    t2_dependents = list(filter(lambda x: x['parent_obj']['objid'] == t2_oid, t1_dependents_graph))
+    t2_dependent_oids = [d['obj']['objid'] for d in list(filter(lambda x: x['parent_obj']['objid'] == t1_oid, t2_dependents))]
 
-    dependents_by_level = sorted(t1_dependents_graph, key=lambda x: x.level, reverse=True)
-    assert dependents_by_level[0].level == 2
+    dependents_by_level = sorted(t1_dependents_graph, key=lambda x: x['level'], reverse=True)
+    assert dependents_by_level[0]['level'] == 2
     assert t1_oid not in t2_dependent_oids
