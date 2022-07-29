@@ -85,7 +85,6 @@ def test_graph_max_level(engine_with_schema):
             Column(f't{i}_id', Integer, ForeignKey(f"t{i}.id")))
         t.create()
 
-
     t0_oid = get_oid_from_table(t0.name, schema, engine)
     dependents = get_dependents_graph(t0_oid, engine).fetchall()
 

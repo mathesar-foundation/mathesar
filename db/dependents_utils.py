@@ -1,5 +1,4 @@
 from sqlalchemy import MetaData, Table, any_, case, column, exists, func, literal, literal_column, select, text, true, union
-from db.tables.operations.select import get_oid_from_table
 from sqlalchemy.dialects.postgresql import array
 
 # OIDs assigned during normal database operation are constrained to be 16384 or higher.
@@ -31,7 +30,14 @@ def get_dependents_graph(referenced_object_id, engine):
     with engine.connect() as conn:
         result = conn.execute(q)
 
-    return result
+    final = []
+    for r in result:
+        d = {}
+        d['obj'] = {'objid': r.objid, 'type': r.type}
+        d['parent'] = {'refobjid': r.refobjid}
+        final.append(d)
+
+    return final
 
 
 def _get_table_dependents(foreign_key_dependents, pg_constraint):

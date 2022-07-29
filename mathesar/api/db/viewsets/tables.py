@@ -8,6 +8,7 @@ from sqlalchemy.exc import DataError, IntegrityError
 
 from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
+from mathesar.api.serializers.dependents import DependentSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.exceptions.database_exceptions import (
@@ -60,8 +61,8 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     @action(methods=['get'], detail=True)
     def dependents(self, request, pk=None):
         table = self.get_object()
-        table_dependents = table.dependents()
-        return Response(table_dependents)
+        serializer = DependentSerializer(table.dependents, many=True, context={'request': request})
+        return Response(serializer.data)
 
     @action(methods=['get'], detail=True)
     def joinable_tables(self, request, pk=None):
