@@ -19,6 +19,7 @@ TIMES_SQL = os.path.join(RESOURCES, "times_create.sql")
 BOOLEANS_SQL = os.path.join(RESOURCES, "booleans_create.sql")
 FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 MAGNITUDE_SQL = os.path.join(RESOURCES, "magnitude_testing_create.sql")
+JSON_SQL = os.path.join(RESOURCES, "json_sort.sql")
 
 
 @pytest.fixture
@@ -83,6 +84,15 @@ def engine_with_times(engine_with_schema):
 
 
 @pytest.fixture
+def engine_with_json(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(JSON_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+
+
+@pytest.fixture
 def engine_with_booleans(engine_with_schema):
     engine, schema = engine_with_schema
     with engine.begin() as conn, open(BOOLEANS_SQL) as f:
@@ -117,6 +127,11 @@ def roster_table_name():
 @pytest.fixture(scope='session')
 def uris_table_name():
     return "uris"
+
+
+@pytest.fixture(scope='session')
+def json_table_name():
+    return "json_sort"
 
 
 @pytest.fixture(scope='session')
@@ -192,6 +207,14 @@ def magnitude_table_obj(engine_with_magnitude, magnitude_table_name):
     engine, schema = engine_with_magnitude
     metadata = MetaData(bind=engine)
     table = Table(magnitude_table_name, metadata, schema=schema, autoload_with=engine)
+    return table, engine
+
+
+@pytest.fixture
+def json_table_obj(engine_with_json, json_table_name):
+    engine, schema = engine_with_json
+    metadata = MetaData(bind=engine)
+    table = Table(json_table_name, metadata, schema=schema, autoload_with=engine)
     return table, engine
 
 
