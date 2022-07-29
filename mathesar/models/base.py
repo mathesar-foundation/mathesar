@@ -28,6 +28,7 @@ from db.tables.operations.drop import drop_table
 from db.tables.operations.move_columns import move_columns_between_related_tables
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tables.operations.split import extract_columns_from_table
+from db.tables.operations.insert import insert_from_select
 
 from mathesar import reflection
 from mathesar.models.relation import Relation
@@ -432,9 +433,17 @@ class Table(DatabaseObject, Relation):
             column_objs.append(column)
         Column.current_objects.bulk_update(column_objs, fields=['table_id', 'attnum'])
 
-    def insert_records_to_existing_table(existing_table, temp_table, mappings):
-        # TBD
-        pass
+    def insert_records_to_existing_table(self, existing_table, data_files, mappings=None):
+        from_table = self._sa_table
+        target_table = existing_table._sa_table
+        schema = existing_table.schema
+        data_file = data_files[0]
+        try:
+            table = insert_from_select(from_table, target_table, schema, mappings)
+            data_file.table_imported_to = target_table
+        except Exception as e:
+            # ToDo raise specific exceptions.
+            raise e
 
 
 class Column(ReflectionManagerMixin, BaseModel):
