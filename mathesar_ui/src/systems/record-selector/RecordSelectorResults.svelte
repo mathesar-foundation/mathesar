@@ -3,6 +3,7 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
   import type { Row } from '@mathesar/stores/table-data/records';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import { rowHasRecord } from '@mathesar/stores/table-data/records';
   // TODO: Remove route dependency in systems
   import RowCellBackgrounds from '@mathesar/routes/schema-home/routes/datascape/table-view/row/RowCellBackgrounds.svelte';
   import { rowHeightPx } from '@mathesar/routes/schema-home/routes/datascape/table-view/geometry';
@@ -15,8 +16,8 @@
 
   let selectionIndex = 0;
 
-  $: ({ display } = $tabularData);
-  $: recordsStore = $tabularData.recordsData.savedRecords;
+  $: ({ display, recordsData } = $tabularData);
+  $: recordsStore = recordsData.savedRecords;
   $: records = $recordsStore;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
@@ -67,20 +68,19 @@
 
 <div class="record-selector-results">
   {#each records as row, index}
-    {#if row.record}
-      <div class="row" style={rowStyle} on:click={() => submitRecord(index)}>
-        <CellArranger {display} let:style let:processedColumn>
-          <CellWrapper {style}>
-            <CellFabric
-              columnFabric={processedColumn}
-              value={row.record[processedColumn.column.id]}
-              disabled
-            />
-            <RowCellBackgrounds isSelected={index === selectionIndex} />
-          </CellWrapper>
-        </CellArranger>
-      </div>
-    {/if}
+    <div class="row" style={rowStyle} on:click={() => submitRecord(index)}>
+      <CellArranger {display} let:style let:processedColumn>
+        <CellWrapper {style}>
+          <CellFabric
+            columnFabric={processedColumn}
+            value={row?.record?.[processedColumn.column.id]}
+            disabled
+            showAsSkeleton={!rowHasRecord(row)}
+          />
+          <RowCellBackgrounds isSelected={index === selectionIndex} />
+        </CellWrapper>
+      </CellArranger>
+    </div>
   {/each}
 </div>
 

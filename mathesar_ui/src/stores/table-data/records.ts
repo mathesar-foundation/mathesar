@@ -29,12 +29,14 @@ import type { Sorting } from './sorting';
 import type { Grouping as GroupingTODORename } from './grouping';
 import type { Filtering } from './filtering';
 import { TabularType } from './TabularType';
+import type { SearchFuzzy } from './searchFuzzy';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
   sorting: Sorting;
   grouping: GroupingTODORename;
   filtering: Filtering;
+  searchFuzzy: SearchFuzzy;
 }
 
 function buildFetchQueryString(data: RecordsRequestParamsData): string {
@@ -43,6 +45,7 @@ function buildFetchQueryString(data: RecordsRequestParamsData): string {
     ...data.sorting.recordsRequestParamsIncludingGrouping(data.grouping),
     ...data.grouping.recordsRequestParams(),
     ...data.filtering.recordsRequestParams(),
+    ...data.searchFuzzy.recordsRequestParams(),
   };
   const entries: [string, string][] = Object.entries(params).map(([k, v]) => {
     const value = typeof v === 'string' ? v : JSON.stringify(v);
@@ -95,6 +98,21 @@ export interface Row {
   group?: Group;
   rowIndex?: number;
   groupValues?: Record<string, unknown>;
+}
+
+export type RecordRow = Omit<Row, 'record'> & Required<Pick<Row, 'record'>>;
+
+export function rowHasRecord(row: Row): row is RecordRow {
+  // Why do we also need to check that the record object is not empty?
+  //
+  // Because somewhere else in the code (I don't know where) we are producing
+  // row objects which contain empty records. That behavior was causing a bug.
+  // This function is a way to work around that bug without taking the time to
+  // track down the root cause and fix/test it. At some point we should refactor
+  // `Row` to be a union of different row types, none of which contain optional
+  // properties. With that approach we can simplify this function to be more
+  // straightforward.
+  return row.record !== undefined && Object.entries(row.record).length > 0;
 }
 
 export interface TableRecordsData {
@@ -271,7 +289,10 @@ export class RecordsData {
 
     this.savedRecords.update((existingData) => {
       let data = [...existingData];
-      data.length = getStoreValue(this.meta.pagination).size;
+      data.length = Math.min(
+        data.length,
+        getStoreValue(this.meta.pagination).size,
+      );
 
       let index = -1;
       data = data.map((entry) => {

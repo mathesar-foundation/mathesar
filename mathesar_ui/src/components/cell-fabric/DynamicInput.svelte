@@ -26,10 +26,23 @@ during Sheet component creation.
      * property here.
      */
     containerClass?: string;
+
+    /**
+     * Why pass a function as a prop instead of using the `input` event or the
+     * `change` event?
+     *
+     * Because I needed a way to access the _value_ of the input each time it
+     * changes, and it was difficult to do that with events in a way that would
+     * work consistently across all input types.
+     */
+    onValueChange?: (value: unknown) => void;
   }
 
   export let value: unknown;
   export let componentAndProps: ComponentAndProps;
+  export let onValueChange: Required<$$Props>['onValueChange'] = () => {};
+
+  $: onValueChange(value);
 
   // TODO write more comments explaining this
   $: props = componentAndProps.props as Record<string, unknown>;

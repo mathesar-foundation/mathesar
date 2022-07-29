@@ -18,6 +18,7 @@ import { Grouping } from './grouping';
 import type { RecordsRequestParamsData } from './records';
 import type { CellKey, RowKey } from './utils';
 import { getRowStatus, getSheetState, extractRowKeyFromCellKey } from './utils';
+import { SearchFuzzy } from './searchFuzzy';
 
 /**
  * Unlike in `RequestStatus`, here the state and the error messages are
@@ -98,6 +99,8 @@ export class Meta {
 
   filtering: Writable<Filtering>;
 
+  searchFuzzy: Writable<SearchFuzzy>;
+
   selectedRows = new WritableSet<RowKey>();
 
   cellClientSideErrors = new WritableMap<CellKey, string[]>();
@@ -145,6 +148,7 @@ export class Meta {
     this.sorting = writable(props.sorting);
     this.grouping = writable(props.grouping);
     this.filtering = writable(props.filtering);
+    this.searchFuzzy = writable(new SearchFuzzy());
 
     this.rowsWithClientSideErrors = derived(
       this.cellClientSideErrors,
@@ -186,14 +190,6 @@ export class Meta {
         }),
     );
 
-    // Why do `this.props` and `this.recordsRequestParamsData` look identical?
-    //
-    // It's a coincidence that `MetaProps` and `RecordsRequestParamsData` are
-    // almost identical, but that might not always be the case. For example, if
-    // we want to store info in the tabs system about the selected cells, then
-    // `MetaProps` would need more fields. Using separate fields for
-    // `this.props` and `this.recordsRequestParamsData` gives us a separation
-    // of concerns.
     this.props = derived(
       [this.pagination, this.sorting, this.grouping, this.filtering],
       ([pagination, sorting, grouping, filtering]) => ({
@@ -204,12 +200,19 @@ export class Meta {
       }),
     );
     this.recordsRequestParamsData = derived(
-      [this.pagination, this.sorting, this.grouping, this.filtering],
-      ([pagination, sorting, grouping, filtering]) => ({
+      [
+        this.pagination,
+        this.sorting,
+        this.grouping,
+        this.filtering,
+        this.searchFuzzy,
+      ],
+      ([pagination, sorting, grouping, filtering, searchFuzzy]) => ({
         pagination,
         sorting,
         grouping,
         filtering,
+        searchFuzzy,
       }),
     );
   }

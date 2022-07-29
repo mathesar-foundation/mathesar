@@ -6,7 +6,6 @@
     setTabularDataStoreInContext,
     TabularData,
   } from '@mathesar/stores/table-data/tabularData';
-  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { constraintIsFk } from '@mathesar/stores/table-data/constraintsUtils';
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import type { RecordSelectorController } from './RecordSelectorController';
@@ -18,6 +17,7 @@
   import NestedRecordSelector from './NestedRecordSelector.svelte';
   import QuarterCircle from './QuarterCircle.svelte';
   import Arrow from './Arrow.svelte';
+  import RecordSelectorInput from './RecordSelectorInput.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -41,7 +41,7 @@
   let inputsRow: HTMLElement;
 
   $: tabularDataStore.set(tabularData);
-  $: ({ columnsDataStore, constraintsDataStore, display, isLoading } =
+  $: ({ columnsDataStore, constraintsDataStore, display, meta, isLoading } =
     tabularData);
   $: ({ constraints } = $constraintsDataStore);
   $: ({ columns } = $columnsDataStore);
@@ -155,11 +155,12 @@
       <CellWrapper
         style="{style}{columnId === activeColumnId ? 'z-index: 101;' : ''}"
       >
-        <DynamicInput
+        <RecordSelectorInput
           class="record-selector-input column-{columnId}"
           containerClass="record-selector-input-container"
           componentAndProps={processedColumn.inputComponentAndProps}
-          value={null}
+          searchFuzzy={meta.searchFuzzy}
+          {columnId}
           on:focus={() => handleInputFocus(columnId)}
           on:blur={() => handleInputBlur(columnId)}
           on:recordSelectorOpen={() => {
