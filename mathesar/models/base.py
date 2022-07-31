@@ -436,10 +436,10 @@ class Table(DatabaseObject, Relation):
     def insert_records_to_existing_table(self, existing_table, data_files, mappings=None):
         from_table = self._sa_table
         target_table = existing_table._sa_table
-        schema = existing_table.schema
+        engine = self._sa_engine
         data_file = data_files[0]
         try:
-            table = insert_from_select(from_table, target_table, schema, mappings)
+            table = insert_from_select(from_table, target_table, engine, mappings)
             data_file.table_imported_to = target_table
         except Exception as e:
             # ToDo raise specific exceptions.
