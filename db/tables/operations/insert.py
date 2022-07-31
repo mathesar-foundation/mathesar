@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from mathesar.database.base import create_mathesar_engine
+
 
 def insert_from_select(from_table, target_table, engine, mappings=None):
     target_table_col_list = [col for col in target_table.c if col.name != 'id']
