@@ -439,11 +439,12 @@ class Table(DatabaseObject, Relation):
         engine = self._sa_engine
         data_file = data_files[0]
         try:
-            table = insert_from_select(from_table, target_table, engine, mappings)
-            data_file.table_imported_to = target_table
+            table, _ = insert_from_select(from_table, target_table, engine, mappings)
+            data_file.table_imported_to = existing_table
         except Exception as e:
             # ToDo raise specific exceptions.
             raise e
+        return table
 
 
 class Column(ReflectionManagerMixin, BaseModel):

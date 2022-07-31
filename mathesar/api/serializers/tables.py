@@ -202,4 +202,4 @@ class MappingSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 class TableImportSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     import_target = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all(), required=True)
     data_files = serializers.PrimaryKeyRelatedField(required=True, many=True, queryset=DataFile.objects.all())
-    mappings = MappingSerializer(required=True)
+    mappings = MappingSerializer(required=True, allow_null=True)

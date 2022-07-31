@@ -11,4 +11,4 @@ def insert_from_select(from_table, target_table, engine, mappings=None):
         except Exception as e:
             # ToDo raise specific exceptions
             raise e
-    return result
+    return target_table, result
