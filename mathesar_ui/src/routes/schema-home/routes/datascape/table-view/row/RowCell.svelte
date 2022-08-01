@@ -16,7 +16,7 @@
     RecordsData,
     CellKey,
   } from '@mathesar/stores/table-data/types';
-  import Cell from '@mathesar/components/cell/Cell.svelte';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
@@ -114,7 +114,7 @@
       />
     {/if}
 
-    <Cell
+    <CellFabric
       {processedColumn}
       {isActive}
       {value}

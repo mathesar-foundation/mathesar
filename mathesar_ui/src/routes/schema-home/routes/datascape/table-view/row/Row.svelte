@@ -153,7 +153,7 @@
       cursor: pointer;
 
       :global([data-sheet-element='cell']:not(.is-active)
-          .sheet-cell
+          .cell-fabric
           .cell-wrapper
           > *) {
         visibility: hidden;

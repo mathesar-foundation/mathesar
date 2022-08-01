@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import type { CellValueFormatter } from '@mathesar/components/cell/utils';
+  import type { CellValueFormatter } from '@mathesar/components/cell-fabric/utils';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import type { CellTypeProps, HorizontalAlignment } from './typeDefinitions';

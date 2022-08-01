@@ -13,9 +13,9 @@
     ProcessedColumn,
   } from '@mathesar/stores/table-data/types';
   import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
-  import DynamicInput from '@mathesar/components/cell/DynamicInput.svelte';
+  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { getDbTypeBasedInputCap } from '@mathesar/components/cell/utils';
+  import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
   import { validateFilterEntry } from './utils';
 
   const dispatch = createEventDispatcher();

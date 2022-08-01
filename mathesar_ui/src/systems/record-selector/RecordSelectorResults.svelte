@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
   import type { Row } from '@mathesar/stores/table-data/records';
-  import Cell from '@mathesar/components/cell/Cell.svelte';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   // TODO: Remove route dependency in systems
   import RowCellBackgrounds from '@mathesar/routes/schema-home/routes/datascape/table-view/row/RowCellBackgrounds.svelte';
   import { rowHeightPx } from '@mathesar/routes/schema-home/routes/datascape/table-view/geometry';
@@ -70,7 +70,7 @@
       <div class="row" style={rowStyle} on:click={() => submitRecord(index)}>
         <CellArranger {display} let:style let:processedColumn>
           <CellWrapper {style}>
-            <Cell
+            <CellFabric
               {processedColumn}
               value={row.record[processedColumn.column.id]}
               disabled

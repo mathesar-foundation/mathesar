@@ -16,7 +16,7 @@ import {
 import {
   getCellCap,
   getDbTypeBasedInputCap,
-} from '@mathesar/components/cell/utils';
+} from '@mathesar/components/cell-fabric/utils';
 import { findFkConstraintsForColumn } from './constraintsUtils';
 
 export interface ProcessedColumn {

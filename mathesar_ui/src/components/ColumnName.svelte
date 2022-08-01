@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Column } from '@mathesar/api/tables/columns';
-  import { getColumnIconProps } from './cell/utils';
+  import { getColumnIconProps } from './cell-fabric/utils';
   import TypeIcon from './TypeIcon.svelte';
 
   export let column: Column;
