@@ -1,16 +1,18 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { CellColumnLike } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
   import { getColumnIconProps } from './cell-fabric/utils';
   import TypeIcon from './TypeIcon.svelte';
 
-  export let column: Column;
+  export let column: CellColumnLike & { name: string };
 
   $: icon = getColumnIconProps(column);
 </script>
 
 <span class="column-name">
   <span class="icon"><TypeIcon {icon} /></span>
-  <span class="name">{column.name}</span>
+  <span class="name">
+    {column.name}
+  </span>
 </span>
 
 <style>

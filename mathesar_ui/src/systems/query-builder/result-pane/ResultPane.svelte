@@ -8,6 +8,7 @@
     SheetCellResizer,
   } from '@mathesar/components/sheet';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import ColumnName from '@mathesar/components/ColumnName.svelte';
   import type QueryManager from '../QueryManager';
 
   export let queryManager: QueryManager;
@@ -29,7 +30,16 @@
             let:style
           >
             <div {...htmlAttributes} {style}>
-              {processedQueryColumn.column.name ?? processedQueryColumn.id}
+              <div class="column-name-wrapper">
+                <ColumnName
+                  column={{
+                    ...processedQueryColumn.column,
+                    name:
+                      processedQueryColumn.column.name ??
+                      processedQueryColumn.column.alias,
+                  }}
+                />
+              </div>
               <SheetCellResizer columnIdentifierKey={processedQueryColumn.id} />
             </div>
           </SheetCell>
@@ -80,5 +90,11 @@
     height: 100%;
     overflow: hidden;
     flex-shrink: 0;
+
+    .column-name-wrapper {
+      flex: 1;
+      padding: 0px 10px;
+      overflow: hidden;
+    }
   }
 </style>
