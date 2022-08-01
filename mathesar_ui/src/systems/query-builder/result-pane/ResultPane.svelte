@@ -7,11 +7,12 @@
     SheetCell,
     SheetCellResizer,
   } from '@mathesar/components/sheet';
-  import type QueryManager from './QueryManager';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import type QueryManager from '../QueryManager';
 
   export let queryManager: QueryManager;
 
-  $: ({ query, columns, records } = queryManager);
+  $: ({ query, processedQueryColumns, records } = queryManager);
   $: ({ base_table } = $query);
 </script>
 
@@ -19,17 +20,17 @@
   {#if !base_table}
     Please select the base table to start building the query
   {:else}
-    <Sheet columns={$columns} getColumnIdentifier={(c) => c.alias}>
+    <Sheet columns={$processedQueryColumns} getColumnIdentifier={(c) => c.id}>
       <SheetHeader>
-        {#each $columns as column (column.alias)}
+        {#each $processedQueryColumns as processedQueryColumn (processedQueryColumn.id)}
           <SheetCell
-            columnIdentifierKey={column.alias}
+            columnIdentifierKey={processedQueryColumn.id}
             let:htmlAttributes
             let:style
           >
             <div {...htmlAttributes} {style}>
-              {column.name ?? column.alias}
-              <SheetCellResizer columnIdentifierKey={column.alias} />
+              {processedQueryColumn.column.name ?? processedQueryColumn.id}
+              <SheetCellResizer columnIdentifierKey={processedQueryColumn.id} />
             </div>
           </SheetCell>
         {/each}
@@ -45,14 +46,21 @@
           {#if $records.results[item.index]}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div {...htmlAttributes} style={styleString}>
-                {#each $columns as column (column.alias)}
+                {#each $processedQueryColumns as processedQueryColumn (processedQueryColumn.id)}
                   <SheetCell
-                    columnIdentifierKey={column.alias}
+                    columnIdentifierKey={processedQueryColumn.id}
                     let:htmlAttributes
                     let:style
                   >
                     <div {...htmlAttributes} {style}>
-                      {$records.results[item.index][column.alias]}
+                      <CellFabric
+                        columnFabric={processedQueryColumn}
+                        value={$records.results[item.index][
+                          processedQueryColumn.id
+                        ]}
+                        showAsSkeleton={false}
+                        disabled={true}
+                      />
                     </div>
                   </SheetCell>
                 {/each}

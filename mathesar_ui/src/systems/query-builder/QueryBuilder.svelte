@@ -21,7 +21,7 @@
   import type QueryManager from './QueryManager';
   import type { QueryInitialColumn } from './QueryModel';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
-  import ResultPane from './ResultPane.svelte';
+  import ResultPane from './result-pane/ResultPane.svelte';
 
   const dispatch = createEventDispatcher();
 

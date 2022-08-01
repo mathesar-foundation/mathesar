@@ -1,18 +1,40 @@
-import { get, writable } from 'svelte/store';
-import type { Writable } from 'svelte/store';
+import { get, writable, derived } from 'svelte/store';
+import type { Writable, Readable } from 'svelte/store';
 import { EventHandler } from '@mathesar-component-library';
 import type { CancellablePromise } from '@mathesar-component-library';
 import { getAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
 import type {
   QueryInstance,
+  QueryResultColumn,
   QueryResultColumns,
   QueryResultRecords,
 } from '@mathesar/api/queries/queryList';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
+import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import Pagination from '@mathesar/utils/Pagination';
+import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
+import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import type QueryModel from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
+
+export interface ProcessedQueryResultColumn extends CellColumnFabric {
+  id: QueryResultColumn['alias'];
+  column: QueryResultColumn;
+}
+
+function processColumn(
+  column: QueryResultColumn,
+  abstractTypeMap: AbstractTypesMap,
+): ProcessedQueryResultColumn {
+  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
+  return {
+    id: column.alias,
+    column,
+    cellComponentAndProps: getCellCap(abstractType.cell, column),
+  };
+}
 
 export default class QueryManager extends EventHandler<{
   save: QueryInstance;
@@ -38,6 +60,8 @@ export default class QueryManager extends EventHandler<{
 
   columns: Writable<QueryResultColumns> = writable([]);
 
+  processedQueryColumns: Readable<ProcessedQueryResultColumn[]> = writable([]);
+
   records: Writable<QueryResultRecords> = writable({ count: 0, results: [] });
 
   querySavePromise: CancellablePromise<QueryInstance> | undefined;
@@ -46,13 +70,17 @@ export default class QueryManager extends EventHandler<{
 
   queryRecordsFetchPromise: CancellablePromise<QueryResultRecords> | undefined;
 
-  constructor(query: QueryModel) {
+  constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
     super();
     this.query = writable(query);
     this.undoRedoManager = new QueryUndoRedoManager(
       query.isSaveable() ? query : undefined,
     );
     void Promise.all([this.fetchColumns(), this.fetchResults()]);
+
+    this.processedQueryColumns = derived(this.columns, (columnsData) =>
+      columnsData.map((column) => processColumn(column, abstractTypeMap)),
+    );
   }
 
   async save(): Promise<QueryInstance | undefined> {

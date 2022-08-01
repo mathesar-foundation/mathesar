@@ -6,6 +6,7 @@
   import QueryManager from '@mathesar/systems/query-builder/QueryManager';
   import QueryModel from '@mathesar/systems/query-builder/QueryModel';
   import { queries, getQuery } from '@mathesar/stores/queries';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { CancellablePromise } from '@mathesar/component-library';
   import type { QueryInstance } from '@mathesar/api/queries/queryList';
   import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
@@ -24,7 +25,10 @@
 
   function createQueryManager(queryInstance: UnsavedQueryInstance) {
     urlUpdateUnsubscriber?.();
-    queryManager = new QueryManager(new QueryModel(queryInstance));
+    queryManager = new QueryManager(
+      new QueryModel(queryInstance),
+      $currentDbAbstractTypes.data,
+    );
     is404 = false;
     urlUpdateUnsubscriber = queryManager.on('save', async (instance) => {
       try {
