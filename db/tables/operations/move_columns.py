@@ -70,7 +70,7 @@ def move_columns_between_related_tables(
     )
     extracted_columns = [MathesarColumn.from_column(col) for col in moving_columns]
     bulk_create_mathesar_column(engine, target_table_oid, extracted_columns, schema)
-    target_table = reflect_table_from_oid(target_table_oid, engine)
+    target_table = reflect_table_from_oid(target_table_oid, engine, metadata=source_table.metadata)
     if relationship["referenced"] == target_table:
         extracted_columns_update_stmt = _create_move_referrer_table_columns_update_stmt(
             source_table,
@@ -141,8 +141,10 @@ def _create_move_referrer_table_columns_update_stmt(
     ranked_columns = [source_table.c[constants.ID]] + moved_columns + ranked_target_table_columns
     # Compute new rank to be used as the new foreign key value
     rank_cte = select(
-        ranked_columns,
-        func.dense_rank().over(order_by=ranking_columns).label(SPLIT_ID)
+        [
+            *ranked_columns,
+            func.dense_rank().over(order_by=ranking_columns).label(SPLIT_ID)
+        ]
     ).join(target_table).cte()
     new_target_table_data_columns = target_table_existing_data_column_names + moved_column_names
     cte_extraction_columns = (

@@ -103,9 +103,13 @@ def test_move_columns_moves_correct_data_from_ext_to_rem(extracted_remainder_ros
 def test_move_columns_moves_correct_data_from_rem_to_extract(extracted_remainder_roster, roster_extracted_cols):
     extracted, remainder, engine, schema = extracted_remainder_roster
     moving_col = "Grade"
-    existing_target_table_column = 'Teacher'
+    existing_target_table_column_names = ['Teacher', 'Teacher Email']
+    existing_target_table_column = [
+        extracted.columns[existing_target_table_column_name]
+        for existing_target_table_column_name in existing_target_table_column_names
+    ]
     expect_tuple_sel = (
-        select(remainder.columns[moving_col], extracted.columns[existing_target_table_column]).join(extracted)
+        select([*existing_target_table_column, remainder.columns[moving_col]]).join(extracted)
         .distinct()
     )
     with engine.begin() as conn:
@@ -125,8 +129,16 @@ def test_move_columns_moves_correct_data_from_rem_to_extract(extracted_remainder
     metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
     new_extracted = metadata.tables[f"{schema}.{extracted_name}"]
+    new_existing_target_table_column = [
+        new_extracted.columns[existing_target_table_column_name]
+        for existing_target_table_column_name in existing_target_table_column_names
+    ]
     actual_tuple_sel = select(
-        [new_extracted.columns[moving_col], new_extracted.columns["Teacher"]]
+        [
+            *new_existing_target_table_column,
+            new_extracted.columns[moving_col]
+
+        ],
     )
     with engine.begin() as conn:
         actual_tuples = conn.execute(actual_tuple_sel).fetchall()

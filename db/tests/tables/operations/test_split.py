@@ -28,7 +28,7 @@ def test_extract_columns_from_table_creates_tables(engine_with_roster, roster_ta
 
 
 def test_extract_columns_from_table_sets_up_one_fkey(extracted_remainder_roster):
-    extracted, remainder, _, _ = extracted_remainder_roster
+    _, remainder, _, _ = extracted_remainder_roster
     fkeys = list(remainder.foreign_keys)
     assert len(fkeys) == 1
 
@@ -43,7 +43,7 @@ def test_extract_columns_from_table_sets_correct_reference(extracted_remainder_r
 
 
 def test_extract_columns_from_table_sets_correct_fkey(extracted_remainder_roster, roster_fkey_col):
-    extracted, remainder, _, _ = extracted_remainder_roster
+    _, remainder, _, _ = extracted_remainder_roster
     fkeys = list(remainder.foreign_keys)
     expect_fkey_column = remainder.columns[roster_fkey_col]
     actual_fkey_column = fkeys[0].parent
@@ -51,7 +51,7 @@ def test_extract_columns_from_table_sets_correct_fkey(extracted_remainder_roster
 
 
 def test_extract_columns_extracts_correct_columns(extracted_remainder_roster, roster_extracted_cols):
-    extracted, remainder, _, _ = extracted_remainder_roster
+    extracted, _, _, _ = extracted_remainder_roster
     expect_extracted_names = sorted(roster_extracted_cols)
     actual_extracted_names = sorted(
         [
@@ -63,7 +63,7 @@ def test_extract_columns_extracts_correct_columns(extracted_remainder_roster, ro
 
 
 def test_extract_columns_leaves_correct_columns(extracted_remainder_roster, roster_extracted_cols, roster_fkey_col):
-    extracted, remainder, _, _ = extracted_remainder_roster
+    _, remainder, _, _ = extracted_remainder_roster
     expect_remainder_names = sorted(
         [
             col.name for col in remainder.columns
