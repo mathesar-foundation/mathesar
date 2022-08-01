@@ -115,7 +115,7 @@
     {/if}
 
     <CellFabric
-      {processedColumn}
+      columnFabric={processedColumn}
       {isActive}
       {value}
       showAsSkeleton={$recordsDataState === States.Loading}

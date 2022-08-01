@@ -71,7 +71,7 @@
         <CellArranger {display} let:style let:processedColumn>
           <CellWrapper {style}>
             <CellFabric
-              {processedColumn}
+              columnFabric={processedColumn}
               value={row.record[processedColumn.column.id]}
               disabled
             />
