@@ -9,16 +9,6 @@ from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table, reflect_table_from_oid
 
 
-def _split_column_list(columns_, extracted_column_names):
-    extracted_columns = [
-        col for col in columns_ if col.name in extracted_column_names
-    ]
-    remainder_columns = [
-        col for col in columns_ if col.name not in extracted_column_names
-    ]
-    return extracted_columns, remainder_columns
-
-
 def _create_split_tables(extracted_table_name, extracted_columns, remainder_table_name, schema, engine):
     extracted_table = create_mathesar_table(
         extracted_table_name,
@@ -76,9 +66,9 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
         col for col in old_columns if not col.is_default
     ]
     extracted_column_names = get_columns_name_from_attnums(old_table_oid, extracted_column_attnums, engine)
-    extracted_columns, remainder_columns = _split_column_list(
-        old_non_default_columns, extracted_column_names,
-    )
+    extracted_columns = [
+        col for col in old_non_default_columns if col.name in extracted_column_names
+    ]
     with engine.begin() as conn:
         extracted_table, remainder_table_with_fk_column, fk_column_name = _create_split_tables(
             extracted_table_name,
