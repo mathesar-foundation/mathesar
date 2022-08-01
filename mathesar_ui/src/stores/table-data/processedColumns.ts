@@ -60,14 +60,19 @@ export function processColumn(
   const sharedConstraints = relevantConstraints.filter(
     (c) => c.columns.length !== 1,
   );
+  const linkFk = findFkConstraintsForColumn(exclusiveConstraints, column.id)[0];
   return {
     id: column.id,
     column,
     exclusiveConstraints,
     sharedConstraints,
-    linkFk: findFkConstraintsForColumn(exclusiveConstraints, column.id)[0],
+    linkFk,
     abstractType,
-    cellComponentAndProps: getCellCap(column, constraints, abstractType.cell),
+    cellComponentAndProps: getCellCap(
+      abstractType.cell,
+      column,
+      linkFk ? linkFk.referent_table : undefined,
+    ),
     inputComponentAndProps: getDbTypeBasedInputCap(column, abstractType.cell),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
   };
