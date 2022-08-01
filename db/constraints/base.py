@@ -40,8 +40,8 @@ class ForeignKeyConstraint(Constraint):
         self.options = options
 
     def add_constraint(self, schema, engine, connection_to_use):
-        table = reflect_table_from_oid(self.table_oid, engine, connection_to_use)
-        referent_table = reflect_table_from_oid(self.referent_table_oid, engine, connection_to_use)
+        table = reflect_table_from_oid(self.table_oid, engine, connection_to_use=connection_to_use)
+        referent_table = reflect_table_from_oid(self.referent_table_oid, engine, connection_to_use=connection_to_use)
         columns_name = get_columns_name_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use)
         referent_columns_name = get_columns_name_from_attnums(
             self.referent_table_oid,
@@ -75,7 +75,7 @@ class UniqueConstraint(Constraint):
         self.columns_attnum = columns_attnum
 
     def add_constraint(self, schema, engine, connection_to_use):
-        table = reflect_table_from_oid(self.table_oid, engine, connection_to_use)
+        table = reflect_table_from_oid(self.table_oid, engine, connection_to_use=connection_to_use)
         columns = get_columns_name_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use)
         metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
         opts = {
