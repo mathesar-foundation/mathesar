@@ -67,7 +67,7 @@ def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
     assert sorted(actual_remainder_cols) == sorted(expect_remainder_cols)
 
 
-def test_move_columns_moves_correct_data_from_rem_to_ext(extracted_remainder_roster, roster_extracted_cols):
+def test_move_columns_moves_correct_data_from_ext_to_rem(extracted_remainder_roster, roster_extracted_cols):
     extracted, remainder, engine, schema = extracted_remainder_roster
     moving_col = roster_extracted_cols[0]
     extracted_name = extracted.name
@@ -94,6 +94,39 @@ def test_move_columns_moves_correct_data_from_rem_to_ext(extracted_remainder_ros
     actual_tuple_sel = select(
         [new_remainder.columns[moving_col]],
         distinct=True
+    )
+    with engine.begin() as conn:
+        actual_tuples = conn.execute(actual_tuple_sel).fetchall()
+    assert sorted(expect_tuples) == sorted(actual_tuples)
+
+
+def test_move_columns_moves_correct_data_from_rem_to_extract(extracted_remainder_roster, roster_extracted_cols):
+    extracted, remainder, engine, schema = extracted_remainder_roster
+    moving_col = "Grade"
+    existing_target_table_column = 'Teacher'
+    expect_tuple_sel = (
+        select(remainder.columns[moving_col], extracted.columns[existing_target_table_column]).join(extracted)
+        .distinct()
+    )
+    with engine.begin() as conn:
+        expect_tuples = conn.execute(expect_tuple_sel).fetchall()
+    extracted_name = extracted.name
+    remainder_name = remainder.name
+    extracted_oid = get_oid_from_table(extracted_name, schema, engine)
+    remainder_oid = get_oid_from_table(remainder_name, schema, engine)
+    column_attnums_to_move = get_columns_attnum_from_names(remainder_oid, [moving_col], engine)
+    move_columns_between_related_tables(
+        remainder_oid,
+        extracted_oid,
+        column_attnums_to_move,
+        schema,
+        engine,
+    )
+    metadata = MetaData(bind=engine, schema=schema)
+    metadata.reflect()
+    new_extracted = metadata.tables[f"{schema}.{extracted_name}"]
+    actual_tuple_sel = select(
+        [new_extracted.columns[moving_col], new_extracted.columns["Teacher"]]
     )
     with engine.begin() as conn:
         actual_tuples = conn.execute(actual_tuple_sel).fetchall()
