@@ -16,6 +16,10 @@
     c: SheetColumnType,
   ) => SheetColumnIdentifierKey;
 
+  export let scrollOffset = 0;
+
+  export let horizontalScrollOffset = 0;
+
   export let columnWidths: ImmutableMap<SheetColumnIdentifierKey, number> =
     new ImmutableMap();
 
@@ -24,13 +28,6 @@
     getColumnIdentifier,
     columnWidths,
   ));
-
-  function setColumnWidth(
-    columnIdentifierKey: SheetColumnIdentifierKey,
-    width: number,
-  ): void {
-    columnWidths = columnWidths.with(columnIdentifierKey, width);
-  }
 
   function getColumnWidth(
     columnIdentifierKey: SheetColumnIdentifierKey,
@@ -48,27 +45,34 @@
     return 0;
   }
 
-  function resetColumnWidth(
-    columnIdentifierKey: SheetColumnIdentifierKey,
-  ): void {
-    columnWidths = columnWidths.without(columnIdentifierKey);
-  }
-
   const api = {
-    setColumnWidth,
     getColumnWidth,
-    resetColumnWidth,
+    setColumnWidth: (key: SheetColumnIdentifierKey, width: number) => {
+      columnWidths = columnWidths.with(key, width);
+    },
+    resetColumnWidth: (key: SheetColumnIdentifierKey) => {
+      columnWidths = columnWidths.without(key);
+    },
+    setHorizontalScrollOffset: (offset: number) => {
+      horizontalScrollOffset = offset;
+    },
+    setScrollOffset: (offset: number) => {
+      scrollOffset = offset;
+    },
   };
-
-  // Creating stores of properties to make them reactive in context
 
   const stores = {
     columnStyleMap: writable(columnStyleMap),
     rowWidth: writable(rowWidth),
+    horizontalScrollOffset: writable(horizontalScrollOffset),
+    scrollOffset: writable(scrollOffset),
   };
 
+  // Setting these values in stores for reactivity in context
   $: stores.rowWidth.set(rowWidth);
   $: stores.columnStyleMap.set(columnStyleMap);
+  $: stores.horizontalScrollOffset.set(horizontalScrollOffset);
+  $: stores.scrollOffset.set(scrollOffset);
 
   setSheetContext({ stores, api });
 </script>
