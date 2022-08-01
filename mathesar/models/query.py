@@ -84,7 +84,6 @@ class UIQuery(BaseModel, Relation):
             and (self.initial_columns is not None)
         )
 
-    # TODO add engine from base_table.schema._sa_engine
     def get_records(self, **kwargs):
         return self.db_query.get_records(
             engine=self._sa_engine,

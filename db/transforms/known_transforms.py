@@ -43,7 +43,7 @@ def get_transform_subclass_from_type_enum(transform_type):
     Each TransformType enumeration represents a single, concrete Transform subclass.
     """
     for known_transform in known_transforms:
-        if transform_type.id == known_transform.type:
+        if transform_type == known_transform.type:
             return known_transform
     raise Exception(
         "Must never happen; this TransformType does not have a corresponding"
