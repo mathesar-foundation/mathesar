@@ -1,6 +1,7 @@
 import pytest
 from db.queries.base import DBQuery, InitialColumn, JoinParams
 
+
 @pytest.fixture
 def shallow_link_dbquery(academics_tables):
     acad_table = academics_tables['academics']

@@ -11,7 +11,7 @@ from db.utils import get_module_members_that_satisfy
 
 import db.transforms.base
 
-from db.transforms.base import Transform, get_transform_type_enum_from_id
+from db.transforms.base import Transform
 
 
 def _is_concrete_transform_subclass(member):
@@ -38,20 +38,14 @@ known_transforms = tuple(
 )
 
 
-def get_transform_subclass_from_type_enum(transform_type):
+def get_transform_subclass_from_type_id(transform_type_id):
     """
-    Each TransformType enumeration represents a single, concrete Transform subclass.
+    Each concrete Transform subclass has a unique transform type identifier. Use that as key.
     """
     for known_transform in known_transforms:
-        if transform_type == known_transform.type:
+        if transform_type_id == known_transform.type:
             return known_transform
     raise Exception(
-        "Must never happen; this TransformType does not have a corresponding"
+        "Must never happen; this transform type does not have a corresponding"
         " Transform subclass with it as the type attribute."
     )
-
-
-def get_transform_subclass_from_type_id(transform_type_id):
-    transform_type = get_transform_type_enum_from_id(transform_type_id)
-    transform_subclass = get_transform_subclass_from_type_enum(transform_type)
-    return transform_subclass

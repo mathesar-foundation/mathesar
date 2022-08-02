@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from enum import Enum
 
 import sqlalchemy
 import sqlalchemy_filters
@@ -7,35 +6,6 @@ from sqlalchemy import select
 
 from db.functions.operations.apply import apply_db_function_spec_as_filter
 from db.records.operations import group, relevance
-
-
-# NOTE, that information provided by this Enum is duplicated in the concrete Transform
-# subclasses, because each of them already has a type. Enum does provide assurance
-# that ids are not duplicated, but that's not obviously useful. Enum also provides
-# a centralized location for knowing what types there are, but that's pretty much
-# solved by the `known_transforms` construct. Keeping this Enum around for the faint
-# benefit of having a plain list of legal transform types, but author doesn't consider
-# this Enum integral, and it can be refactored away.
-class TransformType(Enum):
-    """
-    Enumerates transformation types.
-    """
-    FILTER = "filter"
-    ORDER = "order"
-    LIMIT = "limit"
-    OFFSET = "offset"
-    SELECT = "select"
-    DUPLICATE_ONLY = "duplicate_only"
-    SEARCH = "search"
-    GROUP = "group"
-    SELECT_SUBSET_OF_COLUMNS = "select"
-
-    @property
-    def id(self):
-        """
-        Here we're defining Enum's value attribute to be the transform id.
-        """
-        return self.value
 
 
 class Transform(ABC):
@@ -68,7 +38,7 @@ class Transform(ABC):
 
 
 class Filter(Transform):
-    type = TransformType.FILTER
+    type = "filter"
 
     def apply_to_relation(self, relation):
         filter = self.spec
@@ -80,7 +50,7 @@ class Filter(Transform):
 
 
 class Order(Transform):
-    type = TransformType.ORDER
+    type = "order"
 
     def apply_to_relation(self, relation):
         order_by = self.spec
@@ -92,7 +62,7 @@ class Order(Transform):
 
 
 class Limit(Transform):
-    type = TransformType.LIMIT
+    type = "limit"
 
     def apply_to_relation(self, relation):
         limit = self.spec
@@ -102,7 +72,7 @@ class Limit(Transform):
 
 
 class Offset(Transform):
-    type = TransformType.OFFSET
+    type = "offset"
 
     def apply_to_relation(self, relation):
         offset = self.spec
@@ -112,7 +82,7 @@ class Offset(Transform):
 
 
 class DuplicateOnly(Transform):
-    type = TransformType.DUPLICATE_ONLY
+    type = "duplicate_only"
 
     def apply_to_relation(self, relation):
         duplicate_columns = self.spec
@@ -136,7 +106,7 @@ class DuplicateOnly(Transform):
 
 
 class Search(Transform):
-    type = TransformType.SEARCH
+    type = "search"
     spec = []
 
     @property
@@ -156,7 +126,7 @@ class Search(Transform):
 
 
 class Group(Transform):
-    type = TransformType.GROUP
+    type = "group"
 
     def apply_to_relation(self, relation):
         group_by = self.spec
@@ -170,7 +140,7 @@ class Group(Transform):
 
 
 class SelectSubsetOfColumns(Transform):
-    type = TransformType.SELECT_SUBSET_OF_COLUMNS
+    type = "select"
 
     def apply_to_relation(self, relation):
         columns_to_select = self.spec
@@ -228,18 +198,3 @@ def enforce_relation_type_expectations(relation):
     """
     assert isinstance(relation, sqlalchemy.sql.expression.Selectable)
     assert not isinstance(relation, sqlalchemy.sql.expression.Executable)
-
-
-def get_transform_type_enum_from_id(transform_type_id):
-    """
-    Gets an instance of either the PostgresType enum or the MathesarCustomType enum corresponding
-    to the provided db_type_id. If the id doesn't correspond to any of the mentioned enums,
-    returns None.
-
-    Input id is case insensitive.
-    """
-    transform_type_id = transform_type_id.lower()
-    try:
-        return TransformType(transform_type_id)
-    except ValueError:
-        return None
