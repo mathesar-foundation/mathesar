@@ -9,7 +9,7 @@ from mathesar.api.serializers.shared_serializers import (
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
 )
 from mathesar.models.base import Column
-from db.types.base import get_db_type_enum_from_id
+from db.types.operations.convert import get_db_type_enum_from_id
 
 
 class InputValueField(serializers.CharField):

@@ -13,9 +13,9 @@ from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.types.custom import multicurrency
 from db.types.operations import cast as cast_operations
+from db.types.operations.convert import get_db_type_enum_from_class
 from db.types.base import (
     DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types,
-    get_db_type_enum_from_class,
 )
 
 
@@ -1003,7 +1003,7 @@ def test_db_type_juggling_consistency(engine):
     available_known_db_types = get_available_known_db_types(engine)
     for db_type in available_known_db_types:
         sa_class = db_type.get_sa_class(engine)
-        db_type_from_sa_class = get_db_type_enum_from_class(sa_class, engine)
+        db_type_from_sa_class = get_db_type_enum_from_class(sa_class)
         assert db_type == db_type_from_sa_class
 
 
@@ -1081,7 +1081,7 @@ def test_alter_column_type_alters_column_type(
         schema=schema,
         autoload_with=engine
     ).columns[COLUMN_NAME]
-    actual_type = get_db_type_enum_from_class(actual_column.type.__class__, engine)
+    actual_type = get_db_type_enum_from_class(actual_column.type.__class__)
     assert actual_type == target_type
 
 

@@ -4,7 +4,7 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from sqlalchemy.exc import ProgrammingError
 
-from db.types.base import get_db_type_enum_from_id
+from db.types.operations.convert import get_db_type_enum_from_id
 
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,

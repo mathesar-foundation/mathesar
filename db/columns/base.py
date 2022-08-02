@@ -6,7 +6,7 @@ from db.columns.operations.select import (
 )
 from db.tables.operations.select import get_oid_from_table
 from db.types.operations.cast import get_full_cast_map
-from db.types.base import get_db_type_enum_from_class
+from db.types.operations.convert import get_db_type_enum_from_class
 
 
 # TODO consider renaming to DbColumn or DatabaseColumn
@@ -194,7 +194,7 @@ class MathesarColumn(Column):
         Get this column's database type enum.
         """
         self._assert_that_engine_is_present()
-        return get_db_type_enum_from_class(self.type.__class__, self.engine)
+        return get_db_type_enum_from_class(self.type.__class__)
 
     @property
     def type_options(self):
