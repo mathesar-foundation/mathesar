@@ -1,11 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import Default from '@mathesar/components/Default.svelte';
+  import Null from '@mathesar/components/Null.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   // eslint-disable-next-line import/no-cycle
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import CellWrapper from '../CellWrapper.svelte';
   import type { LinkedRecordCellProps } from '../typeDefinitions';
+  import LaunchCue from './LaunchCue.svelte';
 
   type $$Props = LinkedRecordCellProps;
 
@@ -16,6 +18,8 @@
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
+
+  $: hasValue = value !== undefined && value !== null;
 
   async function launchRecordSelector() {
     const newValue = await recordSelector.acquireUserInput({ tableId });
@@ -68,10 +72,15 @@
   on:keydown={handleWrapperKeyDown}
   on:mousedown={handleMouseDown}
   on:dblclick={launchRecordSelector}
+  hasPadding={!isActive || hasValue}
 >
-  {#if value === undefined}
+  {#if hasValue}
+    <LinkedRecord primaryKeyCellValue={value} showLink={isActive} />
+  {:else if isActive}
+    <LaunchCue />
+  {:else if value === undefined}
     <Default />
   {:else}
-    <LinkedRecord primaryKeyCellValue={value} />
+    <Null />
   {/if}
 </CellWrapper>
