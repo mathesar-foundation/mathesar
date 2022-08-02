@@ -28,7 +28,7 @@ from db.tables.operations.drop import drop_table
 from db.tables.operations.move_columns import move_columns_between_related_tables
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tables.operations.split import extract_columns_from_table
-from db.tables.operations.insert import insert_from_select
+from db.records.operations.insert import insert_from_select
 
 from mathesar import reflection
 from mathesar.models.relation import Relation
