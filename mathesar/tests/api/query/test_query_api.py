@@ -10,11 +10,13 @@ def post_minimal_query(_post_query, create_patents_table, get_uid):
         # TODO use actual columns
         "initial_columns": [
             {
-                "column": 1,
+                "id": 1,
                 "jp_path": [[1, 3], [4, 5]],
+                "alias": "alias_x",
             },
             {
-                "column": 2,
+                "id": 2,
+                "alias": "alias_y",
             },
         ],
     }
@@ -64,8 +66,9 @@ def test_update(post_minimal_query, client):
     patch_data = {
         "initial_columns": [
             {
-                "column": 3,
+                "id": 3,
                 "jp_path": [[1, 3]],
+                "alias": "alias_x",
             }
         ]
     }

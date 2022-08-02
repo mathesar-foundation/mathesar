@@ -14,7 +14,8 @@ from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
 from db.tests.columns.utils import column_test_dict, create_test_table, get_default
-from db.types.base import get_db_type_enum_from_class, PostgresType
+from db.types.base import PostgresType
+from db.types.operations.convert import get_db_type_enum_from_class
 
 
 nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
@@ -437,7 +438,7 @@ def test_batch_update_columns_no_changes(engine_with_schema):
     assert len(table.columns) == len(updated_table.columns)
     for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == PostgresType.CHARACTER_VARYING.id
         assert updated_table.columns[index].name == table.columns[index].name
 
@@ -457,7 +458,7 @@ def test_batch_update_column_names(engine_with_schema):
     assert len(table.columns) == len(updated_table.columns)
     for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
@@ -477,7 +478,7 @@ def test_batch_update_column_types(engine_with_schema):
     assert len(table.columns) == len(updated_table.columns)
     for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
@@ -499,7 +500,7 @@ def test_batch_update_column_names_and_types(engine_with_schema):
     assert len(table.columns) == len(updated_table.columns)
     for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
@@ -519,7 +520,7 @@ def test_batch_update_column_drop_columns(engine_with_schema):
     assert len(updated_table.columns) == len(table.columns) - 2
     for index, _ in enumerate(updated_table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == column_data[index - 2]['type']
         assert updated_table.columns[index].name == column_data[index - 2]['name']
 
@@ -542,6 +543,6 @@ def test_batch_update_column_all_operations(engine_with_schema):
     assert len(updated_table.columns) == len(table.columns) - 1
     for index, _ in enumerate(updated_table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']

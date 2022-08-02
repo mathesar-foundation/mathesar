@@ -8,8 +8,8 @@ import type {
 } from '@mathesar/stores/table-data/types';
 import type { Database, DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
 import {
-  getTabularContent,
-  removeTabularContent,
+  initTabularData,
+  removeTabularData,
   TabularType,
 } from '@mathesar/stores/table-data';
 import { getTablesStoreForSchema } from '@mathesar/stores/tables';
@@ -78,7 +78,7 @@ export function constructTabularTab(
     id: calculateTabularTabId(type, id),
     label,
     type: TabType.Tabular,
-    tabularData: getTabularContent({ type, id, metaProps }),
+    tabularData: initTabularData({ type, id, metaProps }),
   };
   return newTab;
 }
@@ -288,7 +288,7 @@ export class TabList {
         removeImportFromView(this.schemaId, tab.fileImportId);
       }
     } else if (tab.tabularData) {
-      removeTabularContent(tab.tabularData.type, tab.tabularData.id);
+      removeTabularData(tab.tabularData.type, tab.tabularData.id);
     }
   }
 

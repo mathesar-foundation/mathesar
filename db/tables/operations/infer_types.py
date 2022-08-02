@@ -8,7 +8,7 @@ from db.columns.operations.infer_types import infer_column_type
 from db.schemas.operations.create import create_schema
 from db.tables.operations.create import CreateTableAs
 from db.tables.operations.select import reflect_table
-from db.types.base import get_db_type_enum_from_class
+from db.types.operations.convert import get_db_type_enum_from_class
 
 
 TEMP_SCHEMA = constants.INFERENCE_SCHEMA
@@ -61,7 +61,7 @@ def infer_table_column_types(schema, table_name, engine):
     else:
         temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
         types = tuple(
-            get_db_type_enum_from_class(c.type.__class__, engine)
+            get_db_type_enum_from_class(c.type.__class__)
             for c
             in temp_table.columns
         )
