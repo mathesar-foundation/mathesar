@@ -307,19 +307,6 @@ class ToLowercase(DBFunction):
     def to_sa_expression(string):
         return func.lower(string)
 
-class ArrayLength(DBFunction):
-    id = 'array_length'
-    name = 'length'
-    hints = tuple([
-        hints.returns(hints.comparable),
-        hints.parameter_count(1),
-        hints.parameter(0, hints.json_array),
-        hints.mathesar_filter,
-    ])
-
-    @staticmethod
-    def to_sa_expression(value):
-        return func.json_array_length(value)
 
 class CurrentDate(DBFunction):
     id = 'current_date'
