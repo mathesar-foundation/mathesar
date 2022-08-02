@@ -55,6 +55,16 @@ def add_custom_types_to_ischema_names(engine):
         engine.dialect.ischema_names[db_type_id] = sa_class
 
 
+def get_dummy_engine():
+    """
+    In some cases we only need an engine to access the Postgres dialect. E.g. when examining the
+    ischema_names dict. In those cases, following is enough:
+    """
+    engine = create_engine("postgresql://", future=True)
+    add_custom_types_to_ischema_names(engine)
+    return engine
+
+
 def _make_ischema_names_unique(engine):
     """
     For some reason, engine.dialect.ischema_names reference the same dict across different engines.

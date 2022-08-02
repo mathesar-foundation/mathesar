@@ -8,6 +8,8 @@ These variables were broken off into a discrete module to avoid circular imports
 
 import inspect
 
+from db.utils import get_module_members_that_satisfy
+
 import db.functions.base
 import db.functions.packed
 import db.types.custom.datetime
@@ -15,21 +17,6 @@ import db.types.custom.email
 import db.types.custom.uri
 
 from db.functions.base import DBFunction
-
-
-def _get_module_members_that_satisfy(module, predicate):
-    """
-    Looks at the members of the provided module and filters them using the provided predicate.
-
-    In this context, it (together with the appropriate predicate) is used to automatically collect
-    all DBFunction subclasses found as top-level members of a module.
-    """
-    all_members_in_defining_module = inspect.getmembers(module)
-    return set(
-        member
-        for _, member in all_members_in_defining_module
-        if predicate(member)
-    )
 
 
 def _is_concrete_db_function_subclass(member):
@@ -51,7 +38,7 @@ _modules_to_search_in = tuple([
 
 known_db_functions = tuple(
     set.union(*[
-        _get_module_members_that_satisfy(
+        get_module_members_that_satisfy(
             module,
             _is_concrete_db_function_subclass
         )
