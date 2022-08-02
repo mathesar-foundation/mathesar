@@ -13,6 +13,8 @@ import db.functions.packed
 import db.types.custom.datetime
 import db.types.custom.email
 import db.types.custom.uri
+import db.types.custom.json_array
+import db.types.custom.json_object
 
 from db.functions.base import DBFunction
 
@@ -46,6 +48,8 @@ _modules_to_search_in = tuple([
     db.types.custom.datetime,
     db.types.custom.email,
     db.types.custom.uri,
+    db.types.custom.json_array,
+    db.types.custom.json_object,
 ])
 
 
