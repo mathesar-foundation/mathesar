@@ -1,5 +1,6 @@
 import { get } from 'svelte/store';
-import type { DBObjectEntry, TableEntry, ViewEntry } from '@mathesar/AppTypes';
+import type { DBObjectEntry, ViewEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/tables/tableList';
 import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
 import type { TabularDataProps } from './tabularData';
 import { TabularData } from './tabularData';
@@ -8,7 +9,14 @@ import { TabularType } from './TabularType';
 const tableMap: Map<TableEntry['id'], TabularData> = new Map();
 const viewMap: Map<ViewEntry['id'], TabularData> = new Map();
 
-export function getTabularContent(props: TabularDataProps): TabularData {
+export function getTabularData(
+  props: TabularDataProps,
+): TabularData | undefined {
+  const tabularMap = props.type === TabularType.View ? viewMap : tableMap;
+  return tabularMap.get(props.id);
+}
+
+export function initTabularData(props: TabularDataProps): TabularData {
   const abstractTypesMap = get(currentDbAbstractTypes).data;
   const tabularMap = props.type === TabularType.View ? viewMap : tableMap;
   let entry = tabularMap.get(props.id);
@@ -19,7 +27,7 @@ export function getTabularContent(props: TabularDataProps): TabularData {
   return entry;
 }
 
-export function removeTabularContent(
+export function removeTabularData(
   type: TabularType,
   id: DBObjectEntry['id'],
 ): void {

@@ -29,13 +29,16 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     type_suggestions_url = serializers.SerializerMethodField()
     previews_url = serializers.SerializerMethodField()
     name = serializers.CharField(required=False, allow_blank=True, default='')
+    import_target = serializers.PrimaryKeyRelatedField(
+        required=False, allow_null=True, queryset=Table.current_objects.all()
+    )
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
     )
 
     class Meta:
         model = Table
-        fields = ['id', 'name', 'schema', 'created_at', 'updated_at', 'import_verified',
+        fields = ['id', 'name', 'import_target', 'schema', 'created_at', 'updated_at', 'import_verified',
                   'columns', 'records_url', 'constraints_url', 'columns_url',
                   'joinable_tables_url', 'type_suggestions_url', 'previews_url',
                   'data_files', 'has_dependencies']
@@ -97,10 +100,15 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
         schema = validated_data['schema']
         data_files = validated_data.get('data_files')
         name = validated_data.get('name') or gen_table_name(schema, data_files)
+        import_target = validated_data.get('import_target', None)
 
         try:
             if data_files:
                 table = create_table_from_datafile(data_files, name, schema)
+                if import_target:
+                    table.import_target = import_target
+                    table.is_temp = True
+                    table.save()
             else:
                 table = create_empty_table(name, schema)
         except ProgrammingError as e:

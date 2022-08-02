@@ -7,12 +7,12 @@ import {
   WritableSet,
 } from '@mathesar-component-library';
 import type { RequestStatus } from '@mathesar/utils/api';
+import Pagination from '@mathesar/utils/Pagination';
+import type { TersePagination } from '@mathesar/utils/Pagination';
 import type { TerseFiltering } from './filtering';
 import { Filtering } from './filtering';
 import type { TerseSorting } from './sorting';
 import { Sorting } from './sorting';
-import type { TersePagination } from './pagination';
-import { Pagination } from './pagination';
 import type { TerseGrouping } from './grouping';
 import { Grouping } from './grouping';
 import type { RecordsRequestParamsData } from './records';

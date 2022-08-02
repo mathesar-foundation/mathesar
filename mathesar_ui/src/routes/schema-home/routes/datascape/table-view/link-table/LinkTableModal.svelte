@@ -13,20 +13,29 @@
     Spinner,
     TextInput,
   } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/AppTypes';
+  import type {
+    LinksPostRequest,
+    OneToOne,
+    OneToMany,
+    ManyToMany,
+  } from '@mathesar/api/links';
+  import type { TableEntry } from '@mathesar/api/tables/tableList';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { refetchTablesForSchema, tables } from '@mathesar/stores/tables';
   import {
+    getTabularData,
     ColumnsDataStore,
     getTabularDataStoreFromContext,
     TabularType,
   } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { States } from '@mathesar/utils/api';
+  import { postAPI, States } from '@mathesar/utils/api';
   import { getAvailableName } from '@mathesar/utils/db';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import type { RelationshipType } from './linkTableUtils';
   import {
     getRelationshipType,
@@ -142,9 +151,83 @@
   }
   $: setColumnNames(relationshipType, namesOfColumnsInThatTable);
 
-  function handleSave() {
-    toast.error('Implementation will be finished in #947');
-    return Promise.resolve(undefined);
+  function getRequestBody(): LinksPostRequest {
+    if (!thisTable) {
+      throw new Error('Unable to determine base table id.');
+    }
+    if (!thatTable) {
+      throw new Error('Unable to determine target table id.');
+    }
+    switch (relationshipType) {
+      case 'one-to-one':
+      case 'one-to-many': {
+        const oneToOneOrOneToMany: OneToOne | OneToMany = {
+          link_type: relationshipType,
+          reference_table: thatTable.id,
+          reference_column_name: thatNewColumnName,
+          referent_table: thisTable.id,
+        };
+        return oneToOneOrOneToMany;
+      }
+      case 'many-to-one': {
+        const oneToMany: OneToMany = {
+          link_type: 'one-to-many',
+          reference_table: thisTable.id,
+          reference_column_name: thisNewColumnName,
+          referent_table: thatTable.id,
+        };
+        return oneToMany;
+      }
+      case 'many-to-many': {
+        const manyToMany: ManyToMany = {
+          link_type: relationshipType,
+          mapping_table_name: mappingTableName,
+          referents: [
+            {
+              referent_table: thisTable.id,
+              column_name: mappingToThisColumnName,
+            },
+            {
+              referent_table: thatTable.id,
+              column_name: mappingToThatColumnName,
+            },
+          ],
+        };
+        return manyToMany;
+      }
+      default:
+        throw new Error('Unknown relationship type.');
+    }
+  }
+
+  async function reFetchOtherThingsThatChanged() {
+    if (relationshipType === 'many-to-many' && $currentSchemaId !== undefined) {
+      await refetchTablesForSchema($currentSchemaId);
+      return;
+    }
+    const tableWithNewColumn =
+      relationshipType === 'one-to-many' ? thatTable : thisTable;
+    if (!tableWithNewColumn) {
+      return;
+    }
+    const tabularDataWithNewColumn = getTabularData({
+      type: TabularType.Table,
+      id: tableWithNewColumn.id,
+    });
+    if (tabularDataWithNewColumn) {
+      void tabularDataWithNewColumn.refresh();
+    }
+  }
+
+  async function handleSave() {
+    try {
+      await postAPI('/api/db/v0/links/', getRequestBody());
+      await reFetchOtherThingsThatChanged();
+      controller.close();
+      toast.success('Link created.');
+    } catch (e) {
+      toast.error(`Unable to create link. ${getErrorMessage(e)}`);
+    }
   }
 
   function goToConstraints() {
