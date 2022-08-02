@@ -89,17 +89,17 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     },
   },
   {
-    id: 'uri_authority_contains',
-    name: 'URI authority contains',
-    uiTypeParameterMap: {
-      [abstractTypeCategory.Uri]: [abstractTypeCategory.Text],
-    },
-  },
-  {
     id: 'json_array_length_equals',
     name: 'number of elements is',
     uiTypeParameterMap: {
       [abstractTypeCategory.Array]: [abstractTypeCategory.Text],
+    },
+  },
+  {
+    id: 'email_domain_equals',
+    name: 'email domain is',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Email]: [abstractTypeCategory.Text],
     },
   },
   {
