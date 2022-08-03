@@ -200,6 +200,7 @@ class Table(DatabaseObject, Relation):
             self.validate_unique()
         super().save(*args, **kwargs)
 
+    # TODO referenced from outside so much that it probably shouldn't be private
     @cached_property
     def _sa_table(self):
         # We're caching since we want different Django Table instances to return the same SA

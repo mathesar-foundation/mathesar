@@ -6,6 +6,7 @@ from django.utils.functional import cached_property
 
 from db.records.operations import select as records_select
 from db.columns.base import MathesarColumn
+from db.transforms.operations.apply import apply_transformations
 
 
 class DBQuery:
@@ -58,7 +59,7 @@ class DBQuery:
         initial_relation = _get_initial_relation(self)
         transformations = self.transformations
         if transformations:
-            transformed = records_select.apply_transformations(
+            transformed = apply_transformations(
                 initial_relation,
                 transformations,
             )
@@ -130,6 +131,10 @@ class JoinParams(
 
 
 def _get_initial_relation(query):
+    """
+    The initial relation is the relation defined by the initial columns (`initial_columns`). It acts
+    as input to the transformation pipeline (that's defined by `transformations`).
+    """
     sa_columns_to_select = []
     from_clause = query.base_table
     for initial_column in query.initial_columns:

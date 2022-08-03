@@ -70,13 +70,16 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
     def get_paginated_response(self, data):
         return Response(
-            OrderedDict(
-                [
-                    ('count', self.count),
-                    ('grouping', self.grouping),
-                    ('results', data)
-                ]
-            )
+            self.get_wrapped_with_metadata(data)
+        )
+
+    def get_wrapped_with_metadata(self, data):
+        return OrderedDict(
+            [
+                ('count', self.count),
+                ('grouping', self.grouping),
+                ('results', data)
+            ]
         )
 
     def paginate_queryset(
@@ -84,7 +87,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         queryset,
         request,
         table,
-        column_name_id_bidirectional_map,
+        column_name_id_bidirectional_map=None,
         filters=None,
         order_by=[],
         grouping={},
@@ -112,8 +115,18 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             processed_records, groups = None, None
 
         if group_by:
+            # NOTE when column name<->id map is None, we output column names.
+            # That's the case in query record listing.
+            if column_name_id_bidirectional_map:
+                columns = [
+                    column_name_id_bidirectional_map[n]
+                    for n
+                    in group_by.columns
+                ]
+            else:
+                columns = group_by.columns
             self.grouping = {
-                'columns': [column_name_id_bidirectional_map[n] for n in group_by.columns],
+                'columns': columns,
                 'mode': group_by.mode,
                 'num_groups': group_by.num_groups,
                 'bound_tuples': group_by.bound_tuples,

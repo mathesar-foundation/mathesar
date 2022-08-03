@@ -5,6 +5,43 @@ from db.queries.base import DBQuery, JoinParams, InitialColumn
 
 from mathesar.models.base import BaseModel, Column, Table
 from mathesar.models.relation import Relation
+from django.core.exceptions import ValidationError
+from db.transforms.operations.deserialize import deserialize_transformation
+
+
+def _validate_list_of_dicts(value):
+    if not isinstance(value, list):
+        raise ValidationError(f"{value} should be a list.")
+    for subvalue in value:
+        if not isinstance(subvalue, dict):
+            raise ValidationError(f"{value} should contain only dicts.")
+
+
+def _validate_initial_columns(initial_cols):
+    for initial_col in initial_cols:
+        if "id" not in initial_col:
+            raise ValidationError(f"{initial_col} should contain an id.")
+        if "alias" not in initial_col:
+            raise ValidationError(f"{initial_col} should contain an alias.")
+        if len(initial_col) > 2:
+            if "jp_path" not in initial_col:
+                raise ValidationError(
+                    "When an initial column has a third key it is expected to be jp_path,"
+                    f" but instead: {initial_col}."
+                )
+
+
+def _validate_transformations(transformations):
+    for transformation in transformations:
+        if "type" not in transformation:
+            raise ValidationError("Each 'transformations' sub-dict must have a 'type' key.")
+        if "spec" not in transformation:
+            raise ValidationError("Each 'transformations' sub-dict must have a 'spec' key.")
+
+
+def _validate_dict(value):
+    if not isinstance(value, dict):
+        raise ValidationError(f"{value} should be a dict.")
 
 
 class UIQuery(BaseModel, Relation):
@@ -21,18 +58,21 @@ class UIQuery(BaseModel, Relation):
     initial_columns = models.JSONField(
         null=True,
         blank=True,
+        validators=[_validate_list_of_dicts, _validate_initial_columns],
     )
 
     # sequence of dicts
     transformations = models.JSONField(
         null=True,
         blank=True,
+        validators=[_validate_list_of_dicts, _validate_transformations],
     )
 
     # dict of column ids/aliases to display options
     display_options = models.JSONField(
         null=True,
         blank=True,
+        validators=[_validate_dict],
     )
 
     __table_cache = {}
@@ -44,7 +84,6 @@ class UIQuery(BaseModel, Relation):
             and (self.initial_columns is not None)
         )
 
-    # TODO add engine from base_table.schema._sa_engine
     def get_records(self, **kwargs):
         return self.db_query.get_records(
             engine=self._sa_engine,
@@ -100,7 +139,12 @@ class UIQuery(BaseModel, Relation):
     @cached_property
     def _db_transformations(self):
         """No processing necessary."""
-        return self.transformations
+        if self.transformations:
+            return tuple(
+                deserialize_transformation(json)
+                for json
+                in self.transformations
+            )
 
     def _get_display_name_for_sa_col(self, sa_col):
         return self._alias_to_display_name.get(sa_col.name)
@@ -143,7 +187,7 @@ def _db_initial_column_from_json(table_cache, json):
     json_jp_path = json.get('jp_path')
     if json_jp_path:
         jp_path = tuple(
-            join_params_from_json(json_jp)
+            join_params_from_json(table_cache, json_jp)
             for json_jp
             in json_jp_path
         )
@@ -156,12 +200,10 @@ def _db_initial_column_from_json(table_cache, json):
     )
 
 
-def join_params_from_json(json_jp):
+def join_params_from_json(table_cache, json_jp):
     return JoinParams(
-        left_table=_get_sa_table_by_id(json_jp[0][0]),
-        right_table=_get_sa_table_by_id(json_jp[1][0]),
-        left_column=_get_sa_col_by_id(json_jp[0][1]),
-        right_column=_get_sa_col_by_id(json_jp[1][1]),
+        left_column=_get_sa_col_by_id(table_cache, json_jp[0][1]),
+        right_column=_get_sa_col_by_id(table_cache, json_jp[1][1]),
     )
 
 
