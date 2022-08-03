@@ -1,11 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { fade } from 'svelte/transition';
-  import {
-    faExclamationCircle,
-    faTimes,
-  } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-component-library';
+  import { iconClose, iconWarningCircle } from '../common/icons';
 
   const dispatch = createEventDispatcher();
 
@@ -23,14 +20,14 @@
   <div class="notification {type}" transition:fade={{ duration: 120 }}>
     <div class="header">
       <div class="icon">
-        <Icon data={faExclamationCircle} />
+        <Icon {...iconWarningCircle} />
       </div>
       <strong class="message">
         <slot />
       </strong>
       {#if closable}
         <Button class="close" appearance="ghost" size="medium" on:click={close}>
-          <Icon data={faTimes} />
+          <Icon {...iconClose} />
         </Button>
       {/if}
     </div>

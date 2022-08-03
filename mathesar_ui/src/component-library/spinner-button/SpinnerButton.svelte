@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
-  import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import Spinner from '@mathesar-component-library-dir/spinner/Spinner.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
+  import { iconForward } from '../common/icons';
 
   export let label = 'Proceed';
-  export let icon: IconProps = { data: faArrowRight };
+  export let icon: IconProps = iconForward;
   export let onClick: () => Promise<void>;
   export let disabled = false;
   export let isProcessing = false;

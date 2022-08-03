@@ -1,9 +1,9 @@
 import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
-import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
 import type { ModalController } from '@mathesar-component-library-dir/modal';
 import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
+import { iconBack, iconCheck } from '../common/icons';
 
 interface ButtonDetails {
   label: string;
@@ -25,11 +25,11 @@ const baseConfirmationProps: ConfirmationProps = {
   body: 'Are you sure?',
   proceedButton: {
     label: 'Yes',
-    icon: { data: faCheck },
+    icon: iconCheck,
   },
   cancelButton: {
     label: 'Cancel',
-    icon: { data: faArrowLeft },
+    icon: iconBack,
   },
   onProceed: () => Promise.resolve(),
   onSuccess: () => {},

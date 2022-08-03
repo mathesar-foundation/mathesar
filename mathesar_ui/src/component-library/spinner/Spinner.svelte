@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { faSpinner } from '@fortawesome/free-solid-svg-icons';
   import { Icon } from '@mathesar-component-library';
+  import { iconLoading } from '../common/icons';
 
   // eslint-disable-next-line no-undef-init
   export let size: string | undefined = undefined;
 </script>
 
-<Icon data={faSpinner} spin={true} {size} />
+<Icon {...iconLoading} spin={true} {size} />
