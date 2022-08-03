@@ -5,7 +5,9 @@ from collections import Counter
 
 from sqlalchemy import Column, VARCHAR
 
-from db.records.operations.select import get_records, get_column_cast_records, apply_transformations
+from db.records.operations.select import get_records, get_column_cast_records
+from db.transforms.operations.apply import apply_transformations
+from db.transforms import base as transforms_base
 from db.tables.operations.create import create_mathesar_table
 from db.types.base import PostgresType
 
@@ -108,13 +110,13 @@ def test_get_records_duplicate_only(roster_table_obj):
     assert all_counter == got_counter
 
 
+# TODO might want to move this to transforms test namespace
 @pytest.mark.parametrize(
     "transformations,expected_records",
     [
         [
             [
-                dict(
-                    type="filter",
+                transforms_base.Filter(
                     spec=dict(
                         contains=[
                             dict(column_name=["Student Name"]),
@@ -122,16 +124,13 @@ def test_get_records_duplicate_only(roster_table_obj):
                         ]
                     ),
                 ),
-                dict(
-                    type="order",
+                transforms_base.Order(
                     spec=[{"field": "Teacher Email", "direction": "asc"}],
                 ),
-                dict(
-                    type="limit",
+                transforms_base.Limit(
                     spec=5,
                 ),
-                dict(
-                    type="select",
+                transforms_base.SelectSubsetOfColumns(
                     spec=["id"],
                 ),
             ],
@@ -145,12 +144,10 @@ def test_get_records_duplicate_only(roster_table_obj):
         ],
         [
             [
-                dict(
-                    type="limit",
+                transforms_base.Limit(
                     spec=50,
                 ),
-                dict(
-                    type="filter",
+                transforms_base.Filter(
                     spec=dict(
                         contains=[
                             dict(column_name=["Student Name"]),
@@ -158,16 +155,13 @@ def test_get_records_duplicate_only(roster_table_obj):
                         ]
                     ),
                 ),
-                dict(
-                    type="order",
+                transforms_base.Order(
                     spec=[{"field": "Teacher Email", "direction": "asc"}],
                 ),
-                dict(
-                    type="limit",
+                transforms_base.Limit(
                     spec=5,
                 ),
-                dict(
-                    type="select",
+                transforms_base.SelectSubsetOfColumns(
                     spec=["id"],
                 ),
             ],
