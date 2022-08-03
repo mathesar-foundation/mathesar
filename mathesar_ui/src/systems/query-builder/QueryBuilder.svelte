@@ -20,12 +20,16 @@
   import { getAvailableName } from '@mathesar/utils/db';
   import type QueryManager from './QueryManager';
   import type { QueryInitialColumn } from './QueryModel';
+  import InputColumnsManager from './InputColumnsManager';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
+  import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
 
   const dispatch = createEventDispatcher();
 
   export let queryManager: QueryManager;
+
+  const inputColumnsManager = new InputColumnsManager();
 
   $: ({ query, state } = queryManager);
 
@@ -33,10 +37,13 @@
     ? $tablesDataStore.data.get($query.base_table)
     : undefined;
 
+  $: void inputColumnsManager.setBaseTable(currentTable);
+
   function onBaseTableChange(tableEntry: TableEntry | undefined) {
     void queryManager.update((q) =>
       q.withBaseTable(tableEntry ? tableEntry.id : undefined),
     );
+    queryManager.clearSelectedColumn();
   }
 
   function addColumn(column: QueryInitialColumn) {
@@ -104,12 +111,12 @@
         </LabeledInput>
       </div>
       <ColumnSelectionPane
-        baseTable={currentTable}
+        {inputColumnsManager}
         on:add={(e) => addColumn(e.detail)}
       />
     </div>
     <ResultPane {queryManager} />
-    <div class="output-config-sidebar" />
+    <OutputConfigSidebar {queryManager} />
   </div>
 </div>
 
@@ -172,11 +179,11 @@
       right: 0;
 
       .input-sidebar {
-        width: 22rem;
+        width: 20rem;
         border-right: 1px solid #efefef;
         flex-shrink: 0;
         flex-grow: 0;
-        flex-basis: 22rem;
+        flex-basis: 20rem;
         display: flex;
         flex-direction: column;
 
@@ -187,8 +194,6 @@
           flex-grow: 0;
           flex-shrink: 0;
         }
-      }
-      .output-config-sidebar {
       }
     }
   }

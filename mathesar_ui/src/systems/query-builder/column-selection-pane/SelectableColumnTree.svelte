@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Collapsible } from '@mathesar-component-library';
-  import type { ColumnWithLink } from './selectionPaneUtils';
+  import type { ColumnWithLink } from '../InputColumnsManager';
   import SelectableColumn from './SelectableColumn.svelte';
 
-  export let columnsWithLinks: ColumnWithLink[];
+  export let columnsWithLinks: Map<ColumnWithLink['id'], ColumnWithLink>;
 </script>
 
-{#each columnsWithLinks as column (column.id)}
+{#each [...columnsWithLinks] as [columnId, column] (columnId)}
   {#if column.linksTo}
     <Collapsible>
       <div slot="header" class="column-name">

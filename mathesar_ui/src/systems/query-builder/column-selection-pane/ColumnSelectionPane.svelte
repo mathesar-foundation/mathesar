@@ -1,89 +1,21 @@
 <script lang="ts">
   import { Collapsible, Spinner } from '@mathesar-component-library';
-  import type { CancellablePromise } from '@mathesar-component-library/types';
-  import type {
-    TableEntry,
-    JoinableTableResult,
-  } from '@mathesar/api/tables/tableList';
-  import { getAPI } from '@mathesar/utils/api';
-  import type { RequestStatus } from '@mathesar/utils/api';
-  import CacheManager from '@mathesar/utils/CacheManager';
-  import {
-    getBaseTableColumnsWithLinks,
-    getTablesThatReferenceBaseTable,
-  } from './selectionPaneUtils';
-  import type { ColumnWithLink, ReferencedByTable } from './selectionPaneUtils';
   import SelectableColumnTree from './SelectableColumnTree.svelte';
+  import type InputColumnsManager from '../InputColumnsManager';
 
-  export let baseTable: TableEntry | undefined;
+  export let inputColumnsManager: InputColumnsManager;
 
-  let fetchPromise: CancellablePromise<JoinableTableResult> | undefined;
-  let requestStatus: RequestStatus = { state: 'processing' };
-  let baseTableColumns: ColumnWithLink[] = [];
-  let tablesThatReferenceBaseTable: ReferencedByTable[];
-
-  const cacheManager = new CacheManager<
-    number,
-    {
-      baseTableColumns: ColumnWithLink[];
-      tablesThatReferenceBaseTable: ReferencedByTable[];
-    }
-  >(5);
-
-  async function generateTree(_baseTable: TableEntry | undefined) {
-    fetchPromise?.cancel();
-
-    if (!_baseTable) {
-      baseTableColumns = [];
-      tablesThatReferenceBaseTable = [];
-      requestStatus = { state: 'success' };
-      return;
-    }
-
-    const cachedResult = cacheManager.get(_baseTable.id);
-    if (cachedResult) {
-      ({ baseTableColumns, tablesThatReferenceBaseTable } = cachedResult);
-      requestStatus = { state: 'success' };
-      return;
-    }
-
-    try {
-      requestStatus = { state: 'processing' };
-      fetchPromise = getAPI<JoinableTableResult>(
-        `/api/db/v0/tables/${_baseTable.id}/joinable_tables/`,
-      );
-      const result = await fetchPromise;
-      baseTableColumns = getBaseTableColumnsWithLinks(result, _baseTable);
-      tablesThatReferenceBaseTable = getTablesThatReferenceBaseTable(
-        result,
-        _baseTable,
-      );
-      cacheManager.set(_baseTable.id, {
-        baseTableColumns,
-        tablesThatReferenceBaseTable,
-      });
-      requestStatus = { state: 'success' };
-    } catch (err: unknown) {
-      const error =
-        err instanceof Error
-          ? err.message
-          : 'There was an error fetching joinable links';
-      requestStatus = {
-        state: 'failure',
-        errors: [error],
-      };
-    }
-  }
-
-  $: void generateTree(baseTable);
+  $: ({ inputColumns } = inputColumnsManager);
+  $: ({ requestStatus, baseTableColumns, tablesThatReferenceBaseTable } =
+    $inputColumns);
 </script>
 
 <div class="column-selection-pane">
   {#if requestStatus.state === 'success'}
     <SelectableColumnTree columnsWithLinks={baseTableColumns} on:add />
-    {#if tablesThatReferenceBaseTable.length > 0}
+    {#if tablesThatReferenceBaseTable.size > 0}
       <div data-id="referenced-by-tables">
-        {#each tablesThatReferenceBaseTable as table (table.id)}
+        {#each [...tablesThatReferenceBaseTable] as [tableId, table] (tableId)}
           <Collapsible>
             <div slot="header" class="column-name">
               <div>{table.name}</div>
