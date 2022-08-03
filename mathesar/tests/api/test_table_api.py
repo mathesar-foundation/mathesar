@@ -1,3 +1,5 @@
+from frozendict import frozendict
+
 import pytest
 from unittest.mock import patch
 
@@ -399,7 +401,13 @@ def _check_columns(actual_column_list, expected_column_list):
         for actual_column, expected_column
         in zip(actual_column_list, expected_column_list)
     ]
-    assert actual_column_list == expected_column_list
+    _assert_sets_of_dicts_are_equal(actual_column_list, expected_column_list)
+
+
+def _assert_sets_of_dicts_are_equal(a, b):
+    a = set([frozendict(d) for d in a])
+    b = set([frozendict(d) for d in b])
+    assert a == b
 
 
 @pytest.fixture

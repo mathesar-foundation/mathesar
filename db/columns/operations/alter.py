@@ -11,7 +11,7 @@ from db.columns.operations.select import (
 )
 from db.columns.utils import get_mathesar_column_with_engine, get_type_options
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
-from db.types.base import get_db_type_enum_from_class, get_db_type_enum_from_id
+from db.types.operations.convert import get_db_type_enum_from_class, get_db_type_enum_from_id
 from db.types.operations.cast import get_cast_function_name
 from db.utils import execute_statement
 
@@ -65,7 +65,7 @@ def retype_column(
     table = reflect_table_from_oid(table_oid, engine, connection)
     column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
     column = table.columns[column_name]
-    column_db_type = get_db_type_enum_from_class(column.type.__class__, engine)
+    column_db_type = get_db_type_enum_from_class(column.type.__class__)
     new_type = new_type if new_type is not None else column_db_type
     column_type_options = get_type_options(column)
 

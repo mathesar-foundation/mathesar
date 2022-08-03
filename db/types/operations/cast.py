@@ -6,10 +6,11 @@ from sqlalchemy.sql.functions import Function
 
 from db.types.custom import uri
 from db.types.exceptions import UnsupportedTypeException
-from db.types.base import PostgresType, MathesarCustomType, get_available_known_db_types, get_db_type_enum_from_class, get_qualified_name
+from db.types.base import PostgresType, MathesarCustomType, get_available_known_db_types, get_qualified_name
+from db.types.operations.convert import get_db_type_enum_from_class
 from db.types import categories
+from db.types.custom.money import MONEY_ARR_FUNC_NAME
 
-MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
 NUMERIC_ARR_FUNC_NAME = "get_numeric_array"
 
 
@@ -24,7 +25,7 @@ def get_column_cast_expression(column, target_type, engine, type_options={}):
         raise UnsupportedTypeException(
             f"Target Type '{target_type.id}' is not supported."
         )
-    column_type = get_db_type_enum_from_class(column.type.__class__, engine)
+    column_type = get_db_type_enum_from_class(column.type.__class__)
     if target_type == column_type:
         cast_expr = column
     else:
