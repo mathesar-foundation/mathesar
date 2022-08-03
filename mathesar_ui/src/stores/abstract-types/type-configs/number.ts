@@ -1,4 +1,3 @@
-import { faHashtag } from '@fortawesome/free-solid-svg-icons';
 import type {
   NumberDisplayOptions,
   NumberFormat,
@@ -6,6 +5,7 @@ import type {
 } from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/AppTypes';
+import { iconHashtag } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -305,7 +305,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const numberType: AbstractTypeConfiguration = {
-  icon: { data: faHashtag, label: 'Number' },
+  icon: { ...iconHashtag, label: 'Number' },
   cell: {
     type: 'number',
     conditionalConfig: {

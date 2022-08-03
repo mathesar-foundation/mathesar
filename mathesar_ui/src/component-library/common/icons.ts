@@ -1,4 +1,4 @@
-import { faQuestionCircle, faArrowLeft, faCheck, faArrowRight, faExclamationTriangle, faSpinner, faAngleDown, faFile, faFileUpload, faTimes, faExclamationCircle, faSearch, faAngleLeft, faEllipsisH, faAngleDoubleLeft, faAngleDoubleRight, faAngleRight, faCaretRight } from '@fortawesome/free-solid-svg-icons';
+import { faQuestionCircle, faArrowLeft, faCheck, faArrowRight, faExclamationTriangle, faSpinner, faAngleDown, faFile, faFileUpload, faTimes, faExclamationCircle, faSearch, faAngleLeft, faEllipsisH, faAngleDoubleLeft, faAngleDoubleRight, faAngleRight, faCaretRight, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 export const iconBack = { data: faArrowLeft };
 export const iconForward = { data: faArrowRight };
@@ -20,3 +20,4 @@ export const iconAngleDoubleLeft = { data: faAngleDoubleLeft };
 export const iconAngleDoubleRight = { data: faAngleDoubleRight };
 export const iconAngleRight = { data: faAngleRight };
 export const iconCaretRight = { data: faCaretRight };
+export const iconChevronDown = { data: faChevronDown };

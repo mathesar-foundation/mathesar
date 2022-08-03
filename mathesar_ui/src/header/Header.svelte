@@ -1,14 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
   import { get } from 'svelte/store';
-  import {
-    faDragon,
-    faUser,
-    faPlus,
-    faUpload,
-    faTable,
-    faFileContract,
-  } from '@fortawesome/free-solid-svg-icons';
   import { createTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
@@ -22,6 +14,7 @@
   import { Icon, DropdownMenu, MenuItem } from '@mathesar-component-library';
   import { TabularType } from '@mathesar/stores/table-data';
 
+  import { iconAdd, iconDragon, iconFileContract, iconTable, iconUpload, iconUser } from '@mathesar/icons';
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
   import ImportIndicator from './import-indicator/ImportIndicator.svelte';
 
@@ -51,7 +44,7 @@
 <header>
   <div class="logo">
     <div class="image-wrapper">
-      <Icon data={faDragon} />
+      <Icon {...iconDragon} />
     </div>
   </div>
 
@@ -64,15 +57,15 @@
 
     {#if $currentSchemaId}
       <div class="quick-links">
-        <DropdownMenu label="New" icon={{ data: faPlus }}>
-          <MenuItem on:click={handleCreateEmptyTable} icon={{ data: faTable }}>
+        <DropdownMenu label="New" icon={iconAdd}>
+          <MenuItem on:click={handleCreateEmptyTable} icon={iconTable}>
             New Empty Table
           </MenuItem>
           <MenuItem
             on:click={redirectToNewQueryRoute}
-            icon={{ data: faFileContract }}>New Query</MenuItem
+            icon={iconFileContract}>New Query</MenuItem
           >
-          <MenuItem on:click={beginDataImport} icon={{ data: faUpload }}>
+          <MenuItem on:click={beginDataImport} icon={iconUpload}>
             Import Data into New Table
           </MenuItem>
         </DropdownMenu>
@@ -80,7 +73,7 @@
     {/if}
 
     <div class="image-wrapper">
-      <Icon data={faUser} />
+      <Icon {...iconUser} />
     </div>
   </div>
 </header>

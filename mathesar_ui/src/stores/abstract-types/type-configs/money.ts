@@ -1,10 +1,10 @@
-import { faDollarSign } from '@fortawesome/free-solid-svg-icons';
 import type {
   MoneyDisplayOptions,
   NumberFormat,
   Column,
 } from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
+import { iconDollarSign } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -132,7 +132,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const moneyType: AbstractTypeConfiguration = {
-  icon: { data: faDollarSign },
+  icon: iconDollarSign,
   cell: {
     type: 'money',
   },

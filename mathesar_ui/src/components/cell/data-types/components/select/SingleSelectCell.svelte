@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
   import {
     AttachableDropdown,
     ListBox,
@@ -12,6 +11,7 @@
   } from '@mathesar-component-library';
   import type { ListBoxApi } from '@mathesar-component-library/types';
   import CellValue from '@mathesar/components/CellValue.svelte';
+  import { iconDown } from '@mathesar/icons';
   import CellWrapper from '../CellWrapper.svelte';
   import type { SingleSelectCellProps } from '../typeDefinitions';
 
@@ -123,7 +123,7 @@
 
     {#if isActive}
       <div class="icon">
-        <Icon data={faAngleDown} />
+        <Icon {...iconDown} />
       </div>
     {/if}
   </CellWrapper>

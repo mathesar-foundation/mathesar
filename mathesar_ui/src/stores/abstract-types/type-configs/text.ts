@@ -1,8 +1,8 @@
-import { faAlignLeft } from '@fortawesome/free-solid-svg-icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
 import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/api/tables/columns';
+import { iconAlignLeft } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -103,7 +103,7 @@ function constructDbFormValuesFromTypeOptions(
 }
 
 const textType: AbstractTypeConfiguration = {
-  icon: { data: faAlignLeft, label: 'Text' },
+  icon: { ...iconAlignLeft, label: 'Text' },
   defaultDbType: DB_TYPES.VARCHAR,
   cell: {
     type: 'string',

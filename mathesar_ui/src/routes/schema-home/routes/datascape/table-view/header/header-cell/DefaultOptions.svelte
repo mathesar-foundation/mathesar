@@ -1,14 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import {
-    faSortAmountDown,
-    faSortAmountDownAlt,
-    faThList,
-    faTrashAlt,
-    faSpinner,
-    faICursor,
-    faUnlink,
-  } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button, Checkbox } from '@mathesar-component-library';
   import type {
     Meta,
@@ -21,6 +12,7 @@
   import { SortDirection } from '@mathesar/stores/table-data';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
+  import { iconSortAmountDown, iconCursor, iconDeleteAlt, iconLoading, iconSortAmountDownAlt, iconThList, iconUnlink } from '@mathesar/icons';
 
   const dispatch = createEventDispatcher();
 
@@ -148,7 +140,7 @@
 <ul>
   <li>
     <Button appearance="plain" on:click={() => handleSort(SortDirection.A)}>
-      <Icon class="opt" data={faSortAmountDownAlt} />
+      <Icon class="opt" {...iconSortAmountDownAlt} />
       <span>
         {#if sortDirection === SortDirection.A}
           Remove asc sort
@@ -160,7 +152,7 @@
   </li>
   <li>
     <Button appearance="plain" on:click={() => handleSort(SortDirection.D)}>
-      <Icon class="opt" data={faSortAmountDown} />
+      <Icon class="opt" {...iconSortAmountDown} />
       <span>
         {#if sortDirection === SortDirection.D}
           Remove desc sort
@@ -172,7 +164,7 @@
   </li>
   <li>
     <Button appearance="plain" on:click={toggleGroup}>
-      <Icon class="opt" data={faThList} />
+      <Icon class="opt" {...iconThList} />
       <span>
         {#if hasGrouping}
           Remove grouping
@@ -188,13 +180,13 @@
 <ul>
   <li>
     <Button appearance="plain" on:click={handleRename}>
-      <Icon class="opt" data={faICursor} />
+      <Icon class="opt" {...iconCursor} />
       <span> Rename </span>
     </Button>
   </li>
   <li>
     <Button appearance="plain" on:click={deleteColumn}>
-      <Icon class="opt" data={faTrashAlt} />
+      <Icon class="opt" {...iconDeleteAlt} />
       <span> Delete column </span>
     </Button>
   </li>
@@ -205,7 +197,7 @@
   <li>
     <Button appearance="plain" on:click={toggleAllowNull}>
       {#if isRequestingToggleAllowNull}
-        <Icon class="opt" data={faSpinner} spin={true} />
+        <Icon class="opt" {...iconLoading} spin={true} />
       {:else}
         <span class="opt"><Checkbox checked={allowsNull} /></span>
       {/if}
@@ -219,7 +211,7 @@
   <li>
     <Button appearance="plain" on:click={toggleAllowDuplicates}>
       {#if isRequestingToggleAllowDuplicates}
-        <Icon class="opt" data={faSpinner} spin={true} />
+        <Icon class="opt" {...iconLoading} spin={true} />
       {:else}
         <span class="opt"><Checkbox checked={allowsDuplicates} /></span>
       {/if}
@@ -230,9 +222,9 @@
     <li>
       <Button appearance="plain" on:click={removeTableLink}>
         {#if isRequestingRemoveTableLink}
-          <Icon class="opt" data={faSpinner} spin={true} />
+          <Icon class="opt" {...iconLoading} spin={true} />
         {:else}
-          <Icon class="opt" data={faUnlink} />
+          <Icon class="opt" {...iconUnlink} />
         {/if}
         <span>Remove Table Link</span>
       </Button>

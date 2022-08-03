@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { faPlus } from '@fortawesome/free-solid-svg-icons';
   import {
     Button,
     Dropdown,
@@ -10,6 +9,7 @@
     InputGroupText,
   } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/tables/columns';
+import { iconAdd } from '@mathesar/icons';
 
   const dispatch = createEventDispatcher();
   export let columns: Column[];
@@ -44,7 +44,7 @@
   ariaLabel="New Column"
 >
   <svelte:fragment slot="trigger">
-    <Icon class="opt" data={faPlus} size="0.8em" />
+    <Icon class="opt" {...iconAdd} size="0.8em" />
   </svelte:fragment>
   <svelte:fragment slot="content">
     <div class="new-column-dropdown" style="width:250px">

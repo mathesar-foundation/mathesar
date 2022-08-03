@@ -1,11 +1,5 @@
 <script lang="ts">
   import { Icon, Button, Spinner } from '@mathesar-component-library';
-  import {
-    faArrowRight,
-    faExclamationTriangle,
-    faPlus,
-    faTrash,
-  } from '@fortawesome/free-solid-svg-icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { Constraint } from '@mathesar/api/tables/constraints';
@@ -14,6 +8,7 @@
   import type { Column } from '@mathesar/api/tables/columns';
   import type { PaginatedResponse } from '@mathesar/utils/api';
   import { getAPI } from '@mathesar/utils/api';
+  import { iconAdd, iconDelete, iconForward, iconWarningTriangle } from '@mathesar/icons';
 
   export let constraint: Constraint;
   export let drop: () => Promise<void>;
@@ -65,25 +60,25 @@
       {#if referentTable}
         References
         <Identifier>{referentTable.name}</Identifier>
-        <Icon data={faArrowRight} />
+        <Icon {...iconForward} />
         {#await getReferentColumns(constraint)}
           <Spinner />
         {:then referentColumns}
           {#each referentColumns as referentColumn, index (referentColumn.id)}
             <Identifier>{referentColumn.name}</Identifier>
             {#if index < referentColumns.length - 1}
-              <Icon data={faPlus} />
+              <Icon {...iconAdd} />
             {/if}
           {/each}
         {:catch error}
-          <Icon data={faExclamationTriangle} />
+          <Icon {...iconWarningTriangle} />
         {/await}
       {/if}
     </div>
   </div>
   <div class="drop">
     <Button on:click={handleDrop} title={dropTitle}>
-      <Icon data={faTrash} />
+      <Icon {...iconDelete} />
     </Button>
   </div>
 </div>
