@@ -36,7 +36,7 @@ First, [ensure that you have Docker installed](https://docs.docker.com/get-docke
 
 Clone the repository and then run the following command for performing initial setup:
 ```
-make init
+make initial_setup
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 
