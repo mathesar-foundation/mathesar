@@ -14,14 +14,40 @@
 
   export let queryManager: QueryManager;
 
-  $: ({ query, processedQueryColumns, records, state } = queryManager);
+  $: ({ query, processedQueryColumns, records, state, selectedColumnAlias } =
+    queryManager);
   $: ({ base_table, initial_columns } = $query);
 
   $: columnRunState = $state.columnsFetchState?.state;
   $: recordRunState = $state.recordsFetchState?.state;
+
+  function checkAndUnselectColumn(e: MouseEvent) {
+    const target = e.target as HTMLElement;
+    if (
+      target.closest(
+        '[data-sheet-element="header"] [data-sheet-element="cell"]',
+      )
+    ) {
+      return;
+    }
+    if ($selectedColumnAlias) {
+      const closestCell = target.closest(
+        '[data-sheet-element="row"] [data-sheet-element="cell"]',
+      );
+      if (
+        closestCell &&
+        closestCell.querySelector(
+          `[data-column-identifier="${$selectedColumnAlias}"]`,
+        )
+      ) {
+        return;
+      }
+    }
+    queryManager.clearSelectedColumn();
+  }
 </script>
 
-<div class="result">
+<div class="result" on:click={checkAndUnselectColumn}>
   <div class="result-header">
     <span class="title">Result</span>
     {#if base_table && initial_columns.length}
@@ -51,7 +77,18 @@
               let:style
             >
               <div {...htmlAttributes} {style}>
-                <Button appearance="plain" class="column-name-wrapper">
+                <Button
+                  appearance="plain"
+                  class="column-name-wrapper {$selectedColumnAlias ===
+                  processedQueryColumn.column.alias
+                    ? 'selected'
+                    : ''}"
+                  on:click={() => {
+                    queryManager.selectColumn(
+                      processedQueryColumn.column.alias,
+                    );
+                  }}
+                >
                   <ColumnName
                     column={{
                       ...processedQueryColumn.column,
@@ -148,6 +185,10 @@
       height: 100%;
       display: block;
       overflow: hidden;
+    }
+
+    :global(.column-name-wrapper.selected) {
+      background: #dedede !important;
     }
   }
 </style>

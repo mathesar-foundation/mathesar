@@ -64,6 +64,13 @@ export default class QueryManager extends EventHandler<{
 
   records: Writable<QueryResultRecords> = writable({ count: 0, results: [] });
 
+  // Display stores
+
+  selectedColumnAlias: Writable<QueryResultColumn['alias'] | undefined> =
+    writable(undefined);
+
+  // Promises
+
   querySavePromise: CancellablePromise<QueryInstance> | undefined;
 
   queryColumnsFetchPromise: CancellablePromise<QueryResultColumns> | undefined;
@@ -257,5 +264,19 @@ export default class QueryManager extends EventHandler<{
 
   getQueryModelData(): QueryModel {
     return get(this.query);
+  }
+
+  selectColumn(alias: QueryResultColumn['alias']): void {
+    if (
+      get(this.query).initial_columns.some((column) => column.alias === alias)
+    ) {
+      this.selectedColumnAlias.set(alias);
+    } else {
+      this.selectedColumnAlias.set(undefined);
+    }
+  }
+
+  clearSelectedColumn(): void {
+    this.selectedColumnAlias.set(undefined);
   }
 }
