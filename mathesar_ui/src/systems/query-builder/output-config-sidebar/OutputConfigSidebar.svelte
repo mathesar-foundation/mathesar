@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Spinner } from '@mathesar-component-library';
+  import { Spinner, Button } from '@mathesar-component-library';
   import type QueryManager from '../QueryManager';
   import type InputColumnsManager from '../InputColumnsManager';
 
@@ -16,6 +16,14 @@
   $: columnInformation = initialColumn
     ? columnInformationMap.get(initialColumn.id)
     : undefined;
+
+  function deleteSelectedColumn() {
+    const alias = $selectedColumnAlias;
+    if (alias) {
+      void queryManager.update((q) => q.deleteColumn(alias));
+      queryManager.clearSelectedColumn();
+    }
+  }
 </script>
 
 <aside>
@@ -39,6 +47,9 @@
             {:else if requestStatus.state === 'failure'}
               Failed to load column information
             {/if}
+          </div>
+          <div>
+            <Button on:click={deleteSelectedColumn}>Delete column</Button>
           </div>
         </div>
       </div>

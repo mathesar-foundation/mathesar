@@ -52,9 +52,18 @@ export default class QueryModel implements UnsavedQueryInstance {
     return this.initial_columns.find((column) => column.alias === columnAlias);
   }
 
-  // deleteColumn() {
-
-  // }
+  deleteColumn(columnAlias: string): QueryModel {
+    const initialColumns = this.initial_columns.filter(
+      (entry) => entry.alias !== columnAlias,
+    );
+    if (initialColumns.length !== this.initial_columns.length) {
+      return new QueryModel({
+        ...this,
+        initial_columns: initialColumns,
+      });
+    }
+    return this;
+  }
 
   isSaveable(): boolean {
     return (
