@@ -44,6 +44,7 @@ def _filter_from_db_function(ui_type_hints, db_function_subclass):
     )
 
 
+# TODO are aliases still possible? might make sense to get rid of aliases-related logic.
 def _get_aliases(ui_type_hints, db_function_subclass):
     alias_hints = hints.get_hints_with_id(db_function_subclass, 'use_this_alias_when')
     aliases = tuple(
@@ -69,7 +70,7 @@ def _process_alias_hint(ui_type_hints, alias_hint):
 def _get_filter_parameters(ui_type_hints, db_function_subclass):
     """
     Describes filter parameters. Returns a sequence of dicts (one per parameter described)
-    containing at least the index and MA type of parameter.
+    containing at least the MA type of parameter at that index.
     """
     parameter_count = hints.get_parameter_count(db_function_subclass)
     if not parameter_count:

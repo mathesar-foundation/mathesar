@@ -23,7 +23,7 @@ def get_table_or_404(pk):
     return table
 
 
-def process_annotated_records(record_list, column_name_id_map):
+def process_annotated_records(record_list, column_name_id_map=None):
 
     RESULT_IDX = 'result_indices'
 
@@ -49,13 +49,26 @@ def process_annotated_records(record_list, column_name_id_map):
                 column_name_id_map[k]: v for k, v in group_metadata_item.items()
             }
         except AttributeError:
+            # TODO why are we doing this catch? is this in case group_metadata_item is None? we
+            # should use an explicit None check in that case.
             processed_group_metadata_item = group_metadata_item
         return processed_group_metadata_item
+
+    def _use_correct_column_identifier(group_metadata_item):
+        """
+        If column_name_id_map is defined, the identifier to use is the column's Django ID. If
+        column_name_id_map is None, the identifier to use is the column's name/alias, in which
+        case, no processing is needed.
+        """
+        if column_name_id_map is not None:
+            return _replace_column_names_with_ids(group_metadata_item)
+        else:
+            return group_metadata_item
 
     if groups is not None:
         groups_by_id = {
             grp[group.GroupMetadataField.GROUP_ID.value]: {
-                k: _replace_column_names_with_ids(v) for k, v in grp.items()
+                k: _use_correct_column_identifier(v) for k, v in grp.items()
                 if k != group.GroupMetadataField.GROUP_ID.value
             } | {RESULT_IDX: []}
             for grp in groups
