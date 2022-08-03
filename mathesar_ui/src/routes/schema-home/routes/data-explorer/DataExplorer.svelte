@@ -56,7 +56,7 @@
     }
     createQueryManager({
       name: getAvailableName(
-        'New_Query',
+        'New_Exploration',
         new Set([...$queries.data.values()].map((e) => e.name)),
       ),
     });

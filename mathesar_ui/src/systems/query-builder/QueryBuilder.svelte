@@ -19,8 +19,8 @@
   import { queries } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
   import type QueryManager from './QueryManager';
-  import type { QueryInitialColumn } from './QueryModel';
   import InputColumnsManager from './InputColumnsManager';
+  import type { ColumnWithLink } from './InputColumnsManager';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
@@ -46,15 +46,25 @@
     queryManager.clearSelectedColumn();
   }
 
-  function addColumn(column: QueryInitialColumn) {
-    void queryManager.update((q) => q.addColumn(column));
+  function addColumn(column: ColumnWithLink) {
+    const baseAlias = `${column.tableName}_${column.name}`;
+    const allAliases = new Set($query.initial_columns.map((c) => c.alias));
+    const alias = getAvailableName(baseAlias, allAliases);
+    void queryManager.update((q) =>
+      q.addColumn({
+        alias,
+        id: column.id,
+        jpPath: column.jpPath,
+      }),
+    );
+    queryManager.selectColumn(alias);
   }
 
   function handleQueryNameChange(e: Event) {
     const target = e.target as HTMLInputElement;
     if (target.value.trim() === '') {
       target.value = getAvailableName(
-        'New_Query',
+        'New_Exploration',
         new Set([...$queries.data.values()].map((q) => q.name)),
       );
     }
@@ -116,7 +126,7 @@
       />
     </div>
     <ResultPane {queryManager} />
-    <OutputConfigSidebar {queryManager} />
+    <OutputConfigSidebar {queryManager} {inputColumnsManager} />
   </div>
 </div>
 

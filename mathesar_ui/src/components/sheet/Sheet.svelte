@@ -77,7 +77,7 @@
   setSheetContext({ stores, api });
 </script>
 
-<div class="sheet">
+<div class="sheet" on:click>
   {#if columns.length}
     <slot />
   {/if}

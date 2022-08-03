@@ -47,7 +47,7 @@
   }
 </script>
 
-<div class="result" on:click={checkAndUnselectColumn}>
+<div class="result">
   <div class="result-header">
     <span class="title">Result</span>
     {#if base_table && initial_columns.length}
@@ -68,7 +68,11 @@
     {:else if !initial_columns.length}
       Please select a column from the column selection pane
     {:else}
-      <Sheet columns={$processedQueryColumns} getColumnIdentifier={(c) => c.id}>
+      <Sheet
+        columns={$processedQueryColumns}
+        getColumnIdentifier={(c) => c.id}
+        on:click={checkAndUnselectColumn}
+      >
         <SheetHeader>
           {#each $processedQueryColumns as processedQueryColumn (processedQueryColumn.id)}
             <SheetCell

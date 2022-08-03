@@ -6,15 +6,17 @@ import type { JpPath } from '@mathesar/api/tables/tableList';
  * endpoint: /api/db/v0/queries/<query_id>/
  */
 
+export interface QueryInstanceInitialColumn {
+  alias: string;
+  id: Column['id'];
+  jpPath?: JpPath;
+}
+
 export interface QueryInstance {
   readonly id: number;
   readonly name: string;
   readonly base_table: number;
-  readonly initial_columns?: {
-    alias: string;
-    id: Column['id'];
-    jpPath?: JpPath;
-  }[];
+  readonly initial_columns?: QueryInstanceInitialColumn[];
 }
 
 /**

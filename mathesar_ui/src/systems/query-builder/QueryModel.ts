@@ -1,15 +1,6 @@
-import { getAvailableName } from '@mathesar/utils/db';
-import type { TableEntry, JpPath } from '@mathesar/api/tables/tableList';
-import type { Column } from '@mathesar/api/tables/columns';
+import type { QueryInstanceInitialColumn } from '@mathesar/api/queries/queryList';
 import { isDefinedNonNullable } from '@mathesar-component-library';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
-
-export interface QueryInitialColumn {
-  id: Column['id'];
-  name: Column['name'];
-  tableName: TableEntry['name'];
-  jpPath?: JpPath;
-}
 
 export default class QueryModel implements UnsavedQueryInstance {
   base_table;
@@ -49,23 +40,16 @@ export default class QueryModel implements UnsavedQueryInstance {
     });
   }
 
-  addColumn(column: QueryInitialColumn): QueryModel {
-    const baseAlias = `${column.tableName}_${column.name}`;
+  addColumn(column: QueryInstanceInitialColumn): QueryModel {
     const initialColumns = this.initial_columns ?? [];
-    const allAliases = new Set(initialColumns.map((c) => c.alias));
-    const alias = getAvailableName(baseAlias, allAliases);
-
     return new QueryModel({
       ...this,
-      initial_columns: [
-        ...initialColumns,
-        {
-          alias,
-          id: column.id,
-          jpPath: column.jpPath,
-        },
-      ],
+      initial_columns: [...initialColumns, column],
     });
+  }
+
+  getColumn(columnAlias: string): QueryInstanceInitialColumn | undefined {
+    return this.initial_columns.find((column) => column.alias === columnAlias);
   }
 
   // deleteColumn() {

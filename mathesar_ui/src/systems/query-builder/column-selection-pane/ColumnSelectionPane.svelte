@@ -10,7 +10,7 @@
     $inputColumns);
 </script>
 
-<div class="column-selection-pane">
+<aside>
   {#if requestStatus.state === 'success'}
     <SelectableColumnTree columnsWithLinks={baseTableColumns} on:add />
     {#if tablesThatReferenceBaseTable.size > 0}
@@ -35,10 +35,10 @@
   {:else}
     <Spinner />
   {/if}
-</div>
+</aside>
 
 <style lang="scss">
-  .column-selection-pane {
+  aside {
     position: relative;
     padding: 0.75rem;
     flex-grow: 1;

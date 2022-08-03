@@ -3,15 +3,24 @@ import type { Writable } from 'svelte/store';
 import type { CancellablePromise } from '@mathesar-component-library/types';
 import type {
   TableEntry,
+  JpPath,
   JoinableTableResult,
 } from '@mathesar/api/tables/tableList';
 import CacheManager from '@mathesar/utils/CacheManager';
 import { getAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
 import type { Column } from '@mathesar/api/tables/columns';
-import type { QueryInitialColumn } from './QueryModel';
 
-export interface ColumnWithLink extends QueryInitialColumn {
+export interface InputColumn {
+  id: Column['id'];
+  name: Column['name'];
+  tableName: TableEntry['name'];
+  jpPath?: JpPath;
+  type: Column['type'];
+  tableId: TableEntry['id'];
+}
+
+export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
   type: Column['type'];
   linksTo?: LinkedTable;
 }
@@ -31,6 +40,13 @@ export interface ReferencedByTable extends LinkedTable {
     id: Column['id'];
     name: Column['name'];
   };
+}
+
+interface InputColumnsStoreSubstance {
+  requestStatus: RequestStatus;
+  baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
+  tablesThatReferenceBaseTable: Map<ReferencedByTable['id'], ReferencedByTable>;
+  columnInformationMap: Map<InputColumn['id'], InputColumn>;
 }
 
 export function getLinkFromColumn(
@@ -86,6 +102,37 @@ export function getLinkFromColumn(
       }),
     ),
   };
+}
+
+export function getColumnInformationMap(
+  result: JoinableTableResult,
+  baseTable: TableEntry,
+): InputColumnsStoreSubstance['columnInformationMap'] {
+  const map: InputColumnsStoreSubstance['columnInformationMap'] = new Map();
+  baseTable.columns.forEach((column) => {
+    map.set(column.id, {
+      id: column.id,
+      name: column.name,
+      type: column.type,
+      tableId: baseTable.id,
+      tableName: baseTable.name,
+    });
+  });
+  Object.keys(result.tables).forEach((tableIdKey) => {
+    const tableId = parseInt(tableIdKey, 10);
+    const table = result.tables[tableId];
+    table.columns.forEach((columnId) => {
+      const column = result.columns[columnId];
+      map.set(columnId, {
+        id: columnId,
+        name: column.name,
+        type: column.type,
+        tableId,
+        tableName: table.name,
+      });
+    });
+  });
+  return map;
 }
 
 export function getBaseTableColumnsWithLinks(
@@ -163,28 +210,16 @@ export default class InputColumnsManager {
 
   cacheManager: CacheManager<
     number,
-    {
-      baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
-      tablesThatReferenceBaseTable: Map<
-        ReferencedByTable['id'],
-        ReferencedByTable
-      >;
-    }
+    Omit<InputColumnsStoreSubstance, 'requestStatus'>
   > = new CacheManager(5);
 
   baseTable: TableEntry | undefined;
 
-  inputColumns: Writable<{
-    requestStatus: RequestStatus;
-    baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
-    tablesThatReferenceBaseTable: Map<
-      ReferencedByTable['id'],
-      ReferencedByTable
-    >;
-  }> = writable({
+  inputColumns: Writable<InputColumnsStoreSubstance> = writable({
     requestStatus: { state: 'success' },
     baseTableColumns: new Map(),
     tablesThatReferenceBaseTable: new Map(),
+    columnInformationMap: new Map(),
   });
 
   async generateTreeForBaseTable(): Promise<void> {
@@ -198,6 +233,7 @@ export default class InputColumnsManager {
       this.inputColumns.set({
         baseTableColumns: new Map(),
         tablesThatReferenceBaseTable: new Map(),
+        columnInformationMap: new Map(),
         requestStatus: { state: 'success' },
       });
       return;
@@ -205,10 +241,8 @@ export default class InputColumnsManager {
 
     const cachedResult = this.cacheManager.get(this.baseTable.id);
     if (cachedResult) {
-      const { baseTableColumns, tablesThatReferenceBaseTable } = cachedResult;
       this.inputColumns.set({
-        baseTableColumns,
-        tablesThatReferenceBaseTable,
+        ...cachedResult,
         requestStatus: { state: 'success' },
       });
       return;
@@ -227,13 +261,19 @@ export default class InputColumnsManager {
         result,
         this.baseTable,
       );
+      const columnInformationMap = getColumnInformationMap(
+        result,
+        this.baseTable,
+      );
       this.cacheManager.set(this.baseTable.id, {
         baseTableColumns,
         tablesThatReferenceBaseTable,
+        columnInformationMap,
       });
       this.inputColumns.set({
         baseTableColumns,
         tablesThatReferenceBaseTable,
+        columnInformationMap,
         requestStatus: { state: 'success' },
       });
     } catch (err: unknown) {
