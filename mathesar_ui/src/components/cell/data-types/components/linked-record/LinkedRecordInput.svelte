@@ -1,12 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { faBackspace, faSearchPlus } from '@fortawesome/free-solid-svg-icons';
-  import { Icon } from '@mathesar/component-library';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   // TODO remove dependency cycle
   // eslint-disable-next-line import/no-cycle
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import type { LinkedRecordCellProps } from '../typeDefinitions';
+  import LaunchCue from './LaunchCue.svelte';
+  import ClearCue from './ClearCue.svelte';
 
   type $$Props = LinkedRecordCellProps & {
     class?: string;
@@ -23,11 +23,40 @@
   export let containerClass = '';
 
   let isAcquiringInput = false;
-  let hoverTarget: 'launch' | 'clear' | undefined = undefined;
+  let element: HTMLSpanElement;
 
   $: hasValue = value !== undefined && value !== null;
 
+  function clear() {
+    value = undefined;
+    // If the value is cleared via the ClearCue, the focus will shift to the
+    // clear button in the ClearCue. We'd like to shift it back to the input
+    // element to that the user can press `Enter` to launch the record selector.
+    element.focus();
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    switch (e.key) {
+      case 'Enter':
+        void launchRecordSelector();
+        break;
+      case 'Delete':
+        clear();
+        break;
+      default:
+        break;
+    }
+  }
+
+  function handleFocus() {
+    window.addEventListener('keydown', handleKeydown);
+  }
+  function handleBlur() {
+    window.removeEventListener('keydown', handleKeydown);
+  }
+
   async function launchRecordSelector() {
+    console.log('LAUNCH');
     dispatch('recordSelectorOpen');
     isAcquiringInput = true;
     const newValue = await recordSelector.acquireUserInput({ tableId });
@@ -42,149 +71,53 @@
 </script>
 
 <span
-  class="linked-record-input-container {containerClass}"
+  class="linked-record-input {containerClass}"
   class:has-value={hasValue}
   class:is-acquiring-input={isAcquiringInput}
-  class:is-hovering-clear={hoverTarget === 'clear'}
-  class:is-hovering-launch={hoverTarget === 'launch'}
+  tabindex="0"
+  bind:this={element}
+  on:dblclick={launchRecordSelector}
+  on:focus={handleFocus}
+  on:blur={handleBlur}
 >
-  <span
-    class="linked-record-input {classes} absolute-block"
-    tabindex="0"
-    role="button"
-    aria-label="Select record"
-    title="Select record"
-    on:focus={launchRecordSelector}
-    on:mouseenter={() => {
-      hoverTarget = 'launch';
-    }}
-    on:mouseleave={() => {
-      hoverTarget = undefined;
-    }}
-  >
-    {#if hasValue}
-      <span class="value">
-        <LinkedRecord primaryKeyCellValue={value} />
-      </span>
-    {/if}
-  </span>
-
-  <span
-    class="clear-button absolute-block"
-    role="button"
-    aria-label="Clear value"
-    title="Clear value"
-    on:mouseenter={() => {
-      hoverTarget = 'clear';
-    }}
-    on:mouseleave={() => {
-      hoverTarget = undefined;
-    }}
-    on:click={() => {
-      value = undefined;
-    }}
-  >
-    <Icon data={faBackspace} />
-  </span>
-
-  <span class="cue-launch absolute-block">
-    <Icon data={faSearchPlus} />
-  </span>
-  <span class="cue-clear absolute-block" />
+  {#if hasValue}
+    <span class="content">
+      <LinkedRecord primaryKeyCellValue={value} showLink />
+    </span>
+    <ClearCue on:click={clear} />
+  {:else}
+    <LaunchCue on:click={launchRecordSelector} />
+  {/if}
 </span>
 
 <style>
-  /**
-   * Utility CSS
-   */
-
-  .absolute-block {
-    display: block;
-    position: absolute;
-    height: 100%;
-    top: 0;
-    display: flex;
-    align-items: center;
-  }
-
-  /**
-   * Semantic CSS
-   */
-
   /* TODO resolve code duplication with `.input-element` */
-  .linked-record-input-container {
+  .linked-record-input {
+    /**
+     * This size is hard-coded because we need to leave room for it, but for
+     * z-layering reasons we don't want to include it within the content
+     */
+    --clear-button-width: 2.2em;
     width: 100%;
-    box-sizing: border-box;
     display: block;
     position: relative;
-    /* TODO Explain why this needs a hard-coded size */
-    --clear-button-width: 2.2em;
-  }
-
-  .linked-record-input {
-    width: 100%;
     border: 1px solid #dfdfdf;
     border-radius: 0.25rem;
     background: #fff;
-    z-index: 1;
-    cursor: pointer;
+    min-height: 2.25em;
   }
+
   .linked-record-input:focus {
     border-color: #489ee4;
     outline: 0;
     box-shadow: 0 0 0 2px #2087e633;
   }
 
-  .value {
+  .content {
+    position: relative;
     display: block;
-    width: 100%;
-    padding: 6px var(--clear-button-width) 6px 8px;
-  }
-
-  .clear-button {
-    right: 0;
-    width: var(--clear-button-width);
-    justify-content: center;
-    z-index: 3;
-    cursor: pointer;
-    padding: 0 0.4em;
-    color: #aaa;
-  }
-  .clear-button:hover {
-    color: black;
-  }
-  .linked-record-input-container:not(.has-value) .clear-button {
-    display: none;
-  }
-
-  .cue-clear {
-    width: 100%;
-    pointer-events: none;
-    background: rgba(255, 255, 255, 0.5);
+    width: calc(100% - var(--clear-button-width));
+    padding: 6px;
     z-index: 2;
-  }
-  .linked-record-input-container:not(.is-hovering-clear) .cue-clear {
-    display: none;
-  }
-
-  .cue-launch {
-    width: 100%;
-    pointer-events: none;
-    padding-left: 1em;
-    cursor: pointer;
-    color: #aaa;
-    z-index: 2;
-  }
-  .linked-record-input-container.is-hovering-launch .cue-launch {
-    background: rgba(230, 230, 230, 0.6);
-    color: #555;
-  }
-  .linked-record-input-container.has-value.is-hovering-launch .cue-launch {
-    justify-content: center;
-  }
-  .linked-record-input-container.is-acquiring-input .cue-launch,
-  .linked-record-input-container.has-value:not(.is-hovering-launch)
-    .cue-launch {
-    display: none;
   }
 </style>

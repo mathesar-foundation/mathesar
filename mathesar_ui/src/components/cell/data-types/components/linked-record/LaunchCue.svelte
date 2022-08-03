@@ -5,7 +5,7 @@
   let isHovering = false;
 </script>
 
-<div class="launch-cue" class:is-hovering={isHovering}>
+<span class="launch-cue" class:is-hovering={isHovering}>
   <Button
     on:mouseenter={() => {
       isHovering = true;
@@ -16,23 +16,28 @@
     appearance="ghost"
     title="Select Record"
     class="padding-zero launch-cue-button"
+    on:click
   >
     <span class="icon-wrapper">
       <Icon data={faSearchPlus} />
     </span>
   </Button>
-  <div class="hover-indicator" />
-</div>
+  <span class="hover-indicator" />
+</span>
 
 <style>
   .launch-cue {
+    display: block;
     position: absolute;
     width: 100%;
     height: 100%;
+    top: 0;
+    left: 0;
     border-radius: 0.2em;
     background: white;
   }
   .hover-indicator {
+    display: block;
     position: absolute;
     width: 100%;
     height: 100%;
