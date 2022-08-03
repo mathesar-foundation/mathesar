@@ -14,8 +14,8 @@ help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # Initial setup
-init:
-	@sudo bash "$(INITSCRIPT)"
+initial_setup:
+	@bash "$(INITSCRIPT)"
 
 .PHONY: help Makefile
 
