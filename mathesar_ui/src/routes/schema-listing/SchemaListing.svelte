@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { faPlus } from '@fortawesome/free-solid-svg-icons';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
   import { Icon, Button, TextInput } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/AppTypes';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import { modal } from '@mathesar/stores/modal';
+  import { iconAddNew } from '@mathesar/icons';
   import SchemaRow from './schema-row/SchemaRow.svelte';
   import AddEditSchema from './AddEditSchema.svelte';
   import SchemasHelp from './__help__/SchemasHelp.svelte';
@@ -61,7 +61,7 @@
     <div class="container">
       <h1>{$currentDBName}</h1>
       <Button class="add" on:click={addSchema}>
-        <Icon data={faPlus} />
+        <Icon {...iconAddNew} />
         New Schema
       </Button>
     </div>
