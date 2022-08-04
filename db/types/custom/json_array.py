@@ -7,7 +7,7 @@ from db.types.base import MathesarCustomType
 from sqlalchemy.ext.compiler import compiles
 
 from db.functions import hints
-from db.functions.base import DBFunction, Contains, sa_call_sql_function, Equal
+from db.functions.base import DBFunction, Equal
 from db.functions.packed import DBFunctionPacked
 
 DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
