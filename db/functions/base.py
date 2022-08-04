@@ -18,7 +18,6 @@ from sqlalchemy import column, not_, and_, or_, func, literal
 
 from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
-import json
 
 
 def sa_call_sql_function(function_name, *parameters):

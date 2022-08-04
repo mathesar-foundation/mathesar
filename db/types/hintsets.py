@@ -21,6 +21,9 @@ def _build_db_types_hinted():
         MathesarCustomType.EMAIL: tuple([
             hints.email
         ]),
+        MathesarCustomType.MATHESAR_JSON_ARRAY: tuple([
+            hints.json_array
+        ]),
     }
 
     # Then, start adding hints automatically.

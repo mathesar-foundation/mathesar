@@ -92,7 +92,7 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     id: 'json_array_length_equals',
     name: 'number of elements is',
     uiTypeParameterMap: {
-      [abstractTypeCategory.Array]: [abstractTypeCategory.Text],
+      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
     },
   },
   {

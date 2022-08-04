@@ -62,7 +62,7 @@ class ArrayLength(DBFunction):
 
     @staticmethod
     def to_sa_expression(value):
-        return func.json_array_length(value)
+        return func.jsonb_array_length(value)
 
 
 class LengthEquals(DBFunctionPacked):
