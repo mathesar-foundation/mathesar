@@ -9,7 +9,8 @@ import type { JpPath } from '@mathesar/api/tables/tableList';
 export interface QueryInstanceInitialColumn {
   alias: string;
   id: Column['id'];
-  jpPath?: JpPath;
+  jp_path?: JpPath;
+  display_name: string;
 }
 
 export interface QueryInstance {
@@ -37,7 +38,7 @@ export type QueryResultRecords = PaginatedResponse<Record<string, unknown>>;
 
 export interface QueryResultColumn {
   alias: string;
-  name: string | null;
+  display_name: string | null;
   type: Column['type'];
   type_options: Column['type_options'];
   display_options: Column['display_options'];

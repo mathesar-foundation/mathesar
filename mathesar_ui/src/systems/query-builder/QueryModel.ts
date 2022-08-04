@@ -65,6 +65,25 @@ export default class QueryModel implements UnsavedQueryInstance {
     return this;
   }
 
+  updateColumnDisplayName(
+    columnAlias: string,
+    displayName: string,
+  ): QueryModel {
+    const initialColumns = this.initial_columns.map((entry) => {
+      if (entry.alias === columnAlias) {
+        return {
+          ...entry,
+          display_name: displayName,
+        };
+      }
+      return entry;
+    });
+    return new QueryModel({
+      ...this,
+      initial_columns: initialColumns,
+    });
+  }
+
   isSaveable(): boolean {
     return (
       isDefinedNonNullable(this.base_table) &&

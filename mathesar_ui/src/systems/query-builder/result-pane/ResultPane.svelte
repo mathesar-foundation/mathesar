@@ -97,7 +97,7 @@
                     column={{
                       ...processedQueryColumn.column,
                       name:
-                        processedQueryColumn.column.name ??
+                        processedQueryColumn.column.display_name ??
                         processedQueryColumn.column.alias,
                     }}
                   />

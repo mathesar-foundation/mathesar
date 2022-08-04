@@ -54,7 +54,8 @@
       q.addColumn({
         alias,
         id: column.id,
-        jpPath: column.jpPath,
+        jp_path: column.jpPath,
+        display_name: alias,
       }),
     );
     queryManager.selectColumn(alias);

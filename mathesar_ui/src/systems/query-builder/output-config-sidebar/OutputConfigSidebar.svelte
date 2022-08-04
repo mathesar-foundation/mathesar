@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import {
     Spinner,
     Button,
@@ -23,6 +24,12 @@
     ? columnInformationMap.get(initialColumn.id)
     : undefined;
 
+  let timer: number;
+
+  onDestroy(() => {
+    window.clearTimeout(timer);
+  });
+
   function deleteSelectedColumn() {
     const alias = $selectedColumnAlias;
     if (alias) {
@@ -30,19 +37,44 @@
       queryManager.clearSelectedColumn();
     }
   }
+
+  function updateName(value: string) {
+    window.clearTimeout(timer);
+    if (initialColumn && value !== initialColumn.display_name) {
+      const { alias } = initialColumn;
+      void queryManager.update((q) => q.updateColumnDisplayName(alias, value));
+    }
+  }
+
+  function onNameChange(e: Event) {
+    const element = e.target as HTMLInputElement;
+    updateName(element.value);
+  }
+
+  function onNameInput(e: Event) {
+    window.clearTimeout(timer);
+    const element = e.target as HTMLInputElement;
+    timer = window.setTimeout(() => {
+      updateName(element.value);
+    }, 500);
+  }
 </script>
 
 <aside>
-  {#if $selectedColumnAlias}
+  {#if initialColumn}
     <section
       data-identifier="column-properties-pane"
-      transition:slide={{ duration: 160 }}
+      transition:slide|local={{ duration: 160 }}
     >
       <header>Column Properties</header>
       <div>
         <LabeledInput layout="stacked">
           <h4 slot="label">Display name</h4>
-          <TextInput />
+          <TextInput
+            value={initialColumn.display_name}
+            on:input={onNameInput}
+            on:change={onNameChange}
+          />
         </LabeledInput>
         <div data-identifier="column-source">
           <h4>Source</h4>
@@ -67,6 +99,9 @@
   {/if}
   <section>
     <header>Transformations</header>
+    <div>
+      <i>Yet to be implemented</i>
+    </div>
   </section>
 </aside>
 
