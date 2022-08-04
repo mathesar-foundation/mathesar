@@ -185,7 +185,6 @@ def test_query_with_with_unexpected_key(create_patents_table, get_uid, client):
     assert response.status_code == 400
 
 
-
 def test_update(post_minimal_query, client):
     post_data, response = post_minimal_query
     response_json = response.json()
