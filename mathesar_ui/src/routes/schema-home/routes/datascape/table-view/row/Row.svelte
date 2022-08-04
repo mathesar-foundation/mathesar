@@ -60,7 +60,7 @@
     class:is-add-placeholder={row.isAddPlaceholder}
     {...htmlAttributes}
     style={styleString}
-    data-identifier={row.identifier}
+    data-row-identifier={row.identifier}
     on:mousedown={checkAndCreateEmptyRow}
   >
     <SheetCell

@@ -14,7 +14,7 @@
   {#if requestStatus.state === 'success'}
     <SelectableColumnTree columnsWithLinks={baseTableColumns} on:add />
     {#if tablesThatReferenceBaseTable.size > 0}
-      <div data-id="referenced-by-tables">
+      <div data-identifier="referenced-by-tables">
         {#each [...tablesThatReferenceBaseTable] as [tableId, table] (tableId)}
           <Collapsible>
             <div slot="header" class="column-name">
@@ -60,7 +60,7 @@
       margin-top: 0.7rem;
       margin-left: 1rem;
     }
-    [data-id='referenced-by-tables'] {
+    [data-identifier='referenced-by-tables'] {
       border-top: 2px solid #dfdfdf;
       margin-top: 1.2rem;
       padding-top: 0.3rem;
