@@ -6,14 +6,19 @@ ENV_EXAMPLE=".env.example"
 ENV_ORIG=".env"
 #TIMEOUT_TIME=60
 
+exit_on_error () {
+    echo "FAILED AT: $@"
+    exit
+}
+
 # instantiate .env file
 cp ${ENV_EXAMPLE} ${ENV_ORIG}
 
 # runs docker compose as daemon process
-docker-compose up -d || echo "FAILED AT: docker-compose up -d"
+docker-compose up -d || exit_on_error "docker-compose up -d"
 
 #while [[ ${status_code} -ne 302 && ${SECONDS} -lt ${TIMEOUT_TIME} ]];
-while [[ ${status_code} -ne 302 ]];
+while [[ ${status_code} -eq 000 ]];
 do
     status_code=$(curl --write-out %{http_code} --silent --output /dev/null ${URL})
 done
@@ -25,5 +30,5 @@ Application is now available at http://localhost:8000/
 
 # run migrations and install.py
 docker exec mathesar_service sh -c "python manage.py migrate && python install.py"\
-    || echo "FAILED AT: docker exec mathesar_service sh -c 'python manage.py migrate && python install.py'"
+    || exit_on_error "docker exec mathesar_service sh -c 'python manage.py migrate && python install.py'"
 
