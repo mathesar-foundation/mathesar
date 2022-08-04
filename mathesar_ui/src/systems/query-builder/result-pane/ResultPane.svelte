@@ -8,14 +8,21 @@
     SheetCell,
     SheetCellResizer,
   } from '@mathesar/components/sheet';
+  import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import type QueryManager from '../QueryManager';
 
   export let queryManager: QueryManager;
 
-  $: ({ query, processedQueryColumns, records, state, selectedColumnAlias } =
-    queryManager);
+  $: ({
+    query,
+    processedQueryColumns,
+    records,
+    state,
+    selectedColumnAlias,
+    pagination,
+  } = queryManager);
   $: ({ base_table, initial_columns } = $query);
 
   $: columnRunState = $state.columnsFetchState?.state;
@@ -47,8 +54,8 @@
   }
 </script>
 
-<div class="result">
-  <div class="result-header">
+<section data-identifier="result">
+  <header>
     <span class="title">Result</span>
     {#if base_table && initial_columns.length}
       <span class="info">
@@ -61,8 +68,8 @@
         {/if}
       </span>
     {/if}
-  </div>
-  <div class="result-content">
+  </header>
+  <div data-identifier="result-content">
     {#if !base_table}
       Please select the base table to start building the query
     {:else if !initial_columns.length}
@@ -144,12 +151,29 @@
           {/each}
         </SheetVirtualRows>
       </Sheet>
+      <div data-identifier="status-bar">
+        {#if $records.count}
+          <div>
+            Showing {$pagination.leftBound}-{Math.min(
+              $records.count,
+              $pagination.rightBound,
+            )} of {$records.count}
+          </div>
+        {/if}
+        <PaginationGroup
+          pagination={$pagination}
+          totalCount={$records.count}
+          on:change={(e) => {
+            void queryManager.setPagination(e.detail);
+          }}
+        />
+      </div>
     {/if}
   </div>
-</div>
+</section>
 
 <style lang="scss">
-  .result {
+  section {
     position: relative;
     flex-grow: 1;
     overflow: hidden;
@@ -160,7 +184,7 @@
     border: 1px solid #e5e5e5;
     border-radius: 4px;
 
-    .result-header {
+    header {
       padding: 8px 10px;
       border-bottom: 1px solid #e5e5e5;
 
@@ -174,12 +198,33 @@
       }
     }
 
-    .result-content {
+    [data-identifier='result-content'] {
       position: relative;
       flex-grow: 1;
       overflow: hidden;
       flex-shrink: 0;
       display: flex;
+      flex-direction: column;
+
+      :global(.sheet) {
+        position: relative;
+        flex-grow: 1;
+        flex-shrink: 0;
+      }
+
+      [data-identifier='status-bar'] {
+        flex-grow: 0;
+        flex-shrink: 0;
+        border-top: 1px solid #dfdfdf;
+        padding: 0.2rem 0.6rem;
+        background: #fafafa;
+        display: flex;
+        align-items: center;
+
+        :global(.pagination-group) {
+          margin-left: auto;
+        }
+      }
     }
 
     :global(.column-name-wrapper) {

@@ -20,17 +20,16 @@
   let is404 = false;
 
   let queryManager: QueryManager | undefined;
-  let urlUpdateUnsubscriber: () => void;
   let queryLoadPromise: CancellablePromise<QueryInstance | undefined>;
 
   function createQueryManager(queryInstance: UnsavedQueryInstance) {
-    urlUpdateUnsubscriber?.();
+    queryManager?.destroy();
     queryManager = new QueryManager(
       new QueryModel(queryInstance),
       $currentDbAbstractTypes.data,
     );
     is404 = false;
-    urlUpdateUnsubscriber = queryManager.on('save', async (instance) => {
+    queryManager.on('save', async (instance) => {
       try {
         const url = `${String(schemaURL)}queries/${instance.id}/`;
         router.goto(url, true);
@@ -41,7 +40,7 @@
   }
 
   function removeQueryManager(): void {
-    urlUpdateUnsubscriber?.();
+    queryManager?.destroy();
     is404 = true;
     queryManager = undefined;
   }

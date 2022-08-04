@@ -56,7 +56,7 @@ export default class QueryManager extends EventHandler<{
     isRedoPossible: false,
   });
 
-  pagination: Writable<Pagination> = writable(new Pagination());
+  pagination: Writable<Pagination> = writable(new Pagination({ size: 100 }));
 
   columns: Writable<QueryResultColumns> = writable([]);
 
@@ -199,8 +199,9 @@ export default class QueryManager extends EventHandler<{
         recordsFetchState: { state: 'processing' },
       }));
       this.queryRecordsFetchPromise?.cancel();
+      const { limit, offset } = get(this.pagination).recordsRequestParams();
       this.queryRecordsFetchPromise = getAPI(
-        `/api/db/v0/queries/${q.id}/records/`,
+        `/api/db/v0/queries/${q.id}/records/?limit=${limit}&offset=${offset}`,
       );
       const result = await this.queryRecordsFetchPromise;
       this.records.set(result);
@@ -224,6 +225,14 @@ export default class QueryManager extends EventHandler<{
     return undefined;
   }
 
+  async setPagination(
+    pagination: Pagination,
+  ): Promise<QueryResultRecords | undefined> {
+    this.pagination.set(pagination);
+    const result = await this.fetchResults();
+    return result;
+  }
+
   async update(
     callback: (queryModel: QueryModel) => QueryModel,
     opts?: { reversible: boolean },
@@ -235,6 +244,9 @@ export default class QueryManager extends EventHandler<{
     }
     this.setUndoRedoStates();
     await this.save();
+    // TODO:
+    // Depending on the exact nature of the update, decide when to
+    // fetch columns, results, or to reset pagination
     await Promise.all([this.fetchColumns(), this.fetchResults()]);
   }
 
@@ -278,5 +290,12 @@ export default class QueryManager extends EventHandler<{
 
   clearSelectedColumn(): void {
     this.selectedColumnAlias.set(undefined);
+  }
+
+  destroy(): void {
+    super.destroy();
+    this.queryColumnsFetchPromise?.cancel();
+    this.queryColumnsFetchPromise?.cancel();
+    this.queryRecordsFetchPromise?.cancel();
   }
 }
