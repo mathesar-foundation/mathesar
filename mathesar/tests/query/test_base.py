@@ -11,12 +11,12 @@ def test_convert_to_db_query(create_patents_table, get_uid):
         {
             'id': col1_dj.id,
             'alias': 'col1',
-            'name': 'Column 1',
+            'display_name': 'Column 1',
         },
         {
             'id': col2_dj.id,
             'alias': 'col2',
-            'name': 'Column 2',
+            'display_name': 'Column 2',
         },
     ]
     initial_columns = [
