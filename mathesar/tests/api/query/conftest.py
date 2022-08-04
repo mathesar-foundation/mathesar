@@ -9,12 +9,12 @@ def minimal_patents_query(create_patents_table, get_uid):
         {
             'id': base_table.get_column_by_name('Center').id,
             'alias': 'col1',
-            'name': 'Column 1',
+            'display_name': 'Column 1',
         },
         {
             'id': base_table.get_column_by_name('Case Number').id,
             'alias': 'col2',
-            'name': 'Column 2',
+            'display_name': 'Column 2',
         },
     ]
     display_options = {
