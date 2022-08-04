@@ -9,14 +9,14 @@ def test_columns(client, minimal_patents_query):
     assert response_json == [
         {
             'alias': 'col1',
-            'name': 'Column 1',
+            'display_name': 'Column 1',
             'type': PostgresType.TEXT.id,
             'type_options': None,
             'display_options': dict(a=1),
         },
         {
             'alias': 'col2',
-            'name': 'Column 2',
+            'display_name': 'Column 2',
             'type': PostgresType.TEXT.id,
             'type_options': None,
             'display_options': dict(b=2),

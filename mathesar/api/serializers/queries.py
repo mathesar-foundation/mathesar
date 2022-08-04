@@ -32,10 +32,3 @@ class QuerySerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(reverse('query-columns', kwargs={'pk': obj.pk}))
         else:
             return None
-
-    # TODO consider moving to UIQuery field validation:
-    # see https://docs.djangoproject.com/en/4.0/ref/validators/
-    def validate_display_options(self, display_options):
-        if not isinstance(display_options, dict):
-            raise serializers.ValidationError("display_options should be a dict.")
-        return display_options
