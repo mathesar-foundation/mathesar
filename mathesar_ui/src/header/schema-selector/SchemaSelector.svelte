@@ -15,7 +15,7 @@
   } from '@mathesar-component-library';
 
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { iconProject, iconSettings } from '@mathesar/icons';
+  import { iconSchema, iconConfigure } from '@mathesar/icons';
 
   let interalSelectedDB: Database['name'] = get(currentDBName);
   $: schemas = getSchemasStoreForDB(interalSelectedDB);
@@ -59,7 +59,7 @@
     {$currentDBName}
     <span class="separator">/</span>
     {#if $currentSchema}
-      <Icon class="schema" {...iconProject} />
+      <Icon class="schema" {...iconSchema} />
       {$currentSchema.name}
     {/if}
   </svelte:fragment>
@@ -108,7 +108,7 @@
                 href="/{interalSelectedDB}/{schema.id}/"
                 on:click={closeDropdown}
               >
-                <Icon class="schema" {...iconProject} />
+                <Icon class="schema" {...iconSchema} />
                 <span>{schema.name}</span>
               </a>
             </li>
@@ -118,7 +118,7 @@
         </ul>
         <div class="item">
           <a href="/{interalSelectedDB}/schemas/" on:click={closeDropdown}>
-            <Icon class="manage" {...iconSettings} />
+            <Icon class="manage" {...iconConfigure} />
             Manage schemas
           </a>
         </div>

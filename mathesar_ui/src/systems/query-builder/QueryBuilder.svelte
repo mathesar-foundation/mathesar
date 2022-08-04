@@ -13,7 +13,7 @@
   import type { TableEntry } from '@mathesar/api/tables/tableList';
   import { queries } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
-  import { iconFileContract, iconRedo, iconUndo } from '@mathesar/icons';
+  import { iconQuery, iconRedo, iconUndo } from '@mathesar/icons';
   import type QueryManager from './QueryManager';
   import type { QueryInitialColumn } from './QueryModel';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
@@ -54,7 +54,7 @@
 <div class="query-builder">
   <div class="title-bar">
     <div class="icon">
-      <Icon {...iconFileContract} size="2em" />
+      <Icon {...iconQuery} size="2em" />
     </div>
     <div class="name">
       <EditableTitle

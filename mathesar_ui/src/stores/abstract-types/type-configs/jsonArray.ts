@@ -1,8 +1,8 @@
-import { iconEnvelope } from '@mathesar/icons';
+import { iconUiTypeJsonArray } from '@mathesar/icons';
 import type { AbstractTypeConfiguration } from '../types';
 
 const jsonArrayType: AbstractTypeConfiguration = {
-  icon: iconEnvelope,
+  icon: iconUiTypeJsonArray,
   defaultDbType: 'mathesar_json_array',
   cell: {
     type: 'string',

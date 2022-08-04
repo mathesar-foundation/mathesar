@@ -4,7 +4,7 @@ import type {
   Column,
 } from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
-import { iconDollarSign } from '@mathesar/icons';
+import { iconUiTypeMoney } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -132,7 +132,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const moneyType: AbstractTypeConfiguration = {
-  icon: iconDollarSign,
+  icon: iconUiTypeMoney,
   cell: {
     type: 'money',
   },

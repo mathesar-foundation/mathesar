@@ -2,17 +2,20 @@
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import SpinnerButton from '@mathesar-component-library-dir/spinner-button/SpinnerButton.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
+  import {
+    iconCancel,
+    iconProceed,
+  } from '@mathesar-component-library-dir/common/icons';
   import type { ButtonDetails } from './CancelOrProceedButtonPairTypes';
-  import { iconBack, iconCheck } from '../common/icons';
 
   const cancelButtonDefaults: ButtonDetails = {
     label: 'Cancel',
-    icon: iconBack,
+    icon: iconCancel,
   };
 
   const proceedButtonDefaults: ButtonDetails = {
     label: 'Proceed',
-    icon: iconCheck,
+    icon: iconProceed,
   };
 
   export let cancelButton: Partial<ButtonDetails> = {};

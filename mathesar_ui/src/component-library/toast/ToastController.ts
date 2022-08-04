@@ -5,7 +5,11 @@ import type { Writable, Readable } from 'svelte/store';
 import { writable, derived } from 'svelte/store';
 import type { PauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
 import { pauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
-import { iconCheck, iconLoading, iconWarningTriangle } from '../common/icons';
+import {
+  iconSuccess,
+  iconLoading,
+  iconError,
+} from '@mathesar-component-library-dir/common/icons';
 
 /**
  * Allows control of the toast message after it is displayed
@@ -196,7 +200,7 @@ export function makeToast(
 
   function success(detail: ToastDetail = {}) {
     return controller.show({
-      icon: iconCheck,
+      icon: iconSuccess,
       backgroundColor: 'rgba(92, 159, 84, 0.9)',
       ...makeToastProps(detail),
     });
@@ -204,7 +208,7 @@ export function makeToast(
 
   function error(detail: ToastDetail = {}) {
     return controller.show({
-      icon: iconWarningTriangle,
+      icon: iconError,
       backgroundColor: 'rgba(159, 86, 77, 0.9)',
       ...makeToastProps(detail),
     });
@@ -216,7 +220,7 @@ export function makeToast(
 
   function spinner(detail: ToastDetail = {}) {
     return controller.show({
-      icon: { ...iconLoading, spin: true },
+      icon: { ...iconLoading },
       lifetime: 0,
       allowDismiss: false,
       hasProgress: false,

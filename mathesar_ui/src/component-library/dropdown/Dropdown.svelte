@@ -7,8 +7,8 @@
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
 
+  import { iconExpandDown } from '@mathesar-component-library-dir/common/icons';
   import AttachableDropdown from './AttachableDropdown.svelte';
-  import { iconDown } from '../common/icons';
 
   export let triggerClass = '';
   export let triggerAppearance: Appearance = 'default';
@@ -67,7 +67,7 @@
   </span>
   {#if showArrow}
     <span class="arrow">
-      <Icon {...iconDown} />
+      <Icon {...iconExpandDown} />
     </span>
   {/if}
 </Button>

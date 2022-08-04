@@ -5,7 +5,7 @@ import type {
   DateFormat,
   Column,
 } from '@mathesar/api/tables/columns';
-import { iconCalendarWeek } from '@mathesar/icons';
+import { iconUiTypeDateTime } from '@mathesar/icons';
 import type {
   AbstractTypeDbConfig,
   AbstractTypeConfigForm,
@@ -111,7 +111,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const dateTimeType: AbstractTypeConfiguration = {
-  icon: { ...iconCalendarWeek, label: 'Date & Time' },
+  icon: { ...iconUiTypeDateTime, label: 'Date & Time' },
   defaultDbType: DB_TYPES.TIMESTAMP_WITH_TZ,
   cell: {
     type: 'datetime',

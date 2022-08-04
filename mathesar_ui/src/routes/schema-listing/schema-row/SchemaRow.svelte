@@ -7,10 +7,10 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentDBName } from '@mathesar/stores/databases';
   import {
-    iconDeleteAlt,
-    iconLock,
-    iconPencilAlt,
-    iconProject,
+    iconDelete,
+    iconNotEditable,
+    iconEdit,
+    iconSchema,
   } from '@mathesar/icons';
 
   const dispatch = createEventDispatcher();
@@ -40,12 +40,12 @@
 <div class="schema-row">
   <div class="details">
     <div class="title">
-      <Icon {...iconProject} />
+      <Icon {...iconSchema} />
       <a href="/{$currentDBName}/{schema.id}">
         {schema.name}
       </a>
       {#if isLocked}
-        <Icon class="lock" {...iconLock} />
+        <Icon class="lock" {...iconNotEditable} />
       {/if}
     </div>
     {#if isDefault}
@@ -61,10 +61,10 @@
         on:click={() => dispatch('edit', schema)}
         aria-label="Edit Schema"
       >
-        <Icon {...iconPencilAlt} />
+        <Icon {...iconEdit} />
       </Button>
       <Button class="delete" on:click={handleDelete} aria-label="Delete Schema">
-        <Icon {...iconDeleteAlt} />
+        <Icon {...iconDelete} />
       </Button>
       <slot />
     </div>

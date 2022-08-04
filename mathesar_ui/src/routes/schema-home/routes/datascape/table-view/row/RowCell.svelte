@@ -21,7 +21,7 @@
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
-  import { iconBackspace } from '@mathesar/icons';
+  import { iconSetToNull } from '@mathesar/icons';
   import CellErrors from './CellErrors.svelte';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
@@ -126,7 +126,7 @@
     />
     <ContextMenu>
       <MenuItem
-        icon={iconBackspace}
+        icon={iconSetToNull}
         disabled={!canSetNull}
         on:click={() => setValue(null)}
       >

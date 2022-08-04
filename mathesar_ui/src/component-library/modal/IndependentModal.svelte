@@ -2,8 +2,8 @@
   import { createEventDispatcher, tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
   import { Button, Icon, portal } from '@mathesar-component-library';
+  import { iconClose } from '@mathesar-component-library-dir/common/icons';
   import type { ModalCloseAction, ModalWidth } from './modalTypes';
-  import { iconClose } from '../common/icons';
 
   const dispatch = createEventDispatcher();
 

@@ -10,12 +10,15 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { Icon, Progress, formatSize } from '@mathesar-component-library';
+  import {
+    iconFile,
+    iconUploadFile,
+  } from '@mathesar-component-library-dir/common/icons';
   import type {
     FileUpload,
     FileUploadProgress,
     FileUploadAddDetail,
   } from './FileUploadTypes';
-  import { iconFile, iconFileUpload } from '../common/icons';
 
   const dispatch = createEventDispatcher();
   const componentId = `file-import-${getId()}`;
@@ -146,7 +149,7 @@
     >
       <slot>
         <div class="message">
-          <Icon size="60px" {...iconFileUpload} />
+          <Icon size="60px" {...iconUploadFile} />
           <div class="text">
             <div class="title">Drag a file here</div>
             <div>or click to browse a file from your computer</div>

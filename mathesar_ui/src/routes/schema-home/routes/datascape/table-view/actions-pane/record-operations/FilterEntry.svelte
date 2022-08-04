@@ -15,7 +15,7 @@
   import DynamicInput from '@mathesar/components/cell/DynamicInput.svelte';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell/utils';
-  import { iconDeleteAlt } from '@mathesar/icons';
+  import { iconDelete } from '@mathesar/icons';
   import { validateFilterEntry } from './utils';
 
   const dispatch = createEventDispatcher();
@@ -180,7 +180,7 @@
       class="filter-remove"
       on:click={() => dispatch('removeFilter')}
     >
-      <Icon {...iconDeleteAlt} />
+      <Icon {...iconDelete} />
     </Button>
   </InputGroup>
 </div>

@@ -4,7 +4,7 @@ import type {
   DateFormat,
   Column,
 } from '@mathesar/api/tables/columns';
-import { iconCalendarDay } from '@mathesar/icons';
+import { iconUiTypeDate } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -52,7 +52,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const dateType: AbstractTypeConfiguration = {
-  icon: { ...iconCalendarDay, label: 'Date' },
+  icon: { ...iconUiTypeDate, label: 'Date' },
   cell: {
     type: 'date',
   },

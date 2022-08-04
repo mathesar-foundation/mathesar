@@ -10,8 +10,8 @@
     hasProperty,
     hasStringProperty,
   } from '@mathesar-component-library-dir/common/utils/typeUtils';
+  import { iconSearch } from '@mathesar-component-library-dir/common/icons';
   import TreeItemComponent from './TreeItem.svelte';
-  import { iconSearch } from '../common/icons';
 
   type TreeItem = $$Generic;
   interface $$Slots {

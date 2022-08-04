@@ -4,7 +4,7 @@ import type {
   TimeFormat,
   Column,
 } from '@mathesar/api/tables/columns';
-import { iconClock } from '@mathesar/icons';
+import { iconUiTypeTime } from '@mathesar/icons';
 import type {
   AbstractTypeDbConfig,
   AbstractTypeConfigForm,
@@ -97,7 +97,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const timeType: AbstractTypeConfiguration = {
-  icon: { ...iconClock, label: 'Time' },
+  icon: { ...iconUiTypeTime, label: 'Time' },
   defaultDbType: DB_TYPES.TIME_WITH_TZ,
   cell: {
     type: 'time',

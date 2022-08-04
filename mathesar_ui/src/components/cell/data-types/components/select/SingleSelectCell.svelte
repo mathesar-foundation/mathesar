@@ -8,10 +8,10 @@
     Icon,
     isDefinedNonNullable,
     getLabel as defaultGetLabel,
+    iconExpandDown,
   } from '@mathesar-component-library';
   import type { ListBoxApi } from '@mathesar-component-library/types';
   import CellValue from '@mathesar/components/CellValue.svelte';
-  import { iconDown } from '@mathesar/icons';
   import CellWrapper from '../CellWrapper.svelte';
   import type { SingleSelectCellProps } from '../typeDefinitions';
 
@@ -123,7 +123,7 @@
 
     {#if isActive}
       <div class="icon">
-        <Icon {...iconDown} />
+        <Icon {...iconExpandDown} />
       </div>
     {/if}
   </CellWrapper>

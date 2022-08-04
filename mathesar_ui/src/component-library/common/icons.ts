@@ -2,14 +2,12 @@ import {
   faQuestionCircle,
   faArrowLeft,
   faCheck,
-  faArrowRight,
   faExclamationTriangle,
   faSpinner,
   faAngleDown,
   faFile,
   faFileUpload,
   faTimes,
-  faExclamationCircle,
   faSearch,
   faAngleLeft,
   faEllipsisH,
@@ -17,27 +15,44 @@ import {
   faAngleDoubleRight,
   faAngleRight,
   faCaretRight,
-  faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
+import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
-export const iconBack = { data: faArrowLeft };
-export const iconForward = { data: faArrowRight };
-export const iconCheck = { data: faCheck };
-export const iconWarningTriangle = { data: faExclamationTriangle };
-export const iconWarningCircle = { data: faExclamationCircle };
-export const iconLoading = { data: faSpinner };
-export const iconDown = { data: faAngleDown };
-export const iconFile = { data: faFile };
-export const iconFileUpload = { data: faFileUpload };
-export const iconHelp = { data: faQuestionCircle };
-export const iconClose = { data: faTimes };
-export const iconSearch = { data: faSearch };
-export const iconLeft = { data: faAngleLeft };
+/**
+ * @file
+ *
+ * - The "actions" and "things" classification is imperfect. Some icons will fit
+ *   into both categories. That's okay. Use your best judgement when adding new
+ *   ones.
+ *
+ */
 
-// Cannot really think of better naming
-export const iconEllipses = { data: faEllipsisH };
-export const iconAngleDoubleLeft = { data: faAngleDoubleLeft };
-export const iconAngleDoubleRight = { data: faAngleDoubleRight };
-export const iconAngleRight = { data: faAngleRight };
-export const iconCaretRight = { data: faCaretRight };
-export const iconChevronDown = { data: faChevronDown };
+// ACTIONS
+//
+// (These names should all be verbs)
+
+export const iconCancel: IconProps = { data: faArrowLeft };
+export const iconChooseItemManyAhead: IconProps = { data: faAngleDoubleRight };
+export const iconChooseItemManyPrior: IconProps = { data: faAngleDoubleLeft };
+export const iconChooseItemNext: IconProps = { data: faAngleRight };
+export const iconChooseItemPrevious: IconProps = { data: faAngleLeft };
+export const iconClose: IconProps = { data: faTimes };
+export const iconExpandDown: IconProps = { data: faAngleDown };
+export const iconHelp: IconProps = { data: faQuestionCircle };
+export const iconProceed: IconProps = { data: faCheck };
+export const iconSearch: IconProps = { data: faSearch };
+export const iconShowMore: IconProps = { data: faEllipsisH };
+export const iconUploadFile: IconProps = { data: faFileUpload };
+
+// THINGS
+//
+// (These names should all be nouns)
+
+export const iconFile: IconProps = { data: faFile };
+
+// STATUSES
+
+export const iconError: IconProps = { data: faExclamationTriangle };
+export const iconLoading: IconProps = { data: faSpinner, spin: true };
+export const iconSuccess: IconProps = { data: faCheck };
+export const iconVerticallyCollapsed: IconProps = { data: faCaretRight };

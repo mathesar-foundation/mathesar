@@ -5,6 +5,7 @@
     ControlledModal,
     DropdownMenu,
     MenuItem,
+    iconLoading,
   } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type {
@@ -14,10 +15,9 @@
   import { States } from '@mathesar/utils/api';
   import { modal } from '@mathesar/stores/modal';
   import {
-    iconAdd,
-    iconLink,
-    iconLoading,
-    iconSnowflake,
+    iconAddNew,
+    iconTableLink,
+    iconConstraintUnique,
   } from '@mathesar/icons';
   import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
   import TableConstraint from './TableConstraint.svelte';
@@ -51,7 +51,7 @@
   <span slot="title">Table Constraints{countText} <ConstraintHelp /></span>
   <div class="table-constraints">
     {#if shouldShowLoadingSpinner}
-      <Icon {...iconLoading} spin={true} />
+      <Icon {...iconLoading} />
     {:else if state === States.Error}
       <div>Unable to fetch table constraints</div>
       <div>{errorMsg}</div>
@@ -67,14 +67,17 @@
   </div>
 
   <div slot="footer" class="footer">
-    <DropdownMenu label="New Constraint" icon={iconAdd}>
+    <DropdownMenu label="New Constraint" icon={iconAddNew}>
       <MenuItem
         on:click={() => newUniqueConstraintModal.open()}
-        icon={iconSnowflake}
+        icon={iconConstraintUnique}
       >
         Unique
       </MenuItem>
-      <MenuItem on:click={() => newFkConstraintModal.open()} icon={iconLink}>
+      <MenuItem
+        on:click={() => newFkConstraintModal.open()}
+        icon={iconTableLink}
+      >
         Foreign Key
       </MenuItem>
     </DropdownMenu>

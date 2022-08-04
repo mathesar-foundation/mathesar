@@ -3,10 +3,10 @@
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import Spinner from '@mathesar-component-library-dir/spinner/Spinner.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import { iconForward } from '../common/icons';
+  import { iconProceed } from '@mathesar-component-library-dir/common/icons';
 
   export let label = 'Proceed';
-  export let icon: IconProps = iconForward;
+  export let icon: IconProps = iconProceed;
   export let onClick: () => Promise<void>;
   export let disabled = false;
   export let isProcessing = false;

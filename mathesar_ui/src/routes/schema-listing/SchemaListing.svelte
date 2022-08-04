@@ -5,7 +5,7 @@
   import type { SchemaEntry } from '@mathesar/AppTypes';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import { modal } from '@mathesar/stores/modal';
-  import { iconAdd } from '@mathesar/icons';
+  import { iconAddNew } from '@mathesar/icons';
   import SchemaRow from './schema-row/SchemaRow.svelte';
   import AddEditSchema from './AddEditSchema.svelte';
   import SchemasHelp from './__help__/SchemasHelp.svelte';
@@ -61,7 +61,7 @@
     <div class="container">
       <h1>{$currentDBName}</h1>
       <Button class="add" on:click={addSchema}>
-        <Icon {...iconAdd} />
+        <Icon {...iconAddNew} />
         New Schema
       </Button>
     </div>

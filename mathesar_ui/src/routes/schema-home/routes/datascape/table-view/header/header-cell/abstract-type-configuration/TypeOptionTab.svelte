@@ -2,8 +2,7 @@
   // Temporary component
   // Make tab container more low-level to be used here
   import { createEventDispatcher } from 'svelte';
-  import { Button, Icon } from '@mathesar-component-library';
-  import { iconCloseCircle } from '@mathesar/icons';
+  import { Button, Icon, iconError } from '@mathesar-component-library';
 
   const dispatch = createEventDispatcher();
 
@@ -27,7 +26,7 @@
   <Button appearance="ghost" class="padding-zero" on:click={handleTabChange}>
     <slot />
     {#if hasError}
-      <Icon class="error-icon" size="0.75em" {...iconCloseCircle} />
+      <Icon class="error-icon" size="0.75em" {...iconError} />
     {/if}
   </Button>
 </li>

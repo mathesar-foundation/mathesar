@@ -11,7 +11,7 @@
   import { setInFileStore } from '@mathesar/stores/fileImports';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
-  import { iconDeleteAlt } from '@mathesar/icons';
+  import { iconDelete } from '@mathesar/icons';
   import PreviewColumn from './PreviewColumn.svelte';
   import PreviewRows from './PreviewRows.svelte';
   import {
@@ -113,7 +113,7 @@
   <CancelOrProceedButtonPair
     onCancel={() => cancelImport(fileImportStore)}
     onProceed={() => finishImport(fileImportStore)}
-    cancelButton={{ icon: iconDeleteAlt }}
+    cancelButton={{ icon: iconDelete }}
     proceedButton={{ label: 'Finish Import' }}
     {canProceed}
   />

@@ -2,7 +2,7 @@ import type { FormValues } from '@mathesar-component-library/types';
 
 import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/api/tables/columns';
-import { iconAlignLeft } from '@mathesar/icons';
+import { iconUiTypeText } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -103,7 +103,7 @@ function constructDbFormValuesFromTypeOptions(
 }
 
 const textType: AbstractTypeConfiguration = {
-  icon: { ...iconAlignLeft, label: 'Text' },
+  icon: { ...iconUiTypeText, label: 'Text' },
   defaultDbType: DB_TYPES.VARCHAR,
   cell: {
     type: 'string',

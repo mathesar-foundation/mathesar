@@ -6,6 +6,7 @@
     Dropdown,
     DropdownMenu,
     MenuItem,
+    iconError,
   } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { refetchTablesForSchema, deleteTable } from '@mathesar/stores/tables';
@@ -16,17 +17,16 @@
   import { modal } from '@mathesar/stores/modal';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import {
-    iconAdd,
-    iconCursor,
-    iconDeleteAlt,
-    iconFilter,
-    iconKey,
-    iconLink,
-    iconList,
-    iconSettings,
-    iconSort,
-    iconSync,
-    iconWarningTriangle,
+    iconAddNew,
+    iconRename,
+    iconDelete,
+    iconFiltering,
+    iconConstraint,
+    iconTableLink,
+    iconGrouping,
+    iconConfigure,
+    iconSorting,
+    iconRefresh,
   } from '@mathesar/icons';
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import TableConstraints from '../constraints/TableConstraints.svelte';
@@ -81,14 +81,15 @@
 </script>
 
 <div class="actions-pane">
-  <DropdownMenu label="Table" icon={iconSettings}>
-    <MenuItem on:click={() => tableRenameModal.open()} icon={iconCursor}>
+  <DropdownMenu label="Table" icon={iconConfigure}>
+    <MenuItem on:click={() => tableRenameModal.open()} icon={iconRename}>
       Rename
     </MenuItem>
-    <MenuItem on:click={handleDeleteTable} icon={iconDeleteAlt}>
-      Delete
-    </MenuItem>
-    <MenuItem on:click={() => tableConstraintsModal.open()} icon={iconKey}>
+    <MenuItem on:click={handleDeleteTable} icon={iconDelete}>Delete</MenuItem>
+    <MenuItem
+      on:click={() => tableConstraintsModal.open()}
+      icon={iconConstraint}
+    >
       Constraints
     </MenuItem>
   </DropdownMenu>
@@ -106,7 +107,7 @@
 
   <Dropdown showArrow={false} contentClass="filter-dropdown-content">
     <svelte:fragment slot="trigger">
-      <Icon {...iconFilter} size="0.8em" />
+      <Icon {...iconFiltering} size="0.8em" />
       <span>
         Filters
         {#if $filtering.entries.length > 0}
@@ -121,7 +122,7 @@
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
-      <Icon {...iconSort} />
+      <Icon {...iconSorting} />
       <span>
         Sort
         {#if $sorting.size > 0}
@@ -136,7 +137,7 @@
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
-      <Icon {...iconList} />
+      <Icon {...iconGrouping} />
       <span>
         Group
         {#if $grouping.size > 0}
@@ -156,7 +157,7 @@
     size="small"
     on:click={() => recordsData.addEmptyRecord()}
   >
-    <Icon {...iconAdd} />
+    <Icon {...iconAddNew} />
     <span>New Record</span>
   </Button>
 
@@ -167,13 +168,13 @@
     size="small"
     on:click={() => linkTableModal.open()}
   >
-    <Icon {...iconLink} />
+    <Icon {...iconTableLink} />
     <span>Link Table</span>
   </Button>
 
   {#if $selectedRows.size > 0}
     <Button size="small" on:click={() => recordsData.deleteSelected()}>
-      <Icon {...iconDeleteAlt} />
+      <Icon {...iconDelete} />
       <span>
         Delete {$selectedRows.size} records
       </span>
@@ -188,7 +189,7 @@
   <div class="loading-info">
     <Button size="small" disabled={isLoading} on:click={refresh}>
       <Icon
-        {...isError && !isLoading ? iconWarningTriangle : iconSync}
+        {...isError && !isLoading ? iconError : iconRefresh}
         spin={isLoading}
       />
       <span>

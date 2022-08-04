@@ -1,7 +1,7 @@
 <script lang="ts">
   import Dropdown from '@mathesar-component-library-dir/dropdown/Dropdown.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import { iconHelp } from '../common/icons';
+  import { iconHelp } from '@mathesar-component-library-dir/common/icons';
 </script>
 
 <Dropdown

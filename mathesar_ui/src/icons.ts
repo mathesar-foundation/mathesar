@@ -1,22 +1,15 @@
 import {
   faHammer,
   faArrowRight,
-  faExclamationTriangle,
-  faSpinner,
-  faAngleDown,
-  faTimes,
-  faDragon,
   faUser,
   faProjectDiagram,
   faCogs,
   faTable,
   faFilter,
   faSort,
-  faListAlt,
   faPlus,
   faLink,
   faTrashAlt,
-  faTrash,
   faSortAmountDownAlt,
   faSortAmountDown,
   faThList,
@@ -25,7 +18,6 @@ import {
   faChevronRight,
   faDatabase,
   faPalette,
-  faTimesCircle,
   faSync,
   faLock,
   faPencilAlt,
@@ -47,53 +39,77 @@ import {
   faAlignLeft,
   faClock,
   faGlobe,
+  faShapes,
+  faClone,
 } from '@fortawesome/free-solid-svg-icons';
+import type { IconProps } from '@mathesar-component-library/types';
 
-export const iconDown = { data: faAngleDown };
-export const iconDragon = { data: faDragon };
-export const iconUser = { data: faUser };
-export const iconProject = { data: faProjectDiagram };
-export const iconSettings = { data: faCogs };
-export const iconTable = { data: faTable };
-export const iconFilter = { data: faFilter };
-export const iconSort = { data: faSort };
-export const iconList = { data: faListAlt };
-export const iconAdd = { data: faPlus };
-export const iconLink = { data: faLink };
-export const iconDeleteAlt = { data: faTrashAlt };
-export const iconDelete = { data: faTrash };
-export const iconClose = { data: faTimes };
-export const iconCloseCircle = { data: faTimesCircle };
-export const iconForward = { data: faArrowRight };
-export const iconWarningTriangle = { data: faExclamationTriangle };
-export const iconLoading = { data: faSpinner };
-export const iconSortAmountDownAlt = { data: faSortAmountDownAlt };
-export const iconSortAmountDown = { data: faSortAmountDown };
-export const iconThList = { data: faThList };
-export const iconCursor = { data: faICursor };
-export const iconUnlink = { data: faUnlink };
-export const iconChevronRight = { data: faChevronRight };
-export const iconDatabase = { data: faDatabase };
-export const iconPalette = { data: faPalette };
-export const iconHammer = { data: faHammer };
-export const iconSync = { data: faSync };
-export const iconLock = { data: faLock };
-export const iconPencilAlt = { data: faPencilAlt };
-export const iconFileContract = { data: faFileContract };
-export const iconRedo = { data: faRedo };
-export const iconUndo = { data: faUndo };
-export const iconUpload = { data: faUpload };
-export const iconKey = { data: faKey };
-export const iconSnowflake = { data: faSnowflake };
-export const iconBackspace = { data: faBackspace };
-export const iconCheckSquare = { data: faCheckSquare };
-export const iconCalendarDay = { data: faCalendarDay };
-export const iconCalendarWeek = { data: faCalendarWeek };
-export const iconStopwatch = { data: faStopwatch };
-export const iconEnvelope = { data: faEnvelope };
-export const iconHelp = { data: faQuestion };
-export const iconDollarSign = { data: faDollarSign };
-export const iconHashtag = { data: faHashtag };
-export const iconAlignLeft = { data: faAlignLeft };
-export const iconClock = { data: faClock };
-export const iconGlobe = { data: faGlobe };
+/**
+ * @file
+ *
+ * - This file contains the **Mathesar-specific** icon definitions. For generic
+ *   icon definitions, see the file: `src/component-library/common/icons.ts`.
+ *
+ * - When placing icons in the UI, prefer using icon definitions from the
+ *   component library when possible. For example, don't define `iconClose`
+ *   within this file because it already exists within the component library
+ *   icon definitions.
+ */
+
+// ACTIONS
+//
+// (These names should all be verbs)
+
+export const iconAddNew: IconProps = { data: faPlus };
+export const iconConfigure: IconProps = { data: faCogs };
+export const iconDelete: IconProps = { data: faTrashAlt };
+export const iconEdit: IconProps = { data: faPencilAlt };
+export const iconExpandRight: IconProps = { data: faChevronRight };
+export const iconImportData: IconProps = { data: faUpload };
+export const iconRedo: IconProps = { data: faRedo };
+export const iconRefresh: IconProps = { data: faSync };
+export const iconRename: IconProps = { data: faICursor };
+export const iconSetToNull: IconProps = { data: faBackspace };
+export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
+export const iconSortDescending: IconProps = { data: faSortAmountDown };
+export const iconUndo: IconProps = { data: faUndo };
+export const iconUnlink: IconProps = { data: faUnlink };
+
+// THINGS
+//
+// (These names should all be nouns)
+
+export const iconConstraint: IconProps = { data: faKey };
+export const iconConstraintUnique: IconProps = { data: faSnowflake };
+export const iconDatabase: IconProps = { data: faDatabase };
+export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
+export const iconDisplayOptions: IconProps = { data: faPalette };
+export const iconFiltering: IconProps = { data: faFilter };
+export const iconGrouping: IconProps = { data: faThList };
+export const iconQuery: IconProps = { data: faFileContract };
+export const iconSchema: IconProps = { data: faProjectDiagram };
+export const iconSorting: IconProps = { data: faSort };
+export const iconTable: IconProps = { data: faTable };
+export const iconTableLink: IconProps = { data: faLink };
+export const iconTechnicalExplanation: IconProps = { data: faHammer };
+export const iconUser: IconProps = { data: faUser };
+
+// STATUSES
+
+export const iconNotEditable: IconProps = { data: faLock };
+
+// UI TYPES
+
+export const iconUiTypeBoolean: IconProps = { data: faCheckSquare };
+export const iconUiTypeDate: IconProps = { data: faCalendarDay };
+export const iconUiTypeDateTime: IconProps = { data: faCalendarWeek };
+export const iconUiTypeDuration: IconProps = { data: faStopwatch };
+export const iconUiTypeEmail: IconProps = { data: faEnvelope };
+export const iconUiTypeJsonArray: IconProps = { data: faClone };
+export const iconUiTypeJsonObject: IconProps = { data: faShapes };
+export const iconUiTypeMoney: IconProps = { data: faDollarSign };
+export const iconUiTypeNumber: IconProps = { data: faHashtag };
+export const iconUiTypeText: IconProps = { data: faAlignLeft };
+export const iconUiTypeTime: IconProps = { data: faClock };
+export const iconUiTypeUnknown: IconProps = { data: faQuestion };
+export const iconUiTypeUri: IconProps = { data: faGlobe };

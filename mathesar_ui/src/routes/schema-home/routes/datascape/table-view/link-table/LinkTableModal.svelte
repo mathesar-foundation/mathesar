@@ -35,7 +35,7 @@
   import { postAPI, States } from '@mathesar/utils/api';
   import { getAvailableName } from '@mathesar/utils/db';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { iconHammer, iconLink } from '@mathesar/icons';
+  import { iconTechnicalExplanation, iconTableLink } from '@mathesar/icons';
   import type { RelationshipType } from './linkTableUtils';
   import {
     getRelationshipType,
@@ -318,7 +318,9 @@
       {:else if relationshipType}
         <FormField>
           <div class="under-the-hood">
-            <div class="title"><Icon {...iconHammer} /> Under the hood</div>
+            <div class="title">
+              <Icon {...iconTechnicalExplanation} /> Under the hood
+            </div>
 
             {#if relationshipType === 'many-to-many'}
               <FormField>
@@ -426,7 +428,7 @@
     slot="footer"
     onProceed={handleSave}
     onCancel={() => controller.close()}
-    proceedButton={{ label: 'Create Link', icon: iconLink }}
+    proceedButton={{ label: 'Create Link', icon: iconTableLink }}
     {canProceed}
   />
 </ControlledModal>

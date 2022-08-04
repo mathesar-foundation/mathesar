@@ -1,8 +1,8 @@
-import { iconHelp } from '@mathesar/icons';
+import { iconUiTypeUnknown } from '@mathesar/icons';
 import type { AbstractTypeConfiguration } from '../types';
 
 const fallbackType: AbstractTypeConfiguration = {
-  icon: { ...iconHelp, label: 'Unknown column type' },
+  icon: { ...iconUiTypeUnknown, label: 'Unknown column type' },
   cell: {
     type: 'string',
   },

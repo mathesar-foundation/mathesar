@@ -19,7 +19,7 @@
   } from '@mathesar/stores/table-data/types';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { iconChevronRight, iconSettings } from '@mathesar/icons';
+  import { iconExpandRight, iconConfigure } from '@mathesar/icons';
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
 
@@ -158,8 +158,8 @@
               on:click={setTypeView}
             >
               <span>{abstractType.name}</span>
-              <Icon size="0.8em" {...iconSettings} />
-              <Icon size="0.7em" {...iconChevronRight} />
+              <Icon size="0.8em" {...iconConfigure} />
+              <Icon size="0.7em" {...iconExpandRight} />
             </Button>
           {:else if view === 'type'}
             <h6 class="category">
@@ -169,7 +169,7 @@
                 class="padding-zero"
                 on:click={setDefaultView}
               >
-                <Icon {...iconChevronRight} />
+                <Icon {...iconExpandRight} />
                 Go back
               </Button>
             </h6>

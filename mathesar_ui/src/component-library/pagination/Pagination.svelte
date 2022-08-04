@@ -1,14 +1,14 @@
 <script lang="ts">
   import { tick, createEventDispatcher } from 'svelte';
   import { Icon } from '@mathesar-component-library';
-  import { calculatePages, getPageCount } from './paginationUtils';
   import {
-    iconLeft,
-    iconEllipses,
-    iconAngleDoubleLeft,
-    iconAngleDoubleRight,
-    iconAngleRight,
-  } from '../common/icons';
+    iconChooseItemPrevious,
+    iconShowMore,
+    iconChooseItemManyPrior,
+    iconChooseItemManyAhead,
+    iconChooseItemNext,
+  } from '@mathesar-component-library-dir/common/icons';
+  import { calculatePages, getPageCount } from './paginationUtils';
 
   const dispatch = createEventDispatcher();
 
@@ -59,7 +59,7 @@
           on:click={(e) => setPage(e, currentPage - 1)}
           disabled={currentPage === 1}
         >
-          <Icon {...iconLeft} tabindex="-1" />
+          <Icon {...iconChooseItemPrevious} tabindex="-1" />
         </button>
       </li>
     {/if}
@@ -97,8 +97,8 @@
             aria-label="Goto Page {pageInfo.prevPageWindow}"
             on:click={(e) => setPage(e, pageInfo.prevPageWindow)}
           >
-            <Icon class="ellipsis" {...iconEllipses} />
-            <Icon class="arrow" {...iconAngleDoubleLeft} />
+            <Icon class="ellipsis" {...iconShowMore} />
+            <Icon class="arrow" {...iconChooseItemManyPrior} />
           </button>
         </li>
       {/if}
@@ -148,8 +148,8 @@
             aria-label="Goto Page {pageInfo.nextPageWindow}"
             on:click={(e) => setPage(e, pageInfo.nextPageWindow)}
           >
-            <Icon class="ellipsis" {...iconEllipses} />
-            <Icon class="arrow" {...iconAngleDoubleRight} />
+            <Icon class="ellipsis" {...iconShowMore} />
+            <Icon class="arrow" {...iconChooseItemManyAhead} />
           </button>
         </li>
       {/if}
@@ -188,7 +188,7 @@
           on:click={(e) => setPage(e, currentPage + 1)}
           disabled={currentPage === pageCount}
         >
-          <Icon {...iconAngleRight} />
+          <Icon {...iconChooseItemNext} />
         </button>
       </li>
     {/if}

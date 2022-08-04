@@ -1,8 +1,8 @@
-import { iconEnvelope } from '@mathesar/icons';
+import { iconUiTypeEmail } from '@mathesar/icons';
 import type { AbstractTypeConfiguration } from '../types';
 
 const emailType: AbstractTypeConfiguration = {
-  icon: iconEnvelope,
+  icon: iconUiTypeEmail,
   defaultDbType: 'mathesar_types.email',
   cell: {
     type: 'string',

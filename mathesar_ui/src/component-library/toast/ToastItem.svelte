@@ -1,8 +1,8 @@
 <script lang="ts">
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { ensureReadable } from '@mathesar-component-library-dir/common/utils/storeUtils';
+  import { iconClose } from '@mathesar-component-library-dir/common/icons';
   import type { ToastEntry } from './ToastController';
-  import { iconClose } from '../common/icons';
 
   export let entry: ToastEntry;
 

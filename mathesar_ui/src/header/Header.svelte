@@ -15,11 +15,10 @@
   import { TabularType } from '@mathesar/stores/table-data';
 
   import {
-    iconAdd,
-    iconDragon,
-    iconFileContract,
+    iconAddNew,
+    iconQuery,
     iconTable,
-    iconUpload,
+    iconImportData,
     iconUser,
   } from '@mathesar/icons';
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
@@ -49,12 +48,6 @@
 </script>
 
 <header>
-  <div class="logo">
-    <div class="image-wrapper">
-      <Icon {...iconDragon} />
-    </div>
-  </div>
-
   {#if $currentDBName}
     <SchemaSelector />
   {/if}
@@ -64,14 +57,14 @@
 
     {#if $currentSchemaId}
       <div class="quick-links">
-        <DropdownMenu label="New" icon={iconAdd}>
+        <DropdownMenu label="New" icon={iconAddNew}>
           <MenuItem on:click={handleCreateEmptyTable} icon={iconTable}>
             New Empty Table
           </MenuItem>
-          <MenuItem on:click={redirectToNewQueryRoute} icon={iconFileContract}
+          <MenuItem on:click={redirectToNewQueryRoute} icon={iconQuery}
             >New Query</MenuItem
           >
-          <MenuItem on:click={beginDataImport} icon={iconUpload}>
+          <MenuItem on:click={beginDataImport} icon={iconImportData}>
             Import Data into New Table
           </MenuItem>
         </DropdownMenu>

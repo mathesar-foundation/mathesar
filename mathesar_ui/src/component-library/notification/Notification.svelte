@@ -2,7 +2,10 @@
   import { createEventDispatcher } from 'svelte';
   import { fade } from 'svelte/transition';
   import { Icon, Button } from '@mathesar-component-library';
-  import { iconClose, iconWarningCircle } from '../common/icons';
+  import {
+    iconClose,
+    iconError,
+  } from '@mathesar-component-library-dir/common/icons';
 
   const dispatch = createEventDispatcher();
 
@@ -20,7 +23,7 @@
   <div class="notification {type}" transition:fade={{ duration: 120 }}>
     <div class="header">
       <div class="icon">
-        <Icon {...iconWarningCircle} />
+        <Icon {...iconError} />
       </div>
       <strong class="message">
         <slot />

@@ -3,7 +3,7 @@ import type {
   BooleanDisplayOptions,
   Column,
 } from '@mathesar/api/tables/columns';
-import { iconCheckSquare } from '@mathesar/icons';
+import { iconUiTypeBoolean } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -119,7 +119,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const booleanType: AbstractTypeConfiguration = {
-  icon: { ...iconCheckSquare, label: 'Boolean' },
+  icon: { ...iconUiTypeBoolean, label: 'Boolean' },
   cell: {
     type: 'boolean',
   },

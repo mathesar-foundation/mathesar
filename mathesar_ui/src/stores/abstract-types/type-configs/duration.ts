@@ -3,7 +3,7 @@ import type {
   DurationDisplayOptions,
   Column,
 } from '@mathesar/api/tables/columns';
-import { iconStopwatch } from '@mathesar/icons';
+import { iconUiTypeDuration } from '@mathesar/icons';
 import { DurationSpecification } from '@mathesar/utils/duration';
 import type {
   AbstractTypeConfigForm,
@@ -65,7 +65,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const durationType: AbstractTypeConfiguration = {
-  icon: { ...iconStopwatch, label: 'Duration' },
+  icon: { ...iconUiTypeDuration, label: 'Duration' },
   cell: {
     type: 'duration',
   },

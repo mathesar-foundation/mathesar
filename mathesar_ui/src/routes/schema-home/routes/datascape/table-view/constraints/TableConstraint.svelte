@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { Icon, Button, Spinner } from '@mathesar-component-library';
+  import {
+    Icon,
+    Button,
+    Spinner,
+    iconError,
+  } from '@mathesar-component-library';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { Constraint } from '@mathesar/api/tables/constraints';
@@ -9,10 +14,9 @@
   import type { PaginatedResponse } from '@mathesar/utils/api';
   import { getAPI } from '@mathesar/utils/api';
   import {
-    iconAdd,
+    iconAddNew,
     iconDelete,
-    iconForward,
-    iconWarningTriangle,
+    iconDbIdentifierDelimiter,
   } from '@mathesar/icons';
 
   export let constraint: Constraint;
@@ -65,18 +69,18 @@
       {#if referentTable}
         References
         <Identifier>{referentTable.name}</Identifier>
-        <Icon {...iconForward} />
+        <Icon {...iconDbIdentifierDelimiter} />
         {#await getReferentColumns(constraint)}
           <Spinner />
         {:then referentColumns}
           {#each referentColumns as referentColumn, index (referentColumn.id)}
             <Identifier>{referentColumn.name}</Identifier>
             {#if index < referentColumns.length - 1}
-              <Icon {...iconAdd} />
+              <Icon {...iconAddNew} />
             {/if}
           {/each}
         {:catch error}
-          <Icon {...iconWarningTriangle} />
+          <Icon {...iconError} />
         {/await}
       {/if}
     </div>

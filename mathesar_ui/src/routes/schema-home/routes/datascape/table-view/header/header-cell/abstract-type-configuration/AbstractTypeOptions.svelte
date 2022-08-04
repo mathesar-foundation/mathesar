@@ -13,7 +13,7 @@
     AbstractTypeDisplayConfig,
   } from '@mathesar/stores/abstract-types/types';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
-  import { iconDatabase, iconPalette } from '@mathesar/icons';
+  import { iconDatabase, iconDisplayOptions } from '@mathesar/icons';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
   import TypeOptionTab from './TypeOptionTab.svelte';
@@ -108,7 +108,7 @@
           showDefaultValueErrorIndication = defaultValueHasError;
         }}
       >
-        <Icon size="0.75em" {...iconPalette} />
+        <Icon size="0.75em" {...iconDisplayOptions} />
         <span>Display</span>
       </TypeOptionTab>
     {/if}
