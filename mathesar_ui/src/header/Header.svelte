@@ -14,7 +14,14 @@
   import { Icon, DropdownMenu, MenuItem } from '@mathesar-component-library';
   import { TabularType } from '@mathesar/stores/table-data';
 
-  import { iconAdd, iconDragon, iconFileContract, iconTable, iconUpload, iconUser } from '@mathesar/icons';
+  import {
+    iconAdd,
+    iconDragon,
+    iconFileContract,
+    iconTable,
+    iconUpload,
+    iconUser,
+  } from '@mathesar/icons';
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
   import ImportIndicator from './import-indicator/ImportIndicator.svelte';
 
@@ -61,9 +68,8 @@
           <MenuItem on:click={handleCreateEmptyTable} icon={iconTable}>
             New Empty Table
           </MenuItem>
-          <MenuItem
-            on:click={redirectToNewQueryRoute}
-            icon={iconFileContract}>New Query</MenuItem
+          <MenuItem on:click={redirectToNewQueryRoute} icon={iconFileContract}
+            >New Query</MenuItem
           >
           <MenuItem on:click={beginDataImport} icon={iconUpload}>
             Import Data into New Table

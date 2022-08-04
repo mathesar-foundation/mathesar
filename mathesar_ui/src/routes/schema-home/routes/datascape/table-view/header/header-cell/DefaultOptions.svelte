@@ -12,7 +12,15 @@
   import { SortDirection } from '@mathesar/stores/table-data';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
-  import { iconSortAmountDown, iconCursor, iconDeleteAlt, iconLoading, iconSortAmountDownAlt, iconThList, iconUnlink } from '@mathesar/icons';
+  import {
+    iconSortAmountDown,
+    iconCursor,
+    iconDeleteAlt,
+    iconLoading,
+    iconSortAmountDownAlt,
+    iconThList,
+    iconUnlink,
+  } from '@mathesar/icons';
 
   const dispatch = createEventDispatcher();
 

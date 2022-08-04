@@ -13,7 +13,12 @@
   } from '@mathesar/stores/table-data/types';
   import { States } from '@mathesar/utils/api';
   import { modal } from '@mathesar/stores/modal';
-  import { iconAdd, iconLink, iconLoading, iconSnowflake } from '@mathesar/icons';
+  import {
+    iconAdd,
+    iconLink,
+    iconLoading,
+    iconSnowflake,
+  } from '@mathesar/icons';
   import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
   import TableConstraint from './TableConstraint.svelte';
   import ConstraintHelp from './__help__/ConstraintHelp.svelte';
@@ -69,10 +74,7 @@
       >
         Unique
       </MenuItem>
-      <MenuItem
-        on:click={() => newFkConstraintModal.open()}
-        icon={iconLink}
-      >
+      <MenuItem on:click={() => newFkConstraintModal.open()} icon={iconLink}>
         Foreign Key
       </MenuItem>
     </DropdownMenu>

@@ -6,7 +6,12 @@
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentDBName } from '@mathesar/stores/databases';
-  import { iconDeleteAlt, iconLock, iconPencilAlt, iconProject } from '@mathesar/icons';
+  import {
+    iconDeleteAlt,
+    iconLock,
+    iconPencilAlt,
+    iconProject,
+  } from '@mathesar/icons';
 
   const dispatch = createEventDispatcher();
 

@@ -15,7 +15,19 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
-  import { iconAdd, iconCursor, iconDeleteAlt, iconFilter, iconKey, iconLink, iconList, iconSettings, iconSort, iconSync, iconWarningTriangle } from '@mathesar/icons';
+  import {
+    iconAdd,
+    iconCursor,
+    iconDeleteAlt,
+    iconFilter,
+    iconKey,
+    iconLink,
+    iconList,
+    iconSettings,
+    iconSort,
+    iconSync,
+    iconWarningTriangle,
+  } from '@mathesar/icons';
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import Sort from './record-operations/Sort.svelte';
@@ -70,19 +82,13 @@
 
 <div class="actions-pane">
   <DropdownMenu label="Table" icon={iconSettings}>
-    <MenuItem
-      on:click={() => tableRenameModal.open()}
-      icon={iconCursor}
-    >
+    <MenuItem on:click={() => tableRenameModal.open()} icon={iconCursor}>
       Rename
     </MenuItem>
     <MenuItem on:click={handleDeleteTable} icon={iconDeleteAlt}>
       Delete
     </MenuItem>
-    <MenuItem
-      on:click={() => tableConstraintsModal.open()}
-      icon={iconKey}
-    >
+    <MenuItem on:click={() => tableConstraintsModal.open()} icon={iconKey}>
       Constraints
     </MenuItem>
   </DropdownMenu>
@@ -182,7 +188,7 @@
   <div class="loading-info">
     <Button size="small" disabled={isLoading} on:click={refresh}>
       <Icon
-        {...(isError && !isLoading ? iconWarningTriangle : iconSync)}
+        {...isError && !isLoading ? iconWarningTriangle : iconSync}
         spin={isLoading}
       />
       <span>

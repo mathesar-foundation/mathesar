@@ -2,7 +2,13 @@
   import { tick, createEventDispatcher } from 'svelte';
   import { Icon } from '@mathesar-component-library';
   import { calculatePages, getPageCount } from './paginationUtils';
-  import { iconLeft, iconEllipses, iconAngleDoubleLeft, iconAngleDoubleRight, iconAngleRight } from '../common/icons';
+  import {
+    iconLeft,
+    iconEllipses,
+    iconAngleDoubleLeft,
+    iconAngleDoubleRight,
+    iconAngleRight,
+  } from '../common/icons';
 
   const dispatch = createEventDispatcher();
 

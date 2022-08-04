@@ -8,7 +8,12 @@
   import type { Column } from '@mathesar/api/tables/columns';
   import type { PaginatedResponse } from '@mathesar/utils/api';
   import { getAPI } from '@mathesar/utils/api';
-  import { iconAdd, iconDelete, iconForward, iconWarningTriangle } from '@mathesar/icons';
+  import {
+    iconAdd,
+    iconDelete,
+    iconForward,
+    iconWarningTriangle,
+  } from '@mathesar/icons';
 
   export let constraint: Constraint;
   export let drop: () => Promise<void>;
