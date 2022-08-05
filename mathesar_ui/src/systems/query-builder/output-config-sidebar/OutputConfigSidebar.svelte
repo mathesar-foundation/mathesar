@@ -33,7 +33,7 @@
   function deleteSelectedColumn() {
     const alias = $selectedColumnAlias;
     if (alias) {
-      void queryManager.update((q) => q.deleteColumn(alias));
+      void queryManager.update((q) => q.withoutColumn(alias));
       queryManager.clearSelectedColumn();
     }
   }
@@ -42,7 +42,7 @@
     window.clearTimeout(timer);
     if (initialColumn && value !== initialColumn.display_name) {
       const { alias } = initialColumn;
-      void queryManager.update((q) => q.updateColumnDisplayName(alias, value));
+      void queryManager.update((q) => q.withDisplayNameForColumn(alias, value));
     }
   }
 

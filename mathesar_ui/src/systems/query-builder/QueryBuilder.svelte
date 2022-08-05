@@ -47,7 +47,7 @@
     const allAliases = new Set($query.initial_columns.map((c) => c.alias));
     const alias = getAvailableName(baseAlias, allAliases);
     void queryManager.update((q) =>
-      q.addColumn({
+      q.withColumn({
         alias,
         id: column.id,
         jp_path: column.jpPath,

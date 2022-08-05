@@ -17,6 +17,7 @@ import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import type QueryModel from './QueryModel';
+import type { QueryModelUpdateDiff } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
 
 export interface ProcessedQueryResultColumn extends CellColumnFabric {
@@ -107,7 +108,7 @@ export default class QueryManager extends EventHandler<{
           this.querySavePromise = createQuery(q);
         }
         const result = await this.querySavePromise;
-        this.query.update((qr) => qr.withId(result.id));
+        this.query.update((qr) => qr.withId(result.id).model);
         this.state.update((_state) => ({
           ..._state,
           saveState: { state: 'success' },
@@ -233,21 +234,59 @@ export default class QueryManager extends EventHandler<{
     return result;
   }
 
+  resetPaginationPane(): void {
+    this.pagination.update(
+      (pagination) =>
+        new Pagination({
+          ...pagination,
+          page: 1,
+        }),
+    );
+  }
+
+  resetResults(): void {
+    this.queryColumnsFetchPromise?.cancel();
+    this.queryRecordsFetchPromise?.cancel();
+    this.records.set({ count: 0, results: [] });
+    this.columns.set([]);
+    this.selectedColumnAlias.set(undefined);
+    this.state.update((state) => ({
+      ...state,
+      columnsFetchState: undefined,
+      recordsFetchState: undefined,
+    }));
+    this.resetPaginationPane();
+  }
+
   async update(
-    callback: (queryModel: QueryModel) => QueryModel,
-    opts?: { reversible: boolean },
+    callback: (queryModel: QueryModel) => QueryModelUpdateDiff,
   ): Promise<void> {
-    this.query.update((q) => callback(q));
-    const queryModelData = this.getQueryModelData();
-    if (queryModelData.isSaveable()) {
-      this.undoRedoManager.pushState(queryModelData);
+    const updateDiff = callback(this.getQueryModelData());
+    this.query.set(updateDiff.model);
+    if (updateDiff.model.isSaveable()) {
+      // Push entire model instead of diff to always
+      // reload entire state during undo-redo operations
+      this.undoRedoManager.pushState(updateDiff.model);
     }
     this.setUndoRedoStates();
     await this.save();
-    // TODO:
-    // Depending on the exact nature of the update, decide when to
-    // fetch columns, results, or to reset pagination
-    await Promise.all([this.fetchColumns(), this.fetchResults()]);
+    switch (updateDiff.type) {
+      case 'id':
+      case 'name':
+      case 'initialColumnName':
+        break;
+      case 'baseTable':
+        this.resetResults();
+        break;
+      case 'initialColumnsArray':
+        if (!updateDiff.diff.initial_columns?.length) {
+          this.resetPaginationPane();
+        }
+        await Promise.all([this.fetchColumns(), this.fetchResults()]);
+        break;
+      default:
+        await Promise.all([this.fetchColumns(), this.fetchResults()]);
+    }
   }
 
   async performUndoRedoSync(query?: QueryModel): Promise<void> {
@@ -255,7 +294,7 @@ export default class QueryManager extends EventHandler<{
       const currentQueryModelData = this.getQueryModelData();
       let queryToSet = query;
       if (currentQueryModelData?.id) {
-        queryToSet = query.withId(currentQueryModelData.id);
+        queryToSet = query.withId(currentQueryModelData.id).model;
       }
       this.query.set(queryToSet);
       await this.save();

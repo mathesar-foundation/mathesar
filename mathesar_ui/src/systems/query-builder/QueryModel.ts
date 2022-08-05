@@ -2,6 +2,17 @@ import type { QueryInstanceInitialColumn } from '@mathesar/api/queries/queryList
 import { isDefinedNonNullable } from '@mathesar-component-library';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 
+export interface QueryModelUpdateDiff {
+  model: QueryModel;
+  type:
+    | 'id'
+    | 'name'
+    | 'baseTable'
+    | 'initialColumnsArray'
+    | 'initialColumnName';
+  diff: Partial<UnsavedQueryInstance>;
+}
+
 export default class QueryModel implements UnsavedQueryInstance {
   base_table;
 
@@ -18,57 +29,85 @@ export default class QueryModel implements UnsavedQueryInstance {
     this.initial_columns = model?.initial_columns ?? [];
   }
 
-  withBaseTable(base_table?: number): QueryModel {
-    return new QueryModel({
+  withBaseTable(base_table?: number): QueryModelUpdateDiff {
+    const model = new QueryModel({
       base_table,
       id: this.id,
       name: this.name,
     });
+    return {
+      model,
+      type: 'baseTable',
+      diff: {
+        base_table,
+      },
+    };
   }
 
-  withId(id: number): QueryModel {
-    return new QueryModel({
+  withId(id: number): QueryModelUpdateDiff {
+    const model = new QueryModel({
       ...this,
       id,
     });
+    return {
+      model,
+      type: 'id',
+      diff: {
+        id,
+      },
+    };
   }
 
-  withName(name: string): QueryModel {
-    return new QueryModel({
+  withName(name: string): QueryModelUpdateDiff {
+    const model = new QueryModel({
       ...this,
       name,
     });
+    return {
+      model,
+      type: 'name',
+      diff: {
+        name,
+      },
+    };
   }
 
-  addColumn(column: QueryInstanceInitialColumn): QueryModel {
-    const initialColumns = this.initial_columns ?? [];
-    return new QueryModel({
+  withColumn(column: QueryInstanceInitialColumn): QueryModelUpdateDiff {
+    const initialColumns = [...this.initial_columns, column];
+    const model = new QueryModel({
       ...this,
-      initial_columns: [...initialColumns, column],
+      initial_columns: initialColumns,
     });
+    return {
+      model,
+      type: 'initialColumnsArray',
+      diff: {
+        initial_columns: initialColumns,
+      },
+    };
   }
 
-  getColumn(columnAlias: string): QueryInstanceInitialColumn | undefined {
-    return this.initial_columns.find((column) => column.alias === columnAlias);
-  }
-
-  deleteColumn(columnAlias: string): QueryModel {
+  withoutColumn(columnAlias: string): QueryModelUpdateDiff {
     const initialColumns = this.initial_columns.filter(
       (entry) => entry.alias !== columnAlias,
     );
-    if (initialColumns.length !== this.initial_columns.length) {
-      return new QueryModel({
-        ...this,
+    const model = new QueryModel({
+      ...this,
+      initial_columns: initialColumns,
+    });
+    return {
+      model,
+      type: 'initialColumnsArray',
+      diff: {
         initial_columns: initialColumns,
-      });
-    }
-    return this;
+      },
+    };
   }
 
-  updateColumnDisplayName(
+  withDisplayNameForColumn(
     columnAlias: string,
     displayName: string,
-  ): QueryModel {
+  ): QueryModelUpdateDiff {
     const initialColumns = this.initial_columns.map((entry) => {
       if (entry.alias === columnAlias) {
         return {
@@ -78,10 +117,21 @@ export default class QueryModel implements UnsavedQueryInstance {
       }
       return entry;
     });
-    return new QueryModel({
+    const model = new QueryModel({
       ...this,
       initial_columns: initialColumns,
     });
+    return {
+      model,
+      type: 'initialColumnName',
+      diff: {
+        initial_columns: initialColumns,
+      },
+    };
+  }
+
+  getColumn(columnAlias: string): QueryInstanceInitialColumn | undefined {
+    return this.initial_columns.find((column) => column.alias === columnAlias);
   }
 
   isSaveable(): boolean {
