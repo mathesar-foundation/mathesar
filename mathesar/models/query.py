@@ -43,6 +43,27 @@ def _validate_initial_columns(initial_cols):
             raise ValidationError(
                 f"{initial_col} contains unexpected keys: {unexpected_keys}."
             )
+        jp_path = initial_col.get('jp_path')
+        _validate_jp_path(jp_path)
+
+
+def _validate_jp_path(jp_path):
+    if jp_path:
+        if not isinstance(jp_path, list):
+            raise ValidationError(
+                f"jp_path must be a list, instead: {jp_path}."
+            )
+        for jp in jp_path:
+            if not isinstance(jp, list):
+                raise ValidationError(
+                    f"jp_path elements must be 2-item lists, instead: {jp}."
+                )
+            for col_id in jp:
+                if not isinstance(col_id, int):
+                    raise ValidationError(
+                        "jp_path elements must only contain integer column"
+                        f" ids, instead: {jp}."
+                    )
 
 
 def _validate_transformations(transformations):
@@ -201,7 +222,7 @@ def _db_initial_column_from_json(table_cache, json):
     json_jp_path = json.get('jp_path')
     if json_jp_path:
         jp_path = tuple(
-            join_params_from_json(table_cache, json_jp)
+            _join_params_from_json(table_cache, json_jp)
             for json_jp
             in json_jp_path
         )
@@ -214,10 +235,10 @@ def _db_initial_column_from_json(table_cache, json):
     )
 
 
-def join_params_from_json(table_cache, json_jp):
+def _join_params_from_json(table_cache, json_jp):
     return JoinParams(
-        left_column=_get_sa_col_by_id(table_cache, json_jp[0][1]),
-        right_column=_get_sa_col_by_id(table_cache, json_jp[1][1]),
+        left_column=_get_sa_col_by_id(table_cache, json_jp[0]),
+        right_column=_get_sa_col_by_id(table_cache, json_jp[1]),
     )
 
 

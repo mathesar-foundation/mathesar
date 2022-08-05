@@ -59,6 +59,132 @@ def test_create(post_minimal_query):
     _deep_equality_assert(expected=request_data, actual=response_json)
 
 
+def test_query_with_bad_base_table(get_uid, client):
+    unexistant_base_table_id = 16135
+    request_data = {
+        "name": get_uid(),
+        "base_table": unexistant_base_table_id,
+        "initial_columns": [
+            {
+                "id": 1,
+                "jp_path": [[1, 3], [4, 5]],
+                "alias": "alias_x",
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 400
+
+
+def test_query_with_initial_column_without_id(create_patents_table, get_uid, client):
+    base_table = create_patents_table(table_name=get_uid())
+    request_data = {
+        "name": get_uid(),
+        "base_table": base_table.id,
+        "initial_columns": [
+            {
+                "jp_path": [[1, 3], [4, 5]],
+                "alias": "alias_x",
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 400
+
+
+def test_query_with_initial_column_with_bad_jp_path(create_patents_table, get_uid, client):
+    base_table = create_patents_table(table_name=get_uid())
+    request_data = {
+        "name": get_uid(),
+        "base_table": base_table.id,
+        "initial_columns": [
+            {
+                "id": 1,
+                "jp_path": [1],
+                "alias": "alias_x",
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 400
+
+
+def test_query_with_initial_column_without_alias(create_patents_table, get_uid, client):
+    base_table = create_patents_table(table_name=get_uid())
+    request_data = {
+        "name": get_uid(),
+        "base_table": base_table.id,
+        "initial_columns": [
+            {
+                "id": 1,
+                "jp_path": [[1, 3], [4, 5]],
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 400
+
+
+def test_query_with_initial_column_with_unexpected_key(create_patents_table, get_uid, client):
+    base_table = create_patents_table(table_name=get_uid())
+    request_data = {
+        "name": get_uid(),
+        "base_table": base_table.id,
+        "initial_columns": [
+            {
+                "id": 1,
+                "jp_path": [[1, 3], [4, 5]],
+                "alias": "alias_x",
+                "bad_key": 1,
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 400
+
+
+def test_query_with_with_unexpected_key(create_patents_table, get_uid, client):
+    base_table = create_patents_table(table_name=get_uid())
+    request_data = {
+        "bad_key": 1,
+        "name": get_uid(),
+        "base_table": base_table.id,
+        "initial_columns": [
+            {
+                "id": 1,
+                "jp_path": [[1, 3], [4, 5]],
+                "alias": "alias_x",
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 400
+
+
 def test_update(post_minimal_query, client):
     post_data, response = post_minimal_query
     response_json = response.json()
