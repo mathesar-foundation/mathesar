@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { faTable } from '@fortawesome/free-solid-svg-icons';
   import { TabContainer, Icon } from '@mathesar-component-library';
   import {
     getTabsForSchema,
@@ -9,6 +8,7 @@
   import { constructTabularTabLink } from '@mathesar/stores/tabs/tabDataSaver';
   import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
 
+  import { iconTable } from '@mathesar/icons';
   import LeftPane from './LeftPane.svelte';
   import EmptyState from './EmptyState.svelte';
   import ImportData from './import-data/ImportData.svelte';
@@ -55,7 +55,7 @@
       on:tabRemoved={tabRemoved}
     >
       <span slot="tab" let:tab>
-        <Icon data={faTable} />
+        <Icon {...iconTable} />
         <span>{tab.label}</span>
       </span>
 
