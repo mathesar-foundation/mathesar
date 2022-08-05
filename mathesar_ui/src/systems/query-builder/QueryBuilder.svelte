@@ -111,7 +111,7 @@
       <div class="base-table-selector">
         <LabeledInput label="Select Base Table" layout="stacked">
           <SelectTableWithinCurrentSchema
-            prependBlank
+            initialSelectionType="empty"
             table={currentTable}
             on:change={(e) => onBaseTableChange(e.detail)}
           />
