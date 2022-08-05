@@ -1,8 +1,3 @@
-import {
-  faCheck,
-  faExclamationTriangle,
-  faSpinner,
-} from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 import type { SvelteComponent } from 'svelte';
 import { linear } from 'svelte/easing';
@@ -10,6 +5,11 @@ import type { Writable, Readable } from 'svelte/store';
 import { writable, derived } from 'svelte/store';
 import type { PauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
 import { pauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
+import {
+  iconSuccess,
+  iconLoading,
+  iconError,
+} from '@mathesar-component-library-dir/common/icons';
 
 /**
  * Allows control of the toast message after it is displayed
@@ -200,7 +200,7 @@ export function makeToast(
 
   function success(detail: ToastDetail = {}) {
     return controller.show({
-      icon: { data: faCheck },
+      icon: iconSuccess,
       backgroundColor: 'rgba(92, 159, 84, 0.9)',
       ...makeToastProps(detail),
     });
@@ -208,7 +208,7 @@ export function makeToast(
 
   function error(detail: ToastDetail = {}) {
     return controller.show({
-      icon: { data: faExclamationTriangle },
+      icon: iconError,
       backgroundColor: 'rgba(159, 86, 77, 0.9)',
       ...makeToastProps(detail),
     });
@@ -220,7 +220,7 @@ export function makeToast(
 
   function spinner(detail: ToastDetail = {}) {
     return controller.show({
-      icon: { data: faSpinner, spin: true },
+      icon: { ...iconLoading },
       lifetime: 0,
       allowDismiss: false,
       hasProgress: false,

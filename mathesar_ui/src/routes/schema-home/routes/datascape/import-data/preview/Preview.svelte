@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
-  import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
   import {
     TextInput,
     LabeledInput,
@@ -12,6 +11,7 @@
   import { setInFileStore } from '@mathesar/stores/fileImports';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
+  import { iconDelete } from '@mathesar/icons';
   import PreviewColumn from './PreviewColumn.svelte';
   import PreviewRows from './PreviewRows.svelte';
   import {
@@ -113,7 +113,7 @@
   <CancelOrProceedButtonPair
     onCancel={() => cancelImport(fileImportStore)}
     onProceed={() => finishImport(fileImportStore)}
-    cancelButton={{ icon: { data: faTrashAlt } }}
+    cancelButton={{ icon: iconDelete }}
     proceedButton={{ label: 'Finish Import' }}
     {canProceed}
   />

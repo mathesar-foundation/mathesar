@@ -19,16 +19,30 @@ def _validate_list_of_dicts(value):
 
 def _validate_initial_columns(initial_cols):
     for initial_col in initial_cols:
-        if "id" not in initial_col:
-            raise ValidationError(f"{initial_col} should contain an id.")
-        if "alias" not in initial_col:
-            raise ValidationError(f"{initial_col} should contain an alias.")
-        if len(initial_col) > 2:
-            if "jp_path" not in initial_col:
-                raise ValidationError(
-                    "When an initial column has a third key it is expected to be jp_path,"
-                    f" but instead: {initial_col}."
-                )
+        keys = set(initial_col.keys())
+        obligatory_keys = {
+            "id",
+            "alias",
+        }
+        missing_obligatory_keys = obligatory_keys.difference(keys)
+        if missing_obligatory_keys:
+            raise ValidationError(
+                f"{initial_col} doesn't contain"
+                f" following obligatory keys: {missing_obligatory_keys}."
+            )
+        optional_keys = {
+            "display_name",
+            "jp_path",
+        }
+        valid_keys = {
+            *obligatory_keys,
+            *optional_keys,
+        }
+        unexpected_keys = keys.difference(valid_keys)
+        if unexpected_keys:
+            raise ValidationError(
+                f"{initial_col} contains unexpected keys: {unexpected_keys}."
+            )
 
 
 def _validate_transformations(transformations):
@@ -106,7 +120,7 @@ class UIQuery(BaseModel, Relation):
         return tuple(
             {
                 'alias': sa_col.name,
-                'name': self._get_display_name_for_sa_col(sa_col),
+                'display_name': self._get_display_name_for_sa_col(sa_col),
                 'type': sa_col.db_type.id,
                 'type_options': sa_col.type_options,
                 'display_options': self._get_display_options_for_sa_col(sa_col),
@@ -156,10 +170,10 @@ class UIQuery(BaseModel, Relation):
     @cached_property
     def _alias_to_display_name(self):
         return {
-            initial_column['alias']: initial_column['name']
+            initial_column['alias']: initial_column['display_name']
             for initial_column
             in self.initial_columns
-            if 'name' in initial_column
+            if 'display_name' in initial_column
         }
 
     @property

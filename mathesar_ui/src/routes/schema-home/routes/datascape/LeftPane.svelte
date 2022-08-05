@@ -1,7 +1,6 @@
 <script lang="ts">
   import { get } from 'svelte/store';
   import { router } from 'tinro';
-  import { faTable } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Tree } from '@mathesar-component-library';
   import {
     getTabsForSchema,
@@ -21,6 +20,7 @@
   import type { TableEntry } from '@mathesar/api/tables/tableList';
   import { TabularType } from '@mathesar/stores/table-data';
   import type { QueryInstance } from '@mathesar/api/queries/queryList';
+  import { iconTable } from '@mathesar/icons';
 
   export let database: string;
   export let schemaId: SchemaEntry['id'];
@@ -168,7 +168,7 @@
       on:nodeSelected={onNodeSelection}
       let:entry
     >
-      <Icon data={faTable} />
+      <Icon {...iconTable} />
       <span>{getEntryLabel(entry)}</span>
 
       <svelte:fragment slot="empty">No results found</svelte:fragment>

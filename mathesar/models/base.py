@@ -29,6 +29,7 @@ from db.tables.operations.drop import drop_table
 from db.tables.operations.move_columns import move_columns_between_related_tables
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tables.operations.split import extract_columns_from_table
+from db.records.operations.insert import insert_from_select
 
 from mathesar import reflection
 from mathesar.models.relation import Relation
@@ -400,12 +401,12 @@ class Table(DatabaseObject, Relation):
         ]
 
     def move_columns(self, columns_to_move, target_table):
-        columns_name_to_move = [column.name for column in columns_to_move]
+        columns_attnum_to_move = [column.attnum for column in columns_to_move]
         target_table_oid = target_table.oid
         return move_columns_between_related_tables(
             self.oid,
             target_table_oid,
-            columns_name_to_move,
+            columns_attnum_to_move,
             self.schema.name,
             self._sa_engine
         )
@@ -414,18 +415,14 @@ class Table(DatabaseObject, Relation):
             self,
             columns_to_extract,
             extracted_table_name,
-            remainder_table_name,
-            drop_original_table
     ):
-        columns_name_to_extract = [column.name for column in columns_to_extract]
+        columns_attnum_to_extract = [column.attnum for column in columns_to_extract]
         return extract_columns_from_table(
-            self.name,
-            columns_name_to_extract,
+            self.oid,
+            columns_attnum_to_extract,
             extracted_table_name,
-            remainder_table_name,
             self.schema.name,
-            self._sa_engine,
-            drop_original_table=drop_original_table
+            self._sa_engine
         )
 
     def update_column_reference(self, columns_name, column_name_id_map):
@@ -444,9 +441,18 @@ class Table(DatabaseObject, Relation):
             column_objs.append(column)
         Column.current_objects.bulk_update(column_objs, fields=['table_id', 'attnum'])
 
-    def insert_records_to_existing_table(existing_table, temp_table, mappings):
-        # TBD
-        pass
+    def insert_records_to_existing_table(self, existing_table, data_files, mappings=None):
+        from_table = self._sa_table
+        target_table = existing_table._sa_table
+        engine = self._sa_engine
+        data_file = data_files[0]
+        try:
+            table, _ = insert_from_select(from_table, target_table, engine, mappings)
+            data_file.table_imported_to = existing_table
+        except Exception as e:
+            # ToDo raise specific exceptions.
+            raise e
+        return table
 
 
 class Column(ReflectionManagerMixin, BaseModel):
