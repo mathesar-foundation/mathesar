@@ -1,3 +1,4 @@
+from curses import meta
 from sqlalchemy import MetaData, Table, any_, case, column, exists, func, literal, literal_column, select, text, true, union
 from sqlalchemy.dialects.postgresql import array
 
@@ -34,7 +35,7 @@ def get_dependents_graph(referenced_object_id, engine):
     for r in result:
         d = {}
         d['level'] = r.level
-        d['obj'] = {'objid': r.objid, 'type': r.type}
+        d['obj'] = {'objid': r.objid, 'type': r.type, 'i': r.identity }
         d['parent_obj'] = {'objid': r.refobjid}
         final.append(d)
 
@@ -81,6 +82,50 @@ def _get_foreign_key_constraint_dependents(pg_identify_object, base):
     return base.where(pg_identify_object.c.type == 'table constraint')
 
 
+def _get_index_dependents(pg_identify_object, base):
+    return base.where(pg_identify_object.c.type == 'index')
+
+
+def _get_views_dependents(pg_identify_object, pg_rewrite_table, base):
+    pg_rewrite = select(
+        column("oid"),
+        column("ev_class")
+    ).select_from(pg_rewrite_table).cte()
+
+    pg_identify_object = select(
+        column("name"),
+        column("schema"),
+        column("type"),
+        column("identity")) \
+        .select_from(func.pg_identify_object(
+            text('\'pg_class\'::regclass::oid'),
+            pg_rewrite.c.ev_class,
+            0)) \
+        .lateral()
+
+    return select(
+        pg_rewrite.c.ev_class,
+        base.c.refobjid,
+        base.c.column_number,
+        pg_identify_object.c.name,
+        pg_identify_object.c.schema,
+        pg_identify_object.c.type,
+        pg_identify_object.c.identity,
+        base.c.dependency_type) \
+        .select_from(base) \
+        .join(pg_rewrite, base.c.objid == pg_rewrite.c.oid) \
+        .join(pg_identify_object, true()) \
+        .group_by(
+            pg_rewrite.c.ev_class,
+            base.c.refobjid,
+            base.c.column_number,
+            pg_identify_object.c.type,
+            pg_identify_object.c.name,
+            pg_identify_object.c.schema,
+            pg_identify_object.c.identity,
+            base.c.dependency_type)
+
+
 def _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object, referenced_object_id=None):
     res = select(
         pg_depend.c.objid,
@@ -117,6 +162,11 @@ def _get_pg_constraint(engine):
     return Table("pg_constraint", metadata, autoload_with=engine)
 
 
+def _get_pg_rewrite(engine):
+    metadata = MetaData()
+    return Table("pg_rewrite", metadata, autoload_with=engine)
+
+
 def _get_pg_identify_object_lateral(source):
     return select(
         column("name"),
@@ -141,12 +191,20 @@ def _get_all_dependent_objects_statement(engine):
     pg_depend = _get_pg_depend(engine)
     pg_identify_object = _get_pg_identify_object_lateral(pg_depend)
     pg_constraint = _get_pg_constraint(engine)
+    pg_rewrite = _get_pg_rewrite(engine)
 
     base_stmt = _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object)
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, base_stmt).cte('foreign_key_constraint_dependents')
     table_dependents = _get_table_dependents(foreign_key_constraint_dependents, pg_constraint).cte('table_dependents')
 
-    return union(select(foreign_key_constraint_dependents), select(table_dependents))
+    index_dependents = _get_index_dependents(pg_identify_object, base_stmt).cte('index_dependents')
+    view_dependents = _get_views_dependents(pg_identify_object, pg_rewrite, base_stmt).cte('view_dependents')
+
+    return union(
+        select(foreign_key_constraint_dependents),
+        select(table_dependents),
+        select(index_dependents),
+        select(view_dependents))
 
 
 def has_dependencies(referenced_object_id, engine):

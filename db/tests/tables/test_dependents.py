@@ -1,4 +1,5 @@
-from sqlalchemy import Column, ForeignKey, Integer, MetaData, PrimaryKeyConstraint, Table
+from sqlalchemy import Column, ForeignKey, Integer, MetaData, PrimaryKeyConstraint, Table, select
+from sqlalchemy_utils import create_view
 from db.dependents_utils import get_dependents_graph
 from db.tables.operations.select import get_oid_from_table
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid
@@ -139,6 +140,26 @@ def test_specific_object_types(engine_with_schema):
     assert t1_pk_oid in t1_dependent_oids
     assert t2_oid in t1_dependent_oids
     assert t2_fk_oid in t1_dependent_oids
+
+
+def test_views_return_as_dependents(engine_with_schema):
+    engine, schema = engine_with_schema
+    metadata = MetaData(schema=schema, bind=engine)
+    t1_pk_name = "t1_pk_name"
+    t1 = Table(
+        't1', metadata,
+        Column('id', Integer),
+        PrimaryKeyConstraint('id', name=t1_pk_name)
+    )
+    t1.create()
+    t1_view = select(t1).where(t1.c.id > 10)
+    create_view('elder_users', t1_view, metadata)
+    metadata.create_all(engine)
+
+    t1_oid = get_oid_from_table(t1.name, schema, engine)
+    dependents = get_dependents_graph(t1_oid, engine)
+
+    assert 'view' in [dependent['obj']['type'] for dependent in dependents]
 
 
 def test_circular_referene(engine_with_schema):
