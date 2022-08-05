@@ -1,7 +1,7 @@
-import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { ConfirmationProps } from '@mathesar-component-library';
 import { makeConfirm } from '@mathesar-component-library';
 import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
+import { iconDelete } from '@mathesar/icons';
 import { modal } from './modal';
 import { toast } from './toast';
 
@@ -43,7 +43,7 @@ export function confirmDelete(
   return confirm({
     title: getTitle(),
     body: 'Are you sure you want to proceed?',
-    proceedButton: { label: deletePhrase, icon: { data: faTrashAlt } },
+    proceedButton: { label: deletePhrase, icon: iconDelete },
     onError: (e) => toast.error(`Unable to ${deletePhrase}. ${e.message}`),
     ...props,
   });

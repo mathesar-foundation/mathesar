@@ -6,11 +6,6 @@
     InputGroup,
     Button,
   } from '@mathesar-component-library';
-  import {
-    faFileContract,
-    faUndo,
-    faRedo,
-  } from '@fortawesome/free-solid-svg-icons';
   import EditableTitle from '@mathesar/components/EditableTitle.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
@@ -18,6 +13,7 @@
   import type { TableEntry } from '@mathesar/api/tables/tableList';
   import { queries } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
+  import { iconQuery, iconRedo, iconUndo } from '@mathesar/icons';
   import type QueryManager from './QueryManager';
   import InputColumnsManager from './InputColumnsManager';
   import type { ColumnWithLink } from './InputColumnsManager';
@@ -76,7 +72,7 @@
 <div class="query-builder">
   <div class="title-bar">
     <div class="icon">
-      <Icon data={faFileContract} size="2em" />
+      <Icon {...iconQuery} size="2em" />
     </div>
     <div class="name">
       <EditableTitle
@@ -93,7 +89,7 @@
           disabled={!$state.isUndoPossible}
           on:click={() => queryManager.undo()}
         >
-          <Icon data={faUndo} />
+          <Icon {...iconUndo} />
           <span>Undo</span>
         </Button>
         <Button
@@ -101,7 +97,7 @@
           disabled={!$state.isRedoPossible}
           on:click={() => queryManager.redo()}
         >
-          <Icon data={faRedo} />
+          <Icon {...iconRedo} />
           <span>Redo</span>
         </Button>
         <Button appearance="plain" on:click={() => dispatch('close')}

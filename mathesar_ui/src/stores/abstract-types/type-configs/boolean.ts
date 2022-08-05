@@ -1,9 +1,9 @@
-import { faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 import type { FormValues } from '@mathesar-component-library/types';
 import type {
   BooleanDisplayOptions,
   Column,
 } from '@mathesar/api/tables/columns';
+import { iconUiTypeBoolean } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -119,7 +119,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const booleanType: AbstractTypeConfiguration = {
-  icon: { data: faCheckSquare, label: 'Boolean' },
+  icon: { ...iconUiTypeBoolean, label: 'Boolean' },
   cell: {
     type: 'boolean',
   },

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from 'svelte';
-  import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
   import {
     InputGroup,
     Icon,
@@ -16,6 +15,7 @@
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
+  import { iconDelete } from '@mathesar/icons';
   import { validateFilterEntry } from './utils';
 
   const dispatch = createEventDispatcher();
@@ -180,7 +180,7 @@
       class="filter-remove"
       on:click={() => dispatch('removeFilter')}
     >
-      <Icon data={faTrashAlt} />
+      <Icon {...iconDelete} />
     </Button>
   </InputGroup>
 </div>
