@@ -23,13 +23,14 @@ def reflect_table(name, schema, engine, metadata=None, connection_to_use=None):
     return Table(name, metadata, schema=schema, autoload_with=autoload_with, extend_existing=True)
 
 
-def reflect_table_from_oid(oid, engine, connection_to_use=None):
-    tables = reflect_tables_from_oids([oid], engine, connection_to_use)
+def reflect_table_from_oid(oid, engine, metadata=None, connection_to_use=None):
+    tables = reflect_tables_from_oids([oid], engine, metadata=metadata, connection_to_use=connection_to_use)
     return tables.get(oid, None)
 
 
-def reflect_tables_from_oids(oids, engine, connection_to_use=None):
-    metadata = MetaData()
+def reflect_tables_from_oids(oids, engine, metadata=None, connection_to_use=None):
+    if metadata is None:
+        metadata = MetaData(bind=engine)
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
@@ -49,7 +50,7 @@ def reflect_tables_from_oids(oids, engine, connection_to_use=None):
     results = execute_statement(engine, sel, connection_to_use).fetchall()
     tables = {}
     for (schema, table_name, table_oid) in results:
-        tables[table_oid] = reflect_table(table_name, schema, engine, connection_to_use=connection_to_use)
+        tables[table_oid] = reflect_table(table_name, schema, engine, metadata=metadata, connection_to_use=connection_to_use)
     return tables
 
 
