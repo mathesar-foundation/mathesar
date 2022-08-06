@@ -6,6 +6,8 @@ from db.constraints import utils as constraint_utils
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
+from mathesar.api.exceptions.validation_exceptions.exceptions import UnknownDatabaseTypeIdentifier
+from mathesar.api.exceptions.validation_exceptions.base_exceptions import MathesarValidationException 
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
@@ -43,11 +45,7 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
         constraint_obj = self.construct_constraint_obj(table, validated_data)
         if constraint_obj is None:
             message = 'Only creating unique constraints is currently supported.'
-            raise base_api_exceptions.ValueAPIException(
-                ValueError,
-                message=message,
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
+            raise UnknownDatabaseTypeIdentifier(db_type_id=None, message=message)
         try:
             constraint = table.add_constraint(constraint_obj)
         except ProgrammingError as e:
@@ -137,12 +135,7 @@ class ConstraintSerializer(
     def create(self, validated_data):
         serializer = self.get_serializer_class(self.get_mapping_field(validated_data))
         if serializer is None:
-            message = 'Unknown type passed.'
-            raise base_api_exceptions.NotFoundAPIException(
-                ValidationError,
-                message=message,
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
+            raise UnknownDatabaseTypeIdentifier(db_type_id=None)
         return serializer.create(validated_data)
 
     def get_mapping_field(self, data):
@@ -153,13 +146,11 @@ class ConstraintSerializer(
         return constraint_type
 
     def run_validation(self, data):
-        print(f'context === {self.context}')
         columns = data.get('columns', None)
         if columns == []:
             message = 'Columns field cannot be empty'
-            raise base_api_exceptions.NotFoundAPIException(
-                SyntaxError,
-                message=message,
-                status_code=status.HTTP_400_BAD_REQUEST
+            raise MathesarValidationException(
+                ValidationError,
+                message=message
             )
         return super(ConstraintSerializer, self).run_validation(data)
