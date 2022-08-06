@@ -1,6 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 from mathesar.models.query import UIQuery
+from django.core.exceptions import ValidationError
 
 
 class QuerySerializer(serializers.ModelSerializer):
@@ -33,9 +34,8 @@ class QuerySerializer(serializers.ModelSerializer):
         else:
             return None
 
-    # TODO consider moving to UIQuery field validation:
-    # see https://docs.djangoproject.com/en/4.0/ref/validators/
-    def validate_display_options(self, display_options):
-        if not isinstance(display_options, dict):
-            raise serializers.ValidationError("display_options should be a dict.")
-        return display_options
+    def validate(self, attrs):
+        unexpected_fields = set(self.initial_data) - set(self.fields)
+        if unexpected_fields:
+            raise ValidationError(f"Unexpected field(s): {unexpected_fields}")
+        return attrs

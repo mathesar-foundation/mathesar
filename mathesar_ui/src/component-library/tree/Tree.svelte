@@ -10,7 +10,7 @@
     hasProperty,
     hasStringProperty,
   } from '@mathesar-component-library-dir/common/utils/typeUtils';
-  import { faSearch } from '@fortawesome/free-solid-svg-icons';
+  import { iconSearch } from '@mathesar-component-library-dir/common/icons';
   import TreeItemComponent from './TreeItem.svelte';
 
   type TreeItem = $$Generic;
@@ -57,7 +57,7 @@
   {#if search}
     <InputGroup class="search-box">
       <InputGroupText>
-        <Icon class="search-icon" data={faSearch} />
+        <Icon class="search-icon" {...iconSearch} />
       </InputGroupText>
       <TextInput placeholder="search" bind:value={searchText} />
     </InputGroup>
