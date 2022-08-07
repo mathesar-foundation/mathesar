@@ -5,7 +5,7 @@
 
   export let column: ProcessedColumn;
 
-  $: icon = getColumnIconProps(column.column);
+  $: icon = getColumnIconProps(column);
 </script>
 
 <span class="column-name">

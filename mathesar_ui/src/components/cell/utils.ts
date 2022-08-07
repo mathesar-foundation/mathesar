@@ -11,6 +11,8 @@ import type {
 import type { Constraint } from '@mathesar/stores/table-data/constraints';
 import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
 import type { Column } from '@mathesar/api/tables/columns';
+import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+import { iconConstraint, iconTableLink } from '@mathesar/icons';
 import DataTypes from './data-types';
 import type { CellColumnLike } from './data-types/typeDefinitions';
 import type { LinkedRecordCellExternalProps } from './data-types/components/typeDefinitions';
@@ -70,9 +72,28 @@ export function getDbTypeBasedInputCap(
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
 
-export function getColumnIconProps(column: CellColumnLike): IconProps {
+export function getColumnIconProps(column: ProcessedColumn): IconProps {
+  const constraints = [
+    ...column.exclusiveConstraints,
+    ...column.sharedConstraints,
+  ];
+  const hasFKConstraints = constraints.find(
+    (constraint) => constraint.type === 'foreignkey',
+  );
+  const hasPKConstraint = constraints.find(
+    (constraint) => constraint.type === 'primary',
+  );
+
+  if (hasFKConstraints) {
+    return iconTableLink;
+  }
+
+  if (hasPKConstraint) {
+    return iconConstraint;
+  }
+
   return getAbstractTypeForDbType(
-    column.type,
+    column.column.type,
     get(currentDbAbstractTypes)?.data,
   ).icon;
 }
