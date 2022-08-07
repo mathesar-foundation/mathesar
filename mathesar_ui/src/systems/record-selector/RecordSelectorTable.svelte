@@ -48,7 +48,7 @@
   <div class="row">
     <CellArranger {display} let:style let:processedColumn>
       <CellWrapper header {style}>
-        <ColumnName column={processedColumn.column} />
+        <ColumnName column={processedColumn} />
         <ColumnResizer columnId={processedColumn.column.id} />
       </CellWrapper>
     </CellArranger>

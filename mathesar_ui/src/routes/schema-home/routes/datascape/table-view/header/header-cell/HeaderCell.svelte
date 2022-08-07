@@ -150,7 +150,7 @@
     contentClass="no-max-height column-opts-content"
     on:close={setDefaultView}
   >
-    <ColumnName slot="trigger" {column} />
+    <ColumnName slot="trigger" column={processedColumn} />
     <svelte:fragment slot="content">
       <div class="container">
         <div class="section type-header">

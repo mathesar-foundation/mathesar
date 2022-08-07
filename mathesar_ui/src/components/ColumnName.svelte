@@ -1,16 +1,16 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import { getColumnIconProps } from './cell/utils';
   import TypeIcon from './TypeIcon.svelte';
 
-  export let column: Column;
+  export let column: ProcessedColumn;
 
-  $: icon = getColumnIconProps(column);
+  $: icon = getColumnIconProps(column.column);
 </script>
 
 <span class="column-name">
   <span class="icon"><TypeIcon {icon} /></span>
-  <span class="name">{column.name}</span>
+  <span class="name">{column.column.name}</span>
 </span>
 
 <style>
