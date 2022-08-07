@@ -1,10 +1,10 @@
-import { faClock } from '@fortawesome/free-solid-svg-icons';
 import type { FormValues } from '@mathesar-component-library/types';
 import type {
   TimeDisplayOptions,
   TimeFormat,
   Column,
 } from '@mathesar/api/tables/columns';
+import { iconUiTypeTime } from '@mathesar/icons';
 import type {
   AbstractTypeDbConfig,
   AbstractTypeConfigForm,
@@ -97,7 +97,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const timeType: AbstractTypeConfiguration = {
-  icon: { data: faClock, label: 'Time' },
+  icon: { ...iconUiTypeTime, label: 'Time' },
   defaultDbType: DB_TYPES.TIME_WITH_TZ,
   cell: {
     type: 'time',

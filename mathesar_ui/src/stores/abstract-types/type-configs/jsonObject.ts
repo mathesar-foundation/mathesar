@@ -1,8 +1,8 @@
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { iconUiTypeJsonObject } from '@mathesar/icons';
 import type { AbstractTypeConfiguration } from '../types';
 
 const jsonObjectType: AbstractTypeConfiguration = {
-  icon: { data: faEnvelope },
+  icon: iconUiTypeJsonObject,
   defaultDbType: 'mathesar_json_object',
   cell: {
     type: 'string',

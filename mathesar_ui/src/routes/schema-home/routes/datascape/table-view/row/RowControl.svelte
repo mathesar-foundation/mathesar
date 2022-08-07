@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { faSync, faPlus } from '@fortawesome/free-solid-svg-icons';
-  import { Checkbox, Icon } from '@mathesar-component-library';
+  import { Checkbox, Icon, iconLoading } from '@mathesar-component-library';
+  import { iconAddNew } from '@mathesar/icons';
   import { getRowKey } from '@mathesar/stores/table-data';
   import type {
     Meta,
@@ -45,7 +45,7 @@
 <RowCellBackgrounds {isSelected} {hasErrors} />
 <div class="control">
   {#if row.isAddPlaceholder}
-    <Icon data={faPlus} />
+    <Icon {...iconAddNew} />
   {:else}
     {#if typeof row.rowIndex === 'number'}
       <span class="number">
@@ -67,7 +67,7 @@
 </div>
 
 {#if state === 'processing'}
-  <Icon class="mod-indicator" size="0.9em" data={faSync} spin={true} />
+  <Icon class="mod-indicator" size="0.9em" {...iconLoading} />
 {/if}
 
 {#if errors.length}
