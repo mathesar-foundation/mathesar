@@ -188,12 +188,10 @@ class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serial
 
 
 class MappingSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    from_col = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all())
-    target_col = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all())
-
-    class Meta:
-        model = Column
-        fields = ['from_col','target_col']
+    def to_internal_value(self, data):
+        from_col = Column.current_objects.get(id=data[0])
+        target_col = Column.current_objects.get(id=data[1])
+        return [from_col, target_col]
 
 
 class TableImportSerializer(MathesarErrorMessageMixin, serializers.Serializer):
