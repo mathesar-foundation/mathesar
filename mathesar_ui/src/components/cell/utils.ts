@@ -73,14 +73,10 @@ export function getDbTypeBasedInputCap(
 }
 
 export function getColumnIconProps(column: ProcessedColumn): IconProps {
-  const constraints = [
-    ...column.exclusiveConstraints,
-    ...column.sharedConstraints,
-  ];
-  const hasFKConstraints = constraints.find(
+  const hasFKConstraints = column.exclusiveConstraints.find(
     (constraint) => constraint.type === 'foreignkey',
   );
-  const hasPKConstraint = constraints.find(
+  const hasPKConstraint = column.exclusiveConstraints.find(
     (constraint) => constraint.type === 'primary',
   );
 
