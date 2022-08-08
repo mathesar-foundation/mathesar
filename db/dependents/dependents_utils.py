@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, any_, case, column, exists, func, literal, literal_column, select, text, true, union
+from sqlalchemy import MetaData, Table, any_, case, column, exists, func, literal, select, text, true, union
 from sqlalchemy.dialects.postgresql import array
 
 # OIDs assigned during normal database operation are constrained to be 16384 or higher.
