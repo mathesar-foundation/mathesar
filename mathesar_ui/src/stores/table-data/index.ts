@@ -17,7 +17,7 @@ export { Grouping } from './grouping';
 export { getRowKey } from './records';
 export { getCellKey, ID_ROW_CONTROL_COLUMN, ID_ADD_NEW_COLUMN } from './utils';
 
-export { getTabularContent, removeTabularContent } from './manager';
+export { getTabularData, initTabularData, removeTabularData } from './manager';
 export {
   makeTabularDataProps,
   makeTerseTabularDataProps,

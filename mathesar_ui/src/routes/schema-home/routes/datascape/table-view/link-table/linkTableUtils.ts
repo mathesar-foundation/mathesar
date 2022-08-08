@@ -1,10 +1,14 @@
+import type { LinkType } from '@mathesar/api/links';
 import { getAvailableName } from '@mathesar/utils/db';
 
-export type RelationshipType =
-  | 'many-to-many'
-  | 'many-to-one'
-  | 'one-to-many'
-  | 'one-to-one';
+/**
+ * The API is as simple as possible and does not support a 'many-to-one'
+ * relationship type. Instead, it models the 'many-to-one' scenario as a
+ * 'one-to-many' scenario with the referent/reference tables swapped. In the
+ * front end, however, we _do_ need to present the the 'many-to-one' and
+ * 'one-to-many' scenarios to the user as two distinct relationship types.
+ */
+export type RelationshipType = LinkType | 'many-to-one';
 
 export function getRelationshipType(
   thisHasManyOfThat: boolean | undefined,
@@ -33,7 +37,7 @@ export function getRelationshipType(
 }
 
 // prettier-ignore
-const relationshipTypeNames = new Map([
+const relationshipTypeNames = new Map<RelationshipType, string>([
   ['many-to-many' , 'Many to Many'],
   ['many-to-one'  , 'Many to One'],
   ['one-to-many'  , 'One to Many'],

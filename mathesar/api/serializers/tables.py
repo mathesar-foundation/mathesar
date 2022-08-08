@@ -4,11 +4,11 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from sqlalchemy.exc import ProgrammingError
 
-from db.types.base import get_db_type_enum_from_id
+from db.types.operations.convert import get_db_type_enum_from_id
 
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
-    MultipleDataFileAPIException, RemainderTableNameRequiredAPIException, UnknownDatabaseTypeIdentifier,
+    MultipleDataFileAPIException, UnknownDatabaseTypeIdentifier,
 )
 from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
@@ -188,13 +188,6 @@ class MoveTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializ
 class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     extract_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
     extracted_table_name = serializers.CharField()
-    remainder_table_name = serializers.CharField()
-    drop_original_table = serializers.BooleanField()
-
-    def validate(self, attrs):
-        if not attrs['drop_original_table'] and not attrs['remainder_table_name']:
-            raise RemainderTableNameRequiredAPIException()
-        return super().validate(attrs)
 
 
 class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serializer):
@@ -208,5 +201,6 @@ class MappingSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 
 
 class TableImportSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    table_to_import_to = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all(), required=True)
-    mappings = MappingSerializer(required=True)
+    import_target = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all(), required=True)
+    data_files = serializers.PrimaryKeyRelatedField(required=True, many=True, queryset=DataFile.objects.all())
+    mappings = MappingSerializer(required=True, allow_null=True)
