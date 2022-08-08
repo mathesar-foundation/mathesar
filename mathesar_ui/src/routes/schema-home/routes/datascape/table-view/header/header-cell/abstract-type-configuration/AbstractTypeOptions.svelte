@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { faDatabase, faPalette } from '@fortawesome/free-solid-svg-icons';
   import {
     FormBuilder,
     Icon,
@@ -14,6 +13,7 @@
     AbstractTypeDisplayConfig,
   } from '@mathesar/stores/abstract-types/types';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import { iconDatabase, iconDisplayOptions } from '@mathesar/icons';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
   import TypeOptionTab from './TypeOptionTab.svelte';
@@ -96,7 +96,7 @@
       tab="database"
       hasError={dbFormHasError || showDefaultValueErrorIndication}
     >
-      <Icon size="0.75em" data={faDatabase} />
+      <Icon size="0.75em" {...iconDatabase} />
       <span>Database</span>
     </TypeOptionTab>
     {#if displayForm}
@@ -108,7 +108,7 @@
           showDefaultValueErrorIndication = defaultValueHasError;
         }}
       >
-        <Icon size="0.75em" data={faPalette} />
+        <Icon size="0.75em" {...iconDisplayOptions} />
         <span>Display</span>
       </TypeOptionTab>
     {/if}

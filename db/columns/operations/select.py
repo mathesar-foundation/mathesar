@@ -97,7 +97,7 @@ def get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use=Non
 
 
 def get_column_default_dict(table_oid, attnum, engine, connection_to_use=None):
-    table = reflect_table_from_oid(table_oid, engine, connection_to_use)
+    table = reflect_table_from_oid(table_oid, engine, connection_to_use=connection_to_use)
     column_name = get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use)
     column = table.columns[column_name]
     if column.server_default is None:

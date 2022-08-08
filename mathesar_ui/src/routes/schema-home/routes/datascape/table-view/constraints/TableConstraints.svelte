@@ -5,6 +5,7 @@
     ControlledModal,
     DropdownMenu,
     MenuItem,
+    iconLoading,
   } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type {
@@ -12,13 +13,12 @@
     ConstraintsDataStore,
   } from '@mathesar/stores/table-data/types';
   import { States } from '@mathesar/utils/api';
-  import {
-    faLink,
-    faPlus,
-    faSnowflake,
-    faSpinner,
-  } from '@fortawesome/free-solid-svg-icons';
   import { modal } from '@mathesar/stores/modal';
+  import {
+    iconAddNew,
+    iconTableLink,
+    iconConstraintUnique,
+  } from '@mathesar/icons';
   import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
   import TableConstraint from './TableConstraint.svelte';
   import ConstraintHelp from './__help__/ConstraintHelp.svelte';
@@ -51,7 +51,7 @@
   <span slot="title">Table Constraints{countText} <ConstraintHelp /></span>
   <div class="table-constraints">
     {#if shouldShowLoadingSpinner}
-      <Icon data={faSpinner} spin={true} />
+      <Icon {...iconLoading} />
     {:else if state === States.Error}
       <div>Unable to fetch table constraints</div>
       <div>{errorMsg}</div>
@@ -67,16 +67,16 @@
   </div>
 
   <div slot="footer" class="footer">
-    <DropdownMenu label="New Constraint" icon={{ data: faPlus }}>
+    <DropdownMenu label="New Constraint" icon={iconAddNew}>
       <MenuItem
         on:click={() => newUniqueConstraintModal.open()}
-        icon={{ data: faSnowflake }}
+        icon={iconConstraintUnique}
       >
         Unique
       </MenuItem>
       <MenuItem
         on:click={() => newFkConstraintModal.open()}
-        icon={{ data: faLink }}
+        icon={iconTableLink}
       >
         Foreign Key
       </MenuItem>

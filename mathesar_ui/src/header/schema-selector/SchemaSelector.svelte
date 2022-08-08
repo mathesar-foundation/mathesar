@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { faProjectDiagram, faCogs } from '@fortawesome/free-solid-svg-icons';
-
   import { get } from 'svelte/store';
   import { databases, currentDBName } from '@mathesar/stores/databases';
   import {
@@ -17,6 +15,7 @@
   } from '@mathesar-component-library';
 
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { iconSchema, iconConfigure } from '@mathesar/icons';
 
   let interalSelectedDB: Database['name'] = get(currentDBName);
   $: schemas = getSchemasStoreForDB(interalSelectedDB);
@@ -60,7 +59,7 @@
     {$currentDBName}
     <span class="separator">/</span>
     {#if $currentSchema}
-      <Icon class="schema" data={faProjectDiagram} />
+      <Icon class="schema" {...iconSchema} />
       {$currentSchema.name}
     {/if}
   </svelte:fragment>
@@ -109,7 +108,7 @@
                 href="/{interalSelectedDB}/{schema.id}/"
                 on:click={closeDropdown}
               >
-                <Icon class="schema" data={faProjectDiagram} />
+                <Icon class="schema" {...iconSchema} />
                 <span>{schema.name}</span>
               </a>
             </li>
@@ -119,7 +118,7 @@
         </ul>
         <div class="item">
           <a href="/{interalSelectedDB}/schemas/" on:click={closeDropdown}>
-            <Icon class="manage" data={faCogs} />
+            <Icon class="manage" {...iconConfigure} />
             Manage schemas
           </a>
         </div>

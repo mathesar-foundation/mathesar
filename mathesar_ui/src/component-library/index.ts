@@ -56,3 +56,4 @@ export * from './menu';
 export * from './modal';
 export * from './toast';
 export * from './form-builder';
+export * from './common/icons';

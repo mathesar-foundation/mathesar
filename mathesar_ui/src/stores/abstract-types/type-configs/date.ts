@@ -1,10 +1,10 @@
-import { faCalendarDay } from '@fortawesome/free-solid-svg-icons';
 import type { FormValues } from '@mathesar-component-library/types';
 import type {
   DateDisplayOptions,
   DateFormat,
   Column,
 } from '@mathesar/api/tables/columns';
+import { iconUiTypeDate } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -52,7 +52,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const dateType: AbstractTypeConfiguration = {
-  icon: { data: faCalendarDay, label: 'Date' },
+  icon: { ...iconUiTypeDate, label: 'Date' },
   cell: {
     type: 'date',
   },
