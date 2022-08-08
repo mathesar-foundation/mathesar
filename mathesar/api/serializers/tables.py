@@ -188,11 +188,15 @@ class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serial
 
 
 class MappingSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    # TBD
-    pass
+    from_col = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all())
+    target_col = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all())
+
+    class Meta:
+        model = Column
+        fields = ['from_col','target_col']
 
 
 class TableImportSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     import_target = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all(), required=True)
     data_files = serializers.PrimaryKeyRelatedField(required=True, many=True, queryset=DataFile.objects.all())
-    mappings = MappingSerializer(required=True, allow_null=True)
+    mappings = MappingSerializer(required=True, allow_null=True, many=True)
