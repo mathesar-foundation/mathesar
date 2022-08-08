@@ -136,7 +136,7 @@ class Group(Transform):
             executable = group.get_group_augmented_records_pg_query(relation, group_by)
             return _to_non_executable(executable)
         else:
-            relation
+            return relation
 
 
 class SelectSubsetOfColumns(Transform):
