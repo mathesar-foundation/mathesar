@@ -257,6 +257,7 @@ FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "db", "tests", "resources")
 ACADEMICS_SQL = os.path.join(RESOURCES, "academics_create.sql")
 
+
 @pytest.fixture
 def engine_with_academics(engine_with_schema):
     engine, schema = engine_with_schema
@@ -289,4 +290,3 @@ def academics_db_tables(engine_with_academics):
         for table_name
         in table_names
     }
-

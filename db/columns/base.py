@@ -53,9 +53,12 @@ class MathesarColumn(Column):
             autoincrement=autoincrement,
             server_default=server_default
         )
+        # NOTE: For some reason, sometimes `self._proxies` is a tuple. SA expects it to be
+        # appendable, however. Was not able to track down the source of it. As a workaround, we
+        # convert it into a list here. I (Dom) offer a bounty of bragging rights to anyone who
+        # figures out what's causing `_proxies` to be tuples.
         if isinstance(self._proxies, tuple):
             self._proxies = list(self._proxies)
-            #breakpoint()
 
     @classmethod
     def _constructor(cls, *args, **kwargs):
