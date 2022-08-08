@@ -39,6 +39,7 @@ export interface ReferencedByTable extends LinkedTable {
   referencedViaColumn: {
     id: Column['id'];
     name: Column['name'];
+    type: Column['type'];
   };
 }
 
@@ -48,6 +49,20 @@ interface InputColumnsStoreSubstance {
   tablesThatReferenceBaseTable: Map<ReferencedByTable['id'], ReferencedByTable>;
   columnInformationMap: Map<InputColumn['id'], InputColumn>;
 }
+
+// Inorder to place all columns with links at the end while sorting
+const compareColumnByLinks = (
+  a: [ColumnWithLink['id'], ColumnWithLink],
+  b: [ColumnWithLink['id'], ColumnWithLink],
+) => {
+  if (a[1].linksTo && !b[1].linksTo) {
+    return 1;
+  }
+  if (!a[1].linksTo && b[1].linksTo) {
+    return -1;
+  }
+  return 0;
+};
 
 export function getLinkFromColumn(
   result: JoinableTableResult,
@@ -78,29 +93,25 @@ export function getLinkFromColumn(
     id: toColumnId,
     name: result.columns[toColumnId].name,
   };
+  const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
+    toTableInfo.columns.map((columnIdInLinkedTable) => {
+      const columnInLinkedTable = result.columns[columnIdInLinkedTable];
+      return [
+        columnIdInLinkedTable,
+        {
+          id: columnIdInLinkedTable,
+          name: columnInLinkedTable.name,
+          tableName: toTableInfo.name,
+          type: columnInLinkedTable.type,
+          linksTo: getLinkFromColumn(result, columnIdInLinkedTable, depth + 1),
+          jpPath: link.jp_path,
+        },
+      ];
+    });
   return {
     ...toTable,
     linkedToColumn: toColumn,
-    columns: new Map(
-      toTableInfo.columns.map((columnIdInLinkedTable) => {
-        const columnInLinkedTable = result.columns[columnIdInLinkedTable];
-        return [
-          columnIdInLinkedTable,
-          {
-            id: columnIdInLinkedTable,
-            name: columnInLinkedTable.name,
-            tableName: toTableInfo.name,
-            type: columnInLinkedTable.type,
-            linksTo: getLinkFromColumn(
-              result,
-              columnIdInLinkedTable,
-              depth + 1,
-            ),
-            jpPath: link.jp_path,
-          },
-        ];
-      }),
-    ),
+    columns: new Map(columnMapEntries.sort(compareColumnByLinks)),
   };
 }
 
@@ -134,20 +145,6 @@ export function getColumnInformationMap(
   });
   return map;
 }
-
-// Inorder to place all columns with links at the end while sorting
-const compareColumnByLinks = (
-  a: [ColumnWithLink['id'], ColumnWithLink],
-  b: [ColumnWithLink['id'], ColumnWithLink],
-) => {
-  if (a[1].linksTo && !b[1].linksTo) {
-    return 1;
-  }
-  if (!a[1].linksTo && b[1].linksTo) {
-    return -1;
-  }
-  return 0;
-};
 
 export function getBaseTableColumnsWithLinks(
   result: JoinableTableResult,
