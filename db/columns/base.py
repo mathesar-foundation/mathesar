@@ -53,6 +53,9 @@ class MathesarColumn(Column):
             autoincrement=autoincrement,
             server_default=server_default
         )
+        if isinstance(self._proxies, tuple):
+            self._proxies = list(self._proxies)
+            #breakpoint()
 
     @classmethod
     def _constructor(cls, *args, **kwargs):
@@ -84,6 +87,8 @@ class MathesarColumn(Column):
             engine=engine,
         )
         new_column.original_table = column.table
+        if isinstance(new_column._proxies, tuple):
+            breakpoint()
         return new_column
 
     def to_sa_column(self):
