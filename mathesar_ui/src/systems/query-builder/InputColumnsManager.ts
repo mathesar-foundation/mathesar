@@ -135,11 +135,25 @@ export function getColumnInformationMap(
   return map;
 }
 
+// Inorder to place all columns with links at the end while sorting
+const compareColumnByLinks = (
+  a: [ColumnWithLink['id'], ColumnWithLink],
+  b: [ColumnWithLink['id'], ColumnWithLink],
+) => {
+  if (a[1].linksTo && !b[1].linksTo) {
+    return 1;
+  }
+  if (!a[1].linksTo && b[1].linksTo) {
+    return -1;
+  }
+  return 0;
+};
+
 export function getBaseTableColumnsWithLinks(
   result: JoinableTableResult,
   baseTable: TableEntry,
 ): Map<ColumnWithLink['id'], ColumnWithLink> {
-  return new Map(
+  const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
     baseTable.columns.map((column) => [
       column.id,
       {
@@ -149,8 +163,8 @@ export function getBaseTableColumnsWithLinks(
         tableName: baseTable.name,
         linksTo: getLinkFromColumn(result, column.id, 1),
       },
-    ]),
-  );
+    ]);
+  return new Map(columnMapEntries.sort(compareColumnByLinks));
 }
 
 export function getTablesThatReferenceBaseTable(
@@ -173,6 +187,24 @@ export function getTablesThatReferenceBaseTable(
     if (!baseTableColumn) {
       return;
     }
+    const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
+      result.tables[reference.target].columns
+        .filter((columnId) => columnId !== referenceTableColumnId)
+        .map((columnIdInTable) => {
+          const columnInTable = result.columns[columnIdInTable];
+          return [
+            columnIdInTable,
+            {
+              id: columnIdInTable,
+              name: columnInTable.name,
+              type: columnInTable.type,
+              tableName: table.name,
+              linksTo: getLinkFromColumn(result, columnIdInTable, 2),
+              jpPath: reference.jp_path,
+            },
+          ];
+        });
+
     references.set(tableId, {
       id: tableId,
       name: table.name,
@@ -181,24 +213,7 @@ export function getTablesThatReferenceBaseTable(
         ...result.columns[referenceTableColumnId],
       },
       linkedToColumn: baseTableColumn,
-      columns: new Map(
-        result.tables[reference.target].columns
-          .filter((columnId) => columnId !== referenceTableColumnId)
-          .map((columnIdInTable) => {
-            const columnInTable = result.columns[columnIdInTable];
-            return [
-              columnIdInTable,
-              {
-                id: columnIdInTable,
-                name: columnInTable.name,
-                type: columnInTable.type,
-                tableName: table.name,
-                linksTo: getLinkFromColumn(result, columnIdInTable, 2),
-                jpPath: reference.jp_path,
-              },
-            ];
-          }),
-      ),
+      columns: new Map(columnMapEntries.sort(compareColumnByLinks)),
     });
   });
 
