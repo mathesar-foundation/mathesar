@@ -6,8 +6,8 @@ USER_DEFINED_OBJECTS_MIN_OID = 16384
 
 
 def get_dependents_graph(referenced_object_id, engine):
-    all = _get_all_dependent_objects_statement(engine)
-    all_cte = all.cte(recursive=True, name='all')
+    all_dependent_objects_statement = _get_all_dependent_objects_statement(engine)
+    all_cte = all_dependent_objects_statement.cte(recursive=True, name='all')
 
     topq = select(
         all_cte,
@@ -17,7 +17,7 @@ def get_dependents_graph(referenced_object_id, engine):
 
     bottomq = select(
         all_cte,
-        literal_column('cte.level + 1').label('level'),
+        (topq.c.level + 1).label('level'),
         topq.c.chain + array([all_cte.c.objid])) \
         .where(topq.c.level < 10) \
         .where(all_cte.c.objid != any_(topq.c.chain)) \
@@ -107,13 +107,11 @@ def _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object, ref
     return res if referenced_object_id is None else res.where(pg_depend.c.refobjid == referenced_object_id)
 
 
-def _get_pg_depend(engine):
-    metadata = MetaData()
+def _get_pg_depend(engine, metadata):
     return Table("pg_depend", metadata, autoload_with=engine)
 
 
-def _get_pg_constraint(engine):
-    metadata = MetaData()
+def _get_pg_constraint(engine, metadata):
     return Table("pg_constraint", metadata, autoload_with=engine)
 
 
@@ -138,9 +136,10 @@ def _get_dependency_case(pg_depend):
 
 
 def _get_all_dependent_objects_statement(engine):
-    pg_depend = _get_pg_depend(engine)
+    metadata = MetaData()
+    pg_depend = _get_pg_depend(engine, metadata)
     pg_identify_object = _get_pg_identify_object_lateral(pg_depend)
-    pg_constraint = _get_pg_constraint(engine)
+    pg_constraint = _get_pg_constraint(engine, metadata)
 
     base_stmt = _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object)
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, base_stmt).cte('foreign_key_constraint_dependents')
@@ -150,7 +149,8 @@ def _get_all_dependent_objects_statement(engine):
 
 
 def has_dependencies(referenced_object_id, engine):
-    pg_depend = _get_pg_depend(engine)
+    metadata = MetaData()
+    pg_depend = _get_pg_depend(engine, metadata)
 
     stmt = select(
         exists(
