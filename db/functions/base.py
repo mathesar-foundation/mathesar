@@ -344,3 +344,15 @@ class CurrentDateTime(DBFunction):
     @staticmethod
     def to_sa_expression():
         return func.current_timestamp()
+
+
+class Count(DBFunction):
+    id = 'count'
+    name = 'count'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column):
+        return func.count(column)
