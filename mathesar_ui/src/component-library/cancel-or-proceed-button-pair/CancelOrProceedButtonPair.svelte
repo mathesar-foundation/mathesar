@@ -2,17 +2,20 @@
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import SpinnerButton from '@mathesar-component-library-dir/spinner-button/SpinnerButton.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
+  import {
+    iconCancel,
+    iconProceed,
+  } from '@mathesar-component-library-dir/common/icons';
   import type { ButtonDetails } from './CancelOrProceedButtonPairTypes';
 
   const cancelButtonDefaults: ButtonDetails = {
     label: 'Cancel',
-    icon: { data: faArrowLeft },
+    icon: iconCancel,
   };
 
   const proceedButtonDefaults: ButtonDetails = {
     label: 'Proceed',
-    icon: { data: faCheck },
+    icon: iconProceed,
   };
 
   export let cancelButton: Partial<ButtonDetails> = {};

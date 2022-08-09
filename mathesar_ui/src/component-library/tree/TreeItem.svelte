@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { faCaretRight } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-component-library';
+  import { iconVerticallyCollapsed } from '@mathesar-component-library-dir/common/icons';
 
   type TreeItem = $$Generic;
 
@@ -64,7 +64,7 @@
 {#if childrenOfEntry}
   <li aria-level={level + 1} role="treeitem" tabindex="-1">
     <Button appearance="plain" class="item parent" on:click={toggle}>
-      <Icon data={faCaretRight} rotate={isOpen ? 90 : undefined} />
+      <Icon {...iconVerticallyCollapsed} rotate={isOpen ? 90 : undefined} />
       <span>{getLabel(entry)}</span>
     </Button>
 

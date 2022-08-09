@@ -195,6 +195,24 @@ def non_unicode_csv_filepath():
 
 
 @pytest.fixture
+def db_table_to_dj_table(engine, create_schema):
+    """
+    Factory creating Django Table models from DB/SA tables.
+    """
+    def _create_ma_table(db_table):
+        schema_name = db_table.schema
+        dj_schema = create_schema(schema_name)
+        db_table_oid = get_oid_from_table(
+            db_table.name, schema_name, engine
+        )
+        dj_table = Table.current_objects.create(
+            oid=db_table_oid, schema=dj_schema
+        )
+        return dj_table
+    yield _create_ma_table
+
+
+@pytest.fixture
 def empty_nasa_table(patent_schema, engine_with_schema):
     engine, _ = engine_with_schema
     NASA_TABLE = 'NASA Schema List'
@@ -219,10 +237,11 @@ def patent_schema(create_schema):
     yield create_schema(PATENT_SCHEMA)
 
 
+# TODO rename to create_ma_schema
 @pytest.fixture
 def create_schema(test_db_model, create_db_schema):
     """
-    Creates a DJ Schema model factory, making sure to track and clean up new instances
+    Creates a DJ Schema model factory, making sure to cache and clean up new instances.
     """
     engine = test_db_model._sa_engine
 
@@ -235,6 +254,7 @@ def create_schema(test_db_model, create_db_schema):
     # NOTE: Schema model is not cleaned up. Maybe invalidate cache?
 
 
+# TODO rename to create_mathesar_db_table
 @pytest.fixture
 def create_mathesar_table(create_db_schema):
     def _create_mathesar_table(
@@ -264,6 +284,7 @@ def create_patents_table(patents_csv_filepath, patent_schema, create_table):
     return _create_table
 
 
+# TODO rename to create_ma_table_from_csv
 @pytest.fixture
 def create_table(create_schema):
     def _create_table(table_name, schema_name, csv_filepath):
