@@ -1,5 +1,5 @@
-import { get, writable, derived } from 'svelte/store';
-import type { Writable, Readable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
+import type { Writable } from 'svelte/store';
 import { EventHandler } from '@mathesar-component-library';
 import type { CancellablePromise } from '@mathesar-component-library';
 import { getAPI } from '@mathesar/utils/api';
@@ -25,6 +25,11 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   column: QueryResultColumn;
 }
 
+export type ProcessedQueryResultColumnMap = Map<
+  ProcessedQueryResultColumn['id'],
+  ProcessedQueryResultColumn
+>;
+
 function processColumn(
   column: QueryResultColumn,
   abstractTypeMap: AbstractTypesMap,
@@ -35,6 +40,58 @@ function processColumn(
     column,
     cellComponentAndProps: getCellCap(abstractType.cell, column),
   };
+}
+
+function calcProcessedColumnsBasedOnInitialColumns(
+  initialColumns: QueryModel['initial_columns'],
+  existingProcessedColumns: ProcessedQueryResultColumnMap,
+  abstractTypeMap: AbstractTypesMap,
+): ProcessedQueryResultColumnMap {
+  let isChangeRequired =
+    initialColumns.length !== existingProcessedColumns.size;
+  const newProcessedColumns: ProcessedQueryResultColumnMap = new Map(
+    initialColumns.map((column) => {
+      const existingProcessedColumn = existingProcessedColumns.get(
+        column.alias,
+      );
+      if (existingProcessedColumn) {
+        if (
+          existingProcessedColumn.column.display_name !== column.display_name
+        ) {
+          isChangeRequired = true;
+          return [
+            column.alias,
+            {
+              ...existingProcessedColumn,
+              column: {
+                ...existingProcessedColumn.column,
+                display_name: column.display_name,
+              },
+            },
+          ];
+        }
+
+        return [column.alias, existingProcessedColumn];
+      }
+
+      isChangeRequired = true;
+      return [
+        column.alias,
+        processColumn(
+          {
+            alias: column.alias,
+            display_name: column.display_name,
+            type: 'unknown',
+            type_options: null,
+            display_options: null,
+          },
+          abstractTypeMap,
+        ),
+      ];
+    }),
+  );
+
+  return isChangeRequired ? newProcessedColumns : existingProcessedColumns;
 }
 
 export default class QueryManager extends EventHandler<{
@@ -59,11 +116,13 @@ export default class QueryManager extends EventHandler<{
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 100 }));
 
-  columns: Writable<QueryResultColumns> = writable([]);
-
-  processedQueryColumns: Readable<ProcessedQueryResultColumn[]> = writable([]);
+  processedQueryColumns: Writable<ProcessedQueryResultColumnMap> = writable(
+    new Map() as ProcessedQueryResultColumnMap,
+  );
 
   records: Writable<QueryResultRecords> = writable({ count: 0, results: [] });
+
+  abstractTypeMap: AbstractTypesMap;
 
   // Display stores
 
@@ -80,14 +139,25 @@ export default class QueryManager extends EventHandler<{
 
   constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
     super();
+    this.abstractTypeMap = abstractTypeMap;
     this.query = writable(query);
     this.undoRedoManager = new QueryUndoRedoManager(
       query.isSaveable() ? query : undefined,
     );
     void Promise.all([this.fetchColumns(), this.fetchResults()]);
+  }
 
-    this.processedQueryColumns = derived(this.columns, (columnsData) =>
-      columnsData.map((column) => processColumn(column, abstractTypeMap)),
+  reCalculateProcessedColumns(): void {
+    const initialColumns = get(this.query).initial_columns;
+    // We are not creating a derived store so that we calculate
+    // processed columns only in required scenarios and not everytime
+    // query store changes.
+    this.processedQueryColumns.update((existing) =>
+      calcProcessedColumnsBasedOnInitialColumns(
+        initialColumns,
+        existing,
+        this.abstractTypeMap,
+      ),
     );
   }
 
@@ -147,7 +217,7 @@ export default class QueryManager extends EventHandler<{
         ..._state,
         columnsFetchState: { state: 'success' },
       }));
-      this.columns.set([]);
+      this.processedQueryColumns.set(new Map());
       return undefined;
     }
 
@@ -161,7 +231,14 @@ export default class QueryManager extends EventHandler<{
         `/api/db/v0/queries/${q.id}/columns/`,
       );
       const result = await this.queryColumnsFetchPromise;
-      this.columns.set(result);
+      this.processedQueryColumns.set(
+        new Map(
+          result.map((column) => [
+            column.alias,
+            processColumn(column, this.abstractTypeMap),
+          ]),
+        ),
+      );
       this.state.update((_state) => ({
         ..._state,
         columnsFetchState: { state: 'success' },
@@ -248,7 +325,7 @@ export default class QueryManager extends EventHandler<{
     this.queryColumnsFetchPromise?.cancel();
     this.queryRecordsFetchPromise?.cancel();
     this.records.set({ count: 0, results: [] });
-    this.columns.set([]);
+    this.processedQueryColumns.set(new Map());
     this.selectedColumnAlias.set(undefined);
     this.state.update((state) => ({
       ...state,
@@ -273,16 +350,21 @@ export default class QueryManager extends EventHandler<{
     switch (updateDiff.type) {
       case 'id':
       case 'name':
-      case 'initialColumnName':
         break;
       case 'baseTable':
         this.resetResults();
         break;
+      case 'initialColumnName':
+        this.reCalculateProcessedColumns();
+        break;
       case 'initialColumnsArray':
         if (!updateDiff.diff.initial_columns?.length) {
-          this.resetPaginationPane();
+          // All columns have been deleted
+          this.resetResults();
+        } else {
+          this.reCalculateProcessedColumns();
+          await Promise.all([this.fetchColumns(), this.fetchResults()]);
         }
-        await Promise.all([this.fetchColumns(), this.fetchResults()]);
         break;
       default:
         await Promise.all([this.fetchColumns(), this.fetchResults()]);
@@ -297,6 +379,7 @@ export default class QueryManager extends EventHandler<{
         queryToSet = query.withId(currentQueryModelData.id).model;
       }
       this.query.set(queryToSet);
+      this.reCalculateProcessedColumns();
       await this.save();
       await Promise.all([this.fetchColumns(), this.fetchResults()]);
     }

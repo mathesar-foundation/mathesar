@@ -122,6 +122,9 @@
         on:add={(e) => addColumn(e.detail)}
       />
     </div>
+    <!-- Do not use inputColumnManager in ResultPane because
+      we'd also use ResultPane for query page where input column
+      details would not be available-->
     <ResultPane {queryManager} />
     <OutputConfigSidebar {queryManager} {inputColumnsManager} />
   </div>

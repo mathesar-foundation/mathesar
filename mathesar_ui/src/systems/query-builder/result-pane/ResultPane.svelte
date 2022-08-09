@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from '@mathesar-component-library';
+  import { Button, Spinner } from '@mathesar-component-library';
   import {
     Sheet,
     SheetHeader,
@@ -27,6 +27,8 @@
 
   $: columnRunState = $state.columnsFetchState?.state;
   $: recordRunState = $state.recordsFetchState?.state;
+
+  $: columnList = [...$processedQueryColumns.values()];
 
   function checkAndUnselectColumn(e: MouseEvent) {
     const target = e.target as HTMLElement;
@@ -63,6 +65,7 @@
           Query run successfully
         {:else if columnRunState === 'processing' || recordRunState === 'processing'}
           Running query
+          <Spinner />
         {:else if columnRunState === 'failure' || recordRunState === 'failure'}
           Query failed to run
         {/if}
@@ -71,17 +74,21 @@
   </header>
   <div data-identifier="result-content">
     {#if !base_table}
-      Please select the base table to start building the query
+      <div class="empty-state">
+        Please select the base table to get started.
+      </div>
     {:else if !initial_columns.length}
-      Please select a column from the column selection pane
+      <div class="empty-state">
+        Please add a column from the column selection pane to get started.
+      </div>
     {:else}
       <Sheet
-        columns={$processedQueryColumns}
+        columns={columnList}
         getColumnIdentifier={(c) => c.id}
         on:click={checkAndUnselectColumn}
       >
         <SheetHeader>
-          {#each $processedQueryColumns as processedQueryColumn (processedQueryColumn.id)}
+          {#each columnList as processedQueryColumn (processedQueryColumn.id)}
             <SheetCell
               columnIdentifierKey={processedQueryColumn.id}
               let:htmlAttributes
@@ -127,7 +134,7 @@
             {#if $records.results[item.index]}
               <SheetRow style={item.style} let:htmlAttributes let:styleString>
                 <div {...htmlAttributes} style={styleString}>
-                  {#each $processedQueryColumns as processedQueryColumn (processedQueryColumn.id)}
+                  {#each columnList as processedQueryColumn (processedQueryColumn.id)}
                     <SheetCell
                       columnIdentifierKey={processedQueryColumn.id}
                       let:htmlAttributes
@@ -139,7 +146,9 @@
                           value={$records.results[item.index][
                             processedQueryColumn.id
                           ]}
-                          showAsSkeleton={false}
+                          showAsSkeleton={$records.results[item.index][
+                            processedQueryColumn.id
+                          ] === undefined && recordRunState === 'processing'}
                           disabled={true}
                         />
                       </div>
@@ -205,6 +214,10 @@
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
+
+      .empty-state {
+        padding: 1rem;
+      }
 
       :global(.sheet) {
         position: relative;

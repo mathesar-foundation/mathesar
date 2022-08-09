@@ -5,8 +5,10 @@
     Button,
     LabeledInput,
     TextInput,
+    Icon,
   } from '@mathesar-component-library';
   import { slide } from 'svelte/transition';
+  import { iconDelete } from '@mathesar/icons';
   import type QueryManager from '../QueryManager';
   import type InputColumnsManager from '../InputColumnsManager';
 
@@ -81,8 +83,10 @@
           <div>
             {#if requestStatus.state === 'success'}
               {#if columnInformation}
-                <div>Table: {columnInformation.tableName}</div>
-                <div>Column: {columnInformation.name}</div>
+                <div>Table:</div>
+                <div>{columnInformation.tableName}</div>
+                <div>Column:</div>
+                <div>{columnInformation.name}</div>
               {/if}
             {:else if requestStatus.state === 'processing'}
               <Spinner />
@@ -92,7 +96,10 @@
           </div>
         </div>
         <div>
-          <Button on:click={deleteSelectedColumn}>Delete column</Button>
+          <Button on:click={deleteSelectedColumn}>
+            <Icon {...iconDelete} />
+            <span>Delete column</span>
+          </Button>
         </div>
       </div>
     </section>
@@ -144,11 +151,10 @@
           h4 {
             margin-bottom: 0.25rem;
           }
-
           > div {
-            border: 1px solid #dfdfdf;
-            padding: 0.6rem;
-            border-radius: 0.25rem;
+            display: grid;
+            grid-template-columns: 5rem auto;
+            grid-gap: 0.24rem;
           }
         }
       }
