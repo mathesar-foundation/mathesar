@@ -12,7 +12,6 @@ from db.columns.operations.alter import alter_column_type
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
-ACADEMICS_SQL = os.path.join(RESOURCES, "academics_create.sql")
 ROSTER_SQL = os.path.join(RESOURCES, "roster_create.sql")
 URIS_SQL = os.path.join(RESOURCES, "uris_create.sql")
 TIMES_SQL = os.path.join(RESOURCES, "times_create.sql")
@@ -20,40 +19,6 @@ BOOLEANS_SQL = os.path.join(RESOURCES, "booleans_create.sql")
 FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 MAGNITUDE_SQL = os.path.join(RESOURCES, "magnitude_testing_create.sql")
 JSON_SQL = os.path.join(RESOURCES, "json_sort.sql")
-
-
-@pytest.fixture
-def engine_with_academics(engine_with_schema):
-    engine, schema = engine_with_schema
-    with engine.begin() as conn, open(ACADEMICS_SQL) as f:
-        conn.execute(text(f"SET search_path={schema}"))
-        conn.execute(text(f.read()))
-    yield engine, schema
-
-
-@pytest.fixture
-def academics_tables(engine_with_academics):
-    def make_table(table_name):
-        return Table(
-            table_name,
-            metadata,
-            schema=schema,
-            autoload_with=engine,
-        )
-    engine, schema = engine_with_academics
-    metadata = MetaData(bind=engine)
-    table_names = {
-        'academics',
-        'articles',
-        'journals',
-        'publishers',
-        'universities',
-    }
-    return {
-        table_name: make_table(table_name)
-        for table_name
-        in table_names
-    }
 
 
 @pytest.fixture

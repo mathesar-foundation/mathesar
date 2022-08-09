@@ -1,9 +1,12 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import {
     Pagination as PaginationComponent,
     Select,
   } from '@mathesar-component-library';
   import Pagination from '@mathesar/utils/Pagination';
+
+  const dispatch = createEventDispatcher();
 
   export let pagination: Pagination;
   export let totalCount: number;
@@ -20,12 +23,14 @@
       ...pagination,
       page: event.detail.currentPage,
     });
+    dispatch('change', pagination);
   }
 
   function setPageSize(event: CustomEvent<number | undefined>) {
     const newPageSize = event.detail;
     if (typeof newPageSize !== 'undefined' && pageSize !== newPageSize) {
       pagination = new Pagination({ page: 1, size: newPageSize });
+      dispatch('change', pagination);
     }
   }
 </script>

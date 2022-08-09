@@ -41,6 +41,7 @@ import {
   faGlobe,
   faShapes,
   faClone,
+  faArrowLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 
@@ -93,6 +94,8 @@ export const iconTable: IconProps = { data: faTable };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUser: IconProps = { data: faUser };
+export const iconInwardLink: IconProps = { data: faArrowRight };
+export const iconOutwardLink: IconProps = { data: faArrowLeft };
 
 // STATUSES
 

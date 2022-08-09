@@ -14,10 +14,16 @@ export default class Pagination {
 
   readonly offset: number;
 
+  readonly leftBound: number;
+
+  readonly rightBound: number;
+
   constructor({ page, size }: { page?: number; size?: number } = {}) {
     this.page = page ?? 1;
     this.size = size ?? DEFAULT_PAGE_SIZE;
     this.offset = (this.page - 1) * this.size;
+    this.leftBound = this.offset + 1;
+    this.rightBound = this.offset + this.size;
   }
 
   recordsRequestParams(): { limit: number; offset: number } {

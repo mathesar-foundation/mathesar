@@ -32,9 +32,9 @@
     TextInput,
   } from '@mathesar-component-library';
   import FormField from '@mathesar/components/FormField.svelte';
-  import DynamicInput from '@mathesar/components/cell/DynamicInput.svelte';
+  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import type { Column } from '@mathesar/api/tables/columns';
-  import { getDbTypeBasedInputCap } from '@mathesar/components/cell/utils';
+  import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
 
   export let selectedDbType: Column['type'];
   export let typeOptions: Column['type_options'];

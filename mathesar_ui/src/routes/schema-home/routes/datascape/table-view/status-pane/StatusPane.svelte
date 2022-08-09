@@ -8,12 +8,12 @@
 
   $: ({ recordsData, meta } = $tabularData);
   $: ({ selectedRows, pagination } = meta);
-  $: ({ size: pageSize, offset } = $pagination);
+  $: ({ size: pageSize, leftBound, rightBound } = $pagination);
   $: ({ totalCount, state, newRecords } = recordsData);
   $: recordState = $state;
 
   $: pageCount = getPaginationPageCount($totalCount ?? 0, pageSize);
-  $: max = Math.min($totalCount ?? 0, offset + pageSize);
+  $: max = Math.min($totalCount ?? 0, rightBound);
 </script>
 
 <div class="status-pane">
@@ -22,7 +22,7 @@
       {$selectedRows.size} record{$selectedRows.size > 1 ? 's' : ''} selected of
       {$totalCount}
     {:else if pageCount > 0 && $totalCount}
-      Showing {offset + 1} to {max}
+      Showing {leftBound} to {max}
       {#if $newRecords.length > 0}
         (+ {$newRecords.length} new record{$newRecords.length > 1 ? 's' : ''})
       {/if}
