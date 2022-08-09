@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Spinner } from '@mathesar-component-library';
+  import { Button, Spinner, Icon } from '@mathesar-component-library';
   import {
     Sheet,
     SheetHeader,
@@ -11,6 +11,7 @@
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
+  import { iconRefresh } from '@mathesar/icons';
   import type QueryManager from '../QueryManager';
 
   export let queryManager: QueryManager;
@@ -28,6 +29,17 @@
   $: columnRunState = $state.columnsFetchState?.state;
   $: recordRunState = $state.recordsFetchState?.state;
   $: lastFetchTypeEqualsRecords = $state.lastFetchType === 'records';
+
+  $: columnRunErrors =
+    $state.columnsFetchState?.state === 'failure'
+      ? $state.columnsFetchState.errors
+      : [];
+  $: recordRunErrors =
+    $state.recordsFetchState?.state === 'failure'
+      ? $state.recordsFetchState.errors
+      : [];
+  // Prioritize showing column errors over record fetch errors
+  $: errors = columnRunErrors.length > 0 ? columnRunErrors : recordRunErrors;
 
   $: columnList = [...$processedQueryColumns.values()];
 
@@ -69,6 +81,15 @@
           <Spinner />
         {:else if columnRunState === 'failure' || recordRunState === 'failure'}
           Query failed to run
+          <Button
+            appearance="plain"
+            size="small"
+            class="padding-zero"
+            on:click={() => queryManager.fetchColumnsAndRecords()}
+          >
+            <Icon {...iconRefresh} size="0.6rem" />
+            <span>Retry</span>
+          </Button>
         {/if}
       </span>
     {/if}
@@ -81,6 +102,12 @@
     {:else if !initial_columns.length}
       <div class="empty-state">
         Please add a column from the column selection pane to get started.
+      </div>
+    {:else if errors.length}
+      <div class="empty-state errors">
+        {#each errors as error}
+          <p>{error}</p>
+        {/each}
       </div>
     {:else}
       <Sheet
@@ -199,6 +226,8 @@
     header {
       padding: 8px 10px;
       border-bottom: 1px solid #e5e5e5;
+      display: flex;
+      align-items: center;
 
       .title {
         font-weight: 600;
@@ -207,6 +236,9 @@
         margin-left: 8px;
         color: #71717a;
         font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
       }
     }
 
@@ -220,6 +252,14 @@
 
       .empty-state {
         padding: 1rem;
+
+        &.errors {
+          color: var(--danger-color);
+        }
+
+        p {
+          margin: 0;
+        }
       }
 
       :global(.sheet) {

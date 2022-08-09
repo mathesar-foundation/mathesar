@@ -14,6 +14,7 @@ import { createQuery, putQuery } from '@mathesar/stores/queries';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import Pagination from '@mathesar/utils/Pagination';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
+import { toast } from '@mathesar/stores/toast';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import type QueryModel from './QueryModel';
@@ -198,16 +199,18 @@ export default class QueryManager extends EventHandler<{
         await this.dispatch('save', result);
         return result;
       } catch (err) {
+        const errors =
+          err instanceof Error
+            ? [err.message]
+            : ['An error occurred while trying to save the query'];
         this.state.update((_state) => ({
           ..._state,
           saveState: {
             state: 'failure',
-            errors:
-              err instanceof Error
-                ? [err.message]
-                : ['An error occurred while trying to save the query'],
+            errors,
           },
         }));
+        toast.error(`Unable to save query: ${errors.join(',')}`);
       }
     }
     return undefined;
