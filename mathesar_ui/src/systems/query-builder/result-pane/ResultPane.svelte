@@ -135,7 +135,11 @@
                     );
                   }}
                 >
+                  <!--TODO: Use a separate prop to identify column that isn't fetched yet
+                        instead of type:unknown-->
                   <ColumnName
+                    isLoading={columnRunState === 'processing' &&
+                      processedQueryColumn.column.type === 'unknown'}
                     column={{
                       ...processedQueryColumn.column,
                       name:
@@ -168,7 +172,14 @@
                       let:htmlAttributes
                       let:style
                     >
-                      <div {...htmlAttributes} {style}>
+                      <div
+                        {...htmlAttributes}
+                        {style}
+                        class={$selectedColumnAlias ===
+                        processedQueryColumn.column.alias
+                          ? 'selected'
+                          : ''}
+                      >
                         <CellFabric
                           columnFabric={processedQueryColumn}
                           value={$records.results[item.index][
@@ -294,6 +305,9 @@
 
     :global(.column-name-wrapper.selected) {
       background: #dedede !important;
+    }
+    :global([data-sheet-element='cell'].selected) {
+      background: #fafafa;
     }
   }
 </style>

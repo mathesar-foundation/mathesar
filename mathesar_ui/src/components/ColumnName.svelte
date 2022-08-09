@@ -1,15 +1,23 @@
 <script lang="ts">
+  import { Spinner } from '@mathesar-component-library';
   import type { CellColumnLike } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
   import { getColumnIconProps } from './cell-fabric/utils';
   import TypeIcon from './TypeIcon.svelte';
 
   export let column: CellColumnLike & { name: string };
+  export let isLoading = false;
 
   $: icon = getColumnIconProps(column);
 </script>
 
 <span class="column-name">
-  <span class="icon"><TypeIcon {icon} /></span>
+  <span class="icon">
+    {#if isLoading}
+      <Spinner />
+    {:else}
+      <TypeIcon {icon} />
+    {/if}
+  </span>
   <span class="name">
     {column.name}
   </span>
