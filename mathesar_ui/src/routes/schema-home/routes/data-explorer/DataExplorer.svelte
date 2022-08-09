@@ -6,6 +6,7 @@
   import QueryManager from '@mathesar/systems/query-builder/QueryManager';
   import QueryModel from '@mathesar/systems/query-builder/QueryModel';
   import { queries, getQuery } from '@mathesar/stores/queries';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { CancellablePromise } from '@mathesar/component-library';
   import type { QueryInstance } from '@mathesar/api/queries/queryList';
   import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
@@ -19,14 +20,16 @@
   let is404 = false;
 
   let queryManager: QueryManager | undefined;
-  let urlUpdateUnsubscriber: () => void;
   let queryLoadPromise: CancellablePromise<QueryInstance | undefined>;
 
   function createQueryManager(queryInstance: UnsavedQueryInstance) {
-    urlUpdateUnsubscriber?.();
-    queryManager = new QueryManager(new QueryModel(queryInstance));
+    queryManager?.destroy();
+    queryManager = new QueryManager(
+      new QueryModel(queryInstance),
+      $currentDbAbstractTypes.data,
+    );
     is404 = false;
-    urlUpdateUnsubscriber = queryManager.on('save', async (instance) => {
+    queryManager.on('save', async (instance) => {
       try {
         const url = `${String(schemaURL)}queries/${instance.id}/`;
         router.goto(url, true);
@@ -37,7 +40,7 @@
   }
 
   function removeQueryManager(): void {
-    urlUpdateUnsubscriber?.();
+    queryManager?.destroy();
     is404 = true;
     queryManager = undefined;
   }
@@ -52,7 +55,7 @@
     }
     createQueryManager({
       name: getAvailableName(
-        'New_Query',
+        'New_Exploration',
         new Set([...$queries.data.values()].map((e) => e.name)),
       ),
     });

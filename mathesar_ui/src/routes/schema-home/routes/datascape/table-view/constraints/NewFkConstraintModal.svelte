@@ -159,7 +159,11 @@
 
     <FormField>
       <LabeledInput label="Target Table" layout="stacked">
-        <SelectTable {tables} bind:table={targetTable} />
+        <SelectTable
+          {tables}
+          bind:table={targetTable}
+          initialSelectionType="empty"
+        />
       </LabeledInput>
     </FormField>
 

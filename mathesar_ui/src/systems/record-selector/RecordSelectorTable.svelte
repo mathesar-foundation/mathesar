@@ -6,7 +6,7 @@
     setTabularDataStoreInContext,
     TabularData,
   } from '@mathesar/stores/table-data/tabularData';
-  import DynamicInput from '@mathesar/components/cell/DynamicInput.svelte';
+  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
   import ColumnResizer from './ColumnResizer.svelte';
