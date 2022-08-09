@@ -4,7 +4,7 @@ import sqlalchemy
 import sqlalchemy_filters
 from sqlalchemy import select
 
-from db.functions.operations.apply import apply_db_function_spec_as_filter
+from db.functions.operations import apply
 from db.records.operations import group, relevance
 
 
@@ -45,7 +45,7 @@ class Filter(Transform):
         enforce_relation_type_expectations(relation)
         executable = _to_executable(relation)
         if filter is not None:
-            executable = apply_db_function_spec_as_filter(executable, filter)
+            executable = apply.apply_db_function_spec_as_filter(executable, filter)
         return _to_non_executable(executable)
 
 
@@ -137,6 +137,27 @@ class Group(Transform):
             return _to_non_executable(executable)
         else:
             return relation
+
+
+class Summarize(Transform):
+    type = "summarize"
+
+    def apply_to_relation(self, relation):
+        grouping_expressions = [
+            apply.get_sa_expression_from_db_function_spec(col_spec)
+            for col_spec in self.spec.get("grouping_expressions", [])
+        ]
+        aggregation_expressions = [
+            apply.get_sa_expression_from_db_function_spec(col_spec)
+            for col_spec in self.spec["aggregation_expressions"]
+        ]
+
+        executable = (
+            select(*grouping_expressions, *aggregation_expressions)
+            .group_by(*grouping_expressions)
+            .select_from(relation)
+        )
+        return _to_non_executable(executable)
 
 
 class SelectSubsetOfColumns(Transform):
