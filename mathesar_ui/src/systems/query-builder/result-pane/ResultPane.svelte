@@ -274,9 +274,7 @@
       }
 
       :global(.sheet) {
-        position: relative;
-        flex-grow: 1;
-        flex-shrink: 0;
+        bottom: 2.7rem;
       }
 
       [data-identifier='status-bar'] {
@@ -287,6 +285,8 @@
         background: #fafafa;
         display: flex;
         align-items: center;
+        margin-top: auto;
+        height: 2.7rem;
 
         :global(.pagination-group) {
           margin-left: auto;
