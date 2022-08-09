@@ -354,5 +354,30 @@ class Count(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(column):
-        return func.count(column)
+    def to_sa_expression(column_expr):
+        return func.count(column_expr)
+
+
+class ArrayAgg(DBFunction):
+    id = 'aggregate_to_array'
+    name = 'aggregate to array'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return func.array_agg(column_expr)
+
+
+class Alias(DBFunction):
+    id = 'alias'
+    name = 'alias'
+    hints = tuple([
+        hints.parameter_count(2),
+        hints.parameter(0, hints.column),
+    ])
+
+    @staticmethod
+    def to_sa_expression(expr, alias):
+        return expr.label(alias)
