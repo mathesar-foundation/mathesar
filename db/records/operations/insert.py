@@ -78,7 +78,7 @@ def insert_records_from_csv(table, engine, csv_filepath, column_names, header, d
 
 def insert_from_select(from_table, target_table, engine, sa_col_mappings=None):
     if sa_col_mappings:
-        # unzipping column mappings into list of respective tables 
+        # unzipping column mappings into list of respective tables
         from_table_col_list, target_table_col_list = zip(*sa_col_mappings)
     else:
         from_table_col_list = [col for col in from_table.c if not MathesarColumn.from_column(col).is_default]
