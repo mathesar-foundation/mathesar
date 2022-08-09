@@ -201,19 +201,19 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         temp_table = self.get_object()
         serializer = TableImportSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-        existing_table_id = serializer.validated_data['table_to_import_to']
+        target_table = serializer.validated_data['import_target']
+        data_files = serializer.validated_data['data_files']
         mappings = serializer.validated_data['mappings']
-        existing_table = get_table_or_404(existing_table_id)
 
         try:
             temp_table.insert_records_to_existing_table(
-                existing_table, temp_table, mappings
+                target_table, data_files, mappings
             )
         except Exception as e:
             # ToDo raise specific exceptions.
             raise e
         # Reload the table to avoid cached properties
-        existing_table = get_table_or_404(existing_table_id)
+        existing_table = get_table_or_404(target_table.id)
         serializer = TableSerializer(
             existing_table, context={'request': request}
         )

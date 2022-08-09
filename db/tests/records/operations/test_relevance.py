@@ -5,7 +5,8 @@ from db.records.operations import relevance
 def test_rank_and_filter_rows(roster_table_obj):
     roster, engine = roster_table_obj
     sel = relevance.get_rank_and_filter_rows_query(
-        roster, {'Student Name': 'John'}, engine
+        relation=roster,
+        parameters_dict={'Student Name': 'John'}
     )
 
     with engine.begin() as conn:
@@ -20,7 +21,8 @@ def test_get_scored_selectable_text_exact(roster_table_obj):
     roster, engine = roster_table_obj
     sel = select(
         relevance._get_scored_selectable(
-            roster, {'Student Name': 'John Jones'}, engine
+            relation=roster,
+            parameters_dict={'Student Name': 'John Jones'}
         )
     ).order_by(desc(relevance.SCORE_COL))
     with engine.begin() as conn:
@@ -43,7 +45,8 @@ def test_get_scored_selectable_text_begin_and_mid(roster_table_obj):
     roster, engine = roster_table_obj
     sel = select(
         relevance._get_scored_selectable(
-            roster, {'Student Name': 'John'}, engine
+            relation=roster,
+            parameters_dict={'Student Name': 'John'}
         )
     ).order_by(desc(relevance.SCORE_COL))
     with engine.begin() as conn:
@@ -66,7 +69,8 @@ def test_get_scored_selectable_multicol(roster_table_obj):
     roster, engine = roster_table_obj
     sel = select(
         relevance._get_scored_selectable(
-            roster, {'Student Name': 'John', 'Subject': 'Math'}, engine
+            relation=roster,
+            parameters_dict={'Student Name': 'John', 'Subject': 'Math'}
         )
     ).order_by(desc(relevance.SCORE_COL), 'Student Number')
     with engine.begin() as conn:
@@ -107,7 +111,9 @@ def test_get_scored_selectable_multicol(roster_table_obj):
 def test_get_scored_selectable_nontext(roster_table_obj):
     roster, engine = roster_table_obj
     sel = select(
-        relevance._get_scored_selectable(roster, {'Grade': 100}, engine)
+        relevance._get_scored_selectable(
+            relation=roster,
+            parameters_dict={'Grade': 100})
     ).order_by(desc(relevance.SCORE_COL))
     with engine.begin() as conn:
         res = conn.execute(sel).fetchall()
