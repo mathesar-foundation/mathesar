@@ -14,7 +14,7 @@ from mathesar.database.base import create_mathesar_engine
 
 DB_REFLECTION_KEY = 'database_reflected_recently'
 # TODO Change this back to 60 * 5 later in the development process
-DB_REFLECTION_INTERVAL = 1 # we reflect DB changes every second
+DB_REFLECTION_INTERVAL = 1  # we reflect DB changes every second
 
 
 # NOTE: All querysets used for reflection should use the .current_objects manager
