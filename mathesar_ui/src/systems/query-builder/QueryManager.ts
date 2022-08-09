@@ -109,9 +109,11 @@ export default class QueryManager extends EventHandler<{
     recordsFetchState?: RequestStatus;
     isUndoPossible: boolean;
     isRedoPossible: boolean;
+    lastFetchType: 'columns' | 'records' | 'both';
   }> = writable({
     isUndoPossible: false,
     isRedoPossible: false,
+    lastFetchType: 'both',
   });
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 100 }));
@@ -144,7 +146,17 @@ export default class QueryManager extends EventHandler<{
     this.undoRedoManager = new QueryUndoRedoManager(
       query.isSaveable() ? query : undefined,
     );
-    void Promise.all([this.fetchColumns(), this.fetchResults()]);
+    void this.fetchColumnsAndRecords();
+  }
+
+  async fetchColumnsAndRecords(): Promise<
+    [QueryResultColumns | undefined, QueryResultRecords | undefined]
+  > {
+    this.state.update((state) => ({
+      ...state,
+      lastFetchType: 'both',
+    }));
+    return Promise.all([this.fetchColumns(), this.fetchResults()]);
   }
 
   reCalculateProcessedColumns(): void {
@@ -307,6 +319,10 @@ export default class QueryManager extends EventHandler<{
     pagination: Pagination,
   ): Promise<QueryResultRecords | undefined> {
     this.pagination.set(pagination);
+    this.state.update((state) => ({
+      ...state,
+      lastFetchType: 'records',
+    }));
     const result = await this.fetchResults();
     return result;
   }
@@ -363,11 +379,11 @@ export default class QueryManager extends EventHandler<{
           this.resetResults();
         } else {
           this.reCalculateProcessedColumns();
-          await Promise.all([this.fetchColumns(), this.fetchResults()]);
+          await this.fetchColumnsAndRecords();
         }
         break;
       default:
-        await Promise.all([this.fetchColumns(), this.fetchResults()]);
+        await this.fetchColumnsAndRecords();
     }
   }
 
@@ -381,7 +397,7 @@ export default class QueryManager extends EventHandler<{
       this.query.set(queryToSet);
       this.reCalculateProcessedColumns();
       await this.save();
-      await Promise.all([this.fetchColumns(), this.fetchResults()]);
+      await this.fetchColumnsAndRecords();
     }
     this.setUndoRedoStates();
   }

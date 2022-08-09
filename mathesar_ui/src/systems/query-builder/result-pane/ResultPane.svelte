@@ -27,6 +27,7 @@
 
   $: columnRunState = $state.columnsFetchState?.state;
   $: recordRunState = $state.recordsFetchState?.state;
+  $: lastFetchTypeEqualsRecords = $state.lastFetchType === 'records';
 
   $: columnList = [...$processedQueryColumns.values()];
 
@@ -146,9 +147,11 @@
                           value={$records.results[item.index][
                             processedQueryColumn.id
                           ]}
-                          showAsSkeleton={$records.results[item.index][
-                            processedQueryColumn.id
-                          ] === undefined && recordRunState === 'processing'}
+                          showAsSkeleton={recordRunState === 'processing' &&
+                            (lastFetchTypeEqualsRecords ||
+                              $records.results[item.index][
+                                processedQueryColumn.id
+                              ] === undefined)}
                           disabled={true}
                         />
                       </div>
