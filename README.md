@@ -112,8 +112,6 @@ docker exec -it mathesar_service bash
 
 ### Modifying data in the user database
 
-> ⚠️ **Note:** Mathesar caches schema information from the user database for up to 5 minutes. This cache will need to be invalidated before structural changes (e.g. adding a table) become visible within the UI. To invalidate this cache, change `DB_REFLECTION_INTERVAL` to `1` within `mathesar/reflection.py` and reload the UI (but don't commit this change).
-
 - Open a PostgreSQL [psql](https://www.postgresql.org/docs/current/app-psql.html) terminal for the data in Mathesar
 
     ```
@@ -125,8 +123,6 @@ docker exec -it mathesar_service bash
     ```
     docker exec -i mathesar_db bash -c 'psql -U mathesar' < '/path/to/file.sql'
     ```
-
-
 
 ### Troubleshooting
 Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues) for instruction on troubleshooting common issues while setting up and running Mathesar.
