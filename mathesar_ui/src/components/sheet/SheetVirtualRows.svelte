@@ -4,22 +4,20 @@
   import VirtualList from './virtual-list/VirtualList.svelte';
   import type { Props as VirtualListProps } from './virtual-list/listUtils';
 
-  const { stores } = getSheetContext();
-  const { rowWidth } = stores;
+  const { stores, api } = getSheetContext();
+  const { rowWidth, horizontalScrollOffset, scrollOffset } = stores;
 
-  export let scrollOffset: VirtualListProps['scrollOffset'] = 0;
   export let itemCount: VirtualListProps['itemCount'];
   export let itemSize: VirtualListProps['itemSize'];
   export let paddingBottom = 0;
-  export let horizontalScrollOffset = 0;
   export let itemKey: VirtualListProps['itemKey'] | undefined = undefined;
 </script>
 
 <div data-sheet-element="body" tabindex="-1">
   <Resizer let:height>
     <VirtualList
-      bind:horizontalScrollOffset
-      bind:scrollOffset
+      horizontalScrollOffset={$horizontalScrollOffset}
+      scrollOffset={$scrollOffset}
       {height}
       width={$rowWidth}
       {itemCount}
@@ -28,6 +26,12 @@
       {itemKey}
       let:items
       let:api
+      on:scroll={(e) => {
+        api.setScrollOffset(e.detail);
+      }}
+      on:h-scroll={(e) => {
+        api.setHorizontalScrollOffset(e.detail);
+      }}
     >
       <slot {items} {api} />
     </VirtualList>

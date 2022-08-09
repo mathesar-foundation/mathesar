@@ -6,13 +6,94 @@ import { getAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
 import type {
   QueryInstance,
+  QueryResultColumn,
   QueryResultColumns,
   QueryResultRecords,
 } from '@mathesar/api/queries/queryList';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
+import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import Pagination from '@mathesar/utils/Pagination';
+import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
+import { toast } from '@mathesar/stores/toast';
+import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import type QueryModel from './QueryModel';
+import type { QueryModelUpdateDiff } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
+
+export interface ProcessedQueryResultColumn extends CellColumnFabric {
+  id: QueryResultColumn['alias'];
+  column: QueryResultColumn;
+}
+
+export type ProcessedQueryResultColumnMap = Map<
+  ProcessedQueryResultColumn['id'],
+  ProcessedQueryResultColumn
+>;
+
+function processColumn(
+  column: QueryResultColumn,
+  abstractTypeMap: AbstractTypesMap,
+): ProcessedQueryResultColumn {
+  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
+  return {
+    id: column.alias,
+    column,
+    cellComponentAndProps: getCellCap(abstractType.cell, column),
+  };
+}
+
+function calcProcessedColumnsBasedOnInitialColumns(
+  initialColumns: QueryModel['initial_columns'],
+  existingProcessedColumns: ProcessedQueryResultColumnMap,
+  abstractTypeMap: AbstractTypesMap,
+): ProcessedQueryResultColumnMap {
+  let isChangeRequired =
+    initialColumns.length !== existingProcessedColumns.size;
+  const newProcessedColumns: ProcessedQueryResultColumnMap = new Map(
+    initialColumns.map((column) => {
+      const existingProcessedColumn = existingProcessedColumns.get(
+        column.alias,
+      );
+      if (existingProcessedColumn) {
+        if (
+          existingProcessedColumn.column.display_name !== column.display_name
+        ) {
+          isChangeRequired = true;
+          return [
+            column.alias,
+            {
+              ...existingProcessedColumn,
+              column: {
+                ...existingProcessedColumn.column,
+                display_name: column.display_name,
+              },
+            },
+          ];
+        }
+
+        return [column.alias, existingProcessedColumn];
+      }
+
+      isChangeRequired = true;
+      return [
+        column.alias,
+        processColumn(
+          {
+            alias: column.alias,
+            display_name: column.display_name,
+            type: 'unknown',
+            type_options: null,
+            display_options: null,
+          },
+          abstractTypeMap,
+        ),
+      ];
+    }),
+  );
+
+  return isChangeRequired ? newProcessedColumns : existingProcessedColumns;
+}
 
 export default class QueryManager extends EventHandler<{
   save: QueryInstance;
@@ -29,16 +110,29 @@ export default class QueryManager extends EventHandler<{
     recordsFetchState?: RequestStatus;
     isUndoPossible: boolean;
     isRedoPossible: boolean;
+    lastFetchType: 'columns' | 'records' | 'both';
   }> = writable({
     isUndoPossible: false,
     isRedoPossible: false,
+    lastFetchType: 'both',
   });
 
-  pagination: Writable<Pagination> = writable(new Pagination());
+  pagination: Writable<Pagination> = writable(new Pagination({ size: 100 }));
 
-  columns: Writable<QueryResultColumns> = writable([]);
+  processedQueryColumns: Writable<ProcessedQueryResultColumnMap> = writable(
+    new Map() as ProcessedQueryResultColumnMap,
+  );
 
   records: Writable<QueryResultRecords> = writable({ count: 0, results: [] });
+
+  abstractTypeMap: AbstractTypesMap;
+
+  // Display stores
+
+  selectedColumnAlias: Writable<QueryResultColumn['alias'] | undefined> =
+    writable(undefined);
+
+  // Promises
 
   querySavePromise: CancellablePromise<QueryInstance> | undefined;
 
@@ -46,13 +140,38 @@ export default class QueryManager extends EventHandler<{
 
   queryRecordsFetchPromise: CancellablePromise<QueryResultRecords> | undefined;
 
-  constructor(query: QueryModel) {
+  constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
     super();
+    this.abstractTypeMap = abstractTypeMap;
     this.query = writable(query);
     this.undoRedoManager = new QueryUndoRedoManager(
       query.isSaveable() ? query : undefined,
     );
-    void Promise.all([this.fetchColumns(), this.fetchResults()]);
+    void this.fetchColumnsAndRecords();
+  }
+
+  async fetchColumnsAndRecords(): Promise<
+    [QueryResultColumns | undefined, QueryResultRecords | undefined]
+  > {
+    this.state.update((state) => ({
+      ...state,
+      lastFetchType: 'both',
+    }));
+    return Promise.all([this.fetchColumns(), this.fetchResults()]);
+  }
+
+  reCalculateProcessedColumns(): void {
+    const initialColumns = get(this.query).initial_columns;
+    // We are not creating a derived store so that we calculate
+    // processed columns only in required scenarios and not everytime
+    // query store changes.
+    this.processedQueryColumns.update((existing) =>
+      calcProcessedColumnsBasedOnInitialColumns(
+        initialColumns,
+        existing,
+        this.abstractTypeMap,
+      ),
+    );
   }
 
   async save(): Promise<QueryInstance | undefined> {
@@ -72,7 +191,7 @@ export default class QueryManager extends EventHandler<{
           this.querySavePromise = createQuery(q);
         }
         const result = await this.querySavePromise;
-        this.query.update((qr) => qr.withId(result.id));
+        this.query.update((qr) => qr.withId(result.id).model);
         this.state.update((_state) => ({
           ..._state,
           saveState: { state: 'success' },
@@ -80,16 +199,18 @@ export default class QueryManager extends EventHandler<{
         await this.dispatch('save', result);
         return result;
       } catch (err) {
+        const errors =
+          err instanceof Error
+            ? [err.message]
+            : ['An error occurred while trying to save the query'];
         this.state.update((_state) => ({
           ..._state,
           saveState: {
             state: 'failure',
-            errors:
-              err instanceof Error
-                ? [err.message]
-                : ['An error occurred while trying to save the query'],
+            errors,
           },
         }));
+        toast.error(`Unable to save query: ${errors.join(',')}`);
       }
     }
     return undefined;
@@ -111,7 +232,7 @@ export default class QueryManager extends EventHandler<{
         ..._state,
         columnsFetchState: { state: 'success' },
       }));
-      this.columns.set([]);
+      this.processedQueryColumns.set(new Map());
       return undefined;
     }
 
@@ -125,7 +246,14 @@ export default class QueryManager extends EventHandler<{
         `/api/db/v0/queries/${q.id}/columns/`,
       );
       const result = await this.queryColumnsFetchPromise;
-      this.columns.set(result);
+      this.processedQueryColumns.set(
+        new Map(
+          result.map((column) => [
+            column.alias,
+            processColumn(column, this.abstractTypeMap),
+          ]),
+        ),
+      );
       this.state.update((_state) => ({
         ..._state,
         columnsFetchState: { state: 'success' },
@@ -164,8 +292,9 @@ export default class QueryManager extends EventHandler<{
         recordsFetchState: { state: 'processing' },
       }));
       this.queryRecordsFetchPromise?.cancel();
+      const { limit, offset } = get(this.pagination).recordsRequestParams();
       this.queryRecordsFetchPromise = getAPI(
-        `/api/db/v0/queries/${q.id}/records/`,
+        `/api/db/v0/queries/${q.id}/records/?limit=${limit}&offset=${offset}`,
       );
       const result = await this.queryRecordsFetchPromise;
       this.records.set(result);
@@ -189,18 +318,76 @@ export default class QueryManager extends EventHandler<{
     return undefined;
   }
 
+  async setPagination(
+    pagination: Pagination,
+  ): Promise<QueryResultRecords | undefined> {
+    this.pagination.set(pagination);
+    this.state.update((state) => ({
+      ...state,
+      lastFetchType: 'records',
+    }));
+    const result = await this.fetchResults();
+    return result;
+  }
+
+  resetPaginationPane(): void {
+    this.pagination.update(
+      (pagination) =>
+        new Pagination({
+          ...pagination,
+          page: 1,
+        }),
+    );
+  }
+
+  resetResults(): void {
+    this.queryColumnsFetchPromise?.cancel();
+    this.queryRecordsFetchPromise?.cancel();
+    this.records.set({ count: 0, results: [] });
+    this.processedQueryColumns.set(new Map());
+    this.selectedColumnAlias.set(undefined);
+    this.state.update((state) => ({
+      ...state,
+      columnsFetchState: undefined,
+      recordsFetchState: undefined,
+    }));
+    this.resetPaginationPane();
+  }
+
   async update(
-    callback: (queryModel: QueryModel) => QueryModel,
-    opts?: { reversible: boolean },
+    callback: (queryModel: QueryModel) => QueryModelUpdateDiff,
   ): Promise<void> {
-    this.query.update((q) => callback(q));
-    const queryModelData = this.getQueryModelData();
-    if (queryModelData.isSaveable()) {
-      this.undoRedoManager.pushState(queryModelData);
+    const updateDiff = callback(this.getQueryModelData());
+    this.query.set(updateDiff.model);
+    if (updateDiff.model.isSaveable()) {
+      // Push entire model instead of diff to always
+      // reload entire state during undo-redo operations
+      this.undoRedoManager.pushState(updateDiff.model);
     }
     this.setUndoRedoStates();
     await this.save();
-    await Promise.all([this.fetchColumns(), this.fetchResults()]);
+    switch (updateDiff.type) {
+      case 'id':
+      case 'name':
+        break;
+      case 'baseTable':
+        this.resetResults();
+        break;
+      case 'initialColumnName':
+        this.reCalculateProcessedColumns();
+        break;
+      case 'initialColumnsArray':
+        if (!updateDiff.diff.initial_columns?.length) {
+          // All columns have been deleted
+          this.resetResults();
+        } else {
+          this.reCalculateProcessedColumns();
+          await this.fetchColumnsAndRecords();
+        }
+        break;
+      default:
+        await this.fetchColumnsAndRecords();
+    }
   }
 
   async performUndoRedoSync(query?: QueryModel): Promise<void> {
@@ -208,11 +395,12 @@ export default class QueryManager extends EventHandler<{
       const currentQueryModelData = this.getQueryModelData();
       let queryToSet = query;
       if (currentQueryModelData?.id) {
-        queryToSet = query.withId(currentQueryModelData.id);
+        queryToSet = query.withId(currentQueryModelData.id).model;
       }
       this.query.set(queryToSet);
+      this.reCalculateProcessedColumns();
       await this.save();
-      await Promise.all([this.fetchColumns(), this.fetchResults()]);
+      await this.fetchColumnsAndRecords();
     }
     this.setUndoRedoStates();
   }
@@ -229,5 +417,26 @@ export default class QueryManager extends EventHandler<{
 
   getQueryModelData(): QueryModel {
     return get(this.query);
+  }
+
+  selectColumn(alias: QueryResultColumn['alias']): void {
+    if (
+      get(this.query).initial_columns.some((column) => column.alias === alias)
+    ) {
+      this.selectedColumnAlias.set(alias);
+    } else {
+      this.selectedColumnAlias.set(undefined);
+    }
+  }
+
+  clearSelectedColumn(): void {
+    this.selectedColumnAlias.set(undefined);
+  }
+
+  destroy(): void {
+    super.destroy();
+    this.queryColumnsFetchPromise?.cancel();
+    this.queryColumnsFetchPromise?.cancel();
+    this.queryRecordsFetchPromise?.cancel();
   }
 }

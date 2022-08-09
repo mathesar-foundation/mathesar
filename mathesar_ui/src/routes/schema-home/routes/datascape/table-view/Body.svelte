@@ -8,7 +8,7 @@
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ id, recordsData, display } = $tabularData);
-  $: ({ horizontalScrollOffset, scrollOffset, displayableRecords } = display);
+  $: ({ displayableRecords } = display);
 
   function getItemSize(index: number) {
     const allRecords = $displayableRecords;
@@ -51,8 +51,6 @@
 
 {#key id}
   <SheetVirtualRows
-    bind:horizontalScrollOffset={$horizontalScrollOffset}
-    bind:scrollOffset={$scrollOffset}
     itemCount={$displayableRecords.length}
     paddingBottom={30}
     itemSize={getItemSize}
