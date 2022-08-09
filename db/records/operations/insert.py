@@ -76,10 +76,15 @@ def insert_records_from_csv(table, engine, csv_filepath, column_names, header, d
                     cursor.copy_expert(copy_sql, temp_file)
 
 
-def insert_from_select(from_table, target_table, engine, sa_col_mappings=None):
-    if sa_col_mappings:
-        # unzipping column mappings into list of respective tables
-        from_table_col_list, target_table_col_list = zip(*sa_col_mappings)
+def insert_from_select(from_table, target_table, engine, col_mappings=None):
+    if col_mappings:
+        from_table_col_list = []
+        target_table_col_list = []
+        for from_col_name, target_col_name in col_mappings:
+            from_col = [col for col in from_table.c if col.name == from_col_name]
+            target_col = [col for col in target_table.c if col.name == target_col_name]
+            from_table_col_list.append(*from_col)
+            target_table_col_list.append(*target_col)
     else:
         from_table_col_list = [col for col in from_table.c if not MathesarColumn.from_column(col).is_default]
         target_table_col_list = [col for col in target_table.c if not MathesarColumn.from_column(col).is_default]
