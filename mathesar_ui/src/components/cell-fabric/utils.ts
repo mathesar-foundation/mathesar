@@ -66,10 +66,3 @@ export function getDbTypeBasedInputCap(
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
-
-export function getColumnIconProps(column: CellColumnLike): IconProps {
-  return getAbstractTypeForDbType(
-    column.type,
-    get(currentDbAbstractTypes)?.data,
-  ).icon;
-}
