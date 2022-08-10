@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { faDatabase, faPalette } from '@fortawesome/free-solid-svg-icons';
   import {
     FormBuilder,
     Icon,
@@ -7,8 +6,14 @@
   } from '@mathesar-component-library';
   import type { FormValues } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/AppTypes';
-  import type { Column } from '@mathesar/stores/table-data/types';
-  import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+  import type { Column } from '@mathesar/api/tables/columns';
+  import type {
+    AbstractType,
+    AbstractTypeDbConfig,
+    AbstractTypeDisplayConfig,
+  } from '@mathesar/stores/abstract-types/types';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import { iconDatabase, iconDisplayOptions } from '@mathesar/icons';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
   import TypeOptionTab from './TypeOptionTab.svelte';
@@ -19,7 +24,7 @@
   export let typeOptions: Column['type_options'];
   export let displayOptions: Column['display_options'];
   export let defaultValue: Column['default'];
-  export let column: Column;
+  export let processedColumn: ProcessedColumn;
 
   let selectedTab: 'database' | 'display' = 'database';
   let dbFormHasError = false;
@@ -27,17 +32,14 @@
   let defaultValueHasError = false;
   let showDefaultValueErrorIndication = false;
 
-  // Why are the following not reactive?
-  // The whole component gets re-rendered when selectedAbstractType changes,
-  // so these do not have to be reactive.
-  // Also, these functions should not be reactive for changes in selectedDbType and column.
-  const { dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
+  $: ({ column } = processedColumn);
+  $: ({ dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
     selectedAbstractType,
     selectedDbType,
     column,
-  );
-  const { displayOptionsConfig, displayForm, displayFormValues } =
-    constructDisplayForm(selectedAbstractType, selectedDbType, column);
+  ));
+  $: ({ displayOptionsConfig, displayForm, displayFormValues } =
+    constructDisplayForm(selectedAbstractType, selectedDbType, column));
 
   const validationContext = getValidationContext();
   validationContext.addValidator('AbstractTypeConfigValidator', () => {
@@ -55,9 +57,12 @@
     return isValid;
   });
 
-  function onDbFormValuesChange(dbFormValueSubstance: FormValues) {
-    if (dbOptionsConfig) {
-      const determinedResult = dbOptionsConfig.determineDbTypeAndOptions(
+  function onDbFormValuesChange(
+    dbFormValueSubstance: FormValues,
+    _dbOptionsConfig: AbstractTypeDbConfig | undefined,
+  ) {
+    if (_dbOptionsConfig) {
+      const determinedResult = _dbOptionsConfig.determineDbTypeAndOptions(
         dbFormValueSubstance,
         column.type,
       );
@@ -67,18 +72,21 @@
     }
   }
 
-  function onDisplayFormValuesChange(displayFormValueSubstance: FormValues) {
-    if (displayOptionsConfig) {
+  function onDisplayFormValuesChange(
+    displayFormValueSubstance: FormValues,
+    _displayOptionsConfig: AbstractTypeDisplayConfig | undefined,
+  ) {
+    if (_displayOptionsConfig) {
       displayOptions =
-        displayOptionsConfig?.determineDisplayOptions(
+        _displayOptionsConfig?.determineDisplayOptions(
           displayFormValueSubstance,
         ) ?? {};
       validationContext.validate();
     }
   }
 
-  $: onDbFormValuesChange($dbFormValues);
-  $: onDisplayFormValuesChange($displayFormValues);
+  $: onDbFormValuesChange($dbFormValues, dbOptionsConfig);
+  $: onDisplayFormValuesChange($displayFormValues, displayOptionsConfig);
 </script>
 
 <div class="type-options">
@@ -88,7 +96,7 @@
       tab="database"
       hasError={dbFormHasError || showDefaultValueErrorIndication}
     >
-      <Icon size="0.75em" data={faDatabase} />
+      <Icon size="0.75em" {...iconDatabase} />
       <span>Database</span>
     </TypeOptionTab>
     {#if displayForm}
@@ -100,7 +108,7 @@
           showDefaultValueErrorIndication = defaultValueHasError;
         }}
       >
-        <Icon size="0.75em" data={faPalette} />
+        <Icon size="0.75em" {...iconDisplayOptions} />
         <span>Display</span>
       </TypeOptionTab>
     {/if}

@@ -6,7 +6,8 @@ from db.columns.operations.select import get_column_attnum_from_name, get_column
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.constraints.operations.select import get_column_constraints
 from db.tests.columns.utils import create_test_table
-from db.types.base import get_available_known_db_types, known_db_types, get_db_type_enum_from_class, PostgresType
+from db.types.base import get_available_known_db_types, known_db_types, PostgresType
+from db.types.operations.convert import get_db_type_enum_from_class
 from db.constants import COLUMN_NAME_TEMPLATE
 
 
@@ -81,7 +82,7 @@ def test_create_column(engine_with_schema, target_type):
         altered_table = reflect_table_from_oid(table_oid, engine)
         assert len(altered_table.columns) == 2
         assert created_col.name == new_column_name
-        reflected_type = get_db_type_enum_from_class(created_col.type.__class__, engine)
+        reflected_type = get_db_type_enum_from_class(created_col.type.__class__)
         assert reflected_type == target_type
 
 

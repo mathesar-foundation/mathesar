@@ -3,10 +3,10 @@
   import { Button } from '@mathesar-component-library';
   import {
     currentDbAbstractTypes,
-    getAbstractTypesForDbTypeList,
+    getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
   } from '@mathesar/stores/abstract-types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import TypeIcon from '@mathesar/components/TypeIcon.svelte';
 
   const dispatch = createEventDispatcher();
@@ -16,8 +16,9 @@
 
   let abstractTypeContainer: HTMLUListElement;
 
-  $: allowedTypeConversions = getAbstractTypesForDbTypeList(
-    [...(column.valid_target_types || []), column.type],
+  $: allowedTypeConversions = getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
+    column.type,
+    column.valid_target_types ?? [],
     $currentDbAbstractTypes.data,
   );
 

@@ -6,10 +6,11 @@ from sqlalchemy.sql.functions import Function
 
 from db.types.custom import uri
 from db.types.exceptions import UnsupportedTypeException
-from db.types.base import PostgresType, MathesarCustomType, get_available_known_db_types, get_db_type_enum_from_class, get_qualified_name
+from db.types.base import PostgresType, MathesarCustomType, get_available_known_db_types, get_qualified_name
+from db.types.operations.convert import get_db_type_enum_from_class
 from db.types import categories
+from db.types.custom.money import MONEY_ARR_FUNC_NAME
 
-MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
 NUMERIC_ARR_FUNC_NAME = "get_numeric_array"
 
 
@@ -24,7 +25,7 @@ def get_column_cast_expression(column, target_type, engine, type_options={}):
         raise UnsupportedTypeException(
             f"Target Type '{target_type.id}' is not supported."
         )
-    column_type = get_db_type_enum_from_class(column.type.__class__, engine)
+    column_type = get_db_type_enum_from_class(column.type.__class__)
     if target_type == column_type:
         cast_expr = column
     else:
@@ -53,6 +54,7 @@ def install_all_casts(engine):
     create_textual_casts(engine)
     create_uri_casts(engine)
     create_numeric_casts(engine)
+    create_json_casts(engine)
 
 
 def create_boolean_casts(engine):
@@ -63,6 +65,13 @@ def create_boolean_casts(engine):
 def create_date_casts(engine):
     type_body_map = _get_date_type_body_map()
     create_cast_functions(PostgresType.DATE, type_body_map, engine)
+
+
+def create_json_casts(engine):
+    json_types = categories.JSON_TYPES
+    for db_type in json_types:
+        type_body_map = _get_json_type_body_map(db_type)
+        create_cast_functions(db_type, type_body_map, engine)
 
 
 def create_decimal_number_casts(engine):
@@ -154,6 +163,10 @@ def get_full_cast_map(engine):
         PostgresType.CHARACTER: _get_textual_type_body_map(engine),
         PostgresType.CHARACTER_VARYING: _get_textual_type_body_map(engine),
         PostgresType.DATE: _get_date_type_body_map(),
+        PostgresType.JSON: _get_json_type_body_map(target_type=PostgresType.JSON),
+        PostgresType.JSONB: _get_json_type_body_map(target_type=PostgresType.JSONB),
+        MathesarCustomType.MATHESAR_JSON_ARRAY: _get_json_type_body_map(target_type=MathesarCustomType.MATHESAR_JSON_ARRAY),
+        MathesarCustomType.MATHESAR_JSON_OBJECT: _get_json_type_body_map(target_type=MathesarCustomType.MATHESAR_JSON_OBJECT),
         PostgresType.DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type=PostgresType.DOUBLE_PRECISION),
         MathesarCustomType.EMAIL: _get_email_type_body_map(),
         PostgresType.INTEGER: _get_integer_type_body_map(target_type=PostgresType.INTEGER),
@@ -254,6 +267,19 @@ def _escape_illegal_characters(sql_name):
     for old, new in replacement_mapping.items():
         resulting_string = resulting_string.replace(old, new)
     return resulting_string
+
+
+def _get_json_type_body_map(target_type):
+    """
+    Allow casting from text, primitive json types and Mathesar custom json types.
+    Target types include primitive json, jsonb, Mathesar json object and Mathesar json array
+    """
+    default_behavior_source_types = categories.STRING_TYPES | frozenset([PostgresType.JSON, PostgresType.JSONB, MathesarCustomType.MATHESAR_JSON_ARRAY, MathesarCustomType.MATHESAR_JSON_OBJECT])
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, target_type
+    )
+
+    return type_body_map
 
 
 def _get_boolean_type_body_map():

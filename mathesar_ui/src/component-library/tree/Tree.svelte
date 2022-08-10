@@ -6,30 +6,58 @@
     InputGroupText,
   } from '@mathesar-component-library-dir/input-group';
   import { filterTree } from '@mathesar-component-library-dir/common/utils/filterUtils';
-  import { faSearch } from '@fortawesome/free-solid-svg-icons';
+  import {
+    hasProperty,
+    hasStringProperty,
+  } from '@mathesar-component-library-dir/common/utils/typeUtils';
+  import { iconSearch } from '@mathesar-component-library-dir/common/icons';
   import TreeItemComponent from './TreeItem.svelte';
-  import type { TreeItem } from './TreeTypes';
+
+  type TreeItem = $$Generic;
+  interface $$Slots {
+    default: {
+      entry: TreeItem;
+      level: number;
+    };
+  }
+  type $$Events = TreeItemComponent<TreeItem>['$$events_def'];
 
   export let data: TreeItem[] = [];
-  export let idKey = 'id';
-  export let labelKey = 'label';
-  export let childKey = 'children';
-  export let linkKey = 'href';
-  export let getLink: (arg0: unknown, arg1: number) => string;
+
+  export let getId: (entry: TreeItem) => unknown = (item: TreeItem) => {
+    if (hasProperty(item, 'id')) {
+      return item.id;
+    }
+    return String(item);
+  };
+  export let getLabel: (entry: TreeItem) => string = (item: TreeItem) => {
+    if (hasStringProperty(item, 'label')) {
+      return item.label;
+    }
+    return String(item);
+  };
+  export let getAndSetChildren:
+    | {
+        get: (entry: TreeItem) => TreeItem[] | undefined;
+        set: (entry: TreeItem, children?: TreeItem[]) => TreeItem;
+      }
+    | undefined = undefined;
+
+  export let getLink: (arg0: TreeItem) => string | undefined;
 
   export let search = false;
   export let expandedItems = new Set();
   export let selectedItems = new Set();
   let searchText = '';
 
-  $: displayData = filterTree(data, labelKey, childKey, searchText);
+  $: displayData = filterTree(data, getLabel, getAndSetChildren, searchText);
 </script>
 
 <div class="tree">
   {#if search}
     <InputGroup class="search-box">
       <InputGroupText>
-        <Icon class="search-icon" data={faSearch} />
+        <Icon class="search-icon" {...iconSearch} />
       </InputGroupText>
       <TextInput placeholder="search" bind:value={searchText} />
     </InputGroup>
@@ -42,12 +70,11 @@
   {/if}
 
   <ul role="tree">
-    {#each displayData as entry (entry[idKey] || entry)}
+    {#each displayData as entry (getId(entry) || entry)}
       <TreeItemComponent
-        {idKey}
-        {labelKey}
-        {childKey}
-        {linkKey}
+        {getId}
+        {getLabel}
+        {getAndSetChildren}
         {entry}
         {searchText}
         {getLink}
@@ -59,7 +86,7 @@
         bind:selectedItems
       >
         <slot entry={innerEntry} {level}>
-          {innerEntry[labelKey]}
+          {getLabel(innerEntry)}
         </slot>
       </TreeItemComponent>
     {/each}

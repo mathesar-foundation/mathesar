@@ -39,3 +39,7 @@ export function calculatePages(
     nextPageWindow: Math.min(end + 3, pageCount),
   };
 }
+
+export function getPageCount(total: number, pageSize: number): number {
+  return Math.ceil(total / pageSize);
+}

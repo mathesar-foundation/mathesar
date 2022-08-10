@@ -103,6 +103,12 @@ def test_MC_inits_with_server_default_none(column_builder):
     assert col.server_default is None
 
 
+@pytest.mark.parametrize("column_builder", column_builder_list)
+def test_MC_inits_with_engine_empty(column_builder):
+    col = column_builder("some_col", VARCHAR)
+    assert col.server_default is None
+
+
 def test_MC_is_default_when_true():
     for default_col in get_default_mathesar_column_list():
         assert default_col.is_default

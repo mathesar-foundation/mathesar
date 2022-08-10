@@ -1,14 +1,14 @@
 <script lang="ts">
   import { tick, createEventDispatcher } from 'svelte';
-  import {
-    faAngleDoubleLeft,
-    faAngleDoubleRight,
-    faEllipsisH,
-    faAngleLeft,
-    faAngleRight,
-  } from '@fortawesome/free-solid-svg-icons';
   import { Icon } from '@mathesar-component-library';
-  import { calculatePages } from './paginationUtils';
+  import {
+    iconChooseItemPrevious,
+    iconShowMore,
+    iconChooseItemManyPrior,
+    iconChooseItemManyAhead,
+    iconChooseItemNext,
+  } from '@mathesar-component-library-dir/common/icons';
+  import { calculatePages, getPageCount } from './paginationUtils';
 
   const dispatch = createEventDispatcher();
 
@@ -28,22 +28,10 @@
   export let getLink: ((page: number, pageSize: number) => string) | undefined =
     undefined;
 
-  // Total number of pages.
-  //
-  // TODO: @seancolsen says:
-  // > Refactor `pageCount` to no longer be an exported prop. We're exporting it
-  // > just so the parent component can access the calculation done within this
-  // > component. That's an unconventional flow of data.
-  //
-  // See https://github.com/centerofci/mathesar/pull/1109#discussion_r818638950
-  // for further discussion. @pavish and @seancolsen settled on an approach
-  // using a utils function.
-  export let pageCount = 0;
-
   // ARIA Label for component
   export let ariaLabel = 'Pagination';
 
-  $: pageCount = Math.ceil(total / pageSize);
+  $: pageCount = getPageCount(total, pageSize);
   $: pageInfo = calculatePages(currentPage, pageCount);
 
   async function setPage(e: Event, _page: number) {
@@ -71,7 +59,7 @@
           on:click={(e) => setPage(e, currentPage - 1)}
           disabled={currentPage === 1}
         >
-          <Icon data={faAngleLeft} tabindex="-1" />
+          <Icon {...iconChooseItemPrevious} tabindex="-1" />
         </button>
       </li>
     {/if}
@@ -109,8 +97,8 @@
             aria-label="Goto Page {pageInfo.prevPageWindow}"
             on:click={(e) => setPage(e, pageInfo.prevPageWindow)}
           >
-            <Icon class="ellipsis" data={faEllipsisH} />
-            <Icon class="arrow" data={faAngleDoubleLeft} />
+            <Icon class="ellipsis" {...iconShowMore} />
+            <Icon class="arrow" {...iconChooseItemManyPrior} />
           </button>
         </li>
       {/if}
@@ -160,8 +148,8 @@
             aria-label="Goto Page {pageInfo.nextPageWindow}"
             on:click={(e) => setPage(e, pageInfo.nextPageWindow)}
           >
-            <Icon class="ellipsis" data={faEllipsisH} />
-            <Icon class="arrow" data={faAngleDoubleRight} />
+            <Icon class="ellipsis" {...iconShowMore} />
+            <Icon class="arrow" {...iconChooseItemManyAhead} />
           </button>
         </li>
       {/if}
@@ -200,7 +188,7 @@
           on:click={(e) => setPage(e, currentPage + 1)}
           disabled={currentPage === pageCount}
         >
-          <Icon data={faAngleRight} />
+          <Icon {...iconChooseItemNext} />
         </button>
       </li>
     {/if}

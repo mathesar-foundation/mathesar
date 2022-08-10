@@ -3,7 +3,7 @@ import { writable, get as getStoreValue } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';
 import { EventHandler } from '@mathesar-component-library';
-import type { Column as ApiColumn } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/tables/columns';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import {
   deleteAPI,
@@ -14,29 +14,11 @@ import {
 } from '@mathesar/utils/api';
 import { TabularType } from './TabularType';
 
-export interface Column extends ApiColumn {
-  __columnIndex?: number;
-}
-
 export interface ColumnsData {
   state: States;
   error?: string;
   columns: Column[];
   primaryKeyColumnId?: number;
-}
-
-function preprocessColumns(response?: Column[]): Column[] {
-  let index = 0;
-  return (
-    response?.map((column) => {
-      const newColumn = {
-        ...column,
-        __columnIndex: index,
-      };
-      index += 1;
-      return newColumn;
-    }) || []
-  );
 }
 
 function api(url: string) {
@@ -127,12 +109,12 @@ export class ColumnsDataStore
       this.promise = this.api.get();
 
       const response = await this.promise;
-      const columnResponse = preprocessColumns(response.results);
-      const pkColumn = columnResponse.find((column) => column.primary_key);
+      const columns = response.results;
+      const pkColumn = columns.find((column) => column.primary_key);
 
       const storeData: ColumnsData = {
         state: States.Done,
-        columns: columnResponse,
+        columns,
         primaryKeyColumnId: pkColumn?.id,
       };
       this.set(storeData);
@@ -181,7 +163,7 @@ export class ColumnsDataStore
 
   async patch(
     columnId: Column['id'],
-    properties: Omit<Partial<ApiColumn>, 'id'>,
+    properties: Omit<Partial<Column>, 'id'>,
   ): Promise<Partial<Column>> {
     const column = await this.api.update(columnId, {
       ...properties,

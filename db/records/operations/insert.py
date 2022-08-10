@@ -2,8 +2,10 @@ import tempfile
 
 from psycopg2 import sql
 
+from db.columns.base import MathesarColumn
 from db.encoding_utils import get_sql_compatible_encoding
 from db.records.operations.select import get_record
+from sqlalchemy import select
 
 READ_SIZE = 20000
 
@@ -72,3 +74,16 @@ def insert_records_from_csv(table, engine, csv_filepath, column_names, header, d
                         temp_file.write(contents)
                     temp_file.seek(0)
                     cursor.copy_expert(copy_sql, temp_file)
+
+
+def insert_from_select(from_table, target_table, engine, mappings=None):
+    target_table_col_list = [col for col in target_table.c if not MathesarColumn.from_column(col).is_default]
+    with engine.begin() as conn:
+        sel = select([col for col in from_table.c if not MathesarColumn.from_column(col).is_default])
+        ins = target_table.insert().from_select(target_table_col_list, sel)
+        try:
+            result = conn.execute(ins)
+        except Exception as e:
+            # ToDo raise specific exceptions
+            raise e
+    return target_table, result

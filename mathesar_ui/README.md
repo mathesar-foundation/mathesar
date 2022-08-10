@@ -218,4 +218,4 @@ We use [Storybook](https://storybook.js.org/) to develop and document our compon
 
 ## Coding standards
 
-See https://wiki.mathesar.org/engineering/architecture/front-end-standards
+See https://wiki.mathesar.org/en/engineering/standards/frontend

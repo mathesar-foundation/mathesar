@@ -1,122 +1,41 @@
-from collections import defaultdict
+from sqlalchemy import select, func
+from sqlalchemy.sql.base import ColumnSet as SAColumnSet
 
-from sqlalchemy import select, func, or_
-from sqlalchemy_filters import apply_sort
-
-from db.functions.operations.apply import apply_db_function_spec_as_filter
 from db.columns.base import MathesarColumn
-from db.records.operations import group
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
-from db.types.base import get_db_type_enum_from_id
-from db.utils import execute_query
-
-
-def _get_duplicate_only_cte(table, duplicate_columns):
-    DUPLICATE_LABEL = "_is_dupe"
-    duplicate_flag_cte = (
-        select(
-            *table.c,
-            (func.count(1).over(partition_by=duplicate_columns) > 1).label(DUPLICATE_LABEL),
-        ).select_from(table)
-    ).cte()
-    return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
-
-
-def _sort_and_filter(query, order_by, filter):
-    if order_by is not None:
-        query = apply_sort(query, order_by)
-    if filter is not None:
-        query = apply_db_function_spec_as_filter(query, filter)
-    return query
-
-
-def preview_column_key(preview_column, column_name):
-    return f"{preview_column}_fk_{column_name}"
-
-
-def get_query(
-    table,
-    limit,
-    offset,
-    order_by,
-    filter=None,
-    columns_to_select=None,
-    group_by=None,
-    duplicate_only=None,
-):
-    if duplicate_only:
-        select_target = _get_duplicate_only_cte(table, duplicate_only)
-    else:
-        select_target = table
-
-    if isinstance(group_by, group.GroupBy):
-        selectable = group.get_group_augmented_records_query(select_target, group_by)
-    else:
-        selectable = select(select_target)
-
-    selectable = _sort_and_filter(selectable, order_by, filter)
-
-    if columns_to_select:
-        selectable = selectable.cte()
-        selectable = select(*columns_to_select).select_from(selectable)
-
-    selectable = selectable.limit(limit).offset(offset)
-    return selectable
+from db.types.operations.convert import get_db_type_enum_from_id
+from db.utils import execute_pg_query
+from db.transforms.operations.apply import apply_transformations_deprecated
 
 
 def get_record(table, engine, id_value):
     primary_key_column = get_primary_key_column(table)
-    query = select(table).where(primary_key_column == id_value)
-    result = execute_query(engine, query)
+    pg_query = select(table).where(primary_key_column == id_value)
+    result = execute_pg_query(engine, pg_query)
     assert len(result) <= 1
     return result[0] if result else None
 
 
-def get_records_preview_data(
-    records,
-    engine,
-    preview_columns
+def get_records_with_default_order(
+        table,
+        engine,
+        order_by=[],
+        **kwargs,
 ):
-    if preview_columns:
-        preview_filters = _get_preview_values(preview_columns, records)
-        preview_data = []
-        for referent_table_name, referent_columns in preview_filters.items():
-            referent_table = preview_columns[referent_table_name]['table']
-            query = get_query(
-                table=referent_table,
-                columns_to_select=None,
-                limit=None,
-                offset=None,
-                order_by=None
-            )
-            filters = []
-            for referent_column, constrained_values in referent_columns.items():
-                filters.append(referent_table.c[referent_column].in_(constrained_values))
-            query = query.where(or_(*filters))
-            preview_records = execute_query(engine, query)
-            preview_obj = {
-                'table': referent_table.name,
-                'data': preview_records
-            }
-            preview_data.append(preview_obj)
-        return preview_data
+    if not order_by:
+        order_by = get_default_order_by(table, order_by)
+    return get_records(
+        table=table,
+        engine=engine,
+        order_by=order_by,
+        **kwargs
+    )
 
 
-def _get_preview_values(preview_columns, records):
-    preview_filters = defaultdict(lambda: defaultdict(lambda: set()))
-    for record in records:
-        for referent_table_name, referent_obj in preview_columns.items():
-            constraint_columns = referent_obj['constraint_columns']
-            for constraint_column in constraint_columns:
-                constrained_column = constraint_column['constrained_column']
-                constrained_column_value = record[constrained_column]
-                if constrained_column_value is not None:
-                    referent_column = constraint_column['referent_column']
-                    preview_filters[referent_table_name][referent_column].add(constrained_column_value)
-    return preview_filters
-
-
+# TODO change interface to where transformations is a sequence of transform steps
+# first change should be made on the viewset level, where transform steps are currently assigned
+# to named parameters.
 def get_records(
     table,
     engine,
@@ -125,7 +44,8 @@ def get_records(
     order_by=[],
     filter=None,
     group_by=None,
-    duplicate_only=None
+    search=[],
+    duplicate_only=None,
 ):
     """
     Returns annotated records from a table.
@@ -137,6 +57,8 @@ def get_records(
         offset:          int, gives number of rows to skip
         order_by:        list of dictionaries, where each dictionary has a 'field' and
                          'direction' field.
+        search:          list of dictionaries, where each dictionary has a 'column' and
+                         'literal' field.
                          See: https://github.com/centerofci/sqlalchemy-filters#sort-format
         filter:          a dictionary with one key-value pair, where the key is the filter id and
                          the value is a list of parameters; supports composition/nesting.
@@ -144,44 +66,61 @@ def get_records(
         group_by:        group.GroupBy object
         duplicate_only:  list of column names; only rows that have duplicates across those rows
                          will be returned
-        preview_columns: a dictionary with one key-value pair, where the key is the foreign key column attnum and
-                         the value is a list of referent column attnums.
     """
-    if not order_by:
-        # Set default ordering if none was requested
-        if len(table.primary_key.columns) > 0:
-            # If there are primary keys, order by all primary keys
-            order_by = [{'field': str(col.name), 'direction': 'asc'}
-                        for col in table.primary_key.columns]
-        else:
-            # If there aren't primary keys, order by all columns
-            order_by = [{'field': col, 'direction': 'asc'}
-                        for col in table.columns]
-
-    query = get_query(
+    relation = apply_transformations_deprecated(
         table=table,
         limit=limit,
         offset=offset,
         order_by=order_by,
         filter=filter,
         group_by=group_by,
+        search=search,
         duplicate_only=duplicate_only,
     )
-    return execute_query(engine, query)
+    return execute_pg_query(engine, relation)
 
 
-def get_count(table, engine, filter=None):
+def get_count(table, engine, filter=None, search=[]):
     col_name = "_count"
     columns_to_select = [func.count().label(col_name)]
-    query = get_query(
+    relation = apply_transformations_deprecated(
         table=table,
         limit=None,
         offset=None,
+        # TODO does it make sense to order, when we're only interested in row count?
         order_by=None,
         filter=filter,
-        columns_to_select=columns_to_select
+        columns_to_select=columns_to_select,
+        search=search,
     )
-    return execute_query(engine, query)[0][col_name]
+    return execute_pg_query(engine, relation)[0][col_name]
+
+
+def get_default_order_by(table, order_by):
+    # Set default ordering if none was requested
+    relation_has_pk = hasattr(table, 'primary_key')
+    if relation_has_pk:
+        pk = table.primary_key
+        pk_cols = None
+        if hasattr(pk, 'columns'):
+            pk_cols = pk.columns
+        elif isinstance(pk, SAColumnSet):
+            pk_cols = pk
+        # If there are primary keys, order by all primary keys
+        if pk_cols is not None and len(pk_cols) > 0:
+            order_by = [
+                {'field': str(col.name), 'direction': 'asc'}
+                for col
+                in pk_cols
+            ]
+    if not order_by:
+        # If there aren't primary keys, order by all columns
+        order_by = [
+            {'field': col, 'direction': 'asc'}
+            for col
+            in table.columns
+        ]
+    return order_by
 
 
 def get_column_cast_records(engine, table, column_definitions, num_records=20):

@@ -8,13 +8,14 @@ from sqlalchemy.exc import IntegrityError
 from db import constants
 from db.columns.operations import alter as alter_operations
 from db.columns.operations.alter import alter_column, batch_update_columns, change_column_nullable, rename_column, retype_column, set_column_default
-from db.columns.operations.select import get_column_attnum_from_name, get_column_default
+from db.columns.operations.select import get_column_attnum_from_name, get_column_default, get_columns_attnum_from_names
 from db.columns.utils import get_mathesar_column_with_engine
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
 from db.tests.columns.utils import column_test_dict, create_test_table, get_default
-from db.types.base import get_db_type_enum_from_class, PostgresType
+from db.types.base import PostgresType
+from db.types.operations.convert import get_db_type_enum_from_class
 
 
 nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
@@ -115,8 +116,11 @@ def test_rename_column_foreign_keys(engine_with_schema):
     table_name = "table_to_split"
     columns_list = [Column("Filler 1", INTEGER), Column("Filler 2", INTEGER)]
     create_mathesar_table(table_name, schema, columns_list, engine)
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    extracted_cols = ["Filler 1"]
+    extracted_col_attnums = get_columns_attnum_from_names(table_oid, extracted_cols, engine)
     extracted, remainder, fk_name = extract_columns_from_table(
-        table_name, ["Filler 1"], "Extracted", "Remainder", schema, engine
+        table_oid, extracted_col_attnums, "Extracted", schema, engine
     )
     new_fk_name = "new_" + fk_name
     remainder = _rename_column_and_assert(remainder, fk_name, new_fk_name, engine)
@@ -437,7 +441,7 @@ def test_batch_update_columns_no_changes(engine_with_schema):
     assert len(table.columns) == len(updated_table.columns)
     for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == PostgresType.CHARACTER_VARYING.id
         assert updated_table.columns[index].name == table.columns[index].name
 
@@ -457,7 +461,7 @@ def test_batch_update_column_names(engine_with_schema):
     assert len(table.columns) == len(updated_table.columns)
     for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
@@ -477,7 +481,7 @@ def test_batch_update_column_types(engine_with_schema):
     assert len(table.columns) == len(updated_table.columns)
     for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
@@ -499,7 +503,7 @@ def test_batch_update_column_names_and_types(engine_with_schema):
     assert len(table.columns) == len(updated_table.columns)
     for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
@@ -519,7 +523,7 @@ def test_batch_update_column_drop_columns(engine_with_schema):
     assert len(updated_table.columns) == len(table.columns) - 2
     for index, _ in enumerate(updated_table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == column_data[index - 2]['type']
         assert updated_table.columns[index].name == column_data[index - 2]['name']
 
@@ -542,6 +546,6 @@ def test_batch_update_column_all_operations(engine_with_schema):
     assert len(updated_table.columns) == len(table.columns) - 1
     for index, _ in enumerate(updated_table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
-        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        new_column_type = get_db_type_enum_from_class(new_column_type_class).id
         assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']

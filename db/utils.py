@@ -1,6 +1,11 @@
-from db.records import exceptions
-from sqlalchemy.exc import ProgrammingError
+import inspect
+
 from psycopg2.errors import UndefinedFunction
+
+import sqlalchemy
+from sqlalchemy.exc import ProgrammingError
+
+from db.records import exceptions
 
 
 def execute_statement(engine, statement, connection_to_use=None):
@@ -18,8 +23,12 @@ def execute_statement(engine, statement, connection_to_use=None):
             raise e
 
 
-def execute_query(engine, query, connection_to_use=None):
-    return execute_statement(engine, query, connection_to_use=connection_to_use).fetchall()
+def execute_pg_query(engine, query, connection_to_use=None):
+    if isinstance(query, sqlalchemy.sql.expression.Executable):
+        executable = query
+    else:
+        executable = sqlalchemy.select(query)
+    return execute_statement(engine, executable, connection_to_use=connection_to_use).fetchall()
 
 
 # TODO refactor to use @functools.total_ordering
@@ -52,3 +61,18 @@ class OrderByIds:
 
     def _ordering_supported(self, other):
         return hasattr(other, 'id')
+
+
+def get_module_members_that_satisfy(module, predicate):
+    """
+    Looks at the members of the provided module and filters them using the provided predicate.
+
+    Currently used to automatically collect all concrete subclasses of some abstract superclass
+    found as top-level members of a module.
+    """
+    all_members_in_defining_module = inspect.getmembers(module)
+    return set(
+        member
+        for _, member in all_members_in_defining_module
+        if predicate(member)
+    )

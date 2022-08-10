@@ -1,10 +1,12 @@
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, select
 
+from db.columns.operations.select import get_columns_attnum_from_names
 from db.tables.operations.move_columns import move_columns_between_related_tables
+from db.tables.operations.select import get_oid_from_table
 
 
 def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster, roster_extracted_cols):
-    extracted, remainder, _, engine, schema = extracted_remainder_roster
+    extracted, remainder, engine, schema = extracted_remainder_roster
     moving_col = roster_extracted_cols[0]
     extracted_cols = [col.name for col in extracted.columns]
     remainder_cols = [col.name for col in remainder.columns]
@@ -14,10 +16,13 @@ def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster, r
     expect_remainder_cols = remainder_cols + [moving_col]
     extracted_name = extracted.name
     remainder_name = remainder.name
+    extracted_oid = get_oid_from_table(extracted_name, schema, engine)
+    remainder_oid = get_oid_from_table(remainder_name, schema, engine)
+    column_attnums_to_move = get_columns_attnum_from_names(extracted_oid, [moving_col], engine)
     move_columns_between_related_tables(
-        extracted_name,
-        remainder_name,
-        [moving_col],
+        extracted_oid,
+        remainder_oid,
+        column_attnums_to_move,
         schema,
         engine,
     )
@@ -32,7 +37,7 @@ def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster, r
 
 
 def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
-    extracted, remainder, _, engine, schema = extracted_remainder_roster
+    extracted, remainder, engine, schema = extracted_remainder_roster
     extracted_cols = [col.name for col in extracted.columns]
     remainder_cols = [col.name for col in remainder.columns]
     moving_col = "Grade"
@@ -42,10 +47,13 @@ def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
     expect_extracted_cols = extracted_cols + [moving_col]
     extracted_name = extracted.name
     remainder_name = remainder.name
+    extracted_oid = get_oid_from_table(extracted_name, schema, engine)
+    remainder_oid = get_oid_from_table(remainder_name, schema, engine)
+    column_attnums_to_move = get_columns_attnum_from_names(remainder_oid, [moving_col], engine)
     move_columns_between_related_tables(
-        remainder_name,
-        extracted_name,
-        [moving_col],
+        remainder_oid,
+        extracted_oid,
+        column_attnums_to_move,
         schema,
         engine,
     )
@@ -57,3 +65,81 @@ def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
     actual_remainder_cols = [col.name for col in new_remainder.columns]
     assert sorted(actual_extracted_cols) == sorted(expect_extracted_cols)
     assert sorted(actual_remainder_cols) == sorted(expect_remainder_cols)
+
+
+def test_move_columns_moves_correct_data_from_ext_to_rem(extracted_remainder_roster, roster_extracted_cols):
+    extracted, remainder, engine, schema = extracted_remainder_roster
+    moving_col = roster_extracted_cols[0]
+    extracted_name = extracted.name
+    remainder_name = remainder.name
+    expect_tuple_sel = (
+        select(extracted.columns[moving_col])
+        .distinct()
+    )
+    with engine.begin() as conn:
+        expect_tuples = conn.execute(expect_tuple_sel).fetchall()
+    extracted_oid = get_oid_from_table(extracted_name, schema, engine)
+    remainder_oid = get_oid_from_table(remainder_name, schema, engine)
+    column_attnums_to_move = get_columns_attnum_from_names(extracted_oid, [moving_col], engine)
+    move_columns_between_related_tables(
+        extracted_oid,
+        remainder_oid,
+        column_attnums_to_move,
+        schema,
+        engine,
+    )
+    metadata = MetaData(bind=engine, schema=schema)
+    metadata.reflect()
+    new_remainder = metadata.tables[f"{schema}.{remainder_name}"]
+    actual_tuple_sel = select(
+        [new_remainder.columns[moving_col]],
+        distinct=True
+    )
+    with engine.begin() as conn:
+        actual_tuples = conn.execute(actual_tuple_sel).fetchall()
+    assert sorted(expect_tuples) == sorted(actual_tuples)
+
+
+def test_move_columns_moves_correct_data_from_rem_to_extract(extracted_remainder_roster, roster_extracted_cols):
+    extracted, remainder, engine, schema = extracted_remainder_roster
+    moving_col = "Grade"
+    existing_target_table_column_names = ['Teacher', 'Teacher Email']
+    existing_target_table_column = [
+        extracted.columns[existing_target_table_column_name]
+        for existing_target_table_column_name in existing_target_table_column_names
+    ]
+    expect_tuple_sel = (
+        select([*existing_target_table_column, remainder.columns[moving_col]]).join(extracted)
+        .distinct()
+    )
+    with engine.begin() as conn:
+        expect_tuples = conn.execute(expect_tuple_sel).fetchall()
+    extracted_name = extracted.name
+    remainder_name = remainder.name
+    extracted_oid = get_oid_from_table(extracted_name, schema, engine)
+    remainder_oid = get_oid_from_table(remainder_name, schema, engine)
+    column_attnums_to_move = get_columns_attnum_from_names(remainder_oid, [moving_col], engine)
+    move_columns_between_related_tables(
+        remainder_oid,
+        extracted_oid,
+        column_attnums_to_move,
+        schema,
+        engine,
+    )
+    metadata = MetaData(bind=engine, schema=schema)
+    metadata.reflect()
+    new_extracted = metadata.tables[f"{schema}.{extracted_name}"]
+    new_existing_target_table_column = [
+        new_extracted.columns[existing_target_table_column_name]
+        for existing_target_table_column_name in existing_target_table_column_names
+    ]
+    actual_tuple_sel = select(
+        [
+            *new_existing_target_table_column,
+            new_extracted.columns[moving_col]
+
+        ],
+    )
+    with engine.begin() as conn:
+        actual_tuples = conn.execute(actual_tuple_sel).fetchall()
+    assert sorted(expect_tuples) == sorted(actual_tuples)

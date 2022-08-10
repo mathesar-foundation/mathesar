@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { faSync, faPlus } from '@fortawesome/free-solid-svg-icons';
-  import { Checkbox, Icon } from '@mathesar-component-library';
-  import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data';
+  import { Checkbox, Icon, iconLoading } from '@mathesar-component-library';
+  import { iconAddNew } from '@mathesar/icons';
   import { getRowKey } from '@mathesar/stores/table-data';
   import type {
     Meta,
@@ -42,40 +41,35 @@
   }
 </script>
 
-<div
-  class="cell row-control"
-  style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px"
->
-  <CellBackground color="var(--cell-bg-color-header)" />
-  <RowCellBackgrounds {isSelected} {hasErrors} />
-  <div class="control">
-    {#if row.isAddPlaceholder}
-      <Icon data={faPlus} />
-    {:else}
-      {#if typeof row.rowIndex === 'number'}
-        <span class="number">
-          {row.rowIndex +
-            (row.isNew
-              ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
-              : $pagination.offset) +
-            1}
-          {#if row.isNew}
-            *
-          {/if}
-        </span>
-      {/if}
-
-      {#if primaryKeyValue}
-        <Checkbox checked={isRowSelected} on:change={selectionChanged} />
-      {/if}
+<CellBackground color="var(--cell-bg-color-header)" />
+<RowCellBackgrounds {isSelected} {hasErrors} />
+<div class="control">
+  {#if row.isAddPlaceholder}
+    <Icon {...iconAddNew} />
+  {:else}
+    {#if typeof row.rowIndex === 'number'}
+      <span class="number">
+        {row.rowIndex +
+          (row.isNew
+            ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
+            : $pagination.offset) +
+          1}
+        {#if row.isNew}
+          *
+        {/if}
+      </span>
     {/if}
-  </div>
 
-  {#if state === 'processing'}
-    <Icon class="mod-indicator" size="0.9em" data={faSync} spin={true} />
-  {/if}
-
-  {#if errors.length}
-    <CellErrors {errors} />
+    {#if primaryKeyValue}
+      <Checkbox checked={isRowSelected} on:change={selectionChanged} />
+    {/if}
   {/if}
 </div>
+
+{#if state === 'processing'}
+  <Icon class="mod-indicator" size="0.9em" {...iconLoading} />
+{/if}
+
+{#if errors.length}
+  <CellErrors {errors} />
+{/if}

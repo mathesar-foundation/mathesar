@@ -1,3 +1,5 @@
+from frozendict import frozendict
+
 import pytest
 from unittest.mock import patch
 
@@ -65,6 +67,7 @@ def check_table_response(response_table, table, table_name):
     assert response_table['id'] == table.id
     assert response_table['name'] == table_name
     assert response_table['schema'] == table.schema.id
+    assert 'import_target' in response_table
     assert 'created_at' in response_table
     assert 'updated_at' in response_table
     assert 'has_dependencies' in response_table
@@ -99,13 +102,15 @@ def check_table_filter_response(response, status_code=None, count=None):
         assert len(response_data['results']) == count
 
 
-def _create_table(client, data_files, table_name, schema):
+def _create_table(client, data_files, table_name, schema, import_target_table):
     body = {
         'name': table_name,
         'schema': schema.id,
     }
     if data_files is not None:
         body['data_files'] = [df.id for df in data_files]
+        if import_target_table is not None:
+            body['import_target'] = import_target_table.id
 
     response = client.post('/api/db/v0/tables/', body)
     response_table = response.json()
@@ -128,17 +133,18 @@ def _get_expected_name(table_name, data_file=None):
 
 
 def check_create_table_response(
-    client, name, expt_name, data_file, schema, first_row, column_names
+    client, name, expt_name, data_file, schema, first_row, column_names, import_target_table
 ):
     num_tables = Table.objects.count()
 
-    response, response_table, table = _create_table(client, [data_file], name, schema)
+    response, response_table, table = _create_table(client, [data_file], name, schema, import_target_table)
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
     assert table.get_records()[0] == first_row
     assert all([col in table.sa_column_names for col in column_names])
     assert data_file.table_imported_to.id == table.id
+    assert table.import_target == import_target_table
     check_table_response(response_table, table, expt_name)
 
 
@@ -395,7 +401,13 @@ def _check_columns(actual_column_list, expected_column_list):
         for actual_column, expected_column
         in zip(actual_column_list, expected_column_list)
     ]
-    assert actual_column_list == expected_column_list
+    _assert_sets_of_dicts_are_equal(actual_column_list, expected_column_list)
+
+
+def _assert_sets_of_dicts_are_equal(a, b):
+    a = set([frozendict(d) for d in a])
+    b = set([frozendict(d) for d in b])
+    assert a == b
 
 
 @pytest.fixture
@@ -490,7 +502,21 @@ def test_table_create_from_datafile(client, data_file, schema, table_name):
                     'Application SN', 'Title', 'Patent Expiration Date']
 
     check_create_table_response(
-        client, table_name, expt_name, data_file, schema, first_row, column_names
+        client, table_name, expt_name, data_file, schema, first_row, column_names, import_target_table=None
+    )
+
+
+@pytest.mark.parametrize('table_name', ['Test Table Create From Datafile', ''])
+def test_table_create_from_datafile_with_import_target(client, data_file, schema, table_name):
+    _, _, import_target_table = _create_table(client, None, 'target_table', schema, import_target_table=None)
+    expt_name = _get_expected_name(table_name, data_file=data_file)
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
+
+    check_create_table_response(
+        client, table_name, expt_name, data_file, schema, first_row, column_names, import_target_table
     )
 
 
@@ -503,7 +529,7 @@ def test_table_create_from_paste(client, schema, paste_data_file, table_name):
                     'Application SN', 'Title', 'Patent Expiration Date']
 
     check_create_table_response(
-        client, table_name, expt_name, paste_data_file, schema, first_row, column_names
+        client, table_name, expt_name, paste_data_file, schema, first_row, column_names, import_target_table=None
     )
 
 
@@ -516,7 +542,7 @@ def test_table_create_from_url(client, schema, url_data_file, table_name):
                     'application_sn', 'title', 'patent_expiration_date']
 
     check_create_table_response(
-        client, table_name, expt_name, url_data_file, schema, first_row, column_names
+        client, table_name, expt_name, url_data_file, schema, first_row, column_names, import_target_table=None
     )
 
 
@@ -527,7 +553,7 @@ def test_table_create_without_datafile(client, schema, data_files, table_name):
     expt_name = _get_expected_name(table_name)
 
     response, response_table, table = _create_table(
-        client, data_files, table_name, schema
+        client, data_files, table_name, schema, import_target_table=None
     )
 
     assert response.status_code == 201
@@ -548,7 +574,7 @@ def test_table_create_name_taken(client, paste_data_file, schema, create_patents
                     'Application SN', 'Title', 'Patent Expiration Date']
 
     check_create_table_response(
-        client, '', expt_name, paste_data_file, schema, first_row, column_names
+        client, '', expt_name, paste_data_file, schema, first_row, column_names, import_target_table=None
     )
 
 
@@ -563,7 +589,7 @@ def test_table_create_base_name_taken(client, data_file, schema, create_patents_
                     'Application SN', 'Title', 'Patent Expiration Date']
 
     check_create_table_response(
-        client, '', expt_name, data_file, schema, first_row, column_names
+        client, '', expt_name, data_file, schema, first_row, column_names, import_target_table=None
     )
 
 
@@ -578,7 +604,7 @@ def test_table_create_base_name_too_long(client, data_file, schema):
                     'Application SN', 'Title', 'Patent Expiration Date']
 
     check_create_table_response(
-        client, '', expt_name, data_file, schema, first_row, column_names
+        client, '', expt_name, data_file, schema, first_row, column_names, import_target_table=None
     )
 
 
@@ -602,7 +628,7 @@ def test_table_create_non_unicode(client, non_unicode_file_path, filename, first
     expt_name = filename
     non_unicode_datafile = create_data_file(non_unicode_file_path, filename)
     check_create_table_response(
-        client, '', expt_name, non_unicode_datafile, schema, first_row, column_names
+        client, '', expt_name, non_unicode_datafile, schema, first_row, column_names, import_target_table=None
     )
 
 
@@ -1299,12 +1325,9 @@ def test_table_extract_columns_retain_original_table(create_patents_table, clien
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
 
     extract_table_name = "Patent Info"
-    remainder_table_name = "Patent Status"
     split_data = {
         'extract_columns': column_ids_to_extract,
         'extracted_table_name': extract_table_name,
-        "remainder_table_name": remainder_table_name,
-        'drop_original_table': False
     }
     current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
     assert current_table_response.status_code == 201
@@ -1314,15 +1337,13 @@ def test_table_extract_columns_retain_original_table(create_patents_table, clien
     assert extract_table_name == extracted_table.name
     remainder_table_id = response_data['remainder_table']
     remainder_table = Table.objects.get(id=remainder_table_id)
-    assert remainder_table_name == remainder_table.name
-    assert remainder_table.id != table.id
     assert Table.objects.filter(id=table.id).count() == 1
-    extracted_columns = extracted_table.columns.all()
+    extracted_columns = extracted_table.columns.all().order_by('attnum')
     extracted_column_names = [extracted_column.name for extracted_column in extracted_columns]
     expected_extracted_column_names = ['id'] + column_names_to_extract
     assert expected_extracted_column_names == extracted_column_names
 
-    remainder_columns = remainder_table.columns.all()
+    remainder_columns = remainder_table.columns.all().order_by('attnum')
     remainder_column_names = [remainder_column.name for remainder_column in remainder_columns]
     expected_remainder_columns = (set(existing_columns) - set(column_names_to_extract)) | {'Patent Info_id'}
     assert set(expected_remainder_columns) == set(remainder_column_names)
@@ -1334,17 +1355,14 @@ def test_table_extract_columns_drop_original_table(create_patents_table, client)
     column_name_id_map = table.get_column_name_id_bidirectional_map()
     column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
-    existing_columns = table.columns.all()
+    existing_columns = table.columns.all().order_by('attnum')
     existing_columns = [existing_column.name for existing_column in existing_columns]
     remainder_column_names = (set(existing_columns) - set(column_names_to_extract))
 
     extract_table_name = "Patent Info"
-    remainder_table_name = "Patent Status"
     split_data = {
         'extract_columns': column_ids_to_extract,
         'extracted_table_name': extract_table_name,
-        "remainder_table_name": remainder_table_name,
-        'drop_original_table': True
     }
     current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
     assert current_table_response.status_code == 201
@@ -1385,17 +1403,51 @@ def test_table_extract_columns_with_display_options(create_patents_table, client
     column_with_display_options.save()
 
     extract_table_name = "Patent Info"
-    remainder_table_name = "Patent Status"
     split_data = {
         'extract_columns': column_ids_to_extract,
         'extracted_table_name': extract_table_name,
-        "remainder_table_name": remainder_table_name,
-        'drop_original_table': True
     }
     current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
     assert current_table_response.status_code == 201
     response_data = current_table_response.json()
     extracted_table_id = response_data['extracted_table']
+    extracted_table = Table.objects.get(id=extracted_table_id)
+    extracted_column_id = extracted_table.get_column_name_id_bidirectional_map()[column_name_with_display_options]
+    extracted_column = Column.objects.get(id=extracted_column_id)
+    assert extracted_column.id == extracted_column_id
+    assert extracted_column.display_options == column_with_display_options.display_options
+
+
+def test_table_move_columns_after_extracting(create_patents_table, client):
+    table_name = 'Patents'
+    table = create_patents_table(table_name)
+    column_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_names_to_extract = ['Title', 'Patent Expiration Date']
+    column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
+
+    extract_table_name = "Patent Info"
+    split_data = {
+        'extract_columns': column_ids_to_extract,
+        'extracted_table_name': extract_table_name,
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
+    assert current_table_response.status_code == 201
+    remainder_table_id = current_table_response.json()['remainder_table']
+    extracted_table_id = current_table_response.json()['extracted_table']
+    column_names_to_move = ['Patent Number']
+    column_ids_to_move = [column_name_id_map[name] for name in column_names_to_move]
+    column_display_options = {'show_as_percentage': True, 'number_format': 'english'}
+    column_name_with_display_options = column_names_to_move[0]
+    column_id_with_display_options = column_name_id_map[column_name_with_display_options]
+    column_with_display_options = Column.objects.get(id=column_id_with_display_options)
+    column_with_display_options.display_options = column_display_options
+    column_with_display_options.save()
+    move_data = {
+        'move_columns': column_ids_to_move,
+        'target_table': extracted_table_id,
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{remainder_table_id}/move_columns/', data=move_data)
+    assert current_table_response.status_code == 201
     extracted_table = Table.objects.get(id=extracted_table_id)
     extracted_column_id = extracted_table.get_column_name_id_bidirectional_map()[column_name_with_display_options]
     extracted_column = Column.objects.get(id=extracted_column_id)

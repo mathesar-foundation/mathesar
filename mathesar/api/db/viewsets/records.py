@@ -17,7 +17,6 @@ from mathesar.api.utils import get_table_or_404
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.models.base import Table
 from mathesar.utils.json import MathesarJSONRenderer
-from mathesar.utils.preview import get_preview_info
 
 
 class RecordViewSet(viewsets.ViewSet):
@@ -43,7 +42,7 @@ class RecordViewSet(viewsets.ViewSet):
         filter_unprocessed = serializer.validated_data['filter']
         order_by = serializer.validated_data['order_by']
         grouping = serializer.validated_data['grouping']
-        fk_previews = serializer.validated_data['fk_previews']
+        search_fuzzy = serializer.validated_data['search_fuzzy']
         filter_processed = None
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
         column_ids_to_names = column_names_to_ids.inverse
@@ -59,10 +58,8 @@ class RecordViewSet(viewsets.ViewSet):
             group_by_columns_names = [column_ids_to_names[column_id] for column_id in grouping['columns']]
             name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
         name_converted_order_by = [{**column, 'field': column_ids_to_names[column['field']]} for column in order_by]
-        preview_info = None
-        if fk_previews:
-            table_pk = self.kwargs['table_pk']
-            preview_info = get_preview_info(fk_previews, table_pk)
+        name_converted_search = [{**column, 'column': column_ids_to_names[column['field']]} for column in search_fuzzy]
+
         try:
 
             records = paginator.paginate_queryset(
@@ -70,8 +67,8 @@ class RecordViewSet(viewsets.ViewSet):
                 filters=filter_processed,
                 order_by=name_converted_order_by,
                 grouping=name_converted_group_by,
+                search=name_converted_search,
                 duplicate_only=serializer.validated_data['duplicate_only'],
-                preview_info=preview_info
             )
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
             raise database_api_exceptions.BadFilterAPIException(

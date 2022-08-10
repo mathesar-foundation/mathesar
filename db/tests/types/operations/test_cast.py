@@ -5,6 +5,7 @@ from psycopg2.errors import InvalidParameterValue
 from sqlalchemy import Table, Column, MetaData, select, cast, text
 from sqlalchemy import VARCHAR, NUMERIC
 from sqlalchemy.exc import DataError
+import json
 
 from db.types.custom.base import CUSTOM_DB_TYPE_TO_SA_CLASS
 from db.columns.operations.select import get_column_attnum_from_name, get_column_default
@@ -12,9 +13,9 @@ from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.types.custom import multicurrency
 from db.types.operations import cast as cast_operations
+from db.types.operations.convert import get_db_type_enum_from_class
 from db.types.base import (
     DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types,
-    get_db_type_enum_from_class,
 )
 
 
@@ -89,6 +90,182 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.CHARACTER_VARYING: {VALID: [(True, 'true'), (False, 'false')]},
         }
     },
+    PostgresType.JSON: {
+        TARGET_DICT: {
+            PostgresType.JSONB: {
+                VALID: [
+                    ({"key1": "val1"}, {"key1": "val1"}),
+                    ({"key2": "val2"}, {"key2": "val2"})
+                ],
+                INVALID: [],
+            },
+            PostgresType.JSON: {
+                VALID: [
+                    ({"key1": "val1"}, {"key1": "val1"}),
+                    ({"key2": "val2"}, {"key2": "val2"})
+                ],
+                INVALID: [],
+            },
+            PostgresType.TEXT: {
+                VALID: [
+                    ({"key1": "val1"}, '{"key1": "val1"}'),
+                    ({"key2": "val2"}, '{"key2": "val2"}')
+                ],
+                INVALID: [],
+            },
+            PostgresType.CHARACTER: {
+                VALID: [],
+                INVALID: [],
+            },
+            PostgresType.CHARACTER_VARYING: {
+                VALID: [
+                    ({"key1": "val1"}, '{"key1": "val1"}'),
+                    ({"key2": "val2"}, '{"key2": "val2"}')
+                ],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_OBJECT: {
+                VALID: [
+                    ({'key1': 'val1'}, json.dumps({'key1': 'val1'}))
+                ],
+                INVALID: [[1, 2, 3]],
+            },
+            MathesarCustomType.MATHESAR_JSON_ARRAY: {
+                VALID: [
+                    ([1, 2, 3], "[1, 2, 3]")
+                ],
+                INVALID: ["{'key1': 'val1'}"],
+            },
+        },
+    },
+    PostgresType.JSONB: {
+        TARGET_DICT: {
+            PostgresType.JSONB: {
+                VALID: [
+                    ({"key1": "val1"}, {"key1": "val1"}),
+                    ({"key2": "val2"}, {"key2": "val2"})
+                ],
+                INVALID: [],
+            },
+            PostgresType.JSON: {
+                VALID: [
+                    ({"key1": "val1"}, {"key1": "val1"}),
+                    ({"key2": "val2"}, {"key2": "val2"})
+                ],
+                INVALID: [],
+            },
+            PostgresType.TEXT: {
+                VALID: [
+                    ({"key1": "val1"}, '{"key1": "val1"}'),
+                    ({"key2": "val2"}, '{"key2": "val2"}')
+                ],
+                INVALID: [],
+            },
+            PostgresType.CHARACTER: {
+                VALID: [],
+                INVALID: [],
+            },
+            PostgresType.CHARACTER_VARYING: {
+                VALID: [
+                    ({"key1": "val1"}, '{"key1": "val1"}'),
+                    ({"key2": "val2"}, '{"key2": "val2"}')
+                ],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_OBJECT: {
+                VALID: [
+                    ({'key1': 'val1'}, json.dumps({'key1': 'val1'}))
+                ],
+                INVALID: [[1, 2, 3]],
+            },
+            MathesarCustomType.MATHESAR_JSON_ARRAY: {
+                VALID: [
+                    ([1, 2, 3], "[1, 2, 3]")
+                ],
+                INVALID: [],
+            },
+        },
+    },
+    MathesarCustomType.MATHESAR_JSON_OBJECT: {
+        TARGET_DICT: {
+            PostgresType.JSONB: {
+                VALID: [
+                    ({"key1": "val1"}, {"key1": "val1"})
+                ],
+                INVALID: [],
+            },
+            PostgresType.JSON: {
+                VALID: [
+                    ({"key1": "val1"}, {"key1": "val1"}),
+                ],
+                INVALID: [],
+            },
+            PostgresType.TEXT: {
+                VALID: [
+                    ({"key1": "val1"}, '{"key1": "val1"}'),
+                ],
+                INVALID: [],
+            },
+            PostgresType.CHARACTER: {
+                VALID: [],
+                INVALID: [],
+            },
+            PostgresType.CHARACTER_VARYING: {
+                VALID: [
+                    ({"key1": "val1"}, '{"key1": "val1"}'),
+                ],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_OBJECT: {
+                VALID: [],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_ARRAY: {
+                VALID: [],
+                INVALID: [],
+            },
+        },
+    },
+    MathesarCustomType.MATHESAR_JSON_ARRAY: {
+        TARGET_DICT: {
+            PostgresType.JSONB: {
+                VALID: [
+                    ([1, 2, 3], [1, 2, 3])
+                ],
+                INVALID: [],
+            },
+            PostgresType.JSON: {
+                VALID: [
+                    ([1, 2, 3], [1, 2, 3])
+                ],
+                INVALID: [],
+            },
+            PostgresType.TEXT: {
+                VALID: [
+                    ([1, 2, 3], '[1, 2, 3]')
+                ],
+                INVALID: [],
+            },
+            PostgresType.CHARACTER: {
+                VALID: [],
+                INVALID: [],
+            },
+            PostgresType.CHARACTER_VARYING: {
+                VALID: [
+                    ([1, 2, 3], '[1, 2, 3]')
+                ],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_OBJECT: {
+                VALID: [],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_ARRAY: {
+                VALID: [],
+                INVALID: [],
+            },
+        },
+    },
     PostgresType.CHARACTER: {
         TARGET_DICT: {
             PostgresType.BIGINT: {VALID: [("4", 4)], INVALID: ["c"]},
@@ -100,6 +277,22 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.INTERVAL: {VALID: []},
             MathesarCustomType.MATHESAR_MONEY: {VALID: []},
             PostgresType.MONEY: {VALID: []},
+            PostgresType.JSON: {
+                VALID: [],
+                INVALID: [],
+            },
+            PostgresType.JSONB: {
+                VALID: [],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_OBJECT: {
+                VALID: [],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_ARRAY: {
+                VALID: [],
+                INVALID: [],
+            },
             MathesarCustomType.MULTICURRENCY_MONEY: {
                 VALID: [
                     (
@@ -495,6 +688,32 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 INVALID: ["cat"],
             },
             PostgresType.CHARACTER: {VALID: [("a", "a")]},
+            PostgresType.JSON: {
+                VALID: [
+                    ('{"key1": "val1"}', json.loads('{"key1": "val1"}')),
+                    ('{"key2": "val2"}', json.loads('{"key2": "val2"}'))
+                ],
+                INVALID: [],
+            },
+            PostgresType.JSONB: {
+                VALID: [
+                    ('{"key1": "val1"}', json.loads('{"key1": "val1"}')),
+                    ('{"key2": "val2"}', json.loads('{"key2": "val2"}'))
+                ],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_OBJECT: {
+                VALID: [
+                    ('{"key1": "val1"}', json.dumps({"key1": "val1"}))
+                ],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_ARRAY: {
+                VALID: [
+                    ('[1, 2, 3]', '[1, 2, 3]')
+                ],
+                INVALID: [],
+            },
             PostgresType.DOUBLE_PRECISION: {
                 VALID: [("1.234", 1.234)],
                 INVALID: ["bat"],
@@ -647,6 +866,32 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     "1234",
                 ]
             },
+            PostgresType.JSON: {
+                VALID: [
+                    ('{"key1": "val1"}', json.loads('{"key1": "val1"}')),
+                    ('{"key2": "val2"}', json.loads('{"key2": "val2"}'))
+                ],
+                INVALID: [],
+            },
+            PostgresType.JSONB: {
+                VALID: [
+                    ('{"key1": "val1"}', json.loads('{"key1": "val1"}')),
+                    ('{"key2": "val2"}', json.loads('{"key2": "val2"}'))
+                ],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_OBJECT: {
+                VALID: [
+                    ('{"key1": "val1"}', json.dumps({"key1": "val1"}))
+                ],
+                INVALID: [],
+            },
+            MathesarCustomType.MATHESAR_JSON_ARRAY: {
+                VALID: [
+                    ('[1, 2, 3]', '[1, 2, 3]')
+                ],
+                INVALID: [],
+            },
             PostgresType.DOUBLE_PRECISION: {
                 VALID: [("1.234", 1.234)],
                 INVALID: ["bat"],
@@ -758,7 +1003,7 @@ def test_db_type_juggling_consistency(engine):
     available_known_db_types = get_available_known_db_types(engine)
     for db_type in available_known_db_types:
         sa_class = db_type.get_sa_class(engine)
-        db_type_from_sa_class = get_db_type_enum_from_class(sa_class, engine)
+        db_type_from_sa_class = get_db_type_enum_from_class(sa_class)
         assert db_type == db_type_from_sa_class
 
 
@@ -836,7 +1081,7 @@ def test_alter_column_type_alters_column_type(
         schema=schema,
         autoload_with=engine
     ).columns[COLUMN_NAME]
-    actual_type = get_db_type_enum_from_class(actual_column.type.__class__, engine)
+    actual_type = get_db_type_enum_from_class(actual_column.type.__class__)
     assert actual_type == target_type
 
 
@@ -988,9 +1233,19 @@ def test_alter_column_casts_data_gen(
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
     source_sa_type = source_type.get_sa_class(engine)
-    in_sel = select(cast(cast(in_val, source_sa_type), VARCHAR))
-    with engine.begin() as conn:
-        processed_in_val = conn.execute(in_sel).scalar()
+    default_unsupported = [
+        MathesarCustomType.MULTICURRENCY_MONEY,
+        PostgresType.JSON,
+        PostgresType.JSONB,
+        MathesarCustomType.MATHESAR_JSON_ARRAY,
+        MathesarCustomType.MATHESAR_JSON_OBJECT,
+    ]
+    if source_type not in default_unsupported and target_type not in default_unsupported:
+        in_sel = select(cast(cast(in_val, source_sa_type), VARCHAR))
+        with engine.begin() as conn:
+            processed_in_val = conn.execute(in_sel).scalar()
+    else:
+        processed_in_val = None
 
     input_table = Table(
         TABLE_NAME,
@@ -1025,10 +1280,7 @@ def test_alter_column_casts_data_gen(
     column_attnum = get_column_attnum_from_name(table_oid, COLUMN_NAME, engine)
     actual_default = get_column_default(table_oid, column_attnum, engine)
     # TODO This needs to be sorted out by fixing how server_default is set.
-    if all([
-            source_type != MathesarCustomType.MULTICURRENCY_MONEY,
-            target_type != MathesarCustomType.MULTICURRENCY_MONEY,
-    ]):
+    if source_type not in default_unsupported and target_type not in default_unsupported:
         assert actual_default == out_val
 
 

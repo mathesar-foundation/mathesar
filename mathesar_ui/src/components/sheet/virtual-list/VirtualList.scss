@@ -1,0 +1,32 @@
+// TODO: Find a cleaner way to import from node_modules
+@import './../../../../node_modules/perfect-scrollbar/css/perfect-scrollbar.css';
+
+.virtual-list {
+  &.outerElement {
+    position: relative;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    will-change: transform;
+  }
+
+  &.resizer {
+    overflow: visible;
+    height: 0;
+  }
+}
+
+.ps__rail-x {
+  z-index: 20;
+}
+.ps__rail-y {
+  z-index: 30;
+  opacity: 0.6;
+}
+.ps__thumb-x {
+  height: 8px;
+  border-radius: 4px;
+}
+.ps__thumb-y {
+  width: 8px;
+  border-radius: 4px;
+}

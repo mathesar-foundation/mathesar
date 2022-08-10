@@ -1,10 +1,12 @@
 from collections import namedtuple
 
-from sqlalchemy import select, join
+from sqlalchemy import select, join, Column as SAColumn, Table as SATable
 
 from django.utils.functional import cached_property
 
+from db.records.operations import select as records_select
 from db.columns.base import MathesarColumn
+from db.transforms.operations.apply import apply_transformations
 
 
 class DBQuery:
@@ -15,24 +17,38 @@ class DBQuery:
         transformations=None,
         name=None
     ):
+        assert isinstance(base_table, SATable)
         self.base_table = base_table
+        for initial_col in initial_columns:
+            assert isinstance(initial_col, InitialColumn)
         self.initial_columns = initial_columns
         self.transformations = transformations
         self.name = name
-        return self
 
-    def get_records(self):
-        pass
+    # mirrors a method in db.records.operations.select
+    def get_records(self, **kwargs):
+        # NOTE how through this method you can perform a second batch of transformations.
+        # this reflects fact that we can form a query, and then apply temporary transforms on it,
+        # like how you can apply temporary transforms to a table when in a table view.
+        return records_select.get_records(
+            table=self.sa_relation,
+            **kwargs,
+        )
 
-    @cached_property
-    def sa_output_columns(self):
+    # mirrors a method in db.records.operations.select
+    def get_count(self, **kwargs):
+        return records_select.get_count(table=self.sa_relation, **kwargs)
+
+    def sa_output_columns(self, engine):
         """
         Sequence of SQLAlchemy columns representing the output columns of the relation described
         by this query.
         """
-        regular_sa_columns = self.sa_relation.columns
-        enriched_sa_columns = tuple(MathesarColumn.from_column(col) for col in regular_sa_columns)
-        return enriched_sa_columns
+        return tuple(
+            MathesarColumn.from_column(sa_col, engine=engine)
+            for sa_col
+            in self.sa_relation.columns
+        )
 
     @cached_property
     def sa_relation(self):
@@ -41,31 +57,56 @@ class DBQuery:
         relation.
         """
         initial_relation = _get_initial_relation(self)
-        transformed = _apply_transformations(initial_relation, self.transformations)
-        return transformed
+        transformations = self.transformations
+        if transformations:
+            transformed = apply_transformations(
+                initial_relation,
+                transformations,
+            )
+            return transformed
+        else:
+            return initial_relation
 
 
 class InitialColumn:
     def __init__(
         self,
+        alias,
         column,
         jp_path=None,
     ):
+        # alias mustn't be an empty string
+        assert isinstance(alias, str) and alias.strip() != ""
+        self.alias = alias
+
         if jp_path is not None:
+            # jp_path must be made up of JoinParams
             for jp in jp_path:
                 assert isinstance(jp, JoinParams)
         self.jp_path = jp_path
-        assert isinstance(column, MathesarColumn)
+
+        # column must be SA Column, and not MathesarColumn (MathesarColumn is incompatible with some
+        # of SA's joining mechanics).
+        assert isinstance(column, SAColumn)
+        assert not isinstance(column, MathesarColumn)
+
+        # column must have a table with a schema associated.
+        table = column.table
+        assert table is not None
+        schema_name = table.schema
+        assert schema_name is not None
+
         self.column = column
-        return self
+
+    @property
+    def is_base_column(self):
+        return self.jp_path is None
 
 
 class JoinParams(
     namedtuple(
         'JoinParams',
         [
-            'left_table',
-            'right_table',
             'left_column',
             'right_column',
         ]
@@ -76,72 +117,87 @@ class JoinParams(
     """
     def flip(self):
         return JoinParams(
-            left_table=self.right_table,
-            right_table=self.left_table,
             left_column=self.right_column,
             right_column=self.left_column,
         )
 
+    @property
+    def left_table(self):
+        return self.left_column.table
 
-def _apply_transformations(initial_relation, transformations):
-    return initial_relation
+    @property
+    def right_table(self):
+        return self.right_column.table
 
 
 def _get_initial_relation(query):
-    nested_join = None
+    """
+    The initial relation is the relation defined by the initial columns (`initial_columns`). It acts
+    as input to the transformation pipeline (that's defined by `transformations`).
+    """
     sa_columns_to_select = []
+    from_clause = query.base_table
     for initial_column in query.initial_columns:
-        nested_join, sa_column_to_select = _process_initial_column(
+        from_clause, sa_column_to_select = _process_initial_column(
             initial_column=initial_column,
-            nested_join=nested_join,
+            from_clause=from_clause,
         )
         sa_columns_to_select.append(sa_column_to_select)
-
-    select_target = nested_join or query.sa_base_table
-    stmt = select(*sa_columns_to_select).select_from(select_target)
-    return stmt
+    stmt = select(*sa_columns_to_select).select_from(from_clause)
+    return stmt.cte()
 
 
-def _process_initial_column(initial_column, nested_join):
-    if _is_base_column(initial_column):
+def _process_initial_column(initial_column, from_clause):
+    if initial_column.is_base_column:
         col_to_select = initial_column.column
     else:
-        nested_join, col_to_select = _nest_a_join(
+        from_clause, col_to_select = _nest_a_join(
             initial_column=initial_column,
-            nested_join=nested_join,
+            from_clause=from_clause,
         )
     # Give an alias/label to this column, since that's how it will be referenced in transforms.
     aliased_col_to_select = col_to_select.label(initial_column.alias)
-    return nested_join, aliased_col_to_select
+    return from_clause, aliased_col_to_select
 
 
-def _nest_a_join(nested_join, initial_column):
+def _nest_a_join(from_clause, initial_column):
     jp_path = initial_column.jp_path
     target_sa_column = initial_column.column
     rightmost_table_alias = None
-    for i, jp in enumerate(reversed(jp_path)):
-        is_last_jp = i == 0
+    ix_of_last_jp = len(jp_path) - 1
+    for i, jp in enumerate(jp_path):
+        is_last_jp = i == ix_of_last_jp
+        # We want to alias the right-most table in the JP path, so that we can select from it later
         if is_last_jp:
             rightmost_table_alias = jp.right_table.alias()
             right_table = rightmost_table_alias
+            right_column_reference = (
+                # If we give the right table an alias, we have to use that alias whenever we
+                # reference it
+                _access_column_on_relation(
+                    rightmost_table_alias,
+                    jp.right_column,
+                )
+            )
         else:
-            right_table = nested_join
-
-        nested_join = join(
-            jp.left_table, right_table,
-            jp.left_column == jp.right_column
+            right_table = jp.right_table
+            right_column_reference = jp.right_column
+        left_table = from_clause
+        left_column_reference = jp.left_column
+        from_clause = join(
+            left_table, right_table,
+            left_column_reference == right_column_reference
         )
-    sa_col_to_select = _access_column_on_aliased_relation(
-        rightmost_table_alias,
-        target_sa_column,
+    # Here we produce the actual reference to the column we want to join in
+    rightmost_table_target_column_reference = (
+        _access_column_on_relation(
+            rightmost_table_alias,
+            target_sa_column,
+        )
     )
-    return nested_join, sa_col_to_select
+    return from_clause, rightmost_table_target_column_reference
 
 
-def _access_column_on_aliased_relation(aliased_relation, sa_column):
+def _access_column_on_relation(relation, sa_column):
     column_name = sa_column.name
-    return getattr(aliased_relation.c, column_name)
-
-
-def _is_base_column(initial_column):
-    return initial_column.jp_path is not None
+    return getattr(relation.c, column_name)

@@ -1,9 +1,13 @@
+import pytest
+
 from decimal import Decimal
 from collections import Counter
 
 from sqlalchemy import Column, VARCHAR
 
-from db.records.operations.select import get_records, get_column_cast_records, get_records_preview_data
+from db.records.operations.select import get_records, get_column_cast_records
+from db.transforms.operations.apply import apply_transformations
+from db.transforms import base as transforms_base
 from db.tables.operations.create import create_mathesar_table
 from db.types.base import PostgresType
 
@@ -106,166 +110,73 @@ def test_get_records_duplicate_only(roster_table_obj):
     assert all_counter == got_counter
 
 
-def test_foreign_key_record(relation_table_obj):
-    preview_columns = {}
-    referent_table, referrer_table, engine = relation_table_obj
-    fk_column_name = "person"
-    preview_columns[referent_table.name] = {
-        'table': referent_table,
-        'preview_columns': ["Name"],
-        'constraint_columns': [
-            {
-                'referent_column': 'id',
-                'constrained_column': fk_column_name
-            }
-        ]
-    }
-    records = get_records(
-        referrer_table,
-        engine,
-        order_by=[{'field': "id", 'direction': "asc"}],
-    )
-    preview_records = get_records_preview_data(records, engine, preview_columns)
-    expected_preview = [
-        {
-            'table': referent_table.name,
-            'data': [
-                (1, 'Stephanie Norris', 'stephanienorris@hotmail.com'),
-                (2, 'Shannon Ramos', 'shannonramos@gmail.com'),
-                (3, 'Tyler Harris', 'tylerharris@hotmail.com'),
-                (4, 'Lee Henderson', 'leehenderson@yahoo.com'),
-                (5, 'Christopher Bell', 'christopherbell@hotmail.com')
+# TODO might want to move this to transforms test namespace
+@pytest.mark.parametrize(
+    "transformations,expected_records",
+    [
+        [
+            [
+                transforms_base.Filter(
+                    spec=dict(
+                        contains=[
+                            dict(column_name=["Student Name"]),
+                            dict(literal=["son"]),
+                        ]
+                    ),
+                ),
+                transforms_base.Order(
+                    spec=[{"field": "Teacher Email", "direction": "asc"}],
+                ),
+                transforms_base.Limit(
+                    spec=5,
+                ),
+                transforms_base.SelectSubsetOfColumns(
+                    spec=["id"],
+                ),
+            ],
+            [
+                (978,),
+                (194,),
+                (99,),
+                (155,),
+                (192,),
             ]
-        }
+        ],
+        [
+            [
+                transforms_base.Limit(
+                    spec=50,
+                ),
+                transforms_base.Filter(
+                    spec=dict(
+                        contains=[
+                            dict(column_name=["Student Name"]),
+                            dict(literal=["son"]),
+                        ]
+                    ),
+                ),
+                transforms_base.Order(
+                    spec=[{"field": "Teacher Email", "direction": "asc"}],
+                ),
+                transforms_base.Limit(
+                    spec=5,
+                ),
+                transforms_base.SelectSubsetOfColumns(
+                    spec=["id"],
+                ),
+            ],
+            [
+                (31,),
+                (16,),
+                (18,),
+                (24,),
+                (33,),
+            ]
+        ],
     ]
-    assert preview_records == expected_preview
-    expected_record_data = {
-        'id': 1,
-        'person': 1,
-        'teacher': 6,
-        'supplementary': None,
-        'Name': 'Physics',
-        'Score': 43
-    }
-    assert records[0]._asdict() == expected_record_data
-
-
-def test_multiple_column_same_table_relation_foreign_key_record(relation_table_obj):
-    preview_columns = {}
-    referent_table, referrer_table, engine = relation_table_obj
-    fk_column1_name = "person"
-    fk_column2_name = "teacher"
-    preview_columns[referent_table.name] = {
-        'table': referent_table,
-        'preview_columns': ["Name"],
-        'constraint_columns': [
-            {
-                'referent_column': 'id',
-                'constrained_column': fk_column1_name
-            },
-            {
-                'referent_column': 'id',
-                'constrained_column': fk_column2_name
-            }
-        ]
-    }
-    records = get_records(
-        referrer_table,
-        engine,
-        order_by=[{'field': "id", 'direction': "asc"}],
-    )
-    record_index = 3
-    expected_record_data_dict = {
-        'Name': 'Biology',
-        'Score': 41,
-        'id': 4,
-        'person': 1,
-        'supplementary': None,
-        'teacher': 8,
-    }
-    preview_records = get_records_preview_data(records, engine, preview_columns)
-    expected_preview = [
-        {
-            'table': referent_table.name,
-            'data': [
-                (1, 'Stephanie Norris', 'stephanienorris@hotmail.com'),
-                (2, 'Shannon Ramos', 'shannonramos@gmail.com'),
-                (3, 'Tyler Harris', 'tylerharris@hotmail.com'),
-                (4, 'Lee Henderson', 'leehenderson@yahoo.com'),
-                (5, 'Christopher Bell', 'christopherbell@hotmail.com'),
-                (6, 'Mary Carroll', 'marycarroll@hotmail.com'),
-                (8, 'Evelyn Anderson', 'evelynanderson@hotmail.com'),
-                (9, 'Bethany Bell', 'bethanybell@gmail.com'),
-                (10, 'Carolyn Durham', 'carolyndurham@gmail.com')
-            ]
-        }
-    ]
-    assert records[record_index]._asdict() == expected_record_data_dict
-    assert preview_records == expected_preview
-
-
-def test_self_referential_relation_foreign_key_record(relation_table_obj):
-    preview_columns = {}
-    referent_table, referrer_table, engine = relation_table_obj
-    fk_column1_name = "person"
-    preview_columns[referent_table.name] = {
-        'table': referent_table,
-        'preview_columns': ["Name"],
-        'constraint_columns': [
-            {
-                'referent_column': 'id',
-                'constrained_column': fk_column1_name
-            },
-        ]
-    }
-    fk_column2_name = "supplementary"
-    preview_columns[referrer_table.name] = {
-        'table': referrer_table,
-        'preview_columns': ["Name"],
-        'constraint_columns': [
-            {
-                'referent_column': 'id',
-                'constrained_column': fk_column2_name
-            },
-        ]
-    }
-    records = get_records(
-        referrer_table,
-        engine,
-        order_by=[{'field': "id", 'direction': "asc"}],
-    )
-    record_index = 7
-    expected_record_data_dict = {
-        'Name': 'Art',
-        'Score': 31,
-        'id': 8,
-        'person': 2,
-        'supplementary': 3,
-        'teacher': 10
-    }
-    assert records[record_index]._asdict() == expected_record_data_dict
-    preview_records = get_records_preview_data(records, engine, preview_columns)
-    expected_preview = [
-        {
-            'table': referent_table.name,
-            'data': [
-                (1, 'Stephanie Norris', 'stephanienorris@hotmail.com'),
-                (2, 'Shannon Ramos', 'shannonramos@gmail.com'),
-                (3, 'Tyler Harris', 'tylerharris@hotmail.com'),
-                (4, 'Lee Henderson', 'leehenderson@yahoo.com'),
-                (5, 'Christopher Bell', 'christopherbell@hotmail.com')
-            ]
-        },
-        {
-            'table': referrer_table.name,
-            'data': [
-                (1, 1, 6, None, 'Physics', 43),
-                (3, 1, 8, None, 'Chemistry', 55),
-                (6, 2, 6, None, 'Math', 44),
-                (10, 2, 9, None, 'Music', 40)
-            ]
-        },
-
-    ]
-    assert records[record_index]._asdict() == expected_record_data_dict
-    assert preview_records == expected_preview
+)
+def test_transformations(roster_table_obj, transformations, expected_records):
+    roster, engine = roster_table_obj
+    relation = apply_transformations(roster, transformations)
+    records = get_records(relation, engine)
+    assert records == expected_records

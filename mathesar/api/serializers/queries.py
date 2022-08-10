@@ -1,15 +1,22 @@
 from django.urls import reverse
 from rest_framework import serializers
 from mathesar.models.query import UIQuery
+from django.core.exceptions import ValidationError
 
 
 class QuerySerializer(serializers.ModelSerializer):
-    records_url = serializers.SerializerMethodField()
-    columns_url = serializers.SerializerMethodField()
+    records_url = serializers.SerializerMethodField('get_records_url')
+    columns_url = serializers.SerializerMethodField('get_columns_url')
+    schema = serializers.SerializerMethodField('get_schema')
 
     class Meta:
         model = UIQuery
         fields = '__all__'
+
+    def get_schema(self, uiquery):
+        base_table = uiquery.base_table
+        if base_table:
+            return base_table.schema.id
 
     def get_records_url(self, obj):
         if isinstance(obj, UIQuery):
@@ -27,23 +34,8 @@ class QuerySerializer(serializers.ModelSerializer):
         else:
             return None
 
-    def validate_initial_columns(self, cols):
-        _raise_if_not_list_of_dicts("initial_columns", cols)
-        return cols
-
-    def validate_transformations(self, transforms):
-        _raise_if_not_list_of_dicts("transformations", transforms)
-        return transforms
-
-    def validate_display_options(self, display_options):
-        if not isinstance(display_options, dict):
-            raise serializers.ValidationError("display_options should be a dict.")
-        return display_options
-
-
-def _raise_if_not_list_of_dicts(field_name, value):
-    if not isinstance(value, list):
-        raise serializers.ValidationError(f"{field_name} should be a list.")
-    for subvalue in value:
-        if not isinstance(subvalue, dict):
-            raise serializers.ValidationError(f"{field_name} should contain only dicts.")
+    def validate(self, attrs):
+        unexpected_fields = set(self.initial_data) - set(self.fields)
+        if unexpected_fields:
+            raise ValidationError(f"Unexpected field(s): {unexpected_fields}")
+        return attrs

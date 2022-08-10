@@ -4,40 +4,16 @@ from unittest.mock import patch
 
 import pytest
 
-from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
-
 from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
-from mathesar.models.base import db_get_records, Table, Column
+from mathesar.models.base import db_get_records_with_default_order
 from mathesar.models import base as models_base
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
-
-
-def _test_preview_response(preview_response, referent_table, referent_column, referred_value):
-    expected_preview_obj = next(
-        (
-            preview
-            for preview in preview_response
-            if preview['table'] == referent_table.id
-        ),
-        None
-    )
-    assert expected_preview_obj is not None
-    expected_preview_records = expected_preview_obj['data']
-    assert str(referent_column.id) in expected_preview_records[0]
-    expected_preview = next(
-        (
-            data for data in expected_preview_records
-            if data[str(referent_column.id)] == referred_value
-        ),
-        None
-    )
-    assert expected_preview is not None
 
 
 def test_record_list(create_patents_table, client):
@@ -105,84 +81,6 @@ def test_record_serialization(empty_nasa_table, create_column, client, type_, va
     assert response_data["results"][0][str(column.id)] == value
 
 
-def test_foreign_key_record_api_all_column_previews(two_foreign_key_tables, client):
-    referrer_table, referent_table = two_foreign_key_tables
-    referent_column = referent_table.get_columns_by_name(["Id"])[0]
-    referrer_table_columns = referrer_table.get_columns_by_name(
-        ["Id", "Center", "Affiliated Center", "Original Patent"]
-    )
-    referrer_table_pk_column = referrer_table_columns[0]
-    referrer_column_1 = referrer_table_columns[1]
-    referrer_column_2 = referrer_table_columns[2]
-    self_referential_column = referrer_table_columns[3]
-
-    referrer_table.add_constraint(UniqueConstraint(None, referrer_table.oid, [referrer_table_pk_column.attnum]))
-    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
-    referrer_table.add_constraint(ForeignKeyConstraint(None,
-                                                       referrer_table.oid,
-                                                       [referrer_column_1.attnum],
-                                                       referent_table.oid,
-                                                       [referent_column.attnum], {}))
-    referrer_table.add_constraint(ForeignKeyConstraint(None,
-                                                       referrer_table.oid,
-                                                       [referrer_column_2.attnum],
-                                                       referent_table.oid,
-                                                       [referent_column.attnum], {}))
-    referrer_table.add_constraint(ForeignKeyConstraint(None,
-                                                       referrer_table.oid,
-                                                       [self_referential_column.attnum],
-                                                       referrer_table.oid,
-                                                       [referrer_table_pk_column.attnum], {}))
-    response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'all'})
-    response_data = response.json()
-    results = response_data['results']
-    column1_referred_value = results[0][str(referrer_column_1.id)]
-    self_referred_column_referred_value = results[1][str(self_referential_column.id)]
-    preview_response = response_data['previews']
-    _test_preview_response(preview_response, referent_table, referent_column, column1_referred_value)
-    _test_preview_response(preview_response, referrer_table, referrer_table_pk_column, self_referred_column_referred_value)
-
-
-def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, client):
-    referrer_table, referent_table = two_foreign_key_tables
-    referent_column = referent_table.get_columns_by_name(["Id"])[0]
-    referrer_table_columns = referrer_table.get_columns_by_name(
-        ["Id", "Center", "Affiliated Center", "Original Patent"]
-    )
-    referrer_table_column_ids = [referrer_column.id for referrer_column in referrer_table_columns]
-    Column.objects.filter(id__in=referrer_table_column_ids).update(display_options={'show_fk_preview': False})
-    referrer_table_pk = referrer_table_columns[0]
-    referrer_column_with_fk_preview = referrer_table_columns[1]
-    referrer_column_with_fk_preview.display_options = {'show_fk_preview': True}
-    referrer_column_with_fk_preview.save()
-    referrer_column_2 = referrer_table_columns[2]
-    self_referential_column = referrer_table_columns[3]
-
-    referrer_table.add_constraint(UniqueConstraint(None, referrer_table.oid, [referrer_table_pk.attnum]))
-    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
-    referrer_table.add_constraint(ForeignKeyConstraint(None,
-                                                       referrer_table.oid,
-                                                       [referrer_column_with_fk_preview.attnum],
-                                                       referent_table.oid,
-                                                       [referent_column.attnum], {}))
-    referrer_table.add_constraint(ForeignKeyConstraint(None,
-                                                       referrer_table.oid,
-                                                       [referrer_column_2.attnum],
-                                                       referent_table.oid,
-                                                       [referent_column.attnum], {}))
-    referrer_table.add_constraint(ForeignKeyConstraint(None,
-                                                       referrer_table.oid,
-                                                       [self_referential_column.attnum],
-                                                       referrer_table.oid,
-                                                       [referrer_table_pk.attnum], {}))
-    response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'auto'})
-    assert response.status_code == 200
-    response_data = response.json()
-    referred_value = '1'
-    preview_response = response_data['previews']
-    _test_preview_response(preview_response, referent_table, referent_column, referred_value)
-
-
 def test_record_list_filter(create_patents_table, client):
     table_name = 'NASA Record List Filter'
     table = create_patents_table(table_name)
@@ -213,7 +111,7 @@ def test_record_list_filter(create_patents_table, client):
     json_filter = json.dumps(filter)
 
     with patch.object(
-        models_base, "db_get_records", side_effect=db_get_records
+        models_base, "db_get_records_with_default_order", side_effect=db_get_records_with_default_order
     ) as mock_get:
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
@@ -239,7 +137,7 @@ def test_record_list_duplicate_rows_only(create_patents_table, client):
     duplicate_only = columns_name_id_map['Patent Expiration Date']
     json_duplicate_only = json.dumps(duplicate_only)
 
-    with patch.object(models_base, "db_get_records", return_value=[]) as mock_get:
+    with patch.object(models_base, "db_get_records_with_default_order", return_value=[]) as mock_get:
         client.get(f'/api/db/v0/tables/{table.id}/records/?duplicate_only={json_duplicate_only}')
     assert mock_get.call_args is not None
     assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
@@ -279,7 +177,7 @@ def test_filter_with_added_columns(create_patents_table, client):
         table.add_column({"name": new_column_name, "type": new_column_type})
         row_values_list = []
         # Get a new instance with clean cache, so that the new column is added to the _sa_column list
-        table = Table.objects.get(oid=table.oid)
+        table = models_base.Table.objects.get(oid=table.oid)
         response_data = client.get(f'/api/db/v0/tables/{table.id}/records/').json()
         existing_records = response_data['results']
 
@@ -297,7 +195,7 @@ def test_filter_with_added_columns(create_patents_table, client):
             json_filter = json.dumps(filter)
 
             with patch.object(
-                models_base, "db_get_records", side_effect=db_get_records
+                models_base, "db_get_records_with_default_order", side_effect=db_get_records_with_default_order
             ) as mock_get:
                 response = client.get(
                     f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
@@ -331,7 +229,7 @@ def test_record_list_sort(create_patents_table, client):
     json_order_by = json.dumps(id_converted_order_by)
 
     with patch.object(
-        models_base, "db_get_records", side_effect=db_get_records
+        models_base, "db_get_records_with_default_order", side_effect=db_get_records_with_default_order
     ) as mock_get:
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?order_by={json_order_by}'
@@ -344,6 +242,26 @@ def test_record_list_sort(create_patents_table, client):
 
     assert mock_get.call_args is not None
     assert mock_get.call_args[1]['order_by'] == order_by
+
+
+def test_record_search(create_patents_table, client):
+    table_name = 'NASA Record List Search'
+    table = create_patents_table(table_name)
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    search_columns = [
+        {'field': columns_name_id_map['Title'], 'literal': 'A Direct-To Controller Tool'},
+    ]
+
+    json_search_fuzzy = json.dumps(search_columns)
+
+    response = client.get(
+        f'/api/db/v0/tables/{table.id}/records/?search_fuzzy={json_search_fuzzy}'
+    )
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == 1
 
 
 grouping_params = [
@@ -735,7 +653,6 @@ def test_record_list_groups(
 
     group_by = GroupBy(**grouping)
     grouping_dict = response_data['grouping']
-    print(grouping_dict)
     assert grouping_dict['columns'] == [
         columns_name_id_map[colname] for colname in group_by.columns
     ]
@@ -747,6 +664,7 @@ def test_record_list_groups(
     assert grouping_dict['global_max'] == group_by.global_max
     assert grouping_dict['preproc'] == group_by.preproc
     assert grouping_dict['prefix_length'] == group_by.prefix_length
+    assert grouping_dict['extract_field'] == group_by.extract_field
     assert grouping_dict['ranged'] == group_by.ranged
     _test_group_equality(grouping_dict['groups'], expected_groups)
 
@@ -913,7 +831,7 @@ def test_record_list_filter_exceptions(create_patents_table, client):
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     filter_list = json.dumps({"empty": [{"column_name": [columns_name_id_map['Center']]}]})
-    with patch.object(models_base, "db_get_records", side_effect=exception):
+    with patch.object(models_base, "db_get_records_with_default_order", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?filters={filter_list}'
         )
@@ -930,7 +848,7 @@ def test_record_list_sort_exceptions(create_patents_table, client, exception):
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     order_by = json.dumps([{"field": columns_name_id_map['id'], "direction": "desc"}])
-    with patch.object(models_base, "db_get_records", side_effect=exception):
+    with patch.object(models_base, "db_get_records_with_default_order", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?order_by={order_by}'
         )
@@ -947,7 +865,7 @@ def test_record_list_group_exceptions(create_patents_table, client, exception):
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     group_by = json.dumps({"columns": [columns_name_id_map['Case Number']]})
-    with patch.object(models_base, "db_get_records", side_effect=exception):
+    with patch.object(models_base, "db_get_records_with_default_order", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?grouping={group_by}'
         )

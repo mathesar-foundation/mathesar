@@ -2,13 +2,13 @@
   // TODO: Improve UX
 
   import type { Writable } from 'svelte/store';
-  import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
-  import { Icon, Button } from '@mathesar-component-library';
+  import { Icon, Button, iconClose } from '@mathesar-component-library';
   import { SortDirection } from '@mathesar/stores/table-data';
   import type { Sorting } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/api/tables/columns';
   import SelectSortDirection from '@mathesar/components/SelectSortDirection.svelte';
   import SelectColumn from '@mathesar/components/SelectColumn.svelte';
+  import { iconAddNew } from '@mathesar/icons';
 
   export let sorting: Writable<Sorting>;
   export let columns: Column[];
@@ -85,7 +85,7 @@
             </td>
             <td class="action">
               <Button size="small" on:click={addSortColumn}>
-                <Icon data={faPlus} />
+                <Icon {...iconAddNew} />
               </Button>
               <Button
                 size="small"
@@ -93,7 +93,7 @@
                   addNew = false;
                 }}
               >
-                <Icon data={faTimes} />
+                <Icon {...iconClose} />
               </Button>
             </td>
           </tr>

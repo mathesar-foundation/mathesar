@@ -8,7 +8,6 @@
   import type { FilterEntry } from '@mathesar/stores/table-data/types';
   import type { FilterCombination } from '@mathesar/api/tables/records';
   import FilterEntryComponent from './FilterEntry.svelte';
-  import type { ProcessedTableColumnMap } from '../../utils';
 
   const dispatch = createEventDispatcher<{
     remove: number;
@@ -17,13 +16,11 @@
   }>();
 
   export let entries: FilterEntry[];
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
   export let filterCombination: FilterCombination = defaultFilterCombination;
 </script>
 
 {#each entries as entry, index (entry)}
   <FilterEntryComponent
-    {processedTableColumnsMap}
     bind:columnId={entry.columnId}
     bind:conditionId={entry.conditionId}
     bind:value={entry.value}

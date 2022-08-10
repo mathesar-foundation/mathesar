@@ -23,44 +23,8 @@ def get_table_or_404(pk):
     return table
 
 
-def process_preview_data(preview_objs, preview_table_info):
-    """
-    Convert database identifiers into Mathesar model identifiers
-    """
-    def _convert_record_name_key_to_id(record, column_map):
-        record = record._asdict()
-        processed_preview_records = {
-            column_map[column_name]: column_value
-            for column_name, column_value in
-            record.items()
-        }
-        return processed_preview_records
-    if preview_table_info is None:
-        return None
-    name_keyed_preview_table_info = {
-        v['table'].name: v for k, v in preview_table_info.items()
-    }
-    identifier_converted_preview_objs = []
-    for preview_obj in preview_objs:
-        table_name = preview_obj['table']
-        table = name_keyed_preview_table_info[table_name]['table']
-        table_id = table.id
-        referent_column_name_id_map = table.get_column_name_id_bidirectional_map()
-        records = preview_obj['data']
-        column_map = referent_column_name_id_map
-        processed_preview_records = [
-            record_dict
-            for record_dict in (_convert_record_name_key_to_id(record, column_map) for record in records)
-        ]
-        processed_preview_obj = {
-            'table': table_id,
-            'data': processed_preview_records
-        }
-        identifier_converted_preview_objs.append(processed_preview_obj)
-    return identifier_converted_preview_objs
+def process_annotated_records(record_list, column_name_id_map=None):
 
-
-def process_annotated_records(record_list, column_name_id_map):
     RESULT_IDX = 'result_indices'
 
     def _get_record_dict(record):
@@ -79,19 +43,32 @@ def process_annotated_records(record_list, column_name_id_map):
         *tuple(tuple(d.values()) for d in combined_records)
     )
 
-    def _replace_column_names_with_ids(group_metadata_item, table_column_name_id_map):
+    def _replace_column_names_with_ids(group_metadata_item):
         try:
             processed_group_metadata_item = {
-                table_column_name_id_map[k]: v for k, v in group_metadata_item.items()
+                column_name_id_map[k]: v for k, v in group_metadata_item.items()
             }
         except AttributeError:
+            # TODO why are we doing this catch? is this in case group_metadata_item is None? we
+            # should use an explicit None check in that case.
             processed_group_metadata_item = group_metadata_item
         return processed_group_metadata_item
+
+    def _use_correct_column_identifier(group_metadata_item):
+        """
+        If column_name_id_map is defined, the identifier to use is the column's Django ID. If
+        column_name_id_map is None, the identifier to use is the column's name/alias, in which
+        case, no processing is needed.
+        """
+        if column_name_id_map is not None:
+            return _replace_column_names_with_ids(group_metadata_item)
+        else:
+            return group_metadata_item
 
     if groups is not None:
         groups_by_id = {
             grp[group.GroupMetadataField.GROUP_ID.value]: {
-                k: _replace_column_names_with_ids(v, column_name_id_map) for k, v in grp.items()
+                k: _use_correct_column_identifier(v) for k, v in grp.items()
                 if k != group.GroupMetadataField.GROUP_ID.value
             } | {RESULT_IDX: []}
             for grp in groups

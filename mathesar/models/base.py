@@ -19,16 +19,19 @@ from db.constraints import utils as constraint_utils
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
-from db.records.operations.select import get_records as db_get_records
+from db.records.operations.select import get_records_with_default_order as db_get_records_with_default_order
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
+from db.tables.operations.move_columns import move_columns_between_related_tables
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tables.operations.split import extract_columns_from_table
+from db.records.operations.insert import insert_from_select
 
 from mathesar import reflection
+from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
@@ -86,7 +89,7 @@ class DatabaseObject(ReflectionManagerMixin, BaseModel):
 
 # TODO: Replace with a proper form of caching
 # See: https://github.com/centerofci/mathesar/issues/280
-_engines = {}
+_engine_cache = {}
 
 
 class Database(ReflectionManagerMixin, BaseModel):
@@ -97,16 +100,17 @@ class Database(ReflectionManagerMixin, BaseModel):
 
     @property
     def _sa_engine(self):
-        global _engines
+        global _engine_cache
         # We're caching this since the engine is used frequently.
-        if self.name not in _engines:
-            engine = create_mathesar_engine(self.name)
-            _engines[self.name] = engine
-            return engine
-        else:
-            engine = _engines[self.name]
+        db_name = self.name
+        was_cached = db_name in _engine_cache
+        if was_cached:
+            engine = _engine_cache.get(db_name)
             model_utils.ensure_cached_engine_ready(engine)
-            return engine
+        else:
+            engine = create_mathesar_engine(db_name=db_name)
+            _engine_cache[db_name] = engine
+        return engine
 
     @property
     def supported_ui_types(self):
@@ -168,13 +172,15 @@ class Schema(DatabaseObject):
         cache.delete(cache_key)
 
 
-class Table(DatabaseObject):
+class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
     MODEL_FIELDS = ['import_verified']
 
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
+    import_target = models.ForeignKey('Table', blank=True, null=True, on_delete=models.SET_NULL)
+    is_temp = models.BooleanField(blank=True, null=True)
 
     class Meta:
         constraints = [
@@ -194,15 +200,15 @@ class Table(DatabaseObject):
             self.validate_unique()
         super().save(*args, **kwargs)
 
-    @cached_property
-    def _sa_engine(self):
-        return self.schema._sa_engine
-
+    # TODO referenced from outside so much that it probably shouldn't be private
     @cached_property
     def _sa_table(self):
+        # We're caching since we want different Django Table instances to return the same SA
+        # Table, when they're referencing the same Postgres table.
         try:
-            table = reflect_table_from_oid(
-                self.oid, self.schema._sa_engine,
+            sa_table = reflect_table_from_oid(
+                oid=self.oid,
+                engine=self._sa_engine,
             )
         # We catch these errors, since it lets us decouple the cadence of
         # overall DB reflection from the cadence of cache expiration for
@@ -210,30 +216,37 @@ class Table(DatabaseObject):
         # been altered, as opposed to other reasons for a 404 when
         # requesting a table.
         except (TypeError, IndexError):
-            table = table_utils.get_empty_table("MISSING")
-        return table
+            sa_table = table_utils.get_empty_table("MISSING")
+        return sa_table
 
+    # NOTE: it's a problem that we hve both _sa_table and _enriched_column_sa_table. at the moment
+    # it has to be this way because enriched column is not always interachangeable with sa column.
     @cached_property
     def _enriched_column_sa_table(self):
         return column_utils.get_enriched_column_table(
-            self._sa_table, engine=self._sa_engine,
+            table=self._sa_table,
+            engine=self._sa_engine,
         )
-
-    @cached_property
-    def name(self):
-        return self._sa_table.name
 
     @cached_property
     def sa_columns(self):
         return self._enriched_column_sa_table.columns
 
-    @property
-    def sa_constraints(self):
-        return self._sa_table.constraints
+    @cached_property
+    def _sa_engine(self):
+        return self.schema._sa_engine
+
+    @cached_property
+    def name(self):
+        return self._sa_table.name
 
     @property
     def sa_column_names(self):
         return self.sa_columns.keys()
+
+    @property
+    def sa_constraints(self):
+        return self._sa_table.constraints
 
     # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
@@ -277,12 +290,21 @@ class Table(DatabaseObject):
             self.schema._sa_engine, self._sa_table, column_definitions
         )
 
+    # TODO unused? delete if so
     @property
     def sa_all_records(self):
-        return db_get_records(self._sa_table, self.schema._sa_engine)
+        return db_get_records_with_default_order(
+            table=self._sa_table,
+            engine=self.schema._sa_engine,
+        )
 
-    def sa_num_records(self, filter=None):
-        return get_count(self._sa_table, self.schema._sa_engine, filter=filter)
+    def sa_num_records(self, filter=None, search=[]):
+        return get_count(
+            table=self._sa_table,
+            engine=self.schema._sa_engine,
+            filter=filter,
+            search=search,
+        )
 
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
@@ -293,6 +315,7 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
+    # TODO consider using **kwargs instead of forwarding params one-by-one
     def get_records(
         self,
         limit=None,
@@ -300,16 +323,18 @@ class Table(DatabaseObject):
         filter=None,
         order_by=[],
         group_by=None,
+        search=[],
         duplicate_only=None,
     ):
-        return db_get_records(
-            self._sa_table,
-            self.schema._sa_engine,
-            limit,
-            offset,
+        return db_get_records_with_default_order(
+            table=self._sa_table,
+            engine=self.schema._sa_engine,
+            limit=limit,
+            offset=offset,
             filter=filter,
             order_by=order_by,
             group_by=group_by,
+            search=search,
             duplicate_only=duplicate_only,
         )
 
@@ -346,6 +371,11 @@ class Table(DatabaseObject):
         columns_map = bidict({column.name: column.id for column in columns})
         return columns_map
 
+    def get_column_by_name(self, name):
+        columns = self.get_columns_by_name(name_list=[name])
+        if len(columns) > 0:
+            return columns[0]
+
     def get_columns_by_name(self, name_list):
         columns_by_name_dict = {
             col.name: col
@@ -359,22 +389,29 @@ class Table(DatabaseObject):
             in name_list
         ]
 
+    def move_columns(self, columns_to_move, target_table):
+        columns_attnum_to_move = [column.attnum for column in columns_to_move]
+        target_table_oid = target_table.oid
+        return move_columns_between_related_tables(
+            self.oid,
+            target_table_oid,
+            columns_attnum_to_move,
+            self.schema.name,
+            self._sa_engine
+        )
+
     def split_table(
             self,
             columns_to_extract,
             extracted_table_name,
-            remainder_table_name,
-            drop_original_table
     ):
-        columns_name_to_extract = [column.name for column in columns_to_extract]
+        columns_attnum_to_extract = [column.attnum for column in columns_to_extract]
         return extract_columns_from_table(
-            self.name,
-            columns_name_to_extract,
+            self.oid,
+            columns_attnum_to_extract,
             extracted_table_name,
-            remainder_table_name,
             self.schema.name,
-            self._sa_engine,
-            drop_original_table=drop_original_table
+            self._sa_engine
         )
 
     def update_column_reference(self, columns_name, column_name_id_map):
@@ -393,9 +430,18 @@ class Table(DatabaseObject):
             column_objs.append(column)
         Column.current_objects.bulk_update(column_objs, fields=['table_id', 'attnum'])
 
-    def insert_records_to_existing_table(existing_table, temp_table, mappings):
-        # TBD
-        pass
+    def insert_records_to_existing_table(self, existing_table, data_files, mappings=None):
+        from_table = self._sa_table
+        target_table = existing_table._sa_table
+        engine = self._sa_engine
+        data_file = data_files[0]
+        try:
+            table, _ = insert_from_select(from_table, target_table, engine, mappings)
+            data_file.table_imported_to = existing_table
+        except Exception as e:
+            # ToDo raise specific exceptions.
+            raise e
+        return table
 
 
 class Column(ReflectionManagerMixin, BaseModel):
@@ -428,7 +474,7 @@ class Column(ReflectionManagerMixin, BaseModel):
         return self.table._sa_engine
 
     # TODO probably shouldn't be private: a lot of code already references it.
-    @cached_property
+    @property
     def _sa_column(self):
         return self.table.sa_columns[self.name]
 

@@ -1,11 +1,11 @@
-import { faCalendarWeek } from '@fortawesome/free-solid-svg-icons';
 import type { FormValues } from '@mathesar-component-library/types';
-import type { Column } from '@mathesar/stores/table-data/types';
 import type {
   TimeStampDisplayOptions,
   TimeFormat,
   DateFormat,
+  Column,
 } from '@mathesar/api/tables/columns';
+import { iconUiTypeDateTime } from '@mathesar/icons';
 import type {
   AbstractTypeDbConfig,
   AbstractTypeConfigForm,
@@ -111,7 +111,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const dateTimeType: AbstractTypeConfiguration = {
-  icon: { data: faCalendarWeek, label: 'Date & Time' },
+  icon: { ...iconUiTypeDateTime, label: 'Date & Time' },
   defaultDbType: DB_TYPES.TIMESTAMP_WITH_TZ,
   cell: {
     type: 'datetime',

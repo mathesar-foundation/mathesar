@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from 'svelte';
-  import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
   import {
     InputGroup,
     Icon,
@@ -8,39 +7,40 @@
     Select,
   } from '@mathesar-component-library';
   import type { ComponentAndProps } from '@mathesar-component-library/types';
-  import type { FilterEntry } from '@mathesar/stores/table-data/types';
-  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
-  import DataTypeBasedInput from '@mathesar/components/cell/DataTypeBasedInput.svelte';
-  import type { CellColumnLike } from '@mathesar/components/cell/data-types/typeDefinitions';
   import type {
-    ProcessedTableColumn,
-    ProcessedTableColumnMap,
-  } from '../../utils';
+    FilterEntry,
+    ProcessedColumn,
+  } from '@mathesar/stores/table-data/types';
+  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
+  import DynamicInput from '@mathesar/components/cell/DynamicInput.svelte';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { getDbTypeBasedInputCap } from '@mathesar/components/cell/utils';
+  import { iconDelete } from '@mathesar/icons';
   import { validateFilterEntry } from './utils';
 
   const dispatch = createEventDispatcher();
-
-  export let processedTableColumnsMap: ProcessedTableColumnMap;
+  const tabularData = getTabularDataStoreFromContext();
 
   export let columnId: FilterEntry['columnId'] | undefined;
   export let conditionId: FilterEntry['conditionId'] | undefined;
   export let value: FilterEntry['value'] | undefined;
   export let noOfFilters: number;
 
-  $: columnIds = [...processedTableColumnsMap].map(([_columnId]) => _columnId);
+  $: ({ processedColumns } = $tabularData);
+  $: columnIds = [...$processedColumns].map(([_columnId]) => _columnId);
   $: processedSelectedColumn = columnId
-    ? processedTableColumnsMap.get(columnId)
+    ? $processedColumns.get(columnId)
     : undefined;
   $: selectedColumnFiltersMap =
     processedSelectedColumn?.allowedFiltersMap ??
-    (new Map() as ProcessedTableColumn['allowedFiltersMap']);
+    (new Map() as ProcessedColumn['allowedFiltersMap']);
   $: conditionIds = [...selectedColumnFiltersMap].map(
     ([_conditionId]) => _conditionId,
   );
   $: selectedCondition = conditionId
     ? selectedColumnFiltersMap.get(conditionId)
     : undefined;
-  $: selectedColumnInputCap = processedSelectedColumn?.dbTypeInputCap;
+  $: selectedColumnInputCap = processedSelectedColumn?.inputComponentAndProps;
 
   const initialNoOfFilters = noOfFilters;
   let showError = false;
@@ -60,7 +60,7 @@
 
   function getColumnName(_columnId?: FilterEntry['columnId']) {
     if (_columnId) {
-      return processedTableColumnsMap.get(_columnId)?.column.name ?? '';
+      return $processedColumns.get(_columnId)?.column.name ?? '';
     }
     return '';
   }
@@ -94,11 +94,8 @@
 
   function calculateInputCap(
     _selectedCondition?: AbstractTypeFilterDefinition,
-    _processedSelectedColumn?: ProcessedTableColumn,
-  ):
-    | { column: CellColumnLike }
-    | { componentAndProps: ComponentAndProps<unknown> }
-    | undefined {
+    _processedSelectedColumn?: ProcessedColumn,
+  ): ComponentAndProps | undefined {
     const parameterTypeId = _selectedCondition?.parameters[0];
     // If there are no parameters, show no input. eg., isEmpty
     if (typeof parameterTypeId === 'undefined') {
@@ -109,18 +106,15 @@
     // Check if the type is same as column's type.
     // If yes, pass down column's calculated cap.
     // If no, pass down the type directly.
-    const abstractTypeId =
-      _processedSelectedColumn?.abstractTypeOfColumn.identifier;
+    const abstractTypeId = _processedSelectedColumn?.abstractType.identifier;
     if (abstractTypeId === parameterTypeId && selectedColumnInputCap) {
-      return { componentAndProps: selectedColumnInputCap };
+      return selectedColumnInputCap;
     }
-    return {
-      column: {
-        type: parameterTypeId,
-        type_options: {},
-        display_options: {},
-      },
-    };
+    return getDbTypeBasedInputCap({
+      type: parameterTypeId,
+      type_options: {},
+      display_options: {},
+    });
   }
 
   $: inputCap = calculateInputCap(selectedCondition, processedSelectedColumn);
@@ -167,9 +161,9 @@
       triggerClass="filter-condition"
     />
     {#if inputCap}
-      <DataTypeBasedInput
+      <DynamicInput
+        componentAndProps={inputCap}
         bind:value
-        {...inputCap}
         on:input={() => {
           showError = true;
         }}
@@ -186,7 +180,7 @@
       class="filter-remove"
       on:click={() => dispatch('removeFilter')}
     >
-      <Icon data={faTrashAlt} />
+      <Icon {...iconDelete} />
     </Button>
   </InputGroup>
 </div>

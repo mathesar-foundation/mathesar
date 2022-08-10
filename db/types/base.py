@@ -1,5 +1,4 @@
 from enum import Enum
-import inspect
 
 from sqlalchemy import text, create_engine as sa_create_engine
 
@@ -30,11 +29,11 @@ class DatabaseType(OrderByIds):
     def is_available(self, engine, type_ids_on_database=None):
         """
         Returns true if this type is available on provided engine's database. For the sake of
-        optimizing IO, the result of _get_type_ids_on_database(engine) may be passed as the
+        optimizing IO, the result of get_type_ids_on_database(engine) may be passed as the
         type_ids_on_database parameter.
         """
         if type_ids_on_database is None:
-            type_ids_on_database = _get_type_ids_on_database(engine)
+            type_ids_on_database = get_type_ids_on_database(engine)
         is_type_in_database = self.id in type_ids_on_database
         return is_type_in_database
 
@@ -168,6 +167,8 @@ class MathesarCustomType(DatabaseType, Enum):
     MATHESAR_MONEY = 'mathesar_money'
     MULTICURRENCY_MONEY = 'multicurrency_money'
     URI = 'uri'
+    MATHESAR_JSON_OBJECT = 'mathesar_json_object'
+    MATHESAR_JSON_ARRAY = 'mathesar_json_array'
 
     def __new__(cls, unqualified_id):
         """
@@ -208,24 +209,6 @@ _known_custom_db_types = frozenset(mathesar_custom_type for mathesar_custom_type
 known_db_types = frozenset.union(_known_vanilla_db_types, _known_custom_db_types)
 
 
-def get_db_type_enum_from_id(db_type_id):
-    """
-    Gets an instance of either the PostgresType enum or the MathesarCustomType enum corresponding
-    to the provided db_type_id. If the id doesn't correspond to any of the mentioned enums,
-    returns None.
-
-    Input is case insensitive, because sometimes all-caps is used, while the canonical is all lower caps.
-    """
-    db_type_id = db_type_id.lower()
-    try:
-        return PostgresType(db_type_id)
-    except ValueError:
-        try:
-            return MathesarCustomType(db_type_id)
-        except ValueError:
-            return None
-
-
 # TODO improve name; currently its weird names serves to distinguish it from similarly named
 # methods throughout the codebase; should be renamed at earliest convenience.
 def get_available_known_db_types(engine):
@@ -233,7 +216,7 @@ def get_available_known_db_types(engine):
     Returns a tuple of DatabaseType instances that are not ignored and are available on provided
     engine.
     """
-    type_ids_on_database = _get_type_ids_on_database(engine)
+    type_ids_on_database = get_type_ids_on_database(engine)
     return tuple(
         db_type
         for db_type in known_db_types
@@ -247,34 +230,7 @@ def get_available_known_db_types(engine):
     )
 
 
-def get_db_type_enum_from_class(sa_type, engine):
-    if not inspect.isclass(sa_type):
-        # Instead of extracting classes from instances, we're supporting a single type of parameter
-        # and failing early so that the codebase is more homogenous.
-        raise Exception("Programming error: sa_type parameter must be a class, not an instance.")
-    db_type_id = _sa_type_class_to_db_type_id(sa_type, engine)
-    if db_type_id:
-        db_type = get_db_type_enum_from_id(db_type_id)
-        if db_type:
-            return db_type
-    raise UnknownDbTypeId
-
-
-class UnknownDbTypeId(Exception):
-    pass
-
-
-def _sa_type_class_to_db_type_id(sa_type_class, engine):
-    return _get_sa_type_class_id_from_ischema_names(sa_type_class, engine)
-
-
-def _get_sa_type_class_id_from_ischema_names(sa_type_class1, engine):
-    for db_type_id, sa_type_class2 in engine.dialect.ischema_names.items():
-        if sa_type_class1 == sa_type_class2:
-            return db_type_id
-
-
-def _get_type_ids_on_database(engine):
+def get_type_ids_on_database(engine):
     """
     Returns db type ids available on the database.
     """
@@ -294,3 +250,7 @@ def _get_type_ids_on_database(engine):
             in connection.execute(select_statement)
         )
         return db_type_ids
+
+
+class UnknownDbTypeId(Exception):
+    pass

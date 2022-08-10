@@ -32,4 +32,6 @@ urlpatterns = [
     path('<db_name>/', views.db_home, name="db_home"),
     path('<db_name>/schemas/', views.schemas, name="schemas"),
     path('<db_name>/<int:schema_id>/', views.schema_home, name="schema_home"),
+    path('<db_name>/<int:schema_id>/queries/', views.schema_home, name="query_list"),
+    path('<db_name>/<int:schema_id>/queries/<int:query_id>/', views.schema_home, name="query_home"),
 ]
