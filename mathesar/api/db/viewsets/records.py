@@ -43,6 +43,7 @@ class RecordViewSet(viewsets.ViewSet):
         order_by = serializer.validated_data['order_by']
         grouping = serializer.validated_data['grouping']
         search_fuzzy = serializer.validated_data['search_fuzzy']
+        fk_previews = serializer.validated_data['fk_previews']
         filter_processed = None
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
         column_ids_to_names = column_names_to_ids.inverse
@@ -69,6 +70,7 @@ class RecordViewSet(viewsets.ViewSet):
                 grouping=name_converted_group_by,
                 search=name_converted_search,
                 duplicate_only=serializer.validated_data['duplicate_only'],
+                show_preview=fk_previews
             )
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
             raise database_api_exceptions.BadFilterAPIException(

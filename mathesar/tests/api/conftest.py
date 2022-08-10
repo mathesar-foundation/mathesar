@@ -7,6 +7,7 @@ from sqlalchemy import Table as SATable
 from db.columns.operations.select import get_column_attnum_from_name
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
+from db.types.base import PostgresType
 from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
 
 
@@ -59,7 +60,7 @@ def two_foreign_key_tables(_create_two_tables):
 
 
 @pytest.fixture
-def publication_tables(_create_two_tables):
+def publication_tables(_create_two_tables, client):
     author_table, publisher_table, publication_table, checkouts_table = _create_two_tables(
         'mathesar/tests/data/relation_tables/author.csv',
         'mathesar/tests/data/relation_tables/publisher.csv',
@@ -81,6 +82,7 @@ def publication_tables(_create_two_tables):
     )
     checkouts_table_columns = checkouts_table.get_columns_by_name(["id", "publication"])
     checkouts_table_pk_column = checkouts_table_columns[0]
+    checkouts_table_publication_column = checkouts_table_columns[1]
     checkouts_table.add_constraint(
         UniqueConstraint(
             None,
@@ -91,6 +93,11 @@ def publication_tables(_create_two_tables):
     publication_publisher_column = publication_table_columns[1]
     publication_author_column = publication_table_columns[2]
     publication_co_author_column = publication_table_columns[3]
+    db_type = PostgresType.INTEGER
+    data = {"type": db_type.id}
+    client.patch(
+        f"/api/db/v0/tables/{publication_table.id}/columns/{publication_publisher_column.id}/", data=data
+    )
     publication_table.add_constraint(
         ForeignKeyConstraint(
             None,
@@ -100,14 +107,8 @@ def publication_tables(_create_two_tables):
             [publisher_table_pk_column.attnum], {}
         )
     )
-    publication_table.add_constraint(
-        ForeignKeyConstraint(
-            None,
-            publication_table.oid,
-            [publication_publisher_column.attnum],
-            author_table.oid,
-            [author_table_pk_column.attnum], {}
-        )
+    client.patch(
+        f"/api/db/v0/tables/{publication_table.id}/columns/{publication_author_column.id}/", data=data
     )
     publication_table.add_constraint(
         ForeignKeyConstraint(
@@ -118,6 +119,9 @@ def publication_tables(_create_two_tables):
             [author_table_pk_column.attnum], {}
         )
     )
+    client.patch(
+        f"/api/db/v0/tables/{publication_table.id}/columns/{publication_co_author_column.id}/", data=data
+    )
     publication_table.add_constraint(
         ForeignKeyConstraint(
             None,
@@ -127,13 +131,16 @@ def publication_tables(_create_two_tables):
             [author_table_pk_column.attnum], {}
         )
     )
+    client.patch(
+        f"/api/db/v0/tables/{checkouts_table.id}/columns/{checkouts_table_publication_column.id}/", data=data
+    )
     checkouts_table.add_constraint(
         ForeignKeyConstraint(
             None,
             checkouts_table.oid,
-            [publication_co_author_column.attnum],
-            author_table.oid,
-            [author_table_pk_column.attnum], {}
+            [checkouts_table_publication_column.attnum],
+            publication_table.oid,
+            [publication_table_pk_column.attnum], {}
         )
     )
     return author_table, publisher_table, publication_table, checkouts_table

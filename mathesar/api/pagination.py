@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from db.records.operations.group import GroupBy
 from mathesar.api.utils import get_table_or_404, process_annotated_records
+from mathesar.utils.preview import get_preview_info
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
@@ -47,6 +48,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         group_by=None,
         search=[],
         duplicate_only=None,
+        show_preview=None
     ):
         self.limit = self.get_limit(request)
         if self.limit is None:
@@ -55,7 +57,8 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         # TODO: Cache count value somewhere, since calculating it is expensive.
         self.count = table.sa_num_records(filter=filters, search=search)
         self.request = request
-
+        if show_preview:
+            get_preview_info(show_preview, table.id)
         return table.get_records(
             limit=self.limit,
             offset=self.offset,
@@ -93,6 +96,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         grouping={},
         search=[],
         duplicate_only=None,
+        show_preview=None
     ):
         group_by = GroupBy(**grouping) if grouping else None
         records = super().paginate_queryset(
@@ -104,6 +108,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             group_by=group_by,
             search=search,
             duplicate_only=duplicate_only,
+            show_preview=show_preview
         )
 
         if records:
