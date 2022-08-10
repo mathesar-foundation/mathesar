@@ -4,16 +4,39 @@ from unittest.mock import patch
 
 import pytest
 
+from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
-from mathesar.models.base import db_get_records_with_default_order
+from mathesar.models.base import Column, db_get_records_with_default_order
 from mathesar.models import base as models_base
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
+
+
+def _test_preview_response(preview_response, referent_table, referent_column, referred_value):
+    expected_preview_obj = next(
+        (
+            preview
+            for preview in preview_response
+            if preview['table'] == referent_table.id
+        ),
+        None
+    )
+    assert expected_preview_obj is not None
+    expected_preview_records = expected_preview_obj['data']
+    assert str(referent_column.id) in expected_preview_records[0]
+    expected_preview = next(
+        (
+            data for data in expected_preview_records
+            if data[str(referent_column.id)] == referred_value
+        ),
+        None
+    )
+    assert expected_preview is not None
 
 
 def test_record_list(create_patents_table, client):
@@ -707,6 +730,52 @@ def test_record_list_pagination_offset(create_patents_table, client):
     assert record_1_data[str(columns_id[3])] != record_2_data[str(columns_id[3])]
     assert record_1_data[str(columns_id[4])] != record_2_data[str(columns_id[4])]
     assert record_1_data[str(columns_id[5])] != record_2_data[str(columns_id[5])]
+
+
+def test_foreign_key_record_api_all_column_previews(publication_tables, client):
+    author_table, publisher_table, publication_tables, checkouts_table = publication_tables
+    response = client.get(f'/api/db/v0/tables/{checkouts_table.id}/records/', data={'fk_previews': 'all'})
+    response.json()
+
+
+def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, client):
+    referrer_table, referent_table = two_foreign_key_tables
+    referent_column = referent_table.get_columns_by_name(["Id"])[0]
+    referrer_table_columns = referrer_table.get_columns_by_name(
+        ["Id", "Center", "Affiliated Center", "Original Patent"]
+    )
+    referrer_table_column_ids = [referrer_column.id for referrer_column in referrer_table_columns]
+    Column.objects.filter(id__in=referrer_table_column_ids).update(display_options={'show_fk_preview': False})
+    referrer_table_pk = referrer_table_columns[0]
+    referrer_column_with_fk_preview = referrer_table_columns[1]
+    referrer_column_with_fk_preview.display_options = {'show_fk_preview': True}
+    referrer_column_with_fk_preview.save()
+    referrer_column_2 = referrer_table_columns[2]
+    self_referential_column = referrer_table_columns[3]
+
+    referrer_table.add_constraint(UniqueConstraint(None, referrer_table.oid, [referrer_table_pk.attnum]))
+    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
+    referrer_table.add_constraint(ForeignKeyConstraint(None,
+                                                       referrer_table.oid,
+                                                       [referrer_column_with_fk_preview.attnum],
+                                                       referent_table.oid,
+                                                       [referent_column.attnum], {}))
+    referrer_table.add_constraint(ForeignKeyConstraint(None,
+                                                       referrer_table.oid,
+                                                       [referrer_column_2.attnum],
+                                                       referent_table.oid,
+                                                       [referent_column.attnum], {}))
+    referrer_table.add_constraint(ForeignKeyConstraint(None,
+                                                       referrer_table.oid,
+                                                       [self_referential_column.attnum],
+                                                       referrer_table.oid,
+                                                       [referrer_table_pk.attnum], {}))
+    response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'auto'})
+    assert response.status_code == 200
+    response_data = response.json()
+    referred_value = '1'
+    preview_response = response_data['previews']
+    _test_preview_response(preview_response, referent_table, referent_column, referred_value)
 
 
 def test_record_detail(create_patents_table, client):

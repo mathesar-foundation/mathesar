@@ -5,6 +5,7 @@ from sqlalchemy import Column, INTEGER, VARCHAR, MetaData, BOOLEAN, TIMESTAMP, t
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.select import get_column_attnum_from_name
+from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
 
@@ -58,13 +59,84 @@ def two_foreign_key_tables(_create_two_tables):
 
 
 @pytest.fixture
-def publication_table(_create_two_tables):
-    return _create_two_tables(
+def publication_tables(_create_two_tables):
+    author_table, publisher_table, publication_table, checkouts_table = _create_two_tables(
         'mathesar/tests/data/relation_tables/author.csv',
         'mathesar/tests/data/relation_tables/publisher.csv',
         'mathesar/tests/data/relation_tables/publication.csv',
         'mathesar/tests/data/relation_tables/items.csv',
     )
+    author_table_pk_column = author_table.get_column_by_name("id")
+    author_table.add_constraint(UniqueConstraint(None, author_table.oid, [author_table_pk_column.attnum]))
+    publisher_table_pk_column = publisher_table.get_column_by_name("id")
+    publisher_table.add_constraint(UniqueConstraint(None, publisher_table.oid, [publisher_table_pk_column.attnum]))
+    publication_table_columns = publication_table.get_columns_by_name(["id", "publisher", "author", "co_author"])
+    publication_table_pk_column = publication_table_columns[0]
+    publication_table.add_constraint(
+        UniqueConstraint(
+            None,
+            publication_table.oid,
+            [publication_table_pk_column.attnum]
+        )
+    )
+    checkouts_table_columns = checkouts_table.get_columns_by_name(["id", "publication"])
+    checkouts_table_pk_column = checkouts_table_columns[0]
+    checkouts_table.add_constraint(
+        UniqueConstraint(
+            None,
+            checkouts_table.oid,
+            [checkouts_table_pk_column.attnum]
+        )
+    )
+    publication_publisher_column = publication_table_columns[1]
+    publication_author_column = publication_table_columns[2]
+    publication_co_author_column = publication_table_columns[3]
+    publication_table.add_constraint(
+        ForeignKeyConstraint(
+            None,
+            publication_table.oid,
+            [publication_publisher_column.attnum],
+            publisher_table.oid,
+            [publisher_table_pk_column.attnum], {}
+        )
+    )
+    publication_table.add_constraint(
+        ForeignKeyConstraint(
+            None,
+            publication_table.oid,
+            [publication_publisher_column.attnum],
+            author_table.oid,
+            [author_table_pk_column.attnum], {}
+        )
+    )
+    publication_table.add_constraint(
+        ForeignKeyConstraint(
+            None,
+            publication_table.oid,
+            [publication_author_column.attnum],
+            author_table.oid,
+            [author_table_pk_column.attnum], {}
+        )
+    )
+    publication_table.add_constraint(
+        ForeignKeyConstraint(
+            None,
+            publication_table.oid,
+            [publication_co_author_column.attnum],
+            author_table.oid,
+            [author_table_pk_column.attnum], {}
+        )
+    )
+    checkouts_table.add_constraint(
+        ForeignKeyConstraint(
+            None,
+            checkouts_table.oid,
+            [publication_co_author_column.attnum],
+            author_table.oid,
+            [author_table_pk_column.attnum], {}
+        )
+    )
+    return author_table, publisher_table, publication_table, checkouts_table
 
 
 @pytest.fixture
