@@ -58,6 +58,16 @@ def two_foreign_key_tables(_create_two_tables):
 
 
 @pytest.fixture
+def publication_table(_create_two_tables):
+    return _create_two_tables(
+        'mathesar/tests/data/relation_tables/author.csv',
+        'mathesar/tests/data/relation_tables/publisher.csv',
+        'mathesar/tests/data/relation_tables/publication.csv',
+        'mathesar/tests/data/relation_tables/items.csv',
+    )
+
+
+@pytest.fixture
 def two_multi_column_foreign_key_tables(_create_two_tables):
     return _create_two_tables(
         'mathesar/tests/data/multi_column_foreign_key_base_table.csv',
@@ -75,9 +85,9 @@ def two_invalid_related_data_foreign_key_tables(_create_two_tables):
 
 @pytest.fixture
 def _create_two_tables(create_table, get_uid):
-    def _create(csv_filepath1, csv_filepath2, table_name1=get_uid(), table_name2=get_uid(), schema_name=get_uid()):
-        two_csv_filepaths = (csv_filepath1, csv_filepath2)
-        two_table_names = (table_name1, table_name2)
+    def _create(*csv_files):
+        table_names = [get_uid() for i in range(len(csv_files))]
+        schema_name = get_uid()
         return tuple(
             create_table(
                 table_name=table_name,
@@ -85,7 +95,7 @@ def _create_two_tables(create_table, get_uid):
                 csv_filepath=csv_filepath,
             )
             for table_name, csv_filepath
-            in zip(two_table_names, two_csv_filepaths)
+            in zip(table_names, csv_files)
         )
     return _create
 
