@@ -1,6 +1,5 @@
 import type { Column } from '@mathesar/api/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type { ConstraintType } from '@mathesar/api/tables/constraints';
 
 // The types here are frontend types and are
 // different from db types.
@@ -31,9 +30,3 @@ export interface CellComponentFactory {
     config?: Record<string, unknown>,
   ): ComponentAndProps;
 }
-
-// Re-exporting this from here
-// so that the component that are used commonly
-// across multiple contexts and not just table
-// can use it
-export { ConstraintType };
