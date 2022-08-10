@@ -10,7 +10,7 @@
   } from '@mathesar/components/sheet';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import ColumnName from '@mathesar/components/ColumnName.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconRefresh } from '@mathesar/icons';
   import type QueryManager from '../QueryManager';
 

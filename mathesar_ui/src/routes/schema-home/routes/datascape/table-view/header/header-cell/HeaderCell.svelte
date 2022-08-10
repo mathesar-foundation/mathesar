@@ -17,9 +17,9 @@
     Meta,
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
-  import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { iconExpandRight, iconConfigure } from '@mathesar/icons';
+  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
 
@@ -146,7 +146,7 @@
     contentClass="no-max-height column-opts-content"
     on:close={setDefaultView}
   >
-    <ColumnName slot="trigger" {column} />
+    <TableColumnName slot="trigger" column={processedColumn} />
     <svelte:fragment slot="content">
       <div class="container">
         <div class="section type-header">
