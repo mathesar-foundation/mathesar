@@ -98,7 +98,7 @@ export class Meta {
 
   filtering: Writable<Filtering>;
 
-  selectedRows = new WritableSet<RowKey>();
+  // selectedRows = new WritableSet<RowKey>();
 
   cellClientSideErrors = new WritableMap<CellKey, string[]>();
 

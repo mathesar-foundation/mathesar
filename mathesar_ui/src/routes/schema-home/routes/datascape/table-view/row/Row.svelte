@@ -22,7 +22,7 @@
   $: ({ recordsData, columnsDataStore, meta, display, processedColumns } =
     $tabularData);
   $: ({
-    selectedRows,
+    // selectedRows,
     rowStatus,
     rowCreationStatus,
     cellModificationStatus,
@@ -35,7 +35,8 @@
   $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
-  $: isSelected = $selectedRows.has(rowKey);
+  // TODO: Re-calculate this from cell selection
+  $: isSelected = false; // TODO: $selectedRows.has(rowKey);
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
@@ -129,25 +130,25 @@
       align-items: center;
       height: 100%;
 
-      :global(.checkbox) {
-        display: none;
-      }
+      // :global(.checkbox) {
+      //   display: none;
+      // }
     }
 
-    &:not(.group) {
-      &:hover,
-      &.selected {
-        .row-control {
-          :global(.checkbox) {
-            display: inline-flex;
-          }
+    // &:not(.group) {
+    //   &:hover,
+    //   &.selected {
+    //     .row-control {
+    //       // :global(.checkbox) {
+    //       //   display: inline-flex;
+    //       // }
 
-          :global(.number) {
-            display: none;
-          }
-        }
-      }
-    }
+    //       // :global(.number) {
+    //       //   display: none;
+    //       // }
+    //     }
+    //   }
+    // }
 
     &.is-add-placeholder {
       cursor: pointer;
