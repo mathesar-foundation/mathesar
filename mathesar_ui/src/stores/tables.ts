@@ -176,3 +176,13 @@ export const tables: Readable<DBTablesStoreData> = derived(
 export function getTableName(id: DBObjectEntry['id']): string | undefined {
   return get(tables).data.get(id)?.name;
 }
+
+export const currentTableId = writable<number | undefined>(undefined);
+
+export const currentTable = derived(
+  [currentTableId, tables],
+  ([$currentTableId, $tables]) =>
+    $currentTableId === undefined
+      ? undefined
+      : $tables.data.get($currentTableId),
+);
