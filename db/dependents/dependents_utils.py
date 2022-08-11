@@ -9,12 +9,14 @@ def get_dependents_graph(referenced_object_id, engine):
     all_dependent_objects_statement = _get_all_dependent_objects_statement(engine)
     all_cte = all_dependent_objects_statement.cte(recursive=True, name='all')
 
+    # anchor member which includes all dependents of a requested object
     topq = select(
         all_cte,
         literal(1).label('level'),
         array([all_cte.c.refobjid]).label('chain')).where(all_cte.c.refobjid == referenced_object_id).where(all_cte.c.objid != referenced_object_id)
     topq = topq.cte('cte')
 
+    # recursive member which includes dependents for each object of the previous level
     bottomq = select(
         all_cte,
         (topq.c.level + 1).label('level'),
@@ -30,6 +32,8 @@ def get_dependents_graph(referenced_object_id, engine):
     with engine.connect() as conn:
         result = conn.execute(q)
 
+    # initial way of structuring the final response
+    # TODO: extract in a separate function
     final = []
     for r in result:
         d = {}
@@ -41,6 +45,7 @@ def get_dependents_graph(referenced_object_id, engine):
     return final
 
 
+# finding table dependents based on foreign key constraints from the referenced tables
 def _get_table_dependents(foreign_key_dependents, pg_constraint):
     pg_identify_object = select(
         column("name"),
@@ -53,6 +58,7 @@ def _get_table_dependents(foreign_key_dependents, pg_constraint):
             0)) \
         .lateral()
 
+    # conrelid in this case is the oid of the table which a constraint resides in
     return select(
         pg_constraint.c.conrelid.label('objid'),
         foreign_key_dependents.c.refobjid,
@@ -81,8 +87,9 @@ def _get_foreign_key_constraint_dependents(pg_identify_object, base):
     return base.where(pg_identify_object.c.type == 'table constraint')
 
 
-def _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object, referenced_object_id=None):
-    res = select(
+# getting a full list of dependents and identifying them
+def _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object):
+    result = select(
         pg_depend.c.objid,
         pg_depend.c.refobjid,
         func.array_agg(pg_depend.c.objsubid).label('column_number'),
@@ -104,7 +111,7 @@ def _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object, ref
             pg_identify_object.c.identity,
             pg_depend.c.deptype)
 
-    return res if referenced_object_id is None else res.where(pg_depend.c.refobjid == referenced_object_id)
+    return result
 
 
 def _get_pg_depend(engine, metadata):
@@ -141,6 +148,8 @@ def _get_all_dependent_objects_statement(engine):
     pg_identify_object = _get_pg_identify_object_lateral(pg_depend)
     pg_constraint = _get_pg_constraint(engine, metadata)
 
+    # each statement filters the base statement extracting dependents of a specific type
+    # so it's easy to exclude particular types or add new
     base_stmt = _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object)
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, base_stmt).cte('foreign_key_constraint_dependents')
     table_dependents = _get_table_dependents(foreign_key_constraint_dependents, pg_constraint).cte('table_dependents')

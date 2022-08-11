@@ -11,6 +11,7 @@ class DependentMathesarObjectSerializer(serializers.Serializer):
     def _get_object_type(self, instance):
         return instance.get('type', None)
 
+    # TODO: get ids of supported objects on a previous step in batches
     def to_representation(self, instance):
         object_oid = instance.get('objid', None)
         object_type = self._get_object_type(instance)
