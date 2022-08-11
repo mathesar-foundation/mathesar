@@ -18,8 +18,8 @@ def create_foreign_key_link(
         unique_link=False
 ):
     with engine.begin() as conn:
-        referent_table = reflect_table_from_oid(referent_table_oid, engine, conn)
-        referrer_table = reflect_table_from_oid(referrer_table_oid, engine, conn)
+        referent_table = reflect_table_from_oid(referent_table_oid, engine, connection_to_use=conn)
+        referrer_table = reflect_table_from_oid(referrer_table_oid, engine, connection_to_use=conn)
         primary_key_column = get_primary_key_column(referent_table)
         metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
         opts = {
@@ -47,7 +47,7 @@ def create_foreign_key_link(
 def create_many_to_many_link(engine, schema, map_table_name, referents):
     with engine.begin() as conn:
         referent_tables_oid = [referent['referent_table'] for referent in referents]
-        referent_tables = reflect_tables_from_oids(referent_tables_oid, engine, conn)
+        referent_tables = reflect_tables_from_oids(referent_tables_oid, engine, connection_to_use=conn)
         metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
         # Throws sqlalchemy.exc.NoReferencedTableError if metadata is not reflected.
         metadata.reflect()

@@ -119,7 +119,10 @@
     const { clientHeight, scrollHeight, scrollTop, scrollLeft } =
       event.target as HTMLElement;
     requestResetIsScrolling = true;
-    horizontalScrollOffset = scrollLeft;
+    if (horizontalScrollOffset !== scrollLeft) {
+      horizontalScrollOffset = scrollLeft;
+      dispatch('h-scroll', horizontalScrollOffset);
+    }
 
     // Scroll position may have been updated directly
     // In which case we don't need to trigger another render,
@@ -133,12 +136,16 @@
       isScrolling = true;
       scrollDirection = scrollOffset < newScrollOffset ? 'forward' : 'backward';
       scrollOffset = newScrollOffset;
+      dispatch('scroll', scrollOffset);
     }
   }
 
   function onHorizontalScroll(event: Event): void {
     const { scrollLeft } = event.target as HTMLElement;
-    horizontalScrollOffset = scrollLeft;
+    if (horizontalScrollOffset !== scrollLeft) {
+      horizontalScrollOffset = scrollLeft;
+      dispatch('h-scroll', horizontalScrollOffset);
+    }
   }
 
   onMount(() => {

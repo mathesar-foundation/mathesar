@@ -6,11 +6,6 @@
     InputGroup,
     Button,
   } from '@mathesar-component-library';
-  import {
-    faFileContract,
-    faUndo,
-    faRedo,
-  } from '@fortawesome/free-solid-svg-icons';
   import EditableTitle from '@mathesar/components/EditableTitle.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
@@ -18,14 +13,19 @@
   import type { TableEntry } from '@mathesar/api/tables/tableList';
   import { queries } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
+  import { iconQuery, iconRedo, iconUndo } from '@mathesar/icons';
   import type QueryManager from './QueryManager';
-  import type { QueryInitialColumn } from './QueryModel';
+  import InputColumnsManager from './InputColumnsManager';
+  import type { ColumnWithLink } from './InputColumnsManager';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
-  import ResultPane from './ResultPane.svelte';
+  import ResultPane from './result-pane/ResultPane.svelte';
+  import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
 
   const dispatch = createEventDispatcher();
 
   export let queryManager: QueryManager;
+
+  const inputColumnsManager = new InputColumnsManager();
 
   $: ({ query, state } = queryManager);
 
@@ -33,21 +33,35 @@
     ? $tablesDataStore.data.get($query.base_table)
     : undefined;
 
+  $: void inputColumnsManager.setBaseTable(currentTable);
+
   function onBaseTableChange(tableEntry: TableEntry | undefined) {
     void queryManager.update((q) =>
       q.withBaseTable(tableEntry ? tableEntry.id : undefined),
     );
+    queryManager.clearSelectedColumn();
   }
 
-  function addColumn(column: QueryInitialColumn) {
-    void queryManager.update((q) => q.addColumn(column));
+  function addColumn(column: ColumnWithLink) {
+    const baseAlias = `${column.tableName}_${column.name}`;
+    const allAliases = new Set($query.initial_columns.map((c) => c.alias));
+    const alias = getAvailableName(baseAlias, allAliases);
+    void queryManager.update((q) =>
+      q.withColumn({
+        alias,
+        id: column.id,
+        jp_path: column.jpPath,
+        display_name: alias,
+      }),
+    );
+    queryManager.selectColumn(alias);
   }
 
   function handleQueryNameChange(e: Event) {
     const target = e.target as HTMLInputElement;
     if (target.value.trim() === '') {
       target.value = getAvailableName(
-        'New_Query',
+        'New_Exploration',
         new Set([...$queries.data.values()].map((q) => q.name)),
       );
     }
@@ -58,7 +72,7 @@
 <div class="query-builder">
   <div class="title-bar">
     <div class="icon">
-      <Icon data={faFileContract} size="2em" />
+      <Icon {...iconQuery} size="2em" />
     </div>
     <div class="name">
       <EditableTitle
@@ -75,7 +89,7 @@
           disabled={!$state.isUndoPossible}
           on:click={() => queryManager.undo()}
         >
-          <Icon data={faUndo} />
+          <Icon {...iconUndo} />
           <span>Undo</span>
         </Button>
         <Button
@@ -83,7 +97,7 @@
           disabled={!$state.isRedoPossible}
           on:click={() => queryManager.redo()}
         >
-          <Icon data={faRedo} />
+          <Icon {...iconRedo} />
           <span>Redo</span>
         </Button>
         <Button appearance="plain" on:click={() => dispatch('close')}
@@ -97,19 +111,22 @@
       <div class="base-table-selector">
         <LabeledInput label="Select Base Table" layout="stacked">
           <SelectTableWithinCurrentSchema
-            prependBlank
+            initialSelectionType="empty"
             table={currentTable}
             on:change={(e) => onBaseTableChange(e.detail)}
           />
         </LabeledInput>
       </div>
       <ColumnSelectionPane
-        baseTable={currentTable}
+        {inputColumnsManager}
         on:add={(e) => addColumn(e.detail)}
       />
     </div>
+    <!-- Do not use inputColumnManager in ResultPane because
+      we'd also use ResultPane for query page where input column
+      details would not be available-->
     <ResultPane {queryManager} />
-    <div class="output-config-sidebar" />
+    <OutputConfigSidebar {queryManager} {inputColumnsManager} />
   </div>
 </div>
 
@@ -172,11 +189,11 @@
       right: 0;
 
       .input-sidebar {
-        width: 22rem;
+        width: 20rem;
         border-right: 1px solid #efefef;
         flex-shrink: 0;
         flex-grow: 0;
-        flex-basis: 22rem;
+        flex-basis: 20rem;
         display: flex;
         flex-direction: column;
 
@@ -187,8 +204,6 @@
           flex-grow: 0;
           flex-shrink: 0;
         }
-      }
-      .output-config-sidebar {
       }
     }
   }

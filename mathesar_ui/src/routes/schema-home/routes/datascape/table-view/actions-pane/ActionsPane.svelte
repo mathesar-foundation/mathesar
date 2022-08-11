@@ -1,17 +1,4 @@
 <script lang="ts">
-  import {
-    faFilter,
-    faSort,
-    faListAlt,
-    faTrashAlt,
-    faSync,
-    faExclamationTriangle,
-    faPlus,
-    faCog,
-    faICursor,
-    faKey,
-    faLink,
-  } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import {
     Button,
@@ -19,6 +6,7 @@
     Dropdown,
     DropdownMenu,
     MenuItem,
+    iconError,
   } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { refetchTablesForSchema, deleteTable } from '@mathesar/stores/tables';
@@ -28,6 +16,18 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
+  import {
+    iconAddNew,
+    iconRename,
+    iconDelete,
+    iconFiltering,
+    iconConstraint,
+    iconTableLink,
+    iconGrouping,
+    iconConfigure,
+    iconSorting,
+    iconRefresh,
+  } from '@mathesar/icons';
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import Sort from './record-operations/Sort.svelte';
@@ -81,19 +81,14 @@
 </script>
 
 <div class="actions-pane">
-  <DropdownMenu label="Table" icon={{ data: faCog }}>
-    <MenuItem
-      on:click={() => tableRenameModal.open()}
-      icon={{ data: faICursor }}
-    >
+  <DropdownMenu label="Table" icon={iconConfigure}>
+    <MenuItem on:click={() => tableRenameModal.open()} icon={iconRename}>
       Rename
     </MenuItem>
-    <MenuItem on:click={handleDeleteTable} icon={{ data: faTrashAlt }}>
-      Delete
-    </MenuItem>
+    <MenuItem on:click={handleDeleteTable} icon={iconDelete}>Delete</MenuItem>
     <MenuItem
       on:click={() => tableConstraintsModal.open()}
-      icon={{ data: faKey }}
+      icon={iconConstraint}
     >
       Constraints
     </MenuItem>
@@ -112,7 +107,7 @@
 
   <Dropdown showArrow={false} contentClass="filter-dropdown-content">
     <svelte:fragment slot="trigger">
-      <Icon data={faFilter} size="0.8em" />
+      <Icon {...iconFiltering} size="0.8em" />
       <span>
         Filters
         {#if $filtering.entries.length > 0}
@@ -127,7 +122,7 @@
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
-      <Icon data={faSort} />
+      <Icon {...iconSorting} />
       <span>
         Sort
         {#if $sorting.size > 0}
@@ -142,7 +137,7 @@
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
-      <Icon data={faListAlt} />
+      <Icon {...iconGrouping} />
       <span>
         Group
         {#if $grouping.size > 0}
@@ -162,7 +157,7 @@
     size="small"
     on:click={() => recordsData.addEmptyRecord()}
   >
-    <Icon data={faPlus} />
+    <Icon {...iconAddNew} />
     <span>New Record</span>
   </Button>
 
@@ -173,13 +168,13 @@
     size="small"
     on:click={() => linkTableModal.open()}
   >
-    <Icon data={faLink} />
+    <Icon {...iconTableLink} />
     <span>Link Table</span>
   </Button>
 
   {#if $selectedRows.size > 0}
     <Button size="small" on:click={() => recordsData.deleteSelected()}>
-      <Icon data={faTrashAlt} />
+      <Icon {...iconDelete} />
       <span>
         Delete {$selectedRows.size} records
       </span>
@@ -194,7 +189,7 @@
   <div class="loading-info">
     <Button size="small" disabled={isLoading} on:click={refresh}>
       <Icon
-        data={isError && !isLoading ? faExclamationTriangle : faSync}
+        {...isError && !isLoading ? iconError : iconRefresh}
         spin={isLoading}
       />
       <span>

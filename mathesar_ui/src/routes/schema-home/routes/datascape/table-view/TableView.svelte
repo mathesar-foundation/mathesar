@@ -19,7 +19,8 @@
   setTabularDataStoreInContext(tabularDataContextStore);
 
   $: tabularDataContextStore.set(tabularData);
-  $: ({ processedColumns } = tabularData);
+  $: ({ processedColumns, display } = tabularData);
+  $: ({ horizontalScrollOffset, scrollOffset } = display);
 
   $: sheetColumns = [
     { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
@@ -41,6 +42,8 @@
       columns={sheetColumns}
       getColumnIdentifier={(entry) => entry.column.id}
       {columnWidths}
+      bind:horizontalScrollOffset={$horizontalScrollOffset}
+      bind:scrollOffset={$scrollOffset}
     >
       <Header />
       <Body />

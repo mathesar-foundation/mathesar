@@ -3,6 +3,15 @@ from mathesar.models.query import UIQuery
 
 
 @pytest.fixture
+def academics_ma_tables(db_table_to_dj_table, academics_db_tables):
+    return {
+        table_name: db_table_to_dj_table(db_table)
+        for table_name, db_table
+        in academics_db_tables.items()
+    }
+
+
+@pytest.fixture
 def minimal_patents_query(create_patents_table, get_uid):
     base_table = create_patents_table(table_name=get_uid())
     initial_columns = [

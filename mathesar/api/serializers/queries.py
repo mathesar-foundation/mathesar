@@ -1,6 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 from mathesar.models.query import UIQuery
+from django.core.exceptions import ValidationError
 
 
 class QuerySerializer(serializers.ModelSerializer):
@@ -32,3 +33,9 @@ class QuerySerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(reverse('query-columns', kwargs={'pk': obj.pk}))
         else:
             return None
+
+    def validate(self, attrs):
+        unexpected_fields = set(self.initial_data) - set(self.fields)
+        if unexpected_fields:
+            raise ValidationError(f"Unexpected field(s): {unexpected_fields}")
+        return attrs

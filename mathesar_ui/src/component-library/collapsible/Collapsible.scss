@@ -1,4 +1,6 @@
 .collapsible {
+  position: relative;
+
   .collapsible-header {
     display: flex;
     width: 100%;
@@ -11,5 +13,8 @@
       flex-shrink: 0;
       flex-grow: 0;
     }
+  }
+  .collapsible-content {
+    position: relative;
   }
 }

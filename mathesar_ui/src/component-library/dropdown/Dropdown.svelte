@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
   import type { Placement } from '@popperjs/core/lib/enums';
   import type {
     Appearance,
@@ -8,6 +7,7 @@
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
 
+  import { iconExpandDown } from '@mathesar-component-library-dir/common/icons';
   import AttachableDropdown from './AttachableDropdown.svelte';
 
   export let triggerClass = '';
@@ -67,7 +67,7 @@
   </span>
   {#if showArrow}
     <span class="arrow">
-      <Icon data={faAngleDown} />
+      <Icon {...iconExpandDown} />
     </span>
   {/if}
 </Button>

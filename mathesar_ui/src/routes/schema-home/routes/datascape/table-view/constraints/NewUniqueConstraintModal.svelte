@@ -12,10 +12,11 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
   import FormField from '@mathesar/components/FormField.svelte';
-  import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { toast } from '@mathesar/stores/toast';
   import Form from '@mathesar/components/Form.svelte';
   import { getAvailableName } from '@mathesar/utils/db';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
   import UniqueConstraintsHelp from './__help__/UniqueConstraintsHelp.svelte';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
   import UniqueConstraintColumnsHelp from './__help__/UniqueConstraintColumnsHelp.svelte';
@@ -33,10 +34,10 @@
 
   function getSuggestedName(
     _tableName: string,
-    _columns: Column[],
+    _columns: ProcessedColumn[],
     reservedNames: Set<string>,
   ): string {
-    const columnNames = _columns.map((c) => c.name);
+    const columnNames = _columns.map((c) => c.column.name);
     const desiredName = `${_tableName}_${columnNames.join('_')}`;
     return getAvailableName(desiredName, reservedNames);
   }
@@ -58,7 +59,7 @@
     return [];
   }
 
-  let constraintColumns: Column[] = [];
+  let constraintColumns: ProcessedColumn[] = [];
   let namingStrategy: NamingStrategy = 'auto';
   let constraintName: string | undefined;
 
@@ -73,8 +74,8 @@
     $constraintsDataStore.constraints.map((c) => c.name),
   );
   $: tableName = $tables.data.get($tabularData.id)?.name ?? '';
-  $: columnsDataStore = $tabularData.columnsDataStore;
-  $: columnsInTable = $columnsDataStore.columns;
+  $: ({ processedColumns } = $tabularData);
+  $: columnsInTable = Array.from($processedColumns.values());
   $: nameValidationErrors = getNameValidationErrors(
     namingStrategy,
     constraintName,
@@ -122,9 +123,11 @@
       <CheckboxGroup
         options={columnsInTable}
         bind:values={constraintColumns}
-        getCheckboxLabel={(c) => ({
-          component: ColumnName,
-          props: { column: c },
+        getCheckboxLabel={(column) => ({
+          component: TableColumnName,
+          props: {
+            column,
+          },
         })}
       >
         Columns <UniqueConstraintColumnsHelp />
