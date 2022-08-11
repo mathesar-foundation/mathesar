@@ -50,3 +50,4 @@ class BaseDependentObjectSerializer(
 class DependentSerializer(serializers.Serializer):
     obj = BaseDependentObjectSerializer()
     parent_obj = BaseDependentObjectSerializer()
+    level = serializers.IntegerField()

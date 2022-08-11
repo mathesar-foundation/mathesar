@@ -1,3 +1,4 @@
+from tkinter import N
 from sqlalchemy import MetaData, Table, any_, case, column, exists, func, literal, select, text, true, union
 from sqlalchemy.dialects.postgresql import array
 
@@ -5,14 +6,22 @@ from sqlalchemy.dialects.postgresql import array
 USER_DEFINED_OBJECTS_MIN_OID = 16384
 
 
-def get_dependents_graph(referenced_object_id, engine):
+def get_dependents_graph(referenced_object_id, engine, attnum=None):
     all_dependent_objects_statement = _get_all_dependent_objects_statement(engine)
     all_cte = all_dependent_objects_statement.cte(recursive=True, name='all')
 
     topq = select(
         all_cte,
         literal(1).label('level'),
-        array([all_cte.c.refobjid]).label('chain')).where(all_cte.c.refobjid == referenced_object_id).where(all_cte.c.objid != referenced_object_id)
+        array([all_cte.c.refobjid]).label('chain')) \
+        .where(all_cte.c.refobjid == referenced_object_id) \
+        .where(all_cte.c.objid != referenced_object_id)
+
+    if attnum is not None:
+        topq = topq.where(all_cte.c.refobjsubid == attnum) \
+            .where(all_cte.c.objsubid != attnum)
+
+    # TODO: add refobjsubid everywhere
     topq = topq.cte('cte')
 
     bottomq = select(
@@ -55,8 +64,9 @@ def _get_table_dependents(foreign_key_dependents, pg_constraint):
 
     return select(
         pg_constraint.c.conrelid.label('objid'),
+        foreign_key_dependents.c.objsubid,
         foreign_key_dependents.c.refobjid,
-        foreign_key_dependents.c.column_number,
+        foreign_key_dependents.c.refobjsubid,
         pg_identify_object.c.name,
         pg_identify_object.c.schema,
         pg_identify_object.c.type,
@@ -68,8 +78,9 @@ def _get_table_dependents(foreign_key_dependents, pg_constraint):
         .where(pg_constraint.c.confrelid != 0) \
         .group_by(
             pg_constraint.c.conrelid,
+            foreign_key_dependents.c.objsubid,
             foreign_key_dependents.c.refobjid,
-            foreign_key_dependents.c.column_number,
+            foreign_key_dependents.c.refobjsubid,
             pg_identify_object.c.type,
             pg_identify_object.c.name,
             pg_identify_object.c.schema,
@@ -81,11 +92,12 @@ def _get_foreign_key_constraint_dependents(pg_identify_object, base):
     return base.where(pg_identify_object.c.type == 'table constraint')
 
 
-def _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object, referenced_object_id=None):
+def _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object):
     res = select(
         pg_depend.c.objid,
+        pg_depend.c.objsubid,
         pg_depend.c.refobjid,
-        func.array_agg(pg_depend.c.objsubid).label('column_number'),
+        pg_depend.c.refobjsubid,
         pg_identify_object.c.name,
         pg_identify_object.c.schema,
         pg_identify_object.c.type,
@@ -97,14 +109,16 @@ def _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object, ref
         .where(pg_depend.c.objid >= 16384) \
         .group_by(
             pg_depend.c.objid,
+            pg_depend.c.objsubid,
             pg_depend.c.refobjid,
+            pg_depend.c.refobjsubid,
             pg_identify_object.c.type,
             pg_identify_object.c.name,
             pg_identify_object.c.schema,
             pg_identify_object.c.identity,
             pg_depend.c.deptype)
 
-    return res if referenced_object_id is None else res.where(pg_depend.c.refobjid == referenced_object_id)
+    return res
 
 
 def _get_pg_depend(engine, metadata):
@@ -148,20 +162,21 @@ def _get_all_dependent_objects_statement(engine):
     return union(select(foreign_key_constraint_dependents), select(table_dependents))
 
 
-def has_dependencies(referenced_object_id, engine):
+def has_dependencies(referenced_object_id, engine, attnum=None):
     metadata = MetaData()
     pg_depend = _get_pg_depend(engine, metadata)
 
-    stmt = select(
-        exists(
-            select().select_from(pg_depend)
-            .where(pg_depend.c.refobjid == referenced_object_id)
-            .where(pg_depend.c.deptype == any_('{a,n}'))
-            .where(pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID)
-        )
-    )
+    inner = select().select_from(pg_depend) \
+        .where(pg_depend.c.refobjid == referenced_object_id) \
+            .where(pg_depend.c.deptype == any_('{a,n}')) \
+                .where(pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID)
+    
+    if attnum is not None:
+        inner = inner.where(pg_depend.c.refobjsubid == attnum)
+
+    stmt = select(exists(inner))
 
     with engine.connect() as conn:
         result = conn.execute(stmt)
 
-    return result is not None
+    return result.first()[0]

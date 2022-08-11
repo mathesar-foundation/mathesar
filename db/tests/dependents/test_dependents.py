@@ -1,4 +1,6 @@
-from sqlalchemy import Column, ForeignKey, Integer, MetaData, PrimaryKeyConstraint, Table
+from re import M
+from sqlalchemy import Column, ForeignKey, Integer, MetaData, PrimaryKeyConstraint, Table, Text, UniqueConstraint
+from db.columns.operations.select import get_column_attnum_from_name
 from db.dependents.dependents_utils import get_dependents_graph
 from db.tables.operations.select import get_oid_from_table
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid
@@ -168,3 +170,26 @@ def test_circular_referene(engine_with_schema):
     dependents_by_level = sorted(t1_dependents_graph, key=lambda x: x['level'], reverse=True)
     assert dependents_by_level[0]['level'] == 2
     assert t1_oid not in t2_dependent_oids
+
+
+def test_column_dependents(engine_with_schema):
+    engine, schema = engine_with_schema
+    metadata = MetaData(schema=schema, bind=engine)
+    pk_column_name = 'id'
+    unique_column_name = 'name'
+    t1 = Table(
+        't1', metadata,
+        Column(pk_column_name, Integer, primary_key=True),
+        Column(unique_column_name, Text),
+        UniqueConstraint(unique_column_name)
+    )
+    t1.create()
+
+    t1_oid = get_oid_from_table(t1.name, schema, engine)
+    pk_attnum = get_column_attnum_from_name(t1_oid, pk_column_name, engine)
+    unique_attnum = get_column_attnum_from_name(t1_oid, unique_column_name, engine)
+    pk_dependents_graph = get_dependents_graph(t1_oid, engine, pk_attnum)
+    unique_dependents_graph = get_dependents_graph(t1_oid, engine, unique_attnum)
+
+    assert len(pk_dependents_graph) == 1
+    assert len(unique_dependents_graph) == 1

@@ -504,6 +504,22 @@ class Column(ReflectionManagerMixin, BaseModel):
     def db_type(self):
         return self._sa_column.db_type
 
+    @property
+    def has_dependents(self):
+        return has_dependencies(
+            self.table.oid,
+            self._sa_engine,
+            self.attnum
+        )
+
+    @property
+    def dependents(self):
+        return get_dependents_graph(
+            self.table.oid,
+            self._sa_engine,
+            self.attnum
+        )
+
 
 class Constraint(DatabaseObject):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
