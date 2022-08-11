@@ -6,6 +6,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { Meta } from '@mathesar/stores/table-data';
   import { TabularData } from '@mathesar/stores/table-data/tabularData';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
 
@@ -14,10 +15,19 @@
   export let table: TableEntry;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
+  $: ({ hash } = $router);
+  $: meta = Meta.fromSerialization(hash);
   $: tabularData = new TabularData({
     id: table.id,
     abstractTypesMap,
+    meta,
   });
+
+  function handleMetaSerializationChange(s: string) {
+    router.location.hash.set(s);
+  }
+  $: metaSerialization = tabularData.meta.serialization;
+  $: handleMetaSerializationChange($metaSerialization);
 
   function handleDeleteTable() {
     router.goto(getSchemaPageUrl(database.name, schema.id));
