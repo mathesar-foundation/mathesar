@@ -60,7 +60,7 @@
     class:is-add-placeholder={row.isAddPlaceholder}
     {...htmlAttributes}
     style={styleString}
-    data-identifier={row.identifier}
+    data-row-identifier={row.identifier}
     on:mousedown={checkAndCreateEmptyRow}
   >
     <SheetCell
@@ -153,7 +153,7 @@
       cursor: pointer;
 
       :global([data-sheet-element='cell']:not(.is-active)
-          .sheet-cell
+          .cell-fabric
           .cell-wrapper
           > *) {
         visibility: hidden;

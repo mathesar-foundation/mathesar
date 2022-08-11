@@ -89,6 +89,13 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     },
   },
   {
+    id: 'json_array_length_equals',
+    name: 'number of elements is',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+    },
+  },
+  {
     id: 'email_domain_equals',
     name: 'email domain is',
     uiTypeParameterMap: {

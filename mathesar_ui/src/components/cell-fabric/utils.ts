@@ -8,9 +8,7 @@ import type {
   ComponentAndProps,
   IconProps,
 } from '@mathesar-component-library/types';
-import type { Constraint } from '@mathesar/stores/table-data/constraints';
-import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
-import type { Column } from '@mathesar/api/tables/columns';
+import type { TableEntry } from '@mathesar/api/tables/tableList';
 import DataTypes from './data-types';
 import type { CellColumnLike } from './data-types/typeDefinitions';
 import type { LinkedRecordCellExternalProps } from './data-types/components/typeDefinitions';
@@ -43,14 +41,13 @@ function getCellConfiguration(
 }
 
 export function getCellCap(
-  column: Column,
-  constraints: Constraint[],
   cellInfo: AbstractTypeConfiguration['cell'],
+  column: CellColumnLike,
+  linksToTable?: TableEntry['id'],
 ): ComponentAndProps {
-  const fks = findFkConstraintsForColumn(constraints, column.id);
-  if (fks.length) {
+  if (linksToTable) {
     const props: LinkedRecordCellExternalProps = {
-      tableId: fks[0].referent_table,
+      tableId: linksToTable,
     };
     return {
       component: LinkedRecordCell,
@@ -68,11 +65,4 @@ export function getDbTypeBasedInputCap(
   const cellInfo = cellInfoConfig ?? getCellInfo(column.type);
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
-}
-
-export function getColumnIconProps(column: CellColumnLike): IconProps {
-  return getAbstractTypeForDbType(
-    column.type,
-    get(currentDbAbstractTypes)?.data,
-  ).icon;
 }

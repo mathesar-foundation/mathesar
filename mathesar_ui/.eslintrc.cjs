@@ -70,6 +70,7 @@ module.exports = {
         'space-in-parens': 'off',
         'no-confusing-arrow': 'off',
         'no-constant-condition': 'off',
+        '@typescript-eslint/restrict-template-expressions': 'off',
       },
     },
     {

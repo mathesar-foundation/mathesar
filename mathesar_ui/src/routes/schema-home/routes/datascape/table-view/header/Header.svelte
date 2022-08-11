@@ -15,21 +15,15 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({
-    columnsDataStore,
-    meta,
-    display,
-    constraintsDataStore,
-    processedColumns,
-  } = $tabularData);
-  $: ({ horizontalScrollOffset } = display);
+  $: ({ columnsDataStore, meta, constraintsDataStore, processedColumns } =
+    $tabularData);
 
   function addColumn(e: CustomEvent<Partial<Column>>) {
     void columnsDataStore.add(e.detail);
   }
 </script>
 
-<SheetHeader bind:horizontalScrollOffset={$horizontalScrollOffset}>
+<SheetHeader>
   <SheetCell
     columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
     isStatic

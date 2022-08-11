@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { CellValueFormatter } from './cell/utils';
+  import type { CellValueFormatter } from './cell-fabric/utils';
 
   import Null from './Null.svelte';
   import Default from './Default.svelte';
