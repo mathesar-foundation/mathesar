@@ -25,7 +25,7 @@
       type: TabularType.Table,
       id: table.id,
       metaProps: {
-        pagination: new Pagination({ size: 10 }),
+        pagination: new Pagination(),
         sorting: new Sorting(),
         grouping: new Grouping(),
         filtering: new Filtering(),
