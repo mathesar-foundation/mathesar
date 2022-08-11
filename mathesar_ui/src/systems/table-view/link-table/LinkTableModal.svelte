@@ -29,7 +29,6 @@
     getTabularData,
     ColumnsDataStore,
     getTabularDataStoreFromContext,
-    TabularType,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { postAPI, States } from '@mathesar/utils/api';
@@ -88,9 +87,7 @@
     $columnsDataStore.columns.map((c) => c.name),
   );
   $: thatTableColumnsStore = ensureReadable(
-    thatTable
-      ? new ColumnsDataStore(TabularType.Table, thatTable.id)
-      : undefined,
+    thatTable ? new ColumnsDataStore(thatTable.id) : undefined,
   );
   $: thatTableColumnsAreLoading =
     $thatTableColumnsStore?.state === States.Loading;
@@ -211,7 +208,6 @@
       return;
     }
     const tabularDataWithNewColumn = getTabularData({
-      type: TabularType.Table,
       id: tableWithNewColumn.id,
     });
     if (tabularDataWithNewColumn) {

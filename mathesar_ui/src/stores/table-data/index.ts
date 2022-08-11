@@ -24,4 +24,3 @@ export {
   setTabularDataStoreInContext,
   getTabularDataStoreFromContext,
 } from './tabularData';
-export { TabularType } from './TabularType';

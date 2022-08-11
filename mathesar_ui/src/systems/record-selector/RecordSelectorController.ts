@@ -5,12 +5,7 @@ import type { ModalController } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import { TabularData } from '@mathesar/stores/table-data/tabularData';
 import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-import {
-  Filtering,
-  Grouping,
-  Sorting,
-  TabularType,
-} from '@mathesar/stores/table-data';
+import { Filtering, Grouping, Sorting } from '@mathesar/stores/table-data';
 import Pagination from '@mathesar/utils/Pagination';
 
 interface RecordSelectorControllerProps {
@@ -43,7 +38,6 @@ export class RecordSelectorController {
       const abstractTypesMap = get(currentDbAbstractTypes).data;
       return new TabularData(
         {
-          type: TabularType.Table,
           id: tableId,
           metaProps: {
             pagination: new Pagination({ size: 10 }),

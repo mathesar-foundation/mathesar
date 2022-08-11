@@ -4,12 +4,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import {
-    Filtering,
-    Grouping,
-    Sorting,
-    TabularType,
-  } from '@mathesar/stores/table-data';
+  import { Filtering, Grouping, Sorting } from '@mathesar/stores/table-data';
   import { TabularData } from '@mathesar/stores/table-data/tabularData';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import Pagination from '@mathesar/utils/Pagination';
@@ -22,7 +17,6 @@
   $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: tabularData = new TabularData(
     {
-      type: TabularType.Table,
       id: table.id,
       metaProps: {
         pagination: new Pagination(),

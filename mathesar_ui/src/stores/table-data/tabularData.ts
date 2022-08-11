@@ -12,42 +12,33 @@ import { RecordsData } from './records';
 import { Display } from './display';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
-import type { TabularType } from './TabularType';
 import type { ProcessedColumnsStore } from './processedColumns';
 import { processColumn } from './processedColumns';
 
 export interface TabularDataProps {
-  type: TabularType;
   id: DBObjectEntry['id'];
   metaProps?: MetaProps;
 }
 
-/** [ type, id, metaProps ] */
-export type TerseTabularDataProps = [
-  TabularType,
-  DBObjectEntry['id'],
-  TerseMetaProps,
-];
+/** [ id, metaProps ] */
+export type TerseTabularDataProps = [DBObjectEntry['id'], TerseMetaProps];
 
 export function makeTabularDataProps(
   t: TerseTabularDataProps,
 ): TabularDataProps {
   return {
-    type: t[0],
-    id: t[1],
-    metaProps: makeMetaProps(t[2]),
+    id: t[0],
+    metaProps: makeMetaProps(t[1]),
   };
 }
 
 export function makeTerseTabularDataProps(
   p: TabularDataProps,
 ): TerseTabularDataProps {
-  return [p.type, p.id, makeTerseMetaProps(p.metaProps)];
+  return [p.id, makeTerseMetaProps(p.metaProps)];
 }
 
 export class TabularData {
-  type: TabularType;
-
   id: DBObjectEntry['id'];
 
   meta: Meta;
@@ -63,13 +54,11 @@ export class TabularData {
   display: Display;
 
   constructor(props: TabularDataProps, abstractTypeMap: AbstractTypesMap) {
-    this.type = props.type;
     this.id = props.id;
     this.meta = new Meta(props.metaProps);
-    this.columnsDataStore = new ColumnsDataStore(this.type, this.id);
+    this.columnsDataStore = new ColumnsDataStore(this.id);
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
-      this.type,
       this.id,
       this.meta,
       this.columnsDataStore,
