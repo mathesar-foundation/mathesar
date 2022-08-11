@@ -1,5 +1,6 @@
-import { writable, derived } from 'svelte/store';
-import type { Writable, Readable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
+
 import {
   ImmutableMap,
   ImmutableSet,
@@ -7,17 +8,18 @@ import {
   WritableSet,
 } from '@mathesar-component-library';
 import type { RequestStatus } from '@mathesar/utils/api';
-import Pagination from '@mathesar/utils/Pagination';
 import type { TersePagination } from '@mathesar/utils/Pagination';
+import Pagination from '@mathesar/utils/Pagination';
+import Url64 from '@mathesar/utils/Url64';
 import type { TerseFiltering } from './filtering';
 import { Filtering } from './filtering';
-import type { TerseSorting } from './sorting';
-import { Sorting } from './sorting';
 import type { TerseGrouping } from './grouping';
 import { Grouping } from './grouping';
 import type { RecordsRequestParamsData } from './records';
+import type { TerseSorting } from './sorting';
+import { Sorting } from './sorting';
 import type { CellKey, RowKey } from './utils';
-import { getRowStatus, getSheetState, extractRowKeyFromCellKey } from './utils';
+import { extractRowKeyFromCellKey, getRowStatus, getSheetState } from './utils';
 
 /**
  * Unlike in `RequestStatus`, here the state and the error messages are
@@ -131,7 +133,7 @@ export class Meta {
    * Allows us to save and re-create Meta, e.g. from data stored in the tab
    * system.
    */
-  props: Readable<MetaProps>;
+  serialization: Readable<string>;
 
   /**
    * Allows us to re-fetch records from the server when some of the parameters
@@ -186,23 +188,19 @@ export class Meta {
         }),
     );
 
-    // Why do `this.props` and `this.recordsRequestParamsData` look identical?
-    //
-    // It's a coincidence that `MetaProps` and `RecordsRequestParamsData` are
-    // almost identical, but that might not always be the case. For example, if
-    // we want to store info in the tabs system about the selected cells, then
-    // `MetaProps` would need more fields. Using separate fields for
-    // `this.props` and `this.recordsRequestParamsData` gives us a separation
-    // of concerns.
-    this.props = derived(
+    this.serialization = derived(
       [this.pagination, this.sorting, this.grouping, this.filtering],
-      ([pagination, sorting, grouping, filtering]) => ({
-        pagination,
-        sorting,
-        grouping,
-        filtering,
-      }),
+      ([pagination, sorting, grouping, filtering]) => {
+        const t = makeTerseMetaProps({
+          pagination,
+          sorting,
+          grouping,
+          filtering,
+        });
+        return Url64.encode(JSON.stringify(t));
+      },
     );
+
     this.recordsRequestParamsData = derived(
       [this.pagination, this.sorting, this.grouping, this.filtering],
       ([pagination, sorting, grouping, filtering]) => ({
@@ -212,5 +210,13 @@ export class Meta {
         filtering,
       }),
     );
+  }
+
+  static fromSerialization(s: string): Meta | undefined {
+    try {
+      return new Meta(makeMetaProps(JSON.parse(Url64.decode(s))));
+    } catch (e) {
+      return undefined;
+    }
   }
 }

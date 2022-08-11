@@ -3,8 +3,7 @@ import type { Writable } from 'svelte/store';
 import { derived } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import type { TerseMetaProps, MetaProps } from './meta';
-import { makeMetaProps, makeTerseMetaProps, Meta } from './meta';
+import { Meta } from './meta';
 import type { ColumnsData } from './columns';
 import { ColumnsDataStore } from './columns';
 import type { TableRecordsData } from './records';
@@ -17,25 +16,8 @@ import { processColumn } from './processedColumns';
 
 export interface TabularDataProps {
   id: DBObjectEntry['id'];
-  metaProps?: MetaProps;
-}
-
-/** [ id, metaProps ] */
-export type TerseTabularDataProps = [DBObjectEntry['id'], TerseMetaProps];
-
-export function makeTabularDataProps(
-  t: TerseTabularDataProps,
-): TabularDataProps {
-  return {
-    id: t[0],
-    metaProps: makeMetaProps(t[1]),
-  };
-}
-
-export function makeTerseTabularDataProps(
-  p: TabularDataProps,
-): TerseTabularDataProps {
-  return [p.id, makeTerseMetaProps(p.metaProps)];
+  abstractTypesMap: AbstractTypesMap;
+  meta?: Meta;
 }
 
 export class TabularData {
@@ -53,9 +35,9 @@ export class TabularData {
 
   display: Display;
 
-  constructor(props: TabularDataProps, abstractTypeMap: AbstractTypesMap) {
+  constructor(props: TabularDataProps) {
     this.id = props.id;
-    this.meta = new Meta(props.metaProps);
+    this.meta = props.meta ?? new Meta();
     this.columnsDataStore = new ColumnsDataStore(this.id);
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
@@ -75,7 +57,11 @@ export class TabularData {
         new Map(
           columnsData.columns.map((column) => [
             column.id,
-            processColumn(column, constraintsData.constraints, abstractTypeMap),
+            processColumn(
+              column,
+              constraintsData.constraints,
+              props.abstractTypesMap,
+            ),
           ]),
         ),
     );
