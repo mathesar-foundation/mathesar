@@ -3,7 +3,6 @@
   import type { TinroRouteMeta } from 'tinro';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import EventfulRoute from '@mathesar/components/routing/EventfulRoute.svelte';
-  import QueryBuilder from '@mathesar/systems/query-builder/QueryBuilder.svelte';
   import QueryManager from '@mathesar/systems/query-builder/QueryManager';
   import QueryModel from '@mathesar/systems/query-builder/QueryModel';
   import { queries, getQuery } from '@mathesar/stores/queries';
@@ -12,10 +11,9 @@
   import type { QueryInstance } from '@mathesar/api/queries/queryList';
   import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
-  import {
-    getDataExplorerPageUrl,
-    getSchemaPageUrl,
-  } from '@mathesar/routes/urls';
+  import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
+  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -23,7 +21,7 @@
   let is404 = false;
 
   let queryManager: QueryManager | undefined;
-  let queryLoadPromise: CancellablePromise<QueryInstance | undefined>;
+  let queryLoadPromise: CancellablePromise<QueryInstance>;
 
   function createQueryManager(queryInstance: UnsavedQueryInstance) {
     queryManager?.destroy();
@@ -70,26 +68,25 @@
 
   async function loadSavedQuery(meta: TinroRouteMeta) {
     const queryId = parseInt(meta.params.queryId, 10);
-    if (!Number.isNaN(queryId)) {
-      if (queryManager && queryManager.getQueryModelData().id === queryId) {
-        // The requested query is already open
-        return;
-      }
-
-      queryLoadPromise?.cancel();
-      queryLoadPromise = getQuery(queryId);
-      const queryInstance = await queryLoadPromise;
-      if (queryInstance) {
-        createQueryManager(queryInstance);
-        return;
-      }
+    if (Number.isNaN(queryId)) {
+      removeQueryManager();
+      return;
     }
-    removeQueryManager();
-  }
 
-  function gotoSchema() {
-    const schemaURL = getSchemaPageUrl(database.name, schema.id);
-    router.goto(schemaURL);
+    if (queryManager && queryManager.getQueryModelData().id === queryId) {
+      // The requested query is already open
+      return;
+    }
+
+    queryLoadPromise?.cancel();
+    queryLoadPromise = getQuery(queryId);
+    try {
+      const queryInstance = await queryLoadPromise;
+      createQueryManager(queryInstance);
+    } catch {
+      // TODO: Display 404 or other error message based on API response
+      removeQueryManager();
+    }
   }
 </script>
 
@@ -104,10 +101,10 @@
   on:routeLoaded={createNewQuery}
 />
 
+<!--TODO: Add loading state-->
+
 {#if queryManager}
-  <QueryBuilder {queryManager} on:close={gotoSchema} />
+  <DataExplorerPage {database} {schema} {queryManager} />
 {:else if is404}
-  404 - Query not found
-{:else}
-  Loading
+  <ErrorPage>Exploration not found.</ErrorPage>
 {/if}
