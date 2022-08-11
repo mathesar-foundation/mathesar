@@ -85,6 +85,17 @@ export function makeTerseMetaProps(p?: Partial<MetaProps>): TerseMetaProps {
   ];
 }
 
+function serializeMetaProps(p: MetaProps): string {
+  return Url64.encode(JSON.stringify(makeTerseMetaProps(p)));
+}
+
+/** @throws Error if string is not properly formatted. */
+function deserializeMetaProps(s: string): MetaProps {
+  return makeMetaProps(JSON.parse(Url64.decode(s)));
+}
+
+const defaultMetaPropsSerialization = serializeMetaProps(getFullMetaProps());
+
 /**
  * The Meta store is meant to be used by other stores for storing and operating
  * on meta information. This may also include display properties. Properties in
@@ -191,13 +202,18 @@ export class Meta {
     this.serialization = derived(
       [this.pagination, this.sorting, this.grouping, this.filtering],
       ([pagination, sorting, grouping, filtering]) => {
-        const t = makeTerseMetaProps({
+        const serialization = serializeMetaProps({
           pagination,
           sorting,
           grouping,
           filtering,
         });
-        return Url64.encode(JSON.stringify(t));
+        if (serialization === defaultMetaPropsSerialization) {
+          // Avoid returning a serialization which only includes the empty data
+          // structure.
+          return '';
+        }
+        return serialization;
       },
     );
 
@@ -214,7 +230,7 @@ export class Meta {
 
   static fromSerialization(s: string): Meta | undefined {
     try {
-      return new Meta(makeMetaProps(JSON.parse(Url64.decode(s))));
+      return new Meta(deserializeMetaProps(s));
     } catch (e) {
       return undefined;
     }
