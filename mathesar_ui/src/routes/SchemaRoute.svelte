@@ -36,7 +36,7 @@
 
   <Route path="/data-explorer/*">
     <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
-    <DataExplorerRoute database={database.name} {schemaId} />
+    <DataExplorerRoute {database} {schema} />
   </Route>
 
   <Route path="/:tableId/*" let:meta firstmatch>

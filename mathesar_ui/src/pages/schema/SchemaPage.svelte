@@ -28,7 +28,16 @@
   <div><EntityType>Schema</EntityType></div>
   <h1><SchemaName {schema} /></h1>
 
-  <a href={getImportPageUrl(database.name, schema.id)}>Import</a>
+  <ul>
+    <li>
+      <a href={getImportPageUrl(database.name, schema.id)}>Import</a>
+    </li>
+    <li>
+      <a href={getDataExplorerPageUrl(database.name, schema.id)}
+        >New Exploration</a
+      >
+    </li>
+  </ul>
 
   <h2>Tables</h2>
   <ul>

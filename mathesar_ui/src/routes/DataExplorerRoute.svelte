@@ -1,6 +1,7 @@
 <script lang="ts">
   import { router } from 'tinro';
   import type { TinroRouteMeta } from 'tinro';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import EventfulRoute from '@mathesar/components/routing/EventfulRoute.svelte';
   import QueryBuilder from '@mathesar/systems/query-builder/QueryBuilder.svelte';
   import QueryManager from '@mathesar/systems/query-builder/QueryManager';
@@ -11,11 +12,13 @@
   import type { QueryInstance } from '@mathesar/api/queries/queryList';
   import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
+  import {
+    getDataExplorerPageUrl,
+    getSchemaPageUrl,
+  } from '@mathesar/routes/urls';
 
-  export let database: string;
-  export let schemaId: number;
-
-  $: schemaURL = `/${database}/${String(schemaId)}/`;
+  export let database: Database;
+  export let schema: SchemaEntry;
 
   let is404 = false;
 
@@ -31,7 +34,11 @@
     is404 = false;
     queryManager.on('save', async (instance) => {
       try {
-        const url = `${String(schemaURL)}queries/${instance.id}/`;
+        const url = getDataExplorerPageUrl(
+          database.name,
+          schema.id,
+          instance.id,
+        );
         router.goto(url, true);
       } catch (err) {
         console.error('There was an error when updating the URL', err);
@@ -81,6 +88,7 @@
   }
 
   function gotoSchema() {
+    const schemaURL = getSchemaPageUrl(database.name, schema.id);
     router.goto(schemaURL);
   }
 </script>
