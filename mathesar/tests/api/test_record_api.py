@@ -733,7 +733,46 @@ def test_record_list_pagination_offset(create_patents_table, client):
 
 
 def test_foreign_key_record_api_all_column_previews(publication_tables, client):
-    author_table, publisher_table, publication_tables, checkouts_table = publication_tables
+    author_table, publisher_table, publication_table, checkouts_table = publication_tables
+    author_template_column = author_table.get_columns_by_name(["first_name", "last_name"])
+    author_preview_template = f'Full Name: {{{ author_template_column[0].id }}} {{{author_template_column[1].id}}}'
+    author_table_settings_id = author_table.settings.id
+    data = {
+        "preview_settings": {
+            'template': author_preview_template,
+        }
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
+        data=data,
+    )
+    assert response.status_code == 200
+    publisher_template_column = publisher_table.get_column_by_name("name")
+    publisher_preview_template = f'{{{ publisher_template_column.id }}}'
+    publisher_table_settings_id = publisher_table.settings.id
+    data = {
+        "preview_settings": {
+            'template': publisher_preview_template,
+        }
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{publisher_table.id}/settings/{publisher_table_settings_id}/",
+        data=data,
+    )
+    assert response.status_code == 200
+    publication_template_columns = publication_table.get_columns_by_name(['publisher', 'author', 'co_author'])
+    publication_preview_template = f'Published By: {{{ publication_template_columns[0].id}}} and Authored by {{{publication_template_columns[1].id}}} along with {{{publication_template_columns[2].id}}}'
+    publication_table_settings_id = publication_table.settings.id
+    data = {
+        "preview_settings": {
+            'template': publication_preview_template,
+        }
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{publication_table.id}/settings/{publication_table_settings_id}/",
+        data=data,
+    )
+    assert response.status_code == 200
     response = client.get(f'/api/db/v0/tables/{checkouts_table.id}/records/', data={'fk_previews': 'all'})
     response.json()
 
