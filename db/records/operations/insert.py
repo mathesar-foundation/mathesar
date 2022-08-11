@@ -80,8 +80,7 @@ def insert_from_select(from_table, target_table, engine, col_mappings=None):
     if col_mappings:
         from_table_col_list, target_table_col_list = zip(*[(from_table.c[from_col], target_table.c[target_col]) for from_col, target_col in col_mappings])
     else:
-        from_table_col_list = [col for col in from_table.c if not MathesarColumn.from_column(col).is_default]
-        target_table_col_list = [col for col in target_table.c if not MathesarColumn.from_column(col).is_default]
+        from_table_col_list, target_table_col_list = zip(*[(from_col, target_col) for from_col, target_col in zip(from_table.c, target_table.c) if not MathesarColumn.from_column(from_col).is_default and not MathesarColumn.from_column(target_col).is_default])
 
     with engine.begin() as conn:
         sel = select(from_table_col_list)
