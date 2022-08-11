@@ -22,6 +22,8 @@
     display: inline-flex;
     align-items: center;
     text-decoration: inherit;
+    overflow: hidden;
+    max-width: 100%;
   }
 
   .icon {
