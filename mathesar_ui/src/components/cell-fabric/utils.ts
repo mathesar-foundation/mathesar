@@ -60,14 +60,13 @@ export function getCellCap(
 }
 
 export function getDbTypeBasedInputCap(
-  column: Column,
-  constraints: Constraint[],
+  column: CellColumnLike,
+  linksToTable?: TableEntry['id'],
   cellInfoConfig?: AbstractTypeConfiguration['cell'],
 ): ComponentAndProps {
-  const fks = findFkConstraintsForColumn(constraints, column.id);
-  if (fks.length) {
+  if (linksToTable) {
     const props: LinkedRecordCellExternalProps = {
-      tableId: fks[0].referent_table,
+      tableId: linksToTable,
     };
     return {
       component: LinkedRecordInput,
@@ -77,11 +76,4 @@ export function getDbTypeBasedInputCap(
   const cellInfo = cellInfoConfig ?? getCellInfo(column.type);
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
-}
-
-export function getColumnIconProps(column: CellColumnLike): IconProps {
-  return getAbstractTypeForDbType(
-    column.type,
-    get(currentDbAbstractTypes)?.data,
-  ).icon;
 }

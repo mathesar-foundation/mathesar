@@ -10,7 +10,7 @@
   } from '@mathesar/components/sheet';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import ColumnName from '@mathesar/components/ColumnName.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconRefresh } from '@mathesar/icons';
   import type QueryManager from '../QueryManager';
 
@@ -294,13 +294,14 @@
       }
     }
 
-    :global(.column-name-wrapper) {
+    :global(button.column-name-wrapper) {
       flex: 1;
       padding: 6px 8px;
       overflow: hidden;
       height: 100%;
       display: block;
       overflow: hidden;
+      text-align: left;
     }
 
     :global(.column-name-wrapper.selected) {

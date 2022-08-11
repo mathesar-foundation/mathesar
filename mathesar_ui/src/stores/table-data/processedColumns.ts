@@ -75,7 +75,7 @@ export function processColumn(
     ),
     inputComponentAndProps: getDbTypeBasedInputCap(
       column,
-      constraints,
+      linkFk ? linkFk.referent_table : undefined,
       abstractType.cell,
     ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),

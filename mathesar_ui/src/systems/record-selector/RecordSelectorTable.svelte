@@ -1,6 +1,5 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
-  import ColumnName from '@mathesar/components/ColumnName.svelte';
   import type { Row } from '@mathesar/stores/table-data/records';
   import {
     setTabularDataStoreInContext,
@@ -8,6 +7,7 @@
   } from '@mathesar/stores/table-data/tabularData';
   import { constraintIsFk } from '@mathesar/stores/table-data/constraintsUtils';
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
+  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
   import { setNewRecordSelectorControllerInContext } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
@@ -129,7 +129,7 @@
   <div class="row header" style="width: {rowWidth}px">
     <CellArranger {display} let:style let:processedColumn>
       <CellWrapper header {style}>
-        <ColumnName column={processedColumn.column} />
+        <TableColumnName column={processedColumn} />
         <ColumnResizer columnId={processedColumn.column.id} />
       </CellWrapper>
     </CellArranger>

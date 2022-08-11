@@ -13,8 +13,7 @@ from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSer
 from mathesar.database.base import create_mathesar_engine
 
 DB_REFLECTION_KEY = 'database_reflected_recently'
-# TODO Change this back to 60 * 5 later in the development process
-DB_REFLECTION_INTERVAL = 1  # we reflect DB changes every second
+DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
 
 
 # NOTE: All querysets used for reflection should use the .current_objects manager

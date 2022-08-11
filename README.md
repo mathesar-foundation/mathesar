@@ -21,7 +21,6 @@ We started building Mathesar in March 2021 and are making steady progress toward
   - [Running tests](#running-tests)
   - [E2E integration tests](#e2e-integration-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
-  - [Modifying data in the user database](#modifying-data-in-the-user-database)
   - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
@@ -110,19 +109,10 @@ If you need to do some work on the container that's running the code, here's how
 docker exec -it mathesar_service bash
 ```
 
-### Modifying data in the user database
-
-- Open a PostgreSQL [psql](https://www.postgresql.org/docs/current/app-psql.html) terminal for the data in Mathesar
-
-    ```
-    docker exec -it mathesar_db psql -U mathesar
-    ```
-
-- Load data from an SQL file on your machine
-
-    ```
-    docker exec -i mathesar_db bash -c 'psql -U mathesar' < '/path/to/file.sql'
-    ```
+To open a PostgreSQL psql terminal for the data in Mathesar:
+```
+docker exec -it mathesar_db psql -U mathesar
+```
 
 ### Troubleshooting
 Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues) for instruction on troubleshooting common issues while setting up and running Mathesar.

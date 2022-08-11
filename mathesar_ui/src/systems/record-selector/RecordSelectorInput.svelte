@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
   import type { ComponentAndProps } from '@mathesar/component-library/types';
-  import DynamicInput from '@mathesar/components/cell/DynamicInput.svelte';
+  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import type { SearchFuzzy } from '@mathesar/stores/table-data/searchFuzzy';
 
   let classes = '';
