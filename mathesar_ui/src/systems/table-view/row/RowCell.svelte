@@ -22,6 +22,7 @@
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import { iconSetToNull } from '@mathesar/icons';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import CellErrors from './CellErrors.svelte';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
@@ -39,7 +40,7 @@
   export let value: unknown = undefined;
 
   $: recordsDataState = recordsData.state;
-  $: ({ column } = processedColumn);
+  $: ({ column, linkFk } = processedColumn);
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: modificationStatus = $modificationStatusMap.get(key);
@@ -51,6 +52,17 @@
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isEditable = !column.primary_key;
+  $: getRecordPageUrl = $storeToGetRecordPageUrl;
+  $: recordPageLinkHref = (() => {
+    if (linkFk) {
+      const tableId = linkFk.referent_table;
+      return getRecordPageUrl({ tableId, recordId: value });
+    }
+    if (column.primary_key) {
+      return getRecordPageUrl({ recordId: value });
+    }
+    return undefined;
+  })();
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -123,6 +135,7 @@
       on:movementKeyDown={moveThroughCells}
       on:activate={() => display.selectCell(row, column)}
       on:update={valueUpdated}
+      {recordPageLinkHref}
     />
     <ContextMenu>
       <MenuItem

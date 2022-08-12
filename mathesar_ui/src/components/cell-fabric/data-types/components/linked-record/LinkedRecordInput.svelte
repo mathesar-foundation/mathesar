@@ -82,7 +82,7 @@
 >
   {#if hasValue}
     <span class="content">
-      <LinkedRecord primaryKeyCellValue={value} showLink />
+      <LinkedRecord recordId={value} />
     </span>
     <ClearCue on:click={clear} />
   {:else}

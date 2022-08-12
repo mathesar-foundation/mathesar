@@ -75,7 +75,7 @@
   hasPadding={!isActive || hasValue}
 >
   {#if hasValue}
-    <LinkedRecord primaryKeyCellValue={value} showLink={isActive} />
+    <LinkedRecord recordId={value} />
   {:else if isActive}
     <LaunchCue />
   {:else if value === undefined}
