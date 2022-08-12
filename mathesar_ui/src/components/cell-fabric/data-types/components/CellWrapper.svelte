@@ -62,9 +62,12 @@
 
     .cell-wrapper-content {
       flex: 1 1 100%;
+      overflow: hidden;
     }
     .icon {
-      flex: 0 1 auto;
+      flex: 0 0 auto;
+    }
+    .icon:not(:empty) {
       margin-left: 0.5rem;
     }
 
@@ -73,7 +76,7 @@
       .cell-wrapper-content {
         text-align: right;
       }
-      .icon {
+      .icon:not(:empty) {
         margin-left: 0;
         margin-right: 0.5rem;
       }

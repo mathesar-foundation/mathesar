@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import Default from '@mathesar/components/Default.svelte';
+  import Null from '@mathesar/components/Null.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   // eslint-disable-next-line import/no-cycle
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
@@ -16,6 +17,8 @@
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
+
+  $: hasValue = value !== undefined && value !== null;
 
   async function launchRecordSelector() {
     const newValue = await recordSelector.acquireUserInput({ tableId });
@@ -70,9 +73,11 @@
   on:dblclick={launchRecordSelector}
 >
   <slot name="icon" slot="icon" />
-  {#if value === undefined}
+  {#if hasValue}
+    <LinkedRecord recordId={value} />
+  {:else if value === undefined}
     <Default />
   {:else}
-    <LinkedRecord primaryKeyCellValue={value} />
+    <Null />
   {/if}
 </CellWrapper>
