@@ -251,7 +251,6 @@ def create_schema(test_db_model, create_db_schema):
         schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
         return schema_model
     yield _create_schema
-    # NOTE: Schema model is not cleaned up. Maybe invalidate cache?
 
 
 # TODO rename to create_mathesar_db_table

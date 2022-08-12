@@ -1,5 +1,7 @@
 from bidict import bidict
 
+from sqlalchemy import MetaData
+
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -137,6 +139,21 @@ class Schema(DatabaseObject):
     def _sa_engine(self):
         return self.database._sa_engine
 
+    @property
+    def sa_metadata(self):
+        metadata_cache = cache.get('metadata_subcache', {})
+        schema_name = self.name
+        cache_key = self.oid
+        was_cached = cache_key in metadata_cache
+        if was_cached:
+            metadata = metadata_cache.get(cache_key)
+        else:
+            # TODO binding an engine is deprecated; we should stop doing this.
+            # Binding is used for "implicit execution", which we probably shouldn't rely on anyway.
+            metadata = MetaData(bind=self._sa_engine, schema=schema_name)
+            metadata_cache[cache_key] = metadata
+        return metadata
+
     @cached_property
     def name(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"
@@ -200,7 +217,12 @@ class Table(DatabaseObject, Relation):
             self.validate_unique()
         super().save(*args, **kwargs)
 
+    @property
+    def sa_metadata(self):
+        return self.schema.sa_metadata
+
     # TODO referenced from outside so much that it probably shouldn't be private
+    # TODO consider caching using self.sa_metadata
     @cached_property
     def _sa_table(self):
         # We're caching since we want different Django Table instances to return the same SA
@@ -209,6 +231,7 @@ class Table(DatabaseObject, Relation):
             sa_table = reflect_table_from_oid(
                 oid=self.oid,
                 engine=self._sa_engine,
+                metadata=self.sa_metadata,
             )
         # We catch these errors, since it lets us decouple the cadence of
         # overall DB reflection from the cadence of cache expiration for
@@ -216,7 +239,10 @@ class Table(DatabaseObject, Relation):
         # been altered, as opposed to other reasons for a 404 when
         # requesting a table.
         except (TypeError, IndexError):
-            sa_table = table_utils.get_empty_table("MISSING")
+            sa_table = table_utils.get_empty_table(
+                "MISSING",
+                metadata=self.sa_metadata,
+            )
         return sa_table
 
     # NOTE: it's a problem that we hve both _sa_table and _enriched_column_sa_table. at the moment
@@ -226,6 +252,7 @@ class Table(DatabaseObject, Relation):
         return column_utils.get_enriched_column_table(
             table=self._sa_table,
             engine=self._sa_engine,
+            metadata=self.sa_metadata,
         )
 
     @cached_property

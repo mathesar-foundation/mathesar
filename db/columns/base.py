@@ -43,7 +43,6 @@ class MathesarColumn(Column):
         nullable -- Boolean giving whether the column is nullable.
         server_default -- String or DefaultClause giving the default value
         """
-        self.engine = engine
         super().__init__(
             *foreign_keys,
             name=name,
@@ -53,8 +52,14 @@ class MathesarColumn(Column):
             autoincrement=autoincrement,
             server_default=server_default
         )
+        if engine is not None:
+            self.add_engine(engine)
+        # TODO consider and document the purpose of the `engine` attribute; the superclass Column
+        # doesn't have it, and, at first glance, it seems to duplicate logic that's already there.
+        self.engine = engine
+        # TECHNICAL DEBT
         # NOTE: For some reason, sometimes `self._proxies` is a tuple. SA expects it to be
-        # appendable, however. Was not able to track down the source of it. As a workaround, we
+        # appendable, however. Was not able to track down the cause of it. As a workaround, we
         # convert it into a list here. I (Dom) offer a bounty of bragging rights to anyone who
         # figures out what's causing `_proxies` to be tuples.
         if isinstance(self._proxies, tuple):

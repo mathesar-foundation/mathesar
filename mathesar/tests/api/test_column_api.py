@@ -187,6 +187,7 @@ def test_column_create_invalid_default(column_test_table, client):
 def test_column_create_retrieve_options(column_test_table, client, db_type, type_options, expected_type_options):
     name = "anewcolumn"
     num_columns = len(column_test_table.sa_columns)
+    assert num_columns == 4
     data = {
         "name": name, "type": db_type.id, "type_options": type_options,
     }

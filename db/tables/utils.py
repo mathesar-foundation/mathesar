@@ -2,8 +2,8 @@ from sqlalchemy import Table, MetaData
 from sqlalchemy.inspection import inspect
 
 
-def get_empty_table(name):
-    return Table(name, MetaData())
+def get_empty_table(name, metadata=MetaData()):
+    return Table(name, metadata)
 
 
 def get_primary_key_column(table):

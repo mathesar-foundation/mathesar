@@ -34,8 +34,8 @@ def reflect_tables_from_oids(oids, engine, metadata=None, connection_to_use=None
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_class = Table("pg_class", metadata, autoload_with=engine)
-        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+        pg_class = Table("pg_class", metadata, schema="pg_catalog", autoload_with=engine)
+        pg_namespace = Table("pg_namespace", metadata, schema="pg_catalog", autoload_with=engine)
     sel = (
         select(pg_namespace.c.nspname, pg_class.c.relname, pg_class.c.oid)
         .select_from(
@@ -59,7 +59,7 @@ def get_table_oids_from_schema(schema_oid, engine):
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_class = Table("pg_class", metadata, autoload_with=engine)
+        pg_class = Table("pg_class", metadata, schema="pg_catalog", autoload_with=engine)
     sel = (
         select(pg_class.c.oid)
         .where(
@@ -93,7 +93,7 @@ def get_joinable_tables(
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_constraint = Table("pg_constraint", MetaData(), autoload_with=engine)
+        pg_constraint = Table("pg_constraint", MetaData(), schema="pg_catalog", autoload_with=engine)
 
     symmetric_fkeys = select(
         cast(pg_constraint.c.oid, Integer).label(FK_OID),

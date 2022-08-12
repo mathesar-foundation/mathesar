@@ -269,6 +269,7 @@ def _make_sure_column_has_unique_table(table_cache, column):
     return column
 
 
+# TODO consider delegating base_table (Dj Table) to return a unique SA table
 def _make_sure_table_is_unique(table_cache, table):
     assert table is not None
     schema_name = table.schema
