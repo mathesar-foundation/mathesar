@@ -4,7 +4,10 @@
     isDefinedNonNullable,
   } from '@mathesar-component-library';
   import SteppedInputCell from '../SteppedInputCell.svelte';
-  import type { NumberCellProps } from '../typeDefinitions';
+  import type {
+    HorizontalAlignment,
+    NumberCellProps,
+  } from '../typeDefinitions';
   import NumberCellInput from './NumberCellInput.svelte';
 
   type $$Props = NumberCellProps;
@@ -17,6 +20,7 @@
   export let maximumFractionDigits: $$Props['maximumFractionDigits'];
   export let locale: $$Props['locale'];
   export let allowFloat: $$Props['allowFloat'];
+  export let horizontalAlignment: HorizontalAlignment = 'right';
 
   $: formatterOptions = {
     locale,
@@ -48,7 +52,7 @@
   {isActive}
   {disabled}
   {formatValue}
-  horizontalAlignment="right"
+  {horizontalAlignment}
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown

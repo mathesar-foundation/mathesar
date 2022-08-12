@@ -136,6 +136,7 @@
       on:activate={() => display.selectCell(row, column)}
       on:update={valueUpdated}
       {recordPageLinkHref}
+      horizontalAlignment={column.primary_key ? 'left' : undefined}
     />
     <ContextMenu>
       <MenuItem
