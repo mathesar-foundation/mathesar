@@ -13,6 +13,7 @@ import {
   faDatabase,
   faDollarSign,
   faEnvelope,
+  faExternalLinkAlt,
   faFileContract,
   faFilter,
   faGlobe,
@@ -89,6 +90,7 @@ export const iconDisplayOptions: IconProps = { data: faPalette };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faThList };
 export const iconInwardLink: IconProps = { data: faArrowRight };
+export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };
 export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconQuery: IconProps = { data: faFileContract };
 export const iconSchema: IconProps = { data: faProjectDiagram };

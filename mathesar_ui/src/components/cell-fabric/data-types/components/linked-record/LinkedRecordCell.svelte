@@ -69,6 +69,7 @@
   on:mousedown={handleMouseDown}
   on:dblclick={launchRecordSelector}
 >
+  <slot name="icon" slot="icon" />
   {#if value === undefined}
     <Default />
   {:else}
