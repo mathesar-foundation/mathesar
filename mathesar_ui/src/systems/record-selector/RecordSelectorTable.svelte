@@ -38,7 +38,7 @@
    */
   let activeColumnId: number | undefined = undefined;
 
-  let inputsRow: HTMLElement;
+  // let inputsRow: HTMLElement;
 
   $: tabularDataStore.set(tabularData);
   $: ({ columnsDataStore, constraintsDataStore, display, meta, isLoading } =
@@ -91,31 +91,6 @@
       activeColumnId = undefined;
     }
   }
-
-  function programmaticallyFocusInput(columnId: number) {
-    const input = inputsRow.querySelector(
-      `.record-selector-input.column-${columnId}`,
-    ) as HTMLElement | undefined;
-    if (!input) {
-      throw new Error(`No input found for columnId: ${columnId}`);
-    }
-    input.focus();
-    // This is redundant with the handler attached to DynamicInput, but for some
-    // reason Svelte doesn't fire it when programmatically focusing the input.
-    handleInputFocus(columnId);
-  }
-
-  function focusNextColumn(columnId: number) {
-    if (columns.length <= 1) {
-      return;
-    }
-    const index = columns.findIndex((c) => c.id === columnId);
-    if (index === -1) {
-      return;
-    }
-    const column = columns[index + 1] ?? columns[0];
-    programmaticallyFocusInput(column.id);
-  }
 </script>
 
 <div
@@ -136,7 +111,7 @@
     <div class="overlay" />
   </div>
 
-  <div class="row inputs" bind:this={inputsRow}>
+  <div class="row inputs">
     <CellArranger {display} let:style let:processedColumn let:columnId>
       {#if columnId === activeColumnId}
         {#if activeColumnIsFk}
@@ -167,7 +142,6 @@
             activeColumnId = columnId;
           }}
           on:recordSelectorSubmit={() => {
-            focusNextColumn(columnId);
             if (columnId === activeColumnId) {
               activeColumnId = undefined;
             }
