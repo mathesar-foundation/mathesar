@@ -22,10 +22,10 @@
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import { iconSetToNull } from '@mathesar/icons';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import CellErrors from './CellErrors.svelte';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
 
   export let recordsData: RecordsData;
   export let display: Display;
