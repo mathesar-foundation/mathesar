@@ -1,48 +1,49 @@
 import {
-  faHammer,
+  faAlignLeft,
+  faArrowLeft,
   faArrowRight,
-  faUser,
-  faProjectDiagram,
-  faCogs,
-  faTable,
-  faFilter,
-  faSort,
-  faPlus,
-  faLink,
-  faTrashAlt,
-  faSortAmountDownAlt,
-  faSortAmountDown,
-  faThList,
-  faICursor,
-  faUnlink,
-  faChevronRight,
-  faDatabase,
-  faPalette,
-  faSync,
-  faLock,
-  faPencilAlt,
-  faFileContract,
-  faRedo,
-  faUndo,
-  faUpload,
-  faKey,
-  faSnowflake,
   faBackspace,
-  faCheckSquare,
   faCalendarDay,
   faCalendarWeek,
-  faStopwatch,
-  faEnvelope,
-  faQuestion,
-  faDollarSign,
-  faHashtag,
-  faAlignLeft,
+  faCheckSquare,
+  faChevronRight,
   faClock,
-  faGlobe,
-  faShapes,
   faClone,
-  faArrowLeft,
+  faCogs,
+  faDatabase,
+  faDollarSign,
+  faEnvelope,
+  faFileContract,
+  faFilter,
+  faGlobe,
+  faHammer,
+  faHashtag,
+  faICursor,
+  faKey,
+  faLink,
+  faLock,
+  faPalette,
+  faPencilAlt,
+  faPlus,
+  faProjectDiagram,
+  faQuestion,
+  faRedo,
+  faShapes,
+  faSnowflake,
+  faSort,
+  faSortAmountDown,
+  faSortAmountDownAlt,
+  faStopwatch,
+  faSync,
+  faTable,
+  faThList,
+  faTrashAlt,
+  faUndo,
+  faUnlink,
+  faUpload,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons';
+
 import type { IconProps } from '@mathesar-component-library/types';
 
 /**
@@ -87,6 +88,8 @@ export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faThList };
+export const iconInwardLink: IconProps = { data: faArrowRight };
+export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconQuery: IconProps = { data: faFileContract };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSorting: IconProps = { data: faSort };
@@ -94,8 +97,6 @@ export const iconTable: IconProps = { data: faTable };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUser: IconProps = { data: faUser };
-export const iconInwardLink: IconProps = { data: faArrowRight };
-export const iconOutwardLink: IconProps = { data: faArrowLeft };
 
 // STATUSES
 
