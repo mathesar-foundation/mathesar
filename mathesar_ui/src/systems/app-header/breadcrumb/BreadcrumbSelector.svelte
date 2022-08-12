@@ -89,19 +89,19 @@
     padding: 0;
   }
   .entity-switcher .trigger {
-    --background-color: #eee;
-    --border-color: #aaa;
+    --background-color: var(--color-gray-lighter);
+    --border-color: var(--color-gray-dark);
     display: block;
     cursor: pointer;
   }
   .entity-switcher .trigger :global(svg) {
-    height: 2rem;
+    height: 1.8rem;
     display: block;
   }
   .entity-switcher .trigger:hover,
   .entity-switcher.is-open .trigger {
-    --background-color: #3f6ea7;
+    --background-color: var(--color-contrast);
     --icon-color: white;
-    --border-color: white;
+    --border-color:  var(--color-contrast);
   }
 </style>

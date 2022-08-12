@@ -38,8 +38,9 @@
   .breadcrumb {
     display: flex;
     align-items: center;
-    --spacing: 0.4rem;
+    --spacing: 0.5rem;
     margin: calc(-1 * var(--spacing));
+    
   }
   .breadcrumb > :global(*) {
     margin: var(--spacing);
@@ -48,12 +49,12 @@
     display: flex;
     align-items: center;
     text-decoration: none;
+    
   }
   .mathesar {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #999;
+    font-weight: 500;
     display: block;
-    margin-left: 1rem;
+    color: var(--color-gray-darker);
+    margin: 0 var(--spacing);
   }
 </style>
