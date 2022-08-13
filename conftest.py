@@ -1,10 +1,12 @@
 import pytest
 import random
 import string
+import os
 
 # These imports come from the mathesar namespace, because our DB setup logic depends on it.
 from django.db import connection as dj_connection
 
+from sqlalchemy import MetaData, text, Table
 from sqlalchemy.exc import OperationalError
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
@@ -249,3 +251,42 @@ def _create_engine(db_name):
 
 def _get_connection_string(username, password, hostname, database):
     return f"postgresql://{username}:{password}@{hostname}/{database}"
+
+
+FILE_DIR = os.path.abspath(os.path.dirname(__file__))
+RESOURCES = os.path.join(FILE_DIR, "db", "tests", "resources")
+ACADEMICS_SQL = os.path.join(RESOURCES, "academics_create.sql")
+
+
+@pytest.fixture
+def engine_with_academics(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(ACADEMICS_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+
+
+@pytest.fixture
+def academics_db_tables(engine_with_academics):
+    def make_table(table_name):
+        return Table(
+            table_name,
+            metadata,
+            schema=schema,
+            autoload_with=engine,
+        )
+    engine, schema = engine_with_academics
+    metadata = MetaData(bind=engine)
+    table_names = {
+        'academics',
+        'articles',
+        'journals',
+        'publishers',
+        'universities',
+    }
+    return {
+        table_name: make_table(table_name)
+        for table_name
+        in table_names
+    }

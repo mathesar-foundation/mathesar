@@ -186,13 +186,13 @@ export function putQuery(
 
 export function getQuery(
   queryId: QueryInstance['id'],
-): CancellablePromise<QueryInstance | undefined> {
+): CancellablePromise<QueryInstance> {
   // TODO: Get schemaId as a query property
   const schemaId = get(currentSchemaId);
   let innerRequest: CancellablePromise<QueryInstance>;
   if (schemaId) {
-    return new CancellablePromise<QueryInstance | undefined>(
-      (resolve) => {
+    return new CancellablePromise<QueryInstance>(
+      (resolve, reject) => {
         const store = schemasCacheManager.get(schemaId);
         if (store) {
           const storeSubstance = get(store);
@@ -205,7 +205,12 @@ export function getQuery(
             innerRequest = getAPI<QueryInstance>(
               `/api/db/v0/queries/${queryId}/`,
             );
-            void innerRequest.then((result) => resolve(result));
+            void innerRequest.then(
+              (result) => resolve(result),
+              (reason) => reject(reason),
+            );
+          } else {
+            reject(new Error('Query not found'));
           }
         }
       },

@@ -18,6 +18,7 @@ def test_available_filters_structure(engine_with_schema):
         'uri_scheme_equals',
         'email_domain_contains',
         'email_domain_equals',
+        'json_array_length_equals',
     ]
 
     for expected_filter in some_filters_that_we_expect_to_be_there:

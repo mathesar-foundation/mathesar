@@ -1,7 +1,6 @@
 import pytest
 
 from django.core.files import File
-from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import text
 
 from mathesar.models.base import DataFile, Schema
@@ -10,6 +9,7 @@ from mathesar.imports.csv import create_table_from_csv, get_sv_dialect, get_sv_r
 from db.schemas.operations.create import create_schema
 from db.schemas.utils import get_schema_oid_from_name
 from db.constants import COLUMN_NAME_TEMPLATE
+from db.tables.operations.create import DuplicateTable
 
 TEST_SCHEMA = "import_csv_schema"
 
@@ -143,7 +143,6 @@ def test_col_headers_empty_csv(col_headers_empty_data_file, schema):
 
 def test_csv_upload_with_duplicate_table_name(data_file, schema):
     table_name = "NASA 2"
-    already_defined_str = 'relation "NASA 2" already exists'
 
     table = create_table_from_csv(data_file, table_name, schema)
     assert table is not None
@@ -151,9 +150,8 @@ def test_csv_upload_with_duplicate_table_name(data_file, schema):
     assert table.schema == schema
     assert table.sa_num_records() == 1393
 
-    with pytest.raises(ProgrammingError) as excinfo:
+    with pytest.raises(DuplicateTable):
         create_table_from_csv(data_file, table_name, schema)
-    assert already_defined_str in str(excinfo.value)
 
 
 def test_csv_upload_table_imported_to(data_file, schema):

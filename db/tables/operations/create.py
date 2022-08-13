@@ -19,6 +19,11 @@ def create_mathesar_table(name, schema, columns, engine, metadata=None):
     # SQLAlchemy context (e.g., for creating a ForeignKey relationship)
     if metadata is None:
         metadata = MetaData(bind=engine, schema=schema)
+    metadata.reflect()
+    # The exception raised by SQLAlchemy upon hitting a duplicate table in the
+    # schema is non-specific.
+    if (name, schema) in [(t.name, t.schema) for t in metadata.sorted_tables]:
+        raise DuplicateTable
     table = Table(
         name,
         metadata,
@@ -27,6 +32,10 @@ def create_mathesar_table(name, schema, columns, engine, metadata=None):
     )
     table.create(engine)
     return table
+
+
+class DuplicateTable(Exception):
+    pass
 
 
 def create_string_column_table(name, schema, column_names, engine):

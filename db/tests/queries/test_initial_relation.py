@@ -7,8 +7,8 @@
 from db.queries.base import DBQuery, InitialColumn, JoinParams
 
 
-def test_local_columns(engine, academics_tables):
-    base_table = academics_tables['academics']
+def test_local_columns(engine, academics_db_tables):
+    base_table = academics_db_tables['academics']
     initial_columns = [
         InitialColumn(
             alias='id',
@@ -33,10 +33,10 @@ def test_shallow_link(engine, shallow_link_dbquery):
     assert records == [(1, 'uni1'), (2, 'uni1'), (3, 'uni2')]
 
 
-def test_deep_link(engine, academics_tables):
-    art_table = academics_tables['articles']
-    acad_table = academics_tables['academics']
-    uni_table = academics_tables['universities']
+def test_deep_link(engine, academics_db_tables):
+    art_table = academics_db_tables['articles']
+    acad_table = academics_db_tables['academics']
+    uni_table = academics_db_tables['universities']
     initial_columns = [
         InitialColumn(
             alias='title',
@@ -65,8 +65,8 @@ def test_deep_link(engine, academics_tables):
     assert records == [('article1', 'uni1'), ('article2', 'uni1')]
 
 
-def test_self_referencing_table(engine, academics_tables):
-    acad_table = academics_tables['academics']
+def test_self_referencing_table(engine, academics_db_tables):
+    acad_table = academics_db_tables['academics']
     initial_columns = [
         InitialColumn(
             alias='id',

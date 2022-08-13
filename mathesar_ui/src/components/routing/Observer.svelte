@@ -9,9 +9,11 @@
 
   export let meta: TinroRouteMeta;
 
-  $: dispatch('routeUpdated', $meta);
+  $: if ($meta) {
+    dispatch('routeUpdated', $meta);
+  }
 
   onMount(() => {
-    dispatch('routeLoaded', meta);
+    dispatch('routeLoaded', $meta);
   });
 </script>
