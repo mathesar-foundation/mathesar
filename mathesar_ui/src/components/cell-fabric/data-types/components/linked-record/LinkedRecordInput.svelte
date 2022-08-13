@@ -78,7 +78,9 @@
   bind:this={element}
   on:dblclick={launchRecordSelector}
   on:focus={handleFocus}
+  on:focus
   on:blur={handleBlur}
+  on:blur
 >
   {#if hasValue}
     <span class="content">
