@@ -16,6 +16,7 @@
   closeOn={['button', 'esc', 'overlay']}
   size="flex"
   on:close={() => recordSelectorController.cancel()}
+  verticalAlign="top"
 >
   <svelte:fragment slot="title">
     {#if $tableId}
