@@ -1,12 +1,12 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
-  import ColumnName from '@mathesar/components/ColumnName.svelte';
   import type { Row } from '@mathesar/stores/table-data/records';
   import {
     setTabularDataStoreInContext,
     TabularData,
   } from '@mathesar/stores/table-data/tabularData';
-  import DynamicInput from '@mathesar/components/cell/DynamicInput.svelte';
+  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
+  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
   import ColumnResizer from './ColumnResizer.svelte';
@@ -48,7 +48,7 @@
   <div class="row">
     <CellArranger {display} let:style let:processedColumn>
       <CellWrapper header {style}>
-        <ColumnName column={processedColumn.column} />
+        <TableColumnName column={processedColumn} />
         <ColumnResizer columnId={processedColumn.column.id} />
       </CellWrapper>
     </CellArranger>
