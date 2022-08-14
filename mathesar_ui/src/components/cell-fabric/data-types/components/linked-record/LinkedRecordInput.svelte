@@ -87,7 +87,7 @@
       <LinkedRecord recordId={value} />
     </span>
     <ClearCue on:click={clear} />
-  {:else}
+  {:else if !isAcquiringInput}
     <LaunchCue on:click={launchRecordSelector} />
   {/if}
 </span>
