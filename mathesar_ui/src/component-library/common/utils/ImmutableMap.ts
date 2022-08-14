@@ -120,6 +120,12 @@ export default class ImmutableMap<Key, Value> {
     );
   }
 
+  filterValues(fn: (value: Value) => boolean): ImmutableMap<Key, Value> {
+    return new ImmutableMap(
+      [...this.entries()].filter(([, value]) => fn(value)),
+    );
+  }
+
   [Symbol.iterator](): IterableIterator<[Key, Value]> {
     return this.entries();
   }

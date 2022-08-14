@@ -21,17 +21,13 @@
   );
   $: ({ tabularData } = recordSelectorController);
 
-  function isEmpty(v: unknown) {
-    return v === undefined || v === null || v === '';
-  }
-
   $: inputsContainUserEntry = collapse(
     derived(tabularData, (t) => {
       if (!t) {
         return ensureReadable(false);
       }
       return derived(t.meta.searchFuzzy, (searchFuzzy) => {
-        return [...searchFuzzy.values()].some((v) => !isEmpty(v));
+        return searchFuzzy.searchableEntries().size > 0;
       });
     }),
   );

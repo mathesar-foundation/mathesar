@@ -10,13 +10,17 @@ function valueIsSearchable(v: unknown) {
 }
 
 export class SearchFuzzy extends ImmutableMap<number, unknown> {
+  searchableEntries(): ImmutableMap<number, unknown> {
+    return this.filterValues(valueIsSearchable);
+  }
+
   recordsRequestParams(): Pick<GetRequestParams, 'search_fuzzy'> {
-    const searchableEntries = [...this].filter(([, v]) => valueIsSearchable(v));
-    if (!searchableEntries.length) {
+    const searchableEntries = this.searchableEntries();
+    if (searchableEntries.size === 0) {
       return {};
     }
     return {
-      search_fuzzy: searchableEntries.map(([columnId, value]) => ({
+      search_fuzzy: [...searchableEntries].map(([columnId, value]) => ({
         field: columnId,
         literal: value,
       })),
