@@ -17,6 +17,7 @@
     title="Clear Value"
     class="padding-zero clear-cue-button"
     on:click
+    tabindex="-1"
   >
     <span class="icon-wrapper">
       <Icon data={faBackspace} />
