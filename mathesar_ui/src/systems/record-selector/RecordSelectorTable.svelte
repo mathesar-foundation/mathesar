@@ -38,8 +38,6 @@
    */
   let activeColumnId: number | undefined = undefined;
 
-  // let inputsRow: HTMLElement;
-
   $: tabularDataStore.set(tabularData);
   $: ({ columnsDataStore, constraintsDataStore, display, meta, isLoading } =
     tabularData);
@@ -80,10 +78,10 @@
   }
 
   function handleInputFocus(columnId: number) {
-    activeColumnId = columnId;
-    if (!fkConstraintMap.get(columnId)) {
+    if (activeColumnId !== columnId) {
       nestedRecordSelectorController.cancel();
     }
+    activeColumnId = columnId;
   }
 
   function handleInputBlur(columnId: number) {
@@ -95,7 +93,7 @@
 
 <div
   class="record-selector-table"
-  class:has-open-nested-selector={activeColumnIsFk}
+  class:has-open-nested-selector={$nestedSelectorIsOpen}
   class:loading={$isLoading}
 >
   <div class="loading-spinner">
@@ -114,7 +112,7 @@
   <div class="row inputs">
     <CellArranger {display} let:style let:processedColumn let:columnId>
       {#if columnId === activeColumnId}
-        {#if activeColumnIsFk}
+        {#if activeColumnIsFk && $nestedSelectorIsOpen}
           <div class="active-fk-cell-indicator" {style}>
             <div class="border" />
             <div class="knockout">
