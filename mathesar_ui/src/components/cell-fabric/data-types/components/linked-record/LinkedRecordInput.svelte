@@ -36,7 +36,6 @@
   }
 
   async function launchRecordSelector() {
-    console.log('LAUNCH');
     dispatch('recordSelectorOpen');
     isAcquiringInput = true;
     const newValue = await recordSelector.acquireUserInput({ tableId });

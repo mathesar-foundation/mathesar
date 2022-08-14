@@ -1,5 +1,11 @@
 <script lang="ts">
-  import type { ModalController } from '@mathesar-component-library';
+  import { derived } from 'svelte/store';
+
+  import type {
+    ModalCloseAction,
+    ModalController,
+  } from '@mathesar-component-library';
+  import { collapse, ensureReadable } from '@mathesar-component-library';
   import { ControlledModal } from '@mathesar-component-library';
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
@@ -8,12 +14,48 @@
   export let recordSelectorController: RecordSelectorController;
   export let modalController: ModalController;
 
+  let nestedController: RecordSelectorController | undefined;
+
+  $: nestedSelectorIsOpen = ensureReadable(
+    nestedController ? nestedController.isOpen : false,
+  );
+  $: ({ tabularData } = recordSelectorController);
+
+  function isEmpty(v: unknown) {
+    return v === undefined || v === null || v === '';
+  }
+
+  $: inputsContainUserEntry = collapse(
+    derived(tabularData, (t) => {
+      if (!t) {
+        return ensureReadable(false);
+      }
+      return derived(t.meta.searchFuzzy, (searchFuzzy) => {
+        return [...searchFuzzy.values()].some((v) => !isEmpty(v));
+      });
+    }),
+  );
+
+  function getModalCloseActions(
+    _nestedSelectorIsOpen: boolean,
+    _inputsContainUserEntry: boolean,
+  ): ModalCloseAction[] {
+    if (_nestedSelectorIsOpen || _inputsContainUserEntry) {
+      return ['button'];
+    }
+    return ['button', 'esc', 'overlay'];
+  }
+  $: closeOn = getModalCloseActions(
+    $nestedSelectorIsOpen,
+    $inputsContainUserEntry,
+  );
+
   $: ({ tableId } = recordSelectorController);
 </script>
 
 <ControlledModal
   controller={modalController}
-  closeOn={['button', 'esc', 'overlay']}
+  {closeOn}
   size="flex"
   on:close={() => recordSelectorController.cancel()}
   verticalAlign="top"
@@ -23,5 +65,8 @@
       <RecordSelectorTitle tableId={$tableId} />
     {/if}
   </svelte:fragment>
-  <RecordSelectorContent controller={recordSelectorController} />
+  <RecordSelectorContent
+    controller={recordSelectorController}
+    bind:nestedController
+  />
 </ControlledModal>

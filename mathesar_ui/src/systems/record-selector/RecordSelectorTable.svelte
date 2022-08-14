@@ -22,11 +22,12 @@
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
 
+  let nestedRecordSelectorController =
+    setNewRecordSelectorControllerInContext();
+  export { nestedRecordSelectorController as nestedController };
+
   const tabularDataStore = writable(tabularData);
   setTabularDataStoreInContext(tabularDataStore);
-
-  const nestedRecordSelectorController =
-    setNewRecordSelectorControllerInContext();
 
   /**
    * The id of the column (if any) which has focus.
