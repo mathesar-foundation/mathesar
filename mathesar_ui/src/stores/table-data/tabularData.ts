@@ -3,8 +3,7 @@ import type { Writable } from 'svelte/store';
 import { derived } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import type { TerseMetaProps, MetaProps } from './meta';
-import { makeMetaProps, makeTerseMetaProps, Meta } from './meta';
+import { Meta } from './meta';
 import type { ColumnsData } from './columns';
 import { ColumnsDataStore } from './columns';
 import type { TableRecordsData } from './records';
@@ -12,42 +11,16 @@ import { RecordsData } from './records';
 import { Display } from './display';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
-import type { TabularType } from './TabularType';
 import type { ProcessedColumnsStore } from './processedColumns';
 import { processColumn } from './processedColumns';
 
 export interface TabularDataProps {
-  type: TabularType;
   id: DBObjectEntry['id'];
-  metaProps?: MetaProps;
-}
-
-/** [ type, id, metaProps ] */
-export type TerseTabularDataProps = [
-  TabularType,
-  DBObjectEntry['id'],
-  TerseMetaProps,
-];
-
-export function makeTabularDataProps(
-  t: TerseTabularDataProps,
-): TabularDataProps {
-  return {
-    type: t[0],
-    id: t[1],
-    metaProps: makeMetaProps(t[2]),
-  };
-}
-
-export function makeTerseTabularDataProps(
-  p: TabularDataProps,
-): TerseTabularDataProps {
-  return [p.type, p.id, makeTerseMetaProps(p.metaProps)];
+  abstractTypesMap: AbstractTypesMap;
+  meta?: Meta;
 }
 
 export class TabularData {
-  type: TabularType;
-
   id: DBObjectEntry['id'];
 
   meta: Meta;
@@ -62,14 +35,12 @@ export class TabularData {
 
   display: Display;
 
-  constructor(props: TabularDataProps, abstractTypeMap: AbstractTypesMap) {
-    this.type = props.type;
+  constructor(props: TabularDataProps) {
     this.id = props.id;
-    this.meta = new Meta(props.metaProps);
-    this.columnsDataStore = new ColumnsDataStore(this.type, this.id);
+    this.meta = props.meta ?? new Meta();
+    this.columnsDataStore = new ColumnsDataStore(this.id);
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
-      this.type,
       this.id,
       this.meta,
       this.columnsDataStore,
@@ -86,7 +57,11 @@ export class TabularData {
         new Map(
           columnsData.columns.map((column) => [
             column.id,
-            processColumn(column, constraintsData.constraints, abstractTypeMap),
+            processColumn(
+              column,
+              constraintsData.constraints,
+              props.abstractTypesMap,
+            ),
           ]),
         ),
     );
