@@ -8,13 +8,15 @@ export interface ColumnPosition {
   styleString: string;
 }
 
-export interface SheetContextStores<SheetColumnType, SheetColumnIdentifierKey> {
+export interface SheetContextStores<SheetColumnIdentifierKey> {
   columnStyleMap: Readable<Map<SheetColumnIdentifierKey, ColumnPosition>>;
   rowWidth: Readable<number>;
+  horizontalScrollOffset: Readable<number>;
+  scrollOffset: Readable<number>;
 }
 
-export interface SheetContext<SheetColumnType, SheetColumnIdentifierKey> {
-  stores: SheetContextStores<SheetColumnType, SheetColumnIdentifierKey>;
+export interface SheetContext<SheetColumnIdentifierKey> {
+  stores: SheetContextStores<SheetColumnIdentifierKey>;
   api: {
     setColumnWidth: (
       columnIdentifierKey: SheetColumnIdentifierKey,
@@ -22,6 +24,8 @@ export interface SheetContext<SheetColumnType, SheetColumnIdentifierKey> {
     ) => void;
     getColumnWidth: (columnIdentifierKey: SheetColumnIdentifierKey) => number;
     resetColumnWidth: (columnIdentifierKey: SheetColumnIdentifierKey) => void;
+    setHorizontalScrollOffset: (offset: number) => void;
+    setScrollOffset: (offset: number) => void;
   };
 }
 
@@ -54,15 +58,14 @@ export function calculateColumnStyleMapAndRowWidth<
   return { columnStyleMap: map, rowWidth: left };
 }
 
-export function setSheetContext<SheetColumnType, SheetColumnIdentifierKey>(
-  sheetContext: SheetContext<SheetColumnType, SheetColumnIdentifierKey>,
+export function setSheetContext<SheetColumnIdentifierKey>(
+  sheetContext: SheetContext<SheetColumnIdentifierKey>,
 ): void {
   setContext(SHEET_CONTEXT_KEY, sheetContext);
 }
 
 export function getSheetContext<
-  SheetColumnType,
   SheetColumnIdentifierKey,
->(): SheetContext<SheetColumnType, SheetColumnIdentifierKey> {
+>(): SheetContext<SheetColumnIdentifierKey> {
   return getContext(SHEET_CONTEXT_KEY);
 }

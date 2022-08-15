@@ -3,9 +3,9 @@ from db.queries.base import DBQuery, InitialColumn, JoinParams
 
 
 @pytest.fixture
-def shallow_link_dbquery(academics_tables):
-    acad_table = academics_tables['academics']
-    uni_table = academics_tables['universities']
+def shallow_link_dbquery(academics_db_tables):
+    acad_table = academics_db_tables['academics']
+    uni_table = academics_db_tables['universities']
     initial_columns = [
         InitialColumn(
             alias='id',
