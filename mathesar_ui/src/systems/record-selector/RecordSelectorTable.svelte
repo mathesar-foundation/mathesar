@@ -1,6 +1,5 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
-  import type { Row } from '@mathesar/stores/table-data/records';
   import {
     setTabularDataStoreInContext,
     TabularData,
@@ -8,6 +7,8 @@
   import { constraintIsFk } from '@mathesar/stores/table-data/constraintsUtils';
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import TableColumnName from '@mathesar/components/TableColumnName.svelte';
+  import { postAPI } from '@mathesar/utils/api';
+  import type { Result as ApiRecord } from '@mathesar/api/tables/records';
   import type { RecordSelectorController } from './RecordSelectorController';
   import { setNewRecordSelectorControllerInContext } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
@@ -18,6 +19,7 @@
   import QuarterCircle from './QuarterCircle.svelte';
   import Arrow from './Arrow.svelte';
   import RecordSelectorInput from './RecordSelectorInput.svelte';
+  import { getPkValueInRecord } from './recordSelectorUtils';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -38,16 +40,16 @@
    * record selector is open.
    */
   let activeColumnId: number | undefined = undefined;
+  let isSubmittingNewRecord = false;
 
   $: tabularDataStore.set(tabularData);
-  $: ({ columnsDataStore, constraintsDataStore, display, meta, isLoading } =
+  $: ({ constraintsDataStore, display, meta, isLoading, columnsDataStore } =
     tabularData);
   $: ({ constraints } = $constraintsDataStore);
-  $: ({ columns } = $columnsDataStore);
-  $: pkColumn = columns.find((c) => c.primary_key);
   $: nestedSelectorIsOpen = nestedRecordSelectorController.isOpen;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
+  $: ({ columns } = $columnsDataStore);
 
   /** keys are column ids, values are FK constraints */
   $: fkConstraintMap = new ImmutableMap(
@@ -59,23 +61,22 @@
 
   $: activeColumnIsFk = activeColumnId && fkConstraintMap.has(activeColumnId);
 
-  function getPkValue(row: Row): string | number {
-    if (!pkColumn) {
-      throw new Error('No primary key column found');
-    }
-    const { record } = row;
-    if (!record) {
-      throw new Error('No record found within row.');
-    }
-    const pkValue = record[pkColumn.id];
-    if (!(typeof pkValue === 'string' || typeof pkValue === 'number')) {
-      throw new Error('Primary key value is not a string or number.');
-    }
-    return pkValue;
+  function handleSubmitPkValue(v: string | number) {
+    controller.submit(v);
   }
 
-  function handleSubmitRecord(row: Row) {
-    controller.submit(getPkValue(row));
+  async function handleSubmitNewRecord(v: Iterable<[number, unknown]>) {
+    const url = `/api/db/v0/tables/${tabularData.id}/records/`;
+    try {
+      isSubmittingNewRecord = true;
+      const record = await postAPI<ApiRecord>(url, Object.fromEntries(v));
+      const pkValue = getPkValueInRecord(record, columns);
+      controller.submit(pkValue);
+    } catch (err) {
+      // TODO set errors in tabularData to appear within cells
+    } finally {
+      isSubmittingNewRecord = false;
+    }
   }
 
   function handleInputFocus(columnId: number) {
@@ -95,11 +96,15 @@
 <div
   class="record-selector-table"
   class:has-open-nested-selector={$nestedSelectorIsOpen}
-  class:loading={$isLoading}
 >
-  <div class="loading-spinner">
-    <Spinner size="2em" />
-  </div>
+  {#if $isLoading || isSubmittingNewRecord}
+    <div
+      class="loading-spinner"
+      class:prevent-user-entry={isSubmittingNewRecord}
+    >
+      <Spinner size="2em" />
+    </div>
+  {/if}
   <div class="row header" style="width: {rowWidth}px">
     <CellArranger {display} let:style let:processedColumn>
       <CellWrapper header {style}>
@@ -165,7 +170,10 @@
   {#if $nestedSelectorIsOpen}
     <NestedRecordSelector />
   {:else}
-    <RecordSelectorResults submit={handleSubmitRecord} />
+    <RecordSelectorResults
+      submitPkValue={handleSubmitPkValue}
+      submitNewRecord={handleSubmitNewRecord}
+    />
   {/if}
 </div>
 
@@ -186,9 +194,12 @@
     justify-content: center;
     align-items: center;
     color: #aaa;
+    z-index: 100;
+    pointer-events: none;
   }
-  .record-selector-table:not(.loading) > .loading-spinner {
-    display: none;
+  .loading-spinner.prevent-user-entry {
+    pointer-events: all;
+    background: rgba(255, 255, 255, 0.5);
   }
   .row {
     position: relative;
