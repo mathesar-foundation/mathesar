@@ -5,6 +5,7 @@
 -->
 <script lang="ts">
   import RecordPageLink from '../RecordPageLink.svelte';
+  import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';
 
   export let columnFabric: CellColumnFabric;
@@ -13,6 +14,7 @@
   export let disabled = false;
   export let showAsSkeleton = false;
   export let recordPageLinkHref: string | undefined = undefined;
+  export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
 
   $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
@@ -25,6 +27,7 @@
     {...props}
     {isActive}
     {disabled}
+    {horizontalAlignment}
     bind:value
     on:movementKeyDown
     on:activate

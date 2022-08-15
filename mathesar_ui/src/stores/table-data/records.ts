@@ -28,7 +28,6 @@ import type { ColumnsDataStore } from './columns';
 import type { Sorting } from './sorting';
 import type { Grouping as GroupingTODORename } from './grouping';
 import type { Filtering } from './filtering';
-import { TabularType } from './TabularType';
 import type { SearchFuzzy } from './searchFuzzy';
 
 export interface RecordsRequestParamsData {
@@ -216,8 +215,6 @@ function prepareRowForRequest(row: Row): ApiRecord {
 }
 
 export class RecordsData {
-  private type: TabularType;
-
   private parentId: DBObjectEntry['id'];
 
   private url: string;
@@ -251,13 +248,11 @@ export class RecordsData {
   private requestParamsUnsubscriber: Unsubscriber;
 
   constructor(
-    type: TabularType,
     parentId: number,
     meta: Meta,
     columnsDataStore: ColumnsDataStore,
     fetchCallback?: (storeData: TableRecordsData) => void,
   ) {
-    this.type = type;
     this.parentId = parentId;
 
     this.state = writable(States.Loading);
@@ -269,8 +264,7 @@ export class RecordsData {
 
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
-    const tabularEntity = this.type === TabularType.Table ? 'tables' : 'views';
-    this.url = `/api/db/v0/${tabularEntity}/${this.parentId}/records/`;
+    this.url = `/api/db/v0/tables/${this.parentId}/records/`;
     this.fetchCallback = fetchCallback;
     void this.fetch();
 

@@ -4,12 +4,7 @@ import { get, derived, writable } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import { TabularData } from '@mathesar/stores/table-data/tabularData';
 import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-import {
-  Filtering,
-  Grouping,
-  Sorting,
-  TabularType,
-} from '@mathesar/stores/table-data';
+import { Meta } from '@mathesar/stores/table-data';
 import Pagination from '@mathesar/utils/Pagination';
 
 interface RecordSelectorControllerProps {
@@ -42,20 +37,11 @@ export class RecordSelectorController {
       if (!tableId) {
         return undefined;
       }
-      const abstractTypesMap = get(currentDbAbstractTypes).data;
-      return new TabularData(
-        {
-          type: TabularType.Table,
-          id: tableId,
-          metaProps: {
-            pagination: new Pagination({ size: 10 }),
-            sorting: new Sorting(),
-            grouping: new Grouping(),
-            filtering: new Filtering(),
-          },
-        },
-        abstractTypesMap,
-      );
+      return new TabularData({
+        id: tableId,
+        abstractTypesMap: get(currentDbAbstractTypes).data,
+        meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
+      });
     });
   }
 
