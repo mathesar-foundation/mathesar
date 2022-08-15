@@ -1,8 +1,4 @@
-export type {
-  TabularData,
-  TabularDataProps,
-  TerseTabularDataProps,
-} from './tabularData';
+export type { TabularData, TabularDataProps } from './tabularData';
 export type { RecordsData, Row } from './records';
 export type { ColumnsData, ColumnsDataStore } from './columns';
 export type {

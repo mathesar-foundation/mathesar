@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Collapsible, Icon } from '@mathesar-component-library';
-  import ColumnName from '@mathesar/components/ColumnName.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconInwardLink, iconOutwardLink } from '@mathesar/icons';
 
   export let column: { name: string; type: string };

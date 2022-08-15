@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { Button } from '@mathesar-component-library';
-  import ColumnName from '@mathesar/components/ColumnName.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type { ColumnWithLink } from '../InputColumnsManager';
 
   const dispatch = createEventDispatcher();
@@ -28,10 +28,10 @@
       text-align: left;
       border: 1px solid #efefef;
       border-radius: 0.15rem;
-    }
-    :global(button .column-name) {
-      flex-grow: 1;
       overflow: hidden;
+    }
+    :global(button .name-with-icon) {
+      flex-grow: 1;
       text-overflow: ellipsis;
       white-space: nowrap;
     }

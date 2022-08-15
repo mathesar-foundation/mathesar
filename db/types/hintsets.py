@@ -21,6 +21,9 @@ def _build_db_types_hinted():
         MathesarCustomType.EMAIL: tuple([
             hints.email
         ]),
+        MathesarCustomType.MATHESAR_JSON_ARRAY: tuple([
+            hints.json_array
+        ]),
     }
 
     # Then, start adding hints automatically.
@@ -48,7 +51,7 @@ def _build_db_types_hinted():
     _add_to_db_type_hintsets(categories.DATETIME_TYPES, (hints.date, hints.time,))
     _add_to_db_type_hintsets(categories.DURATION_TYPES, (hints.duration,))
     _add_to_db_type_hintsets(categories.COMPARABLE_TYPES, (hints.comparable,))
-    _add_to_db_type_hintsets(categories.JSON_TYPES, (hints.json,))
+    _add_to_db_type_hintsets(categories.JSON_ARRAY, (hints.json_array,))
     return frozendict(db_types_hinted)
 
 
