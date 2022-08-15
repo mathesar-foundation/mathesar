@@ -294,13 +294,14 @@
       }
     }
 
-    :global(.column-name-wrapper) {
+    :global(button.column-name-wrapper) {
       flex: 1;
       padding: 6px 8px;
       overflow: hidden;
       height: 100%;
       display: block;
       overflow: hidden;
+      text-align: left;
     }
 
     :global(.column-name-wrapper.selected) {
