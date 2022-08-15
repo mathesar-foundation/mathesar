@@ -172,7 +172,7 @@ def _to_executable(relation):
     if isinstance(relation, sqlalchemy.sql.expression.Executable):
         return relation
     else:
-        return select(['*']).select_from(relation)
+        return select(*relation.c).select_from(relation)
 
 
 def _to_non_executable(relation):

@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from db.records.operations.group import GroupBy
 from mathesar.api.utils import get_table_or_404, process_annotated_records
+from mathesar.models.base import Table
 from mathesar.models.query import UIQuery
 from mathesar.utils.preview import get_preview_info
 
@@ -74,15 +75,18 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         # TODO: Cache count value somewhere, since calculating it is expensive.
         self.count = table.sa_num_records(filter=filters, search=search)
         self.request = request
-        columns_query = table.columns.all()
-        preview_columns = []
-        preview_metadata = None
-        if show_preview:
-            preview_metadata, preview_columns = get_preview_info(show_preview, table.id)
-        table_columns = [{'id': column.id, 'alias': column.name} for column in columns_query]
-        columns_to_fetch = table_columns + preview_columns
 
-        query = UIQuery(name="preview", base_table=table, initial_columns=columns_to_fetch)
+        preview_metadata = None
+        # Only tables have columns on the Service layer that hold data necessary for preview template.
+        if show_preview and isinstance(table, Table):
+            columns_query = table.columns.all()
+            preview_metadata, preview_columns = get_preview_info(show_preview, table.id)
+            table_columns = [{'id': column.id, 'alias': column.name} for column in columns_query]
+            columns_to_fetch = table_columns + preview_columns
+
+            query = UIQuery(name="preview", base_table=table, initial_columns=columns_to_fetch)
+        else:
+            query = table
         records = query.get_records(
             limit=self.limit,
             offset=self.offset,
