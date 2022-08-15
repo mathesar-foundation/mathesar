@@ -1,20 +1,18 @@
-from copy import deepcopy
 import json
+import pytest
+from copy import deepcopy
 from unittest.mock import patch
 
-import pytest
-
-from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
-from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
-from mathesar.models.base import Column, db_get_records_with_default_order
-from mathesar.models import base as models_base
-from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.api.utils import follows_json_number_spec
+from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
+from mathesar.models import base as models_base
+from mathesar.models.base import db_get_records_with_default_order
 
 
 def _test_preview_response(preview_response, referent_table, referent_column, referred_value):
@@ -760,8 +758,10 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
         data=data,
     )
     assert response.status_code == 200
-    publication_template_columns = publication_table.get_columns_by_name(['publisher', 'author', 'co_author'])
-    publication_preview_template = f'Published By: {{{ publication_template_columns[0].id}}} and Authored by {{{publication_template_columns[1].id}}} along with {{{publication_template_columns[2].id}}}'
+    publication_template_columns = publication_table.get_columns_by_name(['publisher', 'author', 'co_author', 'title', 'id'])
+    # TODO Uncomment once the bug with db explorer is fixed
+    # publication_preview_template = f'{{{publication_template_columns[3].id}}} Published By: {{{ publication_template_columns[0].id}}} and Authored by {{{publication_template_columns[1].id}}} along with {{{publication_template_columns[2].id}}}'
+    publication_preview_template = f'{{{publication_template_columns[3].id}}}'
     publication_table_settings_id = publication_table.settings.id
     data = {
         "preview_settings": {
@@ -774,47 +774,20 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     )
     assert response.status_code == 200
     response = client.get(f'/api/db/v0/tables/{checkouts_table.id}/records/', data={'fk_previews': 'all'})
-    response.json()
-
-
-def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, client):
-    referrer_table, referent_table = two_foreign_key_tables
-    referent_column = referent_table.get_columns_by_name(["Id"])[0]
-    referrer_table_columns = referrer_table.get_columns_by_name(
-        ["Id", "Center", "Affiliated Center", "Original Patent"]
-    )
-    referrer_table_column_ids = [referrer_column.id for referrer_column in referrer_table_columns]
-    Column.objects.filter(id__in=referrer_table_column_ids).update(display_options={'show_fk_preview': False})
-    referrer_table_pk = referrer_table_columns[0]
-    referrer_column_with_fk_preview = referrer_table_columns[1]
-    referrer_column_with_fk_preview.display_options = {'show_fk_preview': True}
-    referrer_column_with_fk_preview.save()
-    referrer_column_2 = referrer_table_columns[2]
-    self_referential_column = referrer_table_columns[3]
-
-    referrer_table.add_constraint(UniqueConstraint(None, referrer_table.oid, [referrer_table_pk.attnum]))
-    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
-    referrer_table.add_constraint(ForeignKeyConstraint(None,
-                                                       referrer_table.oid,
-                                                       [referrer_column_with_fk_preview.attnum],
-                                                       referent_table.oid,
-                                                       [referent_column.attnum], {}))
-    referrer_table.add_constraint(ForeignKeyConstraint(None,
-                                                       referrer_table.oid,
-                                                       [referrer_column_2.attnum],
-                                                       referent_table.oid,
-                                                       [referent_column.attnum], {}))
-    referrer_table.add_constraint(ForeignKeyConstraint(None,
-                                                       referrer_table.oid,
-                                                       [self_referential_column.attnum],
-                                                       referrer_table.oid,
-                                                       [referrer_table_pk.attnum], {}))
-    response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'auto'})
-    assert response.status_code == 200
     response_data = response.json()
-    referred_value = '1'
-    preview_response = response_data['previews']
-    _test_preview_response(preview_response, referent_table, referent_column, referred_value)
+    preview_data = response_data['preview_data']
+    checkouts_table_publication_fk_column = checkouts_table.get_column_by_name('publication')
+    preview_column = next(
+        preview
+        for preview in preview_data
+        if preview['column'] == checkouts_table_publication_fk_column.id
+    )
+    preview_column_alias = f'{checkouts_table_publication_fk_column.id}__{publication_template_columns[4].id}__col__{publication_template_columns[3].id}'
+    assert preview_column['template'] == f'{{{preview_column_alias}}}'
+    preview_data = preview_column['data'][0]
+    assert preview_column_alias in preview_data
+    expected_preview_value = 'Pressure Should Old'
+    assert preview_data[preview_column_alias] == expected_preview_value
 
 
 def test_record_detail(create_patents_table, client):

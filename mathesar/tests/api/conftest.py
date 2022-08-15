@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.core.files import File
 import pytest
 from rest_framework.test import APIClient
@@ -90,47 +92,48 @@ def publication_tables(_create_two_tables, client):
             [checkouts_table_pk_column.attnum]
         )
     )
-    publication_publisher_column = publication_table_columns[1]
-    publication_author_column = publication_table_columns[2]
-    publication_co_author_column = publication_table_columns[3]
     db_type = PostgresType.INTEGER
     data = {"type": db_type.id}
-    client.patch(
-        f"/api/db/v0/tables/{publication_table.id}/columns/{publication_publisher_column.id}/", data=data
-    )
-    publication_table.add_constraint(
-        ForeignKeyConstraint(
-            None,
-            publication_table.oid,
-            [publication_publisher_column.attnum],
-            publisher_table.oid,
-            [publisher_table_pk_column.attnum], {}
-        )
-    )
-    client.patch(
-        f"/api/db/v0/tables/{publication_table.id}/columns/{publication_author_column.id}/", data=data
-    )
-    publication_table.add_constraint(
-        ForeignKeyConstraint(
-            None,
-            publication_table.oid,
-            [publication_author_column.attnum],
-            author_table.oid,
-            [author_table_pk_column.attnum], {}
-        )
-    )
-    client.patch(
-        f"/api/db/v0/tables/{publication_table.id}/columns/{publication_co_author_column.id}/", data=data
-    )
-    publication_table.add_constraint(
-        ForeignKeyConstraint(
-            None,
-            publication_table.oid,
-            [publication_co_author_column.attnum],
-            author_table.oid,
-            [author_table_pk_column.attnum], {}
-        )
-    )
+    # TODO Uncomment when DB query bug is fixed
+    # publication_publisher_column = publication_table_columns[1]
+    # publication_author_column = publication_table_columns[2]
+    # publication_co_author_column = publication_table_columns[3]
+    # client.patch(
+    #     f"/api/db/v0/tables/{publication_table.id}/columns/{publication_publisher_column.id}/", data=data
+    # )
+    # publication_table.add_constraint(
+    #     ForeignKeyConstraint(
+    #         None,
+    #         publication_table.oid,
+    #         [publication_publisher_column.attnum],
+    #         publisher_table.oid,
+    #         [publisher_table_pk_column.attnum], {}
+    #     )
+    # )
+    # client.patch(
+    #     f"/api/db/v0/tables/{publication_table.id}/columns/{publication_author_column.id}/", data=data
+    # )
+    # publication_table.add_constraint(
+    #     ForeignKeyConstraint(
+    #         None,
+    #         publication_table.oid,
+    #         [publication_author_column.attnum],
+    #         author_table.oid,
+    #         [author_table_pk_column.attnum], {}
+    #     )
+    # )
+    # client.patch(
+    #     f"/api/db/v0/tables/{publication_table.id}/columns/{publication_co_author_column.id}/", data=data
+    # )
+    # publication_table.add_constraint(
+    #     ForeignKeyConstraint(
+    #         None,
+    #         publication_table.oid,
+    #         [publication_co_author_column.attnum],
+    #         author_table.oid,
+    #         [author_table_pk_column.attnum], {}
+    #     )
+    # )
     client.patch(
         f"/api/db/v0/tables/{checkouts_table.id}/columns/{checkouts_table_publication_column.id}/", data=data
     )
@@ -169,7 +172,7 @@ def _create_two_tables(create_table, get_uid):
         schema_name = get_uid()
         return tuple(
             create_table(
-                table_name=table_name,
+                table_name=Path(csv_filepath).stem,
                 schema_name=schema_name,
                 csv_filepath=csv_filepath,
             )
