@@ -6,15 +6,18 @@ import type { JpPath } from '@mathesar/api/tables/tableList';
  * endpoint: /api/db/v0/queries/<query_id>/
  */
 
+export interface QueryInstanceInitialColumn {
+  alias: string;
+  id: Column['id'];
+  jp_path?: JpPath;
+  display_name: string;
+}
+
 export interface QueryInstance {
   readonly id: number;
   readonly name: string;
   readonly base_table: number;
-  readonly initial_columns?: {
-    alias: string;
-    id: Column['id'];
-    jpPath?: JpPath;
-  }[];
+  readonly initial_columns?: QueryInstanceInitialColumn[];
 }
 
 /**
@@ -35,7 +38,7 @@ export type QueryResultRecords = PaginatedResponse<Record<string, unknown>>;
 
 export interface QueryResultColumn {
   alias: string;
-  name: string | null;
+  display_name: string | null;
   type: Column['type'];
   type_options: Column['type_options'];
   display_options: Column['display_options'];

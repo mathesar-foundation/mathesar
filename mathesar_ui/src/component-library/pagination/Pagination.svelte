@@ -1,13 +1,13 @@
 <script lang="ts">
   import { tick, createEventDispatcher } from 'svelte';
-  import {
-    faAngleDoubleLeft,
-    faAngleDoubleRight,
-    faEllipsisH,
-    faAngleLeft,
-    faAngleRight,
-  } from '@fortawesome/free-solid-svg-icons';
   import { Icon } from '@mathesar-component-library';
+  import {
+    iconChooseItemPrevious,
+    iconShowMore,
+    iconChooseItemManyPrior,
+    iconChooseItemManyAhead,
+    iconChooseItemNext,
+  } from '@mathesar-component-library-dir/common/icons';
   import { calculatePages, getPageCount } from './paginationUtils';
 
   const dispatch = createEventDispatcher();
@@ -59,7 +59,7 @@
           on:click={(e) => setPage(e, currentPage - 1)}
           disabled={currentPage === 1}
         >
-          <Icon data={faAngleLeft} tabindex="-1" />
+          <Icon {...iconChooseItemPrevious} tabindex="-1" />
         </button>
       </li>
     {/if}
@@ -97,8 +97,8 @@
             aria-label="Goto Page {pageInfo.prevPageWindow}"
             on:click={(e) => setPage(e, pageInfo.prevPageWindow)}
           >
-            <Icon class="ellipsis" data={faEllipsisH} />
-            <Icon class="arrow" data={faAngleDoubleLeft} />
+            <Icon class="ellipsis" {...iconShowMore} />
+            <Icon class="arrow" {...iconChooseItemManyPrior} />
           </button>
         </li>
       {/if}
@@ -148,8 +148,8 @@
             aria-label="Goto Page {pageInfo.nextPageWindow}"
             on:click={(e) => setPage(e, pageInfo.nextPageWindow)}
           >
-            <Icon class="ellipsis" data={faEllipsisH} />
-            <Icon class="arrow" data={faAngleDoubleRight} />
+            <Icon class="ellipsis" {...iconShowMore} />
+            <Icon class="arrow" {...iconChooseItemManyAhead} />
           </button>
         </li>
       {/if}
@@ -188,7 +188,7 @@
           on:click={(e) => setPage(e, currentPage + 1)}
           disabled={currentPage === pageCount}
         >
-          <Icon data={faAngleRight} />
+          <Icon {...iconChooseItemNext} />
         </button>
       </li>
     {/if}

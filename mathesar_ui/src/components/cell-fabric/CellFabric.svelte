@@ -1,25 +1,23 @@
 <!--
   @component
 
-  TODO: Move this component within Sheet
-
-  This component is meant to be common for tables, views, and for import preview
+  This component is meant to be common for tables, queries, and for import preview
 -->
 <script lang="ts">
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import type { CellColumnFabric } from './types';
 
-  export let processedColumn: ProcessedColumn;
+  export let columnFabric: CellColumnFabric;
   export let value: unknown;
   export let isActive = false;
   export let disabled = false;
   export let showAsSkeleton = false;
 
-  $: ({ cellComponentAndProps } = processedColumn);
+  $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
   $: props = cellComponentAndProps.props as Record<string, unknown>;
 </script>
 
-<div class="sheet-cell" data-column-id={processedColumn.column.id}>
+<div class="cell-fabric" data-column-identifier={columnFabric.id}>
   <svelte:component
     this={component}
     {...props}
@@ -37,7 +35,7 @@
 </div>
 
 <style lang="scss">
-  .sheet-cell {
+  .cell-fabric {
     --cell-height: 29px;
     position: relative;
     display: flex;
@@ -47,7 +45,7 @@
     width: 100%;
   }
 
-  .sheet-cell {
+  .cell-fabric {
     .loader {
       top: 6px;
       left: 8px;

@@ -1,8 +1,8 @@
-import { faQuestion } from '@fortawesome/free-solid-svg-icons';
+import { iconUiTypeUnknown } from '@mathesar/icons';
 import type { AbstractTypeConfiguration } from '../types';
 
 const fallbackType: AbstractTypeConfiguration = {
-  icon: { data: faQuestion, label: 'Unknown column type' },
+  icon: { ...iconUiTypeUnknown, label: 'Unknown column type' },
   cell: {
     type: 'string',
   },

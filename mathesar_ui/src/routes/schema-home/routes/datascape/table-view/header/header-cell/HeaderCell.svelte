@@ -1,10 +1,5 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import {
-    faCog,
-    faChevronRight,
-    faChevronLeft,
-  } from '@fortawesome/free-solid-svg-icons';
   import { toast } from '@mathesar/stores/toast';
   import {
     Dropdown,
@@ -22,8 +17,9 @@
     Meta,
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
-  import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { iconExpandRight, iconConfigure } from '@mathesar/icons';
+  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
 
@@ -150,7 +146,7 @@
     contentClass="no-max-height column-opts-content"
     on:close={setDefaultView}
   >
-    <ColumnName slot="trigger" {column} />
+    <TableColumnName slot="trigger" column={processedColumn} />
     <svelte:fragment slot="content">
       <div class="container">
         <div class="section type-header">
@@ -162,8 +158,8 @@
               on:click={setTypeView}
             >
               <span>{abstractType.name}</span>
-              <Icon size="0.8em" data={faCog} />
-              <Icon size="0.7em" data={faChevronRight} />
+              <Icon size="0.8em" {...iconConfigure} />
+              <Icon size="0.7em" {...iconExpandRight} />
             </Button>
           {:else if view === 'type'}
             <h6 class="category">
@@ -173,7 +169,7 @@
                 class="padding-zero"
                 on:click={setDefaultView}
               >
-                <Icon data={faChevronLeft} />
+                <Icon {...iconExpandRight} />
                 Go back
               </Button>
             </h6>

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import { faBackspace } from '@fortawesome/free-solid-svg-icons';
   import {
     ContextMenu,
     MenuItem,
@@ -16,12 +15,13 @@
     RecordsData,
     CellKey,
   } from '@mathesar/stores/table-data/types';
-  import Cell from '@mathesar/components/cell/Cell.svelte';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import { iconSetToNull } from '@mathesar/icons';
   import CellErrors from './CellErrors.svelte';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
@@ -114,8 +114,8 @@
       />
     {/if}
 
-    <Cell
-      {processedColumn}
+    <CellFabric
+      columnFabric={processedColumn}
       {isActive}
       {value}
       showAsSkeleton={$recordsDataState === States.Loading}
@@ -126,7 +126,7 @@
     />
     <ContextMenu>
       <MenuItem
-        icon={{ data: faBackspace }}
+        icon={iconSetToNull}
         disabled={!canSetNull}
         on:click={() => setValue(null)}
       >

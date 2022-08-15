@@ -10,6 +10,7 @@ type MinimalColumnDetails = Pick<
  * endpoint: /api/db/v0/tables/<table_id>/
  */
 
+// TODO: Rename this to TableInstance
 export interface TableEntry {
   id: number;
   name: string;
