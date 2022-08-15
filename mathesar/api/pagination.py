@@ -37,40 +37,6 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
 
 
 class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
-
-    def paginate_queryset(
-        self,
-        queryset,
-        request,
-        table,
-        filters=None,
-        order_by=[],
-        group_by=None,
-        search=[],
-        duplicate_only=None,
-        show_preview=None
-    ):
-        self.limit = self.get_limit(request)
-        if self.limit is None:
-            self.limit = self.default_limit
-        self.offset = self.get_offset(request)
-        # TODO: Cache count value somewhere, since calculating it is expensive.
-        self.count = table.sa_num_records(filter=filters, search=search)
-        self.request = request
-        if show_preview:
-            get_preview_info(show_preview, table.id)
-        return table.get_records(
-            limit=self.limit,
-            offset=self.offset,
-            filter=filters,
-            order_by=order_by,
-            group_by=group_by,
-            search=search,
-            duplicate_only=duplicate_only,
-        )
-
-
-class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
     def get_paginated_response(self, data):
         return Response(
             self.get_wrapped_with_metadata(data)
@@ -99,11 +65,26 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         show_preview=None
     ):
         group_by = GroupBy(**grouping) if grouping else None
-        records = super().paginate_queryset(
-            queryset=queryset,
-            request=request,
-            table=table,
-            filters=filters,
+        self.limit = self.get_limit(request)
+        if self.limit is None:
+            self.limit = self.default_limit
+        self.offset = self.get_offset(request)
+        # TODO: Cache count value somewhere, since calculating it is expensive.
+        self.count = table.sa_num_records(filter=filters, search=search)
+        self.request = request
+        columns_query = table.columns.all()
+        preview_columns = []
+        preview_metadata = None
+        if show_preview:
+            preview_metadata, preview_columns = get_preview_info(show_preview, table.id)
+        table_columns = [{'id': column.id, 'alias': column.name} for column in columns_query]
+        columns_to_fetch = table_columns + preview_columns
+
+        query = UIQuery(name="preview", base_table=table, initial_columns=columns_to_fetch)
+        records = query.get_records(
+            limit=self.limit,
+            offset=self.offset,
+            filter=filters,
             order_by=order_by,
             group_by=group_by,
             search=search,
@@ -111,6 +92,9 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             show_preview=show_preview
         )
 
+        return self.process_records(records, column_name_id_bidirectional_map, group_by, preview_metadata)
+
+    def process_records(self, records, column_name_id_bidirectional_map, group_by, preview_metadata):
         if records:
             processed_records, groups = process_annotated_records(
                 records,
