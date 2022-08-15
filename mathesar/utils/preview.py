@@ -15,8 +15,9 @@ def add_preview_columns(preview_info, referent_table_settings):
     return preview_info
 
 
-def get_constrained_columns_by_referent_table(fk_previews, fk_constraints, existing_columns=[], path=[]):
+def get_constrained_columns_by_referent_table(fk_previews, fk_constraints, previous_path=[], exising_columns=[]):
     preview_info = {}
+    preview_columns = exising_columns
     for fk_constraint in fk_constraints:
         constrained_column = fk_constraint.columns[0]
         # For now only single column foreign key is used.
@@ -27,16 +28,23 @@ def get_constrained_columns_by_referent_table(fk_previews, fk_constraints, exist
         preview_columns_extraction_regex = r'\{(.*?)\}'
         preview_data_column_ids = re.findall(preview_columns_extraction_regex, preview_template)
         preview_data_columns = Column.objects.filter(id__in=preview_data_column_ids)
-        # TODO change to recursive join
-        referent_preview_info = get_preview_info(fk_previews, referent_table.id, preview_data_columns)
+        current_path = previous_path + [[constrained_column.id, referent_column.id]]
+        referent_preview_info, referent_preview_columns = get_preview_info(fk_previews, referent_table.id, preview_data_columns, current_path, exising_columns)
+        preview_columns = preview_columns + referent_preview_columns
         for column_key, column_value in referent_preview_info.items():
             preview_template = preview_template.replace(f'{{{column_key}}}', f'{column_value["template"]}')
-        # Replace column path
-        preview_info[constrained_column.id] = {"template": preview_template}
-    return preview_info
+        path_prefix = "___".join([f"{path[0]}__{path[1]}" for path in current_path])
+        for preview_data_column_id in preview_data_column_ids:
+            if preview_data_column_id not in referent_preview_info:
+                column_alias_name = f'{path_prefix}__col__{preview_data_column_id}'
+                preview_template = preview_template.replace(f'{{{preview_data_column_id}}}', f'{{{column_alias_name}}}')
+                initial_column = {'id': preview_data_column_id, "alias": column_alias_name, "jp_path": current_path}
+                preview_columns.append(initial_column)
+        preview_info[constrained_column.id] = {"template": preview_template, 'path': current_path}
+    return preview_info, preview_columns
 
 
-def get_preview_info(fk_previews, referrer_table_pk, restrict_columns=None):
+def get_preview_info(fk_previews, referrer_table_pk, restrict_columns=None, path=[], existing_columns=[]):
     table_constraints = Constraint.objects.filter(table_id=referrer_table_pk)
     fk_constraints = [
         table_constraint
@@ -54,8 +62,13 @@ def get_preview_info(fk_previews, referrer_table_pk, restrict_columns=None):
             fk_constraints
         )
 
-    preview_info = get_constrained_columns_by_referent_table(fk_previews, fk_constraints)
-    return preview_info
+    preview_info, columns = get_constrained_columns_by_referent_table(
+        fk_previews,
+        fk_constraints,
+        path,
+        existing_columns
+    )
+    return preview_info, columns
 
 
 def _filter_preview_enabled_columns(fk_constraint):
