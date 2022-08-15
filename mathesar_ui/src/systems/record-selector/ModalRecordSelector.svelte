@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { derived } from 'svelte/store';
+  import { derived, readable } from 'svelte/store';
 
   import type {
     ModalCloseAction,
@@ -20,16 +20,10 @@
     nestedController ? nestedController.isOpen : false,
   );
   $: ({ tabularData } = recordSelectorController);
-
   $: inputsContainUserEntry = collapse(
-    derived(tabularData, (t) => {
-      if (!t) {
-        return ensureReadable(false);
-      }
-      return derived(t.meta.searchFuzzy, (searchFuzzy) => {
-        return searchFuzzy.searchableEntries().size > 0;
-      });
-    }),
+    derived(tabularData, (t) =>
+      t ? derived(t.meta.searchFuzzy, (s) => s.size > 0) : readable(false),
+    ),
   );
 
   function getModalCloseActions(

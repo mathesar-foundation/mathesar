@@ -6,21 +6,24 @@ import { ImmutableMap } from '@mathesar/component-library';
  * for empty-like values, so we strip them out.
  */
 function valueIsSearchable(v: unknown) {
-  return v !== '' && v !== null && v !== undefined;
+  if (typeof v === 'string') {
+    return v.trim().length > 0;
+  }
+  return v !== null && v !== undefined;
 }
 
 export class SearchFuzzy extends ImmutableMap<number, unknown> {
-  searchableEntries(): ImmutableMap<number, unknown> {
-    return this.filterValues(valueIsSearchable);
+  constructor(i: Iterable<[number, unknown]> = []) {
+    super(i);
+    this.valueIsValid = valueIsSearchable;
   }
 
   recordsRequestParams(): Pick<GetRequestParams, 'search_fuzzy'> {
-    const searchableEntries = this.searchableEntries();
-    if (searchableEntries.size === 0) {
+    if (this.size === 0) {
       return {};
     }
     return {
-      search_fuzzy: [...searchableEntries].map(([columnId, value]) => ({
+      search_fuzzy: [...this].map(([columnId, value]) => ({
         field: columnId,
         literal: value,
       })),
