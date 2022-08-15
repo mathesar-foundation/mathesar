@@ -23,7 +23,7 @@ def get_table_or_404(pk):
     return table
 
 
-def process_annotated_records(record_list, column_name_id_map=None):
+def process_annotated_records(record_list, column_name_id_map=None, preview_metadata=None):
 
     RESULT_IDX = 'result_indices'
 
@@ -64,7 +64,25 @@ def process_annotated_records(record_list, column_name_id_map=None):
             return _replace_column_names_with_ids(group_metadata_item)
         else:
             return group_metadata_item
-
+    if preview_metadata:
+        # TODO Replace modifying the parameter directly
+        for preview_colum_id, preview_info in preview_metadata.items():
+            preview_template = preview_info['template']
+            # TODO Move the unwanted field preprocessing step to a suitable place
+            preview_metadata[preview_colum_id].pop('path')
+            preview_metadata[preview_colum_id]['column'] = preview_colum_id
+            preview_columns_extraction_regex = r'\{(.*?)\}'
+            preview_data_column_aliases = re.findall(preview_columns_extraction_regex, preview_template)
+            preview_records = []
+            for record_index, record in enumerate(processed_records):
+                column_preview_data = {}
+                for preview_data_column_alias in preview_data_column_aliases:
+                    preview_value = processed_records[record_index].pop(preview_data_column_alias)
+                    column_preview_data.update({preview_data_column_alias: preview_value})
+                preview_records.append(column_preview_data)
+            preview_metadata[preview_colum_id]['data'] = preview_records
+        # Flatten the preview objects
+        preview_metadata = preview_metadata.values()
     if groups is not None:
         groups_by_id = {
             grp[group.GroupMetadataField.GROUP_ID.value]: {
@@ -81,7 +99,7 @@ def process_annotated_records(record_list, column_name_id_map=None):
     else:
         output_groups = None
 
-    return processed_records, output_groups
+    return processed_records, output_groups, preview_metadata
 
 
 def follows_json_number_spec(number):

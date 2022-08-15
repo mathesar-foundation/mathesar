@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from db.records.operations.group import GroupBy
 from mathesar.api.utils import get_table_or_404, process_annotated_records
+from mathesar.models.query import UIQuery
 from mathesar.utils.preview import get_preview_info
 
 
@@ -47,6 +48,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             [
                 ('count', self.count),
                 ('grouping', self.grouping),
+                ('preview_data', self.preview_data),
                 ('results', data)
             ]
         )
@@ -88,20 +90,20 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             order_by=order_by,
             group_by=group_by,
             search=search,
-            duplicate_only=duplicate_only,
-            show_preview=show_preview
+            duplicate_only=duplicate_only
         )
 
         return self.process_records(records, column_name_id_bidirectional_map, group_by, preview_metadata)
 
     def process_records(self, records, column_name_id_bidirectional_map, group_by, preview_metadata):
         if records:
-            processed_records, groups = process_annotated_records(
+            processed_records, groups, preview_data = process_annotated_records(
                 records,
                 column_name_id_bidirectional_map,
+                preview_metadata
             )
         else:
-            processed_records, groups = None, None
+            processed_records, groups, preview_data = None, None, None
 
         if group_by:
             # NOTE when column name<->id map is None, we output column names.
@@ -130,5 +132,6 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             }
         else:
             self.grouping = None
-
+        if preview_metadata:
+            self.preview_data = preview_data
         return processed_records
