@@ -19,9 +19,6 @@ export { getCellKey, ID_ROW_CONTROL_COLUMN, ID_ADD_NEW_COLUMN } from './utils';
 
 export { getTabularData, initTabularData, removeTabularData } from './manager';
 export {
-  makeTabularDataProps,
-  makeTerseTabularDataProps,
   setTabularDataStoreInContext,
   getTabularDataStoreFromContext,
 } from './tabularData';
-export { TabularType } from './TabularType';
