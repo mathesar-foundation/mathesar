@@ -157,10 +157,19 @@ class Schema(DatabaseObject):
         except TypeError:
             return 'MISSING'
 
-    # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
     def has_dependencies(self):
-        return True
+        return has_dependencies(
+            self.oid,
+            self._sa_engine
+        )
+
+    @property
+    def dependents(self):
+        return get_dependents_graph(
+            self.oid,
+            self._sa_engine
+        )
 
     def update_sa_schema(self, update_params):
         return model_utils.update_sa_schema(self, update_params)
@@ -249,7 +258,6 @@ class Table(DatabaseObject, Relation):
     def sa_constraints(self):
         return self._sa_table.constraints
 
-    # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
     def has_dependencies(self):
         return has_dependencies(

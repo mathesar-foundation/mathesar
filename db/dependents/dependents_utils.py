@@ -46,7 +46,7 @@ def get_dependents_graph(referenced_object_id, engine):
 
 
 # finding table dependents based on foreign key constraints from the referenced tables
-def _get_table_dependents(foreign_key_dependents, pg_constraint):
+def _get_table_dependents_from_fk(foreign_key_dependents, pg_constraint):
     pg_identify_object = select(
         column("name"),
         column("schema"),
@@ -85,6 +85,10 @@ def _get_table_dependents(foreign_key_dependents, pg_constraint):
 
 def _get_foreign_key_constraint_dependents(pg_identify_object, base):
     return base.where(pg_identify_object.c.type == 'table constraint')
+
+
+def _get_table_dependents(pg_identify_object, base):
+    return base.where(pg_identify_object.c.type == 'table')
 
 
 # getting a full list of dependents and identifying them
@@ -152,9 +156,13 @@ def _get_all_dependent_objects_statement(engine):
     # so it's easy to exclude particular types or add new
     base_stmt = _get_all_dependent_objects_base_statement(pg_depend, pg_identify_object)
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, base_stmt).cte('foreign_key_constraint_dependents')
-    table_dependents = _get_table_dependents(foreign_key_constraint_dependents, pg_constraint).cte('table_dependents')
+    table_from_fk_dependents = _get_table_dependents_from_fk(foreign_key_constraint_dependents, pg_constraint).cte('table_from_fk_dependents')
+    table_dependents = _get_table_dependents(pg_identify_object, base_stmt).cte('table_dependents')
 
-    return union(select(foreign_key_constraint_dependents), select(table_dependents))
+    return union(
+        select(foreign_key_constraint_dependents),
+        select(table_from_fk_dependents),
+        select(table_dependents))
 
 
 def has_dependencies(referenced_object_id, engine):
