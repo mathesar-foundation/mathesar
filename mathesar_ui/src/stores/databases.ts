@@ -9,7 +9,7 @@ import type { CancellablePromise } from '@mathesar-component-library';
 
 const commonData = preloadCommonData();
 
-export const currentDBName: Writable<Database['name']> = writable(
+export const currentDBName: Writable<Database['name'] | undefined> = writable(
   commonData?.current_db ?? undefined,
 );
 
@@ -35,6 +35,18 @@ export const currentDBId: Readable<Database['id'] | undefined> = derived(
       return undefined;
     }
     return _databases?.find((database) => database.name === _currentDBName)?.id;
+  },
+);
+
+export const currentDatabase = derived(
+  [currentDBName, databases],
+  ([_currentDBName, databasesStore]) => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const _databases = databasesStore.data;
+    if (!_databases?.length) {
+      return undefined;
+    }
+    return _databases?.find((database) => database.name === _currentDBName);
   },
 );
 

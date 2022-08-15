@@ -88,3 +88,11 @@ JSON_TYPES = frozenset({
     MathesarCustomType.MATHESAR_JSON_OBJECT,
     MathesarCustomType.MATHESAR_JSON_ARRAY
 })
+
+JSON_ARRAY = frozenset({
+    MathesarCustomType.MATHESAR_JSON_ARRAY,
+})
+
+JSON_OBJECT = frozenset({
+    MathesarCustomType.MATHESAR_JSON_OBJECT,
+})

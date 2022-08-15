@@ -4,7 +4,7 @@ import type {
   Constraint,
   FkConstraint,
 } from '@mathesar/api/tables/constraints';
-import type { ComponentAndProps } from '@mathesar/component-library/types';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
 import type {
   AbstractType,
   AbstractTypesMap,
@@ -16,10 +16,11 @@ import {
 import {
   getCellCap,
   getDbTypeBasedInputCap,
-} from '@mathesar/components/cell/utils';
+} from '@mathesar/components/cell-fabric/utils';
+import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import { findFkConstraintsForColumn } from './constraintsUtils';
 
-export interface ProcessedColumn {
+export interface ProcessedColumn extends CellColumnFabric {
   /**
    * This property is also available via `column.id`, but it's duplicated at a
    * higher level for brevity's sake because it's used so frequently.
@@ -37,7 +38,6 @@ export interface ProcessedColumn {
    */
   linkFk: FkConstraint | undefined;
   abstractType: AbstractType;
-  cellComponentAndProps: ComponentAndProps;
   inputComponentAndProps: ComponentAndProps;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
 }
@@ -60,14 +60,19 @@ export function processColumn(
   const sharedConstraints = relevantConstraints.filter(
     (c) => c.columns.length !== 1,
   );
+  const linkFk = findFkConstraintsForColumn(exclusiveConstraints, column.id)[0];
   return {
     id: column.id,
     column,
     exclusiveConstraints,
     sharedConstraints,
-    linkFk: findFkConstraintsForColumn(exclusiveConstraints, column.id)[0],
+    linkFk,
     abstractType,
-    cellComponentAndProps: getCellCap(column, constraints, abstractType.cell),
+    cellComponentAndProps: getCellCap(
+      abstractType.cell,
+      column,
+      linkFk ? linkFk.referent_table : undefined,
+    ),
     inputComponentAndProps: getDbTypeBasedInputCap(column, abstractType.cell),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
   };

@@ -88,14 +88,15 @@ class DuplicateOnly(Transform):
         duplicate_columns = self.spec
         enforce_relation_type_expectations(relation)
         DUPLICATE_LABEL = "_is_dupe"
+        duplicate_flag_col = (
+            sqlalchemy.func
+            .count(1)
+            .over(partition_by=duplicate_columns) > 1
+        ).label(DUPLICATE_LABEL)
         duplicate_flag_cte = (
             select(
                 *relation.c,
-                (
-                    sqlalchemy.func
-                    .count(1)
-                    .over(partition_by=duplicate_columns) > 1
-                ).label(DUPLICATE_LABEL),
+                duplicate_flag_col,
             ).select_from(relation)
         ).cte()
         executable = (
@@ -145,13 +146,12 @@ class SelectSubsetOfColumns(Transform):
     def apply_to_relation(self, relation):
         columns_to_select = self.spec
         if columns_to_select:
-            executable = _to_executable(relation)
-            processed_columns_to_select = tuple(
+            processed_columns_to_select = [
                 _make_sure_column_expression(column)
                 for column
                 in columns_to_select
-            )
-            executable = select(*processed_columns_to_select).select_from(executable)
+            ]
+            executable = select(*processed_columns_to_select).select_from(relation)
             return _to_non_executable(executable)
         else:
             return relation
