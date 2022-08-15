@@ -1,38 +1,33 @@
 <script lang="ts">
+  import { router } from 'tinro';
+
   import type { TableEntry } from '@mathesar/api/tables/tableList';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import {
-    Filtering,
-    Grouping,
-    Sorting,
-    TabularType,
-  } from '@mathesar/stores/table-data';
+  import { Meta } from '@mathesar/stores/table-data';
   import { TabularData } from '@mathesar/stores/table-data/tabularData';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
-  import Pagination from '@mathesar/utils/Pagination';
-  import { router } from 'tinro';
 
   export let database: Database;
   export let schema: SchemaEntry;
   export let table: TableEntry;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
-  $: tabularData = new TabularData(
-    {
-      type: TabularType.Table,
-      id: table.id,
-      metaProps: {
-        pagination: new Pagination(),
-        sorting: new Sorting(),
-        grouping: new Grouping(),
-        filtering: new Filtering(),
-      },
-    },
+  $: ({ hash } = $router);
+  $: meta = Meta.fromSerialization(hash);
+  $: tabularData = new TabularData({
+    id: table.id,
     abstractTypesMap,
-  );
+    meta,
+  });
+
+  function handleMetaSerializationChange(s: string) {
+    router.location.hash.set(s);
+  }
+  $: metaSerialization = tabularData.meta.serialization;
+  $: handleMetaSerializationChange($metaSerialization);
 
   function handleDeleteTable() {
     router.goto(getSchemaPageUrl(database.name, schema.id));
