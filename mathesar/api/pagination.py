@@ -134,4 +134,6 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             self.grouping = None
         if preview_metadata:
             self.preview_data = preview_data
+        else:
+            self.preview_data = None
         return processed_records
