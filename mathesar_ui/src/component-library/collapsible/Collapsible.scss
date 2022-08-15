@@ -8,6 +8,7 @@
 
     .collapsible-header-title {
       flex-grow: 1;
+      overflow: hidden;
     }
     svg {
       flex-shrink: 0;

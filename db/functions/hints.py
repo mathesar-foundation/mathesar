@@ -121,7 +121,14 @@ date = _make_hint("date")
 
 literal = _make_hint("literal")
 
+
 json = _make_hint("json")
+
+
+json_array = _make_hint("json_array")
+
+
+json_object = _make_hint("json_object")
 
 
 # Meant to mark a DBFunction for the filtering API to use.
