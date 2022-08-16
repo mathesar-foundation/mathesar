@@ -9,6 +9,7 @@
     ID_ROW_CONTROL_COLUMN,
   } from '@mathesar/stores/table-data';
   import { SheetRow, SheetCell } from '@mathesar/components/sheet';
+  import { isRowSelected } from '@mathesar/stores/table-data/selection';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   // import GroupHeader from './GroupHeader.svelte';
@@ -41,8 +42,8 @@
   $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
-  // TODO: Re-calculate this from cell selection
-  $: isSelected = false; // TODO: $selectedRows.has(rowKey);
+  $: ({ selectedCells } = selection);
+  $: isSelected = isRowSelected($selectedCells, row);
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
@@ -116,7 +117,6 @@
           {display}
           {selection}
           {row}
-          rowIsSelected={isSelected}
           rowHasErrors={hasWholeRowErrors}
           key={getCellKey(rowKey, columnId)}
           modificationStatusMap={cellModificationStatus}

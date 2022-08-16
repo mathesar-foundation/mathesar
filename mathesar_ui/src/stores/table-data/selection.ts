@@ -19,11 +19,16 @@ export const createSelectedCellIdentifier = (
 export const isRowSelected = (
   selectedCells: ImmutableSet<string>,
   row: Row,
-): boolean => selectedCells.some((cell) => cell.startsWith(`${row.rowIndex}-`));
+): boolean =>
+  selectedCells
+    .valuesArray()
+    .some((cell) => cell.startsWith(`${row.rowIndex || DEFAULT_ROW_INDEX}-`));
 
-// export const isColumnSelected = (selectedCells: WritableSet<string>, {id}: Column): boolean => {
-//   return selectedCells.some(cell => cell.endsWith(`-${id}`));
-// }
+export const isColumnSelected = (
+  selectedCells: ImmutableSet<string>,
+  column: Column,
+): boolean =>
+  selectedCells.valuesArray().some((cell) => cell.endsWith(`-${column.id}`));
 
 export const isCellSelected = (
   selectedCells: ImmutableSet<string>,
