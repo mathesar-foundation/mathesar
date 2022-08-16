@@ -7,16 +7,20 @@ button.dropdown.trigger {
   }
 
   > .label {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     position: relative;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     box-sizing: content-box;
+    gap: 0.25rem;
     line-height: 1.2;
     min-height: 1.2em;
     min-width: 2ch;
   }
+
+
 
   > .arrow {
     position: absolute;
