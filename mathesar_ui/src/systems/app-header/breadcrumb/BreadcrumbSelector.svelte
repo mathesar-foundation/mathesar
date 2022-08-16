@@ -51,12 +51,14 @@
 
 <style>
   .entity-switcher-content {
-    padding: 0.5rem 0;
+    padding: 0.5rem;
+    min-width: 12rem;
   }
   .category-name {
-    font-weight: bold;
-    margin: 0 0 0.5rem 0.5rem;
-    color: #555;
+    font-size: var(--text-size-x-small);
+    margin: 0.25rem 0;
+
+    color: var(--color-text-muted);
     text-transform: uppercase;
   }
   .items {
@@ -66,13 +68,13 @@
   }
   .item a {
     display: block;
-    padding: 0.2rem 1rem;
+    padding: 0.25rem;
+    border-radius: 4px;
     color: inherit;
     text-decoration: none;
   }
   .item a:hover {
-    background: #eee;
-    text-decoration: underline;
+    background: var(--color-contrast-light);
   }
   /* TODO: reduce code duplication with this CSS used elsewhere. */
   .passthrough-button {
@@ -89,19 +91,19 @@
     padding: 0;
   }
   .entity-switcher .trigger {
-    --background-color: #eee;
-    --border-color: #aaa;
+    --background-color: var(--color-gray-lighter);
+    --border-color: var(--color-gray-dark);
     display: block;
     cursor: pointer;
   }
   .entity-switcher .trigger :global(svg) {
-    height: 2rem;
+    height: 1.8rem;
     display: block;
   }
   .entity-switcher .trigger:hover,
   .entity-switcher.is-open .trigger {
-    --background-color: #3f6ea7;
+    --background-color: var(--color-contrast);
     --icon-color: white;
-    --border-color: white;
+    --border-color: var(--color-contrast);
   }
 </style>

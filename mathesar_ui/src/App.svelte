@@ -35,6 +35,27 @@
 <style global lang="scss">
   @import 'component-library/styles.scss';
 
+  :root {
+    /** BASE COLORS **/
+    --color-white: #ffffff;
+    --color-blue-light: #e6f0ff;
+    --color-blue-medium: #3b82f6;
+    --color-gray-lighter: #fafafa;
+    --color-gray-light: #f4f4f5;
+    --color-gray-medium: #d4d4d8;
+    --color-gray-dark: #a1a1aa;
+    --color-gray-darker: #27272a;
+    --color-contrast: var(--color-blue-medium);
+    --color-contrast-light: var(--color-blue-light);
+    --color-text: #171717;
+    --color-text-muted: #3f3f46;
+    --text-size-x-small: 0.79rem;
+    --text-size-small: 0.889rem;
+    --text-size-base: 1rem;
+    --text-size-large: 1.125rem;
+    --text-size-x-large: 1.266rem;
+  }
+
   body {
     /**
    * This sets the `mix-blend-mode` property for cell backgrounds.
@@ -70,6 +91,8 @@
     --cell-border-vertical: 1px solid #efefef;
 
     --page-padding: 1em;
+
+    color: var(--color-text);
   }
 
   h1 {

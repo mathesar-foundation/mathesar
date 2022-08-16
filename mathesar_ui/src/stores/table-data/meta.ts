@@ -5,7 +5,6 @@ import {
   ImmutableMap,
   ImmutableSet,
   WritableMap,
-  WritableSet,
 } from '@mathesar-component-library';
 import type { RequestStatus } from '@mathesar/utils/api';
 import type { TersePagination } from '@mathesar/utils/Pagination';
@@ -114,7 +113,7 @@ export class Meta {
 
   searchFuzzy: Writable<SearchFuzzy>;
 
-  selectedRows = new WritableSet<RowKey>();
+  // selectedRows = new WritableSet<RowKey>();
 
   cellClientSideErrors = new WritableMap<CellKey, string[]>();
 

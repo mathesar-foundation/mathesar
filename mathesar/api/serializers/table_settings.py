@@ -27,4 +27,5 @@ class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.Hyperlinked
             instance.preview_settings.delete()
             preview_settings = PreviewColumnSettings.objects.create(customized=True, **preview_settings_data)
             instance.preview_settings = preview_settings
+            instance.save()
         return instance

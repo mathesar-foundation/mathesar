@@ -49,7 +49,13 @@
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore, isLoading } =
     $tabularData);
   $: ({ columns } = $columnsDataStore);
-  $: ({ filtering, sorting, grouping, selectedRows, sheetState } = meta);
+  $: ({
+    filtering,
+    sorting,
+    grouping,
+    // selectedRows,
+    sheetState,
+  } = meta);
   $: recordState = recordsData.state;
 
   $: isError =
@@ -152,7 +158,7 @@
 
   <Button
     disabled={$isLoading}
-    size="small"
+    size="medium"
     on:click={() => recordsData.addEmptyRecord()}
   >
     <Icon {...iconAddNew} />
@@ -163,21 +169,22 @@
 
   <Button
     disabled={$isLoading}
-    size="small"
+    size="medium"
     on:click={() => linkTableModal.open()}
   >
     <Icon {...iconTableLink} />
     <span>Link Table</span>
   </Button>
 
-  {#if $selectedRows.size > 0}
+  <!-- TODO: Bring back the delete functionality -->
+  <!-- {#if $selectedRows.size > 0}
     <Button size="small" on:click={() => recordsData.deleteSelected()}>
       <Icon {...iconDelete} />
       <span>
         Delete {$selectedRows.size} records
       </span>
     </Button>
-  {/if}
+  {/if} -->
 
   {#if $sheetState}
     <div class="divider" />
@@ -185,7 +192,7 @@
   {/if}
 
   <div class="loading-info">
-    <Button size="small" disabled={$isLoading} on:click={refresh}>
+    <Button size="medium" disabled={$isLoading} on:click={refresh}>
       <Icon
         {...isError && !isLoading ? iconError : iconRefresh}
         spin={$isLoading}
@@ -205,24 +212,31 @@
 
 <style>
   .actions-pane {
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid var(--color-gray-dark);
+    background-color: var(--color-white);
     position: relative;
-    padding: var(--page-padding);
-    padding-bottom: 0;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 0.5rem;
+    padding-right: 1rem;
   }
   .heading {
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
+    border-right: 1px solid var(--color-gray-medium);
+    padding: 1rem;
+    margin-right: 0.5rem;
+  }
+  .heading h1 {
+    font-size: var(--text-size-x-large);
+    font-weight: 500;
+    margin-bottom: 0;
   }
   .divider {
     width: 1px;
     display: inline-block;
     background: #dfdfdf;
-    height: 18px;
+    height: 2rem;
     margin: 0px 5px;
   }
   .loading-info {

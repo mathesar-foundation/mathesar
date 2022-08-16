@@ -23,12 +23,17 @@
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import { iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import {
+    isCellSelected,
+    Selection,
+  } from '@mathesar/stores/table-data/selection';
   import CellErrors from './CellErrors.svelte';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let recordsData: RecordsData;
   export let display: Display;
+  export let selection: Selection;
   export let row: Row;
   export let rowIsSelected = false;
   export let rowIsProcessing = false;
@@ -43,6 +48,9 @@
   $: ({ column, linkFk } = processedColumn);
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
+  $: ({ selectedCells } = selection);
+  $: isSelectedInRange =
+    $selectedCells?.size > 1 && isCellSelected($selectedCells, row, column);
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -129,14 +137,24 @@
     <CellFabric
       columnFabric={processedColumn}
       {isActive}
+      {isSelectedInRange}
       {value}
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}
-      on:activate={() => display.selectCell(row, column)}
+      on:activate={() => {
+        display.selectCell(row, column);
+        // Activate event initaites the selection process
+        selection.onStartSelection(row, column);
+      }}
       on:update={valueUpdated}
       {recordPageLinkHref}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
+      on:mouseenter={() => {
+        // This enables the click + drag to
+        // select multiple cells
+        selection.onMouseEnterWhileSelection(row, column);
+      }}
     />
     <ContextMenu>
       <MenuItem
