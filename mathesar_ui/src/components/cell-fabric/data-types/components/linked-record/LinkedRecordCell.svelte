@@ -74,6 +74,7 @@
   on:dblclick={launchRecordSelector}
   hasPadding={!isActive || hasValue}
 >
+  <slot name="icon" slot="icon" />
   {#if hasValue}
     <LinkedRecord recordId={value} />
   {:else if isActive}
