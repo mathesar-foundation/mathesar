@@ -25,6 +25,7 @@ cp ${ENV_EXAMPLE} ${ENV_ORIG}
 
 # runs docker compose as daemon process
 execute docker-compose up -d
+echo "DOCKER CONTAINER RUNNING IN THE BACKGROUND..."
 
 # if container is ready for migrations
 mathesar_service_running=$(docker container inspect -f '{{.State.Running}}' ${CONTAINER_NAME})
