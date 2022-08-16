@@ -102,6 +102,6 @@
   .entity-switcher.is-open .trigger {
     --background-color: var(--color-contrast);
     --icon-color: white;
-    --border-color:  var(--color-contrast);
+    --border-color: var(--color-contrast);
   }
 </style>

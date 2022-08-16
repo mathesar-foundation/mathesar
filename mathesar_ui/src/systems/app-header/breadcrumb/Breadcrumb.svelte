@@ -40,7 +40,6 @@
     align-items: center;
     --spacing: 0.5rem;
     margin: calc(-1 * var(--spacing));
-    
   }
   .breadcrumb > :global(*) {
     margin: var(--spacing);
@@ -49,7 +48,6 @@
     display: flex;
     align-items: center;
     text-decoration: none;
-    
   }
   .mathesar {
     font-weight: 500;

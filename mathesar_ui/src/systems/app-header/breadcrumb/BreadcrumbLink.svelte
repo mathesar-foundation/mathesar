@@ -13,7 +13,7 @@
   .breadcrumb-item a {
     display: block;
     text-decoration: none;
-    color:var(--color-gray-darker);
+    color: var(--color-gray-darker);
     font-weight: 500;
     font-size: var(--text-size-base);
   }

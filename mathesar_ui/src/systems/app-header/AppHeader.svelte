@@ -15,7 +15,6 @@
   </div>
 
   <div class="right">
-    
     <div class="database-switcher">
       {#if database}
         <a href={getDatabasePageUrl(database.name)}>
@@ -60,7 +59,6 @@
   .database-switcher a {
     color: var(--color-text-muted);
     text-decoration: none;
-    
   }
   .database-switcher a:hover {
     text-decoration: underline;
