@@ -6,7 +6,7 @@
   export let isLoading = false;
 </script>
 
-<span class="name-with-icon">
+<span class="name-with-icon" on:click>
   <span class="icon">
     {#if isLoading}
       <Spinner />
