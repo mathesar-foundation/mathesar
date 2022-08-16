@@ -215,17 +215,14 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    
-    
+    padding-right: 1rem;  
   }
   .heading {
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--color-gray-medium);
     padding: 1rem;
-    padding-right: 1rem;
     margin-right: 0.5rem;
-    /* align-items: center; */
   }
   .heading h1 {
     font-size: var(--text-size-x-large);
