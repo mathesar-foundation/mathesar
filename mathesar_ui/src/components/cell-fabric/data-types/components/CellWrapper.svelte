@@ -48,7 +48,8 @@
   tabindex={-1}
   {...$$restProps}
 >
-  <slot />
+  <div class="cell-wrapper-content"><slot /></div>
+  <div class="icon"><slot name="icon" /></div>
 </div>
 
 <style lang="scss">
@@ -62,8 +63,26 @@
     align-items: center;
     width: 100%;
 
+    .cell-wrapper-content {
+      flex: 1 1 100%;
+      overflow: hidden;
+    }
+    .icon {
+      flex: 0 0 auto;
+    }
+    .icon:not(:empty) {
+      margin-left: 0.5rem;
+    }
+
     &.h-align-right {
-      justify-content: flex-end;
+      flex-direction: row-reverse;
+      .cell-wrapper-content {
+        text-align: right;
+      }
+      .icon:not(:empty) {
+        margin-left: 0;
+        margin-right: 0.5rem;
+      }
     }
     &.h-align-center {
       justify-content: center;
@@ -97,6 +116,11 @@
         resize: vertical;
         min-height: 5em;
       }
+    }
+  }
+  @media (hover: hover) {
+    .cell-wrapper:not(:hover) .icon {
+      display: none;
     }
   }
 </style>
