@@ -66,11 +66,13 @@ def process_annotated_records(record_list, column_name_id_map=None, preview_meta
         else:
             return group_metadata_item
     if preview_metadata:
+        # Extract preview data from the records
         # TODO Replace modifying the parameter directly
         for preview_colum_id, preview_info in preview_metadata.items():
             preview_template = preview_info['template']
             # TODO Move the unwanted field preprocessing step to a suitable place
             preview_metadata[preview_colum_id].pop('path')
+            # Move column id into the object so that dict can be flattened into a list
             preview_metadata[preview_colum_id]['column'] = preview_colum_id
             preview_data_column_aliases = column_ids_from_preview_template(preview_template)
             preview_records = []
@@ -83,6 +85,7 @@ def process_annotated_records(record_list, column_name_id_map=None, preview_meta
             preview_metadata[preview_colum_id]['data'] = preview_records
         # Flatten the preview objects
         preview_metadata = preview_metadata.values()
+
     if groups is not None:
         groups_by_id = {
             grp[group.GroupMetadataField.GROUP_ID.value]: {
