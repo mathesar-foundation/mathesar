@@ -37,7 +37,8 @@ class BaseDependentObjectSerializer(
 ):
     serializers_mapping = {
         'table': DependentMathesarObjectSerializer,
-        'table constraint': DependentMathesarObjectSerializer
+        'table constraint': DependentMathesarObjectSerializer,
+        'table column': DependentNonMathesarObjectSerializer
     }
 
     def create(self, validated_data):
@@ -51,3 +52,4 @@ class BaseDependentObjectSerializer(
 class DependentSerializer(serializers.Serializer):
     obj = BaseDependentObjectSerializer()
     parent_obj = BaseDependentObjectSerializer()
+    level = serializers.IntegerField()
