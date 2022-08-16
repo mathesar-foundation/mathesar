@@ -11,6 +11,7 @@
   type Props = CellTypeProps<Value>;
 
   export let isActive: Props['isActive'];
+  export let isSelectedInRange: Props['isSelectedInRange'];
   export let value: Props['value'];
   export let disabled: Props['disabled'];
   export let multiLineTruncate = false;
@@ -95,11 +96,13 @@
 
 <CellWrapper
   {isActive}
+  {isSelectedInRange}
   {disabled}
   bind:element={cellRef}
   on:dblclick={setModeToEdit}
   on:keydown={handleKeyDown}
   on:mousedown={() => dispatch('activate')}
+  on:mouseenter
   mode={isEditMode ? 'edit' : 'default'}
   {multiLineTruncate}
   {horizontalAlignment}

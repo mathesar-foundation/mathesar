@@ -9,6 +9,7 @@
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
   export let isActive = false;
+  export let isSelectedInRange = false;
   export let disabled = false;
   export let showAsSkeleton = false;
 
@@ -22,11 +23,13 @@
     this={component}
     {...props}
     {isActive}
+    {isSelectedInRange}
     {disabled}
     bind:value
     on:movementKeyDown
     on:activate
     on:update
+    on:mouseenter
   />
 
   {#if showAsSkeleton}

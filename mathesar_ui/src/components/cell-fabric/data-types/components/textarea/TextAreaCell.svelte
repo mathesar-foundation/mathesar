@@ -7,6 +7,7 @@
   type $$Props = TextAreaCellProps;
 
   export let isActive: $$Props['isActive'];
+  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
 
@@ -29,12 +30,14 @@
 <SteppedInputCell
   {value}
   {isActive}
+  {isSelectedInRange}
   {disabled}
   multiLineTruncate={true}
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown
   on:activate
+  on:mouseenter
   on:update
 >
   <TextArea

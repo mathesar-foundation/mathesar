@@ -49,7 +49,13 @@
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
     $tabularData);
   $: ({ columns } = $columnsDataStore);
-  $: ({ filtering, sorting, grouping, selectedRows, sheetState } = meta);
+  $: ({
+    filtering,
+    sorting,
+    grouping,
+    // selectedRows,
+    sheetState,
+  } = meta);
   $: recordState = recordsData.state;
 
   $: isLoading =
@@ -174,14 +180,15 @@
     <span>Link Table</span>
   </Button>
 
-  {#if $selectedRows.size > 0}
-    <Button size="medium" on:click={() => recordsData.deleteSelected()}>
+  <!-- TODO: Bring back the delete functionality -->
+  <!-- {#if $selectedRows.size > 0}
+    <Button size="small" on:click={() => recordsData.deleteSelected()}>
       <Icon {...iconDelete} />
       <span>
         Delete {$selectedRows.size} records
       </span>
     </Button>
-  {/if}
+  {/if} -->
 
   {#if $sheetState}
     <div class="divider" />

@@ -9,6 +9,7 @@
   type $$Props = FormattedInputCellProps;
 
   export let isActive: $$Props['isActive'];
+  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
 
@@ -27,6 +28,7 @@
 <SteppedInputCell
   {value}
   {isActive}
+  {isSelectedInRange}
   {disabled}
   horizontalAlignment="right"
   let:handleInputBlur
@@ -34,6 +36,7 @@
   {formatValue}
   on:movementKeyDown
   on:activate
+  on:mouseenter
   on:update
 >
   <FormattedInput

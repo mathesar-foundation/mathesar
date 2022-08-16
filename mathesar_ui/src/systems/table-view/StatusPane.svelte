@@ -7,7 +7,10 @@
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ recordsData, meta } = $tabularData);
-  $: ({ selectedRows, pagination } = meta);
+  $: ({
+    // selectedRows,
+    pagination,
+  } = meta);
   $: ({ size: pageSize, leftBound, rightBound } = $pagination);
   $: ({ totalCount, state, newRecords } = recordsData);
   $: recordState = $state;
@@ -18,10 +21,12 @@
 
 <div class="status-pane">
   <div class="record-count">
-    {#if $selectedRows?.size > 0}
+    <!-- TODO: Check with team if we need this now? -->
+    <!-- {#if $selectedRows?.size > 0}
       {$selectedRows.size} record{$selectedRows.size > 1 ? 's' : ''} selected of
       {$totalCount}
-    {:else if pageCount > 0 && $totalCount}
+    {:else if pageCount > 0 && $totalCount} -->
+    {#if pageCount > 0 && $totalCount}
       Showing {leftBound} to {max}
       {#if $newRecords.length > 0}
         (+ {$newRecords.length} new record{$newRecords.length > 1 ? 's' : ''})
