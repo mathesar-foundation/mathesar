@@ -9,6 +9,7 @@
     ID_ROW_CONTROL_COLUMN,
   } from '@mathesar/stores/table-data';
   import { SheetRow, SheetCell } from '@mathesar/components/sheet';
+  import { isRowSelected } from '@mathesar/stores/table-data/selection';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   // import GroupHeader from './GroupHeader.svelte';
@@ -19,10 +20,16 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ recordsData, columnsDataStore, meta, display, processedColumns } =
-    $tabularData);
   $: ({
-    selectedRows,
+    recordsData,
+    columnsDataStore,
+    meta,
+    display,
+    processedColumns,
+    selection,
+  } = $tabularData);
+  $: ({
+    // selectedRows,
     rowStatus,
     rowCreationStatus,
     cellModificationStatus,
@@ -35,7 +42,8 @@
   $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
-  $: isSelected = $selectedRows.has(rowKey);
+  $: ({ selectedCells } = selection);
+  $: isSelected = isRowSelected($selectedCells, row);
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
@@ -45,6 +53,12 @@
       void recordsData.addEmptyRecord();
     }
   }
+
+  const handleRowClick = () => {
+    if (!row.isAddPlaceholder && typeof row.rowIndex === 'number') {
+      selection.toggleRowSelection(row);
+    }
+  };
 </script>
 
 <SheetRow {style} let:htmlAttributes let:styleString>
@@ -69,7 +83,12 @@
       let:htmlAttributes
       let:style
     >
-      <div class="row-control" {...htmlAttributes} {style}>
+      <div
+        class="row-control"
+        {...htmlAttributes}
+        {style}
+        on:click={handleRowClick}
+      >
         {#if row.record}
           <RowControl
             {primaryKeyColumnId}
@@ -96,8 +115,8 @@
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
           {display}
+          {selection}
           {row}
-          rowIsSelected={isSelected}
           rowHasErrors={hasWholeRowErrors}
           key={getCellKey(rowKey, columnId)}
           modificationStatusMap={cellModificationStatus}
@@ -129,25 +148,25 @@
       align-items: center;
       height: 100%;
 
-      :global(.checkbox) {
-        display: none;
-      }
+      // :global(.checkbox) {
+      //   display: none;
+      // }
     }
 
-    &:not(.group) {
-      &:hover,
-      &.selected {
-        .row-control {
-          :global(.checkbox) {
-            display: inline-flex;
-          }
+    // &:not(.group) {
+    //   &:hover,
+    //   &.selected {
+    //     .row-control {
+    //       // :global(.checkbox) {
+    //       //   display: inline-flex;
+    //       // }
 
-          :global(.number) {
-            display: none;
-          }
-        }
-      }
-    }
+    //       // :global(.number) {
+    //       //   display: none;
+    //       // }
+    //     }
+    //   }
+    // }
 
     &.is-add-placeholder {
       cursor: pointer;
