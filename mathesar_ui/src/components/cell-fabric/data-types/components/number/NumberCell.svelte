@@ -13,6 +13,7 @@
   type $$Props = NumberCellProps;
 
   export let isActive: $$Props['isActive'];
+  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
   export let useGrouping: $$Props['useGrouping'];
@@ -50,6 +51,7 @@
 <SteppedInputCell
   {value}
   {isActive}
+  {isSelectedInRange}
   {disabled}
   {formatValue}
   {horizontalAlignment}
@@ -57,6 +59,7 @@
   let:handleInputKeydown
   on:movementKeyDown
   on:activate
+  on:mouseenter
   on:update
 >
   <slot name="icon" slot="icon" />

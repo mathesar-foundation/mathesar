@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.core.files import File
 import pytest
 from rest_framework.test import APIClient
@@ -5,7 +7,9 @@ from sqlalchemy import Column, INTEGER, VARCHAR, MetaData, BOOLEAN, TIMESTAMP, t
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.select import get_column_attnum_from_name
+from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
+from db.types.base import PostgresType
 from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
 
 
@@ -50,42 +54,130 @@ def self_referential_table(create_table, get_uid):
 
 
 @pytest.fixture
-def two_foreign_key_tables(_create_two_tables):
-    return _create_two_tables(
+def two_foreign_key_tables(_create_tables_from_files):
+    return _create_tables_from_files(
         'mathesar/tests/data/base_table.csv',
         'mathesar/tests/data/reference_table.csv',
     )
 
 
 @pytest.fixture
-def two_multi_column_foreign_key_tables(_create_two_tables):
-    return _create_two_tables(
+def publication_tables(_create_tables_from_files, client):
+    author_table, publisher_table, publication_table, checkouts_table = _create_tables_from_files(
+        'mathesar/tests/data/relation_tables/author.csv',
+        'mathesar/tests/data/relation_tables/publisher.csv',
+        'mathesar/tests/data/relation_tables/publication.csv',
+        'mathesar/tests/data/relation_tables/items.csv',
+    )
+    author_table_pk_column = author_table.get_column_by_name("id")
+    author_table.add_constraint(UniqueConstraint(None, author_table.oid, [author_table_pk_column.attnum]))
+    publisher_table_pk_column = publisher_table.get_column_by_name("id")
+    publisher_table.add_constraint(UniqueConstraint(None, publisher_table.oid, [publisher_table_pk_column.attnum]))
+    publication_table_columns = publication_table.get_columns_by_name(["id", "publisher", "author", "co_author"])
+    publication_table_pk_column = publication_table_columns[0]
+    publication_table.add_constraint(
+        UniqueConstraint(
+            None,
+            publication_table.oid,
+            [publication_table_pk_column.attnum]
+        )
+    )
+    checkouts_table_columns = checkouts_table.get_columns_by_name(["id", "publication"])
+    checkouts_table_pk_column = checkouts_table_columns[0]
+    checkouts_table_publication_column = checkouts_table_columns[1]
+    checkouts_table.add_constraint(
+        UniqueConstraint(
+            None,
+            checkouts_table.oid,
+            [checkouts_table_pk_column.attnum]
+        )
+    )
+    db_type = PostgresType.INTEGER
+    data = {"type": db_type.id}
+    # TODO Uncomment when DB query bug is fixed
+    # publication_publisher_column = publication_table_columns[1]
+    # publication_author_column = publication_table_columns[2]
+    # publication_co_author_column = publication_table_columns[3]
+    # client.patch(
+    #     f"/api/db/v0/tables/{publication_table.id}/columns/{publication_publisher_column.id}/", data=data
+    # )
+    # publication_table.add_constraint(
+    #     ForeignKeyConstraint(
+    #         None,
+    #         publication_table.oid,
+    #         [publication_publisher_column.attnum],
+    #         publisher_table.oid,
+    #         [publisher_table_pk_column.attnum], {}
+    #     )
+    # )
+    # client.patch(
+    #     f"/api/db/v0/tables/{publication_table.id}/columns/{publication_author_column.id}/", data=data
+    # )
+    # publication_table.add_constraint(
+    #     ForeignKeyConstraint(
+    #         None,
+    #         publication_table.oid,
+    #         [publication_author_column.attnum],
+    #         author_table.oid,
+    #         [author_table_pk_column.attnum], {}
+    #     )
+    # )
+    # client.patch(
+    #     f"/api/db/v0/tables/{publication_table.id}/columns/{publication_co_author_column.id}/", data=data
+    # )
+    # publication_table.add_constraint(
+    #     ForeignKeyConstraint(
+    #         None,
+    #         publication_table.oid,
+    #         [publication_co_author_column.attnum],
+    #         author_table.oid,
+    #         [author_table_pk_column.attnum], {}
+    #     )
+    # )
+    client.patch(
+        f"/api/db/v0/tables/{checkouts_table.id}/columns/{checkouts_table_publication_column.id}/", data=data
+    )
+    checkouts_table.add_constraint(
+        ForeignKeyConstraint(
+            None,
+            checkouts_table.oid,
+            [checkouts_table_publication_column.attnum],
+            publication_table.oid,
+            [publication_table_pk_column.attnum], {}
+        )
+    )
+    return author_table, publisher_table, publication_table, checkouts_table
+
+
+@pytest.fixture
+def two_multi_column_foreign_key_tables(_create_tables_from_files):
+    return _create_tables_from_files(
         'mathesar/tests/data/multi_column_foreign_key_base_table.csv',
         'mathesar/tests/data/multi_column_reference_table.csv',
     )
 
 
 @pytest.fixture
-def two_invalid_related_data_foreign_key_tables(_create_two_tables):
-    return _create_two_tables(
+def two_invalid_related_data_foreign_key_tables(_create_tables_from_files):
+    return _create_tables_from_files(
         'mathesar/tests/data/invalid_reference_base_table.csv',
         'mathesar/tests/data/reference_table.csv',
     )
 
 
 @pytest.fixture
-def _create_two_tables(create_table, get_uid):
-    def _create(csv_filepath1, csv_filepath2, table_name1=get_uid(), table_name2=get_uid(), schema_name=get_uid()):
-        two_csv_filepaths = (csv_filepath1, csv_filepath2)
-        two_table_names = (table_name1, table_name2)
+def _create_tables_from_files(create_table, get_uid):
+    def _create(*csv_files):
+        table_names = [get_uid() for i in range(len(csv_files))]
+        schema_name = get_uid()
         return tuple(
             create_table(
-                table_name=table_name,
+                table_name=Path(csv_filepath).stem,
                 schema_name=schema_name,
                 csv_filepath=csv_filepath,
             )
             for table_name, csv_filepath
-            in zip(two_table_names, two_csv_filepaths)
+            in zip(table_names, csv_files)
         )
     return _create
 

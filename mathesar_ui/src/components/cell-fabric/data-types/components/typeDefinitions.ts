@@ -9,6 +9,7 @@ import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
   isActive: boolean;
+  isSelectedInRange: boolean;
   disabled: boolean;
 }
 

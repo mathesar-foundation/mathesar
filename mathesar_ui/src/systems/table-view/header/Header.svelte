@@ -10,13 +10,14 @@
     SheetCell,
     SheetCellResizer,
   } from '@mathesar/components/sheet';
+  import { isColumnSelected } from '@mathesar/stores/table-data/selection';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ columnsDataStore, meta, constraintsDataStore, processedColumns } =
-    $tabularData);
+  $: ({ columnsDataStore, selection, processedColumns } = $tabularData);
+  $: ({ selectedCells } = selection);
 
   function addColumn(e: CustomEvent<Partial<Column>>) {
     void columnsDataStore.add(e.detail);
@@ -38,9 +39,9 @@
       <div {...htmlAttributes} {style}>
         <HeaderCell
           {processedColumn}
-          {meta}
-          {columnsDataStore}
-          {constraintsDataStore}
+          isSelected={isColumnSelected($selectedCells, processedColumn.column)}
+          on:click={() =>
+            selection.toggleColumnSelection(processedColumn.column)}
         />
         <SheetCellResizer columnIdentifierKey={columnId} />
       </div>

@@ -11,6 +11,7 @@
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
   export let isActive = false;
+  export let isSelectedInRange = false;
   export let disabled = false;
   export let showAsSkeleton = false;
   export let recordPageLinkHref: string | undefined = undefined;
@@ -26,12 +27,14 @@
     this={component}
     {...props}
     {isActive}
+    {isSelectedInRange}
     {disabled}
     {horizontalAlignment}
     bind:value
     on:movementKeyDown
     on:activate
     on:update
+    on:mouseenter
   >
     <svelte:fragment slot="icon">
       {#if recordPageLinkHref}
