@@ -215,7 +215,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding-right: 1rem;  
+    padding-right: 1rem;
   }
   .heading {
     display: flex;

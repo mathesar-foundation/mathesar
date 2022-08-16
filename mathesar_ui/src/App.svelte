@@ -39,13 +39,13 @@
     --color-white: #ffffff;
     --color-gray-lighter: #fafafa;
     --color-gray-light: #f4f4f5;
-    --color-gray-medium: #e4e4e7;
+    --color-gray-medium: #d4d4d8;
     --color-gray-dark: #a1a1aa;
     --color-gray-darker: #27272a;
     --color-text: #171717;
     --color-text-muted: #3f3f46;
     --text-size-x-small: 0.79rem;
-    --text-size-small: 0.889rem;   
+    --text-size-small: 0.889rem;
     --text-size-base: 1rem;
     --text-size-large: 1.125rem;
     --text-size-x-large: 1.266rem;
