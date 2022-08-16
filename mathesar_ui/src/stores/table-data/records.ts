@@ -2,7 +2,7 @@ import { writable, get as getStoreValue } from 'svelte/store';
 import {
   States,
   getAPI,
-  deleteAPI,
+  // deleteAPI,
   patchAPI,
   postAPI,
 } from '@mathesar/utils/api';
@@ -22,7 +22,7 @@ import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
 import type { Meta } from './meta';
-import type { RowKey } from './utils';
+// import type { RowKey } from './utils';
 import { validateRow, getCellKey } from './utils';
 import type { ColumnsDataStore } from './columns';
 import type { Sorting } from './sorting';

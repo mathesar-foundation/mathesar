@@ -10,6 +10,7 @@
   type $$Props = MoneyCellProps;
 
   export let isActive: $$Props['isActive'];
+  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
   export let currencySymbol: $$Props['currencySymbol'];
@@ -59,12 +60,14 @@
 <SteppedInputCell
   {value}
   {isActive}
+  {isSelectedInRange}
   {disabled}
   {formatValue}
   horizontalAlignment="right"
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown
+  on:mouseenter
   on:activate
   on:update
 >

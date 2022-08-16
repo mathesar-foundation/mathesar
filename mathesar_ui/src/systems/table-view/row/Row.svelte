@@ -19,8 +19,14 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ recordsData, columnsDataStore, meta, display, processedColumns } =
-    $tabularData);
+  $: ({
+    recordsData,
+    columnsDataStore,
+    meta,
+    display,
+    processedColumns,
+    selection,
+  } = $tabularData);
   $: ({
     // selectedRows,
     rowStatus,
@@ -97,6 +103,7 @@
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
           {display}
+          {selection}
           {row}
           rowIsSelected={isSelected}
           rowHasErrors={hasWholeRowErrors}

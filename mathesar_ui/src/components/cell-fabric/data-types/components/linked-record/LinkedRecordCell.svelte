@@ -13,6 +13,7 @@
   const recordSelector = getRecordSelectorFromContext();
 
   export let isActive: $$Props['isActive'];
+  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
@@ -63,8 +64,10 @@
 
 <CellWrapper
   {isActive}
+  {isSelectedInRange}
   {disabled}
   on:activate
+  on:mouseenter
   on:keydown={handleWrapperKeyDown}
   on:mousedown={handleMouseDown}
   on:dblclick={launchRecordSelector}
