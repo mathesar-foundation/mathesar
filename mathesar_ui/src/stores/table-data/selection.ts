@@ -6,6 +6,8 @@ import type { ColumnsDataStore } from './columns';
 
 const DEFAULT_ROW_INDEX = 0;
 
+type Cell = [Row, Column];
+
 // Creates Unique identifier for a cell using rowIndex and columnId
 // Storing this identifier instead of an object {rowIndex: number, columnId: number}
 // enables easier usage of the Set data type & faster equality checks
@@ -112,20 +114,30 @@ export class Selection {
     const { minRowIndex, maxRowIndex, minColumnIndex, maxColumnIndex } =
       this.selectionBounds;
     this.selectionBounds = undefined;
+
+    const cells: Cell[] = [];
     this.allRows.forEach((row) => {
       const { rowIndex = DEFAULT_ROW_INDEX } = row;
       if (rowIndex >= minRowIndex && rowIndex <= maxRowIndex) {
         this.allColumns.forEach((column) => {
           if (column.id >= minColumnIndex && column.id <= maxColumnIndex) {
-            this.selectCell(row, column);
+            cells.push([row, column]);
           }
         });
       }
     });
+    this.selectMultipleCells(cells);
   }
 
-  private selectCell(row: Row, column: Column): void {
-    this.selectedCells.add(createSelectedCellIdentifier(row, column));
+  // private selectCell(row: Row, column: Column): void {
+  //   this.selectedCells.add(createSelectedCellIdentifier(row, column));
+  // }
+
+  private selectMultipleCells(cells: Array<Cell>) {
+    const identifiers = cells.map(([row, column]) =>
+      createSelectedCellIdentifier(row, column),
+    );
+    this.selectedCells.addMultiple(identifiers);
   }
 
   resetSelection(): void {
@@ -133,11 +145,29 @@ export class Selection {
     this.selectedCells.clear();
   }
 
-  // selectRow(row: Row) {
-  //   get(this.allColumns).forEach(column => this.selectCell(row, column));
-  // }
+  isCompleteColumnSelected(column: Column): boolean {
+    return this.allRows.every((row) =>
+      isCellSelected(get(this.selectedCells), row, column),
+    );
+  }
 
-  // selectColumn(column: Column) {
-  //   get(this.allRows).forEach(row => this.selectCell(row, column));
-  // }
+  toggleColumnSelection(column: Column): void {
+    const isCompleteColumnSelected = this.isCompleteColumnSelected(column);
+
+    if (isCompleteColumnSelected) {
+      // Clear the selection - deselect the column
+      this.resetSelection();
+    } else {
+      const cells: Cell[] = [];
+      this.allRows.forEach((row) => {
+        cells.push([row, column]);
+      });
+
+      // Clearing the selection
+      // since we do not have cmd+click to select
+      // disjointed cells
+      this.resetSelection();
+      this.selectMultipleCells(cells);
+    }
+  }
 }

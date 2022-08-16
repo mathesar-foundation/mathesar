@@ -15,8 +15,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ columnsDataStore, meta, constraintsDataStore, processedColumns } =
-    $tabularData);
+  $: ({ columnsDataStore, selection, processedColumns } = $tabularData);
 
   function addColumn(e: CustomEvent<Partial<Column>>) {
     void columnsDataStore.add(e.detail);
@@ -38,9 +37,8 @@
       <div {...htmlAttributes} {style}>
         <HeaderCell
           {processedColumn}
-          {meta}
-          {columnsDataStore}
-          {constraintsDataStore}
+          on:click={() =>
+            selection.toggleColumnSelection(processedColumn.column)}
         />
         <SheetCellResizer columnIdentifierKey={columnId} />
       </div>
