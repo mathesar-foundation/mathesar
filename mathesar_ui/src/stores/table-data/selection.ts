@@ -16,9 +16,10 @@ export const createSelectedCellIdentifier = (
   { id }: Column,
 ): string => `${rowIndex || DEFAULT_ROW_INDEX}-${id}`;
 
-// export const isRowSelected = (selectedCells: WritableSet<string>, {rowIndex}: Row): boolean => {
-//   return selectedCells.some(cell => cell.startsWith(`${rowIndex}-`));
-// }
+export const isRowSelected = (
+  selectedCells: ImmutableSet<string>,
+  row: Row,
+): boolean => selectedCells.some((cell) => cell.startsWith(`${row.rowIndex}-`));
 
 // export const isColumnSelected = (selectedCells: WritableSet<string>, {id}: Column): boolean => {
 //   return selectedCells.some(cell => cell.endsWith(`-${id}`));
@@ -151,6 +152,12 @@ export class Selection {
     );
   }
 
+  isCompleteRowSelected(row: Row): boolean {
+    return this.allColumns.every((column) =>
+      isCellSelected(get(this.selectedCells), row, column),
+    );
+  }
+
   toggleColumnSelection(column: Column): void {
     const isCompleteColumnSelected = this.isCompleteColumnSelected(column);
 
@@ -160,6 +167,26 @@ export class Selection {
     } else {
       const cells: Cell[] = [];
       this.allRows.forEach((row) => {
+        cells.push([row, column]);
+      });
+
+      // Clearing the selection
+      // since we do not have cmd+click to select
+      // disjointed cells
+      this.resetSelection();
+      this.selectMultipleCells(cells);
+    }
+  }
+
+  toggleRowSelection(row: Row): void {
+    const isCompleteRowSelected = this.isCompleteRowSelected(row);
+
+    if (isCompleteRowSelected) {
+      // Clear the selection - deselect the row
+      this.resetSelection();
+    } else {
+      const cells: Cell[] = [];
+      this.allColumns.forEach((column) => {
         cells.push([row, column]);
       });
 

@@ -52,6 +52,12 @@
       void recordsData.addEmptyRecord();
     }
   }
+
+  const handleRowClick = () => {
+    if (!row.isAddPlaceholder && typeof row.rowIndex === 'number') {
+      selection.toggleRowSelection(row);
+    }
+  };
 </script>
 
 <SheetRow {style} let:htmlAttributes let:styleString>
@@ -76,7 +82,12 @@
       let:htmlAttributes
       let:style
     >
-      <div class="row-control" {...htmlAttributes} {style}>
+      <div
+        class="row-control"
+        {...htmlAttributes}
+        {style}
+        on:click={handleRowClick}
+      >
         {#if row.record}
           <RowControl
             {primaryKeyColumnId}
