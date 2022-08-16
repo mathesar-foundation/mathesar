@@ -56,8 +56,8 @@
   }
   .category-name {
     font-size: var(--text-size-x-small);
-    margin: 0.5rem 0;
-
+    margin: 0.25rem 0;
+  
     color: var(--color-text-muted);
     text-transform: uppercase;
   }
