@@ -45,14 +45,29 @@ export class RecordSelectorController {
     });
   }
 
+  private open(): void {
+    const tabularData = get(this.tabularData);
+    if (tabularData) {
+      tabularData.meta.searchFuzzy.update((s) => s.drained());
+    }
+    this.isOpen.set(true);
+    this.onOpen();
+  }
+
+  private close(): void {
+    this.submit = () => {};
+    this.cancel = () => {};
+    this.isOpen.set(false);
+    this.onClose();
+  }
+
   acquireUserInput({
     tableId,
   }: {
     tableId: DBObjectEntry['id'];
   }): Promise<FkCellValue | undefined> {
     this.tableId.set(tableId);
-    this.isOpen.set(true);
-    this.onOpen();
+    this.open();
     return new Promise((resolve) => {
       this.submit = (v) => {
         resolve(v);
@@ -63,13 +78,6 @@ export class RecordSelectorController {
         this.close();
       };
     });
-  }
-
-  private close(): void {
-    this.submit = () => {};
-    this.cancel = () => {};
-    this.isOpen.set(false);
-    this.onClose();
   }
 }
 

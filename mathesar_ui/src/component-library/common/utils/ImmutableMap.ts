@@ -100,6 +100,10 @@ export default class ImmutableMap<Key, Value> {
     return this.getNewInstance(map);
   }
 
+  drained(): this {
+    return this.getNewInstance([]);
+  }
+
   has(key: Key): boolean {
     return this.map.has(key);
   }
