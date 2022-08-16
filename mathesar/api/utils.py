@@ -3,6 +3,7 @@ import re
 
 from db.records.operations import group
 from mathesar.models.base import Table
+from mathesar.utils.preview import column_ids_from_preview_template
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
@@ -71,8 +72,7 @@ def process_annotated_records(record_list, column_name_id_map=None, preview_meta
             # TODO Move the unwanted field preprocessing step to a suitable place
             preview_metadata[preview_colum_id].pop('path')
             preview_metadata[preview_colum_id]['column'] = preview_colum_id
-            preview_columns_extraction_regex = r'\{(.*?)\}'
-            preview_data_column_aliases = re.findall(preview_columns_extraction_regex, preview_template)
+            preview_data_column_aliases = column_ids_from_preview_template(preview_template)
             preview_records = []
             for record_index, record in enumerate(processed_records):
                 column_preview_data = {}

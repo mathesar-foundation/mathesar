@@ -4,18 +4,7 @@ from db.constraints.utils import ConstraintType
 from mathesar.models.base import Column, Constraint
 
 
-def add_preview_columns(preview_info, referent_table_settings):
-    for referent_table_setting in referent_table_settings:
-        preview_template = referent_table_setting.preview_settings.template
-        preview_columns_extraction_regex = r'\{(.*?)\}'
-        preview_data_column_ids = re.findall(preview_columns_extraction_regex, preview_template)
-        preview_data_columns = Column.objects.filter(id__in=preview_data_column_ids)
-        preview_info[referent_table_setting.table_id]['preview_columns'] = preview_data_columns
-        preview_info[referent_table_setting.table_id]['table'] = referent_table_setting.table
-    return preview_info
-
-
-def get_constrained_columns_by_referent_table(fk_previews, fk_constraints, previous_path=[], exising_columns=[]):
+def _preview_info_by_column_id(fk_previews, fk_constraints, previous_path=[], exising_columns=[]):
     preview_info = {}
     preview_columns = exising_columns
     for fk_constraint in fk_constraints:
@@ -25,8 +14,7 @@ def get_constrained_columns_by_referent_table(fk_previews, fk_constraints, previ
         referent_table = referent_column.table
         referent_table_settings = referent_column.table.settings
         preview_template = referent_table_settings.preview_settings.template
-        preview_columns_extraction_regex = r'\{(.*?)\}'
-        preview_data_column_ids = re.findall(preview_columns_extraction_regex, preview_template)
+        preview_data_column_ids = column_ids_from_preview_template(preview_template)
         preview_data_columns = Column.objects.filter(id__in=preview_data_column_ids)
         current_path = previous_path + [[constrained_column.id, referent_column.id]]
         referent_preview_info, referent_preview_columns = get_preview_info(fk_previews, referent_table.id, preview_data_columns, current_path, exising_columns)
@@ -42,6 +30,12 @@ def get_constrained_columns_by_referent_table(fk_previews, fk_constraints, previ
                 preview_columns.append(initial_column)
         preview_info[constrained_column.id] = {"template": preview_template, 'path': current_path}
     return preview_info, preview_columns
+
+
+def column_ids_from_preview_template(preview_template):
+    preview_columns_extraction_regex = r'\{(.*?)\}'
+    preview_data_column_ids = re.findall(preview_columns_extraction_regex, preview_template)
+    return preview_data_column_ids
 
 
 def get_preview_info(fk_previews, referrer_table_pk, restrict_columns=None, path=[], existing_columns=[]):
@@ -62,7 +56,7 @@ def get_preview_info(fk_previews, referrer_table_pk, restrict_columns=None, path
             fk_constraints
         )
 
-    preview_info, columns = get_constrained_columns_by_referent_table(
+    preview_info, columns = _preview_info_by_column_id(
         fk_previews,
         fk_constraints,
         path,
