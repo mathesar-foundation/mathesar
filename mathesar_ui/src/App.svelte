@@ -33,15 +33,17 @@
   @import 'component-library/styles.scss';
 
   :root {
-    /**CONTRAST COLORS**/
-    --color-contrast: #3b82f6;
     /** BASE COLORS **/
     --color-white: #ffffff;
+    --color-blue-light: #e6f0ff;
+    --color-blue-medium: #3b82f6;
     --color-gray-lighter: #fafafa;
     --color-gray-light: #f4f4f5;
     --color-gray-medium: #d4d4d8;
     --color-gray-dark: #a1a1aa;
     --color-gray-darker: #27272a;
+    --color-contrast: var(--color-blue-medium);
+    --color-contrast-light: var(--color-blue-light);
     --color-text: #171717;
     --color-text-muted: #3f3f46;
     --text-size-x-small: 0.79rem;
