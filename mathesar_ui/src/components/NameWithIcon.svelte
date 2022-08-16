@@ -27,6 +27,7 @@
   }
 
   .icon {
+    flex: 0 0 auto;
     display: inline-block;
     margin-right: 0.25em;
     /**

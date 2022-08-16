@@ -1,5 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { get } from 'svelte/store';
+
   import type { ModalController } from '@mathesar-component-library';
   import {
     CancelOrProceedButtonPair,
@@ -29,12 +31,12 @@
     getTabularData,
     ColumnsDataStore,
     getTabularDataStoreFromContext,
-    TabularType,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { postAPI, States } from '@mathesar/utils/api';
   import { getAvailableName } from '@mathesar/utils/db';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { iconTechnicalExplanation, iconTableLink } from '@mathesar/icons';
   import type { RelationshipType } from './linkTableUtils';
   import {
@@ -88,9 +90,7 @@
     $columnsDataStore.columns.map((c) => c.name),
   );
   $: thatTableColumnsStore = ensureReadable(
-    thatTable
-      ? new ColumnsDataStore(TabularType.Table, thatTable.id)
-      : undefined,
+    thatTable ? new ColumnsDataStore(thatTable.id) : undefined,
   );
   $: thatTableColumnsAreLoading =
     $thatTableColumnsStore?.state === States.Loading;
@@ -210,9 +210,10 @@
     if (!tableWithNewColumn) {
       return;
     }
+    const abstractTypesMap = get(currentDbAbstractTypes).data;
     const tabularDataWithNewColumn = getTabularData({
-      type: TabularType.Table,
       id: tableWithNewColumn.id,
+      abstractTypesMap,
     });
     if (tabularDataWithNewColumn) {
       void tabularDataWithNewColumn.refresh();
