@@ -10,6 +10,11 @@ from db.functions.operations.apply import apply_db_function_as_filter
     (json_array.LengthEquals, 3, 11),
     (json_array.LengthEquals, 4, 1),
     (json_array.LengthEquals, 6, 1),
+    (json_array.LengthGreaterThan, 3, 2),
+    (json_array.LengthGreaterorEqual, 3, 13),
+    (json_array.LengthLessThan, 4, 12),
+    (json_array.LengthLessorEqual, 4, 13),
+    (json_array.LengthGreaterorEqual, 4, 2),
 ])
 def test_json_array_filter_functions(json_table_obj, main_db_function, literal_param, expected_count):
     table, engine = json_table_obj
