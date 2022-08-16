@@ -16,11 +16,6 @@ export interface SchemaEntry extends DBObjectEntry {
   has_dependencies: boolean;
 }
 
-export interface ViewEntry extends DBObjectEntry {
-  // TODO: Temporary, update when view endpoints are ready.
-  columns: { name: string }[];
-}
-
 export interface SchemaResponse extends SchemaEntry, TreeItem {
   tables: DBObjectEntry[];
 }

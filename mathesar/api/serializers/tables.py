@@ -1,14 +1,14 @@
 from django.urls import reverse
-from psycopg2.errors import DuplicateTable
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from sqlalchemy.exc import ProgrammingError
 
 from db.types.operations.convert import get_db_type_enum_from_id
+from db.tables.operations.create import DuplicateTable
 
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
-    MultipleDataFileAPIException, RemainderTableNameRequiredAPIException, UnknownDatabaseTypeIdentifier,
+    MultipleDataFileAPIException, UnknownDatabaseTypeIdentifier,
 )
 from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
@@ -28,6 +28,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     joinable_tables_url = serializers.SerializerMethodField()
     type_suggestions_url = serializers.SerializerMethodField()
     previews_url = serializers.SerializerMethodField()
+    dependents_url = serializers.SerializerMethodField()
     name = serializers.CharField(required=False, allow_blank=True, default='')
     import_target = serializers.PrimaryKeyRelatedField(
         required=False, allow_null=True, queryset=Table.current_objects.all()
@@ -41,7 +42,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
         fields = ['id', 'name', 'import_target', 'schema', 'created_at', 'updated_at', 'import_verified',
                   'columns', 'records_url', 'constraints_url', 'columns_url',
                   'joinable_tables_url', 'type_suggestions_url', 'previews_url',
-                  'data_files', 'has_dependencies']
+                  'data_files', 'has_dependencies', 'dependents_url']
 
     def get_records_url(self, obj):
         if isinstance(obj, Table):
@@ -91,6 +92,13 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
         else:
             return None
 
+    def get_dependents_url(self, obj):
+        if isinstance(obj, Table):
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-dependents', kwargs={'pk': obj.pk}))
+        else:
+            return None
+
     def validate_data_files(self, data_files):
         if data_files and len(data_files) > 1:
             raise MultipleDataFileAPIException()
@@ -111,16 +119,15 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
                     table.save()
             else:
                 table = create_empty_table(name, schema)
+        except DuplicateTable as e:
+            raise DuplicateTableAPIException(
+                e,
+                message=f"Relation {validated_data['name']} already exists in schema {schema.id}",
+                field="name",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         except ProgrammingError as e:
-            if type(e.orig) == DuplicateTable:
-                raise DuplicateTableAPIException(
-                    e,
-                    message=f"Relation {validated_data['name']} already exists in schema {schema.id}",
-                    field="name",
-                    status_code=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                raise ProgrammingAPIException(e)
+            raise ProgrammingAPIException(e)
         return table
 
     def update(self, instance, validated_data):
@@ -180,13 +187,6 @@ class MoveTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializ
 class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     extract_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
     extracted_table_name = serializers.CharField()
-    remainder_table_name = serializers.CharField()
-    drop_original_table = serializers.BooleanField()
-
-    def validate(self, attrs):
-        if not attrs['drop_original_table'] and not attrs['remainder_table_name']:
-            raise RemainderTableNameRequiredAPIException()
-        return super().validate(attrs)
 
 
 class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serializer):

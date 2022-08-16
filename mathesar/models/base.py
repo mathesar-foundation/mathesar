@@ -16,6 +16,7 @@ from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
+from db.dependents.dependents_utils import get_dependents_graph, has_dependencies
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
@@ -251,7 +252,17 @@ class Table(DatabaseObject, Relation):
     # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
     def has_dependencies(self):
-        return True
+        return has_dependencies(
+            self.oid,
+            self.schema._sa_engine
+        )
+
+    @property
+    def dependents(self):
+        return get_dependents_graph(
+            self.oid,
+            self.schema._sa_engine
+        )
 
     def add_column(self, column_data):
         return create_column(
@@ -390,12 +401,12 @@ class Table(DatabaseObject, Relation):
         ]
 
     def move_columns(self, columns_to_move, target_table):
-        columns_name_to_move = [column.name for column in columns_to_move]
+        columns_attnum_to_move = [column.attnum for column in columns_to_move]
         target_table_oid = target_table.oid
         return move_columns_between_related_tables(
             self.oid,
             target_table_oid,
-            columns_name_to_move,
+            columns_attnum_to_move,
             self.schema.name,
             self._sa_engine
         )
@@ -404,18 +415,14 @@ class Table(DatabaseObject, Relation):
             self,
             columns_to_extract,
             extracted_table_name,
-            remainder_table_name,
-            drop_original_table
     ):
-        columns_name_to_extract = [column.name for column in columns_to_extract]
+        columns_attnum_to_extract = [column.attnum for column in columns_to_extract]
         return extract_columns_from_table(
-            self.name,
-            columns_name_to_extract,
+            self.oid,
+            columns_attnum_to_extract,
             extracted_table_name,
-            remainder_table_name,
             self.schema.name,
-            self._sa_engine,
-            drop_original_table=drop_original_table
+            self._sa_engine
         )
 
     def update_column_reference(self, columns_name, column_name_id_map):

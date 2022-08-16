@@ -9,8 +9,11 @@
 
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { faFile, faFileUpload } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Progress, formatSize } from '@mathesar-component-library';
+  import {
+    iconFile,
+    iconUploadFile,
+  } from '@mathesar-component-library-dir/common/icons';
   import type {
     FileUpload,
     FileUploadProgress,
@@ -94,7 +97,7 @@
     <div class="files">
       {#each fileUploads as upload (upload.fileId)}
         <div class="file">
-          <Icon data={faFile} size="3.5em" />
+          <Icon {...iconFile} size="3.5em" />
           <div class="file-info">
             <div class="name">{upload.file.name}</div>
             <Progress
@@ -146,7 +149,7 @@
     >
       <slot>
         <div class="message">
-          <Icon size="60px" data={faFileUpload} />
+          <Icon size="60px" {...iconUploadFile} />
           <div class="text">
             <div class="title">Drag a file here</div>
             <div>or click to browse a file from your computer</div>

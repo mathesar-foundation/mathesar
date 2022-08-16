@@ -74,6 +74,9 @@
    */
   export let valuesAreEqual: DefinedProps['valuesAreEqual'] = (a, b) => a === b;
 
+  export let initialSelectionType: DefinedProps['initialSelectionType'] =
+    'first';
+
   function setValueFromArray(values: (Option | undefined)[]) {
     [value] = values;
     dispatch('change', value);
@@ -85,7 +88,11 @@
         typeof value === 'undefined' ||
         !opts.some((entry) => valuesAreEqual(entry, value))
       ) {
-        setValueFromArray(opts);
+        if (initialSelectionType === 'first') {
+          setValueFromArray(opts);
+        } else if (initialSelectionType === 'empty') {
+          setValueFromArray([]);
+        }
       }
     } else {
       setValueFromArray([]);

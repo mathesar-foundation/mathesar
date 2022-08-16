@@ -8,6 +8,7 @@ from sqlalchemy.exc import DataError, IntegrityError
 
 from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
+from mathesar.api.serializers.dependents import DependentSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.exceptions.database_exceptions import (
@@ -58,6 +59,12 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
+    def dependents(self, request, pk=None):
+        table = self.get_object()
+        serializer = DependentSerializer(table.dependents, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=True)
     def joinable_tables(self, request, pk=None):
         table = self.get_object()
         limit = request.query_params.get('limit')
@@ -85,28 +92,20 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             extracted_column_names = [column.name for column in serializer.validated_data['extract_columns']]
             remainder_column_names = column_names_id_map.keys() - extracted_column_names
             extracted_table_name = serializer.validated_data['extracted_table_name']
-            remainder_table_name = serializer.validated_data['remainder_table_name']
-            drop_original_table = serializer.validated_data['drop_original_table']
             engine = table._sa_engine
             extracted_sa_table, remainder_sa_table, remainder_fk = table.split_table(
                 serializer.validated_data['extract_columns'],
                 extracted_table_name,
-                remainder_table_name,
-                drop_original_table=drop_original_table
             )
             extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
             remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
 
-            if drop_original_table:
-                table.oid = remainder_table_oid
-                table.save()
             # Reflect tables so that the newly created/extracted tables objects are created
             reflect_tables_from_schema(table.schema)
 
-            if drop_original_table:
-                extracted_table = Table.current_objects.get(oid=extracted_table_oid)
-                # Update attnum as it would have changed due to columns moving to a new table.
-                extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
+            extracted_table = Table.current_objects.get(oid=extracted_table_oid)
+            # Update attnum as it would have changed due to columns moving to a new table.
+            extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
 
             remainder_table = Table.current_objects.get(oid=remainder_table_oid)
             remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
