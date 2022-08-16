@@ -1,24 +1,26 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
+
+  import type { Result as ApiRecord } from '@mathesar/api/tables/records';
+  import { ImmutableMap, Spinner } from '@mathesar/component-library';
+  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
+  import { constraintIsFk } from '@mathesar/stores/table-data/constraintsUtils';
   import {
     setTabularDataStoreInContext,
     TabularData,
   } from '@mathesar/stores/table-data/tabularData';
-  import { constraintIsFk } from '@mathesar/stores/table-data/constraintsUtils';
-  import { ImmutableMap, Spinner } from '@mathesar/component-library';
-  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
   import { postAPI } from '@mathesar/utils/api';
-  import type { Result as ApiRecord } from '@mathesar/api/tables/records';
-  import type { RecordSelectorController } from './RecordSelectorController';
-  import { setNewRecordSelectorControllerInContext } from './RecordSelectorController';
-  import RecordSelectorResults from './RecordSelectorResults.svelte';
-  import ColumnResizer from './ColumnResizer.svelte';
+  import Arrow from './Arrow.svelte';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
+  import ColumnResizer from './ColumnResizer.svelte';
   import NestedRecordSelector from './NestedRecordSelector.svelte';
   import QuarterCircle from './QuarterCircle.svelte';
-  import Arrow from './Arrow.svelte';
+  import type { RecordSelectorController } from './RecordSelectorController';
+  import { setNewRecordSelectorControllerInContext } from './RecordSelectorController';
   import RecordSelectorInput from './RecordSelectorInput.svelte';
+  import RecordSelectorResults from './RecordSelectorResults.svelte';
   import { getPkValueInRecord } from './recordSelectorUtils';
 
   export let controller: RecordSelectorController;
@@ -91,6 +93,12 @@
       activeColumnId = undefined;
     }
   }
+
+  onMount(() => {
+    return () => {
+      activeColumnId = undefined;
+    };
+  });
 </script>
 
 <div

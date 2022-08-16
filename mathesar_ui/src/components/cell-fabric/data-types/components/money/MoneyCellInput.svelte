@@ -38,5 +38,7 @@
     parentValue = newChildValue;
   }}
   on:input
+  on:artificialInput
+  on:artificialChange
   --input-element-text-align="right"
 />

@@ -3,6 +3,7 @@
   import type { ComponentAndProps } from '@mathesar/component-library/types';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import type { SearchFuzzy } from '@mathesar/stores/table-data/searchFuzzy';
+  import { Debounce } from '@mathesar/component-library';
 
   let classes = '';
   export { classes as class };
@@ -12,17 +13,33 @@
   export let searchFuzzy: Writable<SearchFuzzy>;
 
   $: value = $searchFuzzy.get(columnId);
+
+  function updateValue(e: CustomEvent<unknown>) {
+    const newValue = e.detail;
+    searchFuzzy.update((s) => s.with(columnId, newValue));
+  }
 </script>
 
-<DynamicInput
-  class={classes}
-  {containerClass}
-  {componentAndProps}
-  {value}
-  onValueChange={(v) => searchFuzzy.update((s) => s.with(columnId, v))}
-  on:focus
-  on:blur
-  on:recordSelectorOpen
-  on:recordSelectorSubmit
-  on:recordSelectorCancel
-/>
+<Debounce
+  on:artificialChange={updateValue}
+  let:artificialInput
+  let:input
+  let:artificialChange
+  let:change
+>
+  <DynamicInput
+    class={classes}
+    {containerClass}
+    {componentAndProps}
+    {value}
+    on:input={input}
+    on:artificialInput={artificialInput}
+    on:change={change}
+    on:artificialChange={artificialChange}
+    on:focus
+    on:blur
+    on:recordSelectorOpen
+    on:recordSelectorSubmit
+    on:recordSelectorCancel
+  />
+</Debounce>
