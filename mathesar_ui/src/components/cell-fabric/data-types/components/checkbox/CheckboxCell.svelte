@@ -10,6 +10,7 @@
   const dispatch = createEventDispatcher();
 
   export let isActive: $$Props['isActive'];
+  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
 
@@ -63,7 +64,9 @@
 <CellWrapper
   bind:element={cellRef}
   {isActive}
+  {isSelectedInRange}
   {disabled}
+  on:mouseenter
   on:keydown={handleWrapperKeyDown}
   on:click={checkAndToggle}
   on:mousedown={handleMouseDown}

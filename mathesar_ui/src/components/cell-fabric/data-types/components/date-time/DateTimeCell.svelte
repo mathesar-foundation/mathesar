@@ -7,6 +7,7 @@
   type $$Props = DateTimeCellProps;
 
   export let isActive: $$Props['isActive'];
+  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
 
@@ -29,12 +30,14 @@
 <SteppedInputCell
   {value}
   {isActive}
+  {isSelectedInRange}
   {disabled}
   let:handleInputBlur
   let:handleInputKeydown
   {formatValue}
   on:movementKeyDown
   on:activate
+  on:mouseenter
   on:update
 >
   <DateTimeInput
