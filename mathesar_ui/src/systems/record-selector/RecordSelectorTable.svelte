@@ -88,15 +88,9 @@
     activeColumnId = columnId;
   }
 
-  function handleInputBlur(columnId: number) {
-    if (activeColumnId === columnId && !activeColumnIsFk) {
-      activeColumnId = undefined;
-    }
-  }
-
   onMount(() => () => {
-      activeColumnId = undefined;
-    });
+    activeColumnId = undefined;
+  });
 </script>
 
 <div
@@ -147,7 +141,9 @@
           searchFuzzy={meta.searchFuzzy}
           {columnId}
           on:focus={() => handleInputFocus(columnId)}
-          on:blur={() => handleInputBlur(columnId)}
+          on:blur={() => {
+            activeColumnId = undefined;
+          }}
           on:recordSelectorOpen={() => {
             activeColumnId = columnId;
           }}
