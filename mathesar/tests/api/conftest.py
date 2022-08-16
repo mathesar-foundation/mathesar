@@ -54,16 +54,16 @@ def self_referential_table(create_table, get_uid):
 
 
 @pytest.fixture
-def two_foreign_key_tables(_create_two_tables):
-    return _create_two_tables(
+def two_foreign_key_tables(_create_tables_from_files):
+    return _create_tables_from_files(
         'mathesar/tests/data/base_table.csv',
         'mathesar/tests/data/reference_table.csv',
     )
 
 
 @pytest.fixture
-def publication_tables(_create_two_tables, client):
-    author_table, publisher_table, publication_table, checkouts_table = _create_two_tables(
+def publication_tables(_create_tables_from_files, client):
+    author_table, publisher_table, publication_table, checkouts_table = _create_tables_from_files(
         'mathesar/tests/data/relation_tables/author.csv',
         'mathesar/tests/data/relation_tables/publisher.csv',
         'mathesar/tests/data/relation_tables/publication.csv',
@@ -150,23 +150,23 @@ def publication_tables(_create_two_tables, client):
 
 
 @pytest.fixture
-def two_multi_column_foreign_key_tables(_create_two_tables):
-    return _create_two_tables(
+def two_multi_column_foreign_key_tables(_create_tables_from_files):
+    return _create_tables_from_files(
         'mathesar/tests/data/multi_column_foreign_key_base_table.csv',
         'mathesar/tests/data/multi_column_reference_table.csv',
     )
 
 
 @pytest.fixture
-def two_invalid_related_data_foreign_key_tables(_create_two_tables):
-    return _create_two_tables(
+def two_invalid_related_data_foreign_key_tables(_create_tables_from_files):
+    return _create_tables_from_files(
         'mathesar/tests/data/invalid_reference_base_table.csv',
         'mathesar/tests/data/reference_table.csv',
     )
 
 
 @pytest.fixture
-def _create_two_tables(create_table, get_uid):
+def _create_tables_from_files(create_table, get_uid):
     def _create(*csv_files):
         table_names = [get_uid() for i in range(len(csv_files))]
         schema_name = get_uid()
