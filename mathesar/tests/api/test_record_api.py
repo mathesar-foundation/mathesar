@@ -15,28 +15,6 @@ from mathesar.models import base as models_base
 from mathesar.models.base import db_get_records_with_default_order
 
 
-def _test_preview_response(preview_response, referent_table, referent_column, referred_value):
-    expected_preview_obj = next(
-        (
-            preview
-            for preview in preview_response
-            if preview['table'] == referent_table.id
-        ),
-        None
-    )
-    assert expected_preview_obj is not None
-    expected_preview_records = expected_preview_obj['data']
-    assert str(referent_column.id) in expected_preview_records[0]
-    expected_preview = next(
-        (
-            data for data in expected_preview_records
-            if data[str(referent_column.id)] == referred_value
-        ),
-        None
-    )
-    assert expected_preview is not None
-
-
 def test_record_list(create_patents_table, client):
     """
     Desired format:
