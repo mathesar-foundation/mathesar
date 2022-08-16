@@ -70,19 +70,20 @@
     return getPkValueInRecord(record, columns);
   }
 
-  function submitSelection(selection: Selection) {
+  function submitIndex(index: number) {
+    submitPkValue(getPkValue(records[index]));
+  }
+
+  function submitGhost() {
+    submitNewRecord($searchFuzzy);
+  }
+
+  function submitSelection() {
     if (selection.type === 'record') {
       submitIndex(selection.index);
     } else {
       submitGhost();
     }
-  }
-
-  function submitIndex(index: number) {
-    submitPkValue(getPkValue(records[index]));
-  }
-  async function submitGhost() {
-    submitNewRecord($searchFuzzy);
   }
 
   function handleKeydown(e: KeyboardEvent) {
@@ -95,7 +96,7 @@
         selectNext();
         break;
       case 'Enter':
-        submitSelection(selection);
+        submitSelection();
         break;
       default:
         handled = false;

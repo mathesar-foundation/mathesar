@@ -94,11 +94,9 @@
     }
   }
 
-  onMount(() => {
-    return () => {
+  onMount(() => () => {
       activeColumnId = undefined;
-    };
-  });
+    });
 </script>
 
 <div
