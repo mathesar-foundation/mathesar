@@ -86,11 +86,11 @@ def insert_from_select(from_table, target_table, engine, col_mappings=None):
         )
     else:
         from_table_col_list = [
-            col for col in from_table.c 
+            col for col in from_table.c
             if not MathesarColumn.from_column(col).is_default
         ]
         target_table_col_list = [
-            col for col in target_table.c 
+            col for col in target_table.c
             if not MathesarColumn.from_column(col).is_default
         ]
     with engine.begin() as conn:
