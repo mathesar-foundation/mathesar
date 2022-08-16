@@ -28,6 +28,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     joinable_tables_url = serializers.SerializerMethodField()
     type_suggestions_url = serializers.SerializerMethodField()
     previews_url = serializers.SerializerMethodField()
+    dependents_url = serializers.SerializerMethodField()
     name = serializers.CharField(required=False, allow_blank=True, default='')
     import_target = serializers.PrimaryKeyRelatedField(
         required=False, allow_null=True, queryset=Table.current_objects.all()
@@ -41,7 +42,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
         fields = ['id', 'name', 'import_target', 'schema', 'created_at', 'updated_at', 'import_verified',
                   'columns', 'records_url', 'constraints_url', 'columns_url',
                   'joinable_tables_url', 'type_suggestions_url', 'previews_url',
-                  'data_files', 'has_dependencies']
+                  'data_files', 'has_dependencies', 'dependents_url']
 
     def get_records_url(self, obj):
         if isinstance(obj, Table):
@@ -88,6 +89,13 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
             # Only get previews if we are serializing an existing table
             request = self.context['request']
             return request.build_absolute_uri(reverse('table-previews', kwargs={'pk': obj.pk}))
+        else:
+            return None
+
+    def get_dependents_url(self, obj):
+        if isinstance(obj, Table):
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-dependents', kwargs={'pk': obj.pk}))
         else:
             return None
 
