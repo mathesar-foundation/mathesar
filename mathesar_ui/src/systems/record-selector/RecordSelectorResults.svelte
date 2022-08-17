@@ -4,7 +4,9 @@
   // TODO: Remove route dependency in systems
   import RowCellBackgrounds from '@mathesar/systems/table-view/row/RowCellBackgrounds.svelte';
 
+  import type { Column } from '@mathesar/api/tables/columns';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
   import type { Row } from '@mathesar/stores/table-data/records';
   import { rowHasRecord } from '@mathesar/stores/table-data/records';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
@@ -12,17 +14,19 @@
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import NewIndicator from './NewIndicator.svelte';
+  import type { RecordSelectorSelection } from './recordSelectorTypes';
   import {
     findNearestValidSelection,
     getPkValueInRecord,
     getValidOffsetSelection,
   } from './recordSelectorUtils';
-  import type { RecordSelectorSelection } from './recordSelectorTypes';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let submitPkValue: (v: string | number) => void;
   export let submitNewRecord: (v: Iterable<[number, unknown]>) => void;
+  export let activeColumnIsFk = false;
+  export let activeColumn: Column | undefined = undefined;
 
   let selection: RecordSelectorSelection = { type: 'record', index: 0 };
 
@@ -55,10 +59,12 @@
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
   $: rowStyle = `width: ${rowWidth as number}px; height: ${rowHeightPx}px;`;
-  $: hasGhostRow = $searchFuzzy.size > 0;
+  $: hasSearchQueries = $searchFuzzy.size > 0;
+  $: hasGhostRow = hasSearchQueries;
   $: indexIsSelected = (index: number) =>
     selection.type === 'record' && selection.index === index;
   $: ({ columns } = $columnsDataStore);
+  $: keyComboToSubmit = `${activeColumnIsFk ? 'Shift+' : ''}Enter`;
 
   $: selection = findNearestValidSelection({
     selection,
@@ -116,7 +122,16 @@
         moveSelectionByOffset(1);
         break;
       case 'Enter':
-        submitSelection();
+        // When we have a FK search cell selected, we use `Enter` to open the
+        // nested selector. That event is handled by LinkedRecordInput, so we
+        // don't need to handle it here -- we just need to make sure to _not_
+        // handle other events here in that case. We still let the user submit
+        // the selected record by using Shift+Enter.
+        if (!activeColumnIsFk || e.shiftKey) {
+          submitSelection();
+        } else {
+          handled = false;
+        }
         break;
       default:
         handled = false;
@@ -149,7 +164,6 @@
             disabled
           />
           <RowCellBackgrounds isSelected={selection.type === 'ghost'} />
-          <!-- TODO -->
         </CellWrapper>
       </CellArranger>
     </div>
@@ -168,7 +182,32 @@
         </CellWrapper>
       </CellArranger>
     </div>
+  {:else}
+    <div class="no-results">
+      No {#if hasSearchQueries}matching{:else}existing{/if} records
+    </div>
   {/each}
+
+  <div class="tips">
+    {#if activeColumnIsFk}
+      <div>
+        <KeyboardKey>Enter</KeyboardKey>: Input a value for
+        {activeColumn?.name}
+      </div>
+    {/if}
+    <div>
+      <KeyboardKey>{keyComboToSubmit}</KeyboardKey>:
+      {#if selection.type === 'ghost'}
+        <strong>Create new record</strong>, select it, and exit.
+      {:else}
+        Choose selected record and exit.
+      {/if}
+    </div>
+    <div>
+      <KeyboardKey>Up</KeyboardKey>/<KeyboardKey>Down</KeyboardKey>: Modify
+      selection.
+    </div>
+  </div>
 </div>
 
 <style>
@@ -191,5 +230,19 @@
   }
   .ghost :global(.cell-wrapper) {
     opacity: 75%;
+  }
+  .no-results {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--color-gray-dark);
+  }
+  .tips {
+    margin-top: 0.7rem;
+    font-size: var(--text-size-x-small);
+    color: var(--color-gray-dark);
+    display: flex;
+  }
+  .tips > * + * {
+    margin-left: 1.5rem;
   }
 </style>

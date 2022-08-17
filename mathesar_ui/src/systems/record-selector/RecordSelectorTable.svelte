@@ -62,7 +62,10 @@
       .map((c) => [c.columns[0], c]),
   );
 
-  $: activeColumnIsFk = activeColumn && fkConstraintMap.has(activeColumn.id);
+  $: activeColumnIsFk =
+    activeColumn === undefined
+      ? false
+      : fkConstraintMap.has(activeColumn.id) ?? false;
 
   function handleSubmitPkValue(v: string | number) {
     controller.submit(v);
@@ -174,6 +177,8 @@
     <NestedRecordSelector />
   {:else}
     <RecordSelectorResults
+      {activeColumn}
+      {activeColumnIsFk}
       submitPkValue={handleSubmitPkValue}
       submitNewRecord={handleSubmitNewRecord}
     />
