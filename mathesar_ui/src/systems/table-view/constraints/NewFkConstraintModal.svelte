@@ -18,7 +18,6 @@
   import {
     ColumnsDataStore,
     getTabularDataStoreFromContext,
-    TabularType,
   } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/tables/columns';
   import { tables as tablesStore } from '@mathesar/stores/tables';
@@ -88,9 +87,7 @@
   $: columnsDataStore = $tabularData.columnsDataStore;
   $: baseTableColumns = $columnsDataStore.columns;
   $: targetTableColumnsStore = ensureReadable(
-    targetTable
-      ? new ColumnsDataStore(TabularType.Table, targetTable.id)
-      : undefined,
+    targetTable ? new ColumnsDataStore(targetTable.id) : undefined,
   );
   $: targetTableColumnsAreLoading =
     $targetTableColumnsStore?.state === States.Loading;

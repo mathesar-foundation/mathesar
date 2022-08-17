@@ -23,6 +23,7 @@
 </script>
 
 <ColumnName
+  on:click
   column={{
     ...column.column,
     constraintsType: getAllConstraintsTypeForColumn(column),

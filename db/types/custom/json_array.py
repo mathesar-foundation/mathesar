@@ -7,8 +7,8 @@ from db.types.base import MathesarCustomType
 from sqlalchemy.ext.compiler import compiles
 
 from db.functions import hints
-from db.functions.base import DBFunction, Equal
-from db.functions.packed import DBFunctionPacked
+from db.functions.base import DBFunction, Equal, Greater, Lesser
+from db.functions.packed import DBFunctionPacked, GreaterOrEqual, LesserOrEqual
 
 DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
 
@@ -80,6 +80,86 @@ class LengthEquals(DBFunctionPacked):
         param0 = self.parameters[0]
         param1 = self.parameters[1]
         return Equal([
+            ArrayLength([param0]),
+            param1,
+        ])
+
+
+class LengthGreaterThan(DBFunctionPacked):
+    id = 'json_array_length_greater_than'
+    name = 'Number of elements is greater than'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return Greater([
+            ArrayLength([param0]),
+            param1,
+        ])
+
+
+class LengthGreaterorEqual(DBFunctionPacked):
+    id = 'json_array_length_greater_or_equal'
+    name = 'Number of elements is greater than or equal to'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return GreaterOrEqual([
+            ArrayLength([param0]),
+            param1,
+        ])
+
+
+class LengthLessThan(DBFunctionPacked):
+    id = 'json_array_length_less_than'
+    name = 'Number of elements is less than'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return Lesser([
+            ArrayLength([param0]),
+            param1,
+        ])
+
+
+class LengthLessorEqual(DBFunctionPacked):
+    id = 'json_array_length_less_or_equal'
+    name = 'Number of elements is less than or equal to'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return LesserOrEqual([
             ArrayLength([param0]),
             param1,
         ])
