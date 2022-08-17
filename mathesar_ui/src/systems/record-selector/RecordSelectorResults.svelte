@@ -51,7 +51,8 @@
    */
   let userHasManuallySelectedGhostRow = false;
 
-  $: ({ display, recordsData, meta, columnsDataStore } = $tabularData);
+  $: ({ display, recordsData, meta, columnsDataStore, isLoading } =
+    $tabularData);
   $: recordsStore = recordsData.savedRecords;
   $: ({ searchFuzzy } = meta);
   $: records = $recordsStore;
@@ -151,7 +152,7 @@
   });
 </script>
 
-<div class="record-selector-results">
+<div class="record-selector-results" class:loading={$isLoading}>
   {#if hasGhostRow}
     <div class="row ghost" style={rowStyle} on:click={() => submitGhost()}>
       <div class="new-indicator-wrapper"><NewIndicator /></div>
@@ -244,5 +245,10 @@
   }
   .tips > * + * {
     margin-left: 1.5rem;
+  }
+
+  .record-selector-results.loading .no-results,
+  .record-selector-results.loading .tips {
+    display: none;
   }
 </style>
