@@ -7,7 +7,7 @@ from db.constraints import utils as constraint_utils
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.validation_exceptions.exceptions import UnknownDatabaseTypeIdentifier
-from mathesar.api.exceptions.validation_exceptions.base_exceptions import MathesarValidationException 
+from mathesar.api.exceptions.validation_exceptions.base_exceptions import MathesarValidationException
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
