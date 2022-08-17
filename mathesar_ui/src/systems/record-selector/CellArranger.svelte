@@ -17,7 +17,7 @@
 {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
   <slot
     {processedColumn}
-    {columnId}
+    column={processedColumn.column}
     style={getCellStyle($columnPlacements, columnId)}
   />
 {/each}

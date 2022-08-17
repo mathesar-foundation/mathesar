@@ -140,11 +140,11 @@
   {#if hasGhostRow}
     <div class="row ghost" style={rowStyle} on:click={() => submitGhost()}>
       <div class="new-indicator-wrapper"><NewIndicator /></div>
-      <CellArranger {display} let:style let:processedColumn let:columnId>
+      <CellArranger {display} let:style let:processedColumn let:column>
         <CellWrapper {style}>
           <CellFabric
             columnFabric={processedColumn}
-            value={$searchFuzzy.get(columnId) ??
+            value={$searchFuzzy.get(column.id) ??
               (processedColumn.column.nullable ? null : undefined)}
             disabled
           />
