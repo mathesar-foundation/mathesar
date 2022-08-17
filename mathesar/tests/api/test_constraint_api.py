@@ -220,8 +220,8 @@ def test_create_unique_constraint_with_name_specified(create_patents_table, clie
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'awesome_constraint')
 
 
-def test_create_single_column_foreign_key_constraint(two_foreign_key_tables, client):
-    referrer_table, referent_table = two_foreign_key_tables
+def test_create_single_column_foreign_key_constraint(base_and_reference_tables, client):
+    referrer_table, referent_table = base_and_reference_tables
     referent_column = referent_table.get_columns_by_name(["Id"])[0]
     referrer_column = referrer_table.get_columns_by_name(["Center"])[0]
     referent_table.add_constraint(
@@ -242,9 +242,9 @@ def test_create_single_column_foreign_key_constraint(two_foreign_key_tables, cli
 
 
 def test_create_single_column_foreign_key_constraint_with_options(
-    two_foreign_key_tables, client
+    base_and_reference_tables, client
 ):
-    referrer_table, referent_table = two_foreign_key_tables
+    referrer_table, referent_table = base_and_reference_tables
     referent_column = referent_table.get_columns_by_name(["Id"])[0]
     referrer_column = referrer_table.get_columns_by_name(["Center"])[0]
     referent_table.add_constraint(

@@ -54,11 +54,28 @@ def self_referential_table(create_table, get_uid):
 
 
 @pytest.fixture
-def two_foreign_key_tables(_create_tables_from_files):
+def base_and_reference_tables(_create_tables_from_files):
     return _create_tables_from_files(
         'mathesar/tests/data/base_table.csv',
         'mathesar/tests/data/reference_table.csv',
     )
+
+
+@pytest.fixture
+def two_foreign_key_tables(base_and_reference_tables, client):
+    referrer_table, referent_table = base_and_reference_tables
+    referent_column = referent_table.get_columns_by_name(["Id"])[0]
+    referrer_column = referrer_table.get_columns_by_name(["Center"])[0]
+    referent_table.add_constraint(
+        UniqueConstraint(None, referent_table.oid, [referent_column.attnum])
+    )
+    data = {
+        'type': 'foreignkey',
+        'columns': [referrer_column.id],
+        'referent_columns': [referent_column.id]
+    }
+    client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
+    return referrer_table, referent_table
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, MetaData, PrimaryKeyConstraint, Table
+from sqlalchemy import Column, ForeignKey, Integer, MetaData, Table
 from db.dependents.dependents_utils import get_dependents_graph
 from db.tables.operations.select import get_oid_from_table
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid
@@ -17,8 +17,8 @@ def test_correct_dependents_amount(engine, post_comment_dependent_tables):
 
     post_dependents_graph = get_dependents_graph(post_oid, engine)
 
-    post_dependents = _get_object_dependents(post_dependents_graph, post_oid) 
-    comment_dependents = _get_object_dependents(post_dependents_graph, comment_oid) 
+    post_dependents = _get_object_dependents(post_dependents_graph, post_oid)
+    comment_dependents = _get_object_dependents(post_dependents_graph, comment_oid)
 
     assert len(post_dependents_graph) == 5
     assert len(post_dependents) == 3
