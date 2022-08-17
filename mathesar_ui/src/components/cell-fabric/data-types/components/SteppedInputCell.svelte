@@ -107,6 +107,7 @@
   {multiLineTruncate}
   {horizontalAlignment}
 >
+  <slot name="icon" slot="icon" />
   {#if isEditMode}
     <slot {handleInputBlur} {handleInputKeydown} />
   {:else}

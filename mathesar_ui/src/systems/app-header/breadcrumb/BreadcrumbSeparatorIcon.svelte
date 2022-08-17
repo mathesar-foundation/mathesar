@@ -16,9 +16,9 @@
   .triangle {
     fill: var(--background-color, white);
     stroke: var(--border-color, black);
-    stroke-width: 2;
+    stroke-width: 4;
   }
   .icon {
-    fill: var(--icon-color, black);
+    fill: var(--icon-color, var(--color-gray-darker));
   }
 </style>

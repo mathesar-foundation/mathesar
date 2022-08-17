@@ -22,6 +22,7 @@
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import { iconSetToNull } from '@mathesar/icons';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     isCellSelected,
     Selection,
@@ -44,7 +45,7 @@
   export let value: unknown = undefined;
 
   $: recordsDataState = recordsData.state;
-  $: ({ column } = processedColumn);
+  $: ({ column, linkFk } = processedColumn);
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: ({ selectedCells } = selection);
@@ -59,6 +60,17 @@
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isEditable = !column.primary_key;
+  $: getRecordPageUrl = $storeToGetRecordPageUrl;
+  $: recordPageLinkHref = (() => {
+    if (linkFk) {
+      const tableId = linkFk.referent_table;
+      return getRecordPageUrl({ tableId, recordId: value });
+    }
+    if (column.primary_key) {
+      return getRecordPageUrl({ recordId: value });
+    }
+    return undefined;
+  })();
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -136,6 +148,8 @@
         selection.onStartSelection(row, column);
       }}
       on:update={valueUpdated}
+      {recordPageLinkHref}
+      horizontalAlignment={column.primary_key ? 'left' : undefined}
       on:mouseenter={() => {
         // This enables the click + drag to
         // select multiple cells

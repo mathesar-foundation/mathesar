@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let primaryKeyCellValue: unknown;
+  export let recordId: unknown;
   export let label: string | undefined = undefined;
 </script>
 
@@ -7,14 +7,19 @@
   {#if label !== undefined}
     {label}
   {:else}
-    {String(primaryKeyCellValue)}
+    {String(recordId)}
   {/if}
 </span>
 
 <style>
   .linked-record {
-    background: #dfd0b3;
-    padding: 0.2em 0.4em;
-    border-radius: 0.2em;
+    background: var(--color-fk);
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.25rem;
+    display: block;
+    max-width: max-content;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 </style>
