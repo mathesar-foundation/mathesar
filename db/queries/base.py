@@ -1,35 +1,39 @@
 from collections import namedtuple
 
-from sqlalchemy import select, join, Column as SAColumn, Table as SATable
+from sqlalchemy import MetaData, select, join
 
 from django.utils.functional import cached_property
 
 from db.records.operations import select as records_select
 from db.columns.base import MathesarColumn
+from db.columns.operations.select import get_column_name_from_attnum
+from db.tables.operations.select import reflect_table_from_oid
 from db.transforms.operations.apply import apply_transformations
 
 
 class DBQuery:
     def __init__(
-        self,
-        base_table,
-        initial_columns,
-        transformations=None,
-        name=None
+            self,
+            base_table_oid,
+            initial_columns,
+            engine,
+            transformations=None,
+            name=None,
     ):
-        assert isinstance(base_table, SATable)
-        self.base_table = base_table
+        self.base_table_oid = base_table_oid
         for initial_col in initial_columns:
             assert isinstance(initial_col, InitialColumn)
         self.initial_columns = initial_columns
+        self.engine = engine
         self.transformations = transformations
         self.name = name
 
     # mirrors a method in db.records.operations.select
     def get_records(self, **kwargs):
-        # NOTE how through this method you can perform a second batch of transformations.
-        # this reflects fact that we can form a query, and then apply temporary transforms on it,
-        # like how you can apply temporary transforms to a table when in a table view.
+        # NOTE how through this method you can perform a second batch of
+        # transformations.  this reflects fact that we can form a query, and
+        # then apply temporary transforms on it, like how you can apply
+        # temporary transforms to a table when in a table view.
         return records_select.get_records(
             table=self.sa_relation,
             **kwargs,
@@ -39,24 +43,29 @@ class DBQuery:
     def get_count(self, **kwargs):
         return records_select.get_count(table=self.sa_relation, **kwargs)
 
-    def sa_output_columns(self, engine):
+    @property
+    def sa_output_columns(self):
         """
-        Sequence of SQLAlchemy columns representing the output columns of the relation described
-        by this query.
+        Sequence of SQLAlchemy columns representing the output columns of the
+        relation described by this query.
         """
         return tuple(
-            MathesarColumn.from_column(sa_col, engine=engine)
+            MathesarColumn.from_column(sa_col, engine=self.engine)
             for sa_col
             in self.sa_relation.columns
         )
 
-    @cached_property
+    @property
     def sa_relation(self):
         """
-        A query describes a relation. This property is the result of parsing a query into a
-        relation.
+        A query describes a relation. This property is the result of parsing a
+        query into a relation.
         """
-        initial_relation = _get_initial_relation(self)
+        initial_relation = get_initial_relation(
+            self.base_table_oid,
+            self.initial_columns,
+            self.engine,
+        )
         transformations = self.transformations
         if transformations:
             transformed = apply_transformations(
@@ -68,35 +77,83 @@ class DBQuery:
             return initial_relation
 
 
+def get_initial_relation(
+        base_oid,
+        initial_columns,
+        engine,
+        metadata=None
+):
+    if metadata is None:
+        metadata = MetaData()
+    base_table = reflect_table_from_oid(base_oid, engine, metadata=metadata)
+    from_clause = base_table
+    jp_path_alias_map = {(): base_table}
+
+    def _process_initial_column(col):
+        nonlocal metadata
+        nonlocal engine
+        nonlocal from_clause
+        nonlocal jp_path_alias_map
+        col_name = get_column_name_from_attnum(col.reloid, col.attnum, engine)
+        # Make the path hashable so it can be a dict key
+        jp_path = _guarantee_jp_path_hashable(col.jp_path)
+
+        if not jp_path:
+            return base_table.columns[col_name]
+
+        left_tab = base_table
+
+        for i, jp in enumerate(jp_path):
+            print("MAP: ", jp_path_alias_map)
+            print(i, jp)
+            left_tab = jp_path_alias_map[jp_path[:i]]
+            print(left_tab.name)
+            # left_tab = reflect_table_from_oid(
+            #     jp[0][0], engine, metadata=metadata
+            # ).alias()
+            right_tab = reflect_table_from_oid(
+                jp[1][0], engine, metadata=metadata
+            ).alias()
+            jp_path_alias_map[jp_path[:i+1]] = right_tab
+            left_jcol = left_tab.columns[get_column_name_from_attnum(jp[0][0], jp[0][1], engine)]
+            right_jcol = right_tab.columns[get_column_name_from_attnum(jp[1][0], jp[1][1], engine)]
+            from_clause = from_clause.join(
+                right_tab, onclause=left_jcol == right_jcol, isouter=True,
+            )
+
+        return right_tab.columns[col_name].label(col.alias)
+
+    stmt = select(
+        [_process_initial_column(col) for col in initial_columns]
+    ).select_from(from_clause)
+    return stmt.cte()
+
+
+def _guarantee_jp_path_hashable(jp_path):
+    if jp_path is not None:
+        return tuple(
+            [tuple([tuple(edge[0]), tuple(edge[1])]) for edge in jp_path]
+        )
+
 class InitialColumn:
     def __init__(
-        self,
-        alias,
-        column,
-        jp_path=None,
+            self,
+            reloid,
+            attnum,
+            alias,
+            jp_path=None,
     ):
         # alias mustn't be an empty string
         assert isinstance(alias, str) and alias.strip() != ""
+        self.reloid = reloid
+        self.attnum = attnum
         self.alias = alias
-
         if jp_path is not None:
-            # jp_path must be made up of JoinParams
-            for jp in jp_path:
-                assert isinstance(jp, JoinParams)
-        self.jp_path = jp_path
-
-        # column must be SA Column, and not MathesarColumn (MathesarColumn is incompatible with some
-        # of SA's joining mechanics).
-        assert isinstance(column, SAColumn)
-        assert not isinstance(column, MathesarColumn)
-
-        # column must have a table with a schema associated.
-        table = column.table
-        assert table is not None
-        schema_name = table.schema
-        assert schema_name is not None
-
-        self.column = column
+            self.jp_path = tuple(
+                [tuple([ tuple(edge[0]), tuple(edge[1])]) for edge in jp_path]
+            )
+        else:
+            self.jp_path = None
 
     @property
     def is_base_column(self):
@@ -135,16 +192,16 @@ def _get_initial_relation(query):
     The initial relation is the relation defined by the initial columns (`initial_columns`). It acts
     as input to the transformation pipeline (that's defined by `transformations`).
     """
-    sa_columns_to_select = []
-    from_clause = query.base_table
-    for initial_column in query.initial_columns:
-        from_clause, sa_column_to_select = _process_initial_column(
-            initial_column=initial_column,
-            from_clause=from_clause,
-        )
-        sa_columns_to_select.append(sa_column_to_select)
-    stmt = select(*sa_columns_to_select).select_from(from_clause)
-    return stmt.cte()
+#     sa_columns_to_select = []
+#     from_clause = query.base_table
+#     for initial_column in query.initial_columns:
+#         from_clause, sa_column_to_select = _process_initial_column(
+#             initial_column=initial_column,
+#             from_clause=from_clause,
+#         )
+#         sa_columns_to_select.append(sa_column_to_select)
+#     stmt = select(*sa_columns_to_select).select_from(from_clause)
+#     return stmt.cte()
 
 
 def _process_initial_column(initial_column, from_clause):
