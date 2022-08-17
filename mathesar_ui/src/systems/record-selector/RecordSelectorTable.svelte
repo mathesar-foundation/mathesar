@@ -25,15 +25,15 @@
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
-  export let nestedController = setNewRecordSelectorControllerInContext();
 
+  const nestedController = setNewRecordSelectorControllerInContext();
   const tabularDataStore = writable(tabularData);
   setTabularDataStoreInContext(tabularDataStore);
 
   let columnWithFocus: Column | undefined = undefined;
-  let columnWithNestedSelectorOpen: Column | undefined = undefined;
   let isSubmittingNewRecord = false;
 
+  $: ({ columnWithNestedSelectorOpen } = controller);
   $: tabularDataStore.set(tabularData);
   $: ({ constraintsDataStore, display, meta, isLoading, columnsDataStore } =
     tabularData);
@@ -107,7 +107,7 @@
 
   <div class="row inputs">
     <CellArranger {display} let:style let:processedColumn let:column>
-      {#if column === columnWithNestedSelectorOpen}
+      {#if column === $columnWithNestedSelectorOpen}
         <div class="active-fk-cell-indicator" {style}>
           <div class="border" />
           <div class="knockout">
@@ -131,13 +131,13 @@
           on:focus={() => handleInputFocus(column)}
           on:blur={() => handleInputBlur()}
           on:recordSelectorOpen={() => {
-            columnWithNestedSelectorOpen = column;
+            $columnWithNestedSelectorOpen = column;
           }}
           on:recordSelectorSubmit={() => {
-            columnWithNestedSelectorOpen = undefined;
+            $columnWithNestedSelectorOpen = undefined;
           }}
           on:recordSelectorCancel={() => {
-            columnWithNestedSelectorOpen = undefined;
+            $columnWithNestedSelectorOpen = undefined;
           }}
         />
       </CellWrapper>

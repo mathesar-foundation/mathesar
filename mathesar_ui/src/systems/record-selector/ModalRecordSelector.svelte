@@ -5,8 +5,7 @@
     ModalCloseAction,
     ModalController,
   } from '@mathesar-component-library';
-  import { collapse, ensureReadable } from '@mathesar-component-library';
-  import { ControlledModal } from '@mathesar-component-library';
+  import { collapse, ControlledModal } from '@mathesar-component-library';
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorTitle from './RecordSelectorTitle.svelte';
@@ -14,12 +13,8 @@
   export let recordSelectorController: RecordSelectorController;
   export let modalController: ModalController;
 
-  let nestedController: RecordSelectorController | undefined;
-
-  $: nestedSelectorIsOpen = ensureReadable(
-    nestedController ? nestedController.isOpen : false,
-  );
-  $: ({ tabularData } = recordSelectorController);
+  $: ({ tabularData, columnWithNestedSelectorOpen } = recordSelectorController);
+  $: nestedSelectorIsOpen = !!$columnWithNestedSelectorOpen;
   $: inputsContainUserEntry = collapse(
     derived(tabularData, (t) =>
       t ? derived(t.meta.searchFuzzy, (s) => s.size > 0) : readable(false),
@@ -36,7 +31,7 @@
     return ['button', 'esc', 'overlay'];
   }
   $: closeOn = getModalCloseActions(
-    $nestedSelectorIsOpen,
+    nestedSelectorIsOpen,
     $inputsContainUserEntry,
   );
 
@@ -55,8 +50,5 @@
       <RecordSelectorTitle tableId={$tableId} />
     {/if}
   </svelte:fragment>
-  <RecordSelectorContent
-    controller={recordSelectorController}
-    bind:nestedController
-  />
+  <RecordSelectorContent controller={recordSelectorController} />
 </ControlledModal>

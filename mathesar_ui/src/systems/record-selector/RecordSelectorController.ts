@@ -1,10 +1,12 @@
 import { getContext, setContext } from 'svelte';
 import type { Readable } from 'svelte/store';
-import { get, derived, writable } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
+
+import type { Column } from '@mathesar/api/tables/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import { TabularData } from '@mathesar/stores/table-data/tabularData';
 import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
 import { Meta } from '@mathesar/stores/table-data';
+import { TabularData } from '@mathesar/stores/table-data/tabularData';
 import Pagination from '@mathesar/utils/Pagination';
 
 interface RecordSelectorControllerProps {
@@ -28,6 +30,8 @@ export class RecordSelectorController {
   tableId = writable<DBObjectEntry['id'] | undefined>(undefined);
 
   tabularData: Readable<TabularData | undefined>;
+
+  columnWithNestedSelectorOpen = writable<Column | undefined>(undefined);
 
   constructor(props: RecordSelectorControllerProps = {}) {
     this.onOpen = props.onOpen ?? (() => {});
