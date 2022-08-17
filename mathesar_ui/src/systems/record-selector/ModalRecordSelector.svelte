@@ -1,11 +1,9 @@
 <script lang="ts">
-  import { derived, readable } from 'svelte/store';
-
   import type {
     ModalCloseAction,
     ModalController,
   } from '@mathesar-component-library';
-  import { collapse, ControlledModal } from '@mathesar-component-library';
+  import { ControlledModal } from '@mathesar-component-library';
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorTitle from './RecordSelectorTitle.svelte';
@@ -13,27 +11,18 @@
   export let recordSelectorController: RecordSelectorController;
   export let modalController: ModalController;
 
-  $: ({ tabularData, columnWithNestedSelectorOpen } = recordSelectorController);
+  $: ({ columnWithNestedSelectorOpen } = recordSelectorController);
   $: nestedSelectorIsOpen = !!$columnWithNestedSelectorOpen;
-  $: inputsContainUserEntry = collapse(
-    derived(tabularData, (t) =>
-      t ? derived(t.meta.searchFuzzy, (s) => s.size > 0) : readable(false),
-    ),
-  );
 
   function getModalCloseActions(
     _nestedSelectorIsOpen: boolean,
-    _inputsContainUserEntry: boolean,
   ): ModalCloseAction[] {
-    if (_nestedSelectorIsOpen || _inputsContainUserEntry) {
+    if (_nestedSelectorIsOpen) {
       return ['button'];
     }
     return ['button', 'esc', 'overlay'];
   }
-  $: closeOn = getModalCloseActions(
-    nestedSelectorIsOpen,
-    $inputsContainUserEntry,
-  );
+  $: closeOn = getModalCloseActions(nestedSelectorIsOpen);
 
   $: ({ tableId } = recordSelectorController);
 </script>

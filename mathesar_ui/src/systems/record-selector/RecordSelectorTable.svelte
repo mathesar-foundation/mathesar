@@ -33,7 +33,7 @@
   let columnWithFocus: Column | undefined = undefined;
   let isSubmittingNewRecord = false;
 
-  $: ({ columnWithNestedSelectorOpen } = controller);
+  $: ({ columnWithNestedSelectorOpen, isOpen } = controller);
   $: tabularDataStore.set(tabularData);
   $: ({ constraintsDataStore, display, meta, isLoading, columnsDataStore } =
     tabularData);
@@ -54,6 +54,10 @@
     }
     return fkColumnIds.has(columnWithFocus.id) ? columnWithFocus : undefined;
   })();
+
+  $: if ($isOpen) {
+    meta.searchFuzzy.update((s) => s.drained());
+  }
 
   function handleSubmitPkValue(v: string | number) {
     controller.submit(v);
