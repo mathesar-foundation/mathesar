@@ -30,7 +30,6 @@ import type {
   FileUploadAddDetail,
   FileUploadProgress,
 } from '@mathesar-component-library/types';
-import { TabularType } from '@mathesar/stores/table-data';
 import { getErrorMessage } from '@mathesar/utils/errors';
 
 function completionCallback(
