@@ -5,8 +5,9 @@
   import type { Filtering } from '@mathesar/stores/table-data';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/api/tables/records';
+  import { validateFilterEntry } from '@mathesar/components/filter-entry';
   import FilterEntries from './FilterEntries.svelte';
-  import { validateFilterEntry, deepCloneFiltering } from './utils';
+  import { deepCloneFiltering } from './utils';
 
   const tabularData = getTabularDataStoreFromContext();
 
