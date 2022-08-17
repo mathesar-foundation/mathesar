@@ -77,7 +77,7 @@
   class="linked-record-input {containerClass}"
   class:has-value={hasValue}
   class:is-acquiring-input={isAcquiringInput}
-  tabindex="0"
+  tabindex={isAcquiringInput ? undefined : 0}
   bind:this={element}
   on:dblclick={launchRecordSelector}
   on:focus={handleFocus}

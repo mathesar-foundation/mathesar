@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
 
   import type { Column } from '@mathesar/api/tables/columns';
   import type { Result as ApiRecord } from '@mathesar/api/tables/records';
-  import { ImmutableMap, Spinner } from '@mathesar/component-library';
+  import { ImmutableSet, Spinner } from '@mathesar/component-library';
   import TableColumnName from '@mathesar/components/TableColumnName.svelte';
   import { constraintIsFk } from '@mathesar/stores/table-data/constraintsUtils';
   import {
@@ -26,46 +25,35 @@
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
-
-  let nestedRecordSelectorController =
-    setNewRecordSelectorControllerInContext();
-  export { nestedRecordSelectorController as nestedController };
+  export let nestedController = setNewRecordSelectorControllerInContext();
 
   const tabularDataStore = writable(tabularData);
   setTabularDataStoreInContext(tabularDataStore);
 
-  /**
-   * The column (if any) which has focus.
-   *
-   * For non-FK cells, this value will be reset to `undefined` when the input
-   * loses focus (e.g. clicking on blank space within the modal). But for FK
-   * cells, this value will remain set to the FK column id while the nested
-   * record selector is open.
-   */
-  let activeColumn: Column | undefined = undefined;
+  let columnWithFocus: Column | undefined = undefined;
+  let columnWithNestedSelectorOpen: Column | undefined = undefined;
   let isSubmittingNewRecord = false;
 
   $: tabularDataStore.set(tabularData);
   $: ({ constraintsDataStore, display, meta, isLoading, columnsDataStore } =
     tabularData);
   $: ({ constraints } = $constraintsDataStore);
-  $: nestedSelectorIsOpen = nestedRecordSelectorController.isOpen;
+  $: nestedSelectorIsOpen = nestedController.isOpen;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
   $: ({ columns } = $columnsDataStore);
-
-  /** keys are column ids, values are FK constraints */
-  $: fkConstraintMap = new ImmutableMap(
+  $: fkColumnIds = new ImmutableSet(
     constraints
       .filter(constraintIsFk)
       .filter((c) => c.columns.length === 1)
-      .map((c) => [c.columns[0], c]),
+      .map((c) => c.columns[0]),
   );
-
-  $: activeColumnIsFk =
-    activeColumn === undefined
-      ? false
-      : fkConstraintMap.has(activeColumn.id) ?? false;
+  $: fkColumnWithFocus = (() => {
+    if (columnWithFocus === undefined) {
+      return undefined;
+    }
+    return fkColumnIds.has(columnWithFocus.id) ? columnWithFocus : undefined;
+  })();
 
   function handleSubmitPkValue(v: string | number) {
     controller.submit(v);
@@ -86,15 +74,13 @@
   }
 
   function handleInputFocus(column: Column) {
-    if (activeColumn !== column) {
-      nestedRecordSelectorController.cancel();
-    }
-    activeColumn = column;
+    nestedController.cancel();
+    columnWithFocus = column;
   }
 
-  onMount(() => () => {
-    activeColumn = undefined;
-  });
+  function handleInputBlur() {
+    columnWithFocus = undefined;
+  }
 </script>
 
 <div
@@ -121,22 +107,20 @@
 
   <div class="row inputs">
     <CellArranger {display} let:style let:processedColumn let:column>
-      {#if column === activeColumn}
-        {#if activeColumnIsFk && $nestedSelectorIsOpen}
-          <div class="active-fk-cell-indicator" {style}>
-            <div class="border" />
-            <div class="knockout">
-              <div class="smoother left"><QuarterCircle /></div>
-              <div class="smoother right"><QuarterCircle /></div>
-            </div>
-            <div class="arrow"><Arrow /></div>
+      {#if column === columnWithNestedSelectorOpen}
+        <div class="active-fk-cell-indicator" {style}>
+          <div class="border" />
+          <div class="knockout">
+            <div class="smoother left"><QuarterCircle /></div>
+            <div class="smoother right"><QuarterCircle /></div>
           </div>
-        {:else}
-          <div class="highlight" {style} />
-        {/if}
+          <div class="arrow"><Arrow /></div>
+        </div>
+      {:else if column === columnWithFocus}
+        <div class="highlight" {style} />
       {/if}
       <CellWrapper
-        style="{style}{column === activeColumn ? 'z-index: 101;' : ''}"
+        style="{style}{column === columnWithFocus ? 'z-index: 101;' : ''}"
       >
         <RecordSelectorInput
           class="record-selector-input column-{column.id}"
@@ -145,21 +129,15 @@
           searchFuzzy={meta.searchFuzzy}
           columnId={column.id}
           on:focus={() => handleInputFocus(column)}
-          on:blur={() => {
-            activeColumn = undefined;
-          }}
+          on:blur={() => handleInputBlur()}
           on:recordSelectorOpen={() => {
-            activeColumn = column;
+            columnWithNestedSelectorOpen = column;
           }}
           on:recordSelectorSubmit={() => {
-            if (column === activeColumn) {
-              activeColumn = undefined;
-            }
+            columnWithNestedSelectorOpen = undefined;
           }}
           on:recordSelectorCancel={() => {
-            if (column === activeColumn) {
-              activeColumn = undefined;
-            }
+            columnWithNestedSelectorOpen = undefined;
           }}
         />
       </CellWrapper>
@@ -177,8 +155,7 @@
     <NestedRecordSelector />
   {:else}
     <RecordSelectorResults
-      {activeColumn}
-      {activeColumnIsFk}
+      {fkColumnWithFocus}
       submitPkValue={handleSubmitPkValue}
       submitNewRecord={handleSubmitNewRecord}
     />

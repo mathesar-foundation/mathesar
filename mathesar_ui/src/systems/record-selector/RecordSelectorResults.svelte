@@ -25,8 +25,7 @@
 
   export let submitPkValue: (v: string | number) => void;
   export let submitNewRecord: (v: Iterable<[number, unknown]>) => void;
-  export let activeColumnIsFk = false;
-  export let activeColumn: Column | undefined = undefined;
+  export let fkColumnWithFocus: Column | undefined = undefined;
 
   let selection: RecordSelectorSelection = { type: 'record', index: 0 };
 
@@ -65,7 +64,7 @@
   $: indexIsSelected = (index: number) =>
     selection.type === 'record' && selection.index === index;
   $: ({ columns } = $columnsDataStore);
-  $: keyComboToSubmit = `${activeColumnIsFk ? 'Shift+' : ''}Enter`;
+  $: keyComboToSubmit = `${fkColumnWithFocus ? 'Shift+' : ''}Enter`;
 
   $: selection = findNearestValidSelection({
     selection,
@@ -128,7 +127,7 @@
         // don't need to handle it here -- we just need to make sure to _not_
         // handle other events here in that case. We still let the user submit
         // the selected record by using Shift+Enter.
-        if (!activeColumnIsFk || e.shiftKey) {
+        if (!fkColumnWithFocus || e.shiftKey) {
           submitSelection();
         } else {
           handled = false;
@@ -190,10 +189,10 @@
   {/each}
 
   <div class="tips">
-    {#if activeColumnIsFk}
+    {#if fkColumnWithFocus}
       <div>
         <KeyboardKey>Enter</KeyboardKey>: Input a value for
-        {activeColumn?.name}
+        {fkColumnWithFocus.name}
       </div>
     {/if}
     <div>
