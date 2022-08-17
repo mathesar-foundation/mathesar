@@ -8,7 +8,6 @@
   } from '@mathesar-component-library';
   import { CancelOrProceedButtonPair } from '@mathesar-component-library';
   import { ControlledModal } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/tables/columns';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
   import FormField from '@mathesar/components/FormField.svelte';
