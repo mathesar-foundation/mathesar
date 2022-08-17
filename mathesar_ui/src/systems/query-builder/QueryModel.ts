@@ -1,6 +1,10 @@
-import type { QueryInstanceInitialColumn } from '@mathesar/api/queries/queryList';
+import type {
+  QueryInstanceInitialColumn,
+  QueryInstanceTransformation,
+} from '@mathesar/api/queries/queryList';
 import { isDefinedNonNullable } from '@mathesar-component-library';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+import QueryTransformationModel from './QueryTransformationModel';
 
 export interface QueryModelUpdateDiff {
   model: QueryModel;
@@ -9,11 +13,12 @@ export interface QueryModelUpdateDiff {
     | 'name'
     | 'baseTable'
     | 'initialColumnsArray'
-    | 'initialColumnName';
+    | 'initialColumnName'
+    | 'transformations';
   diff: Partial<UnsavedQueryInstance>;
 }
 
-export default class QueryModel implements UnsavedQueryInstance {
+export default class QueryModel {
   base_table;
 
   id;
@@ -22,11 +27,16 @@ export default class QueryModel implements UnsavedQueryInstance {
 
   initial_columns;
 
+  transformationModels;
+
   constructor(model?: UnsavedQueryInstance) {
     this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
     this.initial_columns = model?.initial_columns ?? [];
+    this.transformationModels = model?.transformations?.map(
+      (transformation) => new QueryTransformationModel(transformation),
+    );
   }
 
   withBaseTable(base_table?: number): QueryModelUpdateDiff {
@@ -130,6 +140,22 @@ export default class QueryModel implements UnsavedQueryInstance {
     };
   }
 
+  withTransformations(
+    transformations?: QueryInstanceTransformation[],
+  ): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      transformations,
+    });
+    return {
+      model,
+      type: 'transformations',
+      diff: {
+        transformations,
+      },
+    };
+  }
+
   getColumn(columnAlias: string): QueryInstanceInitialColumn | undefined {
     return this.initial_columns.find((column) => column.alias === columnAlias);
   }
@@ -142,16 +168,15 @@ export default class QueryModel implements UnsavedQueryInstance {
     );
   }
 
-  serialize(): string {
-    return JSON.stringify(this);
-  }
-
-  // TODO: Implement better type safety here
-  static deserialize(jsonString: string): QueryModel {
-    const parsedJSON: unknown = JSON.parse(jsonString);
-    if (typeof parsedJSON === 'object' && parsedJSON !== null) {
-      return new QueryModel(parsedJSON);
-    }
-    return new QueryModel();
+  toJSON(): UnsavedQueryInstance {
+    return {
+      id: this.id,
+      name: this.name,
+      base_table: this.base_table,
+      initial_columns: this.initial_columns,
+      transformations: this.transformationModels?.map((entry) =>
+        entry.toJSON(),
+      ),
+    };
   }
 }

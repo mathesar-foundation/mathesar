@@ -160,11 +160,14 @@ export default class QueryManager extends EventHandler<{
     return Promise.all([this.fetchColumns(), this.fetchResults()]);
   }
 
-  reCalculateProcessedColumns(): void {
+  recalculateProcessedColumns(): void {
     const initialColumns = get(this.query).initial_columns;
-    // We are not creating a derived store so that we calculate
-    // processed columns only in required scenarios and not everytime
-    // query store changes.
+    /**
+     * We are not creating a derived store so that we calculate
+     * processed columns only in required scenarios and not everytime
+     * query store changes.
+     * TODO: Include summarization transform to identify virtual columns
+     */
     this.processedQueryColumns.update((existing) =>
       calcProcessedColumnsBasedOnInitialColumns(
         initialColumns,
@@ -175,7 +178,7 @@ export default class QueryManager extends EventHandler<{
   }
 
   async save(): Promise<QueryInstance | undefined> {
-    const q = this.getQueryModelData();
+    const q = this.getQueryModel();
     if (q.isSaveable()) {
       try {
         this.state.update((_state) => ({
@@ -183,12 +186,12 @@ export default class QueryManager extends EventHandler<{
           saveState: { state: 'processing' },
         }));
         this.querySavePromise?.cancel();
-        if (q.id) {
-          // TODO: Find cause
-          // Typescript does not seem to identify q assignable to QueryInstance
-          this.querySavePromise = putQuery(q as QueryInstance);
+        const queryJSON = q.toJSON();
+        if (typeof queryJSON.id !== 'undefined') {
+          // TODO: Figure out a better way to help TS identify this as a saved instance
+          this.querySavePromise = putQuery(queryJSON as QueryInstance);
         } else {
-          this.querySavePromise = createQuery(q);
+          this.querySavePromise = createQuery(queryJSON);
         }
         const result = await this.querySavePromise;
         this.query.update((qr) => qr.withId(result.id).model);
@@ -225,9 +228,9 @@ export default class QueryManager extends EventHandler<{
   }
 
   async fetchColumns(): Promise<QueryResultColumns | undefined> {
-    const q = this.getQueryModelData();
+    const q = this.getQueryModel();
 
-    if (!q.id) {
+    if (typeof q.id === 'undefined') {
       this.state.update((_state) => ({
         ..._state,
         columnsFetchState: { state: 'success' },
@@ -275,9 +278,9 @@ export default class QueryManager extends EventHandler<{
   }
 
   async fetchResults(): Promise<QueryResultRecords | undefined> {
-    const q = this.getQueryModelData();
+    const q = this.getQueryModel();
 
-    if (!q.id) {
+    if (typeof q.id === 'undefined') {
       this.state.update((_state) => ({
         ..._state,
         recordsFetchState: { state: 'success' },
@@ -357,7 +360,7 @@ export default class QueryManager extends EventHandler<{
   async update(
     callback: (queryModel: QueryModel) => QueryModelUpdateDiff,
   ): Promise<void> {
-    const updateDiff = callback(this.getQueryModelData());
+    const updateDiff = callback(this.getQueryModel());
     this.query.set(updateDiff.model);
     if (updateDiff.model.isSaveable()) {
       // Push entire model instead of diff to always
@@ -374,16 +377,20 @@ export default class QueryManager extends EventHandler<{
         this.resetResults();
         break;
       case 'initialColumnName':
-        this.reCalculateProcessedColumns();
+        this.recalculateProcessedColumns();
         break;
       case 'initialColumnsArray':
         if (!updateDiff.diff.initial_columns?.length) {
           // All columns have been deleted
           this.resetResults();
         } else {
-          this.reCalculateProcessedColumns();
+          this.recalculateProcessedColumns();
           await this.fetchColumnsAndRecords();
         }
+        break;
+      case 'transformations':
+        this.resetPaginationPane();
+        await this.fetchColumnsAndRecords();
         break;
       default:
         await this.fetchColumnsAndRecords();
@@ -392,13 +399,13 @@ export default class QueryManager extends EventHandler<{
 
   async performUndoRedoSync(query?: QueryModel): Promise<void> {
     if (query) {
-      const currentQueryModelData = this.getQueryModelData();
+      const currentQueryModelData = this.getQueryModel();
       let queryToSet = query;
       if (currentQueryModelData?.id) {
         queryToSet = query.withId(currentQueryModelData.id).model;
       }
       this.query.set(queryToSet);
-      this.reCalculateProcessedColumns();
+      this.recalculateProcessedColumns();
       await this.save();
       await this.fetchColumnsAndRecords();
     }
@@ -415,7 +422,7 @@ export default class QueryManager extends EventHandler<{
     await this.performUndoRedoSync(query);
   }
 
-  getQueryModelData(): QueryModel {
+  getQueryModel(): QueryModel {
     return get(this.query);
   }
 

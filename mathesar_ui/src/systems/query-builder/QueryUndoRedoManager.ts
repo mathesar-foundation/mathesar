@@ -6,7 +6,7 @@ export default class QueryUndoRedoManager {
 
   constructor(query?: QueryModel) {
     if (query) {
-      this.current = new QueryListEntry(query.serialize());
+      this.current = new QueryListEntry(query.toJSON());
     }
   }
 
@@ -14,7 +14,7 @@ export default class QueryUndoRedoManager {
     if (this.current && this.current.next) {
       this.current.next.prev = undefined;
     }
-    const newNext = new QueryListEntry(query.serialize());
+    const newNext = new QueryListEntry(query.toJSON());
     newNext.prev = this.current;
     if (this.current) {
       this.current.next = newNext;
@@ -34,7 +34,7 @@ export default class QueryUndoRedoManager {
   undo(): QueryModel | undefined {
     if (this.current && this.current.prev) {
       this.current = this.current.prev;
-      return QueryModel.deserialize(this.current.serializedQuery);
+      return new QueryModel(this.current.queryJSON);
     }
     return undefined;
   }
@@ -42,7 +42,7 @@ export default class QueryUndoRedoManager {
   redo(): QueryModel | undefined {
     if (this.current && this.current.next) {
       this.current = this.current.next;
-      return QueryModel.deserialize(this.current.serializedQuery);
+      return new QueryModel(this.current.queryJSON);
     }
     return undefined;
   }

@@ -53,7 +53,7 @@
   function createNewQuery() {
     if (
       queryManager &&
-      typeof queryManager.getQueryModelData().id === 'undefined'
+      typeof queryManager.getQueryModel().id === 'undefined'
     ) {
       // An unsaved query is already open
       return;
@@ -73,7 +73,7 @@
       return;
     }
 
-    if (queryManager && queryManager.getQueryModelData().id === queryId) {
+    if (queryManager && queryManager.getQueryModel().id === queryId) {
       // The requested query is already open
       return;
     }
