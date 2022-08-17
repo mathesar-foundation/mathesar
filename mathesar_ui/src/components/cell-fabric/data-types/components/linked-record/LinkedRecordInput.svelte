@@ -29,6 +29,8 @@
 
   function clear() {
     value = undefined;
+    dispatch('artificialChange', undefined);
+    dispatch('artificialInput', undefined);
     // If the value is cleared via the ClearCue, the focus will shift to the
     // clear button in the ClearCue. We'd like to shift it back to the input
     // element to that the user can press `Enter` to launch the record selector.
@@ -46,6 +48,8 @@
     }
     value = newValue;
     dispatch('recordSelectorSubmit');
+    dispatch('artificialChange', value);
+    dispatch('artificialInput', value);
   }
 
   function handleKeydown(e: KeyboardEvent) {
