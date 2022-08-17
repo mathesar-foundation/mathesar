@@ -4,7 +4,8 @@ import type {
 } from '@mathesar/api/queries/queryList';
 import { isDefinedNonNullable } from '@mathesar-component-library';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
-import QueryTransformationModel from './QueryTransformationModel';
+import QueryFilterTransformationModel from './QueryFilterTransformationModel';
+import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 
 export interface QueryModelUpdateDiff {
   model: QueryModel;
@@ -16,6 +17,13 @@ export interface QueryModelUpdateDiff {
     | 'initialColumnName'
     | 'transformations';
   diff: Partial<UnsavedQueryInstance>;
+}
+
+function getTransformationModel(transformation: QueryInstanceTransformation) {
+  if (transformation.type === 'filter') {
+    return new QueryFilterTransformationModel(transformation);
+  }
+  return new QuerySummarizationTransformationModel(transformation);
 }
 
 export default class QueryModel {
@@ -35,7 +43,7 @@ export default class QueryModel {
     this.name = model?.name;
     this.initial_columns = model?.initial_columns ?? [];
     this.transformationModels = model?.transformations?.map(
-      (transformation) => new QueryTransformationModel(transformation),
+      getTransformationModel,
     );
   }
 
