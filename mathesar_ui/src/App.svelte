@@ -37,6 +37,7 @@
     --color-white: #ffffff;
     --color-blue-light: #e6f0ff;
     --color-blue-medium: #3b82f6;
+    --color-green-medium: #10b981;
     --color-gray-lighter: #fafafa;
     --color-gray-light: #f4f4f5;
     --color-gray-medium: #d4d4d8;

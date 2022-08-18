@@ -32,3 +32,4 @@
 </script>
 
 <NameWithIcon on:click {icon} {isLoading}>{column.name}</NameWithIcon>
+

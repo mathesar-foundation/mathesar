@@ -59,5 +59,6 @@
       padding: 0 0.5rem;
       font-weight: 500;
     }
+
   }
 </style>
