@@ -3,7 +3,7 @@ from django.utils.functional import cached_property
 
 from db.queries.base import DBQuery, InitialColumn
 
-from mathesar.models.base import BaseModel, Column, Table
+from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
 from django.core.exceptions import ValidationError
 from db.transforms.operations.deserialize import deserialize_transformation

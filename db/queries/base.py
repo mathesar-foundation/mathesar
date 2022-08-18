@@ -1,8 +1,4 @@
-from collections import namedtuple
-
-from sqlalchemy import MetaData, select, join
-
-from django.utils.functional import cached_property
+from sqlalchemy import MetaData, select
 
 from db.records.operations import select as records_select
 from db.columns.base import MathesarColumn
@@ -102,7 +98,7 @@ class DBQuery:
             for i, jp in enumerate(jp_path):
                 left = jp_path_alias_map[jp_path[:i]]
                 right = _get_table(jp[1][0]).alias()
-                jp_path_alias_map[jp_path[:i+1]] = right
+                jp_path_alias_map[jp_path[:i + 1]] = right
                 left_col = left.columns[_get_column_name(jp[0][0], jp[0][1])]
                 right_col = right.columns[_get_column_name(jp[1][0], jp[1][1])]
                 from_clause = from_clause.join(
@@ -123,6 +119,7 @@ def _guarantee_jp_path_tuples(jp_path):
     else:
         return ()
 
+
 class InitialColumn:
     def __init__(
             self,
@@ -138,7 +135,7 @@ class InitialColumn:
         self.alias = alias
         if jp_path is not None:
             self.jp_path = tuple(
-                [tuple([ tuple(edge[0]), tuple(edge[1])]) for edge in jp_path]
+                [tuple([tuple(edge[0]), tuple(edge[1])]) for edge in jp_path]
             )
         else:
             self.jp_path = None
