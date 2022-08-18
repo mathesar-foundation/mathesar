@@ -15,15 +15,15 @@
   </div>
 
   <div class="right">
-    <div class="user-switcher">
-      <Icon {...iconUser} />
-    </div>
     <div class="database-switcher">
       {#if database}
         <a href={getDatabasePageUrl(database.name)}>
           <DatabaseName {database} />
         </a>
       {/if}
+    </div>
+    <div class="user-switcher">
+      <Icon {...iconUser} />
     </div>
   </div>
 </header>
@@ -32,9 +32,9 @@
   .app-header {
     display: flex;
     justify-content: space-between;
-    padding: 0.5rem;
-    background: #ddd;
-    border-bottom: 1px solid #bbb;
+    background: var(--color-gray-light);
+    border-bottom: 1px solid var(--color-gray-dark);
+    padding: 0.25rem;
   }
 
   .left {
@@ -44,13 +44,20 @@
 
   .right {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    align-items: center;
+  }
+
+  .user-switcher {
+    display: flex;
+    align-items: center;
+    background: var(--color-gray-medium);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    margin-left: 1rem;
   }
 
   .database-switcher a {
-    font-size: 0.85rem;
-    color: #888;
+    color: var(--color-text-muted);
     text-decoration: none;
   }
   .database-switcher a:hover {

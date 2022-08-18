@@ -39,7 +39,7 @@ export function getRecordPageUrl(
   databaseName: string,
   schemaId: number,
   tableId: number,
-  recordId: number,
+  recordId: unknown,
 ): string {
-  return `/${databaseName}/${schemaId}/${tableId}/${recordId}`;
+  return `/${databaseName}/${schemaId}/${tableId}/${String(recordId)}`;
 }

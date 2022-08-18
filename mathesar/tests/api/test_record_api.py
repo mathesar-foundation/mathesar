@@ -1,19 +1,18 @@
-from copy import deepcopy
 import json
+import pytest
+from copy import deepcopy
 from unittest.mock import patch
 
-import pytest
-
-from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
-from mathesar.models.base import db_get_records_with_default_order
-from mathesar.models import base as models_base
-from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.api.utils import follows_json_number_spec
+from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
+from mathesar.models import base as models_base
+from mathesar.models.base import db_get_records_with_default_order
 
 
 def test_record_list(create_patents_table, client):
@@ -707,6 +706,66 @@ def test_record_list_pagination_offset(create_patents_table, client):
     assert record_1_data[str(columns_id[3])] != record_2_data[str(columns_id[3])]
     assert record_1_data[str(columns_id[4])] != record_2_data[str(columns_id[4])]
     assert record_1_data[str(columns_id[5])] != record_2_data[str(columns_id[5])]
+
+
+def test_foreign_key_record_api_all_column_previews(publication_tables, client):
+    author_table, publisher_table, publication_table, checkouts_table = publication_tables
+    author_template_column = author_table.get_columns_by_name(["first_name", "last_name"])
+    author_preview_template = f'Full Name: {{{ author_template_column[0].id }}} {{{author_template_column[1].id}}}'
+    author_table_settings_id = author_table.settings.id
+    data = {
+        "preview_settings": {
+            'template': author_preview_template,
+        }
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
+        data=data,
+    )
+    assert response.status_code == 200
+    publisher_template_column = publisher_table.get_column_by_name("name")
+    publisher_preview_template = f'{{{ publisher_template_column.id }}}'
+    publisher_table_settings_id = publisher_table.settings.id
+    data = {
+        "preview_settings": {
+            'template': publisher_preview_template,
+        }
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{publisher_table.id}/settings/{publisher_table_settings_id}/",
+        data=data,
+    )
+    assert response.status_code == 200
+    publication_template_columns = publication_table.get_columns_by_name(['publisher', 'author', 'co_author', 'title', 'id'])
+    # TODO Uncomment once the bug with db explorer is fixed
+    # publication_preview_template = f'{{{publication_template_columns[3].id}}} Published By: {{{ publication_template_columns[0].id}}} and Authored by {{{publication_template_columns[1].id}}} along with {{{publication_template_columns[2].id}}}'
+    publication_preview_template = f'{{{publication_template_columns[3].id}}}'
+    publication_table_settings_id = publication_table.settings.id
+    data = {
+        "preview_settings": {
+            'template': publication_preview_template,
+        }
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{publication_table.id}/settings/{publication_table_settings_id}/",
+        data=data,
+    )
+    assert response.status_code == 200
+    response = client.get(f'/api/db/v0/tables/{checkouts_table.id}/records/', data={'fk_previews': 'all'})
+    response_data = response.json()
+    preview_data = response_data['preview_data']
+    checkouts_table_publication_fk_column = checkouts_table.get_column_by_name('publication')
+    preview_column = next(
+        preview
+        for preview in preview_data
+        if preview['column'] == checkouts_table_publication_fk_column.id
+    )
+    preview_column_alias = f'{checkouts_table_publication_fk_column.id}__{publication_template_columns[4].id}__col__{publication_template_columns[3].id}'
+    assert preview_column['template'] == f'{{{preview_column_alias}}}'
+    preview_data = preview_column['data'][0]
+    assert preview_column_alias in preview_data
+    expected_preview_value = 'Pressure Should Old'
+    assert preview_data[preview_column_alias] == expected_preview_value
 
 
 def test_record_detail(create_patents_table, client):

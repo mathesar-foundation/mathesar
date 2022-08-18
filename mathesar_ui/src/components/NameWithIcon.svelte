@@ -6,7 +6,7 @@
   export let isLoading = false;
 </script>
 
-<span class="name-with-icon">
+<span class="name-with-icon" on:click>
   <span class="icon">
     {#if isLoading}
       <Spinner />
@@ -27,8 +27,9 @@
   }
 
   .icon {
+    flex: 0 0 auto;
     display: inline-block;
-    margin-right: 0.4em;
+    margin-right: 0.25em;
     /**
      * This component gets used in headings and other places where the text is
      * larger. But having the icon scale linearly with the text produces an icon
@@ -36,7 +37,7 @@
      * font size is 1rem. As the text gets bigger, the icon gets bigger too, but
      * not quite as big as the text.
      */
-    height: min(1em, 0.7em + 0.1rem);
+    height: min(1em, 0.8em + 0.1rem);
     color: var(--icon-color, current-color);
   }
   .icon > :global(svg) {
