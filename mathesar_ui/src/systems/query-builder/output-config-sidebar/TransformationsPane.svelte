@@ -17,7 +17,7 @@
     queryManager);
   $: ({ transformationModels } = $query);
 
-  function addFilter() {
+  async function addFilter() {
     const firstColumn = [...$processedQueryColumns.values()][0];
     if (!firstColumn) {
       return;
@@ -32,13 +32,22 @@
       value: undefined,
     });
 
-    /**
-     * We are mutating the query object here so that we do not trigger other
-     * operations on QueryManager, but still re-render everything related to
-     * transformations within this Component's scope
-     */
-    transformationModels = [...transformationModels, newFilter];
-    $query.transformationModels = transformationModels;
+    await queryManager.update((q) =>
+      q.withTransformationModels([...transformationModels, newFilter]),
+    );
+  }
+
+  async function removeTransformation(index: number) {
+    transformationModels.splice(index, 1);
+    await queryManager.update((q) =>
+      q.withTransformationModels(transformationModels),
+    );
+  }
+
+  async function updateTransformation() {
+    await queryManager.update((q) =>
+      q.withTransformationModels(transformationModels),
+    );
   }
 </script>
 
@@ -58,7 +67,11 @@
             {/if}
           </span>
           {#if index === transformationModels.length - 1}
-            <Button appearance="plain" class="padding-zero">
+            <Button
+              appearance="plain"
+              class="padding-zero"
+              on:click={() => removeTransformation(index)}
+            >
               <Icon {...iconDelete} size="0.8rem" />
             </Button>
           {/if}
@@ -68,8 +81,9 @@
             <FilterTransformation
               processedQueryColumns={$processedQueryColumns}
               processedQueryColumnHistory={$processedQueryColumnHistory}
-              model={transformationModel}
+              bind:model={transformationModel}
               limitEditing={index !== transformationModels.length - 1}
+              on:update={updateTransformation}
             />
           {:else}
             <i>Summarization - yet to implement</i>

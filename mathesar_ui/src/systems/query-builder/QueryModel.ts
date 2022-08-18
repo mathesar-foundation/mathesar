@@ -43,13 +43,17 @@ export default class QueryModel {
 
   transformationModels: QueryTransformationModel[];
 
-  constructor(model?: UnsavedQueryInstance) {
+  constructor(model?: UnsavedQueryInstance | QueryModel) {
     this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
     this.initial_columns = model?.initial_columns ?? [];
-    this.transformationModels =
-      model?.transformations?.map(getTransformationModel) ?? [];
+    if (model && 'transformationModels' in model) {
+      this.transformationModels = [...model.transformationModels];
+    } else {
+      this.transformationModels =
+        model?.transformations?.map(getTransformationModel) ?? [];
+    }
   }
 
   withBaseTable(base_table?: number): QueryModelUpdateDiff {
@@ -165,6 +169,22 @@ export default class QueryModel {
       type: 'transformations',
       diff: {
         transformations,
+      },
+    };
+  }
+
+  withTransformationModels(
+    transformationModels?: QueryTransformationModel[],
+  ): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      transformationModels,
+    });
+    return {
+      model,
+      type: 'transformations',
+      diff: {
+        transformations: model.toJSON().transformations,
       },
     };
   }

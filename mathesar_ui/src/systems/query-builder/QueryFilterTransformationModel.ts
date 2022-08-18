@@ -29,14 +29,15 @@ export default class QueryFilterTransformationModel
   }
 
   toJSON(): QueryInstanceFilterTransformation {
+    const spec: QueryInstanceFilterTransformation['spec'] = {
+      [this.conditionIdentifier]: [{ column_name: [this.columnIdentifier] }],
+    };
+    if (typeof this.value !== 'undefined') {
+      spec[this.conditionIdentifier].push({ literal: [this.value] });
+    }
     return {
       type: 'filter',
-      spec: {
-        [this.conditionIdentifier]: [
-          { column_name: [this.columnIdentifier] },
-          { literal: [this.value] },
-        ],
-      },
+      spec,
     };
   }
 }

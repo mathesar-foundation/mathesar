@@ -9,7 +9,6 @@
 
   export let limitEditing = false;
 
-  $: ({ columnIdentifier, conditionIdentifier, value } = model);
   $: columns = limitEditing
     ? [...processedQueryColumnHistory.values()]
     : [...processedQueryColumns.values()];
@@ -22,10 +21,9 @@
     processedQueryColumnHistory.get(column.id)?.column.display_name ?? ''}
   disableColumnChange={limitEditing}
   layout="vertical"
-  bind:columnIdentifier
-  bind:conditionIdentifier
-  bind:value
-  on:removeFilter
+  bind:columnIdentifier={model.columnIdentifier}
+  bind:conditionIdentifier={model.conditionIdentifier}
+  bind:value={model.value}
   on:update
 />
 

@@ -337,7 +337,10 @@ export default class QueryManager extends EventHandler<{
         `/api/db/v0/queries/${q.id}/records/?limit=${limit}&offset=${offset}`,
       );
       const result = await this.queryRecordsFetchPromise;
-      this.records.set(result);
+      this.records.set({
+        count: result.count,
+        results: result.results ?? [],
+      });
       this.state.update((_state) => ({
         ..._state,
         recordsFetchState: { state: 'success' },
