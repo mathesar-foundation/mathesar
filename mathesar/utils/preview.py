@@ -31,6 +31,7 @@ def _preview_info_by_column_id(fk_previews, fk_constraints, previous_path=[], ex
             # Replace the foreign key column id with the respective template of the referent table
             preview_template = preview_template.replace(f'{{{column_key}}}', f'{column_value["template"]}')
         path_prefix = compute_path_prefix(current_path)
+
         for preview_data_column_id in preview_data_column_ids:
             if preview_data_column_id not in referent_preview_info:
                 column_alias_name = compute_path_str(path_prefix, preview_data_column_id)
@@ -55,7 +56,8 @@ def compute_path_prefix(paths):
 
 def column_ids_from_preview_template(preview_template):
     preview_columns_extraction_regex = r'\{(.*?)\}'
-    preview_data_column_ids = re.findall(preview_columns_extraction_regex, preview_template)
+    preview_data_column_str_ids = re.findall(preview_columns_extraction_regex, preview_template)
+    preview_data_column_ids = list(map(int, preview_data_column_str_ids))
     return preview_data_column_ids
 
 
