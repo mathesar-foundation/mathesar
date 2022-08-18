@@ -1,10 +1,7 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import { EventHandler, ImmutableMap } from '@mathesar-component-library';
-import type {
-  CancellablePromise,
-  ComponentAndProps,
-} from '@mathesar-component-library/types';
+import type { CancellablePromise } from '@mathesar-component-library/types';
 import { getAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
 import type {
@@ -16,50 +13,12 @@ import type {
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
 import { toast } from '@mathesar/stores/toast';
-import {
-  getAbstractTypeForDbType,
-  getFiltersForAbstractType,
-} from '@mathesar/stores/abstract-types';
-import type {
-  AbstractType,
-  AbstractTypesMap,
-} from '@mathesar/stores/abstract-types/types';
-import {
-  getCellCap,
-  getDbTypeBasedInputCap,
-} from '@mathesar/components/cell-fabric/utils';
-import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type QueryModel from './QueryModel';
 import type { QueryModelUpdateDiff } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
-
-export interface ProcessedQueryResultColumn extends CellColumnFabric {
-  id: QueryResultColumn['alias'];
-  column: QueryResultColumn;
-  abstractType: AbstractType;
-  inputComponentAndProps: ComponentAndProps;
-  allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
-}
-
-export type ProcessedQueryResultColumnMap = ImmutableMap<
-  ProcessedQueryResultColumn['id'],
-  ProcessedQueryResultColumn
->;
-
-function processColumn(
-  column: QueryResultColumn,
-  abstractTypeMap: AbstractTypesMap,
-): ProcessedQueryResultColumn {
-  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
-  return {
-    id: column.alias,
-    column,
-    abstractType,
-    cellComponentAndProps: getCellCap(abstractType.cell, column),
-    inputComponentAndProps: getDbTypeBasedInputCap(column, abstractType.cell),
-    allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
-  };
-}
+import { processColumn } from './utils';
+import type { ProcessedQueryResultColumnMap } from './utils';
 
 function calcProcessedColumnsBasedOnInitialColumns(
   initialColumns: QueryModel['initial_columns'],
@@ -137,9 +96,6 @@ export default class QueryManager extends EventHandler<{
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 100 }));
 
-  processedQueryColumnHistory: Writable<ProcessedQueryResultColumnMap> =
-    writable(new ImmutableMap());
-
   processedQueryColumns: Writable<ProcessedQueryResultColumnMap> = writable(
     new ImmutableMap(),
   );
@@ -196,16 +152,10 @@ export default class QueryManager extends EventHandler<{
         this.abstractTypeMap,
       ),
     );
-    this.processedQueryColumnHistory.update((processedColumns) =>
-      processedColumns.withEntries(get(this.processedQueryColumns)),
-    );
   }
 
-  resetProcessedColumns(clearHistory?: boolean): void {
+  resetProcessedColumns(): void {
     this.processedQueryColumns.set(new ImmutableMap());
-    if (clearHistory) {
-      this.processedQueryColumnHistory.set(new ImmutableMap());
-    }
   }
 
   setProcessedColumnsFromResults(resultColumns: QueryResultColumn[]): void {
@@ -216,9 +166,6 @@ export default class QueryManager extends EventHandler<{
       ]),
     );
     this.processedQueryColumns.set(newColumns);
-    this.processedQueryColumnHistory.update((processedColumns) =>
-      processedColumns.withEntries(newColumns),
-    );
   }
 
   async save(): Promise<QueryInstance | undefined> {
@@ -387,7 +334,7 @@ export default class QueryManager extends EventHandler<{
     this.queryColumnsFetchPromise?.cancel();
     this.queryRecordsFetchPromise?.cancel();
     this.records.set({ count: 0, results: [] });
-    this.resetProcessedColumns(true);
+    this.resetProcessedColumns();
     this.selectedColumnAlias.set(undefined);
     this.state.update((state) => ({
       ...state,

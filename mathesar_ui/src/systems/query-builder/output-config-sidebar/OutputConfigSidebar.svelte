@@ -107,7 +107,7 @@
   {/if}
   <section>
     <header>Transformations</header>
-    <TransformationsPane {queryManager} />
+    <TransformationsPane inputColumns={$inputColumns} {queryManager} />
   </section>
 </aside>
 

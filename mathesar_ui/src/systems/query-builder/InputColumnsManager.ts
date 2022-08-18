@@ -43,7 +43,7 @@ export interface ReferencedByTable extends LinkedTable {
   };
 }
 
-interface InputColumnsStoreSubstance {
+export interface InputColumnsStoreSubstance {
   requestStatus: RequestStatus;
   baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
   tablesThatReferenceBaseTable: Map<ReferencedByTable['id'], ReferencedByTable>;

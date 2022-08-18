@@ -1,16 +1,16 @@
 <script lang="ts">
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
   import type QueryFilterTransformationModel from '../QueryFilterTransformationModel';
-  import type { ProcessedQueryResultColumnMap } from '../QueryManager';
+  import type { ProcessedQueryResultColumnMap } from '../utils';
 
   export let processedQueryColumns: ProcessedQueryResultColumnMap;
-  export let processedQueryColumnHistory: ProcessedQueryResultColumnMap;
+  export let allTransformableColumns: ProcessedQueryResultColumnMap;
   export let model: QueryFilterTransformationModel;
 
   export let limitEditing = false;
 
   $: columns = limitEditing
-    ? [...processedQueryColumnHistory.values()]
+    ? [...allTransformableColumns.values()]
     : [...processedQueryColumns.values()];
 </script>
 
@@ -18,7 +18,7 @@
   allowDelete={false}
   {columns}
   getColumnLabel={(column) =>
-    processedQueryColumnHistory.get(column.id)?.column.display_name ?? ''}
+    allTransformableColumns.get(column.id)?.column.display_name ?? ''}
   disableColumnChange={limitEditing}
   layout="vertical"
   bind:columnIdentifier={model.columnIdentifier}
