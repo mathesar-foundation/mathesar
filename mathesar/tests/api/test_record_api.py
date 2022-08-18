@@ -737,14 +737,12 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     )
     assert response.status_code == 200
     publication_template_columns = publication_table.get_columns_by_name(['publisher', 'author', 'co_author', 'title', 'id'])
-    # TODO Uncomment once the bug with db explorer is fixed
     publication_preview_template = (
         f'{{{publication_template_columns[3].id}}}'
         f' Published By: {{{publication_template_columns[0].id}}}'
         f' and Authored by {{{publication_template_columns[1].id}}}'
         f' along with {{{publication_template_columns[2].id}}}'
     )
-    # publication_preview_template = f'{{{publication_template_columns[3].id}}}'
     publication_table_settings_id = publication_table.settings.id
     data = {
         "preview_settings": {
