@@ -25,7 +25,11 @@
   export let columnIdentifier: ColumnLikeType['id'] | undefined;
   export let conditionIdentifier: string | undefined;
   export let value: unknown | undefined;
-  export let numberOfFilters: number;
+
+  export let layout: 'horizontal' | 'vertical' = 'horizontal';
+  export let disableColumnChange = false;
+  export let allowDelete = true;
+  export let numberOfFilters = 0;
 
   /**
    * Eslint recognizes an unnecessary type assertion that typecheck fails to
@@ -149,17 +153,20 @@
   }
 </script>
 
-<div class="filter-entry">
-  <div class="prefix">
-    <slot />
-  </div>
-  <InputGroup>
+<div class="filter-entry {layout}">
+  {#if $$slots.default}
+    <div class="prefix">
+      <slot />
+    </div>
+  {/if}
+  <InputGroup class={layout}>
     <Select
       options={columnIdentifiers}
       bind:value={columnIdentifier}
       getLabel={getColumnName}
       on:change={onColumnChange}
       triggerClass="filter-column-id"
+      disabled={disableColumnChange}
     />
     <Select
       options={conditionIds}
@@ -183,20 +190,21 @@
         hasError={showError && !isValid}
       />
     {/if}
-    <Button
-      size="small"
-      class="filter-remove"
-      on:click={() => dispatch('removeFilter')}
-    >
-      <Icon {...iconDelete} />
-    </Button>
+    {#if allowDelete}
+      <Button
+        size="small"
+        class="filter-remove"
+        on:click={() => dispatch('removeFilter')}
+      >
+        <Icon {...iconDelete} />
+      </Button>
+    {/if}
   </InputGroup>
 </div>
 
 <style lang="scss">
   .filter-entry {
     display: flex;
-    min-width: 560px;
     gap: 10px;
 
     .prefix {
@@ -215,26 +223,32 @@
       margin-top: 6px;
     }
 
-    :global(.filter-column-id.trigger) {
-      width: 140px;
-      flex-basis: 140px;
-      flex-shrink: 0;
-      flex-grow: 0;
-    }
-    :global(.filter-condition) {
-      width: 140px;
-      flex-basis: 140px;
-      flex-shrink: 0;
-      flex-grow: 0;
+    &.horizontal {
+      min-width: 560px;
+
+      :global(.filter-column-id.trigger),
+      :global(.filter-condition) {
+        width: 140px;
+        flex-basis: 140px;
+        flex-shrink: 0;
+        flex-grow: 0;
+      }
+
+      :global(.filter-input) {
+        width: 160px;
+        flex-basis: 160px;
+        flex-grow: 0;
+        flex-shrink: 0;
+        max-height: 2.2rem;
+        resize: none;
+      }
     }
 
-    :global(.filter-input) {
-      width: 160px;
-      flex-basis: 160px;
-      flex-grow: 0;
-      flex-shrink: 0;
-      max-height: 2.2rem;
-      resize: none;
+    &.vertical {
+      :global(.filter-input) {
+        flex-grow: 1;
+        resize: vertical;
+      }
     }
 
     :global(.filter-remove) {

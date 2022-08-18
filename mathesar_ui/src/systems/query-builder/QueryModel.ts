@@ -19,7 +19,13 @@ export interface QueryModelUpdateDiff {
   diff: Partial<UnsavedQueryInstance>;
 }
 
-function getTransformationModel(transformation: QueryInstanceTransformation) {
+export type QueryTransformationModel =
+  | QueryFilterTransformationModel
+  | QuerySummarizationTransformationModel;
+
+function getTransformationModel(
+  transformation: QueryInstanceTransformation,
+): QueryTransformationModel {
   if (transformation.type === 'filter') {
     return new QueryFilterTransformationModel(transformation);
   }
@@ -27,24 +33,23 @@ function getTransformationModel(transformation: QueryInstanceTransformation) {
 }
 
 export default class QueryModel {
-  base_table;
+  base_table: UnsavedQueryInstance['base_table'];
 
-  id;
+  id: UnsavedQueryInstance['id'];
 
-  name;
+  name: UnsavedQueryInstance['name'];
 
-  initial_columns;
+  initial_columns: QueryInstanceInitialColumn[];
 
-  transformationModels;
+  transformationModels: QueryTransformationModel[];
 
   constructor(model?: UnsavedQueryInstance) {
     this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
     this.initial_columns = model?.initial_columns ?? [];
-    this.transformationModels = model?.transformations?.map(
-      getTransformationModel,
-    );
+    this.transformationModels =
+      model?.transformations?.map(getTransformationModel) ?? [];
   }
 
   withBaseTable(base_table?: number): QueryModelUpdateDiff {

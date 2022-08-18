@@ -11,6 +11,7 @@
   import { iconDelete } from '@mathesar/icons';
   import type QueryManager from '../QueryManager';
   import type InputColumnsManager from '../InputColumnsManager';
+  import TransformationsPane from './TransformationsPane.svelte';
 
   export let queryManager: QueryManager;
   export let inputColumnsManager: InputColumnsManager;
@@ -106,9 +107,7 @@
   {/if}
   <section>
     <header>Transformations</header>
-    <div>
-      <i>Yet to be implemented</i>
-    </div>
+    <TransformationsPane {queryManager} />
   </section>
 </aside>
 
@@ -121,7 +120,8 @@
     flex-basis: 22rem;
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
 
     > section {
       > header {
@@ -133,8 +133,10 @@
         top: 0;
         z-index: 10;
       }
-      > div {
+      > :global(div) {
         padding: 0.75rem 0.75rem 1.2rem;
+      }
+      > div {
         border-bottom: 1px solid #efefef;
 
         h4 {

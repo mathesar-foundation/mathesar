@@ -1,7 +1,7 @@
 import type { QueryInstanceFilterTransformation } from '@mathesar/api/queries/queryList';
 
 export interface QueryFilterTransformationEntry {
-  columnIdentifiter: string;
+  columnIdentifier: string;
   conditionIdentifier: string;
   value: unknown;
 }
@@ -9,9 +9,7 @@ export interface QueryFilterTransformationEntry {
 export default class QueryFilterTransformationModel
   implements QueryFilterTransformationEntry
 {
-  transformation: QueryInstanceFilterTransformation;
-
-  columnIdentifiter;
+  columnIdentifier;
 
   conditionIdentifier;
 
@@ -20,27 +18,25 @@ export default class QueryFilterTransformationModel
   constructor(
     data: QueryInstanceFilterTransformation | QueryFilterTransformationEntry,
   ) {
-    if ('columnIdentifiter' in data) {
-      this.columnIdentifiter = data.columnIdentifiter;
+    if ('columnIdentifier' in data) {
+      this.columnIdentifier = data.columnIdentifier;
       this.conditionIdentifier = data.conditionIdentifier;
-      this.transformation = {
-        type: 'filter',
-        spec: {
-          [data.conditionIdentifier]: [
-            { column_name: [data.columnIdentifiter] },
-            { literal: [data.value] },
-          ],
-        },
-      };
     } else {
       [this.conditionIdentifier] = Object.keys(data.spec);
-      [this.columnIdentifiter] =
+      [this.columnIdentifier] =
         data.spec[this.conditionIdentifier][0].column_name;
-      this.transformation = data;
     }
   }
 
   toJSON(): QueryInstanceFilterTransformation {
-    return this.transformation;
+    return {
+      type: 'filter',
+      spec: {
+        [this.conditionIdentifier]: [
+          { column_name: [this.columnIdentifier] },
+          { literal: [this.value] },
+        ],
+      },
+    };
   }
 }
