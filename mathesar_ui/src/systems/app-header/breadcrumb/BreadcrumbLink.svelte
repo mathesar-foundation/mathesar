@@ -12,13 +12,10 @@
   }
   .breadcrumb-item a {
     display: block;
-    color: #000;
     text-decoration: none;
-    font-size: 1.3rem;
-    padding: 0.2em 0.5em;
-    background: white;
-    border: solid 1px #bbb;
-    border-radius: 0.2em;
+    color: var(--color-gray-darker);
+    font-weight: 500;
+    font-size: var(--text-size-base);
   }
   .breadcrumb-item a:hover {
     text-decoration: underline;
