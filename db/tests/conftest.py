@@ -19,6 +19,8 @@ BOOLEANS_SQL = os.path.join(RESOURCES, "booleans_create.sql")
 FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 MAGNITUDE_SQL = os.path.join(RESOURCES, "magnitude_testing_create.sql")
 JSON_SQL = os.path.join(RESOURCES, "json_sort.sql")
+BOOKS_FROM_SQL = os.path.join(RESOURCES, "books_import_from.sql")
+BOOKS_TARGET_SQL = os.path.join(RESOURCES, "books_import_target.sql")
 
 
 @pytest.fixture
@@ -84,6 +86,24 @@ def engine_with_magnitude(engine_with_schema):
     yield engine, schema
 
 
+@pytest.fixture
+def engine_with_books_to_import_from(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(BOOKS_FROM_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    return engine, schema
+
+
+@pytest.fixture
+def engine_with_books_import_target(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(BOOKS_TARGET_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    return engine, schema
+
+
 @pytest.fixture(scope='session')
 def roster_table_name():
     return "Roster"
@@ -122,6 +142,16 @@ def roster_extracted_cols():
 @pytest.fixture(scope='session')
 def roster_fkey_col(teachers_table_name):
     return f"{teachers_table_name}_{constants.ID}"
+
+
+@pytest.fixture(scope='session')
+def books_import_from_table_name():
+    return "books_from"
+
+
+@pytest.fixture(scope='session')
+def books_import_target_table_name():
+    return "books_target"
 
 
 @pytest.fixture
@@ -200,3 +230,19 @@ def uris_table_obj(engine_with_uris, uris_table_name):
             uri_type,
         )
     yield table, engine
+
+
+@pytest.fixture
+def books_table_import_from_obj(engine_with_books_to_import_from, books_import_from_table_name):
+    engine, schema = engine_with_books_to_import_from
+    metadata = MetaData(bind=engine)
+    table = Table(books_import_from_table_name, metadata, schema=schema, autoload_with=engine)
+    return table, engine
+
+
+@pytest.fixture
+def books_table_import_target_obj(engine_with_books_import_target, books_import_target_table_name):
+    engine, schema = engine_with_books_import_target
+    metadata = MetaData(bind=engine)
+    table = Table(books_import_target_table_name, metadata, schema=schema, autoload_with=engine)
+    return table, engine
