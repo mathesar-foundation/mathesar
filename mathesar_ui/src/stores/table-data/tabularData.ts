@@ -13,6 +13,7 @@ import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
 import type { ProcessedColumnsStore } from './processedColumns';
 import { processColumn } from './processedColumns';
+import { Selection } from './selection';
 
 export interface TabularDataProps {
   id: DBObjectEntry['id'];
@@ -35,6 +36,8 @@ export class TabularData {
 
   display: Display;
 
+  selection: Selection;
+
   constructor(props: TabularDataProps) {
     this.id = props.id;
     this.meta = props.meta ?? new Meta();
@@ -50,6 +53,7 @@ export class TabularData {
       this.columnsDataStore,
       this.recordsData,
     );
+    this.selection = new Selection(this.columnsDataStore, this.recordsData);
 
     this.processedColumns = derived(
       [this.columnsDataStore, this.constraintsDataStore],
