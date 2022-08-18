@@ -48,13 +48,16 @@
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid var(--color-gray-medium);
     user-select: none;
     overflow: hidden;
 
     :global([data-sheet-element='cell']) {
       border-bottom: none;
-      background: #f9f9f9;
+      background: var(--color-gray-lighter);
+      font-size: var(--text-size-small);
+      padding: 0 0.5rem;
+      font-weight: 500;
     }
   }
 </style>

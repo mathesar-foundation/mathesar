@@ -37,7 +37,7 @@
      * font size is 1rem. As the text gets bigger, the icon gets bigger too, but
      * not quite as big as the text.
      */
-    height: min(1em, 0.8em + 0.1rem);
+    height: min(1em, 0.8em + 0.2rem);
     color: var(--icon-color, current-color);
   }
   .icon > :global(svg) {

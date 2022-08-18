@@ -93,6 +93,7 @@
     bottom: 0;
     display: flex;
     flex-direction: column;
+    background: var(--color-gray-lighter);
 
     :global([data-sheet-element='cell']) {
       position: absolute;

@@ -45,7 +45,7 @@
     --color-contrast: var(--color-blue-medium);
     --color-contrast-light: var(--color-blue-light);
     --color-text: #171717;
-    --color-text-muted: #3f3f46;
+    --color-text-muted: #6b7280;
     --text-size-x-small: 0.79rem;
     --text-size-small: 0.889rem;
     --text-size-base: 1rem;
