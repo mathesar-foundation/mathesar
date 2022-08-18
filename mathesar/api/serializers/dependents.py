@@ -37,8 +37,7 @@ class BaseDependentObjectSerializer(
 ):
     serializers_mapping = {
         'table': DependentMathesarObjectSerializer,
-        'table constraint': DependentMathesarObjectSerializer,
-        'table column': DependentNonMathesarObjectSerializer
+        'table constraint': DependentMathesarObjectSerializer
     }
 
     def create(self, validated_data):

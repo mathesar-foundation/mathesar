@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, any_, case, column, exists, func, literal, select, text, true, union
+from sqlalchemy import MetaData, Table, any_, column, exists, func, literal, select, text, true, union
 from sqlalchemy.dialects.postgresql import array
 
 # OIDs assigned during normal database operation are constrained to be 16384 or higher.
@@ -44,11 +44,12 @@ def get_dependents_graph(referenced_object_id, engine):
 
 # finding table dependents based on foreign key constraints from the referenced tables
 def _get_table_dependents(foreign_key_dependents, pg_constraint_table):
+    # TODO: update refobjsubid with actual values when working on columns
     pg_identify_object = _get_pg_identify_object_lateral_stmt(
         text(f'{PG_CLASS_CATALOGUE_NAME}::regclass::oid'), pg_constraint_table.c.conrelid, 0)
 
     pg_identify_refobject = _get_pg_identify_object_lateral_stmt(
-        foreign_key_dependents.c.refclassid, foreign_key_dependents.c.refobjid, foreign_key_dependents.c.refobjsubid)
+        foreign_key_dependents.c.refclassid, foreign_key_dependents.c.refobjid, 0)
 
     # conrelid in this case is the oid of the table which a constraint resides in
     return select(
@@ -162,6 +163,7 @@ def has_dependencies(referenced_object_id, engine):
         result = conn.execute(stmt).scalar()
 
     return result
+
 
 def _get_structured_result(dependency_graph_result):
     result = []
