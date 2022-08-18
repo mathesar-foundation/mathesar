@@ -56,9 +56,8 @@
       border-bottom: none;
       background: var(--color-gray-lighter);
       font-size: var(--text-size-small);
-      padding: 0 0.5rem;
+      padding: 0;
       font-weight: 500;
     }
-
   }
 </style>

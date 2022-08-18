@@ -31,5 +31,12 @@
   $: icon = getColumnIconProps(column);
 </script>
 
-<NameWithIcon on:click {icon} {isLoading}>{column.name}</NameWithIcon>
+<div class="column-name">
+  <NameWithIcon on:click {icon} {isLoading}>{column.name}</NameWithIcon>
+</div>
 
+<style>
+  .column-name {
+    padding: 0 0.5rem;
+  }
+</style>
