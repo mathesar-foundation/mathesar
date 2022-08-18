@@ -16,7 +16,8 @@ import type {
   Grouping as ApiGrouping,
   ResultValue,
   GroupingMode,
-  GetRequestParams as ApiGetRequestParams,
+  Preview,
+  GetRequestParams as ApiGetRequestParams, PreviewRecord,
 } from '@mathesar/api/tables/records';
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
@@ -42,6 +43,7 @@ function buildFetchQueryString(data: RecordsRequestParamsData): string {
     ...data.sorting.recordsRequestParamsIncludingGrouping(data.grouping),
     ...data.grouping.recordsRequestParams(),
     ...data.filtering.recordsRequestParams(),
+    fk_preview: 'all',
   };
   const entries: [string, string][] = Object.entries(params).map(([k, v]) => {
     const value = typeof v === 'string' ? v : JSON.stringify(v);
@@ -93,6 +95,7 @@ export interface Row {
   isGroupHeader?: boolean;
   group?: Group;
   rowIndex?: number;
+  previewRecord?: Record<string, PreviewRecord> | null;
   groupValues?: Record<string, unknown>;
 }
 
@@ -139,10 +142,12 @@ function preprocessRecords({
   records,
   offset,
   grouping,
+  previewColumnData
 }: {
   records: ApiRecord[];
   offset: number;
   grouping?: Grouping;
+  previewColumnData?: Record<string, Preview> ;
 }): Row[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
@@ -180,9 +185,11 @@ function preprocessRecords({
         groupIndex += 1;
       }
     }
+      const previewRecord : Record<string, PreviewRecord> | null = previewColumnData ? Object.entries(previewColumnData).reduce((previewColumnRecord, [columnId, previewObj]) => ({ ...previewColumnRecord, [columnId]: { ...previewObj,  data: previewObj.data[index] } }), {}) : null;
 
     combinedRecords.push({
       record,
+      previewRecord,
       identifier: generateRowIdentifier('normal', offset, existingRecordIndex),
       rowIndex: index,
     });
@@ -302,11 +309,20 @@ export class RecordsData {
       const grouping = response.grouping
         ? buildGrouping(response.grouping)
         : undefined;
+      const previewColumnData: Record<string, Preview> = response.preview_data.reduce(
+          (acc, item) => ({
+            ...acc,
+            [item.column]: item,
+          }),
+          {},
+        );
       const records = preprocessRecords({
         records: response.results,
         offset,
         grouping,
+        previewColumnData
       });
+
       const tableRecordsData: TableRecordsData = {
         state: States.Done,
         savedRecords: records,
