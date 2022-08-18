@@ -738,8 +738,13 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     assert response.status_code == 200
     publication_template_columns = publication_table.get_columns_by_name(['publisher', 'author', 'co_author', 'title', 'id'])
     # TODO Uncomment once the bug with db explorer is fixed
-    # publication_preview_template = f'{{{publication_template_columns[3].id}}} Published By: {{{ publication_template_columns[0].id}}} and Authored by {{{publication_template_columns[1].id}}} along with {{{publication_template_columns[2].id}}}'
-    publication_preview_template = f'{{{publication_template_columns[3].id}}}'
+    publication_preview_template = (
+        f'{{{publication_template_columns[3].id}}}'
+        f' Published By: {{{publication_template_columns[0].id}}}'
+        f' and Authored by {{{publication_template_columns[1].id}}}'
+        f' along with {{{publication_template_columns[2].id}}}'
+    )
+    # publication_preview_template = f'{{{publication_template_columns[3].id}}}'
     publication_table_settings_id = publication_table.settings.id
     data = {
         "preview_settings": {
@@ -760,12 +765,16 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
         for preview in preview_data
         if preview['column'] == checkouts_table_publication_fk_column.id
     )
-    preview_column_alias = f'{checkouts_table_publication_fk_column.id}__{publication_template_columns[4].id}__col__{publication_template_columns[3].id}'
-    assert preview_column['template'] == f'{{{preview_column_alias}}}'
+    title = f'{checkouts_table_publication_fk_column.id}__{publication_template_columns[4].id}__col__{publication_template_columns[3].id}'
+    publisher = f'{checkouts_table_publication_fk_column.id}__{publication_template_columns[4].id}__col__{publication_template_columns[0].id}'
+    author = f'{checkouts_table_publication_fk_column.id}__{publication_template_columns[4].id}__col__{publication_template_columns[1].id}'
+    coauthor = f'{checkouts_table_publication_fk_column.id}__{publication_template_columns[4].id}__col__{publication_template_columns[2].id}'
+    preview_column_alias = f'{{{title}}} Published By: {{{publisher}}} and Authored by {{{author}}} along with {{{coauthor}}}'
+    assert preview_column['template'] == preview_column_alias
     preview_data = preview_column['data'][0]
-    assert preview_column_alias in preview_data
+    assert all([key in preview_data for key in [title, publisher, author, coauthor]])
     expected_preview_value = 'Pressure Should Old'
-    assert preview_data[preview_column_alias] == expected_preview_value
+    assert preview_data[title] == expected_preview_value
 
 
 def test_record_detail(create_patents_table, client):
