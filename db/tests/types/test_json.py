@@ -15,6 +15,10 @@ from db.functions.operations.apply import apply_db_function_as_filter
     (json_array.LengthLessThan, 4, 12),
     (json_array.LengthLessorEqual, 4, 13),
     (json_array.LengthGreaterorEqual, 4, 2),
+    #(json_array.IsNotEmpty, 13),
+    (json_array.ArrayContains, '"BMW", "Ford"', 6),
+    (json_array.ArrayContains, '1, 3', 1),
+    (json_array.ArrayContains, 'true, false', 1),
 ])
 def test_json_array_filter_functions(json_table_obj, main_db_function, literal_param, expected_count):
     table, engine = json_table_obj

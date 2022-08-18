@@ -87,7 +87,7 @@ class LengthEquals(DBFunctionPacked):
 
 class LengthGreaterThan(DBFunctionPacked):
     id = 'json_array_length_greater_than'
-    name = 'Number of elements is greater than'
+    name = 'number of elements >'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -107,7 +107,7 @@ class LengthGreaterThan(DBFunctionPacked):
 
 class LengthGreaterorEqual(DBFunctionPacked):
     id = 'json_array_length_greater_or_equal'
-    name = 'Number of elements is greater than or equal to'
+    name = 'Number of elements >='
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -127,7 +127,7 @@ class LengthGreaterorEqual(DBFunctionPacked):
 
 class LengthLessThan(DBFunctionPacked):
     id = 'json_array_length_less_than'
-    name = 'Number of elements is less than'
+    name = 'Number of elements <'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -147,7 +147,7 @@ class LengthLessThan(DBFunctionPacked):
 
 class LengthLessorEqual(DBFunctionPacked):
     id = 'json_array_length_less_or_equal'
-    name = 'Number of elements is less than or equal to'
+    name = 'Number of elements <='
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -163,3 +163,40 @@ class LengthLessorEqual(DBFunctionPacked):
             ArrayLength([param0]),
             param1,
         ])
+
+
+class IsNotEmpty(DBFunctionPacked):
+    id = 'json_array_not_empty'
+    name = 'Is not empty'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(1),
+        hints.parameter(0, hints.json_array),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        return Greater([
+            ArrayLength([param0]),
+            0,
+        ])
+
+
+class ArrayContains(DBFunctionPacked):
+    id = 'json_array_contains'
+    name = 'contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = func.cast(func.concat('[', self.parameters[1], ']'), SA_JSONB)
+        return func.jsonb_contains(param0, param1)
+
+
