@@ -86,8 +86,6 @@ export default class ImmutableMap<Key, Value> {
     [...other].forEach(([key, value]) => {
       if (!this.has(key) && this.valueIsValid(value)) {
         map.set(key, value);
-      } else {
-        map.delete(key);
       }
     });
     return this.getNewInstance(map);
