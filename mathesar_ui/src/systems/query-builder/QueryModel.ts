@@ -1,6 +1,10 @@
-import type { QueryInstanceInitialColumn } from '@mathesar/api/queries/queryList';
-import { isDefinedNonNullable } from '@mathesar-component-library';
+import type {
+  QueryInstanceInitialColumn,
+  QueryInstanceTransformation,
+} from '@mathesar/api/queries/queryList';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+import QueryFilterTransformationModel from './QueryFilterTransformationModel';
+import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 
 export interface QueryModelUpdateDiff {
   model: QueryModel;
@@ -9,24 +13,46 @@ export interface QueryModelUpdateDiff {
     | 'name'
     | 'baseTable'
     | 'initialColumnsArray'
-    | 'initialColumnName';
+    | 'initialColumnName'
+    | 'transformations';
   diff: Partial<UnsavedQueryInstance>;
 }
 
-export default class QueryModel implements UnsavedQueryInstance {
-  base_table;
+export type QueryTransformationModel =
+  | QueryFilterTransformationModel
+  | QuerySummarizationTransformationModel;
 
-  id;
+function getTransformationModel(
+  transformation: QueryInstanceTransformation,
+): QueryTransformationModel {
+  if (transformation.type === 'filter') {
+    return new QueryFilterTransformationModel(transformation);
+  }
+  return new QuerySummarizationTransformationModel(transformation);
+}
 
-  name;
+export default class QueryModel {
+  base_table: UnsavedQueryInstance['base_table'];
 
-  initial_columns;
+  id: UnsavedQueryInstance['id'];
 
-  constructor(model?: UnsavedQueryInstance) {
+  name: UnsavedQueryInstance['name'];
+
+  initial_columns: QueryInstanceInitialColumn[];
+
+  transformationModels: QueryTransformationModel[];
+
+  constructor(model?: UnsavedQueryInstance | QueryModel) {
     this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
     this.initial_columns = model?.initial_columns ?? [];
+    if (model && 'transformationModels' in model) {
+      this.transformationModels = [...model.transformationModels];
+    } else {
+      this.transformationModels =
+        model?.transformations?.map(getTransformationModel) ?? [];
+    }
   }
 
   withBaseTable(base_table?: number): QueryModelUpdateDiff {
@@ -130,28 +156,51 @@ export default class QueryModel implements UnsavedQueryInstance {
     };
   }
 
+  withTransformations(
+    transformations?: QueryInstanceTransformation[],
+  ): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      transformations,
+    });
+    return {
+      model,
+      type: 'transformations',
+      diff: {
+        transformations,
+      },
+    };
+  }
+
+  withTransformationModels(
+    transformationModels?: QueryTransformationModel[],
+  ): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      transformationModels,
+    });
+    return {
+      model,
+      type: 'transformations',
+      diff: {
+        transformations: model.toJSON().transformations,
+      },
+    };
+  }
+
   getColumn(columnAlias: string): QueryInstanceInitialColumn | undefined {
     return this.initial_columns.find((column) => column.alias === columnAlias);
   }
 
-  isSaveable(): boolean {
-    return (
-      isDefinedNonNullable(this.base_table) &&
-      isDefinedNonNullable(this.name) &&
-      this.name.trim() !== ''
-    );
-  }
-
-  serialize(): string {
-    return JSON.stringify(this);
-  }
-
-  // TODO: Implement better type safety here
-  static deserialize(jsonString: string): QueryModel {
-    const parsedJSON: unknown = JSON.parse(jsonString);
-    if (typeof parsedJSON === 'object' && parsedJSON !== null) {
-      return new QueryModel(parsedJSON);
-    }
-    return new QueryModel();
+  toJSON(): UnsavedQueryInstance {
+    return {
+      id: this.id,
+      name: this.name,
+      base_table: this.base_table,
+      initial_columns: this.initial_columns,
+      transformations: this.transformationModels?.map((entry) =>
+        entry.toJSON(),
+      ),
+    };
   }
 }

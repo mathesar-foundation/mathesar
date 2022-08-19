@@ -3,7 +3,6 @@
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
-  width: 100%;
 
   .input-group-text {
     display: flex;
@@ -20,8 +19,6 @@
   .input-element {
     position: relative;
     flex: 1 1 auto;
-    width: 1%;
-    min-width: 0;
   }
 
   .input-element,
@@ -31,14 +28,28 @@
     }
   }
 
-  > *:not(:last-child) {
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
+  &.vertical {
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 0.4rem;
   }
+  &:not(.vertical) {
+    width: 100%;
 
-  > * + * {
-    border-top-left-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
-    margin-left: -1px !important;
+    .input-element {
+      width: 1%;
+      min-width: 0;
+    }
+
+    > *:not(:last-child) {
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+    }
+
+    > * + * {
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+      margin-left: -1px !important;
+    }
   }
 }
