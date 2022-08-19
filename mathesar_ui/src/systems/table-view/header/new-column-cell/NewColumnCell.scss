@@ -1,6 +1,6 @@
 .datascape .tab-container .table-data .table-content .header .cell.new-column {
   padding: 0px;
- 
+
   > button {
     align-items: center;
     justify-content: center;
@@ -10,7 +10,7 @@
 .new-column-dropdown {
   padding: 0.5em;
   overflow: hidden;
-
+  
   .grid {
     display: grid;
     grid-template-columns: auto auto;
