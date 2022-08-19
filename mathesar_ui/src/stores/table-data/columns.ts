@@ -12,7 +12,6 @@ import {
   postAPI,
   States,
 } from '@mathesar/utils/api';
-import { TabularType } from './TabularType';
 
 export interface ColumnsData {
   state: States;
@@ -47,8 +46,6 @@ export class ColumnsDataStore
   }>
   implements Writable<ColumnsData>
 {
-  private type: TabularType;
-
   private parentId: DBObjectEntry['id'];
 
   private store: Writable<ColumnsData>;
@@ -60,20 +57,17 @@ export class ColumnsDataStore
   private fetchCallback: (storeData: ColumnsData) => void;
 
   constructor(
-    type: TabularType,
     parentId: number,
     fetchCallback: (storeData: ColumnsData) => void = () => {},
   ) {
     super();
-    this.type = type;
     this.parentId = parentId;
     this.store = writable({
       state: States.Loading,
       columns: [],
       primaryKey: undefined,
     });
-    const tabularEntity = this.type === TabularType.Table ? 'tables' : 'views';
-    this.api = api(`/api/db/v0/${tabularEntity}/${this.parentId}/columns/`);
+    this.api = api(`/api/db/v0/tables/${this.parentId}/columns/`);
     this.fetchCallback = fetchCallback;
     void this.fetch();
   }

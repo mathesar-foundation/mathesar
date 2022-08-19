@@ -16,6 +16,7 @@ from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
+from db.dependents.dependents_utils import get_dependents_graph, has_dependencies
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
@@ -251,7 +252,17 @@ class Table(DatabaseObject, Relation):
     # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
     def has_dependencies(self):
-        return True
+        return has_dependencies(
+            self.oid,
+            self.schema._sa_engine
+        )
+
+    @property
+    def dependents(self):
+        return get_dependents_graph(
+            self.oid,
+            self.schema._sa_engine
+        )
 
     def add_column(self, column_data):
         return create_column(
@@ -434,9 +445,13 @@ class Table(DatabaseObject, Relation):
         from_table = self._sa_table
         target_table = existing_table._sa_table
         engine = self._sa_engine
+        if mappings:
+            col_mappings = [[from_col.name, target_col.name] for from_col, target_col in mappings]
+        else:
+            col_mappings = None
         data_file = data_files[0]
         try:
-            table, _ = insert_from_select(from_table, target_table, engine, mappings)
+            table, _ = insert_from_select(from_table, target_table, engine, col_mappings)
             data_file.table_imported_to = existing_table
         except Exception as e:
             # ToDo raise specific exceptions.

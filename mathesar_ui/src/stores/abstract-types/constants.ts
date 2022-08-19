@@ -9,7 +9,7 @@ export const abstractTypeCategory = {
   Number: 'number',
   Text: 'text',
   Uri: 'uri',
-  Array: 'json_array',
-  Object: 'json_object',
+  Array: 'jsonlist',
+  Object: 'map',
   Other: 'other',
 } as const;
