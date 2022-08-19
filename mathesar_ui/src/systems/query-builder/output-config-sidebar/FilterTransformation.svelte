@@ -1,7 +1,10 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
   import type QueryFilterTransformationModel from '../QueryFilterTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../utils';
+
+  const dispatch = createEventDispatcher();
 
   export let processedQueryColumns: ProcessedQueryResultColumnMap;
   export let allTransformableColumns: ProcessedQueryResultColumnMap;
@@ -12,6 +15,10 @@
   $: columns = limitEditing
     ? [...allTransformableColumns.values()]
     : [...processedQueryColumns.values()];
+
+  function updateFilter() {
+    dispatch('update');
+  }
 </script>
 
 <FilterEntryComponent
@@ -24,7 +31,7 @@
   bind:columnIdentifier={model.columnIdentifier}
   bind:conditionIdentifier={model.conditionIdentifier}
   bind:value={model.value}
-  on:update
+  on:update={updateFilter}
 />
 
 <style lang="scss">

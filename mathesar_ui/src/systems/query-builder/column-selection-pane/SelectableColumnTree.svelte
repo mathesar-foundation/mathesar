@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ColumnWithLink } from '../InputColumnsManager';
+  import type { ColumnWithLink } from '../QueryManager';
   import SelectableColumn from './SelectableColumn.svelte';
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
 

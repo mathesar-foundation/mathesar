@@ -21,10 +21,12 @@ export default class QueryFilterTransformationModel
     if ('columnIdentifier' in data) {
       this.columnIdentifier = data.columnIdentifier;
       this.conditionIdentifier = data.conditionIdentifier;
+      this.value = data.value;
     } else {
       [this.conditionIdentifier] = Object.keys(data.spec);
       [this.columnIdentifier] =
         data.spec[this.conditionIdentifier][0].column_name;
+      this.value = data.spec[this.conditionIdentifier][1]?.literal[0];
     }
   }
 

@@ -1,26 +1,38 @@
+import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import QueryListEntry from './QueryListEntry';
 import QueryModel from './QueryModel';
 
 export default class QueryUndoRedoManager {
   current: QueryListEntry | undefined;
 
-  constructor(query?: QueryModel) {
-    if (query) {
-      this.current = new QueryListEntry(query.toJSON());
+  constructor(queryInfo?: { query: QueryModel; isValid: boolean }) {
+    if (queryInfo) {
+      const { query, isValid } = queryInfo;
+      const json = JSON.parse(
+        JSON.stringify(query.toJSON()),
+      ) as UnsavedQueryInstance;
+      this.current = new QueryListEntry(json, isValid);
     }
   }
 
-  pushState(query: QueryModel): QueryListEntry {
+  pushState(query: QueryModel, isValid: boolean): QueryListEntry {
     if (this.current && this.current.next) {
       this.current.next.prev = undefined;
     }
-    const newNext = new QueryListEntry(query.toJSON());
-    newNext.prev = this.current;
-    if (this.current) {
-      this.current.next = newNext;
+    const json = JSON.parse(
+      JSON.stringify(query.toJSON()),
+    ) as UnsavedQueryInstance;
+    const newNode = new QueryListEntry(json, isValid);
+    if (this.current && !this.current.isValid) {
+      newNode.prev = this.current.prev;
+    } else {
+      newNode.prev = this.current;
+      if (this.current) {
+        this.current.next = newNode;
+      }
     }
-    this.current = newNext;
-    return newNext;
+    this.current = newNode;
+    return newNode;
   }
 
   isUndoPossible(): boolean {

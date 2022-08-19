@@ -193,14 +193,6 @@ export default class QueryModel {
     return this.initial_columns.find((column) => column.alias === columnAlias);
   }
 
-  isSaveable(): boolean {
-    return (
-      isDefinedNonNullable(this.base_table) &&
-      isDefinedNonNullable(this.name) &&
-      this.name.trim() !== ''
-    );
-  }
-
   toJSON(): UnsavedQueryInstance {
     return {
       id: this.id,

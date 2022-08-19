@@ -21,14 +21,14 @@
   import FilterTransformation from './FilterTransformation.svelte';
   import QueryFilterTransformationModel from '../QueryFilterTransformationModel';
   import type QueryModel from '../QueryModel';
-  import type { InputColumnsStoreSubstance } from '../InputColumnsManager';
+  import type { QueryTransformationModel } from '../QueryModel';
+  import type { InputColumnsStoreSubstance } from '../QueryManager';
 
   export let queryManager: QueryManager;
-  export let inputColumns: InputColumnsStoreSubstance;
 
-  $: ({ processedQueryColumns, query } = queryManager);
+  $: ({ processedQueryColumns, query, inputColumns, state } = queryManager);
   $: ({ transformationModels } = $query);
-  $: ({ requestStatus } = inputColumns);
+  $: ({ inputColumnsFetchState } = $state);
 
   function calculateAllTransformableColumns(
     _query: QueryModel,
@@ -59,7 +59,7 @@
 
   $: allTransformableColumns = calculateAllTransformableColumns(
     $query,
-    inputColumns,
+    $inputColumns,
     $currentDbAbstractTypes.data,
   );
 
@@ -77,6 +77,9 @@
       conditionIdentifier: firstCondition.id,
       value: undefined,
     });
+    // If valid, update query
+
+    // If invalid, only update transformationModels
 
     await queryManager.update((q) =>
       q.withTransformationModels([...transformationModels, newFilter]),
@@ -90,7 +93,12 @@
     );
   }
 
-  async function updateTransformation() {
+  async function updateTransformation(
+    model: QueryTransformationModel,
+    index: number,
+  ) {
+    // Check if transformation is different from what is present in query
+    // before updating
     await queryManager.update((q) =>
       q.withTransformationModels(transformationModels),
     );
@@ -98,9 +106,9 @@
 </script>
 
 <div>
-  {#if requestStatus.state === 'processing'}
+  {#if inputColumnsFetchState?.state === 'processing'}
     <Spinner />
-  {:else if requestStatus.state === 'success'}
+  {:else if inputColumnsFetchState?.state === 'success'}
     {#if transformationModels}
       {#each transformationModels as transformationModel, index (transformationModel)}
         <section class="transformation">
@@ -130,10 +138,11 @@
               <FilterTransformation
                 processedQueryColumns={$processedQueryColumns}
                 {allTransformableColumns}
-                bind:model={transformationModel}
+                model={transformationModel}
                 limitEditing={index !== transformationModels.length - 1 ||
                   $processedQueryColumns.size === 0}
-                on:update={updateTransformation}
+                on:update={() =>
+                  updateTransformation(transformationModel, index)}
               />
             {:else}
               <i>Summarization - yet to implement</i>
@@ -149,7 +158,7 @@
         <MenuItem icon={iconGrouping}>Summarize (Yet to implement)</MenuItem>
       </DropdownMenu>
     {/if}
-  {:else if requestStatus.state === 'failure'}
+  {:else if inputColumnsFetchState?.state === 'failure'}
     Failed to fetch column information
   {/if}
 </div>

@@ -10,15 +10,13 @@
   import { slide } from 'svelte/transition';
   import { iconDelete } from '@mathesar/icons';
   import type QueryManager from '../QueryManager';
-  import type InputColumnsManager from '../InputColumnsManager';
   import TransformationsPane from './TransformationsPane.svelte';
 
   export let queryManager: QueryManager;
-  export let inputColumnsManager: InputColumnsManager;
 
-  $: ({ selectedColumnAlias, query } = queryManager);
-  $: ({ inputColumns } = inputColumnsManager);
-  $: ({ requestStatus, columnInformationMap } = $inputColumns);
+  $: ({ selectedColumnAlias, query, inputColumns, state } = queryManager);
+  $: ({ inputColumnsFetchState } = $state);
+  $: ({ columnInformationMap } = $inputColumns);
 
   $: initialColumn = $selectedColumnAlias
     ? $query.getColumn($selectedColumnAlias)
@@ -82,16 +80,16 @@
         <div data-identifier="column-source">
           <h4>Source</h4>
           <div>
-            {#if requestStatus.state === 'success'}
+            {#if inputColumnsFetchState?.state === 'success'}
               {#if columnInformation}
                 <div>Table:</div>
                 <div>{columnInformation.tableName}</div>
                 <div>Column:</div>
                 <div>{columnInformation.name}</div>
               {/if}
-            {:else if requestStatus.state === 'processing'}
+            {:else if inputColumnsFetchState?.state === 'processing'}
               <Spinner />
-            {:else if requestStatus.state === 'failure'}
+            {:else if inputColumnsFetchState?.state === 'failure'}
               Failed to load column information
             {/if}
           </div>
@@ -107,7 +105,7 @@
   {/if}
   <section>
     <header>Transformations</header>
-    <TransformationsPane inputColumns={$inputColumns} {queryManager} />
+    <TransformationsPane {queryManager} />
   </section>
 </aside>
 

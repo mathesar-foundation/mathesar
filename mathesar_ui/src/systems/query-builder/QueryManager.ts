@@ -1,16 +1,28 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import { EventHandler, ImmutableMap } from '@mathesar-component-library';
+import {
+  EventHandler,
+  ImmutableMap,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
 import type { CancellablePromise } from '@mathesar-component-library/types';
 import { getAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
+import CacheManager from '@mathesar/utils/CacheManager';
 import type {
   QueryInstance,
   QueryResultColumn,
   QueryResultColumns,
   QueryResultRecords,
 } from '@mathesar/api/queries/queryList';
+import type {
+  TableEntry,
+  JpPath,
+  JoinableTableResult,
+} from '@mathesar/api/tables/tableList';
+import type { Column } from '@mathesar/api/tables/columns';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
+import { getTable } from '@mathesar/stores/tables';
 import Pagination from '@mathesar/utils/Pagination';
 import { toast } from '@mathesar/stores/toast';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
@@ -19,6 +31,211 @@ import type { QueryModelUpdateDiff } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
 import { processColumn } from './utils';
 import type { ProcessedQueryResultColumnMap } from './utils';
+
+export interface InputColumn {
+  id: Column['id'];
+  name: Column['name'];
+  tableName: TableEntry['name'];
+  jpPath?: JpPath;
+  type: Column['type'];
+  tableId: TableEntry['id'];
+}
+
+export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
+  type: Column['type'];
+  linksTo?: LinkedTable;
+}
+
+export interface LinkedTable {
+  id: TableEntry['id'];
+  name: TableEntry['name'];
+  linkedToColumn: {
+    id: Column['id'];
+    name: Column['name'];
+  };
+  columns: Map<ColumnWithLink['id'], ColumnWithLink>;
+}
+
+export interface ReferencedByTable extends LinkedTable {
+  referencedViaColumn: {
+    id: Column['id'];
+    name: Column['name'];
+    type: Column['type'];
+  };
+}
+
+export interface InputColumnsStoreSubstance {
+  baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
+  tablesThatReferenceBaseTable: Map<ReferencedByTable['id'], ReferencedByTable>;
+  columnInformationMap: Map<InputColumn['id'], InputColumn>;
+}
+
+// Inorder to place all columns with links at the end while sorting
+const compareColumnByLinks = (
+  a: [ColumnWithLink['id'], ColumnWithLink],
+  b: [ColumnWithLink['id'], ColumnWithLink],
+) => {
+  if (a[1].linksTo && !b[1].linksTo) {
+    return 1;
+  }
+  if (!a[1].linksTo && b[1].linksTo) {
+    return -1;
+  }
+  return 0;
+};
+
+export function getLinkFromColumn(
+  result: JoinableTableResult,
+  columnId: Column['id'],
+  depth: number,
+): LinkedTable | undefined {
+  const validLinks = result.joinable_tables.filter(
+    (entry) =>
+      entry.depth === depth &&
+      entry.fk_path[depth - 1][1] === false &&
+      entry.jp_path[depth - 1][0] === columnId,
+  );
+  if (validLinks.length === 0) {
+    return undefined;
+  }
+  if (validLinks.length > 1) {
+    // This scenario should never occur
+    throw new Error(`Multiple links present for the same column: ${columnId}`);
+  }
+  const link = validLinks[0];
+  const toTableInfo = result.tables[link.target];
+  const toTable = {
+    id: link.target,
+    name: toTableInfo.name,
+  };
+  const toColumnId = link.jp_path[depth - 1][1];
+  const toColumn = {
+    id: toColumnId,
+    name: result.columns[toColumnId].name,
+  };
+  const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
+    toTableInfo.columns.map((columnIdInLinkedTable) => {
+      const columnInLinkedTable = result.columns[columnIdInLinkedTable];
+      return [
+        columnIdInLinkedTable,
+        {
+          id: columnIdInLinkedTable,
+          name: columnInLinkedTable.name,
+          tableName: toTableInfo.name,
+          type: columnInLinkedTable.type,
+          linksTo: getLinkFromColumn(result, columnIdInLinkedTable, depth + 1),
+          jpPath: link.jp_path,
+        },
+      ];
+    });
+  return {
+    ...toTable,
+    linkedToColumn: toColumn,
+    columns: new Map(columnMapEntries.sort(compareColumnByLinks)),
+  };
+}
+
+export function getColumnInformationMap(
+  result: JoinableTableResult,
+  baseTable: TableEntry,
+): InputColumnsStoreSubstance['columnInformationMap'] {
+  const map: InputColumnsStoreSubstance['columnInformationMap'] = new Map();
+  baseTable.columns.forEach((column) => {
+    map.set(column.id, {
+      id: column.id,
+      name: column.name,
+      type: column.type,
+      tableId: baseTable.id,
+      tableName: baseTable.name,
+    });
+  });
+  Object.keys(result.tables).forEach((tableIdKey) => {
+    const tableId = parseInt(tableIdKey, 10);
+    const table = result.tables[tableId];
+    table.columns.forEach((columnId) => {
+      const column = result.columns[columnId];
+      map.set(columnId, {
+        id: columnId,
+        name: column.name,
+        type: column.type,
+        tableId,
+        tableName: table.name,
+      });
+    });
+  });
+  return map;
+}
+
+export function getBaseTableColumnsWithLinks(
+  result: JoinableTableResult,
+  baseTable: TableEntry,
+): Map<ColumnWithLink['id'], ColumnWithLink> {
+  const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
+    baseTable.columns.map((column) => [
+      column.id,
+      {
+        id: column.id,
+        name: column.name,
+        type: column.type,
+        tableName: baseTable.name,
+        linksTo: getLinkFromColumn(result, column.id, 1),
+      },
+    ]);
+  return new Map(columnMapEntries.sort(compareColumnByLinks));
+}
+
+export function getTablesThatReferenceBaseTable(
+  result: JoinableTableResult,
+  baseTable: TableEntry,
+): Map<ReferencedByTable['id'], ReferencedByTable> {
+  const referenceLinks = result.joinable_tables.filter(
+    (entry) => entry.depth === 1 && entry.fk_path[0][1] === true,
+  );
+  const references: Map<ReferencedByTable['id'], ReferencedByTable> = new Map();
+
+  referenceLinks.forEach((reference) => {
+    const tableId = reference.target;
+    const table = result.tables[tableId];
+    const baseTableColumnId = reference.jp_path[0][0];
+    const baseTableColumn = baseTable.columns.find(
+      (column) => column.id === baseTableColumnId,
+    );
+    const referenceTableColumnId = reference.jp_path[0][1];
+    if (!baseTableColumn) {
+      return;
+    }
+    const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
+      result.tables[reference.target].columns
+        .filter((columnId) => columnId !== referenceTableColumnId)
+        .map((columnIdInTable) => {
+          const columnInTable = result.columns[columnIdInTable];
+          return [
+            columnIdInTable,
+            {
+              id: columnIdInTable,
+              name: columnInTable.name,
+              type: columnInTable.type,
+              tableName: table.name,
+              linksTo: getLinkFromColumn(result, columnIdInTable, 2),
+              jpPath: reference.jp_path,
+            },
+          ];
+        });
+
+    references.set(tableId, {
+      id: tableId,
+      name: table.name,
+      referencedViaColumn: {
+        id: referenceTableColumnId,
+        ...result.columns[referenceTableColumnId],
+      },
+      linkedToColumn: baseTableColumn,
+      columns: new Map(columnMapEntries.sort(compareColumnByLinks)),
+    });
+  });
+
+  return references;
+}
 
 function calcProcessedColumnsBasedOnInitialColumns(
   initialColumns: QueryModel['initial_columns'],
@@ -72,6 +289,18 @@ function calcProcessedColumnsBasedOnInitialColumns(
   return isChangeRequired ? newProcessedColumns : existingProcessedColumns;
 }
 
+function validateQuery(queryModel: QueryModel): boolean {
+  const general =
+    isDefinedNonNullable(queryModel.base_table) &&
+    isDefinedNonNullable(queryModel.name) &&
+    queryModel.name.trim() !== '';
+  if (!general) {
+    return false;
+  }
+  const transformations = true;
+  return true;
+}
+
 export default class QueryManager extends EventHandler<{
   save: QueryInstance;
 }> {
@@ -79,9 +308,14 @@ export default class QueryManager extends EventHandler<{
 
   undoRedoManager: QueryUndoRedoManager;
 
-  // cache: Writable<{}>;
+  cacheManagers: {
+    inputColumns: CacheManager<number, InputColumnsStoreSubstance>;
+  } = {
+    inputColumns: new CacheManager(5),
+  };
 
   state: Writable<{
+    inputColumnsFetchState?: RequestStatus;
     saveState?: RequestStatus;
     columnsFetchState?: RequestStatus;
     recordsFetchState?: RequestStatus;
@@ -104,12 +338,24 @@ export default class QueryManager extends EventHandler<{
 
   abstractTypeMap: AbstractTypesMap;
 
+  inputColumns: Writable<InputColumnsStoreSubstance> = writable({
+    baseTableColumns: new Map(),
+    tablesThatReferenceBaseTable: new Map(),
+    columnInformationMap: new Map(),
+  });
+
   // Display stores
 
   selectedColumnAlias: Writable<QueryResultColumn['alias'] | undefined> =
     writable(undefined);
 
   // Promises
+
+  baseTableFetchPromise: CancellablePromise<TableEntry> | undefined;
+
+  joinableColumnsfetchPromise:
+    | CancellablePromise<JoinableTableResult>
+    | undefined;
 
   querySavePromise: CancellablePromise<QueryInstance> | undefined;
 
@@ -121,10 +367,94 @@ export default class QueryManager extends EventHandler<{
     super();
     this.abstractTypeMap = abstractTypeMap;
     this.query = writable(query);
-    this.undoRedoManager = new QueryUndoRedoManager(
-      query.isSaveable() ? query : undefined,
-    );
+    this.undoRedoManager = new QueryUndoRedoManager();
+    const inputColumnTreePromise = this.calculateInputColumnTree();
+    void inputColumnTreePromise.then(() => {
+      const isQueryValid = validateQuery(query);
+      this.undoRedoManager.pushState(query, isQueryValid);
+      return query;
+    });
     void this.fetchColumnsAndRecords();
+  }
+
+  async calculateInputColumnTree(): Promise<void> {
+    const baseTableId = get(this.query).base_table;
+    if (!baseTableId) {
+      this.inputColumns.set({
+        baseTableColumns: new Map(),
+        tablesThatReferenceBaseTable: new Map(),
+        columnInformationMap: new Map(),
+      });
+      this.state.update((state) => ({
+        ...state,
+        inputColumnsFetchState: { state: 'success' },
+      }));
+      return;
+    }
+
+    const cachedResult = this.cacheManagers.inputColumns.get(baseTableId);
+    if (cachedResult) {
+      this.inputColumns.set({
+        ...cachedResult,
+      });
+      this.state.update((state) => ({
+        ...state,
+        inputColumnsFetchState: { state: 'success' },
+      }));
+      return;
+    }
+
+    try {
+      this.baseTableFetchPromise?.cancel();
+      this.joinableColumnsfetchPromise?.cancel();
+
+      this.state.update((state) => ({
+        ...state,
+        inputColumnsFetchState: { state: 'processing' },
+      }));
+
+      // TODO: Refactor our stores to mimic our db
+      this.baseTableFetchPromise = getTable(baseTableId);
+      this.joinableColumnsfetchPromise = getAPI<JoinableTableResult>(
+        `/api/db/v0/tables/${baseTableId}/joinable_tables/`,
+      );
+      const [baseTableResult, joinableColumnsResult] = await Promise.all([
+        this.baseTableFetchPromise,
+        this.joinableColumnsfetchPromise,
+      ]);
+      const baseTableColumns = getBaseTableColumnsWithLinks(
+        joinableColumnsResult,
+        baseTableResult,
+      );
+      const tablesThatReferenceBaseTable = getTablesThatReferenceBaseTable(
+        joinableColumnsResult,
+        baseTableResult,
+      );
+      const columnInformationMap = getColumnInformationMap(
+        joinableColumnsResult,
+        baseTableResult,
+      );
+      const inputColumns = {
+        baseTableColumns,
+        tablesThatReferenceBaseTable,
+        columnInformationMap,
+      };
+      this.cacheManagers.inputColumns.set(baseTableId, inputColumns);
+      this.inputColumns.set(inputColumns);
+      this.state.update((state) => ({
+        ...state,
+        inputColumnsFetchState: { state: 'success' },
+      }));
+    } catch (err: unknown) {
+      const error =
+        err instanceof Error
+          ? err.message
+          : 'There was an error fetching joinable links';
+      this.state.update((state) => ({
+        ...state,
+        inputColumnsFetchState: { state: 'failure', errors: [error] },
+      }));
+    }
   }
 
   async fetchColumnsAndRecords(): Promise<
@@ -168,46 +498,74 @@ export default class QueryManager extends EventHandler<{
     this.processedQueryColumns.set(newColumns);
   }
 
-  async save(): Promise<QueryInstance | undefined> {
-    const q = this.getQueryModel();
-    if (q.isSaveable()) {
-      try {
-        this.state.update((_state) => ({
-          ..._state,
-          saveState: { state: 'processing' },
-        }));
-        this.querySavePromise?.cancel();
-        const queryJSON = q.toJSON();
-        if (typeof queryJSON.id !== 'undefined') {
-          // TODO: Figure out a better way to help TS identify this as a saved instance
-          this.querySavePromise = putQuery(queryJSON as QueryInstance);
-        } else {
-          this.querySavePromise = createQuery(queryJSON);
-        }
-        const result = await this.querySavePromise;
-        this.query.update((qr) => qr.withId(result.id).model);
-        this.state.update((_state) => ({
-          ..._state,
-          saveState: { state: 'success' },
-        }));
-        await this.dispatch('save', result);
-        return result;
-      } catch (err) {
-        const errors =
-          err instanceof Error
-            ? [err.message]
-            : ['An error occurred while trying to save the query'];
+  async updateQuery(queryModel: QueryModel): Promise<{
+    clientValidationState: RequestStatus;
+    query?: QueryInstance;
+  }> {
+    this.query.set(queryModel);
+    this.state.update((_state) => ({
+      ..._state,
+      saveState: { state: 'processing' },
+    }));
+
+    try {
+      this.querySavePromise?.cancel();
+      await this.calculateInputColumnTree();
+
+      const isQueryValid = validateQuery(queryModel);
+
+      if (!isQueryValid) {
         this.state.update((_state) => ({
           ..._state,
           saveState: {
             state: 'failure',
-            errors,
+            errors: ['Query validation failed'],
           },
         }));
-        toast.error(`Unable to save query: ${errors.join(',')}`);
+        return {
+          clientValidationState: {
+            state: 'failure',
+            errors: ['TODO: Place validation errors here '],
+          },
+        };
       }
+
+      const queryJSON = queryModel.toJSON();
+      if (typeof queryJSON.id !== 'undefined') {
+        // TODO: Figure out a better way to help TS identify this as a saved instance
+        this.querySavePromise = putQuery(queryJSON as QueryInstance);
+      } else {
+        this.querySavePromise = createQuery(queryJSON);
+      }
+      const result = await this.querySavePromise;
+      this.query.update((qr) => qr.withId(result.id).model);
+      this.state.update((_state) => ({
+        ..._state,
+        saveState: { state: 'success' },
+      }));
+      await this.dispatch('save', result);
+      return {
+        clientValidationState: { state: 'success' },
+        query: result,
+      };
+    } catch (err) {
+      const errors =
+        err instanceof Error
+          ? [err.message]
+          : ['An error occurred while trying to save the query'];
+      this.state.update((_state) => ({
+        ..._state,
+        saveState: {
+          state: 'failure',
+          errors,
+        },
+      }));
+      toast.error(`Unable to save query: ${errors.join(',')}`);
     }
-    return undefined;
+    return {
+      clientValidationState: { state: 'success' },
+      query: undefined,
+    };
   }
 
   setUndoRedoStates(): void {
@@ -348,39 +706,34 @@ export default class QueryManager extends EventHandler<{
     callback: (queryModel: QueryModel) => QueryModelUpdateDiff,
   ): Promise<void> {
     const updateDiff = callback(this.getQueryModel());
-    this.query.set(updateDiff.model);
-    if (updateDiff.model.isSaveable()) {
-      // Push entire model instead of diff to always
-      // reload entire state during undo-redo operations
-      this.undoRedoManager.pushState(updateDiff.model);
-    }
+    const { clientValidationState } = await this.updateQuery(updateDiff.model);
+    const isValid = clientValidationState.state === 'success';
+    this.undoRedoManager.pushState(updateDiff.model, isValid);
     this.setUndoRedoStates();
-    await this.save();
-    switch (updateDiff.type) {
-      case 'id':
-      case 'name':
-        break;
-      case 'baseTable':
-        this.resetResults();
-        break;
-      case 'initialColumnName':
-        this.recalculateProcessedColumnsUsingInitialColumns();
-        break;
-      case 'initialColumnsArray':
-        if (!updateDiff.diff.initial_columns?.length) {
-          // All columns have been deleted
+    if (isValid) {
+      switch (updateDiff.type) {
+        case 'baseTable':
           this.resetResults();
-        } else {
+          break;
+        case 'initialColumnName':
           this.recalculateProcessedColumnsUsingInitialColumns();
+          break;
+        case 'initialColumnsArray':
+          if (!updateDiff.diff.initial_columns?.length) {
+            // All columns have been deleted
+            this.resetResults();
+          } else {
+            this.recalculateProcessedColumnsUsingInitialColumns();
+            await this.fetchColumnsAndRecords();
+          }
+          break;
+        case 'transformations':
+          this.resetPaginationPane();
           await this.fetchColumnsAndRecords();
-        }
-        break;
-      case 'transformations':
-        this.resetPaginationPane();
-        await this.fetchColumnsAndRecords();
-        break;
-      default:
-        await this.fetchColumnsAndRecords();
+          break;
+        default:
+          break;
+      }
     }
   }
 
@@ -393,10 +746,14 @@ export default class QueryManager extends EventHandler<{
       }
       this.query.set(queryToSet);
       this.recalculateProcessedColumnsUsingInitialColumns();
-      await this.save();
+      const { clientValidationState } = await this.updateQuery(queryToSet);
+      const isValid = clientValidationState.state === 'success';
+      this.undoRedoManager.pushState(queryToSet, isValid);
+      this.setUndoRedoStates();
       await this.fetchColumnsAndRecords();
+    } else {
+      this.setUndoRedoStates();
     }
-    this.setUndoRedoStates();
   }
 
   async undo(): Promise<void> {
