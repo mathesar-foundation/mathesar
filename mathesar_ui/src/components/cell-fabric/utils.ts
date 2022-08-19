@@ -41,11 +41,11 @@ function getCellConfiguration(
 export function getCellCap(
   cellInfo: AbstractTypeConfiguration['cell'],
   column: CellColumnLike,
-  linksToTable?: TableEntry['id'],
+  fkTargetTableId?: TableEntry['id'],
 ): ComponentAndProps {
-  if (linksToTable) {
+  if (fkTargetTableId) {
     const props: LinkedRecordCellExternalProps = {
-      tableId: linksToTable,
+      tableId: fkTargetTableId,
     };
     return {
       component: LinkedRecordCell,
@@ -58,12 +58,12 @@ export function getCellCap(
 
 export function getDbTypeBasedInputCap(
   column: CellColumnLike,
-  linksToTable?: TableEntry['id'],
+  fkTargetTableId?: TableEntry['id'],
   cellInfoConfig?: AbstractTypeConfiguration['cell'],
 ): ComponentAndProps {
-  if (linksToTable) {
+  if (fkTargetTableId) {
     const props: LinkedRecordCellExternalProps = {
-      tableId: linksToTable,
+      tableId: fkTargetTableId,
     };
     return {
       component: LinkedRecordInput,
