@@ -6,15 +6,10 @@
 
   const dispatch = createEventDispatcher();
 
-  export let processedQueryColumns: ProcessedQueryResultColumnMap;
-  export let allTransformableColumns: ProcessedQueryResultColumnMap;
+  export let columns: ProcessedQueryResultColumnMap;
   export let model: QueryFilterTransformationModel;
 
   export let limitEditing = false;
-
-  $: columns = limitEditing
-    ? [...allTransformableColumns.values()]
-    : [...processedQueryColumns.values()];
 
   function updateFilter() {
     dispatch('update');
@@ -23,9 +18,8 @@
 
 <FilterEntryComponent
   allowDelete={false}
-  {columns}
-  getColumnLabel={(column) =>
-    allTransformableColumns.get(column.id)?.column.display_name ?? ''}
+  columns={[...columns.values()]}
+  getColumnLabel={(column) => columns.get(column.id)?.column.display_name ?? ''}
   disableColumnChange={limitEditing}
   layout="vertical"
   bind:columnIdentifier={model.columnIdentifier}

@@ -18,7 +18,7 @@
 
   $: ({
     query,
-    processedQueryColumns,
+    processedResultColumns,
     records,
     state,
     selectedColumnAlias,
@@ -41,7 +41,7 @@
   // Prioritize showing column errors over record fetch errors
   $: errors = columnRunErrors.length > 0 ? columnRunErrors : recordRunErrors;
 
-  $: columnList = [...$processedQueryColumns.values()];
+  $: columnList = [...$processedResultColumns.values()];
 
   function checkAndUnselectColumn(e: MouseEvent) {
     const target = e.target as HTMLElement;

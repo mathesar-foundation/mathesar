@@ -5,7 +5,6 @@
     Spinner,
     DropdownMenu,
     MenuItem,
-    ImmutableMap,
   } from '@mathesar-component-library';
   import {
     iconAddNew,
@@ -13,58 +12,32 @@
     iconGrouping,
     iconDelete,
   } from '@mathesar/icons';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
   import type QueryManager from '../QueryManager';
-  import { processColumn } from '../utils';
-  import type { ProcessedQueryResultColumnMap } from '../utils';
   import FilterTransformation from './FilterTransformation.svelte';
   import QueryFilterTransformationModel from '../QueryFilterTransformationModel';
-  import type QueryModel from '../QueryModel';
   import type { QueryTransformationModel } from '../QueryModel';
-  import type { InputColumnsStoreSubstance } from '../QueryManager';
+  import { calcAllowedColumnsPerTransformation } from './transformationUtils';
 
   export let queryManager: QueryManager;
 
-  $: ({ processedQueryColumns, query, inputColumns, state } = queryManager);
+  $: ({
+    query,
+    processedResultColumns,
+    processedInitialColumns,
+    processedVirtualColumns,
+    state,
+  } = queryManager);
   $: ({ transformationModels } = $query);
   $: ({ inputColumnsFetchState } = $state);
 
-  function calculateAllTransformableColumns(
-    _query: QueryModel,
-    _inputColumns: InputColumnsStoreSubstance,
-    _abstractTypes: AbstractTypesMap,
-  ): ProcessedQueryResultColumnMap {
-    const transformableColumns: ProcessedQueryResultColumnMap =
-      new ImmutableMap(
-        _query.initial_columns.map((entry) => [
-          entry.alias,
-          processColumn(
-            {
-              alias: entry.alias,
-              display_name: entry.display_name,
-              type:
-                _inputColumns.columnInformationMap.get(entry.id)?.type ??
-                'unknown',
-              type_options: null,
-              display_options: null,
-            },
-            _abstractTypes,
-          ),
-        ]),
-      );
-    // TODO: Identify virtual columns and merge them to this map
-    return transformableColumns;
-  }
-
-  $: allTransformableColumns = calculateAllTransformableColumns(
-    $query,
-    $inputColumns,
-    $currentDbAbstractTypes.data,
+  $: allowedColumnsPerTransformation = calcAllowedColumnsPerTransformation(
+    transformationModels,
+    $processedInitialColumns,
+    $processedVirtualColumns,
   );
 
   async function addFilter() {
-    const firstColumn = [...$processedQueryColumns.values()][0];
+    const firstColumn = [...$processedResultColumns.values()][0];
     if (!firstColumn) {
       return;
     }
@@ -77,10 +50,6 @@
       conditionIdentifier: firstCondition.id,
       value: undefined,
     });
-    // If valid, update query
-
-    // If invalid, only update transformationModels
-
     await queryManager.update((q) =>
       q.withTransformationModels([...transformationModels, newFilter]),
     );
@@ -109,7 +78,7 @@
   {#if inputColumnsFetchState?.state === 'processing'}
     <Spinner />
   {:else if inputColumnsFetchState?.state === 'success'}
-    {#if transformationModels}
+    {#if transformationModels && allowedColumnsPerTransformation.length === transformationModels.length}
       {#each transformationModels as transformationModel, index (transformationModel)}
         <section class="transformation">
           <header>
@@ -136,11 +105,10 @@
           <div class="content">
             {#if transformationModel instanceof QueryFilterTransformationModel}
               <FilterTransformation
-                processedQueryColumns={$processedQueryColumns}
-                {allTransformableColumns}
+                columns={allowedColumnsPerTransformation[index]}
                 model={transformationModel}
                 limitEditing={index !== transformationModels.length - 1 ||
-                  $processedQueryColumns.size === 0}
+                  $processedResultColumns.size === 0}
                 on:update={() =>
                   updateTransformation(transformationModel, index)}
               />
@@ -152,12 +120,14 @@
       {/each}
     {/if}
 
-    {#if $processedQueryColumns.size > 0}
-      <DropdownMenu label="Add transformation step" icon={iconAddNew}>
-        <MenuItem icon={iconFiltering} on:click={addFilter}>Filter</MenuItem>
-        <MenuItem icon={iconGrouping}>Summarize (Yet to implement)</MenuItem>
-      </DropdownMenu>
-    {/if}
+    <DropdownMenu
+      label="Add transformation step"
+      icon={iconAddNew}
+      disabled={$processedResultColumns.size === 0}
+    >
+      <MenuItem icon={iconFiltering} on:click={addFilter}>Filter</MenuItem>
+      <MenuItem icon={iconGrouping}>Summarize (Yet to implement)</MenuItem>
+    </DropdownMenu>
   {:else if inputColumnsFetchState?.state === 'failure'}
     Failed to fetch column information
   {/if}

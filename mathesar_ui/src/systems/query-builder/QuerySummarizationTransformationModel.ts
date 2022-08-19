@@ -8,11 +8,6 @@ export default class QuerySummarizationTransformationModel {
     this.transformation = transformation;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  isValid(): boolean {
-    return false;
-  }
-
   toJSON(): QueryInstanceSummarizationTransformation {
     return this.transformation;
   }

@@ -17,10 +17,8 @@ import type {
 } from '@mathesar/api/queries/queryList';
 import type {
   TableEntry,
-  JpPath,
   JoinableTableResult,
 } from '@mathesar/api/tables/tableList';
-import type { Column } from '@mathesar/api/tables/columns';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
 import Pagination from '@mathesar/utils/Pagination';
@@ -29,265 +27,18 @@ import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type QueryModel from './QueryModel';
 import type { QueryModelUpdateDiff } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
-import { processColumn } from './utils';
-import type { ProcessedQueryResultColumnMap } from './utils';
-
-export interface InputColumn {
-  id: Column['id'];
-  name: Column['name'];
-  tableName: TableEntry['name'];
-  jpPath?: JpPath;
-  type: Column['type'];
-  tableId: TableEntry['id'];
-}
-
-export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
-  type: Column['type'];
-  linksTo?: LinkedTable;
-}
-
-export interface LinkedTable {
-  id: TableEntry['id'];
-  name: TableEntry['name'];
-  linkedToColumn: {
-    id: Column['id'];
-    name: Column['name'];
-  };
-  columns: Map<ColumnWithLink['id'], ColumnWithLink>;
-}
-
-export interface ReferencedByTable extends LinkedTable {
-  referencedViaColumn: {
-    id: Column['id'];
-    name: Column['name'];
-    type: Column['type'];
-  };
-}
-
-export interface InputColumnsStoreSubstance {
-  baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
-  tablesThatReferenceBaseTable: Map<ReferencedByTable['id'], ReferencedByTable>;
-  columnInformationMap: Map<InputColumn['id'], InputColumn>;
-}
-
-// Inorder to place all columns with links at the end while sorting
-const compareColumnByLinks = (
-  a: [ColumnWithLink['id'], ColumnWithLink],
-  b: [ColumnWithLink['id'], ColumnWithLink],
-) => {
-  if (a[1].linksTo && !b[1].linksTo) {
-    return 1;
-  }
-  if (!a[1].linksTo && b[1].linksTo) {
-    return -1;
-  }
-  return 0;
-};
-
-export function getLinkFromColumn(
-  result: JoinableTableResult,
-  columnId: Column['id'],
-  depth: number,
-): LinkedTable | undefined {
-  const validLinks = result.joinable_tables.filter(
-    (entry) =>
-      entry.depth === depth &&
-      entry.fk_path[depth - 1][1] === false &&
-      entry.jp_path[depth - 1][0] === columnId,
-  );
-  if (validLinks.length === 0) {
-    return undefined;
-  }
-  if (validLinks.length > 1) {
-    // This scenario should never occur
-    throw new Error(`Multiple links present for the same column: ${columnId}`);
-  }
-  const link = validLinks[0];
-  const toTableInfo = result.tables[link.target];
-  const toTable = {
-    id: link.target,
-    name: toTableInfo.name,
-  };
-  const toColumnId = link.jp_path[depth - 1][1];
-  const toColumn = {
-    id: toColumnId,
-    name: result.columns[toColumnId].name,
-  };
-  const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-    toTableInfo.columns.map((columnIdInLinkedTable) => {
-      const columnInLinkedTable = result.columns[columnIdInLinkedTable];
-      return [
-        columnIdInLinkedTable,
-        {
-          id: columnIdInLinkedTable,
-          name: columnInLinkedTable.name,
-          tableName: toTableInfo.name,
-          type: columnInLinkedTable.type,
-          linksTo: getLinkFromColumn(result, columnIdInLinkedTable, depth + 1),
-          jpPath: link.jp_path,
-        },
-      ];
-    });
-  return {
-    ...toTable,
-    linkedToColumn: toColumn,
-    columns: new Map(columnMapEntries.sort(compareColumnByLinks)),
-  };
-}
-
-export function getColumnInformationMap(
-  result: JoinableTableResult,
-  baseTable: TableEntry,
-): InputColumnsStoreSubstance['columnInformationMap'] {
-  const map: InputColumnsStoreSubstance['columnInformationMap'] = new Map();
-  baseTable.columns.forEach((column) => {
-    map.set(column.id, {
-      id: column.id,
-      name: column.name,
-      type: column.type,
-      tableId: baseTable.id,
-      tableName: baseTable.name,
-    });
-  });
-  Object.keys(result.tables).forEach((tableIdKey) => {
-    const tableId = parseInt(tableIdKey, 10);
-    const table = result.tables[tableId];
-    table.columns.forEach((columnId) => {
-      const column = result.columns[columnId];
-      map.set(columnId, {
-        id: columnId,
-        name: column.name,
-        type: column.type,
-        tableId,
-        tableName: table.name,
-      });
-    });
-  });
-  return map;
-}
-
-export function getBaseTableColumnsWithLinks(
-  result: JoinableTableResult,
-  baseTable: TableEntry,
-): Map<ColumnWithLink['id'], ColumnWithLink> {
-  const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-    baseTable.columns.map((column) => [
-      column.id,
-      {
-        id: column.id,
-        name: column.name,
-        type: column.type,
-        tableName: baseTable.name,
-        linksTo: getLinkFromColumn(result, column.id, 1),
-      },
-    ]);
-  return new Map(columnMapEntries.sort(compareColumnByLinks));
-}
-
-export function getTablesThatReferenceBaseTable(
-  result: JoinableTableResult,
-  baseTable: TableEntry,
-): Map<ReferencedByTable['id'], ReferencedByTable> {
-  const referenceLinks = result.joinable_tables.filter(
-    (entry) => entry.depth === 1 && entry.fk_path[0][1] === true,
-  );
-  const references: Map<ReferencedByTable['id'], ReferencedByTable> = new Map();
-
-  referenceLinks.forEach((reference) => {
-    const tableId = reference.target;
-    const table = result.tables[tableId];
-    const baseTableColumnId = reference.jp_path[0][0];
-    const baseTableColumn = baseTable.columns.find(
-      (column) => column.id === baseTableColumnId,
-    );
-    const referenceTableColumnId = reference.jp_path[0][1];
-    if (!baseTableColumn) {
-      return;
-    }
-    const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-      result.tables[reference.target].columns
-        .filter((columnId) => columnId !== referenceTableColumnId)
-        .map((columnIdInTable) => {
-          const columnInTable = result.columns[columnIdInTable];
-          return [
-            columnIdInTable,
-            {
-              id: columnIdInTable,
-              name: columnInTable.name,
-              type: columnInTable.type,
-              tableName: table.name,
-              linksTo: getLinkFromColumn(result, columnIdInTable, 2),
-              jpPath: reference.jp_path,
-            },
-          ];
-        });
-
-    references.set(tableId, {
-      id: tableId,
-      name: table.name,
-      referencedViaColumn: {
-        id: referenceTableColumnId,
-        ...result.columns[referenceTableColumnId],
-      },
-      linkedToColumn: baseTableColumn,
-      columns: new Map(columnMapEntries.sort(compareColumnByLinks)),
-    });
-  });
-
-  return references;
-}
-
-function calcProcessedColumnsBasedOnInitialColumns(
-  initialColumns: QueryModel['initial_columns'],
-  existingProcessedColumns: ProcessedQueryResultColumnMap,
-  abstractTypeMap: AbstractTypesMap,
-): ProcessedQueryResultColumnMap {
-  let isChangeRequired =
-    initialColumns.length !== existingProcessedColumns.size;
-  const newProcessedColumns: ProcessedQueryResultColumnMap = new ImmutableMap(
-    initialColumns.map((column) => {
-      const existingProcessedColumn = existingProcessedColumns.get(
-        column.alias,
-      );
-      if (existingProcessedColumn) {
-        if (
-          existingProcessedColumn.column.display_name !== column.display_name
-        ) {
-          isChangeRequired = true;
-          return [
-            column.alias,
-            {
-              ...existingProcessedColumn,
-              column: {
-                ...existingProcessedColumn.column,
-                display_name: column.display_name,
-              },
-            },
-          ];
-        }
-
-        return [column.alias, existingProcessedColumn];
-      }
-
-      isChangeRequired = true;
-      return [
-        column.alias,
-        processColumn(
-          {
-            alias: column.alias,
-            display_name: column.display_name,
-            type: 'unknown',
-            type_options: null,
-            display_options: null,
-          },
-          abstractTypeMap,
-        ),
-      ];
-    }),
-  );
-
-  return isChangeRequired ? newProcessedColumns : existingProcessedColumns;
-}
+import {
+  processColumn,
+  getTablesThatReferenceBaseTable,
+  getBaseTableColumnsWithLinks,
+  getColumnInformationMap,
+  processInitialColumns,
+} from './utils';
+import type {
+  ProcessedQueryResultColumnMap,
+  InputColumnsStoreSubstance,
+} from './utils';
+import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 
 function validateQuery(queryModel: QueryModel): boolean {
   const general =
@@ -297,7 +48,11 @@ function validateQuery(queryModel: QueryModel): boolean {
   if (!general) {
     return false;
   }
-  const transformations = true;
+  for (const transformation of queryModel.transformationModels) {
+    if (transformation instanceof QueryFilterTransformationModel) {
+      //
+    }
+  }
   return true;
 }
 
@@ -330,10 +85,6 @@ export default class QueryManager extends EventHandler<{
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 100 }));
 
-  processedQueryColumns: Writable<ProcessedQueryResultColumnMap> = writable(
-    new ImmutableMap(),
-  );
-
   records: Writable<QueryResultRecords> = writable({ count: 0, results: [] });
 
   abstractTypeMap: AbstractTypesMap;
@@ -343,6 +94,19 @@ export default class QueryManager extends EventHandler<{
     tablesThatReferenceBaseTable: new Map(),
     columnInformationMap: new Map(),
   });
+
+  processedInitialColumns: Writable<ProcessedQueryResultColumnMap> = writable(
+    new ImmutableMap(),
+  );
+
+  processedVirtualColumns: Writable<ProcessedQueryResultColumnMap> = writable(
+    new ImmutableMap(),
+  );
+
+  // TODO: processedResultColumns should also include virtual columns
+  processedResultColumns: Writable<ProcessedQueryResultColumnMap> = writable(
+    new ImmutableMap(),
+  );
 
   // Display stores
 
@@ -467,25 +231,40 @@ export default class QueryManager extends EventHandler<{
     return Promise.all([this.fetchColumns(), this.fetchResults()]);
   }
 
-  recalculateProcessedColumnsUsingInitialColumns(): void {
+  /**
+   * We are not creating a derived store so that we need to control
+   * the callback only for essential scenarios and not everytime
+   * query store changes.
+   */
+  onInitialColumnsChange(): void {
     const initialColumns = get(this.query).initial_columns;
-    /**
-     * We are not creating a derived store so that we calculate
-     * processed columns only in required scenarios and not everytime
-     * query store changes.
-     * TODO: Include summarization transform to identify virtual columns
-     */
-    this.processedQueryColumns.update((existing) =>
-      calcProcessedColumnsBasedOnInitialColumns(
+    const { columnInformationMap } = get(this.inputColumns);
+    // TODO: processedResultColumns should be based on the last transformation
+    this.processedResultColumns.update((existing) =>
+      processInitialColumns(
         initialColumns,
         existing,
         this.abstractTypeMap,
+        columnInformationMap,
+      ),
+    );
+    this.processedInitialColumns.update((existing) =>
+      processInitialColumns(
+        initialColumns,
+        existing,
+        this.abstractTypeMap,
+        columnInformationMap,
       ),
     );
   }
 
+  onTransformationsChange(): void {
+    const { transformationModels } = get(this.query);
+    //
+  }
+
   resetProcessedColumns(): void {
-    this.processedQueryColumns.set(new ImmutableMap());
+    this.processedResultColumns.set(new ImmutableMap());
   }
 
   setProcessedColumnsFromResults(resultColumns: QueryResultColumn[]): void {
@@ -495,7 +274,7 @@ export default class QueryManager extends EventHandler<{
         processColumn(column, this.abstractTypeMap),
       ]),
     );
-    this.processedQueryColumns.set(newColumns);
+    this.processedResultColumns.set(newColumns);
   }
 
   async updateQuery(queryModel: QueryModel): Promise<{
@@ -511,9 +290,7 @@ export default class QueryManager extends EventHandler<{
     try {
       this.querySavePromise?.cancel();
       await this.calculateInputColumnTree();
-
       const isQueryValid = validateQuery(queryModel);
-
       if (!isQueryValid) {
         this.state.update((_state) => ({
           ..._state,
@@ -716,18 +493,19 @@ export default class QueryManager extends EventHandler<{
           this.resetResults();
           break;
         case 'initialColumnName':
-          this.recalculateProcessedColumnsUsingInitialColumns();
+          this.onInitialColumnsChange();
           break;
         case 'initialColumnsArray':
           if (!updateDiff.diff.initial_columns?.length) {
             // All columns have been deleted
             this.resetResults();
           } else {
-            this.recalculateProcessedColumnsUsingInitialColumns();
+            this.onInitialColumnsChange();
             await this.fetchColumnsAndRecords();
           }
           break;
         case 'transformations':
+          this.onTransformationsChange();
           this.resetPaginationPane();
           await this.fetchColumnsAndRecords();
           break;
@@ -745,10 +523,8 @@ export default class QueryManager extends EventHandler<{
         queryToSet = query.withId(currentQueryModelData.id).model;
       }
       this.query.set(queryToSet);
-      this.recalculateProcessedColumnsUsingInitialColumns();
-      const { clientValidationState } = await this.updateQuery(queryToSet);
-      const isValid = clientValidationState.state === 'success';
-      this.undoRedoManager.pushState(queryToSet, isValid);
+      this.onInitialColumnsChange();
+      await this.updateQuery(queryToSet);
       this.setUndoRedoStates();
       await this.fetchColumnsAndRecords();
     } else {

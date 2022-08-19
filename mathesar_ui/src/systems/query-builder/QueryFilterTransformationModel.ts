@@ -30,11 +30,6 @@ export default class QueryFilterTransformationModel
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  isValid(): boolean {
-    return true;
-  }
-
   toJSON(): QueryInstanceFilterTransformation {
     const spec: QueryInstanceFilterTransformation['spec'] = {
       [this.conditionIdentifier]: [{ column_name: [this.columnIdentifier] }],

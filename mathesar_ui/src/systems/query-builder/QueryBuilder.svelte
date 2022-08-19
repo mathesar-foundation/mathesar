@@ -15,7 +15,7 @@
   import { getAvailableName } from '@mathesar/utils/db';
   import { iconQuery, iconRedo, iconUndo } from '@mathesar/icons';
   import type QueryManager from './QueryManager';
-  import type { ColumnWithLink } from './QueryManager';
+  import type { ColumnWithLink } from './utils';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
