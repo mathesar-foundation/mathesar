@@ -1,6 +1,6 @@
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { Column } from '@mathesar/api/tables/columns';
-import type { JpPath } from '@mathesar/api/tables';
+import type { JpPath } from '@mathesar/api/tables/joinable_tables';
 
 /**
  * endpoint: /api/db/v0/queries/<query_id>/

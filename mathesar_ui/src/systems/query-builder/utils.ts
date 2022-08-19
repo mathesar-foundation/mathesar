@@ -14,11 +14,11 @@ import {
   getDbTypeBasedInputCap,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import type { TableEntry } from '@mathesar/api/tables';
 import type {
-  TableEntry,
   JpPath,
   JoinableTableResult,
-} from '@mathesar/api/tables';
+} from '@mathesar/api/tables/joinable_tables';
 import type { Column } from '@mathesar/api/tables/columns';
 import type QueryModel from './QueryModel';
 
