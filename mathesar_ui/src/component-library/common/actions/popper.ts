@@ -33,15 +33,18 @@ export default function popper(
           requires: ['computeStyles'],
           // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
           fn: (obj: ModifierArguments<unknown>): void => {
+            // TODO: Make the default value configurable
+            const widthToSet = Math.min(250, obj.state.rects.reference.width);
             // eslint-disable-next-line no-param-reassign
-            obj.state.styles.popper.minWidth = `${obj.state.rects.reference.width}px`;
+            obj.state.styles.popper.minWidth = `${widthToSet}px`;
           },
           // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
           effect: (obj: ModifierArguments<unknown>): void => {
             const width = (obj.state.elements.reference as HTMLElement)
               .offsetWidth;
+            const widthToSet = Math.min(250, width);
             // eslint-disable-next-line no-param-reassign
-            obj.state.elements.popper.style.minWidth = `${width}px`;
+            obj.state.elements.popper.style.minWidth = `${widthToSet}px`;
           },
         },
         {

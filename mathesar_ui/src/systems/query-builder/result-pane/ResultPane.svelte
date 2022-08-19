@@ -18,7 +18,7 @@
 
   $: ({
     query,
-    processedQueryColumns,
+    processedResultColumns,
     records,
     state,
     selectedColumnAlias,
@@ -40,8 +40,11 @@
       : [];
   // Prioritize showing column errors over record fetch errors
   $: errors = columnRunErrors.length > 0 ? columnRunErrors : recordRunErrors;
-
-  $: columnList = [...$processedQueryColumns.values()];
+  $: columnList = [...$processedResultColumns.values()];
+  // Show a dummy ghost row when there are no records
+  $: showDummyGhostRow =
+    recordRunState === 'success' && !$records.results.length;
+  $: sheetItemCount = showDummyGhostRow ? 1 : $records.results.length;
 
   function checkAndUnselectColumn(e: MouseEvent) {
     const target = e.target as HTMLElement;
@@ -74,9 +77,7 @@
     <span class="title">Result</span>
     {#if base_table && initial_columns.length}
       <span class="info">
-        {#if columnRunState === 'success' && recordRunState === 'success'}
-          Query run successfully
-        {:else if columnRunState === 'processing' || recordRunState === 'processing'}
+        {#if columnRunState === 'processing' || recordRunState === 'processing'}
           Running query
           <Spinner />
         {:else if columnRunState === 'failure' || recordRunState === 'failure'}
@@ -157,13 +158,13 @@
         </SheetHeader>
 
         <SheetVirtualRows
-          itemCount={$records.results.length}
+          itemCount={sheetItemCount}
           paddingBottom={30}
           itemSize={() => 30}
           let:items
         >
           {#each items as item (item.key)}
-            {#if $records.results[item.index]}
+            {#if $records.results[item.index] || showDummyGhostRow}
               <SheetRow style={item.style} let:htmlAttributes let:styleString>
                 <div {...htmlAttributes} style={styleString}>
                   {#each columnList as processedQueryColumn (processedQueryColumn.id)}
@@ -180,18 +181,20 @@
                           ? 'selected'
                           : ''}
                       >
-                        <CellFabric
-                          columnFabric={processedQueryColumn}
-                          value={$records.results[item.index][
-                            processedQueryColumn.id
-                          ]}
-                          showAsSkeleton={recordRunState === 'processing' &&
-                            (lastFetchTypeEqualsRecords ||
-                              $records.results[item.index][
-                                processedQueryColumn.id
-                              ] === undefined)}
-                          disabled={true}
-                        />
+                        {#if $records.results[item.index]}
+                          <CellFabric
+                            columnFabric={processedQueryColumn}
+                            value={$records.results[item.index][
+                              processedQueryColumn.id
+                            ]}
+                            showAsSkeleton={recordRunState === 'processing' &&
+                              (lastFetchTypeEqualsRecords ||
+                                $records.results[item.index][
+                                  processedQueryColumn.id
+                                ] === undefined)}
+                            disabled={true}
+                          />
+                        {/if}
                       </div>
                     </SheetCell>
                   {/each}
@@ -209,6 +212,8 @@
               $pagination.rightBound,
             )} of {$records.count}
           </div>
+        {:else if recordRunState === 'success'}
+          No results found
         {/if}
         <PaginationGroup
           pagination={$pagination}

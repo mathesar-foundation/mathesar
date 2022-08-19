@@ -1,56 +1,64 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from 'svelte';
-
   import {
-    Button,
-    Icon,
     InputGroup,
+    Icon,
+    Button,
     Select,
   } from '@mathesar-component-library';
   import type { ComponentAndProps } from '@mathesar-component-library/types';
+  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
   import { iconDelete } from '@mathesar/icons';
-  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
-  import type {
-    FilterEntry,
-    ProcessedColumn,
-  } from '@mathesar/stores/table-data/types';
+  import type { FilterEntryColumnLike } from './types';
   import { validateFilterEntry } from './utils';
 
+  type T = $$Generic;
+  type ColumnLikeType = FilterEntryColumnLike & T;
+
   const dispatch = createEventDispatcher();
-  const tabularData = getTabularDataStoreFromContext();
 
-  export let columnId: FilterEntry['columnId'] | undefined;
-  export let conditionId: FilterEntry['conditionId'] | undefined;
-  export let value: FilterEntry['value'] | undefined;
-  export let noOfFilters: number;
+  export let columns: ColumnLikeType[];
+  export let getColumnLabel: (column: ColumnLikeType) => string;
 
-  $: ({ processedColumns, constraintsDataStore } = $tabularData);
-  $: ({ constraints } = $constraintsDataStore);
-  $: columnIds = [...$processedColumns].map(([_columnId]) => _columnId);
-  $: processedSelectedColumn = columnId
-    ? $processedColumns.get(columnId)
+  export let columnIdentifier: ColumnLikeType['id'] | undefined;
+  export let conditionIdentifier: string | undefined;
+  export let value: unknown | undefined;
+
+  export let layout: 'horizontal' | 'vertical' = 'horizontal';
+  export let disableColumnChange = false;
+  export let allowDelete = true;
+  export let numberOfFilters = 0;
+
+  /**
+   * Eslint recognizes an unnecessary type assertion that typecheck fails to
+   * do in the svelte template below. *:/ Whaat? Needs more digging down*
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  $: columnIdentifiers = columns.map(
+    (_column) => _column.id,
+  ) as ColumnLikeType['id'][];
+  $: selectedColumn = columnIdentifier
+    ? columns.find((column) => column.id === columnIdentifier)
     : undefined;
   $: selectedColumnFiltersMap =
-    processedSelectedColumn?.allowedFiltersMap ??
-    (new Map() as ProcessedColumn['allowedFiltersMap']);
+    selectedColumn?.allowedFiltersMap ??
+    (new Map() as ColumnLikeType['allowedFiltersMap']);
   $: conditionIds = [...selectedColumnFiltersMap].map(
     ([_conditionId]) => _conditionId,
   );
-  $: selectedCondition = conditionId
-    ? selectedColumnFiltersMap.get(conditionId)
+  $: selectedCondition = conditionIdentifier
+    ? selectedColumnFiltersMap.get(conditionIdentifier)
     : undefined;
-  $: selectedColumnInputCap = processedSelectedColumn?.inputComponentAndProps;
+  $: selectedColumnInputCap = selectedColumn?.inputComponentAndProps;
 
-  const initialNoOfFilters = noOfFilters;
+  const initialNoOfFilters = numberOfFilters;
   let showError = false;
   $: isValid = selectedCondition
     ? validateFilterEntry(selectedCondition, value)
     : false;
-  $: if (noOfFilters !== initialNoOfFilters) {
+  $: if (numberOfFilters !== initialNoOfFilters) {
     showError = true;
   }
 
@@ -61,14 +69,15 @@
     window.clearTimeout(timer);
   });
 
-  function getColumnName(_columnId?: FilterEntry['columnId']) {
-    if (_columnId) {
-      return $processedColumns.get(_columnId)?.column.name ?? '';
+  function getColumnName(_columnId?: ColumnLikeType['id']) {
+    const column = columns.find((columnEntry) => columnEntry.id === _columnId);
+    if (column) {
+      return getColumnLabel(column);
     }
     return '';
   }
 
-  function getConditionName(_conditionId?: FilterEntry['conditionId']) {
+  function getConditionName(_conditionId?: string) {
     if (_conditionId) {
       return selectedColumnFiltersMap.get(_conditionId)?.name ?? '';
     }
@@ -96,15 +105,12 @@
   }
 
   function calculateInputCap(
-    _selectedCondition: AbstractTypeFilterDefinition | undefined,
-    _processedColumn: ProcessedColumn | undefined,
+    _selectedCondition?: AbstractTypeFilterDefinition,
+    _selectedColumn?: FilterEntryColumnLike,
   ): ComponentAndProps | undefined {
-    if (!_processedColumn) {
-      return undefined;
-    }
     const parameterTypeId = _selectedCondition?.parameters[0];
     // If there are no parameters, show no input. eg., isEmpty
-    if (parameterTypeId === undefined) {
+    if (typeof parameterTypeId === 'undefined') {
       return undefined;
     }
 
@@ -112,26 +118,18 @@
     // Check if the type is same as column's type.
     // If yes, pass down column's calculated cap.
     // If no, pass down the type directly.
-    const abstractTypeId = _processedColumn?.abstractType.identifier;
+    const abstractTypeId = _selectedColumn?.abstractType.identifier;
     if (abstractTypeId === parameterTypeId && selectedColumnInputCap) {
       return selectedColumnInputCap;
     }
-    const linkFk = findFkConstraintsForColumn(
-      constraints,
-      _processedColumn.column.id,
-    )[0];
-    return getDbTypeBasedInputCap(
-      {
-        ..._processedColumn.column,
-        type: parameterTypeId,
-        type_options: {},
-        display_options: {},
-      },
-      linkFk ? linkFk.referent_table : undefined,
-    );
+    return getDbTypeBasedInputCap({
+      type: parameterTypeId,
+      type_options: {},
+      display_options: {},
+    });
   }
 
-  $: inputCap = calculateInputCap(selectedCondition, processedSelectedColumn);
+  $: inputCap = calculateInputCap(selectedCondition, selectedColumn);
 
   function onColumnChange() {
     prevValue = undefined;
@@ -155,21 +153,24 @@
   }
 </script>
 
-<div class="filter-entry">
-  <div class="prefix">
-    <slot />
-  </div>
-  <InputGroup>
+<div class="filter-entry {layout}">
+  {#if $$slots.default}
+    <div class="prefix">
+      <slot />
+    </div>
+  {/if}
+  <InputGroup class={layout}>
     <Select
-      options={columnIds}
-      bind:value={columnId}
+      options={columnIdentifiers}
+      bind:value={columnIdentifier}
       getLabel={getColumnName}
       on:change={onColumnChange}
       triggerClass="filter-column-id"
+      disabled={disableColumnChange}
     />
     <Select
       options={conditionIds}
-      bind:value={conditionId}
+      bind:value={conditionIdentifier}
       getLabel={getConditionName}
       on:change={(e) => onConditionChange(e.detail)}
       triggerClass="filter-condition"
@@ -189,20 +190,21 @@
         hasError={showError && !isValid}
       />
     {/if}
-    <Button
-      size="small"
-      class="filter-remove"
-      on:click={() => dispatch('removeFilter')}
-    >
-      <Icon {...iconDelete} />
-    </Button>
+    {#if allowDelete}
+      <Button
+        size="small"
+        class="filter-remove"
+        on:click={() => dispatch('removeFilter')}
+      >
+        <Icon {...iconDelete} />
+      </Button>
+    {/if}
   </InputGroup>
 </div>
 
 <style lang="scss">
   .filter-entry {
     display: flex;
-    min-width: 560px;
     gap: 10px;
 
     .prefix {
@@ -221,26 +223,32 @@
       margin-top: 6px;
     }
 
-    :global(.filter-column-id.trigger) {
-      width: 140px;
-      flex-basis: 140px;
-      flex-shrink: 0;
-      flex-grow: 0;
-    }
-    :global(.filter-condition) {
-      width: 140px;
-      flex-basis: 140px;
-      flex-shrink: 0;
-      flex-grow: 0;
+    &.horizontal {
+      min-width: 560px;
+
+      :global(.filter-column-id.trigger),
+      :global(.filter-condition) {
+        width: 140px;
+        flex-basis: 140px;
+        flex-shrink: 0;
+        flex-grow: 0;
+      }
+
+      :global(.filter-input) {
+        width: 160px;
+        flex-basis: 160px;
+        flex-grow: 0;
+        flex-shrink: 0;
+        max-height: 2.2rem;
+        resize: none;
+      }
     }
 
-    :global(.filter-input) {
-      width: 160px;
-      flex-basis: 160px;
-      flex-shrink: 0;
-      flex-grow: 0;
-      max-height: 31.5px;
-      resize: none;
+    &.vertical {
+      :global(.filter-input) {
+        flex-grow: 1;
+        resize: vertical;
+      }
     }
 
     :global(.filter-remove) {
