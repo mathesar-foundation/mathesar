@@ -10,7 +10,7 @@
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
   import { queries } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
   import { iconQuery, iconRedo, iconUndo } from '@mathesar/icons';

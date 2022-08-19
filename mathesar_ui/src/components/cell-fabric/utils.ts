@@ -5,7 +5,7 @@ import {
 } from '@mathesar/stores/abstract-types';
 import type { AbstractTypeConfiguration } from '@mathesar/stores/abstract-types/types';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type { TableEntry } from '@mathesar/api/tables/tableList';
+import type { TableEntry } from '@mathesar/api/tables';
 import DataTypes from './data-types';
 import type { CellColumnLike } from './data-types/typeDefinitions';
 import type { LinkedRecordCellExternalProps } from './data-types/components/typeDefinitions';

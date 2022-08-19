@@ -1,5 +1,5 @@
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { Column } from './columns';
+import type { Column } from './tables/columns';
 
 type MinimalColumnDetails = Pick<
   Column,

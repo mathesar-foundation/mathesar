@@ -18,7 +18,7 @@ import type {
   TableEntry,
   JpPath,
   JoinableTableResult,
-} from '@mathesar/api/tables/tableList';
+} from '@mathesar/api/tables';
 import type { Column } from '@mathesar/api/tables/columns';
 import type QueryModel from './QueryModel';
 
