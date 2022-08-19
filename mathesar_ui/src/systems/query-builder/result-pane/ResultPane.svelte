@@ -74,9 +74,7 @@
     <span class="title">Result</span>
     {#if base_table && initial_columns.length}
       <span class="info">
-        {#if columnRunState === 'success' && recordRunState === 'success'}
-          Query run successfully
-        {:else if columnRunState === 'processing' || recordRunState === 'processing'}
+        {#if columnRunState === 'processing' || recordRunState === 'processing'}
           Running query
           <Spinner />
         {:else if columnRunState === 'failure' || recordRunState === 'failure'}

@@ -107,8 +107,7 @@
               <FilterTransformation
                 columns={allowedColumnsPerTransformation[index]}
                 model={transformationModel}
-                limitEditing={index !== transformationModels.length - 1 ||
-                  $processedResultColumns.size === 0}
+                limitEditing={allowedColumnsPerTransformation[index].size === 0}
                 on:update={() =>
                   updateTransformation(transformationModel, index)}
               />

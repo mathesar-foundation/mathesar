@@ -16,6 +16,5 @@ export function calcAllowedColumnsPerTransformation(
       }
       return latestColumnList;
     });
-
   return allowedTransformations;
 }

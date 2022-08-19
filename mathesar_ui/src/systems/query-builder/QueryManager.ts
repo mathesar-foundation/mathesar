@@ -24,6 +24,7 @@ import { getTable } from '@mathesar/stores/tables';
 import Pagination from '@mathesar/utils/Pagination';
 import { toast } from '@mathesar/stores/toast';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { validateFilterEntry } from '@mathesar/components/filter-entry';
 import type QueryModel from './QueryModel';
 import type { QueryModelUpdateDiff } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
@@ -40,7 +41,10 @@ import type {
 } from './utils';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 
-function validateQuery(queryModel: QueryModel): boolean {
+function validateQuery(
+  queryModel: QueryModel,
+  columnMap: ProcessedQueryResultColumnMap,
+): boolean {
   const general =
     isDefinedNonNullable(queryModel.base_table) &&
     isDefinedNonNullable(queryModel.name) &&
@@ -48,12 +52,19 @@ function validateQuery(queryModel: QueryModel): boolean {
   if (!general) {
     return false;
   }
-  for (const transformation of queryModel.transformationModels) {
+  return queryModel.transformationModels.every((transformation) => {
     if (transformation instanceof QueryFilterTransformationModel) {
-      //
+      const column = columnMap.get(transformation.columnIdentifier);
+      const condition = column?.allowedFiltersMap.get(
+        transformation.conditionIdentifier,
+      );
+      if (condition) {
+        return validateFilterEntry(condition, transformation.value);
+      }
+      return false;
     }
-  }
-  return true;
+    return true;
+  });
 }
 
 export default class QueryManager extends EventHandler<{
@@ -131,10 +142,17 @@ export default class QueryManager extends EventHandler<{
     super();
     this.abstractTypeMap = abstractTypeMap;
     this.query = writable(query);
+    this.onInitialColumnsChange();
     this.undoRedoManager = new QueryUndoRedoManager();
     const inputColumnTreePromise = this.calculateInputColumnTree();
     void inputColumnTreePromise.then(() => {
-      const isQueryValid = validateQuery(query);
+      this.onInitialColumnsChange();
+      const isQueryValid = validateQuery(
+        query,
+        get(this.processedInitialColumns).withEntries(
+          get(this.processedVirtualColumns),
+        ),
+      );
       this.undoRedoManager.pushState(query, isQueryValid);
       return query;
     });
@@ -239,6 +257,9 @@ export default class QueryManager extends EventHandler<{
   onInitialColumnsChange(): void {
     const initialColumns = get(this.query).initial_columns;
     const { columnInformationMap } = get(this.inputColumns);
+    if (columnInformationMap.size === 0 && initialColumns.length !== 0) {
+      return;
+    }
     // TODO: processedResultColumns should be based on the last transformation
     this.processedResultColumns.update((existing) =>
       processInitialColumns(
@@ -256,11 +277,6 @@ export default class QueryManager extends EventHandler<{
         columnInformationMap,
       ),
     );
-  }
-
-  onTransformationsChange(): void {
-    const { transformationModels } = get(this.query);
-    //
   }
 
   resetProcessedColumns(): void {
@@ -289,8 +305,15 @@ export default class QueryManager extends EventHandler<{
 
     try {
       this.querySavePromise?.cancel();
-      await this.calculateInputColumnTree();
-      const isQueryValid = validateQuery(queryModel);
+      if (get(this.state).inputColumnsFetchState?.state !== 'success') {
+        await this.calculateInputColumnTree();
+      }
+      const isQueryValid = validateQuery(
+        queryModel,
+        get(this.processedInitialColumns).withEntries(
+          get(this.processedVirtualColumns),
+        ),
+      );
       if (!isQueryValid) {
         this.state.update((_state) => ({
           ..._state,
@@ -505,7 +528,6 @@ export default class QueryManager extends EventHandler<{
           }
           break;
         case 'transformations':
-          this.onTransformationsChange();
           this.resetPaginationPane();
           await this.fetchColumnsAndRecords();
           break;
