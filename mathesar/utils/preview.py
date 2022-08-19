@@ -55,9 +55,14 @@ def compute_path_prefix(paths):
 
 
 def column_ids_from_preview_template(preview_template):
-    preview_columns_extraction_regex = r'\{(.*?)\}'
-    preview_data_column_str_ids = re.findall(preview_columns_extraction_regex, preview_template)
+    preview_data_column_str_ids = column_alias_from_preview_template(preview_template)
     preview_data_column_ids = list(map(int, preview_data_column_str_ids))
+    return preview_data_column_ids
+
+
+def column_alias_from_preview_template(preview_template):
+    preview_columns_extraction_regex = r'\{(.*?)\}'
+    preview_data_column_ids = re.findall(preview_columns_extraction_regex, preview_template)
     return preview_data_column_ids
 
 
