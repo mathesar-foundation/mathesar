@@ -13,6 +13,7 @@ from mathesar.api.utils import follows_json_number_spec
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.models import base as models_base
 from mathesar.models.base import db_get_records_with_default_order
+from mathesar.utils.preview import compute_path_prefix, compute_path_str
 
 
 def test_record_list(create_patents_table, client):
@@ -710,8 +711,8 @@ def test_record_list_pagination_offset(create_patents_table, client):
 
 def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     author_table, publisher_table, publication_table, checkouts_table = publication_tables
-    author_template_column = author_table.get_columns_by_name(["first_name", "last_name"])
-    author_preview_template = f'Full Name: {{{ author_template_column[0].id }}} {{{author_template_column[1].id}}}'
+    author_template_columns = author_table.get_columns_by_name(["first_name", "last_name", "id"])
+    author_preview_template = f'Full Name: {{{ author_template_columns[0].id }}} {{{author_template_columns[1].id}}}'
     author_table_settings_id = author_table.settings.id
     data = {
         "preview_settings": {
@@ -723,8 +724,8 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
         data=data,
     )
     assert response.status_code == 200
-    publisher_template_column = publisher_table.get_column_by_name("name")
-    publisher_preview_template = f'{{{ publisher_template_column.id }}}'
+    publisher_template_columns = publisher_table.get_columns_by_name(["name", "id"])
+    publisher_preview_template = f'{{{ publisher_template_columns[0].id }}}'
     publisher_table_settings_id = publisher_table.settings.id
     data = {
         "preview_settings": {
@@ -738,7 +739,6 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     assert response.status_code == 200
     publication_template_columns = publication_table.get_columns_by_name(['publisher', 'author', 'co_author', 'title', 'id'])
     publication_preview_template = f'{{{publication_template_columns[3].id}}} Published By: {{{ publication_template_columns[0].id}}} and Authored by {{{publication_template_columns[1].id}}} along with {{{publication_template_columns[2].id}}}'
-    # publication_preview_template = f'{{{publication_template_columns[3].id}}}'
     publication_table_settings_id = publication_table.settings.id
     data = {
         "preview_settings": {
@@ -759,12 +759,34 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
         for preview in preview_data
         if preview['column'] == checkouts_table_publication_fk_column.id
     )
-    preview_column_alias = f'{checkouts_table_publication_fk_column.id}__{publication_template_columns[4].id}__col__{publication_template_columns[3].id}'
-    assert preview_column['template'] == f'{{{preview_column_alias}}}'
+    publication_path = [[checkouts_table_publication_fk_column.id, publication_template_columns[-1].id]]
+    publisher_paths = publication_path + [[publication_template_columns[0].id, publisher_template_columns[-1].id]]
+    author_paths = publication_path + [[publication_template_columns[1].id, author_template_columns[-1].id]]
+    co_author_paths = publication_path + [[publication_template_columns[2].id, author_template_columns[-1].id]]
+    publication_path_prefix = compute_path_prefix(publication_path)
+    publisher_path_prefix = compute_path_prefix(publisher_paths)
+    co_author_path_path_prefix = compute_path_prefix(co_author_paths)
+    author_path_prefix = compute_path_prefix(author_paths)
+    publication_title_alias = compute_path_str(publication_path_prefix, publication_template_columns[3].id)
+    publisher_name_alias = compute_path_str(publisher_path_prefix, publisher_template_columns[0].id)
+    co_author_first_name_alias = compute_path_str(co_author_path_path_prefix, author_template_columns[0].id)
+    co_author_last_name_alias = compute_path_str(co_author_path_path_prefix, author_template_columns[1].id)
+    author_first_name_alias = compute_path_str(author_path_prefix, author_template_columns[0].id)
+    author_last_name_alias = compute_path_str(author_path_prefix, author_template_columns[1].id)
+    assert preview_column['template'] == f'{{{publication_title_alias}}} Published By: {{{ publisher_name_alias}}} and Authored by Full Name: {{{author_first_name_alias}}} {{{author_last_name_alias}}} along with Full Name: {{{co_author_first_name_alias}}} {{{co_author_last_name_alias}}}'
     preview_data = preview_column['data'][0]
-    assert preview_column_alias in preview_data
-    expected_preview_value = 'Pressure Should Old'
-    assert preview_data[preview_column_alias] == expected_preview_value
+    assert publication_title_alias in preview_data
+    assert publisher_name_alias in preview_data
+    assert author_first_name_alias in preview_data
+    assert author_last_name_alias in preview_data
+    assert co_author_first_name_alias in preview_data
+    assert co_author_last_name_alias in preview_data
+    assert preview_data[publication_title_alias] == 'Pressure Should Old'
+    assert preview_data[publisher_name_alias] == 'Ruiz'
+    assert preview_data[author_first_name_alias] == 'Matthew'
+    assert preview_data[author_last_name_alias] == 'Brown'
+    assert preview_data[co_author_first_name_alias] == 'Mark'
+    assert preview_data[co_author_last_name_alias] == 'Smith'
 
 
 def test_record_detail(create_patents_table, client):
