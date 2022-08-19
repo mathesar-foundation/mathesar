@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.functional import cached_property
 
-from db.queries.base import DBQuery, JoinParams, InitialColumn
+from db.queries.base import DBQuery, InitialColumn
 
-from mathesar.models.base import BaseModel, Column, Table
+from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
 from django.core.exceptions import ValidationError
 from db.transforms.operations.deserialize import deserialize_transformation
@@ -110,8 +110,6 @@ class UIQuery(BaseModel, Relation):
         validators=[_validate_dict],
     )
 
-    __table_cache = {}
-
     @property
     def not_partial(self):
         return (
@@ -120,19 +118,13 @@ class UIQuery(BaseModel, Relation):
         )
 
     def get_records(self, **kwargs):
-        return self.db_query.get_records(
-            engine=self._sa_engine,
-            **kwargs,
-        )
+        return self.db_query.get_records(**kwargs)
 
     # TODO add engine from base_table.schema._sa_engine
     def sa_num_records(self, **kwargs):
-        return self.db_query.get_count(
-            engine=self._sa_engine,
-            **kwargs,
-        )
+        return self.db_query.get_count(**kwargs)
 
-    @cached_property
+    @property
     def output_columns_described(self):
         """
         Returns columns' description, which is to be returned verbatim by the
@@ -147,31 +139,27 @@ class UIQuery(BaseModel, Relation):
                 'display_options': self._get_display_options_for_sa_col(sa_col),
             }
             for sa_col
-            in self.db_query.sa_output_columns(engine=self._sa_engine)
+            in self.db_query.sa_output_columns
         )
 
-    @cached_property
+    @property
     def db_query(self):
-        unique_base_table = _make_sure_table_is_unique(
-            self._table_cache,
-            self.base_table._sa_table,
-        )
         return DBQuery(
-            base_table=unique_base_table,
+            base_table_oid=self.base_table.oid,
             initial_columns=self._db_initial_columns,
+            engine=self._sa_engine,
             transformations=self._db_transformations,
             name=self.name,
         )
 
-    @cached_property
+    @property
     def _db_initial_columns(self):
         return tuple(
-            _db_initial_column_from_json(self._table_cache, json_initial_column)
-            for json_initial_column
-            in self.initial_columns
+            _db_initial_column_from_json(json_col)
+            for json_col in self.initial_columns
         )
 
-    @cached_property
+    @property
     def _db_transformations(self):
         """No processing necessary."""
         if self.transformations:
@@ -201,81 +189,24 @@ class UIQuery(BaseModel, Relation):
     def _sa_engine(self):
         return self.base_table._sa_engine
 
-    @property
-    def _table_cache(self):
-        """
-        Note the use of a UIQuery-wide _table_cache. Its purpose is that every Postgres-unique table
-        should only have a single SQLAlchemy Table when constructing a query. This is necessary,
-        because SQLAlchemy currently does not recognize duplicate SA Tables as such, and, for
-        example, can put the same table in the FROM clause multiple times.
-        """
-        return self.__table_cache
 
-    @_table_cache.deleter
-    def _table_cache(self):
-        self.__table_cache = {}
+def _get_column_pair_from_id(col_id):
+    col = Column.objects.get(id=col_id)
+    return col.table.oid, col.attnum
 
 
-def _db_initial_column_from_json(table_cache, json):
-    alias = json['alias']
-    sa_column = _get_sa_col_by_id(table_cache, json['id'])
-    json_jp_path = json.get('jp_path')
-    if json_jp_path:
-        jp_path = tuple(
-            _join_params_from_json(table_cache, json_jp)
-            for json_jp
-            in json_jp_path
-        )
-    else:
-        jp_path = None
+def _db_initial_column_from_json(col_json):
+    column_pair = _get_column_pair_from_id(col_json["id"])
+    reloid = column_pair[0]
+    attnum = column_pair[1]
+    alias = col_json["alias"]
+    jp_path = [
+        [_get_column_pair_from_id(col_id) for col_id in edge]
+        for edge in col_json.get("jp_path", [])
+    ]
     return InitialColumn(
-        column=sa_column,
-        jp_path=jp_path,
+        reloid=reloid,
+        attnum=attnum,
         alias=alias,
+        jp_path=jp_path if jp_path else None,
     )
-
-
-def _join_params_from_json(table_cache, json_jp):
-    return JoinParams(
-        left_column=_get_sa_col_by_id(table_cache, json_jp[0]),
-        right_column=_get_sa_col_by_id(table_cache, json_jp[1]),
-    )
-
-
-def _get_sa_col_by_id(table_cache, dj_id):
-    """
-    Note that we have to do some shuffling with 2 goals:
-
-    1. reduce a MathesarColumn (enriched_column) to SA Column (regular_column), otherwise SA's
-    joining mechanism throws errors;
-    2. cache tables associated with columns so that there's only a single SA table for a referenced
-    Postgres table, otherwise SA produces invalid SQL with duplicate tables in the FROM clause.
-    """
-    dj_column = Column.objects.get(pk=dj_id)
-    enriched_column = dj_column._sa_column
-    regular_column = enriched_column.to_sa_column()
-    final_column = _make_sure_column_has_unique_table(
-        table_cache,
-        regular_column,
-    )
-    return final_column
-
-
-def _make_sure_column_has_unique_table(table_cache, column):
-    assert isinstance(table_cache, dict)
-    table = column.table
-    unique_table = _make_sure_table_is_unique(table_cache, table)
-    column.table = unique_table
-    return column
-
-
-def _make_sure_table_is_unique(table_cache, table):
-    assert table is not None
-    schema_name = table.schema
-    assert schema_name is not None
-    cached_table = table_cache.setdefault((schema_name, table.name), table)
-    return cached_table
-
-
-def _get_sa_table_by_id(dj_id):
-    return Table.objects.get(pk=dj_id)._sa_table

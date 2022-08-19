@@ -19,15 +19,20 @@ def test_convert_to_db_query(create_patents_table, get_uid):
             'display_name': 'Column 2',
         },
     ]
+    oid = base_table_dj.oid
+    attnum1 = col1_dj.attnum
+    attnum2 = col2_dj.attnum
     initial_columns = [
         InitialColumn(
+            oid,
+            attnum1,
             alias='col1',
-            column=col1_dj._sa_column.to_sa_column(),
             jp_path=None,
         ),
         InitialColumn(
+            oid,
+            attnum2,
             alias='col2',
-            column=col2_dj._sa_column.to_sa_column(),
             jp_path=None,
         ),
     ]
@@ -52,31 +57,26 @@ def test_convert_to_db_query(create_patents_table, get_uid):
         initial_columns=initial_columns_json,
         transformations=transformations_json,
     )
-    base_table_sa = base_table_dj._sa_table
     wanted_db_query = DBQuery(
-        name=name,
-        base_table=base_table_sa,
+        base_table_oid=oid,
         initial_columns=initial_columns,
+        engine=ui_query._sa_engine,
         transformations=transformations,
+        name=name,
     )
     actual_db_query = ui_query.db_query
     assert actual_db_query.name == wanted_db_query.name
-    assert actual_db_query.base_table == wanted_db_query.base_table
+    assert actual_db_query.base_table_oid == wanted_db_query.base_table_oid
     for actual, wanted in zip(
         actual_db_query.initial_columns,
         wanted_db_query.initial_columns
     ):
         assert actual.alias == wanted.alias
         assert actual.jp_path == wanted.jp_path
-        _assert_sa_cols_equal(actual.column, wanted.column)
+        assert actual.reloid == wanted.reloid
+        assert actual.attnum == wanted.attnum
     for actual, wanted in zip(
         actual_db_query.transformations,
         wanted_db_query.transformations
     ):
         assert actual == wanted
-
-
-def _assert_sa_cols_equal(a, b):
-    assert a.name == b.name
-    assert a.table.schema == b.table.schema
-    assert a.table.name == b.table.name
