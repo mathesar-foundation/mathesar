@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onDestroy } from 'svelte';
   import type { ArtificialEvents } from '@mathesar-component-library-dir/common/types/ArtificialEvents';
 
   const dispatch = createEventDispatcher<ArtificialEvents<unknown>>();
@@ -51,6 +51,8 @@
   function handleStandardChange(e: InputEvent) {
     handleGenericChange(getValueFromStandardEvent(e));
   }
+
+  onDestroy(() => clearTimeout(timeout));
 </script>
 
 <slot
