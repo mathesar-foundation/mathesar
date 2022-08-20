@@ -1,9 +1,14 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
-  import type { ComponentAndProps } from '@mathesar/component-library/types';
+
+  import {
+    Debounce,
+    getValueFromArtificialEvent,
+    getValueFromEvent,
+  } from '@mathesar-component-library';
+  import type { ComponentAndProps } from '@mathesar-component-library/types';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import type { SearchFuzzy } from '@mathesar/stores/table-data/searchFuzzy';
-  import { Debounce } from '@mathesar/component-library';
 
   let classes = '';
   export { classes as class };
@@ -20,22 +25,23 @@
   }
 </script>
 
-<Debounce
-  on:artificialChange={updateValue}
-  let:artificialInput
-  let:input
-  let:artificialChange
-  let:change
->
+<Debounce on:artificialChange={updateValue} let:handleNewValue>
   <DynamicInput
     class={classes}
     {containerClass}
     {componentAndProps}
     {value}
-    on:input={input}
-    on:artificialInput={artificialInput}
-    on:change={change}
-    on:artificialChange={artificialChange}
+    on:input={(e) =>
+      handleNewValue({ value: getValueFromEvent(e), debounce: true })}
+    on:artificialInput={(e) =>
+      handleNewValue({ value: getValueFromArtificialEvent(e), debounce: true })}
+    on:change={(e) =>
+      handleNewValue({ value: getValueFromEvent(e), debounce: false })}
+    on:artificialChange={(e) =>
+      handleNewValue({
+        value: getValueFromArtificialEvent(e),
+        debounce: false,
+      })}
     on:focus
     on:blur
     on:recordSelectorOpen

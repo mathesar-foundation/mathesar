@@ -10,54 +10,31 @@
 
   let timeout: number;
 
-  function getValueFromArtificialEvent(event: CustomEvent<unknown>) {
-    return event.detail;
-  }
-
-  function getValueFromStandardEvent(e: InputEvent): unknown {
-    if (!e.target) {
-      return undefined;
-    }
-    const target = e.target as { value?: unknown };
-    return target.value;
-  }
-
   function setParentValue(v: unknown) {
     parentValue = v;
     dispatch('artificialInput', v);
     dispatch('artificialChange', v);
   }
 
-  function handleGenericInput(v: unknown) {
+  function handleNewValue({
+    value,
+    debounce,
+  }: {
+    value: unknown;
+    debounce: boolean;
+  }) {
     clearTimeout(timeout);
-    timeout = window.setTimeout(() => {
-      setParentValue(v);
-    }, duration);
-  }
-  function handleArtificialInput(e: CustomEvent<unknown>) {
-    handleGenericInput(getValueFromArtificialEvent(e));
-  }
-  function handleStandardInput(e: InputEvent) {
-    handleGenericInput(getValueFromStandardEvent(e));
-  }
 
-  function handleGenericChange(v: unknown) {
-    clearTimeout(timeout);
-    setParentValue(v);
-  }
-  function handleArtificialChange(e: CustomEvent<unknown>) {
-    handleGenericChange(getValueFromArtificialEvent(e));
-  }
-  function handleStandardChange(e: InputEvent) {
-    handleGenericChange(getValueFromStandardEvent(e));
+    if (debounce) {
+      timeout = window.setTimeout(() => {
+        setParentValue(value);
+      }, duration);
+    } else {
+      setParentValue(value);
+    }
   }
 
   onDestroy(() => clearTimeout(timeout));
 </script>
 
-<slot
-  artificialInput={handleArtificialInput}
-  input={handleStandardInput}
-  artificialChange={handleArtificialChange}
-  change={handleStandardChange}
-/>
+<slot {handleNewValue} />
