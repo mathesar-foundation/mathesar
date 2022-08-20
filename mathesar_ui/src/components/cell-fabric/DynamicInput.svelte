@@ -39,7 +39,7 @@ during Sheet component creation.
   this={componentAndProps.component}
   {...$$restProps}
   {...props}
-  {value}
+  bind:value
   on:input
   on:artificialInput
   on:change
