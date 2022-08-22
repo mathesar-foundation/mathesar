@@ -189,7 +189,7 @@ class UIQuery(BaseModel, Relation):
                 {
                     k: v
                     for transformation in self.transformations
-                    for k, v in transformation.get('display_name', {}).items()
+                    for k, v in transformation.get('display_names', {}).items()
                 }
             )
         return display_name_map
