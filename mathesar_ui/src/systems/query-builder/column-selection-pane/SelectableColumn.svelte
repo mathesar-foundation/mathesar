@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { Button } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import type { ColumnWithLink } from '../InputColumnsManager';
+  import type { ColumnWithLink } from '../utils';
 
   const dispatch = createEventDispatcher();
 

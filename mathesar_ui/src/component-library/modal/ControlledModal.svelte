@@ -1,5 +1,9 @@
 <script lang="ts">
-  import type { ModalCloseAction, ModalWidth } from './modalTypes';
+  import type {
+    ModalCloseAction,
+    ModalWidth,
+    VerticalAlign,
+  } from './modalTypes';
   import IndependentModal from './IndependentModal.svelte';
   import type ModalController from './ModalController';
 
@@ -11,6 +15,7 @@
   export let size: ModalWidth | undefined = undefined;
   export let allowClose = true;
   export let closeOn: ModalCloseAction[] = ['button'];
+  export let verticalAlign: VerticalAlign | undefined = undefined;
 
   $: ({ isOpen, isOnTop } = controller);
 </script>
@@ -26,6 +31,7 @@
   {closeOn}
   on:open
   on:close
+  {verticalAlign}
 >
   <slot />
   <slot name="title" slot="title" />

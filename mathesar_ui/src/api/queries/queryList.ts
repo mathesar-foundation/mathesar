@@ -13,11 +13,33 @@ export interface QueryInstanceInitialColumn {
   display_name: string;
 }
 
+// TODO: Extend this to support more complicated filters
+// Requires UX reconsideration
+type FilterConditionParams = [
+  { column_name: [string] },
+  ...{ literal: [unknown] }[]
+];
+type FilterCondition = Record<string, FilterConditionParams>;
+
+export interface QueryInstanceFilterTransformation {
+  type: 'filter';
+  spec: FilterCondition;
+}
+
+export interface QueryInstanceSummarizationTransformation {
+  type: 'summarize';
+}
+
+export type QueryInstanceTransformation =
+  | QueryInstanceFilterTransformation
+  | QueryInstanceSummarizationTransformation;
+
 export interface QueryInstance {
   readonly id: number;
   readonly name: string;
   readonly base_table: number;
   readonly initial_columns?: QueryInstanceInitialColumn[];
+  readonly transformations?: QueryInstanceTransformation[];
 }
 
 /**
