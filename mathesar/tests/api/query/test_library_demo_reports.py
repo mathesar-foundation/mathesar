@@ -1,5 +1,5 @@
 import pytest
-from rest_framework.test import APIClient
+
 
 @pytest.fixture
 def library_ma_tables(db_table_to_dj_table, library_db_tables):
