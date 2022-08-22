@@ -4,7 +4,7 @@ from db.constraints.utils import ConstraintType
 from mathesar.models.base import Column, Constraint
 
 
-def _preview_info_by_column_id(fk_previews, fk_constraints, previous_path=[], exising_columns=[]):
+def _preview_info_by_column_id(fk_constraints, previous_path=[], exising_columns=[]):
     preview_info = {}
     preview_columns = exising_columns
     for fk_constraint in fk_constraints:
@@ -20,7 +20,6 @@ def _preview_info_by_column_id(fk_previews, fk_constraints, previous_path=[], ex
         current_path = previous_path + current_position
         # Extract the template for foreign key columns of the referent table
         referent_preview_info, referent_preview_columns = get_preview_info(
-            fk_previews,
             referent_table.id,
             preview_data_columns,
             current_path,
@@ -66,18 +65,13 @@ def column_alias_from_preview_template(preview_template):
     return preview_data_column_ids
 
 
-def get_preview_info(fk_previews, referrer_table_pk, restrict_columns=None, path=[], existing_columns=[]):
+def get_preview_info(referrer_table_pk, restrict_columns=None, path=[], existing_columns=[]):
     table_constraints = Constraint.objects.filter(table_id=referrer_table_pk)
     fk_constraints = [
         table_constraint
         for table_constraint in table_constraints
         if table_constraint.type == ConstraintType.FOREIGN_KEY.value
     ]
-    if fk_previews == 'auto':
-        fk_constraints = filter(
-            _filter_preview_enabled_columns,
-            fk_constraints
-        )
     if restrict_columns:
         fk_constraints = filter(
             _get_filter_restricted_columns_fn(restrict_columns),
@@ -85,17 +79,11 @@ def get_preview_info(fk_previews, referrer_table_pk, restrict_columns=None, path
         )
 
     preview_info, columns = _preview_info_by_column_id(
-        fk_previews,
         fk_constraints,
         path,
         existing_columns
     )
     return preview_info, columns
-
-
-def _filter_preview_enabled_columns(fk_constraint):
-    constrained_column = fk_constraint.columns[0]
-    return constrained_column.display_options['show_fk_preview']
 
 
 def _get_filter_restricted_columns_fn(restricted_columns):
