@@ -150,6 +150,10 @@ export function createTable(
   return postAPI<TableEntry>('/api/db/v0/tables/', { schema, name });
 }
 
+export function getTable(id: number): CancellablePromise<TableEntry> {
+  return getAPI(`/api/db/v0/tables/${id}/`);
+}
+
 export const tables: Readable<DBTablesStoreData> = derived(
   currentSchemaId,
   ($currentSchemaId, set) => {
