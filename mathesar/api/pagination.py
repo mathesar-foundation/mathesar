@@ -65,7 +65,6 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         grouping={},
         search=[],
         duplicate_only=None,
-        show_preview=None
     ):
         group_by = GroupBy(**grouping) if grouping else None
         self.limit = self.get_limit(request)
