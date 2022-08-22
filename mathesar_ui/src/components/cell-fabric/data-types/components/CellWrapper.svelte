@@ -8,6 +8,7 @@
   export let disabled = false;
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
+  export let hasPadding = true;
 
   /**
    * This only affects the alignment of the displayed value while in
@@ -39,6 +40,7 @@
   class:truncate={multiLineTruncate}
   class:h-align-right={horizontalAlignment === 'right'}
   class:h-align-center={horizontalAlignment === 'center'}
+  class:has-padding={hasPadding}
   bind:this={element}
   on:click
   on:dblclick
@@ -55,7 +57,6 @@
 <style lang="scss">
   .cell-wrapper {
     overflow: hidden;
-    padding: 6px 8px;
     position: relative;
     display: flex;
     flex: 1 1 auto;
@@ -72,6 +73,10 @@
     }
     .icon:not(:empty) {
       margin-left: 0.5rem;
+    }
+
+    &.has-padding {
+      padding: 6px 8px;
     }
 
     &.h-align-right {

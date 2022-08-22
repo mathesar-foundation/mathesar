@@ -1,9 +1,10 @@
 <script lang="ts">
   import Identifier from '@mathesar/components/Identifier.svelte';
+  import { getTableName } from '@mathesar/stores/tables';
 
-  export let tableName = '';
+  export let tableId: number;
 </script>
 
-<span>
-  Locate or Create One <Identifier>{tableName}</Identifier> Record
+<span class="record-selector-title">
+  Locate or Create One <Identifier>{getTableName(tableId)}</Identifier> Record
 </span>

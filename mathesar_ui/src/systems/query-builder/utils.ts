@@ -83,7 +83,11 @@ export function processColumn(
     column,
     abstractType,
     cellComponentAndProps: getCellCap(abstractType.cell, column),
-    inputComponentAndProps: getDbTypeBasedInputCap(column, abstractType.cell),
+    inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      undefined,
+      abstractType.cell,
+    ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
   };
 }

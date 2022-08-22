@@ -6,8 +6,18 @@
   left: 0;
   z-index: 50;
   display: flex;
-  align-items: center;
   justify-content: center;
+  --modal-margin: 1rem;
+
+  &.v-align-top {
+    align-items: flex-start;
+  }
+  &.v-align-center {
+    align-items: center;
+  }
+  &.v-align-bottom {
+    align-items: flex-end;
+  }
 
   .overlay {
     background-color: rgba(0, 0, 0, 0.2);
@@ -22,10 +32,11 @@
   .modal {
     background-color: white;
     border-radius: 0.4em;
-    max-height: calc(100vh - 10em);
+    max-height: calc(100% - 2 * var(--modal-margin));
     min-height: 7em;
     position: relative;
     overflow: hidden;
+    margin: var(--modal-margin);
     z-index: 52;
     display: flex;
     flex-direction: column;
