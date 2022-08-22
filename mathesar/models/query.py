@@ -194,7 +194,6 @@ class UIQuery(BaseModel, Relation):
             )
         return display_name_map
 
-
     @property
     def _sa_engine(self):
         return self.base_table._sa_engine
