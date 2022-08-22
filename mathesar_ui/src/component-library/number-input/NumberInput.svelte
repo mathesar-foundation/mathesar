@@ -48,4 +48,6 @@
   {...$$restProps}
   bind:element
   {inputmode}
+  on:artificialInput
+  on:artificialChange
 />
