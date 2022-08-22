@@ -73,7 +73,11 @@ export function processColumn(
       column,
       linkFk ? linkFk.referent_table : undefined,
     ),
-    inputComponentAndProps: getDbTypeBasedInputCap(column, abstractType.cell),
+    inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      linkFk ? linkFk.referent_table : undefined,
+      abstractType.cell,
+    ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
   };
 }

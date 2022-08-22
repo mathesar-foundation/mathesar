@@ -10,6 +10,7 @@ import DataTypes from './data-types';
 import type { CellColumnLike } from './data-types/typeDefinitions';
 import type { LinkedRecordCellExternalProps } from './data-types/components/typeDefinitions';
 import LinkedRecordCell from './data-types/components/linked-record/LinkedRecordCell.svelte';
+import LinkedRecordInput from './data-types/components/linked-record/LinkedRecordInput.svelte';
 
 export type CellValueFormatter<T> = (
   value: T | null | undefined,
@@ -40,11 +41,11 @@ function getCellConfiguration(
 export function getCellCap(
   cellInfo: AbstractTypeConfiguration['cell'],
   column: CellColumnLike,
-  linksToTable?: TableEntry['id'],
+  fkTargetTableId?: TableEntry['id'],
 ): ComponentAndProps {
-  if (linksToTable) {
+  if (fkTargetTableId) {
     const props: LinkedRecordCellExternalProps = {
-      tableId: linksToTable,
+      tableId: fkTargetTableId,
     };
     return {
       component: LinkedRecordCell,
@@ -57,8 +58,18 @@ export function getCellCap(
 
 export function getDbTypeBasedInputCap(
   column: CellColumnLike,
+  fkTargetTableId?: TableEntry['id'],
   cellInfoConfig?: AbstractTypeConfiguration['cell'],
 ): ComponentAndProps {
+  if (fkTargetTableId) {
+    const props: LinkedRecordCellExternalProps = {
+      tableId: fkTargetTableId,
+    };
+    return {
+      component: LinkedRecordInput,
+      props,
+    };
+  }
   const cellInfo = cellInfoConfig ?? getCellInfo(column.type);
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
