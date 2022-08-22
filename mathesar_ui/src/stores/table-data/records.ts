@@ -67,7 +67,7 @@ export interface Grouping {
   mode: GroupingMode;
   groups: Group[];
 }
-export type FKColumnSummary = Record<string, FkSummary>;
+export type FkColumnSummary = Record<string, FkSummary>;
 
 function buildGroup(apiGroup: ApiGroup): Group {
   return {
@@ -86,6 +86,8 @@ function buildGrouping(apiGrouping: ApiGrouping): Grouping {
   };
 }
 
+export type FkColumnsSummaryRecord = Record<string, FkSummaryRecord>;
+
 export interface Row {
   /**
    * Can be `undefined` because some rows don't have an associated record, e.g.
@@ -99,7 +101,7 @@ export interface Row {
   isGroupHeader?: boolean;
   group?: Group;
   rowIndex?: number;
-  fkColumnsSummaryRecord?: Record<string, FkSummaryRecord> | null;
+  fkColumnsSummaryRecord?: FkColumnsSummaryRecord;
   groupValues?: Record<string, unknown>;
 }
 
@@ -166,7 +168,7 @@ function preprocessRecords({
   records: ApiRecord[];
   offset: number;
   grouping?: Grouping;
-  fkColumnSummary?: FKColumnSummary;
+  fkColumnSummary?: FkColumnSummary;
 }): Row[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
@@ -204,7 +206,7 @@ function preprocessRecords({
         groupIndex += 1;
       }
     }
-    const fkColumnsSummaryRecord: Record<string, FkSummaryRecord> | null =
+    const fkColumnsSummaryRecord: FkColumnsSummaryRecord | undefined =
       fkColumnSummary
         ? Object.entries(fkColumnSummary).reduce(
             (fkColumnSummaryRecord, [columnId, summaryObj]) => ({
@@ -213,7 +215,7 @@ function preprocessRecords({
             }),
             {},
           )
-        : null;
+        : undefined;
 
     combinedRecords.push({
       record,
@@ -341,7 +343,7 @@ export class RecordsData {
         ? buildGrouping(response.grouping)
         : undefined;
       // Converting an array to a map type as it would be easier to reference
-      const fkColumnSummary: FKColumnSummary | undefined =
+      const fkColumnSummary: FkColumnSummary | undefined =
         response.preview_data?.reduce(
           (acc, item) => ({
             ...acc,
