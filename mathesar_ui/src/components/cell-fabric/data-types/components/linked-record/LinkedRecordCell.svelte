@@ -7,6 +7,7 @@
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import CellWrapper from '../CellWrapper.svelte';
   import type { LinkedRecordCellProps } from '../typeDefinitions';
+  import LaunchCue from './LaunchCue.svelte';
 
   type $$Props = LinkedRecordCellProps;
 
@@ -74,10 +75,13 @@
   on:keydown={handleWrapperKeyDown}
   on:mousedown={handleMouseDown}
   on:dblclick={launchRecordSelector}
+  hasPadding={!isActive || hasValue}
 >
   <slot name="icon" slot="icon" />
   {#if hasValue}
     <LinkedRecord recordId={value} />
+  {:else if isActive}
+    <LaunchCue />
   {:else if value === undefined}
     <Default />
   {:else}

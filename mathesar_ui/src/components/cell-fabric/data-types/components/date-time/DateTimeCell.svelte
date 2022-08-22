@@ -41,6 +41,7 @@
   on:update
 >
   <DateTimeInput
+    focusOnMount={true}
     bind:value
     {type}
     {formattingString}

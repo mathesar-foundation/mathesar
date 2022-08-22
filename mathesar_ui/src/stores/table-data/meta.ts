@@ -19,6 +19,7 @@ import type { TerseSorting } from './sorting';
 import { Sorting } from './sorting';
 import type { CellKey, RowKey } from './utils';
 import { extractRowKeyFromCellKey, getRowStatus, getSheetState } from './utils';
+import { SearchFuzzy } from './searchFuzzy';
 
 /**
  * Unlike in `RequestStatus`, here the state and the error messages are
@@ -110,6 +111,8 @@ export class Meta {
 
   filtering: Writable<Filtering>;
 
+  searchFuzzy: Writable<SearchFuzzy>;
+
   // selectedRows = new WritableSet<RowKey>();
 
   cellClientSideErrors = new WritableMap<CellKey, string[]>();
@@ -157,6 +160,7 @@ export class Meta {
     this.sorting = writable(props.sorting);
     this.grouping = writable(props.grouping);
     this.filtering = writable(props.filtering);
+    this.searchFuzzy = writable(new SearchFuzzy());
 
     this.rowsWithClientSideErrors = derived(
       this.cellClientSideErrors,
@@ -217,12 +221,19 @@ export class Meta {
     );
 
     this.recordsRequestParamsData = derived(
-      [this.pagination, this.sorting, this.grouping, this.filtering],
-      ([pagination, sorting, grouping, filtering]) => ({
+      [
+        this.pagination,
+        this.sorting,
+        this.grouping,
+        this.filtering,
+        this.searchFuzzy,
+      ],
+      ([pagination, sorting, grouping, filtering, searchFuzzy]) => ({
         pagination,
         sorting,
         grouping,
         filtering,
+        searchFuzzy,
       }),
     );
   }

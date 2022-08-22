@@ -3,20 +3,23 @@
   import { toast } from '@mathesar/stores/toast';
   import { setNewRecordSelectorControllerInContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { confirmationController } from '@mathesar/stores/confirmation';
-  import { getTableName } from '@mathesar/stores/tables';
   import { modal } from './stores/modal';
-  import RecordSelectorModal from './systems/record-selector/RecordSelectorModal.svelte';
+  import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import RootRoute from './routes/RootRoute.svelte';
 
+  const recordSelectorModal = modal.spawnModalController();
   const recordSelectorController = setNewRecordSelectorControllerInContext({
-    modal: modal.spawnModalController(),
-    getTableName,
+    onOpen: () => recordSelectorModal.open(),
+    onClose: () => recordSelectorModal.close(),
   });
 </script>
 
 <ToastPresenter entries={toast.entries} />
 <Confirmation controller={confirmationController} />
-<RecordSelectorModal controller={recordSelectorController} />
+<ModalRecordSelector
+  {recordSelectorController}
+  modalController={recordSelectorModal}
+/>
 
 <RootRoute />
 

@@ -9,7 +9,7 @@
   export let closeOnInnerClick = true;
 </script>
 
-<Dropdown {closeOnInnerClick} ariaLabel={label}>
+<Dropdown {closeOnInnerClick} ariaLabel={label} {...$$restProps}>
   <span class="dropdown-menu-trigger" slot="trigger">
     {#if icon}
       <Icon {...icon} />
