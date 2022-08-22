@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Select } from '@mathesar-component-library';
   import type { SelectProps } from '@mathesar-component-library/types';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
 
   type $$Events = Select<TableEntry | undefined>['$$events_def'];
 
