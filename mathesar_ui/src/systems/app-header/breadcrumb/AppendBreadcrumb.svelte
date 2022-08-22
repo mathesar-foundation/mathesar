@@ -8,8 +8,10 @@
   const items = getBreadcrumbItemsFromContext();
 
   onMount(() => {
+    console.log("AppendBreadcrumb being mounted " + item.type)
     $items = [...$items, item];
     return () => {
+      console.log("AppendBreadcrumb being unmounted " + item.type)
       $items = $items.slice(0, -1);
     };
   });

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AttachableDropdown } from '@mathesar/component-library';
+  import { AttachableDropdown, TextInput } from '@mathesar/component-library';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import BreadcrumbSeparatorIcon from './BreadcrumbSeparatorIcon.svelte';
   import type { BreadcrumbSelectorData } from './breadcrumbTypes';
@@ -9,6 +9,8 @@
 
   let triggerElement: HTMLButtonElement;
   let isOpen = false;
+
+  let filterString = "xxx"
 </script>
 
 <div class="entity-switcher" class:is-open={isOpen}>
@@ -33,6 +35,9 @@
     }}
   >
     <div class="entity-switcher-content">
+      <!-- TODO consider improving semantics of this css class -->
+      <div class="category-name">entities</div>
+      <TextInput bind:value={filterString} />
       {#each [...data] as [categoryName, items] (categoryName)}
         <div class="category-name">{categoryName}</div>
         <ul class="items">
