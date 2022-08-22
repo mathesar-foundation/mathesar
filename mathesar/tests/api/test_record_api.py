@@ -725,60 +725,6 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     )
     assert response.status_code == 200
     publisher_template_columns = publisher_table.get_columns_by_name(["name", "id"])
-    publisher_preview_template = f'{{{publisher_template_columns[0].id}}}'
-    publisher_table_settings_id = publisher_table.settings.id
-    data = {
-        "preview_settings": {
-            'template': publisher_preview_template,
-        }
-    }
-    response = client.patch(
-        f"/api/db/v0/tables/{publisher_table.id}/settings/{publisher_table_settings_id}/",
-        data=data,
-    )
-    assert response.status_code == 200
-    publication_template_columns = publication_table.get_columns_by_name(['publisher', 'author', 'co_author', 'title', 'id'])
-    publication_preview_template = (
-        f'{{{publication_template_columns[3].id}}}'
-        f' Published By: {{{publication_template_columns[0].id}}}'
-        f' and Authored by {{{publication_template_columns[1].id}}}'
-        f' along with {{{publication_template_columns[2].id}}}'
-    )
-    publication_table_settings_id = publication_table.settings.id
-    data = {
-        "preview_settings": {
-            'template': publication_preview_template,
-        }
-    }
-    response = client.patch(
-        f"/api/db/v0/tables/{publication_table.id}/settings/{publication_table_settings_id}/",
-        data=data,
-    )
-    assert response.status_code == 200
-    response = client.get(f'/api/db/v0/tables/{checkouts_table.id}/records/', data={'fk_previews': 'all'})
-    response_data = response.json()
-    preview_data = response_data['preview_data']
-    checkouts_table_publication_fk_column = checkouts_table.get_column_by_name('publication')
-    preview_column = next(
-        preview
-        for preview in preview_data
-        if preview['column'] == checkouts_table_publication_fk_column.id
-    )
-    author_table, publisher_table, publication_table, checkouts_table = publication_tables
-    author_template_columns = author_table.get_columns_by_name(["first_name", "last_name", "id"])
-    author_preview_template = f'Full Name: {{{ author_template_columns[0].id }}} {{{author_template_columns[1].id}}}'
-    author_table_settings_id = author_table.settings.id
-    data = {
-        "preview_settings": {
-            'template': author_preview_template,
-        }
-    }
-    response = client.patch(
-        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
-        data=data,
-    )
-    assert response.status_code == 200
-    publisher_template_columns = publisher_table.get_columns_by_name(["name", "id"])
     publisher_preview_template = f'{{{ publisher_template_columns[0].id }}}'
     publisher_table_settings_id = publisher_table.settings.id
     data = {
@@ -804,7 +750,7 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
         data=data,
     )
     assert response.status_code == 200
-    response = client.get(f'/api/db/v0/tables/{checkouts_table.id}/records/', data={'fk_previews': 'all'})
+    response = client.get(f'/api/db/v0/tables/{checkouts_table.id}/records/')
     response_data = response.json()
     preview_data = response_data['preview_data']
     checkouts_table_publication_fk_column = checkouts_table.get_column_by_name('publication')
