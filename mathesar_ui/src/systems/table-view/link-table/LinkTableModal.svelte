@@ -20,7 +20,7 @@
     OneToMany,
     ManyToMany,
   } from '@mathesar/api/links';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';

@@ -15,10 +15,8 @@ import type {
   QueryResultColumns,
   QueryResultRecords,
 } from '@mathesar/api/queries/queryList';
-import type {
-  TableEntry,
-  JoinableTableResult,
-} from '@mathesar/api/tables/tableList';
+import type { TableEntry } from '@mathesar/api/tables';
+import type { JoinableTableResult } from '@mathesar/api/tables/joinable_tables';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
 import Pagination from '@mathesar/utils/Pagination';
