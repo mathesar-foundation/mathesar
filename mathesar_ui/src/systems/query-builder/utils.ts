@@ -14,11 +14,11 @@ import {
   getDbTypeBasedInputCap,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import type { TableEntry } from '@mathesar/api/tables';
 import type {
-  TableEntry,
   JpPath,
   JoinableTableResult,
-} from '@mathesar/api/tables/tableList';
+} from '@mathesar/api/tables/joinable_tables';
 import type { Column } from '@mathesar/api/tables/columns';
 import type QueryModel from './QueryModel';
 
@@ -83,7 +83,11 @@ export function processColumn(
     column,
     abstractType,
     cellComponentAndProps: getCellCap(abstractType.cell, column),
-    inputComponentAndProps: getDbTypeBasedInputCap(column, abstractType.cell),
+    inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      undefined,
+      abstractType.cell,
+    ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
   };
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
   import type { SchemaEntry } from '@mathesar/AppTypes';
   import { ImmutableMap } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';

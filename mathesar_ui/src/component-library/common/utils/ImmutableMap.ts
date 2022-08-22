@@ -1,6 +1,12 @@
 export default class ImmutableMap<Key, Value> {
   private map: Map<Key, Value>;
 
+  /**
+   * Invalid are considered the same is missing values. Attempting to set a key
+   * to an invalid value will result in the key being removed if it exists.
+   */
+  protected valueIsValid: (value: unknown) => boolean = () => true;
+
   constructor(i: Iterable<[Key, Value]> = []) {
     this.map = new Map(i);
   }
@@ -52,7 +58,11 @@ export default class ImmutableMap<Key, Value> {
       const existingValue = this.get(key);
       const newValue =
         existingValue === undefined ? value : mergeValues(existingValue, value);
-      map.set(key, newValue);
+      if (this.valueIsValid(newValue)) {
+        map.set(key, newValue);
+      } else {
+        map.delete(key);
+      }
     });
     return this.getNewInstance(map);
   }
@@ -74,7 +84,7 @@ export default class ImmutableMap<Key, Value> {
   coalesceEntries(other: Iterable<[Key, Value]>): this {
     const map = new Map(this.map);
     [...other].forEach(([key, value]) => {
-      if (!this.has(key)) {
+      if (!this.has(key) && this.valueIsValid(value)) {
         map.set(key, value);
       }
     });
@@ -86,6 +96,10 @@ export default class ImmutableMap<Key, Value> {
     const map = new Map(this.map);
     keys.forEach((key) => map.delete(key));
     return this.getNewInstance(map);
+  }
+
+  drained(): this {
+    return this.getNewInstance([]);
   }
 
   has(key: Key): boolean {
@@ -117,6 +131,12 @@ export default class ImmutableMap<Key, Value> {
   ): ImmutableMap<Key, NewValue> {
     return new ImmutableMap(
       [...this.entries()].map(([key, value]) => [key, fn(value)]),
+    );
+  }
+
+  filterValues(fn: (value: Value) => boolean): ImmutableMap<Key, Value> {
+    return new ImmutableMap(
+      [...this.entries()].filter(([, value]) => fn(value)),
     );
   }
 
