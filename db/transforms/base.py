@@ -5,6 +5,7 @@ import sqlalchemy_filters
 from sqlalchemy import select
 
 from db.functions.operations import apply
+from db.functions.operations.deserialize import get_db_function_subclass_by_id
 from db.records.operations import group, relevance
 
 
@@ -13,8 +14,8 @@ class Transform(ABC):
     spec = None
 
     def __init__(
-        self,
-        spec
+            self,
+            spec,
     ):
         if self.type is None:
             raise ValueError(
@@ -141,22 +142,62 @@ class Group(Transform):
 
 
 class Summarize(Transform):
+    """
+    "spec": {
+        "grouping_expressions": [
+            {
+                "input_alias": "col1",
+                "output_alias": "col1_alias",
+                "preproc": None  # optional for grouping cols
+            },
+            {
+                "input_alias": "col2",
+                "output_alias": None,  # optional for grouping cols
+                "preproc": "truncate_to_month"  # optional DBFunction id
+            },
+        ],
+        "aggregation_expressions": [
+            {
+                "input_alias": "col3",
+                "output_alias": "col3_alias",  # required for aggregation cols
+                "function": "aggregate_to_array"  # required DBFunction id
+            }
+        ]
+    }
+    """
     type = "summarize"
 
     def apply_to_relation(self, relation):
+
+        def _get_grouping_column(col_spec):
+            preproc = col_spec.get('preproc')
+            out_alias = col_spec.get('output_alias')
+
+            expr = relation.columns[col_spec['input_alias']]
+
+            if preproc is not None:
+                expr = get_db_function_subclass_by_id(preproc).to_sa_expression(expr)
+            if out_alias is not None:
+                expr = expr.label(out_alias)
+
+            return expr
+
         grouping_expressions = [
-            apply.get_sa_expression_from_db_function_spec(col_spec)
+            _get_grouping_column(col_spec)
             for col_spec in self.spec.get("grouping_expressions", [])
         ]
         aggregation_expressions = [
-            apply.get_sa_expression_from_db_function_spec(col_spec)
+            (
+                get_db_function_subclass_by_id(col_spec['function'])
+                .to_sa_expression(relation.columns[col_spec['input_alias']])
+                .label(col_spec['output_alias'])
+            )
             for col_spec in self.spec["aggregation_expressions"]
         ]
 
         executable = (
             select(*grouping_expressions, *aggregation_expressions)
             .group_by(*grouping_expressions)
-            .select_from(relation)
         )
         return _to_non_executable(executable)
 
