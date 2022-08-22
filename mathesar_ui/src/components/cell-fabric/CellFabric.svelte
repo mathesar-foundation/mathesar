@@ -10,6 +10,7 @@
 
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
+  export let fkSummaryValue: unknown;
   export let isActive = false;
   export let isSelectedInRange = false;
   export let disabled = false;
@@ -30,6 +31,7 @@
     {isSelectedInRange}
     {disabled}
     {horizontalAlignment}
+    {fkSummaryValue}
     bind:value
     on:movementKeyDown
     on:activate

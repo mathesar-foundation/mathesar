@@ -1,13 +1,24 @@
 <script lang="ts">
+  import type { FkSummaryRecord } from '@mathesar/api/tables/records';
+
   export let recordId: unknown;
+  export let fkSummaryValue: FkSummaryRecord | undefined;
   export let label: string | undefined = undefined;
+  // Replace the column template with respective foreign key record value
+  $: recordSummary = fkSummaryValue
+    ? Object.entries(fkSummaryValue.data).reduce(
+        (template, [columnAlias, value]) =>
+          template.replace(`{${columnAlias}}`, value?.toString()),
+        fkSummaryValue.template,
+      )
+    : String(recordId);
 </script>
 
 <span class="linked-record">
   {#if label !== undefined}
     {label}
   {:else}
-    {String(recordId)}
+    {recordSummary}
   {/if}
 </span>
 

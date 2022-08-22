@@ -38,7 +38,6 @@ export interface GetRequestParams {
   order_by?: SortingEntry[];
   grouping?: Pick<Grouping, 'columns'>;
   filter?: FilterRequest;
-  fk_preview?: 'all' | 'auto' | null;
 }
 
 export type ResultValue = string | number | boolean | null;
@@ -47,7 +46,7 @@ export type ResultValue = string | number | boolean | null;
 export type Result = Record<string, ResultValue>;
 
 /** keys are column alias name. */
-export type PreviewResult = Record<string, ResultValue>;
+export type SummaryResult = Record<string, ResultValue>;
 
 export type GroupingMode = 'distinct' | 'percentile';
 
@@ -74,21 +73,21 @@ export interface Group {
   result_indices: number[];
 }
 
-export interface Preview {
+export interface FkSummary {
   column: number;
   template: string;
-  data: PreviewResult[];
+  data: SummaryResult[];
 }
 
-export interface PreviewRecord {
+export interface FkSummaryRecord {
   column: number;
   template: string;
-  data: PreviewResult;
+  data: SummaryResult;
 }
 
 export interface Response {
   count: number;
   grouping: Grouping | null;
   results: Result[];
-  preview_data: Preview[];
+  preview_data: FkSummary[] | null;
 }

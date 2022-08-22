@@ -16,6 +16,7 @@
   export let isActive: $$Props['isActive'];
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
+  export let fkSummaryValue: $$Props['fkSummaryValue'] = undefined;
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
 
@@ -77,7 +78,7 @@
 >
   <slot name="icon" slot="icon" />
   {#if hasValue}
-    <LinkedRecord recordId={value} />
+    <LinkedRecord recordId={value} {fkSummaryValue} />
   {:else if value === undefined}
     <Default />
   {:else}

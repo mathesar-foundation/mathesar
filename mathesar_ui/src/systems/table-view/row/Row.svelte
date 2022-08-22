@@ -122,6 +122,7 @@
           modificationStatusMap={cellModificationStatus}
           clientSideErrorMap={cellClientSideErrors}
           bind:value={row.record[columnId]}
+          fkSummaryValue={row.fkColumnsSummaryRecord?.[columnId]}
           {processedColumn}
           {recordsData}
         />

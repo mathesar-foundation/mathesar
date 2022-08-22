@@ -43,6 +43,7 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
+  export let fkSummaryValue: unknown = undefined;
 
   $: recordsDataState = recordsData.state;
   $: ({ column, linkFk } = processedColumn);
@@ -139,6 +140,7 @@
       {isActive}
       {isSelectedInRange}
       {value}
+      {fkSummaryValue}
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}
