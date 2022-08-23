@@ -3,7 +3,7 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import BreadcrumbSeparatorIcon from './BreadcrumbSeparatorIcon.svelte';
   import type { BreadcrumbSelectorData } from './breadcrumbTypes';
-  import { filterBreadcrumbData } from './breadcrumbUtils';
+  import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
 
   export let data: BreadcrumbSelectorData;
   export let triggerLabel: string;
@@ -14,7 +14,7 @@
   let filterString = undefined;
   let processedData = undefined;
   $: if (filterString) {
-    processedData = filterBreadcrumbData(data, filterString);
+    processedData = filterBreadcrumbSelectorData(data, filterString);
   } else {
     processedData = data;
   }
