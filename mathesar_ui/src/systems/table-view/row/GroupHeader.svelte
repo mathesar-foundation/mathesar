@@ -27,13 +27,13 @@
     {#each columnIds as columnId (columnId)}
       <span class="tag">
         <span class="name">
-          {processedColumnsMap.get(columnId)?.column.name ?? ''}:
+          {processedColumnsMap.get(columnId)?.column.name ?? ''}
         </span>
         <span class="value"><CellValue value={cellValue(columnId)} /></span>
       </span>
     {/each}
     <span class="tag count">
-      <span class="name">Count:</span>
+      <span class="name">Count</span>
       <span class="value">{group.count}</span>
     </span>
   </div>
@@ -41,20 +41,23 @@
 
 <style lang="scss">
   [data-sheet-element='cell'].groupheader {
-    padding: 0.6rem 0.4rem;
+    padding: 0.5rem 0.4rem;
     align-items: end;
     gap: 1rem;
 
     .tag {
-      flex-shrink: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: start;
+      flex-direction: column;
+      gap: 0.2rem;
 
       .name {
-        font-weight: 500;
+        font-size: var(--text-size-x-small);
+        color: var(--color-text-muted);
       }
       .value {
-        border: 1px solid var(--color-contrast-light);
-        border-radius: 1.5rem;
-        padding: 0.2rem 0.6rem;
+        font-weight: 500;
       }
     }
   }
