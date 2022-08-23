@@ -97,3 +97,14 @@ class UnsupportedConstraintAPIException(MathesarValidationException):
     ):
         message = f"Operations related to {constraint_type} constraint are currently not supported"
         super().__init__(None, self.error_code, message, field, None)
+
+
+class ConstraintColumnEmptyAPIException(MathesarValidationException):
+    error_code = ErrorCodes.ConstraintColumnEmpty.value
+
+    def __init__(
+            self,
+            field=None,
+    ):
+        message = "Constraint column field cannot be empty"
+        super().__init__(None, self.error_code, message, field, None)

@@ -42,3 +42,4 @@ class ErrorCodes(Enum):
     InvalidLinkChoice = 4409
     IncompatibleFractionDigitValues = 4410
     UnsupportedConstraint = 4411
+    ConstraintColumnEmpty = 4412

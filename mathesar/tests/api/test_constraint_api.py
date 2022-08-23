@@ -437,8 +437,8 @@ def test_empty_column_list(create_patents_table, client):
     )
     response_data = response.json()[0]
     assert response.status_code == 400
-    assert response_data['code'] == ErrorCodes.UnknownError.value
-    assert response_data['message'] == 'Columns field cannot be empty'
+    assert response_data['code'] == ErrorCodes.ConstraintColumnEmpty.value
+    assert response_data['message'] == 'Constraint column field cannot be empty'
 
 
 def test_invalid_constraint_type(create_patents_table, client):

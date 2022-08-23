@@ -1,4 +1,3 @@
-from rest_framework.exceptions import ValidationError
 from psycopg2.errors import DuplicateTable, UniqueViolation
 from rest_framework import serializers, status
 from sqlalchemy.exc import IntegrityError, ProgrammingError
@@ -7,9 +6,8 @@ from db.constraints import utils as constraint_utils
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
-    UnsupportedConstraintAPIException,
+    ConstraintColumnEmptyAPIException, UnsupportedConstraintAPIException,
 )
-from mathesar.api.exceptions.validation_exceptions.base_exceptions import MathesarValidationException
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
@@ -49,7 +47,7 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
         # but we don't support write operations
         if constraint_obj is None:
             constraint_type = validated_data.get('type', None)
-            raise UnsupportedConstraintAPIException(constraint_type=constraint_type)
+            raise UnsupportedConstraintAPIException(constraint_type=constraint_type, field='type')
         try:
             constraint = table.add_constraint(constraint_obj)
         except ProgrammingError as e:
@@ -149,9 +147,5 @@ class ConstraintSerializer(
             raise UnsupportedConstraintAPIException(constraint_type=constraint_type)
         columns = data.get('columns', None)
         if columns == []:
-            message = 'Columns field cannot be empty'
-            raise MathesarValidationException(
-                ValidationError,
-                message=message
-            )
+            raise ConstraintColumnEmptyAPIException(field='columns')
         return super(ConstraintSerializer, self).run_validation(data)
