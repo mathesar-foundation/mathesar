@@ -39,7 +39,6 @@
   <AttachableDropdown
     {isOpen}
     trigger={triggerElement}
-    closeOnInnerClick
     on:close={() => {
       isOpen = false;
     }}
