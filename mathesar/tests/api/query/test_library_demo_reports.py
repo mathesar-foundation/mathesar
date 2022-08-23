@@ -149,6 +149,7 @@ def run_overdue_books_scenario(check_overdue_books_columns, client):
 
 @pytest.fixture
 def create_monthly_checkouts_query(run_overdue_books_scenario, get_uid, client):
+    _ = run_overdue_books_scenario
     checkouts = {
         t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
     }["Checkouts"]
