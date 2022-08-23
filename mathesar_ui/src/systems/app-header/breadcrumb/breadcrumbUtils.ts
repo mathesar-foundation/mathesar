@@ -42,6 +42,6 @@ export function filterBreadcrumbSelectorData(
         breadcrumbSelectorEntryMatches(entry, filterString),
       ),
     ])
-    .filter(([_category, entries]) => entries.length > 0);
+    .filter(([, entries]) => entries.length > 0);
   return new Map(arr);
 }
