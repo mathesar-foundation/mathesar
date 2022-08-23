@@ -38,6 +38,7 @@ export interface GetRequestParams {
   order_by?: SortingEntry[];
   grouping?: Pick<Grouping, 'columns'>;
   filter?: FilterRequest;
+  search_fuzzy?: Record<string, unknown>[];
 }
 
 export type ResultValue = string | number | boolean | null;
