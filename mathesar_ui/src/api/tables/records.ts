@@ -46,8 +46,19 @@ export type ResultValue = string | number | boolean | null;
 /** keys are stringified column ids */
 export type Result = Record<string, ResultValue>;
 
-/** keys are column alias name. */
-export type SummaryResult = Record<string, ResultValue>;
+/**
+ * Provides the data necessary to render one Record Summary, given a summary
+ * template. The template will contain column aliases enclosed in curly braces
+ * as in the following example template which contains only one column alias.
+ *
+ * ```
+ * {65__66__col__67}
+ * ```
+ *
+ * The keys in this type are column aliases. The values are the data to be
+ * rendered for that column.
+ */
+export type RecordSummaryInputData = Record<string, ResultValue>;
 
 export type GroupingMode = 'distinct' | 'percentile';
 
@@ -74,21 +85,23 @@ export interface Group {
   result_indices: number[];
 }
 
-export interface FkSummary {
+export interface DataForRecordSummariesInFkColumn {
   column: number;
   template: string;
-  data: SummaryResult[];
-}
-
-export interface FkSummaryRecord {
-  column: number;
-  template: string;
-  data: SummaryResult;
+  /**
+   * Each item in this array provides the inputs for one cell within the column.
+   * The array is to be matched, index for index, with the records in the
+   * results.
+   */
+  data: RecordSummaryInputData[];
 }
 
 export interface Response {
   count: number;
   grouping: Grouping | null;
   results: Result[];
-  preview_data: FkSummary[] | null;
+  /**
+   * Each item in this array can be matched to each FK column in the table.
+   */
+  preview_data: DataForRecordSummariesInFkColumn[] | null;
 }

@@ -1,15 +1,17 @@
 <script lang="ts">
-  import type { FkSummaryRecord } from '@mathesar/api/tables/records';
+  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
 
   export let recordId: unknown;
-  export let fkSummaryValue: FkSummaryRecord | undefined;
+  export let dataForRecordSummaryInFkCell:
+    | DataForRecordSummaryInFkCell
+    | undefined;
   export let label: string | undefined = undefined;
   // Replace the column template with respective foreign key record value
-  $: recordSummary = fkSummaryValue
-    ? Object.entries(fkSummaryValue.data).reduce(
+  $: recordSummary = dataForRecordSummaryInFkCell
+    ? Object.entries(dataForRecordSummaryInFkCell.data).reduce(
         (template, [columnAlias, value]) =>
           template.replace(`{${columnAlias}}`, String(value)),
-        fkSummaryValue.template,
+        dataForRecordSummaryInFkCell.template,
       )
     : String(recordId);
 </script>

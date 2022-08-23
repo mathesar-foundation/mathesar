@@ -17,7 +17,8 @@
   const dispatch = createEventDispatcher();
 
   export let value: $$Props['value'] = undefined;
-  export let fkSummaryValue: $$Props['fkSummaryValue'] = undefined;
+  export let dataForRecordSummaryInFkCell: $$Props['dataForRecordSummaryInFkCell'] =
+    undefined;
   export let tableId: $$Props['tableId'];
   let classes: $$Props['class'] = '';
   export { classes as class };
@@ -88,7 +89,7 @@
 >
   {#if hasValue}
     <span class="content">
-      <LinkedRecord recordId={value} {fkSummaryValue} />
+      <LinkedRecord recordId={value} {dataForRecordSummaryInFkCell} />
     </span>
     <ClearCue on:click={clear} />
   {:else if !isAcquiringInput}

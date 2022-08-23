@@ -4,13 +4,16 @@
   This component is meant to be common for tables, queries, and for import preview
 -->
 <script lang="ts">
+  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
   import RecordPageLink from '../RecordPageLink.svelte';
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';
 
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
-  export let fkSummaryValue: unknown | undefined = undefined;
+  export let dataForRecordSummaryInFkCell:
+    | DataForRecordSummaryInFkCell
+    | undefined = undefined;
   export let isActive = false;
   export let isSelectedInRange = false;
   export let disabled = false;
@@ -31,7 +34,7 @@
     {isSelectedInRange}
     {disabled}
     {horizontalAlignment}
-    {fkSummaryValue}
+    {dataForRecordSummaryInFkCell}
     bind:value
     on:movementKeyDown
     on:activate

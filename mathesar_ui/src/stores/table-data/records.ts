@@ -16,9 +16,9 @@ import type {
   Grouping as ApiGrouping,
   ResultValue,
   GroupingMode,
-  FkSummary,
+  DataForRecordSummariesInFkColumn,
   GetRequestParams as ApiGetRequestParams,
-  FkSummaryRecord,
+  RecordSummaryInputData,
 } from '@mathesar/api/tables/records';
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
@@ -67,7 +67,11 @@ export interface Grouping {
   mode: GroupingMode;
   groups: Group[];
 }
-export type FkColumnSummary = Record<string, FkSummary>;
+/** Keys are stringified column ids */
+type DataForRecordSummariesInFkColumns = Record<
+  string,
+  DataForRecordSummariesInFkColumn
+>;
 
 function buildGroup(apiGroup: ApiGroup): Group {
   return {
@@ -86,7 +90,13 @@ function buildGrouping(apiGrouping: ApiGrouping): Grouping {
   };
 }
 
-export type FkColumnsSummaryRecord = Record<string, FkSummaryRecord>;
+export interface DataForRecordSummaryInFkCell {
+  column: number;
+  template: string;
+  data: RecordSummaryInputData;
+}
+
+type DataForRecordSummariesInRow = Record<string, DataForRecordSummaryInFkCell>;
 
 export interface Row {
   /**
@@ -101,7 +111,7 @@ export interface Row {
   isGroupHeader?: boolean;
   group?: Group;
   rowIndex?: number;
-  fkColumnsSummaryRecord?: FkColumnsSummaryRecord;
+  dataForRecordSummariesInRow?: DataForRecordSummariesInRow;
   groupValues?: Record<string, unknown>;
 }
 
@@ -163,12 +173,12 @@ function preprocessRecords({
   records,
   offset,
   grouping,
-  fkColumnSummary,
+  dataForRecordSummariesInFkColumns,
 }: {
   records: ApiRecord[];
   offset: number;
   grouping?: Grouping;
-  fkColumnSummary?: FkColumnSummary;
+  dataForRecordSummariesInFkColumns?: DataForRecordSummariesInFkColumns;
 }): Row[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
@@ -206,9 +216,9 @@ function preprocessRecords({
         groupIndex += 1;
       }
     }
-    const fkColumnsSummaryRecord: FkColumnsSummaryRecord | undefined =
-      fkColumnSummary
-        ? Object.entries(fkColumnSummary).reduce(
+    const dataForRecordSummariesInRow: DataForRecordSummariesInRow | undefined =
+      dataForRecordSummariesInFkColumns
+        ? Object.entries(dataForRecordSummariesInFkColumns).reduce(
             (fkColumnSummaryRecord, [columnId, summaryObj]) => ({
               ...fkColumnSummaryRecord,
               [columnId]: { ...summaryObj, data: summaryObj.data[index] },
@@ -219,7 +229,7 @@ function preprocessRecords({
 
     combinedRecords.push({
       record,
-      fkColumnsSummaryRecord,
+      dataForRecordSummariesInRow,
       identifier: generateRowIdentifier('normal', offset, existingRecordIndex),
       rowIndex: index,
     });
@@ -343,8 +353,8 @@ export class RecordsData {
         ? buildGrouping(response.grouping)
         : undefined;
       // Converting an array to a map type as it would be easier to reference
-      const fkColumnSummary: FkColumnSummary | undefined =
-        response.preview_data?.reduce(
+      const dataForRecordSummariesInFkColumns: DataForRecordSummariesInFkColumns =
+        (response.preview_data ?? []).reduce(
           (acc, item) => ({
             ...acc,
             [item.column]: item,
@@ -355,7 +365,7 @@ export class RecordsData {
         records: response.results,
         offset,
         grouping,
-        fkColumnSummary,
+        dataForRecordSummariesInFkColumns,
       });
 
       const tableRecordsData: TableRecordsData = {
