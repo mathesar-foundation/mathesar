@@ -2,8 +2,8 @@ import tempfile
 
 from psycopg2 import sql
 from sqlalchemy.exc import IntegrityError, ProgrammingError
-from psycopg2.errors import NotNullViolation, ForeignKeyViolation, DatatypeMismatch
-from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError
+from psycopg2.errors import NotNullViolation, ForeignKeyViolation, DatatypeMismatch, UniqueViolation
+from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError
 from db.columns.base import MathesarColumn
 from db.encoding_utils import get_sql_compatible_encoding
 from db.records.operations.select import get_record
@@ -105,6 +105,8 @@ def insert_from_select(from_table, target_table, engine, col_mappings=None):
                 raise NotNullError
             elif type(e.orig) == ForeignKeyViolation:
                 raise ForeignKeyError
+            elif type(e.orig) == UniqueViolation:
+                raise UniqueValueError
             else:
                 raise e
         except ProgrammingError as e:

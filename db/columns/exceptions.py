@@ -28,3 +28,7 @@ class ForeignKeyError(Exception):
 
 class TypeMismatchError(Exception):
     pass
+
+
+class UniqueValueError(Exception):
+    pass
