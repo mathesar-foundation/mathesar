@@ -9,11 +9,12 @@
   import type { Row } from '@mathesar/stores/table-data/types';
   import type { SheetVirtualRowsApi } from '@mathesar/components/sheet/types';
   import type Pagination from '@mathesar/utils/Pagination';
+  import type { States } from '@mathesar/utils/api';
 
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ recordsData, display, meta } = $tabularData);
-  $: ({ newRecords } = recordsData);
+  $: ({ newRecords, state } = recordsData);
   $: ({ sorting, filtering, grouping, pagination } = meta);
   $: ({ displayableRecords } = display);
 
@@ -44,8 +45,22 @@
 
   let previousNewRecordsCount = 0;
   let previousAllRecordsCount = 0;
+  let prevGrouping: Grouping;
+  let prevRecordState: States;
 
-  async function resetIndex(_displayableRecords: Row[]) {
+  async function resetIndex(_recordState: States, _displayableRecords: Row[]) {
+    if (
+      prevGrouping !== $grouping ||
+      ($grouping.size > 0 && prevRecordState !== _recordState)
+    ) {
+      await tick();
+      // Reset if grouping is active
+      api.recalculateHeightsAfterIndex(0);
+      prevGrouping = $grouping;
+      prevRecordState = _recordState;
+      return;
+    }
+
     const allRecordCount = _displayableRecords.length ?? 0;
     const newRecordCount = $newRecords.length ?? 0;
     if (previousNewRecordsCount !== newRecordCount) {
@@ -63,5 +78,5 @@
     }
   }
 
-  $: void resetIndex($displayableRecords);
+  $: void resetIndex($state, $displayableRecords);
 </script>
