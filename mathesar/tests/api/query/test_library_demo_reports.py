@@ -98,21 +98,21 @@ def check_overdue_books_columns(create_overdue_books_query, client):
     query_id = create_overdue_books_query.json()['id']
     expect_response_data = [
         {
-            'alias': 'email',
-            'display_name': 'Patron Email',
-            'type': 'mathesar_types.email',
-            'type_options': None,
-            'display_options': None
-        }, {
             'alias': 'Title List',
             'display_name': 'Titles',
             'type': '_array',
             'type_options': None,
             'display_options': None
+        }, {
+            'alias': 'email',
+            'display_name': 'Patron Email',
+            'type': 'mathesar_types.email',
+            'type_options': None,
+            'display_options': None
         }
     ]
     actual_response_data = client.get(f'/api/db/v0/queries/{query_id}/columns/').json()
-    assert actual_response_data == expect_response_data
+    assert sorted(actual_response_data, key=lambda x: x['alias']) == expect_response_data
     return query_id
 
 
@@ -193,9 +193,10 @@ def create_monthly_checkouts_query(run_overdue_books_scenario, get_uid, client):
     return response
 
 
-def test_check_monthly_checkouts_columns(create_monthly_checkouts_query, client):
+@pytest.fixture
+def check_monthly_checkouts_columns(create_monthly_checkouts_query, client):
     query_id = create_monthly_checkouts_query.json()['id']
-    expect_repsonse_data =  [
+    expect_repsonse_data = [
         {
             'alias': 'Checkout Month',
             'display_name': 'Month',
@@ -212,3 +213,16 @@ def test_check_monthly_checkouts_columns(create_monthly_checkouts_query, client)
     ]
     actual_response_data = client.get(f'/api/db/v0/queries/{query_id}/columns/').json()
     assert sorted(actual_response_data, key=lambda x: x['alias']) == expect_repsonse_data
+    return query_id
+
+
+def test_monthly_checkouts_scenario(check_monthly_checkouts_columns, client):
+    query_id = check_monthly_checkouts_columns
+    expect_records = [
+        {'Checkout Month': '2022-05', 'Count': 39},
+        {'Checkout Month': '2022-06', 'Count': 26},
+        {'Checkout Month': '2022-07', 'Count': 29},
+        {'Checkout Month': '2022-08', 'Count': 10},
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
