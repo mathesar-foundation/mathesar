@@ -1,14 +1,20 @@
 <script lang="ts">
-  import { AttachableDropdown } from '@mathesar/component-library';
+  import { AttachableDropdown, TextInput } from '@mathesar/component-library';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import BreadcrumbSeparatorIcon from './BreadcrumbSeparatorIcon.svelte';
   import type { BreadcrumbSelectorData } from './breadcrumbTypes';
+  import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
 
   export let data: BreadcrumbSelectorData;
   export let triggerLabel: string;
 
   let triggerElement: HTMLButtonElement;
   let isOpen = false;
+  let filterString: string;
+
+  $: processedData = filterString
+    ? filterBreadcrumbSelectorData(data, filterString)
+    : data;
 </script>
 
 <div class="entity-switcher" class:is-open={isOpen}>
@@ -24,21 +30,22 @@
     <BreadcrumbSeparatorIcon />
   </button>
 
-  <AttachableDropdown
-    {isOpen}
-    trigger={triggerElement}
-    closeOnInnerClick
-    on:close={() => {
-      isOpen = false;
-    }}
-  >
+  <AttachableDropdown bind:isOpen trigger={triggerElement}>
     <div class="entity-switcher-content">
-      {#each [...data] as [categoryName, items] (categoryName)}
+      <!-- TODO consider improving semantics of this css class -->
+      <div class="category-name">entities</div>
+      <TextInput bind:value={filterString} />
+      {#each [...processedData] as [categoryName, items] (categoryName)}
         <div class="category-name">{categoryName}</div>
         <ul class="items">
           {#each items as { href, label, icon } (href)}
             <li class="item">
-              <a {href}>
+              <a
+                {href}
+                on:click={() => {
+                  isOpen = false;
+                }}
+              >
                 <NameWithIcon {icon}>{label}</NameWithIcon>
               </a>
             </li>
