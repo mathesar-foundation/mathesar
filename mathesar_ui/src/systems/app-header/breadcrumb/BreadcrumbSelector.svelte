@@ -18,7 +18,6 @@
   } else {
     processedData = data;
   }
-  let dropdown: AttachableDropdown;
 </script>
 
 <div class="entity-switcher" class:is-open={isOpen}>
@@ -34,14 +33,7 @@
     <BreadcrumbSeparatorIcon />
   </button>
 
-  <AttachableDropdown
-    {isOpen}
-    bind:this={dropdown}
-    trigger={triggerElement}
-    on:close={() => {
-      isOpen = false;
-    }}
-  >
+  <AttachableDropdown bind:isOpen trigger={triggerElement}>
     <div class="entity-switcher-content">
       <!-- TODO consider improving semantics of this css class -->
       <div class="category-name">entities</div>
@@ -51,7 +43,12 @@
         <ul class="items">
           {#each items as { href, label, icon } (href)}
             <li class="item">
-              <a {href} on:click={dropdown.close}>
+              <a
+                {href}
+                on:click={() => {
+                  isOpen = false;
+                }}
+              >
                 <NameWithIcon {icon}>{label}</NameWithIcon>
               </a>
             </li>

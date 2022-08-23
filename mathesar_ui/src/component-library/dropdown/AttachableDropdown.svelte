@@ -68,7 +68,7 @@
   }
   $: watchIsOpen(isOpen);
 
-  export function close() {
+  function close() {
     isOpen = false;
   }
 
