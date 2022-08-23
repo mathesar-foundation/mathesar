@@ -36,7 +36,7 @@ export function filterBreadcrumbSelectorData(
 ): BreadcrumbSelectorData {
   let arr = Array.from(data);
   arr = arr
-    .map(([category, entries]) => [
+    .map(([category, entries]): [string, BreadcrumbSelectorEntry[]] => [
       category,
       Array.from(entries).filter((entry) =>
         breadcrumbSelectorEntryMatches(entry, filterString),
