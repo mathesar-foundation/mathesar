@@ -24,3 +24,7 @@ class NotNullError(Exception):
 
 class ForeignKeyError(Exception):
     pass
+
+
+class TypeMismatchError(Exception):
+    pass

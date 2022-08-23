@@ -3,7 +3,7 @@ import tempfile
 from psycopg2 import sql
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from psycopg2.errors import NotNullViolation, ForeignKeyViolation, DatatypeMismatch
-from db.columns.exceptions import NotNullError, ForeignKeyError
+from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError
 from db.columns.base import MathesarColumn
 from db.encoding_utils import get_sql_compatible_encoding
 from db.records.operations.select import get_record
@@ -109,7 +109,7 @@ def insert_from_select(from_table, target_table, engine, col_mappings=None):
                 raise e
         except ProgrammingError as e:
             if type(e.orig) == DatatypeMismatch:
-                raise e.orig
+                raise TypeMismatchError
             else:
                 raise e
         except Exception as e:
