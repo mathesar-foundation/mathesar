@@ -6,7 +6,9 @@ from db.constraints import utils as constraint_utils
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
-from mathesar.api.exceptions.validation_exceptions.exceptions import UnknownDatabaseTypeIdentifier
+from mathesar.api.exceptions.validation_exceptions.exceptions import (
+    UnsupportedConstraintAPIException,
+)
 from mathesar.api.exceptions.validation_exceptions.base_exceptions import MathesarValidationException
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from mathesar.api.serializers.shared_serializers import (
@@ -43,9 +45,11 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         table = self.context['table']
         constraint_obj = self.construct_constraint_obj(table, validated_data)
+        # Additional check is needed because we support read operations for primary key constraint,
+        # but we don't support write operations
         if constraint_obj is None:
-            message = 'Only creating unique constraints is currently supported.'
-            raise UnknownDatabaseTypeIdentifier(db_type_id=None, message=message)
+            constraint_type = validated_data.get('type', None)
+            raise UnsupportedConstraintAPIException(constraint_type=constraint_type)
         try:
             constraint = table.add_constraint(constraint_obj)
         except ProgrammingError as e:
@@ -132,12 +136,6 @@ class ConstraintSerializer(
         'unique': BaseConstraintSerializer,
     }
 
-    def create(self, validated_data):
-        serializer = self.get_serializer_class(self.get_mapping_field(validated_data))
-        if serializer is None:
-            raise UnknownDatabaseTypeIdentifier(db_type_id=None)
-        return serializer.create(validated_data)
-
     def get_mapping_field(self, data):
         if isinstance(data, Constraint):
             constraint_type = data.type
@@ -146,6 +144,9 @@ class ConstraintSerializer(
         return constraint_type
 
     def run_validation(self, data):
+        constraint_type = data.get('type', None)
+        if constraint_type not in self.serializers_mapping.keys():
+            raise UnsupportedConstraintAPIException(constraint_type=constraint_type)
         columns = data.get('columns', None)
         if columns == []:
             message = 'Columns field cannot be empty'

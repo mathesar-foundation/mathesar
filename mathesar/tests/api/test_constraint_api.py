@@ -441,11 +441,12 @@ def test_empty_column_list(create_patents_table, client):
     assert response_data['message'] == 'Columns field cannot be empty'
 
 
-def test_invalid_constrint_type(create_patents_table, client):
+def test_invalid_constraint_type(create_patents_table, client):
     table_name = 'NASA Constraint List 12'
     table = create_patents_table(table_name)
+    invalid_constraint = 'foo'
     data = {
-        'type': 'foo',
+        'type': invalid_constraint,
         'columns': [1]
     }
     response = client.post(
@@ -453,5 +454,5 @@ def test_invalid_constrint_type(create_patents_table, client):
     )
     response_data = response.json()[0]
     assert response.status_code == 400
-    assert response_data['code'] == ErrorCodes.UnknownDBType.value
-    assert 'Unknown database type identifier' in response_data['message']
+    assert response_data['code'] == ErrorCodes.UnsupportedConstraint.value
+    assert f'Operations related to {invalid_constraint} constraint are currently not supported' in response_data['message']

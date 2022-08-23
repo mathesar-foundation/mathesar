@@ -85,3 +85,15 @@ class IncompatibleFractionDigitValuesAPIException(MathesarValidationException):
             details=None,
     ):
         super().__init__(None, self.error_code, message, field, details)
+
+
+class UnsupportedConstraintAPIException(MathesarValidationException):
+    error_code = ErrorCodes.UnsupportedConstraint.value
+
+    def __init__(
+            self,
+            constraint_type,
+            field=None,
+    ):
+        message = f"Operations related to {constraint_type} constraint are currently not supported"
+        super().__init__(None, self.error_code, message, field, None)
