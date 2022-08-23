@@ -55,7 +55,16 @@ export type Result = Record<string, ResultValue>;
  * {65__66__col__67}
  * ```
  *
- * The keys in this type are column aliases. The values are the data to be
+ * The column alias, "65__66__col__67" is a unique serialization of the full
+ * path traversed through foreign keys to find the column which contains the
+ * value to be rendered within the template. Because record summaries can be
+ * transitive, the value may lie within a column several tables away. The alias
+ * needs to represent the full path so that we avoid collisions between two FK
+ * columns which point to the same table. The front end does not need to parse
+ * the column alias -- it just needs to match aliases within templates to
+ * aliases within sets of input data.
+ *
+ * The keys in this type below are column aliases. The values are the data to be
  * rendered for that column.
  */
 export type RecordSummaryInputData = Record<string, ResultValue>;
