@@ -11,7 +11,7 @@ import {
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/tables/tableList';
+import type { TableEntry } from '@mathesar/api/tables';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -148,6 +148,10 @@ export function createTable(
   name?: string,
 ): CancellablePromise<TableEntry> {
   return postAPI<TableEntry>('/api/db/v0/tables/', { schema, name });
+}
+
+export function getTable(id: number): CancellablePromise<TableEntry> {
+  return getAPI(`/api/db/v0/tables/${id}/`);
 }
 
 export const tables: Readable<DBTablesStoreData> = derived(

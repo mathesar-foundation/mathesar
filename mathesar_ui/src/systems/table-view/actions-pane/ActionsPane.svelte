@@ -7,7 +7,7 @@
     iconError,
     MenuItem,
   } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
   import type { SchemaEntry } from '@mathesar/AppTypes';
   import EntityType from '@mathesar/components/EntityType.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
@@ -46,7 +46,7 @@
   const linkTableModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
 
-  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
+  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore, isLoading } =
     $tabularData);
   $: ({ columns } = $columnsDataStore);
   $: ({
@@ -58,10 +58,6 @@
   } = meta);
   $: recordState = recordsData.state;
 
-  $: isLoading =
-    $columnsDataStore.state === States.Loading ||
-    $recordState === States.Loading ||
-    $constraintsDataStore.state === States.Loading;
   $: isError =
     $columnsDataStore.state === States.Error ||
     $recordState === States.Error ||
@@ -161,7 +157,7 @@
   <div class="divider" />
 
   <Button
-    disabled={isLoading}
+    disabled={$isLoading}
     size="medium"
     on:click={() => recordsData.addEmptyRecord()}
   >
@@ -172,7 +168,7 @@
   <div class="divider" />
 
   <Button
-    disabled={isLoading}
+    disabled={$isLoading}
     size="medium"
     on:click={() => linkTableModal.open()}
   >
@@ -196,13 +192,13 @@
   {/if}
 
   <div class="loading-info">
-    <Button size="medium" disabled={isLoading} on:click={refresh}>
+    <Button size="medium" disabled={$isLoading} on:click={refresh}>
       <Icon
         {...isError && !isLoading ? iconError : iconRefresh}
-        spin={isLoading}
+        spin={$isLoading}
       />
       <span>
-        {#if isLoading}
+        {#if $isLoading}
           Loading
         {:else if isError}
           Retry
