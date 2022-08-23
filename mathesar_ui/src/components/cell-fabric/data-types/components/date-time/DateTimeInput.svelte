@@ -64,7 +64,6 @@
 
   function onValueChange(newValue: string) {
     value = formatter.parse(newValue).value;
-    close();
   }
 </script>
 
@@ -93,5 +92,6 @@
     {timeShow24Hr}
     {timeEnableSeconds}
     on:change={(e) => onValueChange(e.detail)}
+    on:dateChange={close}
   />
 </AttachableDropdown>
