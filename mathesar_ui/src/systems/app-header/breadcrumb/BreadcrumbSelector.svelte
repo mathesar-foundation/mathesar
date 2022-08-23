@@ -10,14 +10,11 @@
 
   let triggerElement: HTMLButtonElement;
   let isOpen = false;
-
   let filterString: string;
-  let processedData: BreadcrumbSelectorData;
-  $: if (filterString) {
-    processedData = filterBreadcrumbSelectorData(data, filterString);
-  } else {
-    processedData = data;
-  }
+
+  $: processedData = filterString
+    ? filterBreadcrumbSelectorData(data, filterString)
+    : data;
 </script>
 
 <div class="entity-switcher" class:is-open={isOpen}>
