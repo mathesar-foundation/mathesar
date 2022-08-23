@@ -1,8 +1,8 @@
 import tempfile
 
 from psycopg2 import sql
-from sqlalchemy.exc import IntegrityError
-from psycopg2.errors import NotNullViolation, ForeignKeyViolation
+from sqlalchemy.exc import IntegrityError, ProgrammingError
+from psycopg2.errors import NotNullViolation, ForeignKeyViolation, DatatypeMismatch
 from db.columns.exceptions import NotNullError, ForeignKeyError
 from db.columns.base import MathesarColumn
 from db.encoding_utils import get_sql_compatible_encoding
@@ -105,6 +105,11 @@ def insert_from_select(from_table, target_table, engine, col_mappings=None):
                 raise NotNullError
             elif type(e.orig) == ForeignKeyViolation:
                 raise ForeignKeyError
+            else:
+                raise e
+        except ProgrammingError as e:
+            if type(e.orig) == DatatypeMismatch:
+                raise e.orig
             else:
                 raise e
         except Exception as e:
