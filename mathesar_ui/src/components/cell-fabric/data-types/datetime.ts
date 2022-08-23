@@ -47,7 +47,10 @@ const stringType: CellComponentFactory = {
     config?: { supportTimeZone?: boolean },
   ): ComponentAndProps<DateTimeCellExternalProps> => ({
     component: DateTimeInput,
-    props: getProps(column, config?.supportTimeZone ?? false),
+    props: {
+      ...getProps(column, config?.supportTimeZone ?? false),
+      allowRelativePresets: true,
+    },
   }),
 };
 

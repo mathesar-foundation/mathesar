@@ -38,7 +38,10 @@ const stringType: CellComponentFactory = {
     column: DateLikeColumn,
   ): ComponentAndProps<DateTimeCellExternalProps> => ({
     component: DateTimeInput,
-    props: getProps(column),
+    props: {
+      ...getProps(column),
+      allowRelativePresets: true,
+    },
   }),
 };
 
