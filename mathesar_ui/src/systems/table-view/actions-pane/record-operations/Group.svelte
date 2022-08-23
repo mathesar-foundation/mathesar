@@ -10,12 +10,18 @@
   export let columns: Column[];
 
   /** Columns which are not already used as a grouping entry */
-  $: availableColumns = columns.filter((column) => !$grouping.has(column.id));
+  $: availableColumns = columns.filter(
+    (column) => !$grouping.hasColumn(column.id),
+  );
   $: [newGroupColumn] = availableColumns;
   let addNew = false;
 
   function addGroupColumn() {
-    grouping.update((g) => g.with(newGroupColumn.id));
+    grouping.update((g) =>
+      g.withEntry({
+        columnId: newGroupColumn.id,
+      }),
+    );
     addNew = false;
   }
 </script>
@@ -24,21 +30,21 @@
   <div class="header">
     <span>
       Group
-      {#if $grouping.size > 0}
-        ({$grouping.size})
+      {#if $grouping.entries.length > 0}
+        ({$grouping.entries.length})
       {/if}
     </span>
   </div>
   <div class="content">
     <table>
-      {#each [...$grouping] as columnId (columnId)}
+      {#each $grouping.entries as groupEntry, index (groupEntry)}
         <tr>
           <td class="groupcolumn">
-            {columns.find((c) => c.id === columnId)?.name}
+            {columns.find((c) => c.id === groupEntry.columnId)?.name}
           </td>
           <td class="action">
             <Button
-              on:click={() => grouping.update((g) => g.without(columnId))}
+              on:click={() => grouping.update((g) => g.withoutEntry(index))}
             >
               Clear
             </Button>

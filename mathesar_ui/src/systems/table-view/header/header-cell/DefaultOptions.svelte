@@ -38,7 +38,7 @@
 
   $: ({ sorting, grouping } = meta);
   $: sortDirection = $sorting.get(column.id);
-  $: hasGrouping = $grouping.has(column.id);
+  $: hasGrouping = $grouping.hasColumn(column.id);
 
   $: allowsNull = column.nullable;
   $: ({ uniqueColumns } = constraintsDataStore);
@@ -59,9 +59,13 @@
 
   function toggleGroup() {
     if (hasGrouping) {
-      grouping.update((g) => g.without(column.id));
+      grouping.update((g) => g.withoutColumn(column.id));
     } else {
-      grouping.update((g) => g.with(column.id));
+      grouping.update((g) =>
+        g.withEntry({
+          columnId: column.id,
+        }),
+      );
     }
     dispatch('close');
   }

@@ -3,6 +3,12 @@ export interface Grouping {
   columns: number[];
   mode: GroupingMode;
   /**
+   * Preproc needs to contain id of a preproc function.
+   * The number of preproc functions should match the
+   * number of columns, or it should be null.
+   */
+  preproc: (string | null)[] | null;
+  /**
    * When `mode` === 'distinct', `num_groups` will always be `null`.
    *
    * When `mode` === 'percentile', `num_groups` will give the number of groups,
@@ -36,7 +42,7 @@ export interface GetRequestParams {
   limit?: number;
   offset?: number;
   order_by?: SortingEntry[];
-  grouping?: Pick<Grouping, 'columns'>;
+  grouping?: Pick<Grouping, 'columns' | 'preproc'>;
   filter?: FilterRequest;
   search_fuzzy?: Record<string, unknown>[];
 }

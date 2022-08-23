@@ -145,8 +145,8 @@
       <Icon {...iconGrouping} />
       <span>
         Group
-        {#if $grouping.size > 0}
-          ({$grouping.size})
+        {#if $grouping.entries.length > 0}
+          ({$grouping.entries.length})
         {/if}
       </span>
     </svelte:fragment>

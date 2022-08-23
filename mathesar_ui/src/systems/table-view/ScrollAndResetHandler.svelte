@@ -51,7 +51,7 @@
   async function resetIndex(_recordState: States, _displayableRecords: Row[]) {
     if (
       prevGrouping !== $grouping ||
-      ($grouping.size > 0 && prevRecordState !== _recordState)
+      ($grouping.entries.length > 0 && prevRecordState !== _recordState)
     ) {
       await tick();
       // Reset if grouping is active

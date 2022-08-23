@@ -26,14 +26,14 @@ import type { Meta } from './meta';
 import { validateRow, getCellKey } from './utils';
 import type { ColumnsDataStore } from './columns';
 import type { Sorting } from './sorting';
-import type { Grouping as GroupingTODORename } from './grouping';
+import type { Grouping as GroupingRequest } from './grouping';
 import type { Filtering } from './filtering';
 import type { SearchFuzzy } from './searchFuzzy';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
   sorting: Sorting;
-  grouping: GroupingTODORename;
+  grouping: GroupingRequest;
   filtering: Filtering;
   searchFuzzy: SearchFuzzy;
 }

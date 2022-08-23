@@ -79,7 +79,7 @@ export class Sorting extends ImmutableMap<number, SortDirection> {
     grouping: Grouping,
   ): Pick<GetRequestParams, 'order_by'> {
     const sortingFromGrouping = new Sorting(
-      [...grouping].map((g) => [g, SortDirection.A]),
+      grouping.entries.map((g) => [g.columnId, SortDirection.A]),
     );
     return sortingFromGrouping.withEntries(this).recordsRequestParams();
   }
