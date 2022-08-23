@@ -12,6 +12,7 @@
     DateTimeCellExternalProps,
     DateTimeCellProps,
   } from '../typeDefinitions';
+  import Presets from './Presets.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -27,6 +28,8 @@
   export let value: $$Props['value'];
   export let timeShow24Hr: $$Props['timeShow24Hr'] = true;
   export let timeEnableSeconds: $$Props['timeEnableSeconds'] = true;
+
+  export let allowRelativePresets: $$Props['allowRelativePresets'] = false;
 
   let element: HTMLInputElement;
   let isOpen = false;
@@ -64,7 +67,6 @@
 
   function onValueChange(newValue: string) {
     value = formatter.parse(newValue).value;
-    close();
   }
 </script>
 
@@ -93,5 +95,13 @@
     {timeShow24Hr}
     {timeEnableSeconds}
     on:change={(e) => onValueChange(e.detail)}
+    on:dateChange={close}
+  />
+  <Presets
+    bind:value
+    isRelative={allowRelativePresets}
+    {type}
+    {formattingString}
+    on:change={close}
   />
 </AttachableDropdown>

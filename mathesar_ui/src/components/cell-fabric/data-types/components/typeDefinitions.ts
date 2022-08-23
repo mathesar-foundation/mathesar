@@ -101,6 +101,7 @@ export interface DateTimeCellExternalProps {
   formatter: DateTimeFormatter;
   timeShow24Hr?: boolean;
   timeEnableSeconds?: boolean;
+  allowRelativePresets?: boolean;
 }
 
 export interface DateTimeCellProps
