@@ -12,7 +12,7 @@ from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.utils import follows_json_number_spec
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.models import base as models_base
-from mathesar.models.base import db_get_records_with_default_order
+from mathesar.models.query import DBQuery
 from mathesar.utils.preview import compute_path_prefix, compute_path_str
 
 
@@ -111,7 +111,7 @@ def test_record_list_filter(create_patents_table, client):
     json_filter = json.dumps(filter)
 
     with patch.object(
-        models_base, "db_get_records_with_default_order", side_effect=db_get_records_with_default_order
+        DBQuery, "get_records", side_effect=DBQuery.get_records, autospec=True
     ) as mock_get:
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
@@ -137,7 +137,7 @@ def test_record_list_duplicate_rows_only(create_patents_table, client):
     duplicate_only = columns_name_id_map['Patent Expiration Date']
     json_duplicate_only = json.dumps(duplicate_only)
 
-    with patch.object(models_base, "db_get_records_with_default_order", return_value=[]) as mock_get:
+    with patch.object(DBQuery, "get_records", return_value=[]) as mock_get:
         client.get(f'/api/db/v0/tables/{table.id}/records/?duplicate_only={json_duplicate_only}')
     assert mock_get.call_args is not None
     assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
@@ -195,7 +195,7 @@ def test_filter_with_added_columns(create_patents_table, client):
             json_filter = json.dumps(filter)
 
             with patch.object(
-                models_base, "db_get_records_with_default_order", side_effect=db_get_records_with_default_order
+                DBQuery, "get_records", side_effect=DBQuery.get_records, autospec=True
             ) as mock_get:
                 response = client.get(
                     f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
@@ -229,7 +229,7 @@ def test_record_list_sort(create_patents_table, client):
     json_order_by = json.dumps(id_converted_order_by)
 
     with patch.object(
-        models_base, "db_get_records_with_default_order", side_effect=db_get_records_with_default_order
+        DBQuery, "get_records", side_effect=DBQuery.get_records, autospec=True
     ) as mock_get:
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?order_by={json_order_by}'
@@ -905,7 +905,7 @@ def test_record_list_filter_exceptions(create_patents_table, client):
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     filter_list = json.dumps({"empty": [{"column_name": [columns_name_id_map['Center']]}]})
-    with patch.object(models_base, "db_get_records_with_default_order", side_effect=exception):
+    with patch.object(DBQuery, "get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?filters={filter_list}'
         )
@@ -922,7 +922,7 @@ def test_record_list_sort_exceptions(create_patents_table, client, exception):
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     order_by = json.dumps([{"field": columns_name_id_map['id'], "direction": "desc"}])
-    with patch.object(models_base, "db_get_records_with_default_order", side_effect=exception):
+    with patch.object(DBQuery, "get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?order_by={order_by}'
         )
@@ -939,7 +939,7 @@ def test_record_list_group_exceptions(create_patents_table, client, exception):
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     group_by = json.dumps({"columns": [columns_name_id_map['Case Number']]})
-    with patch.object(models_base, "db_get_records_with_default_order", side_effect=exception):
+    with patch.object(DBQuery, "get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?grouping={group_by}'
         )
