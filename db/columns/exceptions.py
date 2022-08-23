@@ -16,3 +16,11 @@ class DagCycleError(Exception):
 
 class DynamicDefaultWarning(Warning):
     pass
+
+
+class NotNullError(Exception):
+    pass
+
+
+class ForeignKeyError(Exception):
+    pass
