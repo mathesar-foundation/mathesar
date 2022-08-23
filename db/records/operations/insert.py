@@ -2,7 +2,7 @@ import tempfile
 
 from psycopg2 import sql
 from sqlalchemy.exc import IntegrityError
-from psycopg2.errors import NotNullViolation
+from psycopg2.errors import NotNullViolation, ForeignKeyViolation
 from db.columns.base import MathesarColumn
 from db.encoding_utils import get_sql_compatible_encoding
 from db.records.operations.select import get_record
@@ -102,6 +102,10 @@ def insert_from_select(from_table, target_table, engine, col_mappings=None):
         except IntegrityError as e:
             if type(e.orig) == NotNullViolation:
                 raise e.orig
+            elif type(e.orig)== ForeignKeyViolation:
+                raise e.orig
+            else:
+                raise e
         except Exception as e:
             # ToDo raise specific exceptions
             raise e
