@@ -34,6 +34,7 @@
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
+  import Group from './record-operations/Group.svelte';
   import RenameTableModal from './RenameTableModal.svelte';
 
   export let schema: SchemaEntry;
@@ -150,7 +151,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <!-- <DisplayGroup {columns} grouping={meta.grouping} /> -->
+      <Group {columns} grouping={meta.grouping} />
     </svelte:fragment>
   </Dropdown>
 

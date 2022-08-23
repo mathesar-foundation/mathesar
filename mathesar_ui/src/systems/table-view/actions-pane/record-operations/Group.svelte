@@ -1,26 +1,25 @@
 <script lang="ts">
-  // import type { Writable } from 'svelte/store';
-  // import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
-  // import type { Grouping } from '@mathesar/stores/table-data';
-  // import { Button, Icon } from '@mathesar-component-library';
-  // import type { Column } from '@mathesar/api/tables/columns';
-  // import SelectColumn from '@mathesar/components/SelectColumn.svelte';
+  import type { Writable } from 'svelte/store';
+  import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
+  import type { Grouping } from '@mathesar/stores/table-data';
+  import { Button, Icon } from '@mathesar-component-library';
+  import type { Column } from '@mathesar/api/tables/columns';
+  import SelectColumn from '@mathesar/components/SelectColumn.svelte';
 
-  // export let grouping: Writable<Grouping>;
-  // export let columns: Column[];
+  export let grouping: Writable<Grouping>;
+  export let columns: Column[];
 
-  // /** Columns which are not already used as a grouping entry */
-  // $: availableColumns = columns.filter((column) => !$grouping.has(column.id));
-  // $: [newGroupColumn] = availableColumns;
-  // let addNew = false;
+  /** Columns which are not already used as a grouping entry */
+  $: availableColumns = columns.filter((column) => !$grouping.has(column.id));
+  $: [newGroupColumn] = availableColumns;
+  let addNew = false;
 
-  // function addGroupColumn() {
-  //   grouping.update((g) => g.with(newGroupColumn.id));
-  //   addNew = false;
-  // }
+  function addGroupColumn() {
+    grouping.update((g) => g.with(newGroupColumn.id));
+    addNew = false;
+  }
 </script>
 
-<!-- 
 <div class="display-option">
   <div class="header">
     <span>
@@ -94,4 +93,4 @@
 
 <style global lang="scss">
   @import 'DisplayOption.scss';
-</style> -->
+</style>

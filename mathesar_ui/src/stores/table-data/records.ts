@@ -189,7 +189,6 @@ function preprocessRecords({
 
       if (isGroup) {
         combinedRecords.push({
-          record,
           isGroupHeader: true,
           group: recordIndexToGroupMap.get(index),
           identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
