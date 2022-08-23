@@ -5,15 +5,17 @@
   import type { Filtering } from '@mathesar/stores/table-data';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/api/tables/records';
+  import { validateFilterEntry } from '@mathesar/components/filter-entry';
   import FilterEntries from './FilterEntries.svelte';
-  import { validateFilterEntry, deepCloneFiltering } from './utils';
+  import { deepCloneFiltering } from './utils';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let filtering: Writable<Filtering>;
 
   // This component is not reactive towards $filtering
-  // to avoid having to sync states and handle unnecessary set calls.
+  // to avoid having to sync states and handle unnecessary set calls,
+  // since each set call triggers requests.
   // This should be okay since this component is re-created
   // everytime the dropdown reopens.
   const internalFiltering = writable(deepCloneFiltering($filtering));
@@ -22,7 +24,7 @@
   $: filterCount = $internalFiltering.entries.length;
 
   function checkAndSetExternalFiltering() {
-    const isValid = $internalFiltering.entries.every((filter) => {
+    const validFilters = $internalFiltering.entries.filter((filter) => {
       const column = $processedColumns.get(filter.columnId);
       const condition = column?.allowedFiltersMap.get(filter.conditionId);
       if (condition) {
@@ -30,9 +32,14 @@
       }
       return false;
     });
-    if (isValid) {
-      filtering.set(deepCloneFiltering($internalFiltering));
+    const newFiltering = deepCloneFiltering({
+      ...$internalFiltering,
+      entries: validFilters,
+    });
+    if ($filtering.equals(newFiltering)) {
+      return;
     }
+    filtering.set(newFiltering);
   }
 
   function addFilter() {

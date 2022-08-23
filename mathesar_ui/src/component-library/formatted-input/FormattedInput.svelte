@@ -2,15 +2,14 @@
   import { createEventDispatcher, tick } from 'svelte';
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import { getOutcomeOfBeforeInputEvent } from '@mathesar-component-library-dir/common/utils';
+  import type { ArtificialEvents } from '@mathesar/component-library/common/types/ArtificialEvents';
   import type { ParseResult, FormattedInputProps } from './FormattedInputTypes';
   import { getCursorPositionAfterReformat } from './formattedInputUtils';
 
   type T = $$Generic;
   type $$Props = FormattedInputProps<T>;
 
-  const dispatch = createEventDispatcher<{
-    input: T | null;
-  }>();
+  const dispatch = createEventDispatcher<ArtificialEvents<T | null>>();
 
   export let formatter: $$Props['formatter'];
   /**
@@ -58,6 +57,11 @@
   let parseResult: ParseResult<T> | undefined;
   let formattedValue: string | undefined;
 
+  /**
+   * The value most recently submitted via the artificialChange event.
+   */
+  let lastCleanValue: T | null | undefined;
+
   $: format = (v: T | null | undefined) =>
     v === undefined || v === null ? '' : formatter.format(v);
 
@@ -67,16 +71,17 @@
       return;
     }
     childText = formattedValue;
+    lastCleanValue = newParentValue;
   }
 
   $: handleParentValueChange(parentValue);
 
   function updateParentValue(v: T | null) {
     parentValue = v;
-    dispatch('input', v);
+    dispatch('artificialInput', v);
   }
 
-  async function handleChildValueChange(event: InputEvent) {
+  async function handleChildBeforeInput(event: InputEvent) {
     event.preventDefault();
     const { value: userInput, cursorPosition } =
       getOutcomeOfBeforeInputEvent(event);
@@ -97,6 +102,13 @@
     }
   }
 
+  function handleChildBlur() {
+    if (lastCleanValue === parentValue) {
+      return;
+    }
+    dispatch('artificialChange', parentValue);
+  }
+
   function handleBlur() {
     childText = formattedValue ?? '';
   }
@@ -106,7 +118,8 @@
   value={childText}
   {...$$restProps}
   bind:element
-  on:beforeinput={handleChildValueChange}
+  on:beforeinput={handleChildBeforeInput}
+  on:blur={handleChildBlur}
   on:focus
   on:blur
   on:blur={handleBlur}

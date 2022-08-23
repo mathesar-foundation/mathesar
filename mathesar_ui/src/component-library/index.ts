@@ -14,6 +14,7 @@ export { default as Checkbox } from './checkbox/Checkbox.svelte';
 export { default as CheckboxGroup } from './checkbox-group/CheckboxGroup.svelte';
 export { default as Collapsible } from './collapsible/Collapsible.svelte';
 export { default as ContextMenu } from './context-menu/ContextMenu.svelte';
+export { default as Debounce } from './debounce/Debounce.svelte';
 export { default as Help } from './help/Help.svelte';
 export { default as Icon } from './icon/Icon.svelte';
 export { InputGroup, InputGroupText } from './input-group';
