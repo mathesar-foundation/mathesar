@@ -12,15 +12,13 @@
   let isOpen = false;
 
   let filterString = undefined;
-
-  $: console.log(data)
-
   let processedData = undefined;
   $: if (filterString) {
     processedData = filterBreadcrumbData(data, filterString);
   } else {
     processedData = data;
   }
+  let dropdown = undefined;
 </script>
 
 <div class="entity-switcher" class:is-open={isOpen}>
@@ -38,6 +36,7 @@
 
   <AttachableDropdown
     {isOpen}
+    bind:this={dropdown}
     trigger={triggerElement}
     on:close={() => {
       isOpen = false;
@@ -52,7 +51,7 @@
         <ul class="items">
           {#each items as { href, label, icon } (href)}
             <li class="item">
-              <a {href}>
+              <a {href} on:click={dropdown.close}>
                 <NameWithIcon {icon}>{label}</NameWithIcon>
               </a>
             </li>

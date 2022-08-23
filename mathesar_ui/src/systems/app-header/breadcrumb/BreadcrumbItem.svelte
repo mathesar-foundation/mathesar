@@ -13,8 +13,6 @@
   import EntitySelector from './EntitySelector.svelte';
 
   export let item: BreadcrumbItem;
-
-  $: console.log(item)
 </script>
 
 {#if item.type === 'database'}
@@ -27,7 +25,6 @@
   </BreadcrumbLink>
   <EntitySelector database={item.database} schema={item.schema} />
 {:else if item.type === 'table'}
-  <!-- TODO item.type is never 'table', for some reason -->
   <BreadcrumbLink
     href={getTablePageUrl(item.database.name, item.schema.id, item.table.id)}
   >
