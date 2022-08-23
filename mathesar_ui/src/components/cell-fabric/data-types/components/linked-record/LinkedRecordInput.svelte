@@ -17,7 +17,7 @@
   const dispatch = createEventDispatcher();
 
   export let value: $$Props['value'] = undefined;
-    export let fkSummaryValue: $$Props['fkSummaryValue'] = undefined;
+  export let fkSummaryValue: $$Props['fkSummaryValue'] = undefined;
   export let tableId: $$Props['tableId'];
   let classes: $$Props['class'] = '';
   export { classes as class };
