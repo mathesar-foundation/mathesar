@@ -14,7 +14,7 @@ access hints on what composition of functions and parameters should be valid.
 
 from abc import ABC, abstractmethod
 
-from sqlalchemy import column, not_, and_, or_, func, literal
+from sqlalchemy import column, not_, and_, or_, func, literal, cast, INTEGER
 from sqlalchemy.dialects.postgresql import array_agg
 
 from db.functions import hints
@@ -356,7 +356,7 @@ class Count(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
-        return func.count(column_expr)
+        return cast(func.count(column_expr), INTEGER)
 
 
 class ArrayAgg(DBFunction):
