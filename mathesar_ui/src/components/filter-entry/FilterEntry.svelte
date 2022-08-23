@@ -239,7 +239,7 @@
         flex-basis: 160px;
         flex-grow: 0;
         flex-shrink: 0;
-        max-height: 2.2rem;
+        max-height: 2.3rem;
         resize: none;
       }
     }
