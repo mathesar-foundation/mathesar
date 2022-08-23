@@ -81,7 +81,7 @@ export class Sorting extends ImmutableMap<number, SortDirection> {
     const sortingFromGrouping = new Sorting(
       [...grouping].map((g) => [g, SortDirection.A]),
     );
-    return sortingFromGrouping.coalesceEntries(this).recordsRequestParams();
+    return sortingFromGrouping.withEntries(this).recordsRequestParams();
   }
 
   terse(): TerseSorting {
