@@ -10,7 +10,7 @@
 
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
-  export let fkSummaryValue: unknown;
+  export let fkSummaryValue: unknown | undefined = undefined;
   export let isActive = false;
   export let isSelectedInRange = false;
   export let disabled = false;

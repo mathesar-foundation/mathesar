@@ -26,7 +26,7 @@ export interface LinkedRecordCellExternalProps {
 export interface LinkedRecordCellProps
   extends CellTypeProps<ForeignKeyCellValue>,
     LinkedRecordCellExternalProps {
-  fkSummaryValue?: Pick<FkSummaryRecord, 'template' | 'data'>;
+  fkSummaryValue?: FkSummaryRecord;
 }
 
 // TextBox

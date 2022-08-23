@@ -8,7 +8,7 @@
   $: recordSummary = fkSummaryValue
     ? Object.entries(fkSummaryValue.data).reduce(
         (template, [columnAlias, value]) =>
-          template.replace(`{${columnAlias}}`, value?.toString()),
+          template.replace(`{${columnAlias}}`, String(value)),
         fkSummaryValue.template,
       )
     : String(recordId);
