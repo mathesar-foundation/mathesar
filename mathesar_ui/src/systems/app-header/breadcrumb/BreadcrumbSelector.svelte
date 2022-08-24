@@ -13,11 +13,9 @@
   let filterString: string;
 
   // Focus the text input when dropdown is opened
-  let textInputEl: HTMLInputElement;
+  let textInputEl: HTMLInputElement | undefined;
   $: if (isOpen) {
-    if (textInputEl) {
-      textInputEl.focus();
-    }
+    textInputEl?.focus();
   }
 
   // Filter the selector data based on text input
