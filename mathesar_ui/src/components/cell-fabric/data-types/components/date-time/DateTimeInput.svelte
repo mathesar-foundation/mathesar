@@ -1,21 +1,25 @@
 <script lang="ts">
-  import { dayjs, isDefinedNonNullable } from '@mathesar-component-library';
-  import { createEventDispatcher } from 'svelte';
   import {
+    dayjs,
+    isDefinedNonNullable,
     FormattedInput,
     InlineDateTimePicker,
     AttachableDropdown,
   } from '@mathesar-component-library';
+  import { createEventDispatcher } from 'svelte';
+  import type { FormattedInputProps } from '@mathesar-component-library/types';
   import type {
     DateTimeCellExternalProps,
     DateTimeCellProps,
   } from '../typeDefinitions';
+  import Presets from './Presets.svelte';
 
   const dispatch = createEventDispatcher();
 
-  type $$Props = DateTimeCellExternalProps & {
-    value: DateTimeCellProps['value'];
-  };
+  type $$Props = FormattedInputProps<string> &
+    DateTimeCellExternalProps & {
+      value: DateTimeCellProps['value'];
+    };
 
   export let type: $$Props['type'];
   export let formattingString: $$Props['formattingString'];
@@ -24,6 +28,8 @@
   export let value: $$Props['value'];
   export let timeShow24Hr: $$Props['timeShow24Hr'] = true;
   export let timeEnableSeconds: $$Props['timeEnableSeconds'] = true;
+
+  export let allowRelativePresets: $$Props['allowRelativePresets'] = false;
 
   let element: HTMLInputElement;
   let isOpen = false;
@@ -61,12 +67,11 @@
 
   function onValueChange(newValue: string) {
     value = formatter.parse(newValue).value;
-    close();
   }
 </script>
 
 <FormattedInput
-  focusOnMount={true}
+  {...$$restProps}
   bind:value
   {formatter}
   placeholder={formattingString}
@@ -90,5 +95,13 @@
     {timeShow24Hr}
     {timeEnableSeconds}
     on:change={(e) => onValueChange(e.detail)}
+    on:dateChange={close}
+  />
+  <Presets
+    bind:value
+    isRelative={allowRelativePresets}
+    {type}
+    {formattingString}
+    on:change={close}
   />
 </AttachableDropdown>

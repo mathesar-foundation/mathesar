@@ -69,6 +69,7 @@
   {disabled}
   bind:value
   on:input
+  on:change
   on:focus
   on:blur
   on:keydown={handleKeyDown}

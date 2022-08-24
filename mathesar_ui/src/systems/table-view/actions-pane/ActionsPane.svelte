@@ -7,7 +7,7 @@
     iconError,
     MenuItem,
   } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
   import type { SchemaEntry } from '@mathesar/AppTypes';
   import EntityType from '@mathesar/components/EntityType.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
@@ -46,7 +46,7 @@
   const linkTableModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
 
-  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
+  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore, isLoading } =
     $tabularData);
   $: ({ columns } = $columnsDataStore);
   $: ({
@@ -58,10 +58,6 @@
   } = meta);
   $: recordState = recordsData.state;
 
-  $: isLoading =
-    $columnsDataStore.state === States.Loading ||
-    $recordState === States.Loading ||
-    $constraintsDataStore.state === States.Loading;
   $: isError =
     $columnsDataStore.state === States.Error ||
     $recordState === States.Error ||
@@ -161,8 +157,8 @@
   <div class="divider" />
 
   <Button
-    disabled={isLoading}
-    size="small"
+    disabled={$isLoading}
+    size="medium"
     on:click={() => recordsData.addEmptyRecord()}
   >
     <Icon {...iconAddNew} />
@@ -172,8 +168,8 @@
   <div class="divider" />
 
   <Button
-    disabled={isLoading}
-    size="small"
+    disabled={$isLoading}
+    size="medium"
     on:click={() => linkTableModal.open()}
   >
     <Icon {...iconTableLink} />
@@ -196,13 +192,13 @@
   {/if}
 
   <div class="loading-info">
-    <Button size="small" disabled={isLoading} on:click={refresh}>
+    <Button size="medium" disabled={$isLoading} on:click={refresh}>
       <Icon
         {...isError && !isLoading ? iconError : iconRefresh}
-        spin={isLoading}
+        spin={$isLoading}
       />
       <span>
-        {#if isLoading}
+        {#if $isLoading}
           Loading
         {:else if isError}
           Retry
@@ -216,24 +212,31 @@
 
 <style>
   .actions-pane {
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid var(--color-gray-dark);
+    background-color: var(--color-white);
     position: relative;
-    padding: var(--page-padding);
-    padding-bottom: 0;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 0.5rem;
+    padding-right: 1rem;
   }
   .heading {
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
+    border-right: 1px solid var(--color-gray-medium);
+    padding: 1rem;
+    margin-right: 0.5rem;
+  }
+  .heading h1 {
+    font-size: var(--text-size-x-large);
+    font-weight: 500;
+    margin-bottom: 0;
   }
   .divider {
     width: 1px;
     display: inline-block;
     background: #dfdfdf;
-    height: 18px;
+    height: 2rem;
     margin: 0px 5px;
   }
   .loading-info {

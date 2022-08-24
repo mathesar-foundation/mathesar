@@ -10,13 +10,12 @@
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
   import { queries } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
   import { iconQuery, iconRedo, iconUndo } from '@mathesar/icons';
   import type QueryManager from './QueryManager';
-  import InputColumnsManager from './InputColumnsManager';
-  import type { ColumnWithLink } from './InputColumnsManager';
+  import type { ColumnWithLink } from './utils';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
@@ -25,15 +24,11 @@
 
   export let queryManager: QueryManager;
 
-  const inputColumnsManager = new InputColumnsManager();
-
   $: ({ query, state } = queryManager);
 
   $: currentTable = $query.base_table
     ? $tablesDataStore.data.get($query.base_table)
     : undefined;
-
-  $: void inputColumnsManager.setBaseTable(currentTable);
 
   function onBaseTableChange(tableEntry: TableEntry | undefined) {
     void queryManager.update((q) =>
@@ -117,16 +112,13 @@
           />
         </LabeledInput>
       </div>
-      <ColumnSelectionPane
-        {inputColumnsManager}
-        on:add={(e) => addColumn(e.detail)}
-      />
+      <ColumnSelectionPane {queryManager} on:add={(e) => addColumn(e.detail)} />
     </div>
     <!-- Do not use inputColumnManager in ResultPane because
       we'd also use ResultPane for query page where input column
       details would not be available-->
     <ResultPane {queryManager} />
-    <OutputConfigSidebar {queryManager} {inputColumnsManager} />
+    <OutputConfigSidebar {queryManager} />
   </div>
 </div>
 
@@ -187,6 +179,7 @@
       bottom: 0;
       left: 0;
       right: 0;
+      overflow-x: auto;
 
       .input-sidebar {
         width: 20rem;

@@ -445,9 +445,13 @@ class Table(DatabaseObject, Relation):
         from_table = self._sa_table
         target_table = existing_table._sa_table
         engine = self._sa_engine
+        if mappings:
+            col_mappings = [[from_col.name, target_col.name] for from_col, target_col in mappings]
+        else:
+            col_mappings = None
         data_file = data_files[0]
         try:
-            table, _ = insert_from_select(from_table, target_table, engine, mappings)
+            table, _ = insert_from_select(from_table, target_table, engine, col_mappings)
             data_file.table_imported_to = existing_table
         except Exception as e:
             # ToDo raise specific exceptions.

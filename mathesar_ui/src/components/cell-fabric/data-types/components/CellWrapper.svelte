@@ -8,6 +8,7 @@
   export let disabled = false;
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
+  export let hasPadding = true;
 
   /**
    * This only affects the alignment of the displayed value while in
@@ -39,6 +40,7 @@
   class:truncate={multiLineTruncate}
   class:h-align-right={horizontalAlignment === 'right'}
   class:h-align-center={horizontalAlignment === 'center'}
+  class:has-padding={hasPadding}
   bind:this={element}
   on:click
   on:dblclick
@@ -48,13 +50,13 @@
   tabindex={-1}
   {...$$restProps}
 >
-  <slot />
+  <div class="cell-wrapper-content"><slot /></div>
+  <div class="icon"><slot name="icon" /></div>
 </div>
 
 <style lang="scss">
   .cell-wrapper {
     overflow: hidden;
-    padding: 6px 8px;
     position: relative;
     display: flex;
     flex: 1 1 auto;
@@ -62,8 +64,30 @@
     align-items: center;
     width: 100%;
 
+    .cell-wrapper-content {
+      flex: 1 1 100%;
+      overflow: hidden;
+    }
+    .icon {
+      flex: 0 0 auto;
+    }
+    .icon:not(:empty) {
+      margin-left: 0.5rem;
+    }
+
+    &.has-padding {
+      padding: 6px 8px;
+    }
+
     &.h-align-right {
-      justify-content: flex-end;
+      flex-direction: row-reverse;
+      .cell-wrapper-content {
+        text-align: right;
+      }
+      .icon:not(:empty) {
+        margin-left: 0;
+        margin-right: 0.5rem;
+      }
     }
     &.h-align-center {
       justify-content: center;
@@ -97,6 +121,11 @@
         resize: vertical;
         min-height: 5em;
       }
+    }
+  }
+  @media (hover: hover) {
+    .cell-wrapper:not(:hover) .icon {
+      display: none;
     }
   }
 </style>

@@ -3,20 +3,23 @@
   import { toast } from '@mathesar/stores/toast';
   import { setNewRecordSelectorControllerInContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { confirmationController } from '@mathesar/stores/confirmation';
-  import { getTableName } from '@mathesar/stores/tables';
   import { modal } from './stores/modal';
-  import RecordSelectorModal from './systems/record-selector/RecordSelectorModal.svelte';
+  import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import RootRoute from './routes/RootRoute.svelte';
 
+  const recordSelectorModal = modal.spawnModalController();
   const recordSelectorController = setNewRecordSelectorControllerInContext({
-    modal: modal.spawnModalController(),
-    getTableName,
+    onOpen: () => recordSelectorModal.open(),
+    onClose: () => recordSelectorModal.close(),
   });
 </script>
 
 <ToastPresenter entries={toast.entries} />
 <Confirmation controller={confirmationController} />
-<RecordSelectorModal controller={recordSelectorController} />
+<ModalRecordSelector
+  {recordSelectorController}
+  modalController={recordSelectorModal}
+/>
 
 <RootRoute />
 
@@ -31,6 +34,27 @@
 -->
 <style global lang="scss">
   @import 'component-library/styles.scss';
+
+  :root {
+    /** BASE COLORS **/
+    --color-white: #ffffff;
+    --color-blue-light: #e6f0ff;
+    --color-blue-medium: #3b82f6;
+    --color-gray-lighter: #fafafa;
+    --color-gray-light: #f4f4f5;
+    --color-gray-medium: #d4d4d8;
+    --color-gray-dark: #a1a1aa;
+    --color-gray-darker: #27272a;
+    --color-contrast: var(--color-blue-medium);
+    --color-contrast-light: var(--color-blue-light);
+    --color-text: #171717;
+    --color-text-muted: #3f3f46;
+    --text-size-x-small: 0.79rem;
+    --text-size-small: 0.889rem;
+    --text-size-base: 1rem;
+    --text-size-large: 1.125rem;
+    --text-size-x-large: 1.266rem;
+  }
 
   body {
     /**
@@ -59,12 +83,16 @@
     --cell-bg-color-row-hover: #f6f7f7;
     --cell-bg-color-row-selected: #e4f2ff;
 
+    --color-fk: #dfd0b3;
+
     --cell-text-color-processing: #888;
 
     --cell-border-horizontal: 1px solid #e7e7e7;
     --cell-border-vertical: 1px solid #efefef;
 
     --page-padding: 1em;
+
+    color: var(--color-text);
   }
 
   h1 {
