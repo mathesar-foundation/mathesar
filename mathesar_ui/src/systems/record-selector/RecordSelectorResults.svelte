@@ -175,6 +175,9 @@
           <CellFabric
             columnFabric={processedColumn}
             value={row?.record?.[processedColumn.column.id]}
+            dataForRecordSummaryInFkCell={row?.dataForRecordSummariesInRow?.[
+              processedColumn.column.id
+            ]}
             disabled
             showAsSkeleton={!rowHasRecord(row)}
           />

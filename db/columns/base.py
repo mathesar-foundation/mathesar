@@ -78,20 +78,26 @@ class MathesarColumn(Column):
         given column.  It respects only the properties in the __init__
         of the MathesarColumn.
         """
-        fkeys = {ForeignKey(fk.target_fullname) for fk in column.foreign_keys}
-        new_column = cls(
-            column.name,
-            column.type,
-            foreign_keys=fkeys,
-            primary_key=column.primary_key,
-            nullable=column.nullable,
-            autoincrement=column.autoincrement,
-            server_default=column.server_default,
-            engine=engine,
-        )
-        new_column.original_table = column.table
-        if isinstance(new_column._proxies, tuple):
-            breakpoint()
+        try:
+            fkeys = {ForeignKey(fk.target_fullname) for fk in column.foreign_keys}
+            new_column = cls(
+                column.name,
+                column.type,
+                foreign_keys=fkeys,
+                primary_key=column.primary_key,
+                nullable=column.nullable,
+                autoincrement=column.autoincrement,
+                server_default=column.server_default,
+                engine=engine,
+            )
+            new_column.original_table = column.table
+        # dirty hack to handle cases where this isn't a real column
+        except AttributeError:
+            new_column = cls(
+                column.name,
+                column.type,
+                engine=engine,
+            )
         return new_column
 
     def to_sa_column(self):

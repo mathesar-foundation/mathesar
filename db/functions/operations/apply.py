@@ -16,6 +16,11 @@ def apply_db_function_as_filter(relation, db_function):
     return relation
 
 
+def get_sa_expression_from_db_function_spec(ma_function_spec):
+    db_function = get_db_function_from_ma_function_spec(ma_function_spec)
+    return _db_function_to_sa_expression(db_function)
+
+
 def _assert_that_all_referenced_columns_exist(relation, db_function):
     columns_that_exist = _get_columns_that_exist(relation)
     referenced_columns = db_function.referenced_columns
