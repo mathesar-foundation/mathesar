@@ -8,9 +8,8 @@
   export let tables: TableEntry[];
   export let table: TableEntry | undefined = undefined;
   export let prependBlank = false;
-  export let initialSelectionType: SelectProps<
-    TableEntry | undefined
-  >['initialSelectionType'] = 'first';
+  export let autoSelect: SelectProps<TableEntry | undefined>['autoSelect'] =
+    'first';
 
   $: tableList = prependBlank ? [undefined, ...tables] : tables;
 </script>
@@ -19,7 +18,7 @@
   options={tableList}
   labelKey="name"
   valuesAreEqual={(a, b) => a?.id === b?.id}
-  {initialSelectionType}
+  {autoSelect}
   bind:value={table}
   on:change
 />
