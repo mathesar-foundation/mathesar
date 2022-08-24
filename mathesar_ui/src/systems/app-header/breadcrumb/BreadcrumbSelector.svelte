@@ -46,21 +46,25 @@
       <div class="category-name">entities</div>
       <TextInput bind:value={filterString} bind:element={textInputEl} />
       {#each [...processedData] as [categoryName, items] (categoryName)}
-        <div class="category-name">{categoryName}</div>
-        <ul class="items">
-          {#each items as { href, label, icon } (href)}
-            <li class="item">
-              <a
-                {href}
-                on:click={() => {
-                  isOpen = false;
-                }}
-              >
-                <NameWithIcon {icon}>{label}</NameWithIcon>
-              </a>
-            </li>
-          {/each}
-        </ul>
+        <!-- data coming down from parent can have categories with 0 items: we
+        don't want to render that. -->
+        {#if items.length > 0}
+          <div class="category-name">{categoryName}</div>
+          <ul class="items">
+            {#each items as { href, label, icon } (href)}
+              <li class="item">
+                <a
+                  {href}
+                  on:click={() => {
+                    isOpen = false;
+                  }}
+                >
+                  <NameWithIcon {icon}>{label}</NameWithIcon>
+                </a>
+              </li>
+            {/each}
+          </ul>
+        {/if}
       {/each}
     </div>
   </AttachableDropdown>
