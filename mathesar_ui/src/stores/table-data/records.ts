@@ -14,7 +14,6 @@ import type {
   Response as ApiRecordsResponse,
   Group as ApiGroup,
   Grouping as ApiGrouping,
-  ResultValue,
   GroupingMode,
   GetRequestParams as ApiGetRequestParams,
 } from '@mathesar/api/tables/records';
@@ -55,8 +54,8 @@ function buildFetchQueryString(data: RecordsRequestParamsData): string {
 
 export interface Group {
   count: number;
-  firstValue: ResultValue;
-  lastValue: ResultValue;
+  firstValue: ApiGroup['first_value'];
+  lastValue: ApiGroup['last_value'];
   resultIndices: number[];
 }
 

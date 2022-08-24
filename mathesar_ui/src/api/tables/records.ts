@@ -60,7 +60,7 @@ export interface Group {
    * the current page of records.
    */
   count: number;
-  first_value: ResultValue;
+  first_value: Result;
   /**
    * When GroupingMode is 'distinct', then `first_value` and `last_value` will
    * be identical. Separate first and last values are useful when GroupingMode
@@ -68,7 +68,7 @@ export interface Group {
    * values in the order used for window function in the ranged grouping (which
    * may not be the same as the order used to sort the result set).
    */
-  last_value: ResultValue;
+  last_value: Result;
   /**
    * Each number refers to the index of a record in the response result. This
    * array will only indices for records returned on the page. If the page is
