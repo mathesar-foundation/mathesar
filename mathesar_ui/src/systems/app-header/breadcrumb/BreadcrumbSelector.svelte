@@ -12,6 +12,15 @@
   let isOpen = false;
   let filterString: string;
 
+  // Focus the text input when dropdown is opened
+  let text_input: HTMLInputElement;
+  $: if (isOpen) {
+    if (text_input) {
+      text_input.focus()
+    }
+  }
+
+  // Filter the selector data based on text input
   $: processedData = filterString
     ? filterBreadcrumbSelectorData(data, filterString)
     : data;
@@ -34,7 +43,7 @@
     <div class="entity-switcher-content">
       <!-- TODO consider improving semantics of this css class -->
       <div class="category-name">entities</div>
-      <TextInput bind:value={filterString} />
+      <TextInput bind:value={filterString} bind:element={text_input}/>
       {#each [...processedData] as [categoryName, items] (categoryName)}
         <div class="category-name">{categoryName}</div>
         <ul class="items">
