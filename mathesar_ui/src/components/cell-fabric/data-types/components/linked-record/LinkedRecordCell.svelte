@@ -7,6 +7,7 @@
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import CellWrapper from '../CellWrapper.svelte';
   import type { LinkedRecordCellProps } from '../typeDefinitions';
+  import LaunchCue from './LaunchCue.svelte';
 
   type $$Props = LinkedRecordCellProps;
 
@@ -16,6 +17,8 @@
   export let isActive: $$Props['isActive'];
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
+  export let dataForRecordSummaryInFkCell: $$Props['dataForRecordSummaryInFkCell'] =
+    undefined;
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
 
@@ -74,10 +77,13 @@
   on:keydown={handleWrapperKeyDown}
   on:mousedown={handleMouseDown}
   on:dblclick={launchRecordSelector}
+  hasPadding={!isActive || hasValue}
 >
   <slot name="icon" slot="icon" />
   {#if hasValue}
-    <LinkedRecord recordId={value} />
+    <LinkedRecord recordId={value} {dataForRecordSummaryInFkCell} />
+  {:else if isActive}
+    <LaunchCue />
   {:else if value === undefined}
     <Default />
   {:else}

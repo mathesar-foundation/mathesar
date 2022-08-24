@@ -21,6 +21,7 @@
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
   import { iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -43,6 +44,9 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
+  export let dataForRecordSummaryInFkCell:
+    | DataForRecordSummaryInFkCell
+    | undefined = undefined;
 
   $: recordsDataState = recordsData.state;
   $: ({ column, linkFk } = processedColumn);
@@ -139,6 +143,7 @@
       {isActive}
       {isSelectedInRange}
       {value}
+      {dataForRecordSummaryInFkCell}
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}

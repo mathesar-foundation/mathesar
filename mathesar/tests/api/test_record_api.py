@@ -12,7 +12,8 @@ from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.utils import follows_json_number_spec
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.models import base as models_base
-from mathesar.models.base import db_get_records_with_default_order
+from mathesar.models.query import DBQuery
+from mathesar.utils.preview import compute_path_prefix, compute_path_str
 
 
 def test_record_list(create_patents_table, client):
@@ -110,7 +111,7 @@ def test_record_list_filter(create_patents_table, client):
     json_filter = json.dumps(filter)
 
     with patch.object(
-        models_base, "db_get_records_with_default_order", side_effect=db_get_records_with_default_order
+        DBQuery, "get_records", side_effect=DBQuery.get_records, autospec=True
     ) as mock_get:
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
@@ -136,7 +137,7 @@ def test_record_list_duplicate_rows_only(create_patents_table, client):
     duplicate_only = columns_name_id_map['Patent Expiration Date']
     json_duplicate_only = json.dumps(duplicate_only)
 
-    with patch.object(models_base, "db_get_records_with_default_order", return_value=[]) as mock_get:
+    with patch.object(DBQuery, "get_records", return_value=[]) as mock_get:
         client.get(f'/api/db/v0/tables/{table.id}/records/?duplicate_only={json_duplicate_only}')
     assert mock_get.call_args is not None
     assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
@@ -194,7 +195,7 @@ def test_filter_with_added_columns(create_patents_table, client):
             json_filter = json.dumps(filter)
 
             with patch.object(
-                models_base, "db_get_records_with_default_order", side_effect=db_get_records_with_default_order
+                DBQuery, "get_records", side_effect=DBQuery.get_records, autospec=True
             ) as mock_get:
                 response = client.get(
                     f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
@@ -228,7 +229,7 @@ def test_record_list_sort(create_patents_table, client):
     json_order_by = json.dumps(id_converted_order_by)
 
     with patch.object(
-        models_base, "db_get_records_with_default_order", side_effect=db_get_records_with_default_order
+        DBQuery, "get_records", side_effect=DBQuery.get_records, autospec=True
     ) as mock_get:
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?order_by={json_order_by}'
@@ -710,8 +711,8 @@ def test_record_list_pagination_offset(create_patents_table, client):
 
 def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     author_table, publisher_table, publication_table, checkouts_table = publication_tables
-    author_template_column = author_table.get_columns_by_name(["first_name", "last_name"])
-    author_preview_template = f'Full Name: {{{ author_template_column[0].id }}} {{{author_template_column[1].id}}}'
+    author_template_columns = author_table.get_columns_by_name(["first_name", "last_name", "id"])
+    author_preview_template = f'Full Name: {{{ author_template_columns[0].id }}} {{{author_template_columns[1].id}}}'
     author_table_settings_id = author_table.settings.id
     data = {
         "preview_settings": {
@@ -723,8 +724,8 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
         data=data,
     )
     assert response.status_code == 200
-    publisher_template_column = publisher_table.get_column_by_name("name")
-    publisher_preview_template = f'{{{ publisher_template_column.id }}}'
+    publisher_template_columns = publisher_table.get_columns_by_name(["name", "id"])
+    publisher_preview_template = f'{{{ publisher_template_columns[0].id }}}'
     publisher_table_settings_id = publisher_table.settings.id
     data = {
         "preview_settings": {
@@ -737,9 +738,7 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     )
     assert response.status_code == 200
     publication_template_columns = publication_table.get_columns_by_name(['publisher', 'author', 'co_author', 'title', 'id'])
-    # TODO Uncomment once the bug with db explorer is fixed
-    # publication_preview_template = f'{{{publication_template_columns[3].id}}} Published By: {{{ publication_template_columns[0].id}}} and Authored by {{{publication_template_columns[1].id}}} along with {{{publication_template_columns[2].id}}}'
-    publication_preview_template = f'{{{publication_template_columns[3].id}}}'
+    publication_preview_template = f'{{{publication_template_columns[3].id}}} Published By: {{{ publication_template_columns[0].id}}} and Authored by {{{publication_template_columns[1].id}}} along with {{{publication_template_columns[2].id}}}'
     publication_table_settings_id = publication_table.settings.id
     data = {
         "preview_settings": {
@@ -751,7 +750,7 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
         data=data,
     )
     assert response.status_code == 200
-    response = client.get(f'/api/db/v0/tables/{checkouts_table.id}/records/', data={'fk_previews': 'all'})
+    response = client.get(f'/api/db/v0/tables/{checkouts_table.id}/records/')
     response_data = response.json()
     preview_data = response_data['preview_data']
     checkouts_table_publication_fk_column = checkouts_table.get_column_by_name('publication')
@@ -760,12 +759,28 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
         for preview in preview_data
         if preview['column'] == checkouts_table_publication_fk_column.id
     )
-    preview_column_alias = f'{checkouts_table_publication_fk_column.id}__{publication_template_columns[4].id}__col__{publication_template_columns[3].id}'
-    assert preview_column['template'] == f'{{{preview_column_alias}}}'
+    publication_path = [[checkouts_table_publication_fk_column.id, publication_template_columns[-1].id]]
+    publisher_paths = publication_path + [[publication_template_columns[0].id, publisher_template_columns[-1].id]]
+    author_paths = publication_path + [[publication_template_columns[1].id, author_template_columns[-1].id]]
+    co_author_paths = publication_path + [[publication_template_columns[2].id, author_template_columns[-1].id]]
+    publication_path_prefix = compute_path_prefix(publication_path)
+    publisher_path_prefix = compute_path_prefix(publisher_paths)
+    co_author_path_path_prefix = compute_path_prefix(co_author_paths)
+    author_path_prefix = compute_path_prefix(author_paths)
+    publication_title_alias = compute_path_str(publication_path_prefix, publication_template_columns[3].id)
+    publisher_name_alias = compute_path_str(publisher_path_prefix, publisher_template_columns[0].id)
+    co_author_first_name_alias = compute_path_str(co_author_path_path_prefix, author_template_columns[0].id)
+    co_author_last_name_alias = compute_path_str(co_author_path_path_prefix, author_template_columns[1].id)
+    author_first_name_alias = compute_path_str(author_path_prefix, author_template_columns[0].id)
+    author_last_name_alias = compute_path_str(author_path_prefix, author_template_columns[1].id)
+    preview_column_alias = f'{{{publication_title_alias}}} Published By: {{{ publisher_name_alias}}} and Authored by Full Name: {{{author_first_name_alias}}} {{{author_last_name_alias}}} along with Full Name: {{{co_author_first_name_alias}}} {{{co_author_last_name_alias}}}'
+
+    assert preview_column['template'] == preview_column_alias
     preview_data = preview_column['data'][0]
-    assert preview_column_alias in preview_data
-    expected_preview_value = 'Pressure Should Old'
-    assert preview_data[preview_column_alias] == expected_preview_value
+    assert all([key in preview_data for key in [publication_title_alias, publisher_name_alias, author_first_name_alias, author_last_name_alias, co_author_first_name_alias, co_author_last_name_alias]])
+
+    expected_preview_data = {publication_title_alias: 'Pressure Should Old', publisher_name_alias: 'Ruiz', author_first_name_alias: 'Matthew', author_last_name_alias: 'Brown', co_author_first_name_alias: 'Mark', co_author_last_name_alias: 'Smith'}
+    assert preview_data == expected_preview_data
 
 
 def test_record_detail(create_patents_table, client):
@@ -890,7 +905,7 @@ def test_record_list_filter_exceptions(create_patents_table, client):
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     filter_list = json.dumps({"empty": [{"column_name": [columns_name_id_map['Center']]}]})
-    with patch.object(models_base, "db_get_records_with_default_order", side_effect=exception):
+    with patch.object(DBQuery, "get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?filters={filter_list}'
         )
@@ -907,7 +922,7 @@ def test_record_list_sort_exceptions(create_patents_table, client, exception):
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     order_by = json.dumps([{"field": columns_name_id_map['id'], "direction": "desc"}])
-    with patch.object(models_base, "db_get_records_with_default_order", side_effect=exception):
+    with patch.object(DBQuery, "get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?order_by={order_by}'
         )
@@ -924,7 +939,7 @@ def test_record_list_group_exceptions(create_patents_table, client, exception):
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     group_by = json.dumps({"columns": [columns_name_id_map['Case Number']]})
-    with patch.object(models_base, "db_get_records_with_default_order", side_effect=exception):
+    with patch.object(DBQuery, "get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?grouping={group_by}'
         )

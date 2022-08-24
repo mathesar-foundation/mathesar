@@ -22,7 +22,7 @@ class ConstraintViewSet(ListModelMixin, RetrieveModelMixin, CreateModelMixin, vi
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['table'] = get_table_or_404(self.kwargs['table_pk'])
-
+        context['table_id'] = self.kwargs['table_pk']
         return context
 
     def destroy(self, request, pk=None, table_pk=None):

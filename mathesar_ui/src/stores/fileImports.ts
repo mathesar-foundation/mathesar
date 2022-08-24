@@ -9,7 +9,7 @@ import type {
 import type { FileUpload } from '@mathesar-component-library/types';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/tables/tableList';
+import type { TableEntry } from '@mathesar/api/tables';
 
 /**
  * TODO: refactor to remove `id` entirely.

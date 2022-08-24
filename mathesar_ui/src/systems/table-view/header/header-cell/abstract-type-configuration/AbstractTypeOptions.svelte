@@ -1,19 +1,21 @@
 <script lang="ts">
   import {
     FormBuilder,
-    Icon,
     getValidationContext,
+    Icon,
   } from '@mathesar-component-library';
   import type { FormValues } from '@mathesar-component-library/types';
-  import type { DbType } from '@mathesar/AppTypes';
   import type { Column } from '@mathesar/api/tables/columns';
+  import type { DbType } from '@mathesar/AppTypes';
+  import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
+  import { iconDatabase, iconDisplayOptions } from '@mathesar/icons';
   import type {
     AbstractType,
     AbstractTypeDbConfig,
     AbstractTypeDisplayConfig,
   } from '@mathesar/stores/abstract-types/types';
+  import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
-  import { iconDatabase, iconDisplayOptions } from '@mathesar/icons';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
   import TypeOptionTab from './TypeOptionTab.svelte';
@@ -32,7 +34,7 @@
   let defaultValueHasError = false;
   let showDefaultValueErrorIndication = false;
 
-  $: ({ column } = processedColumn);
+  $: ({ column, exclusiveConstraints } = processedColumn);
   $: ({ dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
     selectedAbstractType,
     selectedDbType,
@@ -87,6 +89,17 @@
 
   $: onDbFormValuesChange($dbFormValues, dbOptionsConfig);
   $: onDisplayFormValuesChange($displayFormValues, displayOptionsConfig);
+
+  $: [linkFk] = findFkConstraintsForColumn(exclusiveConstraints, column.id);
+  $: defaultInputComponentAndProps = getDbTypeBasedInputCap(
+    {
+      ...column,
+      type: selectedDbType,
+      type_options: typeOptions,
+      display_options: displayOptions,
+    },
+    linkFk ? linkFk.referent_table : undefined,
+  );
 </script>
 
 <div class="type-options">
@@ -122,9 +135,7 @@
         bind:defaultValue
         bind:defaultValueHasError
         bind:showError={showDefaultValueErrorIndication}
-        {selectedDbType}
-        {typeOptions}
-        {displayOptions}
+        inputComponentAndProps={defaultInputComponentAndProps}
       />
       <DbTypeIndicator {selectedDbType} />
     {:else if displayForm}

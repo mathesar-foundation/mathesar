@@ -86,6 +86,31 @@ export class Filtering {
     });
   }
 
+  equals(filtering: Filtering): boolean {
+    if (
+      this.entries.length !== filtering.entries.length ||
+      this.combination !== filtering.combination
+    ) {
+      return false;
+    }
+    for (
+      let entryIndex = 0;
+      entryIndex < filtering.entries.length;
+      entryIndex += 1
+    ) {
+      const currentEntry = this.entries[entryIndex];
+      const comparedEntry = filtering.entries[entryIndex];
+      if (
+        currentEntry.columnId !== comparedEntry.columnId ||
+        currentEntry.conditionId !== comparedEntry.conditionId ||
+        currentEntry.value !== comparedEntry.value
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   recordsRequestParams(): Pick<GetRequestParams, 'filter'> {
     if (!this.entries.length) {
       return {};

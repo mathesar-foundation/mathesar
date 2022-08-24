@@ -41,10 +41,10 @@ def test_dependents_response(two_foreign_key_tables, client):
     referent_constraint_ids = _get_constraint_ids(referent_table_constrints_results)
     referer_foreign_key_constraint_id = list(filter(lambda x: x['type'] == 'foreignkey', referrer_table_constraints_results))[0]['id']
 
-    referent_expected_dependent_ids = referent_constraint_ids + [referer_foreign_key_constraint_id] + [referrer_table.id]
+    referent_expected_dependent_ids = referent_constraint_ids + referer_foreign_key_constraint_id + [referrer_table.id]
+    referent_actual_dependents_ids = [int(d['obj']['id']) for d in response_data if int(d['parent_obj']['id']) == referent_table.id]
 
-    referent_actual_dependents_ids = _get_object_dependent_ids(response_data, referent_table.oid)
-    referrer_dependents_ids = _get_object_dependent_ids(response_data, referrer_table.oid)
+    referrer_dependents_ids = [int(d['obj']['id']) for d in response_data if int(d['parent_obj']['id']) == referrer_table.id]
 
     assert sorted(referent_expected_dependent_ids) == sorted(referent_actual_dependents_ids)
     assert sorted(referer_constraint_ids) == sorted(referrer_dependents_ids)

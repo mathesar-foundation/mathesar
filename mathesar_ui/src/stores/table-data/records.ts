@@ -16,7 +16,9 @@ import type {
   Grouping as ApiGrouping,
   ResultValue,
   GroupingMode,
+  DataForRecordSummariesInFkColumn,
   GetRequestParams as ApiGetRequestParams,
+  RecordSummaryInputData,
 } from '@mathesar/api/tables/records';
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
@@ -28,12 +30,14 @@ import type { ColumnsDataStore } from './columns';
 import type { Sorting } from './sorting';
 import type { Grouping as GroupingTODORename } from './grouping';
 import type { Filtering } from './filtering';
+import type { SearchFuzzy } from './searchFuzzy';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
   sorting: Sorting;
   grouping: GroupingTODORename;
   filtering: Filtering;
+  searchFuzzy: SearchFuzzy;
 }
 
 function buildFetchQueryString(data: RecordsRequestParamsData): string {
@@ -42,6 +46,7 @@ function buildFetchQueryString(data: RecordsRequestParamsData): string {
     ...data.sorting.recordsRequestParamsIncludingGrouping(data.grouping),
     ...data.grouping.recordsRequestParams(),
     ...data.filtering.recordsRequestParams(),
+    ...data.searchFuzzy.recordsRequestParams(),
   };
   const entries: [string, string][] = Object.entries(params).map(([k, v]) => {
     const value = typeof v === 'string' ? v : JSON.stringify(v);
@@ -62,6 +67,11 @@ export interface Grouping {
   mode: GroupingMode;
   groups: Group[];
 }
+/** Keys are stringified column ids */
+type DataForRecordSummariesInFkColumns = Record<
+  string,
+  DataForRecordSummariesInFkColumn
+>;
 
 function buildGroup(apiGroup: ApiGroup): Group {
   return {
@@ -80,6 +90,14 @@ function buildGrouping(apiGrouping: ApiGrouping): Grouping {
   };
 }
 
+export interface DataForRecordSummaryInFkCell {
+  column: number;
+  template: string;
+  data: RecordSummaryInputData;
+}
+
+type DataForRecordSummariesInRow = Record<string, DataForRecordSummaryInFkCell>;
+
 export interface Row {
   /**
    * Can be `undefined` because some rows don't have an associated record, e.g.
@@ -93,7 +111,23 @@ export interface Row {
   isGroupHeader?: boolean;
   group?: Group;
   rowIndex?: number;
+  dataForRecordSummariesInRow?: DataForRecordSummariesInRow;
   groupValues?: Record<string, unknown>;
+}
+
+export type RecordRow = Omit<Row, 'record'> & Required<Pick<Row, 'record'>>;
+
+export function rowHasRecord(row: Row): row is RecordRow {
+  // Why do we also need to check that the record object is not empty?
+  //
+  // Because somewhere else in the code (I don't know where) we are producing
+  // row objects which contain empty records. That behavior was causing a bug.
+  // This function is a way to work around that bug without taking the time to
+  // track down the root cause and fix/test it. At some point we should refactor
+  // `Row` to be a union of different row types, none of which contain optional
+  // properties. With that approach we can simplify this function to be more
+  // straightforward.
+  return row.record !== undefined && Object.entries(row.record).length > 0;
 }
 
 export interface TableRecordsData {
@@ -139,10 +173,12 @@ function preprocessRecords({
   records,
   offset,
   grouping,
+  dataForRecordSummariesInFkColumns,
 }: {
   records: ApiRecord[];
   offset: number;
   grouping?: Grouping;
+  dataForRecordSummariesInFkColumns?: DataForRecordSummariesInFkColumns;
 }): Row[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
@@ -180,9 +216,20 @@ function preprocessRecords({
         groupIndex += 1;
       }
     }
+    const dataForRecordSummariesInRow: DataForRecordSummariesInRow | undefined =
+      dataForRecordSummariesInFkColumns
+        ? Object.entries(dataForRecordSummariesInFkColumns).reduce(
+            (fkColumnSummaryRecord, [columnId, summaryObj]) => ({
+              ...fkColumnSummaryRecord,
+              [columnId]: { ...summaryObj, data: summaryObj.data[index] },
+            }),
+            {},
+          )
+        : undefined;
 
     combinedRecords.push({
       record,
+      dataForRecordSummariesInRow,
       identifier: generateRowIdentifier('normal', offset, existingRecordIndex),
       rowIndex: index,
     });
@@ -265,7 +312,10 @@ export class RecordsData {
 
     this.savedRecords.update((existingData) => {
       let data = [...existingData];
-      data.length = getStoreValue(this.meta.pagination).size;
+      data.length = Math.min(
+        data.length,
+        getStoreValue(this.meta.pagination).size,
+      );
 
       let index = -1;
       data = data.map((entry) => {
@@ -302,11 +352,22 @@ export class RecordsData {
       const grouping = response.grouping
         ? buildGrouping(response.grouping)
         : undefined;
+      // Converting an array to a map type as it would be easier to reference
+      const dataForRecordSummariesInFkColumns: DataForRecordSummariesInFkColumns =
+        (response.preview_data ?? []).reduce(
+          (acc, item) => ({
+            ...acc,
+            [item.column]: item,
+          }),
+          {},
+        );
       const records = preprocessRecords({
         records: response.results,
         offset,
         grouping,
+        dataForRecordSummariesInFkColumns,
       });
+
       const tableRecordsData: TableRecordsData = {
         state: States.Done,
         savedRecords: records,
