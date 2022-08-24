@@ -12,7 +12,7 @@
   import { isRowSelected } from '@mathesar/stores/table-data/selection';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
-  // import GroupHeader from './GroupHeader.svelte';
+  import GroupHeader from './GroupHeader.svelte';
   import NewRecordMessage from './NewRecordMessage.svelte';
 
   export let row: Row;
@@ -55,7 +55,11 @@
   }
 
   const handleRowClick = () => {
-    if (!row.isAddPlaceholder && typeof row.rowIndex === 'number') {
+    if (
+      row.record &&
+      !row.isAddPlaceholder &&
+      typeof row.rowIndex === 'number'
+    ) {
       selection.toggleRowSelection(row);
     }
   };
@@ -105,12 +109,12 @@
     {#if row.isNewHelpText}
       <NewRecordMessage columnCount={$processedColumns.size} />
     {:else if row.isGroupHeader && $grouping && row.group}
-      <!-- <GroupHeader
+      <GroupHeader
         {row}
-        rowWidth={100}
         grouping={$grouping}
         group={row.group}
-      /> -->
+        processedColumnsMap={$processedColumns}
+      />
     {:else if row.record}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
@@ -150,26 +154,7 @@
       display: inline-flex;
       align-items: center;
       height: 100%;
-
-      // :global(.checkbox) {
-      //   display: none;
-      // }
     }
-
-    // &:not(.group) {
-    //   &:hover,
-    //   &.selected {
-    //     .row-control {
-    //       // :global(.checkbox) {
-    //       //   display: inline-flex;
-    //       // }
-
-    //       // :global(.number) {
-    //       //   display: none;
-    //       // }
-    //     }
-    //   }
-    // }
 
     &.is-add-placeholder {
       cursor: pointer;
