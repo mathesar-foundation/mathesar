@@ -16,7 +16,7 @@
   let text_input_el: HTMLInputElement;
   $: if (isOpen) {
     if (text_input_el) {
-      text_input_el.focus()
+      text_input_el.focus();
     }
   }
 
@@ -43,7 +43,7 @@
     <div class="entity-switcher-content">
       <!-- TODO consider improving semantics of this css class -->
       <div class="category-name">entities</div>
-      <TextInput bind:value={filterString} bind:element={text_input_el}/>
+      <TextInput bind:value={filterString} bind:element={text_input_el} />
       {#each [...processedData] as [categoryName, items] (categoryName)}
         <div class="category-name">{categoryName}</div>
         <ul class="items">
