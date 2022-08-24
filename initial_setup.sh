@@ -27,11 +27,26 @@ cp ${ENV_EXAMPLE} ${ENV_ORIG}
 execute docker-compose up -d
 echo "DOCKER CONTAINER RUNNING IN THE BACKGROUND..."
 
-# if container is ready for migrations
-mathesar_service_running=$(docker container inspect -f '{{.State.Running}}' ${CONTAINER_NAME})
-while [[ ${mathesar_service_running} != "true" ]];
-do
-    mathesar_service_running=$(docker container inspect -f '{{.State.Running}}' ${CONTAINER_NAME})
+function are_pip_deps_installed {
+  docker exec mathesar_service \
+    pip3 -vvv freeze -r requirements.txt 2>&1 >/dev/null \
+    | grep -q 'not installed' \
+    && return 1 \
+    || return 0
+}
+
+function is_postgres_ready {
+  local postgres_container_id=$(docker ps -q --filter ancestor=postgres:13)
+  docker exec $postgres_container_id pg_isready > /dev/null
+}
+
+function is_ready {
+  are_pip_deps_installed && is_postgres_ready
+}
+
+# block until container is ready for migrations
+until is_ready; do
+  execute sleep 0.5s
 done
 
 # run migrations and install.py
