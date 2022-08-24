@@ -1,29 +1,22 @@
-from sqlalchemy import MetaData, Table, Column, Integer, PrimaryKeyConstraint, ForeignKeyConstraint
 import pytest
 
 from db.tables.operations.select import get_oid_from_table
 
 
 @pytest.fixture
-def post_comment_dependent_tables(engine_with_schema):
-    engine, schema = engine_with_schema
-    metadata = MetaData(schema=schema, bind=engine)
-    post = Table(
-        'post', metadata,
-        Column('id', Integer),
-        PrimaryKeyConstraint('id', name='pk_post')
-    )
-    post.create()
+def academics_tables_oids(engine_with_academics):
+    engine, schema = engine_with_academics
 
-    comment = Table(
-        'comment', metadata,
-        Column('id', Integer),
-        Column('post_id', Integer),
-        PrimaryKeyConstraint('id', name='pk_comment'),
-        ForeignKeyConstraint(['post_id'], ['post.id'], name='fk_comment_post')
-    )
-    comment.create()
+    universities_oid = get_oid_from_table('universities', schema, engine)
+    academics_oid = get_oid_from_table('academics', schema, engine)
+    journals_oid = get_oid_from_table('journals', schema, engine)
+    articles_oid = get_oid_from_table('articles', schema, engine)
+    publishers_oid = get_oid_from_table('publishers', schema, engine)
 
-    post_oid = get_oid_from_table(post.name, schema, engine)
-    comment_oid = get_oid_from_table(comment.name, schema, engine)
-    return post, post_oid, comment, comment_oid
+    return {
+        'universities': universities_oid,
+        'academics': academics_oid,
+        'journals': journals_oid,
+        'articles': articles_oid,
+        'publishers': publishers_oid
+    }
