@@ -5,6 +5,9 @@ from db.constraints import utils as constraint_utils
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
+from mathesar.api.exceptions.validation_exceptions.exceptions import (
+    ConstraintColumnEmptyAPIException, UnsupportedConstraintAPIException,
+)
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
@@ -13,10 +16,19 @@ from mathesar.api.serializers.shared_serializers import (
 from mathesar.models.base import Column, Constraint
 
 
+class Table_Filtered_Column_queryset(serializers.PrimaryKeyRelatedField):
+    def get_queryset(self):
+        table_id = self.context.get('table_id', None)
+        queryset = super(Table_Filtered_Column_queryset, self).get_queryset()
+        if table_id is None or not queryset:
+            return None
+        return queryset.filter(table__id=table_id)
+
+
 class BaseConstraintSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
     type = serializers.CharField()
-    columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
+    columns = Table_Filtered_Column_queryset(queryset=Column.current_objects, many=True)
 
     class Meta:
         model = Constraint
@@ -31,8 +43,11 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         table = self.context['table']
         constraint_obj = self.construct_constraint_obj(table, validated_data)
+        # Additional check is needed because we support read operations for primary key constraint,
+        # but we don't support write operations
         if constraint_obj is None:
-            raise ValueError('Only creating unique constraints is currently supported.')
+            constraint_type = validated_data.get('type', None)
+            raise UnsupportedConstraintAPIException(constraint_type=constraint_type, field='type')
         try:
             constraint = table.add_constraint(constraint_obj)
         except ProgrammingError as e:
@@ -119,13 +134,22 @@ class ConstraintSerializer(
         'unique': BaseConstraintSerializer,
     }
 
-    def create(self, validated_data):
-        serializer = self.get_serializer_class(self.get_mapping_field(validated_data))
-        return serializer.create(validated_data)
-
     def get_mapping_field(self, data):
         if isinstance(data, Constraint):
             constraint_type = data.type
         else:
             constraint_type = data.get('type', None)
         return constraint_type
+
+    def create(self, validated_data):
+        serializer = self.get_serializer_class(self.get_mapping_field(validated_data))
+        return serializer.create(validated_data)
+
+    def run_validation(self, data):
+        constraint_type = data.get('type', None)
+        if constraint_type not in self.serializers_mapping.keys():
+            raise UnsupportedConstraintAPIException(constraint_type=constraint_type)
+        columns = data.get('columns', None)
+        if columns == []:
+            raise ConstraintColumnEmptyAPIException(field='columns')
+        return super(ConstraintSerializer, self).run_validation(data)
