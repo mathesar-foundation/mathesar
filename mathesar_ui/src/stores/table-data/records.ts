@@ -163,11 +163,19 @@ function preprocessRecords({
     let recordIndex = 0;
 
     grouping?.groups.forEach((group, groupIndex) => {
+      const groupValues: ApiRecord = {};
+      grouping.columnIds.forEach((columnId) => {
+        if (group.eqValue[columnId] !== undefined) {
+          groupValues[columnId] = group.eqValue[columnId];
+        } else {
+          groupValues[columnId] = group.firstValue[columnId];
+        }
+      });
       combinedRecords.push({
         isGroupHeader: true,
         group,
         identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
-        groupValues: group.eqValue,
+        groupValues,
       });
       group.resultIndices.forEach((resultIndex) => {
         const record = records[resultIndex];
