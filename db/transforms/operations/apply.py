@@ -26,7 +26,6 @@ def apply_transformations_deprecated(
     columns_to_select=None,
     group_by=None,
     duplicate_only=None,
-    aggregate=None,
     search=[],
 ):
     # TODO rename the actual method parameter
@@ -38,7 +37,7 @@ def apply_transformations_deprecated(
 
     if duplicate_only:
         transforms.append(base.DuplicateOnly(duplicate_only))
-    if group_by or aggregate:
+    if group_by:
         transforms.append(base.Group(group_by))
     if order_by:
         transforms.append(base.Order(order_by))

@@ -1,4 +1,4 @@
-from db.functions.base import Literal, ColumnName
+from db.functions.base import Literal, ColumnName, Alias
 from db.functions.known_db_functions import known_db_functions
 from db.functions.exceptions import UnknownDBFunctionID, BadDBFunctionFormat
 
@@ -47,6 +47,7 @@ def _process_parameter(parameter, parent_db_function_subclass):
     elif (
         parent_db_function_subclass is Literal
         or parent_db_function_subclass is ColumnName
+        or parent_db_function_subclass is Alias
     ):
         # Everything except for a dict is considered a literal parameter,
         # and only the Literal and ColumnName DBFunctions can have
