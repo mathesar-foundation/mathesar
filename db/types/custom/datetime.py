@@ -1,4 +1,4 @@
-from sqlalchemy import case, func, and_
+from sqlalchemy import case, func, and_, cast, TEXT
 from sqlalchemy.dialects.postgresql import DATE as SA_DATE
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.dialects.postgresql import TIME as SA_TIME
@@ -265,7 +265,7 @@ class TruncateToYear(DBFunction):
 
     @staticmethod
     def to_sa_expression(col):
-        return sa_call_sql_function('to_char', col, 'YYYY')
+        return cast(sa_call_sql_function('to_char', col, 'YYYY'), TEXT)
 
 
 class TruncateToMonth(DBFunction):
@@ -275,7 +275,7 @@ class TruncateToMonth(DBFunction):
 
     @staticmethod
     def to_sa_expression(col):
-        return sa_call_sql_function('to_char', col, 'YYYY-MM')
+        return cast(sa_call_sql_function('to_char', col, 'YYYY-MM'), TEXT)
 
 
 class TruncateToDay(DBFunction):
@@ -285,4 +285,4 @@ class TruncateToDay(DBFunction):
 
     @staticmethod
     def to_sa_expression(col):
-        return sa_call_sql_function('to_char', col, 'YYYY-MM-DD')
+        return cast(sa_call_sql_function('to_char', col, 'YYYY-MM-DD'), TEXT)
