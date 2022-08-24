@@ -178,12 +178,21 @@ class UIQuery(BaseModel, Relation):
 
     @cached_property
     def _alias_to_display_name(self):
-        return {
+        display_name_map = {
             initial_column['alias']: initial_column['display_name']
             for initial_column
             in self.initial_columns
             if 'display_name' in initial_column
         }
+        if self.transformations is not None:
+            display_name_map.update(
+                {
+                    k: v
+                    for transformation in self.transformations
+                    for k, v in transformation.get('display_names', {}).items()
+                }
+            )
+        return display_name_map
 
     @property
     def _sa_engine(self):

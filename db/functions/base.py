@@ -14,7 +14,8 @@ access hints on what composition of functions and parameters should be valid.
 
 from abc import ABC, abstractmethod
 
-from sqlalchemy import column, not_, and_, or_, func, literal
+from sqlalchemy import column, not_, and_, or_, func, literal, cast, INTEGER
+from sqlalchemy.dialects.postgresql import array_agg
 
 from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
@@ -344,3 +345,40 @@ class CurrentDateTime(DBFunction):
     @staticmethod
     def to_sa_expression():
         return func.current_timestamp()
+
+
+class Count(DBFunction):
+    id = 'count'
+    name = 'count'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return cast(func.count(column_expr), INTEGER)
+
+
+class ArrayAgg(DBFunction):
+    id = 'aggregate_to_array'
+    name = 'aggregate to array'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return array_agg(column_expr)
+
+
+class Alias(DBFunction):
+    id = 'alias'
+    name = 'alias'
+    hints = tuple([
+        hints.parameter_count(2),
+        hints.parameter(0, hints.column),
+    ])
+
+    @staticmethod
+    def to_sa_expression(expr, alias):
+        return expr.label(alias)
