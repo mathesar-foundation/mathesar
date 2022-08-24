@@ -531,6 +531,14 @@ group_by_num_list = [
             mode=group.GroupMode.DISTINCT.value,
             preproc=[None, 'extract_email_domain']
         ),
+        259
+    ),
+    (
+        group.GroupBy(
+            ['Student Email'],
+            mode=group.GroupMode.DISTINCT.value,
+            preproc=['extract_email_domain']
+        ),
         3
     ),
     (
