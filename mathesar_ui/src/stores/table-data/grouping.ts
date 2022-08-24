@@ -1,11 +1,14 @@
 import type { GetRequestParams } from '@mathesar/api/tables/records';
+import { isDefinedNonNullable } from '@mathesar/component-library';
 
 export interface GroupEntry {
   readonly columnId: number;
   readonly preprocFnId?: string;
 }
 
-type TerseGroupEntry = [GroupEntry['columnId'], GroupEntry['preprocFnId']];
+type TerseGroupEntry =
+  | [GroupEntry['columnId'], GroupEntry['preprocFnId']]
+  | [GroupEntry['columnId']];
 
 export type TerseGrouping = TerseGroupEntry[];
 
@@ -30,6 +33,17 @@ export class Grouping {
     });
   }
 
+  withReplacedEntry(entryIndex: number, entry: GroupEntry): Grouping {
+    return new Grouping({
+      entries: this.entries.map((existingEntry, index) => {
+        if (index === entryIndex) {
+          return entry;
+        }
+        return existingEntry;
+      }),
+    });
+  }
+
   withoutEntry(entryIndex: number): Grouping {
     return new Grouping({
       entries: [
@@ -45,6 +59,20 @@ export class Grouping {
     });
   }
 
+  withPreprocForColumn(columnId: number, preprocFnId?: string): Grouping {
+    return new Grouping({
+      entries: this.entries.map((entry) => {
+        if (entry.columnId === columnId) {
+          return {
+            columnId,
+            preprocFnId,
+          };
+        }
+        return entry;
+      }),
+    });
+  }
+
   recordsRequestParams(): Pick<GetRequestParams, 'grouping'> {
     if (!this.entries.length) {
       return {};
@@ -57,20 +85,27 @@ export class Grouping {
       request.columns.push(entry.columnId);
       request.preproc?.push(entry.preprocFnId ?? null);
     });
+    if (request.preproc?.every((entry) => !isDefinedNonNullable(entry))) {
+      request.preproc = null;
+    }
     return {
       grouping: request,
     };
   }
 
   terse(): TerseGrouping {
-    return this.entries.map((entry) => [entry.columnId, entry.preprocFnId]);
+    return this.entries.map((entry) =>
+      entry.preprocFnId
+        ? [entry.columnId, entry.preprocFnId]
+        : [entry.columnId],
+    );
   }
 
   static fromTerse(terse: TerseGrouping): Grouping {
     return new Grouping({
       entries: terse.map((terseEntry) => ({
         columnId: terseEntry[0],
-        preprocFnId: terseEntry[1],
+        preprocFnId: terseEntry[1] ?? undefined,
       })),
     });
   }

@@ -96,7 +96,7 @@ export interface Row {
   isGroupHeader?: boolean;
   group?: Group;
   rowIndex?: number;
-  groupValues?: Record<string, unknown>;
+  groupValues?: ApiGroup['first_value'];
 }
 
 export type RecordRow = Omit<Row, 'record'> & Required<Pick<Row, 'record'>>;
@@ -143,16 +143,6 @@ function generateRowIdentifier(
   return `__${offset}_${type}_${index}`;
 }
 
-function getRecordIndexToGroupMap(groups: Group[]): Map<number, Group> {
-  const map = new Map<number, Group>();
-  groups.forEach((group) => {
-    group.resultIndices.forEach((resultIndex) => {
-      map.set(resultIndex, group);
-    });
-  });
-  return map;
-}
-
 function preprocessRecords({
   records,
   offset,
@@ -164,49 +154,36 @@ function preprocessRecords({
 }): Row[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
-  const combinedRecords: Row[] = [];
-  let index = 0;
-  let groupIndex = 0;
-  let existingRecordIndex = 0;
 
-  const recordIndexToGroupMap = getRecordIndexToGroupMap(
-    grouping?.groups ?? [],
-  );
+  if (isResultGrouped) {
+    const combinedRecords: Row[] = [];
+    let recordIndex = 0;
 
-  records?.forEach((record) => {
-    if (isResultGrouped) {
-      let isGroup = false;
-      if (index === 0) {
-        isGroup = true;
-      } else {
-        for (const id of groupingColumnIds) {
-          if (records[index - 1][id] !== records[index][id]) {
-            isGroup = true;
-            break;
-          }
-        }
-      }
-
-      if (isGroup) {
+    grouping?.groups.forEach((group, groupIndex) => {
+      combinedRecords.push({
+        isGroupHeader: true,
+        group,
+        identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
+        groupValues: group.firstValue,
+      });
+      group.resultIndices.forEach((resultIndex) => {
+        const record = records[resultIndex];
         combinedRecords.push({
-          isGroupHeader: true,
-          group: recordIndexToGroupMap.get(index),
-          identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
-          groupValues: record,
+          record,
+          identifier: generateRowIdentifier('normal', offset, recordIndex),
+          rowIndex: recordIndex,
         });
-        groupIndex += 1;
-      }
-    }
-
-    combinedRecords.push({
-      record,
-      identifier: generateRowIdentifier('normal', offset, existingRecordIndex),
-      rowIndex: index,
+        recordIndex += 1;
+      });
     });
-    index += 1;
-    existingRecordIndex += 1;
-  });
-  return combinedRecords;
+    return combinedRecords;
+  }
+
+  return records.map((record, index) => ({
+    record,
+    identifier: generateRowIdentifier('normal', offset, index),
+    rowIndex: index,
+  }));
 }
 
 function prepareRowForRequest(row: Row): ApiRecord {

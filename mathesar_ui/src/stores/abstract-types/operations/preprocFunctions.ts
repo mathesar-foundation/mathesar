@@ -9,18 +9,9 @@ import type {
 const preprocFunctionsResponse: AbstractTypePreprocFunctionsResponse[] = [
   {
     id: 'truncate_to_day',
-    name: 'Day',
-    appliesTo: [abstractTypeCategory.Date, abstractTypeCategory.DateTime],
+    name: 'Day, Month, Year',
+    appliesTo: [abstractTypeCategory.DateTime],
     returns: abstractTypeCategory.Text,
-    possibleReturnValues: [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ].map((entry) => ({ label: entry, value: entry })),
   },
   {
     id: 'truncate_to_year',
@@ -30,23 +21,9 @@ const preprocFunctionsResponse: AbstractTypePreprocFunctionsResponse[] = [
   },
   {
     id: 'truncate_to_month',
-    name: 'Month',
+    name: 'Month, Year',
     appliesTo: [abstractTypeCategory.Date, abstractTypeCategory.DateTime],
     returns: abstractTypeCategory.Text,
-    possibleReturnValues: [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ].map((entry) => ({ label: entry, value: entry })),
   },
   {
     id: 'extract_uri_scheme',

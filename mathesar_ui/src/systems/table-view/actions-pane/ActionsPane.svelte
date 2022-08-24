@@ -151,7 +151,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <Group {columns} grouping={meta.grouping} />
+      <Group grouping={meta.grouping} />
     </svelte:fragment>
   </Dropdown>
 
