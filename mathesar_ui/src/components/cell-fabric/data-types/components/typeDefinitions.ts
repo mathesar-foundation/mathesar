@@ -5,6 +5,7 @@ import type {
 } from '@mathesar-component-library/types';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
+import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
 
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
@@ -24,7 +25,9 @@ export interface LinkedRecordCellExternalProps {
 
 export interface LinkedRecordCellProps
   extends CellTypeProps<ForeignKeyCellValue>,
-    LinkedRecordCellExternalProps {}
+    LinkedRecordCellExternalProps {
+  dataForRecordSummaryInFkCell?: DataForRecordSummaryInFkCell;
+}
 
 // TextBox
 

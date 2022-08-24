@@ -15,7 +15,9 @@ import type {
   Group as ApiGroup,
   Grouping as ApiGrouping,
   GroupingMode,
+  DataForRecordSummariesInFkColumn,
   GetRequestParams as ApiGetRequestParams,
+  RecordSummaryInputData,
 } from '@mathesar/api/tables/records';
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
@@ -66,6 +68,11 @@ export interface Grouping {
   mode: GroupingMode;
   groups: Group[];
 }
+/** Keys are stringified column ids */
+type DataForRecordSummariesInFkColumns = Record<
+  string,
+  DataForRecordSummariesInFkColumn
+>;
 
 function buildGroup(apiGroup: ApiGroup): Group {
   return {
@@ -86,6 +93,14 @@ function buildGrouping(apiGrouping: ApiGrouping): Grouping {
   };
 }
 
+export interface DataForRecordSummaryInFkCell {
+  column: number;
+  template: string;
+  data: RecordSummaryInputData;
+}
+
+type DataForRecordSummariesInRow = Record<string, DataForRecordSummaryInFkCell>;
+
 export interface Row {
   /**
    * Can be `undefined` because some rows don't have an associated record, e.g.
@@ -99,6 +114,7 @@ export interface Row {
   isGroupHeader?: boolean;
   group?: Group;
   rowIndex?: number;
+  dataForRecordSummariesInRow?: DataForRecordSummariesInRow;
   groupValues?: ApiGroup['first_value'];
 }
 
@@ -146,14 +162,40 @@ function generateRowIdentifier(
   return `__${offset}_${type}_${index}`;
 }
 
+function getProcessedRecordRow(
+  record: ApiRecord,
+  recordIndex: number,
+  offset: number,
+  dataForRecordSummariesInFkColumns?: DataForRecordSummariesInFkColumns,
+): Row {
+  const dataForRecordSummariesInRow: DataForRecordSummariesInRow | undefined =
+    dataForRecordSummariesInFkColumns
+      ? Object.entries(dataForRecordSummariesInFkColumns).reduce(
+          (fkColumnSummaryRecord, [columnId, summaryObj]) => ({
+            ...fkColumnSummaryRecord,
+            [columnId]: { ...summaryObj, data: summaryObj.data[recordIndex] },
+          }),
+          {},
+        )
+      : undefined;
+  return {
+    record,
+    dataForRecordSummariesInRow,
+    identifier: generateRowIdentifier('normal', offset, recordIndex),
+    rowIndex: recordIndex,
+  };
+}
+
 function preprocessRecords({
   records,
   offset,
   grouping,
+  dataForRecordSummariesInFkColumns,
 }: {
   records: ApiRecord[];
   offset: number;
   grouping?: Grouping;
+  dataForRecordSummariesInFkColumns?: DataForRecordSummariesInFkColumns;
 }): Row[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
@@ -179,22 +221,28 @@ function preprocessRecords({
       });
       group.resultIndices.forEach((resultIndex) => {
         const record = records[resultIndex];
-        combinedRecords.push({
-          record,
-          identifier: generateRowIdentifier('normal', offset, recordIndex),
-          rowIndex: recordIndex,
-        });
+        combinedRecords.push(
+          getProcessedRecordRow(
+            record,
+            recordIndex,
+            offset,
+            dataForRecordSummariesInFkColumns,
+          ),
+        );
         recordIndex += 1;
       });
     });
     return combinedRecords;
   }
 
-  return records.map((record, index) => ({
-    record,
-    identifier: generateRowIdentifier('normal', offset, index),
-    rowIndex: index,
-  }));
+  return records.map((record, index) =>
+    getProcessedRecordRow(
+      record,
+      index,
+      offset,
+      dataForRecordSummariesInFkColumns,
+    ),
+  );
 }
 
 function prepareRowForRequest(row: Row): ApiRecord {
@@ -310,11 +358,22 @@ export class RecordsData {
       const grouping = response.grouping
         ? buildGrouping(response.grouping)
         : undefined;
+      // Converting an array to a map type as it would be easier to reference
+      const dataForRecordSummariesInFkColumns: DataForRecordSummariesInFkColumns =
+        (response.preview_data ?? []).reduce(
+          (acc, item) => ({
+            ...acc,
+            [item.column]: item,
+          }),
+          {},
+        );
       const records = preprocessRecords({
         records: response.results,
         offset,
         grouping,
+        dataForRecordSummariesInFkColumns,
       });
+
       const tableRecordsData: TableRecordsData = {
         state: States.Done,
         savedRecords: records,
