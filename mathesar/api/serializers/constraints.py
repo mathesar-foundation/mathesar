@@ -141,6 +141,10 @@ class ConstraintSerializer(
             constraint_type = data.get('type', None)
         return constraint_type
 
+    def create(self, validated_data):
+        serializer = self.get_serializer_class(self.get_mapping_field(validated_data))
+        return serializer.create(validated_data)
+
     def run_validation(self, data):
         constraint_type = data.get('type', None)
         if constraint_type not in self.serializers_mapping.keys():
