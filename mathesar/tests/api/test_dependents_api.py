@@ -59,9 +59,9 @@ def test_dependents_response(two_foreign_key_tables, client):
     referer_foreign_key_constraint_id = [r['id'] for r in referrer_table_constraints_results if r['type'] == 'foreignkey']
 
     referent_expected_dependent_ids = referent_constraint_ids + referer_foreign_key_constraint_id + [referrer_table.id]
-    referent_actual_dependents_ids = [int(d['obj']['id']) for d in response_data if d['parent_obj']['objid'] == referent_table.oid]
+    referent_actual_dependents_ids = [int(d['obj']['id']) for d in response_data if int(d['parent_obj']['id']) == referent_table.id]
 
-    referrer_dependents_ids = [int(d['obj']['id']) for d in response_data if d['parent_obj']['objid'] == referrer_table.oid]
+    referrer_dependents_ids = [int(d['obj']['id']) for d in response_data if int(d['parent_obj']['id']) == referrer_table.id]
 
     assert sorted(referent_expected_dependent_ids) == sorted(referent_actual_dependents_ids)
     assert sorted(referer_constraint_ids) == sorted(referrer_dependents_ids)
