@@ -4,10 +4,12 @@ import type { QueryResultColumn } from '@mathesar/api/queries/queryList';
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,
+  getPreprocFunctionsForAbstractType,
 } from '@mathesar/stores/abstract-types';
 import type {
   AbstractType,
   AbstractTypesMap,
+  AbstractTypePreprocFunctionDefinition,
 } from '@mathesar/stores/abstract-types/types';
 import {
   getCellCap,
@@ -28,6 +30,7 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   abstractType: AbstractType;
   inputComponentAndProps: ComponentAndProps;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
+  preprocFunctions: AbstractTypePreprocFunctionDefinition[];
 }
 
 export type ProcessedQueryResultColumnMap = ImmutableMap<
@@ -89,6 +92,9 @@ export function processColumn(
       abstractType.cell,
     ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
+    preprocFunctions: getPreprocFunctionsForAbstractType(
+      abstractType.identifier,
+    ),
   };
 }
 

@@ -20,6 +20,7 @@ export const isRowSelected = (
   selectedCells: ImmutableSet<string>,
   row: Row,
 ): boolean =>
+  !!row.record &&
   selectedCells
     .valuesArray()
     .some((cell) => cell.startsWith(`${row.rowIndex || DEFAULT_ROW_INDEX}-`));

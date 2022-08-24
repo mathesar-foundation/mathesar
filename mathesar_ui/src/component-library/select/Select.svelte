@@ -74,8 +74,7 @@
    */
   export let valuesAreEqual: DefinedProps['valuesAreEqual'] = (a, b) => a === b;
 
-  export let initialSelectionType: DefinedProps['initialSelectionType'] =
-    'first';
+  export let autoSelect: DefinedProps['autoSelect'] = 'first';
 
   function setValueFromArray(values: (Option | undefined)[]) {
     [value] = values;
@@ -83,19 +82,24 @@
   }
 
   function setValueOnOptionChange(opts: Option[]) {
-    if (opts.length > 0) {
-      if (
-        typeof value === 'undefined' ||
-        !opts.some((entry) => valuesAreEqual(entry, value))
-      ) {
-        if (initialSelectionType === 'first') {
-          setValueFromArray(opts);
-        } else if (initialSelectionType === 'empty') {
-          setValueFromArray([]);
-        }
+    if (autoSelect === 'none') {
+      return;
+    }
+    if (!opts.length) {
+      if (value !== undefined) {
+        setValueFromArray([]);
       }
-    } else {
-      setValueFromArray([]);
+      return;
+    }
+    if (
+      value === undefined ||
+      !opts.some((entry) => valuesAreEqual(entry, value))
+    ) {
+      if (autoSelect === 'first') {
+        setValueFromArray(opts);
+      } else if (autoSelect === 'clear') {
+        setValueFromArray([]);
+      }
     }
   }
 

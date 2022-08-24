@@ -93,7 +93,7 @@ export class TabularData {
     });
     this.columnsDataStore.on('columnDeleted', async (columnId) => {
       this.meta.sorting.update((s) => s.without(columnId));
-      this.meta.grouping.update((g) => g.without(columnId));
+      this.meta.grouping.update((g) => g.withoutColumn(columnId));
       this.meta.filtering.update((f) => f.withoutColumn(columnId));
     });
     this.columnsDataStore.on('columnPatched', async () => {

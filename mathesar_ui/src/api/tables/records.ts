@@ -3,6 +3,12 @@ export interface Grouping {
   columns: number[];
   mode: GroupingMode;
   /**
+   * Preproc needs to contain id of a preproc function.
+   * The number of preproc functions should match the
+   * number of columns, or it should be null.
+   */
+  preproc: (string | null)[] | null;
+  /**
    * When `mode` === 'distinct', `num_groups` will always be `null`.
    *
    * When `mode` === 'percentile', `num_groups` will give the number of groups,
@@ -36,7 +42,7 @@ export interface GetRequestParams {
   limit?: number;
   offset?: number;
   order_by?: SortingEntry[];
-  grouping?: Pick<Grouping, 'columns'>;
+  grouping?: Pick<Grouping, 'columns' | 'preproc'>;
   filter?: FilterRequest;
   search_fuzzy?: Record<string, unknown>[];
 }
@@ -77,7 +83,12 @@ export interface Group {
    * the current page of records.
    */
   count: number;
-  first_value: ResultValue;
+  /**
+   * eq_value will contain preprocessed value when grouping contains preproc
+   * functions. In other cases, it will be identical to first_value.
+   */
+  eq_value: Result;
+  first_value: Result;
   /**
    * When GroupingMode is 'distinct', then `first_value` and `last_value` will
    * be identical. Separate first and last values are useful when GroupingMode
@@ -85,7 +96,7 @@ export interface Group {
    * values in the order used for window function in the ranged grouping (which
    * may not be the same as the order used to sort the result set).
    */
-  last_value: ResultValue;
+  last_value: Result;
   /**
    * Each number refers to the index of a record in the response result. This
    * array will only indices for records returned on the page. If the page is

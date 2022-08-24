@@ -143,8 +143,13 @@ def run_overdue_books_scenario(check_overdue_books_columns, client):
             'Title List': ['Mention Add Size City Kid', 'Economic Too Level']
         }
     ]
-    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
-    assert sorted(actual_records, key=lambda x: x['email']) == expect_records
+    actual_records = sorted(
+        client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results'],
+        key=lambda x: x['email']
+    )
+    for rec_pair in zip(actual_records, expect_records):
+        assert rec_pair[0]['email'] == rec_pair[1]['email']
+        assert sorted(rec_pair[0]['Title List']) == sorted(rec_pair[1]['Title List'])
 
 
 @pytest.fixture
