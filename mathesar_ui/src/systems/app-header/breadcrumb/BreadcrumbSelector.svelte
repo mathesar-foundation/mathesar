@@ -41,7 +41,8 @@
 
   <AttachableDropdown bind:isOpen trigger={triggerElement}>
     <div class="entity-switcher-content">
-      <!-- TODO consider improving semantics of this css class -->
+      <!-- TODO consider improving semantics of this css class: it's less of a
+      category-name and more of a section-name. -->
       <div class="category-name">entities</div>
       <TextInput bind:value={filterString} bind:element={textInputEl} />
       {#each [...processedData] as [categoryName, items] (categoryName)}
