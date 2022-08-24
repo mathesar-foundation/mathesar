@@ -60,6 +60,11 @@ export interface Group {
    * the current page of records.
    */
   count: number;
+  /**
+   * eq_value will contain preprocessed value when grouping contains preproc
+   * functions. In other cases, it will be identical to first_value.
+   */
+  eq_value: Result;
   first_value: Result;
   /**
    * When GroupingMode is 'distinct', then `first_value` and `last_value` will

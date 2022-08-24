@@ -10,10 +10,21 @@
   export let grouping: Grouping;
   export let group: Group;
 
-  $: ({ columnIds } = grouping);
+  $: ({ columnIds, preprocIds } = grouping);
 
   $: cellValue = (columnId: number) =>
     row.groupValues ? row.groupValues[columnId] : undefined;
+
+  $: preProcFunctionsForColumn = columnIds.map(
+    (columnId) => processedColumnsMap.get(columnId)?.preprocFunctions ?? [],
+  );
+  $: preprocNames = preprocIds.map((preprocId, index) =>
+    preprocId
+      ? preProcFunctionsForColumn[index].find(
+          (preprocFn) => preprocFn.id === preprocId,
+        )?.name
+      : undefined,
+  );
 </script>
 
 <SheetPositionableCell
@@ -24,10 +35,15 @@
 >
   <div {...htmlAttributes} {style} class="groupheader">
     <CellBackground color="var(--cell-bg-color-header)" />
-    {#each columnIds as columnId (columnId)}
+    {#each columnIds as columnId, index (columnId)}
       <span class="tag">
         <span class="name">
           {processedColumnsMap.get(columnId)?.column.name ?? ''}
+          {#if preprocNames[index]}
+            <span class="preproc">
+              {preprocNames[index]}
+            </span>
+          {/if}
         </span>
         <span class="value"><CellValue value={cellValue(columnId)} /></span>
       </span>
@@ -55,6 +71,16 @@
       .name {
         font-size: var(--text-size-x-small);
         color: var(--color-text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.14rem;
+
+        .preproc {
+          font-size: var(--text-size-xx-small);
+          border: 1px solid var(--color-text-muted);
+          padding: 0rem 0.3rem;
+          border-radius: 5rem;
+        }
       }
       .value {
         font-weight: 500;

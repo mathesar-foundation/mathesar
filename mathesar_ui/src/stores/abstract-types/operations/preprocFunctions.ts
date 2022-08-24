@@ -9,7 +9,7 @@ import type {
 const preprocFunctionsResponse: AbstractTypePreprocFunctionsResponse[] = [
   {
     id: 'truncate_to_day',
-    name: 'Day, Month, Year',
+    name: 'Year, Month, Day',
     appliesTo: [abstractTypeCategory.DateTime],
     returns: abstractTypeCategory.Text,
   },
@@ -21,7 +21,7 @@ const preprocFunctionsResponse: AbstractTypePreprocFunctionsResponse[] = [
   },
   {
     id: 'truncate_to_month',
-    name: 'Month, Year',
+    name: 'Year, Month',
     appliesTo: [abstractTypeCategory.Date, abstractTypeCategory.DateTime],
     returns: abstractTypeCategory.Text,
   },

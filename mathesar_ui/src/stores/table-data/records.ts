@@ -54,6 +54,7 @@ function buildFetchQueryString(data: RecordsRequestParamsData): string {
 
 export interface Group {
   count: number;
+  eqValue: ApiGroup['eq_value'];
   firstValue: ApiGroup['first_value'];
   lastValue: ApiGroup['last_value'];
   resultIndices: number[];
@@ -61,6 +62,7 @@ export interface Group {
 
 export interface Grouping {
   columnIds: number[];
+  preprocIds: (string | null)[];
   mode: GroupingMode;
   groups: Group[];
 }
@@ -68,6 +70,7 @@ export interface Grouping {
 function buildGroup(apiGroup: ApiGroup): Group {
   return {
     count: apiGroup.count,
+    eqValue: apiGroup.eq_value,
     firstValue: apiGroup.first_value,
     lastValue: apiGroup.last_value,
     resultIndices: apiGroup.result_indices,
@@ -77,6 +80,7 @@ function buildGroup(apiGroup: ApiGroup): Group {
 function buildGrouping(apiGrouping: ApiGrouping): Grouping {
   return {
     columnIds: apiGrouping.columns,
+    preprocIds: apiGrouping.preproc ?? [],
     mode: apiGrouping.mode,
     groups: apiGrouping.groups.map(buildGroup),
   };
@@ -163,7 +167,7 @@ function preprocessRecords({
         isGroupHeader: true,
         group,
         identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
-        groupValues: group.firstValue,
+        groupValues: group.eqValue,
       });
       group.resultIndices.forEach((resultIndex) => {
         const record = records[resultIndex];
