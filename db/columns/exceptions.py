@@ -32,3 +32,7 @@ class TypeMismatchError(Exception):
 
 class UniqueValueError(Exception):
     pass
+
+
+class ExclusionError(Exception):
+    pass
