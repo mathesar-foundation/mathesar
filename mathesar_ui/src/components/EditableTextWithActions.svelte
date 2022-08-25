@@ -18,6 +18,8 @@
   let isSubmitting = false;
   let errors: string[] = [];
 
+  const paddingStyle = 'padding:0.43rem 0.57rem;';
+
   const makeEditbale = () => {
     value = initialValue;
     isEditable = true;
@@ -52,7 +54,12 @@
 
 <div class="editable-text">
   {#if !isEditable}
-    <span role="button" on:click={makeEditbale}>{initialValue}</span>
+    <span
+      style={paddingStyle}
+      class="non-editable-value"
+      role="button"
+      on:click={makeEditbale}>{initialValue}</span
+    >
   {:else}
     <div class="input-container">
       <TextInput
@@ -114,5 +121,9 @@
   .error {
     color: red;
     font-size: 0.75rem;
+  }
+
+  .non-editable-value:hover {
+    box-shadow: 0 0 0 2px #2087e633;
   }
 </style>

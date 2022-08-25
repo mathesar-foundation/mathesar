@@ -20,7 +20,6 @@
     iconFiltering,
     iconGrouping,
     iconRefresh,
-    iconRename,
     iconSorting,
     iconTableLink,
     iconToolbox,
@@ -31,7 +30,6 @@
   import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { States } from '@mathesar/utils/api';
   import { createEventDispatcher } from 'svelte';
-  import TableConstraints from '../constraints/TableConstraints.svelte';
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
@@ -104,8 +102,6 @@
       Constraints
     </MenuItem>
   </DropdownMenu>
-
-  <TableConstraints controller={tableConstraintsModal} />
 
   <LinkTableModal
     controller={linkTableModal}
