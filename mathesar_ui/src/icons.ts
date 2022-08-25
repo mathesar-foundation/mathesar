@@ -43,6 +43,7 @@ import {
   faUnlink,
   faUpload,
   faUser,
+  faToolbox,
 } from '@fortawesome/free-solid-svg-icons';
 
 import type { IconProps } from '@mathesar-component-library/types';
@@ -99,6 +100,7 @@ export const iconTable: IconProps = { data: faTable };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUser: IconProps = { data: faUser };
+export const iconToolbox: IconProps = { data: faToolbox };
 
 // STATUSES
 

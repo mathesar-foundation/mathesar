@@ -23,6 +23,7 @@
     iconRename,
     iconSorting,
     iconTableLink,
+    iconToolbox,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
@@ -46,8 +47,14 @@
   const linkTableModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
 
-  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore, isLoading } =
-    $tabularData);
+  $: ({
+    columnsDataStore,
+    recordsData,
+    meta,
+    constraintsDataStore,
+    isLoading,
+    display,
+  } = $tabularData);
   $: ({ columns } = $columnsDataStore);
   $: ({
     filtering,
@@ -56,6 +63,7 @@
     // selectedRows,
     sheetState,
   } = meta);
+  $: ({ isTableInspectorVisible } = display);
   $: recordState = recordsData.state;
 
   $: isError =
@@ -77,6 +85,10 @@
         await refetchTablesForSchema(schema.id);
       },
     });
+  }
+
+  function toggleTableInspector() {
+    isTableInspectorVisible.set(!$isTableInspectorVisible);
   }
 </script>
 
@@ -208,6 +220,10 @@
       </span>
     </Button>
   </div>
+
+  <Button size="medium" disabled={$isLoading} on:click={toggleTableInspector}>
+    <Icon {...iconToolbox} />
+  </Button>
 </div>
 
 <style>

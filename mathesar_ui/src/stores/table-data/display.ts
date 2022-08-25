@@ -150,6 +150,9 @@ export class Display {
 
   activeCell: Writable<ActiveCell | undefined>;
 
+  // @sean / @pavish let me know if you think there is a better place for this!
+  isTableInspectorVisible: Writable<boolean>;
+
   /**
    * @deprecated
    * Keys are column ids. Values are column widths in px.
@@ -183,6 +186,7 @@ export class Display {
     this.horizontalScrollOffset = writable(0);
     this.scrollOffset = writable(0);
     this.activeCell = writable<ActiveCell | undefined>(undefined);
+    this.isTableInspectorVisible = writable(false);
 
     this.customizedColumnWidths = new WritableMap();
 
