@@ -70,6 +70,6 @@
     gap: 0.5rem;
   }
   .label {
-    font-size: 1.15rem;
+    font-size: 0.85rem;
   }
 </style>
