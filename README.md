@@ -39,6 +39,12 @@ Clone the repository and then run the following command for performing initial s
 make initial_setup
 ```
 
+Setup all Initial settings using the pre-build script
+```
+initial_setup.sh
+```
+
+
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 
 
 It is recommended that you keep the Docker containers running while you make changes to the code. Any change to the code made locally will sync to the container and the version deployed at `http://localhost:8000` will always be the latest local version of the code.
@@ -110,3 +116,4 @@ Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineer
 ## License
 
 Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).
+
