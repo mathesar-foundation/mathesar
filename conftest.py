@@ -256,6 +256,8 @@ def _get_connection_string(username, password, hostname, database):
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "db", "tests", "resources")
 ACADEMICS_SQL = os.path.join(RESOURCES, "academics_create.sql")
+LIBRARY_SQL = os.path.join(RESOURCES, "library_without_checkouts.sql")
+LIBRARY_CHECKOUTS_SQL = os.path.join(RESOURCES, "library_add_checkouts.sql")
 
 
 @pytest.fixture
@@ -284,6 +286,42 @@ def academics_db_tables(engine_with_academics):
         'journals',
         'publishers',
         'universities',
+    }
+    return {
+        table_name: make_table(table_name)
+        for table_name
+        in table_names
+    }
+
+
+@pytest.fixture
+def engine_with_library(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(LIBRARY_SQL) as f1, open(LIBRARY_CHECKOUTS_SQL) as f2:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f1.read()))
+        conn.execute(text(f2.read()))
+    yield engine, schema
+
+
+@pytest.fixture
+def library_db_tables(engine_with_library):
+    def make_table(table_name):
+        return Table(
+            table_name,
+            metadata,
+            schema=schema,
+            autoload_with=engine,
+        )
+    engine, schema = engine_with_library
+    metadata = MetaData(bind=engine)
+    table_names = {
+        "Authors",
+        "Checkouts",
+        "Items",
+        "Patrons",
+        "Publications",
+        "Publishers",
     }
     return {
         table_name: make_table(table_name)

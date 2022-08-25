@@ -145,13 +145,13 @@
       <Icon {...iconGrouping} />
       <span>
         Group
-        {#if $grouping.size > 0}
-          ({$grouping.size})
+        {#if $grouping.entries.length > 0}
+          ({$grouping.entries.length})
         {/if}
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <!-- <DisplayGroup {columns} grouping={meta.grouping} /> -->
+      <Group grouping={meta.grouping} />
     </svelte:fragment>
   </Dropdown>
 

@@ -6,17 +6,10 @@
 
   export let table: TableEntry | undefined = undefined;
   export let prependBlank = false;
-  export let initialSelectionType: SelectProps<
-    TableEntry | undefined
-  >['initialSelectionType'] = 'first';
+  export let autoSelect: SelectProps<TableEntry | undefined>['autoSelect'] =
+    'first';
 
   $: tables = [...$tablesDataStore.data.values()];
 </script>
 
-<SelectTable
-  {tables}
-  bind:table
-  {prependBlank}
-  {initialSelectionType}
-  on:change
-/>
+<SelectTable {tables} bind:table {prependBlank} {autoSelect} on:change />

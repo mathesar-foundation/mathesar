@@ -32,6 +32,7 @@ class GroupMetadataField(Enum):
     GEQ_VALUE = 'greater_than_eq_value'
     LT_VALUE = 'less_than_value'
     GT_VALUE = 'greater_than_value'
+    EQ_VALUE = 'eq_value'
 
 
 class GroupBy:
@@ -250,40 +251,71 @@ def get_group_augmented_records_pg_query(table, group_by):
 
 
 def _get_distinct_group_select(table, grouping_columns, preproc):
-    window_def = GroupingWindowDefinition(
-        order_by=grouping_columns, partition_by=grouping_columns
-    )
+    def _get_processed_column(proc, col):
+        if proc is not None:
+            pcol = get_db_function_subclass_by_id(proc).to_sa_expression(col)
+        else:
+            pcol = col
+        return pcol
 
     if preproc is not None:
         processed_columns = [
-            get_db_function_subclass_by_id(proc).to_sa_expression(col)
+            _get_processed_column(proc, col)
             for proc, col in zip(preproc, grouping_columns)
-            if proc is not None
         ]
     else:
         processed_columns = grouping_columns
 
+    eq_expr = func.json_build_object(
+        *[
+            i for t in [
+                (literal(col.name), val)
+                for col, val in zip(grouping_columns, processed_columns)
+            ]
+            for i in t
+        ]
+    )
+
+    window_def = GroupingWindowDefinition(
+        order_by=grouping_columns, partition_by=processed_columns
+    )
+
     group_id_expr = func.dense_rank().over(
         order_by=processed_columns, range_=window_def.range_
     )
     return select(
         table,
-        _get_group_metadata_definition(window_def, grouping_columns, group_id_expr)
+        _get_group_metadata_definition(
+            window_def, grouping_columns, group_id_expr, eq_expr=eq_expr
+        )
     )
 
 
 def _get_extract_group_select(table, grouping_columns, extract_field):
-    window_def = GroupingWindowDefinition(
-        order_by=grouping_columns, partition_by=grouping_columns
-    )
     processed_columns = [extract(extract_field, grouping_columns[0])]
+
+    eq_expr = func.json_build_object(
+        *[
+            i for t in [
+                (literal(col.name), val)
+                for col, val in zip(grouping_columns, processed_columns)
+            ]
+            for i in t
+        ]
+    )
+
+    window_def = GroupingWindowDefinition(
+        order_by=grouping_columns, partition_by=processed_columns
+    )
     group_id_expr = func.dense_rank().over(
         order_by=processed_columns, range_=window_def.range_
     )
 
     return select(
         table,
-        _get_group_metadata_definition(window_def, grouping_columns, group_id_expr)
+        _get_group_metadata_definition(
+            window_def, grouping_columns, group_id_expr, eq_expr=eq_expr
+        )
     )
 
 
@@ -479,6 +511,7 @@ def _get_group_metadata_definition(
         geq_expr=None,
         lt_expr=None,
         gt_expr=None,
+        eq_expr=None,
 ):
     col_key_value_tuples = (
         (literal(str(col.name)), col) for col in grouping_columns
@@ -516,6 +549,8 @@ def _get_group_metadata_definition(
         lt_expr,
         literal(GroupMetadataField.GT_VALUE.value),
         gt_expr,
+        literal(GroupMetadataField.EQ_VALUE.value),
+        eq_expr,
     ).label(MATHESAR_GROUP_METADATA)
 
 

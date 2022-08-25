@@ -50,6 +50,7 @@
     --color-text: #171717;
     --color-text-muted: #3f3f46;
     --text-size-x-small: 0.79rem;
+    --text-size-xx-small: 0.69rem;
     --text-size-small: 0.889rem;
     --text-size-base: 1rem;
     --text-size-large: 1.125rem;

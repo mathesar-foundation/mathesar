@@ -423,3 +423,36 @@ def test_drop_nonexistent_table(client):
     response_data = response.json()[0]
     assert response_data['message'] == "Not found."
     assert response_data['code'] == ErrorCodes.NotFound.value
+
+
+def test_empty_column_list(create_patents_table, client):
+    table_name = 'NASA Constraint List 11'
+    table = create_patents_table(table_name)
+    data = {
+        'type': 'unique',
+        'columns': []
+    }
+    response = client.post(
+        f'/api/db/v0/tables/{table.id}/constraints/', data
+    )
+    response_data = response.json()[0]
+    assert response.status_code == 400
+    assert response_data['code'] == ErrorCodes.ConstraintColumnEmpty.value
+    assert response_data['message'] == 'Constraint column field cannot be empty'
+
+
+def test_invalid_constraint_type(create_patents_table, client):
+    table_name = 'NASA Constraint List 12'
+    table = create_patents_table(table_name)
+    invalid_constraint = 'foo'
+    data = {
+        'type': invalid_constraint,
+        'columns': [1]
+    }
+    response = client.post(
+        f'/api/db/v0/tables/{table.id}/constraints/', data
+    )
+    response_data = response.json()[0]
+    assert response.status_code == 400
+    assert response_data['code'] == ErrorCodes.UnsupportedConstraint.value
+    assert f'Operations related to {invalid_constraint} constraint are currently not supported' in response_data['message']

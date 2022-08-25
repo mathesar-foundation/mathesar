@@ -139,6 +139,10 @@ mathesar_filter = _make_hint("mathesar_filter")
 any = _make_hint("any")
 
 
+# Meant to mark a DBFunction as an aggregation.
+aggregation = _make_hint("aggregation")
+
+
 # When applied to a parameter, meant to suggest values for that parameter.
 def suggested_values(values):
     return _make_hint("suggested_values", hints=(not_applicable_to_types,), values=values)
