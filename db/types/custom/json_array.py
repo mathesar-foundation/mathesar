@@ -163,3 +163,38 @@ class LengthLessorEqual(DBFunctionPacked):
             ArrayLength([param0]),
             param1,
         ])
+
+
+class NotEmpty(DBFunctionPacked):
+    id = 'json_array_not_empty'
+    name = 'Is not empty'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(1),
+        hints.parameter(0, hints.json_array),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        return Greater([
+            ArrayLength([param0]),
+            0,
+        ])
+
+
+class Contains(DBFunction):
+    id = 'json_array_contains'
+    name = 'contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+    ])
+
+    @staticmethod
+    def to_sa_expression(value1, value2):
+        pattern = func.concat('[', value2, ']')
+        return func.jsonb_contains(value1, func.cast(pattern, SA_JSONB))
+

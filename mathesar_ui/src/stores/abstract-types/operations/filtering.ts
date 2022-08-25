@@ -97,30 +97,43 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
   },
   {
     id: 'json_array_length_greater_than',
-    name: 'number of elements is greater than',
+    name: 'number of elements >',
     uiTypeParameterMap: {
       [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
     },
   },
   {
     id: 'json_array_length_greater_or_equal',
-    name: 'number of elements is greater than or equal to',
+    name: 'number of elements >=',
     uiTypeParameterMap: {
       [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
     },
   },
   {
     id: 'json_array_length_less_than',
-    name: 'number of elements is less than',
+    name: 'number of elements <',
     uiTypeParameterMap: {
       [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
     },
   },
   {
     id: 'json_array_length_less_or_equal',
-    name: 'number of elements is less than or equal to',
+    name: 'number of elements <=',
     uiTypeParameterMap: {
       [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+    },
+  },
+  {
+    id: 'json_array_not_empty',
+    name: 'array is not empty',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+    },
+  },  {
+    id: 'json_array_contains',
+    name: 'array contains',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Array]: [abstractTypeCategory.Text],
     },
   },
   {
