@@ -55,6 +55,9 @@
       font-size: 0.8rem;
     }
 
+    // TODO: Check with @pavish
+    // This is leading to unwanted padding and border
+    // when collapsible is used in isolation
     :global(.collapsible .collapsible-header) {
       padding: 0.5rem 0.75rem;
       border: 1px solid #dfdfdf;

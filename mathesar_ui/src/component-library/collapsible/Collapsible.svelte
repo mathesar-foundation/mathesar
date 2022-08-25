@@ -4,11 +4,12 @@
   import { iconExpandDown } from '@mathesar-component-library-dir/common/icons';
 
   export let isOpen = false;
+  export let noStyle = false;
 </script>
 
 <div class="collapsible">
   <Button
-    class="collapsible-header"
+    class={`collapsible-header ${noStyle && 'no-style'}`}
     on:click={() => {
       isOpen = !isOpen;
     }}

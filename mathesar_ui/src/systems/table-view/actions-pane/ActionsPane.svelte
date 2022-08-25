@@ -35,7 +35,6 @@
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
-  import RenameTableModal from './RenameTableModal.svelte';
 
   export let schema: SchemaEntry;
   export let table: TableEntry;
@@ -45,7 +44,6 @@
 
   const tableConstraintsModal = modal.spawnModalController();
   const linkTableModal = modal.spawnModalController();
-  const tableRenameModal = modal.spawnModalController();
 
   $: ({
     columnsDataStore,
@@ -98,9 +96,6 @@
     <h1><TableName {table} /></h1>
   </div>
   <DropdownMenu label="Actions" icon={iconConfigure}>
-    <MenuItem on:click={() => tableRenameModal.open()} icon={iconRename}>
-      Rename
-    </MenuItem>
     <MenuItem on:click={handleDeleteTable} icon={iconDelete}>Delete</MenuItem>
     <MenuItem
       on:click={() => tableConstraintsModal.open()}
@@ -111,8 +106,6 @@
   </DropdownMenu>
 
   <TableConstraints controller={tableConstraintsModal} />
-
-  <RenameTableModal controller={tableRenameModal} tabularData={$tabularData} />
 
   <LinkTableModal
     controller={linkTableModal}

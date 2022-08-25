@@ -76,4 +76,19 @@ export class ApiMultiError extends Error {
   }
 }
 
+/**
+ * Special error class for passing UIErrors across the application
+ * Creating a new class will help us differentiate
+ * between frontend form validation errors from others like ApiError
+ * As of not it only supports errorMessages: string[]
+ */
+export class UIError extends Error {
+  errorMessages: string[];
+
+  constructor(errorMessage: string[]) {
+    super();
+    this.errorMessages = errorMessage;
+  }
+}
+
 /* eslint-enable max-classes-per-file */
