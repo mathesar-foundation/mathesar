@@ -197,4 +197,3 @@ class Contains(DBFunction):
     def to_sa_expression(value1, value2):
         pattern = func.concat('[', value2, ']')
         return func.jsonb_contains(value1, func.cast(pattern, SA_JSONB))
-

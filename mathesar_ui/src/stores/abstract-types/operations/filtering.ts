@@ -129,7 +129,8 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     uiTypeParameterMap: {
       [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
     },
-  },  {
+  },
+  {
     id: 'json_array_contains',
     name: 'array contains',
     uiTypeParameterMap: {
