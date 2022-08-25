@@ -33,6 +33,7 @@
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
+  import Group from './record-operations/Group.svelte';
 
   export let schema: SchemaEntry;
   export let table: TableEntry;
