@@ -33,6 +33,7 @@
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
+  import Group from './record-operations/Group.svelte';
 
   export let schema: SchemaEntry;
   export let table: TableEntry;
@@ -145,13 +146,13 @@
       <Icon {...iconGrouping} />
       <span>
         Group
-        {#if $grouping.size > 0}
-          ({$grouping.size})
+        {#if $grouping.entries.length > 0}
+          ({$grouping.entries.length})
         {/if}
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <!-- <DisplayGroup {columns} grouping={meta.grouping} /> -->
+      <Group grouping={meta.grouping} />
     </svelte:fragment>
   </Dropdown>
 

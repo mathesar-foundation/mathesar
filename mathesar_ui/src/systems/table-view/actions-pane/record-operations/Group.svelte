@@ -1,97 +1,107 @@
 <script lang="ts">
-  // import type { Writable } from 'svelte/store';
-  // import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
-  // import type { Grouping } from '@mathesar/stores/table-data';
-  // import { Button, Icon } from '@mathesar-component-library';
-  // import type { Column } from '@mathesar/api/tables/columns';
-  // import SelectColumn from '@mathesar/components/SelectColumn.svelte';
+  import { DropdownMenu, MenuItem } from '@mathesar-component-library';
+  import type { Writable } from 'svelte/store';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import type { Grouping } from '@mathesar/stores/table-data/types';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
+  import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
 
-  // export let grouping: Writable<Grouping>;
-  // export let columns: Column[];
+  const tabularData = getTabularDataStoreFromContext();
 
-  // /** Columns which are not already used as a grouping entry */
-  // $: availableColumns = columns.filter((column) => !$grouping.has(column.id));
-  // $: [newGroupColumn] = availableColumns;
-  // let addNew = false;
+  export let grouping: Writable<Grouping>;
+  $: ({ processedColumns } = $tabularData);
 
-  // function addGroupColumn() {
-  //   grouping.update((g) => g.with(newGroupColumn.id));
-  //   addNew = false;
-  // }
+  /** Columns which are not already used as a grouping entry */
+  $: availableColumns = [...$processedColumns.values()].filter(
+    (column) => !$grouping.hasColumn(column.id),
+  );
+
+  function addGroupColumn(column: ProcessedColumn) {
+    grouping.update((g) =>
+      g.withEntry({
+        columnId: column.id,
+        preprocFnId: undefined,
+      }),
+    );
+  }
+
+  function updateGrouping(
+    index: number,
+    updateEventDetail: {
+      preprocFunctionIdentifier: string | undefined;
+      columnIdentifier: number;
+    },
+  ) {
+    grouping.update((g) =>
+      g.withReplacedEntry(index, {
+        columnId: updateEventDetail.columnIdentifier,
+        preprocFnId: updateEventDetail.preprocFunctionIdentifier,
+      }),
+    );
+  }
 </script>
 
-<!-- 
-<div class="display-option">
-  <div class="header">
-    <span>
-      Group
-      {#if $grouping.size > 0}
-        ({$grouping.size})
-      {/if}
-    </span>
-  </div>
+<div class="groups" class:grouped={$grouping.entries.length > 0}>
+  <header>
+    {#if $grouping.entries.length > 0}
+      Group records by
+    {:else}
+      No grouping condition has been added
+    {/if}
+  </header>
   <div class="content">
-    <table>
-      {#each [...$grouping] as columnId (columnId)}
-        <tr>
-          <td class="groupcolumn">
-            {columns.find((c) => c.id === columnId)?.name}
-          </td>
-          <td class="action">
-            <Button
-              on:click={() => grouping.update((g) => g.without(columnId))}
-            >
-              Clear
-            </Button>
-          </td>
-        </tr>
-      {:else}
-        <tr>
-          <td class="empty-msg" colspan="3"> No column selected </td>
-        </tr>
-      {/each}
-
-      {#if availableColumns.length > 0}
-        {#if !addNew}
-          <tr class="add-option">
-            <td colspan="3">
-              <Button
-                on:click={() => {
-                  addNew = true;
-                }}
-              >
-                Add new group column
-              </Button>
-            </td>
-          </tr>
-        {:else}
-          <tr class="add-option">
-            <td class="groupcolumn">
-              <SelectColumn
-                columns={availableColumns}
-                bind:column={newGroupColumn}
-              />
-            </td>
-            <td class="action">
-              <Button size="small" on:click={addGroupColumn}>
-                <Icon data={faPlus} />
-              </Button>
-              <Button
-                size="small"
-                on:click={() => {
-                  addNew = false;
-                }}
-              >
-                <Icon data={faTimes} />
-              </Button>
-            </td>
-          </tr>
-        {/if}
-      {/if}
-    </table>
+    {#each $grouping.entries as groupEntry, index (index)}
+      <GroupEntryComponent
+        columns={$processedColumns}
+        columnsAllowedForSelection={availableColumns.map((entry) => entry.id)}
+        getColumnLabel={(processedColumn) => processedColumn?.column.name ?? ''}
+        columnIdentifier={groupEntry.columnId}
+        preprocFunctionIdentifier={groupEntry.preprocFnId}
+        on:update={(e) => updateGrouping(index, e.detail)}
+        on:removeGroup={() => grouping.update((g) => g.withoutEntry(index))}
+        disableColumnChange={$grouping.entries.length > 1 &&
+          index < $grouping.entries.length - 1}
+      />
+    {/each}
   </div>
+  <footer>
+    <DropdownMenu
+      label="Select column to group by"
+      disabled={availableColumns.length === 0}
+    >
+      {#each availableColumns as column (column.id)}
+        <MenuItem on:click={() => addGroupColumn(column)}
+          >{$processedColumns.get(column.id)?.column.name}</MenuItem
+        >
+      {/each}
+    </DropdownMenu>
+  </footer>
 </div>
 
-<style global lang="scss">
-  @import 'DisplayOption.scss';
-</style> -->
+<style lang="scss">
+  .groups {
+    min-width: 25rem;
+    padding: 0.8rem;
+
+    &:not(.grouped) {
+      header {
+        color: var(--color-text-muted);
+      }
+    }
+    .content {
+      margin-top: 0.8rem;
+
+      :global(.input-group) {
+        margin-top: 0.4rem;
+      }
+
+      :global(.input-group-text) {
+        flex-grow: 1;
+      }
+    }
+
+    footer {
+      margin-top: 1rem;
+    }
+  }
+</style>

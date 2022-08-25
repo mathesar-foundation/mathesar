@@ -298,6 +298,14 @@ def _group_lt_value(row):
     return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.LT_VALUE.value]
 
 
+def _group_eq_value(row):
+    return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.EQ_VALUE.value]
+
+
+def _group_count(row):
+    return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.COUNT.value]
+
+
 def _group_id(row):
     return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.GROUP_ID.value]
 
@@ -412,18 +420,33 @@ def test_smoke_get_group_augmented_records_pg_query_extract(times_table_obj):
 
 
 datetime_trunc_tests_def = [
-    ('date', 'truncate_to_year', 3),
-    ('timestamp', 'truncate_to_year', 3),
-    ('date', 'truncate_to_month', 4),
-    ('timestamp', 'truncate_to_month', 4),
-    ('date', 'truncate_to_day', 6),
-    ('timestamp', 'truncate_to_day', 6),
+    ('date', 'truncate_to_year', 3, 4, {'1999': 1, '2010': 1, '2013': 4}),
+    ('timestamp', 'truncate_to_year', 3, 4, {'1999': 1, '1980': 1, '1981': 4}),
+    (
+        'date', 'truncate_to_month', 4, 7,
+        {'1999-01': 1, '2010-01': 1, '2013-01': 3, '2013-02': 1},
+    ), (
+        'timestamp', 'truncate_to_month', 4, 7,
+        {'1999-01': 1, '1980-01': 1, '1981-01': 3, '1981-02': 1},
+    ), (
+        'date', 'truncate_to_day', 6, 10,
+        {
+            '1999-01-08': 1, '2010-01-08': 1, '2013-01-08': 1, '2013-01-09': 1,
+            '2013-01-10': 1, '2013-02-08': 1,
+        }
+    ), (
+        'timestamp', 'truncate_to_day', 6, 10,
+        {
+            '1999-01-08': 1, '1980-01-08': 1, '1981-01-08': 1, '1981-01-09': 1,
+            '1981-01-10': 1, '1981-02-08': 1,
+        }
+    ),
 ]
 
 
-@pytest.mark.parametrize('col,preproc,num', datetime_trunc_tests_def)
+@pytest.mark.parametrize('col,preproc,num,length,count_map', datetime_trunc_tests_def)
 def test_get_group_augmented_records_pg_query_datetimes_preproc(
-        times_table_obj, col, preproc, num
+        times_table_obj, col, preproc, num, length, count_map
 ):
     roster, engine = times_table_obj
     group_by = group.GroupBy(
@@ -436,6 +459,9 @@ def test_get_group_augmented_records_pg_query_datetimes_preproc(
         res = conn.execute(augmented_pg_query).fetchall()
 
     assert max([_group_id(row) for row in res]) == num
+    for row in res:
+        assert row[col][:length] == _group_eq_value(row)[col]
+        assert count_map[_group_eq_value(row)[col]] == _group_count(row)
 
 
 datetime_extract_tests_def = [
@@ -504,6 +530,14 @@ group_by_num_list = [
             ['Student Number', 'Student Email'],
             mode=group.GroupMode.DISTINCT.value,
             preproc=[None, 'extract_email_domain']
+        ),
+        259
+    ),
+    (
+        group.GroupBy(
+            ['Student Email'],
+            mode=group.GroupMode.DISTINCT.value,
+            preproc=['extract_email_domain']
         ),
         3
     ),
