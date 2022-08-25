@@ -52,7 +52,7 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
     @action(methods=['post'], detail=False)
     def run(self, request):
         paginator = TableLimitOffsetPagination()
-        params = request.data.pop("parameters", None)
+        params = request.data.pop("parameters", {})
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         query = UIQuery(**serializer.validated_data)
