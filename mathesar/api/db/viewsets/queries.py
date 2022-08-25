@@ -48,3 +48,27 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
         if query.not_partial:
             output_col_desc = query.output_columns_described
             return Response(output_col_desc)
+
+    @action(methods=['post'], detail=False)
+    def run(self, request):
+        paginator = TableLimitOffsetPagination()
+        params = request.data.pop("parameters", None)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        query = UIQuery(**serializer.validated_data)
+        record_serializer = RecordListParameterSerializer(data=params)
+        record_serializer.is_valid(raise_exception=True)
+        records = query.get_records()
+        records = paginator.paginate_queryset(
+            queryset=self.get_queryset(),
+            request=request,
+            table=query,
+            filters=record_serializer.validated_data['filter'],
+            order_by=record_serializer.validated_data['order_by'],
+            grouping=record_serializer.validated_data['grouping'],
+            search=record_serializer.validated_data['search_fuzzy'],
+            duplicate_only=record_serializer.validated_data['duplicate_only'],
+        )
+        paginated_records = paginator.get_paginated_response(records)
+        columns = query.output_columns_described
+        return Response({"records": paginated_records.data, "columns": columns})
