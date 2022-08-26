@@ -3,7 +3,11 @@
   import { SheetVirtualRows } from '@mathesar/components/sheet';
   import RowComponent from './row/Row.svelte';
   import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
-  import { rowHeightPx } from './geometry';
+  import {
+    rowHeightPx,
+    helpTextRowHeightPx,
+    groupHeaderRowHeightPx,
+  } from './geometry';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -12,11 +16,15 @@
 
   function getItemSize(index: number) {
     const allRecords = $displayableRecords;
-    if (allRecords?.[index]?.isNewHelpText) {
-      return 24;
+    const record = allRecords?.[index];
+    if (record) {
+      if (record.isNewHelpText) {
+        return helpTextRowHeightPx;
+      }
+      if (record.isGroupHeader) {
+        return groupHeaderRowHeightPx;
+      }
     }
-
-    // TODO: Check and set extra height for group. Needs UX rethought.
     return rowHeightPx;
   }
 
