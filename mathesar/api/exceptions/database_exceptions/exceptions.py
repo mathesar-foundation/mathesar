@@ -234,3 +234,22 @@ class NotNullViolationAPIException(MathesarAPIException):
             'column_id': column.id
         }
         super().__init__(exception, self.error_code, message_str, field, details, status_code)
+
+
+class NotNullImportViolationAPIException(MathesarAPIException):
+        """ Exception raised when trying to import/insert a null value to a column with not-null constraint """
+        pass
+
+
+class ForeignKeyViolationAPIException(MathesarAPIException):
+        """ Exception raised when trying to add an invalid reference to a primary key """
+        pass
+
+
+class UniqueImportViolationAPIException(MathesarAPIException):
+        """ Exception raised when trying to add duplicate values to a column with uniqueness constraint """
+        pass
+
+
+class ExclusionViolationAPIException(MathesarAPIException):
+        pass

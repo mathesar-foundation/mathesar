@@ -1,3 +1,4 @@
+from sqlite3 import ProgrammingError
 from django_filters import rest_framework as filters
 from psycopg2.errors import CheckViolation, InvalidTextRepresentation
 from rest_framework import status, viewsets
@@ -8,6 +9,7 @@ from sqlalchemy.exc import DataError, IntegrityError
 
 from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
+from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
 from mathesar.api.serializers.dependents import DependentSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
@@ -207,6 +209,41 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         try:
             temp_table.insert_records_to_existing_table(
                 target_table, data_files, mappings
+            )
+        except NotNullError as e:
+            raise database_api_exceptions.NotNullImportViolationAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except ForeignKeyError as e:
+            raise database_api_exceptions.ForeignKeyViolationAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except TypeMismatchError as e:
+            raise database_api_exceptions.InvalidTypeCastAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except UniqueValueError as e:
+            raise database_api_exceptions.UniqueImportViolationAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except ExclusionError as e:
+            raise database_api_exceptions.ExclusionViolationAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except IntegrityError as e:
+            raise database_base_api_exceptions.IntegrityAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except ProgrammingError as e:
+            raise database_base_api_exceptions.ProgrammingAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
             # ToDo raise specific exceptions.
