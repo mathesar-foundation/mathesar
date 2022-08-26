@@ -1,5 +1,5 @@
 <!-- 
-  EdtiableTextWithActions enables inline editing
+  EditableTextWithActions enables inline editing
   with support for "Save" & "Cancel" actions
 
   onChange: Expects a promise in return to support interactions with the API
@@ -20,14 +20,14 @@
 
   const paddingStyle = 'padding:0.43rem 0.57rem;';
 
-  const makeEditbale = () => {
+  const makeEditable = () => {
     value = initialValue;
     isEditable = true;
   };
 
   const handleValueChange = (e: Event) => {
-    const { value: valueFromInout } = e.target as HTMLInputElement;
-    value = valueFromInout;
+    const { value: valueFromInput } = e.target as HTMLInputElement;
+    value = valueFromInput;
   };
 
   const handleCancel = () => {
@@ -58,7 +58,7 @@
       style={paddingStyle}
       class="non-editable-value"
       role="button"
-      on:click={makeEditbale}>{initialValue}</span
+      on:click={makeEditable}>{initialValue}</span
     >
   {:else}
     <div class="input-container">
