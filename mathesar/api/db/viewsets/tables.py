@@ -221,8 +221,9 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except TypeMismatchError as e:
-            raise database_api_exceptions.InvalidTypeCastAPIException(
+            raise database_api_exceptions.TypeMismatchViolationAPIException(
                 e,
+                message='Type mismatch error',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except UniqueValueError as e:
