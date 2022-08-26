@@ -150,7 +150,6 @@ export class Display {
 
   activeCell: Writable<ActiveCell | undefined>;
 
-  // @sean / @pavish let me know if you think there is a better place for this!
   isTableInspectorVisible: Writable<boolean>;
 
   /**
