@@ -38,12 +38,12 @@ import {
   faSync,
   faTable,
   faThList,
+  faToolbox,
   faTrashAlt,
   faUndo,
   faUnlink,
   faUpload,
   faUser,
-  faToolbox,
 } from '@fortawesome/free-solid-svg-icons';
 
 import type { IconProps } from '@mathesar-component-library/types';
@@ -97,10 +97,10 @@ export const iconQuery: IconProps = { data: faFileContract };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: faTable };
+export const iconTableInspector: IconProps = { data: faToolbox };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUser: IconProps = { data: faUser };
-export const iconTableInspector: IconProps = { data: faToolbox };
 
 // STATUSES
 
