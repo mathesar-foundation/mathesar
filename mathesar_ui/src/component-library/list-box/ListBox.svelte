@@ -53,13 +53,9 @@
 
   function focusSelected(): void {
     const lastSelectedOption = value[value.length - 1];
-    if (typeof lastSelectedOption !== 'undefined') {
-      $focusedOptionIndex = $displayedOptions.findIndex((opt) =>
-        checkEquality(lastSelectedOption, opt),
-      );
-    } else {
-      $focusedOptionIndex = -1;
-    }
+    $focusedOptionIndex = $displayedOptions.findIndex((opt) =>
+      checkEquality(lastSelectedOption, opt),
+    );
   }
 
   function open(): void {
@@ -163,11 +159,7 @@
 
   function pickFocused(): void {
     const focusedOption = $displayedOptions[$focusedOptionIndex];
-    if (typeof focusedOption !== 'undefined') {
-      pick(focusedOption);
-    } else if (selectionType === 'single') {
-      close();
-    }
+    pick(focusedOption);
   }
 
   function handleKeyDown(e: KeyboardEvent): void {

@@ -27,12 +27,11 @@ def column_test_table_with_service_layer_options(patent_schema):
     ]
     column_data_list = [
         {},
-        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}, 'show_fk_preview': True},
+        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
         {
             'display_options': {
                 'show_as_percentage': True,
                 'number_format': "english",
-                'show_fk_preview': True,
                 "use_grouping": 'auto',
                 "minimum_fraction_digits": None,
                 "maximum_fraction_digits": None,
@@ -46,13 +45,12 @@ def column_test_table_with_service_layer_options(patent_schema):
                     'currency_symbol': "HK $",
                     'number_format': "english",
                     'currency_symbol_location': 'after-minus'
-                },
-                'show_fk_preview': True
+                }
             }
         },
-        {'display_options': {'time_format': 'hh:mm', 'date_format': 'YYYY-MM-DD', 'show_fk_preview': True}},
-        {'display_options': {'format': 'hh:mm', 'show_fk_preview': True}},
-        {'display_options': {'format': 'YYYY-MM-DD', 'show_fk_preview': True}},
+        {'display_options': {'time_format': 'hh:mm', 'date_format': 'YYYY-MM-DD'}},
+        {'display_options': {'format': 'hh:mm'}},
+        {'display_options': {'format': 'YYYY-MM-DD'}},
     ]
     db_table = SATable(
         "anewtable",
@@ -81,22 +79,22 @@ _create_display_options_test_list = [
     (
         PostgresType.BOOLEAN,
         {"input": "dropdown"},
-        {"input": "dropdown", 'show_fk_preview': True}
+        {"input": "dropdown"}
     ),
     (
         PostgresType.BOOLEAN,
         {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}},
-        {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}, 'show_fk_preview': True}
+        {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}
     ),
     (
         PostgresType.DATE,
         {'format': 'YYYY-MM-DD'},
-        {'format': 'YYYY-MM-DD', 'show_fk_preview': True}
+        {'format': 'YYYY-MM-DD'}
     ),
     (
         PostgresType.INTERVAL,
         {'min': 's', 'max': 'h', 'show_units': True},
-        {'min': 's', 'max': 'h', 'show_units': True, 'show_fk_preview': True}
+        {'min': 's', 'max': 'h', 'show_units': True}
     ),
     (
         PostgresType.MONEY,
@@ -113,7 +111,6 @@ _create_display_options_test_list = [
             'currency_symbol_location': 'after-minus',
             'number_format': "english",
             'use_grouping': 'true',
-            'show_fk_preview': True,
             "minimum_fraction_digits": 2,
             "maximum_fraction_digits": 2,
         },
@@ -125,7 +122,6 @@ _create_display_options_test_list = [
             "show_as_percentage": False,
             'number_format': None,
             'use_grouping': 'auto',
-            'show_fk_preview': True,
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },
@@ -143,7 +139,6 @@ _create_display_options_test_list = [
             "show_as_percentage": True,
             'number_format': None,
             'use_grouping': 'false',
-            'show_fk_preview': True,
             "minimum_fraction_digits": 2,
             "maximum_fraction_digits": 20,
         },
@@ -161,7 +156,6 @@ _create_display_options_test_list = [
             "show_as_percentage": True,
             'number_format': "english",
             'use_grouping': 'auto',
-            'show_fk_preview': True,
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },
@@ -169,22 +163,22 @@ _create_display_options_test_list = [
     (
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
         {'date_format': 'x', 'time_format': 'x'},
-        {'date_format': 'x', 'time_format': 'x', 'show_fk_preview': True}
+        {'date_format': 'x', 'time_format': 'x'}
     ),
     (
         PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
         {'date_format': 'x', 'time_format': 'x'},
-        {'date_format': 'x', 'time_format': 'x', 'show_fk_preview': True}
+        {'date_format': 'x', 'time_format': 'x'}
     ),
     (
         PostgresType.TIME_WITHOUT_TIME_ZONE,
         {'format': 'hh:mm'},
-        {'format': 'hh:mm', 'show_fk_preview': True}
+        {'format': 'hh:mm'}
     ),
     (
         PostgresType.TIME_WITH_TIME_ZONE,
         {'format': 'hh:mm Z'},
-        {'format': 'hh:mm Z', 'show_fk_preview': True}
+        {'format': 'hh:mm Z'}
     ),
 ]
 
@@ -315,8 +309,7 @@ def test_column_update_display_options(column_test_table_with_service_layer_opti
         column_id = column.id
         display_options = {
             "input": "dropdown",
-            "custom_labels": {"TRUE": "yes", "FALSE": "no"},
-            'show_fk_preview': False
+            "custom_labels": {"TRUE": "yes", "FALSE": "no"}
         }
         column_data = {
             'type': PostgresType.BOOLEAN.id,
@@ -404,7 +397,7 @@ def test_column_alter_same_type_display_options(
 
 @pytest.mark.parametrize(
     "display_options,type_options, expected_display_options, expected_type_options",
-    [[None, None, None, None], [{}, {}, {'show_fk_preview': True}, {}]]
+    [[None, None, None, None], [{}, {}, {}, {}]]
 )
 def test_column_update_type_with_display_and_type_options_as_null_or_empty_obj(
     column_test_table, client, display_options, type_options, expected_display_options, expected_type_options

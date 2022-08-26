@@ -65,7 +65,6 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         grouping={},
         search=[],
         duplicate_only=None,
-        show_preview=None
     ):
         group_by = GroupBy(**grouping) if grouping else None
         self.limit = self.get_limit(request)
@@ -78,9 +77,9 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
         preview_metadata = None
         # Only tables have columns on the Service layer that hold data necessary for preview template.
-        if show_preview and isinstance(table, Table):
+        if isinstance(table, Table):
             columns_query = table.columns.all()
-            preview_metadata, preview_columns = get_preview_info(show_preview, table.id)
+            preview_metadata, preview_columns = get_preview_info(table.id)
             table_columns = [{'id': column.id, 'alias': column.name} for column in columns_query]
             columns_to_fetch = table_columns + preview_columns
 

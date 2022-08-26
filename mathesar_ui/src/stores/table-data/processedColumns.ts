@@ -8,10 +8,12 @@ import type { ComponentAndProps } from '@mathesar-component-library/types';
 import type {
   AbstractType,
   AbstractTypesMap,
+  AbstractTypePreprocFunctionDefinition,
 } from '@mathesar/stores/abstract-types/types';
 import {
   getFiltersForAbstractType,
   getAbstractTypeForDbType,
+  getPreprocFunctionsForAbstractType,
 } from '@mathesar/stores/abstract-types';
 import {
   getCellCap,
@@ -40,6 +42,7 @@ export interface ProcessedColumn extends CellColumnFabric {
   abstractType: AbstractType;
   inputComponentAndProps: ComponentAndProps;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
+  preprocFunctions: AbstractTypePreprocFunctionDefinition[];
 }
 
 /** Maps column ids to processed columns */
@@ -79,5 +82,8 @@ export function processColumn(
       abstractType.cell,
     ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
+    preprocFunctions: getPreprocFunctionsForAbstractType(
+      abstractType.identifier,
+    ),
   };
 }
