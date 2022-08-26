@@ -190,10 +190,9 @@ class Contains(DBFunction):
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.parameter(0, hints.json_array),
-        hints.parameter(1, hints.string_like),
+        hints.parameter(1, hints.array),
     ])
 
     @staticmethod
     def to_sa_expression(value1, value2):
-        pattern = func.concat('[', value2, ']')
-        return func.jsonb_contains(value1, func.cast(pattern, SA_JSONB))
+        return func.jsonb_contains(value1, func.cast(value2, SA_JSONB))
