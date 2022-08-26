@@ -26,7 +26,7 @@
 
 <div class="table-inspector-container">
   <div class="mode-tabs-container">
-    {#each tabs as tab}
+    {#each tabs as tab (tab.id)}
       <span
         on:click={() => handleTabClick(tab.id)}
         role="button"
