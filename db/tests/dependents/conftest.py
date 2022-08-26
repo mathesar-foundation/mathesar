@@ -4,19 +4,21 @@ from db.tables.operations.select import get_oid_from_table
 
 
 @pytest.fixture
-def academics_tables_oids(engine_with_academics):
-    engine, schema = engine_with_academics
+def library_tables_oids(engine_with_library):
+    engine, schema = engine_with_library
 
-    universities_oid = get_oid_from_table('universities', schema, engine)
-    academics_oid = get_oid_from_table('academics', schema, engine)
-    journals_oid = get_oid_from_table('journals', schema, engine)
-    articles_oid = get_oid_from_table('articles', schema, engine)
-    publishers_oid = get_oid_from_table('publishers', schema, engine)
+    authors_oid = get_oid_from_table('Authors', schema, engine)
+    checkouts_oid = get_oid_from_table('Checkouts', schema, engine)
+    items_oid = get_oid_from_table('Items', schema, engine)
+    patrons_oid = get_oid_from_table('Patrons', schema, engine)
+    publications_oid = get_oid_from_table('Publications', schema, engine)
+    publishers_oid = get_oid_from_table('Publishers', schema, engine)
 
     return {
-        'universities': universities_oid,
-        'academics': academics_oid,
-        'journals': journals_oid,
-        'articles': articles_oid,
-        'publishers': publishers_oid
+        'Authors': authors_oid,
+        'Checkouts': checkouts_oid,
+        'Items': items_oid,
+        'Patrons': patrons_oid,
+        'Publications': publications_oid,
+        'Publishers': publishers_oid
     }

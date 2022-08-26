@@ -12,107 +12,113 @@ def _get_object_dependents_oids(dependents_graph, object_oid):
     return [dependent['obj']['objid'] for dependent in _get_object_dependents(dependents_graph, object_oid)]
 
 
-def test_correct_dependents_amount_and_level(engine, academics_tables_oids):
-    universities_dependents_graph = get_dependents_graph(academics_tables_oids['universities'], engine)
+def test_correct_dependents_amount_and_level(engine, library_tables_oids):
+    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
 
-    universities_dependents = _get_object_dependents(universities_dependents_graph, academics_tables_oids['universities'])
-    academics_dependents = _get_object_dependents(universities_dependents_graph, academics_tables_oids['academics'])
-    journals_dependents = _get_object_dependents(universities_dependents_graph, academics_tables_oids['journals'])
-    articles_dependents = _get_object_dependents(universities_dependents_graph, academics_tables_oids['articles'])
+    publishers_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Publishers'])
+    publications_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Publications'])
+    items_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Items'])
+    checkouts_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Checkouts'])
 
-    assert len(universities_dependents) == 5
-    assert len(journals_dependents) == 5
-    assert len(articles_dependents) == 4
-    assert len(academics_dependents) == 7
+    assert len(publishers_dependents) == 3
+    assert len(publications_dependents) == 5
+    assert len(items_dependents) == 4
+    assert len(checkouts_dependents) == 3
     assert all(
         [
             r['level'] == 1
-            for r in universities_dependents
+            for r in publishers_dependents
         ]
     )
     assert all(
         [
             r['level'] == 2
-            for r in academics_dependents + journals_dependents
+            for r in publications_dependents
         ]
     )
     assert all(
         [
             r['level'] == 3
-            for r in articles_dependents
+            for r in items_dependents
+        ]
+    )
+    assert all(
+        [
+            r['level'] == 4
+            for r in checkouts_dependents
         ]
     )
 
 
-def test_response_format(engine, academics_tables_oids):
-    universities_dependents_graph = get_dependents_graph(academics_tables_oids['universities'], engine)
+def test_response_format(engine, library_tables_oids):
+    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
 
     dependent_expected_attrs = ['obj', 'parent_obj', 'level']
     obj_expected_attrs = ['objid', 'type']
-    parent_expected_attrs = ['objid']  # TODO: add 'type' when it's returned for the parent obj
     assert all(
         [
             all(attr in dependent for attr in dependent_expected_attrs)
-            for dependent in universities_dependents_graph
+            for dependent in publishers_dependents_graph
         ]
     )
     assert all(
         [
             all(attr in dependent['obj'] for attr in obj_expected_attrs)
-            for dependent in universities_dependents_graph
+            for dependent in publishers_dependents_graph
         ]
     )
     assert all(
         [
-            all(attr in dependent['parent_obj'] for attr in parent_expected_attrs)
-            for dependent in universities_dependents_graph
+            all(attr in dependent['parent_obj'] for attr in obj_expected_attrs)
+            for dependent in publishers_dependents_graph
         ]
     )
 
 
 # TODO: add other types when they are added as dependents
-def test_specific_object_types(engine, academics_tables_oids, academics_db_tables):
-    journals_oid = academics_tables_oids['journals']
-    journals_dependents_graph = get_dependents_graph(journals_oid, engine)
-    journals_dependents_oids = _get_object_dependents_oids(journals_dependents_graph, journals_oid)
+def test_specific_object_types(engine, library_tables_oids, library_db_tables):
+    items_oid = library_tables_oids['Items']
+    items_dependents_graph = get_dependents_graph(items_oid, engine)
+    items_dependents_oids = _get_object_dependents_oids(items_dependents_graph, items_oid)
 
-    journals_constraint_oids = [
-        get_constraint_oid_by_name_and_table_oid(constraint.name, journals_oid, engine)
-        for constraint in academics_db_tables['journals'].constraints]
-    
-    articles_oid = academics_tables_oids['articles']
-    articles_journals_fk = [c for c in academics_db_tables['articles'].foreign_key_constraints if 'journal' in c][0]
-    articles_journals_fk_oid = get_constraint_oid_by_name_and_table_oid(articles_journals_fk.name, articles_oid, engine)
+    items_constraint_oids = [
+        get_constraint_oid_by_name_and_table_oid(constraint.name, items_oid, engine)
+        for constraint in library_db_tables['Items'].constraints]
 
-    assert sorted(journals_dependents_oids) == sorted(journals_constraint_oids + [articles_oid] + [articles_journals_fk_oid])
+    checkouts_oid = library_tables_oids['Checkouts']
+    checkouts_items_fk = [c for c in library_db_tables['Checkouts'].foreign_key_constraints if 'Item' in c][0]
+    checkouts_items_fk_oid = get_constraint_oid_by_name_and_table_oid(checkouts_items_fk.name, checkouts_oid, engine)
+
+    assert sorted(items_dependents_oids) == sorted(items_constraint_oids + [checkouts_oid] + [checkouts_items_fk_oid])
 
 
 # if a table contains a foreign key referencing itself, it shouldn't be treated as a dependent
-def test_self_reference(engine, academics_tables_oids):
-    academics_oid = academics_tables_oids['academics']
-    academics_dependents_graph = get_dependents_graph(academics_oid, engine)
+def test_self_reference(engine, library_tables_oids):
+    with engine.begin() as conn:
+        conn.execute(text('ALTER TABLE "Publishers" ADD COLUMN "Parent Publisher" integer'))
+        conn.execute(text('ALTER TABLE "Publishers" ADD CONSTRAINT "Publishers_Publisher_fkey" FOREIGN KEY ("Parent Publisher") REFERENCES "Publishers" (id)'))
 
-    academics_dependents_oids = _get_object_dependents_oids(academics_dependents_graph, academics_oid)
-    assert academics_oid not in academics_dependents_oids
+    publishers_oid = library_tables_oids['Publishers']
+    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine)
+
+    publishers_dependents_oids = _get_object_dependents_oids(publishers_dependents_graph, publishers_oid)
+    assert publishers_oid not in publishers_dependents_oids
 
 
 # if two tables depend on each other, we should return dependence only for the topmost object in the graph
 # excluding the possibility of circulal reference
-def test_circular_reference(engine, academics_tables_oids, academics_db_tables):
-    academics = academics_db_tables['academics']
-    universities = academics_db_tables['universities']
-    universities.append_column(Column('top_researcher', Integer, ForeignKey(academics.c.id)))
+def test_circular_reference(engine, library_tables_oids):
     with engine.begin() as conn:
-        conn.execute(text('ALTER TABLE universities ADD COLUMN top_researcher integer'))
-        conn.execute(text('ALTER TABLE universities ADD CONSTRAINT fk_univ_academics FOREIGN KEY (top_researcher) REFERENCES academics (id)'))
-    
-    universities_oid = academics_tables_oids['universities']
-    academics_oid = academics_tables_oids['academics']
+        conn.execute(text('ALTER TABLE "Publishers" ADD COLUMN "Top Publication" integer'))
+        conn.execute(text('ALTER TABLE "Publishers" ADD CONSTRAINT "Publishers_Publications_fkey" FOREIGN KEY ("Top Publication") REFERENCES "Publications" (id)'))
 
-    universities_dependents_graph = get_dependents_graph(universities_oid, engine)
-    academics_dependents_oids = _get_object_dependents_oids(universities_dependents_graph, academics_oid)
+    publishers_oid = library_tables_oids['Publishers']
+    publications_oid = library_tables_oids['Publications']
 
-    assert universities_oid not in academics_dependents_oids
+    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine)
+    publications_dependents_oids = _get_object_dependents_oids(publishers_dependents_graph, publications_oid)
+
+    assert publishers_oid not in publications_dependents_oids
 
 
 def test_dependents_graph_max_level(engine_with_schema):
