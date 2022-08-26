@@ -4,6 +4,7 @@
   import BreadcrumbSeparatorIcon from './BreadcrumbSeparatorIcon.svelte';
   import type { BreadcrumbSelectorData } from './breadcrumbTypes';
   import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
+  import {meta} from 'tinro';
 
   export let data: BreadcrumbSelectorData;
   export let triggerLabel: string;
@@ -22,6 +23,13 @@
   $: processedData = filterString
     ? filterBreadcrumbSelectorData(data, filterString)
     : data;
+
+  const currentRoute = meta()
+
+  function isItemActive(currentRoute: any, href: string): boolean {
+    const currentHref = currentRoute.url
+    return currentHref.startsWith(href)
+  }
 </script>
 
 <div class="entity-switcher" class:is-open={isOpen}>
@@ -50,7 +58,10 @@
           <div class="category-name">{categoryName}</div>
           <ul class="items">
             {#each items as { href, label, icon } (href)}
-              <li class="item">
+              <li
+                class="item"
+                class:active="{isItemActive($currentRoute, href)}"
+              >
                 <a
                   {href}
                   on:click={() => {
@@ -84,6 +95,10 @@
     list-style: none;
     padding: 0;
     margin: 0;
+  }
+  .item.active {
+    /* placeholder styling */
+    background-color: hsla(0, 0%, 0%, 0.1);
   }
   .item a {
     display: block;
