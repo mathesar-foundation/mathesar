@@ -22,7 +22,7 @@
     iconRefresh,
     iconSorting,
     iconTableLink,
-    iconToolbox,
+    iconTableInspector,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
@@ -212,7 +212,7 @@
   </div>
 
   <Button size="medium" disabled={$isLoading} on:click={toggleTableInspector}>
-    <Icon {...iconToolbox} />
+    <Icon {...iconTableInspector} />
   </Button>
 </div>
 
