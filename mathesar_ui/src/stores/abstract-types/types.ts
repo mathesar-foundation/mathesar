@@ -100,3 +100,21 @@ export type AbstractTypeFilterDefinitionMap = Map<
   AbstractTypeCategoryIdentifier,
   AbstractTypeFilterDefinition[]
 >;
+
+export interface AbstractTypePreprocFunctionsResponse {
+  id: string;
+  name: string;
+  appliesTo: AbstractTypeCategoryIdentifier[];
+  returns: AbstractTypeCategoryIdentifier;
+  possibleReturnValues?: { label: string; value: unknown }[];
+}
+
+export type AbstractTypePreprocFunctionDefinition = Omit<
+  AbstractTypePreprocFunctionsResponse,
+  'appliesTo'
+>;
+
+export type AbstractTypePreprocFunctionDefinitionMap = Map<
+  AbstractTypeCategoryIdentifier,
+  AbstractTypePreprocFunctionDefinition[]
+>;

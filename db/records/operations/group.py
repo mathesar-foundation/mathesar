@@ -251,11 +251,17 @@ def get_group_augmented_records_pg_query(table, group_by):
 
 
 def _get_distinct_group_select(table, grouping_columns, preproc):
+    def _get_processed_column(proc, col):
+        if proc is not None:
+            pcol = get_db_function_subclass_by_id(proc).to_sa_expression(col)
+        else:
+            pcol = col
+        return pcol
+
     if preproc is not None:
         processed_columns = [
-            get_db_function_subclass_by_id(proc).to_sa_expression(col)
+            _get_processed_column(proc, col)
             for proc, col in zip(preproc, grouping_columns)
-            if proc is not None
         ]
     else:
         processed_columns = grouping_columns

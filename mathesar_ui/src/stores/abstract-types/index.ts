@@ -7,3 +7,4 @@ export {
   filterDefinitionMap,
   getFiltersForAbstractType,
 } from './operations/filtering';
+export { getPreprocFunctionsForAbstractType } from './operations/preprocFunctions';
