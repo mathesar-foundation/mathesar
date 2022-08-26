@@ -25,39 +25,77 @@
 </svelte:head>
 
 <LayoutWithHeader>
-  <div><EntityType>Schema</EntityType></div>
-  <h1><SchemaName {schema} /></h1>
+  <div class="homepage-header">
+    <div class="homepage-heading">
+      <div><EntityType>Schema</EntityType></div>
+      <h1><SchemaName {schema} /></h1>
+    </div>
 
-  <ul>
-    <li>
-      <a href={getImportPageUrl(database.name, schema.id)}>Import</a>
-    </li>
-    <li>
-      <a href={getDataExplorerPageUrl(database.name, schema.id)}
-        >New Exploration</a
-      >
-    </li>
-  </ul>
-
-  <h2>Tables</h2>
-  <ul>
-    {#each [...tablesMap.values()] as table (table.id)}
-      <li>
-        <a href={getTablePageUrl(database.name, schema.id, table.id)}>
-          <TableName {table} />
-        </a>
+    <ul class="actions-list">
+      <li class="actions-list-item">
+        <a href={getImportPageUrl(database.name, schema.id)}>Import</a>
       </li>
-    {/each}
-  </ul>
-
-  <h2>Explorations</h2>
-  <ul>
-    {#each [...queriesMap.values()] as query (query.id)}
-      <li>
-        <a href={getDataExplorerPageUrl(database.name, schema.id, query.id)}>
-          <QueryName {query} />
-        </a>
+      <li class="actions-list-item">
+        <a href={getDataExplorerPageUrl(database.name, schema.id)}
+          >New Exploration</a
+        >
       </li>
-    {/each}
-  </ul>
+    </ul>
+  </div>
+
+  <div class="homepage-wrapper">
+    <h2 class="homepage-title">
+      Explorations ({[...queriesMap.values()].length})
+    </h2>
+    <ul class="homepage-list">
+      {#each [...queriesMap.values()] as query (query.id)}
+        <li class="homepage-list-item">
+          <a href={getDataExplorerPageUrl(database.name, schema.id, query.id)}>
+            <QueryName {query} />
+          </a>
+        </li>
+      {/each}
+    </ul>
+  </div>
+
+  <div class="homepage-wrapper">
+    <h2 class="homepage-title">Tables ({[...tablesMap.values()].length})</h2>
+    <ul class="homepage-list">
+      {#each [...tablesMap.values()] as table (table.id)}
+        <li class="homepage-list-item">
+          <a href={getTablePageUrl(database.name, schema.id, table.id)}>
+            <TableName {table} />
+          </a>
+        </li>
+      {/each}
+    </ul>
+  </div>
+
+  
 </LayoutWithHeader>
+
+<style lang="scss">
+  .homepage-header {
+    margin: 0.5rem 0;
+    display: flex;
+    align-items: center;
+  }
+  .homepage-heading {
+    flex-grow: 1;
+    h1 {
+      margin: 0;
+      font-weight: 500;
+    }
+  }
+  .homepage-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    .homepage-title {
+      font-size: var(--text-size-large);
+      margin: 1rem 0;
+      font-weight: 500;
+    }
+    
+  }
+</style>

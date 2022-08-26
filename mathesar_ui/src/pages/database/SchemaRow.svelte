@@ -41,6 +41,7 @@
         <span class="lock"><Icon {...iconNotEditable} /></span>
       {/if}
     </div>
+    <p class="description">Description</p>
     {#if isDefault}<div class="default">Default</div>{/if}
   </div>
   {#if !isLocked}
@@ -69,17 +70,18 @@
   $font-size-info: 0.875rem;
 
   .schema-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+    border-radius: 0.25rem;
     color: $color-dark;
     padding: 1em;
+    border: 1px solid var(--color-gray-dark);
+    height: 100%;
   }
 
   .title {
     display: flex;
     flex-direction: row;
     gap: 0.5em;
+    font-size: var(--text-size-large);
   }
   .title a {
     color: $color-link;
@@ -88,14 +90,18 @@
   .title a:hover {
     text-decoration: underline;
   }
+  .description {
+    color: var(--color-text-muted);
+    margin: 0;
+  }
   .lock {
-    color: $color-muted;
+    color: var(--color-text-muted);
   }
   .default {
     margin-top: 0.5em;
-    color: $color-muted;
-    font-size: $font-size-info;
-    font-weight: 600;
+    color: var(--color-text-muted);
+    font-size: var(--text-size-small);
+    font-weight: 500;
   }
   .controls {
     margin-left: auto;
