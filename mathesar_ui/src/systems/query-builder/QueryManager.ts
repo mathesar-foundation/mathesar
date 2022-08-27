@@ -34,10 +34,12 @@ import {
   processInitialColumns,
 } from './utils';
 import type {
+  ProcessedQueryResultColumn,
   ProcessedQueryResultColumnMap,
   InputColumnsStoreSubstance,
 } from './utils';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
+import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 
 function validateQuery(
   queryModel: QueryModel,
@@ -104,6 +106,8 @@ export default class QueryManager extends EventHandler<{
     columnInformationMap: new Map(),
   });
 
+  // Processed columns
+
   processedInitialColumns: Writable<ProcessedQueryResultColumnMap> = writable(
     new ImmutableMap(),
   );
@@ -112,7 +116,6 @@ export default class QueryManager extends EventHandler<{
     new ImmutableMap(),
   );
 
-  // TODO: processedResultColumns should also include virtual columns
   processedResultColumns: Writable<ProcessedQueryResultColumnMap> = writable(
     new ImmutableMap(),
   );
@@ -140,11 +143,11 @@ export default class QueryManager extends EventHandler<{
     super();
     this.abstractTypeMap = abstractTypeMap;
     this.query = writable(query);
-    this.onInitialColumnsChange();
+    this.reprocessColumns('both');
     this.undoRedoManager = new QueryUndoRedoManager();
     const inputColumnTreePromise = this.calculateInputColumnTree();
     void inputColumnTreePromise.then(() => {
-      this.onInitialColumnsChange();
+      this.reprocessColumns('both', false);
       const isQueryValid = validateQuery(
         query,
         get(this.processedInitialColumns).withEntries(
@@ -252,29 +255,86 @@ export default class QueryManager extends EventHandler<{
    * the callback only for essential scenarios and not everytime
    * query store changes.
    */
-  onInitialColumnsChange(): void {
-    const initialColumns = get(this.query).initial_columns;
-    const { columnInformationMap } = get(this.inputColumns);
-    if (columnInformationMap.size === 0 && initialColumns.length !== 0) {
-      return;
+  reprocessColumns(
+    type: 'both' | 'initial' | 'virtual',
+    setResultColumns = true,
+  ): void {
+    const queryModel = this.getQueryModel();
+    const initialColumns = queryModel.initial_columns;
+    if (type === 'initial' || type === 'both') {
+      const { columnInformationMap } = get(this.inputColumns);
+      if (columnInformationMap.size === 0 && initialColumns.length !== 0) {
+        return;
+      }
+      this.processedInitialColumns.update((existing) =>
+        processInitialColumns(
+          initialColumns,
+          existing,
+          this.abstractTypeMap,
+          columnInformationMap,
+        ),
+      );
     }
-    // TODO: processedResultColumns should be based on the last transformation
-    this.processedResultColumns.update((existing) =>
-      processInitialColumns(
-        initialColumns,
-        existing,
-        this.abstractTypeMap,
-        columnInformationMap,
-      ),
-    );
-    this.processedInitialColumns.update((existing) =>
-      processInitialColumns(
-        initialColumns,
-        existing,
-        this.abstractTypeMap,
-        columnInformationMap,
-      ),
-    );
+
+    const summarizationTransforms: QuerySummarizationTransformationModel[] =
+      queryModel.transformationModels.filter(
+        (transform): transform is QuerySummarizationTransformationModel =>
+          transform instanceof QuerySummarizationTransformationModel,
+      );
+    if (type === 'virtual' || type === 'both') {
+      const virtualColumns: Map<
+        ProcessedQueryResultColumn['id'],
+        ProcessedQueryResultColumn
+      > = new Map();
+      summarizationTransforms.forEach((transformation) => {
+        [...transformation.aggregations.values()].forEach((entry) => {
+          virtualColumns.set(
+            entry.outputAlias,
+            processColumn(
+              {
+                alias: entry.outputAlias,
+                display_name: entry.displayName,
+                type:
+                  entry.function === 'aggregate_to_array'
+                    ? '_array'
+                    : 'integer',
+                type_options: null,
+                display_options: null,
+              },
+              this.abstractTypeMap,
+            ),
+          );
+        });
+      });
+      this.processedVirtualColumns.set(new ImmutableMap(virtualColumns));
+    }
+
+    if (setResultColumns) {
+      const processedInitialColumns = get(this.processedInitialColumns);
+      const processedVirtualColumns = get(this.processedVirtualColumns);
+      if (summarizationTransforms.length > 0) {
+        const lastTransform =
+          summarizationTransforms[summarizationTransforms.length - 1];
+        const result = new Map();
+        lastTransform.getOutputColumnAliases().forEach((alias) => {
+          const column =
+            processedVirtualColumns.get(alias) ??
+            processedInitialColumns.get(alias);
+          if (column) {
+            result.set('alias', column);
+          } else {
+            console.error(
+              'This should never happen - Output column not found in both virtual and initial column list',
+            );
+          }
+        });
+        this.processedResultColumns.set(new ImmutableMap(result));
+      } else {
+        this.processedResultColumns.set(
+          new ImmutableMap(processedInitialColumns),
+        );
+      }
+    }
   }
 
   resetProcessedColumns(): void {
@@ -514,14 +574,14 @@ export default class QueryManager extends EventHandler<{
           this.resetResults();
           break;
         case 'initialColumnName':
-          this.onInitialColumnsChange();
+          this.reprocessColumns('initial');
           break;
         case 'initialColumnsArray':
           if (!updateDiff.diff.initial_columns?.length) {
             // All columns have been deleted
             this.resetResults();
           } else {
-            this.onInitialColumnsChange();
+            this.reprocessColumns('initial');
             await this.fetchColumnsAndRecords();
           }
           break;
@@ -543,7 +603,7 @@ export default class QueryManager extends EventHandler<{
         queryToSet = query.withId(currentQueryModelData.id).model;
       }
       this.query.set(queryToSet);
-      this.onInitialColumnsChange();
+      this.reprocessColumns('both');
       await this.updateQuery(queryToSet);
       this.setUndoRedoStates();
       await this.fetchColumnsAndRecords();

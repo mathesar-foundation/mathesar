@@ -28,6 +28,17 @@ export interface QueryInstanceFilterTransformation {
 
 export interface QueryInstanceSummarizationTransformation {
   type: 'summarize';
+  spec: {
+    grouping_expressions: [
+      { input_alias: string; output_alias: string; preproc?: string },
+    ];
+    aggregation_expressions: {
+      input_alias: string;
+      output_alias: string;
+      function: 'aggregate_to_array' | 'count';
+    }[];
+  };
+  display_names: Record<string, string>;
 }
 
 export type QueryInstanceTransformation =
