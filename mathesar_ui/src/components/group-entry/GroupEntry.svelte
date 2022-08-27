@@ -7,7 +7,7 @@
     Select,
   } from '@mathesar-component-library';
   import { iconDelete } from '@mathesar/icons';
-  import type { GroupEntryColumnLike } from './types';
+  import type { ReadableMapLike, GroupEntryColumnLike } from './types';
 
   type T = $$Generic;
   type ColumnLikeType = T & GroupEntryColumnLike;
@@ -20,7 +20,7 @@
     removeGroup: undefined;
   }>();
 
-  export let columns: Map<ColumnLikeType['id'], ColumnLikeType>;
+  export let columns: ReadableMapLike<ColumnLikeType['id'], ColumnLikeType>;
   export let getColumnLabel: (column?: ColumnLikeType) => string;
   export let columnsAllowedForSelection: ColumnLikeType['id'][] | undefined =
     undefined;
@@ -73,7 +73,7 @@
   }
 
   function functionToGetPreprocLabel(
-    _columns: Map<ColumnLikeType['id'], ColumnLikeType>,
+    _columns: ReadableMapLike<ColumnLikeType['id'], ColumnLikeType>,
     _columnIdentifier: ColumnLikeType['id'],
   ) {
     return (preprocId: string) =>

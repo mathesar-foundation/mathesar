@@ -1,11 +1,9 @@
 import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/queries/queryList';
 import { ImmutableMap } from '@mathesar/component-library';
 
-export default class QuerySummarizationTransformationModel {
+export interface QuerySummarizationTransformationEntry {
   columnIdentifier: string;
-
-  preprocFunctionIdentifier: string | undefined;
-
+  preprocFunctionIdentifier?: string;
   aggregations: ImmutableMap<
     string,
     {
@@ -15,27 +13,56 @@ export default class QuerySummarizationTransformationModel {
       displayName: string;
     }
   >;
-
   displayNames: Record<string, string>;
+}
 
-  constructor(transformation: QueryInstanceSummarizationTransformation) {
-    const groupingExpression = transformation.spec.grouping_expressions[0];
-    const aggregationExpressions = transformation.spec.aggregation_expressions;
-    const displayNames = transformation.display_names;
-    this.columnIdentifier = groupingExpression.input_alias;
-    this.preprocFunctionIdentifier = groupingExpression.preproc;
-    this.aggregations = new ImmutableMap(
-      aggregationExpressions.map((entry) => [
-        entry.input_alias,
-        {
-          inputAlias: entry.input_alias,
-          outputAlias: entry.output_alias,
-          function: entry.function,
-          displayName: displayNames[entry.output_alias] ?? entry.output_alias,
+export default class QuerySummarizationTransformationModel
+  implements QuerySummarizationTransformationEntry
+{
+  columnIdentifier;
+
+  preprocFunctionIdentifier;
+
+  aggregations;
+
+  displayNames;
+
+  constructor(
+    transformation:
+      | QueryInstanceSummarizationTransformation
+      | Omit<QuerySummarizationTransformationEntry, 'displayNames'>,
+  ) {
+    if ('columnIdentifier' in transformation) {
+      this.columnIdentifier = transformation.columnIdentifier;
+      this.preprocFunctionIdentifier = transformation.preprocFunctionIdentifier;
+      this.aggregations = transformation.aggregations;
+      this.displayNames = [...transformation.aggregations.values()].reduce(
+        (acc, aggValue) => {
+          acc[aggValue.outputAlias] = aggValue.displayName;
+          return acc;
         },
-      ]),
-    );
-    this.displayNames = transformation.display_names;
+        {} as Record<string, string>,
+      );
+    } else {
+      const groupingExpression = transformation.spec.grouping_expressions[0];
+      const aggregationExpressions =
+        transformation.spec.aggregation_expressions;
+      const displayNames = transformation.display_names;
+      this.columnIdentifier = groupingExpression.input_alias;
+      this.preprocFunctionIdentifier = groupingExpression.preproc;
+      this.aggregations = new ImmutableMap(
+        aggregationExpressions.map((entry) => [
+          entry.input_alias,
+          {
+            inputAlias: entry.input_alias,
+            outputAlias: entry.output_alias,
+            function: entry.function,
+            displayName: displayNames[entry.output_alias] ?? entry.output_alias,
+          },
+        ]),
+      );
+      this.displayNames = transformation.display_names;
+    }
   }
 
   getOutputColumnAliases(): string[] {

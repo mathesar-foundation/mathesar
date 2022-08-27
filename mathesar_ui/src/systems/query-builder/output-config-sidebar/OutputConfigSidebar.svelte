@@ -105,7 +105,15 @@
   {/if}
   <section>
     <header>Transformations</header>
-    <TransformationsPane {queryManager} />
+    <div>
+      {#if inputColumnsFetchState?.state === 'processing'}
+        <Spinner />
+      {:else if inputColumnsFetchState?.state === 'success'}
+        <TransformationsPane {queryManager} />
+      {:else if inputColumnsFetchState?.state === 'failure'}
+        Failed to fetch column information
+      {/if}
+    </div>
   </section>
 </aside>
 

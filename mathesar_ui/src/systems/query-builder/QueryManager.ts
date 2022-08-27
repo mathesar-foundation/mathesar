@@ -147,7 +147,6 @@ export default class QueryManager extends EventHandler<{
     this.undoRedoManager = new QueryUndoRedoManager();
     const inputColumnTreePromise = this.calculateInputColumnTree();
     void inputColumnTreePromise.then(() => {
-      this.reprocessColumns('both', false);
       const isQueryValid = validateQuery(
         query,
         get(this.processedInitialColumns).withEntries(
@@ -184,6 +183,7 @@ export default class QueryManager extends EventHandler<{
         ...state,
         inputColumnsFetchState: { state: 'success' },
       }));
+      this.reprocessColumns('both', false);
       return;
     }
 
@@ -224,6 +224,7 @@ export default class QueryManager extends EventHandler<{
       };
       this.cacheManagers.inputColumns.set(baseTableId, inputColumns);
       this.inputColumns.set(inputColumns);
+      this.reprocessColumns('both', false);
       this.state.update((state) => ({
         ...state,
         inputColumnsFetchState: { state: 'success' },
