@@ -56,7 +56,6 @@
       border-bottom: none;
       background: var(--color-gray-lighter);
       font-size: var(--text-size-small);
-      padding: 0 0.5rem;
       font-weight: 500;
     }
   }
