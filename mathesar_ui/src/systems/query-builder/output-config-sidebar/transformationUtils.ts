@@ -11,30 +11,32 @@ export function calcAllowedColumnsPerTransformation(
   processedInitialColumns: ProcessedQueryResultColumnMap,
   processedVirtualColumns: ProcessedQueryResultColumnMap,
 ): ProcessedQueryResultColumnMap[] {
-  const latestColumnList = processedInitialColumns;
-  const allowedTransformations: ProcessedQueryResultColumnMap[] =
-    transformationModels.map((transformation) => {
-      if (transformation instanceof QuerySummarizationTransformationModel) {
-        const result: Map<
-          ProcessedQueryResultColumn['id'],
-          ProcessedQueryResultColumn
-        > = new Map();
-        transformation.getOutputColumnAliases().forEach((alias) => {
-          const column =
-            processedVirtualColumns.get(alias) ??
-            processedInitialColumns.get(alias);
-          if (column) {
-            result.set(alias, column);
-          } else {
-            console.error(
-              'This should never happen - Output column not found in both virtual and initial column list',
-            );
-          }
-        });
+  const allowedTransformations: ProcessedQueryResultColumnMap[] = [];
+  let latestColumnList = processedInitialColumns;
+  allowedTransformations.push(latestColumnList);
+  for (let index = 1; index < transformationModels.length; index += 1) {
+    const transformation = transformationModels[index - 1];
+    if (transformation instanceof QuerySummarizationTransformationModel) {
+      const result: Map<
+        ProcessedQueryResultColumn['id'],
+        ProcessedQueryResultColumn
+      > = new Map();
+      transformation.getOutputColumnAliases().forEach((alias) => {
+        const column =
+          processedVirtualColumns.get(alias) ??
+          processedInitialColumns.get(alias);
+        if (column) {
+          result.set(alias, column);
+        } else {
+          console.error(
+            'This should never happen - Output column not found in both virtual and initial column list',
+          );
+        }
+      });
 
-        return new ImmutableMap(result);
-      }
-      return latestColumnList;
-    });
+      latestColumnList = new ImmutableMap(result);
+    }
+    allowedTransformations.push(latestColumnList);
+  }
   return allowedTransformations;
 }

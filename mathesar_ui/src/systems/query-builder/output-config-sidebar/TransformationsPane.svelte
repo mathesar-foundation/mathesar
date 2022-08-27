@@ -72,7 +72,7 @@
               inputAlias: processedColumn.column.alias,
               outputAlias: `${processedColumn.column.alias}_1`,
               function: 'aggregate_to_array',
-              displayName: `${processedColumn.column.alias}_1`,
+              displayName: `${processedColumn.column.display_name}_agg`,
             },
           ]),
       ),
@@ -139,7 +139,7 @@
             model={transformationModel}
             limitEditing={allowedColumnsPerTransformation[index].size === 0 ||
               index < transformationModels.length - 1}
-            on:update={() => updateTransformation(transformationModel, index)}
+            on:update={(e) => updateTransformation(e.detail, index)}
           />
         {/if}
       </div>

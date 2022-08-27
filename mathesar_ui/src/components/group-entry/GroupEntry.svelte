@@ -36,9 +36,7 @@
     _columnsAllowedForSelection: ColumnLikeType['id'][] | undefined,
   ): ColumnLikeType['id'][] {
     let allowedColumns = _columnsAllowedForSelection ?? _allColumnIds;
-    if (
-      !_columnsAllowedForSelection?.some((entry) => entry === _columnIdentifier)
-    ) {
+    if (!allowedColumns?.some((entry) => entry === _columnIdentifier)) {
       allowedColumns = [_columnIdentifier, ...allowedColumns];
     }
     return allowedColumns;
