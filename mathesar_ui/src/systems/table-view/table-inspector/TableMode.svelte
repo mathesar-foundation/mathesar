@@ -1,6 +1,6 @@
 <script>
   import { Collapsible } from '@mathesar-component-library';
-  import TableConstraints from '../constraints/TableConstraints.svelte';
+  import TableConstraints from '@mathesar/systems/table-view/constraints/TableConstraints.svelte';
   import RenameTableProperty from './RenameTableProperty.svelte';
   import ConstraintHelp from '../constraints/__help__/ConstraintHelp.svelte';
 </script>
