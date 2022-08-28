@@ -7,19 +7,14 @@
 
 <div class="table-mode-container">
   <Collapsible isOpen>
-    <div slot="header">
-      <span>Table Properties</span>
-    </div>
+    <span slot="header">Table Properties</span>
     <div slot="content" class="property-container">
       <RenameTableProperty />
     </div>
   </Collapsible>
 
   <Collapsible isOpen>
-    <div slot="header">
-      <span>Links</span>
-      <ConstraintHelp />
-    </div>
+    <span slot="header">Links <ConstraintHelp /></span>
     <div slot="content" class="property-container">
       <TableConstraints />
     </div>
