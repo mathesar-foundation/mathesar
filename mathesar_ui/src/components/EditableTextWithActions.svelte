@@ -25,11 +25,6 @@
     isEditable = true;
   }
 
-  function handleValueChange(e: Event) {
-    const { value: valueFromInput } = e.target as HTMLInputElement;
-    value = valueFromInput;
-  }
-
   function handleCancel() {
     value = '';
     errors = [];
@@ -60,12 +55,7 @@
     >
   {:else}
     <div class="input-container">
-      <TextInput
-        disabled={isSubmitting}
-        autofocus
-        bind:value
-        on:change={handleValueChange}
-      />
+      <TextInput disabled={isSubmitting} autofocus bind:value />
       {#if errors.length}
         {#each errors as error}
           <span class="error">{error}</span>
