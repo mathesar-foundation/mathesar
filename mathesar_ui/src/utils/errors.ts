@@ -81,7 +81,7 @@ export class ApiMultiError extends Error {
  * new class will help us differentiate between frontend form validation errors
  * from others like `ApiError`.
  */
-export class UIError extends Error {
+export class UiError extends Error {
   errorMessages: string[];
 
   constructor(errorMessages: string[]) {

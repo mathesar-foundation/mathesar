@@ -8,7 +8,7 @@
     tables,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { UIError } from '@mathesar/utils/errors';
+  import { UiError } from '@mathesar/utils/errors';
 
   function schemaContainsTableName(name: string): boolean {
     const { id } = $tabularData;
@@ -37,7 +37,7 @@
     try {
       const errors = getValidationErrors(name);
       if (errors.length) {
-        throw new UIError(errors);
+        throw new UiError(errors);
       } else {
         const { id } = $tabularData;
         await renameTable(id, name);
@@ -46,7 +46,7 @@
         }
       }
     } catch (e) {
-      if (e instanceof UIError) {
+      if (e instanceof UiError) {
         throw e;
       } else {
         toast.fromError(e);
