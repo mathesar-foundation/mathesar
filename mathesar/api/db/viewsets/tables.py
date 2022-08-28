@@ -1,11 +1,10 @@
-from sqlite3 import ProgrammingError
 from django_filters import rest_framework as filters
 from psycopg2.errors import CheckViolation, InvalidTextRepresentation
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
-from sqlalchemy.exc import DataError, IntegrityError
+from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError
 
 from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
