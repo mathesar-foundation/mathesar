@@ -18,12 +18,4 @@
   .collapsible-content {
     position: relative;
   }
-
-  // TODO: Can be improved once the
-  // global css from TableGroupCollapsible.svelte is removed
-  .no-style {
-    border: none !important;
-    padding-left: 5px !important;
-    padding-right: 5px !important;
-  }
 }

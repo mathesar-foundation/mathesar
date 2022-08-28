@@ -6,7 +6,7 @@
 </script>
 
 <div class="table-mode-container">
-  <Collapsible noStyle>
+  <Collapsible>
     <div slot="header">
       <span>Table Properties</span>
     </div>
@@ -15,7 +15,7 @@
     </div>
   </Collapsible>
 
-  <Collapsible noStyle>
+  <Collapsible>
     <div slot="header">
       <span>Links</span>
       <ConstraintHelp />
