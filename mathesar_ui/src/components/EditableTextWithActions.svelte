@@ -22,8 +22,6 @@
     value === initialValue ? [] : getValidationErrors(value);
   $: canSave = validationErrors.length === 0 && value !== initialValue;
 
-  const paddingStyle = 'padding:0.43rem 0.57rem;';
-
   function makeEditable() {
     value = initialValue;
     isEditable = true;
@@ -50,11 +48,8 @@
 
 <div class="editable-text">
   {#if !isEditable}
-    <span
-      style={paddingStyle}
-      class="non-editable-value"
-      role="button"
-      on:click={makeEditable}>{initialValue}</span
+    <span class="non-editable-value" role="button" on:click={makeEditable}
+      >{initialValue}</span
     >
   {:else}
     <div class="input-container">
@@ -114,6 +109,9 @@
     font-size: 0.75rem;
   }
 
+  .non-editable-value {
+    padding: 0.43rem 0.57rem;
+  }
   .non-editable-value:hover {
     box-shadow: 0 0 0 2px #2087e633;
   }
