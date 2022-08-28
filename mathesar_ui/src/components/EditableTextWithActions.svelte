@@ -4,9 +4,10 @@
   Enables inline editing with support for "Save" & "Cancel" actions.
  -->
 <script lang="ts">
-  import { TextInput } from '@mathesar-component-library';
-  import Button from '@mathesar/component-library/button/Button.svelte';
-  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
+  import {
+    CancelOrProceedButtonPair,
+    TextInput,
+  } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
 
@@ -59,28 +60,14 @@
           <span class="error">{error}</span>
         {/each}
       {/if}
-      <div class="input-actions">
-        <Button
-          disabled={isSubmitting || !canSave}
-          size="small"
-          appearance="primary"
-          on:click={handleSave}
-        >
-          {#if isSubmitting}
-            <Spinner />
-          {:else}
-            Save
-          {/if}
-        </Button>
-        <Button
-          disabled={isSubmitting}
-          size="small"
-          appearance="secondary"
-          on:click={handleCancel}
-        >
-          Cancel
-        </Button>
-      </div>
+      <CancelOrProceedButtonPair
+        onProceed={handleSave}
+        onCancel={handleCancel}
+        isProcessing={isSubmitting}
+        canProceed={canSave}
+        proceedButton={{ label: 'Save' }}
+        size="small"
+      />
     </div>
   {/if}
 </div>
@@ -98,12 +85,6 @@
     gap: 0.25rem;
   }
 
-  .input-actions {
-    display: flex;
-    flex-direction: row;
-    justify-content: end;
-    gap: 0.25rem;
-  }
   .error {
     color: var(--color-error);
     font-size: var(--text-size-x-small);
