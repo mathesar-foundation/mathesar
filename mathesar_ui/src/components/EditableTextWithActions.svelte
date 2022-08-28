@@ -1,8 +1,7 @@
 <!-- 
-  EditableTextWithActions enables inline editing
-  with support for "Save" & "Cancel" actions
+  @component
 
-  onChange: Expects a promise in return to support interactions with the API
+  Enables inline editing with support for "Save" & "Cancel" actions.
  -->
 <script lang="ts">
   import { TextInput } from '@mathesar-component-library';
