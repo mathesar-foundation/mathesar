@@ -8,7 +8,7 @@
   import { TextInput } from '@mathesar-component-library';
   import Button from '@mathesar/component-library/button/Button.svelte';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
-  import type { UiError } from '@mathesar/utils/errors';
+  import { getErrorMessage } from '@mathesar/utils/errors';
 
   export let initialValue = '';
   export let onChange: (value: string) => Promise<void>;
@@ -45,8 +45,8 @@
         isSubmitting = false;
         return true;
       })
-      .catch((e: UiError) => {
-        errors = e.errorMessages;
+      .catch((e: unknown) => {
+        errors = [getErrorMessage(e)];
         isSubmitting = false;
       });
   }
