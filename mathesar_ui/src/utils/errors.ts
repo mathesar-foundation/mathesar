@@ -85,9 +85,9 @@ export class ApiMultiError extends Error {
 export class UIError extends Error {
   errorMessages: string[];
 
-  constructor(errorMessage: string[]) {
+  constructor(errorMessages: string[]) {
     super();
-    this.errorMessages = errorMessage;
+    this.errorMessages = errorMessages;
   }
 }
 
