@@ -10,7 +10,7 @@
   import { getErrorMessage } from '@mathesar/utils/errors';
 
   export let initialValue = '';
-  export let onChange: (value: string) => Promise<void>;
+  export let onSubmit: (value: string) => Promise<void>;
 
   let isEditable = false;
   let value = '';
@@ -33,7 +33,7 @@
   async function handleSave() {
     isSubmitting = true;
     try {
-      await onChange(value);
+      await onSubmit(value);
       value = '';
       isEditable = false;
     } catch (e: unknown) {

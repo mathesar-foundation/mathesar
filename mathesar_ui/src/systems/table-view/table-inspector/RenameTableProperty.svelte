@@ -59,7 +59,7 @@
   <span class="label">Name</span>
   <EditableTextWithActions
     initialValue={$tables.data.get($tabularData.id)?.name ?? ''}
-    onChange={handleTableNameChange}
+    onSubmit={handleTableNameChange}
   />
 </div>
 
