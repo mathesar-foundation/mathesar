@@ -36,19 +36,17 @@
     isEditable = false;
   }
 
-  function handleSave() {
+  async function handleSave() {
     isSubmitting = true;
-    onChange(value)
-      .then(() => {
-        value = '';
-        isEditable = false;
-        isSubmitting = false;
-        return true;
-      })
-      .catch((e: unknown) => {
-        errors = [getErrorMessage(e)];
-        isSubmitting = false;
-      });
+    try {
+      await onChange(value);
+      value = '';
+      isEditable = false;
+    } catch (e: unknown) {
+      errors = [getErrorMessage(e)];
+    } finally {
+      isSubmitting = false;
+    }
   }
 </script>
 
