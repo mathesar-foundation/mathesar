@@ -212,11 +212,13 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         except NotNullError as e:
             raise database_api_exceptions.NotNullImportViolationAPIException(
                 e,
+                message='Null values cannot be inserted into this column',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except ForeignKeyError as e:
             raise database_api_exceptions.ForeignKeyViolationAPIException(
                 e,
+                message='Cannot add an invalid reference to a record',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except TypeMismatchError as e:
@@ -228,11 +230,13 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         except UniqueValueError as e:
             raise database_api_exceptions.UniqueImportViolationAPIException(
                 e,
+                message='This column has uniqueness constraint set so non-unique values cannot be inserted',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except ExclusionError as e:
             raise database_api_exceptions.ExclusionViolationAPIException(
                 e,
+                message='This record violates exclusion constraint',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except IntegrityError as e:
