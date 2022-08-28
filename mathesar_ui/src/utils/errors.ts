@@ -85,7 +85,7 @@ export class UiError extends Error {
   errorMessages: string[];
 
   constructor(errorMessages: string[]) {
-    super();
+    super(errorMessages.join(' '));
     this.errorMessages = errorMessages;
   }
 }
