@@ -7,15 +7,19 @@
   import { TextInput } from '@mathesar-component-library';
   import Button from '@mathesar/component-library/button/Button.svelte';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
+  import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
 
   export let initialValue = '';
   export let onSubmit: (value: string) => Promise<void>;
+  export let getValidationErrors: (value: string) => string[] = () => [];
 
   let isEditable = false;
   let value = '';
   let isSubmitting = false;
-  let errors: string[] = [];
+
+  $: validationErrors =
+    value === initialValue ? [] : getValidationErrors(value);
 
   const paddingStyle = 'padding:0.43rem 0.57rem;';
 
@@ -26,7 +30,6 @@
 
   function handleCancel() {
     value = '';
-    errors = [];
     isEditable = false;
   }
 
@@ -37,7 +40,7 @@
       value = '';
       isEditable = false;
     } catch (e: unknown) {
-      errors = [getErrorMessage(e)];
+      toast.error(getErrorMessage(e));
     } finally {
       isSubmitting = false;
     }
@@ -55,8 +58,8 @@
   {:else}
     <div class="input-container">
       <TextInput disabled={isSubmitting} autofocus bind:value />
-      {#if errors.length}
-        {#each errors as error}
+      {#if validationErrors.length}
+        {#each validationErrors as error}
           <span class="error">{error}</span>
         {/each}
       {/if}

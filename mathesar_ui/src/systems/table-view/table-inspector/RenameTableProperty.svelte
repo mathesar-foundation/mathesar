@@ -7,8 +7,6 @@
     renameTable,
     tables,
   } from '@mathesar/stores/tables';
-  import { toast } from '@mathesar/stores/toast';
-  import { UiError } from '@mathesar/utils/errors';
 
   function schemaContainsTableName(name: string): boolean {
     const { id } = $tabularData;
@@ -34,23 +32,10 @@
   const tabularData = getTabularDataStoreFromContext();
 
   async function handleTableNameChange(name: string): Promise<void> {
-    try {
-      const errors = getValidationErrors(name);
-      if (errors.length) {
-        throw new UiError(errors);
-      } else {
-        const { id } = $tabularData;
-        await renameTable(id, name);
-        if ($currentSchemaId) {
-          await refetchTablesForSchema($currentSchemaId);
-        }
-      }
-    } catch (e) {
-      if (e instanceof UiError) {
-        throw e;
-      } else {
-        toast.fromError(e);
-      }
+    const { id } = $tabularData;
+    await renameTable(id, name);
+    if ($currentSchemaId) {
+      await refetchTablesForSchema($currentSchemaId);
     }
   }
 </script>
@@ -60,6 +45,7 @@
   <EditableTextWithActions
     initialValue={$tables.data.get($tabularData.id)?.name ?? ''}
     onSubmit={handleTableNameChange}
+    {getValidationErrors}
   />
 </div>
 
