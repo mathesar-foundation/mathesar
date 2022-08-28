@@ -85,7 +85,7 @@
     --cell-bg-color-row-selected: #e4f2ff;
 
     --color-fk: #dfd0b3;
-
+    --color-error: #f47171;
     --cell-text-color-processing: #888;
 
     --cell-border-horizontal: 1px solid #e7e7e7;

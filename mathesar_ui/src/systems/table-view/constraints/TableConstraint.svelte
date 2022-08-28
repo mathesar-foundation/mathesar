@@ -105,7 +105,7 @@
     color: #666;
   }
   .drop {
-    color: #f47171;
+    color: var(--color-error);
   }
   .columns {
     color: #666;

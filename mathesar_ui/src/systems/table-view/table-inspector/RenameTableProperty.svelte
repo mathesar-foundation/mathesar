@@ -56,6 +56,6 @@
     gap: 0.5rem;
   }
   .label {
-    font-size: 0.85rem;
+    font-size: var(--text-size-small);
   }
 </style>

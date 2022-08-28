@@ -105,8 +105,8 @@
     gap: 0.25rem;
   }
   .error {
-    color: red;
-    font-size: 0.75rem;
+    color: var(--color-error);
+    font-size: var(--text-size-x-small);
   }
 
   .non-editable-value {
