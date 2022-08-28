@@ -20,23 +20,23 @@
 
   const paddingStyle = 'padding:0.43rem 0.57rem;';
 
-  const makeEditable = () => {
+  function makeEditable() {
     value = initialValue;
     isEditable = true;
-  };
+  }
 
-  const handleValueChange = (e: Event) => {
+  function handleValueChange(e: Event) {
     const { value: valueFromInput } = e.target as HTMLInputElement;
     value = valueFromInput;
-  };
+  }
 
-  const handleCancel = () => {
+  function handleCancel() {
     value = '';
     errors = [];
     isEditable = false;
-  };
+  }
 
-  const handleSave = () => {
+  function handleSave() {
     isSubmitting = true;
     onChange(value)
       .then(() => {
@@ -49,7 +49,7 @@
         errors = e.errorMessages;
         isSubmitting = false;
       });
-  };
+  }
 </script>
 
 <div class="editable-text">
