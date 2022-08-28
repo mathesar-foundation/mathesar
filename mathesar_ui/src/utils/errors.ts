@@ -77,10 +77,9 @@ export class ApiMultiError extends Error {
 }
 
 /**
- * Special error class for passing UIErrors across the application
- * Creating a new class will help us differentiate
- * between frontend form validation errors from others like ApiError
- * As of not it only supports errorMessages: string[]
+ * Special error class for passing UI errors across the application. Creating a
+ * new class will help us differentiate between frontend form validation errors
+ * from others like `ApiError`.
  */
 export class UIError extends Error {
   errorMessages: string[];
