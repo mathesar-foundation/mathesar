@@ -20,6 +20,7 @@
 
   $: validationErrors =
     value === initialValue ? [] : getValidationErrors(value);
+  $: canSave = validationErrors.length === 0 && value !== initialValue;
 
   const paddingStyle = 'padding:0.43rem 0.57rem;';
 
@@ -65,7 +66,7 @@
       {/if}
       <div class="input-actions">
         <Button
-          disabled={isSubmitting}
+          disabled={isSubmitting || !canSave}
           size="small"
           appearance="primary"
           on:click={handleSave}
