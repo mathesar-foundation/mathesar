@@ -790,7 +790,7 @@ def test_record_detail(create_patents_table, client):
     record = table.get_record(record_id)
 
     response = client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
-    record_data = response.json()
+    record_data = response.json()['results'][0]
     record_as_dict = record._asdict()
 
     assert response.status_code == 200
