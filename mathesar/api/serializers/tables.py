@@ -16,12 +16,14 @@ from mathesar.api.exceptions.validation_exceptions import base_exceptions as bas
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
+from mathesar.api.serializers.table_settings import TableSettingsSerializer
 from mathesar.models.base import Column, Table, DataFile
 from mathesar.utils.tables import gen_table_name, create_table_from_datafile, create_empty_table
 
 
 class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, required=False)
+    settings = TableSettingsSerializer()
     records_url = serializers.SerializerMethodField()
     constraints_url = serializers.SerializerMethodField()
     columns_url = serializers.SerializerMethodField()
@@ -39,10 +41,12 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
 
     class Meta:
         model = Table
-        fields = ['id', 'name', 'import_target', 'schema', 'created_at', 'updated_at', 'import_verified',
-                  'columns', 'records_url', 'constraints_url', 'columns_url',
-                  'joinable_tables_url', 'type_suggestions_url', 'previews_url',
-                  'data_files', 'has_dependencies', 'dependents_url']
+        fields = [
+            'id', 'name', 'import_target', 'schema', 'created_at', 'updated_at', 'import_verified',
+            'columns', 'records_url', 'constraints_url', 'columns_url',
+            'joinable_tables_url', 'type_suggestions_url', 'previews_url',
+            'data_files', 'has_dependencies', 'dependents_url'
+        ]
 
     def get_records_url(self, obj):
         if isinstance(obj, Table):
