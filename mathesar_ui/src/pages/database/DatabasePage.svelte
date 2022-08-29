@@ -63,11 +63,10 @@
       <div><EntityType>Database</EntityType></div>
       <h1><DatabaseName {database} /></h1>
     </div>
+    <Button class="add" on:click={addSchema}>
+      <Icon {...iconAddNew} /> New Schema
+    </Button>
   </div>
-
-  <Button class="add" on:click={addSchema}>
-    <Icon {...iconAddNew} /> New Schema
-  </Button>
 
   <div class="schema-list-wrapper">
     <h2 class="schema-list-title">
@@ -93,7 +92,7 @@
 
 <style lang="scss">
   .database-page-header {
-    margin: 0.5rem 0;
+    margin: 0.5rem 0 1rem;
     display: flex;
     align-items: center;
   }

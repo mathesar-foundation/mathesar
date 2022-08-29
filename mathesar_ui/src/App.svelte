@@ -95,7 +95,7 @@
     --cell-border-horizontal: 1px solid #e7e7e7;
     --cell-border-vertical: 1px solid #efefef;
 
-    --page-padding: 1.5em;
+    --page-padding: 1em;
 
     color: var(--color-text);
   }
