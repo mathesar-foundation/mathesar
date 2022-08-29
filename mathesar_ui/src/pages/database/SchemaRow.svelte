@@ -87,7 +87,7 @@
     border-radius: 0.25rem;
     color: $color-dark;
     padding: 1em;
-    border: 1px solid var(--color-gray-dark);
+    border: 1px solid var(--color-gray-medium);
     height: 100%;
   }
 
@@ -100,9 +100,11 @@
     margin-bottom: 0.25rem;
   }
   .title a {
-    color: $color-link;
+    color: var(--color-link);
+    font-weight: 500;
     text-decoration: none;
     flex-grow: 1;
+    
   }
   .title a:hover {
     text-decoration: underline;
@@ -120,7 +122,7 @@
     color: var(--color-text-muted);
     font-weight: 500;
     font-size: var(--text-size-small);
-    border: 2px solid var(--color-gray-dark);
+    border: 1px solid var(--color-gray-medium);
     padding: 0.25rem 0.5rem;
     border-radius: 1rem;
   }

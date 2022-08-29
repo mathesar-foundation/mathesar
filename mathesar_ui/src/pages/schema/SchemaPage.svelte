@@ -25,8 +25,8 @@
 </svelte:head>
 
 <LayoutWithHeader>
-  <div class="homepage-header">
-    <div class="homepage-heading">
+  <div class="schema-page-header">
+    <div class="schema-page-name">
       <div><EntityType>Schema</EntityType></div>
       <h1><SchemaName {schema} /></h1>
     </div>
@@ -43,28 +43,30 @@
     </ul>
   </div>
 
-  <div class="homepage-wrapper">
-    <h2 class="homepage-title">
-      Explorations ({[...queriesMap.values()].length})
-    </h2>
-    <ul class="homepage-list">
-      {#each [...queriesMap.values()] as query (query.id)}
-        <li class="homepage-list-item">
-          <a href={getDataExplorerPageUrl(database.name, schema.id, query.id)}>
-            <QueryName {query} />
+  
+
+  <div class="entity-list-wrapper">
+    <h2 class="entity-list-title">Tables ({[...tablesMap.values()].length})</h2>
+    <ul class="entity-list">
+      {#each [...tablesMap.values()] as table (table.id)}
+        <li class="entity-list-item">
+          <a href={getTablePageUrl(database.name, schema.id, table.id)}>
+            <TableName {table} />
           </a>
         </li>
       {/each}
     </ul>
   </div>
 
-  <div class="homepage-wrapper">
-    <h2 class="homepage-title">Tables ({[...tablesMap.values()].length})</h2>
-    <ul class="homepage-list">
-      {#each [...tablesMap.values()] as table (table.id)}
-        <li class="homepage-list-item">
-          <a href={getTablePageUrl(database.name, schema.id, table.id)}>
-            <TableName {table} />
+  <div class="entity-list-wrapper">
+    <h2 class="entity-list-title">
+      Explorations ({[...queriesMap.values()].length})
+    </h2>
+    <ul class="entity-list">
+      {#each [...queriesMap.values()] as query (query.id)}
+        <li class="entity-list-item">
+          <a href={getDataExplorerPageUrl(database.name, schema.id, query.id)}>
+            <QueryName {query} />
           </a>
         </li>
       {/each}
@@ -73,41 +75,45 @@
 </LayoutWithHeader>
 
 <style lang="scss">
-  .homepage-header {
+  .schema-page-header {
     margin: 0.5rem 0;
     display: flex;
     align-items: center;
   }
-  .homepage-heading {
+  .schema-page-name {
     flex-grow: 1;
     h1 {
       margin: 0;
       font-weight: 500;
     }
   }
-  .homepage-wrapper {
+  .entity-list-wrapper {
     display: flex;
     flex-direction: column;
 
-    .homepage-title {
+    .entity-list-title {
       font-size: var(--text-size-large);
       margin: 0.5rem 0;
       font-weight: 500;
     }
   }
-  .homepage-list {
+  .entity-list {
     list-style: none;
-    border: 1px solid blue;
     margin: 0;
     padding-left: 0;
     
-    .homepage-list-item {
-      border: 1px solid red;
+    .entity-list-item {
+      margin: 0.25rem 0;
     }
-    .homepage-list-item > a {
-      display: block;
-      padding: 0.25rem;
-      border: 1px solid green;
+    .entity-list-item > a {
+      display: inline-block;
+      text-decoration: none;
+      padding: 0.25rem 0;
+      color: var(--color-link);
+      font-size: var(--text-size-large);
+    }
+    .entity-list-item > a:hover {
+      text-decoration: underline;
     }
   }
 </style>

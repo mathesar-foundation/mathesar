@@ -58,8 +58,8 @@
 </svelte:head>
 
 <LayoutWithHeader>
-  <div class="homepage-header">
-    <div class="homepage-heading">
+  <div class="database-page-header">
+    <div class="database-page-name">
       <div><EntityType>Database</EntityType></div>
       <h1><DatabaseName {database} /></h1>
     </div>
@@ -69,13 +69,13 @@
     </Button>
   </div>
 
-  <div class="homepage-wrapper">
-    <h2 class="homepage-title">Schemas ({schemasMap.size}) <SchemasHelp /></h2>
+  <div class="schema-list-wrapper">
+    <h2 class="schema-list-title">Schemas ({schemasMap.size}) <SchemasHelp /></h2>
     <TextInput placeholder="Find a schema..." bind:value={filterQuery} />
 
-    <ul class="homepage-list">
+    <ul class="schema-list">
       {#each displayList as schema (schema.id)}
-        <li class="homepage-list-item">
+        <li class="schema-list-item">
           <SchemaRow {database} {schema} on:edit={() => editSchema(schema)} />
         </li>
       {/each}
@@ -90,29 +90,29 @@
 />
 
 <style lang="scss">
-  .homepage-header {
+  .database-page-header {
     margin: 0.5rem 0;
     display: flex;
     align-items: center;
   }
-  .homepage-heading {
+  .database-page-name {
     flex-grow: 1;
     h1 {
       margin: 0;
       font-weight: 500;
     }
   }
-  .homepage-wrapper {
+  .schema-list-wrapper {
     display: flex;
     flex-direction: column;
 
-    .homepage-title {
+    .schema-list-title {
       font-size: var(--text-size-large);
       margin: 1rem 0;
       font-weight: 500;
     }
 
-    .homepage-list {
+    .schema-list {
       width: 100%;
       list-style: none;
       padding: 0;
