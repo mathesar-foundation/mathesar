@@ -2,17 +2,21 @@
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import SpinnerButton from '@mathesar-component-library-dir/spinner-button/SpinnerButton.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
+  import {
+    iconCancel,
+    iconProceed,
+  } from '@mathesar-component-library-dir/common/icons';
+  import type { Size } from '@mathesar-component-library-dir/commonTypes';
   import type { ButtonDetails } from './CancelOrProceedButtonPairTypes';
 
   const cancelButtonDefaults: ButtonDetails = {
     label: 'Cancel',
-    icon: { data: faArrowLeft },
+    icon: iconCancel,
   };
 
   const proceedButtonDefaults: ButtonDetails = {
     label: 'Proceed',
-    icon: { data: faCheck },
+    icon: iconProceed,
   };
 
   export let cancelButton: Partial<ButtonDetails> = {};
@@ -22,6 +26,7 @@
   export let canProceed = true;
   export let canCancel = true;
   export let isProcessing = false;
+  export let size: Size | undefined = undefined;
 
   let spinnerButtonProceed: () => Promise<void> = async () => {};
 
@@ -40,7 +45,7 @@
 </script>
 
 <div class="cancel-or-proceed-button-pair">
-  <Button on:click={onCancel} disabled={isProcessing || !canCancel}>
+  <Button on:click={onCancel} disabled={isProcessing || !canCancel} {size}>
     {#if fullCancelButton.icon}<Icon {...fullCancelButton.icon} />{/if}
     <span>{fullCancelButton.label}</span>
   </Button>
@@ -51,5 +56,6 @@
     icon={fullProceedButton.icon}
     label={fullProceedButton.label}
     disabled={isProcessing || !canProceed}
+    {size}
   />
 </div>

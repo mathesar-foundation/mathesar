@@ -4,7 +4,7 @@ import type {
   FormValues,
   IconProps,
 } from '@mathesar-component-library/types';
-import type { CellDataType } from '@mathesar/components/cell/data-types/typeDefinitions';
+import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
 import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/api/tables/columns';
 import type { States } from '@mathesar/utils/api';
@@ -99,4 +99,22 @@ export interface AbstractTypeFilterDefinition {
 export type AbstractTypeFilterDefinitionMap = Map<
   AbstractTypeCategoryIdentifier,
   AbstractTypeFilterDefinition[]
+>;
+
+export interface AbstractTypePreprocFunctionsResponse {
+  id: string;
+  name: string;
+  appliesTo: AbstractTypeCategoryIdentifier[];
+  returns: AbstractTypeCategoryIdentifier;
+  possibleReturnValues?: { label: string; value: unknown }[];
+}
+
+export type AbstractTypePreprocFunctionDefinition = Omit<
+  AbstractTypePreprocFunctionsResponse,
+  'appliesTo'
+>;
+
+export type AbstractTypePreprocFunctionDefinitionMap = Map<
+  AbstractTypeCategoryIdentifier,
+  AbstractTypePreprocFunctionDefinition[]
 >;

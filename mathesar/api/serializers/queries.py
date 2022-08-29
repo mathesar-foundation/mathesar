@@ -1,6 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 from mathesar.models.query import UIQuery
+from django.core.exceptions import ValidationError
 
 
 class QuerySerializer(serializers.ModelSerializer):
@@ -33,34 +34,8 @@ class QuerySerializer(serializers.ModelSerializer):
         else:
             return None
 
-    # TODO consider moving to UIQuery field validation:
-    # see https://docs.djangoproject.com/en/4.0/ref/validators/
-    def validate_initial_columns(self, cols):
-        _raise_if_not_list_of_dicts("initial_columns", cols)
-        return cols
-
-    # TODO consider moving to UIQuery field validation:
-    # see https://docs.djangoproject.com/en/4.0/ref/validators/
-    def validate_transformations(self, transforms):
-        _raise_if_not_list_of_dicts("transformations", transforms)
-        for transform in transforms:
-            if "type" not in transform:
-                raise serializers.ValidationError("Each 'transformations' sub-dict must have a 'type' key.")
-            if "spec" not in transform:
-                raise serializers.ValidationError("Each 'transformations' sub-dict must have a 'spec' key.")
-        return transforms
-
-    # TODO consider moving to UIQuery field validation:
-    # see https://docs.djangoproject.com/en/4.0/ref/validators/
-    def validate_display_options(self, display_options):
-        if not isinstance(display_options, dict):
-            raise serializers.ValidationError("display_options should be a dict.")
-        return display_options
-
-
-def _raise_if_not_list_of_dicts(field_name, value):
-    if not isinstance(value, list):
-        raise serializers.ValidationError(f"{field_name} should be a list.")
-    for subvalue in value:
-        if not isinstance(subvalue, dict):
-            raise serializers.ValidationError(f"{field_name} should contain only dicts.")
+    def validate(self, attrs):
+        unexpected_fields = set(self.initial_data) - set(self.fields)
+        if unexpected_fields:
+            raise ValidationError(f"Unexpected field(s): {unexpected_fields}")
+        return attrs

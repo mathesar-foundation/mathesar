@@ -24,7 +24,7 @@ function removeCommonDataScript() {
 test('shows mathesar default text when rendered', async () => {
   addCommonDataScript();
   const App = await import('../App.svelte');
-  const { getByText } = render(App.default, {});
-  expect(getByText('mathesar_tables')).toBeInTheDocument();
+  const { getAllByText } = render(App.default, {});
+  expect(getAllByText('mathesar_tables').length).toBeGreaterThan(0);
   removeCommonDataScript();
 });

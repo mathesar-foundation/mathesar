@@ -5,8 +5,9 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from mathesar.api.pagination import DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
+from mathesar.api.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.api.serializers.queries import QuerySerializer
+from mathesar.api.serializers.records import RecordListParameterSerializer
 from mathesar.models.query import UIQuery
 
 
@@ -24,14 +25,20 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
 
     @action(methods=['get'], detail=True)
     def records(self, request, pk=None):
-        paginator = TableLimitOffsetGroupPagination()
+        paginator = TableLimitOffsetPagination()
         query = self.get_object()
         if query.not_partial:
+            serializer = RecordListParameterSerializer(data=request.GET)
+            serializer.is_valid(raise_exception=True)
             records = paginator.paginate_queryset(
                 queryset=self.get_queryset(),
                 request=request,
                 table=query,
-                column_name_id_bidirectional_map=dict(),
+                filters=serializer.validated_data['filter'],
+                order_by=serializer.validated_data['order_by'],
+                grouping=serializer.validated_data['grouping'],
+                search=serializer.validated_data['search_fuzzy'],
+                duplicate_only=serializer.validated_data['duplicate_only'],
             )
             return paginator.get_paginated_response(records)
 

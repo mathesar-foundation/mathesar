@@ -36,8 +36,30 @@
       monthSelectorType: 'static',
       onChange: (val) => {
         if (val[0]) {
-          value = dayjs(val[0]).format(format);
+          const prevValue = value;
+          const newDayJs = dayjs(val[0]);
+          value = newDayJs.format(format);
           dispatch('change', value);
+          if (type === 'date') {
+            dispatch('dateChange', value);
+          } else if (type === 'time') {
+            dispatch('timeChange', value);
+          } else {
+            const prevDayJs = dayjs(prevValue, format);
+            if (!prevDayJs.isValid()) {
+              dispatch('dateChange', value);
+              dispatch('timeChange', value);
+              return;
+            }
+            if (
+              prevDayJs.format('YYYY-MM-DD') !== newDayJs.format('YYYY-MM-DD')
+            ) {
+              dispatch('dateChange', value);
+            }
+            if (prevDayJs.format('HH:mm') !== newDayJs.format('HH:mm')) {
+              dispatch('timeChange', value);
+            }
+          }
         }
       },
     });

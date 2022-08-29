@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { getSheetContext } from './utils';
 
-  export let horizontalScrollOffset = 0;
+  const { stores, api } = getSheetContext();
+  const { horizontalScrollOffset } = stores;
 
   let headerRef: HTMLElement;
 
@@ -11,16 +13,16 @@
     }
   }
 
-  $: onHScrollOffsetChange(horizontalScrollOffset);
+  $: onHScrollOffsetChange($horizontalScrollOffset);
 
   function onHeaderScroll(scrollLeft: number) {
-    if (horizontalScrollOffset !== scrollLeft) {
-      horizontalScrollOffset = scrollLeft;
+    if ($horizontalScrollOffset !== scrollLeft) {
+      api.setHorizontalScrollOffset(scrollLeft);
     }
   }
 
   onMount(() => {
-    onHScrollOffsetChange(horizontalScrollOffset);
+    onHScrollOffsetChange($horizontalScrollOffset);
 
     const scrollListener = (event: Event) => {
       const { scrollLeft } = event.target as HTMLElement;
@@ -46,13 +48,15 @@
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid var(--color-gray-medium);
     user-select: none;
     overflow: hidden;
 
     :global([data-sheet-element='cell']) {
       border-bottom: none;
-      background: #f9f9f9;
+      background: var(--color-gray-lighter);
+      font-size: var(--text-size-small);
+      font-weight: 500;
     }
   }
 </style>

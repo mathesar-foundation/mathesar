@@ -1,23 +1,25 @@
-import { writable, derived } from 'svelte/store';
-import type { Writable, Readable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
+
 import {
   ImmutableMap,
   ImmutableSet,
   WritableMap,
-  WritableSet,
 } from '@mathesar-component-library';
 import type { RequestStatus } from '@mathesar/utils/api';
-import Pagination from '@mathesar/utils/Pagination';
 import type { TersePagination } from '@mathesar/utils/Pagination';
+import Pagination from '@mathesar/utils/Pagination';
+import Url64 from '@mathesar/utils/Url64';
 import type { TerseFiltering } from './filtering';
 import { Filtering } from './filtering';
-import type { TerseSorting } from './sorting';
-import { Sorting } from './sorting';
 import type { TerseGrouping } from './grouping';
 import { Grouping } from './grouping';
 import type { RecordsRequestParamsData } from './records';
+import type { TerseSorting } from './sorting';
+import { Sorting } from './sorting';
 import type { CellKey, RowKey } from './utils';
-import { getRowStatus, getSheetState, extractRowKeyFromCellKey } from './utils';
+import { extractRowKeyFromCellKey, getRowStatus, getSheetState } from './utils';
+import { SearchFuzzy } from './searchFuzzy';
 
 /**
  * Unlike in `RequestStatus`, here the state and the error messages are
@@ -83,6 +85,17 @@ export function makeTerseMetaProps(p?: Partial<MetaProps>): TerseMetaProps {
   ];
 }
 
+function serializeMetaProps(p: MetaProps): string {
+  return Url64.encode(JSON.stringify(makeTerseMetaProps(p)));
+}
+
+/** @throws Error if string is not properly formatted. */
+function deserializeMetaProps(s: string): MetaProps {
+  return makeMetaProps(JSON.parse(Url64.decode(s)));
+}
+
+const defaultMetaPropsSerialization = serializeMetaProps(getFullMetaProps());
+
 /**
  * The Meta store is meant to be used by other stores for storing and operating
  * on meta information. This may also include display properties. Properties in
@@ -98,7 +111,9 @@ export class Meta {
 
   filtering: Writable<Filtering>;
 
-  selectedRows = new WritableSet<RowKey>();
+  searchFuzzy: Writable<SearchFuzzy>;
+
+  // selectedRows = new WritableSet<RowKey>();
 
   cellClientSideErrors = new WritableMap<CellKey, string[]>();
 
@@ -131,7 +146,7 @@ export class Meta {
    * Allows us to save and re-create Meta, e.g. from data stored in the tab
    * system.
    */
-  props: Readable<MetaProps>;
+  serialization: Readable<string>;
 
   /**
    * Allows us to re-fetch records from the server when some of the parameters
@@ -145,6 +160,7 @@ export class Meta {
     this.sorting = writable(props.sorting);
     this.grouping = writable(props.grouping);
     this.filtering = writable(props.filtering);
+    this.searchFuzzy = writable(new SearchFuzzy());
 
     this.rowsWithClientSideErrors = derived(
       this.cellClientSideErrors,
@@ -186,31 +202,47 @@ export class Meta {
         }),
     );
 
-    // Why do `this.props` and `this.recordsRequestParamsData` look identical?
-    //
-    // It's a coincidence that `MetaProps` and `RecordsRequestParamsData` are
-    // almost identical, but that might not always be the case. For example, if
-    // we want to store info in the tabs system about the selected cells, then
-    // `MetaProps` would need more fields. Using separate fields for
-    // `this.props` and `this.recordsRequestParamsData` gives us a separation
-    // of concerns.
-    this.props = derived(
+    this.serialization = derived(
       [this.pagination, this.sorting, this.grouping, this.filtering],
-      ([pagination, sorting, grouping, filtering]) => ({
-        pagination,
-        sorting,
-        grouping,
-        filtering,
-      }),
+      ([pagination, sorting, grouping, filtering]) => {
+        const serialization = serializeMetaProps({
+          pagination,
+          sorting,
+          grouping,
+          filtering,
+        });
+        if (serialization === defaultMetaPropsSerialization) {
+          // Avoid returning a serialization which only includes the empty data
+          // structure.
+          return '';
+        }
+        return serialization;
+      },
     );
+
     this.recordsRequestParamsData = derived(
-      [this.pagination, this.sorting, this.grouping, this.filtering],
-      ([pagination, sorting, grouping, filtering]) => ({
+      [
+        this.pagination,
+        this.sorting,
+        this.grouping,
+        this.filtering,
+        this.searchFuzzy,
+      ],
+      ([pagination, sorting, grouping, filtering, searchFuzzy]) => ({
         pagination,
         sorting,
         grouping,
         filtering,
+        searchFuzzy,
       }),
     );
+  }
+
+  static fromSerialization(s: string): Meta | undefined {
+    try {
+      return new Meta(deserializeMetaProps(s));
+    } catch (e) {
+      return undefined;
+    }
   }
 }

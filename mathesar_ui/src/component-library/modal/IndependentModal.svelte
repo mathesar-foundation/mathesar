@@ -1,9 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
-  import { faTimes } from '@fortawesome/free-solid-svg-icons';
   import { Button, Icon, portal } from '@mathesar-component-library';
-  import type { ModalCloseAction, ModalWidth } from './modalTypes';
+  import { iconClose } from '@mathesar-component-library-dir/common/icons';
+  import type {
+    ModalCloseAction,
+    ModalWidth,
+    VerticalAlign,
+  } from './modalTypes';
 
   const dispatch = createEventDispatcher();
 
@@ -16,6 +20,7 @@
   export let allowClose = true;
   export let hasOverlay = true;
   export let closeOn: ModalCloseAction[] = ['button'];
+  export let verticalAlign: VerticalAlign | undefined = 'center';
 
   $: closeOnButton = allowClose && closeOn.includes('button');
   $: closeOnEsc = allowClose && closeOn.includes('esc');
@@ -48,7 +53,13 @@
 <svelte:window on:keydown={handleKeydown} />
 
 {#if isOpen}
-  <div class="modal-wrapper" use:portal>
+  <div
+    class="modal-wrapper"
+    use:portal
+    class:v-align-top={verticalAlign === 'top'}
+    class:v-align-center={verticalAlign === 'center'}
+    class:v-align-bottom={verticalAlign === 'bottom'}
+  >
     {#if hasOverlay}
       <div
         class="overlay"
@@ -71,7 +82,7 @@
           </div>
           {#if closeOnButton}
             <Button appearance="plain" class="close-button" on:click={close}>
-              <Icon data={faTimes} />
+              <Icon {...iconClose} />
             </Button>
           {/if}
         </div>

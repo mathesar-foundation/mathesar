@@ -5,7 +5,8 @@ from sqlalchemy import Column, MetaData, Table, select, VARCHAR
 from db.columns.operations.infer_types import infer_column_type
 from db.tables.operations import infer_types as infer_operations
 from db.tables.operations.create import create_mathesar_table
-from db.types.base import PostgresType, MathesarCustomType, get_db_type_enum_from_class
+from db.types.base import PostgresType, MathesarCustomType
+from db.types.operations.convert import get_db_type_enum_from_class
 
 
 type_data_list = [
@@ -146,7 +147,7 @@ def test_type_inference(engine_with_schema, initial_type, value_list, expected_t
         reflected_type_sa_class = Table(
             TEST_TABLE, metadata, schema=schema, autoload_with=engine,
         ).columns[TEST_COLUMN].type.__class__
-        reflected_type = get_db_type_enum_from_class(reflected_type_sa_class, engine)
+        reflected_type = get_db_type_enum_from_class(reflected_type_sa_class)
     assert reflected_type == expected_type
 
 
@@ -275,7 +276,7 @@ def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
 
 
 def test_update_table_column_types_skips_fkey_columns(extracted_remainder_roster, roster_fkey_col):
-    _, remainder, _, engine, schema = extracted_remainder_roster
+    _, remainder, engine, schema = extracted_remainder_roster
     with patch.object(infer_operations, "infer_column_type") as mock_infer:
         infer_operations.update_table_column_types(
             schema,

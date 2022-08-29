@@ -6,7 +6,7 @@ from db.columns.operations.select import (
 )
 from db.tables.operations.select import get_oid_from_table
 from db.types.operations.cast import get_full_cast_map
-from db.types.base import get_db_type_enum_from_class
+from db.types.operations.convert import get_db_type_enum_from_class
 
 
 # TODO consider renaming to DbColumn or DatabaseColumn
@@ -53,6 +53,12 @@ class MathesarColumn(Column):
             autoincrement=autoincrement,
             server_default=server_default
         )
+        # NOTE: For some reason, sometimes `self._proxies` is a tuple. SA expects it to be
+        # appendable, however. Was not able to track down the source of it. As a workaround, we
+        # convert it into a list here. I (Dom) offer a bounty of bragging rights to anyone who
+        # figures out what's causing `_proxies` to be tuples.
+        if isinstance(self._proxies, tuple):
+            self._proxies = list(self._proxies)
 
     @classmethod
     def _constructor(cls, *args, **kwargs):
@@ -72,18 +78,26 @@ class MathesarColumn(Column):
         given column.  It respects only the properties in the __init__
         of the MathesarColumn.
         """
-        fkeys = {ForeignKey(fk.target_fullname) for fk in column.foreign_keys}
-        new_column = cls(
-            column.name,
-            column.type,
-            foreign_keys=fkeys,
-            primary_key=column.primary_key,
-            nullable=column.nullable,
-            autoincrement=column.autoincrement,
-            server_default=column.server_default,
-            engine=engine,
-        )
-        new_column.original_table = column.table
+        try:
+            fkeys = {ForeignKey(fk.target_fullname) for fk in column.foreign_keys}
+            new_column = cls(
+                column.name,
+                column.type,
+                foreign_keys=fkeys,
+                primary_key=column.primary_key,
+                nullable=column.nullable,
+                autoincrement=column.autoincrement,
+                server_default=column.server_default,
+                engine=engine,
+            )
+            new_column.original_table = column.table
+        # dirty hack to handle cases where this isn't a real column
+        except AttributeError:
+            new_column = cls(
+                column.name,
+                column.type,
+                engine=engine,
+            )
         return new_column
 
     def to_sa_column(self):
@@ -194,7 +208,7 @@ class MathesarColumn(Column):
         Get this column's database type enum.
         """
         self._assert_that_engine_is_present()
-        return get_db_type_enum_from_class(self.type.__class__, self.engine)
+        return get_db_type_enum_from_class(self.type.__class__)
 
     @property
     def type_options(self):

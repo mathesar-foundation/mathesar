@@ -1,7 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { Button } from '@mathesar-component-library';
-  import type { ColumnWithLink } from './selectionPaneUtils';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import type { ColumnWithLink } from '../utils';
 
   const dispatch = createEventDispatcher();
 
@@ -9,36 +10,43 @@
 </script>
 
 <div class="selectable-column">
-  <div>{column.name}</div>
-  <Button appearance="plain" on:click={() => dispatch('add', column)}>+</Button>
+  <Button appearance="plain" on:click={() => dispatch('add', column)}>
+    <ColumnName
+      column={{ ...column, type_options: null, display_options: null }}
+    />
+    <span class="add">Add +</span>
+  </Button>
 </div>
 
 <style lang="scss">
   div.selectable-column {
-    border: 1px dashed #dfdfdf;
-    border-radius: 2px;
-    margin: 0.7rem 0;
     display: flex;
     align-items: center;
-    height: 2.4rem;
 
-    > div {
-      padding: 0.5rem 0.75rem;
+    :global(button) {
       flex-grow: 1;
+      text-align: left;
+      border: 1px solid #efefef;
+      border-radius: 0.15rem;
       overflow: hidden;
+    }
+    :global(button .name-with-icon) {
+      flex-grow: 1;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-
-    :global(button) {
-      border-left: 1px solid #dfdfdf;
+    :global(button .add) {
+      flex-shrink: 0;
     }
 
-    // Figure out interaction for touch devices
     &:not(:hover) {
-      :global(button) {
+      :global(button .add) {
         display: none;
       }
+    }
+
+    + :global(.selectable-column) {
+      margin-top: -1px;
     }
   }
 </style>

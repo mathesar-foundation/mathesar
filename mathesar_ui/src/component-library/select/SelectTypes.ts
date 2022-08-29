@@ -14,4 +14,14 @@ export interface SelectProps<Option> extends BaseInputProps {
   triggerAppearance?: Appearance;
   ariaLabel?: string;
   valuesAreEqual?: ListBoxProps<Option | undefined>['checkEquality'];
+  /**
+   * When options change and the selected value is either undefined or
+   * not present in the options array, autoSelect determines how to
+   * choose the selected option.
+   *
+   * first: Selects the first option from the options array.
+   * clear: Sets selected value to undefined.
+   * none: Disables auto select. Current value stays as it is.
+   */
+  autoSelect?: 'first' | 'clear' | 'none';
 }

@@ -1,27 +1,22 @@
 import { getContext, setContext } from 'svelte';
-import type { Readable } from 'svelte/store';
-import { get, derived, writable } from 'svelte/store';
-import type { ModalController } from '@mathesar-component-library';
+import { writable } from 'svelte/store';
+
+import type { Column } from '@mathesar/api/tables/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import { TabularData } from '@mathesar/stores/table-data/tabularData';
-import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-import {
-  Filtering,
-  Grouping,
-  Sorting,
-  TabularType,
-} from '@mathesar/stores/table-data';
-import Pagination from '@mathesar/utils/Pagination';
 
 interface RecordSelectorControllerProps {
-  modal: ModalController;
-  getTableName: (id: DBObjectEntry['id']) => string | undefined;
+  onOpen?: () => void;
+  onClose?: () => void;
 }
 
 type FkCellValue = string | number;
 
 export class RecordSelectorController {
-  modal: ModalController;
+  private onOpen: () => void;
+
+  private onClose: () => void;
+
+  isOpen = writable(false);
 
   submit: (v: FkCellValue) => void = () => {};
 
@@ -29,36 +24,23 @@ export class RecordSelectorController {
 
   tableId = writable<DBObjectEntry['id'] | undefined>(undefined);
 
-  tabularData: Readable<TabularData | undefined>;
+  columnWithNestedSelectorOpen = writable<Column | undefined>(undefined);
 
-  tableName: Readable<string | undefined>;
+  constructor(props: RecordSelectorControllerProps = {}) {
+    this.onOpen = props.onOpen ?? (() => {});
+    this.onClose = props.onClose ?? (() => {});
+  }
 
-  constructor(props: RecordSelectorControllerProps) {
-    this.modal = props.modal;
+  private open(): void {
+    this.isOpen.set(true);
+    this.onOpen();
+  }
 
-    this.tabularData = derived(this.tableId, (tableId) => {
-      if (!tableId) {
-        return undefined;
-      }
-      const abstractTypesMap = get(currentDbAbstractTypes).data;
-      return new TabularData(
-        {
-          type: TabularType.Table,
-          id: tableId,
-          metaProps: {
-            pagination: new Pagination({ size: 10 }),
-            sorting: new Sorting(),
-            grouping: new Grouping(),
-            filtering: new Filtering(),
-          },
-        },
-        abstractTypesMap,
-      );
-    });
-
-    this.tableName = derived(this.tableId, (id) =>
-      id === undefined ? undefined : props.getTableName(id),
-    );
+  private close(): void {
+    this.submit = () => {};
+    this.cancel = () => {};
+    this.isOpen.set(false);
+    this.onClose();
   }
 
   acquireUserInput({
@@ -67,7 +49,7 @@ export class RecordSelectorController {
     tableId: DBObjectEntry['id'];
   }): Promise<FkCellValue | undefined> {
     this.tableId.set(tableId);
-    this.modal.open();
+    this.open();
     return new Promise((resolve) => {
       this.submit = (v) => {
         resolve(v);
@@ -79,18 +61,12 @@ export class RecordSelectorController {
       };
     });
   }
-
-  close(): void {
-    this.submit = () => {};
-    this.cancel = () => {};
-    this.modal.close();
-  }
 }
 
 const contextKey = {};
 
 export function setNewRecordSelectorControllerInContext(
-  props: RecordSelectorControllerProps,
+  props: RecordSelectorControllerProps = {},
 ): RecordSelectorController {
   const recordSelectorController = new RecordSelectorController(props);
   setContext(contextKey, recordSelectorController);

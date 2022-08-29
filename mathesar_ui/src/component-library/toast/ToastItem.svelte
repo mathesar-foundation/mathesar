@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { faTimes } from '@fortawesome/free-solid-svg-icons';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { ensureReadable } from '@mathesar-component-library-dir/common/utils/storeUtils';
+  import { iconClose } from '@mathesar-component-library-dir/common/icons';
   import type { ToastEntry } from './ToastController';
 
   export let entry: ToastEntry;
@@ -50,7 +50,7 @@
   </div>
   {#if props.allowDismiss}
     <div class="close-button" role="button" tabindex="-1" on:click={dismiss}>
-      <Icon data={faTimes} />
+      <Icon {...iconClose} />
     </div>
   {/if}
   {#if props.hasProgress}
