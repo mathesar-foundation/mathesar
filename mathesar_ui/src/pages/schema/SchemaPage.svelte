@@ -85,11 +85,10 @@
       font-size: var(--display-size-large);
     }
   }
-  
+
   .entity-list-wrapper {
     display: flex;
     flex-direction: column;
-    
 
     .entity-list-title {
       font-size: var(--text-size-large);
@@ -104,7 +103,7 @@
     padding-left: 0;
     border: 1px solid var(--color-gray-medium);
     border-radius: 0.25rem;
-    
+
     margin-bottom: 1rem;
 
     .entity-list-item {

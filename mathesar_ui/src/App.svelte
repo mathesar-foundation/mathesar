@@ -41,6 +41,7 @@
     --color-blue-light: #e6f0ff;
     --color-blue-medium: #3b82f6;
     --color-blue-dark: #1d4ed8;
+    --color-orange-dark: #7c2d12;
     --color-green-medium: #10b981;
     --color-gray-lighter: #fafafa;
     --color-gray-light: #f4f4f5;
