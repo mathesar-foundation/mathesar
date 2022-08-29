@@ -18,8 +18,8 @@
       label: schemaEntry.name,
       href: getSchemaPageUrl(database.name, schemaEntry.id),
       icon: iconSchema,
-      isActive: function () {
-        return schemaEntry.id == $currentSchemaId;
+      isActive() {
+        return schemaEntry.id === $currentSchemaId;
       },
     };
   }

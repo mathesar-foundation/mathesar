@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { meta } from 'tinro';
   import {
     currentTableId,
     tables as tablesStore,
@@ -14,7 +15,6 @@
   import type { QueryInstance } from '@mathesar/api/queries/queryList';
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
-  import { meta } from 'tinro';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -26,8 +26,8 @@
       label: tableEntry.name,
       href: getTablePageUrl(database.name, schema.id, tableEntry.id),
       icon: iconTable,
-      isActive: function () {
-        return tableEntry.id == $currentTableId;
+      isActive() {
+        return tableEntry.id === $currentTableId;
       },
     };
   }
@@ -41,7 +41,7 @@
       label: queryInstance.name,
       href: getDataExplorerPageUrl(database.name, schema.id, queryInstance.id),
       icon: iconTable,
-      isActive: function () {
+      isActive() {
         // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
         const entryhref = getDataExplorerPageUrl(
           database.name,
