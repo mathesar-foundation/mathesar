@@ -70,8 +70,6 @@
       {/each}
     </ul>
   </div>
-
-  
 </LayoutWithHeader>
 
 <style lang="scss">
@@ -93,9 +91,23 @@
 
     .homepage-title {
       font-size: var(--text-size-large);
-      margin: 1rem 0;
+      margin: 0.5rem 0;
       font-weight: 500;
     }
+  }
+  .homepage-list {
+    list-style: none;
+    border: 1px solid blue;
+    margin: 0;
+    padding-left: 0;
     
+    .homepage-list-item {
+      border: 1px solid red;
+    }
+    .homepage-list-item > a {
+      display: block;
+      padding: 0.25rem;
+      border: 1px solid green;
+    }
   }
 </style>

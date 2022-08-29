@@ -37,25 +37,40 @@
   <div class="details">
     <div class="title">
       <a {href}><SchemaName {schema} /></a>
+
       {#if isLocked}
+        {#if isDefault}<span class="default">Default</span>{/if}
         <span class="lock"><Icon {...iconNotEditable} /></span>
+      {/if}
+
+      {#if !isLocked}
+        <div class="controls">
+          <Button
+            class="edit"
+            size="small"
+            on:click={() => dispatch('edit', schema)}
+            aria-label="Edit Schema"
+          >
+            <Icon {...iconEdit} />
+          </Button>
+          <Button
+            class="delete"
+            size="small"
+            on:click={handleDelete}
+            aria-label="Delete Schema"
+          >
+            <Icon {...iconDelete} />
+          </Button>
+
+          <slot />
+        </div>
       {/if}
     </div>
     <p class="description">Description</p>
-    {#if isDefault}<div class="default">Default</div>{/if}
+    
   </div>
   {#if !isLocked}
     <div class="controls">
-      <Button
-        class="edit"
-        on:click={() => dispatch('edit', schema)}
-        aria-label="Edit Schema"
-      >
-        <Icon {...iconEdit} />
-      </Button>
-      <Button class="delete" on:click={handleDelete} aria-label="Delete Schema">
-        <Icon {...iconDelete} />
-      </Button>
       <slot />
     </div>
   {/if}
@@ -80,12 +95,15 @@
   .title {
     display: flex;
     flex-direction: row;
-    gap: 0.5em;
+    gap: 0.25em;
     font-size: var(--text-size-large);
+    align-items: center;
+    margin-bottom: 0.25rem;
   }
   .title a {
     color: $color-link;
     text-decoration: none;
+    flex-grow: 1;
   }
   .title a:hover {
     text-decoration: underline;
@@ -96,12 +114,16 @@
   }
   .lock {
     color: var(--color-text-muted);
+    font-size: var(--text-size-small);
+    padding: 0.25rem;
   }
   .default {
-    margin-top: 0.5em;
     color: var(--color-text-muted);
-    font-size: var(--text-size-small);
     font-weight: 500;
+    font-size: var(--text-size-small);
+    border: 2px solid var(--color-gray-dark);
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
   }
   .controls {
     margin-left: auto;
