@@ -50,10 +50,7 @@
           <div class="category-name">{categoryName}</div>
           <ul class="items">
             {#each items as { href, label, icon, isActive } (href)}
-              <li
-                class="item"
-                class:active="{isActive()}"
-              >
+              <li class="item" class:active={isActive()}>
                 <a
                   {href}
                   on:click={() => {
