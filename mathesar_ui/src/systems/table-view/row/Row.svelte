@@ -148,9 +148,9 @@
     }
 
     .row-control {
-      font-size: 12px;
-      padding: 7px 14px;
-      color: #959595;
+      font-size: var(--text-size-x-small);
+      padding: 0 1.5rem;
+      color: var(--color-text-muted);
       display: inline-flex;
       align-items: center;
       height: 100%;

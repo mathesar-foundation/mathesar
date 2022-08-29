@@ -44,7 +44,7 @@
   ariaLabel="New Column"
 >
   <svelte:fragment slot="trigger">
-    <Icon class="opt" {...iconAddNew} size="0.8em" />
+    <Icon class="opt" {...iconAddNew} size="0.75em" />
   </svelte:fragment>
   <svelte:fragment slot="content">
     <div class="new-column-dropdown" style="width:250px">
