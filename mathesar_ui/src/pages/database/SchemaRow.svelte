@@ -67,7 +67,6 @@
       {/if}
     </div>
     <p class="description">Description</p>
-    
   </div>
   {#if !isLocked}
     <div class="controls">
@@ -104,7 +103,6 @@
     font-weight: 500;
     text-decoration: none;
     flex-grow: 1;
-    
   }
   .title a:hover {
     text-decoration: underline;

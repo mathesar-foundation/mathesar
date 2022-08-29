@@ -63,14 +63,16 @@
       <div><EntityType>Database</EntityType></div>
       <h1><DatabaseName {database} /></h1>
     </div>
-    <Button class="add" on:click={addSchema}>
-      <Icon {...iconAddNew} />
-      New Schema
-    </Button>
   </div>
 
+  <Button class="add" on:click={addSchema}>
+    <Icon {...iconAddNew} /> New Schema
+  </Button>
+
   <div class="schema-list-wrapper">
-    <h2 class="schema-list-title">Schemas ({schemasMap.size}) <SchemasHelp /></h2>
+    <h2 class="schema-list-title">
+      Schemas ({schemasMap.size}) <SchemasHelp />
+    </h2>
     <TextInput placeholder="Find a schema..." bind:value={filterQuery} />
 
     <ul class="schema-list">
@@ -100,6 +102,7 @@
     h1 {
       margin: 0;
       font-weight: 500;
+      font-size: var(--display-size-large);
     }
   }
   .schema-list-wrapper {
@@ -117,10 +120,27 @@
       list-style: none;
       padding: 0;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+
       grid-template-rows: 1fr;
       grid-column-gap: 1rem;
       grid-row-gap: 1rem;
+    }
+    @media only screen and (min-width: 768px) {
+      .schema-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media only screen and (min-width: 992px) {
+      .schema-list {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media only screen and (min-width: 1200px) {
+      .schema-list {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
   }
 </style>

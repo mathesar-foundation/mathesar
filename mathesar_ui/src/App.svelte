@@ -58,6 +58,7 @@
     --text-size-base: 1rem;
     --text-size-large: 1.125rem;
     --text-size-x-large: 1.266rem;
+    --display-size-large: 1.953rem;
   }
 
   body {
@@ -94,7 +95,7 @@
     --cell-border-horizontal: 1px solid #e7e7e7;
     --cell-border-vertical: 1px solid #efefef;
 
-    --page-padding: 1em;
+    --page-padding: 1.5em;
 
     color: var(--color-text);
   }

@@ -30,20 +30,18 @@
       <div><EntityType>Schema</EntityType></div>
       <h1><SchemaName {schema} /></h1>
     </div>
-
-    <ul class="actions-list">
-      <li class="actions-list-item">
-        <a href={getImportPageUrl(database.name, schema.id)}>Import</a>
-      </li>
-      <li class="actions-list-item">
-        <a href={getDataExplorerPageUrl(database.name, schema.id)}
-          >New Exploration</a
-        >
-      </li>
-    </ul>
   </div>
 
-  
+  <ul class="actions-list">
+    <li class="actions-list-item">
+      <a href={getImportPageUrl(database.name, schema.id)}>Import</a>
+    </li>
+    <li class="actions-list-item">
+      <a href={getDataExplorerPageUrl(database.name, schema.id)}
+        >New Exploration</a
+      >
+    </li>
+  </ul>
 
   <div class="entity-list-wrapper">
     <h2 class="entity-list-title">Tables ({[...tablesMap.values()].length})</h2>
@@ -85,6 +83,7 @@
     h1 {
       margin: 0;
       font-weight: 500;
+      font-size: var(--display-size-large);
     }
   }
   .entity-list-wrapper {
@@ -101,7 +100,7 @@
     list-style: none;
     margin: 0;
     padding-left: 0;
-    
+
     .entity-list-item {
       margin: 0.25rem 0;
     }
