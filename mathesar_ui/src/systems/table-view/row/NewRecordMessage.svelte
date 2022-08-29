@@ -21,10 +21,11 @@
 
 <style lang="scss">
   .new-record-message {
-    background: #069668;
+    background: var(--color-green-medium);
     display: flex;
     align-items: center;
-    color: #fff;
-    padding: 0px 14px;
+    font-size: var(--text-size-small);
+    color: var(--color-white);
+    padding: 0 0.5rem;
   }
 </style>

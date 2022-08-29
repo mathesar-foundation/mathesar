@@ -20,9 +20,9 @@
     iconFiltering,
     iconGrouping,
     iconRefresh,
-    iconRename,
     iconSorting,
     iconTableLink,
+    iconTableInspector,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
@@ -30,12 +30,10 @@
   import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { States } from '@mathesar/utils/api';
   import { createEventDispatcher } from 'svelte';
-  import TableConstraints from '../constraints/TableConstraints.svelte';
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
   import Group from './record-operations/Group.svelte';
-  import RenameTableModal from './RenameTableModal.svelte';
 
   export let schema: SchemaEntry;
   export let table: TableEntry;
@@ -45,10 +43,15 @@
 
   const tableConstraintsModal = modal.spawnModalController();
   const linkTableModal = modal.spawnModalController();
-  const tableRenameModal = modal.spawnModalController();
 
-  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore, isLoading } =
-    $tabularData);
+  $: ({
+    columnsDataStore,
+    recordsData,
+    meta,
+    constraintsDataStore,
+    isLoading,
+    display,
+  } = $tabularData);
   $: ({ columns } = $columnsDataStore);
   $: ({
     filtering,
@@ -57,6 +60,7 @@
     // selectedRows,
     sheetState,
   } = meta);
+  $: ({ isTableInspectorVisible } = display);
   $: recordState = recordsData.state;
 
   $: isError =
@@ -79,6 +83,10 @@
       },
     });
   }
+
+  function toggleTableInspector() {
+    isTableInspectorVisible.set(!$isTableInspectorVisible);
+  }
 </script>
 
 <div class="actions-pane">
@@ -87,9 +95,6 @@
     <h1><TableName {table} /></h1>
   </div>
   <DropdownMenu label="Actions" icon={iconConfigure}>
-    <MenuItem on:click={() => tableRenameModal.open()} icon={iconRename}>
-      Rename
-    </MenuItem>
     <MenuItem on:click={handleDeleteTable} icon={iconDelete}>Delete</MenuItem>
     <MenuItem
       on:click={() => tableConstraintsModal.open()}
@@ -98,10 +103,6 @@
       Constraints
     </MenuItem>
   </DropdownMenu>
-
-  <TableConstraints controller={tableConstraintsModal} />
-
-  <RenameTableModal controller={tableRenameModal} tabularData={$tabularData} />
 
   <LinkTableModal
     controller={linkTableModal}
@@ -209,6 +210,10 @@
       </span>
     </Button>
   </div>
+
+  <Button size="medium" disabled={$isLoading} on:click={toggleTableInspector}>
+    <Icon {...iconTableInspector} />
+  </Button>
 </div>
 
 <style>
