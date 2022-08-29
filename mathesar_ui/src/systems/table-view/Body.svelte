@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { SheetVirtualRows } from '@mathesar/components/sheet';
-  import RowComponent from './row/Row.svelte';
+  import Row from './row/Row.svelte';
   import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
   import {
     rowHeightPx,
@@ -10,6 +10,8 @@
   } from './geometry';
 
   const tabularData = getTabularDataStoreFromContext();
+
+  export let usesVirtualList = false;
 
   $: ({ id, recordsData, display } = $tabularData);
   $: ({ displayableRecords } = display);
@@ -58,22 +60,28 @@
 />
 
 {#key id}
-  <SheetVirtualRows
-    itemCount={$displayableRecords.length}
-    paddingBottom={30}
-    itemSize={getItemSize}
-    itemKey={(index) => recordsData.getIterationKey(index)}
-    let:items
-    let:api
-  >
-    <ScrollAndResetHandler {api} />
-    {#each items as item (item.key)}
-      {#if $displayableRecords[item.index]}
-        <RowComponent
-          style={item.style}
-          bind:row={$displayableRecords[item.index]}
-        />
-      {/if}
+  {#if usesVirtualList}
+    <SheetVirtualRows
+      itemCount={$displayableRecords.length}
+      paddingBottom={30}
+      itemSize={getItemSize}
+      itemKey={(index) => recordsData.getIterationKey(index)}
+      let:items
+      let:api
+    >
+      <ScrollAndResetHandler {api} />
+      {#each items as item (item.key)}
+        {#if $displayableRecords[item.index]}
+          <Row style={item.style} bind:row={$displayableRecords[item.index]} />
+        {/if}
+      {/each}
+    </SheetVirtualRows>
+  {:else}
+    {#each $displayableRecords as displayableRecord}
+      <Row
+        style={{ position: 'relative', height: rowHeightPx }}
+        row={displayableRecord}
+      />
     {/each}
-  </SheetVirtualRows>
+  {/if}
 {/key}

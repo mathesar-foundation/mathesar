@@ -7,8 +7,18 @@
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { Meta } from '@mathesar/stores/table-data';
-  import { TabularData } from '@mathesar/stores/table-data/tabularData';
+  import {
+    setTabularDataStoreInContext,
+    TabularData,
+  } from '@mathesar/stores/table-data/tabularData';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
+  import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
+
+  const tabularDataStore = setTabularDataStoreInContext(
+    // Sacrifice type safety here since the value is initialized reactively
+    // below.
+    undefined as unknown as TabularData,
+  );
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -22,6 +32,7 @@
     abstractTypesMap,
     meta,
   });
+  $: tabularDataStore.set(tabularData);
 
   function handleMetaSerializationChange(s: string) {
     router.location.hash.set(s);
@@ -39,10 +50,16 @@
 </svelte:head>
 
 <LayoutWithHeader fitViewport>
-  <TableView
-    {schema}
-    {table}
-    {tabularData}
-    on:deleteTable={handleDeleteTable}
-  />
+  <div class="table-page">
+    <ActionsPane {schema} {table} on:deleteTable={handleDeleteTable} />
+    <TableView usesVirtualList allowsDdlOperations />
+  </div>
 </LayoutWithHeader>
+
+<style>
+  .table-page {
+    display: grid;
+    grid-template: auto 1fr / 1fr;
+    height: 100%;
+  }
+</style>

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { writable } from 'svelte/store';
-
   import type { Column } from '@mathesar/api/tables/columns';
   import type { Result as ApiRecord } from '@mathesar/api/tables/records';
   import { ImmutableSet, Spinner } from '@mathesar/component-library';
@@ -27,8 +25,7 @@
   export let tabularData: TabularData;
 
   const nestedController = setNewRecordSelectorControllerInContext();
-  const tabularDataStore = writable(tabularData);
-  setTabularDataStoreInContext(tabularDataStore);
+  const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
   let columnWithFocus: Column | undefined = undefined;
   let isSubmittingNewRecord = false;
