@@ -10,10 +10,12 @@ import {
   faClock,
   faClone,
   faCogs,
+  faCopy,
   faDatabase,
   faDollarSign,
   faEnvelope,
   faExternalLinkAlt,
+  faFileAlt,
   faFileContract,
   faFilter,
   faGlobe,
@@ -92,8 +94,10 @@ export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faThList };
 export const iconInwardLink: IconProps = { data: faArrowRight };
 export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };
+export const iconMultipleRecords: IconProps = { data: faCopy };
 export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconQuery: IconProps = { data: faFileContract };
+export const iconRecord: IconProps = { data: faFileAlt };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: faTable };
