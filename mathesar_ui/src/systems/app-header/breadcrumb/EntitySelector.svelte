@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tables as tablesStore } from '@mathesar/stores/tables';
+  import { currentTableId, tables as tablesStore } from '@mathesar/stores/tables';
   import type { TableEntry } from '@mathesar/api/tables';
   import {
     getTablePageUrl,
@@ -22,6 +22,9 @@
       label: tableEntry.name,
       href: getTablePageUrl(database.name, schema.id, tableEntry.id),
       icon: iconTable,
+      isActive: function () {
+        return tableEntry.id == $currentTableId
+      },
     };
   }
 
