@@ -16,7 +16,7 @@ import type {
   QueryResultRecords,
 } from '@mathesar/api/queries/queryList';
 import type { TableEntry } from '@mathesar/api/tables';
-import type { JoinableTableResult } from '@mathesar/api/tables/joinable_tables';
+import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
 import Pagination from '@mathesar/utils/Pagination';
@@ -127,7 +127,7 @@ export default class QueryManager extends EventHandler<{
   baseTableFetchPromise: CancellablePromise<TableEntry> | undefined;
 
   joinableColumnsfetchPromise:
-    | CancellablePromise<JoinableTableResult>
+    | CancellablePromise<JoinableTablesResult>
     | undefined;
 
   querySavePromise: CancellablePromise<QueryInstance> | undefined;
@@ -195,7 +195,7 @@ export default class QueryManager extends EventHandler<{
 
       // TODO: Refactor our stores to mimic our db
       this.baseTableFetchPromise = getTable(baseTableId);
-      this.joinableColumnsfetchPromise = getAPI<JoinableTableResult>(
+      this.joinableColumnsfetchPromise = getAPI<JoinableTablesResult>(
         `/api/db/v0/tables/${baseTableId}/joinable_tables/`,
       );
       const [baseTableResult, joinableColumnsResult] = await Promise.all([
