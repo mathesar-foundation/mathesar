@@ -29,7 +29,7 @@ export interface BreadcrumbSelectorEntry {
   href: string;
   label: string;
   icon: IconProps;
-  isActive(string): boolean;
+  isActive(): boolean;
 }
 
 /** Keys are category names */

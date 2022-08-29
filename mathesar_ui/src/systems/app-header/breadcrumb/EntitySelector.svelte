@@ -14,6 +14,7 @@
   import type { QueryInstance } from '@mathesar/api/queries/queryList';
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
+  import { meta } from 'tinro';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -31,6 +32,8 @@
     };
   }
 
+  const currentRoute = meta();
+
   function makeQueryBreadcrumbSelectorItem(
     queryInstance: QueryInstance,
   ): BreadcrumbSelectorEntry {
@@ -38,6 +41,16 @@
       label: queryInstance.name,
       href: getDataExplorerPageUrl(database.name, schema.id, queryInstance.id),
       icon: iconTable,
+      isActive: function () {
+        // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
+        const entryhref = getDataExplorerPageUrl(
+          database.name,
+          schema.id,
+          queryInstance.id,
+        );
+        const currentHref = $currentRoute.url;
+        return currentHref.startsWith(entryhref);
+      },
     };
   }
 
