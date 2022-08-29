@@ -38,6 +38,7 @@ import {
   faSync,
   faTable,
   faThList,
+  faToolbox,
   faTrashAlt,
   faUndo,
   faUnlink,
@@ -96,6 +97,7 @@ export const iconQuery: IconProps = { data: faFileContract };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: faTable };
+export const iconTableInspector: IconProps = { data: faToolbox };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUser: IconProps = { data: faUser };

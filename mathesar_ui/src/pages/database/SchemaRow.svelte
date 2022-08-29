@@ -80,7 +80,6 @@
   // TODO: Extract design tokens
   $color-dark: #1e1e1e;
   $color-muted: #606066;
-  $color-danger: #f47171;
   $color-link: #1a79c8;
   $font-size-info: 0.875rem;
 
@@ -129,7 +128,7 @@
     margin-left: auto;
   }
   .controls :global(.delete) {
-    color: $color-danger;
-    border-color: $color-danger;
+    color: var(--color-error);
+    border-color: var(--color-error);
   }
 </style>
