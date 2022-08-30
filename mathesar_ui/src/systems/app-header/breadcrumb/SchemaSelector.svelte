@@ -2,7 +2,10 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconSchema } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import { schemas as schemasStore } from '@mathesar/stores/schemas';
+  import {
+    currentSchemaId,
+    schemas as schemasStore,
+  } from '@mathesar/stores/schemas';
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
@@ -15,6 +18,9 @@
       label: schemaEntry.name,
       href: getSchemaPageUrl(database.name, schemaEntry.id),
       icon: iconSchema,
+      isActive() {
+        return schemaEntry.id === $currentSchemaId;
+      },
     };
   }
 
