@@ -39,7 +39,8 @@
 
   $: tgClasses = calculateTriggerClass(triggerClass, showArrow);
 
-  function toggle() {
+  function toggle(e: Event) {
+    e.stopPropagation();
     isOpen = !isOpen;
   }
 

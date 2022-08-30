@@ -95,7 +95,7 @@
 <style>
   .table-constraint {
     line-height: 1.4;
-    padding: 10px 15px;
+    padding: 10px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -105,7 +105,7 @@
     color: #666;
   }
   .drop {
-    color: #f47171;
+    color: var(--color-error);
   }
   .columns {
     color: #666;
