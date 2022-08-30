@@ -18,7 +18,7 @@
   import type { QueryTransformationModel } from '../QueryModel';
   import { calcAllowedColumnsPerTransformation } from './transformationUtils';
   import QuerySummarizationTransformationModel from '../QuerySummarizationTransformationModel';
-  import SummarizationTransformation from './SummarizationTransformation.svelte';
+  import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
 
   export let queryManager: QueryManager;
 

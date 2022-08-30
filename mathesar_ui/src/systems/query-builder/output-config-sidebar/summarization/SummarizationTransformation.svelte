@@ -1,8 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
-  import type QuerySummarizationTransformationModel from '../QuerySummarizationTransformationModel';
-  import type { ProcessedQueryResultColumnMap } from '../utils';
+  import type QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
+  import type { ProcessedQueryResultColumnMap } from '../../utils';
+  import Aggregation from './Aggregation.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -37,7 +38,7 @@
   }
 </script>
 
-<div>
+<div class="summarization">
   <GroupEntryComponent
     allowDelete={false}
     {columns}
@@ -48,16 +49,18 @@
     preprocFunctionIdentifier={model.preprocFunctionIdentifier}
     on:update={(e) => updateGrouping(e.detail)}
   />
-
-  {#each [...aggregations.values()] as aggregation (aggregation.inputAlias)}
-    <div>
-      <div>{aggregation.inputAlias}</div>
-      <div>
-        {aggregation.function} : {aggregation.displayName}
-      </div>
-    </div>
-  {/each}
+  <div class="aggregations">
+    <header>Aggregate</header>
+    {#each [...aggregations.values()] as aggregation (aggregation.inputAlias)}
+      <Aggregation {aggregation} {columns} />
+    {/each}
+  </div>
 </div>
 
 <style lang="scss">
+  .summarization {
+    .aggregations {
+      margin-top: 0.6rem;
+    }
+  }
 </style>

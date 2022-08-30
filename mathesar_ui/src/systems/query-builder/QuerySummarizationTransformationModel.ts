@@ -1,18 +1,17 @@
 import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/queries/queryList';
 import { ImmutableMap } from '@mathesar/component-library';
 
+export interface QuerySummarizationAggregationEntry {
+  inputAlias: string;
+  outputAlias: string;
+  function: 'aggregate_to_array' | 'count';
+  displayName: string;
+}
+
 export interface QuerySummarizationTransformationEntry {
   columnIdentifier: string;
   preprocFunctionIdentifier?: string;
-  aggregations: ImmutableMap<
-    string,
-    {
-      inputAlias: string;
-      outputAlias: string;
-      function: 'aggregate_to_array' | 'count';
-      displayName: string;
-    }
-  >;
+  aggregations: ImmutableMap<string, QuerySummarizationAggregationEntry>;
   displayNames: Record<string, string>;
 }
 
