@@ -2,9 +2,9 @@
   import {
     Button,
     Icon,
-    Spinner,
     DropdownMenu,
     MenuItem,
+    ImmutableMap,
   } from '@mathesar-component-library';
   import {
     iconAddNew,
@@ -17,6 +17,8 @@
   import QueryFilterTransformationModel from '../QueryFilterTransformationModel';
   import type { QueryTransformationModel } from '../QueryModel';
   import { calcAllowedColumnsPerTransformation } from './transformationUtils';
+  import QuerySummarizationTransformationModel from '../QuerySummarizationTransformationModel';
+  import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
 
   export let queryManager: QueryManager;
 
@@ -25,10 +27,8 @@
     processedResultColumns,
     processedInitialColumns,
     processedVirtualColumns,
-    state,
   } = queryManager);
   $: ({ transformationModels } = $query);
-  $: ({ inputColumnsFetchState } = $state);
 
   $: allowedColumnsPerTransformation = calcAllowedColumnsPerTransformation(
     transformationModels,
@@ -55,6 +55,33 @@
     );
   }
 
+  async function addSummarization() {
+    const allColumns = [...$processedResultColumns.values()];
+    const firstColumn = allColumns[0];
+    if (!firstColumn) {
+      return;
+    }
+    const newSummarization = new QuerySummarizationTransformationModel({
+      columnIdentifier: firstColumn.column.alias,
+      aggregations: new ImmutableMap(
+        allColumns
+          .filter((column) => column.id !== firstColumn.column.alias)
+          .map((processedColumn) => [
+            processedColumn.column.alias,
+            {
+              inputAlias: processedColumn.column.alias,
+              outputAlias: `${processedColumn.column.alias}_1`,
+              function: 'aggregate_to_array',
+              displayName: `${processedColumn.column.display_name}_agg`,
+            },
+          ]),
+      ),
+    });
+    await queryManager.update((q) =>
+      q.withTransformationModels([...transformationModels, newSummarization]),
+    );
+  }
+
   async function removeTransformation(index: number) {
     transformationModels.splice(index, 1);
     await queryManager.update((q) =>
@@ -74,63 +101,60 @@
   }
 </script>
 
-<div>
-  {#if inputColumnsFetchState?.state === 'processing'}
-    <Spinner />
-  {:else if inputColumnsFetchState?.state === 'success'}
-    {#if transformationModels && allowedColumnsPerTransformation.length === transformationModels.length}
-      {#each transformationModels as transformationModel, index (transformationModel)}
-        <section class="transformation">
-          <header>
-            <span class="number">
-              {index + 1}
-            </span>
-            <span class="title">
-              {#if transformationModel instanceof QueryFilterTransformationModel}
-                Filter
-              {:else}
-                Summarization
-              {/if}
-            </span>
-            {#if index === transformationModels.length - 1}
-              <Button
-                appearance="plain"
-                class="padding-zero"
-                on:click={() => removeTransformation(index)}
-              >
-                <Icon {...iconDelete} size="0.8rem" />
-              </Button>
-            {/if}
-          </header>
-          <div class="content">
-            {#if transformationModel instanceof QueryFilterTransformationModel}
-              <FilterTransformation
-                columns={allowedColumnsPerTransformation[index]}
-                model={transformationModel}
-                limitEditing={allowedColumnsPerTransformation[index].size === 0}
-                on:update={() =>
-                  updateTransformation(transformationModel, index)}
-              />
-            {:else}
-              <i>Summarization - yet to implement</i>
-            {/if}
-          </div>
-        </section>
-      {/each}
-    {/if}
+{#if transformationModels && allowedColumnsPerTransformation.length === transformationModels.length}
+  {#each transformationModels as transformationModel, index (transformationModel)}
+    <section class="transformation">
+      <header>
+        <span class="number">
+          {index + 1}
+        </span>
+        <span class="title">
+          {#if transformationModel instanceof QueryFilterTransformationModel}
+            Filter
+          {:else}
+            Summarization
+          {/if}
+        </span>
+        {#if index === transformationModels.length - 1}
+          <Button
+            appearance="plain"
+            class="padding-zero"
+            on:click={() => removeTransformation(index)}
+          >
+            <Icon {...iconDelete} size="0.8rem" />
+          </Button>
+        {/if}
+      </header>
+      <div class="content">
+        {#if transformationModel instanceof QueryFilterTransformationModel}
+          <FilterTransformation
+            columns={allowedColumnsPerTransformation[index]}
+            model={transformationModel}
+            limitEditing={allowedColumnsPerTransformation[index].size === 0}
+            on:update={() => updateTransformation(transformationModel, index)}
+          />
+        {:else if transformationModel instanceof QuerySummarizationTransformationModel}
+          <SummarizationTransformation
+            columns={allowedColumnsPerTransformation[index]}
+            model={transformationModel}
+            limitEditing={allowedColumnsPerTransformation[index].size === 0 ||
+              index < transformationModels.length - 1}
+            on:update={(e) => updateTransformation(e.detail, index)}
+          />
+        {/if}
+      </div>
+    </section>
+  {/each}
+{/if}
 
-    <DropdownMenu
-      label="Add transformation step"
-      icon={iconAddNew}
-      disabled={$processedResultColumns.size === 0}
-    >
-      <MenuItem icon={iconFiltering} on:click={addFilter}>Filter</MenuItem>
-      <MenuItem icon={iconGrouping}>Summarize (Yet to implement)</MenuItem>
-    </DropdownMenu>
-  {:else if inputColumnsFetchState?.state === 'failure'}
-    Failed to fetch column information
-  {/if}
-</div>
+<DropdownMenu
+  label="Add transformation step"
+  icon={iconAddNew}
+  disabled={$processedResultColumns.size === 0}
+>
+  <MenuItem icon={iconFiltering} on:click={addFilter}>Filter</MenuItem>
+  <MenuItem icon={iconGrouping} on:click={addSummarization}>Summarize</MenuItem>
+</DropdownMenu>
 
 <style lang="scss">
   .transformation {
