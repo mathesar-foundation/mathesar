@@ -36,7 +36,7 @@
       </li>
       <li class="actions-list-item">
         <a href={getDataExplorerPageUrl(database.name, schema.id)}
-          >New Exploration</a
+          >Data Explorer</a
         >
       </li>
     </ul>
