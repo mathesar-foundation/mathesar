@@ -12,7 +12,6 @@ export interface QuerySummarizationTransformationEntry {
   columnIdentifier: string;
   preprocFunctionIdentifier?: string;
   aggregations: ImmutableMap<string, QuerySummarizationAggregationEntry>;
-  displayNames: Record<string, string>;
 }
 
 export default class QuerySummarizationTransformationModel
@@ -24,8 +23,6 @@ export default class QuerySummarizationTransformationModel
 
   aggregations;
 
-  displayNames;
-
   constructor(
     transformation:
       | QueryInstanceSummarizationTransformation
@@ -35,13 +32,6 @@ export default class QuerySummarizationTransformationModel
       this.columnIdentifier = transformation.columnIdentifier;
       this.preprocFunctionIdentifier = transformation.preprocFunctionIdentifier;
       this.aggregations = transformation.aggregations;
-      this.displayNames = [...transformation.aggregations.values()].reduce(
-        (acc, aggValue) => {
-          acc[aggValue.outputAlias] = aggValue.displayName;
-          return acc;
-        },
-        {} as Record<string, string>,
-      );
     } else {
       const groupingExpression = transformation.spec.grouping_expressions[0];
       const aggregationExpressions =
@@ -60,7 +50,6 @@ export default class QuerySummarizationTransformationModel
           },
         ]),
       );
-      this.displayNames = transformation.display_names;
     }
   }
 
@@ -72,6 +61,8 @@ export default class QuerySummarizationTransformationModel
   }
 
   toJSON(): QueryInstanceSummarizationTransformation {
+    const aggregationEntries = [...this.aggregations.entries()];
+
     const spec: QueryInstanceSummarizationTransformation['spec'] = {
       grouping_expressions: [
         {
@@ -80,7 +71,7 @@ export default class QuerySummarizationTransformationModel
           preproc: this.preprocFunctionIdentifier,
         },
       ],
-      aggregation_expressions: [...this.aggregations.entries()].map(
+      aggregation_expressions: aggregationEntries.map(
         ([inputAlias, aggObj]) => ({
           input_alias: inputAlias,
           output_alias: aggObj.outputAlias,
@@ -92,7 +83,13 @@ export default class QuerySummarizationTransformationModel
     return {
       type: 'summarize',
       spec,
-      display_names: this.displayNames,
+      display_names: aggregationEntries.reduce(
+        (displayNames, aggregation) => ({
+          ...displayNames,
+          [aggregation[1].outputAlias]: aggregation[1].displayName,
+        }),
+        {} as Record<string, string>,
+      ),
     };
   }
 }

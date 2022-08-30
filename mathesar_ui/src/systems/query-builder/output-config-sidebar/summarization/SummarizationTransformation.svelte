@@ -83,6 +83,7 @@
         aggregation={aggregations.get(processedColumn.id)}
         on:include={() => includeColumnForAggregation(processedColumn)}
         on:exclude={() => excludeColumnFromAggregation(processedColumn)}
+        on:update
       />
     {/each}
   </div>

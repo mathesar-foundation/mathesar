@@ -5,6 +5,8 @@
     TextInput,
     LabeledInput,
     Checkbox,
+    Debounce,
+    getValueFromEvent,
   } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type { QuerySummarizationAggregationEntry } from '../../QuerySummarizationTransformationModel';
@@ -59,11 +61,24 @@
           options={['aggregate_to_array', 'count']}
           bind:value={aggregation.function}
           getLabel={getAggregationTypeLabel}
+          on:change={() => dispatch('update')}
         />
       </LabeledInput>
 
       <LabeledInput label="with display name" layout="stacked">
-        <TextInput bind:value={aggregation.displayName} />
+        <Debounce
+          bind:value={aggregation.displayName}
+          let:handleNewValue
+          on:artificialInput={() => dispatch('update')}
+        >
+          <TextInput
+            value={aggregation.displayName}
+            on:input={(e) =>
+              handleNewValue({ value: getValueFromEvent(e), debounce: true })}
+            on:change={(e) =>
+              handleNewValue({ value: getValueFromEvent(e), debounce: false })}
+          />
+        </Debounce>
       </LabeledInput>
     </div>
   {/if}
