@@ -159,7 +159,7 @@ export default class QueryManager extends EventHandler<{
     void this.fetchColumnsAndRecords();
   }
 
-  async calculateInputColumnTree(): Promise<void> {
+  private async calculateInputColumnTree(): Promise<void> {
     const baseTableId = get(this.query).base_table;
     if (!baseTableId) {
       this.inputColumns.set({
@@ -256,7 +256,7 @@ export default class QueryManager extends EventHandler<{
    * the callback only for essential scenarios and not everytime
    * query store changes.
    */
-  reprocessColumns(
+  private reprocessColumns(
     type: 'both' | 'initial' | 'virtual',
     setResultColumns = true,
   ): void {
@@ -338,11 +338,13 @@ export default class QueryManager extends EventHandler<{
     }
   }
 
-  resetProcessedColumns(): void {
+  private resetProcessedColumns(): void {
     this.processedResultColumns.set(new ImmutableMap());
   }
 
-  setProcessedColumnsFromResults(resultColumns: QueryResultColumn[]): void {
+  private setProcessedColumnsFromResults(
+    resultColumns: QueryResultColumn[],
+  ): void {
     const newColumns = new ImmutableMap(
       resultColumns.map((column) => [
         column.alias,
@@ -352,7 +354,7 @@ export default class QueryManager extends EventHandler<{
     this.processedResultColumns.set(newColumns);
   }
 
-  async updateQuery(queryModel: QueryModel): Promise<{
+  private async updateQuery(queryModel: QueryModel): Promise<{
     clientValidationState: RequestStatus;
     query?: QueryInstance;
   }> {
@@ -427,7 +429,7 @@ export default class QueryManager extends EventHandler<{
     };
   }
 
-  setUndoRedoStates(): void {
+  private setUndoRedoStates(): void {
     this.state.update((_state) => ({
       ..._state,
       isUndoPossible: this.undoRedoManager.isUndoPossible(),
@@ -435,7 +437,7 @@ export default class QueryManager extends EventHandler<{
     }));
   }
 
-  async fetchColumns(): Promise<QueryResultColumns | undefined> {
+  private async fetchColumns(): Promise<QueryResultColumns | undefined> {
     const q = this.getQueryModel();
 
     if (typeof q.id === 'undefined') {
@@ -478,7 +480,7 @@ export default class QueryManager extends EventHandler<{
     return undefined;
   }
 
-  async fetchResults(): Promise<QueryResultRecords | undefined> {
+  private async fetchResults(): Promise<QueryResultRecords | undefined> {
     const q = this.getQueryModel();
 
     if (typeof q.id === 'undefined') {
@@ -537,7 +539,7 @@ export default class QueryManager extends EventHandler<{
     return result;
   }
 
-  resetPaginationPane(): void {
+  private resetPaginationPane(): void {
     this.pagination.update(
       (pagination) =>
         new Pagination({
@@ -547,7 +549,7 @@ export default class QueryManager extends EventHandler<{
     );
   }
 
-  resetResults(): void {
+  private resetResults(): void {
     this.queryColumnsFetchPromise?.cancel();
     this.queryRecordsFetchPromise?.cancel();
     this.records.set({ count: 0, results: [] });
@@ -596,7 +598,14 @@ export default class QueryManager extends EventHandler<{
     }
   }
 
-  async performUndoRedoSync(query?: QueryModel): Promise<void> {
+  // Meant to be used directly outside query manager
+  async save(): Promise<void> {
+    await this.updateQuery(this.getQueryModel());
+    this.resetPaginationPane();
+    await this.fetchColumnsAndRecords();
+  }
+
+  private async performUndoRedoSync(query?: QueryModel): Promise<void> {
     if (query) {
       const currentQueryModelData = this.getQueryModel();
       let queryToSet = query;

@@ -8,7 +8,7 @@
     MenuItem,
   } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/tables';
-  import type { SchemaEntry } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import EntityType from '@mathesar/components/EntityType.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
@@ -30,11 +30,13 @@
   import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { States } from '@mathesar/utils/api';
   import { createEventDispatcher } from 'svelte';
+  import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/query-builder/urlSerializationUtils';
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
   import Group from './record-operations/Group.svelte';
 
+  export let database: Database;
   export let schema: SchemaEntry;
   export let table: TableEntry;
 
@@ -45,6 +47,7 @@
   const linkTableModal = modal.spawnModalController();
 
   $: ({
+    id,
     columnsDataStore,
     recordsData,
     meta,
@@ -67,6 +70,16 @@
     $columnsDataStore.state === States.Error ||
     $recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
+
+  $: summarizationUrl = constructDataExplorerUrlToSummarizeFromGroup(
+    database.name,
+    schema.id,
+    {
+      baseTableId: id,
+      columns,
+      terseGrouping: $grouping.terse(),
+    },
+  );
 
   function refresh() {
     void $tabularData.refresh();
@@ -155,6 +168,12 @@
       <Group grouping={meta.grouping} />
     </svelte:fragment>
   </Dropdown>
+
+  <!-- Restricting Data Explorer redirection to single column
+      grouping for the time being -->
+  {#if summarizationUrl && $grouping.entries.length === 1}
+    <a href={summarizationUrl}>Summarize</a>
+  {/if}
 
   <div class="divider" />
 

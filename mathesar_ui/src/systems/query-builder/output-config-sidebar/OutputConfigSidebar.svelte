@@ -119,11 +119,11 @@
 
 <style lang="scss">
   aside {
-    width: 22rem;
+    width: 24rem;
     border-left: 1px solid #efefef;
     flex-shrink: 0;
     flex-grow: 0;
-    flex-basis: 22rem;
+    flex-basis: 24rem;
     display: flex;
     flex-direction: column;
     overflow-y: auto;

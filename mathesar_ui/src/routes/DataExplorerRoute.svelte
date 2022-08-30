@@ -14,6 +14,7 @@
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import { constructQueryModelFromTerseSummarizationHash } from '@mathesar/systems/query-builder/urlSerializationUtils';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -58,12 +59,29 @@
       // An unsaved query is already open
       return;
     }
-    createQueryManager({
+    let newQueryModel = {
       name: getAvailableName(
         'New_Exploration',
         new Set([...$queries.data.values()].map((e) => e.name)),
       ),
-    });
+    };
+    const { hash } = $router;
+    if (hash) {
+      try {
+        newQueryModel = {
+          ...newQueryModel,
+          ...constructQueryModelFromTerseSummarizationHash(hash),
+        };
+        router.location.hash.clear();
+        createQueryManager(newQueryModel);
+        queryManager?.save();
+        return;
+      } catch {
+        // fail silently
+        console.error('Unable to create query model from hash', hash);
+      }
+    }
+    createQueryManager(newQueryModel);
   }
 
   async function loadSavedQuery(meta: TinroRouteMeta) {
