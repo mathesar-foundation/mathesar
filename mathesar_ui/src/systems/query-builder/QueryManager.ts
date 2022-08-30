@@ -575,6 +575,7 @@ export default class QueryManager extends EventHandler<{
       switch (updateDiff.type) {
         case 'baseTable':
           this.resetResults();
+          await this.calculateInputColumnTree();
           break;
         case 'initialColumnName':
           this.reprocessColumns('initial');
