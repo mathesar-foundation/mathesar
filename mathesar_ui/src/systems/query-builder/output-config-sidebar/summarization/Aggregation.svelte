@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import {
     Select,
     TextInput,
@@ -7,12 +8,12 @@
   } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type { QuerySummarizationAggregationEntry } from '../../QuerySummarizationTransformationModel';
-  import type { ProcessedQueryResultColumnMap } from '../../utils';
+  import type { ProcessedQueryResultColumn } from '../../utils';
 
-  export let columns: ProcessedQueryResultColumnMap;
-  export let aggregation: QuerySummarizationAggregationEntry;
+  const dispatch = createEventDispatcher();
 
-  $: columnDetails = columns.get(aggregation.inputAlias)?.column;
+  export let processedColumn: ProcessedQueryResultColumn;
+  export let aggregation: QuerySummarizationAggregationEntry | undefined;
 
   function getAggregationTypeLabel(aggType?: string) {
     switch (aggType) {
@@ -24,22 +25,34 @@
         return '';
     }
   }
+
+  function includeExcludeAggregation(isAggregated: boolean) {
+    if (isAggregated) {
+      dispatch('include');
+    } else {
+      dispatch('exclude');
+    }
+  }
 </script>
 
 <div class="aggregation">
-  {#if columnDetails}
-    <header>
-      <LabeledInput layout="inline-input-first">
-        <Checkbox />
-        <ColumnName
-          slot="label"
-          column={{
-            ...columnDetails,
-            name: columnDetails.display_name ?? columnDetails.alias,
-          }}
-        />
-      </LabeledInput>
-    </header>
+  <header>
+    <LabeledInput layout="inline-input-first">
+      <Checkbox
+        checked={!!aggregation}
+        on:change={(e) => includeExcludeAggregation(e.detail)}
+      />
+      <ColumnName
+        slot="label"
+        column={{
+          ...processedColumn.column,
+          name:
+            processedColumn.column.display_name ?? processedColumn.column.alias,
+        }}
+      />
+    </LabeledInput>
+  </header>
+  {#if aggregation}
     <div class="content">
       <LabeledInput label="as" layout="stacked">
         <Select
@@ -53,8 +66,6 @@
         <TextInput bind:value={aggregation.displayName} />
       </LabeledInput>
     </div>
-  {:else}
-    Error: Unknown column
   {/if}
 </div>
 

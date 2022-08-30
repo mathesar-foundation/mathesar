@@ -2,7 +2,10 @@
   import { createEventDispatcher } from 'svelte';
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
   import type QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
-  import type { ProcessedQueryResultColumnMap } from '../../utils';
+  import type {
+    ProcessedQueryResultColumn,
+    ProcessedQueryResultColumnMap,
+  } from '../../utils';
   import Aggregation from './Aggregation.svelte';
 
   const dispatch = createEventDispatcher();
@@ -28,12 +31,33 @@
           inputAlias: model.columnIdentifier,
           outputAlias: `${model.columnIdentifier}_agg`,
           function: 'aggregate_to_array',
-          displayName: model.columnIdentifier,
+          displayName: `${model.columnIdentifier}_agg`,
         });
       model.aggregations = aggregations;
     }
     model.columnIdentifier = columnIdentifier;
     model.preprocFunctionIdentifier = preprocFunctionIdentifier;
+    dispatch('update', model);
+  }
+
+  function includeColumnForAggregation(
+    processedColumn: ProcessedQueryResultColumn,
+  ) {
+    aggregations = model.aggregations.with(processedColumn.id, {
+      inputAlias: processedColumn.id,
+      outputAlias: `${processedColumn.id}_agg`,
+      function: 'aggregate_to_array',
+      displayName: `${processedColumn.id}_agg`,
+    });
+    model.aggregations = aggregations;
+    dispatch('update', model);
+  }
+
+  function excludeColumnFromAggregation(
+    processedColumn: ProcessedQueryResultColumn,
+  ) {
+    aggregations = model.aggregations.without(processedColumn.id);
+    model.aggregations = aggregations;
     dispatch('update', model);
   }
 </script>
@@ -51,8 +75,15 @@
   />
   <div class="aggregations">
     <header>Aggregate</header>
-    {#each [...aggregations.values()] as aggregation (aggregation.inputAlias)}
-      <Aggregation {aggregation} {columns} />
+    {#each [...columns
+        .without(model.columnIdentifier)
+        .values()] as processedColumn (processedColumn.id)}
+      <Aggregation
+        {processedColumn}
+        aggregation={aggregations.get(processedColumn.id)}
+        on:include={() => includeColumnForAggregation(processedColumn)}
+        on:exclude={() => excludeColumnFromAggregation(processedColumn)}
+      />
     {/each}
   </div>
 </div>
