@@ -134,13 +134,43 @@ class UIQuery(BaseModel, Relation):
             {
                 'alias': sa_col.name,
                 'display_name': self._get_display_name_for_sa_col(sa_col),
-                'type': sa_col.db_type.id,
+                'db_type': sa_col.db_type.id,
                 'type_options': sa_col.type_options,
                 'display_options': self._get_display_options_for_sa_col(sa_col),
             }
             for sa_col
             in self.db_query.sa_output_columns
         )
+
+    @property
+    def initial_dj_columns(self):
+        return Column.objects.filter(pk__in=[col['id'] for col in self.initial_columns])
+
+    @property
+    def initial_columns_described(self):
+        return tuple(
+            {
+                'alias': col['alias'],
+                'display_name': col.get('display_name')
+            }
+            | {
+                'db_type': dj_col.db_type.id,
+                'type_options': dj_col._sa_column.type_options,
+                'display_options': dj_col.display_options
+            }
+            for col, dj_col in zip(self.initial_columns, self.initial_dj_columns)
+        )
+
+    @property
+    def all_columns_described(self):
+        init_descriptions = {
+            k: {"display_name": v} for k, v in self._alias_to_display_name.items()
+        }
+        return {
+            col['alias']: col
+            for col
+            in self.initial_columns_described + self.output_columns_described
+        }
 
     @property
     def db_query(self):
@@ -179,10 +209,9 @@ class UIQuery(BaseModel, Relation):
     @cached_property
     def _alias_to_display_name(self):
         display_name_map = {
-            initial_column['alias']: initial_column['display_name']
+            initial_column['alias']: initial_column.get('display_name')
             for initial_column
             in self.initial_columns
-            if 'display_name' in initial_column
         }
         if self.transformations is not None:
             display_name_map.update(
