@@ -7,12 +7,13 @@ ul.pagination {
   align-items: center;
 
   li {
-    margin: 0 2px;
+    margin: 0 0.25rem;
 
     a,
     button {
-      padding: 5px 3px;
-      min-width: 26px;
+      padding: 0.25rem;
+
+      min-width: 1.5rem;
       display: inline-block;
       text-align: center;
       cursor: pointer;
@@ -34,6 +35,7 @@ ul.pagination {
 
     .page {
       border: 1px solid #efefef;
+      border-radius: 0.25rem;
       text-decoration: none;
       color: inherit;
       background: #fff;
