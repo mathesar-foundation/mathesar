@@ -53,9 +53,9 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
     def run(self, request):
         paginator = TableLimitOffsetPagination()
         params = request.data.pop("parameters", {})
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        query = UIQuery(**serializer.validated_data)
+        input_serializer = self.get_serializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        query = UIQuery(**input_serializer.validated_data)
         record_serializer = RecordListParameterSerializer(data=params)
         record_serializer.is_valid(raise_exception=True)
         records = query.get_records()
@@ -71,4 +71,13 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
         )
         paginated_records = paginator.get_paginated_response(records)
         columns = query.output_columns_described
-        return Response({"records": paginated_records.data, "columns": columns})
+        column_metadata = query.all_columns_described
+        output_serializer = self.get_serializer(query)
+        return Response(
+            {
+                "query": output_serializer.data,
+                "records": paginated_records.data,
+                "columns": columns,
+                "column_metadata": column_metadata,
+            }
+        )

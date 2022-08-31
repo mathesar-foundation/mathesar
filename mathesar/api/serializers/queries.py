@@ -19,16 +19,16 @@ class QuerySerializer(serializers.ModelSerializer):
             return base_table.schema.id
 
     def get_records_url(self, obj):
-        if isinstance(obj, UIQuery):
-            # Only get records if we are serializing an existing table
+        if isinstance(obj, UIQuery) and obj.pk is not None:
+            # Only get records_url if we are serializing an existing persisted UIQuery
             request = self.context['request']
             return request.build_absolute_uri(reverse('query-records', kwargs={'pk': obj.pk}))
         else:
             return None
 
     def get_columns_url(self, obj):
-        if isinstance(obj, UIQuery):
-            # Only get columns if we are serializing an existing table
+        if isinstance(obj, UIQuery) and obj.pk is not None:
+            # Only get columns_url if we are serializing an existing persisted UIQuery
             request = self.context['request']
             return request.build_absolute_uri(reverse('query-columns', kwargs={'pk': obj.pk}))
         else:
