@@ -4,6 +4,7 @@
   using table inspector
  -->
 <script lang="ts">
+  import { Button } from '@mathesar-component-library';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
   import TableColumnName from '@mathesar/components/TableColumnName.svelte';
   // TODO: Check if this component should be moved to
@@ -14,9 +15,21 @@
   export let isSelected = false;
 </script>
 
-<CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
-<TableColumnName on:click column={processedColumn} />
+<div>
+  <CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
+  <Button appearance="ghost" on:click>
+    <TableColumnName column={processedColumn} />
+  </Button>
+</div>
 
-<style global lang="scss">
-  @import 'HeaderCell.scss';
+<style lang="scss">
+  div {
+    width: 100%;
+
+    :global(button.btn) {
+      width: 100%;
+      padding: 0.26rem 0.5rem;
+      font-size: inherit;
+    }
+  }
 </style>

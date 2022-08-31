@@ -45,14 +45,17 @@
 
 <style>
   .status-pane {
-    padding: 3px 12px;
+    padding: 0.25rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid #efefef;
+    border-top: 1px solid var(--color-gray-medium);
     position: relative;
     flex-shrink: 0;
-    flex-basis: 35px;
-    background: #f7f8f8;
+    flex-basis: 32px;
+  }
+
+  .record-count {
+    font-size: var(--text-size-small);
   }
 </style>

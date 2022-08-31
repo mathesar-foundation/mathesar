@@ -86,7 +86,7 @@ export function getOutcomeOfBeforeInputEvent(
  * Intended to be used with DOM `input` and `change` events dispatched from
  * input elements.
  */
-export function getValueFromEvent(e: InputEvent): unknown {
+export function getValueFromEvent(e: Event): unknown {
   if (!e.target) {
     return undefined;
   }

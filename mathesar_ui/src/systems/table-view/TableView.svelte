@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { TableEntry } from '@mathesar/api/tables';
-  import type { SchemaEntry } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { ImmutableMap } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import {
@@ -14,7 +14,9 @@
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
+  import TableInspector from './table-inspector/TableInspector.svelte';
 
+  export let database: Database;
   export let schema: SchemaEntry;
   export let tabularData: TabularData;
   export let table: TableEntry;
@@ -24,7 +26,8 @@
 
   $: tabularDataContextStore.set(tabularData);
   $: ({ processedColumns, display } = tabularData);
-  $: ({ horizontalScrollOffset, scrollOffset } = display);
+  $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
+    display);
 
   $: sheetColumns = [
     { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
@@ -39,23 +42,26 @@
 </script>
 
 <div class="table-view">
-  <ActionsPane {schema} {table} on:deleteTable />
-
-  <div class="sheet-area">
-    {#if $processedColumns.size}
-      <Sheet
-        columns={sheetColumns}
-        getColumnIdentifier={(entry) => entry.column.id}
-        {columnWidths}
-        bind:horizontalScrollOffset={$horizontalScrollOffset}
-        bind:scrollOffset={$scrollOffset}
-      >
-        <Header />
-        <Body />
-      </Sheet>
+  <ActionsPane {database} {schema} {table} on:deleteTable />
+  <div class="table-inspector-view">
+    <div class="sheet-area">
+      {#if $processedColumns.size}
+        <Sheet
+          columns={sheetColumns}
+          getColumnIdentifier={(entry) => entry.column.id}
+          {columnWidths}
+          bind:horizontalScrollOffset={$horizontalScrollOffset}
+          bind:scrollOffset={$scrollOffset}
+        >
+          <Header />
+          <Body />
+        </Sheet>
+      {/if}
+    </div>
+    {#if $isTableInspectorVisible}
+      <TableInspector />
     {/if}
   </div>
-
   <StatusPane />
 </div>
 
@@ -65,7 +71,12 @@
     grid-template: auto 1fr auto / 1fr;
     height: 100%;
   }
+  .table-inspector-view {
+    display: flex;
+    flex-direction: row;
+  }
   .sheet-area {
     position: relative;
+    flex: 1;
   }
 </style>

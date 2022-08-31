@@ -27,6 +27,3 @@
   bind:value={model.value}
   on:update={updateFilter}
 />
-
-<style lang="scss">
-</style>
