@@ -15,3 +15,9 @@ export interface SelectionDetails {
   hasGhostRow: boolean;
   userHasManuallySelectedGhostRow: boolean;
 }
+
+/**
+ * - 'button' - each row is a button that submits the recordId via a Promise.
+ * - 'hyperlink' - each row is a hyperlink to a Record Page.
+ */
+export type RecordSelectorRowType = 'button' | 'hyperlink';
