@@ -23,7 +23,7 @@ from mathesar.utils.tables import gen_table_name, create_table_from_datafile, cr
 
 class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, required=False)
-    settings = TableSettingsSerializer()
+    settings = TableSettingsSerializer(read_only=True)
     records_url = serializers.SerializerMethodField()
     constraints_url = serializers.SerializerMethodField()
     columns_url = serializers.SerializerMethodField()
@@ -45,7 +45,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
             'id', 'name', 'import_target', 'schema', 'created_at', 'updated_at', 'import_verified',
             'columns', 'records_url', 'constraints_url', 'columns_url',
             'joinable_tables_url', 'type_suggestions_url', 'previews_url',
-            'data_files', 'has_dependencies', 'dependents_url'
+            'data_files', 'has_dependencies', 'dependents_url', 'settings'
         ]
 
     def get_records_url(self, obj):
