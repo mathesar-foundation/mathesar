@@ -93,6 +93,6 @@
 
 <style>
   .error {
-    color: #f47171;
+    color: var(--color-error);
   }
 </style>
