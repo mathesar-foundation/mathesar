@@ -26,7 +26,6 @@ from mathesar.api.serializers.tables import (
 )
 from mathesar.models.base import Table
 from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
-from mathesar.utils.performance_tracker import OperationTracker
 from mathesar.utils.tables import get_table_column_types
 from mathesar.utils.joins import get_processed_joinable_tables
 
@@ -39,12 +38,6 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
 
     def get_queryset(self):
         return Table.objects.all().order_by('-created_at')
-
-    def list(self, request, *args, **kwargs):
-        tracker = OperationTracker()
-        tracker.register()
-        x = super().list(request, *args, **kwargs)
-        return x
 
     def partial_update(self, request, pk=None):
         table = self.get_object()
