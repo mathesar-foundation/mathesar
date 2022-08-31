@@ -40,6 +40,7 @@
 
 <LayoutWithHeader fitViewport>
   <TableView
+    {database}
     {schema}
     {table}
     {tabularData}

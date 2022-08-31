@@ -7,6 +7,7 @@
   import type { Column } from '@mathesar/api/tables/columns';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { Row } from '@mathesar/stores/table-data/records';
   import { rowHasRecord } from '@mathesar/stores/table-data/records';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
@@ -14,7 +15,11 @@
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import NewIndicator from './NewIndicator.svelte';
-  import type { RecordSelectorSelection } from './recordSelectorTypes';
+  import RecordSelectorRow from './RecordSelectorRow.svelte';
+  import type {
+    RecordSelectorRowType,
+    RecordSelectorSelection,
+  } from './recordSelectorTypes';
   import {
     findNearestValidSelection,
     getPkValueInRecord,
@@ -23,6 +28,8 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
+  export let tableId: number;
+  export let rowType: RecordSelectorRowType;
   export let submitPkValue: (v: string | number) => void;
   export let submitNewRecord: (v: Iterable<[number, unknown]>) => void;
   export let fkColumnWithFocus: Column | undefined = undefined;
@@ -88,16 +95,30 @@
     );
   }
 
-  function getPkValue(row: Row): string | number {
+  function getPkValue(row: Row): string | number | undefined {
     const { record } = row;
-    if (!record) {
-      throw new Error('No record found within row.');
+    if (!record || Object.keys(record).length === 0) {
+      return undefined;
     }
     return getPkValueInRecord(record, columns);
   }
 
+  function getRowHref(row: Row): string | undefined {
+    if (rowType === 'button') {
+      return undefined;
+    }
+    const recordId = getPkValue(row);
+    if (!recordId) {
+      return undefined;
+    }
+    return $storeToGetRecordPageUrl({ tableId, recordId });
+  }
+
   function submitIndex(index: number) {
-    submitPkValue(getPkValue(records[index]));
+    const pkValue = getPkValue(records[index]);
+    if (pkValue !== undefined) {
+      submitPkValue(pkValue);
+    }
   }
 
   function submitGhost() {
@@ -153,37 +174,45 @@
 
 <div class="record-selector-results" class:loading={$isLoading}>
   {#if hasGhostRow}
-    <div class="row ghost" style={rowStyle} on:click={() => submitGhost()}>
-      <div class="new-indicator-wrapper"><NewIndicator /></div>
-      <CellArranger {display} let:style let:processedColumn let:column>
-        <CellWrapper {style}>
-          <CellFabric
-            columnFabric={processedColumn}
-            value={$searchFuzzy.get(column.id) ??
-              (processedColumn.column.nullable ? null : undefined)}
-            disabled
-          />
-          <RowCellBackgrounds isSelected={selection.type === 'ghost'} />
-        </CellWrapper>
-      </CellArranger>
+    <div class="row ghost" style={rowStyle}>
+      <RecordSelectorRow on:buttonClick={() => submitGhost()}>
+        <div class="new-indicator-wrapper"><NewIndicator /></div>
+        <CellArranger {display} let:style let:processedColumn let:column>
+          <CellWrapper {style}>
+            <CellFabric
+              columnFabric={processedColumn}
+              value={$searchFuzzy.get(column.id) ??
+                (processedColumn.column.nullable ? null : undefined)}
+              disabled
+            />
+            <RowCellBackgrounds isSelected={selection.type === 'ghost'} />
+          </CellWrapper>
+        </CellArranger>
+      </RecordSelectorRow>
     </div>
   {/if}
   {#each records as row, index}
-    <div class="row" style={rowStyle} on:click={() => submitIndex(index)}>
-      <CellArranger {display} let:style let:processedColumn>
-        <CellWrapper {style}>
-          <CellFabric
-            columnFabric={processedColumn}
-            value={row?.record?.[processedColumn.column.id]}
-            dataForRecordSummaryInFkCell={row?.dataForRecordSummariesInRow?.[
-              processedColumn.column.id
-            ]}
-            disabled
-            showAsSkeleton={!rowHasRecord(row)}
-          />
-          <RowCellBackgrounds isSelected={indexIsSelected(index)} />
-        </CellWrapper>
-      </CellArranger>
+    <div class="row" style={rowStyle}>
+      <RecordSelectorRow
+        href={getRowHref(row)}
+        on:linkClick
+        on:buttonClick={() => submitIndex(index)}
+      >
+        <CellArranger {display} let:style let:processedColumn>
+          <CellWrapper {style}>
+            <CellFabric
+              columnFabric={processedColumn}
+              value={row?.record?.[processedColumn.column.id]}
+              dataForRecordSummaryInFkCell={row?.dataForRecordSummariesInRow?.[
+                processedColumn.column.id
+              ]}
+              disabled
+              showAsSkeleton={!rowHasRecord(row)}
+            />
+            <RowCellBackgrounds isSelected={indexIsSelected(index)} />
+          </CellWrapper>
+        </CellArranger>
+      </RecordSelectorRow>
     </div>
   {:else}
     <div class="no-results">
