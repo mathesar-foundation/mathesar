@@ -202,7 +202,7 @@ MATHESAR_CLIENT_DEV_URL = 'http://localhost:3000'
 MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
 MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPTION', default=False)
 
-# UI source files have to be served by django inorder for static assets to be included during dev mode
+# UI source files have to be served by Django in order for static assets to be included during dev mode
 # https://vitejs.dev/guide/assets.html
 # https://vitejs.dev/guide/backend-integration.html
 STATICFILES_DIRS = [MATHESAR_UI_SOURCE_LOCATION] if MATHESAR_MODE == 'DEVELOPMENT' else [MATHESAR_UI_BUILD_LOCATION]
