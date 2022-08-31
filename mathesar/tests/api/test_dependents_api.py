@@ -19,7 +19,8 @@ def library_ma_tables(db_table_to_dj_table, library_db_tables):
 
 
 def test_dependents_response_attrs(library_ma_tables, client):
-    response = client.get(f'/api/db/v0/tables/{library_ma_tables["Items"].id}/dependents/')
+    items_id = library_ma_tables["Items"].id
+    response = client.get(f'/api/db/v0/tables/{items_id}/dependents/')
     response_data = response.json()
 
     dependent_expected_attrs = ['obj', 'parent_obj']
