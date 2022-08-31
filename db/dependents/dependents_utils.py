@@ -125,7 +125,13 @@ def _get_view_dependents(pg_identify_object, pg_rewrite_table, rule_dependents):
 # stmt for getting a full list of dependents and identifying them
 def _get_dependency_pairs_stmt(pg_depend, pg_identify_object, pg_identify_refobject):
     result = select(
-        pg_depend,
+        pg_depend.c.classid,
+        pg_depend.c.objid,
+        pg_depend.c.objsubid,
+        pg_depend.c.refclassid,
+        pg_depend.c.refobjid,
+        literal(0).label('refobjsubid'),  # subject to change when implementing columns
+        pg_depend.c.deptype,
         pg_identify_object.c.name.label('objname'),
         pg_identify_object.c.type.label('objtype'),
         pg_identify_refobject.c.name.label('refobjname'),
@@ -140,7 +146,7 @@ def _get_dependency_pairs_stmt(pg_depend, pg_identify_object, pg_identify_refobj
             pg_identify_object.c.name,
             pg_identify_object.c.type,
             pg_identify_refobject.c.name,
-            pg_identify_refobject.c.type)
+            pg_identify_refobject.c.type).distinct()
 
     return result
 
@@ -151,6 +157,7 @@ def _get_pg_depend_table(engine, metadata):
 
 def _get_pg_constraint_table(engine, metadata):
     return Table("pg_constraint", metadata, autoload_with=engine)
+
 
 def _get_pg_rewrite(engine, metadata):
     return Table("pg_rewrite", metadata, autoload_with=engine)
@@ -184,7 +191,7 @@ def _get_typed_dependency_pairs_stmt(engine):
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pairs).cte('foreign_key_constraint_dependents')
     table_dependents = _get_table_dependents(foreign_key_constraint_dependents, pg_constraint).cte('table_dependents')
 
-    #should not be returned directly, used for getting views
+    # should not be returned directly, used for getting views
     rule_dependents = _get_rule_dependents(pg_identify_object, dependency_pairs).cte('rule_dependents')
     view_dependents = _get_view_dependents(pg_identify_object, pg_rewrite, rule_dependents).cte('view_dependents')
 

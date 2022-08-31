@@ -13,6 +13,10 @@ def _get_object_dependents_oids(dependents_graph, object_oid):
     return [dependent['obj']['objid'] for dependent in _get_object_dependents(dependents_graph, object_oid)]
 
 
+def _get_object_dependents_by_type(dependents_graph, object_oid, type):
+    return [dependent['obj']['objid'] for dependent in _get_object_dependents(dependents_graph, object_oid) if dependent['obj']['type'] == type]
+
+
 def test_correct_dependents_amount_and_level(engine, library_tables_oids):
     publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
 
@@ -160,15 +164,15 @@ def test_views_as_dependents(engine_with_schema, library_db_tables, library_tabl
 
     publications_oid = library_tables_oids['Publications']
     publications_dependents_graph = get_dependents_graph(publications_oid, engine)
-    publications_dependents = _get_object_dependents(publications_dependents_graph, publications_oid)
+    publications_view_dependents = _get_object_dependents_by_type(publications_dependents_graph, publications_oid, 'view')
 
-    assert 'view' in [dependent['obj']['type'] for dependent in publications_dependents]
+    assert len(publications_view_dependents) == 1
 
 
 def test_indexex_as_dependents(engine, library_db_tables, library_tables_oids):
     index = Index('someindex', library_db_tables['Publishers'].c.id)
     index.create(engine)
-    
+
     publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
     publishers_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Publishers'])
 

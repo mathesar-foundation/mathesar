@@ -61,8 +61,8 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     @action(methods=['get'], detail=True)
     def dependents(self, request, pk=None):
         table = self.get_object()
-        # serializer = DependentSerializer(table.dependents, many=True, context={'request': request})
-        return Response(table.dependents)
+        serializer = DependentSerializer(table.dependents, many=True, context={'request': request})
+        return Response(serializer.data)
 
     @action(methods=['get'], detail=True)
     def joinable_tables(self, request, pk=None):
