@@ -3,6 +3,7 @@ import { writable } from 'svelte/store';
 
 import type { Column } from '@mathesar/api/tables/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { RecordSelectorRowType } from './recordSelectorTypes';
 
 interface RecordSelectorControllerProps {
   onOpen?: () => void;
@@ -15,6 +16,8 @@ export class RecordSelectorController {
   private onOpen: () => void;
 
   private onClose: () => void;
+
+  rowType = writable<RecordSelectorRowType>('button');
 
   isOpen = writable(false);
 
@@ -49,6 +52,7 @@ export class RecordSelectorController {
     tableId: DBObjectEntry['id'];
   }): Promise<FkCellValue | undefined> {
     this.tableId.set(tableId);
+    this.rowType.set('button');
     this.open();
     return new Promise((resolve) => {
       this.submit = (v) => {
@@ -60,6 +64,15 @@ export class RecordSelectorController {
         this.close();
       };
     });
+  }
+
+  navigateToRecordPage({ tableId }: { tableId: DBObjectEntry['id'] }): void {
+    this.tableId.set(tableId);
+    this.rowType.set('hyperlink');
+    this.open();
+    this.cancel = () => {
+      this.close();
+    };
   }
 }
 

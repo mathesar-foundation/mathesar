@@ -29,6 +29,7 @@ import {
   faProjectDiagram,
   faQuestion,
   faRedo,
+  faSearchPlus,
   faShapes,
   faSnowflake,
   faSort,
@@ -38,6 +39,7 @@ import {
   faSync,
   faTable,
   faThList,
+  faToolbox,
   faTrashAlt,
   faUndo,
   faUnlink,
@@ -72,6 +74,7 @@ export const iconImportData: IconProps = { data: faUpload };
 export const iconRedo: IconProps = { data: faRedo };
 export const iconRefresh: IconProps = { data: faSync };
 export const iconRename: IconProps = { data: faICursor };
+export const iconSelectRecord: IconProps = { data: faSearchPlus };
 export const iconSetToNull: IconProps = { data: faBackspace };
 export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
 export const iconSortDescending: IconProps = { data: faSortAmountDown };
@@ -96,6 +99,7 @@ export const iconQuery: IconProps = { data: faFileContract };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: faTable };
+export const iconTableInspector: IconProps = { data: faToolbox };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUser: IconProps = { data: faUser };

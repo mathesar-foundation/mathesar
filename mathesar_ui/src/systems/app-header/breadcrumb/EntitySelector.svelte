@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { tables as tablesStore } from '@mathesar/stores/tables';
+  import { meta } from 'tinro';
+  import {
+    currentTableId,
+    tables as tablesStore,
+  } from '@mathesar/stores/tables';
   import type { TableEntry } from '@mathesar/api/tables';
   import {
     getTablePageUrl,
@@ -22,8 +26,13 @@
       label: tableEntry.name,
       href: getTablePageUrl(database.name, schema.id, tableEntry.id),
       icon: iconTable,
+      isActive() {
+        return tableEntry.id === $currentTableId;
+      },
     };
   }
+
+  const currentRoute = meta();
 
   function makeQueryBreadcrumbSelectorItem(
     queryInstance: QueryInstance,
@@ -32,6 +41,16 @@
       label: queryInstance.name,
       href: getDataExplorerPageUrl(database.name, schema.id, queryInstance.id),
       icon: iconTable,
+      isActive() {
+        // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
+        const entryhref = getDataExplorerPageUrl(
+          database.name,
+          schema.id,
+          queryInstance.id,
+        );
+        const currentHref = $currentRoute.url;
+        return currentHref.startsWith(entryhref);
+      },
     };
   }
 
