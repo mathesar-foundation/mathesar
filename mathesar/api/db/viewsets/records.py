@@ -119,7 +119,7 @@ class RecordViewSet(viewsets.ViewSet):
             column_ids_to_names,
             filters=record_filters
         )
-        if len(records) < 1:
+        if not records:
             raise NotFound
         serializer = RecordSerializer(
             records,
@@ -133,7 +133,33 @@ class RecordViewSet(viewsets.ViewSet):
         serializer = RecordSerializer(data=request.data, context=self.get_serializer_context(table))
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        column_name_id_map = table.get_column_name_id_bidirectional_map()
+        table_pk_column_id = column_name_id_map[table.primary_key_column_name]
+        pk_value = serializer.data[table_pk_column_id]
+        paginator = TableLimitOffsetPagination()
+        record_filters = {
+            "equal": [
+                {"column_name": [table.primary_key_column_name]},
+                {"literal": [pk_value]}
+            ]
+        }
+        column_names_to_ids = table.get_column_name_id_bidirectional_map()
+        column_ids_to_names = column_names_to_ids.inverse
+        records = paginator.paginate_queryset(
+            table,
+            request,
+            table,
+            column_ids_to_names,
+            filters=record_filters
+        )
+        serializer = RecordSerializer(
+            records,
+            many=True,
+            context=self.get_serializer_context(table)
+        )
+        response = paginator.get_paginated_response(serializer.data)
+        response.status_code = status.HTTP_201_CREATED
+        return response
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
@@ -145,7 +171,28 @@ class RecordViewSet(viewsets.ViewSet):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        paginator = TableLimitOffsetPagination()
+        record_filters = {
+            "equal": [
+                {"column_name": [table.primary_key_column_name]},
+                {"literal": [pk]}
+            ]
+        }
+        column_names_to_ids = table.get_column_name_id_bidirectional_map()
+        column_ids_to_names = column_names_to_ids.inverse
+        records = paginator.paginate_queryset(
+            table,
+            request,
+            table,
+            column_ids_to_names,
+            filters=record_filters
+        )
+        serializer = RecordSerializer(
+            records,
+            many=True,
+            context=self.get_serializer_context(table)
+        )
+        return paginator.get_paginated_response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
