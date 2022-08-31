@@ -105,4 +105,22 @@
     margin: 0 0 1rem 0;
     font-size: 1.6rem;
   }
+
+  /**
+   * Used to turn elements like `<button>` and `<a>` into plain elements that
+   * don't have any browser styling but still have functionality.
+   */
+  .passthrough {
+    background: inherit;
+    border-radius: inherit;
+    border: inherit;
+    color: inherit;
+    cursor: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    text-align: inherit;
+    margin: 0;
+    padding: 0;
+  }
 </style>

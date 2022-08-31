@@ -12,6 +12,7 @@
   } from '@mathesar/routes/urls';
   import { queries } from '@mathesar/stores/queries';
   import { tables as tablesStore } from '@mathesar/stores/tables';
+  import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -43,13 +44,16 @@
   </div>
 
   <div class="entity-list-wrapper">
-    <h2 class="entity-list-title">Tables ({[...tablesMap.values()].length})</h2>
+    <h2 class="entity-list-title">Tables ({tablesMap.size})</h2>
     <ul class="entity-list">
       {#each [...tablesMap.values()] as table (table.id)}
         <li class="entity-list-item">
           <a href={getTablePageUrl(database.name, schema.id, table.id)}>
             <TableName {table} />
           </a>
+          <span class="record-selector-for-table">
+            <RecordSelectorNavigationButton {table} />
+          </span>
         </li>
       {/each}
     </ul>
@@ -139,6 +143,19 @@
       display: block;
       text-decoration: none;
       padding: 0.5rem;
+    }
+  }
+  .record-selector-for-table {
+    margin-left: 0.5em;
+    color: var(--color-gray-dark);
+  }
+  .record-selector-for-table:hover {
+    color: black;
+  }
+
+  @media (hover: hover) {
+    .entity-list-item:not(:hover) .record-selector-for-table {
+      visibility: hidden;
     }
   }
 </style>

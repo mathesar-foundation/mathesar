@@ -49,8 +49,8 @@
         {#if items.length > 0}
           <div class="category-name">{categoryName}</div>
           <ul class="items">
-            {#each items as { href, label, icon } (href)}
-              <li class="item">
+            {#each items as { href, label, icon, isActive } (href)}
+              <li class="item" class:active={isActive()}>
                 <a
                   {href}
                   on:click={() => {
@@ -84,6 +84,10 @@
     list-style: none;
     padding: 0;
     margin: 0;
+  }
+  .item.active {
+    /* placeholder styling */
+    background-color: hsla(0, 0%, 0%, 0.1);
   }
   .item a {
     display: block;
