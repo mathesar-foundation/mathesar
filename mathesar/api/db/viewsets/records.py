@@ -103,6 +103,7 @@ class RecordViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
+        # TODO refactor to use serializer for more DRY response logic
         paginator = TableLimitOffsetPagination()
         record_filters = {
             "equal": [
@@ -133,6 +134,7 @@ class RecordViewSet(viewsets.ViewSet):
         serializer = RecordSerializer(data=request.data, context=self.get_serializer_context(table))
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        # TODO refactor to use serializer for more DRY response logic
         column_name_id_map = table.get_column_name_id_bidirectional_map()
         table_pk_column_id = column_name_id_map[table.primary_key_column_name]
         pk_value = serializer.data[table_pk_column_id]
@@ -171,6 +173,7 @@ class RecordViewSet(viewsets.ViewSet):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        # TODO refactor to use serializer for more DRY response logic
         paginator = TableLimitOffsetPagination()
         record_filters = {
             "equal": [
