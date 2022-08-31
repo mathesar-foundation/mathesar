@@ -51,7 +51,12 @@
 
 <LayoutWithHeader fitViewport>
   <div class="table-page">
-    <ActionsPane {schema} {table} on:deleteTable={handleDeleteTable} />
+    <ActionsPane
+      {database}
+      {schema}
+      {table}
+      on:deleteTable={handleDeleteTable}
+    />
     <TableView usesVirtualList allowsDdlOperations />
   </div>
 </LayoutWithHeader>

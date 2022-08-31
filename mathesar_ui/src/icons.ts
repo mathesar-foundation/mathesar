@@ -31,6 +31,7 @@ import {
   faProjectDiagram,
   faQuestion,
   faRedo,
+  faSearchPlus,
   faShapes,
   faSnowflake,
   faSort,
@@ -75,6 +76,7 @@ export const iconImportData: IconProps = { data: faUpload };
 export const iconRedo: IconProps = { data: faRedo };
 export const iconRefresh: IconProps = { data: faSync };
 export const iconRename: IconProps = { data: faICursor };
+export const iconSelectRecord: IconProps = { data: faSearchPlus };
 export const iconSetToNull: IconProps = { data: faBackspace };
 export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
 export const iconSortDescending: IconProps = { data: faSortAmountDown };

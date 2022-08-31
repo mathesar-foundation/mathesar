@@ -12,6 +12,7 @@
   } from '@mathesar/routes/urls';
   import { queries } from '@mathesar/stores/queries';
   import { tables as tablesStore } from '@mathesar/stores/tables';
+  import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -42,10 +43,13 @@
   <h2>Tables</h2>
   <ul>
     {#each [...tablesMap.values()] as table (table.id)}
-      <li>
+      <li class="table-item">
         <a href={getTablePageUrl(database.name, schema.id, table.id)}>
           <TableName {table} />
         </a>
+        <span class="record-selector-for-table">
+          <RecordSelectorNavigationButton {table} />
+        </span>
       </li>
     {/each}
   </ul>
@@ -61,3 +65,19 @@
     {/each}
   </ul>
 </LayoutWithHeader>
+
+<style>
+  .record-selector-for-table {
+    margin-left: 0.5em;
+    color: var(--color-gray-dark);
+  }
+  .record-selector-for-table:hover {
+    color: black;
+  }
+
+  @media (hover: hover) {
+    .table-item:not(:hover) .record-selector-for-table {
+      visibility: hidden;
+    }
+  }
+</style>
