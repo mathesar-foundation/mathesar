@@ -1,7 +1,7 @@
 import pytest
 from db.types.custom import json_array
 from db.utils import execute_pg_query
-from db.functions.base import ColumnName, Literal
+from db.functions.base import ColumnName, Noop
 from db.functions.operations.apply import apply_db_function_as_filter
 
 
@@ -26,7 +26,7 @@ def test_json_array_filter_functions(json_table_obj, main_db_function, literal_p
     json_column_name = "json_array"
     db_function = main_db_function([
         ColumnName([json_column_name]),
-        Literal([literal_param]),
+        Noop([literal_param]),
     ])
     query = apply_db_function_as_filter(selectable, db_function)
     record_list = execute_pg_query(engine, query)

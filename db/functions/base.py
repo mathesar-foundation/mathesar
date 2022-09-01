@@ -86,6 +86,19 @@ class Literal(DBFunction):
         return literal(primitive)
 
 
+class Noop(DBFunction):
+    id = 'noop'
+    name = 'no wrapping'
+    hints = tuple([
+        hints.parameter_count(1),
+        hints.parameter(0, hints.literal),
+    ])
+
+    @staticmethod
+    def to_sa_expression(primitive):
+        return primitive
+
+
 # This represents referencing columns by their Postgres name.
 class ColumnName(DBFunction):
     id = 'column_name'
