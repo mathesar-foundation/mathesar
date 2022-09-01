@@ -131,13 +131,7 @@ class UIQuery(BaseModel, Relation):
         `queries/[id]/columns` endpoint.
         """
         return tuple(
-            {
-                'alias': sa_col.name,
-                'display_name': self._get_display_name_for_sa_col(sa_col),
-                'db_type': sa_col.db_type.id,
-                'type_options': sa_col.type_options,
-                'display_options': self._get_display_options_for_sa_col(sa_col),
-            }
+            self._describe_query_column(sa_col)
             for sa_col
             in self.db_query.sa_output_columns
         )
@@ -161,15 +155,20 @@ class UIQuery(BaseModel, Relation):
             for col, dj_col in zip(self.initial_columns, self.initial_dj_columns)
         )
 
-    @property
-    def all_columns_described(self):
-        init_descriptions = {
-            k: {"display_name": v} for k, v in self._alias_to_display_name.items()
-        }
+    def _describe_query_column(self, sa_col):
         return {
-            col['alias']: col
-            for col
-            in self.initial_columns_described + self.output_columns_described
+            'alias': sa_col.name,
+            'display_name': self._get_display_name_for_sa_col(sa_col),
+            'db_type': sa_col.db_type.id,
+            'type_options': sa_col.type_options,
+            'display_options': self._get_display_options_for_sa_col(sa_col),
+        }
+
+    @property
+    def all_columns_description_map(self):
+        return {
+            alias: self._describe_query_column(sa_col)
+            for alias, sa_col in self.db_query.all_sa_columns_map.items()
         }
 
     @property

@@ -71,7 +71,7 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
         )
         paginated_records = paginator.get_paginated_response(records)
         columns = query.output_columns_described
-        column_metadata = query.all_columns_described
+        column_metadata = query.all_columns_description_map
         output_serializer = self.get_serializer(query)
         return Response(
             {

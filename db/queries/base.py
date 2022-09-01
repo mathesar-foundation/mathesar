@@ -41,6 +41,36 @@ class DBQuery:
         )
 
     @property
+    def all_sa_columns_map(self):
+        """
+        Expensive! use with care.
+        """
+        initial_columns_map = {
+            col.name: MathesarColumn.from_column(col, engine=self.engine)
+            for col in self.initial_relation.columns
+        }
+        output_columns_map = {
+            col.name: col for col in self.sa_output_columns
+        }
+        if self.transformations is not None:
+            transforms_columns_map = {
+                col.name: MathesarColumn.from_column(col, engine=self.engine)
+                for i in range(len(self.transformations))
+                for col in DBQuery(
+                    base_table_oid=self.base_table_oid,
+                    initial_columns=self.initial_columns,
+                    engine=self.engine,
+                    transformations=self.transformations[:i],
+                    name=f'{self.name}_{i}'
+                ).transformed_relation.columns
+            }
+        else:
+            transforms_columns_map = {}
+
+        return initial_columns_map | transforms_columns_map | output_columns_map
+
+
+    @property
     def sa_output_columns(self):
         """
         Sequence of SQLAlchemy columns representing the output columns of the
