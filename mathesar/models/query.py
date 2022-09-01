@@ -5,16 +5,16 @@ from db.queries.base import DBQuery, InitialColumn
 
 from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
-from django.core.exceptions import ValidationError
+from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValueType, DictHasBadKeys
 from db.transforms.operations.deserialize import deserialize_transformation
 
 
 def _validate_list_of_dicts(value):
     if not isinstance(value, list):
-        raise ValidationError(f"{value} should be a list.")
+        raise InvalidValueType(f"{value} should be a list.")
     for subvalue in value:
         if not isinstance(subvalue, dict):
-            raise ValidationError(f"{value} should contain only dicts.")
+            raise InvalidValueType(f"{value} should contain only dicts.")
 
 
 def _validate_initial_columns(initial_cols):
@@ -26,7 +26,7 @@ def _validate_initial_columns(initial_cols):
         }
         missing_obligatory_keys = obligatory_keys.difference(keys)
         if missing_obligatory_keys:
-            raise ValidationError(
+            raise DictHasBadKeys(
                 f"{initial_col} doesn't contain"
                 f" following obligatory keys: {missing_obligatory_keys}."
             )
@@ -40,7 +40,7 @@ def _validate_initial_columns(initial_cols):
         }
         unexpected_keys = keys.difference(valid_keys)
         if unexpected_keys:
-            raise ValidationError(
+            raise DictHasBadKeys(
                 f"{initial_col} contains unexpected keys: {unexpected_keys}."
             )
         jp_path = initial_col.get('jp_path')
@@ -50,17 +50,17 @@ def _validate_initial_columns(initial_cols):
 def _validate_jp_path(jp_path):
     if jp_path:
         if not isinstance(jp_path, list):
-            raise ValidationError(
+            raise InvalidValueType(
                 f"jp_path must be a list, instead: {jp_path}."
             )
         for jp in jp_path:
             if not isinstance(jp, list):
-                raise ValidationError(
+                raise InvalidValueType(
                     f"jp_path elements must be 2-item lists, instead: {jp}."
                 )
             for col_id in jp:
                 if not isinstance(col_id, int):
-                    raise ValidationError(
+                    raise InvalidValueType(
                         "jp_path elements must only contain integer column"
                         f" ids, instead: {jp}."
                     )
@@ -69,14 +69,14 @@ def _validate_jp_path(jp_path):
 def _validate_transformations(transformations):
     for transformation in transformations:
         if "type" not in transformation:
-            raise ValidationError("Each 'transformations' sub-dict must have a 'type' key.")
+            raise DictHasBadKeys("Each 'transformations' sub-dict must have a 'type' key.")
         if "spec" not in transformation:
-            raise ValidationError("Each 'transformations' sub-dict must have a 'spec' key.")
+            raise DictHasBadKeys("Each 'transformations' sub-dict must have a 'spec' key.")
 
 
 def _validate_dict(value):
     if not isinstance(value, dict):
-        raise ValidationError(f"{value} should be a dict.")
+        raise InvalidValueType(f"{value} should be a dict.")
 
 
 class UIQuery(BaseModel, Relation):
