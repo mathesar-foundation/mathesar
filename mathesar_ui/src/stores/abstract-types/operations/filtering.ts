@@ -127,7 +127,7 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     id: 'json_array_not_empty',
     name: 'array is not empty',
     uiTypeParameterMap: {
-      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+      [abstractTypeCategory.Array]: [],
     },
   },
   {
