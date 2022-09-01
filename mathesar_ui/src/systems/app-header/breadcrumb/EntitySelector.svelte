@@ -14,20 +14,26 @@
   import { queries as queriesStore } from '@mathesar/stores/queries';
   import type { QueryInstance } from '@mathesar/api/queries/queryList';
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
-  import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
+  import type {
+    BreadcrumbSelectorEntry,
+    SimpleBreadcrumbSelectorEntry,
+    BreadcrumbSelectorEntryForTable,
+  } from './breadcrumbTypes';
 
   export let database: Database;
   export let schema: SchemaEntry;
 
   function makeTableBreadcrumbSelectorItem(
-    tableEntry: TableEntry,
-  ): BreadcrumbSelectorEntry {
+    table: TableEntry,
+  ): BreadcrumbSelectorEntryForTable {
     return {
-      label: tableEntry.name,
-      href: getTablePageUrl(database.name, schema.id, tableEntry.id),
+      type: 'table',
+      table,
+      label: table.name,
+      href: getTablePageUrl(database.name, schema.id, table.id),
       icon: iconTable,
       isActive() {
-        return tableEntry.id === $currentTableId;
+        return table.id === $currentTableId;
       },
     };
   }
@@ -36,8 +42,9 @@
 
   function makeQueryBreadcrumbSelectorItem(
     queryInstance: QueryInstance,
-  ): BreadcrumbSelectorEntry {
+  ): SimpleBreadcrumbSelectorEntry {
     return {
+      type: 'simple',
       label: queryInstance.name,
       href: getDataExplorerPageUrl(database.name, schema.id, queryInstance.id),
       icon: iconTable,
@@ -57,7 +64,7 @@
   $: tables = [...$tablesStore.data.values()];
   $: queries = [...$queriesStore.data.values()];
 
-  $: selectorData = new Map([
+  $: selectorData = new Map<string, BreadcrumbSelectorEntry[]>([
     ['Tables', tables.map(makeTableBreadcrumbSelectorItem)],
     ['Explorations', queries.map(makeQueryBreadcrumbSelectorItem)],
   ]);
