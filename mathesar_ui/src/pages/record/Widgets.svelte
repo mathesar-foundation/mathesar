@@ -33,7 +33,7 @@
     }));
 </script>
 
-{#each tableWidgetInputs as { table, fkColumn }}
+{#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
   <section class="table-widget-positioner">
     <TableWidget {table} {fkColumn} {recordId} />
   </section>
