@@ -11,9 +11,11 @@
   let timeout: number;
 
   function setParentValue(v: unknown) {
-    parentValue = v;
-    dispatch('artificialInput', v);
-    dispatch('artificialChange', v);
+    if (parentValue !== v) {
+      parentValue = v;
+      dispatch('artificialInput', v);
+      dispatch('artificialChange', v);
+    }
   }
 
   function handleNewValue({
