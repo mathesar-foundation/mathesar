@@ -49,8 +49,11 @@ class BaseModel(models.Model):
         abstract = True
 
 
+import logging
+logger = logging.getLogger(__name__)
 class DatabaseObjectManager(models.Manager):
     def get_queryset(self):
+        logger.error('DatabaseObjectManager is reflecting.')
         reflection.reflect_db_objects()
         return super().get_queryset()
 

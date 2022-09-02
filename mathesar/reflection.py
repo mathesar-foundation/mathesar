@@ -22,7 +22,10 @@ DB_REFLECTION_INTERVAL = 1  # we reflect DB changes every second
 # queryset is created, and will recurse if used in these functions.
 
 
+import logging
+logger = logging.getLogger(__name__)
 def reflect_db_objects(skip_cache_check=False):
+    logger.error('reflect_db_objects called.')
     if skip_cache_check or not cache.get(DB_REFLECTION_KEY):
         reflect_databases()
         for database in models.Database.current_objects.filter(deleted=False):
