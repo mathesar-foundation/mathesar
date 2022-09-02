@@ -22,6 +22,19 @@ DB_REFLECTION_INTERVAL = 1  # we reflect DB changes every second
 # queryset is created, and will recurse if used in these functions.
 
 
+def reflect_db_objects(skip_cache_check=False):
+    if skip_cache_check or not cache.get(DB_REFLECTION_KEY):
+        reflect_databases()
+        for database in models.Database.current_objects.filter(deleted=False):
+            reflect_schemas_from_database(database.name)
+        for schema in models.Schema.current_objects.all():
+            reflect_tables_from_schema(schema)
+        for table in models.Table.current_objects.all():
+            reflect_columns_from_table(table)
+        reflect_constraints_from_database(database.name)
+        cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
+
+
 def reflect_databases():
     dbs_in_settings = set(settings.DATABASES)
     # We only want to track non-django dbs
@@ -120,16 +133,3 @@ def reflect_new_table_constraints(table):
     ]
     engine.dispose()
     return constraints
-
-
-def reflect_db_objects(skip_cache_check=False):
-    if skip_cache_check or not cache.get(DB_REFLECTION_KEY):
-        reflect_databases()
-        for database in models.Database.current_objects.filter(deleted=False):
-            reflect_schemas_from_database(database.name)
-        for schema in models.Schema.current_objects.all():
-            reflect_tables_from_schema(schema)
-        for table in models.Table.current_objects.all():
-            reflect_columns_from_table(table)
-        reflect_constraints_from_database(database.name)
-        cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
