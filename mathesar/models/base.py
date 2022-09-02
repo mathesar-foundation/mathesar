@@ -51,15 +51,10 @@ class BaseModel(models.Model):
 
 import logging
 logger = logging.getLogger(__name__)
-have_db_objects_been_reflected = False
 class DatabaseObjectManager(models.Manager):
     def get_queryset(self):
-        logger.error('DatabaseObjectManager.get_query_set')
-        global have_db_objects_been_reflected
-        if not have_db_objects_been_reflected:
-            logger.error('DatabaseObjectManager is reflecting.')
-            reflection.reflect_db_objects()
-            have_db_objects_been_reflected = True
+        logger.error('DatabaseObjectManager is reflecting.')
+        reflection.reflect_db_objects()
         return super().get_queryset()
 
 
