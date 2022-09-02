@@ -53,6 +53,7 @@
     font-weight: 500;
     display: block;
     color: var(--color-gray-darker);
+    font-size: var(--text-size-x-large);
     margin: 0 var(--spacing);
   }
 </style>
