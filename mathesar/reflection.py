@@ -29,12 +29,12 @@ def reflect_db_objects(skip_cache_check=False):
     if skip_cache_check or not cache.get(DB_REFLECTION_KEY):
         reflect_databases()
         for database in models.Database.current_objects.filter(deleted=False):
-            reflect_schemas_from_database(database.name)
+            reflect_schemas_from_database(metadata, database.name)
         for schema in models.Schema.current_objects.all():
-            reflect_tables_from_schema(schema)
+            reflect_tables_from_schema(metadata, schema)
         for table in models.Table.current_objects.all():
-            reflect_columns_from_table(table)
-        reflect_constraints_from_database(database.name)
+            reflect_columns_from_table(metadata, table)
+        reflect_constraints_from_database(metadata, database.name)
         cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
 
 
@@ -57,8 +57,8 @@ def reflect_databases():
         models.Database.current_objects.create(name=db_name)
 
 
-# TODO creating a one-off engine is expensive
-def reflect_schemas_from_database(database_name):
+# TODO pass in a cached engine instead of creating a new one
+def reflect_schemas_from_database(metadata, database_name):
     engine = create_mathesar_engine(database_name)
     db_schema_oids = {
         schema['oid'] for schema in get_mathesar_schemas_with_oids(engine)
@@ -73,7 +73,7 @@ def reflect_schemas_from_database(database_name):
     engine.dispose()
 
 
-def reflect_tables_from_schema(schema):
+def reflect_tables_from_schema(metadata, schema):
     db_table_oids = {
         table['oid']
         for table in get_table_oids_from_schema(schema.oid, schema._sa_engine)
@@ -85,7 +85,7 @@ def reflect_tables_from_schema(schema):
             table.delete()
 
 
-def reflect_columns_from_table(table):
+def reflect_columns_from_table(metadata, table):
     attnums = {
         column['attnum']
         for column in get_column_attnums_from_table(table.oid, table.schema._sa_engine)
@@ -107,8 +107,8 @@ def reflect_columns_from_table(table):
     models.Column.current_objects.filter(table=table).filter(~Q(attnum__in=attnums)).delete()
 
 
-# TODO creating a one-off engine is expensive
-def reflect_constraints_from_database(database):
+# TODO pass in a cached engine instead of creating a new one
+def reflect_constraints_from_database(metadata, database):
     engine = create_mathesar_engine(database)
     db_constraints = get_constraints_with_oids(engine)
     for db_constraint in db_constraints:
@@ -123,8 +123,8 @@ def reflect_constraints_from_database(database):
     engine.dispose()
 
 
-# TODO creating a one-off engine is expensive
-def reflect_new_table_constraints(table):
+# TODO pass in a cached engine instead of creating a new one
+def reflect_new_table_constraints(metadata, table):
     engine = create_mathesar_engine(table.schema.database.name)
     db_constraints = get_constraints_with_oids(engine, table_oid=table.oid)
     constraints = [
