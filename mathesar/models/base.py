@@ -49,12 +49,18 @@ class BaseModel(models.Model):
         abstract = True
 
 
+from sqlalchemy import MetaData
+from db.constraints.utils import naming_convention
+
+_metadata_cache = MetaData(naming_convention=naming_convention)
+
+
 import logging
 logger = logging.getLogger(__name__)
 class DatabaseObjectManager(models.Manager):
     def get_queryset(self):
         logger.error('DatabaseObjectManager is reflecting.')
-        reflection.reflect_db_objects()
+        reflection.reflect_db_objects(metadata=_metadata_cache)
         return super().get_queryset()
 
 

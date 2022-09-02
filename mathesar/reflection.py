@@ -24,7 +24,7 @@ DB_REFLECTION_INTERVAL = 1  # we reflect DB changes every second
 
 import logging
 logger = logging.getLogger(__name__)
-def reflect_db_objects(skip_cache_check=False):
+def reflect_db_objects(metadata, skip_cache_check=False):
     logger.error('reflect_db_objects called.')
     if skip_cache_check or not cache.get(DB_REFLECTION_KEY):
         reflect_databases()
@@ -34,6 +34,7 @@ def reflect_db_objects(skip_cache_check=False):
             reflect_tables_from_schema(metadata, schema)
         for table in models.Table.current_objects.all():
             reflect_columns_from_table(metadata, table)
+        # TODO where is the database variable coming from? someone explain how this even runs.
         reflect_constraints_from_database(metadata, database.name)
         cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
 
@@ -76,7 +77,11 @@ def reflect_schemas_from_database(metadata, database_name):
 def reflect_tables_from_schema(metadata, schema):
     db_table_oids = {
         table['oid']
-        for table in get_table_oids_from_schema(schema.oid, schema._sa_engine)
+        for table in get_table_oids_from_schema(
+            schema_oid=schema.oid,
+            engine=schema._sa_engine,
+            metadata=metadata,
+        )
     }
     for oid in db_table_oids:
         models.Table.current_objects.get_or_create(oid=oid, schema=schema)
