@@ -1,7 +1,7 @@
 import warnings
 
 from sqlalchemy import (
-    Table, MetaData, select, join, inspect, and_, cast, func, Integer, literal, or_
+    Table, select, join, inspect, and_, cast, func, Integer, literal, or_
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -16,22 +16,17 @@ TARGET = 'target'
 MULTIPLE_RESULTS = 'multiple_results'
 
 
-def reflect_table(name, schema, engine, metadata=None, connection_to_use=None):
-    if metadata is None:
-        metadata = MetaData(bind=engine)
+def reflect_table(name, schema, engine, metadata, connection_to_use=None):
     autoload_with = engine if connection_to_use is None else connection_to_use
     return Table(name, metadata, schema=schema, autoload_with=autoload_with, extend_existing=True)
 
 
-def reflect_table_from_oid(oid, engine, metadata=None, connection_to_use=None):
+def reflect_table_from_oid(oid, engine, metadata, connection_to_use=None):
     tables = reflect_tables_from_oids([oid], engine, metadata=metadata, connection_to_use=connection_to_use)
     return tables.get(oid, None)
 
 
-def reflect_tables_from_oids(oids, engine, metadata=None, connection_to_use=None):
-    if metadata is None:
-        metadata = MetaData(bind=engine)
-
+def reflect_tables_from_oids(oids, engine, metadata, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_class = Table("pg_class", metadata, autoload_with=engine)
@@ -54,9 +49,7 @@ def reflect_tables_from_oids(oids, engine, metadata=None, connection_to_use=None
     return tables
 
 
-def get_table_oids_from_schema(schema_oid, engine):
-    metadata = MetaData()
-
+def get_table_oids_from_schema(schema_oid, engine, metadata):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_class = Table("pg_class", metadata, autoload_with=engine)
@@ -77,7 +70,7 @@ def get_oid_from_table(name, schema, engine):
 
 
 def get_joinable_tables(
-        engine, base_table_oid=None, max_depth=3, limit=None, offset=None
+        engine, metadata, base_table_oid=None, max_depth=3, limit=None, offset=None
 ):
     FK_OID = 'fk_oid'
     LEFT_REL = 'left_rel'
@@ -93,7 +86,7 @@ def get_joinable_tables(
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_constraint = Table("pg_constraint", MetaData(), autoload_with=engine)
+        pg_constraint = Table("pg_constraint", metadata, autoload_with=engine)
 
     symmetric_fkeys = select(
         cast(pg_constraint.c.oid, Integer).label(FK_OID),
