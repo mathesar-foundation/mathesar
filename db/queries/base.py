@@ -52,23 +52,19 @@ class DBQuery:
         output_columns_map = {
             col.name: col for col in self.sa_output_columns
         }
-        if self.transformations is not None:
-            transforms_columns_map = {
-                col.name: MathesarColumn.from_column(col, engine=self.engine)
-                for i in range(len(self.transformations))
-                for col in DBQuery(
-                    base_table_oid=self.base_table_oid,
-                    initial_columns=self.initial_columns,
-                    engine=self.engine,
-                    transformations=self.transformations[:i],
-                    name=f'{self.name}_{i}'
-                ).transformed_relation.columns
-            }
-        else:
-            transforms_columns_map = {}
+        transforms_columns_map = {} if self.transformations is None else {
+            col.name: MathesarColumn.from_column(col, engine=self.engine)
+            for i in range(len(self.transformations))
+            for col in DBQuery(
+                base_table_oid=self.base_table_oid,
+                initial_columns=self.initial_columns,
+                engine=self.engine,
+                transformations=self.transformations[:i],
+                name=f'{self.name}_{i}'
+            ).transformed_relation.columns
+        }
 
         return initial_columns_map | transforms_columns_map | output_columns_map
-
 
     @property
     def sa_output_columns(self):
