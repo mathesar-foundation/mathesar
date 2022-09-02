@@ -36,6 +36,7 @@ from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
+from mathesar.metadata import get_metadata
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -49,18 +50,12 @@ class BaseModel(models.Model):
         abstract = True
 
 
-from sqlalchemy import MetaData
-from db.constraints.utils import naming_convention
-
-_metadata_cache = MetaData(naming_convention=naming_convention)
-
-
 import logging
 logger = logging.getLogger(__name__)
 class DatabaseObjectManager(models.Manager):
     def get_queryset(self):
         logger.error('DatabaseObjectManager is reflecting.')
-        reflection.reflect_db_objects(metadata=_metadata_cache)
+        reflection.reflect_db_objects(metadata=get_metadata())
         return super().get_queryset()
 
 
