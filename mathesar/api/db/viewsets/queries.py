@@ -79,5 +79,6 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
                 "records": paginated_records.data,
                 "columns": columns,
                 "column_metadata": column_metadata,
+                "parameters": params,
             }
         )
