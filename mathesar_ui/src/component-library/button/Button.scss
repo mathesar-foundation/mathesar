@@ -104,8 +104,8 @@ button.btn {
   }
 
   &.size-small {
-    padding: 4px 10px;
-    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    font-size: var(--text-size-small);
   }
 
   &.size-large {

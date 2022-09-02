@@ -26,7 +26,7 @@ def get_dependents_graph(referenced_object_id, engine):
     # recursive member which includes dependents for each object of the previous level
     recursive = select(
         dependency_pairs_cte,
-        (anchor.c.level + 1).label('level'),
+        (anchor.c.level + 1),
         anchor.c.dependency_chain + array([anchor.c.objid])) \
         .where(anchor.c.level < MAX_LEVEL) \
         .where(dependency_pairs_cte.c.objid != any_(anchor.c.dependency_chain)) \
@@ -82,7 +82,7 @@ def _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pair):
     return dependency_pair.where(pg_identify_object.c.type == 'table constraint')
 
 
-# getting a full list of dependents and identifying them
+# stmt for getting a full list of dependents and identifying them
 def _get_dependency_pairs_stmt(pg_depend, pg_identify_object, pg_identify_refobject):
     result = select(
         pg_depend,
@@ -136,8 +136,8 @@ def _get_typed_dependency_pairs_stmt(engine):
 
     # each statement filters the base statement extracting dependents of a specific type
     # so it's easy to exclude particular types or add new
-    dependency_pair = _get_dependency_pairs_stmt(pg_depend, pg_identify_object, pg_identify_refobject)
-    foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pair).cte('foreign_key_constraint_dependents')
+    dependency_pairs = _get_dependency_pairs_stmt(pg_depend, pg_identify_object, pg_identify_refobject)
+    foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pairs).cte('foreign_key_constraint_dependents')
     table_dependents = _get_table_dependents(foreign_key_constraint_dependents, pg_constraint).cte('table_dependents')
 
     return union(
