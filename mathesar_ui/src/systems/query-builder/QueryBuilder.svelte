@@ -144,17 +144,9 @@
         display: flex;
         align-items: center;
         overflow: hidden;
-        padding: 1rem;
+        padding: 0.7rem 1rem;
         margin-right: 1rem;
         border-right: 1px solid var(--color-gray-medium);
-      }
-
-      .type {
-        font-size: var(--text-size-x-small);
-        font-weight: 500;
-        color: var(--color-text-muted);
-        text-transform: uppercase;
-        line-height: 1;
       }
 
       .icon {
