@@ -32,4 +32,21 @@
   <h3>Import From</h3>
 </RadioGroup>
 
-<svelte:component this={uploadMethod.component} {fileImportStore} />
+<div class="import-section">
+  <svelte:component this={uploadMethod.component} {fileImportStore} />
+</div>
+
+<style lang="scss">
+  .import-section {
+    margin: 0.9rem 0;
+
+    :global(.help-content) {
+      margin: 0.4rem 0;
+    }
+
+    :global(.buttons) {
+      margin-top: 0.9rem;
+      text-align: right;
+    }
+  }
+</style>

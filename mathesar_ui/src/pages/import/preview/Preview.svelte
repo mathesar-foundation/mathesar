@@ -12,7 +12,7 @@
   } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconDelete } from '@mathesar/icons';
-  import { getTablePageUrl } from '@mathesar/routes/urls';
+  import { getTablePageUrl, getSchemaPageUrl } from '@mathesar/routes/urls';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { setInFileStore } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
@@ -59,7 +59,7 @@
 
   function handleCancel() {
     cancelImport(fileImportStore);
-    // TODO go to schema page
+    router.goto(getSchemaPageUrl(database.name, schema.id));
   }
 
   async function handleProceed() {
@@ -137,6 +137,54 @@
   />
 {/if}
 
-<style global lang="scss">
-  @import 'Preview.scss';
+<style lang="scss">
+  .table-config-options {
+    margin-top: 1rem;
+    .name {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      :global(.text-input) {
+        width: 15rem;
+        margin-left: 0.8rem;
+      }
+    }
+  }
+
+  .preview-table-header {
+    font-weight: 500;
+    margin-top: 20px;
+    font-size: 1.2rem;
+    height: 20px;
+    display: flex;
+    align-items: center;
+
+    :global(svg) {
+      margin-left: 6px;
+    }
+  }
+
+  .preview-table {
+    overflow: auto;
+    max-height: 400px;
+    position: relative;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin: 10px 0px 20px;
+
+    &.disabled {
+      background: #efefef;
+      pointer-events: none;
+    }
+
+    table {
+      border-collapse: collapse;
+
+      :global(th:not(:first-child)),
+      :global(td:not(:first-child)) {
+        border-left: 1px solid #e0e0e0;
+      }
+    }
+  }
 </style>

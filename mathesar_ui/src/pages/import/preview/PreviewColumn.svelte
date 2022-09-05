@@ -39,3 +39,38 @@
     />
   </div>
 </th>
+
+<style lang="scss">
+  th {
+    margin: 0;
+    padding: 0;
+    position: sticky;
+    top: 0;
+
+    .name,
+    .type {
+      border-bottom: 1px solid #efefef;
+    }
+
+    .name {
+      min-width: 15rem;
+      display: flex;
+      padding: 4px 10px;
+      background: #efefef;
+      align-items: center;
+
+      :global(.text-input) {
+        margin-left: 0.8rem;
+        text-align: left;
+      }
+    }
+
+    .type {
+      background: #fff;
+      :global(button) {
+        width: 100%;
+        border: none;
+      }
+    }
+  }
+</style>

@@ -67,3 +67,21 @@
     {/each}
   </tr>
 {/each}
+
+<style lang="scss">
+  tr {
+    border-bottom: 1px solid #efefef;
+
+    td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 8px 10px;
+      max-width: 200px;
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+</style>
