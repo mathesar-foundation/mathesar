@@ -9,7 +9,7 @@
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
-  import LinkTableModal from '../link-table/LinkTableModal.svelte';
+  import LinkTableModal from '../../link-table/LinkTableModal.svelte';
 
   const dispatch = createEventDispatcher();
   const tabularData = getTabularDataStoreFromContext();

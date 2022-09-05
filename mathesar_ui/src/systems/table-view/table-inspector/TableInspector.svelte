@@ -1,7 +1,7 @@
 <script lang="ts">
-  import ColumnMode from './ColumnMode.svelte';
+  import ColumnMode from './column/ColumnMode.svelte';
 
-  import TableMode from './TableMode.svelte';
+  import TableMode from './table/TableMode.svelte';
 
   const tabs = [
     {

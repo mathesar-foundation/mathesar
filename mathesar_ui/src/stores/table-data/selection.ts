@@ -5,6 +5,7 @@ import type { Row, RecordsData } from './records';
 import type { ColumnsDataStore } from './columns';
 
 const DEFAULT_ROW_INDEX = 0;
+const ROW_COLUMN_SEPARATOR = '-';
 
 type Cell = [Row, Column];
 
@@ -14,7 +15,7 @@ type Cell = [Row, Column];
 export const createSelectedCellIdentifier = (
   { rowIndex }: Row,
   { id }: Column,
-): string => `${rowIndex || DEFAULT_ROW_INDEX}-${id}`;
+): string => `${rowIndex || DEFAULT_ROW_INDEX}${ROW_COLUMN_SEPARATOR}${id}`;
 
 export const isRowSelected = (
   selectedCells: ImmutableSet<string>,
@@ -36,6 +37,10 @@ export const isCellSelected = (
   row: Row,
   column: Column,
 ): boolean => selectedCells.has(createSelectedCellIdentifier(row, column));
+
+export function getSelectedColumnId(selectedCell: string): number {
+  return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[1]);
+}
 
 export class Selection {
   private columnsDataStore: ColumnsDataStore;

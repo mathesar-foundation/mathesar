@@ -1,8 +1,8 @@
 <script>
   import { Collapsible } from '@mathesar-component-library';
   import TableConstraints from '@mathesar/systems/table-view/constraints/TableConstraints.svelte';
-  import RenameTableProperty from './RenameTableProperty.svelte';
-  import ConstraintHelp from '../constraints/__help__/ConstraintHelp.svelte';
+  import RenameTable from './RenameTable.svelte';
+  import ConstraintHelp from '../../constraints/__help__/ConstraintHelp.svelte';
   import TableActions from './TableActions.svelte';
 </script>
 
@@ -10,7 +10,7 @@
   <Collapsible isOpen>
     <span slot="header">Table Properties</span>
     <div slot="content" class="property-container">
-      <RenameTableProperty />
+      <RenameTable />
     </div>
   </Collapsible>
 

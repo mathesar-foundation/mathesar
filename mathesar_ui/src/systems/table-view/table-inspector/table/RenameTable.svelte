@@ -57,5 +57,6 @@
   }
   .label {
     font-size: var(--text-size-small);
+    margin-left: 0.5rem;
   }
 </style>
