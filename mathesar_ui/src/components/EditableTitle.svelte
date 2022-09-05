@@ -4,13 +4,14 @@
   export let value = '';
   export let size = 1;
 
-  const paddingStyle = 'padding:0.43rem 0.57rem;';
+  const paddingStyle = 'padding:0.43rem';
 </script>
 
 <!--TODO: Improve accessibility-->
 <div
   class="editable-title"
-  style="font-size:{size}rem;height:{size + 1.15 + 0.125}rem"
+  style="font-size:{size}rem;
+  height:{size + 1.15 + 0.125}rem"
 >
   <span style={paddingStyle}>{value}</span>
   <TextInput bind:value style={paddingStyle} on:input on:change />
@@ -31,11 +32,13 @@
       white-space: pre;
       text-overflow: ellipsis;
       overflow: hidden;
+      font-weight: 500;
     }
     :global(input) {
       position: absolute;
       top: 0;
       background: #fff;
+      font-weight: 500;
     }
     :global(input.text-input:not(:hover):not(:focus)) {
       border-color: transparent;

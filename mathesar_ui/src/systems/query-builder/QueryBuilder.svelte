@@ -65,22 +65,24 @@
 </script>
 
 <div class="query-builder">
-  <div class="title-bar">
-    <div class="icon">
-      <Icon {...iconQuery} size="2em" />
-    </div>
-    <div class="name">
+  <div class="header">
+    <div class="title-wrapper">
+      <div class="icon">
+        <Icon {...iconQuery} size="1.5em" />
+      </div>
+
       <EditableTitle
         value={$query.name}
-        size={1.3}
+        size={1.266}
         on:change={handleQueryNameChange}
       />
-      <SaveStatusIndicator status={$state.saveState?.state} />
     </div>
-    <div class="toolbar">
+
+    <SaveStatusIndicator status={$state.saveState?.state} />
+    <div class="actions">
       <InputGroup>
         <Button
-          appearance="plain"
+          appearance="default"
           disabled={!$state.isUndoPossible}
           on:click={() => queryManager.undo()}
         >
@@ -88,17 +90,17 @@
           <span>Undo</span>
         </Button>
         <Button
-          appearance="plain"
+          appearance="default"
           disabled={!$state.isRedoPossible}
           on:click={() => queryManager.redo()}
         >
           <Icon {...iconRedo} />
           <span>Redo</span>
         </Button>
-        <Button appearance="plain" on:click={() => dispatch('close')}
-          >Close</Button
-        >
       </InputGroup>
+      <Button appearance="default" on:click={() => dispatch('close')}
+        >Close</Button
+      >
     </div>
   </div>
   <div class="content-pane">
@@ -130,52 +132,58 @@
     top: 0;
     bottom: 0;
 
-    .title-bar {
+    .header {
       display: flex;
-      height: 3.5rem;
       align-items: center;
-      border-bottom: 1px solid #efefef;
+      height: 4rem;
+      border-bottom: 1px solid var(--color-gray-dark);
       position: relative;
       overflow: hidden;
 
-      .icon {
-        padding: 0 0.3rem 0 1rem;
-        flex-shrink: 0;
-        flex-grow: 0;
-
-        :global(svg.fa-icon) {
-          color: #4285f4;
-        }
-      }
-      .name {
-        flex-grow: 1;
-        padding-right: 1rem;
-        position: relative;
-        overflow: hidden;
+      .title-wrapper {
         display: flex;
         align-items: center;
+        overflow: hidden;
+        padding: 1rem;
+        margin-right: 1rem;
+        border-right: 1px solid var(--color-gray-medium);
+      }
 
-        :global(.save-status) {
-          display: inline-flex;
-          flex-shrink: 0;
+      .type {
+        font-size: var(--text-size-x-small);
+        font-weight: 500;
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        line-height: 1;
+      }
+
+      .icon {
+        margin-right: 0.25rem;
+        opacity: 0.8;
+        :global(svg.fa-icon) {
+          color: var(--color-gray-darker);
         }
       }
 
-      .toolbar {
+      .actions {
         flex-shrink: 0;
-        padding-right: 1rem;
+        padding: 0.5rem;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
         :global(button) {
           flex-shrink: 0;
         }
         :global(button .fa-icon) {
-          padding-right: 0.2rem;
+          padding-right: 0.25rem;
         }
       }
     }
     .content-pane {
       display: flex;
       position: absolute;
-      top: 3.5rem;
+      top: 4rem;
       bottom: 0;
       left: 0;
       right: 0;
@@ -183,7 +191,7 @@
 
       .input-sidebar {
         width: 20rem;
-        border-right: 1px solid #efefef;
+        border-right: 1px solid var(--color-gray-medium);
         flex-shrink: 0;
         flex-grow: 0;
         flex-basis: 20rem;
@@ -191,11 +199,14 @@
         flex-direction: column;
 
         .base-table-selector {
-          border-bottom: 1px solid #efefef;
-          padding: 1rem 0.75rem 1.4rem;
-          background: #f7f8f8;
+          border-bottom: 1px solid var(--color-gray-medium);
+          padding: 1rem;
+          background: var(--color-gray-light);
           flex-grow: 0;
           flex-shrink: 0;
+          :global(label) {
+            font-weight: 500;
+          }
         }
       }
     }
