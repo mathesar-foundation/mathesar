@@ -70,7 +70,7 @@ def check_table_response(response_table, table, table_name):
     assert 'import_target' in response_table
     assert 'created_at' in response_table
     assert 'updated_at' in response_table
-    assert 'has_dependencies' in response_table
+    assert 'has_dependents' in response_table
     assert 'import_verified' in response_table
     assert len(response_table['columns']) == len(table.sa_column_names)
     for column in response_table['columns']:
@@ -720,7 +720,7 @@ def test_table_dependencies(client, create_patents_table):
     response = client.get(f'/api/db/v0/tables/{table.id}/')
     response_table = response.json()
     assert response.status_code == 200
-    assert response_table['has_dependencies'] is True
+    assert response_table['has_dependents'] is True
 
 
 def test_table_404(client):

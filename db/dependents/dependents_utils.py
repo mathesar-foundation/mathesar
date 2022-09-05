@@ -151,7 +151,7 @@ def _get_typed_dependency_pairs_stmt(engine):
         select(table_dependents))
 
 
-def has_dependencies(referenced_object_id, engine):
+def has_dependents(referenced_object_id, engine):
     metadata = MetaData()
 
     pg_depend = _get_pg_depend_table(engine, metadata)

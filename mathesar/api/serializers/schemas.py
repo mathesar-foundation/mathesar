@@ -21,4 +21,4 @@ class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSe
 
     class Meta:
         model = Schema
-        fields = ['id', 'name', 'database', 'has_dependencies']
+        fields = ['id', 'name', 'database', 'has_dependents']

@@ -16,7 +16,7 @@ from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
-from db.dependents.dependents_utils import get_dependents_graph, has_dependencies
+from db.dependents.dependents_utils import get_dependents_graph, has_dependents
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
@@ -158,8 +158,8 @@ class Schema(DatabaseObject):
             return 'MISSING'
 
     @property
-    def has_dependencies(self):
-        return has_dependencies(
+    def has_dependents(self):
+        return has_dependents(
             self.oid,
             self._sa_engine
         )
@@ -259,8 +259,8 @@ class Table(DatabaseObject, Relation):
         return self._sa_table.constraints
 
     @property
-    def has_dependencies(self):
-        return has_dependencies(
+    def has_dependents(self):
+        return has_dependents(
             self.oid,
             self.schema._sa_engine
         )
