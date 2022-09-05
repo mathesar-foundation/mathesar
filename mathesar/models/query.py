@@ -148,7 +148,7 @@ class UIQuery(BaseModel, Relation):
                 'display_name': col.get('display_name')
             }
             | {
-                'db_type': dj_col.db_type.id,
+                'type': dj_col.db_type.id,
                 'type_options': dj_col._sa_column.type_options,
                 'display_options': dj_col.display_options
             }
@@ -159,7 +159,7 @@ class UIQuery(BaseModel, Relation):
         return {
             'alias': sa_col.name,
             'display_name': self._get_display_name_for_sa_col(sa_col),
-            'db_type': sa_col.db_type.id,
+            'type': sa_col.db_type.id,
             'type_options': sa_col.type_options,
             'display_options': self._get_display_options_for_sa_col(sa_col),
         }
