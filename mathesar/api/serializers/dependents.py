@@ -1,7 +1,7 @@
 from mathesar.api.serializers.shared_serializers import MathesarPolymorphicErrorMixin, ReadOnlyPolymorphicSerializerMappingMixin
 from rest_framework import serializers
 
-from mathesar.models.base import Constraint, Table
+from mathesar.models.base import Constraint, Schema, Table
 
 
 class DependentMathesarObjectSerializer(serializers.Serializer):
@@ -20,6 +20,8 @@ class DependentMathesarObjectSerializer(serializers.Serializer):
             object_id = Table.objects.get(oid=object_oid).id
         elif object_type == 'table constraint':
             object_id = Constraint.objects.get(oid=object_oid).id
+        elif object_type == 'schema':
+            object_id = Schema.objects.get(oid=object_oid).id
 
         instance['id'] = object_id
         return super().to_representation(instance)
@@ -37,7 +39,8 @@ class BaseDependentObjectSerializer(
 ):
     serializers_mapping = {
         'table': DependentMathesarObjectSerializer,
-        'table constraint': DependentMathesarObjectSerializer
+        'table constraint': DependentMathesarObjectSerializer,
+        'schema': DependentMathesarObjectSerializer
     }
 
     def create(self, validated_data):
