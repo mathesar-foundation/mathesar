@@ -53,8 +53,20 @@
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: ({ selectedCells } = selection);
-  $: isSelectedInRange =
-    $selectedCells?.size > 1 && isCellSelected($selectedCells, row, column);
+
+  /**
+   * Although the name indicates that this boolean is only true
+   * when more than once cell is selected but because of the bug
+   * that active cell and selected cell does not remain in sync when using keyboard
+   * this boolean is true even when atleast one cell is selected
+   * to differentiate between different active and selected cell
+   * using blue background styling for selected cell
+   * and blue border styling for active cell
+   * The above bug can be fixed when following two conditions are met
+   * 1. We are working on keyboard accessbility of the application.
+   * 2. selectedCells and activeCell are merged in a single store.
+   */
+  $: isSelectedInRange = isCellSelected($selectedCells, row, column);
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
