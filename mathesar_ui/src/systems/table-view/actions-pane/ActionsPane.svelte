@@ -16,14 +16,11 @@
     iconGrouping,
     iconRefresh,
     iconSorting,
-    iconTableLink,
     iconTableInspector,
   } from '@mathesar/icons';
-  import { modal } from '@mathesar/stores/modal';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/utils/api';
   import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/query-builder/urlSerializationUtils';
-  import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
   import Group from './record-operations/Group.svelte';
@@ -33,9 +30,6 @@
   export let table: TableEntry;
 
   const tabularData = getTabularDataStoreFromContext();
-
-  const tableConstraintsModal = modal.spawnModalController();
-  const linkTableModal = modal.spawnModalController();
 
   $: ({
     id,
@@ -86,11 +80,6 @@
     <EntityType>Table</EntityType>
     <h1><TableName {table} /></h1>
   </div>
-
-  <LinkTableModal
-    controller={linkTableModal}
-    on:goToConstraints={() => tableConstraintsModal.open()}
-  />
 
   <Dropdown showArrow={false} contentClass="filter-dropdown-content">
     <svelte:fragment slot="trigger">
@@ -152,17 +141,6 @@
   >
     <Icon {...iconAddNew} />
     <span>New Record</span>
-  </Button>
-
-  <div class="divider" />
-
-  <Button
-    disabled={$isLoading}
-    size="medium"
-    on:click={() => linkTableModal.open()}
-  >
-    <Icon {...iconTableLink} />
-    <span>Link Table</span>
   </Button>
 
   <!-- TODO: Bring back the delete functionality -->
