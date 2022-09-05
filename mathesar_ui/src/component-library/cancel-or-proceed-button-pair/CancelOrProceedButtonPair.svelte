@@ -6,6 +6,7 @@
     iconCancel,
     iconProceed,
   } from '@mathesar-component-library-dir/common/icons';
+  import type { Size } from '@mathesar-component-library-dir/commonTypes';
   import type { ButtonDetails } from './CancelOrProceedButtonPairTypes';
 
   const cancelButtonDefaults: ButtonDetails = {
@@ -25,6 +26,7 @@
   export let canProceed = true;
   export let canCancel = true;
   export let isProcessing = false;
+  export let size: Size | undefined = undefined;
 
   let spinnerButtonProceed: () => Promise<void> = async () => {};
 
@@ -43,7 +45,7 @@
 </script>
 
 <div class="cancel-or-proceed-button-pair">
-  <Button on:click={onCancel} disabled={isProcessing || !canCancel}>
+  <Button on:click={onCancel} disabled={isProcessing || !canCancel} {size}>
     {#if fullCancelButton.icon}<Icon {...fullCancelButton.icon} />{/if}
     <span>{fullCancelButton.label}</span>
   </Button>
@@ -54,5 +56,6 @@
     icon={fullProceedButton.icon}
     label={fullProceedButton.label}
     disabled={isProcessing || !canProceed}
+    {size}
   />
 </div>

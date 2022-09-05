@@ -1,8 +1,4 @@
-export type {
-  TabularData,
-  TabularDataProps,
-  TerseTabularDataProps,
-} from './tabularData';
+export type { TabularData, TabularDataProps } from './tabularData';
 export type { RecordsData, Row } from './records';
 export type { ColumnsData, ColumnsDataStore } from './columns';
 export type {
@@ -10,6 +6,7 @@ export type {
   ProcessedColumnsStore,
 } from './processedColumns';
 export type { Filtering, FilterEntry } from './filtering';
+export type { Grouping, GroupEntry, TerseGrouping } from './grouping';
 export type {
   Constraint,
   ConstraintsData,

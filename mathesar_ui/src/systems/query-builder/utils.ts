@@ -1,15 +1,42 @@
-import { writable } from 'svelte/store';
-import type { Writable } from 'svelte/store';
-import type { CancellablePromise } from '@mathesar-component-library/types';
+import { ImmutableMap } from '@mathesar-component-library';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+import type { QueryResultColumn } from '@mathesar/api/queries/queryList';
+import {
+  getAbstractTypeForDbType,
+  getFiltersForAbstractType,
+  getPreprocFunctionsForAbstractType,
+} from '@mathesar/stores/abstract-types';
 import type {
-  TableEntry,
+  AbstractType,
+  AbstractTypesMap,
+  AbstractTypePreprocFunctionDefinition,
+} from '@mathesar/stores/abstract-types/types';
+import {
+  getCellCap,
+  getDbTypeBasedInputCap,
+} from '@mathesar/components/cell-fabric/utils';
+import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import type { TableEntry } from '@mathesar/api/tables';
+import type {
   JpPath,
   JoinableTableResult,
-} from '@mathesar/api/tables/tableList';
-import CacheManager from '@mathesar/utils/CacheManager';
-import { getAPI } from '@mathesar/utils/api';
-import type { RequestStatus } from '@mathesar/utils/api';
+} from '@mathesar/api/tables/joinable_tables';
 import type { Column } from '@mathesar/api/tables/columns';
+import type QueryModel from './QueryModel';
+
+export interface ProcessedQueryResultColumn extends CellColumnFabric {
+  id: QueryResultColumn['alias'];
+  column: QueryResultColumn;
+  abstractType: AbstractType;
+  inputComponentAndProps: ComponentAndProps;
+  allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
+  preprocFunctions: AbstractTypePreprocFunctionDefinition[];
+}
+
+export type ProcessedQueryResultColumnMap = ImmutableMap<
+  ProcessedQueryResultColumn['id'],
+  ProcessedQueryResultColumn
+>;
 
 export interface InputColumn {
   id: Column['id'];
@@ -43,11 +70,85 @@ export interface ReferencedByTable extends LinkedTable {
   };
 }
 
-interface InputColumnsStoreSubstance {
-  requestStatus: RequestStatus;
+export interface InputColumnsStoreSubstance {
   baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
   tablesThatReferenceBaseTable: Map<ReferencedByTable['id'], ReferencedByTable>;
   columnInformationMap: Map<InputColumn['id'], InputColumn>;
+}
+
+export function processColumn(
+  column: QueryResultColumn,
+  abstractTypeMap: AbstractTypesMap,
+): ProcessedQueryResultColumn {
+  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
+  return {
+    id: column.alias,
+    column,
+    abstractType,
+    cellComponentAndProps: getCellCap(abstractType.cell, column),
+    inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      undefined,
+      abstractType.cell,
+    ),
+    allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
+    preprocFunctions: getPreprocFunctionsForAbstractType(
+      abstractType.identifier,
+    ),
+  };
+}
+
+export function processInitialColumns(
+  initialColumns: QueryModel['initial_columns'],
+  existingProcessedColumns: ProcessedQueryResultColumnMap,
+  abstractTypeMap: AbstractTypesMap,
+  inputColumnInformationMap: InputColumnsStoreSubstance['columnInformationMap'],
+): ProcessedQueryResultColumnMap {
+  let isChangeRequired =
+    initialColumns.length !== existingProcessedColumns.size;
+  const newProcessedColumns: ProcessedQueryResultColumnMap = new ImmutableMap(
+    initialColumns.map((column) => {
+      const existingProcessedColumn = existingProcessedColumns.get(
+        column.alias,
+      );
+      if (existingProcessedColumn) {
+        if (
+          existingProcessedColumn.column.display_name !== column.display_name
+        ) {
+          isChangeRequired = true;
+          return [
+            column.alias,
+            {
+              ...existingProcessedColumn,
+              column: {
+                ...existingProcessedColumn.column,
+                display_name: column.display_name,
+              },
+            },
+          ];
+        }
+
+        return [column.alias, existingProcessedColumn];
+      }
+
+      isChangeRequired = true;
+      return [
+        column.alias,
+        processColumn(
+          {
+            alias: column.alias,
+            display_name: column.display_name,
+            type: inputColumnInformationMap.get(column.id)?.type ?? 'unknown',
+            type_options: null,
+            display_options: null,
+          },
+          abstractTypeMap,
+        ),
+      ];
+    }),
+  );
+
+  return isChangeRequired ? newProcessedColumns : existingProcessedColumns;
 }
 
 // Inorder to place all columns with links at the end while sorting
@@ -215,93 +316,4 @@ export function getTablesThatReferenceBaseTable(
   });
 
   return references;
-}
-
-export default class InputColumnsManager {
-  fetchPromise: CancellablePromise<JoinableTableResult> | undefined;
-
-  cacheManager: CacheManager<
-    number,
-    Omit<InputColumnsStoreSubstance, 'requestStatus'>
-  > = new CacheManager(5);
-
-  baseTable: TableEntry | undefined;
-
-  inputColumns: Writable<InputColumnsStoreSubstance> = writable({
-    requestStatus: { state: 'success' },
-    baseTableColumns: new Map(),
-    tablesThatReferenceBaseTable: new Map(),
-    columnInformationMap: new Map(),
-  });
-
-  async generateTreeForBaseTable(): Promise<void> {
-    this.fetchPromise?.cancel();
-    this.inputColumns.update((columnInfo) => ({
-      ...columnInfo,
-      requestStatus: { state: 'processing' },
-    }));
-
-    if (!this.baseTable) {
-      this.inputColumns.set({
-        baseTableColumns: new Map(),
-        tablesThatReferenceBaseTable: new Map(),
-        columnInformationMap: new Map(),
-        requestStatus: { state: 'success' },
-      });
-      return;
-    }
-
-    const cachedResult = this.cacheManager.get(this.baseTable.id);
-    if (cachedResult) {
-      this.inputColumns.set({
-        ...cachedResult,
-        requestStatus: { state: 'success' },
-      });
-      return;
-    }
-
-    try {
-      this.fetchPromise = getAPI<JoinableTableResult>(
-        `/api/db/v0/tables/${this.baseTable.id}/joinable_tables/`,
-      );
-      const result = await this.fetchPromise;
-      const baseTableColumns = getBaseTableColumnsWithLinks(
-        result,
-        this.baseTable,
-      );
-      const tablesThatReferenceBaseTable = getTablesThatReferenceBaseTable(
-        result,
-        this.baseTable,
-      );
-      const columnInformationMap = getColumnInformationMap(
-        result,
-        this.baseTable,
-      );
-      this.cacheManager.set(this.baseTable.id, {
-        baseTableColumns,
-        tablesThatReferenceBaseTable,
-        columnInformationMap,
-      });
-      this.inputColumns.set({
-        baseTableColumns,
-        tablesThatReferenceBaseTable,
-        columnInformationMap,
-        requestStatus: { state: 'success' },
-      });
-    } catch (err: unknown) {
-      const error =
-        err instanceof Error
-          ? err.message
-          : 'There was an error fetching joinable links';
-      this.inputColumns.update((columnInfo) => ({
-        ...columnInfo,
-        requestStatus: { state: 'failure', errors: [error] },
-      }));
-    }
-  }
-
-  async setBaseTable(_baseTable?: TableEntry): Promise<void> {
-    this.baseTable = _baseTable;
-    await this.generateTreeForBaseTable();
-  }
 }

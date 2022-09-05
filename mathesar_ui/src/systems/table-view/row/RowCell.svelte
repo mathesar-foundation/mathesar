@@ -21,13 +21,20 @@
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
   import { iconSetToNull } from '@mathesar/icons';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import {
+    isCellSelected,
+    Selection,
+  } from '@mathesar/stores/table-data/selection';
   import CellErrors from './CellErrors.svelte';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let recordsData: RecordsData;
   export let display: Display;
+  export let selection: Selection;
   export let row: Row;
   export let rowIsSelected = false;
   export let rowIsProcessing = false;
@@ -37,11 +44,17 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
+  export let dataForRecordSummaryInFkCell:
+    | DataForRecordSummaryInFkCell
+    | undefined = undefined;
 
   $: recordsDataState = recordsData.state;
-  $: ({ column } = processedColumn);
+  $: ({ column, linkFk } = processedColumn);
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
+  $: ({ selectedCells } = selection);
+  $: isSelectedInRange =
+    $selectedCells?.size > 1 && isCellSelected($selectedCells, row, column);
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -51,6 +64,17 @@
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isEditable = !column.primary_key;
+  $: getRecordPageUrl = $storeToGetRecordPageUrl;
+  $: recordPageLinkHref = (() => {
+    if (linkFk) {
+      const tableId = linkFk.referent_table;
+      return getRecordPageUrl({ tableId, recordId: value });
+    }
+    if (column.primary_key) {
+      return getRecordPageUrl({ recordId: value });
+    }
+    return undefined;
+  })();
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -117,12 +141,25 @@
     <CellFabric
       columnFabric={processedColumn}
       {isActive}
+      {isSelectedInRange}
       {value}
+      {dataForRecordSummaryInFkCell}
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}
-      on:activate={() => display.selectCell(row, column)}
+      on:activate={() => {
+        display.selectCell(row, column);
+        // Activate event initaites the selection process
+        selection.onStartSelection(row, column);
+      }}
       on:update={valueUpdated}
+      {recordPageLinkHref}
+      horizontalAlignment={column.primary_key ? 'left' : undefined}
+      on:mouseenter={() => {
+        // This enables the click + drag to
+        // select multiple cells
+        selection.onMouseEnterWhileSelection(row, column);
+      }}
     />
     <ContextMenu>
       <MenuItem

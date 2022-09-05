@@ -1,18 +1,18 @@
 <script lang="ts">
   import { Spinner } from '@mathesar-component-library';
   import SelectableColumnTree from './SelectableColumnTree.svelte';
-  import type InputColumnsManager from '../InputColumnsManager';
+  import type QueryManager from '../QueryManager';
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
 
-  export let inputColumnsManager: InputColumnsManager;
+  export let queryManager: QueryManager;
 
-  $: ({ inputColumns } = inputColumnsManager);
-  $: ({ requestStatus, baseTableColumns, tablesThatReferenceBaseTable } =
-    $inputColumns);
+  $: ({ inputColumns, state } = queryManager);
+  $: ({ inputColumnsFetchState } = $state);
+  $: ({ baseTableColumns, tablesThatReferenceBaseTable } = $inputColumns);
 </script>
 
 <aside>
-  {#if requestStatus.state === 'success'}
+  {#if inputColumnsFetchState?.state === 'success'}
     <SelectableColumnTree columnsWithLinks={baseTableColumns} on:add />
     {#if tablesThatReferenceBaseTable.size > 0}
       <div data-identifier="referenced-by-tables">
@@ -27,9 +27,9 @@
         {/each}
       </div>
     {/if}
-  {:else if requestStatus.state === 'failure'}
-    {requestStatus.errors.join(' ')}
-  {:else}
+  {:else if inputColumnsFetchState?.state === 'failure'}
+    {inputColumnsFetchState.errors.join(' ')}
+  {:else if inputColumnsFetchState?.state === 'processing'}
     <Spinner />
   {/if}
 </aside>

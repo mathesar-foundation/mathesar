@@ -1,41 +1,30 @@
-import { get } from 'svelte/store';
-import type { DBObjectEntry, ViewEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/tables/tableList';
-import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/tables';
 import type { TabularDataProps } from './tabularData';
 import { TabularData } from './tabularData';
-import { TabularType } from './TabularType';
 
 const tableMap: Map<TableEntry['id'], TabularData> = new Map();
-const viewMap: Map<ViewEntry['id'], TabularData> = new Map();
 
 export function getTabularData(
   props: TabularDataProps,
 ): TabularData | undefined {
-  const tabularMap = props.type === TabularType.View ? viewMap : tableMap;
-  return tabularMap.get(props.id);
+  return tableMap.get(props.id);
 }
 
 export function initTabularData(props: TabularDataProps): TabularData {
-  const abstractTypesMap = get(currentDbAbstractTypes).data;
-  const tabularMap = props.type === TabularType.View ? viewMap : tableMap;
-  let entry = tabularMap.get(props.id);
+  let entry = tableMap.get(props.id);
   if (!entry) {
-    entry = new TabularData(props, abstractTypesMap);
-    tabularMap.set(props.id, entry);
+    entry = new TabularData(props);
+    tableMap.set(props.id, entry);
   }
   return entry;
 }
 
-export function removeTabularData(
-  type: TabularType,
-  id: DBObjectEntry['id'],
-): void {
-  const tabularMap = type === TabularType.View ? viewMap : tableMap;
+export function removeTabularData(id: DBObjectEntry['id']): void {
   // destroy all objects in table
-  const entry = tabularMap.get(id);
+  const entry = tableMap.get(id);
   if (entry) {
     entry.destroy();
-    tabularMap.delete(id);
+    tableMap.delete(id);
   }
 }

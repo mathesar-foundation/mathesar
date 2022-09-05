@@ -9,7 +9,7 @@
     Spinner,
     TextInput,
   } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -18,7 +18,6 @@
   import {
     ColumnsDataStore,
     getTabularDataStoreFromContext,
-    TabularType,
   } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/tables/columns';
   import { tables as tablesStore } from '@mathesar/stores/tables';
@@ -88,9 +87,7 @@
   $: columnsDataStore = $tabularData.columnsDataStore;
   $: baseTableColumns = $columnsDataStore.columns;
   $: targetTableColumnsStore = ensureReadable(
-    targetTable
-      ? new ColumnsDataStore(TabularType.Table, targetTable.id)
-      : undefined,
+    targetTable ? new ColumnsDataStore(targetTable.id) : undefined,
   );
   $: targetTableColumnsAreLoading =
     $targetTableColumnsStore?.state === States.Loading;
@@ -159,11 +156,7 @@
 
     <FormField>
       <LabeledInput label="Target Table" layout="stacked">
-        <SelectTable
-          {tables}
-          bind:table={targetTable}
-          initialSelectionType="empty"
-        />
+        <SelectTable {tables} bind:table={targetTable} autoSelect="clear" />
       </LabeledInput>
     </FormField>
 

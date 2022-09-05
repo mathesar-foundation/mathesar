@@ -4,9 +4,11 @@
 
   export let element: HTMLElement | undefined = undefined;
   export let isActive = false;
+  export let isSelectedInRange = false;
   export let disabled = false;
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
+  export let hasPadding = true;
 
   /**
    * This only affects the alignment of the displayed value while in
@@ -32,26 +34,29 @@
 <div
   class="cell-wrapper"
   class:is-active={isActive}
+  class:is-selected-in-range={isSelectedInRange}
   class:disabled
   class:is-edit-mode={mode === 'edit'}
   class:truncate={multiLineTruncate}
   class:h-align-right={horizontalAlignment === 'right'}
   class:h-align-center={horizontalAlignment === 'center'}
+  class:has-padding={hasPadding}
   bind:this={element}
   on:click
   on:dblclick
   on:mousedown
+  on:mouseenter
   on:keydown
   tabindex={-1}
   {...$$restProps}
 >
-  <slot />
+  <div class="cell-wrapper-content"><slot /></div>
+  <div class="icon"><slot name="icon" /></div>
 </div>
 
 <style lang="scss">
   .cell-wrapper {
     overflow: hidden;
-    padding: 6px 8px;
     position: relative;
     display: flex;
     flex: 1 1 auto;
@@ -59,8 +64,30 @@
     align-items: center;
     width: 100%;
 
+    .cell-wrapper-content {
+      flex: 1 1 100%;
+      overflow: hidden;
+    }
+    .icon {
+      flex: 0 0 auto;
+    }
+    .icon:not(:empty) {
+      margin-left: 0.5rem;
+    }
+
+    &.has-padding {
+      padding: 6px 8px;
+    }
+
     &.h-align-right {
-      justify-content: flex-end;
+      flex-direction: row-reverse;
+      .cell-wrapper-content {
+        text-align: right;
+      }
+      .icon:not(:empty) {
+        margin-left: 0;
+        margin-right: 0.5rem;
+      }
     }
     &.h-align-center {
       justify-content: center;
@@ -73,6 +100,10 @@
       &.disabled {
         box-shadow: 0 0 0 2px #a8a8a8;
       }
+    }
+
+    &.is-selected-in-range {
+      background-color: rgba(14, 101, 235, 0.1);
     }
 
     :global(.input-element) {
@@ -90,6 +121,11 @@
         resize: vertical;
         min-height: 5em;
       }
+    }
+  }
+  @media (hover: hover) {
+    .cell-wrapper:not(:hover) .icon {
+      display: none;
     }
   }
 </style>

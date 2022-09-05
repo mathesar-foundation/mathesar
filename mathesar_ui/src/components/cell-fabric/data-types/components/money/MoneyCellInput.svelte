@@ -32,10 +32,13 @@
   {...$$restProps}
   value={childValue}
   on:blur
+  on:focus
   on:keydown
   on:input={({ detail: newChildValue }) => {
     parentValue = newChildValue;
   }}
   on:input
+  on:artificialInput
+  on:artificialChange
   --input-element-text-align="right"
 />

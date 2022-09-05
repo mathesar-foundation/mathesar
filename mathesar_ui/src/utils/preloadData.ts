@@ -3,7 +3,7 @@ import type {
   SchemaResponse,
   AbstractTypeResponse,
 } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/tables/tableList';
+import type { TableEntry } from '@mathesar/api/tables';
 import type { QueryInstance } from '@mathesar/api/queries/queryList';
 
 interface CommonData {

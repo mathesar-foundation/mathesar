@@ -1,98 +1,70 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import { EventHandler } from '@mathesar-component-library';
-import type { CancellablePromise } from '@mathesar-component-library';
+import {
+  EventHandler,
+  ImmutableMap,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
+import type { CancellablePromise } from '@mathesar-component-library/types';
 import { getAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
+import CacheManager from '@mathesar/utils/CacheManager';
 import type {
   QueryInstance,
   QueryResultColumn,
   QueryResultColumns,
   QueryResultRecords,
 } from '@mathesar/api/queries/queryList';
+import type { TableEntry } from '@mathesar/api/tables';
+import type { JoinableTableResult } from '@mathesar/api/tables/joinable_tables';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
-import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import { getTable } from '@mathesar/stores/tables';
 import Pagination from '@mathesar/utils/Pagination';
-import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import { toast } from '@mathesar/stores/toast';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { getCellCap } from '@mathesar/components/cell-fabric/utils';
+import { validateFilterEntry } from '@mathesar/components/filter-entry';
 import type QueryModel from './QueryModel';
 import type { QueryModelUpdateDiff } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
+import {
+  processColumn,
+  getTablesThatReferenceBaseTable,
+  getBaseTableColumnsWithLinks,
+  getColumnInformationMap,
+  processInitialColumns,
+} from './utils';
+import type {
+  ProcessedQueryResultColumn,
+  ProcessedQueryResultColumnMap,
+  InputColumnsStoreSubstance,
+} from './utils';
+import QueryFilterTransformationModel from './QueryFilterTransformationModel';
+import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 
-export interface ProcessedQueryResultColumn extends CellColumnFabric {
-  id: QueryResultColumn['alias'];
-  column: QueryResultColumn;
-}
-
-export type ProcessedQueryResultColumnMap = Map<
-  ProcessedQueryResultColumn['id'],
-  ProcessedQueryResultColumn
->;
-
-function processColumn(
-  column: QueryResultColumn,
-  abstractTypeMap: AbstractTypesMap,
-): ProcessedQueryResultColumn {
-  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
-  return {
-    id: column.alias,
-    column,
-    cellComponentAndProps: getCellCap(abstractType.cell, column),
-  };
-}
-
-function calcProcessedColumnsBasedOnInitialColumns(
-  initialColumns: QueryModel['initial_columns'],
-  existingProcessedColumns: ProcessedQueryResultColumnMap,
-  abstractTypeMap: AbstractTypesMap,
-): ProcessedQueryResultColumnMap {
-  let isChangeRequired =
-    initialColumns.length !== existingProcessedColumns.size;
-  const newProcessedColumns: ProcessedQueryResultColumnMap = new Map(
-    initialColumns.map((column) => {
-      const existingProcessedColumn = existingProcessedColumns.get(
-        column.alias,
+function validateQuery(
+  queryModel: QueryModel,
+  columnMap: ProcessedQueryResultColumnMap,
+): boolean {
+  const general =
+    isDefinedNonNullable(queryModel.base_table) &&
+    isDefinedNonNullable(queryModel.name) &&
+    queryModel.name.trim() !== '';
+  if (!general) {
+    return false;
+  }
+  return queryModel.transformationModels.every((transformation) => {
+    if (transformation instanceof QueryFilterTransformationModel) {
+      const column = columnMap.get(transformation.columnIdentifier);
+      const condition = column?.allowedFiltersMap.get(
+        transformation.conditionIdentifier,
       );
-      if (existingProcessedColumn) {
-        if (
-          existingProcessedColumn.column.display_name !== column.display_name
-        ) {
-          isChangeRequired = true;
-          return [
-            column.alias,
-            {
-              ...existingProcessedColumn,
-              column: {
-                ...existingProcessedColumn.column,
-                display_name: column.display_name,
-              },
-            },
-          ];
-        }
-
-        return [column.alias, existingProcessedColumn];
+      if (condition) {
+        return validateFilterEntry(condition, transformation.value);
       }
-
-      isChangeRequired = true;
-      return [
-        column.alias,
-        processColumn(
-          {
-            alias: column.alias,
-            display_name: column.display_name,
-            type: 'unknown',
-            type_options: null,
-            display_options: null,
-          },
-          abstractTypeMap,
-        ),
-      ];
-    }),
-  );
-
-  return isChangeRequired ? newProcessedColumns : existingProcessedColumns;
+      return false;
+    }
+    return true;
+  });
 }
 
 export default class QueryManager extends EventHandler<{
@@ -102,9 +74,14 @@ export default class QueryManager extends EventHandler<{
 
   undoRedoManager: QueryUndoRedoManager;
 
-  // cache: Writable<{}>;
+  cacheManagers: {
+    inputColumns: CacheManager<number, InputColumnsStoreSubstance>;
+  } = {
+    inputColumns: new CacheManager(5),
+  };
 
   state: Writable<{
+    inputColumnsFetchState?: RequestStatus;
     saveState?: RequestStatus;
     columnsFetchState?: RequestStatus;
     recordsFetchState?: RequestStatus;
@@ -119,13 +96,29 @@ export default class QueryManager extends EventHandler<{
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 100 }));
 
-  processedQueryColumns: Writable<ProcessedQueryResultColumnMap> = writable(
-    new Map() as ProcessedQueryResultColumnMap,
-  );
-
   records: Writable<QueryResultRecords> = writable({ count: 0, results: [] });
 
   abstractTypeMap: AbstractTypesMap;
+
+  inputColumns: Writable<InputColumnsStoreSubstance> = writable({
+    baseTableColumns: new Map(),
+    tablesThatReferenceBaseTable: new Map(),
+    columnInformationMap: new Map(),
+  });
+
+  // Processed columns
+
+  processedInitialColumns: Writable<ProcessedQueryResultColumnMap> = writable(
+    new ImmutableMap(),
+  );
+
+  processedVirtualColumns: Writable<ProcessedQueryResultColumnMap> = writable(
+    new ImmutableMap(),
+  );
+
+  processedResultColumns: Writable<ProcessedQueryResultColumnMap> = writable(
+    new ImmutableMap(),
+  );
 
   // Display stores
 
@@ -133,6 +126,12 @@ export default class QueryManager extends EventHandler<{
     writable(undefined);
 
   // Promises
+
+  baseTableFetchPromise: CancellablePromise<TableEntry> | undefined;
+
+  joinableColumnsfetchPromise:
+    | CancellablePromise<JoinableTableResult>
+    | undefined;
 
   querySavePromise: CancellablePromise<QueryInstance> | undefined;
 
@@ -144,10 +143,102 @@ export default class QueryManager extends EventHandler<{
     super();
     this.abstractTypeMap = abstractTypeMap;
     this.query = writable(query);
-    this.undoRedoManager = new QueryUndoRedoManager(
-      query.isSaveable() ? query : undefined,
-    );
+    this.reprocessColumns('both');
+    this.undoRedoManager = new QueryUndoRedoManager();
+    const inputColumnTreePromise = this.calculateInputColumnTree();
+    void inputColumnTreePromise.then(() => {
+      const isQueryValid = validateQuery(
+        query,
+        get(this.processedInitialColumns).withEntries(
+          get(this.processedVirtualColumns),
+        ),
+      );
+      this.undoRedoManager.pushState(query, isQueryValid);
+      return query;
+    });
     void this.fetchColumnsAndRecords();
+  }
+
+  private async calculateInputColumnTree(): Promise<void> {
+    const baseTableId = get(this.query).base_table;
+    if (!baseTableId) {
+      this.inputColumns.set({
+        baseTableColumns: new Map(),
+        tablesThatReferenceBaseTable: new Map(),
+        columnInformationMap: new Map(),
+      });
+      this.state.update((state) => ({
+        ...state,
+        inputColumnsFetchState: { state: 'success' },
+      }));
+      return;
+    }
+
+    const cachedResult = this.cacheManagers.inputColumns.get(baseTableId);
+    if (cachedResult) {
+      this.inputColumns.set({
+        ...cachedResult,
+      });
+      this.state.update((state) => ({
+        ...state,
+        inputColumnsFetchState: { state: 'success' },
+      }));
+      this.reprocessColumns('both', false);
+      return;
+    }
+
+    try {
+      this.baseTableFetchPromise?.cancel();
+      this.joinableColumnsfetchPromise?.cancel();
+
+      this.state.update((state) => ({
+        ...state,
+        inputColumnsFetchState: { state: 'processing' },
+      }));
+
+      // TODO: Refactor our stores to mimic our db
+      this.baseTableFetchPromise = getTable(baseTableId);
+      this.joinableColumnsfetchPromise = getAPI<JoinableTableResult>(
+        `/api/db/v0/tables/${baseTableId}/joinable_tables/`,
+      );
+      const [baseTableResult, joinableColumnsResult] = await Promise.all([
+        this.baseTableFetchPromise,
+        this.joinableColumnsfetchPromise,
+      ]);
+      const baseTableColumns = getBaseTableColumnsWithLinks(
+        joinableColumnsResult,
+        baseTableResult,
+      );
+      const tablesThatReferenceBaseTable = getTablesThatReferenceBaseTable(
+        joinableColumnsResult,
+        baseTableResult,
+      );
+      const columnInformationMap = getColumnInformationMap(
+        joinableColumnsResult,
+        baseTableResult,
+      );
+      const inputColumns = {
+        baseTableColumns,
+        tablesThatReferenceBaseTable,
+        columnInformationMap,
+      };
+      this.cacheManagers.inputColumns.set(baseTableId, inputColumns);
+      this.inputColumns.set(inputColumns);
+      this.reprocessColumns('both', false);
+      this.state.update((state) => ({
+        ...state,
+        inputColumnsFetchState: { state: 'success' },
+      }));
+    } catch (err: unknown) {
+      const error =
+        err instanceof Error
+          ? err.message
+          : 'There was an error fetching joinable links';
+      this.state.update((state) => ({
+        ...state,
+        inputColumnsFetchState: { state: 'failure', errors: [error] },
+      }));
+    }
   }
 
   async fetchColumnsAndRecords(): Promise<
@@ -160,63 +251,185 @@ export default class QueryManager extends EventHandler<{
     return Promise.all([this.fetchColumns(), this.fetchResults()]);
   }
 
-  reCalculateProcessedColumns(): void {
-    const initialColumns = get(this.query).initial_columns;
-    // We are not creating a derived store so that we calculate
-    // processed columns only in required scenarios and not everytime
-    // query store changes.
-    this.processedQueryColumns.update((existing) =>
-      calcProcessedColumnsBasedOnInitialColumns(
-        initialColumns,
-        existing,
-        this.abstractTypeMap,
-      ),
-    );
+  /**
+   * We are not creating a derived store so that we need to control
+   * the callback only for essential scenarios and not everytime
+   * query store changes.
+   */
+  private reprocessColumns(
+    type: 'both' | 'initial' | 'virtual',
+    setResultColumns = true,
+  ): void {
+    const queryModel = this.getQueryModel();
+    const initialColumns = queryModel.initial_columns;
+    if (type === 'initial' || type === 'both') {
+      const { columnInformationMap } = get(this.inputColumns);
+      if (columnInformationMap.size === 0 && initialColumns.length !== 0) {
+        return;
+      }
+      this.processedInitialColumns.update((existing) =>
+        processInitialColumns(
+          initialColumns,
+          existing,
+          this.abstractTypeMap,
+          columnInformationMap,
+        ),
+      );
+    }
+
+    const summarizationTransforms: QuerySummarizationTransformationModel[] =
+      queryModel.transformationModels.filter(
+        (transform): transform is QuerySummarizationTransformationModel =>
+          transform instanceof QuerySummarizationTransformationModel,
+      );
+    if (type === 'virtual' || type === 'both') {
+      const virtualColumns: Map<
+        ProcessedQueryResultColumn['id'],
+        ProcessedQueryResultColumn
+      > = new Map();
+      summarizationTransforms.forEach((transformation) => {
+        [...transformation.aggregations.values()].forEach((entry) => {
+          virtualColumns.set(
+            entry.outputAlias,
+            processColumn(
+              {
+                alias: entry.outputAlias,
+                display_name: entry.displayName,
+                type:
+                  entry.function === 'aggregate_to_array'
+                    ? '_array'
+                    : 'integer',
+                type_options: null,
+                display_options: null,
+              },
+              this.abstractTypeMap,
+            ),
+          );
+        });
+      });
+      this.processedVirtualColumns.set(new ImmutableMap(virtualColumns));
+    }
+
+    if (setResultColumns) {
+      const processedInitialColumns = get(this.processedInitialColumns);
+      const processedVirtualColumns = get(this.processedVirtualColumns);
+      if (summarizationTransforms.length > 0) {
+        const lastTransform =
+          summarizationTransforms[summarizationTransforms.length - 1];
+        const result = new Map();
+        lastTransform.getOutputColumnAliases().forEach((alias) => {
+          const column =
+            processedVirtualColumns.get(alias) ??
+            processedInitialColumns.get(alias);
+          if (column) {
+            result.set('alias', column);
+          } else {
+            console.error(
+              'This should never happen - Output column not found in both virtual and initial column list',
+            );
+          }
+        });
+        this.processedResultColumns.set(new ImmutableMap(result));
+      } else {
+        this.processedResultColumns.set(
+          new ImmutableMap(processedInitialColumns),
+        );
+      }
+    }
   }
 
-  async save(): Promise<QueryInstance | undefined> {
-    const q = this.getQueryModelData();
-    if (q.isSaveable()) {
-      try {
-        this.state.update((_state) => ({
-          ..._state,
-          saveState: { state: 'processing' },
-        }));
-        this.querySavePromise?.cancel();
-        if (q.id) {
-          // TODO: Find cause
-          // Typescript does not seem to identify q assignable to QueryInstance
-          this.querySavePromise = putQuery(q as QueryInstance);
-        } else {
-          this.querySavePromise = createQuery(q);
-        }
-        const result = await this.querySavePromise;
-        this.query.update((qr) => qr.withId(result.id).model);
-        this.state.update((_state) => ({
-          ..._state,
-          saveState: { state: 'success' },
-        }));
-        await this.dispatch('save', result);
-        return result;
-      } catch (err) {
-        const errors =
-          err instanceof Error
-            ? [err.message]
-            : ['An error occurred while trying to save the query'];
+  private resetProcessedColumns(): void {
+    this.processedResultColumns.set(new ImmutableMap());
+  }
+
+  private setProcessedColumnsFromResults(
+    resultColumns: QueryResultColumn[],
+  ): void {
+    const newColumns = new ImmutableMap(
+      resultColumns.map((column) => [
+        column.alias,
+        processColumn(column, this.abstractTypeMap),
+      ]),
+    );
+    this.processedResultColumns.set(newColumns);
+  }
+
+  private async updateQuery(queryModel: QueryModel): Promise<{
+    clientValidationState: RequestStatus;
+    query?: QueryInstance;
+  }> {
+    this.query.set(queryModel);
+    this.state.update((_state) => ({
+      ..._state,
+      saveState: { state: 'processing' },
+    }));
+
+    try {
+      this.querySavePromise?.cancel();
+      if (get(this.state).inputColumnsFetchState?.state !== 'success') {
+        await this.calculateInputColumnTree();
+      }
+      const isQueryValid = validateQuery(
+        queryModel,
+        get(this.processedInitialColumns).withEntries(
+          get(this.processedVirtualColumns),
+        ),
+      );
+      if (!isQueryValid) {
         this.state.update((_state) => ({
           ..._state,
           saveState: {
             state: 'failure',
-            errors,
+            errors: ['Query validation failed'],
           },
         }));
-        toast.error(`Unable to save query: ${errors.join(',')}`);
+        return {
+          clientValidationState: {
+            state: 'failure',
+            errors: ['TODO: Place validation errors here '],
+          },
+        };
       }
+
+      const queryJSON = queryModel.toJSON();
+      if (typeof queryJSON.id !== 'undefined') {
+        // TODO: Figure out a better way to help TS identify this as a saved instance
+        this.querySavePromise = putQuery(queryJSON as QueryInstance);
+      } else {
+        this.querySavePromise = createQuery(queryJSON);
+      }
+      const result = await this.querySavePromise;
+      this.query.update((qr) => qr.withId(result.id).model);
+      this.state.update((_state) => ({
+        ..._state,
+        saveState: { state: 'success' },
+      }));
+      await this.dispatch('save', result);
+      return {
+        clientValidationState: { state: 'success' },
+        query: result,
+      };
+    } catch (err) {
+      const errors =
+        err instanceof Error
+          ? [err.message]
+          : ['An error occurred while trying to save the query'];
+      this.state.update((_state) => ({
+        ..._state,
+        saveState: {
+          state: 'failure',
+          errors,
+        },
+      }));
+      toast.error(`Unable to save query: ${errors.join(',')}`);
     }
-    return undefined;
+    return {
+      clientValidationState: { state: 'success' },
+      query: undefined,
+    };
   }
 
-  setUndoRedoStates(): void {
+  private setUndoRedoStates(): void {
     this.state.update((_state) => ({
       ..._state,
       isUndoPossible: this.undoRedoManager.isUndoPossible(),
@@ -224,15 +437,15 @@ export default class QueryManager extends EventHandler<{
     }));
   }
 
-  async fetchColumns(): Promise<QueryResultColumns | undefined> {
-    const q = this.getQueryModelData();
+  private async fetchColumns(): Promise<QueryResultColumns | undefined> {
+    const q = this.getQueryModel();
 
-    if (!q.id) {
+    if (typeof q.id === 'undefined') {
       this.state.update((_state) => ({
         ..._state,
         columnsFetchState: { state: 'success' },
       }));
-      this.processedQueryColumns.set(new Map());
+      this.resetProcessedColumns();
       return undefined;
     }
 
@@ -246,14 +459,7 @@ export default class QueryManager extends EventHandler<{
         `/api/db/v0/queries/${q.id}/columns/`,
       );
       const result = await this.queryColumnsFetchPromise;
-      this.processedQueryColumns.set(
-        new Map(
-          result.map((column) => [
-            column.alias,
-            processColumn(column, this.abstractTypeMap),
-          ]),
-        ),
-      );
+      this.setProcessedColumnsFromResults(result);
       this.state.update((_state) => ({
         ..._state,
         columnsFetchState: { state: 'success' },
@@ -274,10 +480,10 @@ export default class QueryManager extends EventHandler<{
     return undefined;
   }
 
-  async fetchResults(): Promise<QueryResultRecords | undefined> {
-    const q = this.getQueryModelData();
+  private async fetchResults(): Promise<QueryResultRecords | undefined> {
+    const q = this.getQueryModel();
 
-    if (!q.id) {
+    if (typeof q.id === 'undefined') {
       this.state.update((_state) => ({
         ..._state,
         recordsFetchState: { state: 'success' },
@@ -297,7 +503,10 @@ export default class QueryManager extends EventHandler<{
         `/api/db/v0/queries/${q.id}/records/?limit=${limit}&offset=${offset}`,
       );
       const result = await this.queryRecordsFetchPromise;
-      this.records.set(result);
+      this.records.set({
+        count: result.count,
+        results: result.results ?? [],
+      });
       this.state.update((_state) => ({
         ..._state,
         recordsFetchState: { state: 'success' },
@@ -330,7 +539,7 @@ export default class QueryManager extends EventHandler<{
     return result;
   }
 
-  resetPaginationPane(): void {
+  private resetPaginationPane(): void {
     this.pagination.update(
       (pagination) =>
         new Pagination({
@@ -340,11 +549,11 @@ export default class QueryManager extends EventHandler<{
     );
   }
 
-  resetResults(): void {
+  private resetResults(): void {
     this.queryColumnsFetchPromise?.cancel();
     this.queryRecordsFetchPromise?.cancel();
     this.records.set({ count: 0, results: [] });
-    this.processedQueryColumns.set(new Map());
+    this.resetProcessedColumns();
     this.selectedColumnAlias.set(undefined);
     this.state.update((state) => ({
       ...state,
@@ -357,52 +566,61 @@ export default class QueryManager extends EventHandler<{
   async update(
     callback: (queryModel: QueryModel) => QueryModelUpdateDiff,
   ): Promise<void> {
-    const updateDiff = callback(this.getQueryModelData());
-    this.query.set(updateDiff.model);
-    if (updateDiff.model.isSaveable()) {
-      // Push entire model instead of diff to always
-      // reload entire state during undo-redo operations
-      this.undoRedoManager.pushState(updateDiff.model);
-    }
+    const updateDiff = callback(this.getQueryModel());
+    const { clientValidationState } = await this.updateQuery(updateDiff.model);
+    const isValid = clientValidationState.state === 'success';
+    this.undoRedoManager.pushState(updateDiff.model, isValid);
     this.setUndoRedoStates();
-    await this.save();
-    switch (updateDiff.type) {
-      case 'id':
-      case 'name':
-        break;
-      case 'baseTable':
-        this.resetResults();
-        break;
-      case 'initialColumnName':
-        this.reCalculateProcessedColumns();
-        break;
-      case 'initialColumnsArray':
-        if (!updateDiff.diff.initial_columns?.length) {
-          // All columns have been deleted
+    if (isValid) {
+      switch (updateDiff.type) {
+        case 'baseTable':
           this.resetResults();
-        } else {
-          this.reCalculateProcessedColumns();
+          await this.calculateInputColumnTree();
+          break;
+        case 'initialColumnName':
+          this.reprocessColumns('initial');
+          break;
+        case 'initialColumnsArray':
+          if (!updateDiff.diff.initial_columns?.length) {
+            // All columns have been deleted
+            this.resetResults();
+          } else {
+            this.reprocessColumns('initial');
+            await this.fetchColumnsAndRecords();
+          }
+          break;
+        case 'transformations':
+          this.resetPaginationPane();
           await this.fetchColumnsAndRecords();
-        }
-        break;
-      default:
-        await this.fetchColumnsAndRecords();
+          break;
+        default:
+          break;
+      }
     }
   }
 
-  async performUndoRedoSync(query?: QueryModel): Promise<void> {
+  // Meant to be used directly outside query manager
+  async save(): Promise<void> {
+    await this.updateQuery(this.getQueryModel());
+    this.resetPaginationPane();
+    await this.fetchColumnsAndRecords();
+  }
+
+  private async performUndoRedoSync(query?: QueryModel): Promise<void> {
     if (query) {
-      const currentQueryModelData = this.getQueryModelData();
+      const currentQueryModelData = this.getQueryModel();
       let queryToSet = query;
       if (currentQueryModelData?.id) {
         queryToSet = query.withId(currentQueryModelData.id).model;
       }
       this.query.set(queryToSet);
-      this.reCalculateProcessedColumns();
-      await this.save();
+      this.reprocessColumns('both');
+      await this.updateQuery(queryToSet);
+      this.setUndoRedoStates();
       await this.fetchColumnsAndRecords();
+    } else {
+      this.setUndoRedoStates();
     }
-    this.setUndoRedoStates();
   }
 
   async undo(): Promise<void> {
@@ -415,7 +633,7 @@ export default class QueryManager extends EventHandler<{
     await this.performUndoRedoSync(query);
   }
 
-  getQueryModelData(): QueryModel {
+  getQueryModel(): QueryModel {
     return get(this.query);
   }
 

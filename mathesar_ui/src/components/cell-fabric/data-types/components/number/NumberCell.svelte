@@ -4,12 +4,16 @@
     isDefinedNonNullable,
   } from '@mathesar-component-library';
   import SteppedInputCell from '../SteppedInputCell.svelte';
-  import type { NumberCellProps } from '../typeDefinitions';
+  import type {
+    HorizontalAlignment,
+    NumberCellProps,
+  } from '../typeDefinitions';
   import NumberCellInput from './NumberCellInput.svelte';
 
   type $$Props = NumberCellProps;
 
   export let isActive: $$Props['isActive'];
+  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
   export let useGrouping: $$Props['useGrouping'];
@@ -17,6 +21,7 @@
   export let maximumFractionDigits: $$Props['maximumFractionDigits'];
   export let locale: $$Props['locale'];
   export let allowFloat: $$Props['allowFloat'];
+  export let horizontalAlignment: HorizontalAlignment = 'right';
 
   $: formatterOptions = {
     locale,
@@ -46,15 +51,18 @@
 <SteppedInputCell
   {value}
   {isActive}
+  {isSelectedInRange}
   {disabled}
   {formatValue}
-  horizontalAlignment="right"
+  {horizontalAlignment}
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown
   on:activate
+  on:mouseenter
   on:update
 >
+  <slot name="icon" slot="icon" />
   <NumberCellInput
     {disabled}
     bind:value

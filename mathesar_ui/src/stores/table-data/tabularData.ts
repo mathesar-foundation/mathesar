@@ -1,10 +1,10 @@
 import { getContext, setContext } from 'svelte';
-import type { Writable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 import { derived } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import type { TerseMetaProps, MetaProps } from './meta';
-import { makeMetaProps, makeTerseMetaProps, Meta } from './meta';
+import { States } from '@mathesar/utils/api';
+import { Meta } from './meta';
 import type { ColumnsData } from './columns';
 import { ColumnsDataStore } from './columns';
 import type { TableRecordsData } from './records';
@@ -12,42 +12,17 @@ import { RecordsData } from './records';
 import { Display } from './display';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
-import type { TabularType } from './TabularType';
 import type { ProcessedColumnsStore } from './processedColumns';
 import { processColumn } from './processedColumns';
+import { Selection } from './selection';
 
 export interface TabularDataProps {
-  type: TabularType;
   id: DBObjectEntry['id'];
-  metaProps?: MetaProps;
-}
-
-/** [ type, id, metaProps ] */
-export type TerseTabularDataProps = [
-  TabularType,
-  DBObjectEntry['id'],
-  TerseMetaProps,
-];
-
-export function makeTabularDataProps(
-  t: TerseTabularDataProps,
-): TabularDataProps {
-  return {
-    type: t[0],
-    id: t[1],
-    metaProps: makeMetaProps(t[2]),
-  };
-}
-
-export function makeTerseTabularDataProps(
-  p: TabularDataProps,
-): TerseTabularDataProps {
-  return [p.type, p.id, makeTerseMetaProps(p.metaProps)];
+  abstractTypesMap: AbstractTypesMap;
+  meta?: Meta;
 }
 
 export class TabularData {
-  type: TabularType;
-
   id: DBObjectEntry['id'];
 
   meta: Meta;
@@ -62,14 +37,16 @@ export class TabularData {
 
   display: Display;
 
-  constructor(props: TabularDataProps, abstractTypeMap: AbstractTypesMap) {
-    this.type = props.type;
+  isLoading: Readable<boolean>;
+
+  selection: Selection;
+
+  constructor(props: TabularDataProps) {
     this.id = props.id;
-    this.meta = new Meta(props.metaProps);
-    this.columnsDataStore = new ColumnsDataStore(this.type, this.id);
+    this.meta = props.meta ?? new Meta();
+    this.columnsDataStore = new ColumnsDataStore(this.id);
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
-      this.type,
       this.id,
       this.meta,
       this.columnsDataStore,
@@ -79,6 +56,7 @@ export class TabularData {
       this.columnsDataStore,
       this.recordsData,
     );
+    this.selection = new Selection(this.columnsDataStore, this.recordsData);
 
     this.processedColumns = derived(
       [this.columnsDataStore, this.constraintsDataStore],
@@ -86,9 +64,25 @@ export class TabularData {
         new Map(
           columnsData.columns.map((column) => [
             column.id,
-            processColumn(column, constraintsData.constraints, abstractTypeMap),
+            processColumn(
+              column,
+              constraintsData.constraints,
+              props.abstractTypesMap,
+            ),
           ]),
         ),
+    );
+
+    this.isLoading = derived(
+      [
+        this.columnsDataStore,
+        this.constraintsDataStore,
+        this.recordsData.state,
+      ],
+      ([columnsData, constraintsData, recordsDataState]) =>
+        columnsData.state === States.Loading ||
+        constraintsData.state === States.Loading ||
+        recordsDataState === States.Loading,
     );
 
     this.columnsDataStore.on('columnRenamed', async () => {
@@ -99,7 +93,7 @@ export class TabularData {
     });
     this.columnsDataStore.on('columnDeleted', async (columnId) => {
       this.meta.sorting.update((s) => s.without(columnId));
-      this.meta.grouping.update((g) => g.without(columnId));
+      this.meta.grouping.update((g) => g.withoutColumn(columnId));
       this.meta.filtering.update((f) => f.withoutColumn(columnId));
     });
     this.columnsDataStore.on('columnPatched', async () => {

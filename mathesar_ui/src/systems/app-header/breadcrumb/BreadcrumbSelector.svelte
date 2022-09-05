@@ -1,14 +1,27 @@
 <script lang="ts">
-  import { AttachableDropdown } from '@mathesar/component-library';
+  import { AttachableDropdown, TextInput } from '@mathesar/component-library';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import BreadcrumbSeparatorIcon from './BreadcrumbSeparatorIcon.svelte';
   import type { BreadcrumbSelectorData } from './breadcrumbTypes';
+  import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
 
   export let data: BreadcrumbSelectorData;
   export let triggerLabel: string;
 
   let triggerElement: HTMLButtonElement;
   let isOpen = false;
+  let filterString: string;
+
+  // Focus the text input when dropdown is opened
+  let textInputEl: HTMLInputElement | undefined;
+  $: if (isOpen) {
+    textInputEl?.focus();
+  }
+
+  // Filter the selector data based on text input
+  $: processedData = filterString
+    ? filterBreadcrumbSelectorData(data, filterString)
+    : data;
 </script>
 
 <div class="entity-switcher" class:is-open={isOpen}>
@@ -24,26 +37,32 @@
     <BreadcrumbSeparatorIcon />
   </button>
 
-  <AttachableDropdown
-    {isOpen}
-    trigger={triggerElement}
-    closeOnInnerClick
-    on:close={() => {
-      isOpen = false;
-    }}
-  >
+  <AttachableDropdown bind:isOpen trigger={triggerElement}>
     <div class="entity-switcher-content">
-      {#each [...data] as [categoryName, items] (categoryName)}
-        <div class="category-name">{categoryName}</div>
-        <ul class="items">
-          {#each items as { href, label, icon } (href)}
-            <li class="item">
-              <a {href}>
-                <NameWithIcon {icon}>{label}</NameWithIcon>
-              </a>
-            </li>
-          {/each}
-        </ul>
+      <!-- TODO consider improving semantics of this css class: it's less of a
+      category-name and more of a section-name. -->
+      <div class="category-name">entities</div>
+      <TextInput bind:value={filterString} bind:element={textInputEl} />
+      {#each [...processedData] as [categoryName, items] (categoryName)}
+        <!-- data coming down from parent can have categories with 0 items: we
+        don't want to render that. -->
+        {#if items.length > 0}
+          <div class="category-name">{categoryName}</div>
+          <ul class="items">
+            {#each items as { href, label, icon, isActive } (href)}
+              <li class="item" class:active={isActive()}>
+                <a
+                  {href}
+                  on:click={() => {
+                    isOpen = false;
+                  }}
+                >
+                  <NameWithIcon {icon}>{label}</NameWithIcon>
+                </a>
+              </li>
+            {/each}
+          </ul>
+        {/if}
       {/each}
     </div>
   </AttachableDropdown>
@@ -51,12 +70,14 @@
 
 <style>
   .entity-switcher-content {
-    padding: 0.5rem 0;
+    padding: 0.5rem;
+    min-width: 12rem;
   }
   .category-name {
-    font-weight: bold;
-    margin: 0 0 0.5rem 0.5rem;
-    color: #555;
+    font-size: var(--text-size-x-small);
+    margin: 0.25rem 0;
+
+    color: var(--color-text-muted);
     text-transform: uppercase;
   }
   .items {
@@ -64,15 +85,19 @@
     padding: 0;
     margin: 0;
   }
+  .item.active {
+    /* placeholder styling */
+    background-color: hsla(0, 0%, 0%, 0.1);
+  }
   .item a {
     display: block;
-    padding: 0.2rem 1rem;
+    padding: 0.25rem;
+    border-radius: 4px;
     color: inherit;
     text-decoration: none;
   }
   .item a:hover {
-    background: #eee;
-    text-decoration: underline;
+    background: var(--color-contrast-light);
   }
   /* TODO: reduce code duplication with this CSS used elsewhere. */
   .passthrough-button {
@@ -89,19 +114,19 @@
     padding: 0;
   }
   .entity-switcher .trigger {
-    --background-color: #eee;
-    --border-color: #aaa;
+    --background-color: var(--color-gray-lighter);
+    --border-color: var(--color-gray-dark);
     display: block;
     cursor: pointer;
   }
   .entity-switcher .trigger :global(svg) {
-    height: 2rem;
+    height: 1.8rem;
     display: block;
   }
   .entity-switcher .trigger:hover,
   .entity-switcher.is-open .trigger {
-    --background-color: #3f6ea7;
+    --background-color: var(--color-contrast);
     --icon-color: white;
-    --border-color: white;
+    --border-color: var(--color-contrast);
   }
 </style>

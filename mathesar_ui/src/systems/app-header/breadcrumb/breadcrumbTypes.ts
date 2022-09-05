@@ -1,4 +1,4 @@
-import type { TableEntry } from '@mathesar/api/tables/tableList';
+import type { TableEntry } from '@mathesar/api/tables';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import type { IconProps } from '@mathesar/component-library/types';
 
@@ -29,6 +29,7 @@ export interface BreadcrumbSelectorEntry {
   href: string;
   label: string;
   icon: IconProps;
+  isActive(): boolean;
 }
 
 /** Keys are category names */

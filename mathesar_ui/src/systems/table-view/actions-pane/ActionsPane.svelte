@@ -7,8 +7,8 @@
     iconError,
     MenuItem,
   } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
-  import type { SchemaEntry } from '@mathesar/AppTypes';
+  import type { TableEntry } from '@mathesar/api/tables';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import EntityType from '@mathesar/components/EntityType.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
@@ -20,9 +20,9 @@
     iconFiltering,
     iconGrouping,
     iconRefresh,
-    iconRename,
     iconSorting,
     iconTableLink,
+    iconTableInspector,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
@@ -30,12 +30,13 @@
   import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { States } from '@mathesar/utils/api';
   import { createEventDispatcher } from 'svelte';
-  import TableConstraints from '../constraints/TableConstraints.svelte';
+  import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/query-builder/urlSerializationUtils';
   import LinkTableModal from '../link-table/LinkTableModal.svelte';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
-  import RenameTableModal from './RenameTableModal.svelte';
+  import Group from './record-operations/Group.svelte';
 
+  export let database: Database;
   export let schema: SchemaEntry;
   export let table: TableEntry;
 
@@ -44,22 +45,41 @@
 
   const tableConstraintsModal = modal.spawnModalController();
   const linkTableModal = modal.spawnModalController();
-  const tableRenameModal = modal.spawnModalController();
 
-  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
-    $tabularData);
+  $: ({
+    id,
+    columnsDataStore,
+    recordsData,
+    meta,
+    constraintsDataStore,
+    isLoading,
+    display,
+  } = $tabularData);
   $: ({ columns } = $columnsDataStore);
-  $: ({ filtering, sorting, grouping, selectedRows, sheetState } = meta);
+  $: ({
+    filtering,
+    sorting,
+    grouping,
+    // selectedRows,
+    sheetState,
+  } = meta);
+  $: ({ isTableInspectorVisible } = display);
   $: recordState = recordsData.state;
 
-  $: isLoading =
-    $columnsDataStore.state === States.Loading ||
-    $recordState === States.Loading ||
-    $constraintsDataStore.state === States.Loading;
   $: isError =
     $columnsDataStore.state === States.Error ||
     $recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
+
+  $: summarizationUrl = constructDataExplorerUrlToSummarizeFromGroup(
+    database.name,
+    schema.id,
+    {
+      baseTableId: id,
+      columns,
+      terseGrouping: $grouping.terse(),
+    },
+  );
 
   function refresh() {
     void $tabularData.refresh();
@@ -76,6 +96,10 @@
       },
     });
   }
+
+  function toggleTableInspector() {
+    isTableInspectorVisible.set(!$isTableInspectorVisible);
+  }
 </script>
 
 <div class="actions-pane">
@@ -84,9 +108,6 @@
     <h1><TableName {table} /></h1>
   </div>
   <DropdownMenu label="Actions" icon={iconConfigure}>
-    <MenuItem on:click={() => tableRenameModal.open()} icon={iconRename}>
-      Rename
-    </MenuItem>
     <MenuItem on:click={handleDeleteTable} icon={iconDelete}>Delete</MenuItem>
     <MenuItem
       on:click={() => tableConstraintsModal.open()}
@@ -95,10 +116,6 @@
       Constraints
     </MenuItem>
   </DropdownMenu>
-
-  <TableConstraints controller={tableConstraintsModal} />
-
-  <RenameTableModal controller={tableRenameModal} tabularData={$tabularData} />
 
   <LinkTableModal
     controller={linkTableModal}
@@ -142,21 +159,27 @@
       <Icon {...iconGrouping} />
       <span>
         Group
-        {#if $grouping.size > 0}
-          ({$grouping.size})
+        {#if $grouping.entries.length > 0}
+          ({$grouping.entries.length})
         {/if}
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <!-- <DisplayGroup {columns} grouping={meta.grouping} /> -->
+      <Group grouping={meta.grouping} />
     </svelte:fragment>
   </Dropdown>
+
+  <!-- Restricting Data Explorer redirection to single column
+      grouping for the time being -->
+  {#if summarizationUrl && $grouping.entries.length === 1}
+    <a href={summarizationUrl}>Summarize</a>
+  {/if}
 
   <div class="divider" />
 
   <Button
-    disabled={isLoading}
-    size="small"
+    disabled={$isLoading}
+    size="medium"
     on:click={() => recordsData.addEmptyRecord()}
   >
     <Icon {...iconAddNew} />
@@ -166,22 +189,23 @@
   <div class="divider" />
 
   <Button
-    disabled={isLoading}
-    size="small"
+    disabled={$isLoading}
+    size="medium"
     on:click={() => linkTableModal.open()}
   >
     <Icon {...iconTableLink} />
     <span>Link Table</span>
   </Button>
 
-  {#if $selectedRows.size > 0}
+  <!-- TODO: Bring back the delete functionality -->
+  <!-- {#if $selectedRows.size > 0}
     <Button size="small" on:click={() => recordsData.deleteSelected()}>
       <Icon {...iconDelete} />
       <span>
         Delete {$selectedRows.size} records
       </span>
     </Button>
-  {/if}
+  {/if} -->
 
   {#if $sheetState}
     <div class="divider" />
@@ -189,13 +213,13 @@
   {/if}
 
   <div class="loading-info">
-    <Button size="small" disabled={isLoading} on:click={refresh}>
+    <Button size="medium" disabled={$isLoading} on:click={refresh}>
       <Icon
         {...isError && !isLoading ? iconError : iconRefresh}
-        spin={isLoading}
+        spin={$isLoading}
       />
       <span>
-        {#if isLoading}
+        {#if $isLoading}
           Loading
         {:else if isError}
           Retry
@@ -205,28 +229,39 @@
       </span>
     </Button>
   </div>
+
+  <Button size="medium" disabled={$isLoading} on:click={toggleTableInspector}>
+    <Icon {...iconTableInspector} />
+  </Button>
 </div>
 
 <style>
   .actions-pane {
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid var(--color-gray-dark);
+    background-color: var(--color-white);
     position: relative;
-    padding: var(--page-padding);
-    padding-bottom: 0;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 0.5rem;
+    padding-right: 1rem;
   }
   .heading {
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
+    border-right: 1px solid var(--color-gray-medium);
+    padding: 1rem;
+    margin-right: 0.5rem;
+  }
+  .heading h1 {
+    font-size: var(--text-size-x-large);
+    font-weight: 500;
+    margin-bottom: 0;
   }
   .divider {
     width: 1px;
     display: inline-block;
     background: #dfdfdf;
-    height: 18px;
+    height: 2rem;
     margin: 0px 5px;
   }
   .loading-info {

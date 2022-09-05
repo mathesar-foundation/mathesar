@@ -1,11 +1,16 @@
+import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+
 export default class QueryListEntry {
-  serializedQuery: string;
+  queryJSON: UnsavedQueryInstance;
+
+  isValid: boolean;
 
   next: QueryListEntry | undefined = undefined;
 
   prev: QueryListEntry | undefined = undefined;
 
-  constructor(serializedQuery: string) {
-    this.serializedQuery = serializedQuery;
+  constructor(queryJSON: UnsavedQueryInstance, isValid: boolean) {
+    this.queryJSON = queryJSON;
+    this.isValid = isValid;
   }
 }
