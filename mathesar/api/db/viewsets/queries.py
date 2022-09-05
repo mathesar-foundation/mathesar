@@ -1,3 +1,4 @@
+import json
 from django_filters import rest_framework as filters
 
 from rest_framework import viewsets
@@ -51,12 +52,13 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
 
     @action(methods=['post'], detail=False)
     def run(self, request):
-        paginator = TableLimitOffsetPagination()
         params = request.data.pop("parameters", {})
+        request.GET |= {k: [json.dumps(v)] for k, v in params.items()}
+        paginator = TableLimitOffsetPagination()
         input_serializer = self.get_serializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         query = UIQuery(**input_serializer.validated_data)
-        record_serializer = RecordListParameterSerializer(data=params)
+        record_serializer = RecordListParameterSerializer(data=request.GET)
         record_serializer.is_valid(raise_exception=True)
         records = query.get_records()
         records = paginator.paginate_queryset(
@@ -79,6 +81,6 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
                 "records": paginated_records.data,
                 "columns": columns,
                 "column_metadata": column_metadata,
-                "parameters": params,
+                "parameters": {k: json.loads(request.GET[k]) for k in request.GET},
             }
         )
