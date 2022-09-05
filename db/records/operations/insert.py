@@ -120,7 +120,4 @@ def insert_from_select(from_table, target_table, engine, col_mappings=None):
                 raise TypeMismatchError
             else:
                 raise e
-        except Exception as e:
-            # ToDo raise specific exceptions
-            raise e
     return target_table, result

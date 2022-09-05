@@ -249,9 +249,6 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
                 e,
                 status_code=status.HTTP_400_BAD_REQUEST
             )
-        except Exception as e:
-            # ToDo raise specific exceptions.
-            raise e
         # Reload the table to avoid cached properties
         existing_table = get_table_or_404(target_table.id)
         serializer = TableSerializer(
