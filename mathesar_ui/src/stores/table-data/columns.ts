@@ -43,6 +43,7 @@ export class ColumnsDataStore
     columnAdded: Partial<Column>;
     columnDeleted: number;
     columnPatched: Partial<Column>;
+    columnsFetched: Column[];
   }>
   implements Writable<ColumnsData>
 {
@@ -113,6 +114,7 @@ export class ColumnsDataStore
       };
       this.set(storeData);
       this.fetchCallback?.(storeData);
+      await this.dispatch('columnsFetched', storeData.columns);
       return storeData;
     } catch (err) {
       this.set({

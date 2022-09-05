@@ -99,6 +99,9 @@ export class TabularData {
     this.columnsDataStore.on('columnPatched', async () => {
       await this.recordsData.fetch();
     });
+    this.columnsDataStore.on('columnsFetched', async () => {
+      this.display.isTableInspectorVisible.set(true);
+    });
   }
 
   refresh(): Promise<

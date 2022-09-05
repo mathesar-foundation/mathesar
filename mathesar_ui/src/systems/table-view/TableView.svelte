@@ -25,7 +25,7 @@
   setTabularDataStoreInContext(tabularDataContextStore);
 
   $: tabularDataContextStore.set(tabularData);
-  $: ({ processedColumns, display } = tabularData);
+  $: ({ processedColumns, display, isLoading } = tabularData);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
 
@@ -39,6 +39,7 @@
     [ID_ROW_CONTROL_COLUMN, 70],
     [ID_ADD_NEW_COLUMN, 100],
   ]);
+  $: showTableInspector = $isTableInspectorVisible && !$isLoading;
 </script>
 
 <div class="table-view">
@@ -58,7 +59,7 @@
         </Sheet>
       {/if}
     </div>
-    {#if $isTableInspectorVisible}
+    {#if showTableInspector}
       <TableInspector />
     {/if}
   </div>
