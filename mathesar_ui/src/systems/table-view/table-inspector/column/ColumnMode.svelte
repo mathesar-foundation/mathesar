@@ -59,7 +59,7 @@
       </div>
     </Collapsible>
   {:else}
-    <span>Select a column to see column properties and actions</span>
+    <span>Select a cell to see column properties and actions</span>
   {/if}
 </div>
 

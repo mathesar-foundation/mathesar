@@ -42,6 +42,10 @@ export function getSelectedColumnId(selectedCell: string): number {
   return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[1]);
 }
 
+export function getSelectedRowId(selectedCell: string): number {
+  return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[0]);
+}
+
 export class Selection {
   private columnsDataStore: ColumnsDataStore;
 
@@ -58,10 +62,13 @@ export class Selection {
 
   selectedCells: WritableSet<string>;
 
+  freezeSelection: boolean;
+
   constructor(columnsDataStore: ColumnsDataStore, recordsData: RecordsData) {
     this.selectedCells = new WritableSet<string>();
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
+    this.freezeSelection = false;
 
     // This event terminates the cell selection process
     // specially useful when selecting multiple cells
@@ -73,6 +80,9 @@ export class Selection {
   }
 
   onStartSelection(row: Row, column: Column): void {
+    if (this.freezeSelection) {
+      return;
+    }
     // Clear any existing selection
     this.resetSelection();
 
@@ -91,7 +101,7 @@ export class Selection {
 
     // If there is no selection start cell,
     // this means the selection was never initiated
-    if (!this.selectionBounds) {
+    if (!this.selectionBounds || this.freezeSelection) {
       return;
     }
 
