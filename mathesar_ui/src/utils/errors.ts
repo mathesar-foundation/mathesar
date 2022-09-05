@@ -77,7 +77,8 @@ export class ApiMultiError extends Error {
 }
 
 /**
- * TODO:
+ * This is meant to be a build time error
+ * Generally use to make sure of exhaustive conditions handlint
  */
 export class UnhandledError extends Error {
   constructor(value: never, message: string) {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, Icon } from '@mathesar/component-library';
-  import { iconDelete, iconQuery, iconTableLink } from '@mathesar/icons';
+  import { iconDelete } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import type {
     ColumnsDataStore,
