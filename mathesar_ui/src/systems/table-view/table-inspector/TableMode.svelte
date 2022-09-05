@@ -3,6 +3,7 @@
   import TableConstraints from '@mathesar/systems/table-view/constraints/TableConstraints.svelte';
   import RenameTableProperty from './RenameTableProperty.svelte';
   import ConstraintHelp from '../constraints/__help__/ConstraintHelp.svelte';
+  import TableActions from './TableActions.svelte';
 </script>
 
 <div class="table-mode-container">
@@ -14,9 +15,16 @@
   </Collapsible>
 
   <Collapsible isOpen>
-    <span slot="header">Links <ConstraintHelp /></span>
+    <span slot="header">Constraints <ConstraintHelp /></span>
     <div slot="content" class="property-container">
       <TableConstraints />
+    </div>
+  </Collapsible>
+
+  <Collapsible isOpen>
+    <span slot="header">Actions</span>
+    <div slot="content" class="actions-container">
+      <TableActions />
     </div>
   </Collapsible>
 </div>
@@ -31,5 +39,9 @@
 
   .property-container {
     padding: 1rem;
+  }
+
+  .actions-container {
+    padding: 1rem 0;
   }
 </style>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
   import { currentSchemaId } from '@mathesar/stores/schemas';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
     refetchTablesForSchema,
     renameTable,
