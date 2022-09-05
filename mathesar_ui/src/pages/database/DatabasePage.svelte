@@ -58,23 +58,30 @@
 </svelte:head>
 
 <LayoutWithHeader>
-  <div><EntityType>Database</EntityType></div>
-  <h1><DatabaseName {database} /></h1>
-  <Button class="add" on:click={addSchema}>
-    <Icon {...iconAddNew} />
-    New Schema
-  </Button>
+  <div class="database-page-header">
+    <div class="database-page-name">
+      <div><EntityType>Database</EntityType></div>
+      <h1><DatabaseName {database} /></h1>
+    </div>
+    <Button class="add" on:click={addSchema}>
+      <Icon {...iconAddNew} /> New Schema
+    </Button>
+  </div>
 
-  <h2>Schemas ({schemasMap.size}) <SchemasHelp /></h2>
-  <TextInput placeholder="Find a schema..." bind:value={filterQuery} />
+  <div class="schema-list-wrapper">
+    <h2 class="schema-list-title">
+      Schemas ({schemasMap.size}) <SchemasHelp />
+    </h2>
+    <TextInput placeholder="Find a schema..." bind:value={filterQuery} />
 
-  <ul class="schema-list">
-    {#each displayList as schema (schema.id)}
-      <li>
-        <SchemaRow {database} {schema} on:edit={() => editSchema(schema)} />
-      </li>
-    {/each}
-  </ul>
+    <ul class="schema-list">
+      {#each displayList as schema (schema.id)}
+        <li class="schema-list-item">
+          <SchemaRow {database} {schema} on:edit={() => editSchema(schema)} />
+        </li>
+      {/each}
+    </ul>
+  </div>
 </LayoutWithHeader>
 
 <AddEditSchemaModal
@@ -84,9 +91,55 @@
 />
 
 <style lang="scss">
-  .schema-list {
-    width: 100%;
-    list-style: none;
-    padding-left: 0;
+  .database-page-header {
+    margin: 0.5rem 0 1rem;
+    display: flex;
+    align-items: center;
+  }
+  .database-page-name {
+    flex-grow: 1;
+    h1 {
+      margin: 0;
+      font-weight: 500;
+      font-size: var(--display-size-large);
+    }
+  }
+  .schema-list-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    .schema-list-title {
+      font-size: var(--text-size-large);
+      margin: 1rem 0;
+      font-weight: 500;
+    }
+
+    .schema-list {
+      width: 100%;
+      list-style: none;
+      padding: 0;
+      display: grid;
+
+      grid-template-rows: 1fr;
+      grid-column-gap: 1rem;
+      grid-row-gap: 1rem;
+    }
+    @media only screen and (min-width: 768px) {
+      .schema-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media only screen and (min-width: 992px) {
+      .schema-list {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media only screen and (min-width: 1200px) {
+      .schema-list {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
   }
 </style>
