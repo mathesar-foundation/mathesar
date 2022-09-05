@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { TableEntry } from '@mathesar/api/tables';
-  import type { SchemaEntry } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { ImmutableMap } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import {
@@ -16,6 +16,7 @@
   import StatusPane from './StatusPane.svelte';
   import TableInspector from './table-inspector/TableInspector.svelte';
 
+  export let database: Database;
   export let schema: SchemaEntry;
   export let tabularData: TabularData;
   export let table: TableEntry;
@@ -41,7 +42,7 @@
 </script>
 
 <div class="table-view">
-  <ActionsPane {schema} {table} on:deleteTable />
+  <ActionsPane {database} {schema} {table} on:deleteTable />
   <div class="table-inspector-view">
     <div class="sheet-area">
       {#if $processedColumns.size}

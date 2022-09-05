@@ -1,15 +1,7 @@
-<!-- TODO -->
-<div class="logo">
-  <em>LOGO</em>
-</div>
+<script lang="ts">
+  import Logo from '@mathesar/static-assets/logo.svg';
+</script>
 
-<style>
-  .logo {
-    background: var(--color-gray-darker);
-    font-weight: 500;
-    color: var(--color-gray-lighter);
-    border-radius: 0.25rem;
-    font-size: var(--text-size-small);
-    padding: 0.25rem;
-  }
-</style>
+<div class="logo">
+  <img src={Logo} alt="Mathesar Logo" />
+</div>

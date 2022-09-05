@@ -1,16 +1,18 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
+  import { router } from 'tinro';
 
   import type { Column } from '@mathesar/api/tables/columns';
   import type { Result as ApiRecord } from '@mathesar/api/tables/records';
   import { ImmutableSet, Spinner } from '@mathesar/component-library';
   import TableColumnName from '@mathesar/components/TableColumnName.svelte';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import { constraintIsFk } from '@mathesar/stores/table-data/constraintsUtils';
   import {
     setTabularDataStoreInContext,
     TabularData,
   } from '@mathesar/stores/table-data/tabularData';
-  import { postAPI } from '@mathesar/utils/api';
+  import { postAPI, States } from '@mathesar/utils/api';
   import Arrow from './Arrow.svelte';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
@@ -33,15 +35,21 @@
   let columnWithFocus: Column | undefined = undefined;
   let isSubmittingNewRecord = false;
 
-  $: ({ columnWithNestedSelectorOpen, isOpen } = controller);
+  $: ({ columnWithNestedSelectorOpen, isOpen, rowType } = controller);
   $: tabularDataStore.set(tabularData);
-  $: ({ constraintsDataStore, display, meta, isLoading, columnsDataStore } =
-    tabularData);
-  $: ({ constraints } = $constraintsDataStore);
+  $: ({
+    constraintsDataStore,
+    display,
+    meta,
+    isLoading,
+    columnsDataStore,
+    id: tableId,
+  } = tabularData);
+  $: ({ constraints, state: constraintsState } = $constraintsDataStore);
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
-  $: ({ columns } = $columnsDataStore);
+  $: ({ columns, state: columnsState } = $columnsDataStore);
   $: fkColumnIds = new ImmutableSet(
     constraints
       .filter(constraintIsFk)
@@ -54,22 +62,32 @@
     }
     return fkColumnIds.has(columnWithFocus.id) ? columnWithFocus : undefined;
   })();
+  $: isInitialized =
+    columnsState === States.Done && constraintsState === States.Done;
 
   $: if ($isOpen) {
     meta.searchFuzzy.update((s) => s.drained());
   }
 
-  function handleSubmitPkValue(v: string | number) {
-    controller.submit(v);
+  function handleSubmitPkValue(recordId: string | number) {
+    if ($rowType === 'button') {
+      controller.submit(recordId);
+    } else if ($rowType === 'hyperlink') {
+      const recordPageUrl = $storeToGetRecordPageUrl({ tableId, recordId });
+      if (recordPageUrl) {
+        router.goto(recordPageUrl);
+        controller.cancel();
+      }
+    }
   }
 
   async function handleSubmitNewRecord(v: Iterable<[number, unknown]>) {
-    const url = `/api/db/v0/tables/${tabularData.id}/records/`;
+    const url = `/api/db/v0/tables/${tableId}/records/`;
     try {
       isSubmittingNewRecord = true;
       const record = await postAPI<ApiRecord>(url, Object.fromEntries(v));
-      const pkValue = getPkValueInRecord(record, columns);
-      controller.submit(pkValue);
+      const recordId = getPkValueInRecord(record, columns);
+      handleSubmitPkValue(recordId);
     } catch (err) {
       // TODO set errors in tabularData to appear within cells
     } finally {
@@ -99,76 +117,83 @@
       <Spinner size="2em" />
     </div>
   {/if}
-  <div class="row header" style="width: {rowWidth}px">
-    <CellArranger {display} let:style let:processedColumn>
-      <CellWrapper header {style}>
-        <TableColumnName column={processedColumn} />
-        <ColumnResizer columnId={processedColumn.column.id} />
-      </CellWrapper>
-    </CellArranger>
-    <div class="overlay" />
-  </div>
 
-  <div class="row inputs">
-    <CellArranger {display} let:style let:processedColumn let:column>
-      {#if column === $columnWithNestedSelectorOpen}
-        <div class="active-fk-cell-indicator" {style}>
-          <div class="border" />
-          <div class="knockout">
-            <div class="smoother left"><QuarterCircle /></div>
-            <div class="smoother right"><QuarterCircle /></div>
+  {#if isInitialized}
+    <div class="row header" style="width: {rowWidth}px">
+      <CellArranger {display} let:style let:processedColumn>
+        <CellWrapper header {style}>
+          <TableColumnName column={processedColumn} />
+          <ColumnResizer columnId={processedColumn.column.id} />
+        </CellWrapper>
+      </CellArranger>
+      <div class="overlay" />
+    </div>
+
+    <div class="row inputs">
+      <CellArranger {display} let:style let:processedColumn let:column>
+        {#if column === $columnWithNestedSelectorOpen}
+          <div class="active-fk-cell-indicator" {style}>
+            <div class="border" />
+            <div class="knockout">
+              <div class="smoother left"><QuarterCircle /></div>
+              <div class="smoother right"><QuarterCircle /></div>
+            </div>
+            <div class="arrow"><Arrow /></div>
           </div>
-          <div class="arrow"><Arrow /></div>
-        </div>
-      {:else if column === columnWithFocus}
-        <div class="highlight" {style} />
-      {/if}
-      <CellWrapper
-        style="{style}{column === columnWithFocus ? 'z-index: 101;' : ''}"
-      >
-        <RecordSelectorInput
-          class="record-selector-input column-{column.id}"
-          containerClass="record-selector-input-container"
-          componentAndProps={processedColumn.inputComponentAndProps}
-          searchFuzzy={meta.searchFuzzy}
-          columnId={column.id}
-          on:focus={() => handleInputFocus(column)}
-          on:blur={() => handleInputBlur()}
-          on:recordSelectorOpen={() => {
-            $columnWithNestedSelectorOpen = column;
-          }}
-          on:recordSelectorSubmit={() => {
-            $columnWithNestedSelectorOpen = undefined;
-          }}
-          on:recordSelectorCancel={() => {
-            $columnWithNestedSelectorOpen = undefined;
-          }}
-        />
-      </CellWrapper>
-    </CellArranger>
-    <div class="overlay" />
-  </div>
+        {:else if column === columnWithFocus}
+          <div class="highlight" {style} />
+        {/if}
+        <CellWrapper
+          style="{style}{column === columnWithFocus ? 'z-index: 101;' : ''}"
+        >
+          <RecordSelectorInput
+            class="record-selector-input column-{column.id}"
+            containerClass="record-selector-input-container"
+            componentAndProps={processedColumn.inputComponentAndProps}
+            searchFuzzy={meta.searchFuzzy}
+            columnId={column.id}
+            on:focus={() => handleInputFocus(column)}
+            on:blur={() => handleInputBlur()}
+            on:recordSelectorOpen={() => {
+              $columnWithNestedSelectorOpen = column;
+            }}
+            on:recordSelectorSubmit={() => {
+              $columnWithNestedSelectorOpen = undefined;
+            }}
+            on:recordSelectorCancel={() => {
+              $columnWithNestedSelectorOpen = undefined;
+            }}
+          />
+        </CellWrapper>
+      </CellArranger>
+      <div class="overlay" />
+    </div>
 
-  <div class="divider">
-    <CellArranger {display} let:style>
-      <CellWrapper {style} divider />
-    </CellArranger>
-  </div>
+    <div class="divider">
+      <CellArranger {display} let:style>
+        <CellWrapper {style} divider />
+      </CellArranger>
+    </div>
 
-  {#if $nestedSelectorIsOpen}
-    <NestedRecordSelector />
-  {:else}
-    <RecordSelectorResults
-      {fkColumnWithFocus}
-      submitPkValue={handleSubmitPkValue}
-      submitNewRecord={handleSubmitNewRecord}
-    />
+    {#if $nestedSelectorIsOpen}
+      <NestedRecordSelector />
+    {:else}
+      <RecordSelectorResults
+        {tableId}
+        {fkColumnWithFocus}
+        rowType={$rowType}
+        submitPkValue={handleSubmitPkValue}
+        submitNewRecord={handleSubmitNewRecord}
+        on:linkClick={() => controller.cancel()}
+      />
+    {/if}
   {/if}
 </div>
 
 <style>
   .record-selector-table {
     position: relative;
+    min-height: 6rem;
     --divider-height: 0.7rem;
     --divider-color: #e7e7e7;
     --color-highlight: #428af4;
