@@ -210,7 +210,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
                 target_table, data_files, mappings
             )
         except NotNullError as e:
-            raise database_api_exceptions.NotNullImportViolationAPIException(
+            raise database_api_exceptions.NotNullViolationAPIException(
                 e,
                 message='Null values cannot be inserted into this column',
                 status_code=status.HTTP_400_BAD_REQUEST

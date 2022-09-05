@@ -31,7 +31,6 @@ class ErrorCodes(Enum):
 
     # Data Imports error code
     InvalidTableError = 4301
-    NotNullImportViolation = 4302
     UniqueImportViolation = 4303
 
     # Validation Error
