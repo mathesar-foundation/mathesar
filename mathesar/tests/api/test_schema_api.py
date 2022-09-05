@@ -295,14 +295,14 @@ def test_schema_delete(create_schema, client):
     }
 
 
-def test_schema_dependencies(client, create_schema):
+def test_schema_dependents(client, create_schema):
     schema_name = 'NASA Schema Dependencies'
     schema = create_schema(schema_name)
 
     response = client.get(f'/api/db/v0/schemas/{schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
-    assert response_schema['has_dependents'] is True
+    assert response_schema['has_dependents'] is False
 
 
 def test_schema_detail_404(client):
