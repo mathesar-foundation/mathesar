@@ -37,35 +37,51 @@
     <BreadcrumbSeparatorIcon />
   </button>
 
-  <AttachableDropdown bind:isOpen trigger={triggerElement}>
+  <AttachableDropdown
+    bind:isOpen
+    trigger={triggerElement}
+    class="breadcrumb-selector-dropdown"
+  >
     <div class="entity-switcher-content">
-      <div class="section-name">entities</div>
-      <TextInput bind:value={filterString} bind:element={textInputEl} />
-      {#each [...processedData] as [categoryName, entries] (categoryName)}
-        <!-- data coming down from parent can have categories with 0 items: we
+      <div class="search">
+        <TextInput bind:value={filterString} bind:element={textInputEl} />
+      </div>
+      <div class="results">
+        {#each [...processedData] as [categoryName, entries] (categoryName)}
+          <!-- data coming down from parent can have categories with 0 items: we
         don't want to render that. -->
-        {#if entries.length > 0}
-          <div class="section-name">{categoryName}</div>
-          <ul class="items">
-            {#each entries as entry (entry.href)}
-              <BreadcrumbSelectorRow
-                {entry}
-                closeSelector={() => {
-                  isOpen = false;
-                }}
-              />
-            {/each}
-          </ul>
-        {/if}
-      {/each}
+          {#if entries.length > 0}
+            <div class="section-name">{categoryName}</div>
+            <ul class="items">
+              {#each entries as entry (entry.href)}
+                <BreadcrumbSelectorRow
+                  {entry}
+                  closeSelector={() => {
+                    isOpen = false;
+                  }}
+                />
+              {/each}
+            </ul>
+          {/if}
+        {/each}
+      </div>
     </div>
   </AttachableDropdown>
 </div>
 
 <style>
+  :global(.breadcrumb-selector-dropdown) {
+    display: flex;
+  }
   .entity-switcher-content {
     padding: 0.5rem;
     min-width: 12rem;
+    display: grid;
+    grid-template: auto 1fr / 1fr;
+    grid-gap: 0.5rem;
+  }
+  .results {
+    overflow-y: auto;
   }
   .section-name {
     font-size: var(--text-size-x-small);
