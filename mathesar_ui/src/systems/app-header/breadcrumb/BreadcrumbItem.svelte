@@ -7,10 +7,11 @@
     getSchemaPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
-  import SchemaSelector from './SchemaSelector.svelte';
+  import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
   import BreadcrumbLink from './BreadcrumbLink.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
   import EntitySelector from './EntitySelector.svelte';
+  import SchemaSelector from './SchemaSelector.svelte';
 
   export let item: BreadcrumbItem;
 </script>
@@ -30,7 +31,7 @@
   >
     <TableName table={item.table} />
   </BreadcrumbLink>
-  <!-- TODO: add record selector here -->
+  <RecordSelectorNavigationButton table={item.table} />
 {/if}
 
 <style>

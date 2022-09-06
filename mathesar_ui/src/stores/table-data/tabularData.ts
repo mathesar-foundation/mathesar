@@ -1,8 +1,9 @@
 import { getContext, setContext } from 'svelte';
-import type { Writable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 import { derived } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { States } from '@mathesar/utils/api';
 import { Meta } from './meta';
 import type { ColumnsData } from './columns';
 import { ColumnsDataStore } from './columns';
@@ -35,6 +36,8 @@ export class TabularData {
   recordsData: RecordsData;
 
   display: Display;
+
+  isLoading: Readable<boolean>;
 
   selection: Selection;
 
@@ -70,6 +73,18 @@ export class TabularData {
         ),
     );
 
+    this.isLoading = derived(
+      [
+        this.columnsDataStore,
+        this.constraintsDataStore,
+        this.recordsData.state,
+      ],
+      ([columnsData, constraintsData, recordsDataState]) =>
+        columnsData.state === States.Loading ||
+        constraintsData.state === States.Loading ||
+        recordsDataState === States.Loading,
+    );
+
     this.columnsDataStore.on('columnRenamed', async () => {
       await this.refresh();
     });
@@ -78,7 +93,7 @@ export class TabularData {
     });
     this.columnsDataStore.on('columnDeleted', async (columnId) => {
       this.meta.sorting.update((s) => s.without(columnId));
-      this.meta.grouping.update((g) => g.without(columnId));
+      this.meta.grouping.update((g) => g.withoutColumn(columnId));
       this.meta.filtering.update((f) => f.withoutColumn(columnId));
     });
     this.columnsDataStore.on('columnPatched', async () => {

@@ -42,4 +42,5 @@ export default defineConfig({
     outDir: '../mathesar/static/mathesar/',
     emptyOutDir: true,
   },
+  base: '/static/',
 });

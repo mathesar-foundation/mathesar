@@ -15,10 +15,8 @@ import type {
   QueryResultColumns,
   QueryResultRecords,
 } from '@mathesar/api/queries/queryList';
-import type {
-  TableEntry,
-  JoinableTableResult,
-} from '@mathesar/api/tables/tableList';
+import type { TableEntry } from '@mathesar/api/tables';
+import type { JoinableTableResult } from '@mathesar/api/tables/joinable_tables';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
 import Pagination from '@mathesar/utils/Pagination';
@@ -36,10 +34,12 @@ import {
   processInitialColumns,
 } from './utils';
 import type {
+  ProcessedQueryResultColumn,
   ProcessedQueryResultColumnMap,
   InputColumnsStoreSubstance,
 } from './utils';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
+import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 
 function validateQuery(
   queryModel: QueryModel,
@@ -106,6 +106,8 @@ export default class QueryManager extends EventHandler<{
     columnInformationMap: new Map(),
   });
 
+  // Processed columns
+
   processedInitialColumns: Writable<ProcessedQueryResultColumnMap> = writable(
     new ImmutableMap(),
   );
@@ -114,7 +116,6 @@ export default class QueryManager extends EventHandler<{
     new ImmutableMap(),
   );
 
-  // TODO: processedResultColumns should also include virtual columns
   processedResultColumns: Writable<ProcessedQueryResultColumnMap> = writable(
     new ImmutableMap(),
   );
@@ -142,11 +143,10 @@ export default class QueryManager extends EventHandler<{
     super();
     this.abstractTypeMap = abstractTypeMap;
     this.query = writable(query);
-    this.onInitialColumnsChange();
+    this.reprocessColumns('both');
     this.undoRedoManager = new QueryUndoRedoManager();
     const inputColumnTreePromise = this.calculateInputColumnTree();
     void inputColumnTreePromise.then(() => {
-      this.onInitialColumnsChange();
       const isQueryValid = validateQuery(
         query,
         get(this.processedInitialColumns).withEntries(
@@ -159,7 +159,7 @@ export default class QueryManager extends EventHandler<{
     void this.fetchColumnsAndRecords();
   }
 
-  async calculateInputColumnTree(): Promise<void> {
+  private async calculateInputColumnTree(): Promise<void> {
     const baseTableId = get(this.query).base_table;
     if (!baseTableId) {
       this.inputColumns.set({
@@ -183,6 +183,7 @@ export default class QueryManager extends EventHandler<{
         ...state,
         inputColumnsFetchState: { state: 'success' },
       }));
+      this.reprocessColumns('both', false);
       return;
     }
 
@@ -223,6 +224,7 @@ export default class QueryManager extends EventHandler<{
       };
       this.cacheManagers.inputColumns.set(baseTableId, inputColumns);
       this.inputColumns.set(inputColumns);
+      this.reprocessColumns('both', false);
       this.state.update((state) => ({
         ...state,
         inputColumnsFetchState: { state: 'success' },
@@ -254,36 +256,95 @@ export default class QueryManager extends EventHandler<{
    * the callback only for essential scenarios and not everytime
    * query store changes.
    */
-  onInitialColumnsChange(): void {
-    const initialColumns = get(this.query).initial_columns;
-    const { columnInformationMap } = get(this.inputColumns);
-    if (columnInformationMap.size === 0 && initialColumns.length !== 0) {
-      return;
+  private reprocessColumns(
+    type: 'both' | 'initial' | 'virtual',
+    setResultColumns = true,
+  ): void {
+    const queryModel = this.getQueryModel();
+    const initialColumns = queryModel.initial_columns;
+    if (type === 'initial' || type === 'both') {
+      const { columnInformationMap } = get(this.inputColumns);
+      if (columnInformationMap.size === 0 && initialColumns.length !== 0) {
+        return;
+      }
+      this.processedInitialColumns.update((existing) =>
+        processInitialColumns(
+          initialColumns,
+          existing,
+          this.abstractTypeMap,
+          columnInformationMap,
+        ),
+      );
     }
-    // TODO: processedResultColumns should be based on the last transformation
-    this.processedResultColumns.update((existing) =>
-      processInitialColumns(
-        initialColumns,
-        existing,
-        this.abstractTypeMap,
-        columnInformationMap,
-      ),
-    );
-    this.processedInitialColumns.update((existing) =>
-      processInitialColumns(
-        initialColumns,
-        existing,
-        this.abstractTypeMap,
-        columnInformationMap,
-      ),
-    );
+
+    const summarizationTransforms: QuerySummarizationTransformationModel[] =
+      queryModel.transformationModels.filter(
+        (transform): transform is QuerySummarizationTransformationModel =>
+          transform instanceof QuerySummarizationTransformationModel,
+      );
+    if (type === 'virtual' || type === 'both') {
+      const virtualColumns: Map<
+        ProcessedQueryResultColumn['id'],
+        ProcessedQueryResultColumn
+      > = new Map();
+      summarizationTransforms.forEach((transformation) => {
+        [...transformation.aggregations.values()].forEach((entry) => {
+          virtualColumns.set(
+            entry.outputAlias,
+            processColumn(
+              {
+                alias: entry.outputAlias,
+                display_name: entry.displayName,
+                type:
+                  entry.function === 'aggregate_to_array'
+                    ? '_array'
+                    : 'integer',
+                type_options: null,
+                display_options: null,
+              },
+              this.abstractTypeMap,
+            ),
+          );
+        });
+      });
+      this.processedVirtualColumns.set(new ImmutableMap(virtualColumns));
+    }
+
+    if (setResultColumns) {
+      const processedInitialColumns = get(this.processedInitialColumns);
+      const processedVirtualColumns = get(this.processedVirtualColumns);
+      if (summarizationTransforms.length > 0) {
+        const lastTransform =
+          summarizationTransforms[summarizationTransforms.length - 1];
+        const result = new Map();
+        lastTransform.getOutputColumnAliases().forEach((alias) => {
+          const column =
+            processedVirtualColumns.get(alias) ??
+            processedInitialColumns.get(alias);
+          if (column) {
+            result.set('alias', column);
+          } else {
+            console.error(
+              'This should never happen - Output column not found in both virtual and initial column list',
+            );
+          }
+        });
+        this.processedResultColumns.set(new ImmutableMap(result));
+      } else {
+        this.processedResultColumns.set(
+          new ImmutableMap(processedInitialColumns),
+        );
+      }
+    }
   }
 
-  resetProcessedColumns(): void {
+  private resetProcessedColumns(): void {
     this.processedResultColumns.set(new ImmutableMap());
   }
 
-  setProcessedColumnsFromResults(resultColumns: QueryResultColumn[]): void {
+  private setProcessedColumnsFromResults(
+    resultColumns: QueryResultColumn[],
+  ): void {
     const newColumns = new ImmutableMap(
       resultColumns.map((column) => [
         column.alias,
@@ -293,7 +354,7 @@ export default class QueryManager extends EventHandler<{
     this.processedResultColumns.set(newColumns);
   }
 
-  async updateQuery(queryModel: QueryModel): Promise<{
+  private async updateQuery(queryModel: QueryModel): Promise<{
     clientValidationState: RequestStatus;
     query?: QueryInstance;
   }> {
@@ -368,7 +429,7 @@ export default class QueryManager extends EventHandler<{
     };
   }
 
-  setUndoRedoStates(): void {
+  private setUndoRedoStates(): void {
     this.state.update((_state) => ({
       ..._state,
       isUndoPossible: this.undoRedoManager.isUndoPossible(),
@@ -376,7 +437,7 @@ export default class QueryManager extends EventHandler<{
     }));
   }
 
-  async fetchColumns(): Promise<QueryResultColumns | undefined> {
+  private async fetchColumns(): Promise<QueryResultColumns | undefined> {
     const q = this.getQueryModel();
 
     if (typeof q.id === 'undefined') {
@@ -419,7 +480,7 @@ export default class QueryManager extends EventHandler<{
     return undefined;
   }
 
-  async fetchResults(): Promise<QueryResultRecords | undefined> {
+  private async fetchResults(): Promise<QueryResultRecords | undefined> {
     const q = this.getQueryModel();
 
     if (typeof q.id === 'undefined') {
@@ -478,7 +539,7 @@ export default class QueryManager extends EventHandler<{
     return result;
   }
 
-  resetPaginationPane(): void {
+  private resetPaginationPane(): void {
     this.pagination.update(
       (pagination) =>
         new Pagination({
@@ -488,7 +549,7 @@ export default class QueryManager extends EventHandler<{
     );
   }
 
-  resetResults(): void {
+  private resetResults(): void {
     this.queryColumnsFetchPromise?.cancel();
     this.queryRecordsFetchPromise?.cancel();
     this.records.set({ count: 0, results: [] });
@@ -514,16 +575,17 @@ export default class QueryManager extends EventHandler<{
       switch (updateDiff.type) {
         case 'baseTable':
           this.resetResults();
+          await this.calculateInputColumnTree();
           break;
         case 'initialColumnName':
-          this.onInitialColumnsChange();
+          this.reprocessColumns('initial');
           break;
         case 'initialColumnsArray':
           if (!updateDiff.diff.initial_columns?.length) {
             // All columns have been deleted
             this.resetResults();
           } else {
-            this.onInitialColumnsChange();
+            this.reprocessColumns('initial');
             await this.fetchColumnsAndRecords();
           }
           break;
@@ -537,7 +599,14 @@ export default class QueryManager extends EventHandler<{
     }
   }
 
-  async performUndoRedoSync(query?: QueryModel): Promise<void> {
+  // Meant to be used directly outside query manager
+  async save(): Promise<void> {
+    await this.updateQuery(this.getQueryModel());
+    this.resetPaginationPane();
+    await this.fetchColumnsAndRecords();
+  }
+
+  private async performUndoRedoSync(query?: QueryModel): Promise<void> {
     if (query) {
       const currentQueryModelData = this.getQueryModel();
       let queryToSet = query;
@@ -545,7 +614,7 @@ export default class QueryManager extends EventHandler<{
         queryToSet = query.withId(currentQueryModelData.id).model;
       }
       this.query.set(queryToSet);
-      this.onInitialColumnsChange();
+      this.reprocessColumns('both');
       await this.updateQuery(queryToSet);
       this.setUndoRedoStates();
       await this.fetchColumnsAndRecords();

@@ -4,21 +4,23 @@ import type { QueryResultColumn } from '@mathesar/api/queries/queryList';
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,
+  getPreprocFunctionsForAbstractType,
 } from '@mathesar/stores/abstract-types';
 import type {
   AbstractType,
   AbstractTypesMap,
+  AbstractTypePreprocFunctionDefinition,
 } from '@mathesar/stores/abstract-types/types';
 import {
   getCellCap,
   getDbTypeBasedInputCap,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import type { TableEntry } from '@mathesar/api/tables';
 import type {
-  TableEntry,
   JpPath,
   JoinableTableResult,
-} from '@mathesar/api/tables/tableList';
+} from '@mathesar/api/tables/joinable_tables';
 import type { Column } from '@mathesar/api/tables/columns';
 import type QueryModel from './QueryModel';
 
@@ -28,6 +30,7 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   abstractType: AbstractType;
   inputComponentAndProps: ComponentAndProps;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
+  preprocFunctions: AbstractTypePreprocFunctionDefinition[];
 }
 
 export type ProcessedQueryResultColumnMap = ImmutableMap<
@@ -83,8 +86,15 @@ export function processColumn(
     column,
     abstractType,
     cellComponentAndProps: getCellCap(abstractType.cell, column),
-    inputComponentAndProps: getDbTypeBasedInputCap(column, abstractType.cell),
+    inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      undefined,
+      abstractType.cell,
+    ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
+    preprocFunctions: getPreprocFunctionsForAbstractType(
+      abstractType.identifier,
+    ),
   };
 }
 

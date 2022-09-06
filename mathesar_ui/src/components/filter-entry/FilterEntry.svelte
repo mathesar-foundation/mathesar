@@ -168,28 +168,32 @@
       triggerClass="filter-column-id"
       disabled={disableColumnChange}
     />
-    <Select
-      options={conditionIds}
-      bind:value={conditionIdentifier}
-      getLabel={getConditionName}
-      on:change={(e) => onConditionChange(e.detail)}
-      triggerClass="filter-condition"
-    />
-    {#if inputCap}
-      <DynamicInput
-        componentAndProps={inputCap}
-        bind:value
-        on:input={() => {
-          showError = true;
-        }}
-        on:blur={() => {
-          showError = true;
-        }}
-        on:change={onValueChangeFromUser}
-        class="filter-input"
-        hasError={showError && !isValid}
+    {#key columnIdentifier}
+      <Select
+        options={conditionIds}
+        bind:value={conditionIdentifier}
+        getLabel={getConditionName}
+        on:change={(e) => onConditionChange(e.detail)}
+        triggerClass="filter-condition"
       />
-    {/if}
+    {/key}
+    {#key `${columnIdentifier}${conditionIdentifier}`}
+      {#if inputCap}
+        <DynamicInput
+          componentAndProps={inputCap}
+          bind:value
+          on:input={() => {
+            showError = true;
+          }}
+          on:blur={() => {
+            showError = true;
+          }}
+          on:change={onValueChangeFromUser}
+          class="filter-input"
+          hasError={showError && !isValid}
+        />
+      {/if}
+    {/key}
     {#if allowDelete}
       <Button
         size="small"
@@ -239,7 +243,7 @@
         flex-basis: 160px;
         flex-grow: 0;
         flex-shrink: 0;
-        max-height: 2.2rem;
+        max-height: 2.3rem;
         resize: none;
       }
     }

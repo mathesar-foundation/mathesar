@@ -14,9 +14,10 @@ import type {
   Response as ApiRecordsResponse,
   Group as ApiGroup,
   Grouping as ApiGrouping,
-  ResultValue,
   GroupingMode,
+  DataForRecordSummariesInFkColumn,
   GetRequestParams as ApiGetRequestParams,
+  RecordSummaryInputData,
 } from '@mathesar/api/tables/records';
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
@@ -26,14 +27,16 @@ import type { Meta } from './meta';
 import { validateRow, getCellKey } from './utils';
 import type { ColumnsDataStore } from './columns';
 import type { Sorting } from './sorting';
-import type { Grouping as GroupingTODORename } from './grouping';
+import type { Grouping as GroupingRequest } from './grouping';
 import type { Filtering } from './filtering';
+import type { SearchFuzzy } from './searchFuzzy';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
   sorting: Sorting;
-  grouping: GroupingTODORename;
+  grouping: GroupingRequest;
   filtering: Filtering;
+  searchFuzzy: SearchFuzzy;
 }
 
 function buildFetchQueryString(data: RecordsRequestParamsData): string {
@@ -42,6 +45,7 @@ function buildFetchQueryString(data: RecordsRequestParamsData): string {
     ...data.sorting.recordsRequestParamsIncludingGrouping(data.grouping),
     ...data.grouping.recordsRequestParams(),
     ...data.filtering.recordsRequestParams(),
+    ...data.searchFuzzy.recordsRequestParams(),
   };
   const entries: [string, string][] = Object.entries(params).map(([k, v]) => {
     const value = typeof v === 'string' ? v : JSON.stringify(v);
@@ -52,20 +56,28 @@ function buildFetchQueryString(data: RecordsRequestParamsData): string {
 
 export interface Group {
   count: number;
-  firstValue: ResultValue;
-  lastValue: ResultValue;
+  eqValue: ApiGroup['eq_value'];
+  firstValue: ApiGroup['first_value'];
+  lastValue: ApiGroup['last_value'];
   resultIndices: number[];
 }
 
 export interface Grouping {
   columnIds: number[];
+  preprocIds: (string | null)[];
   mode: GroupingMode;
   groups: Group[];
 }
+/** Keys are stringified column ids */
+type DataForRecordSummariesInFkColumns = Record<
+  string,
+  DataForRecordSummariesInFkColumn
+>;
 
 function buildGroup(apiGroup: ApiGroup): Group {
   return {
     count: apiGroup.count,
+    eqValue: apiGroup.eq_value,
     firstValue: apiGroup.first_value,
     lastValue: apiGroup.last_value,
     resultIndices: apiGroup.result_indices,
@@ -75,10 +87,19 @@ function buildGroup(apiGroup: ApiGroup): Group {
 function buildGrouping(apiGrouping: ApiGrouping): Grouping {
   return {
     columnIds: apiGrouping.columns,
+    preprocIds: apiGrouping.preproc ?? [],
     mode: apiGrouping.mode,
     groups: apiGrouping.groups.map(buildGroup),
   };
 }
+
+export interface DataForRecordSummaryInFkCell {
+  column: number;
+  template: string;
+  data: RecordSummaryInputData;
+}
+
+type DataForRecordSummariesInRow = Record<string, DataForRecordSummaryInFkCell>;
 
 export interface Row {
   /**
@@ -93,7 +114,23 @@ export interface Row {
   isGroupHeader?: boolean;
   group?: Group;
   rowIndex?: number;
-  groupValues?: Record<string, unknown>;
+  dataForRecordSummariesInRow?: DataForRecordSummariesInRow;
+  groupValues?: ApiGroup['first_value'];
+}
+
+export type RecordRow = Omit<Row, 'record'> & Required<Pick<Row, 'record'>>;
+
+export function rowHasRecord(row: Row): row is RecordRow {
+  // Why do we also need to check that the record object is not empty?
+  //
+  // Because somewhere else in the code (I don't know where) we are producing
+  // row objects which contain empty records. That behavior was causing a bug.
+  // This function is a way to work around that bug without taking the time to
+  // track down the root cause and fix/test it. At some point we should refactor
+  // `Row` to be a union of different row types, none of which contain optional
+  // properties. With that approach we can simplify this function to be more
+  // straightforward.
+  return row.record !== undefined && Object.entries(row.record).length > 0;
 }
 
 export interface TableRecordsData {
@@ -125,71 +162,87 @@ function generateRowIdentifier(
   return `__${offset}_${type}_${index}`;
 }
 
-function getRecordIndexToGroupMap(groups: Group[]): Map<number, Group> {
-  const map = new Map<number, Group>();
-  groups.forEach((group) => {
-    group.resultIndices.forEach((resultIndex) => {
-      map.set(resultIndex, group);
-    });
-  });
-  return map;
+function getProcessedRecordRow(
+  record: ApiRecord,
+  recordIndex: number,
+  offset: number,
+  dataForRecordSummariesInFkColumns?: DataForRecordSummariesInFkColumns,
+): Row {
+  const dataForRecordSummariesInRow: DataForRecordSummariesInRow | undefined =
+    dataForRecordSummariesInFkColumns
+      ? Object.entries(dataForRecordSummariesInFkColumns).reduce(
+          (fkColumnSummaryRecord, [columnId, summaryObj]) => ({
+            ...fkColumnSummaryRecord,
+            [columnId]: { ...summaryObj, data: summaryObj.data[recordIndex] },
+          }),
+          {},
+        )
+      : undefined;
+  return {
+    record,
+    dataForRecordSummariesInRow,
+    identifier: generateRowIdentifier('normal', offset, recordIndex),
+    rowIndex: recordIndex,
+  };
 }
 
 function preprocessRecords({
   records,
   offset,
   grouping,
+  dataForRecordSummariesInFkColumns,
 }: {
   records: ApiRecord[];
   offset: number;
   grouping?: Grouping;
+  dataForRecordSummariesInFkColumns?: DataForRecordSummariesInFkColumns;
 }): Row[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
-  const combinedRecords: Row[] = [];
-  let index = 0;
-  let groupIndex = 0;
-  let existingRecordIndex = 0;
 
-  const recordIndexToGroupMap = getRecordIndexToGroupMap(
-    grouping?.groups ?? [],
-  );
+  if (isResultGrouped) {
+    const combinedRecords: Row[] = [];
+    let recordIndex = 0;
 
-  records?.forEach((record) => {
-    if (isResultGrouped) {
-      let isGroup = false;
-      if (index === 0) {
-        isGroup = true;
-      } else {
-        for (const id of groupingColumnIds) {
-          if (records[index - 1][id] !== records[index][id]) {
-            isGroup = true;
-            break;
-          }
+    grouping?.groups.forEach((group, groupIndex) => {
+      const groupValues: ApiRecord = {};
+      grouping.columnIds.forEach((columnId) => {
+        if (group.eqValue[columnId] !== undefined) {
+          groupValues[columnId] = group.eqValue[columnId];
+        } else {
+          groupValues[columnId] = group.firstValue[columnId];
         }
-      }
-
-      if (isGroup) {
-        combinedRecords.push({
-          record,
-          isGroupHeader: true,
-          group: recordIndexToGroupMap.get(index),
-          identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
-          groupValues: record,
-        });
-        groupIndex += 1;
-      }
-    }
-
-    combinedRecords.push({
-      record,
-      identifier: generateRowIdentifier('normal', offset, existingRecordIndex),
-      rowIndex: index,
+      });
+      combinedRecords.push({
+        isGroupHeader: true,
+        group,
+        identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
+        groupValues,
+      });
+      group.resultIndices.forEach((resultIndex) => {
+        const record = records[resultIndex];
+        combinedRecords.push(
+          getProcessedRecordRow(
+            record,
+            recordIndex,
+            offset,
+            dataForRecordSummariesInFkColumns,
+          ),
+        );
+        recordIndex += 1;
+      });
     });
-    index += 1;
-    existingRecordIndex += 1;
-  });
-  return combinedRecords;
+    return combinedRecords;
+  }
+
+  return records.map((record, index) =>
+    getProcessedRecordRow(
+      record,
+      index,
+      offset,
+      dataForRecordSummariesInFkColumns,
+    ),
+  );
 }
 
 function prepareRowForRequest(row: Row): ApiRecord {
@@ -265,7 +318,10 @@ export class RecordsData {
 
     this.savedRecords.update((existingData) => {
       let data = [...existingData];
-      data.length = getStoreValue(this.meta.pagination).size;
+      data.length = Math.min(
+        data.length,
+        getStoreValue(this.meta.pagination).size,
+      );
 
       let index = -1;
       data = data.map((entry) => {
@@ -302,11 +358,22 @@ export class RecordsData {
       const grouping = response.grouping
         ? buildGrouping(response.grouping)
         : undefined;
+      // Converting an array to a map type as it would be easier to reference
+      const dataForRecordSummariesInFkColumns: DataForRecordSummariesInFkColumns =
+        (response.preview_data ?? []).reduce(
+          (acc, item) => ({
+            ...acc,
+            [item.column]: item,
+          }),
+          {},
+        );
       const records = preprocessRecords({
         records: response.results,
         offset,
         grouping,
+        dataForRecordSummariesInFkColumns,
       });
+
       const tableRecordsData: TableRecordsData = {
         state: States.Done,
         savedRecords: records,

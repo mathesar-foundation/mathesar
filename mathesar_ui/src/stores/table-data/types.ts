@@ -6,6 +6,7 @@ export type {
   ProcessedColumnsStore,
 } from './processedColumns';
 export type { Filtering, FilterEntry } from './filtering';
+export type { Grouping, GroupEntry, TerseGrouping } from './grouping';
 export type {
   Constraint,
   ConstraintsData,

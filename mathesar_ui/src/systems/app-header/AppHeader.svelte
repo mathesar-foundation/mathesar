@@ -32,7 +32,6 @@
   .app-header {
     display: flex;
     justify-content: space-between;
-    background: var(--color-gray-light);
     border-bottom: 1px solid var(--color-gray-dark);
     padding: 0.25rem;
   }

@@ -1,6 +1,6 @@
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { Column } from '@mathesar/api/tables/columns';
-import type { JpPath } from '@mathesar/api/tables/tableList';
+import type { JpPath } from '@mathesar/api/tables/joinable_tables';
 
 /**
  * endpoint: /api/db/v0/queries/<query_id>/
@@ -28,6 +28,17 @@ export interface QueryInstanceFilterTransformation {
 
 export interface QueryInstanceSummarizationTransformation {
   type: 'summarize';
+  spec: {
+    grouping_expressions: [
+      { input_alias: string; output_alias: string; preproc?: string },
+    ];
+    aggregation_expressions: {
+      input_alias: string;
+      output_alias: string;
+      function: 'aggregate_to_array' | 'count';
+    }[];
+  };
+  display_names: Record<string, string>;
 }
 
 export type QueryInstanceTransformation =

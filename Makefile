@@ -7,10 +7,15 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = docs
 BUILDDIR      = docs/_build
+INITSCRIPT	  = initial_setup.sh
 
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+# Initial setup
+initial_setup:
+	@bash "$(INITSCRIPT)"
 
 .PHONY: help Makefile
 

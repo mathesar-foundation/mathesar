@@ -1,7 +1,7 @@
 <script lang="ts">
   import { router } from 'tinro';
 
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
@@ -40,6 +40,7 @@
 
 <LayoutWithHeader fitViewport>
   <TableView
+    {database}
     {schema}
     {table}
     {tabularData}

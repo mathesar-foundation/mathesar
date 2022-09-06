@@ -105,17 +105,25 @@
   {/if}
   <section>
     <header>Transformations</header>
-    <TransformationsPane {queryManager} />
+    <div>
+      {#if inputColumnsFetchState?.state === 'processing'}
+        <Spinner />
+      {:else if inputColumnsFetchState?.state === 'success'}
+        <TransformationsPane {queryManager} />
+      {:else if inputColumnsFetchState?.state === 'failure'}
+        Failed to fetch column information
+      {/if}
+    </div>
   </section>
 </aside>
 
 <style lang="scss">
   aside {
-    width: 22rem;
-    border-left: 1px solid #efefef;
+    width: 24rem;
+    border-left: 1px solid var(--color-gray-medium);
     flex-shrink: 0;
     flex-grow: 0;
-    flex-basis: 22rem;
+    flex-basis: 24rem;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -124,19 +132,18 @@
     > section {
       > header {
         font-weight: 500;
-        padding: 0.5rem 0.75rem;
-        background: #f7f8f8;
-        border-bottom: 1px solid #efefef;
+        padding: 1rem;
+        background: var(--color-gray-light);
+        border-bottom: 1px solid var(--color-gray-medium);
         position: sticky;
         top: 0;
         z-index: 10;
       }
       > :global(div) {
-        padding: 0.75rem 0.75rem 1.2rem;
+        padding: 1rem 1rem 1.25rem;
       }
       > div {
-        border-bottom: 1px solid #efefef;
-
+        border-bottom: 1px solid var(--color-gray-medium);
         h4 {
           margin: 0;
           padding: 0;
@@ -149,12 +156,12 @@
 
         [data-identifier='column-source'] {
           h4 {
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
           }
           > div {
             display: grid;
             grid-template-columns: 5rem auto;
-            grid-gap: 0.24rem;
+            grid-gap: 0.5rem;
           }
         }
       }

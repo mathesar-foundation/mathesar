@@ -1,8 +1,6 @@
 <script lang="ts">
-  import type { ModalController } from '@mathesar-component-library';
   import {
     Icon,
-    ControlledModal,
     DropdownMenu,
     MenuItem,
     iconLoading,
@@ -21,10 +19,7 @@
   } from '@mathesar/icons';
   import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
   import TableConstraint from './TableConstraint.svelte';
-  import ConstraintHelp from './__help__/ConstraintHelp.svelte';
   import NewFkConstraintModal from './NewFkConstraintModal.svelte';
-
-  export let controller: ModalController;
 
   const tabularData = getTabularDataStoreFromContext();
   const newUniqueConstraintModal = modal.spawnModalController();
@@ -47,52 +42,34 @@
   }
 </script>
 
-<ControlledModal {controller}>
-  <span slot="title">Table Constraints{countText} <ConstraintHelp /></span>
-  <div class="table-constraints">
-    {#if shouldShowLoadingSpinner}
-      <Icon {...iconLoading} />
-    {:else if state === States.Error}
-      <div>Unable to fetch table constraints</div>
-      <div>{errorMsg}</div>
-    {:else if isEmpty}
-      <div>No constraints</div>
-    {:else}
-      <div class="constraints-list">
-        {#each constraints as constraint (constraint.id)}
-          <TableConstraint {constraint} drop={() => remove(constraint)} />
-        {/each}
-      </div>
-    {/if}
-  </div>
+<div class="table-constraints">
+  {#if shouldShowLoadingSpinner}
+    <Icon {...iconLoading} />
+  {:else if state === States.Error}
+    <div>Unable to fetch table constraints</div>
+    <div>{errorMsg}</div>
+  {:else if isEmpty}
+    <div>No constraints</div>
+  {:else}
+    <div class="constraints-list">
+      {#each constraints as constraint (constraint.id)}
+        <TableConstraint {constraint} drop={() => remove(constraint)} />
+      {/each}
+    </div>
+  {/if}
+</div>
 
-  <div slot="footer" class="footer">
-    <DropdownMenu label="New Constraint" icon={iconAddNew}>
-      <MenuItem
-        on:click={() => newUniqueConstraintModal.open()}
-        icon={iconConstraintUnique}
-      >
-        Unique
-      </MenuItem>
-      <MenuItem
-        on:click={() => newFkConstraintModal.open()}
-        icon={iconTableLink}
-      >
-        Foreign Key
-      </MenuItem>
-    </DropdownMenu>
-  </div>
+<DropdownMenu label="New Constraint" icon={iconAddNew}>
+  <MenuItem
+    on:click={() => newUniqueConstraintModal.open()}
+    icon={iconConstraintUnique}
+  >
+    Unique
+  </MenuItem>
+  <MenuItem on:click={() => newFkConstraintModal.open()} icon={iconTableLink}>
+    Foreign Key
+  </MenuItem>
+</DropdownMenu>
 
-  <NewUniqueConstraintModal controller={newUniqueConstraintModal} />
-  <NewFkConstraintModal controller={newFkConstraintModal} />
-</ControlledModal>
-
-<style>
-  .constraints-list {
-    border: solid #ccc 1px;
-    border-radius: 4px;
-  }
-  .footer {
-    text-align: right;
-  }
-</style>
+<NewUniqueConstraintModal controller={newUniqueConstraintModal} />
+<NewFkConstraintModal controller={newFkConstraintModal} />

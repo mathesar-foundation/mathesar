@@ -17,7 +17,6 @@ button.dropdown.trigger {
     gap: 0.25rem;
     line-height: 1.2;
     min-height: 1.2em;
-    min-width: 2ch;
   }
 
   > .arrow {
@@ -37,7 +36,7 @@ button.dropdown.trigger {
   border-radius: 0.25rem;
   background: #fff;
   z-index: 100;
-  max-height: 210px;
+  max-height: calc(100vh - 5em);
   overflow: auto;
 
   &[data-popper-placement='top-start'] {

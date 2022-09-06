@@ -9,7 +9,7 @@
     Spinner,
     TextInput,
   } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -156,11 +156,7 @@
 
     <FormField>
       <LabeledInput label="Target Table" layout="stacked">
-        <SelectTable
-          {tables}
-          bind:table={targetTable}
-          initialSelectionType="empty"
-        />
+        <SelectTable {tables} bind:table={targetTable} autoSelect="clear" />
       </LabeledInput>
     </FormField>
 
