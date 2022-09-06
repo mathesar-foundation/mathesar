@@ -38,7 +38,7 @@
 
   export let database: Database;
   export let schema: SchemaEntry;
-  export let table: TableEntry;
+  export let table: Pick<TableEntry, 'name'>;
 
   const tabularData = getTabularDataStoreFromContext();
   const dispatch = createEventDispatcher();

@@ -19,7 +19,7 @@ import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import type { TableEntry } from '@mathesar/api/tables';
 import type {
   JpPath,
-  JoinableTableResult,
+  JoinableTablesResult,
 } from '@mathesar/api/tables/joinable_tables';
 import type { Column } from '@mathesar/api/tables/columns';
 import type QueryModel from './QueryModel';
@@ -166,7 +166,7 @@ const compareColumnByLinks = (
 };
 
 export function getLinkFromColumn(
-  result: JoinableTableResult,
+  result: JoinableTablesResult,
   columnId: Column['id'],
   depth: number,
 ): LinkedTable | undefined {
@@ -217,7 +217,7 @@ export function getLinkFromColumn(
 }
 
 export function getColumnInformationMap(
-  result: JoinableTableResult,
+  result: JoinableTablesResult,
   baseTable: TableEntry,
 ): InputColumnsStoreSubstance['columnInformationMap'] {
   const map: InputColumnsStoreSubstance['columnInformationMap'] = new Map();
@@ -248,7 +248,7 @@ export function getColumnInformationMap(
 }
 
 export function getBaseTableColumnsWithLinks(
-  result: JoinableTableResult,
+  result: JoinableTablesResult,
   baseTable: TableEntry,
 ): Map<ColumnWithLink['id'], ColumnWithLink> {
   const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
@@ -266,7 +266,7 @@ export function getBaseTableColumnsWithLinks(
 }
 
 export function getTablesThatReferenceBaseTable(
-  result: JoinableTableResult,
+  result: JoinableTablesResult,
   baseTable: TableEntry,
 ): Map<ReferencedByTable['id'], ReferencedByTable> {
   const referenceLinks = result.joinable_tables.filter(

@@ -1,11 +1,26 @@
 <script lang="ts">
-  import EntityType from '@mathesar/components/EntityType.svelte';
+  import { Spinner } from '@mathesar-component-library';
+  import type { TableEntry } from '@mathesar/api/tables';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { TableStructure } from '@mathesar/stores/table-data/TableStructure';
+  import { currentTable } from '@mathesar/stores/tables';
+  import RecordPageContent from './RecordPageContent.svelte';
 
   export let recordId: number;
+
+  $: table = $currentTable as TableEntry;
+  $: tableStructure = new TableStructure({
+    id: table.id,
+    abstractTypesMap: $currentDbAbstractTypes.data,
+  });
+  $: ({ isLoading } = tableStructure);
 </script>
 
 <LayoutWithHeader>
-  <div><EntityType>Record</EntityType></div>
-  <h1>Record Page {recordId}</h1>
+  {#if $isLoading}
+    <Spinner />
+  {:else}
+    <RecordPageContent {tableStructure} {recordId} />
+  {/if}
 </LayoutWithHeader>
