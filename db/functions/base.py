@@ -88,7 +88,7 @@ class Literal(DBFunction):
 
 class Noop(DBFunction):
     """This Noop function is an unwrapped version of Literal().
-    The Literal DB function produces a literal SQLAlchemy wrapper 
+    The Literal DB function produces a literal SQLAlchemy wrapper
     which doesn't play nicely with the type conversion between python classes and db types in psycopg2."""
     id = 'noop'
     name = 'no wrapping'
