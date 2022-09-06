@@ -57,6 +57,7 @@
   aria-controls={ariaControls}
   aria-haspopup="listbox"
   aria-label={ariaLabel}
+  title={ariaLabel}
   {size}
   on:keydown
   on:focus

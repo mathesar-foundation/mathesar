@@ -160,7 +160,7 @@
   .transformation {
     border: 1px solid var(--color-gray-medium);
     padding: 0.5rem;
-    border-radius: 3px;
+    border-radius: 4px;
     background: var(--color-gray-lighter);
     margin-bottom: 1rem;
 
@@ -174,7 +174,9 @@
         border: 1px solid var(--color-gray-medium);
         border-radius: 100%;
         font-size: var(--text-size-x-small);
-        padding: 0.125em 0.5em;
+        font-variant-numeric: tabular-nums;
+        padding: 0.125em 0.4em;
+        font-weight: 500;
       }
 
       .title {
