@@ -81,3 +81,21 @@ export function getOutcomeOfBeforeInputEvent(
     cursorPosition: textBeforeSelection.length + insertionText.length,
   };
 }
+
+/**
+ * Intended to be used with DOM `input` and `change` events dispatched from
+ * input elements.
+ */
+export function getValueFromEvent(e: Event): unknown {
+  if (!e.target) {
+    return undefined;
+  }
+  const target = e.target as { value?: unknown };
+  return target.value;
+}
+
+export function getValueFromArtificialEvent(
+  event: CustomEvent<unknown>,
+): unknown {
+  return event.detail;
+}

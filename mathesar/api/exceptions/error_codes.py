@@ -16,18 +16,22 @@ class ErrorCodes(Enum):
     # DB Error Codes
     DuplicateTableError = 4205
     DuplicateColumnError = 4206
+    ExclusionViolation = 4213
+    ForeignKeyViolation = 4212
     InvalidTypeCast = 4203
     InvalidTypeOption = 4210
     InvalidDefault = 4211
     NonClassifiedIntegrityError = 4201
     NotNullViolation = 4204
     RaiseException = 4202
+    TypeMismatchViolation = 4214
     UndefinedFunction = 4207
     UniqueViolation = 4208
     UnsupportedType = 4209
 
     # Data Imports error code
     InvalidTableError = 4301
+    UniqueImportViolation = 4303
 
     # Validation Error
     ColumnSizeMismatch = 4401
@@ -41,3 +45,5 @@ class ErrorCodes(Enum):
     UnknownDBType = 4408
     InvalidLinkChoice = 4409
     IncompatibleFractionDigitValues = 4410
+    UnsupportedConstraint = 4411
+    ConstraintColumnEmpty = 4412

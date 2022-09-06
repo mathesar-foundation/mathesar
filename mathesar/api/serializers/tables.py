@@ -1,10 +1,10 @@
 from django.urls import reverse
-from psycopg2.errors import DuplicateTable
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from sqlalchemy.exc import ProgrammingError
 
 from db.types.operations.convert import get_db_type_enum_from_id
+from db.tables.operations.create import DuplicateTable
 
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
@@ -119,16 +119,15 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
                     table.save()
             else:
                 table = create_empty_table(name, schema)
+        except DuplicateTable as e:
+            raise DuplicateTableAPIException(
+                e,
+                message=f"Relation {validated_data['name']} already exists in schema {schema.id}",
+                field="name",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         except ProgrammingError as e:
-            if type(e.orig) == DuplicateTable:
-                raise DuplicateTableAPIException(
-                    e,
-                    message=f"Relation {validated_data['name']} already exists in schema {schema.id}",
-                    field="name",
-                    status_code=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                raise ProgrammingAPIException(e)
+            raise ProgrammingAPIException(e)
         return table
 
     def update(self, instance, validated_data):
@@ -196,11 +195,13 @@ class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serial
 
 
 class MappingSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    # TBD
-    pass
+    def to_internal_value(self, data):
+        from_col = Column.current_objects.get(id=data[0])
+        target_col = Column.current_objects.get(id=data[1])
+        return [from_col, target_col]
 
 
 class TableImportSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     import_target = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all(), required=True)
     data_files = serializers.PrimaryKeyRelatedField(required=True, many=True, queryset=DataFile.objects.all())
-    mappings = MappingSerializer(required=True, allow_null=True)
+    mappings = MappingSerializer(required=True, allow_null=True, many=True)

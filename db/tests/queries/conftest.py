@@ -1,29 +1,35 @@
 import pytest
-from db.queries.base import DBQuery, InitialColumn, JoinParams
+from db.columns.operations.select import get_column_attnum_from_name as get_attnum
+from db.tables.operations.select import get_oid_from_table
+from db.queries.base import DBQuery, InitialColumn
 
 
 @pytest.fixture
-def shallow_link_dbquery(academics_tables):
-    acad_table = academics_tables['academics']
-    uni_table = academics_tables['universities']
+def shallow_link_dbquery(engine_with_academics):
+    engine, schema = engine_with_academics
+    acad_oid = get_oid_from_table('academics', schema, engine)
+    uni_oid = get_oid_from_table('universities', schema, engine)
     initial_columns = [
         InitialColumn(
+            acad_oid,
+            get_attnum(acad_oid, 'id', engine),
             alias='id',
-            column=acad_table.c.id,
         ),
         InitialColumn(
+            uni_oid,
+            get_attnum(uni_oid, 'name', engine),
             alias='institution_name',
-            column=uni_table.c.name,
             jp_path=[
-                JoinParams(
-                    left_column=acad_table.c.institution,
-                    right_column=uni_table.c.id,
-                ),
+                [
+                    (acad_oid, get_attnum(acad_oid, 'institution', engine)),
+                    (uni_oid, get_attnum(uni_oid, 'id', engine)),
+                ],
             ],
         ),
     ]
     dbq = DBQuery(
-        base_table=acad_table,
-        initial_columns=initial_columns,
+        acad_oid,
+        initial_columns,
+        engine
     )
     return dbq

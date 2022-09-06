@@ -1,7 +1,9 @@
 import tempfile
 
 from psycopg2 import sql
-
+from sqlalchemy.exc import IntegrityError, ProgrammingError
+from psycopg2.errors import NotNullViolation, ForeignKeyViolation, DatatypeMismatch, UniqueViolation, ExclusionViolation
+from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
 from db.columns.base import MathesarColumn
 from db.encoding_utils import get_sql_compatible_encoding
 from db.records.operations.select import get_record
@@ -76,14 +78,46 @@ def insert_records_from_csv(table, engine, csv_filepath, column_names, header, d
                     cursor.copy_expert(copy_sql, temp_file)
 
 
-def insert_from_select(from_table, target_table, engine, mappings=None):
-    target_table_col_list = [col for col in target_table.c if not MathesarColumn.from_column(col).is_default]
+def insert_from_select(from_table, target_table, engine, col_mappings=None):
+    if col_mappings:
+        from_table_col_list, target_table_col_list = zip(
+            *[
+                (from_table.c[from_col], target_table.c[target_col])
+                for from_col, target_col in col_mappings
+            ]
+        )
+    else:
+        from_table_col_list = [
+            col for col in from_table.c
+            if not MathesarColumn.from_column(col).is_default
+        ]
+        target_table_col_list = [
+            col for col in target_table.c
+            if not MathesarColumn.from_column(col).is_default
+        ]
     with engine.begin() as conn:
-        sel = select([col for col in from_table.c if not MathesarColumn.from_column(col).is_default])
+        sel = select(from_table_col_list)
         ins = target_table.insert().from_select(target_table_col_list, sel)
         try:
             result = conn.execute(ins)
-        except Exception as e:
-            # ToDo raise specific exceptions
-            raise e
+        except IntegrityError as e:
+            if type(e.orig) == NotNullViolation:
+                raise NotNullError
+            elif type(e.orig) == ForeignKeyViolation:
+                raise ForeignKeyError
+            elif type(e.orig) == UniqueViolation:
+                # ToDo: Try to differentiate between the types of unique violations
+                # Scenario 1: Adding a duplicate value into a column with uniqueness constraint in the target table.
+                # Scenario 2: Adding a non existing value twice in a column with uniqueness constraint in the target table.
+                # Both the scenarios currently result in the same exception being thrown.
+                raise UniqueValueError
+            elif type(e.orig) == ExclusionViolation:
+                raise ExclusionError
+            else:
+                raise e
+        except ProgrammingError as e:
+            if type(e.orig) == DatatypeMismatch:
+                raise TypeMismatchError
+            else:
+                raise e
     return target_table, result

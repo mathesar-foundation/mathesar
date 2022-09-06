@@ -4,7 +4,8 @@ import sqlalchemy
 import sqlalchemy_filters
 from sqlalchemy import select
 
-from db.functions.operations.apply import apply_db_function_spec_as_filter
+from db.functions.operations import apply
+from db.functions.operations.deserialize import get_db_function_subclass_by_id
 from db.records.operations import group, relevance
 
 
@@ -13,8 +14,8 @@ class Transform(ABC):
     spec = None
 
     def __init__(
-        self,
-        spec
+            self,
+            spec,
     ):
         if self.type is None:
             raise ValueError(
@@ -45,7 +46,7 @@ class Filter(Transform):
         enforce_relation_type_expectations(relation)
         executable = _to_executable(relation)
         if filter is not None:
-            executable = apply_db_function_spec_as_filter(executable, filter)
+            executable = apply.apply_db_function_spec_as_filter(executable, filter)
         return _to_non_executable(executable)
 
 
@@ -88,14 +89,15 @@ class DuplicateOnly(Transform):
         duplicate_columns = self.spec
         enforce_relation_type_expectations(relation)
         DUPLICATE_LABEL = "_is_dupe"
+        duplicate_flag_col = (
+            sqlalchemy.func
+            .count(1)
+            .over(partition_by=duplicate_columns) > 1
+        ).label(DUPLICATE_LABEL)
         duplicate_flag_cte = (
             select(
                 *relation.c,
-                (
-                    sqlalchemy.func
-                    .count(1)
-                    .over(partition_by=duplicate_columns) > 1
-                ).label(DUPLICATE_LABEL),
+                duplicate_flag_col,
             ).select_from(relation)
         ).cte()
         executable = (
@@ -136,7 +138,68 @@ class Group(Transform):
             executable = group.get_group_augmented_records_pg_query(relation, group_by)
             return _to_non_executable(executable)
         else:
-            relation
+            return relation
+
+
+class Summarize(Transform):
+    """
+    "spec": {
+        "grouping_expressions": [
+            {
+                "input_alias": "col1",
+                "output_alias": "col1_alias",
+                "preproc": None  # optional for grouping cols
+            },
+            {
+                "input_alias": "col2",
+                "output_alias": None,  # optional for grouping cols
+                "preproc": "truncate_to_month"  # optional DBFunction id
+            },
+        ],
+        "aggregation_expressions": [
+            {
+                "input_alias": "col3",
+                "output_alias": "col3_alias",  # required for aggregation cols
+                "function": "aggregate_to_array"  # required DBFunction id
+            }
+        ]
+    }
+    """
+    type = "summarize"
+
+    def apply_to_relation(self, relation):
+
+        def _get_grouping_column(col_spec):
+            preproc = col_spec.get('preproc')
+            out_alias = col_spec.get('output_alias')
+
+            expr = relation.columns[col_spec['input_alias']]
+
+            if preproc is not None:
+                expr = get_db_function_subclass_by_id(preproc).to_sa_expression(expr)
+            if out_alias is not None:
+                expr = expr.label(out_alias)
+
+            return expr
+
+        grouping_expressions = [
+            _get_grouping_column(col_spec)
+            for col_spec in self.spec.get("grouping_expressions", [])
+        ]
+        aggregation_expressions = [
+            (
+                get_db_function_subclass_by_id(col_spec['function'])
+                .to_sa_expression(relation.columns[col_spec['input_alias']])
+                .label(col_spec['output_alias'])
+            )
+            for col_spec in self.spec["aggregation_expressions"]
+        ]
+
+        executable = (
+            select(*grouping_expressions, *aggregation_expressions)
+            .group_by(*grouping_expressions)
+        )
+        return _to_non_executable(executable)
 
 
 class SelectSubsetOfColumns(Transform):
@@ -145,13 +208,12 @@ class SelectSubsetOfColumns(Transform):
     def apply_to_relation(self, relation):
         columns_to_select = self.spec
         if columns_to_select:
-            executable = _to_executable(relation)
-            processed_columns_to_select = tuple(
+            processed_columns_to_select = [
                 _make_sure_column_expression(column)
                 for column
                 in columns_to_select
-            )
-            executable = select(*processed_columns_to_select).select_from(executable)
+            ]
+            executable = select(*processed_columns_to_select).select_from(relation)
             return _to_non_executable(executable)
         else:
             return relation

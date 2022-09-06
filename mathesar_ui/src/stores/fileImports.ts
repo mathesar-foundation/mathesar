@@ -9,7 +9,26 @@ import type {
 import type { FileUpload } from '@mathesar-component-library/types';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/tables/tableList';
+import type { TableEntry } from '@mathesar/api/tables';
+
+/**
+ * TODO: refactor to remove `id` entirely.
+ *
+ * Our import system was originally designed with a UI that allowed the user to
+ * perform multiple imports asynchronously while using the app for other
+ * purposes. We've since changed the design to present the import process to the
+ * user as synchronous and uninterruptible. We also changed the import system to
+ * live within a dedicated page instead of a tab within the page, meaning we no
+ * longer need to handle concurrent imports. I _think_ the purpose of storing
+ * `id` values per import was to concurrent imports. I had to do some
+ * refactoring but I didn't want to go too deep, so I made one global import id
+ * to use everywhere that we were previously passing around unique import id
+ * values. The import UI will soon be redesigned and will likely require some
+ * refactoring. Until then, I'm leaving this value here as it seems to be the
+ * quickest path towards removing the tabs system wherein each import tab was
+ * associated with an importId value.
+ */
+const IMPORT_ID = 'HACKY_ID_VALUE';
 
 export const Stages = {
   UPLOAD: 1,
@@ -125,9 +144,9 @@ export function getSchemaImportStore(
 export function getFileStore(
   databaseName: Database['name'],
   schemaId: SchemaEntry['id'],
-  id: string,
 ): FileImport {
   const imports = getSchemaImportStore(schemaId);
+  const id = IMPORT_ID;
 
   let fileImport = imports.get(id);
   if (!fileImport) {
@@ -161,7 +180,7 @@ export function newImport(
   schemaId: SchemaEntry['id'],
 ): FileImport {
   const id = `_new_${fileId}`;
-  const fileImport = getFileStore(databaseName, schemaId, id);
+  const fileImport = getFileStore(databaseName, schemaId);
   const fileImportData = get(fileImport);
   importStatuses.update((existingMap) => {
     existingMap.set(id, {
@@ -182,8 +201,7 @@ export function loadIncompleteImport(
   schemaId: SchemaEntry['id'],
   tableInfo: TableEntry,
 ): FileImport {
-  const id = `_existing_${tableInfo.id}`;
-  const fileImport = getFileStore(databaseName, schemaId, id);
+  const fileImport = getFileStore(databaseName, schemaId);
   if (get(fileImport).stage === Stages.UPLOAD) {
     const dataFileId = tableInfo.data_files?.[0];
     if (dataFileId) {
@@ -244,8 +262,8 @@ export function setImportStatus(
   id: string,
   data: FileImportStatusWritableInfo,
 ): void {
-  const importmap = get(importStatuses);
-  if (importmap.get(id)) {
+  const importMap = get(importStatuses);
+  if (importMap.get(id)) {
     importStatuses.update((existingMap) => {
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       existingMap.set(id, {

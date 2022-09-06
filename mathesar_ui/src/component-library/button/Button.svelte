@@ -37,6 +37,8 @@
   on:keydown
   on:focus
   on:blur
+  on:mouseenter
+  on:mouseleave
 >
   <slot />
 </button>

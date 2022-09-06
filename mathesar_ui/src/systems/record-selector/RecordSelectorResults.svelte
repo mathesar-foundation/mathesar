@@ -1,50 +1,158 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
-  import type { Row } from '@mathesar/stores/table-data/records';
-  import Cell from '@mathesar/components/cell/Cell.svelte';
+
   // TODO: Remove route dependency in systems
-  import RowCellBackgrounds from '@mathesar/routes/schema-home/routes/datascape/table-view/row/RowCellBackgrounds.svelte';
-  import { rowHeightPx } from '@mathesar/routes/schema-home/routes/datascape/table-view/geometry';
+  import RowCellBackgrounds from '@mathesar/systems/table-view/row/RowCellBackgrounds.svelte';
+
+  import type { Column } from '@mathesar/api/tables/columns';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import type { Row } from '@mathesar/stores/table-data/records';
+  import { rowHasRecord } from '@mathesar/stores/table-data/records';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
+  import { rowHeightPx } from '@mathesar/systems/table-view/geometry';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
+  import NewIndicator from './NewIndicator.svelte';
+  import RecordSelectorRow from './RecordSelectorRow.svelte';
+  import type {
+    RecordSelectorRowType,
+    RecordSelectorSelection,
+  } from './recordSelectorTypes';
+  import {
+    findNearestValidSelection,
+    getPkValueInRecord,
+    getValidOffsetSelection,
+  } from './recordSelectorUtils';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  export let submit: (record: Row) => void;
+  export let tableId: number;
+  export let rowType: RecordSelectorRowType;
+  export let submitPkValue: (v: string | number) => void;
+  export let submitNewRecord: (v: Iterable<[number, unknown]>) => void;
+  export let fkColumnWithFocus: Column | undefined = undefined;
 
-  let selectionIndex = 0;
+  let selection: RecordSelectorSelection = { type: 'record', index: 0 };
 
-  $: ({ display } = $tabularData);
-  $: recordsStore = $tabularData.recordsData.savedRecords;
+  /**
+   * The ghost row will appear and disappear based on whether the user has
+   * entered values into the search fields. Here's the situation that this
+   * variable helps us with:
+   *
+   * 1. The user record selector loads with 10 rows.
+   * 1. The user enters a search term which filters the number of rows to 0.
+   * 1. The ghost row is automatically selected (good).
+   * 1. The user modifies their search term, allowing 5 rows to display.
+   * 1. At this point, we'd like to automatically select the first result row
+   *    (instead of the ghost row) because we know that the user never manually
+   *    selected the ghost row. If we leave the ghost row selected, there's a
+   *    chance the user (if they're not paying close attention) could select the
+   *    ghost, inadvertently creating a new record. We want to make sure that
+   *    when they select the ghost row, they mean it!
+   * 1. Because we also want to support the user case where they've manually
+   *    selected the ghost row and are continuing to build a new record, we need
+   *    this variable.
+   */
+  let userHasManuallySelectedGhostRow = false;
+
+  $: ({ display, recordsData, meta, columnsDataStore, isLoading } =
+    $tabularData);
+  $: recordsStore = recordsData.savedRecords;
+  $: ({ searchFuzzy } = meta);
   $: records = $recordsStore;
+  $: resultCount = records.length;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
   $: rowStyle = `width: ${rowWidth as number}px; height: ${rowHeightPx}px;`;
+  $: hasSearchQueries = $searchFuzzy.size > 0;
+  $: hasGhostRow = hasSearchQueries;
+  $: indexIsSelected = (index: number) =>
+    selection.type === 'record' && selection.index === index;
+  $: ({ columns } = $columnsDataStore);
+  $: keyComboToSubmit = `${fkColumnWithFocus ? 'Shift+' : ''}Enter`;
 
-  function selectPrevious() {
-    selectionIndex = Math.max(selectionIndex - 1, 0);
+  $: selection = findNearestValidSelection({
+    selection,
+    resultCount,
+    hasGhostRow,
+    userHasManuallySelectedGhostRow,
+  });
+
+  function moveSelectionByOffset(offset: number) {
+    userHasManuallySelectedGhostRow =
+      userHasManuallySelectedGhostRow ||
+      (selection.type === 'record' && selection.index === 0 && offset < 0);
+    selection = getValidOffsetSelection(
+      {
+        selection,
+        resultCount,
+        hasGhostRow,
+        userHasManuallySelectedGhostRow,
+      },
+      offset,
+    );
   }
 
-  function selectNext() {
-    selectionIndex = Math.min(selectionIndex + 1, records.length - 1);
+  function getPkValue(row: Row): string | number | undefined {
+    const { record } = row;
+    if (!record || Object.keys(record).length === 0) {
+      return undefined;
+    }
+    return getPkValueInRecord(record, columns);
   }
 
-  function submitRecord(index: number) {
-    submit(records[index]);
+  function getRowHref(row: Row): string | undefined {
+    if (rowType === 'button') {
+      return undefined;
+    }
+    const recordId = getPkValue(row);
+    if (!recordId) {
+      return undefined;
+    }
+    return $storeToGetRecordPageUrl({ tableId, recordId });
+  }
+
+  function submitIndex(index: number) {
+    const pkValue = getPkValue(records[index]);
+    if (pkValue !== undefined) {
+      submitPkValue(pkValue);
+    }
+  }
+
+  function submitGhost() {
+    submitNewRecord($searchFuzzy);
+  }
+
+  function submitSelection() {
+    if (selection.type === 'record') {
+      submitIndex(selection.index);
+    } else {
+      submitGhost();
+    }
   }
 
   function handleKeydown(e: KeyboardEvent) {
     let handled = true;
     switch (e.key) {
       case 'ArrowUp':
-        selectPrevious();
+        moveSelectionByOffset(-1);
         break;
       case 'ArrowDown':
-        selectNext();
+        moveSelectionByOffset(1);
         break;
       case 'Enter':
-        submitRecord(selectionIndex);
+        // When we have a FK search cell selected, we use `Enter` to open the
+        // nested selector. That event is handled by LinkedRecordInput, so we
+        // don't need to handle it here -- we just need to make sure to _not_
+        // handle other events here in that case. We still let the user submit
+        // the selected record by using Shift+Enter.
+        if (!fkColumnWithFocus || e.shiftKey) {
+          submitSelection();
+        } else {
+          handled = false;
+        }
         break;
       default:
         handled = false;
@@ -64,23 +172,74 @@
   });
 </script>
 
-<div class="record-selector-results">
-  {#each records as row, index}
-    {#if row.record}
-      <div class="row" style={rowStyle} on:click={() => submitRecord(index)}>
-        <CellArranger {display} let:style let:processedColumn>
+<div class="record-selector-results" class:loading={$isLoading}>
+  {#if hasGhostRow}
+    <div class="row ghost" style={rowStyle}>
+      <RecordSelectorRow on:buttonClick={() => submitGhost()}>
+        <div class="new-indicator-wrapper"><NewIndicator /></div>
+        <CellArranger {display} let:style let:processedColumn let:column>
           <CellWrapper {style}>
-            <Cell
-              {processedColumn}
-              value={row.record[processedColumn.column.id]}
+            <CellFabric
+              columnFabric={processedColumn}
+              value={$searchFuzzy.get(column.id) ??
+                (processedColumn.column.nullable ? null : undefined)}
               disabled
             />
-            <RowCellBackgrounds isSelected={index === selectionIndex} />
+            <RowCellBackgrounds isSelected={selection.type === 'ghost'} />
           </CellWrapper>
         </CellArranger>
+      </RecordSelectorRow>
+    </div>
+  {/if}
+  {#each records as row, index}
+    <div class="row" style={rowStyle}>
+      <RecordSelectorRow
+        href={getRowHref(row)}
+        on:linkClick
+        on:buttonClick={() => submitIndex(index)}
+      >
+        <CellArranger {display} let:style let:processedColumn>
+          <CellWrapper {style}>
+            <CellFabric
+              columnFabric={processedColumn}
+              value={row?.record?.[processedColumn.column.id]}
+              dataForRecordSummaryInFkCell={row?.dataForRecordSummariesInRow?.[
+                processedColumn.column.id
+              ]}
+              disabled
+              showAsSkeleton={!rowHasRecord(row)}
+            />
+            <RowCellBackgrounds isSelected={indexIsSelected(index)} />
+          </CellWrapper>
+        </CellArranger>
+      </RecordSelectorRow>
+    </div>
+  {:else}
+    <div class="no-results">
+      No {#if hasSearchQueries}matching{:else}existing{/if} records
+    </div>
+  {/each}
+
+  <div class="tips">
+    {#if fkColumnWithFocus}
+      <div>
+        <KeyboardKey>Enter</KeyboardKey>: Input a value for
+        {fkColumnWithFocus.name}
       </div>
     {/if}
-  {/each}
+    <div>
+      <KeyboardKey>{keyComboToSubmit}</KeyboardKey>:
+      {#if selection.type === 'ghost'}
+        <strong>Create new record</strong>, select it, and exit.
+      {:else}
+        Choose selected record and exit.
+      {/if}
+    </div>
+    <div>
+      <KeyboardKey>Up</KeyboardKey>/<KeyboardKey>Down</KeyboardKey>: Modify
+      selection.
+    </div>
+  </div>
 </div>
 
 <style>
@@ -89,6 +248,38 @@
     cursor: pointer;
   }
   .row:not(:hover) :global(.cell-bg-row-hover) {
+    display: none;
+  }
+  .new-indicator-wrapper {
+    position: absolute;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    left: -0.5rem;
+  }
+  .ghost {
+    border-bottom: dashed 2px #aaa;
+  }
+  .ghost :global(.cell-wrapper) {
+    opacity: 75%;
+  }
+  .no-results {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--color-gray-dark);
+  }
+  .tips {
+    margin-top: 0.7rem;
+    font-size: var(--text-size-x-small);
+    color: var(--color-gray-dark);
+    display: flex;
+  }
+  .tips > * + * {
+    margin-left: 1.5rem;
+  }
+
+  .record-selector-results.loading .no-results,
+  .record-selector-results.loading .tips {
     display: none;
   }
 </style>

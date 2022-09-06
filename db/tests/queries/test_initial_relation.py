@@ -4,98 +4,117 @@
 # Initial columns is an ordered set of columns sourced either from the base table, or from linked
 # tables.
 
-from db.queries.base import DBQuery, InitialColumn, JoinParams
+from db.columns.operations.select import get_column_attnum_from_name as get_attnum
+from db.tables.operations.select import get_oid_from_table
+from db.queries.base import DBQuery, InitialColumn
 
 
-def test_local_columns(engine, academics_tables):
-    base_table = academics_tables['academics']
+def test_local_columns(engine_with_academics):
+    engine, schema = engine_with_academics
+    oid = get_oid_from_table("academics", schema, engine)
     initial_columns = [
         InitialColumn(
+            oid,
+            get_attnum(oid, 'id', engine),
             alias='id',
-            column=base_table.c.id,
         ),
         InitialColumn(
+            oid,
+            get_attnum(oid, 'institution', engine),
             alias='institution',
-            column=base_table.c.institution,
         ),
     ]
     dbq = DBQuery(
-        base_table=base_table,
-        initial_columns=initial_columns,
+        oid,
+        initial_columns,
+        engine
     )
-    records = dbq.get_records(engine=engine)
+    records = dbq.get_records()
     assert records == [(1, 1), (2, 1), (3, 2)]
 
 
-def test_shallow_link(engine, shallow_link_dbquery):
+def test_shallow_link(shallow_link_dbquery):
     dbq = shallow_link_dbquery
-    records = dbq.get_records(engine=engine)
+    records = dbq.get_records()
     assert records == [(1, 'uni1'), (2, 'uni1'), (3, 'uni2')]
 
 
-def test_deep_link(engine, academics_tables):
-    art_table = academics_tables['articles']
-    acad_table = academics_tables['academics']
-    uni_table = academics_tables['universities']
+def test_deep_link(engine_with_academics):
+    engine, schema = engine_with_academics
+    art_oid = get_oid_from_table("articles", schema, engine)
+    acad_oid = get_oid_from_table("academics", schema, engine)
+    uni_oid = get_oid_from_table("universities", schema, engine)
     initial_columns = [
         InitialColumn(
+            art_oid,
+            get_attnum(art_oid, 'title', engine),
             alias='title',
-            column=art_table.c.title,
         ),
         InitialColumn(
+            uni_oid,
+            get_attnum(uni_oid, 'name', engine),
             alias='primary_author_institution_name',
-            column=uni_table.c.name,
             jp_path=[
-                JoinParams(
-                    left_column=art_table.c.primary_author,
-                    right_column=acad_table.c.id,
-                ),
-                JoinParams(
-                    left_column=acad_table.c.institution,
-                    right_column=uni_table.c.id,
-                ),
+                [
+                    (art_oid, get_attnum(art_oid, 'primary_author', engine)),
+                    (acad_oid, get_attnum(acad_oid, 'id', engine)),
+                ],
+                [
+                    (acad_oid, get_attnum(acad_oid, 'institution', engine)),
+                    (uni_oid, get_attnum(uni_oid, 'id', engine)),
+                ]
             ],
         ),
     ]
     dbq = DBQuery(
-        base_table=art_table,
-        initial_columns=initial_columns,
+        art_oid,
+        initial_columns,
+        engine
     )
-    records = dbq.get_records(engine=engine)
+    records = dbq.get_records()
     assert records == [('article1', 'uni1'), ('article2', 'uni1')]
 
 
-def test_self_referencing_table(engine, academics_tables):
-    acad_table = academics_tables['academics']
+def test_self_referencing_table(engine_with_academics):
+    engine, schema = engine_with_academics
+    acad_oid = get_oid_from_table("academics", schema, engine)
     initial_columns = [
         InitialColumn(
+            acad_oid,
+            get_attnum(acad_oid, 'id', engine),
             alias='id',
-            column=acad_table.c.id,
         ),
         InitialColumn(
+            acad_oid,
+            get_attnum(acad_oid, 'name', engine),
             alias='advisor name',
-            column=acad_table.c.name,
             jp_path=[
-                JoinParams(
-                    left_column=acad_table.c.advisor,
-                    right_column=acad_table.c.id,
-                ),
+                [
+                    (acad_oid, get_attnum(acad_oid, 'advisor', engine)),
+                    (acad_oid, get_attnum(acad_oid, 'id', engine)),
+                ]
             ],
         ),
         InitialColumn(
+            acad_oid,
+            get_attnum(acad_oid, 'name', engine),
             alias='advisee name',
-            column=acad_table.c.name,
             jp_path=[
-                JoinParams(
-                    left_column=acad_table.c.id,
-                    right_column=acad_table.c.advisor,
-                ),
+                [
+                    (acad_oid, get_attnum(acad_oid, 'id', engine)),
+                    (acad_oid, get_attnum(acad_oid, 'advisor', engine)),
+                ]
             ],
         ),
     ]
     dbq = DBQuery(
-        base_table=acad_table,
-        initial_columns=initial_columns,
+        acad_oid,
+        initial_columns,
+        engine
     )
-    records = dbq.get_records(engine=engine)
-    assert records == [(2, 'academic3', 'academic1')]
+    records = dbq.get_records()
+    assert sorted(records, key=lambda t: t[0]) == [
+        (1, 'academic2', None),
+        (2, 'academic3', 'academic1'),
+        (3, None, 'academic2'),
+    ]

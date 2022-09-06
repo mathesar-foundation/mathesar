@@ -10,14 +10,15 @@
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/tables/tableList';
+  import type { TableEntry } from '@mathesar/api/tables';
   import { queries } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
   import { iconQuery, iconRedo, iconUndo } from '@mathesar/icons';
   import type QueryManager from './QueryManager';
-  import type { QueryInitialColumn } from './QueryModel';
+  import type { ColumnWithLink } from './utils';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
-  import ResultPane from './ResultPane.svelte';
+  import ResultPane from './result-pane/ResultPane.svelte';
+  import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -33,17 +34,29 @@
     void queryManager.update((q) =>
       q.withBaseTable(tableEntry ? tableEntry.id : undefined),
     );
+    queryManager.clearSelectedColumn();
   }
 
-  function addColumn(column: QueryInitialColumn) {
-    void queryManager.update((q) => q.addColumn(column));
+  function addColumn(column: ColumnWithLink) {
+    const baseAlias = `${column.tableName}_${column.name}`;
+    const allAliases = new Set($query.initial_columns.map((c) => c.alias));
+    const alias = getAvailableName(baseAlias, allAliases);
+    void queryManager.update((q) =>
+      q.withColumn({
+        alias,
+        id: column.id,
+        jp_path: column.jpPath,
+        display_name: alias,
+      }),
+    );
+    queryManager.selectColumn(alias);
   }
 
   function handleQueryNameChange(e: Event) {
     const target = e.target as HTMLInputElement;
     if (target.value.trim() === '') {
       target.value = getAvailableName(
-        'New_Query',
+        'New_Exploration',
         new Set([...$queries.data.values()].map((q) => q.name)),
       );
     }
@@ -52,22 +65,24 @@
 </script>
 
 <div class="query-builder">
-  <div class="title-bar">
-    <div class="icon">
-      <Icon {...iconQuery} size="2em" />
-    </div>
-    <div class="name">
+  <div class="header">
+    <div class="title-wrapper">
+      <div class="icon">
+        <Icon {...iconQuery} size="1.5em" />
+      </div>
+
       <EditableTitle
         value={$query.name}
-        size={1.3}
+        size={1.266}
         on:change={handleQueryNameChange}
       />
-      <SaveStatusIndicator status={$state.saveState?.state} />
     </div>
-    <div class="toolbar">
+
+    <SaveStatusIndicator status={$state.saveState?.state} />
+    <div class="actions">
       <InputGroup>
         <Button
-          appearance="plain"
+          appearance="default"
           disabled={!$state.isUndoPossible}
           on:click={() => queryManager.undo()}
         >
@@ -75,17 +90,17 @@
           <span>Undo</span>
         </Button>
         <Button
-          appearance="plain"
+          appearance="default"
           disabled={!$state.isRedoPossible}
           on:click={() => queryManager.redo()}
         >
           <Icon {...iconRedo} />
           <span>Redo</span>
         </Button>
-        <Button appearance="plain" on:click={() => dispatch('close')}
-          >Close</Button
-        >
       </InputGroup>
+      <Button appearance="default" on:click={() => dispatch('close')}
+        >Close</Button
+      >
     </div>
   </div>
   <div class="content-pane">
@@ -93,19 +108,19 @@
       <div class="base-table-selector">
         <LabeledInput label="Select Base Table" layout="stacked">
           <SelectTableWithinCurrentSchema
-            prependBlank
+            autoSelect="clear"
             table={currentTable}
             on:change={(e) => onBaseTableChange(e.detail)}
           />
         </LabeledInput>
       </div>
-      <ColumnSelectionPane
-        baseTable={currentTable}
-        on:add={(e) => addColumn(e.detail)}
-      />
+      <ColumnSelectionPane {queryManager} on:add={(e) => addColumn(e.detail)} />
     </div>
+    <!-- Do not use inputColumnManager in ResultPane because
+      we'd also use ResultPane for query page where input column
+      details would not be available-->
     <ResultPane {queryManager} />
-    <div class="output-config-sidebar" />
+    <OutputConfigSidebar {queryManager} />
   </div>
 </div>
 
@@ -117,74 +132,74 @@
     top: 0;
     bottom: 0;
 
-    .title-bar {
+    .header {
       display: flex;
-      height: 3.5rem;
       align-items: center;
-      border-bottom: 1px solid #efefef;
+      height: 4rem;
+      border-bottom: 1px solid var(--color-gray-dark);
       position: relative;
       overflow: hidden;
 
-      .icon {
-        padding: 0 0.3rem 0 1rem;
-        flex-shrink: 0;
-        flex-grow: 0;
-
-        :global(svg.fa-icon) {
-          color: #4285f4;
-        }
-      }
-      .name {
-        flex-grow: 1;
-        padding-right: 1rem;
-        position: relative;
-        overflow: hidden;
+      .title-wrapper {
         display: flex;
         align-items: center;
+        overflow: hidden;
+        padding: 0.7rem 1rem;
+        margin-right: 1rem;
+        border-right: 1px solid var(--color-gray-medium);
+      }
 
-        :global(.save-status) {
-          display: inline-flex;
-          flex-shrink: 0;
+      .icon {
+        margin-right: 0.25rem;
+        opacity: 0.8;
+        :global(svg.fa-icon) {
+          color: var(--color-gray-darker);
         }
       }
 
-      .toolbar {
+      .actions {
         flex-shrink: 0;
-        padding-right: 1rem;
+        padding: 0.5rem;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
         :global(button) {
           flex-shrink: 0;
         }
         :global(button .fa-icon) {
-          padding-right: 0.2rem;
+          padding-right: 0.25rem;
         }
       }
     }
     .content-pane {
       display: flex;
       position: absolute;
-      top: 3.5rem;
+      top: 4rem;
       bottom: 0;
       left: 0;
       right: 0;
+      overflow-x: auto;
 
       .input-sidebar {
-        width: 22rem;
-        border-right: 1px solid #efefef;
+        width: 20rem;
+        border-right: 1px solid var(--color-gray-medium);
         flex-shrink: 0;
         flex-grow: 0;
-        flex-basis: 22rem;
+        flex-basis: 20rem;
         display: flex;
         flex-direction: column;
 
         .base-table-selector {
-          border-bottom: 1px solid #efefef;
-          padding: 1rem 0.75rem 1.4rem;
-          background: #f7f8f8;
+          border-bottom: 1px solid var(--color-gray-medium);
+          padding: 1rem;
+          background: var(--color-gray-light);
           flex-grow: 0;
           flex-shrink: 0;
+          :global(label) {
+            font-weight: 500;
+          }
         }
-      }
-      .output-config-sidebar {
       }
     }
   }

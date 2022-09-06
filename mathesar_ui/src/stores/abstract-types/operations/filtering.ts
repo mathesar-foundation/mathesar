@@ -89,6 +89,41 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     },
   },
   {
+    id: 'json_array_length_equals',
+    name: 'number of elements is',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+    },
+  },
+  {
+    id: 'json_array_length_greater_than',
+    name: 'number of elements is greater than',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+    },
+  },
+  {
+    id: 'json_array_length_greater_or_equal',
+    name: 'number of elements is greater than or equal to',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+    },
+  },
+  {
+    id: 'json_array_length_less_than',
+    name: 'number of elements is less than',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+    },
+  },
+  {
+    id: 'json_array_length_less_or_equal',
+    name: 'number of elements is less than or equal to',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+    },
+  },
+  {
     id: 'email_domain_equals',
     name: 'email domain is',
     uiTypeParameterMap: {

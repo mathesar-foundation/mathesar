@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework_nested import routers
 
 from mathesar import views
@@ -27,11 +27,12 @@ urlpatterns = [
     path('api/db/v0/', include(db_table_router.urls)),
     path('api/ui/v0/', include(ui_router.urls)),
 
-    # Specifying each route individually to facilitate redirection and data pre-rendering based on route
     path('', views.home, name="home"),
     path('<db_name>/', views.db_home, name="db_home"),
     path('<db_name>/schemas/', views.schemas, name="schemas"),
-    path('<db_name>/<int:schema_id>/', views.schema_home, name="schema_home"),
-    path('<db_name>/<int:schema_id>/queries/', views.schema_home, name="query_list"),
-    path('<db_name>/<int:schema_id>/queries/<int:query_id>/', views.schema_home, name="query_home"),
+    re_path(
+        r'^(?P<db_name>\w+)/(?P<schema_id>\w+)/',
+        views.schema_home,
+        name="schema_home"
+    ),
 ]

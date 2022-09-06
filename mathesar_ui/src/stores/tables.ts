@@ -11,7 +11,7 @@ import {
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/tables/tableList';
+import type { TableEntry } from '@mathesar/api/tables';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -150,6 +150,10 @@ export function createTable(
   return postAPI<TableEntry>('/api/db/v0/tables/', { schema, name });
 }
 
+export function getTable(id: number): CancellablePromise<TableEntry> {
+  return getAPI(`/api/db/v0/tables/${id}/`);
+}
+
 export const tables: Readable<DBTablesStoreData> = derived(
   currentSchemaId,
   ($currentSchemaId, set) => {
@@ -176,3 +180,13 @@ export const tables: Readable<DBTablesStoreData> = derived(
 export function getTableName(id: DBObjectEntry['id']): string | undefined {
   return get(tables).data.get(id)?.name;
 }
+
+export const currentTableId = writable<number | undefined>(undefined);
+
+export const currentTable = derived(
+  [currentTableId, tables],
+  ([$currentTableId, $tables]) =>
+    $currentTableId === undefined
+      ? undefined
+      : $tables.data.get($currentTableId),
+);

@@ -4,7 +4,7 @@
   type SheetColumnIdentifierKey = $$Generic;
 
   const MIN_COLUMN_WIDTH = 50;
-  const { api } = getSheetContext<unknown, SheetColumnIdentifierKey>();
+  const { api } = getSheetContext<SheetColumnIdentifierKey>();
 
   export let columnIdentifierKey: SheetColumnIdentifierKey;
 

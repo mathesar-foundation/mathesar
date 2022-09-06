@@ -11,7 +11,7 @@ from db.functions.exceptions import (
 from db.records.exceptions import (
     BadGroupFormat, GroupFieldNotFound, InvalidGroupType, UndefinedFunction
 )
-from mathesar.api.pagination import TableLimitOffsetGroupPagination
+from mathesar.api.pagination import TableLimitOffsetPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
@@ -33,7 +33,7 @@ class RecordViewSet(viewsets.ViewSet):
     # For sorting parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#sort-format
     def list(self, request, table_pk=None):
-        paginator = TableLimitOffsetGroupPagination()
+        paginator = TableLimitOffsetPagination()
 
         serializer = RecordListParameterSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
@@ -68,7 +68,7 @@ class RecordViewSet(viewsets.ViewSet):
                 order_by=name_converted_order_by,
                 grouping=name_converted_group_by,
                 search=name_converted_search,
-                duplicate_only=serializer.validated_data['duplicate_only'],
+                duplicate_only=serializer.validated_data['duplicate_only']
             )
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
             raise database_api_exceptions.BadFilterAPIException(

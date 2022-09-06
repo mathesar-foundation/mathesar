@@ -1,47 +1,52 @@
 import {
-  faHammer,
+  faAlignLeft,
+  faArrowLeft,
   faArrowRight,
-  faUser,
-  faProjectDiagram,
-  faCogs,
-  faTable,
-  faFilter,
-  faSort,
-  faPlus,
-  faLink,
-  faTrashAlt,
-  faSortAmountDownAlt,
-  faSortAmountDown,
-  faThList,
-  faICursor,
-  faUnlink,
-  faChevronRight,
-  faDatabase,
-  faPalette,
-  faSync,
-  faLock,
-  faPencilAlt,
-  faFileContract,
-  faRedo,
-  faUndo,
-  faUpload,
-  faKey,
-  faSnowflake,
   faBackspace,
-  faCheckSquare,
   faCalendarDay,
   faCalendarWeek,
-  faStopwatch,
-  faEnvelope,
-  faQuestion,
-  faDollarSign,
-  faHashtag,
-  faAlignLeft,
+  faCheckSquare,
+  faChevronRight,
   faClock,
-  faGlobe,
-  faShapes,
   faClone,
+  faCogs,
+  faDatabase,
+  faDollarSign,
+  faEnvelope,
+  faExternalLinkAlt,
+  faFileContract,
+  faFilter,
+  faGlobe,
+  faHammer,
+  faHashtag,
+  faICursor,
+  faKey,
+  faLink,
+  faLock,
+  faPalette,
+  faPencilAlt,
+  faPlus,
+  faProjectDiagram,
+  faQuestion,
+  faRedo,
+  faSearchPlus,
+  faShapes,
+  faSnowflake,
+  faSort,
+  faSortAmountDown,
+  faSortAmountDownAlt,
+  faStopwatch,
+  faSync,
+  faTable,
+  faThList,
+  faToolbox,
+  faTrashAlt,
+  faUndo,
+  faUnlink,
+  faUpload,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons';
+
 import type { IconProps } from '@mathesar-component-library/types';
 
 /**
@@ -69,6 +74,7 @@ export const iconImportData: IconProps = { data: faUpload };
 export const iconRedo: IconProps = { data: faRedo };
 export const iconRefresh: IconProps = { data: faSync };
 export const iconRename: IconProps = { data: faICursor };
+export const iconSelectRecord: IconProps = { data: faSearchPlus };
 export const iconSetToNull: IconProps = { data: faBackspace };
 export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
 export const iconSortDescending: IconProps = { data: faSortAmountDown };
@@ -86,10 +92,14 @@ export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faThList };
+export const iconInwardLink: IconProps = { data: faArrowRight };
+export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };
+export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconQuery: IconProps = { data: faFileContract };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: faTable };
+export const iconTableInspector: IconProps = { data: faToolbox };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUser: IconProps = { data: faUser };

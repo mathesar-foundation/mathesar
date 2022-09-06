@@ -1,10 +1,12 @@
 <script lang="ts">
+  let className = '';
+  export { className as class };
   export let style: string | undefined = undefined;
   export let header = false;
   export let divider = false;
 </script>
 
-<div class="cell-wrapper" class:header class:divider {style}>
+<div class="cell-wrapper {className}" class:header class:divider {style}>
   <slot />
 </div>
 
@@ -18,6 +20,7 @@
     border-right: var(--cell-border-vertical);
     display: flex;
     align-items: center;
+    overflow: hidden;
   }
   .cell-wrapper:first-child {
     border-left: var(--cell-border-vertical);
@@ -32,6 +35,6 @@
     padding: 5px 26px 5px 12px;
   }
   .divider {
-    background: #e7e7e7;
+    background: var(--divider-color);
   }
 </style>
