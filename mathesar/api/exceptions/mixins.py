@@ -152,12 +152,14 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                 }
             )
         elif field_type in self.field_map['file']:
+            # Parent method calculates the length of the file instead of the filename,
+            # we are changing it to calculate length of the file name
+            file_field = field.parent.data.get(field.source, None)
+            file_name_length = len(file_field.name) if file_field else 0
             kwargs.update(
                 {
                     'max_length': field.max_length,
-                    # Parent method calculates the length of the file instead of the filename,
-                    # we are changing it to calculate length of the file name
-                    'length': len(field.parent.data.get(field.source, '').name)
+                    'length': file_name_length
                 }
             )
         elif field_type in self.field_map['composite']:

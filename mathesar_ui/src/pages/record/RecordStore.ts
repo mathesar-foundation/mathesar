@@ -3,8 +3,7 @@ import { WritableMap } from '@mathesar/component-library';
 import type { RequestStatus } from '@mathesar/utils/api';
 import { patchAPI, getAPI } from '@mathesar/utils/api';
 import { getErrorMessage } from '@mathesar/utils/errors';
-
-type ApiResponse = Record<string, unknown>;
+import type { Response as ApiResponse } from '@mathesar/api/tables/records';
 
 export default class RecordStore {
   fetchRequest: RequestStatus | undefined;
@@ -32,8 +31,9 @@ export default class RecordStore {
   }
 
   private setFieldsFromResponse(response: ApiResponse): void {
+    const result = response.results[0];
     this.fields.reconstruct(
-      Object.entries(response).map(([k, v]) => [parseInt(k, 10), v]),
+      Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
     );
   }
 
