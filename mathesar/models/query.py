@@ -137,6 +137,10 @@ class UIQuery(BaseModel, Relation):
         )
 
     @property
+    def output_columns_simple(self):
+        return tuple(sa_col.name for sa_col in self.db_query.sa_output_columns)
+
+    @property
     def initial_dj_columns(self):
         return Column.objects.filter(pk__in=[col['id'] for col in self.initial_columns])
 

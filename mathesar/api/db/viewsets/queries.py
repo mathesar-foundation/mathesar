@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from mathesar.api.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
-from mathesar.api.serializers.queries import QuerySerializer
+from mathesar.api.serializers.queries import BaseQuerySerializer, QuerySerializer
 from mathesar.api.serializers.records import RecordListParameterSerializer
 from mathesar.models.query import UIQuery
 
@@ -55,7 +55,7 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
         params = request.data.pop("parameters", {})
         request.GET |= {k: [json.dumps(v)] for k, v in params.items()}
         paginator = TableLimitOffsetPagination()
-        input_serializer = self.get_serializer(data=request.data)
+        input_serializer = BaseQuerySerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         query = UIQuery(**input_serializer.validated_data)
         record_serializer = RecordListParameterSerializer(data=request.GET)
@@ -72,9 +72,9 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
             duplicate_only=record_serializer.validated_data['duplicate_only'],
         )
         paginated_records = paginator.get_paginated_response(records)
-        columns = query.output_columns_described
+        columns = query.output_columns_simple
         column_metadata = query.all_columns_description_map
-        output_serializer = self.get_serializer(query)
+        output_serializer = BaseQuerySerializer(query)
         return Response(
             {
                 "query": output_serializer.data,

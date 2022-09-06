@@ -4,19 +4,32 @@ from mathesar.models.query import UIQuery
 from django.core.exceptions import ValidationError
 
 
-class QuerySerializer(serializers.ModelSerializer):
-    records_url = serializers.SerializerMethodField('get_records_url')
-    columns_url = serializers.SerializerMethodField('get_columns_url')
+class BaseQuerySerializer(serializers.ModelSerializer):
     schema = serializers.SerializerMethodField('get_schema')
 
     class Meta:
         model = UIQuery
-        fields = '__all__'
+        fields = ['schema', 'name', 'initial_columns', 'transformations', 'base_table']
 
     def get_schema(self, uiquery):
         base_table = uiquery.base_table
         if base_table:
             return base_table.schema.id
+
+    def validate(self, attrs):
+        unexpected_fields = set(self.initial_data) - set(self.fields)
+        if unexpected_fields:
+            raise ValidationError(f"Unexpected field(s): {unexpected_fields}")
+        return attrs
+
+
+class QuerySerializer(BaseQuerySerializer):
+    records_url = serializers.SerializerMethodField('get_records_url')
+    columns_url = serializers.SerializerMethodField('get_columns_url')
+
+    class Meta:
+        model = UIQuery
+        fields = '__all__'
 
     def get_records_url(self, obj):
         if isinstance(obj, UIQuery) and obj.pk is not None:
@@ -33,9 +46,3 @@ class QuerySerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(reverse('query-columns', kwargs={'pk': obj.pk}))
         else:
             return None
-
-    def validate(self, attrs):
-        unexpected_fields = set(self.initial_data) - set(self.fields)
-        if unexpected_fields:
-            raise ValidationError(f"Unexpected field(s): {unexpected_fields}")
-        return attrs
