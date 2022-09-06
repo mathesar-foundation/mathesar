@@ -13,7 +13,6 @@ def test_queries_run_minimal(create_patents_table, client):
         },
     ]
     data = {
-        'name': 'minimal_patent_query_run',
         'base_table': base_table.id,
         'initial_columns': initial_columns,
         'parameters': {
@@ -42,7 +41,7 @@ def test_queries_run_minimal(create_patents_table, client):
                 {'col1': 'NASA Ames Research Center', 'col2': 'ARC-16892-1A'}
             ]
         },
-        'columns': ['col1', 'col2'],
+        'output_columns': ['col1', 'col2'],
         'column_metadata': {
             'col1': {
                 'alias': 'col1',

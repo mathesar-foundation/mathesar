@@ -79,7 +79,7 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
             {
                 "query": output_serializer.data,
                 "records": paginated_records.data,
-                "columns": columns,
+                "output_columns": columns,
                 "column_metadata": column_metadata,
                 "parameters": {k: json.loads(request.GET[k]) for k in request.GET},
             }

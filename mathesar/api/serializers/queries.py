@@ -9,7 +9,7 @@ class BaseQuerySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UIQuery
-        fields = ['schema', 'name', 'initial_columns', 'transformations', 'base_table']
+        fields = ['schema', 'initial_columns', 'transformations', 'base_table']
 
     def get_schema(self, uiquery):
         base_table = uiquery.base_table
