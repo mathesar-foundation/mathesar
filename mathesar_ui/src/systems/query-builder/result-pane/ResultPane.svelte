@@ -115,6 +115,7 @@
         columns={columnList}
         getColumnIdentifier={(c) => c.id}
         on:click={checkAndUnselectColumn}
+        usesVirtualList
       >
         <SheetHeader>
           {#each columnList as processedQueryColumn (processedQueryColumn.id)}
