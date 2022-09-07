@@ -31,15 +31,23 @@ def test_rename_schema_missing(engine):
 
 def test_comment_on_schema(engine_with_schema):
     engine, schema = engine_with_schema
+    schema_oid = reflect_schema(engine, name=schema)['oid']
+
     expect_comment = 'test comment'
     comment_on_schema(schema, engine, expect_comment)
-    schema_oid = reflect_schema(engine, name=schema)['oid']
     with engine.begin() as conn:
         res = conn.execute(select(func.obj_description(schema_oid, 'pg_namespace')))
     actual_comment = res.fetchone()[0]
 
     assert actual_comment == expect_comment
 
+    expect_new_comment = 'test comment new'
+    comment_on_schema(schema, engine, expect_new_comment)
+    with engine.begin() as conn:
+        res = conn.execute(select(func.obj_description(schema_oid, 'pg_namespace')))
+    actual_new_comment = res.fetchone()[0]
+
+    assert actual_new_comment == expect_new_comment
 
 def test_rename_schema_foreign_key(engine):
     test_schema = "test_rename_schema_foreign_key"
