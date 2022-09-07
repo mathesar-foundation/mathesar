@@ -5,32 +5,55 @@ from sqlalchemy.dialects.postgresql import array
 USER_DEFINED_OBJECTS_MIN_OID = 16384
 # automatic and normal dependents
 PG_DEPENDENT_TYPES = ['a', 'n']
+DEFAULT_NON_COLUMN_OBJSUBID = 0
 PG_CLASS_CATALOGUE_NAME = '\'pg_class\''
 START_LEVEL = 1
 MAX_LEVEL = 10
 
 
-def get_dependents_graph(referenced_object_id, engine):
+def get_dependents_graph(referenced_object_id, engine, attnum=None):
     dependency_pairs = _get_typed_dependency_pairs_stmt(engine)
     dependency_pairs_cte = dependency_pairs.cte(recursive=True, name='dependency_pairs_cte')
 
+    pg_identify_refobject = _get_pg_identify_object_lateral_stmt(
+        dependency_pairs_cte.c.refclassid,
+        dependency_pairs_cte.c.refobjid,
+        (DEFAULT_NON_COLUMN_OBJSUBID if attnum is None else attnum)
+    )
+
     # anchor member which includes all dependents of a requested object
-    anchor = select(
-        dependency_pairs_cte,
-        literal(START_LEVEL).label('level'),
-        array([dependency_pairs_cte.c.refobjid]).label('dependency_chain')) \
-        .where(dependency_pairs_cte.c.refobjid == referenced_object_id) \
+    anchor = (
+        select(
+            dependency_pairs_cte,
+            pg_identify_refobject.c.name.label('refobjname'),
+            pg_identify_refobject.c.type.label('refobjtype'),
+            literal(START_LEVEL).label('level'),
+            array([dependency_pairs_cte.c.refobjid]).label('dependency_chain')
+        )
+        .join(pg_identify_refobject, true())
+        .where(dependency_pairs_cte.c.refobjid == referenced_object_id)
         .where(dependency_pairs_cte.c.objid != referenced_object_id)
+    )
+
+    if (attnum is not None):
+        anchor = anchor.where(dependency_pairs_cte.c.refobjsubid == attnum)
+
     anchor = anchor.cte('cte')
 
     # recursive member which includes dependents for each object of the previous level
-    recursive = select(
-        dependency_pairs_cte,
-        (anchor.c.level + 1),
-        anchor.c.dependency_chain + array([anchor.c.objid])) \
-        .where(anchor.c.level < MAX_LEVEL) \
-        .where(dependency_pairs_cte.c.objid != any_(anchor.c.dependency_chain)) \
+    recursive = (
+        select(
+            dependency_pairs_cte,
+            anchor.c.objname.label('refobjname'),
+            anchor.c.objtype.label('refobjtype'),
+            (anchor.c.level + 1),
+            anchor.c.dependency_chain + array([anchor.c.objid])
+        )
+        .where(anchor.c.level < MAX_LEVEL)
+        .where(dependency_pairs_cte.c.objid != any_(anchor.c.dependency_chain))
         .where(dependency_pairs_cte.c.objid != dependency_pairs_cte.c.refobjid)
+    )
+
     recursive = recursive.join(anchor, dependency_pairs_cte.c.refobjid == anchor.c.objid)
 
     recursive_stmt = anchor.union(recursive)
@@ -44,38 +67,31 @@ def get_dependents_graph(referenced_object_id, engine):
 
 # finding table dependents based on foreign key constraints from the referenced tables
 def _get_table_dependents(foreign_key_dependents, pg_constraint_table):
-    # TODO: update refobjsubid with actual values when working on columns
     pg_identify_object = _get_pg_identify_object_lateral_stmt(
-        text(f'{PG_CLASS_CATALOGUE_NAME}::regclass::oid'), pg_constraint_table.c.conrelid, 0)
-
-    pg_identify_refobject = _get_pg_identify_object_lateral_stmt(
-        foreign_key_dependents.c.refclassid, foreign_key_dependents.c.refobjid, 0)
+        text(f'{PG_CLASS_CATALOGUE_NAME}::regclass::oid'), pg_constraint_table.c.conrelid, DEFAULT_NON_COLUMN_OBJSUBID)
 
     # conrelid in this case is the oid of the table which a constraint resides in
-    return select(
-        foreign_key_dependents.c.classid,
-        pg_constraint_table.c.conrelid.label('objid'),
-        foreign_key_dependents.c.objsubid,
-        foreign_key_dependents.c.refclassid,
-        foreign_key_dependents.c.refobjid,
-        foreign_key_dependents.c.refobjsubid,
-        foreign_key_dependents.c.deptype,
-        pg_identify_object.c.name.label('objname'),
-        pg_identify_object.c.type.label('objtype'),
-        pg_identify_refobject.c.name.label('refobjname'),
-        pg_identify_refobject.c.type.label('refobjtype')) \
-        .select_from(foreign_key_dependents) \
-        .join(pg_constraint_table, pg_constraint_table.c.oid == foreign_key_dependents.c.objid) \
-        .join(pg_identify_object, true()) \
-        .join(pg_identify_refobject, true()) \
-        .where(pg_constraint_table.c.confrelid != 0) \
+    return (
+        select(
+            foreign_key_dependents.c.classid,
+            pg_constraint_table.c.conrelid.label('objid'),
+            foreign_key_dependents.c.objsubid,
+            foreign_key_dependents.c.refclassid,
+            foreign_key_dependents.c.refobjid,
+            foreign_key_dependents.c.refobjsubid,
+            foreign_key_dependents.c.deptype,
+            pg_identify_object.c.name.label('objname'),
+            pg_identify_object.c.type.label('objtype')
+        )
+        .select_from(foreign_key_dependents)
+        .join(pg_constraint_table, pg_constraint_table.c.oid == foreign_key_dependents.c.objid)
+        .join(pg_identify_object, true())
         .group_by(
             foreign_key_dependents,
             pg_constraint_table.c.conrelid,
             pg_identify_object.c.name,
-            pg_identify_object.c.type,
-            pg_identify_refobject.c.name,
-            pg_identify_refobject.c.type)
+            pg_identify_object.c.type)
+    )
 
 
 def _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pair):
@@ -83,24 +99,22 @@ def _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pair):
 
 
 # stmt for getting a full list of dependents and identifying them
-def _get_dependency_pairs_stmt(pg_depend, pg_identify_object, pg_identify_refobject):
-    result = select(
-        pg_depend,
-        pg_identify_object.c.name.label('objname'),
-        pg_identify_object.c.type.label('objtype'),
-        pg_identify_refobject.c.name.label('refobjname'),
-        pg_identify_refobject.c.type.label('refobjtype')) \
-        .select_from(pg_depend) \
-        .join(pg_identify_object, true()) \
-        .join(pg_identify_refobject, true()) \
-        .where(pg_depend.c.deptype == any_(array(PG_DEPENDENT_TYPES))) \
-        .where(pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID) \
+def _get_dependency_pairs_stmt(pg_depend, pg_identify_object):
+    result = (
+        select(
+            pg_depend,
+            pg_identify_object.c.name.label('objname'),
+            pg_identify_object.c.type.label('objtype')
+        )
+        .select_from(pg_depend)
+        .join(pg_identify_object, true())
+        .where(pg_depend.c.deptype == any_(array(PG_DEPENDENT_TYPES)))
+        .where(pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID)
         .group_by(
             pg_depend,
             pg_identify_object.c.name,
-            pg_identify_object.c.type,
-            pg_identify_refobject.c.name,
-            pg_identify_refobject.c.type)
+            pg_identify_object.c.type)
+    )
 
     return result
 
@@ -114,14 +128,17 @@ def _get_pg_constraint_table(engine, metadata):
 
 
 def _get_pg_identify_object_lateral_stmt(classid, objid, objsubid):
-    return select(
-        column("name"),
-        column("type")) \
+    return (
+        select(
+            column("name"),
+            column("type")
+        )
         .select_from(func.pg_identify_object(
             classid,
             objid,
-            objsubid)) \
+            objsubid))
         .lateral()
+    )
 
 
 def _get_typed_dependency_pairs_stmt(engine):
@@ -130,19 +147,18 @@ def _get_typed_dependency_pairs_stmt(engine):
     pg_depend = _get_pg_depend_table(engine, metadata)
     pg_identify_object = _get_pg_identify_object_lateral_stmt(
         pg_depend.c.classid, pg_depend.c.objid, pg_depend.c.objsubid)
-    pg_identify_refobject = _get_pg_identify_object_lateral_stmt(
-        pg_depend.c.refclassid, pg_depend.c.refobjid, 0)
     pg_constraint = _get_pg_constraint_table(engine, metadata)
 
     # each statement filters the base statement extracting dependents of a specific type
     # so it's easy to exclude particular types or add new
-    dependency_pairs = _get_dependency_pairs_stmt(pg_depend, pg_identify_object, pg_identify_refobject)
+    dependency_pairs = _get_dependency_pairs_stmt(pg_depend, pg_identify_object)
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pairs).cte('foreign_key_constraint_dependents')
     table_dependents = _get_table_dependents(foreign_key_constraint_dependents, pg_constraint).cte('table_dependents')
 
     return union(
         select(foreign_key_constraint_dependents),
-        select(table_dependents))
+        select(table_dependents)
+    )
 
 
 def has_dependencies(referenced_object_id, engine, attnum=None):
@@ -154,6 +170,7 @@ def has_dependencies(referenced_object_id, engine, attnum=None):
         exists(
             select().select_from(pg_depend)
             .where(pg_depend.c.refobjid == referenced_object_id)
+            .where(pg_depend.c.refobjsubid == attnum)
             .where(pg_depend.c.deptype == any_(array(PG_DEPENDENT_TYPES)))
             .where(pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID)
         )
