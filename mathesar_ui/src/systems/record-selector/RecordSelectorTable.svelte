@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { writable } from 'svelte/store';
   import { router } from 'tinro';
 
   import type { Column } from '@mathesar/api/tables/columns';
@@ -29,8 +28,7 @@
   export let tabularData: TabularData;
 
   const nestedController = setNewRecordSelectorControllerInContext();
-  const tabularDataStore = writable(tabularData);
-  setTabularDataStoreInContext(tabularDataStore);
+  const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
   let columnWithFocus: Column | undefined = undefined;
   let isSubmittingNewRecord = false;

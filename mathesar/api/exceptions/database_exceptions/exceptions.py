@@ -209,8 +209,14 @@ class UndefinedFunctionAPIException(MathesarAPIException):
 
 class NotNullViolationAPIException(MathesarAPIException):
     """
-    Exception raised when trying to add not null constraint to column with null value
-     or when trying to add non-null value to a column with not null constraint
+    Exception raised when trying to:
+
+    - Add not null constraint to column with null value
+    or when trying to add non-null value to a column with not null constraint
+
+    or
+
+    - Import/insert a null value to a column with not null constraint
     """
     error_code = ErrorCodes.NotNullViolation.value
 
@@ -234,3 +240,62 @@ class NotNullViolationAPIException(MathesarAPIException):
             'column_id': column.id
         }
         super().__init__(exception, self.error_code, message_str, field, details, status_code)
+
+
+class TypeMismatchViolationAPIException(MathesarAPIException):
+    """ Exception raised when trying to insert a non castable datatype value to a column with certain datatype"""
+    error_code = ErrorCodes.TypeMismatchViolation.value
+
+    def __init__(
+            self,
+            exception,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class ForeignKeyViolationAPIException(MathesarAPIException):
+    """ Exception raised when trying to add an invalid reference to a primary key """
+    error_code = ErrorCodes.ForeignKeyViolation.value
+
+    def __init__(
+            self,
+            exception,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class UniqueImportViolationAPIException(MathesarAPIException):
+    """ Exception raised when trying to add duplicate values to a column with uniqueness constraint """
+    error_code = ErrorCodes.UniqueImportViolation.value
+
+    def __init__(
+            self,
+            exception,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_400_BAD_REQUEST
+    ):
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class ExclusionViolationAPIException(MathesarAPIException):
+    error_code = ErrorCodes.ExclusionViolation.value
+
+    def __init__(
+            self,
+            exception,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        super().__init__(exception, self.error_code, message, field, details, status_code)

@@ -67,6 +67,7 @@ def check_table_response(response_table, table, table_name):
     assert response_table['id'] == table.id
     assert response_table['name'] == table_name
     assert response_table['schema'] == table.schema.id
+    assert response_table['settings']['preview_settings']['template'] == table.settings.preview_settings.template
     assert 'import_target' in response_table
     assert 'created_at' in response_table
     assert 'updated_at' in response_table
