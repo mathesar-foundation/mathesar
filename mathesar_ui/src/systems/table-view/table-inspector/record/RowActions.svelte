@@ -32,7 +32,9 @@
   <Button appearance="ghost" on:click={handleDeleteRecords}>
     <Icon {...isDeleting ? iconLoading : iconDelete} />
     <span>
-      Delete {selectedRoweKey.length} records
+      Delete {selectedRoweKey.length} record{selectedRoweKey.length > 1
+        ? 's'
+        : ''}
     </span>
   </Button>
 </div>

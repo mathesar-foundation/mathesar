@@ -10,15 +10,16 @@
   $: selectedRowsId = $selectedCells
     .valuesArray()
     .map((cell) => getSelectedRowId(cell));
+  $: uniquelySelectedRowsId = Array.from(new Set(selectedRowsId));
 </script>
 
 <div class="column-mode-container">
-  {#if selectedRowsId.length}
+  {#if uniquelySelectedRowsId.length}
     <Collapsible isOpen>
       <span slot="header">Actions</span>
       <div slot="content" class="actions-container">
         <RowActions
-          selectedRoweKey={selectedRowsId}
+          selectedRoweKey={uniquelySelectedRowsId}
           {recordsData}
           {selection}
         />
