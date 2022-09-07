@@ -15,6 +15,7 @@
   $: selectedColumnsId = $selectedCells
     .valuesArray()
     .map((cell) => getSelectedColumnId(cell));
+  $: uniquelySelectedColumnsId = Array.from(new Set(selectedColumnsId));
 
   function getSelectedColumn(selectedColumnId: number): ProcessedColumn {
     return $processedColumns.get(selectedColumnId)!;
@@ -22,20 +23,20 @@
 </script>
 
 <div class="column-mode-container">
-  {#if selectedColumnsId.length === 1}
+  {#if uniquelySelectedColumnsId.length === 1}
     <Collapsible isOpen>
       <span slot="header">Column Properties</span>
       <div slot="content" class="property-container">
         <RenameColumn
-          column={getSelectedColumn(selectedColumnsId[0])}
+          column={getSelectedColumn(uniquelySelectedColumnsId[0])}
           columnsDataStore={$tabularData.columnsDataStore}
         />
         <ColumnDisplayProperties
-          column={getSelectedColumn(selectedColumnsId[0])}
+          column={getSelectedColumn(uniquelySelectedColumnsId[0])}
           meta={$tabularData.meta}
         />
         <ColumnOptions
-          column={getSelectedColumn(selectedColumnsId[0])}
+          column={getSelectedColumn(uniquelySelectedColumnsId[0])}
           columnsDataStore={$tabularData.columnsDataStore}
           constraintsDataStore={$tabularData.constraintsDataStore}
         />
@@ -45,7 +46,7 @@
     <Collapsible isOpen>
       <span slot="header">Data Type</span>
       <div slot="content" class="actions-container">
-        <ColumnType column={getSelectedColumn(selectedColumnsId[0])} />
+        <ColumnType column={getSelectedColumn(uniquelySelectedColumnsId[0])} />
       </div>
     </Collapsible>
 
@@ -53,13 +54,16 @@
       <span slot="header">Actions</span>
       <div slot="content" class="actions-container">
         <ColumnActions
-          column={getSelectedColumn(selectedColumnsId[0])}
+          column={getSelectedColumn(uniquelySelectedColumnsId[0])}
           columnsDataStore={$tabularData.columnsDataStore}
         />
       </div>
     </Collapsible>
   {:else}
-    <span>Select a single cell to see column properties and actions</span>
+    <span
+      >Select a single column or mulitple cells belonging to a single column to
+      see column properties and actions</span
+    >
   {/if}
 </div>
 
