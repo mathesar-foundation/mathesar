@@ -493,7 +493,7 @@ export class RecordsData {
     const cellKey = getCellKey(rowKey, column.id);
     this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
-    const promise = patchAPI<ApiRecord>(
+    const promise = patchAPI<ApiRecordsResponse>(
       `${this.url}${String(primaryKeyValue)}/`,
       { [column.id]: record[column.id] },
     );
@@ -507,7 +507,7 @@ export class RecordsData {
       this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
       return {
         ...row,
-        record: result,
+        record: result.results[0],
       };
     } catch (err) {
       this.meta.cellModificationStatus.set(cellKey, {

@@ -19,7 +19,7 @@ class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.Hyperlinked
 
     class Meta:
         model = TableSettings
-        fields = ['preview_settings']
+        fields = ['id', 'preview_settings']
 
     def update(self, instance, validated_data):
         preview_settings_data = validated_data.pop('preview_settings', None)
