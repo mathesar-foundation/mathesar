@@ -49,6 +49,7 @@ def test_comment_on_schema(engine_with_schema):
 
     assert actual_new_comment == expect_new_comment
 
+
 def test_rename_schema_foreign_key(engine):
     test_schema = "test_rename_schema_foreign_key"
     related_schema = "test_rename_schema_foreign_key_related"
