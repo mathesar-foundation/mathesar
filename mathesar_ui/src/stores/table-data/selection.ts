@@ -8,6 +8,12 @@ const DEFAULT_ROW_INDEX = 0;
 const ROW_COLUMN_SEPARATOR = '-';
 
 type Cell = [Row, Column];
+type SelectionBounds = {
+  startRowIndex: number;
+  endRowIndex: number;
+  startColumnIndex: number;
+  endColumnIndex: number;
+};
 
 // Creates Unique identifier for a cell using rowIndex and columnId
 // Storing this identifier instead of an object {rowIndex: number, columnId: number}
@@ -51,14 +57,7 @@ export class Selection {
 
   private recordsData: RecordsData;
 
-  private selectionBounds:
-    | {
-        minRowIndex: number;
-        maxRowIndex: number;
-        minColumnIndex: number;
-        maxColumnIndex: number;
-      }
-    | undefined;
+  private selectionBounds: SelectionBounds | undefined;
 
   selectedCells: WritableSet<string>;
 
@@ -88,10 +87,10 @@ export class Selection {
 
     // Initialize the bounds of the selection
     this.selectionBounds = {
-      minColumnIndex: column.id,
-      maxColumnIndex: column.id,
-      minRowIndex: row.rowIndex || DEFAULT_ROW_INDEX,
-      maxRowIndex: row.rowIndex || DEFAULT_ROW_INDEX,
+      startColumnIndex: column.id,
+      endColumnIndex: column.id,
+      startRowIndex: row.rowIndex || DEFAULT_ROW_INDEX,
+      endRowIndex: row.rowIndex || DEFAULT_ROW_INDEX,
     };
   }
 
@@ -105,18 +104,8 @@ export class Selection {
       return;
     }
 
-    this.selectionBounds = {
-      minRowIndex: Math.min(this.selectionBounds.minRowIndex, rowIndex),
-      maxRowIndex: Math.max(this.selectionBounds.maxRowIndex, rowIndex),
-      minColumnIndex: Math.min(
-        this.selectionBounds.minColumnIndex,
-        columnIndex,
-      ),
-      maxColumnIndex: Math.max(
-        this.selectionBounds.maxColumnIndex,
-        columnIndex,
-      ),
-    };
+    this.selectionBounds.endRowIndex = rowIndex;
+    this.selectionBounds.endColumnIndex = columnIndex;
   }
 
   get allRows(): Row[] {
@@ -133,8 +122,12 @@ export class Selection {
       return;
     }
 
-    const { minRowIndex, maxRowIndex, minColumnIndex, maxColumnIndex } =
+    const { startRowIndex, endRowIndex, startColumnIndex, endColumnIndex } =
       this.selectionBounds;
+    const minRowIndex = Math.min(startRowIndex, endRowIndex);
+    const maxRowIndex = Math.max(startRowIndex, endRowIndex);
+    const minColumnIndex = Math.min(startColumnIndex, endColumnIndex);
+    const maxColumnIndex = Math.max(startColumnIndex, endColumnIndex);
     this.selectionBounds = undefined;
 
     const cells: Cell[] = [];
