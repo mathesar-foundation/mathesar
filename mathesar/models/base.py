@@ -23,6 +23,7 @@ from db.records.operations.select import get_column_cast_records, get_count, get
 from db.records.operations.select import get_records_with_default_order as db_get_records_with_default_order
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
+from db.schemas.operations.select import get_schema_description
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
@@ -162,6 +163,10 @@ class Schema(DatabaseObject):
     @property
     def has_dependencies(self):
         return True
+
+    @property
+    def description(self):
+        return get_schema_description(self.oid, self._sa_engine)
 
     def update_sa_schema(self, update_params):
         return model_utils.update_sa_schema(self, update_params)
