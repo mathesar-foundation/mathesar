@@ -3,7 +3,7 @@ from sqlalchemy.schema import DDLElement
 from sqlalchemy.ext import compiler
 
 
-SUPPORTED_SCHEMA_ALTER_ARGS = {'name'}
+SUPPORTED_SCHEMA_ALTER_ARGS = {'name', 'description'}
 
 
 class RenameSchema(DDLElement):
