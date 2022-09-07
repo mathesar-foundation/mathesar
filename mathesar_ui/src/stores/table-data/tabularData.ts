@@ -1,6 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import type { Readable, Writable } from 'svelte/store';
-import { derived } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/utils/api';
@@ -127,8 +127,12 @@ export class TabularData {
 
 const tabularDataStoreContextKey = {};
 
-export function setTabularDataStoreInContext(s: Writable<TabularData>): void {
-  setContext(tabularDataStoreContextKey, s);
+export function setTabularDataStoreInContext(
+  t: TabularData,
+): Writable<TabularData> {
+  const store = writable(t);
+  setContext(tabularDataStoreContextKey, store);
+  return store;
 }
 
 export function getTabularDataStoreFromContext(): Writable<TabularData> {
