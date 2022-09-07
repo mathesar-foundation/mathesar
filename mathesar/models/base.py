@@ -27,7 +27,7 @@ from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
 from db.tables.operations.move_columns import move_columns_between_related_tables
-from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
+from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid, get_table_description
 from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
 from db.tables.utils import get_primary_key_column
@@ -262,6 +262,10 @@ class Table(DatabaseObject, Relation):
             self.oid,
             self.schema._sa_engine
         )
+
+    @property
+    def description(self):
+        return get_table_description(self.oid, self._sa_engine)
 
     @property
     def dependents(self):

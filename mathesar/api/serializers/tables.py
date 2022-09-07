@@ -42,10 +42,11 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     class Meta:
         model = Table
         fields = [
-            'id', 'name', 'import_target', 'schema', 'created_at', 'updated_at', 'import_verified',
-            'columns', 'records_url', 'constraints_url', 'columns_url',
-            'joinable_tables_url', 'type_suggestions_url', 'previews_url',
-            'data_files', 'has_dependencies', 'dependents_url', 'settings'
+            'id', 'name', 'import_target', 'schema', 'created_at', 'updated_at',
+            'import_verified', 'columns', 'records_url', 'constraints_url',
+            'columns_url', 'joinable_tables_url', 'type_suggestions_url',
+            'previews_url', 'data_files', 'has_dependencies', 'dependents_url',
+            'settings', 'description'
         ]
 
     def get_records_url(self, obj):
