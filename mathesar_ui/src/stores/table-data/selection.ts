@@ -8,6 +8,7 @@ const DEFAULT_ROW_INDEX = 0;
 const ROW_COLUMN_SEPARATOR = '-';
 
 type Cell = [Row, Column];
+
 type SelectionBounds = {
   startRowIndex: number;
   endRowIndex: number;
@@ -15,9 +16,11 @@ type SelectionBounds = {
   endColumnIndex: number;
 };
 
-// Creates Unique identifier for a cell using rowIndex and columnId
-// Storing this identifier instead of an object {rowIndex: number, columnId: number}
-// enables easier usage of the Set data type & faster equality checks
+/**
+ * Creates Unique identifier for a cell using rowIndex and columnId
+ * Storing this identifier instead of an object {rowIndex: number, columnId: number}
+ * enables easier usage of the Set data type & faster equality checks
+ */
 export const createSelectedCellIdentifier = (
   { rowIndex }: Row,
   { id }: Column,
@@ -118,17 +121,20 @@ export class Selection {
   }
 
   onEndSelection(): void {
-    if (!this.selectionBounds) {
-      return;
+    if (this.selectionBounds) {
+      const cells = this.getIncludedCells(this.selectionBounds);
+      this.selectMultipleCells(cells);
+      this.selectionBounds = undefined;
     }
+  }
 
+  getIncludedCells(selectionBounds: SelectionBounds): Cell[] {
     const { startRowIndex, endRowIndex, startColumnIndex, endColumnIndex } =
-      this.selectionBounds;
+      selectionBounds;
     const minRowIndex = Math.min(startRowIndex, endRowIndex);
     const maxRowIndex = Math.max(startRowIndex, endRowIndex);
     const minColumnIndex = Math.min(startColumnIndex, endColumnIndex);
     const maxColumnIndex = Math.max(startColumnIndex, endColumnIndex);
-    this.selectionBounds = undefined;
 
     const cells: Cell[] = [];
     this.allRows.forEach((row) => {
@@ -141,12 +147,8 @@ export class Selection {
         });
       }
     });
-    this.selectMultipleCells(cells);
+    return cells;
   }
-
-  // private selectCell(row: Row, column: Column): void {
-  //   this.selectedCells.add(createSelectedCellIdentifier(row, column));
-  // }
 
   private selectMultipleCells(cells: Array<Cell>) {
     const identifiers = cells.map(([row, column]) =>
