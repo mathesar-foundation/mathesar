@@ -50,8 +50,8 @@ def install(engine):
         conn.commit()
 
 
-class ArrayLength(DBFunction):
-    id = 'array_length'
+class JsonArrayLength(DBFunction):
+    id = 'json_array_length'
     name = 'length'
     hints = tuple([
         hints.returns(hints.comparable),
@@ -65,7 +65,7 @@ class ArrayLength(DBFunction):
         return func.jsonb_array_length(value)
 
 
-class LengthEquals(DBFunctionPacked):
+class JsonLengthEquals(DBFunctionPacked):
     id = 'json_array_length_equals'
     name = 'Number of elements is'
     hints = tuple([
@@ -80,12 +80,12 @@ class LengthEquals(DBFunctionPacked):
         param0 = self.parameters[0]
         param1 = self.parameters[1]
         return Equal([
-            ArrayLength([param0]),
+            JsonArrayLength([param0]),
             param1,
         ])
 
 
-class LengthGreaterThan(DBFunctionPacked):
+class JsonLengthGreaterThan(DBFunctionPacked):
     id = 'json_array_length_greater_than'
     name = 'Number of elements is greater than'
     hints = tuple([
@@ -100,12 +100,12 @@ class LengthGreaterThan(DBFunctionPacked):
         param0 = self.parameters[0]
         param1 = self.parameters[1]
         return Greater([
-            ArrayLength([param0]),
+            JsonArrayLength([param0]),
             param1,
         ])
 
 
-class LengthGreaterorEqual(DBFunctionPacked):
+class JsonLengthGreaterorEqual(DBFunctionPacked):
     id = 'json_array_length_greater_or_equal'
     name = 'Number of elements is greater than or equal to'
     hints = tuple([
@@ -120,12 +120,12 @@ class LengthGreaterorEqual(DBFunctionPacked):
         param0 = self.parameters[0]
         param1 = self.parameters[1]
         return GreaterOrEqual([
-            ArrayLength([param0]),
+            JsonArrayLength([param0]),
             param1,
         ])
 
 
-class LengthLessThan(DBFunctionPacked):
+class JsonLengthLessThan(DBFunctionPacked):
     id = 'json_array_length_less_than'
     name = 'Number of elements is less than'
     hints = tuple([
@@ -140,12 +140,12 @@ class LengthLessThan(DBFunctionPacked):
         param0 = self.parameters[0]
         param1 = self.parameters[1]
         return Lesser([
-            ArrayLength([param0]),
+            JsonArrayLength([param0]),
             param1,
         ])
 
 
-class LengthLessorEqual(DBFunctionPacked):
+class JsonLengthLessorEqual(DBFunctionPacked):
     id = 'json_array_length_less_or_equal'
     name = 'Number of elements is less than or equal to'
     hints = tuple([
@@ -160,6 +160,39 @@ class LengthLessorEqual(DBFunctionPacked):
         param0 = self.parameters[0]
         param1 = self.parameters[1]
         return LesserOrEqual([
-            ArrayLength([param0]),
+            JsonArrayLength([param0]),
             param1,
         ])
+
+
+class JsonNotEmpty(DBFunctionPacked):
+    id = 'json_array_not_empty'
+    name = 'Is not empty'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(1),
+        hints.parameter(0, hints.json_array),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        return Greater([
+            JsonArrayLength([param0]),
+            0,
+        ])
+
+
+class JsonArrayContains(DBFunction):
+    id = 'json_array_contains'
+    name = 'contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.array),
+    ])
+
+    @staticmethod
+    def to_sa_expression(value1, value2):
+        return func.jsonb_contains(value1, func.cast(value2, SA_JSONB))
