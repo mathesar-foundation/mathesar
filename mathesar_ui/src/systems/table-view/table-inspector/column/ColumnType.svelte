@@ -32,5 +32,6 @@
   <AbstractTypeConfiguration
     processedColumn={column}
     abstractType={column.abstractType}
+    on:close={toggleMode}
   />
 {/if}
