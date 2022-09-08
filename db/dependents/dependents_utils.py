@@ -187,8 +187,15 @@ def _get_structured_result(dependency_graph_result):
     for dependency_pair in dependency_graph_result:
         d = {}
         d['level'] = dependency_pair.level
-        d['obj'] = {'objid': dependency_pair.objid, 'type': dependency_pair.objtype }
-        d['parent_obj'] = {'objid': dependency_pair.refobjid, 'type': dependency_pair.refobjtype,  'objsubid': (dependency_pair.refobjsubid if dependency_pair.refobjsubid != 0 else None)}
+        d['obj'] = {
+            'objid': dependency_pair.objid,
+            'type': dependency_pair.objtype
+        }
+        d['parent_obj'] = {
+            'objid': dependency_pair.refobjid,
+            'type': dependency_pair.refobjtype,
+            'objsubid': (dependency_pair.refobjsubid if dependency_pair.refobjsubid != 0 else None)
+        }
         result.append(d)
 
     return result
