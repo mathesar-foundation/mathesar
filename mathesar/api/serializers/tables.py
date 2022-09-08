@@ -38,6 +38,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
     )
+    description = serializers.CharField(required=False, allow_blank=True, default=None)
 
     class Meta:
         model = Table
@@ -46,7 +47,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
             'import_verified', 'columns', 'records_url', 'constraints_url',
             'columns_url', 'joinable_tables_url', 'type_suggestions_url',
             'previews_url', 'data_files', 'has_dependencies', 'dependents_url',
-            'settings', 'description'
+            'settings', 'description',
         ]
 
     def get_records_url(self, obj):
@@ -114,16 +115,19 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
         data_files = validated_data.get('data_files')
         name = validated_data.get('name') or gen_table_name(schema, data_files)
         import_target = validated_data.get('import_target', None)
+        description = validated_data.get('description')
 
         try:
             if data_files:
-                table = create_table_from_datafile(data_files, name, schema)
+                table = create_table_from_datafile(
+                    data_files, name, schema, comment=description
+                )
                 if import_target:
                     table.import_target = import_target
                     table.is_temp = True
                     table.save()
             else:
-                table = create_empty_table(name, schema)
+                table = create_empty_table(name, schema, comment=description)
         except DuplicateTable as e:
             raise DuplicateTableAPIException(
                 e,
