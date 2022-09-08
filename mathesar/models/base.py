@@ -163,7 +163,7 @@ class Schema(DatabaseObject):
             self.oid,
             self._sa_engine
         )
-        
+
     # Returns only schema-scoped dependents on the top level
     # However, returns dependents from other schemas for other
     # objects down the graph.
