@@ -157,6 +157,12 @@ class Schema(DatabaseObject):
         except TypeError:
             return 'MISSING'
 
+    # Returns only schema-scoped dependents on the top level
+    # However, returns dependents from other schemas for other
+    # objects down the graph.
+    # E.g: TableA from SchemaA depends on TableB from SchemaB
+    # SchemaA won't return as a dependent for SchemaB, however
+    # TableA will be a dependent of TableB which in turn depends on its schema
     @property
     def has_dependents(self):
         return has_dependents(
