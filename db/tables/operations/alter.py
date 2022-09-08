@@ -4,7 +4,6 @@ from sqlalchemy import text
 
 from db.columns.operations.alter import batch_update_columns
 from db.tables.operations.select import reflect_table
-from db.tables.operations.alter import reflect_table
 
 SUPPORTED_TABLE_ALTER_ARGS = {'name', 'columns', 'description'}
 
