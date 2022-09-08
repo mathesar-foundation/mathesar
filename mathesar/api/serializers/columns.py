@@ -61,7 +61,7 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
                   'name',
                   TYPE_KEY,
                   'type_options',
-                  DISPLAY_OPTIONS_KEY
+                  DISPLAY_OPTIONS_KEY,
                   )
     id = serializers.IntegerField(required=False)
     name = serializers.CharField()
@@ -122,7 +122,7 @@ class ColumnSerializer(SimpleColumnSerializer):
             'copy_source_constraints',
             'valid_target_types',
             'default',
-            'has_dependents'
+            'has_dependents',
         )
         model_fields = (DISPLAY_OPTIONS_KEY,)
 
@@ -143,7 +143,6 @@ class ColumnSerializer(SimpleColumnSerializer):
 
     # Read only fields
     valid_target_types = SerializerMethodField(method_name='get_valid_target_types', read_only=True)
-    has_dependents = serializers.BooleanField()
 
     def validate(self, data):
         data = super().validate(data)
