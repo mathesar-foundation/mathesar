@@ -18,7 +18,9 @@ class ModelNameField(serializers.CharField):
 class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
     name = serializers.CharField()
     database = ModelNameField(max_length=128)
-    description = serializers.CharField(required=False, allow_blank=True, default=None)
+    description = serializers.CharField(
+        required=False, allow_blank=True, default=None, allow_null=True
+    )
 
     class Meta:
         model = Schema

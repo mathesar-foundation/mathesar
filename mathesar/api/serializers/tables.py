@@ -38,7 +38,9 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
     )
-    description = serializers.CharField(required=False, allow_blank=True, default=None)
+    description = serializers.CharField(
+        required=False, allow_blank=True, default=None, allow_null=True
+    )
 
     class Meta:
         model = Table
