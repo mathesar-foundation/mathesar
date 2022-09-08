@@ -16,7 +16,7 @@
   export let usesVirtualList = false;
   export let allowsDdlOperations = false;
 
-  $: ({ processedColumns, display } = $tabularData);
+  $: ({ processedColumns, display, isLoading } = $tabularData);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
   $: hasNewColumnButton = allowsDdlOperations;
@@ -41,6 +41,8 @@
     [ID_ROW_CONTROL_COLUMN, 70],
     [ID_ADD_NEW_COLUMN, 100],
   ]);
+  $: showTableInspector =
+    $isTableInspectorVisible && !$isLoading && supportsTableInspector;
 </script>
 
 <div class="table-view">
@@ -60,7 +62,7 @@
         </Sheet>
       {/if}
     </div>
-    {#if supportsTableInspector && $isTableInspectorVisible}
+    {#if showTableInspector}
       <TableInspector />
     {/if}
   </div>

@@ -1,6 +1,12 @@
-.dropdown.content.column-opts-content .container .column-type-menu {
+.abstract-type-configuration-container.column-type-menu {
   width: 18rem;
   padding: 0.3125rem 0.75rem;
+
+  ul {
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+  }
 
   .menu-header {
     font-size: 1rem;
@@ -19,6 +25,10 @@
     li {
       border-bottom: 1px solid #f1f1f1;
       position: relative;
+
+      button {
+        width: 100%;
+      }
 
       &:last-child {
         border-bottom: none;

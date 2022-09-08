@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { router } from 'tinro';
+  import { meta, router } from 'tinro';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import QueryBuilder from '@mathesar/systems/query-builder/QueryBuilder.svelte';
@@ -10,11 +10,13 @@
   export let schema: SchemaEntry;
   export let queryManager: QueryManager;
 
+  const routeMeta = meta();
+
   $: ({ query } = queryManager);
 
-  function gotoSchema() {
+  function goBackWithFallbackToSchema() {
     const schemaURL = getSchemaPageUrl(database.name, schema.id);
-    router.goto(schemaURL);
+    router.goto($routeMeta.from || schemaURL);
   }
 </script>
 
@@ -23,5 +25,5 @@
 </svelte:head>
 
 <LayoutWithHeader fitViewport>
-  <QueryBuilder {queryManager} on:close={gotoSchema} />
+  <QueryBuilder {queryManager} on:close={goBackWithFallbackToSchema} />
 </LayoutWithHeader>
