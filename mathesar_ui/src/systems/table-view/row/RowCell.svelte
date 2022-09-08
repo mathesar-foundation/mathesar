@@ -55,16 +55,20 @@
   $: ({ selectedCells } = selection);
 
   /**
-   * Although the name indicates that this boolean is only true
-   * when more than once cell is selected but because of the bug
-   * that active cell and selected cell does not remain in sync when using keyboard
-   * this boolean is true even when atleast one cell is selected
-   * to differentiate between different active and selected cell
-   * using blue background styling for selected cell
-   * and blue border styling for active cell
+   * The name indicates that this boolean is only true when more than one cell
+   * is selected. However, because of the bug that [the active cell and selected
+   * cells do not remain in sync when using keyboard][1] this boolean is
+   * sometimes true even when multiple cells are selected. This is to
+   * differentiate between different active and selected cell using blue
+   * background styling for selected cell and blue border styling for active
+   * cell.
+   *
    * The above bug can be fixed when following two conditions are met
-   * 1. We are working on keyboard accessbility of the application.
-   * 2. selectedCells and activeCell are merged in a single store.
+   *
+   * - We are working on keyboard accessability of the application.
+   * - `selectedCells` and `activeCell` are merged in a single store.
+   *
+   * [1]: https://github.com/centerofci/mathesar/issues/1534
    */
   $: isSelectedInRange = isCellSelected($selectedCells, row, column);
   $: modificationStatus = $modificationStatusMap.get(key);
