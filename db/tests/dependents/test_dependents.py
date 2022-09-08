@@ -18,8 +18,8 @@ def _get_object_dependents_oids(dependents_graph, object_oid):
     return [dependent['obj']['objid'] for dependent in _get_object_dependents(dependents_graph, object_oid)]
 
 
-def _get_object_dependents_by_type(dependents_graph, object_oid, type):
-    return [dependent['obj']['objid'] for dependent in _get_object_dependents(dependents_graph, object_oid) if dependent['obj']['type'] == type]
+def _get_object_dependents_by_name(dependents_graph, object_oid, name):
+    return [dependent['obj'] for dependent in _get_object_dependents(dependents_graph, object_oid) if dependent['obj']['name'] == name]
 
 
 def test_correct_dependents_amount_and_level(engine, library_tables_oids):
@@ -174,21 +174,23 @@ def test_views_as_dependents(engine_with_schema, library_db_tables, library_tabl
 
     publications = library_db_tables['Publications']
     new_publications_view = select(publications).where(publications.c['Publication Year'] >= 2000)
-    create_view('NewPublications', new_publications_view, metadata)
+    view_name = 'new_publications'
+    create_view(view_name, new_publications_view, metadata)
     metadata.create_all(engine)
 
     publications_oid = library_tables_oids['Publications']
     publications_dependents_graph = get_dependents_graph(publications_oid, engine)
-    publications_view_dependents = _get_object_dependents_by_type(publications_dependents_graph, publications_oid, 'view')
+    publications_view_dependent = _get_object_dependents_by_name(publications_dependents_graph, publications_oid, view_name)[0]
 
-    assert len(publications_view_dependents) == 1
+    assert publications_view_dependent['name'] == view_name
 
 
 def test_indexex_as_dependents(engine, library_db_tables, library_tables_oids):
-    index = Index('someindex', library_db_tables['Publishers'].c.id)
+    index_name = 'index'
+    index = Index(index_name, library_db_tables['Publishers'].c.id)
     index.create(engine)
 
     publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
-    publishers_index_dependents = _get_object_dependents_by_type(publishers_dependents_graph, library_tables_oids['Publishers'], 'index')
+    publishers_index_dependent = _get_object_dependents_by_name(publishers_dependents_graph, library_tables_oids['Publishers'], index_name)[0]
 
-    assert len(publishers_index_dependents) == 1
+    assert publishers_index_dependent['name'] == index_name
