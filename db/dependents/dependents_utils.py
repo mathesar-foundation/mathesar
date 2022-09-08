@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, any_, column, exists, func, literal, select, text, true, union
+from sqlalchemy import MetaData, Table, any_, column, exists, func, literal, select, text, true, union, and_
 from sqlalchemy.dialects.postgresql import array
 
 # OIDs assigned during normal database operation are constrained to be 16384 or higher.
@@ -166,13 +166,19 @@ def has_dependencies(referenced_object_id, engine, attnum=None):
 
     pg_depend = _get_pg_depend_table(engine, metadata)
 
+    conditions = [
+        pg_depend.c.refobjid == referenced_object_id,
+        pg_depend.c.deptype == any_(array(PG_DEPENDENT_TYPES)),
+        pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID
+    ]
+
+    if attnum is not None:
+        conditions.append(pg_depend.c.refobjsubid == (0 if attnum is None else 0))
+
     stmt = select(
         exists(
             select().select_from(pg_depend)
-            .where(pg_depend.c.refobjid == referenced_object_id)
-            .where(pg_depend.c.refobjsubid == attnum)
-            .where(pg_depend.c.deptype == any_(array(PG_DEPENDENT_TYPES)))
-            .where(pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID)
+            .where(and_(*conditions))
         )
     )
 
