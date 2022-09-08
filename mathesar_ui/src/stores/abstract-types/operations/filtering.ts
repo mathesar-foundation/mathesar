@@ -138,6 +138,41 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     },
   },
   {
+    id: 'json_object_contains',
+    name: 'object contains',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Object]: [abstractTypeCategory.Text],
+    },
+  },
+  {
+    id: 'json_object_not_contains',
+    name: 'object not contains',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Object]: [abstractTypeCategory.Text],
+    },
+  },
+  {
+    id: 'json_object_exists',
+    name: 'object exists key',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Object]: [abstractTypeCategory.Text],
+    },
+  },
+  {
+    id: 'json_object_not_exists',
+    name: 'object not exists key',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Object]: [abstractTypeCategory.Text],
+    },
+  },
+  {
+    id: 'json_object_length_equals',
+    name: 'Number of keys is',
+    uiTypeParameterMap: {
+      [abstractTypeCategory.Object]: [abstractTypeCategory.Text],
+    },
+  },
+  {
     id: 'email_domain_equals',
     name: 'email domain is',
     uiTypeParameterMap: {
