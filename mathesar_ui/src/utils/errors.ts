@@ -76,4 +76,16 @@ export class ApiMultiError extends Error {
   }
 }
 
+/**
+ * This is meant to be a build time error
+ * Generally use to make sure of exhaustive conditions handlint
+ */
+export class UnhandledError extends Error {
+  constructor(value: never, message: string) {
+    super();
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    this.message = `Unhandled Error: ${value}. ${message}`;
+  }
+}
+
 /* eslint-enable max-classes-per-file */
