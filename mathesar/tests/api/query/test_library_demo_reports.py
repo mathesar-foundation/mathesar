@@ -101,7 +101,7 @@ def check_overdue_books_columns(create_overdue_books_query, client):
             'alias': 'Title List',
             'display_name': 'Titles',
             'type': '_array',
-            'type_options': None,
+            'type_options': {'item_type': 'text'},
             'display_options': None
         }, {
             'alias': 'email',
