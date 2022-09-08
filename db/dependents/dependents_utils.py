@@ -192,6 +192,8 @@ def _get_typed_dependency_pairs_stmt(engine):
     table_dependents = _get_table_dependents(foreign_key_constraint_dependents, pg_constraint).cte('table_dependents')
 
     # should not be returned directly, used for getting views
+    # this relation is required because views in PostgreSQL are implemented using the rule system
+    # views don't depend on tables directly but through rules, that are mapped one-to-one
     rule_dependents = _get_rule_dependents(pg_identify_object, dependency_pairs).cte('rule_dependents')
     view_dependents = _get_view_dependents(pg_identify_object, pg_rewrite, rule_dependents).cte('view_dependents')
 
@@ -229,8 +231,16 @@ def _get_structured_result(dependency_graph_result):
     for dependency_pair in dependency_graph_result:
         d = {}
         d['level'] = dependency_pair.level
-        d['obj'] = {'objid': dependency_pair.objid, 'type': dependency_pair.objtype}
-        d['parent_obj'] = {'objid': dependency_pair.refobjid, 'type': dependency_pair.refobjtype}
+        d['obj'] = {
+            'objid': dependency_pair.objid,
+            'type': dependency_pair.objtype,
+            'name': dependency_pair.objname
+        }
+        d['parent_obj'] = {
+            'objid': dependency_pair.refobjid,
+            'type': dependency_pair.refobjtype,
+            'name': dependency_pair.refobjname
+        }
         result.append(d)
 
     return result
