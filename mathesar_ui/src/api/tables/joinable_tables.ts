@@ -19,7 +19,7 @@ export interface JoinableTable {
   multiple_results: boolean;
 }
 
-export interface JoinableTableResult {
+export interface JoinableTablesResult {
   joinable_tables: JoinableTable[];
   tables: Record<
     string, // tableId

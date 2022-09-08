@@ -16,6 +16,8 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
+  export let hasNewColumnButton = false;
+
   $: ({ columnsDataStore, selection, processedColumns } = $tabularData);
   $: ({ selectedCells } = selection);
 
@@ -48,16 +50,18 @@
     </SheetCell>
   {/each}
 
-  <SheetCell
-    columnIdentifierKey={ID_ADD_NEW_COLUMN}
-    let:htmlAttributes
-    let:style
-  >
-    <div {...htmlAttributes} {style}>
-      <NewColumnCell
-        columns={$columnsDataStore.columns}
-        on:addColumn={addColumn}
-      />
-    </div>
-  </SheetCell>
+  {#if hasNewColumnButton}
+    <SheetCell
+      columnIdentifierKey={ID_ADD_NEW_COLUMN}
+      let:htmlAttributes
+      let:style
+    >
+      <div {...htmlAttributes} {style}>
+        <NewColumnCell
+          columns={$columnsDataStore.columns}
+          on:addColumn={addColumn}
+        />
+      </div>
+    </SheetCell>
+  {/if}
 </SheetHeader>

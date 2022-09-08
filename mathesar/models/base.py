@@ -30,6 +30,7 @@ from db.tables.operations.move_columns import move_columns_between_related_table
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
+from db.tables.utils import get_primary_key_column
 
 from mathesar import reflection
 from mathesar.models.relation import Relation
@@ -243,6 +244,11 @@ class Table(DatabaseObject, Relation):
             table=self._sa_table,
             engine=self._sa_engine,
         )
+
+    @cached_property
+    def primary_key_column_name(self):
+        pk_column = get_primary_key_column(self._sa_table)
+        return pk_column.name
 
     @cached_property
     def sa_columns(self):

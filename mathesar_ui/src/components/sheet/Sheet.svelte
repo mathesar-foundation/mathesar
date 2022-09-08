@@ -11,6 +11,7 @@
   type SheetColumnIdentifierKey = $$Generic;
 
   export let columns: SheetColumnType[];
+  export let usesVirtualList = false;
 
   export let getColumnIdentifier: (
     c: SheetColumnType,
@@ -77,7 +78,7 @@
   setSheetContext({ stores, api });
 </script>
 
-<div class="sheet" on:click>
+<div class="sheet" class:uses-virtual-list={usesVirtualList} on:click>
   {#if columns.length}
     <slot />
   {/if}
@@ -85,14 +86,17 @@
 
 <style lang="scss">
   .sheet {
-    overflow: hidden;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
     display: flex;
     flex-direction: column;
+
+    &.uses-virtual-list {
+      overflow: hidden;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+    }
 
     :global([data-sheet-element='cell']) {
       position: absolute;
