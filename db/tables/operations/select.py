@@ -76,6 +76,12 @@ def get_oid_from_table(name, schema, engine):
     return inspector.get_table_oid(name, schema=schema)
 
 
+def get_table_description(oid, engine):
+    with engine.begin() as conn:
+        res = conn.execute(select(func.obj_description(oid, 'pg_class')))
+    return res.fetchone()[0]
+
+
 def get_joinable_tables(
         engine, base_table_oid=None, max_depth=3, limit=None, offset=None
 ):

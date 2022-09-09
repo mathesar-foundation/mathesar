@@ -23,11 +23,12 @@ from db.records.operations.select import get_column_cast_records, get_count, get
 from db.records.operations.select import get_records_with_default_order as db_get_records_with_default_order
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
+from db.schemas.operations.select import get_schema_description
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
 from db.tables.operations.move_columns import move_columns_between_related_tables
-from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
+from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid, get_table_description
 from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
 from db.tables.utils import get_primary_key_column
@@ -178,6 +179,10 @@ class Schema(DatabaseObject):
             self._sa_engine
         )
 
+    @property
+    def description(self):
+        return get_schema_description(self.oid, self._sa_engine)
+
     def update_sa_schema(self, update_params):
         return model_utils.update_sa_schema(self, update_params)
 
@@ -276,6 +281,10 @@ class Table(DatabaseObject, Relation):
             self.oid,
             self.schema._sa_engine
         )
+
+    @property
+    def description(self):
+        return get_table_description(self.oid, self._sa_engine)
 
     @property
     def dependents(self):

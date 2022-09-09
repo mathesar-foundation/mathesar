@@ -86,7 +86,7 @@ class UIQuery(BaseModel, Relation):
     )
 
     base_table = models.ForeignKey(
-        'Table', on_delete=models.CASCADE,
+        'Table', on_delete=models.CASCADE, related_name='queries'
     )
 
     # sequence of dicts

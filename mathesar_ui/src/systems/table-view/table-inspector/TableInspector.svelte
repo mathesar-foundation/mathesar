@@ -1,7 +1,8 @@
 <script lang="ts">
-  import ColumnMode from './ColumnMode.svelte';
+  import ColumnMode from './column/ColumnMode.svelte';
+  import RecordMode from './record/RecordMode.svelte';
 
-  import TableMode from './TableMode.svelte';
+  import TableMode from './table/TableMode.svelte';
 
   const tabs = [
     {
@@ -13,6 +14,11 @@
       label: 'Column',
       component: ColumnMode,
       id: 2,
+    },
+    {
+      label: 'Record',
+      component: RecordMode,
+      id: 3,
     },
   ];
 

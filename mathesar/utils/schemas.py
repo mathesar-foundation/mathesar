@@ -7,7 +7,7 @@ from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Schema, Database
 
 
-def create_schema_and_object(name, database):
+def create_schema_and_object(name, database, comment=None):
     engine = create_mathesar_engine(database)
 
     all_schemas = get_mathesar_schemas(engine)
@@ -19,7 +19,7 @@ def create_schema_and_object(name, database):
     except ObjectDoesNotExist:
         raise ValidationError({"database": f"Database '{database}' not found"})
 
-    create_schema(name, engine)
+    create_schema(name, engine, comment=comment)
     schema_oid = get_schema_oid_from_name(name, engine)
 
     schema = Schema.objects.create(oid=schema_oid, database=database_model)

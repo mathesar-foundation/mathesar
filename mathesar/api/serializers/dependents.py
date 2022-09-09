@@ -30,6 +30,7 @@ class DependentMathesarObjectSerializer(serializers.Serializer):
 class DependentNonMathesarObjectSerializer(serializers.Serializer):
     objid = serializers.CharField()
     type = serializers.CharField()
+    name = serializers.CharField()
 
 
 class BaseDependentObjectSerializer(
