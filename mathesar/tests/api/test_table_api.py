@@ -103,10 +103,11 @@ def check_table_filter_response(response, status_code=None, count=None):
         assert len(response_data['results']) == count
 
 
-def _create_table(client, data_files, table_name, schema, import_target_table):
+def _create_table(client, data_files, table_name, schema, import_target_table, description=None):
     body = {
         'name': table_name,
         'schema': schema.id,
+        'description': description
     }
     if data_files is not None:
         body['data_files'] = [df.id for df in data_files]
@@ -553,14 +554,18 @@ def test_table_create_without_datafile(client, schema, data_files, table_name):
     num_tables = Table.objects.count()
     expt_name = _get_expected_name(table_name)
 
+    expect_comment = 'test comment for table create'
     response, response_table, table = _create_table(
-        client, data_files, table_name, schema, import_target_table=None
+        client, data_files, table_name, schema, import_target_table=None,
+        description=expect_comment
     )
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
     assert len(table.sa_columns) == 1  # only the internal `id` column
     assert len(table.get_records()) == 0
+    assert table.description == expect_comment
+    assert response_table['description'] == expect_comment
     check_table_response(response_table, table, expt_name)
 
 
@@ -652,11 +657,14 @@ def test_table_partial_update(create_patents_table, client):
     new_table_name = 'NASA Table Partial Update New'
     table = create_patents_table(table_name)
 
-    body = {'name': new_table_name}
+    expect_comment = 'a super new test comment'
+    body = {'name': new_table_name, 'description': expect_comment}
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
     response_table = response.json()
     assert response.status_code == 200
+    assert response_table
+    assert response_table['description'] == expect_comment
     check_table_response(response_table, table, new_table_name)
 
     table = Table.objects.get(oid=table.oid)

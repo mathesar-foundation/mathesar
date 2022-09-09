@@ -1,9 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
   import {
-    Button,
-    Spinner,
     createValidationContext,
+    CancelOrProceedButtonPair,
   } from '@mathesar-component-library';
   import { States } from '@mathesar/utils/api';
   import { toast } from '@mathesar/stores/toast';
@@ -101,7 +100,7 @@
     !$validationResult;
 </script>
 
-<div class="column-type-menu">
+<div class="abstract-type-configuration-container column-type-menu">
   <h5 class="menu-header">Set Column Type</h5>
   <AbstractTypeSelector
     {selectedAbstractType}
@@ -122,16 +121,14 @@
     {/key}
   {/if}
 
-  <div class="divider" />
-  <div class="type-menu-footer">
-    <Button appearance="primary" disabled={isSaveDisabled} on:click={onSave}>
-      {#if typeChangeState === States.Loading}
-        <Spinner />
-      {/if}
-      <span>Save</span>
-    </Button>
-    <Button appearance="default" on:click={close}>Close</Button>
-  </div>
+  <CancelOrProceedButtonPair
+    onProceed={onSave}
+    onCancel={close}
+    isProcessing={typeChangeState === States.Loading}
+    canProceed={!isSaveDisabled}
+    proceedButton={{ label: 'Save' }}
+    size="small"
+  />
 </div>
 
 <style global lang="scss">

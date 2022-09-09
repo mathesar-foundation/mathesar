@@ -1,6 +1,6 @@
 import warnings
 
-from sqlalchemy import MetaData, select, and_, not_, or_, Table
+from sqlalchemy import MetaData, select, and_, not_, or_, Table, func
 
 from db import constants
 from db import types
@@ -46,3 +46,10 @@ def get_mathesar_schemas_with_oids(engine):
     with engine.begin() as conn:
         result = conn.execute(sel).fetchall()
     return result
+
+
+def get_schema_description(oid, engine):
+    with engine.begin() as conn:
+        res = conn.execute(select(func.obj_description(oid, 'pg_namespace')))
+
+    return res.fetchone()[0]
