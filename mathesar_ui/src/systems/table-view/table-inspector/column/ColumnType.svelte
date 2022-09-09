@@ -2,7 +2,7 @@
   import { Button, Icon } from '@mathesar/component-library';
   import { iconEdit } from '@mathesar/icons';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
-  import { UnhandledError } from '@mathesar/utils/errors';
+  import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
   import AbstractTypeConfiguration from '../../header/header-cell/abstract-type-configuration/AbstractTypeConfiguration.svelte';
 
   export let column: ProcessedColumn;
@@ -17,7 +17,7 @@
         mode = 'read';
         break;
       default:
-        throw new UnhandledError(mode, 'ColumnType');
+        throw new MissingExhaustiveConditionError(mode, 'ColumnType');
     }
     return undefined;
   }
