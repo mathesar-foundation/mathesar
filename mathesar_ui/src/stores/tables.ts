@@ -155,19 +155,25 @@ export function getTable(id: number): CancellablePromise<TableEntry> {
 }
 
 export function splitTable(
-    id: number,
-    extract_columns: number[],
-    extracted_table_name: string,
+  id: number,
+  extract_columns: number[],
+  extracted_table_name: string,
 ): CancellablePromise<SplitTableResponse> {
-  return postAPI(`/api/db/v0/tables/${id}/split_table`, { extract_columns, extracted_table_name });
+  return postAPI(`/api/db/v0/tables/${id}/split_table`, {
+    extract_columns,
+    extracted_table_name,
+  });
 }
 
 export function moveColumns(
-    id: number,
-    move_columns: number[],
-    target_table: number,
+  id: number,
+  move_columns: number[],
+  target_table: number,
 ): CancellablePromise<null> {
-  return postAPI(`/api/db/v0/tables/${id}/move_table`, { move_columns, target_table });
+  return postAPI(`/api/db/v0/tables/${id}/move_table`, {
+    move_columns,
+    target_table,
+  });
 }
 
 export const tables: Readable<DBTablesStoreData> = derived(

@@ -182,7 +182,7 @@ export class Selection {
       // since we do not have cmd+click to select
       // disjointed cells
       this.selectMultipleCells(cells);
-      this.columnsDataStore.get()
+      this.columnsDataStore.get();
     }
   }
 
@@ -206,6 +206,5 @@ export class Selection {
     }
   }
 
-  private clearSelection(column: Column) {
-  }
+  private clearSelection(column: Column) {}
 }
