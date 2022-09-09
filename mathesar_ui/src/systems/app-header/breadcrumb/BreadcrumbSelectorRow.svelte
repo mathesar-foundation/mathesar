@@ -8,10 +8,10 @@
   export let filterString = '';
   export let closeSelector: () => void;
 
-  $: ({ href, icon, label, isActive } = entry);
+  $: ({ href, icon, label } = entry);
 </script>
 
-<li class="breadcrumb-selector-row" class:active={isActive()}>
+<li class="breadcrumb-selector-row" class:active={entry.isActive()}>
   <a {href} on:click={closeSelector}>
     <NameWithIcon {icon}>
       <MatchHighlighter text={label} substring={filterString} />
