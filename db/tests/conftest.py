@@ -167,11 +167,10 @@ def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_ext
         schema,
         engine,
     )
-    metadata = MetaData(bind=engine, schema=schema)
-    metadata.reflect()
-    teachers = metadata.tables[f"{schema}.{teachers_table_name}"]
-    roster_no_teachers = metadata.tables[f"{schema}.{roster_table_name}"]
-    return teachers, roster_no_teachers, engine, schema
+    metadata = get_empty_metadata()
+    extracted = Table(teachers_table_name, metadata, schema=schema, autoload_with=engine)
+    remainder = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
+    return extracted, remainder, engine, schema
 
 
 @pytest.fixture
