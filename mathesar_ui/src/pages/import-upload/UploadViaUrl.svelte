@@ -8,10 +8,14 @@
   let url: string;
 
   async function importFromURL() {
-    const response = await postAPI<{ id: number }>('/api/db/v0/data_files/', {
-      url,
-    });
-    dispatch('success', { dataFileId: response.id });
+    try {
+      const response = await postAPI<{ id: number }>('/api/db/v0/data_files/', {
+        url,
+      });
+      dispatch('success', { dataFileId: response.id });
+    } catch (err) {
+      //
+    }
   }
 </script>
 

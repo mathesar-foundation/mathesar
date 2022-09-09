@@ -145,9 +145,16 @@ export function renameTable(
 
 export function createTable(
   schema: SchemaEntry['id'],
-  name?: string,
+  tableArgs: {
+    name?: string;
+    dataFiles?: [number, ...number[]];
+  },
 ): CancellablePromise<TableEntry> {
-  return postAPI<TableEntry>('/api/db/v0/tables/', { schema, name });
+  return postAPI<TableEntry>('/api/db/v0/tables/', {
+    schema,
+    name: tableArgs.name,
+    data_files: tableArgs.dataFiles,
+  });
 }
 
 export function getTable(id: number): CancellablePromise<TableEntry> {

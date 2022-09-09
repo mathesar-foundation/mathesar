@@ -8,10 +8,14 @@
   let clipboardContent = '';
 
   async function importFromText() {
-    const response = await postAPI<{ id: number }>('/api/db/v0/data_files/', {
-      paste: clipboardContent,
-    });
-    dispatch('success', { dataFileId: response.id });
+    try {
+      const response = await postAPI<{ id: number }>('/api/db/v0/data_files/', {
+        paste: clipboardContent,
+      });
+      dispatch('success', { dataFileId: response.id });
+    } catch (err) {
+      //
+    }
   }
 </script>
 

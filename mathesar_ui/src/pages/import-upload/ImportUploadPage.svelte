@@ -1,7 +1,11 @@
 <script lang="ts">
+  import { router } from 'tinro';
+  import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { RadioGroup } from '@mathesar-component-library';
+  import type { RequestStatus } from '@mathesar/utils/api';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { createTable } from '@mathesar/stores/tables';
   import UploadViaFile from './UploadViaFile.svelte';
   import UploadViaUrl from './UploadViaUrl.svelte';
   import UploadViaClipboard from './UploadViaClipboard.svelte';
@@ -16,14 +20,33 @@
   ];
   let uploadMethod = uploadMethods[0];
 
-  function createPreviewTable(uploadInfo: { dataFileId: number }) {
-    //
+  let tableCreationProgress: RequestStatus;
+
+  async function createPreviewTable(uploadInfo: { dataFileId: number }) {
+    const { dataFileId } = uploadInfo;
+    try {
+      tableCreationProgress = { state: 'processing' };
+      const table = await createTable(schema.id, {
+        dataFiles: [dataFileId],
+      });
+      router.goto(getImportPreviewPageUrl(database.name, schema.id, table.id));
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Unable to create a table from the uploaded data';
+      // Throw toast here?
+      tableCreationProgress = {
+        state: 'failure',
+        errors: [errorMessage],
+      };
+    }
   }
 </script>
 
 <LayoutWithHeader>
   <div class="import-file-view">
-    <h2>Import your data</h2>
+    <h2>Create a table by importing your data</h2>
 
     <div class="upload-method-input">
       <RadioGroup
@@ -47,7 +70,7 @@
     <div class="help-content bounded">
       Large data sets can sometimes take several minutes to process.
       <strong>
-        Please do not leave this page or close the browser tab while upload is
+        Please do not leave this page or close the browser tab while import is
         in progress.
       </strong>
     </div>
