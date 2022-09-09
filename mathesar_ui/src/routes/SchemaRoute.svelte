@@ -4,12 +4,12 @@
 
   import type { Database } from '@mathesar/AppTypes';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
-  import ImportPage from '@mathesar/pages/import/ImportPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
   import AppendBreadcrumb from '@mathesar/systems/app-header/breadcrumb/AppendBreadcrumb.svelte';
   import DataExplorerRoute from './DataExplorerRoute.svelte';
   import TableRoute from './TableRoute.svelte';
+  import ImportRoute from './ImportRoute.svelte';
 
   export let database: Database;
   export let schemaId: number;
@@ -29,9 +29,9 @@
     <SchemaPage {database} {schema} />
   </Route>
 
-  <Route path="/import">
+  <Route path="/import/*">
     <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
-    <ImportPage {database} {schema} />
+    <ImportRoute {database} {schema} />
   </Route>
 
   <Route path="/data-explorer/*">
