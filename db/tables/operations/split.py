@@ -7,6 +7,7 @@ from db.columns.operations.select import get_columns_name_from_attnums
 from db.links.operations.create import create_foreign_key_link
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table, reflect_table_from_oid
+from db.metadata import get_empty_metadata
 
 
 def _create_split_tables(extracted_table_name, extracted_columns, remainder_table_name, schema, engine):
@@ -20,7 +21,8 @@ def _create_split_tables(extracted_table_name, extracted_columns, remainder_tabl
     remainder_table_oid = get_oid_from_table(remainder_table_name, schema, engine)
     extracted_table_oid = get_oid_from_table(extracted_table_name, schema, engine)
     create_foreign_key_link(engine, schema, fk_column_name, remainder_table_oid, extracted_table_oid)
-    remainder_table_with_fk_key = reflect_table(remainder_table_name, schema, engine)
+    # TODO reuse metadata
+    remainder_table_with_fk_key = reflect_table(remainder_table_name, schema, engine, metadata=get_empty_metadata())
     return extracted_table, remainder_table_with_fk_key, fk_column_name
 
 
@@ -59,13 +61,18 @@ def _create_split_insert_stmt(old_table, extracted_table, extracted_columns, rem
 
 
 def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracted_table_name, schema, engine,):
-    old_table_name = reflect_table_from_oid(old_table_oid, engine).name
-    old_table = reflect_table(old_table_name, schema, engine)
+    # TODO reuse metadata
+    old_table = reflect_table_from_oid(old_table_oid, engine, metadata=get_empty_metadata())
+    old_table_name = old_table.name
+    # TODO why is old_table reflected twice here? does reflect_table_from_oid return same thing as reflect_table?
+    # TODO reuse metadata
+    old_table = reflect_table(old_table_name, schema, engine, metadata=get_empty_metadata())
     old_columns = (MathesarColumn.from_column(col) for col in old_table.columns)
     old_non_default_columns = [
         col for col in old_columns if not col.is_default
     ]
-    extracted_column_names = get_columns_name_from_attnums(old_table_oid, extracted_column_attnums, engine)
+    # TODO reuse metadata
+    extracted_column_names = get_columns_name_from_attnums(old_table_oid, extracted_column_attnums, engine, metadata=get_empty_metadata())
     extracted_columns = [
         col for col in old_non_default_columns if col.name in extracted_column_names
     ]

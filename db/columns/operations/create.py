@@ -20,10 +20,12 @@ from db.tables.operations.select import reflect_table_from_oid
 from db.types.base import PostgresType
 from db.types.operations.convert import get_db_type_enum_from_id, get_db_type_enum_from_class
 from db import constants
+from db.metadata import get_empty_metadata
 
 
 def create_column(engine, table_oid, column_data):
-    table = reflect_table_from_oid(table_oid, engine)
+    # TODO reuse metadata
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     column_name = column_data.get(NAME, '').strip()
     if column_name == '':
         column_data[NAME] = gen_col_name(table)
@@ -40,7 +42,8 @@ def create_column(engine, table_oid, column_data):
         # Requested type unknown or not supported. Falling back to CHARACTER_VARYING
         column_type_class = PostgresType.CHARACTER_VARYING.get_sa_class(engine)
         column_type_options = {}
-    table = reflect_table_from_oid(table_oid, engine)
+    # TODO reuse metadata
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
 
     try:
         column = MathesarColumn(
@@ -53,7 +56,8 @@ def create_column(engine, table_oid, column_data):
         else:
             raise e
 
-    table = reflect_table_from_oid(table_oid, engine)
+    # TODO reuse metadata
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     try:
         with engine.begin() as conn:
             ctx = MigrationContext.configure(conn)
@@ -67,14 +71,16 @@ def create_column(engine, table_oid, column_data):
         else:
             raise e
 
+    # TODO reuse metadata
     return get_mathesar_column_with_engine(
-        reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]],
+        reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata()).columns[column_data[NAME]],
         engine
     )
 
 
 def bulk_create_mathesar_column(engine, table_oid, columns, schema):
-    table = reflect_table_from_oid(table_oid, engine)
+    # TODO reuse metadata
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
@@ -117,9 +123,11 @@ def compile_copy_column(element, compiler, **_):
 
 
 def _duplicate_column_data(table_oid, from_column_attnum, to_column_attnum, engine):
-    table = reflect_table_from_oid(table_oid, engine)
-    from_column_name = get_column_name_from_attnum(table_oid, from_column_attnum, engine)
-    to_column_name = get_column_name_from_attnum(table_oid, to_column_attnum, engine)
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    table = reflect_table_from_oid(table_oid, engine, metadata=metadata)
+    from_column_name = get_column_name_from_attnum(table_oid, from_column_attnum, engine, metadata=metadata)
+    to_column_name = get_column_name_from_attnum(table_oid, to_column_attnum, engine, metadata=metadata)
     copy = CopyColumn(
         table.schema,
         table.name,
@@ -128,15 +136,18 @@ def _duplicate_column_data(table_oid, from_column_attnum, to_column_attnum, engi
     )
     with engine.begin() as conn:
         conn.execute(copy)
-    from_default = get_column_default(table_oid, from_column_attnum, engine)
+    # TODO reuse metadata
+    from_default = get_column_default(table_oid, from_column_attnum, engine, metadata=get_empty_metadata())
     if from_default is not None:
         with engine.begin() as conn:
             set_column_default(table_oid, to_column_attnum, engine, conn, from_default)
 
 
 def _duplicate_column_constraints(table_oid, from_column_attnum, to_column_attnum, engine, copy_nullable=True):
-    table = reflect_table_from_oid(table_oid, engine)
-    from_column_name = get_column_name_from_attnum(table_oid, from_column_attnum, engine)
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    table = reflect_table_from_oid(table_oid, engine, metadata=metadata)
+    from_column_name = get_column_name_from_attnum(table_oid, from_column_attnum, engine, metadata=metadata)
     if copy_nullable:
         with engine.begin() as conn:
             change_column_nullable(table_oid, to_column_attnum, engine, conn, table.c[from_column_name].nullable)
@@ -152,8 +163,10 @@ def _duplicate_column_constraints(table_oid, from_column_attnum, to_column_attnu
 
 
 def duplicate_column(table_oid, copy_from_attnum, engine, new_column_name=None, copy_data=True, copy_constraints=True):
-    table = reflect_table_from_oid(table_oid, engine)
-    copy_from_name = get_column_name_from_attnum(table_oid, copy_from_attnum, engine)
+    # TODO reuse metadata
+    metadata=get_empty_metadata()
+    table = reflect_table_from_oid(table_oid, engine, metadata=metadata)
+    copy_from_name = get_column_name_from_attnum(table_oid, copy_from_attnum, engine, metadata=metadata)
     from_column = MathesarColumn.from_column(table.c[copy_from_name])
     from_column_db_type = get_db_type_enum_from_class(
         from_column.type.__class__
@@ -167,7 +180,8 @@ def duplicate_column(table_oid, copy_from_attnum, engine, new_column_name=None, 
         NULLABLE: True,
     }
     new_column = create_column(engine, table_oid, column_data)
-    new_column_attnum = get_column_attnum_from_name(table_oid, new_column.name, engine)
+    # TODO reuse metadata
+    new_column_attnum = get_column_attnum_from_name(table_oid, new_column.name, engine, metadata=get_empty_metadata())
     if copy_data:
         _duplicate_column_data(
             table_oid,
@@ -185,6 +199,8 @@ def duplicate_column(table_oid, copy_from_attnum, engine, new_column_name=None, 
             copy_nullable=copy_data
         )
 
-    table = reflect_table_from_oid(table_oid, engine)
-    column_name = get_column_name_from_attnum(table_oid, new_column_attnum, engine)
+    # TODO reuse metadata
+    metadata=get_empty_metadata()
+    table = reflect_table_from_oid(table_oid, engine, metadata=metadata)
+    column_name = get_column_name_from_attnum(table_oid, new_column_attnum, engine, metadata=metadata)
     return get_mathesar_column_with_engine(table.c[column_name], engine)

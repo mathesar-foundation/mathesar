@@ -1,7 +1,7 @@
 import warnings
 
 from pglast import Node, parse_sql
-from sqlalchemy import MetaData, Table, and_, asc, cast, select, text
+from sqlalchemy import Table, and_, asc, cast, select, text
 
 from db.columns.exceptions import DynamicDefaultWarning
 from db.tables.operations.select import reflect_table_from_oid
@@ -17,10 +17,10 @@ from db.utils import execute_statement
 DYNAMIC_NODE_TAGS = {"SQLValueFunction", "FuncCall"}
 
 
-def _get_columns_attnum_from_names(table_oid, column_names, engine):
+def _get_columns_attnum_from_names(table_oid, column_names, engine, metadata):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
+        pg_attribute = Table("pg_attribute", metadata, autoload_with=engine)
     sel = select(pg_attribute.c.attnum, pg_attribute.c.attname).where(
         and_(
             pg_attribute.c.attrelid == table_oid,
@@ -30,12 +30,12 @@ def _get_columns_attnum_from_names(table_oid, column_names, engine):
     return sel
 
 
-def get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None, return_as_name_map=False):
+def get_columns_attnum_from_names(table_oid, column_names, engine, metadata, connection_to_use=None, return_as_name_map=False):
     """
     Returns the respective list of attnum of the column names passed.
      The order is based on the column order in the table and not by the order of the column names argument.
     """
-    statement = _get_columns_attnum_from_names(table_oid, column_names, engine)
+    statement = _get_columns_attnum_from_names(table_oid, column_names, engine=engine, metadata=metadata)
     attnums_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
     if return_as_name_map:
         name_attnum_map = {attnum_tuple[1]: attnum_tuple[0] for attnum_tuple in attnums_tuple}
@@ -45,15 +45,15 @@ def get_columns_attnum_from_names(table_oid, column_names, engine, connection_to
         return attnums
 
 
-def get_column_attnum_from_name(table_oid, column_name, engine, connection_to_use=None):
-    statement = _get_columns_attnum_from_names(table_oid, [column_name], engine)
+def get_column_attnum_from_name(table_oid, column_name, engine, metadata, connection_to_use=None):
+    statement = _get_columns_attnum_from_names(table_oid, [column_name], engine=engine, metadata=metadata)
     return execute_statement(engine, statement, connection_to_use).scalar()
 
 
-def get_column_attnums_from_table(table_oid, engine, connection_to_use=None):
+def get_column_attnums_from_table(table_oid, engine, metadata, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
+        pg_attribute = Table("pg_attribute", metadata, autoload_with=engine)
     sel = select(pg_attribute.c.attnum).where(
         and_(
             pg_attribute.c.attrelid == table_oid,
@@ -67,10 +67,10 @@ def get_column_attnums_from_table(table_oid, engine, connection_to_use=None):
     return results
 
 
-def _get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None):
+def _get_columns_name_from_attnums(table_oid, attnums, engine, metadata, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
+        pg_attribute = Table("pg_attribute", metadata, autoload_with=engine)
     sel = select(pg_attribute.c.attname).where(
         and_(
             pg_attribute.c.attrelid == table_oid,
@@ -80,25 +80,25 @@ def _get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use
     return sel
 
 
-def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None):
+def get_columns_name_from_attnums(table_oid, attnums, engine, metadata, connection_to_use=None):
     """
     Returns the respective list of attnum of the column names passed.
      The order is based on the column order in the table and not by the order of the column names argument.
     """
-    statement = _get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None)
+    statement = _get_columns_name_from_attnums(table_oid, attnums, engine, metadata=metadata, connection_to_use=None)
     column_names_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
     column_names = [column_name_tuple[0] for column_name_tuple in column_names_tuple]
     return column_names
 
 
-def get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use=None):
-    statement = _get_columns_name_from_attnums(table_oid, [attnum], engine, connection_to_use=None)
+def get_column_name_from_attnum(table_oid, attnum, engine, metadata, connection_to_use=None):
+    statement = _get_columns_name_from_attnums(table_oid, [attnum], engine, metadata=metadata, connection_to_use=None)
     return execute_statement(engine, statement, connection_to_use).scalar()
 
 
-def get_column_default_dict(table_oid, attnum, engine, connection_to_use=None):
-    table = reflect_table_from_oid(table_oid, engine, connection_to_use=connection_to_use)
-    column_name = get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use)
+def get_column_default_dict(table_oid, attnum, engine, metadata, connection_to_use=None):
+    table = reflect_table_from_oid(table_oid, engine, metadata=metadata, connection_to_use=connection_to_use)
+    column_name = get_column_name_from_attnum(table_oid, attnum, engine=engine, metadata=metadata, connection_to_use=connection_to_use)
     column = table.columns[column_name]
     if column.server_default is None:
         return
@@ -124,9 +124,13 @@ def get_column_default_dict(table_oid, attnum, engine, connection_to_use=None):
     return {"value": default_value, "is_dynamic": is_dynamic}
 
 
-def get_column_default(table_oid, attnum, engine, connection_to_use=None):
+def get_column_default(table_oid, attnum, engine, metadata, connection_to_use=None):
     default_dict = get_column_default_dict(
-        table_oid, attnum, engine, connection_to_use=connection_to_use
+        table_oid,
+        attnum,
+        engine,
+        metadata=metadata,
+        connection_to_use=connection_to_use,
     )
     if default_dict is not None:
         return default_dict['value']

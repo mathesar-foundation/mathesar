@@ -7,6 +7,7 @@ from db.columns.operations.alter import batch_alter_table_drop_columns
 from db.columns.operations.create import bulk_create_mathesar_column
 from db.columns.operations.select import get_columns_name_from_attnums
 from db.tables.operations.select import reflect_table_from_oid
+from db.metadata import get_empty_metadata
 
 
 def _find_table_relationship(table_one, table_two):
@@ -58,10 +59,12 @@ def move_columns_between_related_tables(
         schema,
         engine
 ):
-    source_table = reflect_table_from_oid(source_table_oid, engine)
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    source_table = reflect_table_from_oid(source_table_oid, engine, metadata=metadata)
     target_table = reflect_table_from_oid(target_table_oid, engine, metadata=source_table.metadata)
     relationship = _find_table_relationship(source_table, target_table)
-    column_names_to_move = get_columns_name_from_attnums(source_table_oid, column_attnums_to_move, engine)
+    column_names_to_move = get_columns_name_from_attnums(source_table_oid, column_attnums_to_move, engine, metadata=metadata)
     moving_columns = [source_table.columns[n] for n in column_names_to_move]
     assert _check_columns(relationship, moving_columns)
     source_table_reference_column, target_table_reference_column = _get_table_connecting_columns(
@@ -70,7 +73,8 @@ def move_columns_between_related_tables(
     )
     extracted_columns = [MathesarColumn.from_column(col) for col in moving_columns]
     bulk_create_mathesar_column(engine, target_table_oid, extracted_columns, schema)
-    target_table = reflect_table_from_oid(target_table_oid, engine, metadata=source_table.metadata)
+    # TODO reuse metadata
+    target_table = reflect_table_from_oid(target_table_oid, engine, metadata=get_empty_metadata())
     if relationship["referenced"] == target_table:
         extracted_columns_update_stmt = _create_move_referrer_table_columns_update_stmt(
             source_table,
@@ -90,7 +94,8 @@ def move_columns_between_related_tables(
         conn.execute(extracted_columns_update_stmt)
         deletion_column_data = [{'attnum': column_attnum} for column_attnum in column_attnums_to_move]
         batch_alter_table_drop_columns(source_table_oid, deletion_column_data, conn, engine)
-    source_table = reflect_table_from_oid(source_table_oid, engine)
+    # TODO reuse metadata
+    source_table = reflect_table_from_oid(source_table_oid, engine, metadata=get_empty_metadata())
     return target_table, source_table
 
 
