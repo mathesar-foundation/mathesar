@@ -11,7 +11,7 @@ import {
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/tables';
+import type { SplitTableResponse, TableEntry } from '@mathesar/api/tables';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -152,6 +152,22 @@ export function createTable(
 
 export function getTable(id: number): CancellablePromise<TableEntry> {
   return getAPI(`/api/db/v0/tables/${id}/`);
+}
+
+export function splitTable(
+    id: number,
+    extract_columns: number[],
+    extracted_table_name: string,
+): CancellablePromise<SplitTableResponse> {
+  return postAPI(`/api/db/v0/tables/${id}/split_table`, { extract_columns, extracted_table_name });
+}
+
+export function moveColumns(
+    id: number,
+    move_columns: number[],
+    target_table: number,
+): CancellablePromise<null> {
+  return postAPI(`/api/db/v0/tables/${id}/move_table`, { move_columns, target_table });
 }
 
 export const tables: Readable<DBTablesStoreData> = derived(
