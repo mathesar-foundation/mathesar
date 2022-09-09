@@ -27,6 +27,5 @@
   }
   .app-layout:not(.fit-viewport) .app-layout-content {
     padding: var(--page-padding);
-    overflow: auto;
   }
 </style>

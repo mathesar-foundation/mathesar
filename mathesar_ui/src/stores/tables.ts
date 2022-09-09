@@ -11,7 +11,7 @@ import {
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/tables';
+import type { TableEntry, MinimalColumnDetails } from '@mathesar/api/tables';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -157,8 +157,24 @@ export function createTable(
   });
 }
 
-export function getTable(id: number): CancellablePromise<TableEntry> {
+export function getTable(id: TableEntry['id']): CancellablePromise<TableEntry> {
   return getAPI(`/api/db/v0/tables/${id}/`);
+}
+
+export function getTypeSuggestionsForTable(
+  id: TableEntry['id'],
+): CancellablePromise<Record<string, string>> {
+  return getAPI(`/api/db/v0/tables/${id}/type_suggestions/`);
+}
+
+export function generateTablePreview(
+  id: TableEntry['id'],
+  // TODO: Update API to not require name for previews
+  columns: Pick<MinimalColumnDetails, 'id' | 'name' | 'type'>[],
+): CancellablePromise<{
+  records: Record<string, unknown>[];
+}> {
+  return postAPI(`/api/db/v0/tables/${id}/previews/`, { columns });
 }
 
 export const tables: Readable<DBTablesStoreData> = derived(

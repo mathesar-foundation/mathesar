@@ -13,5 +13,9 @@
 </Route>
 
 <Route path="/:previewTableId" let:meta>
-  <ImportPreviewPage {database} {schema} />
+  <ImportPreviewPage
+    {database}
+    {schema}
+    previewTableId={parseInt(meta.params.previewTableId, 10)}
+  />
 </Route>
