@@ -56,6 +56,7 @@
               {#each entries as entry (entry.href)}
                 <BreadcrumbSelectorRow
                   {entry}
+                  {filterString}
                   closeSelector={() => {
                     isOpen = false;
                   }}

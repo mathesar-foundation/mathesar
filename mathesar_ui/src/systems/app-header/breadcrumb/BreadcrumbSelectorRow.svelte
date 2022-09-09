@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { MatchHighlighter } from '@mathesar/component-library';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
   export let entry: BreadcrumbSelectorEntry;
+  export let filterString = '';
   export let closeSelector: () => void;
 
   $: ({ href, icon, label, isActive } = entry);
@@ -11,7 +13,9 @@
 
 <li class="breadcrumb-selector-row" class:active={isActive()}>
   <a {href} on:click={closeSelector}>
-    <NameWithIcon {icon}>{label}</NameWithIcon>
+    <NameWithIcon {icon}>
+      <MatchHighlighter text={label} substring={filterString} />
+    </NameWithIcon>
   </a>
   {#if entry.type === 'table'}
     <div class="record-selector">
