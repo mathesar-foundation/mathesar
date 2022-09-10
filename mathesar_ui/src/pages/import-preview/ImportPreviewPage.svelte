@@ -25,6 +25,13 @@
     deleteTable,
     createTable,
   } from '@mathesar/stores/tables';
+  import {
+    currentDbAbstractTypes,
+    getAbstractTypeForDbType,
+  } from '@mathesar/stores/abstract-types';
+  import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -38,6 +45,26 @@
   let dataFileDetails: { id: number; header: boolean };
   let columns: MinimalColumnDetails[] = [];
   let records: Record<string, unknown>[] = [];
+
+  function processColumns(
+    _columns: MinimalColumnDetails[],
+    abstractTypeMap: AbstractTypesMap,
+  ) {
+    return _columns.map((column) => {
+      const abstractType = getAbstractTypeForDbType(
+        column.type,
+        abstractTypeMap,
+      );
+      return {
+        id: column.id,
+        column,
+        abstractType,
+        cellComponentAndProps: getCellCap(abstractType.cell, column),
+      };
+    });
+  }
+
+  $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
 
   async function loadTablePreview() {
     previewRequestStatus = { state: 'processing' };
@@ -107,14 +134,18 @@
   async function updateDataFileHeader() {
     if (dataFileDetails) {
       dataFileDetails.header = useFirstRowAsHeader;
-      await patchAPI(`/api/db/v0/data_files/${dataFileDetails.id}/`, {
-        header: useFirstRowAsHeader,
-      });
+      const deleteTablePromise = deleteTable(previewTableId);
+      const patchDataFilePromise = patchAPI(
+        `/api/db/v0/data_files/${dataFileDetails.id}/`,
+        {
+          header: useFirstRowAsHeader,
+        },
+      );
+      await Promise.all([deleteTablePromise, patchDataFilePromise]);
       tableInfo = await createTable(schema.id, {
         name: tableName,
         dataFiles: [dataFileDetails.id],
       });
-      await deleteTable(previewTableId);
       router.goto(
         getImportPreviewPageUrl(database.name, schema.id, tableInfo.id),
       );
@@ -150,18 +181,18 @@
       />
     </LabeledInput>
 
-    <Sheet {columns} getColumnIdentifier={(c) => c.id}>
+    <Sheet columns={processedColumns} getColumnIdentifier={(c) => c.id}>
       <SheetHeader>
-        {#each columns as column (column.id)}
+        {#each processedColumns as processedColumn (processedColumn.id)}
           <SheetCell
-            columnIdentifierKey={column.id}
+            columnIdentifierKey={processedColumn.id}
             let:htmlAttributes
             let:style
           >
             <div {...htmlAttributes} {style}>
-              <div>{column.name}</div>
-              <div>{column.type}</div>
-              <SheetCellResizer columnIdentifierKey={column.id} />
+              <div>{processedColumn.column.name}</div>
+              <div>{processedColumn.column.type}</div>
+              <SheetCellResizer columnIdentifierKey={processedColumn.id} />
             </div>
           </SheetCell>
         {/each}
@@ -177,14 +208,20 @@
           let:styleString
         >
           <div {...htmlAttributes} style={styleString}>
-            {#each columns as column (column.id)}
+            {#each processedColumns as processedColumn (processedColumn.id)}
               <SheetCell
-                columnIdentifierKey={column.id}
+                columnIdentifierKey={processedColumn.id}
                 let:htmlAttributes
                 let:style
               >
                 <div {...htmlAttributes} {style}>
-                  {String(record[column.name])}
+                  <CellFabric
+                    columnFabric={processedColumn}
+                    value={record[processedColumn.column.name]}
+                    showAsSkeleton={previewRequestStatus?.state ===
+                      'processing'}
+                    disabled={true}
+                  />
                 </div>
               </SheetCell>
             {/each}
