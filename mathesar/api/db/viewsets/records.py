@@ -201,7 +201,8 @@ class RecordViewSet(viewsets.ViewSet):
     def destroy(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
         if table.get_record(pk) is None:
-            raise generic_api_exceptions.NotFoundAPIException(NotFound, message="record doesn't exist")
+            raise NotFound
+            #raise generic_api_exceptions.NotFoundAPIException(NotFound, message="record doesn't exist")
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
