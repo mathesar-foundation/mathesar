@@ -157,6 +157,19 @@ export function createTable(
   });
 }
 
+/**
+ * NOTE: The getTable function currently does not get data from the store.
+ * We need to keep it that way for the time-being, because the components
+ * that call this function expect latest data from the db, while the store
+ * contains stale information.
+ *
+ * TODO:
+ * 1. Keep stores upto-date when user performs any action to related db objects.
+ * 2. Find a sync mechanism to keep the frontend stores upto-date when
+ *    data in db changes.
+ * 3. Move all api-call-only functions to /api. Only keep functions that
+ *    update the stores within /stores
+ */
 export function getTable(id: TableEntry['id']): CancellablePromise<TableEntry> {
   return getAPI(`/api/db/v0/tables/${id}/`);
 }
@@ -170,6 +183,7 @@ export function getTypeSuggestionsForTable(
 export function generateTablePreview(
   id: TableEntry['id'],
   // TODO: Update API to not require name for previews
+  // Needs both type_options and display_options
   columns: Pick<MinimalColumnDetails, 'id' | 'name' | 'type'>[],
 ): CancellablePromise<{
   records: Record<string, unknown>[];
