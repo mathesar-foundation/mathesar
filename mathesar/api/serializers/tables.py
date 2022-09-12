@@ -48,7 +48,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
             'id', 'name', 'import_target', 'schema', 'created_at', 'updated_at',
             'import_verified', 'columns', 'records_url', 'constraints_url',
             'columns_url', 'joinable_tables_url', 'type_suggestions_url',
-            'previews_url', 'data_files', 'has_dependencies', 'dependents_url',
+            'previews_url', 'data_files', 'has_dependents', 'dependents_url',
             'settings', 'description',
         ]
 
