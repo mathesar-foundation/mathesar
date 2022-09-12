@@ -190,8 +190,10 @@ class Table(DatabaseObject, Relation):
     MODEL_FIELDS = ['import_verified']
     current_objects = models.Manager()
     objects = DatabaseObjectManager(
+        # TODO Move the Prefetcher into a separate class and replace lambdas with proper function
         _sa_table=Prefetcher(
-            filter=lambda oids, tables: reflect_tables_from_oids(oids, list(tables)[0]._sa_engine),
+            filter=lambda oids, tables: reflect_tables_from_oids(oids, list(tables)[0]._sa_engine)
+            if len(tables) > 0 else [],
             mapper=lambda table: table.oid,
             # A filler statement, just used to satisfy the library. It does not affect the prefetcher in any way as we bypass reverse mapping if the prefetcher returns a dictionary
             reverse_mapper=lambda table: table.oid,
