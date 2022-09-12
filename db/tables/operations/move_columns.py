@@ -10,48 +10,6 @@ from db.tables.operations.select import reflect_table_from_oid
 from db.metadata import get_empty_metadata
 
 
-def _find_table_relationship(table_one, table_two):
-    """
-    This function takes two tables, and returns a dict defining the direction
-    of the foreign key constraint relating the tables (if one exists)
-    """
-    one_referencing_two = [
-        fkey_constraint for fkey_constraint in table_one.foreign_key_constraints
-        if fkey_constraint.referred_table == table_two
-    ]
-    two_referencing_one = [
-        fkey_constraint for fkey_constraint in table_two.foreign_key_constraints
-        if fkey_constraint.referred_table == table_one
-    ]
-    if one_referencing_two and not two_referencing_one:
-        relationship = {"referencing": table_one, "referenced": table_two, "constraint": one_referencing_two[0]}
-    elif two_referencing_one and not one_referencing_two:
-        relationship = {"referencing": table_two, "referenced": table_one, "constraint": two_referencing_one[0]}
-    else:
-        relationship = None
-    return relationship
-
-
-def _check_columns(relationship, moving_columns):
-    return (
-        relationship is not None
-        and all([not c.foreign_keys for c in moving_columns])
-    )
-
-
-def _get_table_connecting_columns(relationship, target_table):
-    constraint = relationship['constraint']
-    referrer_column = constraint.columns[0]
-    referent_column = constraint.elements[0].column
-    if relationship["referenced"] == target_table:
-        source_table_reference_column = referrer_column
-        target_table_reference_column = referent_column
-    else:
-        source_table_reference_column = referent_column
-        target_table_reference_column = referrer_column
-    return source_table_reference_column, target_table_reference_column
-
-
 def move_columns_between_related_tables(
         source_table_oid,
         target_table_oid,
@@ -180,3 +138,45 @@ def _create_move_referrer_table_columns_update_stmt(
         )
     )
     return split_ins
+
+
+def _find_table_relationship(table_one, table_two):
+    """
+    This function takes two tables, and returns a dict defining the direction
+    of the foreign key constraint relating the tables (if one exists)
+    """
+    one_referencing_two = [
+        fkey_constraint for fkey_constraint in table_one.foreign_key_constraints
+        if fkey_constraint.referred_table == table_two
+    ]
+    two_referencing_one = [
+        fkey_constraint for fkey_constraint in table_two.foreign_key_constraints
+        if fkey_constraint.referred_table == table_one
+    ]
+    if one_referencing_two and not two_referencing_one:
+        relationship = {"referencing": table_one, "referenced": table_two, "constraint": one_referencing_two[0]}
+    elif two_referencing_one and not one_referencing_two:
+        relationship = {"referencing": table_two, "referenced": table_one, "constraint": two_referencing_one[0]}
+    else:
+        relationship = None
+    return relationship
+
+
+def _check_columns(relationship, moving_columns):
+    return (
+        relationship is not None
+        and all([not c.foreign_keys for c in moving_columns])
+    )
+
+
+def _get_table_connecting_columns(relationship, target_table):
+    constraint = relationship['constraint']
+    referrer_column = constraint.columns[0]
+    referent_column = constraint.elements[0].column
+    if relationship["referenced"] == target_table:
+        source_table_reference_column = referrer_column
+        target_table_reference_column = referent_column
+    else:
+        source_table_reference_column = referent_column
+        target_table_reference_column = referrer_column
+    return source_table_reference_column, target_table_reference_column
