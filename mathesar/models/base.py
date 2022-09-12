@@ -43,6 +43,7 @@ from db.tables.utils import get_primary_key_column
 from mathesar import reflection
 from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
+from mathesar.utils.prefetch import PrefetchManager, Prefetcher
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
 
