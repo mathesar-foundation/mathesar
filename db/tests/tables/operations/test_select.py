@@ -1,4 +1,5 @@
 import sys
+from sqlalchemy import text
 from db.columns.operations.select import get_column_name_from_attnum
 from db.tables.operations import select as ma_sel
 import pytest
@@ -216,3 +217,15 @@ def test_get_joinable_tables_query_paths(engine_with_academics, table, depth):
         key=lambda x: x[JP_PATH]
     )
     assert expect_rows == actual_rows
+
+
+def test_get_description_from_table(roster_table_name, engine_with_roster):
+    engine, schema = engine_with_roster
+    roster_table_oid = ma_sel.get_oid_from_table(roster_table_name, schema, engine)
+    expect_comment = 'my super comment'
+    with engine.begin() as conn:
+        conn.execute(text(f'''COMMENT ON TABLE "{roster_table_name}" IS '{expect_comment}';'''))
+
+    actual_comment = ma_sel.get_table_description(roster_table_oid, engine)
+
+    assert actual_comment == expect_comment

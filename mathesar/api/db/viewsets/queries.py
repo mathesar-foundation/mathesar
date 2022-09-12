@@ -1,3 +1,4 @@
+import json
 from django_filters import rest_framework as filters
 
 from rest_framework import viewsets
@@ -6,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from mathesar.api.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
-from mathesar.api.serializers.queries import QuerySerializer
+from mathesar.api.serializers.queries import BaseQuerySerializer, QuerySerializer
 from mathesar.api.serializers.records import RecordListParameterSerializer
 from mathesar.models.query import UIQuery
 
@@ -48,3 +49,38 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
         if query.not_partial:
             output_col_desc = query.output_columns_described
             return Response(output_col_desc)
+
+    @action(methods=['post'], detail=False)
+    def run(self, request):
+        params = request.data.pop("parameters", {})
+        request.GET |= {k: [json.dumps(v)] for k, v in params.items()}
+        paginator = TableLimitOffsetPagination()
+        input_serializer = BaseQuerySerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        query = UIQuery(**input_serializer.validated_data)
+        record_serializer = RecordListParameterSerializer(data=request.GET)
+        record_serializer.is_valid(raise_exception=True)
+        records = query.get_records()
+        records = paginator.paginate_queryset(
+            queryset=self.get_queryset(),
+            request=request,
+            table=query,
+            filters=record_serializer.validated_data['filter'],
+            order_by=record_serializer.validated_data['order_by'],
+            grouping=record_serializer.validated_data['grouping'],
+            search=record_serializer.validated_data['search_fuzzy'],
+            duplicate_only=record_serializer.validated_data['duplicate_only'],
+        )
+        paginated_records = paginator.get_paginated_response(records)
+        columns = query.output_columns_simple
+        column_metadata = query.all_columns_description_map
+        output_serializer = BaseQuerySerializer(query)
+        return Response(
+            {
+                "query": output_serializer.data,
+                "records": paginated_records.data,
+                "output_columns": columns,
+                "column_metadata": column_metadata,
+                "parameters": {k: json.loads(request.GET[k]) for k in request.GET},
+            }
+        )

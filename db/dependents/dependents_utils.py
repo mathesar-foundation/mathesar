@@ -66,7 +66,7 @@ def get_dependents_graph(referenced_object_id, engine, attnum=None):
 
 
 # finding table dependents based on foreign key constraints from the referenced tables
-def _get_table_dependents(foreign_key_dependents, pg_constraint_table):
+def _get_table_dependents_from_fk(foreign_key_dependents, pg_constraint_table):
     pg_identify_object = _get_pg_identify_object_lateral_stmt(
         text(f'{PG_CLASS_CATALOGUE_NAME}::regclass::oid'), pg_constraint_table.c.conrelid, DEFAULT_NON_COLUMN_OBJSUBID)
 
@@ -94,8 +94,44 @@ def _get_table_dependents(foreign_key_dependents, pg_constraint_table):
     )
 
 
-def _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pair):
-    return dependency_pair.where(pg_identify_object.c.type == 'table constraint')
+def _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pairs):
+    return dependency_pairs.where(pg_identify_object.c.type == 'table constraint')
+
+
+def _get_index_dependents(pg_identify_object, dependency_pairs):
+    return dependency_pairs.where(pg_identify_object.c.type == 'index')
+
+
+def _get_rule_dependents(pg_identify_object, dependency_pairs):
+    return dependency_pairs.where(pg_identify_object.c.type == 'rule')
+
+
+def _get_view_dependents(pg_identify_object, pg_rewrite_table, rule_dependents):
+    pg_identify_object = _get_pg_identify_object_lateral_stmt(
+        text(f'{PG_CLASS_CATALOGUE_NAME}::regclass::oid'), pg_rewrite_table.c.ev_class, DEFAULT_NON_COLUMN_OBJSUBID)
+
+    return select(
+        rule_dependents.c.classid,
+        pg_rewrite_table.c.ev_class.label('objid'),
+        rule_dependents.c.objsubid,
+        rule_dependents.c.refclassid,
+        rule_dependents.c.refobjid,
+        rule_dependents.c.refobjsubid,
+        rule_dependents.c.deptype,
+        pg_identify_object.c.name.label('objname'),
+        pg_identify_object.c.type.label('objtype')) \
+        .select_from(rule_dependents) \
+        .join(pg_rewrite_table, rule_dependents.c.objid == pg_rewrite_table.c.oid) \
+        .join(pg_identify_object, true()) \
+        .group_by(
+            rule_dependents,
+            pg_rewrite_table.c.ev_class,
+            pg_identify_object.c.type,
+            pg_identify_object.c.name)
+
+
+def _get_table_dependents(pg_identify_object, base):
+    return base.where(pg_identify_object.c.type == 'table')
 
 
 # stmt for getting a full list of dependents and identifying them
@@ -127,6 +163,10 @@ def _get_pg_constraint_table(engine, metadata):
     return Table("pg_constraint", metadata, autoload_with=engine)
 
 
+def _get_pg_rewrite(engine, metadata):
+    return Table("pg_rewrite", metadata, autoload_with=engine)
+
+
 def _get_pg_identify_object_lateral_stmt(classid, objid, objsubid):
     return (
         select(
@@ -148,20 +188,32 @@ def _get_typed_dependency_pairs_stmt(engine):
     pg_identify_object = _get_pg_identify_object_lateral_stmt(
         pg_depend.c.classid, pg_depend.c.objid, pg_depend.c.objsubid)
     pg_constraint = _get_pg_constraint_table(engine, metadata)
+    pg_rewrite = _get_pg_rewrite(engine, metadata)
 
     # each statement filters the base statement extracting dependents of a specific type
     # so it's easy to exclude particular types or add new
     dependency_pairs = _get_dependency_pairs_stmt(pg_depend, pg_identify_object)
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pairs).cte('foreign_key_constraint_dependents')
-    table_dependents = _get_table_dependents(foreign_key_constraint_dependents, pg_constraint).cte('table_dependents')
+    table_from_fk_dependents = _get_table_dependents_from_fk(foreign_key_constraint_dependents, pg_constraint).cte('table_from_fk_dependents')
+    table_dependents = _get_table_dependents(pg_identify_object, dependency_pairs).cte('table_dependents')
+
+    # should not be returned directly, used for getting views
+    # this relation is required because views in PostgreSQL are implemented using the rule system
+    # views don't depend on tables directly but through rules, that are mapped one-to-one
+    rule_dependents = _get_rule_dependents(pg_identify_object, dependency_pairs).cte('rule_dependents')
+    view_dependents = _get_view_dependents(pg_identify_object, pg_rewrite, rule_dependents).cte('view_dependents')
+
+    index_dependents = _get_index_dependents(pg_identify_object, dependency_pairs).cte('index_dependents')
 
     return union(
         select(foreign_key_constraint_dependents),
-        select(table_dependents)
-    )
+        select(table_dependents),
+        select(table_from_fk_dependents),
+        select(view_dependents),
+        select(index_dependents))
 
 
-def has_dependencies(referenced_object_id, engine, attnum=None):
+def has_dependents(referenced_object_id, engine, attnum=None):
     metadata = MetaData()
 
     pg_depend = _get_pg_depend_table(engine, metadata)
@@ -195,12 +247,14 @@ def _get_structured_result(dependency_graph_result):
         d['level'] = dependency_pair.level
         d['obj'] = {
             'objid': dependency_pair.objid,
-            'type': dependency_pair.objtype
+            'type': dependency_pair.objtype,
+            'name': dependency_pair.objname
         }
         d['parent_obj'] = {
             'objid': dependency_pair.refobjid,
             'type': dependency_pair.refobjtype,
-            'objsubid': (dependency_pair.refobjsubid if dependency_pair.refobjsubid != 0 else None)
+            'objsubid': (dependency_pair.refobjsubid if dependency_pair.refobjsubid != 0 else None),
+            'name': dependency_pair.refobjname
         }
         result.append(d)
 

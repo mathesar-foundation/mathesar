@@ -16,18 +16,19 @@ from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
-from db.dependents.dependents_utils import get_dependents_graph, has_dependencies
+from db.dependents.dependents_utils import get_dependents_graph, has_dependents
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
 from db.records.operations.select import get_records_with_default_order as db_get_records_with_default_order
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
+from db.schemas.operations.select import get_schema_description
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
 from db.tables.operations.move_columns import move_columns_between_related_tables
-from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
+from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid, get_table_description
 from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
 from db.tables.utils import get_primary_key_column
@@ -158,10 +159,29 @@ class Schema(DatabaseObject):
         except TypeError:
             return 'MISSING'
 
-    # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
-    def has_dependencies(self):
-        return True
+    def has_dependents(self):
+        return has_dependents(
+            self.oid,
+            self._sa_engine
+        )
+
+    # Returns only schema-scoped dependents on the top level
+    # However, returns dependents from other schemas for other
+    # objects down the graph.
+    # E.g: TableA from SchemaA depends on TableB from SchemaB
+    # SchemaA won't return as a dependent for SchemaB, however
+    # TableA will be a dependent of TableB which in turn depends on its schema
+    @property
+    def dependents(self):
+        return get_dependents_graph(
+            self.oid,
+            self._sa_engine
+        )
+
+    @property
+    def description(self):
+        return get_schema_description(self.oid, self._sa_engine)
 
     def update_sa_schema(self, update_params):
         return model_utils.update_sa_schema(self, update_params)
@@ -255,13 +275,16 @@ class Table(DatabaseObject, Relation):
     def sa_constraints(self):
         return self._sa_table.constraints
 
-    # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
-    def has_dependencies(self):
-        return has_dependencies(
+    def has_dependents(self):
+        return has_dependents(
             self.oid,
             self.schema._sa_engine
         )
+
+    @property
+    def description(self):
+        return get_table_description(self.oid, self._sa_engine)
 
     @property
     def dependents(self):
@@ -516,7 +539,7 @@ class Column(ReflectionManagerMixin, BaseModel):
 
     @property
     def has_dependents(self):
-        return has_dependencies(
+        return has_dependents(
             self.table.oid,
             self._sa_engine,
             self.attnum
