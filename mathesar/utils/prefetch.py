@@ -252,16 +252,15 @@ class Prefetcher(object):
                 else:
                     data_mapping[self.mapper(obj)] = obj
 
-
             t2 = time.time()
             logger.debug("Creating data_mapping for %s query took %.3f secs for the %s prefetcher.",
-                         model.__name__, t2-t1, name)
+                         model.__name__, t2 - t1, name)
             t1 = time.time()
             related_data = self.filter(data_mapping.keys(), data_mapping.values())
             related_data_len = len(related_data)
             t2 = time.time()
             logger.debug("Filtering for %s related objects for %s query took %.3f secs for the %s prefetcher.",
-                         related_data_len, model.__name__, t2-t1, name)
+                         related_data_len, model.__name__, t2 - t1, name)
             relation_mapping = collections.defaultdict(list)
 
             t1 = time.time()
@@ -282,7 +281,7 @@ class Prefetcher(object):
 
             t2 = time.time()
             logger.debug("Adding the related objects on the %s query took %.3f secs for the %s prefetcher.",
-                         model.__name__, t2-t1, name)
+                         model.__name__, t2 - t1, name)
             return dataset
         except Exception:
             logger.exception("Prefetch failed for %s prefetch on the %s model:", name, model.__name__)
