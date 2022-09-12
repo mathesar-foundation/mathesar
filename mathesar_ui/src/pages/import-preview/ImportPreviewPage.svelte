@@ -50,6 +50,11 @@
   let columns: Column[] = [];
   let records: Record<string, unknown>[] = [];
 
+  let columnProperties: Record<
+    Column['id'],
+    { selected: boolean; displayName: string }
+  > = {};
+
   function processColumns(
     _columns: Column[],
     abstractTypeMap: AbstractTypesMap,
@@ -75,6 +80,7 @@
     try {
       const response = await generateTablePreview(
         previewTableId,
+        // TODO: Send type_options and display_options to preview
         columns.map((column) => ({
           id: column.id,
           name: column.name,
@@ -102,6 +108,16 @@
       `/api/db/v0/tables/${previewTableId}/columns/?limit=500`,
     );
     columns = columnData.results;
+    columnProperties = columns.reduce(
+      (_columnProperties, column) => ({
+        ..._columnProperties,
+        [column.id]: {
+          selected: true,
+          displayName: column.name,
+        },
+      }),
+      {},
+    );
     return tableInfo;
   }
 
@@ -115,6 +131,11 @@
     return dataFileDetails;
   }
 
+  /**
+   * Preview table id will change,
+   * 1. whenever user redirects to a different preview
+   * 2. whenever user toggles first row as header checkbox
+   */
   async function onPreviewTableIdChange(_previewTableId: number) {
     const typeSuggestionPromise = getTypeSuggestionsForTable(_previewTableId);
     const tableDetails = await fetchTableInfo();
@@ -206,7 +227,13 @@
                 let:style
               >
                 <div {...htmlAttributes} {style} class="inherit-font-style">
-                  <PreviewColumn {processedColumn} />
+                  <PreviewColumn
+                    {processedColumn}
+                    bind:selected={columnProperties[processedColumn.id]
+                      .selected}
+                    bind:displayName={columnProperties[processedColumn.id]
+                      .displayName}
+                  />
                   <SheetCellResizer
                     columnIdentifierKey={processedColumn.id}
                     minColumnWidth={120}
@@ -254,7 +281,7 @@
 
 <style lang="scss">
   .table-preview-configurations {
-    --sheet-header-height: 64px;
+    --sheet-header-height: 5.25rem;
 
     .table-preview-content {
       border: 1px solid var(--color-gray-light);
