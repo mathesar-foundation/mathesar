@@ -113,12 +113,13 @@ def test_move_columns_moves_correct_data_from_rem_to_extract(extracted_remainder
     ]
     expect_tuple_sel = (
         select([*existing_extracted_table_columns, remainder.columns[moving_col]]).join(extracted)
+        # NOTE below distinct's purpose is unclear
         .distinct()
     )
     with engine.begin() as conn:
         expect_tuples = conn.execute(expect_tuple_sel).fetchall()
 
-    # move columns
+    # move columns from "remainder" to "extracted" table
     extracted_name = extracted.name
     remainder_name = remainder.name
     extracted_oid = get_oid_from_table(extracted_name, schema, engine)
@@ -132,7 +133,7 @@ def test_move_columns_moves_correct_data_from_rem_to_extract(extracted_remainder
         engine,
     )
 
-    # build actual tuple table
+    # reflect records in "extracted" table after move
     metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
     new_extracted = metadata.tables[f"{schema}.{extracted_name}"]
