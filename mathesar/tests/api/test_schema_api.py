@@ -22,7 +22,7 @@ def check_schema_response(
     assert response_schema['name'] == schema_name
     assert response_schema['database'] == test_db_name
     assert response_schema['description'] == schema_description
-    assert 'has_dependencies' in response_schema
+    assert 'has_dependents' in response_schema
     if check_schema_objects:
         engine = MOD_engine_cache(test_db_name)
         assert schema_name in get_mathesar_schemas(engine)
@@ -342,14 +342,14 @@ def test_schema_delete(create_schema, client):
     }
 
 
-def test_schema_dependencies(client, create_schema):
+def test_schema_dependents(client, create_schema):
     schema_name = 'NASA Schema Dependencies'
     schema = create_schema(schema_name)
 
     response = client.get(f'/api/db/v0/schemas/{schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
-    assert response_schema['has_dependencies'] is True
+    assert response_schema['has_dependents'] is False
 
 
 def test_schema_detail_404(client):

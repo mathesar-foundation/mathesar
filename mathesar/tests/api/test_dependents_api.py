@@ -1,8 +1,11 @@
 import pytest
 
 
-def _get_object_dependent_ids(dependents, object_id):
-    return [int(d['obj']['id']) for d in dependents if int(d['parent_obj']['id']) == object_id]
+def _get_object_dependent_ids(dependents, object_id, type):
+    return [
+        int(d['obj']['id'])
+        for d in dependents if int(d['parent_obj']['id']) == object_id and d['parent_obj']['type'] == type
+    ]
 
 
 def _get_constraint_ids(table_constraint_results):
@@ -44,7 +47,7 @@ def test_dependents_response(library_ma_tables, client):
     checkouts_id = library_ma_tables["Checkouts"].id
 
     items_dependents = client.get(f'/api/db/v0/tables/{items_id}/dependents/').json()
-    items_dependent_ids = _get_object_dependent_ids(items_dependents, items_id)
+    items_dependent_ids = _get_object_dependent_ids(items_dependents, items_id, 'table')
 
     items_constraints = client.get(f'/api/db/v0/tables/{items_id}/constraints/').json()['results']
     checkouts_constraints = client.get(f'/api/db/v0/tables/{checkouts_id}/constraints/').json()['results']
@@ -53,3 +56,15 @@ def test_dependents_response(library_ma_tables, client):
     checkouts_items_fkey_id = [c['id'] for c in checkouts_constraints if "Item" in c['name']]
 
     assert sorted(items_dependent_ids) == sorted(items_constraints_ids + [checkouts_id] + checkouts_items_fkey_id)
+
+
+def test_schema_dependents(library_ma_tables, client):
+    table_names = ['Authors', 'Checkouts', 'Items', 'Patrons', 'Publications', 'Publishers']
+    table_ids = [library_ma_tables[name].id for name in table_names]
+
+    schema_id = library_ma_tables['Authors'].schema.id
+    schema_dependents_graph = client.get(f'/api/db/v0/schemas/{schema_id}/dependents/').json()
+
+    schema_dependents_ids = _get_object_dependent_ids(schema_dependents_graph, schema_id, 'schema')
+
+    assert sorted(table_ids) == sorted(schema_dependents_ids)
