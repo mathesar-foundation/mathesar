@@ -6,6 +6,7 @@
     getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
   } from '@mathesar/stores/abstract-types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import type { ColumnWithAbstractType } from './utils';
 
   const dispatch = createEventDispatcher<{
@@ -58,4 +59,10 @@
   getLabel={(entry) => entry?.name ?? ''}
   autoSelect="none"
   on:change={(e) => selectAbstractType(e.detail)}
-/>
+  let:option
+  let:label
+>
+  <NameWithIcon icon={option.icon}>
+    {label}
+  </NameWithIcon>
+</Select>

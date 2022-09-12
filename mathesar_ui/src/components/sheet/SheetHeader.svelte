@@ -57,6 +57,12 @@
       background: var(--color-gray-lighter);
       font-size: var(--text-size-small);
       font-weight: 500;
+      overflow: hidden;
+    }
+
+    :global([data-sheet-element='cell'].inherit-font-style) {
+      font-size: inherit;
+      font-weight: inherit;
     }
   }
 </style>

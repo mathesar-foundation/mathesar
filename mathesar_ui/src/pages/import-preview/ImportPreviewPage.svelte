@@ -93,19 +93,15 @@
 
   async function fetchTableInfo() {
     if (previewTableId !== tableInfo?.id) {
-      const tableInfoPromise = getTable(previewTableId);
-      // TODO: Move this request to /api
-      const columnDataPromise = getAPI<PaginatedResponse<Column>>(
-        `/api/db/v0/tables/${previewTableId}/columns/?limit=500`,
-      );
-      const [table, columnData] = await Promise.all([
-        tableInfoPromise,
-        columnDataPromise,
-      ]);
-      tableInfo = table;
+      tableInfo = await getTable(previewTableId);
       tableName = tableInfo.name;
-      columns = columnData.results;
     }
+    // TODO: Move this request to /api
+    // Get `valid_target_types` in Table response
+    const columnData = await getAPI<PaginatedResponse<Column>>(
+      `/api/db/v0/tables/${previewTableId}/columns/?limit=500`,
+    );
+    columns = columnData.results;
     return tableInfo;
   }
 
@@ -200,53 +196,58 @@
         />
       </LabeledInput>
 
-      <Sheet columns={processedColumns} getColumnIdentifier={(c) => c.id}>
-        <SheetHeader>
-          {#each processedColumns as processedColumn (processedColumn.id)}
-            <SheetCell
-              columnIdentifierKey={processedColumn.id}
-              let:htmlAttributes
-              let:style
-            >
-              <div {...htmlAttributes} {style}>
-                <PreviewColumn {processedColumn} />
-                <SheetCellResizer columnIdentifierKey={processedColumn.id} />
-              </div>
-            </SheetCell>
-          {/each}
-        </SheetHeader>
+      <div class="table-preview-content">
+        <Sheet columns={processedColumns} getColumnIdentifier={(c) => c.id}>
+          <SheetHeader>
+            {#each processedColumns as processedColumn (processedColumn.id)}
+              <SheetCell
+                columnIdentifierKey={processedColumn.id}
+                let:htmlAttributes
+                let:style
+              >
+                <div {...htmlAttributes} {style} class="inherit-font-style">
+                  <PreviewColumn {processedColumn} />
+                  <SheetCellResizer
+                    columnIdentifierKey={processedColumn.id}
+                    minColumnWidth={120}
+                  />
+                </div>
+              </SheetCell>
+            {/each}
+          </SheetHeader>
 
-        {#each records as record (record)}
-          <SheetRow
-            style={{
-              position: 'relative',
-              height: 30,
-            }}
-            let:htmlAttributes
-            let:styleString
-          >
-            <div {...htmlAttributes} style={styleString}>
-              {#each processedColumns as processedColumn (processedColumn.id)}
-                <SheetCell
-                  columnIdentifierKey={processedColumn.id}
-                  let:htmlAttributes
-                  let:style
-                >
-                  <div {...htmlAttributes} {style}>
-                    <CellFabric
-                      columnFabric={processedColumn}
-                      value={record[processedColumn.column.name]}
-                      showAsSkeleton={previewRequestStatus?.state ===
-                        'processing'}
-                      disabled={true}
-                    />
-                  </div>
-                </SheetCell>
-              {/each}
-            </div>
-          </SheetRow>
-        {/each}
-      </Sheet>
+          {#each records as record (record)}
+            <SheetRow
+              style={{
+                position: 'relative',
+                height: 30,
+              }}
+              let:htmlAttributes
+              let:styleString
+            >
+              <div {...htmlAttributes} style={styleString}>
+                {#each processedColumns as processedColumn (processedColumn.id)}
+                  <SheetCell
+                    columnIdentifierKey={processedColumn.id}
+                    let:htmlAttributes
+                    let:style
+                  >
+                    <div {...htmlAttributes} {style}>
+                      <CellFabric
+                        columnFabric={processedColumn}
+                        value={record[processedColumn.column.name]}
+                        showAsSkeleton={previewRequestStatus?.state ===
+                          'processing'}
+                        disabled={true}
+                      />
+                    </div>
+                  </SheetCell>
+                {/each}
+              </div>
+            </SheetRow>
+          {/each}
+        </Sheet>
+      </div>
     </div>
   {/if}
 </LayoutWithHeader>
@@ -254,5 +255,11 @@
 <style lang="scss">
   .table-preview-configurations {
     --sheet-header-height: 64px;
+
+    .table-preview-content {
+      border: 1px solid var(--color-gray-light);
+      padding-bottom: 30px;
+      border-radius: 0.2rem;
+    }
   }
 </style>

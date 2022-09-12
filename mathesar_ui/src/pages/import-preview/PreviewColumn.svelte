@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { Dropdown } from '@mathesar-component-library';
+  import { Dropdown, TextInput } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/tables/columns';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
 
   export let processedColumn: {
     column: Column;
@@ -11,9 +12,13 @@
 </script>
 
 <div class="column">
-  <div>{processedColumn.column.name}</div>
-  <Dropdown>
-    <span slot="trigger">{processedColumn.abstractType.name}</span>
+  <div class="column-name">
+    <TextInput value={processedColumn.column.name} />
+  </div>
+  <Dropdown triggerClass="column-type" triggerAppearance="plain">
+    <NameWithIcon slot="trigger" icon={processedColumn.abstractType.icon}>
+      {processedColumn.abstractType.name}
+    </NameWithIcon>
     <AbstractTypeControl
       slot="content"
       column={{
@@ -28,8 +33,10 @@
   .column {
     flex-grow: 1;
 
-    > div {
+    > .column-name,
+    > :global(.column-type) {
       height: 32px;
+      width: 100%;
     }
   }
 </style>
