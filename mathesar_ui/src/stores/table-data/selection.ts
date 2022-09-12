@@ -179,9 +179,7 @@ export class Selection {
 
     if (isCompleteColumnSelected) {
       // Clear the selection - deselect the column
-      // Replace with deselecting a single column
       this.resetSelection();
-      // this.clearSelection(column);
     } else {
       const cells: Cell[] = [];
       this.allRows.forEach((row) => {
@@ -191,8 +189,8 @@ export class Selection {
       // Clearing the selection
       // since we do not have cmd+click to select
       // disjointed cells
+      this.resetSelection();
       this.selectMultipleCells(cells);
-      this.columnsDataStore.get();
     }
   }
 
@@ -215,6 +213,4 @@ export class Selection {
       this.selectMultipleCells(cells);
     }
   }
-
-  private clearSelection(column: Column) {}
 }
