@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/tables';
   import {
     ControlledModal,
     CancelOrProceedButtonPair,
@@ -9,26 +8,33 @@
   import type { ExtractColumnsModalController } from './ExtractColumnsModalController';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
-  import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
+  import { getLinkedTables } from './columnExtractionUtils';
+  import SelectLinkedTable from './SelectLinkedTable.svelte';
+  import type { LinkedTable } from './columnExtractionTypes';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let controller: ExtractColumnsModalController;
 
-  let table: TableEntry | undefined = undefined;
+  let linkedTable: LinkedTable | undefined = undefined;
   let tableName = '';
   let newFkColumnName = '';
 
-  $: ({ processedColumns } = $tabularData);
+  $: ({ processedColumns, constraintsDataStore } = $tabularData);
+  $: ({ constraints } = $constraintsDataStore);
   $: availableColumns = [...$processedColumns.values()];
   $: ({ targetType, columns } = controller);
   $: canProceed = true;
   $: proceedButtonLabel =
     $targetType === 'existingTable' ? 'Move Columns' : 'Create Table';
-  $: tables = [...$tablesDataStore.data.values()];
+  $: linkedTables = getLinkedTables({
+    constraints,
+    columns: $processedColumns,
+    tables: $tablesDataStore.data,
+  });
 
   function init() {
     tableName = '';
@@ -75,7 +81,7 @@
             <span class="title">Linked Table</span>
             <span class="help" />
           </span>
-          <SelectTable {tables} bind:table />
+          <SelectLinkedTable {linkedTables} bind:value={linkedTable} />
         </LabeledInput>
       </FormField>
     {/if}
