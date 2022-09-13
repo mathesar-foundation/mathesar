@@ -1,6 +1,5 @@
 import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-
 import {
   getAPI,
   postAPI,
@@ -9,11 +8,10 @@ import {
   patchAPI,
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-
 import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
 import type { TableEntry, MinimalColumnDetails } from '@mathesar/api/tables';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar-component-library';
+import { CancellablePromise } from '@mathesar-component-library';
 
 import { currentSchemaId } from './schemas';
 
@@ -132,15 +130,67 @@ export function getTablesStoreForSchema(
   return store;
 }
 
+/**
+ * TODO: Use a dedicated higher level Tables store and
+ * remove this function.
+ */
+function findSchemaStoreForTable(id: TableEntry['id']) {
+  return [...schemaTablesStoreMap.values()].find((entry) =>
+    get(entry).data.has(id),
+  );
+}
+
+function findAndUpdateTableStore(id: TableEntry['id'], tableEntry: TableEntry) {
+  findSchemaStoreForTable(id)?.update((tableStoreData) => {
+    const existing = tableStoreData.data.get(id);
+    tableStoreData.data.set(id, {
+      ...(existing ?? {}),
+      ...tableEntry,
+    });
+    return {
+      ...tableStoreData,
+      data: new Map(tableStoreData.data),
+    };
+  });
+}
+
 export function deleteTable(id: number): CancellablePromise<TableEntry> {
-  return deleteAPI(`/api/db/v0/tables/${id}/`);
+  const promise = deleteAPI<TableEntry>(`/api/db/v0/tables/${id}/`);
+  return new CancellablePromise(
+    (resolve, reject) => {
+      void promise.then((value) => {
+        findSchemaStoreForTable(id)?.update((tableStoreData) => {
+          tableStoreData.data.delete(id);
+          return {
+            ...tableStoreData,
+            data: new Map(tableStoreData.data),
+          };
+        });
+        return resolve(value);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
 }
 
 export function renameTable(
   id: number,
   name: string,
 ): CancellablePromise<TableEntry> {
-  return patchAPI(`/api/db/v0/tables/${id}/`, { name });
+  const promise = patchAPI<TableEntry>(`/api/db/v0/tables/${id}/`, { name });
+  return new CancellablePromise(
+    (resolve, reject) => {
+      void promise.then((value) => {
+        findAndUpdateTableStore(id, value);
+        return resolve(value);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
 }
 
 export function createTable(
@@ -150,11 +200,52 @@ export function createTable(
     dataFiles?: [number, ...number[]];
   },
 ): CancellablePromise<TableEntry> {
-  return postAPI<TableEntry>('/api/db/v0/tables/', {
+  const promise = postAPI<TableEntry>('/api/db/v0/tables/', {
     schema,
     name: tableArgs.name,
     data_files: tableArgs.dataFiles,
   });
+  return new CancellablePromise(
+    (resolve, reject) => {
+      void promise.then((value) => {
+        findAndUpdateTableStore(value.schema, value);
+        schemaTablesStoreMap.get(value.schema)?.update((existing) => {
+          const data = new Map(existing.data);
+          data.set(value.id, value);
+          return {
+            ...existing,
+            data,
+          };
+        });
+        return resolve(value);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
+}
+
+export function patchTable(
+  id: TableEntry['id'],
+  patch: {
+    name?: TableEntry['name'];
+    import_verified?: TableEntry['import_verified'];
+    columns?: MinimalColumnDetails[];
+  },
+): CancellablePromise<TableEntry> {
+  const promise = patchAPI<TableEntry>(`/api/db/v0/tables/${id}/`, patch);
+  return new CancellablePromise(
+    (resolve, reject) => {
+      void promise.then((value) => {
+        findAndUpdateTableStore(id, value);
+        return resolve(value);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
 }
 
 /**
@@ -187,17 +278,6 @@ export function generateTablePreview(
   records: Record<string, unknown>[];
 }> {
   return postAPI(`/api/db/v0/tables/${id}/previews/`, { columns });
-}
-
-export function patchTable(
-  id: TableEntry['id'],
-  patch: {
-    name?: TableEntry['name'];
-    import_verified?: TableEntry['import_verified'];
-    columns?: MinimalColumnDetails[];
-  },
-): CancellablePromise<TableEntry> {
-  return patchAPI(`/api/db/v0/tables/${id}/`, patch);
 }
 
 export const tables: Readable<DBTablesStoreData> = derived(
