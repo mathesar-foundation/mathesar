@@ -11,13 +11,14 @@
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
+  import Form from '@mathesar/components/Form.svelte';
+  import FormField from '@mathesar/components/FormField.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let controller: ExtractColumnsModalController;
 
   let table: TableEntry | undefined = undefined;
-  // TODO init
   let tableName = '';
   let newFkColumnName = '';
 
@@ -29,10 +30,19 @@
     $targetType === 'existingTable' ? 'Move Columns' : 'Create Table';
   $: tables = [...$tablesDataStore.data.values()];
 
+  function init() {
+    tableName = '';
+    newFkColumnName = '';
+  }
+
+  function handleTableNameUpdate() {
+    newFkColumnName = tableName;
+  }
+
   async function handleSave() {}
 </script>
 
-<ControlledModal {controller}>
+<ControlledModal {controller} on:open={init}>
   <span slot="title">
     {#if $targetType === 'existingTable'}
       Move Columns to Linked Table
@@ -41,29 +51,48 @@
     {/if}
   </span>
 
-  {#if $targetType === 'newTable'}
-    <LabeledInput layout="stacked">
-      <span slot="label">Table Name</span>
-      <TextInput bind:value={tableName} />
-    </LabeledInput>
+  <Form>
+    {#if $targetType === 'newTable'}
+      <FormField>
+        <LabeledInput layout="stacked">
+          <span slot="label">Name of New Table</span>
+          <TextInput bind:value={tableName} on:input={handleTableNameUpdate} />
+        </LabeledInput>
+      </FormField>
 
-    <LabeledInput layout="stacked">
-      <span slot="label">Link Column Name</span>
-      <TextInput bind:value={newFkColumnName} />
-    </LabeledInput>
-  {/if}
+      <FormField>
+        <LabeledInput layout="stacked">
+          <span slot="label">Name of New Linking Column In This Table</span>
+          <TextInput bind:value={newFkColumnName} />
+        </LabeledInput>
+      </FormField>
+    {/if}
 
-  {#if $targetType === 'existingTable'}
-    <LabeledInput layout="stacked">
-      <span slot="label">Linked Table</span>
-      <SelectTable {tables} bind:table />
-    </LabeledInput>
-  {/if}
+    {#if $targetType === 'existingTable'}
+      <FormField>
+        <LabeledInput layout="stacked">
+          <span slot="label" class="label">
+            <span class="title">Linked Table</span>
+            <span class="help" />
+          </span>
+          <SelectTable {tables} bind:table />
+        </LabeledInput>
+      </FormField>
+    {/if}
 
-  <LabeledInput layout="stacked">
-    <span slot="label">Columns to Move</span>
-    <SelectProcessedColumns {availableColumns} bind:columns={$columns} />
-  </LabeledInput>
+    <FormField>
+      <LabeledInput layout="stacked">
+        <span slot="label" class="label">
+          <span class="title">Columns to Move</span>
+          <span class="help">
+            These columns will be removed from the current table and moved to
+            the linked table.
+          </span>
+        </span>
+        <SelectProcessedColumns {availableColumns} bind:columns={$columns} />
+      </LabeledInput>
+    </FormField>
+  </Form>
 
   <CancelOrProceedButtonPair
     slot="footer"
@@ -73,3 +102,18 @@
     {canProceed}
   />
 </ControlledModal>
+
+<style>
+  .label {
+    display: block;
+  }
+  .title {
+    display: block;
+  }
+  .help {
+    display: block;
+    font-size: var(--text-size-small);
+    color: var(--color-text-muted);
+    margin-top: 0.5rem;
+  }
+</style>
