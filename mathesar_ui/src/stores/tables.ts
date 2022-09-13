@@ -159,7 +159,7 @@ export function splitTable(
   extract_columns: number[],
   extracted_table_name: string,
 ): CancellablePromise<SplitTableResponse> {
-  return postAPI(`/api/db/v0/tables/${id}/split_table`, {
+  return postAPI(`/api/db/v0/tables/${id}/split_table/`, {
     extract_columns,
     extracted_table_name,
   });
@@ -170,7 +170,7 @@ export function moveColumns(
   move_columns: number[],
   target_table: number,
 ): CancellablePromise<null> {
-  return postAPI(`/api/db/v0/tables/${id}/move_columns`, {
+  return postAPI(`/api/db/v0/tables/${id}/move_columns/`, {
     move_columns,
     target_table,
   });
