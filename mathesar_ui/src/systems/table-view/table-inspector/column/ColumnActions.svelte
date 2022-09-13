@@ -11,15 +11,15 @@
     ColumnsDataStore,
     ProcessedColumn,
   } from '@mathesar/stores/table-data/types';
-  import type { ColumnExtractionTargetType } from './columnExtractionTypes';
-  import ExtractColumnsModal from './ExtractColumnsModal.svelte';
+  import ExtractColumnsModal from './column-extraction/ExtractColumnsModal.svelte';
+  import { ExtractColumnsModalController } from './column-extraction/ExtractColumnsModalController';
 
   export let columnsDataStore: ColumnsDataStore;
   export let columns: ProcessedColumn[];
 
-  let columnExtractionTargetType: ColumnExtractionTargetType = 'newTable';
-
-  const extractColumns = modal.spawnModalController();
+  const extractColumns = new ExtractColumnsModalController(
+    modal.getPropsForNewModal(),
+  );
 
   $: column = columns.length === 1 ? columns[0] : undefined;
   $: s = columns.length > 1 ? 's' : '';
@@ -38,12 +38,14 @@
   }
 
   function handleMoveColumnsToNewLinkedTable() {
-    columnExtractionTargetType = 'newTable';
+    extractColumns.targetType.set('newTable');
+    extractColumns.columns.set(columns);
     extractColumns.open();
   }
 
   function handleMoveColumnsToExistingLinkedTable() {
-    columnExtractionTargetType = 'existingTable';
+    extractColumns.targetType.set('existingTable');
+    extractColumns.columns.set(columns);
     extractColumns.open();
   }
 </script>
@@ -68,10 +70,7 @@
   </Button>
 </div>
 
-<ExtractColumnsModal
-  controller={extractColumns}
-  targetType={columnExtractionTargetType}
-/>
+<ExtractColumnsModal controller={extractColumns} />
 
 <style>
   .actions-container {

@@ -2,6 +2,7 @@
   import { Select } from '@mathesar-component-library';
   import type { SelectProps } from '@mathesar-component-library/types';
   import type { TableEntry } from '@mathesar/api/tables';
+  import TableName from './TableName.svelte';
 
   type $$Events = Select<TableEntry | undefined>['$$events_def'];
 
@@ -16,7 +17,8 @@
 
 <Select
   options={tableList}
-  labelKey="name"
+  getLabel={(table) =>
+    table ? { component: TableName, props: { table } } : ''}
   valuesAreEqual={(a, b) => a?.id === b?.id}
   {autoSelect}
   bind:value={table}
