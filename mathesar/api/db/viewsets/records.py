@@ -199,7 +199,6 @@ class RecordViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
-        print("yes")
         table = get_table_or_404(table_pk)
         if table.get_record(pk) is None:
             raise generic_api_exceptions.NotFoundAPIException(NotFound, message="Record doesn't exist")
