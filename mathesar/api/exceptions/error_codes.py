@@ -44,7 +44,7 @@ class ErrorCodes(Enum):
     URLInvalidContentType = 4406
     UnknownDBType = 4408
     InvalidDateError = 4413
-    InvalidDateFormatError= 4414
+    InvalidDateFormatError = 4414
     InvalidLinkChoice = 4409
     IncompatibleFractionDigitValues = 4410
     UnsupportedConstraint = 4411
