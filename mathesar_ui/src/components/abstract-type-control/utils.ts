@@ -18,6 +18,11 @@ export interface ColumnWithAbstractType
   abstractType: AbstractType;
 }
 
+export type ColumnTypeOptionsSaveArgs = Pick<
+  ColumnWithAbstractType,
+  'type' | 'type_options' | 'display_options'
+>;
+
 export function getFormValueStore(
   form: FormBuildConfiguration | undefined,
 ): FormBuildConfiguration['values'] {

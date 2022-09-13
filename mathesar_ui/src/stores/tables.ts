@@ -182,9 +182,7 @@ export function getTypeSuggestionsForTable(
 
 export function generateTablePreview(
   id: TableEntry['id'],
-  // TODO: Update API to not require name for previews
-  // Needs both type_options and display_options
-  columns: Pick<MinimalColumnDetails, 'id' | 'name' | 'type'>[],
+  columns: MinimalColumnDetails[],
 ): CancellablePromise<{
   records: Record<string, unknown>[];
 }> {

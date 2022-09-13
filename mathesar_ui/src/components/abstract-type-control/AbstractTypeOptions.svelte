@@ -12,6 +12,7 @@
     AbstractTypeDbConfig,
     AbstractTypeDisplayConfig,
   } from '@mathesar/stores/abstract-types/types';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import { constructDbForm, constructDisplayForm } from './utils';
   import type { ColumnWithAbstractType } from './utils';
@@ -87,8 +88,7 @@
     {#if dbForm}
       <div class="option-form db-opts">
         <div class="header">
-          <Icon {...iconDatabase} />
-          <span>Database Options</span>
+          <NameWithIcon icon={iconDatabase}>Database Options</NameWithIcon>
         </div>
         <div class="content">
           <FormBuilder form={dbForm} />
@@ -98,8 +98,9 @@
     {#if displayForm}
       <div class="option-form display-opts">
         <div class="header">
-          <Icon {...iconDisplayOptions} />
-          <span>Formatting Options</span>
+          <NameWithIcon icon={iconDisplayOptions}>
+            Formatting Options
+          </NameWithIcon>
         </div>
         <div class="content">
           <FormBuilder form={displayForm} />

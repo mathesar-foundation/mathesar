@@ -83,14 +83,15 @@
 
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
 
-  async function loadTablePreview() {
+  async function loadTablePreview(_columns: Column[]) {
     const response = await generateTablePreview(
       previewTableId,
-      // TODO: Send type_options and display_options to preview
-      columns.map((column) => ({
+      _columns.map((column) => ({
         id: column.id,
         name: column.name,
         type: column.type,
+        type_options: column.type_options,
+        display_options: column.display_options,
       })),
     );
     records = response.records;
@@ -166,7 +167,7 @@
         type: typeSuggestions[column.name] ?? column.type,
       }));
 
-      const previewPromise = loadTablePreview();
+      const previewPromise = loadTablePreview(columns);
       await Promise.all([dataFileDetailsPromise, previewPromise]);
       previewRequestStatus = { state: 'success' };
     } catch (err) {
@@ -210,6 +211,17 @@
         };
       }
     }
+  }
+
+  async function updateTypeRelatedOptions(updatedColumn: Column) {
+    const newColumns = columns.map((column) => {
+      if (column.id === updatedColumn.id) {
+        return updatedColumn;
+      }
+      return column;
+    });
+    await loadTablePreview(newColumns);
+    columns = newColumns;
   }
 </script>
 
@@ -270,6 +282,7 @@
                   <PreviewColumn
                     {isLoading}
                     {processedColumn}
+                    {updateTypeRelatedOptions}
                     bind:selected={columnProperties[processedColumn.id]
                       .selected}
                     bind:displayName={columnProperties[processedColumn.id]
@@ -356,7 +369,7 @@
         margin-right: auto;
         border-top: 1px solid var(--color-gray-light);
         border-left: 1px solid var(--color-gray-light);
-        // TODO: This should be min of 100%, 900px
+        // TODO: This should be min of (100%, 900px)
         min-width: 900px;
       }
     }

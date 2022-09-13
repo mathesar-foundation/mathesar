@@ -1,1 +1,4 @@
-export type { ColumnWithAbstractType } from './utils';
+export type {
+  ColumnWithAbstractType,
+  ColumnTypeOptionsSaveArgs,
+} from './utils';

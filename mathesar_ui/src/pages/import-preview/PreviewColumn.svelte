@@ -13,6 +13,9 @@
   };
   export let selected: boolean;
   export let displayName: string;
+  export let updateTypeRelatedOptions: (options: Column) => Promise<unknown>;
+
+  $: disabled = processedColumn.column.primary_key || isLoading;
 
   // TODO: Also validate with other column names
   function checkAndSetNameIfEmpty() {
@@ -24,29 +27,30 @@
 
 <div class="column">
   <div class="column-name">
-    <Checkbox
-      bind:checked={selected}
-      disabled={processedColumn.column.primary_key || isLoading}
-    />
+    <Checkbox bind:checked={selected} {disabled} />
     <TextInput
       disabled={isLoading}
       bind:value={displayName}
       on:blur={checkAndSetNameIfEmpty}
     />
   </div>
-  <Dropdown
-    disabled={isLoading}
-    triggerClass="column-type"
-    triggerAppearance="plain"
-  >
+  <Dropdown {disabled} triggerClass="column-type" triggerAppearance="plain">
     <NameWithIcon slot="trigger" icon={processedColumn.abstractType.icon}>
       {processedColumn.abstractType.name}
     </NameWithIcon>
-    <div slot="content" class="type-options-content">
+    <div slot="content" class="type-options-content" let:close>
       <AbstractTypeControl
         column={{
           ...processedColumn.column,
           abstractType: processedColumn.abstractType,
+        }}
+        on:cancel={close}
+        save={async (opts) => {
+          await updateTypeRelatedOptions({
+            ...processedColumn.column,
+            ...opts,
+          });
+          close();
         }}
       />
     </div>

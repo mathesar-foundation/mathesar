@@ -6,13 +6,17 @@
   } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
   import type { RequestStatus } from '@mathesar/utils/api';
-  import type { ColumnWithAbstractType } from './utils';
+  import type {
+    ColumnWithAbstractType,
+    ColumnTypeOptionsSaveArgs,
+  } from './utils';
   import AbstractTypeOptions from './AbstractTypeOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
 
   const dispatch = createEventDispatcher();
 
   export let column: ColumnWithAbstractType;
+  export let save: (options: ColumnTypeOptionsSaveArgs) => Promise<unknown>;
 
   let selectedAbstractType: ColumnWithAbstractType['abstractType'] =
     column.abstractType;
@@ -54,24 +58,21 @@
   function cancel() {
     resetAbstractType(column);
     typeChangeState = { state: 'success' };
-    dispatch('close');
+    dispatch('cancel');
   }
 
   async function onSave() {
     typeChangeState = { state: 'processing' };
     try {
-      if (selectedDbType) {
-        /**
-         * {
-         *  type: selectedDbType,
-         *  type_options: typeOptions,
-         *  display_options: displayOptions,
-         * }
-         */
-      }
+      await save({
+        type: selectedDbType,
+        type_options: typeOptions,
+        display_options: displayOptions,
+      });
     } catch (err) {
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      toast.error(`Unable to change column type. ${err.message as string}`);
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unable to change column type';
+      toast.error(errorMessage);
     }
   }
 
