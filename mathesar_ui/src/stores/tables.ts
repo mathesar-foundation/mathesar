@@ -170,7 +170,7 @@ export function moveColumns(
   move_columns: number[],
   target_table: number,
 ): CancellablePromise<null> {
-  return postAPI(`/api/db/v0/tables/${id}/move_table`, {
+  return postAPI(`/api/db/v0/tables/${id}/move_columns`, {
     move_columns,
     target_table,
   });
