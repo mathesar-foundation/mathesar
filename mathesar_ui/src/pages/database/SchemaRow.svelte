@@ -1,6 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Icon, Button } from '@mathesar-component-library';
+  import {
+    Icon,
+    Button,
+    WithViewMoreOrLessButton,
+  } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { deleteSchema } from '@mathesar/stores/schemas';
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
@@ -14,6 +18,8 @@
 
   export let database: Database;
   export let schema: SchemaEntry;
+
+  const MAX_DESCRIPTION_LENGTH_IN_LESS_VIEW = 80;
 
   $: href = getSchemaPageUrl(database.name, schema.id);
   $: isDefault = schema.name === 'public';
@@ -66,7 +72,15 @@
         </div>
       {/if}
     </div>
-    <p class="description">Description</p>
+    {#if schema.description}
+      <WithViewMoreOrLessButton
+        content={schema.description}
+        maxLength={MAX_DESCRIPTION_LENGTH_IN_LESS_VIEW}
+      >
+        <p class="description" slot="truncatedText" let:text>{text}</p>
+        <p class="description" slot="completeText" let:text>{text}</p>
+      </WithViewMoreOrLessButton>
+    {/if}
   </div>
   {#if !isLocked}
     <div class="controls">
