@@ -83,24 +83,49 @@
 
 {#if dbForm || displayForm}
   <div class="type-options">
-    <div class="type-options-content">
-      {#if dbForm}
-        <div>
+    <DbTypeIndicator type={selectedDbType} />
+    {#if dbForm}
+      <div class="option-form db-opts">
+        <div class="header">
           <Icon {...iconDatabase} />
           <span>Database Options</span>
         </div>
-        <FormBuilder form={dbForm} />
-        {#if column.type !== selectedDbType}
-          New Db type: <DbTypeIndicator type={selectedDbType} />
-        {/if}
-      {/if}
-      {#if displayForm}
-        <div>
+        <div class="content">
+          <FormBuilder form={dbForm} />
+        </div>
+      </div>
+    {/if}
+    {#if displayForm}
+      <div class="option-form display-opts">
+        <div class="header">
           <Icon {...iconDisplayOptions} />
           <span>Formatting Options</span>
         </div>
-        <FormBuilder form={displayForm} />
-      {/if}
-    </div>
+        <div class="content">
+          <FormBuilder form={displayForm} />
+        </div>
+      </div>
+    {/if}
   </div>
+{:else}
+  <DbTypeIndicator type={selectedDbType} />
 {/if}
+
+<style lang="scss">
+  .type-options {
+    .option-form {
+      margin-top: 0.5rem;
+
+      .header {
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+        padding: 0.4rem;
+        border-bottom: 1px solid var(--color-gray-medium);
+      }
+
+      .content {
+        padding: 0.4rem;
+      }
+    }
+  }
+</style>

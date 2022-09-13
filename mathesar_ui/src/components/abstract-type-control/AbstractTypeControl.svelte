@@ -9,7 +9,6 @@
   import type { ColumnWithAbstractType } from './utils';
   import AbstractTypeOptions from './AbstractTypeOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
-  import DbTypeIndicator from './DbTypeIndicator.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -83,9 +82,6 @@
 </script>
 
 <div class="column-type-menu">
-  Current Db Type: <DbTypeIndicator type={column.type} />
-
-  <h5 class="menu-header">Set Column Type</h5>
   <AbstractTypeSelector
     {selectedAbstractType}
     {column}
@@ -105,18 +101,24 @@
     {/key}
   {/if}
 
-  <CancelOrProceedButtonPair
-    onProceed={onSave}
-    onCancel={cancel}
-    isProcessing={typeChangeState?.state === 'processing'}
-    canProceed={!isSaveDisabled}
-    proceedButton={{ label: 'Save' }}
-    size="small"
-  />
+  <div class="footer">
+    <CancelOrProceedButtonPair
+      onProceed={onSave}
+      onCancel={cancel}
+      isProcessing={typeChangeState?.state === 'processing'}
+      canProceed={!isSaveDisabled}
+      proceedButton={{ label: 'Save' }}
+      size="small"
+    />
+  </div>
 </div>
 
 <style lang="scss">
   .column-type-menu {
-    padding: 0.3125rem 0.75rem;
+    padding: 0.75rem;
+
+    .footer {
+      margin-top: 1rem;
+    }
   }
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Select } from '@mathesar-component-library';
+  import { Select, LabeledInput } from '@mathesar-component-library';
   import {
     currentDbAbstractTypes,
     getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
@@ -53,16 +53,18 @@
   }
 </script>
 
-<Select
-  options={allowedTypeConversions}
-  value={selectedAbstractType}
-  getLabel={(entry) => entry?.name ?? ''}
-  autoSelect="none"
-  on:change={(e) => selectAbstractType(e.detail)}
-  let:option
-  let:label
->
-  <NameWithIcon icon={option.icon}>
-    {label}
-  </NameWithIcon>
-</Select>
+<LabeledInput label="Column Data Type" layout={'stacked'}>
+  <Select
+    options={allowedTypeConversions}
+    value={selectedAbstractType}
+    getLabel={(entry) => entry?.name ?? ''}
+    autoSelect="none"
+    on:change={(e) => selectAbstractType(e.detail)}
+    let:option
+    let:label
+  >
+    <NameWithIcon icon={option.icon}>
+      {label}
+    </NameWithIcon>
+  </Select>
+</LabeledInput>

@@ -42,13 +42,14 @@
     <NameWithIcon slot="trigger" icon={processedColumn.abstractType.icon}>
       {processedColumn.abstractType.name}
     </NameWithIcon>
-    <AbstractTypeControl
-      slot="content"
-      column={{
-        ...processedColumn.column,
-        abstractType: processedColumn.abstractType,
-      }}
-    />
+    <div slot="content" class="type-options-content">
+      <AbstractTypeControl
+        column={{
+          ...processedColumn.column,
+          abstractType: processedColumn.abstractType,
+        }}
+      />
+    </div>
   </Dropdown>
 </div>
 
@@ -74,5 +75,10 @@
         margin-right: 0.5rem;
       }
     }
+  }
+
+  .type-options-content {
+    min-width: 18rem;
+    max-width: 22rem;
   }
 </style>
