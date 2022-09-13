@@ -1196,6 +1196,47 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     _check_columns(response_json['columns'], column_data)
 
 
+def test_table_patch_columns_invalid_display_options(create_data_types_table, client):
+    table_name = 'PATCH columns 101'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data(table)
+    # despite its name, the last column is of type text
+    display_options = {"use_grouping": "auto"}
+
+    column_data[-1]['display_options'] = display_options
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    response_json = response.json()
+
+    assert response.status_code == 200
+    # TODO This is exemplifies the current behavior, but the behavior
+    # itself may not be optimal
+    assert response_json['columns'][-1]['display_options'] == {}
+
+
+def test_table_patch_columns_type_plus_display_options(create_data_types_table, client):
+    table_name = 'PATCH columns 102'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data(table)
+    # despite its name, the last column is of type text
+    display_options = {"use_grouping": "auto"}
+    column_data[-1].update(
+        {'type': PostgresType.NUMERIC.id, 'display_options': display_options}
+    )
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    response_json = response.json()
+
+    assert response.status_code == 200
+    assert response_json['columns'][-1]['type'] == PostgresType.NUMERIC.id
+    for k, v in display_options.items():
+        assert response_json['columns'][-1]['display_options'][k] == v
+
+
 def test_table_patch_columns_same_name_type_drop(create_data_types_table, client):
     table_name = 'PATCH columns 13'
     table = create_data_types_table(table_name)

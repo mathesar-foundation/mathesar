@@ -185,7 +185,7 @@ def _validate_columns_for_batch_update(table, column_data):
     ALLOWED_KEYS = ['attnum', 'name', 'type', 'type_options', 'delete']
     for single_column_data in column_data:
         if 'attnum' not in single_column_data.keys():
-            raise ValueError(f'Key "attnum" is required')
+            raise ValueError('Key "attnum" is required')
         for key in single_column_data.keys():
             if key not in ALLOWED_KEYS:
                 allowed_key_list = ', '.join(ALLOWED_KEYS)
