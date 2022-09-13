@@ -3,6 +3,7 @@ import mathesar.api.exceptions.generic_exceptions.base_exceptions as generic_api
 import re
 
 from db.records.operations import group
+from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.base import Table
 from mathesar.utils.preview import column_alias_from_preview_template
 
@@ -21,7 +22,11 @@ def get_table_or_404(pk):
     try:
         table = Table.objects.get(id=pk)
     except Table.DoesNotExist:
-        raise generic_api_exceptions.NotFoundAPIException(NotFound, message="Table doesn't exist")
+        raise generic_api_exceptions.NotFoundAPIException(
+            NotFound,
+            error_code=ErrorCodes.TableNotFound.value,
+            message="Table doesn't exist"
+            )
     return table
 
 

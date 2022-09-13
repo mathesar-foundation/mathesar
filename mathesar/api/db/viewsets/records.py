@@ -4,6 +4,7 @@ from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
+from mathesar.api.exceptions.error_codes import ErrorCodes
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as generic_api_exceptions
 from db.functions.exceptions import (
@@ -201,7 +202,11 @@ class RecordViewSet(viewsets.ViewSet):
     def destroy(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
         if table.get_record(pk) is None:
-            raise generic_api_exceptions.NotFoundAPIException(NotFound, message="Record doesn't exist")
+            raise generic_api_exceptions.NotFoundAPIException(
+                NotFound,
+                error_code=ErrorCodes.RecordNotFound.value,
+                message="Record doesn't exist"
+                )
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
