@@ -1,12 +1,13 @@
 .multi-select-trigger {
-  --spacing: 0.15em;
+  --spacing: 0.2em;
   --spacing-2: calc(2 * var(--spacing));
   display: flex;
   align-items: center;
   justify-content: space-between;
   border: solid 0.02em #ddd;
+  border-radius: 0.25rem;
   padding: var(--spacing);
-  min-height: 1.5em;
+  min-height: 2.37em;
 
   .selected-values {
     display: flex;
