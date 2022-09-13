@@ -1,7 +1,11 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { router } from 'tinro';
-  import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
+  import {
+    getImportPreviewPageUrl,
+    getTablePageUrl,
+    getSchemaPageUrl,
+  } from '@mathesar/routes/urls';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import {
     Sheet,
@@ -16,6 +20,7 @@
     LabeledInput,
     TextInput,
     Spinner,
+    CancelOrProceedButtonPair,
   } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Column } from '@mathesar/api/tables/columns';
@@ -25,6 +30,7 @@
     getTable,
     getTypeSuggestionsForTable,
     generateTablePreview,
+    patchTable,
     deleteTable,
     createTable,
   } from '@mathesar/stores/tables';
@@ -34,7 +40,9 @@
   } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import { iconDelete } from '@mathesar/icons';
   import { getCellCap } from '@mathesar/components/cell-fabric/utils';
+  import { toast } from '@mathesar/stores/toast';
   import PreviewColumn from './PreviewColumn.svelte';
 
   export let database: Database;
@@ -60,6 +68,10 @@
     headerUpdateRequestStatus?.state === 'processing';
   $: showTableSkeleton =
     isLoading || typeChangeRequestStatus?.state === 'processing';
+  $: canProceed =
+    !showTableSkeleton &&
+    previewRequestStatus?.state !== 'failure' &&
+    headerUpdateRequestStatus?.state !== 'failure';
 
   let columnProperties: Record<
     Column['id'],
@@ -236,6 +248,41 @@
       throw err;
     }
   }
+
+  function handleCancel() {
+    void deleteTable(previewTableId).catch((err) => {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unable to cancel import';
+      toast.error(errorMessage);
+    });
+    router.goto(getSchemaPageUrl(database.name, schema.id), true);
+  }
+
+  async function finishImport() {
+    try {
+      await patchTable(previewTableId, {
+        name: tableName,
+        import_verified: true,
+        columns: columns
+          .filter((column) => columnProperties[column.id]?.selected)
+          .map((column) => ({
+            id: column.id,
+            name: columnProperties[column.id].displayName,
+            type: column.type,
+            type_options: column.type_options,
+            display_options: column.display_options,
+          })),
+      });
+      router.goto(
+        getTablePageUrl(database.name, schema.id, previewTableId),
+        true,
+      );
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unable to save table';
+      toast.error(errorMessage);
+    }
+  }
 </script>
 
 <LayoutWithHeader>
@@ -341,6 +388,18 @@
           {/each}
         </Sheet>
       </div>
+
+      <div class="footer">
+        {#if !isLoading}
+          <CancelOrProceedButtonPair
+            onCancel={handleCancel}
+            onProceed={finishImport}
+            cancelButton={{ icon: iconDelete }}
+            proceedButton={{ label: 'Confirm & create table' }}
+            {canProceed}
+          />
+        {/if}
+      </div>
     {/if}
   </div>
 </LayoutWithHeader>
@@ -385,6 +444,10 @@
         // TODO: This should be min of (100%, 900px)
         min-width: 900px;
       }
+    }
+
+    .footer {
+      margin: 1.6rem auto;
     }
   }
 </style>

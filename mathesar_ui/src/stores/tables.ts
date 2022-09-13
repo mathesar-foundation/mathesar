@@ -189,6 +189,17 @@ export function generateTablePreview(
   return postAPI(`/api/db/v0/tables/${id}/previews/`, { columns });
 }
 
+export function patchTable(
+  id: TableEntry['id'],
+  patch: {
+    name?: TableEntry['name'];
+    import_verified?: TableEntry['import_verified'];
+    columns?: MinimalColumnDetails[];
+  },
+): CancellablePromise<TableEntry> {
+  return patchAPI(`/api/db/v0/tables/${id}/`, patch);
+}
+
 export const tables: Readable<DBTablesStoreData> = derived(
   currentSchemaId,
   ($currentSchemaId, set) => {
