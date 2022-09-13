@@ -45,6 +45,7 @@
 
   let previewRequestStatus: RequestStatus;
   let headerUpdateRequestStatus: RequestStatus;
+  let typeChangeRequestStatus: RequestStatus;
   let tableName = '';
   let useFirstRowAsHeader = true;
 
@@ -57,6 +58,8 @@
   $: isLoading =
     previewRequestStatus?.state === 'processing' ||
     headerUpdateRequestStatus?.state === 'processing';
+  $: showTableSkeleton =
+    isLoading || typeChangeRequestStatus?.state === 'processing';
 
   let columnProperties: Record<
     Column['id'],
@@ -214,14 +217,24 @@
   }
 
   async function updateTypeRelatedOptions(updatedColumn: Column) {
-    const newColumns = columns.map((column) => {
-      if (column.id === updatedColumn.id) {
-        return updatedColumn;
-      }
-      return column;
-    });
-    await loadTablePreview(newColumns);
-    columns = newColumns;
+    try {
+      typeChangeRequestStatus = { state: 'processing' };
+      const newColumns = columns.map((column) => {
+        if (column.id === updatedColumn.id) {
+          return updatedColumn;
+        }
+        return column;
+      });
+      await loadTablePreview(newColumns);
+      columns = newColumns;
+      typeChangeRequestStatus = { state: 'success' };
+    } catch (err) {
+      typeChangeRequestStatus = {
+        state: 'failure',
+        errors: [err instanceof Error ? err.message : 'Unable to change type'],
+      };
+      throw err;
+    }
   }
 </script>
 
@@ -307,7 +320,7 @@
               let:styleString
             >
               <div {...htmlAttributes} style={styleString}>
-                {#each processedColumns as processedColumn (processedColumn.id)}
+                {#each processedColumns as processedColumn (processedColumn)}
                   <SheetCell
                     columnIdentifierKey={processedColumn.id}
                     let:htmlAttributes
@@ -317,7 +330,7 @@
                       <CellFabric
                         columnFabric={processedColumn}
                         value={record[processedColumn.column.name]}
-                        showAsSkeleton={isLoading}
+                        showAsSkeleton={showTableSkeleton}
                         disabled={true}
                       />
                     </div>

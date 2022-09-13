@@ -66,8 +66,8 @@
     try {
       await save({
         type: selectedDbType,
-        type_options: typeOptions,
-        display_options: displayOptions,
+        type_options: { ...typeOptions },
+        display_options: { ...displayOptions },
       });
     } catch (err) {
       const errorMessage =
