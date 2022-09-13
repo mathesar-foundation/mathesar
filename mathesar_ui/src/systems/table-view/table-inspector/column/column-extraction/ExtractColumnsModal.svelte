@@ -1,19 +1,20 @@
 <script lang="ts">
   import {
-    ControlledModal,
     CancelOrProceedButtonPair,
+    ControlledModal,
     LabeledInput,
     TextInput,
   } from '@mathesar-component-library';
-  import type { ExtractColumnsModalController } from './ExtractColumnsModalController';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
-  import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
-  import { getLinkedTables } from './columnExtractionUtils';
-  import SelectLinkedTable from './SelectLinkedTable.svelte';
+  import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { tables as tablesDataStore } from '@mathesar/stores/tables';
+  import { toast } from '@mathesar/stores/toast';
   import type { LinkedTable } from './columnExtractionTypes';
+  import { getLinkedTables } from './columnExtractionUtils';
+  import type { ExtractColumnsModalController } from './ExtractColumnsModalController';
+  import SelectLinkedTable from './SelectLinkedTable.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -45,7 +46,9 @@
     newFkColumnName = tableName;
   }
 
-  async function handleSave() {}
+  async function handleSave() {
+    toast.info('Implementation pending');
+  }
 </script>
 
 <ControlledModal {controller} on:open={init}>
@@ -66,12 +69,16 @@
         </LabeledInput>
       </FormField>
 
-      <FormField>
+      <!--
+        TODO Uncomment and implement when
+        https://github.com/centerofci/mathesar/issues/1434 is done
+      -->
+      <!-- <FormField>
         <LabeledInput layout="stacked">
           <span slot="label">Name of New Linking Column In This Table</span>
           <TextInput bind:value={newFkColumnName} />
         </LabeledInput>
-      </FormField>
+      </FormField> -->
     {/if}
 
     {#if $targetType === 'existingTable'}

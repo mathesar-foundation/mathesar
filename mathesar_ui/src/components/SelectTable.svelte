@@ -17,8 +17,7 @@
 
 <Select
   options={tableList}
-  getLabel={(table) =>
-    table ? { component: TableName, props: { table } } : ''}
+  getLabel={(t) => (t ? { component: TableName, props: { table: t } } : '')}
   valuesAreEqual={(a, b) => a?.id === b?.id}
   {autoSelect}
   bind:value={table}
