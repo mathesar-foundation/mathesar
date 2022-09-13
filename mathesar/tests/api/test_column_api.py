@@ -34,7 +34,7 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
-            'has_dependents': False
+            'has_dependents': True
         },
         {
             'name': 'mycolumn1',
@@ -69,7 +69,7 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
-            'has_dependents': False
+            'has_dependents': True
         },
         {
             'name': 'mycolumn3',
