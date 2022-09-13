@@ -190,9 +190,11 @@ export function getSchemaInfo(
 export async function createSchema(
   database: Database['name'],
   schemaName: SchemaEntry['name'],
+  schemaDescription: SchemaEntry['description'],
 ): Promise<SchemaResponse> {
   const response = await postAPI<SchemaResponse>('/api/db/v0/schemas/', {
     name: schemaName,
+    description: schemaDescription,
     database,
   });
   updateSchemaInDBSchemaStore(database, response);
@@ -204,7 +206,10 @@ export async function updateSchema(
   schema: SchemaEntry,
 ): Promise<SchemaResponse> {
   const url = `/api/db/v0/schemas/${schema.id}/`;
-  const response = await patchAPI<SchemaResponse>(url, { name: schema.name });
+  const response = await patchAPI<SchemaResponse>(url, {
+    name: schema.name,
+    description: schema.description,
+  });
   updateSchemaInDBSchemaStore(database, response);
   return response;
 }
