@@ -187,38 +187,47 @@
 </script>
 
 <LayoutWithHeader>
-  <h2>Confirm your data</h2>
+  <div class="table-preview-confirmation">
+    <h2>Confirm your data</h2>
 
-  <div class="help-content">
-    {#if previewRequestStatus?.state === 'processing'}
-      Please wait until we prepare a preview
-    {:else if previewRequestStatus?.state === 'failure'}
-      {previewRequestStatus.errors.join(',')}
+    <div class="help-content">
+      {#if previewRequestStatus?.state === 'processing'}
+        Please wait until we prepare a preview
+      {:else if previewRequestStatus?.state === 'failure'}
+        {previewRequestStatus.errors.join(',')}
+      {:else}
+        To finish, review suggestions for the field types and column names. To
+        ensure your import is correct we have included a preview of your first
+        few rows.
+      {/if}
+    </div>
+
+    {#if tableIsAlreadyConfirmed}
+      Table has already been confirmed. Click here to view the table.
     {:else}
-      To finish, review suggestions for the field types and column names. To
-      ensure your import is correct we have included a preview of your first few
-      rows.
-    {/if}
-  </div>
+      <div class="table-properties-inputs">
+        <LabeledInput label="Enter table name:" layout="inline">
+          <TextInput bind:value={tableName} />
+        </LabeledInput>
 
-  {#if tableIsAlreadyConfirmed}
-    Table has already been confirmed. Click here to view the table.
-  {:else}
-    <div class="table-preview-configurations">
-      <div class="name">
-        Table name: <TextInput bind:value={tableName} />
+        <LabeledInput
+          label="Use first row as header"
+          layout="inline-input-first"
+        >
+          <Checkbox
+            bind:checked={useFirstRowAsHeader}
+            disabled={previewRequestStatus?.state === 'processing'}
+            on:change={updateDataFileHeader}
+          />
+        </LabeledInput>
       </div>
 
-      <LabeledInput label="Use first row as header" layout="inline-input-first">
-        <Checkbox
-          bind:checked={useFirstRowAsHeader}
-          disabled={previewRequestStatus?.state === 'processing'}
-          on:change={updateDataFileHeader}
-        />
-      </LabeledInput>
-
       <div class="table-preview-content">
-        <Sheet columns={processedColumns} getColumnIdentifier={(c) => c.id}>
+        <Sheet
+          restrictWidthToRowWidth
+          columns={processedColumns}
+          getColumnIdentifier={(c) => c.id}
+        >
           <SheetHeader>
             {#each processedColumns as processedColumn (processedColumn.id)}
               <SheetCell
@@ -275,18 +284,40 @@
           {/each}
         </Sheet>
       </div>
-    </div>
-  {/if}
+    {/if}
+  </div>
 </LayoutWithHeader>
 
 <style lang="scss">
-  .table-preview-configurations {
+  .table-preview-confirmation {
     --sheet-header-height: 5.25rem;
+    margin-top: 1rem;
+
+    > *:not(.table-preview-content) {
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .table-properties-inputs {
+      margin: 1rem auto;
+      > :global(.labeled-input) {
+        margin-bottom: 1rem;
+      }
+    }
 
     .table-preview-content {
-      border: 1px solid var(--color-gray-light);
+      margin-top: 2rem;
       padding-bottom: 30px;
       border-radius: 0.2rem;
+
+      > :global(.sheet) {
+        margin-left: auto;
+        margin-right: auto;
+        border-top: 1px solid var(--color-gray-light);
+        border-left: 1px solid var(--color-gray-light);
+        min-width: 900px;
+      }
     }
   }
 </style>
