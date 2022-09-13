@@ -273,6 +273,24 @@ export function getTable(id: TableEntry['id']): CancellablePromise<TableEntry> {
   return getAPI(`/api/db/v0/tables/${id}/`);
 }
 
+/**
+ * Replace getTable with this function once the above mentioned changes are done.
+ */
+export function getTableFromStore(
+  id: TableEntry['id'],
+): CancellablePromise<TableEntry> {
+  const schemaStore = findSchemaStoreForTable(id);
+  if (schemaStore) {
+    const tableEntry = get(schemaStore).data.get(id);
+    if (tableEntry) {
+      return new CancellablePromise((resolve) => {
+        resolve(tableEntry);
+      });
+    }
+  }
+  return getTable(id);
+}
+
 export function getTypeSuggestionsForTable(
   id: TableEntry['id'],
 ): CancellablePromise<Record<string, string>> {

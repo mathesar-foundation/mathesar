@@ -21,13 +21,14 @@
     TextInput,
     Spinner,
     CancelOrProceedButtonPair,
+    CancellablePromise,
   } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Column } from '@mathesar/api/tables/columns';
   import { getAPI, patchAPI } from '@mathesar/utils/api';
   import type { RequestStatus, PaginatedResponse } from '@mathesar/utils/api';
   import {
-    getTable,
+    getTableFromStore,
     getTypeSuggestionsForTable,
     generateTablePreview,
     patchTable,
@@ -78,6 +79,15 @@
     { selected: boolean; displayName: string }
   > = {};
 
+  const promises: {
+    previewTableLoadPromise?: CancellablePromise<{
+      records: Record<string, unknown>[];
+    }>;
+    columnsFetchPromise?: CancellablePromise<PaginatedResponse<Column>>;
+    dataFileFetchPromise?: CancellablePromise<{ id: number; header: boolean }>;
+    typeSuggestionPromise?: ReturnType<typeof getTypeSuggestionsForTable>;
+  } = {};
+
   function processColumns(
     _columns: Column[],
     abstractTypeMap: AbstractTypesMap,
@@ -99,7 +109,8 @@
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
 
   async function loadTablePreview(_columns: Column[]) {
-    const response = await generateTablePreview(
+    promises.previewTableLoadPromise?.cancel();
+    promises.previewTableLoadPromise = generateTablePreview(
       previewTableId,
       _columns.map((column) => ({
         id: column.id,
@@ -109,19 +120,22 @@
         display_options: column.display_options,
       })),
     );
+    const response = await promises.previewTableLoadPromise;
     records = response.records;
   }
 
   async function fetchTableInfo() {
     if (previewTableId !== tableInfo?.id) {
-      tableInfo = await getTable(previewTableId);
+      tableInfo = await getTableFromStore(previewTableId);
       tableName = tableInfo.name;
     }
     // TODO: Move this request to /api
     // Get `valid_target_types` in Table response
-    const columnData = await getAPI<PaginatedResponse<Column>>(
+    promises.columnsFetchPromise?.cancel();
+    promises.columnsFetchPromise = getAPI<PaginatedResponse<Column>>(
       `/api/db/v0/tables/${previewTableId}/columns/?limit=500`,
     );
+    const columnData = await promises.columnsFetchPromise;
     columns = columnData.results;
     columnProperties = columns.reduce(
       (_columnProperties, column) => ({
@@ -138,9 +152,11 @@
 
   async function fetchDataFileDetails(_dataFileId: number) {
     if (_dataFileId !== dataFileDetails?.id) {
-      dataFileDetails = await getAPI<{ id: number; header: boolean }>(
+      promises.dataFileFetchPromise?.cancel();
+      promises.dataFileFetchPromise = getAPI<{ id: number; header: boolean }>(
         `/api/db/v0/data_files/${_dataFileId}/`,
       );
+      dataFileDetails = await promises.dataFileFetchPromise;
     }
     useFirstRowAsHeader = dataFileDetails.header;
     return dataFileDetails;
@@ -161,7 +177,9 @@
        */
       await tick();
       previewRequestStatus = { state: 'processing' };
-      const typeSuggestionPromise = getTypeSuggestionsForTable(_previewTableId);
+      promises.typeSuggestionPromise?.cancel();
+      promises.typeSuggestionPromise =
+        getTypeSuggestionsForTable(_previewTableId);
       const tableDetails = await fetchTableInfo();
 
       if (tableDetails.import_verified || !tableDetails.data_files?.length) {
@@ -176,7 +194,7 @@
       const dataFileDetailsPromise = fetchDataFileDetails(
         tableDetails.data_files[0],
       );
-      const typeSuggestions = await typeSuggestionPromise;
+      const typeSuggestions = await promises.typeSuggestionPromise;
       columns = columns.map((column) => ({
         ...column,
         type: typeSuggestions[column.name] ?? column.type,
