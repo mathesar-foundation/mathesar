@@ -1,4 +1,5 @@
 from rest_framework.exceptions import NotFound
+import mathesar.api.exceptions.generic_exceptions.base_exceptions as generic_api_exceptions
 import re
 
 from db.records.operations import group
@@ -20,7 +21,7 @@ def get_table_or_404(pk):
     try:
         table = Table.objects.get(id=pk)
     except Table.DoesNotExist:
-        raise NotFound
+        raise generic_api_exceptions.NotFoundAPIException(NotFound, message="Table doesn't exist")
     return table
 
 

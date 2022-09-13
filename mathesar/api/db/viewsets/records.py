@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
+import mathesar.api.exceptions.generic_exceptions.base_exceptions as generic_api_exceptions
 from db.functions.exceptions import (
     BadDBFunctionFormat, ReferencedColumnsDontExist, UnknownDBFunctionID,
 )
@@ -198,9 +199,10 @@ class RecordViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
+        print("yes")
         table = get_table_or_404(table_pk)
         if table.get_record(pk) is None:
-            raise NotFound
+            raise generic_api_exceptions.NotFoundAPIException(NotFound, message="Record doesn't exist")
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
