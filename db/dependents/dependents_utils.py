@@ -225,7 +225,7 @@ def has_dependents(referenced_object_id, engine, attnum=None):
     ]
 
     if attnum is not None:
-        conditions.append(pg_depend.c.refobjsubid == (0 if attnum is None else 0))
+        conditions.append(pg_depend.c.refobjsubid == (0 if attnum is None else attnum))
 
     stmt = select(
         exists(
