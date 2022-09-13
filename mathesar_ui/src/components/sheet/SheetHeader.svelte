@@ -5,6 +5,7 @@
   const { stores, api } = getSheetContext();
   const { horizontalScrollOffset } = stores;
 
+  export let inheritFontStyle = false;
   let headerRef: HTMLElement;
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
@@ -37,7 +38,11 @@
   });
 </script>
 
-<div bind:this={headerRef} data-sheet-element="header">
+<div
+  bind:this={headerRef}
+  data-sheet-element="header"
+  class:inherit-font-style={inheritFontStyle}
+>
   <slot />
 </div>
 
@@ -60,9 +65,11 @@
       overflow: hidden;
     }
 
-    :global([data-sheet-element='cell'].inherit-font-style) {
-      font-size: inherit;
-      font-weight: inherit;
+    &.inherit-font-style {
+      :global([data-sheet-element='cell']) {
+        font-size: inherit;
+        font-weight: inherit;
+      }
     }
   }
 </style>

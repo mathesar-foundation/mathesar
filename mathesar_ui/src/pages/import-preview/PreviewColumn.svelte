@@ -5,6 +5,8 @@
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
 
+  export let isLoading = false;
+
   export let processedColumn: {
     column: Column;
     abstractType: AbstractType;
@@ -24,11 +26,19 @@
   <div class="column-name">
     <Checkbox
       bind:checked={selected}
-      disabled={processedColumn.column.primary_key}
+      disabled={processedColumn.column.primary_key || isLoading}
     />
-    <TextInput bind:value={displayName} on:blur={checkAndSetNameIfEmpty} />
+    <TextInput
+      disabled={isLoading}
+      bind:value={displayName}
+      on:blur={checkAndSetNameIfEmpty}
+    />
   </div>
-  <Dropdown triggerClass="column-type" triggerAppearance="plain">
+  <Dropdown
+    disabled={isLoading}
+    triggerClass="column-type"
+    triggerAppearance="plain"
+  >
     <NameWithIcon slot="trigger" icon={processedColumn.abstractType.icon}>
       {processedColumn.abstractType.name}
     </NameWithIcon>

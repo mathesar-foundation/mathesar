@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { router } from 'tinro';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
@@ -14,6 +15,7 @@
     Checkbox,
     LabeledInput,
     TextInput,
+    Spinner,
   } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Column } from '@mathesar/api/tables/columns';
@@ -42,13 +44,19 @@
   let tableIsAlreadyConfirmed = false;
 
   let previewRequestStatus: RequestStatus;
+  let headerUpdateRequestStatus: RequestStatus;
   let tableName = '';
   let useFirstRowAsHeader = true;
 
   let tableInfo: TableEntry;
   let dataFileDetails: { id: number; header: boolean };
   let columns: Column[] = [];
-  let records: Record<string, unknown>[] = [];
+  // Add a couple empty records to show skeleton upon initial load
+  let records: Record<string, unknown>[] = [{}, {}];
+
+  $: isLoading =
+    previewRequestStatus?.state === 'processing' ||
+    headerUpdateRequestStatus?.state === 'processing';
 
   let columnProperties: Record<
     Column['id'],
@@ -76,25 +84,16 @@
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
 
   async function loadTablePreview() {
-    previewRequestStatus = { state: 'processing' };
-    try {
-      const response = await generateTablePreview(
-        previewTableId,
-        // TODO: Send type_options and display_options to preview
-        columns.map((column) => ({
-          id: column.id,
-          name: column.name,
-          type: column.type,
-        })),
-      );
-      records = response.records;
-      previewRequestStatus = { state: 'success' };
-    } catch (err) {
-      previewRequestStatus = {
-        state: 'failure',
-        errors: [err instanceof Error ? err.message : 'Unable to load preview'],
-      };
-    }
+    const response = await generateTablePreview(
+      previewTableId,
+      // TODO: Send type_options and display_options to preview
+      columns.map((column) => ({
+        id: column.id,
+        name: column.name,
+        type: column.type,
+      })),
+    );
+    records = response.records;
   }
 
   async function fetchTableInfo() {
@@ -137,51 +136,79 @@
    * 2. whenever user toggles first row as header checkbox
    */
   async function onPreviewTableIdChange(_previewTableId: number) {
-    const typeSuggestionPromise = getTypeSuggestionsForTable(_previewTableId);
-    const tableDetails = await fetchTableInfo();
+    try {
+      /**
+       * Since this method is async and is called reactively on the component,
+       * the prop updates in this method would only occur when it finishes
+       * execution. Hence, it is essential to await a tick to ensure that
+       * prop updates happen during method execution.
+       */
+      await tick();
+      previewRequestStatus = { state: 'processing' };
+      const typeSuggestionPromise = getTypeSuggestionsForTable(_previewTableId);
+      const tableDetails = await fetchTableInfo();
 
-    if (tableDetails.import_verified || !tableDetails.data_files?.length) {
-      // Cannot preview
-      // Show 404 or error message here
-      tableIsAlreadyConfirmed = true;
-      return;
+      if (tableDetails.import_verified || !tableDetails.data_files?.length) {
+        // Do not allow preview since table is already verified
+        // Show 404 or error message here
+        tableIsAlreadyConfirmed = true;
+        return;
+      }
+
+      tableIsAlreadyConfirmed = false;
+
+      const dataFileDetailsPromise = fetchDataFileDetails(
+        tableDetails.data_files[0],
+      );
+      const typeSuggestions = await typeSuggestionPromise;
+      columns = columns.map((column) => ({
+        ...column,
+        type: typeSuggestions[column.name] ?? column.type,
+      }));
+
+      const previewPromise = loadTablePreview();
+      await Promise.all([dataFileDetailsPromise, previewPromise]);
+      previewRequestStatus = { state: 'success' };
+    } catch (err) {
+      previewRequestStatus = {
+        state: 'failure',
+        errors: [err instanceof Error ? err.message : 'Unable to load preview'],
+      };
     }
-
-    tableIsAlreadyConfirmed = false;
-
-    const dataFileDetailsPromise = fetchDataFileDetails(
-      tableDetails.data_files[0],
-    );
-    const typeSuggestions = await typeSuggestionPromise;
-    columns = columns.map((column) => ({
-      ...column,
-      type: typeSuggestions[column.name] ?? column.type,
-    }));
-
-    const previewPromise = loadTablePreview();
-    await Promise.all([dataFileDetailsPromise, previewPromise]);
   }
 
   $: void onPreviewTableIdChange(previewTableId);
 
   async function updateDataFileHeader() {
     if (dataFileDetails) {
-      dataFileDetails.header = useFirstRowAsHeader;
-      const deleteTablePromise = deleteTable(previewTableId);
-      const patchDataFilePromise = patchAPI(
-        `/api/db/v0/data_files/${dataFileDetails.id}/`,
-        {
-          header: useFirstRowAsHeader,
-        },
-      );
-      await Promise.all([deleteTablePromise, patchDataFilePromise]);
-      tableInfo = await createTable(schema.id, {
-        name: tableName,
-        dataFiles: [dataFileDetails.id],
-      });
-      router.goto(
-        getImportPreviewPageUrl(database.name, schema.id, tableInfo.id),
-      );
+      try {
+        headerUpdateRequestStatus = { state: 'processing' };
+        dataFileDetails.header = useFirstRowAsHeader;
+        const deleteTablePromise = deleteTable(previewTableId);
+        const patchDataFilePromise = patchAPI(
+          `/api/db/v0/data_files/${dataFileDetails.id}/`,
+          {
+            header: useFirstRowAsHeader,
+          },
+        );
+        await Promise.all([deleteTablePromise, patchDataFilePromise]);
+        tableInfo = await createTable(schema.id, {
+          name: tableName,
+          dataFiles: [dataFileDetails.id],
+        });
+        headerUpdateRequestStatus = { state: 'success' };
+        router.goto(
+          getImportPreviewPageUrl(database.name, schema.id, tableInfo.id),
+          true,
+        );
+      } catch (err) {
+        headerUpdateRequestStatus = {
+          state: 'failure',
+          errors: [
+            err instanceof Error ? err.message : 'Unable to load preview',
+          ],
+        };
+      }
     }
   }
 </script>
@@ -191,15 +218,9 @@
     <h2>Confirm your data</h2>
 
     <div class="help-content">
-      {#if previewRequestStatus?.state === 'processing'}
-        Please wait until we prepare a preview
-      {:else if previewRequestStatus?.state === 'failure'}
-        {previewRequestStatus.errors.join(',')}
-      {:else}
-        To finish, review suggestions for the field types and column names. To
-        ensure your import is correct we have included a preview of your first
-        few rows.
-      {/if}
+      To finish, review suggestions for the field types and column names. To
+      ensure your import is correct we have included a preview of your first few
+      rows.
     </div>
 
     {#if tableIsAlreadyConfirmed}
@@ -216,10 +237,20 @@
         >
           <Checkbox
             bind:checked={useFirstRowAsHeader}
-            disabled={previewRequestStatus?.state === 'processing'}
+            disabled={isLoading}
             on:change={updateDataFileHeader}
           />
         </LabeledInput>
+      </div>
+
+      <div class="help-content preview-message">
+        {#if isLoading}
+          Please wait until we prepare a preview for you <Spinner />
+        {:else if previewRequestStatus?.state === 'failure'}
+          {previewRequestStatus.errors.join(',')}
+        {:else if headerUpdateRequestStatus?.state === 'failure'}
+          {headerUpdateRequestStatus.errors.join(',')}
+        {/if}
       </div>
 
       <div class="table-preview-content">
@@ -228,15 +259,16 @@
           columns={processedColumns}
           getColumnIdentifier={(c) => c.id}
         >
-          <SheetHeader>
+          <SheetHeader inheritFontStyle>
             {#each processedColumns as processedColumn (processedColumn.id)}
               <SheetCell
                 columnIdentifierKey={processedColumn.id}
                 let:htmlAttributes
                 let:style
               >
-                <div {...htmlAttributes} {style} class="inherit-font-style">
+                <div {...htmlAttributes} {style}>
                   <PreviewColumn
+                    {isLoading}
                     {processedColumn}
                     bind:selected={columnProperties[processedColumn.id]
                       .selected}
@@ -272,8 +304,7 @@
                       <CellFabric
                         columnFabric={processedColumn}
                         value={record[processedColumn.column.name]}
-                        showAsSkeleton={previewRequestStatus?.state ===
-                          'processing'}
+                        showAsSkeleton={isLoading}
                         disabled={true}
                       />
                     </div>
@@ -306,9 +337,18 @@
       }
     }
 
+    .help-content {
+      line-height: 1.6;
+
+      &.preview-message {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+    }
+
     .table-preview-content {
-      margin-top: 2rem;
-      padding-bottom: 30px;
+      margin-top: 1rem;
       border-radius: 0.2rem;
 
       > :global(.sheet) {
@@ -316,6 +356,7 @@
         margin-right: auto;
         border-top: 1px solid var(--color-gray-light);
         border-left: 1px solid var(--color-gray-light);
+        // TODO: This should be min of 100%, 900px
         min-width: 900px;
       }
     }
