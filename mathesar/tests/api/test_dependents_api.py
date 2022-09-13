@@ -73,7 +73,7 @@ def test_schema_dependents(library_ma_tables, client):
 def test_column_dependents(library_ma_tables, client):
     patrons = library_ma_tables['Patrons']
     patronds_id_col = patrons.get_column_by_name('id')
-    
+
     patrons_id_dependents_graph = client.get(f'/api/db/v0/tables/{patrons.id}/columns/{patronds_id_col.id}/dependents/').json()
     patrons_id_dependents_ids = _get_object_dependent_ids(patrons_id_dependents_graph, patrons.id, 'table column')
 
