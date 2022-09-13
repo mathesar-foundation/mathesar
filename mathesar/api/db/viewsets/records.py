@@ -206,7 +206,7 @@ class RecordViewSet(viewsets.ViewSet):
                 NotFound,
                 error_code=ErrorCodes.RecordNotFound.value,
                 message="Record doesn't exist"
-                )
+            )
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 

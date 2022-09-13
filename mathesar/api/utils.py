@@ -26,7 +26,7 @@ def get_table_or_404(pk):
             NotFound,
             error_code=ErrorCodes.TableNotFound.value,
             message="Table doesn't exist"
-            )
+        )
     return table
 
 
