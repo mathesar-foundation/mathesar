@@ -7,8 +7,9 @@
   } from '@mathesar-component-library/types';
   import { uploadFile } from '@mathesar/utils/api';
   import type { UploadCompletionOpts } from '@mathesar/utils/api';
+  import type { UploadEvents } from './uploadUtils';
 
-  const dispatch = createEventDispatcher<{ success: { dataFileId: number } }>();
+  const dispatch = createEventDispatcher<UploadEvents>();
 
   let uploads: FileUpload[] | undefined;
   let uploadProgress: UploadCompletionOpts | undefined;
@@ -19,6 +20,7 @@
 
   async function uploadNewFile(fileInformation: FileUploadAddDetail) {
     try {
+      dispatch('start');
       const { added } = fileInformation;
       const { file } = added[0];
 
@@ -46,10 +48,9 @@
       }
       dispatch('success', { dataFileId: response.id });
     } catch (err) {
-      // Throw toast error;
-      // Ask user to retry upload;
       uploads = undefined;
       uploadProgress = undefined;
+      dispatch('error', err instanceof Error ? err.message : undefined);
     }
   }
 </script>

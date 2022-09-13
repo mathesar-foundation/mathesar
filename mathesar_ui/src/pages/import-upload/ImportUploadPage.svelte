@@ -2,7 +2,7 @@
   import { router } from 'tinro';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import { RadioGroup } from '@mathesar-component-library';
+  import { RadioGroup, Spinner } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/utils/api';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { createTable } from '@mathesar/stores/tables';
@@ -20,9 +20,20 @@
   ];
   let uploadMethod = uploadMethods[0];
 
+  let uploadStatus: RequestStatus;
   let tableCreationProgress: RequestStatus;
 
+  $: isLoading =
+    uploadStatus?.state === 'processing' ||
+    tableCreationProgress?.state === 'processing';
+
+  $: statusInfo = [
+    { label: 'Uploading data', status: uploadStatus },
+    { label: 'Preparing preview', status: tableCreationProgress },
+  ];
+
   async function createPreviewTable(uploadInfo: { dataFileId: number }) {
+    uploadStatus = { state: 'success' };
     const { dataFileId } = uploadInfo;
     try {
       tableCreationProgress = { state: 'processing' };
@@ -60,10 +71,17 @@
     <div class="upload-section">
       <svelte:component
         this={uploadMethod.component}
-        on:start
+        {isLoading}
+        on:start={() => {
+          uploadStatus = { state: 'processing' };
+        }}
         on:success={(e) => createPreviewTable(e.detail)}
-        on:error
-        on:cancel
+        on:error={(e) => {
+          uploadStatus = {
+            state: 'failure',
+            errors: [e.detail ?? 'Upload failed'],
+          };
+        }}
       />
     </div>
 
@@ -73,6 +91,23 @@
         Please do not leave this page or close the browser tab while import is
         in progress.
       </strong>
+
+      <div>
+        {#each statusInfo as info (info)}
+          {#if info.status?.state}
+            <div>
+              {info.label}:
+              {#if info.status?.state === 'processing'}
+                <Spinner />
+              {:else if info.status?.state === 'success'}
+                Success
+              {:else if info.status?.state === 'failure'}
+                {info.status?.errors.join(', ')}
+              {/if}
+            </div>
+          {/if}
+        {/each}
+      </div>
     </div>
   </div>
 </LayoutWithHeader>
