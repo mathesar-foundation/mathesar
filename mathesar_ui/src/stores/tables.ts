@@ -142,14 +142,19 @@ function findSchemaStoreForTable(id: TableEntry['id']) {
 
 function findAndUpdateTableStore(id: TableEntry['id'], tableEntry: TableEntry) {
   findSchemaStoreForTable(id)?.update((tableStoreData) => {
-    const existing = tableStoreData.data.get(id);
-    tableStoreData.data.set(id, {
-      ...(existing ?? {}),
+    const existingTableEntry = tableStoreData.data.get(id);
+    const updatedTableEntry = {
+      ...(existingTableEntry ?? {}),
       ...tableEntry,
+    };
+    tableStoreData.data.set(id, updatedTableEntry);
+    const tableEntryMap: DBTablesStoreData['data'] = new Map();
+    sortedTableEntries([...tableStoreData.data.values()]).forEach((entry) => {
+      tableEntryMap.set(entry.id, entry);
     });
     return {
       ...tableStoreData,
-      data: new Map(tableStoreData.data),
+      data: tableEntryMap,
     };
   });
 }
@@ -208,13 +213,16 @@ export function createTable(
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
-        findAndUpdateTableStore(value.schema, value);
         schemaTablesStoreMap.get(value.schema)?.update((existing) => {
-          const data = new Map(existing.data);
-          data.set(value.id, value);
+          const tableEntryMap: DBTablesStoreData['data'] = new Map();
+          sortedTableEntries([...existing.data.values(), value]).forEach(
+            (entry) => {
+              tableEntryMap.set(entry.id, entry);
+            },
+          );
           return {
             ...existing,
-            data,
+            data: tableEntryMap,
           };
         });
         return resolve(value);
