@@ -107,14 +107,15 @@ def render_schema(request, database, schema):
 
 def home(request):
     database = get_current_database(request, None)
-    schema = get_current_schema(request, None, database)
-    return render_schema(request, database, schema)
+    return redirect('schemas', db_name=database.name)
 
 
-def db_home(request, db_name):
-    database = get_current_database(request, db_name)
-    schema = get_current_schema(request, None, database)
-    return render_schema(request, database, schema)
+# There is no db_home. 
+# db_home and schemas are the same page in FE
+# def db_home(request, db_name):
+#     database = get_current_database(request, db_name)
+#     schema = get_current_schema(request, None, database)
+#     return render_schema(request, database, schema)
 
 
 def schema_home(request, db_name, schema_id, **kwargs):
@@ -127,7 +128,6 @@ def schema_home(request, db_name, schema_id, **kwargs):
 
 def schemas(request, db_name):
     database = get_current_database(request, db_name)
-    schema = get_current_schema(request, None, database)
     return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request, database, schema)
+        'common_data': get_common_data(request, database, None)
     })

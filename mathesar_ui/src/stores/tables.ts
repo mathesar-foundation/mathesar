@@ -108,7 +108,9 @@ export async function refetchTablesForSchema(
   }
 }
 
-let preload = true;
+// Since we are not landing on the first schema page by default
+// hence preloading the first schema data won't make any sense
+let preload = false;
 
 export function getTablesStoreForSchema(
   schemaId: SchemaEntry['id'],

@@ -26,10 +26,9 @@ urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
     path('api/db/v0/', include(db_table_router.urls)),
     path('api/ui/v0/', include(ui_router.urls)),
-
+    
     path('', views.home, name="home"),
-    path('<db_name>/', views.db_home, name="db_home"),
-    path('<db_name>/schemas/', views.schemas, name="schemas"),
+    path('<db_name>/', views.schemas, name="schemas"),
     re_path(
         r'^(?P<db_name>\w+)/(?P<schema_id>\w+)/',
         views.schema_home,
