@@ -29,7 +29,7 @@ def copy_constraint(table_oid, engine, constraint, from_column_attnum, to_column
     if constraint_type == ConstraintType.UNIQUE.value:
         column_attnums = constraint.conkey
         changed_column_attnums = [to_column_attnum if attnum == from_column_attnum else attnum for attnum in column_attnums]
-        columns = get_columns_name_from_attnums(table_oid, changed_column_attnums, engine)
+        columns = get_columns_name_from_attnums([table_oid], changed_column_attnums, engine)
         create_unique_constraint(table.name, table.schema, engine, columns)
     else:
         raise NotImplementedError

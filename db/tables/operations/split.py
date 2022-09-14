@@ -65,7 +65,7 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
     old_non_default_columns = [
         col for col in old_columns if not col.is_default
     ]
-    extracted_column_names = get_columns_name_from_attnums(old_table_oid, extracted_column_attnums, engine)
+    extracted_column_names = get_columns_name_from_attnums([old_table_oid], extracted_column_attnums, engine)
     extracted_columns = [
         col for col in old_non_default_columns if col.name in extracted_column_names
     ]

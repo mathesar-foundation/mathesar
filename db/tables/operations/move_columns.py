@@ -61,7 +61,7 @@ def move_columns_between_related_tables(
     source_table = reflect_table_from_oid(source_table_oid, engine)
     target_table = reflect_table_from_oid(target_table_oid, engine, metadata=source_table.metadata)
     relationship = _find_table_relationship(source_table, target_table)
-    column_names_to_move = get_columns_name_from_attnums(source_table_oid, column_attnums_to_move, engine)
+    column_names_to_move = get_columns_name_from_attnums([source_table_oid], column_attnums_to_move, engine)
     moving_columns = [source_table.columns[n] for n in column_names_to_move]
     assert _check_columns(relationship, moving_columns)
     source_table_reference_column, target_table_reference_column = _get_table_connecting_columns(
