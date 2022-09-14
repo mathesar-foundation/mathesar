@@ -1196,8 +1196,26 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     _check_columns(response_json['columns'], column_data)
 
 
+def test_table_patch_columns_display_options(create_data_types_table, client):
+    table_name = 'patch_cols_one'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data(table)
+    display_options = {"use_grouping": "auto"}
+    column_data[0]['display_options'] = display_options
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    actual_id_col = [c for c in response.json()['columns'] if c['name'] == 'id'][0]
+
+    assert response.status_code == 200
+    actual_display_options = actual_id_col['display_options']
+    for k in display_options:
+        assert actual_display_options[k] == display_options[k]
+
+
 def test_table_patch_columns_invalid_display_options(create_data_types_table, client):
-    table_name = 'PATCH columns 101'
+    table_name = 'patch_cols_two'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data(table)
     # despite its name, the last column is of type text
@@ -1208,16 +1226,14 @@ def test_table_patch_columns_invalid_display_options(create_data_types_table, cl
         'columns': column_data
     }
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
-    response_json = response.json()
+    actual_col = [c for c in response.json()['columns'] if c['name'] == 'Decimal'][0]
 
     assert response.status_code == 200
-    # TODO This is exemplifies the current behavior, but the behavior
-    # itself may not be optimal
-    assert response_json['columns'][-1]['display_options'] == {}
+    assert actual_col['display_options'] == {}
 
 
 def test_table_patch_columns_type_plus_display_options(create_data_types_table, client):
-    table_name = 'PATCH columns 102'
+    table_name = 'patch_cols_three'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data(table)
     # despite its name, the last column is of type text
@@ -1229,12 +1245,12 @@ def test_table_patch_columns_type_plus_display_options(create_data_types_table, 
         'columns': column_data
     }
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
-    response_json = response.json()
+    actual_col = [c for c in response.json()['columns'] if c['name'] == 'Decimal'][0]
 
     assert response.status_code == 200
-    assert response_json['columns'][-1]['type'] == PostgresType.NUMERIC.id
+    assert actual_col['type'] == PostgresType.NUMERIC.id
     for k, v in display_options.items():
-        assert response_json['columns'][-1]['display_options'][k] == v
+        assert actual_col['display_options'][k] == v
 
 
 def test_table_patch_columns_same_name_type_drop(create_data_types_table, client):
