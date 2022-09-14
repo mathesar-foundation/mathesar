@@ -25,8 +25,7 @@ ui_router.register(r'databases', ui_viewsets.DatabaseViewSet, basename='database
 urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
     path('api/db/v0/', include(db_table_router.urls)),
-    path('api/ui/v0/', include(ui_router.urls)),
-    
+    path('api/ui/v0/', include(ui_router.urls)), 
     path('', views.home, name="home"),
     path('<db_name>/', views.schemas, name="schemas"),
     re_path(
