@@ -985,9 +985,9 @@ def test_table_patch_columns_and_table_name(create_patents_table, client):
     # as a multi-part form, which can't handle nested keys.
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
-    response_error = response.json()[0]
-    assert response.status_code == 400
-    assert response_error['message'] == 'Only name or columns can be passed in, not both.'
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json['name'] == 'PATCH COLUMNS 1'
 
 
 def test_table_patch_columns_no_changes(create_patents_table, client):
