@@ -167,10 +167,14 @@ class Schema(DatabaseObject):
         return True
 
     def update_sa_schema(self, update_params):
-        return model_utils.update_sa_schema(self, update_params)
+        result = model_utils.update_sa_schema(self, update_params)
+        clear_cached_metadata()
+        return result
 
     def delete_sa_schema(self):
-        return drop_schema(self.name, self._sa_engine, cascade=True)
+        result = drop_schema(self.name, self._sa_engine, cascade=True)
+        clear_cached_metadata()
+        return result
 
     def clear_name_cache(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"
@@ -271,19 +275,23 @@ class Table(DatabaseObject, Relation):
         )
 
     def add_column(self, column_data):
-        return create_column(
+        result = create_column(
             self.schema._sa_engine,
             self.oid,
             column_data,
         )
+        clear_cached_metadata()
+        return result
 
     def alter_column(self, column_attnum, column_data):
-        return alter_column(
+        result = alter_column(
             self.schema._sa_engine,
             self.oid,
             column_attnum,
             column_data,
         )
+        clear_cached_metadata()
+        return result
 
     def drop_column(self, column_attnum):
         drop_column(
@@ -291,9 +299,10 @@ class Table(DatabaseObject, Relation):
             column_attnum,
             self.schema._sa_engine,
         )
+        clear_cached_metadata()
 
     def duplicate_column(self, column_attnum, copy_data, copy_constraints, name=None):
-        return duplicate_column(
+        result = duplicate_column(
             self.oid,
             column_attnum,
             self.schema._sa_engine,
@@ -301,6 +310,8 @@ class Table(DatabaseObject, Relation):
             copy_data=copy_data,
             copy_constraints=copy_constraints,
         )
+        clear_cached_metadata()
+        return result
 
     def get_preview(self, column_definitions):
         return get_column_cast_records(
@@ -324,10 +335,14 @@ class Table(DatabaseObject, Relation):
         )
 
     def update_sa_table(self, update_params):
-        return model_utils.update_sa_table(self, update_params)
+        result = model_utils.update_sa_table(self, update_params)
+        clear_cached_metadata()
+        return result
 
     def delete_sa_table(self):
-        return drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
+        result = drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
+        clear_cached_metadata()
+        return result
 
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
@@ -386,7 +401,9 @@ class Table(DatabaseObject, Relation):
                 metadata=get_cached_metadata(),
             )
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
-        return Constraint.current_objects.create(oid=constraint_oid, table=self)
+        result = Constraint.current_objects.create(oid=constraint_oid, table=self)
+        clear_cached_metadata()
+        return result
 
     def get_column_name_id_bidirectional_map(self):
         # TODO: Prefetch column names to avoid N+1 queries
@@ -415,13 +432,15 @@ class Table(DatabaseObject, Relation):
     def move_columns(self, columns_to_move, target_table):
         columns_attnum_to_move = [column.attnum for column in columns_to_move]
         target_table_oid = target_table.oid
-        return move_columns_between_related_tables(
+        result = move_columns_between_related_tables(
             self.oid,
             target_table_oid,
             columns_attnum_to_move,
             self.schema.name,
             self._sa_engine
         )
+        clear_cached_metadata()
+        return result
 
     def split_table(
             self,
@@ -429,20 +448,23 @@ class Table(DatabaseObject, Relation):
             extracted_table_name,
     ):
         columns_attnum_to_extract = [column.attnum for column in columns_to_extract]
-        return extract_columns_from_table(
+        result = extract_columns_from_table(
             self.oid,
             columns_attnum_to_extract,
             extracted_table_name,
             self.schema.name,
             self._sa_engine
         )
+        clear_cached_metadata()
+        return result
 
     def update_column_reference(self, columns_name, column_name_id_map):
         columns_name_attnum_map = get_columns_attnum_from_names(
             self.oid,
             columns_name,
             self._sa_engine,
-            return_as_name_map=True
+            return_as_name_map=True,
+            metadata=get_cached_metadata(),
         )
         column_objs = []
         for column_name, column_attnum in columns_name_attnum_map.items():
@@ -586,6 +608,7 @@ class Constraint(DatabaseObject):
             self.name
         )
         self.delete()
+        clear_cached_metadata()
 
 
 class DataFile(BaseModel):
