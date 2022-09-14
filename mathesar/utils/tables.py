@@ -7,7 +7,7 @@ from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.models.base import Table
 from mathesar.reflection import reflect_columns_from_table
-from mathesar.metadata import clear_cached_metadata
+from mathesar.metadata import clear_cached_metadata, get_cached_metadata
 
 TABLE_NAME_TEMPLATE = 'Table'
 
@@ -73,10 +73,10 @@ def create_empty_table(name, schema):
     """
     engine = create_mathesar_engine(schema.database.name)
     db_table = create_mathesar_table(name, schema.name, [], engine)
-    metadata = clear_cached_metadata()
+    clear_cached_metadata()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     # Using current_objects to create the table instead of objects. objects
     # triggers re-reflection, which will cause a race condition to create the table
     table, _ = Table.current_objects.get_or_create(oid=db_table_oid, schema=schema)
-    reflect_columns_from_table(metadata=metadata, table=table)
+    reflect_columns_from_table(metadata=get_cached_metadata(), table=table)
     return table
