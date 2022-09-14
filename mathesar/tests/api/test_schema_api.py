@@ -9,11 +9,20 @@ from mathesar import reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
-def check_schema_response(MOD_engine_cache, response_schema, schema, schema_name, test_db_name, check_schema_objects=True):
+def check_schema_response(
+        MOD_engine_cache,
+        response_schema,
+        schema,
+        schema_name,
+        test_db_name,
+        schema_description=None,
+        check_schema_objects=True
+):
     assert response_schema['id'] == schema.id
     assert response_schema['name'] == schema_name
     assert response_schema['database'] == test_db_name
-    assert 'has_dependencies' in response_schema
+    assert response_schema['description'] == schema_description
+    assert 'has_dependents' in response_schema
     if check_schema_objects:
         engine = MOD_engine_cache(test_db_name)
         assert schema_name in get_mathesar_schemas(engine)
@@ -222,7 +231,45 @@ def test_schema_create(client, FUN_create_dj_db, MOD_engine_cache):
     schema_count_after = Schema.objects.count()
     assert schema_count_after == schema_count_before + 1
     schema = Schema.objects.get(id=response_schema['id'])
-    check_schema_response(MOD_engine_cache, response_schema, schema, schema_name, db_name, 0)
+    check_schema_response(
+        MOD_engine_cache,
+        response_schema,
+        schema,
+        schema_name,
+        db_name,
+        check_schema_objects=0
+    )
+
+
+def test_schema_create_description(client, FUN_create_dj_db, MOD_engine_cache):
+    db_name = "some_db2"
+    FUN_create_dj_db(db_name)
+
+    schema_count_before = Schema.objects.count()
+
+    schema_name = 'Test Schema with description'
+    description = 'blah blah blah'
+    data = {
+        'name': schema_name,
+        'database': db_name,
+        'description': description,
+    }
+    response = client.post('/api/db/v0/schemas/', data=data)
+    response_schema = response.json()
+
+    assert response.status_code == 201
+    schema_count_after = Schema.objects.count()
+    assert schema_count_after == schema_count_before + 1
+    schema = Schema.objects.get(id=response_schema['id'])
+    check_schema_response(
+        MOD_engine_cache,
+        response_schema,
+        schema,
+        schema_name,
+        db_name,
+        schema_description=description,
+        check_schema_objects=0,
+    )
 
 
 def test_schema_update(client, create_schema):
@@ -295,14 +342,14 @@ def test_schema_delete(create_schema, client):
     }
 
 
-def test_schema_dependencies(client, create_schema):
+def test_schema_dependents(client, create_schema):
     schema_name = 'NASA Schema Dependencies'
     schema = create_schema(schema_name)
 
     response = client.get(f'/api/db/v0/schemas/{schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
-    assert response_schema['has_dependencies'] is True
+    assert response_schema['has_dependents'] is False
 
 
 def test_schema_detail_404(client):

@@ -43,10 +43,10 @@ def get_dependents_graph(referenced_object_id, engine):
 
 
 # finding table dependents based on foreign key constraints from the referenced tables
-def _get_table_dependents(foreign_key_dependents, pg_constraint_table):
+def _get_table_dependents_from_fk(foreign_key_dependents, pg_constraint):
     # TODO: update refobjsubid with actual values when working on columns
     pg_identify_object = _get_pg_identify_object_lateral_stmt(
-        text(f'{PG_CLASS_CATALOGUE_NAME}::regclass::oid'), pg_constraint_table.c.conrelid, 0)
+        text(f'{PG_CLASS_CATALOGUE_NAME}::regclass::oid'), pg_constraint.c.conrelid, 0)
 
     pg_identify_refobject = _get_pg_identify_object_lateral_stmt(
         foreign_key_dependents.c.refclassid, foreign_key_dependents.c.refobjid, 0)
@@ -54,7 +54,7 @@ def _get_table_dependents(foreign_key_dependents, pg_constraint_table):
     # conrelid in this case is the oid of the table which a constraint resides in
     return select(
         foreign_key_dependents.c.classid,
-        pg_constraint_table.c.conrelid.label('objid'),
+        pg_constraint.c.conrelid.label('objid'),
         foreign_key_dependents.c.objsubid,
         foreign_key_dependents.c.refclassid,
         foreign_key_dependents.c.refobjid,
@@ -65,13 +65,13 @@ def _get_table_dependents(foreign_key_dependents, pg_constraint_table):
         pg_identify_refobject.c.name.label('refobjname'),
         pg_identify_refobject.c.type.label('refobjtype')) \
         .select_from(foreign_key_dependents) \
-        .join(pg_constraint_table, pg_constraint_table.c.oid == foreign_key_dependents.c.objid) \
+        .join(pg_constraint, pg_constraint.c.oid == foreign_key_dependents.c.objid) \
         .join(pg_identify_object, true()) \
         .join(pg_identify_refobject, true()) \
-        .where(pg_constraint_table.c.confrelid != 0) \
+        .where(pg_constraint.c.confrelid != 0) \
         .group_by(
             foreign_key_dependents,
-            pg_constraint_table.c.conrelid,
+            pg_constraint.c.conrelid,
             pg_identify_object.c.name,
             pg_identify_object.c.type,
             pg_identify_refobject.c.name,
@@ -120,6 +120,10 @@ def _get_view_dependents(pg_identify_object, pg_rewrite_table, rule_dependents):
             pg_identify_object.c.name,
             pg_identify_refobject.c.name,
             pg_identify_refobject.c.type)
+
+
+def _get_table_dependents(pg_identify_object, base):
+    return base.where(pg_identify_object.c.type == 'table')
 
 
 # stmt for getting a full list of dependents and identifying them
@@ -189,7 +193,8 @@ def _get_typed_dependency_pairs_stmt(engine):
     # so it's easy to exclude particular types or add new
     dependency_pairs = _get_dependency_pairs_stmt(pg_depend, pg_identify_object, pg_identify_refobject)
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pairs).cte('foreign_key_constraint_dependents')
-    table_dependents = _get_table_dependents(foreign_key_constraint_dependents, pg_constraint).cte('table_dependents')
+    table_from_fk_dependents = _get_table_dependents_from_fk(foreign_key_constraint_dependents, pg_constraint).cte('table_from_fk_dependents')
+    table_dependents = _get_table_dependents(pg_identify_object, dependency_pairs).cte('table_dependents')
 
     # should not be returned directly, used for getting views
     # this relation is required because views in PostgreSQL are implemented using the rule system
@@ -201,12 +206,13 @@ def _get_typed_dependency_pairs_stmt(engine):
 
     return union(
         select(foreign_key_constraint_dependents),
+        select(table_from_fk_dependents),
         select(table_dependents),
         select(view_dependents),
         select(index_dependents))
 
 
-def has_dependencies(referenced_object_id, engine):
+def has_dependents(referenced_object_id, engine):
     metadata = MetaData()
 
     pg_depend = _get_pg_depend_table(engine, metadata)
