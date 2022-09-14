@@ -2,7 +2,6 @@
   import {
     FormBuilder,
     getValidationContext,
-    Icon,
   } from '@mathesar-component-library';
   import type { FormValues } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/AppTypes';
