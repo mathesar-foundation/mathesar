@@ -286,11 +286,11 @@ class Table(DatabaseObject, Relation):
     def description(self):
         return get_table_description(self.oid, self._sa_engine)
 
-    @property
-    def dependents(self):
+    def get_dependents(self, exclude=[]):
         return get_dependents_graph(
             self.oid,
-            self.schema._sa_engine
+            self.schema._sa_engine,
+            exclude
         )
 
     def add_column(self, column_data):

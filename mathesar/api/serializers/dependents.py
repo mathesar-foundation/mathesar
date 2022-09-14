@@ -56,3 +56,7 @@ class DependentSerializer(serializers.Serializer):
     obj = BaseDependentObjectSerializer()
     parent_obj = BaseDependentObjectSerializer()
     level = serializers.IntegerField()
+
+
+class DependentFilterSerializer(serializers.Serializer):
+    filter = serializers.JSONField(required=False, default={})

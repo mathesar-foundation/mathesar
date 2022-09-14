@@ -10,8 +10,8 @@ START_LEVEL = 1
 MAX_LEVEL = 10
 
 
-def get_dependents_graph(referenced_object_id, engine):
-    dependency_pairs = _get_typed_dependency_pairs_stmt(engine)
+def get_dependents_graph(referenced_object_id, engine, exclude=[]):
+    dependency_pairs = _get_typed_dependency_pairs_stmt(engine, exclude)
     dependency_pairs_cte = dependency_pairs.cte(recursive=True, name='dependency_pairs_cte')
 
     # anchor member which includes all dependents of a requested object
@@ -178,7 +178,7 @@ def _get_pg_identify_object_lateral_stmt(classid, objid, objsubid):
         .lateral()
 
 
-def _get_typed_dependency_pairs_stmt(engine):
+def _get_typed_dependency_pairs_stmt(engine, exclude=[]):
     metadata = MetaData()
 
     pg_depend = _get_pg_depend_table(engine, metadata)
@@ -189,27 +189,35 @@ def _get_typed_dependency_pairs_stmt(engine):
     pg_constraint = _get_pg_constraint_table(engine, metadata)
     pg_rewrite = _get_pg_rewrite(engine, metadata)
 
+    type_selects = []
+
     # each statement filters the base statement extracting dependents of a specific type
     # so it's easy to exclude particular types or add new
     dependency_pairs = _get_dependency_pairs_stmt(pg_depend, pg_identify_object, pg_identify_refobject)
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pairs).cte('foreign_key_constraint_dependents')
-    table_from_fk_dependents = _get_table_dependents_from_fk(foreign_key_constraint_dependents, pg_constraint).cte('table_from_fk_dependents')
-    table_dependents = _get_table_dependents(pg_identify_object, dependency_pairs).cte('table_dependents')
+
+    if 'table constraint' not in exclude:
+        type_selects.append(foreign_key_constraint_dependents)
+
+    if 'table' not in exclude:
+        table_from_fk_dependents = _get_table_dependents_from_fk(foreign_key_constraint_dependents, pg_constraint).cte('table_from_fk_dependents')
+        table_dependents = _get_table_dependents(pg_identify_object, dependency_pairs).cte('table_dependents')
+        type_selects.append(table_from_fk_dependents)
+        type_selects.append(table_dependents)
 
     # should not be returned directly, used for getting views
     # this relation is required because views in PostgreSQL are implemented using the rule system
     # views don't depend on tables directly but through rules, that are mapped one-to-one
-    rule_dependents = _get_rule_dependents(pg_identify_object, dependency_pairs).cte('rule_dependents')
-    view_dependents = _get_view_dependents(pg_identify_object, pg_rewrite, rule_dependents).cte('view_dependents')
+    if 'view' not in exclude:
+        rule_dependents = _get_rule_dependents(pg_identify_object, dependency_pairs).cte('rule_dependents')
+        view_dependents = _get_view_dependents(pg_identify_object, pg_rewrite, rule_dependents).cte('view_dependents')
+        type_selects.append(view_dependents)
 
-    index_dependents = _get_index_dependents(pg_identify_object, dependency_pairs).cte('index_dependents')
+    if 'view' not in exclude:
+        index_dependents = _get_index_dependents(pg_identify_object, dependency_pairs).cte('index_dependents')
+        type_selects.append(index_dependents)
 
-    return union(
-        select(foreign_key_constraint_dependents),
-        select(table_from_fk_dependents),
-        select(table_dependents),
-        select(view_dependents),
-        select(index_dependents))
+    return union(*[select(type_select) for type_select in type_selects])
 
 
 def has_dependents(referenced_object_id, engine):
