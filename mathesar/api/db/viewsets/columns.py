@@ -20,6 +20,7 @@ from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models.base import Column
+from mathesar.metadata import get_cached_metadata
 
 
 class ColumnViewSet(viewsets.ModelViewSet):
@@ -90,7 +91,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 )
         dj_column = Column(
             table=table,
-            attnum=get_column_attnum_from_name(table.oid, column.name, table.schema._sa_engine),
+            attnum=get_column_attnum_from_name(table.oid, column.name, table.schema._sa_engine, metadata=get_cached_metadata()),
             **serializer.validated_model_fields
         )
         dj_column.save()

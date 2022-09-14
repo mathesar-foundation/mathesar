@@ -23,6 +23,8 @@ from mathesar.models.base import Column as mathesar_model_column
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
+from mathesar.metadata import clear_cached_metadata
+from db.metadata import get_empty_metadata
 
 
 @pytest.fixture(scope="session")
@@ -34,11 +36,20 @@ def django_db_modify_db_settings(
 
 
 @pytest.fixture(autouse=True)
-def automatically_clear_cache():
+def automatically_clear_django_cache():
     """
     Makes sure Django cache is cleared before every test.
     """
     cache.clear()
+    yield
+
+
+@pytest.fixture(autouse=True)
+def automatically_clear_metadata_cache():
+    """
+    Makes sure MetaData cache is cleared before every test.
+    """
+    clear_cached_metadata()
     yield
 
 
@@ -304,7 +315,7 @@ def _get_datafile_for_path(path):
 def create_column():
     def _create_column(table, column_data):
         column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine)
+        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine, metadata=get_empty_metadata())
         column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
         return column[0]
     return _create_column
@@ -319,7 +330,7 @@ def custom_types_schema_url(schema, live_server):
 def create_column_with_display_options():
     def _create_column(table, column_data):
         column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine)
+        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine, metadata=get_empty_metadata())
         # passing table object caches sa_columns, missing out any new columns
         # So table.id is passed to get new instance of table.
         column = mathesar_model_column.current_objects.get_or_create(

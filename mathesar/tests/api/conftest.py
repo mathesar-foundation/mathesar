@@ -11,6 +11,7 @@ from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import PostgresType
 from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
+from db.metadata import get_empty_metadata
 
 
 @pytest.fixture
@@ -251,7 +252,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     service_columns = []
     for column_data in zip(column_list_in, column_data_list):
-        attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
+        attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine, metadata=get_empty_metadata())
         display_options = column_data[1].get('display_options', None)
         first_column = ServiceLayerColumn.current_objects.get_or_create(
             table=table,

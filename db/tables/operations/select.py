@@ -64,6 +64,7 @@ def get_table_oids_from_schema(schema_oid, engine, metadata):
     return table_oids
 
 
+# TODO how to not make redundant queries when getting oids?
 def get_oid_from_table(name, schema, engine):
     inspector = inspect(engine)
     return inspector.get_table_oid(name, schema=schema)

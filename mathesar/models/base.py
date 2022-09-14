@@ -36,7 +36,7 @@ from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
-from mathesar.metadata import get_metadata
+from mathesar.metadata import clear_cached_metadata, get_cached_metadata
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -54,8 +54,8 @@ import logging
 logger = logging.getLogger(__name__)
 class DatabaseObjectManager(models.Manager):
     def get_queryset(self):
-        logger.error('DatabaseObjectManager is reflecting.')
-        reflection.reflect_db_objects(metadata=get_metadata())
+        logger.debug('DatabaseObjectManager is reflecting.')
+        reflection.reflect_db_objects(metadata=get_cached_metadata())
         return super().get_queryset()
 
 
@@ -214,6 +214,7 @@ class Table(DatabaseObject, Relation):
             sa_table = reflect_table_from_oid(
                 oid=self.oid,
                 engine=self._sa_engine,
+                metadata=get_cached_metadata(),
             )
         # We catch these errors, since it lets us decouple the cadence of
         # overall DB reflection from the cadence of cache expiration for
@@ -231,6 +232,7 @@ class Table(DatabaseObject, Relation):
         return column_utils.get_enriched_column_table(
             table=self._sa_table,
             engine=self._sa_engine,
+            metadata=get_cached_metadata(),
         )
 
     @cached_property
@@ -376,7 +378,13 @@ class Table(DatabaseObject, Relation):
         engine = self.schema.database._sa_engine
         name = constraint_obj.name
         if not name:
-            name = constraint_utils.get_constraint_name(engine, constraint_obj.constraint_type(), self.oid, constraint_obj.columns_attnum[0])
+            name = constraint_utils.get_constraint_name(
+                engine=engine,
+                constraint_type=constraint_obj.constraint_type(),
+                table_oid=self.oid,
+                column_0_attnum=constraint_obj.columns_attnum[0],
+                metadata=get_cached_metadata(),
+            )
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.current_objects.create(oid=constraint_oid, table=self)
 
@@ -500,7 +508,7 @@ class Column(ReflectionManagerMixin, BaseModel):
     @property
     def name(self):
         return get_column_name_from_attnum(
-            self.table.oid, self.attnum, self._sa_engine,
+            self.table.oid, self.attnum, self._sa_engine, metadata=get_cached_metadata(),
         )
 
     @property
@@ -533,7 +541,7 @@ class Constraint(DatabaseObject):
     def columns(self):
         column_names = [column.name for column in self._sa_constraint.columns]
         engine = self.table.schema.database._sa_engine
-        column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
+        column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine, metadata=get_cached_metadata())]
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
 
     @cached_property
@@ -545,7 +553,7 @@ class Constraint(DatabaseObject):
                                      self._sa_constraint.referred_table.schema,
                                      engine)
             table = Table.objects.get(oid=oid, schema=self.table.schema)
-            column_attnum_list = get_columns_attnum_from_names(oid, column_names, table.schema._sa_engine)
+            column_attnum_list = get_columns_attnum_from_names(oid, column_names, table.schema._sa_engine, metadata=get_cached_metadata())
             columns = Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
             return columns
         return None

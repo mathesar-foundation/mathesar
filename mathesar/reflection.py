@@ -25,7 +25,7 @@ DB_REFLECTION_INTERVAL = 1  # we reflect DB changes every second
 import logging
 logger = logging.getLogger(__name__)
 def reflect_db_objects(metadata, skip_cache_check=False):
-    logger.error('reflect_db_objects called.')
+    logger.debug('reflect_db_objects called.')
     if skip_cache_check or not cache.get(DB_REFLECTION_KEY):
         reflect_databases()
         for database in models.Database.current_objects.filter(deleted=False):
@@ -93,7 +93,7 @@ def reflect_tables_from_schema(metadata, schema):
 def reflect_columns_from_table(metadata, table):
     attnums = {
         column['attnum']
-        for column in get_column_attnums_from_table(table.oid, table.schema._sa_engine)
+        for column in get_column_attnums_from_table(table.oid, table.schema._sa_engine, metadata=metadata)
     }
     for attnum in attnums:
         column, created = models.Column.current_objects.get_or_create(

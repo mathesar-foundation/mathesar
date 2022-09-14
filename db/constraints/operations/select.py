@@ -4,6 +4,7 @@ from sqlalchemy import MetaData, Table, select, and_
 
 
 def get_constraints_with_oids(engine, table_oid=None):
+    # TODO reuse metadata
     metadata = MetaData()
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
@@ -22,6 +23,7 @@ def get_constraints_with_oids(engine, table_oid=None):
 
 
 def get_constraint_from_oid(oid, engine, table):
+    # TODO reuse metadata
     metadata = MetaData()
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
@@ -37,6 +39,7 @@ def get_constraint_from_oid(oid, engine, table):
 
 
 def get_constraint_oid_by_name_and_table_oid(name, table_oid, engine):
+    # TODO reuse metadata
     metadata = MetaData()
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
@@ -50,6 +53,7 @@ def get_constraint_oid_by_name_and_table_oid(name, table_oid, engine):
 
 
 def get_column_constraints(column_attnum, table_oid, engine):
+    # TODO reuse metadata
     metadata = MetaData()
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
