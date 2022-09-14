@@ -409,7 +409,10 @@ def _check_columns(actual_column_list, expected_column_list):
 def _assert_sets_of_dicts_are_equal(a, b):
     a = set([frozendict(d) for d in a])
     b = set([frozendict(d) for d in b])
-    assert a == b
+    assert len(a) == len(b)
+    for d_a, d_b in zip(a, b):
+        for k, v in d_a.items():
+            assert d_b[k] == v
 
 
 @pytest.fixture
@@ -1054,19 +1057,14 @@ def test_table_patch_columns_one_type_change(create_patents_table, client):
 def _get_data_types_column_data(table):
     column_data = [{
         'name': 'id',
-        'type': PostgresType.INTEGER.id
     }, {
         'name': 'Integer',
-        'type': PostgresType.TEXT.id
     }, {
         'name': 'Boolean',
-        'type': PostgresType.TEXT.id
     }, {
         'name': 'Text',
-        'type': PostgresType.TEXT.id
     }, {
         'name': 'Decimal',
-        'type': PostgresType.TEXT.id
     }]
     bidirectmap = table.get_column_name_id_bidirectional_map()
     for data in column_data:
