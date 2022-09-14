@@ -15,6 +15,7 @@
     schemaEntry: SchemaEntry,
   ): BreadcrumbSelectorEntry {
     return {
+      type: 'simple',
       label: schemaEntry.name,
       href: getSchemaPageUrl(database.name, schemaEntry.id),
       icon: iconSchema,
