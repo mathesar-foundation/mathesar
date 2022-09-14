@@ -211,32 +211,25 @@ class ColumnNamePrefetcher(Prefetcher):
         return
 
     def decorator(self, column, name):
-        setattr(
-                column,
-                'name',
-                name
-        )
+        setattr(column, 'name', name)
 
 
 class ColumnPrefetcher(Prefetcher):
     def filter(self, table_ids, tables):
         columns = Column.objects.filter(table_id__in=table_ids)
         table_oids = [table.oid for table in tables]
+
         def _get_column_names_from_attnums(attnums):
             return get_columns_name_from_attnums(
-                    table_oids,
-                    attnums,
-                    list(tables)[0]._sa_engine if len(tables) > 0 else [],
-                    fetch_as_map=True
+                table_oids,
+                attnums,
+                list(tables)[0]._sa_engine
+                if len(tables) > 0 else [],
+                fetch_as_map=True
             )
         return ColumnNamePrefetcher(
-                filter=lambda column_attnums, columns: _get_column_names_from_attnums(column_attnums)
-        ).fetch(
-                columns,
-                'columns__name',
-                Column,
-                [],
-            )
+            filter=lambda column_attnums, columns: _get_column_names_from_attnums(column_attnums)
+        ).fetch(columns, 'columns__name', Column, [])
 
     def reverse_mapper(self, column):
         return [column.table_id]
@@ -266,7 +259,7 @@ class Table(DatabaseObject, Relation):
                 _sa_table
             )
         ),
-            columns=ColumnPrefetcher,
+        columns=ColumnPrefetcher,
     )
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
