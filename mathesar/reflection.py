@@ -12,10 +12,6 @@ from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSer
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY
 from mathesar.database.base import create_mathesar_engine
 
-DB_REFLECTION_KEY = 'database_reflected_recently'
-# TODO Change this back to 60 * 5 later in the development process
-DB_REFLECTION_INTERVAL = 1  # we reflect DB changes every second
-
 
 # NOTE: All querysets used for reflection should use the .current_objects manager
 # instead of the .objects manger. The .objects manager calls reflect_db_objects when a
@@ -26,17 +22,15 @@ import logging
 logger = logging.getLogger(__name__)
 def reflect_db_objects(metadata, skip_cache_check=False):
     logger.debug('reflect_db_objects called.')
-    if skip_cache_check or not cache.get(DB_REFLECTION_KEY):
-        reflect_databases()
-        for database in models.Database.current_objects.filter(deleted=False):
-            reflect_schemas_from_database(metadata, database.name)
-        for schema in models.Schema.current_objects.all():
-            reflect_tables_from_schema(metadata, schema)
-        for table in models.Table.current_objects.all():
-            reflect_columns_from_table(metadata, table)
-        # TODO where is the database variable coming from? someone explain how this even runs.
-        reflect_constraints_from_database(metadata, database.name)
-        cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
+    reflect_databases()
+    for database in models.Database.current_objects.filter(deleted=False):
+        reflect_schemas_from_database(metadata, database.name)
+    for schema in models.Schema.current_objects.all():
+        reflect_tables_from_schema(metadata, schema)
+    for table in models.Table.current_objects.all():
+        reflect_columns_from_table(metadata, table)
+    # TODO where is the database variable coming from? someone explain how this even runs.
+    reflect_constraints_from_database(metadata, database.name)
 
 
 def reflect_databases():
