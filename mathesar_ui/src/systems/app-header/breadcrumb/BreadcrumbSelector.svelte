@@ -1,6 +1,6 @@
 <script lang="ts">
   import { AttachableDropdown, TextInput } from '@mathesar/component-library';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import BreadcrumbSelectorRow from './BreadcrumbSelectorRow.svelte';
   import BreadcrumbSeparatorIcon from './BreadcrumbSeparatorIcon.svelte';
   import type { BreadcrumbSelectorData } from './breadcrumbTypes';
   import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
@@ -37,43 +37,54 @@
     <BreadcrumbSeparatorIcon />
   </button>
 
-  <AttachableDropdown bind:isOpen trigger={triggerElement}>
+  <AttachableDropdown
+    bind:isOpen
+    trigger={triggerElement}
+    class="breadcrumb-selector-dropdown"
+  >
     <div class="entity-switcher-content">
-      <!-- TODO consider improving semantics of this css class: it's less of a
-      category-name and more of a section-name. -->
-      <div class="category-name">entities</div>
-      <TextInput bind:value={filterString} bind:element={textInputEl} />
-      {#each [...processedData] as [categoryName, items] (categoryName)}
-        <!-- data coming down from parent can have categories with 0 items: we
+      <div class="search">
+        <TextInput bind:value={filterString} bind:element={textInputEl} />
+      </div>
+      <div class="results">
+        {#each [...processedData] as [categoryName, entries] (categoryName)}
+          <!-- data coming down from parent can have categories with 0 items: we
         don't want to render that. -->
-        {#if items.length > 0}
-          <div class="category-name">{categoryName}</div>
-          <ul class="items">
-            {#each items as { href, label, icon, isActive } (href)}
-              <li class="item" class:active={isActive()}>
-                <a
-                  {href}
-                  on:click={() => {
+          {#if entries.length > 0}
+            <div class="section-name">{categoryName}</div>
+            <ul class="items">
+              {#each entries as entry (entry.href)}
+                <BreadcrumbSelectorRow
+                  {entry}
+                  {filterString}
+                  closeSelector={() => {
                     isOpen = false;
                   }}
-                >
-                  <NameWithIcon {icon}>{label}</NameWithIcon>
-                </a>
-              </li>
-            {/each}
-          </ul>
-        {/if}
-      {/each}
+                />
+              {/each}
+            </ul>
+          {/if}
+        {/each}
+      </div>
     </div>
   </AttachableDropdown>
 </div>
 
 <style>
+  :global(.breadcrumb-selector-dropdown) {
+    display: flex;
+  }
   .entity-switcher-content {
     padding: 0.5rem;
     min-width: 12rem;
+    display: grid;
+    grid-template: auto 1fr / 1fr;
+    grid-gap: 0.5rem;
   }
-  .category-name {
+  .results {
+    overflow-y: auto;
+  }
+  .section-name {
     font-size: var(--text-size-x-small);
     margin: 0.25rem 0;
 
@@ -84,20 +95,6 @@
     list-style: none;
     padding: 0;
     margin: 0;
-  }
-  .item.active {
-    /* placeholder styling */
-    background-color: hsla(0, 0%, 0%, 0.1);
-  }
-  .item a {
-    display: block;
-    padding: 0.25rem;
-    border-radius: 4px;
-    color: inherit;
-    text-decoration: none;
-  }
-  .item a:hover {
-    background: var(--color-contrast-light);
   }
   /* TODO: reduce code duplication with this CSS used elsewhere. */
   .passthrough-button {

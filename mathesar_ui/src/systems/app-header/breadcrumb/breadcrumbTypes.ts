@@ -25,12 +25,27 @@ export type BreadcrumbItem =
   | BreadcrumbItemSchema
   | BreadcrumbItemTable;
 
-export interface BreadcrumbSelectorEntry {
+export interface BaseBreadcrumbSelectorEntry {
   href: string;
   label: string;
   icon: IconProps;
   isActive(): boolean;
 }
+
+export interface SimpleBreadcrumbSelectorEntry
+  extends BaseBreadcrumbSelectorEntry {
+  type: 'simple';
+}
+
+export interface BreadcrumbSelectorEntryForTable
+  extends BaseBreadcrumbSelectorEntry {
+  type: 'table';
+  table: TableEntry;
+}
+
+export type BreadcrumbSelectorEntry =
+  | SimpleBreadcrumbSelectorEntry
+  | BreadcrumbSelectorEntryForTable;
 
 /** Keys are category names */
 export type BreadcrumbSelectorData = Map<string, BreadcrumbSelectorEntry[]>;

@@ -3,7 +3,7 @@
   import { iconEdit } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
-  import { UnhandledError } from '@mathesar/utils/errors';
+  import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import type { ColumnTypeOptionsSaveArgs } from '@mathesar/components/abstract-type-control/types';
   import { toast } from '@mathesar/stores/toast';
@@ -23,7 +23,7 @@
         mode = 'read';
         break;
       default:
-        throw new UnhandledError(mode, 'ColumnType');
+        throw new MissingExhaustiveConditionError(mode, 'ColumnType');
     }
     return undefined;
   }
