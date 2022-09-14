@@ -11,7 +11,7 @@ from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
-from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names
+from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names, get_columns_name_from_attnums
 from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
@@ -200,6 +200,54 @@ class Schema(DatabaseObject):
         cache.delete(cache_key)
 
 
+class ColumnNamePrefetcher(Prefetcher):
+    def filter(self, column_attnums, columns):
+        pass
+
+    def mapper(self, column):
+        return column.attnum
+
+    def reverse_mapper(self, column):
+        return
+
+    def decorator(self, column, name):
+        setattr(
+                column,
+                'name',
+                name
+        )
+
+
+class ColumnPrefetcher(Prefetcher):
+    def filter(self, table_ids, tables):
+        columns = Column.objects.filter(table_id__in=table_ids)
+        table_oids = [table.oid for table in tables]
+        def _get_column_names_from_attnums(attnums):
+            return get_columns_name_from_attnums(
+                    table_oids,
+                    attnums,
+                    list(tables)[0]._sa_engine if len(tables) > 0 else [],
+                    fetch_as_map=True
+            )
+        return ColumnNamePrefetcher(
+                filter=lambda column_attnums, columns: _get_column_names_from_attnums(column_attnums)
+        ).fetch(
+                columns,
+                'columns__name',
+                Column,
+                [],
+            )
+
+    def reverse_mapper(self, column):
+        return [column.table_id]
+
+    def decorator(self, table, columns):
+        # TODO Move the logic for directly settings the properties to Django prefetch cache to the library
+        if not hasattr(table, '_prefetched_objects_cache'):
+            table._prefetched_objects_cache = {}
+        table._prefetched_objects_cache["columns"] = columns
+
+
 class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
     MODEL_FIELDS = ['import_verified']
@@ -217,7 +265,8 @@ class Table(DatabaseObject, Relation):
                 '_sa_table',
                 _sa_table
             )
-        )
+        ),
+            columns=ColumnPrefetcher,
     )
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
