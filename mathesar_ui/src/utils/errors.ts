@@ -77,14 +77,13 @@ export class ApiMultiError extends Error {
 }
 
 /**
- * This is meant to be a build time error
- * Generally use to make sure of exhaustive conditions handlint
+ * This error should be thrown when a union type has not been sufficiently
+ * narrowed by exhaustiveness checking.
  */
-export class UnhandledError extends Error {
-  constructor(value: never, message: string) {
-    super();
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    this.message = `Unhandled Error: ${value}. ${message}`;
+export class MissingExhaustiveConditionError extends Error {
+  constructor(value: never, message?: string) {
+    super(`${JSON.stringify(value)}${message ? ` ${message}` : ''}`);
+    this.name = 'MissingExhaustiveConditionError';
   }
 }
 

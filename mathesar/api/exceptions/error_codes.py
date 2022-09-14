@@ -7,6 +7,8 @@ class ErrorCodes(Enum):
     # API Error
     MethodNotAllowed = 4006
     NotFound = 4005
+    TableNotFound = 4041
+    RecordNotFound = 4042
     UnknownError = 4999
     # Generic Errors
     ProgrammingError = 4101

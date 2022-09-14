@@ -14,6 +14,8 @@ export interface DBObjectEntry {
 
 export interface SchemaEntry extends DBObjectEntry {
   has_dependencies: boolean;
+  num_tables: number;
+  num_queries: number;
 }
 
 export interface SchemaResponse extends SchemaEntry, TreeItem {
