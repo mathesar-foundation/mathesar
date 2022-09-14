@@ -9,7 +9,8 @@ def make_sure_initial_reflection_happened():
 
 def reset_reflection():
     """
-    Resets our reflection of what's on Postgres databases.
+    Resets our reflection of what's on Postgres databases. Reset meaning that information is
+    either deleted, to be refreshed on demand, or preemptively refreshed.
 
     We have two forms of state (aka reflection), and both are reset by this routine. The two forms
     of reflection are Django models representing database objects (mathesar.models namespace), and
