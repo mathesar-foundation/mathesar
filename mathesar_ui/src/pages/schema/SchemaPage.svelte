@@ -44,7 +44,7 @@
   </div>
 
   <div class="entity-list-wrapper">
-    <h2 class="entity-list-title">Tables ({tablesMap.size})</h2>
+    <h2 class="entity-list-title">Tables ({schema.num_tables})</h2>
     <ul class="entity-list">
       {#each [...tablesMap.values()] as table (table.id)}
         <li class="entity-list-item">
@@ -61,7 +61,7 @@
 
   <div class="entity-list-wrapper">
     <h2 class="entity-list-title">
-      Explorations ({[...queriesMap.values()].length})
+      Explorations ({schema.num_queries})
     </h2>
     <ul class="entity-list">
       {#each [...queriesMap.values()] as query (query.id)}
