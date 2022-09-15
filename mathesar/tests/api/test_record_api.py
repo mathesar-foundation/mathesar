@@ -696,6 +696,7 @@ def test_group_filter_combo_order(create_patents_table, client):
 
     expect_group_counts = [2, 3, 2, 1, 7]
     actual_group_counts = [g['count'] for g in response_data['grouping']['groups']]
+    assert actual_group_counts == expect_group_counts
 
 
 def test_record_list_pagination_limit(create_patents_table, client):
