@@ -35,14 +35,14 @@ def apply_transformations_deprecated(
 
     transforms = []
 
+    if filter:
+        transforms.append(base.Filter(filter))
     if duplicate_only:
         transforms.append(base.DuplicateOnly(duplicate_only))
     if group_by:
         transforms.append(base.Group(group_by))
     if order_by:
         transforms.append(base.Order(order_by))
-    if filter:
-        transforms.append(base.Filter(filter))
     if search:
         transforms.append(base.Search([search, limit]))
     if columns_to_select:
