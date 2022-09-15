@@ -1,3 +1,4 @@
+from collections import Counter
 from frozendict import frozendict
 
 import pytest
@@ -407,12 +408,9 @@ def _check_columns(actual_column_list, expected_column_list):
 
 
 def _assert_sets_of_dicts_are_equal(a, b):
-    a = set([frozendict(d) for d in a])
-    b = set([frozendict(d) for d in b])
-    assert len(a) == len(b)
-    for d_a, d_b in zip(a, b):
-        for k, v in d_a.items():
-            assert d_b[k] == v
+    a = Counter([frozendict(d) for d in a])
+    b = Counter([frozendict(d) for d in b])
+    assert a == b
 
 
 @pytest.fixture
