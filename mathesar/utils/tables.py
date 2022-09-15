@@ -6,8 +6,8 @@ from db.tables.operations.infer_types import infer_table_column_types
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.models.base import Table
-from mathesar.reflection import reflect_columns_from_table
-from mathesar.metadata import clear_cached_metadata, get_cached_metadata
+from mathesar.state.django import reflect_columns_from_table
+from mathesar.state import reset_reflection, get_cached_metadata
 
 TABLE_NAME_TEMPLATE = 'Table'
 
@@ -73,7 +73,7 @@ def create_empty_table(name, schema):
     """
     engine = create_mathesar_engine(schema.database.name)
     db_table = create_mathesar_table(name, schema.name, [], engine)
-    clear_cached_metadata()
+    reset_reflection()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     # Using current_objects to create the table instead of objects. objects
     # triggers re-reflection, which will cause a race condition to create the table

@@ -12,7 +12,7 @@ from mathesar.errors import InvalidTableError
 from db.constants import ID, ID_ORIGINAL, COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
 
-from mathesar.reflection import reflect_columns_from_table
+from mathesar.state.django import reflect_columns_from_table
 from db.metadata import get_empty_metadata
 
 ALLOWED_DELIMITERS = ",\t:|"

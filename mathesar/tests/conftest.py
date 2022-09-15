@@ -23,7 +23,7 @@ from mathesar.models.base import Column as mathesar_model_column
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
-from mathesar.metadata import clear_cached_metadata
+from mathesar.state.metadata import reset_cached_metadata
 from db.metadata import get_empty_metadata
 
 
@@ -49,7 +49,7 @@ def automatically_clear_metadata_cache():
     """
     Makes sure MetaData cache is cleared before every test.
     """
-    clear_cached_metadata()
+    reset_cached_metadata()
     yield
 
 

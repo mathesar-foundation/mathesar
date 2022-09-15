@@ -25,7 +25,7 @@ from mathesar.api.serializers.tables import (
     MoveTableRequestSerializer
 )
 from mathesar.models.base import Table
-from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
+from mathesar.state.django import reflect_db_objects, reflect_tables_from_schema
 from mathesar.utils.tables import get_table_column_types
 from mathesar.utils.joins import get_processed_joinable_tables
 

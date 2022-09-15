@@ -1,7 +1,7 @@
 import pytest
 from django.core.cache import cache
 
-from mathesar.reflection import reflect_db_objects
+from mathesar.state.django import reflect_db_objects
 from mathesar.models.base import Table, Schema, Database
 from db.metadata import get_empty_metadata
 

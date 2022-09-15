@@ -23,6 +23,8 @@ def is_metadata_cache_in_initial_state():
     return _metadata_cache == _get_initial_metadata_cache_state()
 
 
+# TODO consider using a separate global variable to signal that reflection has not yet been performed
+# coupling metadata and django reflection might be more trouble than it's worth
 def _get_initial_metadata_cache_state():
     """
     MetaData cache is initially None. After the first reflection is performed, it will never be

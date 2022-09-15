@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 
 from mathesar.models.base import Table, Schema, Database
-from mathesar.reflection import reflect_db_objects
+from mathesar.state.django import reflect_db_objects
 
 from db.metadata import get_empty_metadata
 

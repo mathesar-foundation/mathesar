@@ -20,7 +20,7 @@ from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models.base import Column
-from mathesar.metadata import get_cached_metadata
+from mathesar.state import get_cached_metadata
 
 
 class ColumnViewSet(viewsets.ModelViewSet):

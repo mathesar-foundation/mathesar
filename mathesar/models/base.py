@@ -31,12 +31,11 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
 
-from mathesar import reflection
 from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
-from mathesar.metadata import clear_cached_metadata, get_cached_metadata
+from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -55,7 +54,7 @@ logger = logging.getLogger(__name__)
 class DatabaseObjectManager(models.Manager):
     def get_queryset(self):
         logger.debug('DatabaseObjectManager is reflecting.')
-        reflection.reflect_db_objects(metadata=get_cached_metadata())
+        make_sure_initial_reflection_happened()
         return super().get_queryset()
 
 
@@ -280,7 +279,7 @@ class Table(DatabaseObject, Relation):
             self.oid,
             column_data,
         )
-        clear_cached_metadata()
+        reset_reflection()
         return result
 
     def alter_column(self, column_attnum, column_data):
@@ -290,7 +289,7 @@ class Table(DatabaseObject, Relation):
             column_attnum,
             column_data,
         )
-        clear_cached_metadata()
+        reset_reflection()
         return result
 
     def drop_column(self, column_attnum):
@@ -299,7 +298,7 @@ class Table(DatabaseObject, Relation):
             column_attnum,
             self.schema._sa_engine,
         )
-        clear_cached_metadata()
+        reset_reflection()
 
     def duplicate_column(self, column_attnum, copy_data, copy_constraints, name=None):
         result = duplicate_column(
@@ -310,7 +309,7 @@ class Table(DatabaseObject, Relation):
             copy_data=copy_data,
             copy_constraints=copy_constraints,
         )
-        clear_cached_metadata()
+        reset_reflection()
         return result
 
     def get_preview(self, column_definitions):
@@ -336,12 +335,12 @@ class Table(DatabaseObject, Relation):
 
     def update_sa_table(self, update_params):
         result = model_utils.update_sa_table(self, update_params)
-        clear_cached_metadata()
+        reset_reflection()
         return result
 
     def delete_sa_table(self):
         result = drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
-        clear_cached_metadata()
+        reset_reflection()
         return result
 
     def get_record(self, id_value):
@@ -402,7 +401,7 @@ class Table(DatabaseObject, Relation):
             )
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         result = Constraint.current_objects.create(oid=constraint_oid, table=self)
-        clear_cached_metadata()
+        reset_reflection()
         return result
 
     def get_column_name_id_bidirectional_map(self):
@@ -439,7 +438,7 @@ class Table(DatabaseObject, Relation):
             self.schema.name,
             self._sa_engine
         )
-        clear_cached_metadata()
+        reset_reflection()
         return result
 
     def split_table(
@@ -455,7 +454,7 @@ class Table(DatabaseObject, Relation):
             self.schema.name,
             self._sa_engine
         )
-        clear_cached_metadata()
+        reset_reflection()
         return result
 
     def update_column_reference(self, columns_name, column_name_id_map):
@@ -608,7 +607,7 @@ class Constraint(DatabaseObject):
             self.name
         )
         self.delete()
-        clear_cached_metadata()
+        reset_reflection()
 
 
 class DataFile(BaseModel):

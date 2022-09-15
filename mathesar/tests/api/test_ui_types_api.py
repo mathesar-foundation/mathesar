@@ -1,6 +1,6 @@
 from mathesar.api.display_options import DISPLAY_OPTIONS_BY_UI_TYPE
 from mathesar.models.base import Database
-from mathesar.reflection import reflect_db_objects
+from mathesar.state.django import reflect_db_objects
 from mathesar.database.types import get_ui_type_from_id, UIType
 from db.types.base import PostgresType, MathesarCustomType
 

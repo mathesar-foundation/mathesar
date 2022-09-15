@@ -11,7 +11,7 @@ from db.schemas.operations.alter import alter_schema, SUPPORTED_SCHEMA_ALTER_ARG
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
-from mathesar.reflection import reflect_columns_from_table
+from mathesar.state.django import reflect_columns_from_table
 
 
 def user_directory_path(instance, filename):

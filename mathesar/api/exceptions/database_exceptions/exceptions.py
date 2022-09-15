@@ -8,7 +8,7 @@ from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
     get_default_exception_detail,
 )
 from mathesar.models.base import Column
-from mathesar.metadata import get_cached_metadata
+from mathesar.state import get_cached_metadata
 
 
 class UniqueViolationAPIException(MathesarAPIException):
