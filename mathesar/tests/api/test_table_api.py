@@ -409,7 +409,10 @@ def _check_columns(actual_column_list, expected_column_list):
 def _assert_sets_of_dicts_are_equal(a, b):
     a = set([frozendict(d) for d in a])
     b = set([frozendict(d) for d in b])
-    assert a == b
+    assert len(a) == len(b)
+    for d_a, d_b in zip(a, b):
+        for k, v in d_a.items():
+            assert d_b[k] == v
 
 
 @pytest.fixture
@@ -982,9 +985,9 @@ def test_table_patch_columns_and_table_name(create_patents_table, client):
     # as a multi-part form, which can't handle nested keys.
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
-    response_error = response.json()[0]
-    assert response.status_code == 400
-    assert response_error['message'] == 'Only name or columns can be passed in, not both.'
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json['name'] == 'PATCH COLUMNS 1'
 
 
 def test_table_patch_columns_no_changes(create_patents_table, client):
@@ -1054,19 +1057,14 @@ def test_table_patch_columns_one_type_change(create_patents_table, client):
 def _get_data_types_column_data(table):
     column_data = [{
         'name': 'id',
-        'type': PostgresType.INTEGER.id
     }, {
         'name': 'Integer',
-        'type': PostgresType.TEXT.id
     }, {
         'name': 'Boolean',
-        'type': PostgresType.TEXT.id
     }, {
         'name': 'Text',
-        'type': PostgresType.TEXT.id
     }, {
         'name': 'Decimal',
-        'type': PostgresType.TEXT.id
     }]
     bidirectmap = table.get_column_name_id_bidirectional_map()
     for data in column_data:
@@ -1092,17 +1090,11 @@ def test_table_patch_columns_multiple_type_change(create_data_types_table, clien
     _check_columns(response_json['columns'], column_data)
 
 
-def _check_columns_with_dropped(response_column_data, request_column_data, dropped_indices):
-    assert len(response_column_data) == len(request_column_data) - len(dropped_indices)
-    expected_column_data = [data for index, data in enumerate(request_column_data) if index not in dropped_indices]
-    _check_columns(response_column_data, expected_column_data)
-
-
 def test_table_patch_columns_one_drop(create_data_types_table, client):
     table_name = 'PATCH columns 7'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data(table)
-    column_data[1] = {'id': column_data[1]['id']}
+    column_data.pop(1)
 
     body = {
         'columns': column_data
@@ -1111,16 +1103,15 @@ def test_table_patch_columns_one_drop(create_data_types_table, client):
     response_json = response.json()
 
     assert response.status_code == 200
-    _check_columns_with_dropped(response_json['columns'], column_data, [1])
+    _check_columns(response_json['columns'], column_data)
 
 
 def test_table_patch_columns_multiple_drop(create_data_types_table, client):
-    INDICES_TO_DROP = [1, 2]
     table_name = 'PATCH columns 8'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data(table)
-    for index in INDICES_TO_DROP:
-        column_data[index] = {'id': column_data[index]['id']}
+    column_data.pop(1)
+    column_data.pop(1)
 
     body = {
         'columns': column_data
@@ -1129,7 +1120,7 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client):
     response_json = response.json()
 
     assert response.status_code == 200
-    _check_columns_with_dropped(response_json['columns'], column_data, INDICES_TO_DROP)
+    _check_columns(response_json['columns'], column_data)
 
 
 def test_table_patch_columns_diff_name_type_change(create_data_types_table, client):
@@ -1191,7 +1182,7 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     column_data = _get_data_types_column_data(table)
     column_data[1]['type'] = PostgresType.INTEGER.id
     column_data[2]['name'] = 'Checkbox'
-    column_data[3] = {'id': column_data[3]['id']}
+    column_data.pop(3)
 
     body = {
         'columns': column_data
@@ -1200,7 +1191,64 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     response_json = response.json()
 
     assert response.status_code == 200
-    _check_columns_with_dropped(response_json['columns'], column_data, [3])
+    _check_columns(response_json['columns'], column_data)
+
+
+def test_table_patch_columns_display_options(create_data_types_table, client):
+    table_name = 'patch_cols_one'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data(table)
+    display_options = {"use_grouping": "auto"}
+    column_data[0]['display_options'] = display_options
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    actual_id_col = [c for c in response.json()['columns'] if c['name'] == 'id'][0]
+
+    assert response.status_code == 200
+    actual_display_options = actual_id_col['display_options']
+    for k in display_options:
+        assert actual_display_options[k] == display_options[k]
+
+
+def test_table_patch_columns_invalid_display_options(create_data_types_table, client):
+    table_name = 'patch_cols_two'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data(table)
+    # despite its name, the last column is of type text
+    display_options = {"use_grouping": "auto"}
+
+    column_data[-1]['display_options'] = display_options
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    actual_col = [c for c in response.json()['columns'] if c['name'] == 'Decimal'][0]
+
+    assert response.status_code == 200
+    assert actual_col['display_options'] == {}
+
+
+def test_table_patch_columns_type_plus_display_options(create_data_types_table, client):
+    table_name = 'patch_cols_three'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data(table)
+    # despite its name, the last column is of type text
+    display_options = {"use_grouping": "auto"}
+    column_data[-1].update(
+        {'type': PostgresType.NUMERIC.id, 'display_options': display_options}
+    )
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    actual_col = [c for c in response.json()['columns'] if c['name'] == 'Decimal'][0]
+
+    assert response.status_code == 200
+    assert actual_col['type'] == PostgresType.NUMERIC.id
+    for k, v in display_options.items():
+        assert actual_col['display_options'][k] == v
 
 
 def test_table_patch_columns_same_name_type_drop(create_data_types_table, client):
@@ -1210,7 +1258,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     column_data[1] = {'id': column_data[1]['id']}
     column_data[2]['type'] = PostgresType.BOOLEAN.id
     column_data[2]['name'] = 'Checkbox'
-    column_data[3] = {'id': column_data[3]['id']}
+    column_data.pop(3)
 
     body = {
         'columns': column_data
@@ -1219,7 +1267,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     response_json = response.json()
 
     assert response.status_code == 200
-    _check_columns_with_dropped(response_json['columns'], column_data, [1, 3])
+    _check_columns(response_json['columns'], column_data)
 
 
 def test_table_patch_columns_invalid_type(create_data_types_table, client):
