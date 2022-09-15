@@ -669,6 +669,35 @@ def test_record_list_groups(
     _test_group_equality(grouping_dict['groups'], expected_groups)
 
 
+def test_group_filter_combo_order(create_patents_table, client):
+    table_name = 'NASA Record List Group Filter'
+    table = create_patents_table(table_name)
+    name_id_map = table.get_column_name_id_bidirectional_map()
+
+    raw_grouping = {'columns': ['Center']}
+    raw_filter = {
+        "contains": [
+            {"column_id": [name_id_map["Case Number"]]}, {"literal": ["11"]}
+        ]
+    }
+    raw_order_by = [{'field': name_id_map['id'], 'direction': 'asc'}]
+    group_by_col_ids = [name_id_map[col_name] for col_name in raw_grouping['columns']]
+    ids_converted_group_by = {**raw_grouping, 'columns': group_by_col_ids}
+
+    grouping = json.dumps(ids_converted_group_by)
+    filter_ = json.dumps(raw_filter)
+    order_by = json.dumps(raw_order_by)
+
+    limit = 10
+    query_str = f'grouping={grouping}&order_by={order_by}&limit={limit}&filter={filter_}'
+
+    response = client.get(f'/api/db/v0/tables/{table.id}/records/?{query_str}')
+    response_data = response.json()
+
+    expect_group_counts = [2, 3, 2, 1, 7]
+    actual_group_counts = [g['count'] for g in response_data['grouping']['groups']]
+
+
 def test_record_list_pagination_limit(create_patents_table, client):
     table_name = 'NASA Record List Pagination Limit'
     table = create_patents_table(table_name)
