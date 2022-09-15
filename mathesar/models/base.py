@@ -28,7 +28,12 @@ from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
 from db.tables.operations.move_columns import move_columns_between_related_tables
-from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid, get_table_description
+from db.tables.operations.select import (
+    get_oid_from_table,
+    reflect_table_from_oid,
+    get_table_description,
+    reflect_tables_from_oids
+)
 from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
 from db.tables.utils import get_primary_key_column
@@ -36,6 +41,7 @@ from db.tables.utils import get_primary_key_column
 from mathesar import reflection
 from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
+from mathesar.utils.prefetch import PrefetchManager, Prefetcher
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
 
@@ -51,7 +57,7 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class DatabaseObjectManager(models.Manager):
+class DatabaseObjectManager(PrefetchManager):
     def get_queryset(self):
         reflection.reflect_db_objects()
         return super().get_queryset()
@@ -197,7 +203,22 @@ class Schema(DatabaseObject):
 class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
     MODEL_FIELDS = ['import_verified']
-
+    current_objects = models.Manager()
+    objects = DatabaseObjectManager(
+        # TODO Move the Prefetcher into a separate class and replace lambdas with proper function
+        _sa_table=Prefetcher(
+            filter=lambda oids, tables: reflect_tables_from_oids(oids, list(tables)[0]._sa_engine)
+            if len(tables) > 0 else [],
+            mapper=lambda table: table.oid,
+            # A filler statement, just used to satisfy the library. It does not affect the prefetcher in any way as we bypass reverse mapping if the prefetcher returns a dictionary
+            reverse_mapper=lambda table: table.oid,
+            decorator=lambda table, _sa_table: setattr(
+                table,
+                '_sa_table',
+                _sa_table
+            )
+        )
+    )
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
