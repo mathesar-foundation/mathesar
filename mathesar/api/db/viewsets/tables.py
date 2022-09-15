@@ -38,7 +38,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     filterset_class = TableFilter
 
     def get_queryset(self):
-        return Table.objects.all().order_by('-created_at')
+        return Table.objects.prefetch('_sa_table').order_by('-created_at')
 
     def partial_update(self, request, pk=None):
         table = self.get_object()
