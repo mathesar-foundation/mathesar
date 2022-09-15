@@ -1,3 +1,4 @@
+import { toAsciiLowerCase } from '@mathesar/component-library';
 import { setContext, getContext } from 'svelte';
 import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
@@ -21,8 +22,8 @@ function breadcrumbSelectorEntryMatches(
   entry: BreadcrumbSelectorEntry,
   filterString: string,
 ): boolean {
-  const mainString = entry.label.toLowerCase();
-  const subString = filterString.toLowerCase();
+  const mainString = toAsciiLowerCase(entry.label);
+  const subString = toAsciiLowerCase(filterString);
   return mainString.includes(subString);
 }
 
