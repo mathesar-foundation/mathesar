@@ -27,13 +27,11 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
         except InvalidDate as e:
             raise database_api_exceptions.InvalidDateAPIException(
                 e,
-                message="Invalid date.",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except InvalidDateFormat as e:
             raise database_api_exceptions.InvalidDateFormatAPIException(
                 e,
-                message="Invalid date format.",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         return record

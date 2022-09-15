@@ -1042,3 +1042,31 @@ def test_number_input_api_validation(empty_nasa_table, client):
         }
         response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
         assert response.status_code == status_code
+
+
+def test_record_patch_invalid_date(create_patents_table, client):
+    table_name = 'NASA Invalid Date'
+    table = create_patents_table(table_name)
+    column_id_with_date_type = table.get_column_name_id_bidirectional_map()['Patent Expiration Date']
+    column_attnum = table.columns.get(id = column_id_with_date_type).attnum
+    table.alter_column(column_attnum, {'type': 'date'})
+    data = {f"{column_id_with_date_type}":"99/99/9999"}
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/17/', data=data)
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data[0]['code'] == ErrorCodes.InvalidDateError.value
+    assert response_data[0]['message'] == 'Invalid date'
+
+
+def test_record_patch_invalid_date_format(create_patents_table, client):
+    table_name = 'NASA Invalid Date Format'
+    table = create_patents_table(table_name)
+    column_id_with_date_type = table.get_column_name_id_bidirectional_map()['Patent Expiration Date']
+    column_attnum = table.columns.get(id = column_id_with_date_type).attnum
+    table.alter_column(column_attnum, {'type': 'date'})
+    data = {f"{column_id_with_date_type}":"5555/5555"}
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/17/', data=data)
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data[0]['code'] == ErrorCodes.InvalidDateFormatError.value
+    assert response_data[0]['message'] == 'Invalid date format'

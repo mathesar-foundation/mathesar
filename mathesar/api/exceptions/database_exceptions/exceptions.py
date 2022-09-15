@@ -307,7 +307,7 @@ class InvalidDateAPIException(MathesarAPIException):
     def __init__(
             self,
             exception,
-            message=None,
+            message="Invalid date",
             field=None,
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -321,7 +321,7 @@ class InvalidDateFormatAPIException(MathesarAPIException):
     def __init__(
             self,
             exception,
-            message=None,
+            message="Invalid date format",
             field=None,
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
