@@ -224,7 +224,7 @@ def test_get_description_from_table(roster_table_name, engine_with_roster):
     roster_table_oid = ma_sel.get_oid_from_table(roster_table_name, schema, engine)
     expect_comment = 'my super comment'
     with engine.begin() as conn:
-        conn.execute(text(f'''COMMENT ON TABLE "{roster_table_name}" IS '{expect_comment}';'''))
+        conn.execute(text(f'''COMMENT ON TABLE "{schema}"."{roster_table_name}" IS '{expect_comment}';'''))
 
     actual_comment = ma_sel.get_table_description(roster_table_oid, engine)
 
