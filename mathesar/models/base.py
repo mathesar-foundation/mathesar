@@ -209,7 +209,7 @@ class Table(DatabaseObject, Relation):
         super().save(*args, **kwargs)
 
     # TODO referenced from outside so much that it probably shouldn't be private
-    @cached_property
+    @property
     def _sa_table(self):
         # We're caching since we want different Django Table instances to return the same SA
         # Table, when they're referencing the same Postgres table.
@@ -230,7 +230,7 @@ class Table(DatabaseObject, Relation):
 
     # NOTE: it's a problem that we hve both _sa_table and _enriched_column_sa_table. at the moment
     # it has to be this way because enriched column is not always interachangeable with sa column.
-    @cached_property
+    @property
     def _enriched_column_sa_table(self):
         return column_utils.get_enriched_column_table(
             table=self._sa_table,
@@ -238,15 +238,15 @@ class Table(DatabaseObject, Relation):
             metadata=get_cached_metadata(),
         )
 
-    @cached_property
+    @property
     def sa_columns(self):
         return self._enriched_column_sa_table.columns
 
-    @cached_property
+    @property
     def _sa_engine(self):
         return self.schema._sa_engine
 
-    @cached_property
+    @property
     def name(self):
         return self._sa_table.name
 
