@@ -3,7 +3,6 @@ from django.dispatch import receiver
 
 from mathesar.models.base import Column, PreviewColumnSettings, Table, TableSettings
 from mathesar.state.django import reflect_new_table_constraints
-from mathesar.state import get_cached_metadata
 
 
 @receiver(post_save, sender=Table)
@@ -11,7 +10,7 @@ def sync_table_constraints(**kwargs):
     # When a table is created, we want to immediately make the appropriate
     # Constraint model instances for that table's constraints.
     if kwargs['created']:
-        reflect_new_table_constraints(get_cached_metadata(), kwargs['instance'])
+        reflect_new_table_constraints(kwargs['instance'])
 
 
 @receiver(post_save, sender=Table)

@@ -174,7 +174,7 @@ def create_table_from_csv(data_file, name, schema):
         import_verified=False
     )
     metadata = get_empty_metadata()
-    reflect_columns_from_table(metadata, table)
+    reflect_columns_from_table(table, metadata=metadata)
     data_file.table_imported_to = table
     data_file.save()
     return table

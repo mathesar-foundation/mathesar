@@ -50,7 +50,7 @@ def test_database_types_installed(client, test_db_name):
             'display_options': None
         },
     ]
-    reflect_db_objects()
+    #reflect_db_objects()
     default_database = Database.objects.get(name=test_db_name)
 
     response = client.get(f'/api/ui/v0/databases/{default_database.id}/types/')

@@ -23,7 +23,7 @@ from mathesar.models.base import Column as mathesar_model_column
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
-from mathesar.state.metadata import reset_cached_metadata
+from mathesar.state.base import set_initial_reflection_happened
 from db.metadata import get_empty_metadata
 
 
@@ -45,11 +45,11 @@ def automatically_clear_django_cache():
 
 
 @pytest.fixture(autouse=True)
-def automatically_clear_metadata_cache():
+def mark_reflection_as_not_having_happened():
     """
-    Makes sure MetaData cache is cleared before every test.
+    Makes sure reflection is reset when one of our models' querysets is next accessed.
     """
-    reset_cached_metadata()
+    set_initial_reflection_happened(False)
     yield
 
 

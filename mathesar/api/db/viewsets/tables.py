@@ -26,6 +26,7 @@ from mathesar.api.serializers.tables import (
 )
 from mathesar.models.base import Table
 from mathesar.state.django import reflect_db_objects, reflect_tables_from_schema
+from mathesar.state import reset_reflection, get_cached_metadata
 from mathesar.utils.tables import get_table_column_types
 from mathesar.utils.joins import get_processed_joinable_tables
 
@@ -101,7 +102,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
 
             # Reflect tables so that the newly created/extracted tables objects are created
-            reflect_tables_from_schema(table.schema)
+            reflect_tables_from_schema(table.schema, metadata=get_cached_metadata())
 
             extracted_table = Table.current_objects.get(oid=extracted_table_oid)
             # Update attnum as it would have changed due to columns moving to a new table.
@@ -110,7 +111,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             remainder_table = Table.current_objects.get(oid=remainder_table_oid)
             remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
 
-            reflect_db_objects(skip_cache_check=True)
+            reset_reflection()
             extracted_table = Table.objects.get(oid=extracted_table_oid)
             remainder_table_obj = Table.objects.get(oid=remainder_table_oid)
             split_table_response = {

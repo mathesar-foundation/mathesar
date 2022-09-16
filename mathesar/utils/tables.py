@@ -78,5 +78,5 @@ def create_empty_table(name, schema):
     # Using current_objects to create the table instead of objects. objects
     # triggers re-reflection, which will cause a race condition to create the table
     table, _ = Table.current_objects.get_or_create(oid=db_table_oid, schema=schema)
-    reflect_columns_from_table(metadata=get_cached_metadata(), table=table)
+    reflect_columns_from_table(table=table, metadata=get_cached_metadata())
     return table

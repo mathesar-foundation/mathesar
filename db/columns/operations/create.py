@@ -12,7 +12,7 @@ from db.columns.operations.alter import set_column_default, change_column_nullab
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
 )
-from db.columns.utils import get_mathesar_column_with_engine
+from db.columns.utils import to_mathesar_column_with_engine
 from db.constraints.operations.create import copy_constraint
 from db.constraints.operations.select import get_column_constraints
 from db.constraints import utils as constraint_utils
@@ -72,9 +72,11 @@ def create_column(engine, table_oid, column_data):
             raise e
 
     # TODO reuse metadata
-    return get_mathesar_column_with_engine(
-        reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata()).columns[column_data[NAME]],
-        engine
+    reflected_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
+    reflected_column = reflected_table.columns[column_data[NAME]]
+    return MathesarColumn.from_column(
+        reflected_column,
+        engine=engine
     )
 
 
@@ -203,4 +205,4 @@ def duplicate_column(table_oid, copy_from_attnum, engine, new_column_name=None, 
     metadata=get_empty_metadata()
     table = reflect_table_from_oid(table_oid, engine, metadata=metadata)
     column_name = get_column_name_from_attnum(table_oid, new_column_attnum, engine, metadata=metadata)
-    return get_mathesar_column_with_engine(table.c[column_name], engine)
+    return to_mathesar_column_with_engine(table.c[column_name], engine)

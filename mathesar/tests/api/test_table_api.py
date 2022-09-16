@@ -10,7 +10,7 @@ from sqlalchemy import text
 from db.columns.operations.select import get_columns_attnum_from_names
 from db.types.base import PostgresType, MathesarCustomType
 
-from mathesar import reflection
+from mathesar.state import django as reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import base as models_base
 from mathesar.models.base import Column, Table, DataFile

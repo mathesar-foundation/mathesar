@@ -5,7 +5,7 @@ from unittest.mock import patch
 from db.schemas.utils import get_mathesar_schemas, get_schema_oid_from_name
 from mathesar.models import base as models_base
 from mathesar.models.base import Schema
-from mathesar import reflection
+from mathesar.state import django as reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 

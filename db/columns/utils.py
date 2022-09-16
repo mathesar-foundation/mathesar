@@ -9,7 +9,7 @@ def get_default_mathesar_column_list():
     return [MathesarColumn(col_name, **DEFAULT_COLUMNS[col_name]) for col_name in DEFAULT_COLUMNS]
 
 
-def get_mathesar_column_with_engine(col, engine):
+def to_mathesar_column_with_engine(col, engine):
     new_column = MathesarColumn.from_column(col)
     new_column.add_engine(engine)
     return new_column

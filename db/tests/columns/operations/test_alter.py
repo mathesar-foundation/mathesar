@@ -9,7 +9,7 @@ from db import constants
 from db.columns.operations import alter as alter_operations
 from db.columns.operations.alter import alter_column, batch_update_columns, change_column_nullable, rename_column, retype_column, set_column_default
 from db.columns.operations.select import get_column_attnum_from_name, get_column_default, get_columns_attnum_from_names
-from db.columns.utils import get_mathesar_column_with_engine
+from db.columns.utils import to_mathesar_column_with_engine
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
@@ -281,7 +281,7 @@ def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
             nullable_tup[1],
         )
     changed_table = reflect_table(table_name, schema, engine, metadata=get_empty_metadata())
-    changed_column = get_mathesar_column_with_engine(
+    changed_column = to_mathesar_column_with_engine(
         changed_table.columns[0],
         engine
     )
@@ -319,7 +319,7 @@ def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
             nullable_tup[1],
         )
     changed_table = reflect_table(table_name, schema, engine, metadata=get_empty_metadata())
-    changed_column = get_mathesar_column_with_engine(
+    changed_column = to_mathesar_column_with_engine(
         changed_table.columns[0],
         engine
     )

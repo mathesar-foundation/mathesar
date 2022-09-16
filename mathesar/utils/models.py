@@ -11,7 +11,7 @@ from db.schemas.operations.alter import alter_schema, SUPPORTED_SCHEMA_ALTER_ARG
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
-from mathesar.state.django import reflect_columns_from_table
+from mathesar.state import reset_reflection
 
 
 def user_directory_path(instance, filename):
@@ -33,7 +33,7 @@ def update_sa_table(table, validated_data):
     try:
         data = _update_id_to_attnum(table, validated_data)
         alter_table(table.name, table.oid, table.schema.name, table.schema._sa_engine, data)
-        reflect_columns_from_table(table)
+        reset_reflection()
     # TODO: Catch more specific exceptions
     except Exception as e:
         raise base_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
