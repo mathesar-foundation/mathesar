@@ -95,17 +95,15 @@ class ColumnViewSet(viewsets.ModelViewSet):
             table.schema._sa_engine,
             metadata=get_cached_metadata(),
         )
+        # The created column's Django model was automatically reflected. It can be reflected.
         dj_column = Column.objects.get(
             table=table,
             attnum=column_attnum,
         )
+        # Some properties of the column are not reflected (e.g. display options). Here we set those
+        # attributes on the reflected model.
         for k, v in serializer.validated_model_fields.items():
             setattr(dj_column, k, v)
-       #dj_column = Column(
-       #    table=table,
-       #    attnum=column_attnum,
-       #    **serializer.validated_model_fields
-       #)
         dj_column.save()
         out_serializer = ColumnSerializer(dj_column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
