@@ -24,13 +24,14 @@ def reflect_db_objects(metadata, skip_cache_check=False):
     logger.debug('reflect_db_objects called.')
     reflect_databases()
     for database in models.Database.current_objects.filter(deleted=False):
-        reflect_schemas_from_database(metadata, database.name)
+        reflect_schemas_from_database(database.name)
     for schema in models.Schema.current_objects.all():
-        reflect_tables_from_schema(metadata, schema)
+        reflect_tables_from_schema(schema, metadata=metadata)
     for table in models.Table.current_objects.all():
-        reflect_columns_from_table(metadata, table)
+        reflect_columns_from_table(table, metadata=metadata)
     # TODO where is the database variable coming from? someone explain how this even runs.
-    reflect_constraints_from_database(metadata, database.name)
+    for database in models.Database.current_objects.filter(deleted=False):
+        reflect_constraints_from_database(database.name)
 
 
 def reflect_databases():
@@ -53,7 +54,7 @@ def reflect_databases():
 
 
 # TODO pass in a cached engine instead of creating a new one
-def reflect_schemas_from_database(metadata, database_name):
+def reflect_schemas_from_database(database_name):
     engine = create_mathesar_engine(database_name)
     db_schema_oids = {
         schema['oid'] for schema in get_mathesar_schemas_with_oids(engine)
@@ -61,14 +62,14 @@ def reflect_schemas_from_database(metadata, database_name):
 
     database = models.Database.current_objects.get(name=database_name)
     for oid in db_schema_oids:
-        schema, boolean = models.Schema.current_objects.get_or_create(oid=oid, database=database)
+        schema, _ = models.Schema.current_objects.get_or_create(oid=oid, database=database)
     for schema in models.Schema.current_objects.all():
         if schema.database.name == database and schema.oid not in db_schema_oids:
             schema.delete()
     engine.dispose()
 
 
-def reflect_tables_from_schema(metadata, schema):
+def reflect_tables_from_schema(schema, metadata):
     db_table_oids = {
         table['oid']
         for table in get_table_oids_from_schema(
@@ -84,7 +85,7 @@ def reflect_tables_from_schema(metadata, schema):
             table.delete()
 
 
-def reflect_columns_from_table(metadata, table):
+def reflect_columns_from_table(table, metadata):
     attnums = {
         column['attnum']
         for column in get_column_attnums_from_table(table.oid, table.schema._sa_engine, metadata=metadata)
@@ -107,7 +108,7 @@ def reflect_columns_from_table(metadata, table):
 
 
 # TODO pass in a cached engine instead of creating a new one
-def reflect_constraints_from_database(metadata, database):
+def reflect_constraints_from_database(database):
     engine = create_mathesar_engine(database)
     db_constraints = get_constraints_with_oids(engine)
     for db_constraint in db_constraints:
@@ -123,7 +124,7 @@ def reflect_constraints_from_database(metadata, database):
 
 
 # TODO pass in a cached engine instead of creating a new one
-def reflect_new_table_constraints(metadata, table):
+def reflect_new_table_constraints(table):
     engine = create_mathesar_engine(table.schema.database.name)
     db_constraints = get_constraints_with_oids(engine, table_oid=table.oid)
     constraints = [
