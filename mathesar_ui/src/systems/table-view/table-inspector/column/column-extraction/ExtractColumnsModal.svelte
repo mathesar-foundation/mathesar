@@ -8,12 +8,10 @@
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
     getTableFromStoreOrApi,
     moveColumns,
-    refetchTablesForSchema,
     splitTable,
     tables as tablesDataStore,
   } from '@mathesar/stores/tables';
