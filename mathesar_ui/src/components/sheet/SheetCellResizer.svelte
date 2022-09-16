@@ -3,9 +3,9 @@
 
   type SheetColumnIdentifierKey = $$Generic;
 
-  const MIN_COLUMN_WIDTH = 50;
   const { api } = getSheetContext<SheetColumnIdentifierKey>();
 
+  export let minColumnWidth = 50;
   export let columnIdentifierKey: SheetColumnIdentifierKey;
 
   let isResizing = false;
@@ -25,7 +25,7 @@
     const pointerMovement = getPointerX(e) - (startingPointerX ?? 0);
     const newColumnWidth = Math.max(
       (startingColumnWidth ?? 0) + pointerMovement,
-      MIN_COLUMN_WIDTH,
+      minColumnWidth,
     );
     api.setColumnWidth(columnIdentifierKey, newColumnWidth);
   }
