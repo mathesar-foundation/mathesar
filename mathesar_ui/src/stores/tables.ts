@@ -1,3 +1,18 @@
+/**
+ * @file
+ *
+ * TODO This file **badly** needs to be refactored, cleaned up, and made to
+ * function more consistently with the rest of the codebase.
+ *
+ * - For values of type `Writable<DBTablesStoreData>`, we seem to be using using
+ *   names like `schemaStore`, `tableStore`, `tablesStore`, `schemaTablesStore`
+ *   almost interchangeably which is a readability nightmare.
+ *
+ * - Tables need to be sorted before being stored, but that sorting happens in
+ *   many different places. I suggest having a derived store that does the
+ *   sorting.
+ */
+
 import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
 import {
@@ -279,42 +294,55 @@ export function getTable(id: TableEntry['id']): CancellablePromise<TableEntry> {
 
 export function splitTable(
   id: number,
-  extract_columns: number[],
-  extracted_table_name: string,
+  idsOfColumnsToExtract: number[],
+  extractedTableName: string,
 ): CancellablePromise<SplitTableResponse> {
   return postAPI(`/api/db/v0/tables/${id}/split_table/`, {
-    extract_columns,
-    extracted_table_name,
+    extract_columns: idsOfColumnsToExtract,
+    extracted_table_name: extractedTableName,
   });
 }
 
 export function moveColumns(
-  id: number,
-  move_columns: number[],
-  target_table: number,
+  tableId: number,
+  idsOfColumnsToMove: number[],
+  targetTableId: number,
 ): CancellablePromise<null> {
-  return postAPI(`/api/db/v0/tables/${id}/move_columns/`, {
-    move_columns,
-    target_table,
+  return postAPI(`/api/db/v0/tables/${tableId}/move_columns/`, {
+    move_columns: idsOfColumnsToMove,
+    target_table: targetTableId,
   });
 }
 
 /**
  * Replace getTable with this function once the above mentioned changes are done.
  */
-export function getTableFromStore(
+export async function getTableFromStoreOrApi(
   id: TableEntry['id'],
-): CancellablePromise<TableEntry> {
+): Promise<TableEntry> {
   const schemaStore = findSchemaStoreForTable(id);
   if (schemaStore) {
     const tableEntry = get(schemaStore).data.get(id);
     if (tableEntry) {
-      return new CancellablePromise((resolve) => {
-        resolve(tableEntry);
-      });
+      return tableEntry;
     }
   }
-  return getTable(id);
+  const table = await getTable(id);
+  const store = schemaTablesStoreMap.get(table.schema);
+  if (store) {
+    store.update((existing) => {
+      const tableMap = new Map<number, TableEntry>();
+      const tables = [...existing.data.values(), table];
+      sortedTableEntries(tables).forEach((t) => {
+        tableMap.set(t.id, t);
+      });
+      return {
+        ...existing,
+        data: tableMap,
+      };
+    });
+  }
+  return table;
 }
 
 export function getTypeSuggestionsForTable(

@@ -8,9 +8,17 @@
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { tables as tablesDataStore } from '@mathesar/stores/tables';
+  import {
+    getTableFromStoreOrApi,
+    moveColumns,
+    refetchTablesForSchema,
+    splitTable,
+    tables as tablesDataStore,
+  } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import type { LinkedTable } from './columnExtractionTypes';
   import { getLinkedTables } from './columnExtractionUtils';
   import type { ExtractColumnsModalController } from './ExtractColumnsModalController';
@@ -47,7 +55,32 @@
   }
 
   async function handleSave() {
-    toast.info('Implementation pending');
+    const followUps: Promise<unknown>[] = [];
+    try {
+      if ($targetType === 'existingTable') {
+        const targetTableId = linkedTable?.table.id;
+        if (!targetTableId) {
+          throw new Error('No target table selected');
+        }
+        await moveColumns(
+          $tabularData.id,
+          $columns.map((c) => c.id),
+          targetTableId,
+        );
+      } else {
+        const response = await splitTable(
+          $tabularData.id,
+          $columns.map((c) => c.id),
+          tableName,
+        );
+        followUps.push(getTableFromStoreOrApi(response.extracted_table));
+      }
+      followUps.push($tabularData.refresh());
+      await Promise.all(followUps);
+      controller.close();
+    } catch (e) {
+      toast.error(getErrorMessage(e));
+    }
   }
 </script>
 
