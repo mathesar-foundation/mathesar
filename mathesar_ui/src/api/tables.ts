@@ -1,7 +1,7 @@
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { Column } from './tables/columns';
 
-type MinimalColumnDetails = Pick<
+export type MinimalColumnDetails = Pick<
   Column,
   'id' | 'name' | 'type' | 'type_options' | 'display_options'
 >;

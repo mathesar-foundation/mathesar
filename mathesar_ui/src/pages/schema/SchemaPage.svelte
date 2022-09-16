@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { TableEntry } from '@mathesar/api/tables';
   import EntityType from '@mathesar/components/EntityType.svelte';
   import QueryName from '@mathesar/components/QueryName.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
@@ -9,6 +10,7 @@
     getTablePageUrl,
     getDataExplorerPageUrl,
     getImportPageUrl,
+    getImportPreviewPageUrl,
   } from '@mathesar/routes/urls';
   import { queries } from '@mathesar/stores/queries';
   import { tables as tablesStore } from '@mathesar/stores/tables';
@@ -19,6 +21,20 @@
 
   $: tablesMap = $tablesStore.data;
   $: queriesMap = $queries.data;
+
+  // TODO: Move this function to a common location
+  function isTableImportConfirmationRequired(table: TableEntry): boolean {
+    /**
+     * table.import_verified can be null when tables have been
+     * manually added to the db/already present in db in which
+     * case we should not ask for re-confirmation.
+     */
+    return (
+      table.import_verified === false &&
+      table.data_files !== undefined &&
+      table.data_files.length > 0
+    );
+  }
 </script>
 
 <svelte:head>
@@ -44,16 +60,25 @@
   </div>
 
   <div class="entity-list-wrapper">
-    <h2 class="entity-list-title">Tables ({tablesMap.size})</h2>
+    <h2 class="entity-list-title">Tables ({schema.num_tables})</h2>
     <ul class="entity-list">
       {#each [...tablesMap.values()] as table (table.id)}
         <li class="entity-list-item">
-          <a href={getTablePageUrl(database.name, schema.id, table.id)}>
+          <a
+            href={isTableImportConfirmationRequired(table)
+              ? getImportPreviewPageUrl(database.name, schema.id, table.id)
+              : getTablePageUrl(database.name, schema.id, table.id)}
+          >
             <TableName {table} />
+            {#if isTableImportConfirmationRequired(table)}
+              *
+            {/if}
           </a>
-          <span class="record-selector-for-table">
-            <RecordSelectorNavigationButton {table} />
-          </span>
+          {#if !isTableImportConfirmationRequired(table)}
+            <span class="record-selector-for-table">
+              <RecordSelectorNavigationButton {table} />
+            </span>
+          {/if}
         </li>
       {/each}
     </ul>
@@ -61,7 +86,7 @@
 
   <div class="entity-list-wrapper">
     <h2 class="entity-list-title">
-      Explorations ({[...queriesMap.values()].length})
+      Explorations ({schema.num_queries})
     </h2>
     <ul class="entity-list">
       {#each [...queriesMap.values()] as query (query.id)}
