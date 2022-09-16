@@ -1,6 +1,3 @@
-from collections import Counter
-from frozendict import frozendict
-
 import pytest
 from unittest.mock import patch
 
