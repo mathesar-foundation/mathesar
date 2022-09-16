@@ -89,11 +89,23 @@ class ColumnViewSet(viewsets.ModelViewSet):
                     message='This type casting is invalid.',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-        dj_column = Column(
-            table=table,
-            attnum=get_column_attnum_from_name(table.oid, column.name, table.schema._sa_engine, metadata=get_cached_metadata()),
-            **serializer.validated_model_fields
+        column_attnum = get_column_attnum_from_name(
+            table.oid,
+            column.name,
+            table.schema._sa_engine,
+            metadata=get_cached_metadata(),
         )
+        dj_column = Column.objects.get(
+            table=table,
+            attnum=column_attnum,
+        )
+        for k, v in serializer.validated_model_fields.items():
+            setattr(dj_column, k, v)
+       #dj_column = Column(
+       #    table=table,
+       #    attnum=column_attnum,
+       #    **serializer.validated_model_fields
+       #)
         dj_column.save()
         out_serializer = ColumnSerializer(dj_column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
