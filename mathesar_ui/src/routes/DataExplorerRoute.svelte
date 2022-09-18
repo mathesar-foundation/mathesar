@@ -13,7 +13,6 @@
   import { getAvailableName } from '@mathesar/utils/db';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
-  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { constructQueryModelFromTerseSummarizationHash } from '@mathesar/systems/query-builder/urlSerializationUtils';
 
   export let database: Database;
@@ -31,18 +30,18 @@
       $currentDbAbstractTypes.data,
     );
     is404 = false;
-    queryManager.on('save', async (instance) => {
-      try {
-        const url = getDataExplorerPageUrl(
-          database.name,
-          schema.id,
-          instance.id,
-        );
-        router.goto(url, true);
-      } catch (err) {
-        console.error('There was an error when updating the URL', err);
-      }
-    });
+    // queryManager.on('save', async (instance) => {
+    //   try {
+    //     const url = getDataExplorerPageUrl(
+    //       database.name,
+    //       schema.id,
+    //       instance.id,
+    //     );
+    //     router.goto(url, true);
+    //   } catch (err) {
+    //     console.error('There was an error when updating the URL', err);
+    //   }
+    // });
   }
 
   function removeQueryManager(): void {
@@ -74,7 +73,6 @@
         };
         router.location.hash.clear();
         createQueryManager(newQueryModel);
-        queryManager?.save();
         return;
       } catch {
         // fail silently

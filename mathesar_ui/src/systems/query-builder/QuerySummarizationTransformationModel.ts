@@ -1,5 +1,5 @@
 import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/queries';
-import { ImmutableMap } from '@mathesar/component-library';
+import { ImmutableMap } from '@mathesar-component-library';
 
 export interface QuerySummarizationAggregationEntry {
   inputAlias: string;

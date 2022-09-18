@@ -18,16 +18,17 @@
 
   $: ({
     query,
-    processedResultColumns,
+    processedColumns,
     records,
     state,
     selectedColumnAlias,
     pagination,
+    runState,
   } = queryManager);
   $: ({ base_table, initial_columns } = $query);
 
-  $: columnRunState = $state.columnsFetchState?.state;
-  $: recordRunState = $state.recordsFetchState?.state;
+  $: columnRunState = $runState?.state;
+  $: recordRunState = $runState?.state;
   $: lastFetchTypeEqualsRecords = $state.lastFetchType === 'records';
 
   $: columnRunErrors =
@@ -40,7 +41,7 @@
       : [];
   // Prioritize showing column errors over record fetch errors
   $: errors = columnRunErrors.length > 0 ? columnRunErrors : recordRunErrors;
-  $: columnList = [...$processedResultColumns.values()];
+  $: columnList = [...$processedColumns.values()];
   // Show a dummy ghost row when there are no records
   $: showDummyGhostRow =
     recordRunState === 'success' && !$records.results.length;
@@ -86,7 +87,7 @@
             appearance="plain"
             size="small"
             class="padding-zero"
-            on:click={() => queryManager.fetchColumnsAndRecords()}
+            on:click={() => queryManager.run()}
           >
             <Icon {...iconRefresh} size="0.6rem" />
             <span>Retry</span>

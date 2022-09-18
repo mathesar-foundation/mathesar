@@ -156,22 +156,6 @@ export default class QueryModel {
     };
   }
 
-  withTransformations(
-    transformations?: QueryInstanceTransformation[],
-  ): QueryModelUpdateDiff {
-    const model = new QueryModel({
-      ...this,
-      transformations,
-    });
-    return {
-      model,
-      type: 'transformations',
-      diff: {
-        transformations,
-      },
-    };
-  }
-
   withTransformationModels(
     transformationModels?: QueryTransformationModel[],
   ): QueryModelUpdateDiff {
