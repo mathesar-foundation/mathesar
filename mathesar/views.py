@@ -42,7 +42,7 @@ def get_queries_list(request, schema):
     if schema is None:
         return []
     query_serializer = QuerySerializer(
-        UIQuery.objects.all(),
+        UIQuery.objects.filter(base_table__schema=schema),
         many=True,
         context={'request': request}
     )
