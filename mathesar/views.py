@@ -110,14 +110,6 @@ def home(request):
     return redirect('schemas', db_name=database.name)
 
 
-# There is no db_home.
-# db_home and schemas are the same page in FE
-# def db_home(request, db_name):
-#     database = get_current_database(request, db_name)
-#     schema = get_current_schema(request, None, database)
-#     return render_schema(request, database, schema)
-
-
 def schema_home(request, db_name, schema_id, **kwargs):
     database = get_current_database(request, db_name)
     schema = get_current_schema(request, schema_id, database)
