@@ -12,7 +12,7 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import { queries as queriesStore } from '@mathesar/stores/queries';
-  import type { QueryInstance } from '@mathesar/api/queries/queryList';
+  import type { QueryInstance } from '@mathesar/api/queries';
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type {
     BreadcrumbSelectorEntry,

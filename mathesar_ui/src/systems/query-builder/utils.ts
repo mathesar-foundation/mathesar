@@ -1,6 +1,6 @@
 import { ImmutableMap } from '@mathesar-component-library';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type { QueryResultColumn } from '@mathesar/api/queries/queryList';
+import type { QueryResultColumn } from '@mathesar/api/queries';
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,

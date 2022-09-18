@@ -8,7 +8,7 @@
   import { queries, getQuery } from '@mathesar/stores/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { CancellablePromise } from '@mathesar/component-library';
-  import type { QueryInstance } from '@mathesar/api/queries/queryList';
+  import type { QueryInstance } from '@mathesar/api/queries';
   import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';

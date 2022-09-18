@@ -14,7 +14,7 @@ import type {
   QueryResultColumn,
   QueryResultColumns,
   QueryResultRecords,
-} from '@mathesar/api/queries/queryList';
+} from '@mathesar/api/queries';
 import type { TableEntry } from '@mathesar/api/tables';
 import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
 import { createQuery, putQuery } from '@mathesar/stores/queries';

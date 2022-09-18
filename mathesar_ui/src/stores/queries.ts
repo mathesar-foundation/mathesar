@@ -5,7 +5,7 @@ import type { RequestStatus, PaginatedResponse } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { SchemaEntry } from '@mathesar/AppTypes';
-import type { QueryInstance } from '@mathesar/api/queries/queryList';
+import type { QueryInstance } from '@mathesar/api/queries';
 import { CancellablePromise } from '@mathesar-component-library';
 
 import { currentSchemaId } from './schemas';
