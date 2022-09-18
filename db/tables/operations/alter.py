@@ -27,8 +27,6 @@ def comment_on_table(name, schema, engine, comment):
 
 
 def alter_table(table_name, table_oid, schema, engine, update_data):
-    if 'name' in update_data and 'columns' in update_data:
-        raise ValueError('Only name or columns can be passed in, not both.')
     if 'description' in update_data:
         comment_on_table(table_name, schema, engine, update_data['description'])
     if 'name' in update_data:
