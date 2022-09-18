@@ -106,9 +106,7 @@ export async function refetchTablesForSchema(
   }
 }
 
-// Since we are not landing on the first schema page by default
-// hence preloading the first schema data won't make any sense
-let preload = false;
+let preload = true;
 
 export function getTablesStoreForSchema(
   schemaId: SchemaEntry['id'],
@@ -120,12 +118,12 @@ export function getTablesStoreForSchema(
       data: new Map(),
     });
     schemaTablesStoreMap.set(schemaId, store);
-    if (preload) {
-      preload = false;
+    if (preload && commonData?.current_schema === schemaId) {
       store = setSchemaTablesStore(schemaId, commonData?.tables ?? []);
     } else {
       void refetchTablesForSchema(schemaId);
     }
+    preload = false;
   } else if (get(store).error) {
     void refetchTablesForSchema(schemaId);
   }
