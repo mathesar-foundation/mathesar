@@ -167,12 +167,12 @@ class Schema(DatabaseObject):
 
     def update_sa_schema(self, update_params):
         result = model_utils.update_sa_schema(self, update_params)
-        clear_cached_metadata()
+        reset_reflection()
         return result
 
     def delete_sa_schema(self):
         result = drop_schema(self.name, self._sa_engine, cascade=True)
-        clear_cached_metadata()
+        reset_reflection()
         return result
 
     def clear_name_cache(self):

@@ -100,11 +100,12 @@ class ColumnViewSet(viewsets.ModelViewSet):
             table=table,
             attnum=column_attnum,
         )
-        # Some properties of the column are not reflected (e.g. display options). Here we set those
-        # attributes on the reflected model.
-        for k, v in serializer.validated_model_fields.items():
-            setattr(dj_column, k, v)
-        dj_column.save()
+        # Some properties of the column are not reflected (e.g. display options). Here we add those
+        # attributes to the reflected model.
+        if serializer.validated_model_fields:
+            for k, v in serializer.validated_model_fields.items():
+                setattr(dj_column, k, v)
+            dj_column.save()
         out_serializer = ColumnSerializer(dj_column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
@@ -179,7 +180,6 @@ class ColumnViewSet(viewsets.ModelViewSet):
         table = column_instance.table
         try:
             table.drop_column(column_instance.attnum)
-            column_instance.delete()
         except IndexError:
             raise NotFound
         return Response(status=status.HTTP_204_NO_CONTENT)

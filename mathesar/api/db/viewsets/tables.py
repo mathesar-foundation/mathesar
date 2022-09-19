@@ -56,7 +56,6 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     def destroy(self, request, pk=None):
         table = self.get_object()
         table.delete_sa_table()
-        table.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
@@ -101,9 +100,6 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
             remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
 
-            # Reflect tables so that the newly created/extracted tables objects are created
-            reflect_tables_from_schema(table.schema, metadata=get_cached_metadata())
-
             extracted_table = Table.current_objects.get(oid=extracted_table_oid)
             # Update attnum as it would have changed due to columns moving to a new table.
             extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
@@ -111,7 +107,6 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             remainder_table = Table.current_objects.get(oid=remainder_table_oid)
             remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
 
-            reset_reflection()
             extracted_table = Table.objects.get(oid=extracted_table_oid)
             remainder_table_obj = Table.objects.get(oid=remainder_table_oid)
             split_table_response = {
