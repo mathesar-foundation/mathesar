@@ -317,32 +317,43 @@ export function moveColumns(
 /**
  * Replace getTable with this function once the above mentioned changes are done.
  */
-export async function getTableFromStoreOrApi(
+export function getTableFromStoreOrApi(
   id: TableEntry['id'],
-): Promise<TableEntry> {
+): CancellablePromise<TableEntry> {
   const schemaStore = findSchemaStoreForTable(id);
   if (schemaStore) {
     const tableEntry = get(schemaStore).data.get(id);
     if (tableEntry) {
-      return tableEntry;
+      return new CancellablePromise((resolve) => {
+        resolve(tableEntry);
+      });
     }
   }
-  const table = await getTable(id);
-  const store = schemaTablesStoreMap.get(table.schema);
-  if (store) {
-    store.update((existing) => {
-      const tableMap = new Map<number, TableEntry>();
-      const tables = [...existing.data.values(), table];
-      sortedTableEntries(tables).forEach((t) => {
-        tableMap.set(t.id, t);
-      });
-      return {
-        ...existing,
-        data: tableMap,
-      };
-    });
-  }
-  return table;
+  const promise = getTable(id);
+  return new CancellablePromise(
+    (resolve, reject) => {
+      void promise.then((table) => {
+        const store = schemaTablesStoreMap.get(table.schema);
+        if (store) {
+          store.update((existing) => {
+            const tableMap = new Map<number, TableEntry>();
+            const tables = [...existing.data.values(), table];
+            sortedTableEntries(tables).forEach((t) => {
+              tableMap.set(t.id, t);
+            });
+            return {
+              ...existing,
+              data: tableMap,
+            };
+          });
+        }
+        return resolve(table);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
 }
 
 export function getTypeSuggestionsForTable(
