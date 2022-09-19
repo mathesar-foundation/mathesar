@@ -5,6 +5,7 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { iconExploration } from '@mathesar/icons';
+  import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -19,9 +20,9 @@
   item={{
     type: 'simple',
     href: getExplorationPageUrl(database.name, schema.id, queryId),
-    label: $query?.name ?? 'Data Explorer',
+    label: $query?.name ?? 'Exploration',
     icon: iconExploration,
   }}
 />
 
-Exploration Page
+<ExplorationPage {database} {schema} {queryId} />
