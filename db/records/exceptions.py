@@ -16,3 +16,11 @@ class InvalidGroupType(Exception):
 
 class UndefinedFunction(Exception):
     pass
+
+
+class InvalidDate(Exception):
+    pass
+
+
+class InvalidDateFormat(Exception):
+    pass
