@@ -19,7 +19,7 @@ import { currentDBName } from './databases';
 const commonData = preloadCommonData();
 
 export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
-  writable(commonData?.current_schema || undefined);
+  writable(commonData?.current_schema ?? undefined);
 
 export interface DBSchemaStoreData {
   state: States;

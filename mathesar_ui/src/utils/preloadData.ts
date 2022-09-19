@@ -12,7 +12,7 @@ interface CommonData {
   tables: TableEntry[];
   queries: QueryInstance[];
   current_db: string;
-  current_schema: number;
+  current_schema: number | null;
   abstract_types: AbstractTypeResponse[];
 }
 

@@ -85,6 +85,9 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
         )
         conn.execute(split_ins)
         remainder_table_oid = get_oid_from_table(remainder_table_with_fk_column.name, schema, engine)
-        deletion_column_data = [{'attnum': column_attnum} for column_attnum in extracted_column_attnums]
+        deletion_column_data = [
+            {'attnum': column_attnum, 'delete': True}
+            for column_attnum in extracted_column_attnums
+        ]
         batch_alter_table_drop_columns(remainder_table_oid, deletion_column_data, conn, engine)
     return extracted_table, remainder_table_with_fk_column, fk_column_name

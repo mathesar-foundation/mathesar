@@ -7,6 +7,8 @@ class ErrorCodes(Enum):
     # API Error
     MethodNotAllowed = 4006
     NotFound = 4005
+    TableNotFound = 4041
+    RecordNotFound = 4042
     UnknownError = 4999
     # Generic Errors
     ProgrammingError = 4101
@@ -43,6 +45,8 @@ class ErrorCodes(Enum):
     URLNotReachableError = 4405
     URLInvalidContentType = 4406
     UnknownDBType = 4408
+    InvalidDateError = 4413
+    InvalidDateFormatError = 4414
     InvalidLinkChoice = 4409
     IncompatibleFractionDigitValues = 4410
     UnsupportedConstraint = 4411
