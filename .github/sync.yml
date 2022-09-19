@@ -9,6 +9,17 @@ centerofci/mathesar-ansible:
   - .github/workflows/update-project-on-issue-label.yml
   - .github/workflows/update-project-on-pr-edit.yml
   - .github/workflows/update-project-on-pr-label.yml
+centerofci/mathesar-data-playground:
+  - .github/actions/project_update/
+  - .github/workflows/add-to-project.yml
+  - .github/workflows/toc.yml
+  - .github/workflows/stale.yml
+  - .github/workflows/update-project-on-issue-assign.yml
+  - .github/workflows/update-project-on-issue-close.yml
+  - .github/workflows/update-project-on-issue-edit.yml
+  - .github/workflows/update-project-on-issue-label.yml
+  - .github/workflows/update-project-on-pr-edit.yml
+  - .github/workflows/update-project-on-pr-label.yml
 centerofci/mathesar-design:
   - .github/actions/project_update/
   - .github/workflows/add-to-project.yml

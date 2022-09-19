@@ -49,7 +49,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.pull_request.node_id }} --status Blocked
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Waiting
 
       - name: Update Ready PRs
         if: "${{ contains(github.event.pull_request.labels.*.name, 'status: ready') }}"
