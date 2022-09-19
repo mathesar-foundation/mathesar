@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import {
     Icon,
     LabeledInput,
@@ -19,8 +18,6 @@
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
-
-  const dispatch = createEventDispatcher();
 
   export let queryManager: QueryManager;
 
@@ -98,9 +95,6 @@
           <span>Redo</span>
         </Button>
       </InputGroup>
-      <Button appearance="default" on:click={() => dispatch('close')}
-        >Close</Button
-      >
     </div>
   </div>
   <div class="content-pane">
