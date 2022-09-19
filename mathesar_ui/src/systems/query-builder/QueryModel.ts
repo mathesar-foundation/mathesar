@@ -187,4 +187,8 @@ export default class QueryModel {
       ),
     };
   }
+
+  isSaved(): boolean {
+    return !!this.id;
+  }
 }

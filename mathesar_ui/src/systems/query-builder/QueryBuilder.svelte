@@ -1,10 +1,5 @@
 <script lang="ts">
-  import {
-    Icon,
-    LabeledInput,
-    InputGroup,
-    Button,
-  } from '@mathesar-component-library';
+  import { Icon, InputGroup, Button } from '@mathesar-component-library';
   import EditableTitle from '@mathesar/components/EditableTitle.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
@@ -68,14 +63,31 @@
         <Icon {...iconExploration} size="1.5em" />
       </div>
 
-      <EditableTitle
-        value={$query.name}
-        size={1.266}
-        on:change={handleQueryNameChange}
-      />
+      {#if $query.isSaved()}
+        <EditableTitle
+          value={$query.name}
+          size={1.266}
+          on:change={handleQueryNameChange}
+        />
+        <div class="base-table-holder">
+          Based on {currentTable?.name}
+        </div>
+      {:else}
+        <div class="title">Exploring</div>
+        <div class="base-table-holder">
+          <SelectTableWithinCurrentSchema
+            autoSelect="none"
+            table={currentTable}
+            on:change={(e) => onBaseTableChange(e.detail)}
+          />
+        </div>
+      {/if}
     </div>
 
-    <SaveStatusIndicator status={$state.saveState?.state} />
+    {#if $query.isSaved()}
+      <SaveStatusIndicator status={$state.saveState?.state} />
+    {/if}
+
     <div class="actions">
       <InputGroup>
         <Button
@@ -98,23 +110,21 @@
     </div>
   </div>
   <div class="content-pane">
-    <div class="input-sidebar">
-      <div class="base-table-selector">
-        <LabeledInput label="Select Base Table" layout="stacked">
-          <SelectTableWithinCurrentSchema
-            autoSelect="none"
-            table={currentTable}
-            on:change={(e) => onBaseTableChange(e.detail)}
-          />
-        </LabeledInput>
+    {#if !$query.base_table}
+      <div class="help-text">Please select a table to start exploring</div>
+    {:else}
+      <div class="input-sidebar">
+        <ColumnSelectionPane
+          {queryManager}
+          on:add={(e) => addColumn(e.detail)}
+        />
       </div>
-      <ColumnSelectionPane {queryManager} on:add={(e) => addColumn(e.detail)} />
-    </div>
-    <!-- Do not use inputColumnManager in ResultPane because
-      we'd also use ResultPane for query page where input column
-      details would not be available-->
-    <ResultPane {queryManager} />
-    <OutputConfigSidebar {queryManager} />
+      <!-- Do not use inputColumnManager in ResultPane because
+        we'd also use ResultPane for query page where input column
+        details would not be available-->
+      <ResultPane {queryManager} />
+      <OutputConfigSidebar {queryManager} />
+    {/if}
   </div>
 </div>
 
@@ -130,17 +140,27 @@
       display: flex;
       align-items: center;
       height: 4rem;
-      border-bottom: 1px solid var(--color-gray-dark);
+      border-bottom: 1px solid var(--color-gray-medium);
       position: relative;
       overflow: hidden;
+      background: var(--color-gray-lighter);
 
       .title-wrapper {
         display: flex;
         align-items: center;
         overflow: hidden;
         padding: 0.7rem 1rem;
-        margin-right: 1rem;
-        border-right: 1px solid var(--color-gray-medium);
+
+        .title {
+          font-size: 1.266rem;
+        }
+
+        .base-table-holder {
+          flex-grow: 0;
+          flex-shrink: 0;
+          margin-left: 0.6rem;
+          min-width: 14rem;
+        }
       }
 
       .icon {
@@ -175,6 +195,10 @@
       right: 0;
       overflow-x: auto;
 
+      .help-text {
+        padding: 1rem;
+      }
+
       .input-sidebar {
         width: 20rem;
         border-right: 1px solid var(--color-gray-medium);
@@ -183,17 +207,6 @@
         flex-basis: 20rem;
         display: flex;
         flex-direction: column;
-
-        .base-table-selector {
-          border-bottom: 1px solid var(--color-gray-medium);
-          padding: 1rem;
-          background: var(--color-gray-light);
-          flex-grow: 0;
-          flex-shrink: 0;
-          :global(label) {
-            font-weight: 500;
-          }
-        }
       }
     }
   }
