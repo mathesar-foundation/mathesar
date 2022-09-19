@@ -83,6 +83,7 @@
   on:close={close}
   on:open
   on:close
+  let:close
 >
-  <slot name="content" />
+  <slot name="content" {close} />
 </AttachableDropdown>

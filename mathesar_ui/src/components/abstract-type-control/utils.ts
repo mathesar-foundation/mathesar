@@ -10,6 +10,19 @@ import type { Column } from '@mathesar/api/tables/columns';
 import { readable } from 'svelte/store';
 import DurationConfiguration from './config-components/DurationConfiguration.svelte';
 
+export interface ColumnWithAbstractType
+  extends Pick<
+    Column,
+    'id' | 'type' | 'type_options' | 'display_options' | 'valid_target_types'
+  > {
+  abstractType: AbstractType;
+}
+
+export type ColumnTypeOptionsSaveArgs = Pick<
+  ColumnWithAbstractType,
+  'type' | 'type_options' | 'display_options'
+>;
+
 export function getFormValueStore(
   form: FormBuildConfiguration | undefined,
 ): FormBuildConfiguration['values'] {
@@ -22,7 +35,7 @@ export function getFormValueStore(
 export function constructDbForm(
   selectedAbstractType: AbstractType,
   selectedDbType: DbType,
-  column: Column,
+  column: ColumnWithAbstractType,
 ): {
   dbOptionsConfig?: AbstractTypeDbConfig;
   dbForm?: FormBuildConfiguration;
@@ -51,7 +64,7 @@ export function constructDbForm(
 export function constructDisplayForm(
   selectedAbstractType: AbstractType,
   selectedDbType: DbType,
-  column: Column,
+  column: ColumnWithAbstractType,
 ): {
   displayOptionsConfig?: AbstractTypeDisplayConfig;
   displayForm?: FormBuildConfiguration;

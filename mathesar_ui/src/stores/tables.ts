@@ -1,6 +1,5 @@
 import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-
 import {
   getAPI,
   postAPI,
@@ -9,11 +8,10 @@ import {
   patchAPI,
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-
 import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/tables';
+import type { TableEntry, MinimalColumnDetails } from '@mathesar/api/tables';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar-component-library';
+import { CancellablePromise } from '@mathesar-component-library';
 
 import { currentSchemaId } from './schemas';
 
@@ -120,38 +118,192 @@ export function getTablesStoreForSchema(
       data: new Map(),
     });
     schemaTablesStoreMap.set(schemaId, store);
-    if (preload) {
-      preload = false;
+    if (preload && commonData?.current_schema === schemaId) {
       store = setSchemaTablesStore(schemaId, commonData?.tables ?? []);
     } else {
       void refetchTablesForSchema(schemaId);
     }
+    preload = false;
   } else if (get(store).error) {
     void refetchTablesForSchema(schemaId);
   }
   return store;
 }
 
+/**
+ * TODO: Use a dedicated higher level Tables store and
+ * remove this function.
+ */
+function findSchemaStoreForTable(id: TableEntry['id']) {
+  return [...schemaTablesStoreMap.values()].find((entry) =>
+    get(entry).data.has(id),
+  );
+}
+
+function findAndUpdateTableStore(id: TableEntry['id'], tableEntry: TableEntry) {
+  findSchemaStoreForTable(id)?.update((tableStoreData) => {
+    const existingTableEntry = tableStoreData.data.get(id);
+    const updatedTableEntry = {
+      ...(existingTableEntry ?? {}),
+      ...tableEntry,
+    };
+    tableStoreData.data.set(id, updatedTableEntry);
+    const tableEntryMap: DBTablesStoreData['data'] = new Map();
+    sortedTableEntries([...tableStoreData.data.values()]).forEach((entry) => {
+      tableEntryMap.set(entry.id, entry);
+    });
+    return {
+      ...tableStoreData,
+      data: tableEntryMap,
+    };
+  });
+}
+
 export function deleteTable(id: number): CancellablePromise<TableEntry> {
-  return deleteAPI(`/api/db/v0/tables/${id}/`);
+  const promise = deleteAPI<TableEntry>(`/api/db/v0/tables/${id}/`);
+  return new CancellablePromise(
+    (resolve, reject) => {
+      void promise.then((value) => {
+        findSchemaStoreForTable(id)?.update((tableStoreData) => {
+          tableStoreData.data.delete(id);
+          return {
+            ...tableStoreData,
+            data: new Map(tableStoreData.data),
+          };
+        });
+        return resolve(value);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
 }
 
 export function renameTable(
   id: number,
   name: string,
 ): CancellablePromise<TableEntry> {
-  return patchAPI(`/api/db/v0/tables/${id}/`, { name });
+  const promise = patchAPI<TableEntry>(`/api/db/v0/tables/${id}/`, { name });
+  return new CancellablePromise(
+    (resolve, reject) => {
+      void promise.then((value) => {
+        findAndUpdateTableStore(id, value);
+        return resolve(value);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
 }
 
 export function createTable(
   schema: SchemaEntry['id'],
-  name?: string,
+  tableArgs: {
+    name?: string;
+    dataFiles?: [number, ...number[]];
+  },
 ): CancellablePromise<TableEntry> {
-  return postAPI<TableEntry>('/api/db/v0/tables/', { schema, name });
+  const promise = postAPI<TableEntry>('/api/db/v0/tables/', {
+    schema,
+    name: tableArgs.name,
+    data_files: tableArgs.dataFiles,
+  });
+  return new CancellablePromise(
+    (resolve, reject) => {
+      void promise.then((value) => {
+        schemaTablesStoreMap.get(value.schema)?.update((existing) => {
+          const tableEntryMap: DBTablesStoreData['data'] = new Map();
+          sortedTableEntries([...existing.data.values(), value]).forEach(
+            (entry) => {
+              tableEntryMap.set(entry.id, entry);
+            },
+          );
+          return {
+            ...existing,
+            data: tableEntryMap,
+          };
+        });
+        return resolve(value);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
 }
 
-export function getTable(id: number): CancellablePromise<TableEntry> {
+export function patchTable(
+  id: TableEntry['id'],
+  patch: {
+    name?: TableEntry['name'];
+    import_verified?: TableEntry['import_verified'];
+    columns?: MinimalColumnDetails[];
+  },
+): CancellablePromise<TableEntry> {
+  const promise = patchAPI<TableEntry>(`/api/db/v0/tables/${id}/`, patch);
+  return new CancellablePromise(
+    (resolve, reject) => {
+      void promise.then((value) => {
+        findAndUpdateTableStore(id, value);
+        return resolve(value);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
+}
+
+/**
+ * NOTE: The getTable function currently does not get data from the store.
+ * We need to keep it that way for the time-being, because the components
+ * that call this function expect latest data from the db, while the store
+ * contains stale information.
+ *
+ * TODO:
+ * 1. Keep stores upto-date when user performs any action to related db objects.
+ * 2. Find a sync mechanism to keep the frontend stores upto-date when
+ *    data in db changes.
+ * 3. Move all api-call-only functions to /api. Only keep functions that
+ *    update the stores within /stores
+ */
+export function getTable(id: TableEntry['id']): CancellablePromise<TableEntry> {
   return getAPI(`/api/db/v0/tables/${id}/`);
+}
+
+/**
+ * Replace getTable with this function once the above mentioned changes are done.
+ */
+export function getTableFromStore(
+  id: TableEntry['id'],
+): CancellablePromise<TableEntry> {
+  const schemaStore = findSchemaStoreForTable(id);
+  if (schemaStore) {
+    const tableEntry = get(schemaStore).data.get(id);
+    if (tableEntry) {
+      return new CancellablePromise((resolve) => {
+        resolve(tableEntry);
+      });
+    }
+  }
+  return getTable(id);
+}
+
+export function getTypeSuggestionsForTable(
+  id: TableEntry['id'],
+): CancellablePromise<Record<string, string>> {
+  return getAPI(`/api/db/v0/tables/${id}/type_suggestions/`);
+}
+
+export function generateTablePreview(
+  id: TableEntry['id'],
+  columns: MinimalColumnDetails[],
+): CancellablePromise<{
+  records: Record<string, unknown>[];
+}> {
+  return postAPI(`/api/db/v0/tables/${id}/previews/`, { columns });
 }
 
 export const tables: Readable<DBTablesStoreData> = derived(
