@@ -63,7 +63,9 @@
       class:in-focus={index === $focusedOptionIndex}
       on:click={() => api.pick(option)}
     >
-      <StringOrComponent arg={$staticProps.getLabel(option)} />
+      <slot {option} label={$staticProps.getLabel(option)}>
+        <StringOrComponent arg={$staticProps.getLabel(option)} />
+      </slot>
     </li>
   {/each}
 </ul>

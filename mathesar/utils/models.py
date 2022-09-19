@@ -31,7 +31,7 @@ def update_sa_table(table, validated_data):
     if errors:
         raise base_api_exceptions.GenericAPIException(errors, status_code=status.HTTP_400_BAD_REQUEST)
     try:
-        data = _update_id_to_attnum(table, validated_data)
+        data = _update_columns_side_effector(table, validated_data)
         alter_table(table.name, table.oid, table.schema.name, table.schema._sa_engine, data)
         reflect_columns_from_table(table)
     # TODO: Catch more specific exceptions
@@ -74,14 +74,19 @@ def attempt_dumb_query(engine):
         con.execute(text('select 1 as is_alive'))
 
 
-def _update_id_to_attnum(table, validated_data):
-    if 'columns' in validated_data:
-        data = validated_data.get('columns')
+def _update_columns_side_effector(table, validated_data):
+    data = validated_data.get('columns')
+    if data is not None:
         queryset = table.columns.all()
         for column_data in data:
-            col_id = column_data.get('id', None)
-            if col_id is not None:
-                attnum = queryset.get(id=col_id).attnum
-                column_data['attnum'] = attnum
-                column_data.pop('id')
+            col_id = column_data.pop('id')
+            dj_col = queryset.get(id=col_id)
+            column_data['attnum'] = dj_col.attnum
+            display_options = column_data.pop('display_options', 'NOT PASSED')
+            if display_options != 'NOT PASSED':
+                dj_col.display_options = display_options
+                dj_col.save()
+        for col in queryset:
+            if col.attnum not in {column_data['attnum'] for column_data in data}:
+                data.append({"attnum": col.attnum, "delete": True})
     return validated_data

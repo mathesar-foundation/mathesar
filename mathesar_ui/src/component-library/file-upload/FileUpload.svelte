@@ -14,32 +14,18 @@
     iconFile,
     iconUploadFile,
   } from '@mathesar-component-library-dir/common/icons';
-  import type {
-    FileUpload,
-    FileUploadProgress,
-    FileUploadAddDetail,
-  } from './FileUploadTypes';
+  import type { FileUpload, FileUploadAddDetail } from './FileUploadTypes';
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{ add: FileUploadAddDetail }>();
   const componentId = `file-import-${getId()}`;
 
-  export let fileProgress: Record<string, FileUploadProgress> | undefined =
+  export let fileProgress: Record<string, number | undefined> | undefined =
     undefined;
   export let multiple = false;
   export let fileUploads: FileUpload[] | undefined = undefined;
 
   let fileId = 0;
   let state = 'idle';
-
-  export function updateState(
-    fileIdentifier: string,
-    progress: FileUploadProgress,
-  ): void {
-    fileProgress = {
-      ...fileProgress,
-      [fileIdentifier]: progress,
-    };
-  }
 
   function processFiles(event: Event, files: FileList | File[]) {
     const newUploads: FileUpload[] = [];
@@ -101,15 +87,11 @@
           <div class="file-info">
             <div class="name">{upload.file.name}</div>
             <Progress
-              percentage={Math.round(
-                fileProgress?.[upload.fileId]?.progress || 0,
-              )}
+              percentage={Math.round(fileProgress?.[upload.fileId] ?? 0)}
             />
             <div class="upload-info">
               <span>
-                Uploaded {Math.round(
-                  fileProgress?.[upload.fileId]?.progress || 0,
-                )}%
+                Uploaded {Math.round(fileProgress?.[upload.fileId] ?? 0)}%
               </span>
               <span>{formatSize(upload.file.size)}</span>
             </div>
