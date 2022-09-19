@@ -7,7 +7,7 @@
   import type { TableEntry } from '@mathesar/api/tables';
   import {
     getTablePageUrl,
-    getDataExplorerPageUrl,
+    getExplorationPageUrl,
   } from '@mathesar/routes/urls';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
@@ -46,11 +46,11 @@
     return {
       type: 'simple',
       label: queryInstance.name,
-      href: getDataExplorerPageUrl(database.name, schema.id, queryInstance.id),
+      href: getExplorationPageUrl(database.name, schema.id, queryInstance.id),
       icon: iconTable,
       isActive() {
         // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
-        const entryhref = getDataExplorerPageUrl(
+        const entryhref = getExplorationPageUrl(
           database.name,
           schema.id,
           queryInstance.id,
