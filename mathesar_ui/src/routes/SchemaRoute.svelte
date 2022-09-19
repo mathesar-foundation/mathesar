@@ -25,22 +25,21 @@
 </script>
 
 {#if schema}
+  <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
+
   <Route path="/">
     <SchemaPage {database} {schema} />
   </Route>
 
   <Route path="/import/*">
-    <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
     <ImportRoute {database} {schema} />
   </Route>
 
   <Route path="/data-explorer/*">
-    <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
     <DataExplorerRoute {database} {schema} />
   </Route>
 
   <Route path="/:tableId/*" let:meta firstmatch>
-    <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
     <TableRoute
       {database}
       {schema}

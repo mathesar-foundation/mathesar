@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { readable } from 'svelte/store';
   import { router } from 'tinro';
   import type { TinroRouteMeta } from 'tinro';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import EventfulRoute from '@mathesar/components/routing/EventfulRoute.svelte';
   import QueryManager from '@mathesar/systems/query-builder/QueryManager';
@@ -15,6 +17,8 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { constructQueryModelFromTerseSummarizationHash } from '@mathesar/systems/query-builder/urlSerializationUtils';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import { iconExploration } from '@mathesar/icons';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -23,6 +27,9 @@
 
   let queryManager: QueryManager | undefined;
   let queryLoadPromise: CancellablePromise<QueryInstance>;
+
+  $: queryStore = queryManager ? queryManager.query : readable(undefined);
+  $: query = $queryStore;
 
   function createQueryManager(queryInstance: UnsavedQueryInstance) {
     queryManager?.destroy();
@@ -107,6 +114,15 @@
     }
   }
 </script>
+
+<AppendBreadcrumb
+  item={{
+    type: 'simple',
+    href: getDataExplorerPageUrl(database.name, schema.id, query?.id),
+    label: query?.name || 'Data Explorer',
+    icon: iconExploration,
+  }}
+/>
 
 <EventfulRoute
   path="/:queryId"

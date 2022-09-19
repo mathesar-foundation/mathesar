@@ -22,12 +22,13 @@
 </script>
 
 {#if database}
+  <AppendBreadcrumb item={{ type: 'database', database }} />
+
   <Route path="/">
     <DatabasePage />
   </Route>
 
   <Route path="/:schemaId/*" let:meta firstmatch>
-    <AppendBreadcrumb item={{ type: 'database', database }} />
     <SchemaRoute {database} schemaId={parseInt(meta.params.schemaId, 10)} />
   </Route>
 {:else}
