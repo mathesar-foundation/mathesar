@@ -2,6 +2,7 @@
   import Logo from '@mathesar/components/Logo.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import {
     getDatabasePageUrl,
     getSchemaPageUrl,
@@ -32,6 +33,14 @@
     <TableName table={item.table} />
   </BreadcrumbLink>
   <RecordSelectorNavigationButton table={item.table} />
+{:else if item.type === 'simple'}
+  <BreadcrumbLink href={item.href}>
+    {#if item.icon}
+      <NameWithIcon icon={item.icon}>{item.label}</NameWithIcon>
+    {:else}
+      {item.label}
+    {/if}
+  </BreadcrumbLink>
 {/if}
 
 <style>

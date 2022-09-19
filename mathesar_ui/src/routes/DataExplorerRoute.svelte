@@ -11,7 +11,10 @@
   import { getAvailableName } from '@mathesar/utils/db';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { constructQueryModelFromTerseSummarizationHash } from '@mathesar/systems/query-builder/urlSerializationUtils';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import { iconExploration } from '@mathesar/icons';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -113,6 +116,15 @@
 
   $: createOrLoadQuery(queryId);
 </script>
+
+<AppendBreadcrumb
+  item={{
+    type: 'simple',
+    href: getDataExplorerPageUrl(database.name, schema.id),
+    label: 'Data Explorer',
+    icon: iconExploration,
+  }}
+/>
 
 <!--TODO: Add loading state-->
 

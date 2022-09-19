@@ -6,7 +6,7 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
-  import AppendBreadcrumb from '@mathesar/systems/app-header/breadcrumb/AppendBreadcrumb.svelte';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
   import DataExplorerRoute from './DataExplorerRoute.svelte';
   import TableRoute from './TableRoute.svelte';
@@ -26,13 +26,13 @@
 </script>
 
 {#if schema}
+  <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
+
   <Route path="/import/*" firstmatch>
-    <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
     <ImportRoute {database} {schema} />
   </Route>
 
   <Route path="/tables/:tableId/*" let:meta firstmatch>
-    <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
     <TableRoute
       {database}
       {schema}
@@ -48,7 +48,6 @@
     let:path
     let:meta
   >
-    <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
     <DataExplorerRoute
       {database}
       {schema}

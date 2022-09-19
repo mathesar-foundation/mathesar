@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { QueryInstance } from '@mathesar/api/queries';
-  import { iconQuery } from '@mathesar/icons';
+  import { iconExploration } from '@mathesar/icons';
   import NameWithIcon from './NameWithIcon.svelte';
 
   export let query: QueryInstance;
 </script>
 
-<NameWithIcon icon={iconQuery}>{query.name}</NameWithIcon>
+<NameWithIcon icon={iconExploration}>{query.name}</NameWithIcon>
