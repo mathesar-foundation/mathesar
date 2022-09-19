@@ -11,6 +11,7 @@
   import DataExplorerRoute from './DataExplorerRoute.svelte';
   import TableRoute from './TableRoute.svelte';
   import ImportRoute from './ImportRoute.svelte';
+  import ExplorationRoute from './ExplorationRoute.svelte';
 
   export let database: Database;
   export let schemaId: number;
@@ -42,7 +43,7 @@
 
   <MultiPathRoute
     paths={[
-      { name: 'edit-exploration', path: '/explorations/:queryId' },
+      { name: 'edit-exploration', path: '/explorations/edit/:queryId' },
       { name: 'new-exploration', path: '/data-explorer/' },
     ]}
     let:path
@@ -56,6 +57,14 @@
         : undefined}
     />
   </MultiPathRoute>
+
+  <Route path="/explorations/:queryId" let:meta firstmatch>
+    <ExplorationRoute
+      {database}
+      {schema}
+      queryId={parseInt(meta.params.queryId, 10)}
+    />
+  </Route>
 
   <MultiPathRoute
     paths={[

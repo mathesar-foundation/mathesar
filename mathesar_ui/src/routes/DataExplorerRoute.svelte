@@ -13,7 +13,7 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import {
     getDataExplorerPageUrl,
-    getExplorationPageUrl,
+    getExplorationEditorPageUrl,
   } from '@mathesar/routes/urls';
   import { constructQueryModelFromTerseSummarizationHash } from '@mathesar/systems/query-builder/urlSerializationUtils';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
@@ -127,8 +127,8 @@
   <AppendBreadcrumb
     item={{
       type: 'simple',
-      href: getExplorationPageUrl(database.name, schema.id, $query.id),
-      label: $query?.name ?? 'Data Explorer',
+      href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
+      label: $query?.name ? `Edit: ${$query?.name}` : 'Data Explorer',
       icon: iconExploration,
     }}
   />
