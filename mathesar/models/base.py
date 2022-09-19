@@ -242,6 +242,7 @@ class ColumnPrefetcher(Prefetcher):
     def decorator(self, table, columns):
         pass
 
+
 class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
     MODEL_FIELDS = ['import_verified']
