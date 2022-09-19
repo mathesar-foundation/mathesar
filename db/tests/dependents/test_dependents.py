@@ -24,7 +24,7 @@ def _get_object_dependents_by_name(dependents_graph, object_oid, name):
 
 
 def test_correct_dependents_amount_and_level(engine, library_tables_oids):
-    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
+    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine, [])
 
     publishers_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Publishers'])
     publications_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Publications'])
@@ -62,7 +62,7 @@ def test_correct_dependents_amount_and_level(engine, library_tables_oids):
 
 
 def test_response_format(engine, library_tables_oids):
-    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
+    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine, [])
 
     dependent_expected_attrs = ['obj', 'parent_obj', 'level']
     obj_expected_attrs = ['objid', 'type']
@@ -89,7 +89,7 @@ def test_response_format(engine, library_tables_oids):
 # TODO: add other types when they are added as dependents
 def test_specific_object_types(engine, library_tables_oids, library_db_tables):
     items_oid = library_tables_oids['Items']
-    items_dependents_graph = get_dependents_graph(items_oid, engine)
+    items_dependents_graph = get_dependents_graph(items_oid, engine, [])
     items_dependents_oids = _get_object_dependents_oids(items_dependents_graph, items_oid)
 
     items_constraint_oids = [
@@ -116,7 +116,7 @@ def test_self_reference(engine_with_schema, library_tables_oids):
     create_constraint(schema, engine, fk_constraint)
 
     publishers_oid = library_tables_oids['Publishers']
-    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine)
+    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, [])
 
     publishers_dependents_oids = _get_object_dependents_oids(publishers_dependents_graph, publishers_oid)
     assert publishers_oid not in publishers_dependents_oids
@@ -136,7 +136,7 @@ def test_circular_reference(engine_with_schema, library_tables_oids):
     fk_constraint = ForeignKeyConstraint('Publishers_Publications_fkey', publishers_oid, [fk_column.column_attnum], publications_oid, [publications_pk_column_attnum], {})
     create_constraint(schema, engine, fk_constraint)
 
-    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine)
+    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, [])
     publications_dependents_oids = _get_object_dependents_oids(publishers_dependents_graph, publications_oid)
 
     assert publishers_oid not in publications_dependents_oids
@@ -158,7 +158,7 @@ def test_dependents_graph_max_level(engine_with_schema):
         t.create()
 
     t0_oid = get_oid_from_table(t0.name, schema, engine)
-    t0_dependents_graph = get_dependents_graph(t0_oid, engine)
+    t0_dependents_graph = get_dependents_graph(t0_oid, engine, [])
 
     tables_count = len(metadata.tables.keys())
     assert tables_count == 12
@@ -180,7 +180,7 @@ def test_views_as_dependents(engine_with_schema, library_db_tables, library_tabl
     metadata.create_all(engine)
 
     publications_oid = library_tables_oids['Publications']
-    publications_dependents_graph = get_dependents_graph(publications_oid, engine)
+    publications_dependents_graph = get_dependents_graph(publications_oid, engine, [])
     publications_view_dependent = _get_object_dependents_by_name(publications_dependents_graph, publications_oid, view_name)[0]
 
     assert publications_view_dependent['name'] == view_name
@@ -191,7 +191,7 @@ def test_indexex_as_dependents(engine, library_db_tables, library_tables_oids):
     index = Index(index_name, library_db_tables['Publishers'].c.id)
     index.create(engine)
 
-    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
+    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine, [])
     publishers_index_dependent = _get_object_dependents_by_name(publishers_dependents_graph, library_tables_oids['Publishers'], index_name)[0]
 
     assert publishers_index_dependent['name'] == index_name
