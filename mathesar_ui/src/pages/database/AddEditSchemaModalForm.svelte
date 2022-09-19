@@ -11,7 +11,6 @@
 
   export let controller: ModalController;
   export let getNameValidationErrors: (name: string) => string[];
-  export let getDescriptionValidationErrors: (description: string) => string[];
   export let getInitialName: () => string = () => '';
   export let getInitialDescription: () => string = () => '';
   export let save: (name: string, description: string) => Promise<void>;
@@ -22,14 +21,12 @@
   let name = '';
   let description = '';
   let nameHasChanged = false;
-  let descriptionHasChanged = false;
 
   async function init() {
     initialName = getInitialName();
     name = initialName;
     description = getInitialDescription();
     nameHasChanged = false;
-    descriptionHasChanged = false;
     if (!inputElement) {
       return;
     }
@@ -51,9 +48,7 @@
   }
 
   $: nameValidationErrors = getNameValidationErrors(name);
-  $: descriptionValidationErrors = getDescriptionValidationErrors(description);
-  $: canProceed =
-    !nameValidationErrors.length && !descriptionValidationErrors.length;
+  $: canProceed = !nameValidationErrors.length;
 </script>
 
 <ControlledModal
@@ -88,15 +83,7 @@
         aria-label="description"
         disabled={isSubmitting}
         placeholder="Description"
-        on:input={() => {
-          descriptionHasChanged = true;
-        }}
       />
-      {#if descriptionHasChanged && descriptionValidationErrors.length}
-        <p class="error">
-          {descriptionValidationErrors.join(' ')}
-        </p>
-      {/if}
     </div>
 
     <CancelOrProceedButtonPair

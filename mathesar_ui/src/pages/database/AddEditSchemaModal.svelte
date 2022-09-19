@@ -35,14 +35,6 @@
     return [];
   }
 
-  function getDescriptionValidationErrors(description: string) {
-    // Making description non mandatory since that's how the API and DB works
-    // if (!description.trim()) {
-    //   return ['Description cannot be empty.'];
-    // }
-    return [];
-  }
-
   async function save(name: string, description: string) {
     try {
       if (schema) {
@@ -60,7 +52,6 @@
   {controller}
   {save}
   {getNameValidationErrors}
-  {getDescriptionValidationErrors}
   getInitialName={() => schema?.name ?? ''}
   getInitialDescription={() => schema?.description ?? ''}
 >

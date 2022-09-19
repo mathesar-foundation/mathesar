@@ -10,7 +10,6 @@ export { default as portal } from './common/actions/portal';
 // Simple Components
 export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
-export { default as WithViewMoreOrLessButton } from './with-view-more-or-less-button/WithViewMoreOrLessButton.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
 export { default as CheckboxGroup } from './checkbox-group/CheckboxGroup.svelte';
 export { default as Collapsible } from './collapsible/Collapsible.svelte';
