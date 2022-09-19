@@ -172,11 +172,11 @@ class Schema(DatabaseObject):
     # E.g: TableA from SchemaA depends on TableB from SchemaB
     # SchemaA won't return as a dependent for SchemaB, however
     # TableA will be a dependent of TableB which in turn depends on its schema
-    @property
-    def dependents(self):
+    def get_dependents(self, exclude=[]):
         return get_dependents_graph(
             self.oid,
-            self._sa_engine
+            self._sa_engine,
+            exclude
         )
 
     @property

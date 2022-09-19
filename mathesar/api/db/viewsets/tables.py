@@ -63,10 +63,10 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     def dependents(self, request, pk=None):
         serializer = DependentFilterSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
-        filter = serializer.validated_data['filter']
+        types_exclude = serializer.validated_data['filter'].get('types_exclude', [])
 
         table = self.get_object()
-        serializer = DependentSerializer(table.get_dependents(filter.get('types_exclude', [])), many=True, context={'request': request})
+        serializer = DependentSerializer(table.get_dependents(types_exclude), many=True, context={'request': request})
         return Response(serializer.data)
 
     @action(methods=['get'], detail=True)

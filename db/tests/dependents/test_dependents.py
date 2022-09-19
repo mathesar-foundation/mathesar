@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import Column, ForeignKey, Integer, MetaData, Table, select, Index
 from sqlalchemy_utils import create_view
 from db.constraints.base import ForeignKeyConstraint
@@ -194,3 +195,24 @@ def test_indexex_as_dependents(engine, library_db_tables, library_tables_oids):
     publishers_index_dependent = _get_object_dependents_by_name(publishers_dependents_graph, library_tables_oids['Publishers'], index_name)[0]
 
     assert publishers_index_dependent['name'] == index_name
+
+
+types = [
+    ['table'],
+    ['table constraint'],
+    ['table', 'table constraint'],
+]
+
+
+@pytest.mark.parametrize("exclude_types", types)
+def test_filter(engine, library_tables_oids, exclude_types):
+    publishers_oid = library_tables_oids['Publishers']
+
+    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, exclude_types)
+    dependents_types = [dependent['obj']['type'] for dependent in publishers_dependents_graph]
+
+    assert all(
+        [
+            type not in dependents_types for type in exclude_types
+        ]
+    )

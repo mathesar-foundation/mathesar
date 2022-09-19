@@ -1,4 +1,5 @@
 import pytest
+import json
 
 
 def _get_object_dependent_ids(dependents, object_id, type):
@@ -68,3 +69,18 @@ def test_schema_dependents(library_ma_tables, client):
     schema_dependents_ids = _get_object_dependent_ids(schema_dependents_graph, schema_id, 'schema')
 
     assert sorted(table_ids) == sorted(schema_dependents_ids)
+
+
+def test_dependents_filters(library_ma_tables, client):
+    publishers_id = library_ma_tables['Publishers'].id
+    exclude_types = json.dumps(["table constraint"])
+
+    publishers_dependents_graph = client.get(f'/api/db/v0/tables/{publishers_id}/dependents/?filter={{"types_exclude": {exclude_types}}}').json()
+
+    dependents_types = [dependent['obj']['type'] for dependent in publishers_dependents_graph]
+
+    assert all(
+        [
+            type not in dependents_types for type in exclude_types
+        ]
+    )
