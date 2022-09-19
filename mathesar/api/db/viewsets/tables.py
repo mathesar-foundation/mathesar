@@ -256,3 +256,12 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         )
         table_data = serializer.data
         return Response(table_data)
+
+    @action(methods=['get'], detail=True)
+    def mapper(self, request, pk=None):
+        temp_table = self.get_object()
+        target_table = request.get('import_target', None)
+        try:
+            temp_table.get_mappings(target_table)
+        except Exception as e:
+            raise e

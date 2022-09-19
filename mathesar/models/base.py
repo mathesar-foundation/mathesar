@@ -507,7 +507,11 @@ class Table(DatabaseObject, Relation):
             # ToDo raise specific exceptions.
             raise e
         return table
-
+    
+    def get_mappings(self, existing_table):
+        temp_table_col_list = self.get_column_name_id_bidirectional_map()
+        target_table_col_list = existing_table.get_column_name_id_bidirectional_map()
+        pass
 
 class Column(ReflectionManagerMixin, BaseModel):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='columns')
