@@ -26,6 +26,7 @@
 
 {#if schema}
   <Route path="/">
+    <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
     <SchemaPage {database} {schema} />
   </Route>
 

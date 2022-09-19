@@ -23,6 +23,7 @@
 
 {#if database}
   <Route path="/">
+    <AppendBreadcrumb item={{ type: 'database', database }} />
     <DatabasePage />
   </Route>
 
