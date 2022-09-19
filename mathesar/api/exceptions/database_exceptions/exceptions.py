@@ -299,3 +299,31 @@ class ExclusionViolationAPIException(MathesarAPIException):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
         super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class InvalidDateAPIException(MathesarAPIException):
+    error_code = ErrorCodes.InvalidDateError.value
+
+    def __init__(
+            self,
+            exception,
+            message="Invalid date",
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class InvalidDateFormatAPIException(MathesarAPIException):
+    error_code = ErrorCodes.InvalidDateFormatError.value
+
+    def __init__(
+            self,
+            exception,
+            message="Invalid date format",
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        super().__init__(exception, self.error_code, message, field, details, status_code)
