@@ -44,7 +44,7 @@ class ForeignKeyConstraint(Constraint):
         referent_table = reflect_table_from_oid(self.referent_table_oid, engine, connection_to_use=connection_to_use)
         columns_name = get_columns_name_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use)
         referent_columns_name = get_columns_name_from_attnums(
-            self.referent_table_oid,
+            [self.referent_table_oid],
             self.referent_columns,
             engine,
             connection_to_use
