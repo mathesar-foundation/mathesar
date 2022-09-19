@@ -1,6 +1,3 @@
-from collections import Counter
-from frozendict import frozendict
-
 import pytest
 from unittest.mock import patch
 
@@ -404,13 +401,13 @@ def _check_columns(actual_column_list, expected_column_list):
         for actual_column, expected_column
         in zip(actual_column_list, expected_column_list)
     ]
-    _assert_sets_of_dicts_are_equal(actual_column_list, expected_column_list)
+    _assert_lists_of_dicts_are_equal(actual_column_list, expected_column_list)
 
 
-def _assert_sets_of_dicts_are_equal(a, b):
-    a = Counter([frozendict(d) for d in a])
-    b = Counter([frozendict(d) for d in b])
-    assert a == b
+def _assert_lists_of_dicts_are_equal(a, b):
+    assert len(a) == len(b)
+    for d in a:
+        assert d in b
 
 
 @pytest.fixture
