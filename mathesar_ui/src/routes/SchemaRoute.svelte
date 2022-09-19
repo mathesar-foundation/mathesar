@@ -6,7 +6,7 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
-  import AppendBreadcrumb from '@mathesar/systems/app-header/breadcrumb/AppendBreadcrumb.svelte';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import DataExplorerRoute from './DataExplorerRoute.svelte';
   import TableRoute from './TableRoute.svelte';
   import ImportRoute from './ImportRoute.svelte';

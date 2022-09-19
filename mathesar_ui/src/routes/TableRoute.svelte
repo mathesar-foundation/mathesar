@@ -7,7 +7,7 @@
   import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
   import { currentTableId, tables } from '@mathesar/stores/tables';
-  import AppendBreadcrumb from '@mathesar/systems/app-header/breadcrumb/AppendBreadcrumb.svelte';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
