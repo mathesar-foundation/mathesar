@@ -11,10 +11,14 @@
   import { getAvailableName } from '@mathesar/utils/db';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
-  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import {
+    getDataExplorerPageUrl,
+    getExplorationPageUrl,
+  } from '@mathesar/routes/urls';
   import { constructQueryModelFromTerseSummarizationHash } from '@mathesar/systems/query-builder/urlSerializationUtils';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconExploration } from '@mathesar/icons';
+  import { readable } from 'svelte/store';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -24,6 +28,8 @@
 
   let queryManager: QueryManager | undefined;
   let queryLoadPromise: CancellablePromise<QueryInstance>;
+
+  $: ({ query } = queryManager ?? { query: readable(undefined) });
 
   function createQueryManager(queryInstance: UnsavedQueryInstance) {
     queryManager?.destroy();
@@ -117,14 +123,25 @@
   $: createOrLoadQuery(queryId);
 </script>
 
-<AppendBreadcrumb
-  item={{
-    type: 'simple',
-    href: getDataExplorerPageUrl(database.name, schema.id),
-    label: 'Data Explorer',
-    icon: iconExploration,
-  }}
-/>
+{#if $query?.id}
+  <AppendBreadcrumb
+    item={{
+      type: 'simple',
+      href: getExplorationPageUrl(database.name, schema.id, $query.id),
+      label: $query?.name ?? 'Data Explorer',
+      icon: iconExploration,
+    }}
+  />
+{:else}
+  <AppendBreadcrumb
+    item={{
+      type: 'simple',
+      href: getDataExplorerPageUrl(database.name, schema.id),
+      label: 'Data Explorer',
+      icon: iconExploration,
+    }}
+  />
+{/if}
 
 <!--TODO: Add loading state-->
 
