@@ -8,7 +8,6 @@ from django.db import models
 from django.db.models import JSONField, Deferrable
 from django.utils.functional import cached_property
 from django.contrib.auth.models import User
-from sqlalchemy import MetaData
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
