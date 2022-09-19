@@ -13,7 +13,15 @@ export function getImportPageUrl(
   databaseName: string,
   schemaId: number,
 ): string {
-  return `/${databaseName}/${schemaId}/import`;
+  return `/${databaseName}/${schemaId}/import/`;
+}
+
+export function getImportPreviewPageUrl(
+  databaseName: string,
+  schemaId: number,
+  previewTableId: number,
+): string {
+  return `/${databaseName}/${schemaId}/import/${previewTableId}/`;
 }
 
 export function getDataExplorerPageUrl(

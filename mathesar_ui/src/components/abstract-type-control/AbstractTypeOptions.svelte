@@ -2,39 +2,29 @@
   import {
     FormBuilder,
     getValidationContext,
-    Icon,
   } from '@mathesar-component-library';
   import type { FormValues } from '@mathesar-component-library/types';
-  import type { Column } from '@mathesar/api/tables/columns';
   import type { DbType } from '@mathesar/AppTypes';
-  import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
   import { iconDatabase, iconDisplayOptions } from '@mathesar/icons';
   import type {
     AbstractType,
     AbstractTypeDbConfig,
     AbstractTypeDisplayConfig,
   } from '@mathesar/stores/abstract-types/types';
-  import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
-  import SetDefaultValue from './SetDefaultValue.svelte';
-  import TypeOptionTab from './TypeOptionTab.svelte';
   import { constructDbForm, constructDisplayForm } from './utils';
+  import type { ColumnWithAbstractType } from './utils';
 
   export let selectedAbstractType: AbstractType;
   export let selectedDbType: DbType;
-  export let typeOptions: Column['type_options'];
-  export let displayOptions: Column['display_options'];
-  export let defaultValue: Column['default'];
-  export let processedColumn: ProcessedColumn;
+  export let typeOptions: ColumnWithAbstractType['type_options'];
+  export let displayOptions: ColumnWithAbstractType['display_options'];
+  export let column: ColumnWithAbstractType;
 
-  let selectedTab: 'database' | 'display' = 'database';
   let dbFormHasError = false;
   let displayFormHasError = false;
-  let defaultValueHasError = false;
-  let showDefaultValueErrorIndication = false;
 
-  $: ({ column, exclusiveConstraints } = processedColumn);
   $: ({ dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
     selectedAbstractType,
     selectedDbType,
@@ -45,7 +35,7 @@
 
   const validationContext = getValidationContext();
   validationContext.addValidator('AbstractTypeConfigValidator', () => {
-    let isValid = !defaultValueHasError;
+    let isValid = true;
     if (dbForm) {
       const isDbFormValid = dbForm.getValidationResult().isValid;
       dbFormHasError = !isDbFormValid;
@@ -89,57 +79,53 @@
 
   $: onDbFormValuesChange($dbFormValues, dbOptionsConfig);
   $: onDisplayFormValuesChange($displayFormValues, displayOptionsConfig);
-
-  $: [linkFk] = findFkConstraintsForColumn(exclusiveConstraints, column.id);
-  $: defaultInputComponentAndProps = getDbTypeBasedInputCap(
-    {
-      ...column,
-      type: selectedDbType,
-      type_options: typeOptions,
-      display_options: displayOptions,
-    },
-    linkFk ? linkFk.referent_table : undefined,
-  );
 </script>
 
-<div class="type-options">
-  <ul class="type-option-tabs">
-    <TypeOptionTab
-      bind:selectedTab
-      tab="database"
-      hasError={dbFormHasError || showDefaultValueErrorIndication}
-    >
-      <Icon size="0.75em" {...iconDatabase} />
-      <span>Database</span>
-    </TypeOptionTab>
-    {#if displayForm}
-      <TypeOptionTab
-        bind:selectedTab
-        tab="display"
-        hasError={displayFormHasError}
-        on:select={() => {
-          showDefaultValueErrorIndication = defaultValueHasError;
-        }}
-      >
-        <Icon size="0.75em" {...iconDisplayOptions} />
-        <span>Display</span>
-      </TypeOptionTab>
+{#if dbForm || displayForm}
+  <div class="type-options">
+    <DbTypeIndicator type={selectedDbType} />
+    {#if dbForm}
+      <div class="option-form db-opts">
+        <div class="header">
+          <NameWithIcon icon={iconDatabase}>Database Options</NameWithIcon>
+        </div>
+        <div class="content">
+          <FormBuilder form={dbForm} />
+        </div>
+      </div>
     {/if}
-  </ul>
-  <div class="type-options-content">
-    {#if selectedTab === 'database'}
-      {#if dbForm}
-        <FormBuilder form={dbForm} />
-      {/if}
-      <SetDefaultValue
-        bind:defaultValue
-        bind:defaultValueHasError
-        bind:showError={showDefaultValueErrorIndication}
-        inputComponentAndProps={defaultInputComponentAndProps}
-      />
-      <DbTypeIndicator {selectedDbType} />
-    {:else if displayForm}
-      <FormBuilder form={displayForm} />
+    {#if displayForm}
+      <div class="option-form display-opts">
+        <div class="header">
+          <NameWithIcon icon={iconDisplayOptions}>
+            Formatting Options
+          </NameWithIcon>
+        </div>
+        <div class="content">
+          <FormBuilder form={displayForm} />
+        </div>
+      </div>
     {/if}
   </div>
-</div>
+{:else}
+  <DbTypeIndicator type={selectedDbType} />
+{/if}
+
+<style lang="scss">
+  .type-options {
+    .option-form {
+      margin-top: 0.5rem;
+
+      .header {
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+        padding: 0.4rem;
+        border-bottom: 1px solid var(--color-gray-medium);
+      }
+
+      .content {
+        padding: 0.4rem;
+      }
+    }
+  }
+</style>
