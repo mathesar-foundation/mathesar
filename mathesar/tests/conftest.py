@@ -2,6 +2,7 @@
 This inherits the fixtures in the root conftest.py
 """
 import pytest
+import logging
 from copy import deepcopy
 
 from django.core.files import File
@@ -23,8 +24,14 @@ from mathesar.models.base import Column as mathesar_model_column
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
+from mathesar.state import reset_reflection
 from mathesar.state.base import set_initial_reflection_happened
 from db.metadata import get_empty_metadata
+
+
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    pass
 
 
 @pytest.fixture(scope="session")
@@ -36,21 +43,18 @@ def django_db_modify_db_settings(
 
 
 @pytest.fixture(autouse=True)
-def automatically_clear_django_cache():
+def reflection_fixture():
     """
-    Makes sure Django cache is cleared before every test.
+    During setup, makes sure reflection is reset when one of our models' querysets is next
+    accessed. During teardown, eagerly resets reflection; unfortunately that currently causes
+    redundant reflective calls to Postgres.
     """
-    cache.clear()
-    yield
-
-
-@pytest.fixture(autouse=True)
-def mark_reflection_as_not_having_happened():
-    """
-    Makes sure reflection is reset when one of our models' querysets is next accessed.
-    """
+    logger = logging.getLogger('mark_reflection_as_not_having_happened')
+    logger.debug('setup')
     set_initial_reflection_happened(False)
     yield
+    reset_reflection()
+    logger.debug('teardown')
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -103,7 +107,8 @@ def test_db_model(request, test_db_name, django_db_blocker):
     add_db_to_dj_settings(test_db_name)
     with django_db_blocker.unblock():
         database_model = Database.current_objects.create(name=test_db_name)
-    return database_model
+    yield database_model
+    database_model.delete()
 
 
 def add_db_to_dj_settings(request):
@@ -153,11 +158,6 @@ def dj_databases():
 # MOD_dj_databases
 # SES_dj_databases
 create_scoped_fixtures(globals(), dj_databases)
-
-
-@pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(db):
-    pass
 
 
 @pytest.fixture(scope='session')

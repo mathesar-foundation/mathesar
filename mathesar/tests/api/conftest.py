@@ -203,6 +203,9 @@ def table_for_reflection(engine):
 
 @pytest.fixture
 def column_test_table(patent_schema):
+    import logging
+    logger = logging.getLogger(f'column_test_table')
+    logger.debug('enter')
     engine = patent_schema._sa_engine
     column_list_in = [
         Column("mycolumn0", INTEGER, primary_key=True),
@@ -219,6 +222,13 @@ def column_test_table(patent_schema):
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    metadata = get_empty_metadata()
+    for sa_column in column_list_in:
+        attnum = get_column_attnum_from_name(db_table_oid, sa_column.name, engine, metadata=metadata)
+        ServiceLayerColumn.current_objects.get_or_create(
+            table=table,
+            attnum=attnum,
+        )
     return table
 
 
