@@ -1,6 +1,7 @@
 from enum import Enum
 import os
-from sqlalchemy import text, Text, Table, Column, String, MetaData
+from sqlalchemy import text, Table, Column, String, MetaData
+from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
@@ -46,7 +47,7 @@ class URI(UserDefinedType):
 # adding custom SQL functions to SQLAlchemy
 def build_generic_function_def_class(name):
     class_dict = {
-        "type": Text,
+        "type": TEXT,
         "name": quoted_name(URIFunction[name].value, False),
         "identifier": URIFunction[name].value
     }
