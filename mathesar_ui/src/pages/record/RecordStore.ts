@@ -1,5 +1,5 @@
 import type { Readable } from 'svelte/store';
-import { derived } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 
 import type { TableEntry } from '@mathesar/api/tables';
 import { WritableMap } from '@mathesar/component-library';
@@ -10,7 +10,7 @@ import type { Response as ApiResponse } from '@mathesar/api/tables/records';
 import { renderRecordSummaryFromFieldsMap } from '@mathesar/utils/recordSummary';
 
 export default class RecordStore {
-  fetchRequest: RequestStatus | undefined;
+  fetchRequest = writable<RequestStatus | undefined>(undefined);
 
   /** Keys are column ids */
   fields = new WritableMap<number, unknown>();
@@ -42,15 +42,15 @@ export default class RecordStore {
   }
 
   async fetch(): Promise<void> {
-    this.fetchRequest = { state: 'processing' };
+    this.fetchRequest.set({ state: 'processing' });
     try {
       this.setFieldsFromResponse(await getAPI(this.url));
-      this.fetchRequest = { state: 'success' };
+      this.fetchRequest.set({ state: 'success' });
     } catch (error) {
-      this.fetchRequest = {
+      this.fetchRequest.set({
         state: 'failure',
         errors: [getErrorMessage(error)],
-      };
+      });
     }
   }
 
