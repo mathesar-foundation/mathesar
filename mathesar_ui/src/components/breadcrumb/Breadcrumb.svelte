@@ -2,7 +2,10 @@
   import Logo from '@mathesar/components/Logo.svelte';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import BreadcrumbItem from './BreadcrumbItem.svelte';
-  import { getBreadcrumbItemsFromContext } from './breadcrumbUtils';
+  import {
+    breadcrumbItemIsDatabase,
+    getBreadcrumbItemsFromContext,
+  } from './breadcrumbUtils';
 
   const items = getBreadcrumbItemsFromContext();
 
@@ -13,7 +16,8 @@
     if (!isMinimal) {
       return fallback;
     }
-    const database = $items.find((i) => i.type === 'database')?.database;
+    const databaseItem = $items.find(breadcrumbItemIsDatabase);
+    const database = databaseItem?.database;
     if (!database) {
       return fallback;
     }
