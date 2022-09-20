@@ -40,3 +40,7 @@ def init_mathesar_table_column_list_with_defaults(column_list):
             if c.name == constants.ID:
                 c.autoincrement = False
     return default_columns + given_columns
+
+
+def get_mappings(temp_table_col_list, target_table_col_list):
+    pass
