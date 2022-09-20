@@ -5,6 +5,7 @@
   import QueryBuilder from '@mathesar/systems/query-builder/QueryBuilder.svelte';
   import type QueryManager from '@mathesar/systems/query-builder/QueryManager';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -19,7 +20,7 @@
 </script>
 
 <svelte:head>
-  <title>{$query.name} | {schema.name} | Mathesar</title>
+  <title>{makeSimplePageTitle($query.name ?? 'Data Explorer')}</title>
 </svelte:head>
 
 <LayoutWithHeader fitViewport>

@@ -15,6 +15,7 @@
   import { queries } from '@mathesar/stores/queries';
   import { tables as tablesStore } from '@mathesar/stores/tables';
   import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -37,9 +38,7 @@
   }
 </script>
 
-<svelte:head>
-  <title>{schema.name} | Mathesar</title>
-</svelte:head>
+<svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
 
 <LayoutWithHeader>
   <div class="schema-page-header">

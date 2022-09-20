@@ -13,6 +13,7 @@
   } from '@mathesar/stores/table-data/tabularData';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
 
   const tabularDataStore = setTabularDataStoreInContext(
     // Sacrifice type safety here since the value is initialized reactively
@@ -45,9 +46,7 @@
   }
 </script>
 
-<svelte:head>
-  <title>{table.name} | {schema.name} | Mathesar</title>
-</svelte:head>
+<svelte:head><title>{makeSimplePageTitle(table.name)}</title></svelte:head>
 
 <LayoutWithHeader fitViewport>
   <div class="table-page">

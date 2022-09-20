@@ -44,6 +44,7 @@
   import { iconDelete } from '@mathesar/icons';
   import { getCellCap } from '@mathesar/components/cell-fabric/utils';
   import { toast } from '@mathesar/stores/toast';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import PreviewColumn from './PreviewColumn.svelte';
 
   export let database: Database;
@@ -302,6 +303,8 @@
     }
   }
 </script>
+
+<svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
 
 <LayoutWithHeader>
   <div class="table-preview-confirmation">
