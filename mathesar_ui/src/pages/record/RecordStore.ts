@@ -1,9 +1,13 @@
+import type { Readable } from 'svelte/store';
+import { derived } from 'svelte/store';
+
 import type { TableEntry } from '@mathesar/api/tables';
 import { WritableMap } from '@mathesar/component-library';
 import type { RequestStatus } from '@mathesar/utils/api';
 import { patchAPI, getAPI } from '@mathesar/utils/api';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { Response as ApiResponse } from '@mathesar/api/tables/records';
+import { renderRecordSummaryFromFieldsMap } from '@mathesar/utils/recordSummary';
 
 export default class RecordStore {
   fetchRequest: RequestStatus | undefined;
@@ -11,22 +15,22 @@ export default class RecordStore {
   /** Keys are column ids */
   fields = new WritableMap<number, unknown>();
 
-  table: Pick<TableEntry, 'id'>;
+  summary: Readable<string>;
+
+  table: TableEntry;
 
   recordId: number;
 
   private url: string;
 
-  constructor({
-    table,
-    recordId,
-  }: {
-    table: Pick<TableEntry, 'id'>;
-    recordId: number;
-  }) {
+  constructor({ table, recordId }: { table: TableEntry; recordId: number }) {
     this.table = table;
     this.recordId = recordId;
     this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordId}/`;
+    const { template } = this.table.settings.preview_settings;
+    this.summary = derived(this.fields, (fields) =>
+      renderRecordSummaryFromFieldsMap(template, fields),
+    );
     void this.fetch();
   }
 
