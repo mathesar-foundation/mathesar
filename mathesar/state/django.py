@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import cache as dj_cache
 from django.db.models import Q
 
 from db.columns.operations.select import get_column_attnums_from_table
@@ -11,6 +11,10 @@ from mathesar.models import base as models
 from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer, \
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY
 from mathesar.database.base import create_mathesar_engine
+
+
+def clear_dj_cache():
+    dj_cache.clear()
 
 
 # NOTE: All querysets used for reflection should use the .current_objects manager

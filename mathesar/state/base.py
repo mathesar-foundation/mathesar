@@ -1,4 +1,4 @@
-from mathesar.state.django import reflect_db_objects
+from mathesar.state.django import reflect_db_objects, clear_dj_cache
 from mathesar.state.metadata import reset_cached_metadata, get_cached_metadata
 
 
@@ -16,10 +16,14 @@ def reset_reflection():
     Resets our reflection of what's on Postgres databases. Reset meaning that information is
     either deleted (to be refreshed on demand) or is preemptively refreshed.
 
-    We have two forms of state (aka reflection), and both are reset by this routine. The two forms
-    of reflection are Django models representing database objects (mathesar.models namespace), and
-    SQLAlchemy MetaData. Note, this causes immediate calls to Postgres.
+    We have following forms of state (aka reflection), and all are reset by this routine:
+        - Django cache (django.core.cache),
+        - Django models (mathesar.models namespace),
+        - SQLAlchemy MetaData.
+
+    Note, this causes immediate calls to Postgres.
     """
+    clear_dj_cache()
     set_initial_reflection_happened()
     reset_cached_metadata()
     _trigger_django_model_reflection()

@@ -141,7 +141,7 @@ class Schema(DatabaseObject):
     def _sa_engine(self):
         return self.database._sa_engine
 
-    @cached_property
+    @property
     def name(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"
         try:
@@ -545,7 +545,7 @@ class Column(ReflectionManagerMixin, BaseModel):
 class Constraint(DatabaseObject):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
 
-    @cached_property
+    @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
         return get_constraint_from_oid(self.oid, engine, self.table._sa_table)
@@ -558,14 +558,14 @@ class Constraint(DatabaseObject):
     def type(self):
         return constraint_utils.get_constraint_type_from_class(self._sa_constraint)
 
-    @cached_property
+    @property
     def columns(self):
         column_names = [column.name for column in self._sa_constraint.columns]
         engine = self.table.schema.database._sa_engine
         column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine, metadata=get_cached_metadata())]
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
 
-    @cached_property
+    @property
     def referent_columns(self):
         if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
             column_names = [fk.column.name for fk in self._sa_constraint.elements]
@@ -579,22 +579,22 @@ class Constraint(DatabaseObject):
             return columns
         return None
 
-    @cached_property
+    @property
     def ondelete(self):
         if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
             return self._sa_constraint.ondelete
 
-    @cached_property
+    @property
     def onupdate(self):
         if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
             return self._sa_constraint.onupdate
 
-    @cached_property
+    @property
     def deferrable(self):
         if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
             return self._sa_constraint.deferrable
 
-    @cached_property
+    @property
     def match(self):
         if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
             return self._sa_constraint.match
