@@ -18,10 +18,9 @@ import type {
 } from '@mathesar/api/queries';
 import type { TableEntry } from '@mathesar/api/tables';
 import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
-import { runQuery } from '@mathesar/stores/queries';
+import { createQuery, putQuery, runQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
 import Pagination from '@mathesar/utils/Pagination';
-import { toast } from '@mathesar/stores/toast';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { validateFilterEntry } from '@mathesar/components/filter-entry';
 import type QueryModel from './QueryModel';
@@ -47,10 +46,7 @@ function validateQuery(
   queryModel: QueryModel,
   columnMap: ProcessedQueryResultColumnMap,
 ): boolean {
-  const general =
-    isDefinedNonNullable(queryModel.base_table) &&
-    isDefinedNonNullable(queryModel.name) &&
-    queryModel.name.trim() !== '';
+  const general = isDefinedNonNullable(queryModel.base_table);
   if (!general) {
     return false;
   }
@@ -253,7 +249,7 @@ export default class QueryManager extends EventHandler<{
     }
   }
 
-  async run(): Promise<QueryRunResponse['records'] | undefined> {
+  private async run(): Promise<QueryRunResponse['records'] | undefined> {
     this.runPromise?.cancel();
     const queryModel = this.getQueryModel();
 
@@ -384,73 +380,26 @@ export default class QueryManager extends EventHandler<{
     this.processedResultColumns.set(new ImmutableMap());
   }
 
-  private setProcessedColumnsFromResults(
-    resultColumns: QueryResultColumn[],
-  ): void {
-    const newColumns = new ImmutableMap(
-      resultColumns.map((column) => [
-        column.alias,
-        processColumn(column, this.abstractTypeMap),
-      ]),
-    );
-    this.processedResultColumns.set(newColumns);
-  }
-
   private async updateQuery(queryModel: QueryModel): Promise<{
     clientValidationState: RequestStatus;
   }> {
     this.query.set(queryModel);
-
-    try {
-      if (get(this.state).inputColumnsFetchState?.state !== 'success') {
-        await this.calculateInputColumnTree();
-      }
-      const isQueryValid = validateQuery(
-        queryModel,
-        get(this.processedInitialColumns).withEntries(
-          get(this.processedVirtualColumns),
-        ),
-      );
-      if (!isQueryValid) {
-        this.state.update((_state) => ({
-          ..._state,
-          saveState: {
-            state: 'failure',
-            errors: ['Query validation failed'],
-          },
-        }));
-        return {
-          clientValidationState: {
-            state: 'failure',
-            errors: ['TODO: Place validation errors here '],
-          },
-        };
-      }
-      this.state.update((_state) => ({
-        ..._state,
-        saveState: { state: 'success' },
-      }));
-      await this.dispatch('save');
-      return {
-        clientValidationState: { state: 'success' },
-      };
-    } catch (err) {
-      const errors =
-        err instanceof Error
-          ? [err.message]
-          : ['An error occurred while trying to save the query'];
-      this.state.update((_state) => ({
-        ..._state,
-        saveState: {
-          state: 'failure',
-          errors,
-        },
-      }));
-      toast.error(`Unable to save query: ${errors.join(',')}`);
+    if (get(this.state).inputColumnsFetchState?.state !== 'success') {
+      await this.calculateInputColumnTree();
     }
-    return {
-      clientValidationState: { state: 'success' },
-    };
+    const isQueryValid = validateQuery(
+      queryModel,
+      get(this.processedInitialColumns).withEntries(
+        get(this.processedVirtualColumns),
+      ),
+    );
+    const clientValidationState: RequestStatus = isQueryValid
+      ? { state: 'success' }
+      : {
+          state: 'failure',
+          errors: ['TODO: Place validation errors here '],
+        };
+    return { clientValidationState };
   }
 
   private setUndoRedoStates(): void {
@@ -459,96 +408,6 @@ export default class QueryManager extends EventHandler<{
       isUndoPossible: this.undoRedoManager.isUndoPossible(),
       isRedoPossible: this.undoRedoManager.isRedoPossible(),
     }));
-  }
-
-  private async fetchColumns(): Promise<QueryResultColumns | undefined> {
-    const q = this.getQueryModel();
-
-    if (typeof q.id === 'undefined') {
-      this.state.update((_state) => ({
-        ..._state,
-        columnsFetchState: { state: 'success' },
-      }));
-      this.resetProcessedColumns();
-      return undefined;
-    }
-
-    try {
-      this.state.update((_state) => ({
-        ..._state,
-        columnsFetchState: { state: 'processing' },
-      }));
-      this.queryColumnsFetchPromise?.cancel();
-      this.queryColumnsFetchPromise = getAPI(
-        `/api/db/v0/queries/${q.id}/columns/`,
-      );
-      const result = await this.queryColumnsFetchPromise;
-      this.setProcessedColumnsFromResults(result);
-      this.state.update((_state) => ({
-        ..._state,
-        columnsFetchState: { state: 'success' },
-      }));
-      return result;
-    } catch (err) {
-      this.state.update((_state) => ({
-        ..._state,
-        columnsFetchState: {
-          state: 'failure',
-          errors:
-            err instanceof Error
-              ? [err.message]
-              : ['An error occurred while trying to fetch query columns'],
-        },
-      }));
-    }
-    return undefined;
-  }
-
-  private async fetchResults(): Promise<QueryResultRecords | undefined> {
-    const q = this.getQueryModel();
-
-    if (typeof q.id === 'undefined') {
-      this.state.update((_state) => ({
-        ..._state,
-        recordsFetchState: { state: 'success' },
-      }));
-      this.records.set({ count: 0, results: [] });
-      return undefined;
-    }
-
-    try {
-      this.state.update((_state) => ({
-        ..._state,
-        recordsFetchState: { state: 'processing' },
-      }));
-      this.queryRecordsFetchPromise?.cancel();
-      const { limit, offset } = get(this.pagination).recordsRequestParams();
-      this.queryRecordsFetchPromise = getAPI(
-        `/api/db/v0/queries/${q.id}/records/?limit=${limit}&offset=${offset}`,
-      );
-      const result = await this.queryRecordsFetchPromise;
-      this.records.set({
-        count: result.count,
-        results: result.results ?? [],
-      });
-      this.state.update((_state) => ({
-        ..._state,
-        recordsFetchState: { state: 'success' },
-      }));
-      return result;
-    } catch (err) {
-      this.state.update((_state) => ({
-        ..._state,
-        recordsFetchState: {
-          state: 'failure',
-          errors:
-            err instanceof Error
-              ? [err.message]
-              : ['An error occurred while trying to fetch query records'],
-        },
-      }));
-    }
-    return undefined;
   }
 
   async setPagination(
@@ -604,6 +463,8 @@ export default class QueryManager extends EventHandler<{
       switch (updateDiff.type) {
         case 'baseTable':
           this.resetResults();
+          this.undoRedoManager.clear();
+          this.setUndoRedoStates();
           await this.calculateInputColumnTree();
           break;
         case 'initialColumnName':
@@ -653,6 +514,48 @@ export default class QueryManager extends EventHandler<{
   async redo(): Promise<void> {
     const query = this.undoRedoManager.redo();
     await this.performUndoRedoSync(query);
+  }
+
+  /**
+   * @throws Error if unable to save
+   */
+  async save(): Promise<QueryModel> {
+    const queryJSON = this.getQueryModel().toJSON();
+    this.state.update((_state) => ({
+      ..._state,
+      saveState: { state: 'processing' },
+    }));
+    try {
+      this.querySavePromise?.cancel();
+      // TODO: Check for latest validation status here
+      if (queryJSON.id !== undefined) {
+        // TODO: Figure out a better way to help TS identify this as a saved instance
+        this.querySavePromise = putQuery(queryJSON as QueryInstance);
+      } else {
+        this.querySavePromise = createQuery(queryJSON);
+      }
+      const result = await this.querySavePromise;
+      this.query.update((qr) => qr.withId(result.id).model);
+      await this.dispatch('save', result);
+      this.state.update((_state) => ({
+        ..._state,
+        saveState: { state: 'success' },
+      }));
+      return this.getQueryModel();
+    } catch (err) {
+      const errors =
+        err instanceof Error
+          ? [err.message]
+          : ['An error occurred while trying to save the query'];
+      this.state.update((_state) => ({
+        ..._state,
+        saveState: {
+          state: 'failure',
+          errors,
+        },
+      }));
+      throw err;
+    }
   }
 
   getQueryModel(): QueryModel {

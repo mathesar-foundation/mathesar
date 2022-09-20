@@ -1,18 +1,33 @@
 <script lang="ts">
-  import { Icon, InputGroup, Button } from '@mathesar-component-library';
+  import {
+    Icon,
+    InputGroup,
+    Button,
+    SpinnerButton,
+  } from '@mathesar-component-library';
   import EditableTitle from '@mathesar/components/EditableTitle.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
+  import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import type { TableEntry } from '@mathesar/api/tables';
   import { queries } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
-  import { iconExploration, iconRedo, iconUndo } from '@mathesar/icons';
+  import {
+    iconExploration,
+    iconRedo,
+    iconUndo,
+    iconSave,
+  } from '@mathesar/icons';
+  import { modal } from '@mathesar/stores/modal';
+  import { toast } from '@mathesar/stores/toast';
   import type QueryManager from './QueryManager';
   import type { ColumnWithLink } from './utils';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
+
+  const saveModalController = modal.spawnModalController();
 
   export let queryManager: QueryManager;
 
@@ -44,7 +59,7 @@
     queryManager.selectColumn(alias);
   }
 
-  function handleQueryNameChange(e: Event) {
+  function handleNameChange(e: Event) {
     const target = e.target as HTMLInputElement;
     if (target.value.trim() === '') {
       target.value = getAvailableName(
@@ -53,6 +68,46 @@
       );
     }
     void queryManager.update((q) => q.withName(target.value));
+  }
+
+  function getNameValidationErrors(name: string) {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      return ['Name cannot be empty.'];
+    }
+    const isDuplicate = Array.from($queries.data ?? []).some(
+      ([, s]) => s.name.toLowerCase().trim() === trimmedName,
+    );
+    if (isDuplicate) {
+      return ['An exploration with that name already exists.'];
+    }
+    return [];
+  }
+
+  async function save() {
+    try {
+      await queryManager.save();
+    } catch (err) {
+      toast.fromError(err);
+    }
+  }
+
+  // TODO: Handle description
+  async function create(name: string) {
+    try {
+      await queryManager.update((q) => q.withName(name));
+      await save();
+    } catch (err) {
+      toast.fromError(err);
+    }
+  }
+
+  async function saveExistingOrCreateNew() {
+    if ($query.isSaved()) {
+      await save();
+    } else {
+      saveModalController.open();
+    }
   }
 </script>
 
@@ -67,7 +122,7 @@
         <EditableTitle
           value={$query.name}
           size={1.266}
-          on:change={handleQueryNameChange}
+          on:change={handleNameChange}
         />
         <div class="base-table-holder">
           Based on {currentTable?.name}
@@ -84,11 +139,17 @@
       {/if}
     </div>
 
-    {#if $query.isSaved()}
-      <SaveStatusIndicator status={$state.saveState?.state} />
-    {/if}
-
     <div class="actions">
+      {#if $query.isSaved()}
+        <SaveStatusIndicator status={$state.saveState?.state} />
+      {/if}
+      <!-- TODO: Change disabled condition to is_valid(query) -->
+      <SpinnerButton
+        label="Save"
+        icon={iconSave}
+        disabled={!$query.base_table}
+        onClick={saveExistingOrCreateNew}
+      />
       <InputGroup>
         <Button
           appearance="default"
@@ -127,6 +188,16 @@
     {/if}
   </div>
 </div>
+
+<NameAndDescInputModalForm
+  controller={saveModalController}
+  save={create}
+  {getNameValidationErrors}
+  getInitialName={() => $query.name ?? ''}
+  getInitialDescription={() => ''}
+>
+  <span slot="title"> Save Exploration </span>
+</NameAndDescInputModalForm>
 
 <style lang="scss">
   .query-builder {

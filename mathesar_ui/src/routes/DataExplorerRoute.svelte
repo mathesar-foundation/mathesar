@@ -3,12 +3,11 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import QueryManager from '@mathesar/systems/query-builder/QueryManager';
   import QueryModel from '@mathesar/systems/query-builder/QueryModel';
-  import { queries, getQuery } from '@mathesar/stores/queries';
+  import { getQuery } from '@mathesar/stores/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { CancellablePromise } from '@mathesar/component-library';
   import type { QueryInstance } from '@mathesar/api/queries';
   import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
-  import { getAvailableName } from '@mathesar/utils/db';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import {
@@ -38,18 +37,18 @@
       $currentDbAbstractTypes.data,
     );
     is404 = false;
-    // queryManager.on('save', async (instance) => {
-    //   try {
-    //     const url = getDataExplorerPageUrl(
-    //       database.name,
-    //       schema.id,
-    //       instance.id,
-    //     );
-    //     router.goto(url, true);
-    //   } catch (err) {
-    //     console.error('There was an error when updating the URL', err);
-    //   }
-    // });
+    queryManager.on('save', async (instance) => {
+      try {
+        const url = getExplorationEditorPageUrl(
+          database.name,
+          schema.id,
+          instance.id,
+        );
+        router.goto(url, true);
+      } catch (err) {
+        console.error('There was an error when updating the URL', err);
+      }
+    });
   }
 
   function removeQueryManager(): void {
@@ -66,19 +65,11 @@
       // An unsaved query is already open
       return;
     }
-    let newQueryModel = {
-      name: getAvailableName(
-        'New_Exploration',
-        new Set([...$queries.data.values()].map((e) => e.name)),
-      ),
-    };
     const { hash } = $router;
     if (hash) {
       try {
-        newQueryModel = {
-          ...newQueryModel,
-          ...constructQueryModelFromTerseSummarizationHash(hash),
-        };
+        const newQueryModel =
+          constructQueryModelFromTerseSummarizationHash(hash);
         router.location.hash.clear();
         createQueryManager(newQueryModel);
         return;
@@ -87,7 +78,7 @@
         console.error('Unable to create query model from hash', hash);
       }
     }
-    createQueryManager(newQueryModel);
+    createQueryManager({});
   }
 
   async function loadSavedQuery(_queryId: number) {
