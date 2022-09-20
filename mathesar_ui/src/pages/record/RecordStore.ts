@@ -7,13 +7,17 @@ import type { RequestStatus } from '@mathesar/utils/api';
 import { patchAPI, getAPI } from '@mathesar/utils/api';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { Response as ApiResponse } from '@mathesar/api/tables/records';
-import { renderRecordSummaryFromFieldsMap } from '@mathesar/utils/recordSummary';
+import { renderSummaryFromFieldsAndFkData } from '@mathesar/utils/recordSummary';
+import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
 
 export default class RecordStore {
   fetchRequest = writable<RequestStatus | undefined>(undefined);
 
   /** Keys are column ids */
   fields = new WritableMap<number, unknown>();
+
+  /** Keys are column ids */
+  fkSummaryData = new WritableMap<number, DataForRecordSummaryInFkCell>();
 
   summary: Readable<string>;
 
@@ -28,8 +32,10 @@ export default class RecordStore {
     this.recordId = recordId;
     this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordId}/`;
     const { template } = this.table.settings.preview_settings;
-    this.summary = derived(this.fields, (fields) =>
-      renderRecordSummaryFromFieldsMap(template, fields),
+    this.summary = derived(
+      [this.fields, this.fkSummaryData],
+      ([fields, fkSummaryData]) =>
+        renderSummaryFromFieldsAndFkData(template, fields, fkSummaryData),
     );
     void this.fetch();
   }
@@ -39,6 +45,14 @@ export default class RecordStore {
     this.fields.reconstruct(
       Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
     );
+    if (response.preview_data) {
+      this.fkSummaryData.reconstruct(
+        response.preview_data.map(({ column, template, data }) => [
+          column,
+          { column, template, data: data[0] },
+        ]),
+      );
+    }
   }
 
   async fetch(): Promise<void> {
