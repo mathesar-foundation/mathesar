@@ -9,18 +9,11 @@ import {
 import { getAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
 import CacheManager from '@mathesar/utils/CacheManager';
-import type {
-  QueryInstance,
-  QueryResultColumn,
-  QueryResultColumns,
-  QueryResultRecords,
-  QueryRunResponse,
-} from '@mathesar/api/queries';
+import type { QueryInstance } from '@mathesar/api/queries';
 import type { TableEntry } from '@mathesar/api/tables';
 import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
-import { createQuery, putQuery, runQuery } from '@mathesar/stores/queries';
+import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
-import Pagination from '@mathesar/utils/Pagination';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { validateFilterEntry } from '@mathesar/components/filter-entry';
 import type QueryModel from './QueryModel';
@@ -32,7 +25,6 @@ import {
   getBaseTableColumnsWithLinks,
   getColumnInformationMap,
   processInitialColumns,
-  processColumns,
 } from './utils';
 import type {
   ProcessedQueryResultColumn,
@@ -41,6 +33,7 @@ import type {
 } from './utils';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
+import QueryRunner from './QueryRunner';
 
 function validateQuery(
   queryModel: QueryModel,
@@ -65,14 +58,10 @@ function validateQuery(
   });
 }
 
-export default class QueryManager extends EventHandler<{
-  save: QueryInstance;
-}> {
-  query: Writable<QueryModel>;
+export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
+  private undoRedoManager: QueryUndoRedoManager;
 
-  undoRedoManager: QueryUndoRedoManager;
-
-  cacheManagers: {
+  private cacheManagers: {
     inputColumns: CacheManager<number, InputColumnsStoreSubstance>;
   } = {
     inputColumns: new CacheManager(5),
@@ -81,24 +70,21 @@ export default class QueryManager extends EventHandler<{
   state: Writable<{
     inputColumnsFetchState?: RequestStatus;
     saveState?: RequestStatus;
-    columnsFetchState?: RequestStatus;
-    recordsFetchState?: RequestStatus;
     isUndoPossible: boolean;
     isRedoPossible: boolean;
-    lastFetchType: 'columns' | 'records' | 'both';
   }> = writable({
     isUndoPossible: false,
     isRedoPossible: false,
-    lastFetchType: 'both',
   });
-
-  abstractTypeMap: AbstractTypesMap;
 
   inputColumns: Writable<InputColumnsStoreSubstance> = writable({
     baseTableColumns: new Map(),
     tablesThatReferenceBaseTable: new Map(),
     columnInformationMap: new Map(),
   });
+
+  private eventHandler: EventHandler<{ save: QueryInstance }> =
+    new EventHandler();
 
   // Processed columns
 
@@ -114,43 +100,19 @@ export default class QueryManager extends EventHandler<{
     new ImmutableMap(),
   );
 
-  // Display stores
-
-  selectedColumnAlias: Writable<QueryResultColumn['alias'] | undefined> =
-    writable(undefined);
-
   // Promises
 
-  baseTableFetchPromise: CancellablePromise<TableEntry> | undefined;
+  private baseTableFetchPromise: CancellablePromise<TableEntry> | undefined;
 
-  joinableColumnsfetchPromise:
+  private joinableColumnsfetchPromise:
     | CancellablePromise<JoinableTablesResult>
     | undefined;
 
-  querySavePromise: CancellablePromise<QueryInstance> | undefined;
-
-  queryColumnsFetchPromise: CancellablePromise<QueryResultColumns> | undefined;
-
-  queryRecordsFetchPromise: CancellablePromise<QueryResultRecords> | undefined;
+  private querySavePromise: CancellablePromise<QueryInstance> | undefined;
 
   // NEW CHANGES
-
-  runState: Writable<RequestStatus | undefined> = writable();
-
-  pagination: Writable<Pagination> = writable(new Pagination({ size: 100 }));
-
-  runPromise: CancellablePromise<QueryRunResponse> | undefined;
-
-  records: Writable<QueryResultRecords> = writable({ count: 0, results: [] });
-
-  processedColumns: Writable<ProcessedQueryResultColumnMap> = writable(
-    new ImmutableMap(),
-  );
-
   constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
-    super();
-    this.abstractTypeMap = abstractTypeMap;
-    this.query = writable(query);
+    super(query, abstractTypeMap);
     this.reprocessColumns('both');
     this.undoRedoManager = new QueryUndoRedoManager();
     const inputColumnTreePromise = this.calculateInputColumnTree();
@@ -164,7 +126,6 @@ export default class QueryManager extends EventHandler<{
       this.undoRedoManager.pushState(query, isQueryValid);
       return query;
     });
-    void this.run();
   }
 
   private async calculateInputColumnTree(): Promise<void> {
@@ -247,46 +208,6 @@ export default class QueryManager extends EventHandler<{
         inputColumnsFetchState: { state: 'failure', errors: [error] },
       }));
     }
-  }
-
-  private async run(): Promise<QueryRunResponse['records'] | undefined> {
-    this.runPromise?.cancel();
-    const queryModel = this.getQueryModel();
-
-    if (queryModel.base_table === undefined) {
-      const records = { count: 0, results: [] };
-      this.processedColumns.set(new ImmutableMap());
-      this.records.set(records);
-      this.runState.set({ state: 'success' });
-      return records;
-    }
-
-    try {
-      const paginationRequest = get(this.pagination).recordsRequestParams();
-      this.runState.set({ state: 'processing' });
-      this.runPromise = runQuery({
-        base_table: queryModel.base_table,
-        initial_columns: queryModel.initial_columns,
-        transformations: queryModel.transformationModels.map((transformation) =>
-          transformation.toJSON(),
-        ),
-        parameters: {
-          ...paginationRequest,
-        },
-      });
-      const response = await this.runPromise;
-      this.processedColumns.set(processColumns(response, this.abstractTypeMap));
-      this.records.set(response.records);
-      this.runState.set({ state: 'success' });
-      return response.records;
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Unable to run query due to an unknown reason';
-      this.runState.set({ state: 'failure', errors: [errorMessage] });
-    }
-    return undefined;
   }
 
   /**
@@ -376,10 +297,6 @@ export default class QueryManager extends EventHandler<{
     }
   }
 
-  private resetProcessedColumns(): void {
-    this.processedResultColumns.set(new ImmutableMap());
-  }
-
   private async updateQuery(queryModel: QueryModel): Promise<{
     clientValidationState: RequestStatus;
   }> {
@@ -410,45 +327,11 @@ export default class QueryManager extends EventHandler<{
     }));
   }
 
-  async setPagination(
-    pagination: Pagination,
-  ): Promise<QueryResultRecords | undefined> {
-    this.pagination.set(pagination);
+  private resetState(): void {
     this.state.update((state) => ({
       ...state,
-      lastFetchType: 'records',
     }));
-    const result = await this.run();
-    return result;
-  }
-
-  private resetPaginationPane(): void {
-    this.pagination.update(
-      (pagination) =>
-        new Pagination({
-          ...pagination,
-          page: 1,
-        }),
-    );
-  }
-
-  private resetResults(): void {
-    this.queryColumnsFetchPromise?.cancel();
-    this.queryRecordsFetchPromise?.cancel();
-    this.records.set({ count: 0, results: [] });
-    this.resetProcessedColumns();
-    this.selectedColumnAlias.set(undefined);
-    this.state.update((state) => ({
-      ...state,
-      columnsFetchState: undefined,
-      recordsFetchState: undefined,
-    }));
-    this.resetPaginationPane();
-
-    // NEW
-    this.runPromise?.cancel();
-    this.processedColumns.set(new ImmutableMap());
-    this.runState.set(undefined);
+    this.resetResults();
   }
 
   async update(
@@ -462,7 +345,7 @@ export default class QueryManager extends EventHandler<{
     if (isValid) {
       switch (updateDiff.type) {
         case 'baseTable':
-          this.resetResults();
+          this.resetState();
           this.undoRedoManager.clear();
           this.setUndoRedoStates();
           await this.calculateInputColumnTree();
@@ -473,15 +356,14 @@ export default class QueryManager extends EventHandler<{
         case 'initialColumnsArray':
           if (!updateDiff.diff.initial_columns?.length) {
             // All columns have been deleted
-            this.resetResults();
+            this.resetState();
           } else {
             this.reprocessColumns('initial');
             await this.run();
           }
           break;
         case 'transformations':
-          this.resetPaginationPane();
-          await this.run();
+          await this.resetPaginationAndRun();
           break;
         default:
           break;
@@ -558,28 +440,7 @@ export default class QueryManager extends EventHandler<{
     }
   }
 
-  getQueryModel(): QueryModel {
-    return get(this.query);
-  }
-
-  selectColumn(alias: QueryResultColumn['alias']): void {
-    if (
-      get(this.query).initial_columns.some((column) => column.alias === alias)
-    ) {
-      this.selectedColumnAlias.set(alias);
-    } else {
-      this.selectedColumnAlias.set(undefined);
-    }
-  }
-
-  clearSelectedColumn(): void {
-    this.selectedColumnAlias.set(undefined);
-  }
-
   destroy(): void {
     super.destroy();
-    this.queryColumnsFetchPromise?.cancel();
-    this.queryColumnsFetchPromise?.cancel();
-    this.queryRecordsFetchPromise?.cancel();
   }
 }

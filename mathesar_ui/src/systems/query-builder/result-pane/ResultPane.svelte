@@ -12,35 +12,24 @@
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconRefresh } from '@mathesar/icons';
-  import type QueryManager from '../QueryManager';
+  import type QueryRunner from '../QueryRunner';
 
-  export let queryManager: QueryManager;
+  export let queryRunner: QueryRunner;
 
   $: ({
     query,
     processedColumns,
     records,
-    state,
     selectedColumnAlias,
     pagination,
     runState,
-  } = queryManager);
+  } = queryRunner);
   $: ({ base_table, initial_columns } = $query);
 
   $: columnRunState = $runState?.state;
   $: recordRunState = $runState?.state;
-  $: lastFetchTypeEqualsRecords = $state.lastFetchType === 'records';
 
-  $: columnRunErrors =
-    $state.columnsFetchState?.state === 'failure'
-      ? $state.columnsFetchState.errors
-      : [];
-  $: recordRunErrors =
-    $state.recordsFetchState?.state === 'failure'
-      ? $state.recordsFetchState.errors
-      : [];
-  // Prioritize showing column errors over record fetch errors
-  $: errors = columnRunErrors.length > 0 ? columnRunErrors : recordRunErrors;
+  $: errors = $runState?.state === 'failure' ? $runState.errors : [];
   $: columnList = [...$processedColumns.values()];
   // Show a dummy ghost row when there are no records
   $: showDummyGhostRow =
@@ -69,7 +58,7 @@
         return;
       }
     }
-    queryManager.clearSelectedColumn();
+    queryRunner.clearSelectedColumn();
   }
 </script>
 
@@ -87,7 +76,7 @@
             appearance="plain"
             size="small"
             class="padding-zero"
-            on:click={() => queryManager.run()}
+            on:click={() => queryRunner.run()}
           >
             <Icon {...iconRefresh} size="0.6rem" />
             <span>Retry</span>
@@ -133,9 +122,7 @@
                     ? 'selected'
                     : ''}"
                   on:click={() => {
-                    queryManager.selectColumn(
-                      processedQueryColumn.column.alias,
-                    );
+                    queryRunner.selectColumn(processedQueryColumn.column.alias);
                   }}
                 >
                   <!--TODO: Use a separate prop to identify column that isn't fetched yet
@@ -189,11 +176,7 @@
                             value={$records.results[item.index][
                               processedQueryColumn.id
                             ]}
-                            showAsSkeleton={recordRunState === 'processing' &&
-                              (lastFetchTypeEqualsRecords ||
-                                $records.results[item.index][
-                                  processedQueryColumn.id
-                                ] === undefined)}
+                            showAsSkeleton={recordRunState === 'processing'}
                             disabled={true}
                           />
                         {/if}
@@ -221,7 +204,7 @@
           pagination={$pagination}
           totalCount={$records.count}
           on:change={(e) => {
-            void queryManager.setPagination(e.detail);
+            void queryRunner.setPagination(e.detail);
           }}
         />
       </div>

@@ -183,7 +183,7 @@
       <!-- Do not use inputColumnManager in ResultPane because
         we'd also use ResultPane for query page where input column
         details would not be available-->
-      <ResultPane {queryManager} />
+      <ResultPane queryRunner={queryManager} />
       <OutputConfigSidebar {queryManager} />
     {/if}
   </div>
