@@ -13,15 +13,33 @@ access hints on what composition of functions and parameters should be valid.
 """
 
 from abc import ABC, abstractmethod
+import warnings
 
-from sqlalchemy import column, not_, and_, or_, func, literal, cast, INTEGER
-from sqlalchemy.dialects.postgresql import array_agg
+from sqlalchemy import column, not_, and_, or_, func, literal
+from sqlalchemy.dialects.postgresql import array_agg, TEXT
+from sqlalchemy.sql import quoted_name
+from sqlalchemy.sql.functions import GenericFunction
 
 from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
 
 
-def sa_call_sql_function(function_name, *parameters):
+def sa_call_sql_function(function_name, *parameters, return_type=None):
+    if return_type is None:
+        warnings.warn(
+            "sa_call_sql_function should be called with the return_type kwarg set"
+        )
+        return_type = TEXT  # can't use PostgresType since we don't want engine here
+
+    class_dict = {
+        "type": return_type,
+        "name": quoted_name(function_name, False),
+        "identifier": function_name,
+    }
+
+    globals().update(
+        {function_name: type(class_dict["identifier"], (GenericFunction,), class_dict)}
+    )
     return getattr(func, function_name)(*parameters)
 
 
@@ -372,7 +390,7 @@ class Count(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
-        return cast(func.count(column_expr), INTEGER)
+        return sa_call_sql_function('count', column_expr)
 
 
 class ArrayAgg(DBFunction):
