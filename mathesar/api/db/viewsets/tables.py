@@ -38,7 +38,11 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     filterset_class = TableFilter
 
     def get_queryset(self):
-        return Table.objects.prefetch('_sa_table').order_by('-created_at')
+        # Better to use prefetch_related for schema and database,
+        # because select_related would lead to duplicate object instances and could result in multiple engines instances
+        # We prefetch `columns` using Django prefetch_related to get list of column objects and
+        # then prefetch column properties like `column name` using prefetch library.
+        return Table.objects.prefetch_related('schema', 'schema__database', 'columns').prefetch('_sa_table', 'columns').order_by('-created_at')
 
     def partial_update(self, request, pk=None):
         table = self.get_object()

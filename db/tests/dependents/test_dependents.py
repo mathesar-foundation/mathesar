@@ -169,6 +169,31 @@ def test_dependents_graph_max_level(engine_with_schema):
     assert dependents_by_level[-1]['level'] == 10
 
 
+def test_column_dependents(engine, library_tables_oids):
+    publications_oid = library_tables_oids['Publications']
+    items_oid = library_tables_oids['Items']
+    publications_id_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine)
+    publishers_dependents_graph = get_dependents_graph(publications_oid, engine, [], publications_id_column_attnum)
+
+    publications_pk_oid = get_constraint_oid_by_name_and_table_oid('Publications_pkey', publications_oid, engine)
+    items_publications_fk_oid = get_constraint_oid_by_name_and_table_oid('Items_Publications_id_fkey', items_oid, engine)
+
+    publications_dependents = _get_object_dependents(publishers_dependents_graph, publications_oid)
+    publications_dependent_oids = _get_object_dependents_oids(publishers_dependents_graph, publications_oid)
+    assert all(
+        [
+            r['parent_obj']['objsubid'] == 1
+            for r in publications_dependents
+        ]
+    )
+    assert all(
+        [
+            oid in publications_dependent_oids
+            for oid in [publications_pk_oid, items_oid, items_publications_fk_oid]
+        ]
+    )
+
+
 def test_views_as_dependents(engine_with_schema, library_db_tables, library_tables_oids):
     engine, schema = engine_with_schema
     metadata = MetaData(schema=schema, bind=engine)

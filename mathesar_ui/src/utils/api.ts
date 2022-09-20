@@ -72,6 +72,21 @@ export interface PaginatedResponse<T> {
 const NO_CONTENT = 204;
 const successStatusCodes = new Set([200, 201, NO_CONTENT]);
 
+function getResultFromRequest<T>(request: XMLHttpRequest): T | undefined {
+  if (request.status === NO_CONTENT) {
+    return undefined;
+  }
+  // I don't understand why we're getting this ESLint error here.
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const { response } = request;
+  if (typeof response === 'string' && response.trim().length === 0) {
+    // This is to accommodate poorly-behaving APIs that return an empty string
+    // when they should instead respond with HTTP 204.
+    return undefined;
+  }
+  return JSON.parse(response) as T;
+}
+
 function sendXHRRequest<T>(
   method: string,
   url: string,
@@ -95,11 +110,7 @@ function sendXHRRequest<T>(
     (resolve, reject) => {
       request.addEventListener('load', () => {
         if (successStatusCodes.has(request.status)) {
-          const result =
-            request.status === NO_CONTENT
-              ? undefined
-              : (JSON.parse(request.response) as T);
-          resolve(result);
+          resolve(getResultFromRequest<T>(request));
         } else {
           try {
             reject(new ApiMultiError(JSON.parse(request.response)));
