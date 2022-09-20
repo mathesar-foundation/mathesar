@@ -432,6 +432,11 @@ class Table(DatabaseObject, Relation):
         columns_map = bidict({column.name: column.id for column in columns})
         return columns_map
 
+    def get_column_name_type_map(self):
+        columns = Column.objects.filter(table_id=self.id)
+        columns_map = {column.name: str(column.type) for column in columns}
+        return columns_map
+
     def get_column_by_name(self, name):
         columns = self.get_columns_by_name(name_list=[name])
         if len(columns) > 0:
@@ -507,10 +512,10 @@ class Table(DatabaseObject, Relation):
             # ToDo raise specific exceptions.
             raise e
         return table
-    
+
     def get_mappings(self, existing_table):
-        temp_table_col_list = self.get_column_name_id_bidirectional_map()
-        target_table_col_list = existing_table.get_column_name_id_bidirectional_map()
+        temp_table_col_list = self.get_column_name_type_map()
+        target_table_col_list = existing_table.get_column_name_type_map()
         pass
 
 class Column(ReflectionManagerMixin, BaseModel):
