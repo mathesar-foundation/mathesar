@@ -7,25 +7,24 @@
   export let item: BreadcrumbItem;
   const items = getBreadcrumbItemsFromContext();
 
+  /** `item` as it was before the most recent reactive update */
   let previousItem: BreadcrumbItem | undefined;
 
-  function popLastItem() {
+  function removeItemAtEnd() {
     $items = $items.slice(0, -1);
   }
 
-  function popLastItemIfPrevious() {
-    if (previousItem && $items[$items.length - 1] === previousItem) {
-      popLastItem();
-    }
+  function removePreviousItem() {
+    $items = $items.filter((i) => i !== previousItem);
   }
 
   function handleItemChange(i: BreadcrumbItem) {
-    popLastItemIfPrevious();
+    removePreviousItem();
     $items = [...$items, i];
     previousItem = item;
   }
 
   $: handleItemChange(item);
 
-  onDestroy(popLastItem);
+  onDestroy(removeItemAtEnd);
 </script>
