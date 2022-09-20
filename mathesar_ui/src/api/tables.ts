@@ -20,6 +20,11 @@ export interface TableEntry {
   columns: MinimalColumnDetails[];
 }
 
+export interface SplitTableResponse {
+  extracted_table: number;
+  remainder_table: number;
+}
+
 /**
  * endpoint: /api/db/v0/tables/
  */

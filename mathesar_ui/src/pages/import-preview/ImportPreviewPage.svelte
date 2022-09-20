@@ -28,7 +28,7 @@
   import { getAPI, patchAPI } from '@mathesar/utils/api';
   import type { RequestStatus, PaginatedResponse } from '@mathesar/utils/api';
   import {
-    getTableFromStore,
+    getTableFromStoreOrApi,
     getTypeSuggestionsForTable,
     generateTablePreview,
     patchTable,
@@ -126,7 +126,7 @@
 
   async function fetchTableInfo() {
     if (previewTableId !== tableInfo?.id) {
-      tableInfo = await getTableFromStore(previewTableId);
+      tableInfo = await getTableFromStoreOrApi(previewTableId);
       tableName = tableInfo.name;
     }
     // TODO: Move this request to /api

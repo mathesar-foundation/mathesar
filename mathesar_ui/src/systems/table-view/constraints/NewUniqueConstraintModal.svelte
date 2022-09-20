@@ -15,7 +15,7 @@
   import Form from '@mathesar/components/Form.svelte';
   import { getAvailableName } from '@mathesar/utils/db';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
-  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
+  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import UniqueConstraintsHelp from './__help__/UniqueConstraintsHelp.svelte';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
   import UniqueConstraintColumnsHelp from './__help__/UniqueConstraintColumnsHelp.svelte';
@@ -122,10 +122,10 @@
       <CheckboxGroup
         options={columnsInTable}
         bind:values={constraintColumns}
-        getCheckboxLabel={(column) => ({
-          component: TableColumnName,
+        getCheckboxLabel={(processedColumn) => ({
+          component: ProcessedColumnName,
           props: {
-            column,
+            processedColumn,
           },
         })}
       >
