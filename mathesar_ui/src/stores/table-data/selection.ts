@@ -3,6 +3,7 @@ import { ImmutableSet, WritableSet } from '@mathesar-component-library';
 import { get } from 'svelte/store';
 import type { Row, RecordsData } from './records';
 import type { ColumnsDataStore } from './columns';
+import type { Display } from './display';
 
 const DEFAULT_ROW_INDEX = 0;
 const ROW_COLUMN_SEPARATOR = '-';
@@ -66,11 +67,18 @@ export class Selection {
 
   freezeSelection: boolean;
 
-  constructor(columnsDataStore: ColumnsDataStore, recordsData: RecordsData) {
+  display: Display;
+
+  constructor(
+    columnsDataStore: ColumnsDataStore,
+    recordsData: RecordsData,
+    display: Display,
+  ) {
     this.selectedCells = new WritableSet<string>();
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
     this.freezeSelection = false;
+    this.display = display;
 
     // This event terminates the cell selection process
     // specially useful when selecting multiple cells
@@ -78,6 +86,30 @@ export class Selection {
     // when the user drags the mouse out of the table view
     document.addEventListener('mouseup', () => {
       this.onEndSelection();
+    });
+
+    // Keep active cell and selected cell in sync
+    this.display.activeCell.subscribe((activeCell) => {
+      if (activeCell) {
+        const activeCellRow = this.allRows.find(
+          (row) => row.rowIndex === activeCell.rowIndex,
+        );
+        const activeCellColumn = this.allColumns.find(
+          (column) => column.id === activeCell.columnId,
+        );
+        if (activeCellRow && activeCellColumn) {
+          /**
+           * This handles the very rare edge case
+           * when the user starts the selection using mouse
+           * but before ending(mouseup event)
+           * she change the active cell using keyboard
+           */
+          this.selectionBounds = undefined;
+          this.selectMultipleCells([[activeCellRow, activeCellColumn]]);
+        }
+      } else {
+        this.resetSelection();
+      }
     });
   }
 
@@ -154,7 +186,7 @@ export class Selection {
     const identifiers = cells.map(([row, column]) =>
       createSelectedCellIdentifier(row, column),
     );
-    this.selectedCells.addMultiple(identifiers);
+    this.selectedCells.reconstruct(identifiers);
   }
 
   resetSelection(): void {

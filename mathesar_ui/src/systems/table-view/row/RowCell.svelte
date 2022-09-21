@@ -70,7 +70,8 @@
    *
    * [1]: https://github.com/centerofci/mathesar/issues/1534
    */
-  $: isSelectedInRange = isCellSelected($selectedCells, row, column);
+  $: isSelectedInRange =
+    isCellSelected($selectedCells, row, column) && $selectedCells.size > 1;
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
