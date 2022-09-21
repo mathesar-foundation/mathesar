@@ -25,22 +25,37 @@ from db.functions.exceptions import BadDBFunctionFormat
 
 
 def sa_call_sql_function(function_name, *parameters, return_type=None):
+    """
+    This function registers an SQL function with SQLAlchemy and generates
+    an expression to call it.
+
+    function_name: string giving a namespaced SQL function
+    *parameters:   these will be passed directly to the generated function.
+    return_type:   an SQLAlchemy type class
+    """
     if return_type is None:
         warnings.warn(
             "sa_call_sql_function should be called with the return_type kwarg set"
         )
-        return_type = TEXT  # can't use PostgresType since we don't want engine here
+        # We can't use PostgresType since we don't want an engine here
+        return_type = TEXT
 
-    class_dict = {
-        "type": return_type,
-        "name": quoted_name(function_name, False),
-        "identifier": function_name,
-    }
+    temp_func_classname = 'temp_func_classname'
 
-    globals().update(
-        {function_name: type(class_dict["identifier"], (GenericFunction,), class_dict)}
-    )
-    return getattr(func, function_name)(*parameters)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="The GenericFunction")
+        # Creating this anonymous class registers the function (more
+        # importantly, its return type) with SQLAlchemy. **magic!!**
+        type(
+            temp_func_classname,
+            (GenericFunction,),
+            {
+                "type": return_type,
+                "name": quoted_name(function_name, False),
+                "identifier": temp_func_classname,
+            }
+        )
+    return getattr(func, temp_func_classname)(*parameters)
 
 
 # NOTE: this class is abstract.
