@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from '@mathesar-component-library';
+  import { Button, ImmutableMap } from '@mathesar-component-library';
   import {
     Sheet,
     SheetHeader,
@@ -14,6 +14,8 @@
   import type QueryRunner from '../QueryRunner';
 
   export let queryRunner: QueryRunner;
+
+  const ID_ROW_CONTROL_COLUMN = 'row-control';
 
   $: ({
     query,
@@ -30,10 +32,15 @@
 
   $: errors = $runState?.state === 'failure' ? $runState.errors : [];
   $: columnList = [...$processedColumns.values()];
+  $: sheetColumns = columnList.length
+    ? [{ id: ID_ROW_CONTROL_COLUMN }, ...columnList]
+    : [];
   // Show a dummy ghost row when there are no records
   $: showDummyGhostRow =
     recordRunState === 'success' && !$records.results.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : $records.results.length;
+
+  const columnWidths = new ImmutableMap([[ID_ROW_CONTROL_COLUMN, 70]]);
 
   function checkAndUnselectColumn(e: MouseEvent) {
     const target = e.target as HTMLElement;
@@ -75,12 +82,23 @@
     </div>
   {:else}
     <Sheet
-      columns={columnList}
+      columns={sheetColumns}
       getColumnIdentifier={(c) => c.id}
+      {columnWidths}
       on:click={checkAndUnselectColumn}
       usesVirtualList
     >
       <SheetHeader>
+        <SheetCell
+          columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+          isStatic
+          isControlCell
+          let:htmlAttributes
+          let:style
+        >
+          <div {...htmlAttributes} {style} />
+        </SheetCell>
+
         {#each columnList as processedQueryColumn (processedQueryColumn.id)}
           <SheetCell
             columnIdentifierKey={processedQueryColumn.id}
@@ -127,6 +145,18 @@
           {#if $records.results[item.index] || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div {...htmlAttributes} style={styleString}>
+                <SheetCell
+                  columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+                  isStatic
+                  isControlCell
+                  let:htmlAttributes
+                  let:style
+                >
+                  <div {...htmlAttributes} {style}>
+                    {$pagination.offset + item.index + 1}
+                  </div>
+                </SheetCell>
+
                 {#each columnList as processedQueryColumn (processedQueryColumn.id)}
                   <SheetCell
                     columnIdentifierKey={processedQueryColumn.id}

@@ -1,28 +1,32 @@
 <script lang="ts">
-  import { readable } from 'svelte/store';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import type { QueryManager } from '@mathesar/systems/data-explorer/types';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { iconExploration } from '@mathesar/icons';
   import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
+  import { queries } from '@mathesar/stores/queries';
+  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
   export let queryId: number;
 
-  let queryManager: QueryManager | undefined;
-
-  $: ({ query } = queryManager ?? { query: readable(undefined) });
+  $: query = $queries.data.get(queryId);
 </script>
 
-<AppendBreadcrumb
-  item={{
-    type: 'simple',
-    href: getExplorationPageUrl(database.name, schema.id, queryId),
-    label: $query?.name ?? 'Exploration',
-    icon: iconExploration,
-  }}
-/>
+{#if query}
+  <AppendBreadcrumb
+    item={{
+      type: 'simple',
+      href: getExplorationPageUrl(database.name, schema.id, queryId),
+      label: query?.name ?? 'Exploration',
+      icon: iconExploration,
+    }}
+  />
 
-<ExplorationPage {database} {schema} {queryId} />
+  <ExplorationPage {database} {schema} {query} />
+{:else if Number.isNaN(queryId)}
+  <ErrorPage>The specified URL is not found.</ErrorPage>
+{:else}
+  <ErrorPage>Table with id {queryId} not found.</ErrorPage>
+{/if}
