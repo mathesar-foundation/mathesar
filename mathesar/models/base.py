@@ -13,7 +13,10 @@ from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
-from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names, get_columns_name_from_tables
+from db.columns.operations.select import (
+    get_column_name_from_attnum, get_columns_attnum_from_names,
+    get_columns_name_from_attnums, get_columns_name_from_tables,
+)
 from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
@@ -204,13 +207,17 @@ class Schema(DatabaseObject):
 
 class ColumnNamePrefetcher(Prefetcher):
     def filter(self, column_attnums, columns):
-        pass
+        if len(columns) < 1:
+            return []
+        table = list(columns)[0].table
+        return get_columns_name_from_attnums(table.oid, column_attnums, table._sa_engine, fetch_as_map=True)
 
     def mapper(self, column):
         return column.attnum
 
     def reverse_mapper(self, column):
-        return
+        # We return maps mostly, so a reverse mapper is not needed
+        pass
 
     def decorator(self, column, name):
         setattr(column, 'name', name)
@@ -571,11 +578,15 @@ class Column(ReflectionManagerMixin, BaseModel):
         except AttributeError as e:
             # Blacklist Django attribute names that cause recursion by trying to fetch an invalid cache.
             # TODO Find a better way to avoid finding Django related columns
-            blacklisted_attribute_names = ['resolve_expression']
+            blacklisted_attribute_names = ['resolve_expression', '_prefetched_objects_cache']
             if name not in blacklisted_attribute_names:
                 return getattr(self._sa_column, name)
             else:
                 raise e
+    current_objects = models.Manager()
+    objects = DatabaseObjectManager(
+        name=ColumnNamePrefetcher
+    )
 
     @property
     def _sa_engine(self):

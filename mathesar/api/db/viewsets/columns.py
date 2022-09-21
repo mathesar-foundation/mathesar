@@ -27,7 +27,11 @@ class ColumnViewSet(viewsets.ModelViewSet):
     pagination_class = DefaultLimitOffsetPagination
 
     def get_queryset(self):
-        return Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
+        queryset = Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
+        # Prefetching instead of using select_related because select_related uses joins,
+        # and we need a reuse of individual Django object instead of its data
+        prefetched_queryset = queryset.prefetch_related('table').prefetch('name')
+        return prefetched_queryset
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
