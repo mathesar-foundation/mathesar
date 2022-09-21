@@ -1,6 +1,7 @@
 from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import text, select, Table, MetaData, Column
+from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.exc import IntegrityError
 from db.types.custom import uri
 from db.utils import execute_pg_query
@@ -131,7 +132,13 @@ FUNC_WRAPPERS = [
 def test_uri_func_wrapper(engine_with_schema, test_uri, part_dict, part, uri_function):
     engine, _ = engine_with_schema
     uri_function_name = uri_function.value
-    sel = select(sa_call_sql_function(uri_function_name, text(f"'{test_uri}'")))
+    sel = select(
+        sa_call_sql_function(
+            uri_function_name,
+            text(f"'{test_uri}'"),
+            return_type=TEXT
+        )
+    )
     with engine.begin() as conn:
         result = conn.execute(sel).fetchone()[0]
     assert result == part_dict[part]

@@ -2,8 +2,6 @@ from enum import Enum
 import os
 from sqlalchemy import text, Table, Column, String, MetaData
 from sqlalchemy.dialects.postgresql import TEXT
-from sqlalchemy.sql import quoted_name
-from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
 
 from db.functions import hints
@@ -41,24 +39,6 @@ class URI(UserDefinedType):
         # This results in the type name being upper case when viewed.
         # Actual usage in the DB is case-insensitive.
         return DB_TYPE.upper()
-
-
-# This function lets us avoid having to define repetitive classes for
-# adding custom SQL functions to SQLAlchemy
-def build_generic_function_def_class(name):
-    class_dict = {
-        "type": TEXT,
-        "name": quoted_name(URIFunction[name].value, False),
-        "identifier": URIFunction[name].value
-    }
-    return type(class_dict["identifier"], (GenericFunction,), class_dict)
-
-
-# We need to add these classes to the globals() dict so they get picked
-# up by SQLAlchemy
-globals().update(
-    {f.name: build_generic_function_def_class(f.name) for f in URIFunction}
-)
 
 
 def install(engine):
@@ -130,7 +110,7 @@ class ExtractURIAuthority(DBFunction):
 
     @staticmethod
     def to_sa_expression(uri):
-        return sa_call_sql_function(URIFunction.AUTHORITY.value, uri)
+        return sa_call_sql_function(URIFunction.AUTHORITY.value, uri, return_type=TEXT)
 
 
 class ExtractURIScheme(DBFunction):
@@ -144,7 +124,7 @@ class ExtractURIScheme(DBFunction):
 
     @staticmethod
     def to_sa_expression(uri):
-        return sa_call_sql_function(URIFunction.SCHEME.value, uri)
+        return sa_call_sql_function(URIFunction.SCHEME.value, uri, return_type=TEXT)
 
 
 class URIAuthorityContains(DBFunctionPacked):
