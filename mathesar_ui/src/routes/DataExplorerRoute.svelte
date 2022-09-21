@@ -5,7 +5,7 @@
     QueryManager,
     QueryModel,
     constructQueryModelFromTerseSummarizationHash,
-  } from '@mathesar/systems/query-builder';
+  } from '@mathesar/systems/data-explorer';
   import { getQuery } from '@mathesar/stores/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { CancellablePromise } from '@mathesar/component-library';

@@ -20,7 +20,7 @@
   } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/utils/api';
-  import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/query-builder';
+  import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/data-explorer';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
   import Group from './record-operations/Group.svelte';
