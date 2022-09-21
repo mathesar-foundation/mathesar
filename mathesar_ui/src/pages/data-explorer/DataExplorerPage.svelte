@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { SchemaEntry } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import QueryBuilder from '@mathesar/systems/query-builder/QueryBuilder.svelte';
-  import type QueryManager from '@mathesar/systems/query-builder/QueryManager';
+  import { DataExplorer } from '@mathesar/systems/query-builder';
+  import type { QueryManager } from '@mathesar/systems/query-builder/types';
 
   export let schema: SchemaEntry;
   export let queryManager: QueryManager;
@@ -15,5 +15,5 @@
 </svelte:head>
 
 <LayoutWithHeader fitViewport>
-  <QueryBuilder {queryManager} />
+  <DataExplorer {queryManager} />
 </LayoutWithHeader>

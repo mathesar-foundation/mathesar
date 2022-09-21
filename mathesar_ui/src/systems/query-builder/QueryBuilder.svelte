@@ -111,7 +111,7 @@
   }
 </script>
 
-<div class="query-builder">
+<div class="data-explorer">
   <div class="header">
     <div class="title-wrapper">
       <div class="icon">
@@ -200,7 +200,7 @@
 </NameAndDescInputModalForm>
 
 <style lang="scss">
-  .query-builder {
+  .data-explorer {
     position: absolute;
     left: 0;
     right: 0;

@@ -1,8 +1,11 @@
 <script lang="ts">
   import { router } from 'tinro';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import QueryManager from '@mathesar/systems/query-builder/QueryManager';
-  import QueryModel from '@mathesar/systems/query-builder/QueryModel';
+  import {
+    QueryManager,
+    QueryModel,
+    constructQueryModelFromTerseSummarizationHash,
+  } from '@mathesar/systems/query-builder';
   import { getQuery } from '@mathesar/stores/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { CancellablePromise } from '@mathesar/component-library';
@@ -14,7 +17,6 @@
     getDataExplorerPageUrl,
     getExplorationEditorPageUrl,
   } from '@mathesar/routes/urls';
-  import { constructQueryModelFromTerseSummarizationHash } from '@mathesar/systems/query-builder/urlSerializationUtils';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconExploration } from '@mathesar/icons';
   import { readable } from 'svelte/store';

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { readable } from 'svelte/store';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import type QueryManager from '@mathesar/systems/query-builder/QueryManager';
+  import type { QueryManager } from '@mathesar/systems/query-builder/types';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { iconExploration } from '@mathesar/icons';
