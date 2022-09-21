@@ -16,8 +16,9 @@
     id: table.id,
     abstractTypesMap: $currentDbAbstractTypes.data,
   });
-  $: ({ isLoading: tableStructureIsLoading } = tableStructure);
-  $: ({ fetchRequest: recordStoreFetchRequest, summary } = record);
+  $: tableStructureIsLoading = tableStructure.isLoading;
+  $: recordStoreFetchRequest = record.fetchRequest;
+  $: ({ summary } = record);
   $: recordStoreIsLoading = $recordStoreFetchRequest?.state === 'processing';
   $: isLoading = $tableStructureIsLoading || recordStoreIsLoading;
   $: title = recordStoreIsLoading ? '' : $summary;

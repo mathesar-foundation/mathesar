@@ -21,7 +21,7 @@
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
-  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
+  import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
   import { iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
