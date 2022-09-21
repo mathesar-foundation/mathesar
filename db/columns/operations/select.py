@@ -95,14 +95,17 @@ def get_columns_name_from_tables(table_oids, engine, connection_to_use=None, fet
     return column_names
 
 
-def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None):
+def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None, fetch_as_map=False):
     """
     Returns the respective list of attnum of the column names passed.
      The order is based on the column order in the table and not by the order of the column names argument.
     """
     statement = _get_columns_name_from_attnums([table_oid], attnums, engine, connection_to_use=None)
     column_names_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
-    column_names = [column_name_tuple[0] for column_name_tuple in column_names_tuple]
+    if fetch_as_map:
+        column_names = {column_name_tuple[1]: column_name_tuple[0] for column_name_tuple in column_names_tuple}
+    else:
+        column_names = [column_name_tuple[0] for column_name_tuple in column_names_tuple]
     return column_names
 
 
