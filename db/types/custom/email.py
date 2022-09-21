@@ -1,6 +1,5 @@
-from sqlalchemy import text, Text
-from sqlalchemy.sql import quoted_name
-from sqlalchemy.sql.functions import GenericFunction
+from sqlalchemy import text
+from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.types import UserDefinedType
 
 from db.types.base import MathesarCustomType
@@ -28,22 +27,6 @@ class Email(UserDefinedType):
         # This results in the type name being upper case when viewed.
         # Actual usage in the DB is case-insensitive.
         return DB_TYPE.upper()
-
-
-# This will register our custom email_domain_name function with sqlalchemy so
-# it can be used via `func.email_domain_name`
-class email_domain_name(GenericFunction):
-    type = Text
-    name = quoted_name(EMAIL_DOMAIN_NAME, False)
-    identifier = EMAIL_DOMAIN_NAME
-
-
-# This will register our custom email_local_part function with sqlalchemy so
-# it can be used via `func.email_local_part`
-class email_local_part(GenericFunction):
-    type = Text
-    name = quoted_name(EMAIL_LOCAL_PART, False)
-    identifier = EMAIL_LOCAL_PART
 
 
 def install(engine):
@@ -89,7 +72,7 @@ class ExtractEmailDomain(DBFunction):
 
     @staticmethod
     def to_sa_expression(uri):
-        return sa_call_sql_function(EMAIL_DOMAIN_NAME, uri)
+        return sa_call_sql_function(EMAIL_DOMAIN_NAME, uri, return_type=TEXT)
 
 
 class EmailDomainContains(DBFunctionPacked):

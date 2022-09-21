@@ -3,6 +3,7 @@ import pytest
 from sqlalchemy import text, select, Table, Column, MetaData
 from sqlalchemy.exc import IntegrityError
 from db.types.custom import email
+from db.types.base import PostgresType
 from db.utils import execute_pg_query
 from db.functions.base import ColumnName, Literal, sa_call_sql_function
 from db.functions.operations.apply import apply_db_function_as_filter
@@ -10,7 +11,13 @@ from db.functions.operations.apply import apply_db_function_as_filter
 
 def test_domain_func_wrapper(engine_with_schema):
     engine, _ = engine_with_schema
-    sel = select(sa_call_sql_function(email.EMAIL_DOMAIN_NAME, text("'test@example.com'")))
+    sel = select(
+        sa_call_sql_function(
+            email.EMAIL_DOMAIN_NAME,
+            text("'test@example.com'"),
+            return_type=PostgresType.TEXT.get_sa_class(engine)
+        )
+    )
     with engine.begin() as conn:
         res = conn.execute(sel)
         assert res.fetchone()[0] == "example.com"
@@ -18,7 +25,13 @@ def test_domain_func_wrapper(engine_with_schema):
 
 def test_local_part_func_wrapper(engine_with_schema):
     engine, _ = engine_with_schema
-    sel = select(sa_call_sql_function(email.EMAIL_LOCAL_PART, text("'test@example.com'")))
+    sel = select(
+        sa_call_sql_function(
+            email.EMAIL_LOCAL_PART,
+            text("'test@example.com'"),
+            return_type=PostgresType.TEXT.get_sa_class(engine)
+        )
+    )
     with engine.begin() as conn:
         res = conn.execute(sel)
         assert res.fetchone()[0] == "test"
