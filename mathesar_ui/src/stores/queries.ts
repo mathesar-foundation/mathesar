@@ -1,12 +1,13 @@
 import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-import { getAPI, postAPI, putAPI } from '@mathesar/utils/api';
+import { deleteAPI, getAPI, postAPI, putAPI } from '@mathesar/utils/api';
 import type { RequestStatus, PaginatedResponse } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { SchemaEntry } from '@mathesar/AppTypes';
 import type {
   QueryInstance,
+  QueryGetResponse,
   QueryRunRequest,
   QueryRunResponse,
 } from '@mathesar/api/queries';
@@ -62,6 +63,12 @@ function setSchemaQueriesStore(
     store.set(storeValue);
   }
   return store;
+}
+
+function findSchemaStoreForTable(id: QueryInstance['id']) {
+  return [...schemasCacheManager.cache.values()].find((entry) =>
+    get(entry).data.has(id),
+  );
 }
 
 export async function refetchQueriesForSchema(
@@ -155,14 +162,10 @@ export const queries: Readable<QueriesStoreSubstance> = derived(
 
 export function createQuery(
   newQuery: UnsavedQueryInstance,
-): CancellablePromise<QueryInstance> {
-  const promise = postAPI<QueryInstance>('/api/db/v0/queries/', newQuery);
-  void promise.then(() => {
-    // TODO: Get schemaId as a query property
-    const schemaId = get(currentSchemaId);
-    if (schemaId) {
-      void refetchQueriesForSchema(schemaId);
-    }
+): CancellablePromise<QueryGetResponse> {
+  const promise = postAPI<QueryGetResponse>('/api/db/v0/queries/', newQuery);
+  void promise.then((instance) => {
+    void refetchQueriesForSchema(instance.schema);
     return undefined;
   });
   return promise;
@@ -230,4 +233,17 @@ export function runQuery(
   request: QueryRunRequest,
 ): CancellablePromise<QueryRunResponse> {
   return postAPI('/api/db/v0/queries/run/', request);
+}
+
+export function deleteQuery(queryId: number): CancellablePromise<void> {
+  const promise = deleteAPI<void>(`/api/db/v0/queries/${queryId}/`);
+
+  void promise.then(() => {
+    findSchemaStoreForTable(queryId)?.update((storeData) => {
+      storeData.data.delete(queryId);
+      return { ...storeData, data: new Map(storeData.data) };
+    });
+    return undefined;
+  });
+  return promise;
 }

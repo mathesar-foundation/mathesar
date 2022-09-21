@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import {
     ExplorationResult,
@@ -10,12 +9,13 @@
   import type { QueryInstance } from '@mathesar/api/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+  import ActionsPane from './ActionsPane.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
   export let query: QueryInstance;
 
-  let queryRunner: QueryRunner;
+  let queryRunner: QueryRunner | undefined;
 
   function createQueryRunner(
     _query: QueryInstance,
@@ -29,19 +29,16 @@
 </script>
 
 <svelte:head>
-  <title>Exploration Name comes here | {schema.name} | Mathesar</title>
+  <title>{query.name} | {schema.name} | Mathesar</title>
 </svelte:head>
 
 <LayoutWithHeader fitViewport>
-  <div class="exploration-page">
-    <a href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}
-      >Edit exploration in Data Explorer</a
-    >
-
-    {#if queryRunner}
+  {#if queryRunner}
+    <div class="exploration-page">
+      <ActionsPane {query} {queryRunner} {database} {schema} />
       <ExplorationResult {queryRunner} />
-    {/if}
-  </div>
+    </div>
+  {/if}
 </LayoutWithHeader>
 
 <style lang="scss">

@@ -56,6 +56,10 @@ export interface QueryInstance {
   readonly transformations?: QueryInstanceTransformation[];
 }
 
+export interface QueryGetResponse extends QueryInstance {
+  readonly schema: number;
+}
+
 /**
  * endpoint: /api/db/v0/queries/
  */
