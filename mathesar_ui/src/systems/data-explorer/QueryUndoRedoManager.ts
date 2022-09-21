@@ -58,4 +58,8 @@ export default class QueryUndoRedoManager {
     }
     return undefined;
   }
+
+  clear(): void {
+    this.current = undefined;
+  }
 }

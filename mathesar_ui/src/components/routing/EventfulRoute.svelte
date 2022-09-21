@@ -7,6 +7,6 @@
 </script>
 
 <Route {path} {firstmatch} let:meta>
-  <Observer {meta} on:routeUpdated on:routeLoaded />
+  <Observer {meta} on:load on:unload />
   <slot {meta} />
 </Route>

@@ -7,12 +7,12 @@
   import type { TableEntry } from '@mathesar/api/tables';
   import {
     getTablePageUrl,
-    getDataExplorerPageUrl,
+    getExplorationPageUrl,
   } from '@mathesar/routes/urls';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import { queries as queriesStore } from '@mathesar/stores/queries';
-  import type { QueryInstance } from '@mathesar/api/queries/queryList';
+  import type { QueryInstance } from '@mathesar/api/queries';
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type {
     BreadcrumbSelectorEntry,
@@ -46,11 +46,11 @@
     return {
       type: 'simple',
       label: queryInstance.name,
-      href: getDataExplorerPageUrl(database.name, schema.id, queryInstance.id),
+      href: getExplorationPageUrl(database.name, schema.id, queryInstance.id),
       icon: iconTable,
       isActive() {
         // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
-        const entryhref = getDataExplorerPageUrl(
+        const entryhref = getExplorationPageUrl(
           database.name,
           schema.id,
           queryInstance.id,

@@ -47,6 +47,7 @@ import {
   faUnlink,
   faUpload,
   faUser,
+  faSave,
 } from '@fortawesome/free-solid-svg-icons';
 
 import type { IconProps } from '@mathesar-component-library/types';
@@ -84,6 +85,7 @@ export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
 export const iconSortDescending: IconProps = { data: faSortAmountDown };
 export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
+export const iconSave: IconProps = { data: faSave };
 
 // THINGS
 //

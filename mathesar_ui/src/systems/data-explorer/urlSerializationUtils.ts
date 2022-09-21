@@ -47,9 +47,10 @@ export function constructQueryModelFromTerseSummarizationHash(
   if (!groupedColumn) {
     return {};
   }
-  const aggregatedColumns = terseSummarization.columns.filter(
+  const firstNonGroupColumn = terseSummarization.columns.find(
     (entry) => entry.id !== groupedColumnId,
   );
+  const aggregatedColumns = firstNonGroupColumn ? [firstNonGroupColumn] : [];
 
   return {
     base_table: terseSummarization.baseTableId,
@@ -72,13 +73,13 @@ export function constructQueryModelFromTerseSummarizationHash(
           aggregation_expressions: aggregatedColumns.map((entry) => ({
             input_alias: entry.name,
             output_alias: `${entry.name} (aggregated)`,
-            function: 'aggregate_to_array',
+            function: 'count',
           })),
         },
         display_names: aggregatedColumns.reduce(
           (displayNames, entry) => ({
             ...displayNames,
-            [`${entry.name} (aggregated)`]: `${entry.name} (aggregated)`,
+            [`${entry.name} (aggregated)`]: `Count(${entry.name})`,
           }),
           {} as Record<string, string>,
         ),
