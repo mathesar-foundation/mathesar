@@ -60,15 +60,15 @@ def reflect_databases():
 # TODO pass in a cached engine instead of creating a new one
 def reflect_schemas_from_database(database_name):
     engine = create_mathesar_engine(database_name)
+    schema_names_with_oids = get_mathesar_schemas_with_oids(engine)
     db_schema_oids = {
-        schema['oid'] for schema in get_mathesar_schemas_with_oids(engine)
+        schema['oid'] for schema in schema_names_with_oids
     }
-
     database = models.Database.current_objects.get(name=database_name)
     for oid in db_schema_oids:
         schema, _ = models.Schema.current_objects.get_or_create(oid=oid, database=database)
     for schema in models.Schema.current_objects.all():
-        if schema.database.name == database and schema.oid not in db_schema_oids:
+        if schema.database == database and schema.oid not in db_schema_oids:
             schema.delete()
     engine.dispose()
 
