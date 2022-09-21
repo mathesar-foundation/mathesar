@@ -43,4 +43,10 @@ def init_mathesar_table_column_list_with_defaults(column_list):
 
 
 def get_mappings(temp_table_col_list, target_table_col_list):
-    pass
+    return perfect_map(temp_table_col_list, target_table_col_list)
+
+
+def perfect_map(temp_table_col_list, target_table_col_list):
+    match = list(zip(sorted(temp_table_col_list), sorted(target_table_col_list)))
+    result = [(temp_table_col_list.index(i1), target_table_col_list.index(i2)) for i1, i2 in match] if all(i1 == i2 for i1, i2 in match) else None
+    return result

@@ -434,7 +434,7 @@ class Table(DatabaseObject, Relation):
 
     def get_column_name_type_map(self):
         columns = Column.objects.filter(table_id=self.id)
-        columns_map = {column.name: str(column.type) for column in columns}
+        columns_map = [(column.name, str(column.type)) for column in columns]
         return columns_map
 
     def get_column_by_name(self, name):
