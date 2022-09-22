@@ -1,6 +1,6 @@
 import type { Column } from '@mathesar/api/tables/columns';
 import { ImmutableSet, WritableSet } from '@mathesar-component-library';
-import { get } from 'svelte/store';
+import { get, Unsubscriber } from 'svelte/store';
 import type { Row, RecordsData } from './records';
 import type { ColumnsDataStore } from './columns';
 import type { Display } from './display';
@@ -63,6 +63,8 @@ export class Selection {
 
   private selectionBounds: SelectionBounds | undefined;
 
+  private activeCellUnsubscriber: Unsubscriber;
+
   selectedCells: WritableSet<string>;
 
   freezeSelection: boolean;
@@ -89,28 +91,30 @@ export class Selection {
     });
 
     // Keep active cell and selected cell in sync
-    this.display.activeCell.subscribe((activeCell) => {
-      if (activeCell) {
-        const activeCellRow = this.allRows.find(
-          (row) => row.rowIndex === activeCell.rowIndex,
-        );
-        const activeCellColumn = this.allColumns.find(
-          (column) => column.id === activeCell.columnId,
-        );
-        if (activeCellRow && activeCellColumn) {
-          /**
-           * This handles the very rare edge case
-           * when the user starts the selection using mouse
-           * but before ending(mouseup event)
-           * she change the active cell using keyboard
-           */
-          this.selectionBounds = undefined;
-          this.selectMultipleCells([[activeCellRow, activeCellColumn]]);
+    this.activeCellUnsubscriber = this.display.activeCell.subscribe(
+      (activeCell) => {
+        if (activeCell) {
+          const activeCellRow = this.allRows.find(
+            (row) => row.rowIndex === activeCell.rowIndex,
+          );
+          const activeCellColumn = this.allColumns.find(
+            (column) => column.id === activeCell.columnId,
+          );
+          if (activeCellRow && activeCellColumn) {
+            /**
+             * This handles the very rare edge case
+             * when the user starts the selection using mouse
+             * but before ending(mouseup event)
+             * she change the active cell using keyboard
+             */
+            this.selectionBounds = undefined;
+            this.selectMultipleCells([[activeCellRow, activeCellColumn]]);
+          }
+        } else {
+          this.resetSelection();
         }
-      } else {
-        this.resetSelection();
-      }
-    });
+      },
+    );
   }
 
   onStartSelection(row: Row, column: Column): void {
@@ -244,5 +248,9 @@ export class Selection {
       this.resetSelection();
       this.selectMultipleCells(cells);
     }
+  }
+
+  destroy(): void {
+    this.activeCellUnsubscriber();
   }
 }

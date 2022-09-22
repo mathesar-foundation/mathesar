@@ -123,6 +123,7 @@ export class TabularData {
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
+    this.selection.destroy();
   }
 }
 
