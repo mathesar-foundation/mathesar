@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 import warnings
 
 from sqlalchemy import column, not_, and_, or_, func, literal
-from sqlalchemy.dialects.postgresql import array_agg, TEXT
+from sqlalchemy.dialects.postgresql import array_agg, INTEGER, TEXT
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
 
@@ -34,28 +34,27 @@ def sa_call_sql_function(function_name, *parameters, return_type=None):
     return_type:   an SQLAlchemy type class
     """
     if return_type is None:
-        warnings.warn(
+        # TODO change back to warning
+        raise Exception(
             "sa_call_sql_function should be called with the return_type kwarg set"
         )
         # We can't use PostgresType since we don't want an engine here
         return_type = TEXT
 
-    temp_func_classname = 'temp_func_classname'
-
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="The GenericFunction")
-        # Creating this anonymous class registers the function (more
-        # importantly, its return type) with SQLAlchemy. **magic!!**
+        # Creating this type registers the function (more importantly,
+        # its return type) with SQLAlchemy. **magic!!**
         type(
-            temp_func_classname,
+            function_name,
             (GenericFunction,),
             {
                 "type": return_type,
                 "name": quoted_name(function_name, False),
-                "identifier": temp_func_classname,
+                "identifier": function_name,
             }
         )
-    return getattr(func, temp_func_classname)(*parameters)
+    return getattr(func, function_name)(*parameters)
 
 
 # NOTE: this class is abstract.
@@ -291,7 +290,7 @@ class StartsWith(DBFunction):
 
     @staticmethod
     def to_sa_expression(string, prefix):
-        pattern = func.concat(prefix, '%')
+        pattern = sa_call_sql_function('concat', prefix, '%', return_type=TEXT)
         return string.like(pattern)
 
 
@@ -306,7 +305,7 @@ class Contains(DBFunction):
 
     @staticmethod
     def to_sa_expression(string, sub_string):
-        pattern = func.concat('%', sub_string, '%')
+        pattern = sa_call_sql_function('concat', '%', sub_string, '%', return_type=TEXT)
         return string.like(pattern)
 
 
@@ -405,7 +404,7 @@ class Count(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
-        return sa_call_sql_function('count', column_expr)
+        return sa_call_sql_function('count', column_expr, return_type=INTEGER)
 
 
 class ArrayAgg(DBFunction):
