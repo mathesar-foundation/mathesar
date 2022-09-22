@@ -17,7 +17,7 @@
   let isUpdating = false;
 
   $: ({ column } = processedColumn);
-  $: ({ fields } = record);
+  $: ({ fields, fkSummaryData } = record);
   $: value = $fields.get(column.id);
   $: disabled = column.primary_key || isUpdating;
 
@@ -41,5 +41,6 @@
     componentAndProps={processedColumn.inputComponentAndProps}
     on:change={(e) => updateField(getValueFromEvent(e))}
     on:artificialChange={(e) => updateField(getValueFromArtificialEvent(e))}
+    dataForRecordSummaryInFkCell={$fkSummaryData.get(column.id)}
   />
 </LabeledInput>
