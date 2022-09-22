@@ -5,7 +5,7 @@ import type {
 } from '@mathesar-component-library/types';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
-import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
+import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
 
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
