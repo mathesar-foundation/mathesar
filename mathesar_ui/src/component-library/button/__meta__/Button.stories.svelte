@@ -6,9 +6,10 @@
   const argTypes = {
     onClick: { action: 'click', table: { disable: true } },
     slotContent: {
-      control: 'text',
+      control: {
+        type: 'text',
+      },
       description: 'Slot content of button. Allows any DOM element.',
-      type: { required: true },
     },
     element: {
       control: {
