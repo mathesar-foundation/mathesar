@@ -56,7 +56,11 @@ export class TabularData {
       this.columnsDataStore,
       this.recordsData,
     );
-    this.selection = new Selection(this.columnsDataStore, this.recordsData);
+    this.selection = new Selection(
+      this.columnsDataStore,
+      this.recordsData,
+      this.display,
+    );
 
     this.processedColumns = derived(
       [this.columnsDataStore, this.constraintsDataStore],
@@ -119,6 +123,7 @@ export class TabularData {
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
+    this.selection.destroy();
   }
 }
 
