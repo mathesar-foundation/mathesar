@@ -89,29 +89,16 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         if serializer.is_valid(True):
             # We need to get the column names before splitting the table,
             # as they are the only reference to the new column after it is moved to a new table
-            extracted_column_names = [column.name for column in serializer.validated_data['extract_columns']]
-            remainder_column_names = column_names_id_map.keys() - extracted_column_names
+            columns_to_extract = serializer.validated_data['extract_columns']
             extracted_table_name = serializer.validated_data['extracted_table_name']
-            engine = table._sa_engine
-            extracted_sa_table, remainder_sa_table, remainder_fk = table.split_table(
-                serializer.validated_data['extract_columns'],
-                extracted_table_name,
+            extracted_table, remainder_table, _ = table.split_table(
+                columns_to_extract=columns_to_extract,
+                extracted_table_name=extracted_table_name,
+                column_names_id_map=column_names_id_map,
             )
-            extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
-            remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
-
-            extracted_table = Table.current_objects.get(oid=extracted_table_oid)
-            # Update attnum as it would have changed due to columns moving to a new table.
-            extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
-
-            remainder_table = Table.current_objects.get(oid=remainder_table_oid)
-            remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
-
-            extracted_table = Table.objects.get(oid=extracted_table_oid)
-            remainder_table_obj = Table.objects.get(oid=remainder_table_oid)
             split_table_response = {
                 'extracted_table': extracted_table.id,
-                'remainder_table': remainder_table_obj.id
+                'remainder_table': remainder_table.id
             }
             response_serializer = SplitTableResponseSerializer(data=split_table_response)
             response_serializer.is_valid(True)
@@ -120,35 +107,15 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     @action(methods=['post'], detail=True)
     def move_columns(self, request, pk=None):
         table = self.get_object()
-        column_names_id_map = table.get_column_name_id_bidirectional_map()
         serializer = MoveTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
         if serializer.is_valid(True):
             target_table = serializer.validated_data['target_table']
             move_columns = serializer.validated_data['move_columns']
-            column_names_to_move = [column.name for column in move_columns]
-            target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
-            extracted_sa_table, remainder_sa_table = table.move_columns(
-                move_columns,
-                target_table,
+            table.move_columns(
+                columns_to_move=move_columns,
+                target_table=target_table,
             )
-            engine = table._sa_engine
-            extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
-            remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
-
-            target_table.oid = extracted_table_oid
-            target_table.save()
-            # Refresh existing target table columns to use correct attnum preventing conflicts with the moved column
-            existing_target_column_names = target_columns_name_id_map.keys()
-            target_table.update_column_reference(existing_target_column_names, target_columns_name_id_map)
-            # Add the moved column
-            target_table.update_column_reference(column_names_to_move, column_names_id_map)
-
-            table.oid = remainder_table_oid
-            table.save()
-            remainder_column_names = column_names_id_map.keys() - column_names_to_move
-            table.update_column_reference(remainder_column_names, column_names_id_map)
-
-        return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], detail=True)
     def previews(self, request, pk=None):

@@ -428,36 +428,74 @@ class Table(DatabaseObject, Relation):
     def move_columns(self, columns_to_move, target_table):
         columns_attnum_to_move = [column.attnum for column in columns_to_move]
         target_table_oid = target_table.oid
-        result = move_columns_between_related_tables(
-            self.oid,
-            target_table_oid,
-            columns_attnum_to_move,
-            self.schema.name,
-            self._sa_engine
+        extracted_sa_table, remainder_sa_table = move_columns_between_related_tables(
+            source_table_oid=self.oid,
+            target_table_oid=target_table_oid,
+            column_attnums_to_move=columns_attnum_to_move,
+            schema=self.schema.name,
+            engine=self._sa_engine
         )
+        engine = self._sa_engine
+        extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
+        remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
+        target_table.oid = extracted_table_oid
+        target_table.save()
+        target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
+        # Refresh existing target table columns to use correct attnum preventing conflicts with the moved column
+        existing_target_column_names = target_columns_name_id_map.keys()
+        target_table.update_column_reference(existing_target_column_names, target_columns_name_id_map)
+        column_names_id_map = self.get_column_name_id_bidirectional_map()
+        column_names_to_move = [column.name for column in columns_to_move]
+        # Add the moved column
+        target_table.update_column_reference(column_names_to_move, column_names_id_map)
+        self.oid = remainder_table_oid
+        self.save()
+        remainder_column_names = column_names_id_map.keys() - column_names_to_move
+        self.update_column_reference(remainder_column_names, column_names_id_map)
         reset_reflection()
-        return result
+        return extracted_sa_table, remainder_sa_table
 
     def split_table(
             self,
             columns_to_extract,
             extracted_table_name,
+            column_names_id_map,
     ):
         columns_attnum_to_extract = [column.attnum for column in columns_to_extract]
-        result = extract_columns_from_table(
+        extracted_sa_table, remainder_sa_table, remainder_fk = extract_columns_from_table(
             self.oid,
             columns_attnum_to_extract,
             extracted_table_name,
             self.schema.name,
             self._sa_engine
         )
-        reset_reflection()
-        return result
+        engine = self._sa_engine
+        extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
+        remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
 
-    def update_column_reference(self, columns_name, column_name_id_map):
+        extracted_column_names = [column.name for column in columns_to_extract]
+        remainder_column_names = column_names_id_map.keys() - extracted_column_names
+
+        extracted_table = Table(oid=extracted_table_oid, schema=self.schema)
+        extracted_table.save()
+        # Update attnum as it would have changed due to columns moving to a new table.
+        extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
+
+        remainder_table = Table.current_objects.get(oid=remainder_table_oid)
+        remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
+
+        reset_reflection()
+
+        return extracted_table, remainder_table, remainder_fk
+
+    def update_column_reference(self, column_names, column_name_id_map):
+        """
+        Will update the columns specified via column_names to have the right attnum and to be part
+        of this table.
+        """
         columns_name_attnum_map = get_columns_attnum_from_names(
             self.oid,
-            columns_name,
+            column_names,
             self._sa_engine,
             return_as_name_map=True,
             metadata=get_cached_metadata(),
