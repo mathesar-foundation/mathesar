@@ -10,7 +10,7 @@ from sqlalchemy import text
 from db.columns.operations.select import get_columns_attnum_from_names
 from db.types.base import PostgresType, MathesarCustomType
 
-from mathesar.state import django as reflection
+from mathesar.state import django as reflection, reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import base as models_base
 from mathesar.models.base import Column, Table, DataFile
@@ -880,7 +880,7 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
     assert len(orig_created) == 1
     with engine.begin() as conn:
         conn.execute(text(f'DROP TABLE {schema_name}.{table_name};'))
-    cache.clear()
+    reset_reflection()
     response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     new_created = [
