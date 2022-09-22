@@ -15,7 +15,7 @@ import type {
   Group as ApiGroup,
   Grouping as ApiGrouping,
   GroupingMode,
-  DataForRecordSummariesInFkColumn,
+  ApiDataForRecordSummariesInFkColumn,
   GetRequestParams as ApiGetRequestParams,
 } from '@mathesar/api/tables/records';
 import type { Column } from '@mathesar/api/tables/columns';
@@ -71,7 +71,7 @@ export interface Grouping {
 /** Keys are stringified column ids */
 type DataForRecordSummariesInFkColumns = Record<
   string,
-  DataForRecordSummariesInFkColumn
+  ApiDataForRecordSummariesInFkColumn
 >;
 
 function buildGroup(apiGroup: ApiGroup): Group {

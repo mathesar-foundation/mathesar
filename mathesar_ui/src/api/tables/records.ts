@@ -105,7 +105,7 @@ export interface Group {
   result_indices: number[];
 }
 
-export interface DataForRecordSummariesInFkColumn {
+export interface ApiDataForRecordSummariesInFkColumn {
   column: number;
   template: string;
   /**
@@ -123,5 +123,5 @@ export interface Response {
   /**
    * Each item in this array can be matched to each FK column in the table.
    */
-  preview_data: DataForRecordSummariesInFkColumn[] | null;
+  preview_data: ApiDataForRecordSummariesInFkColumn[] | null;
 }
