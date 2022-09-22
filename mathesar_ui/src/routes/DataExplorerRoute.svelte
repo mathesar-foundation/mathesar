@@ -139,7 +139,7 @@
 <!--TODO: Add loading state-->
 
 {#if queryManager}
-  <DataExplorerPage {schema} {queryManager} />
+  <DataExplorerPage {queryManager} />
 {:else if is404}
   <ErrorPage>Exploration not found.</ErrorPage>
 {/if}
