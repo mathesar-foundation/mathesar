@@ -4,7 +4,9 @@ import type { NumberFormatterOptions } from './number-formatter/types';
 
 export * from './number-formatter/types';
 
-export interface NumberInputProps extends Partial<NumberFormatterOptions>, SimplifiedTextInputProps {
+export interface NumberInputProps
+  extends Partial<NumberFormatterOptions>,
+    SimplifiedTextInputProps {
   value?: number;
   element?: HTMLInputElement;
 }

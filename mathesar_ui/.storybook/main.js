@@ -23,7 +23,7 @@ module.exports = {
     return mergeConfig(config, {
       resolve: {
         alias: getAlias(),
-        dedupe: ["@storybook/client-api"],
+        dedupe: ['@storybook/client-api'],
       },
     });
   },
