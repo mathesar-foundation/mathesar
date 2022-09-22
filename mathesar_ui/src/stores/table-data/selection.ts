@@ -1,6 +1,7 @@
 import type { Column } from '@mathesar/api/tables/columns';
 import { ImmutableSet, WritableSet } from '@mathesar-component-library';
-import { get, Unsubscriber } from 'svelte/store';
+import { get } from 'svelte/store';
+import type { Unsubscriber } from 'svelte/store';
 import type { Row, RecordsData } from './records';
 import type { ColumnsDataStore } from './columns';
 import type { Display } from './display';
