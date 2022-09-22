@@ -62,17 +62,11 @@
       })();
     </script>
 
-    {% for js_file in manifest_data.module_vendor_js %}
-    <link rel="modulepreload" href="{% static js_file %}" />
-    {% endfor %}
     <script type="module" src="{% static manifest_data.module_js %}"></script>
     <script
       nomodule
       src="{% static manifest_data.legacy_polyfill_js %}"
     ></script>
-    {% for js_file in manifest_data.legacy_vendor_js %}
-    <script nomodule src="{% static js_file %}"></script>
-    {% endfor %}
     <script
       nomodule
       id="vite-legacy-entry"
