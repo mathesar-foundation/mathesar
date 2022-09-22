@@ -1,13 +1,16 @@
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { Column } from '@mathesar/api/tables/columns';
 import type { JpPath } from '@mathesar/api/tables/joinable_tables';
+import type { SchemaEntry } from '@mathesar/AppTypes';
+
+export type QueryColumnAlias = string;
 
 /**
  * endpoint: /api/db/v0/queries/<query_id>/
  */
 
 export interface QueryInstanceInitialColumn {
-  alias: string;
+  alias: QueryColumnAlias;
   id: Column['id'];
   jp_path?: JpPath;
   display_name: string;
@@ -53,6 +56,10 @@ export interface QueryInstance {
   readonly transformations?: QueryInstanceTransformation[];
 }
 
+export interface QueryGetResponse extends QueryInstance {
+  readonly schema: number;
+}
+
 /**
  * endpoint: /api/db/v0/queries/
  */
@@ -78,3 +85,35 @@ export interface QueryResultColumn {
 }
 
 export type QueryResultColumns = QueryResultColumn[];
+
+/**
+ * endpoint: /api/db/v0/queries/<query_id>/run/
+ */
+
+export interface QueryRunRequest {
+  base_table: QueryInstance['base_table'];
+  initial_columns: QueryInstanceInitialColumn[];
+  transformations?: QueryInstanceTransformation[];
+  parameters: {
+    order_by?: {
+      field: QueryColumnAlias;
+      direction: 'asc' | 'desc';
+    }[];
+    limit: number;
+    offset: number;
+  };
+}
+
+export type QueryColumnMetaData = QueryResultColumn;
+
+export interface QueryRunResponse {
+  query: {
+    schema: SchemaEntry['id'];
+    base_table: QueryInstance['base_table'];
+    initial_columns: QueryInstanceInitialColumn[];
+    transformations?: QueryInstanceTransformation[];
+  };
+  records: QueryResultRecords;
+  output_columns: QueryColumnAlias[];
+  column_metadata: Record<string, QueryColumnMetaData>;
+}

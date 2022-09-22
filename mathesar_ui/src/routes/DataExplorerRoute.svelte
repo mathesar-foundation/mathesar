@@ -1,35 +1,36 @@
 <script lang="ts">
-  import { readable } from 'svelte/store';
   import { router } from 'tinro';
-  import type { TinroRouteMeta } from 'tinro';
-
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import EventfulRoute from '@mathesar/components/routing/EventfulRoute.svelte';
-  import QueryManager from '@mathesar/systems/query-builder/QueryManager';
-  import QueryModel from '@mathesar/systems/query-builder/QueryModel';
-  import { queries, getQuery } from '@mathesar/stores/queries';
+  import {
+    QueryManager,
+    QueryModel,
+    constructQueryModelFromTerseSummarizationHash,
+  } from '@mathesar/systems/data-explorer';
+  import { getQuery } from '@mathesar/stores/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { CancellablePromise } from '@mathesar/component-library';
-  import type { QueryInstance } from '@mathesar/api/queries/queryList';
+  import type { QueryInstance } from '@mathesar/api/queries';
   import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
-  import { getAvailableName } from '@mathesar/utils/db';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
-  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
-  import { constructQueryModelFromTerseSummarizationHash } from '@mathesar/systems/query-builder/urlSerializationUtils';
+  import {
+    getDataExplorerPageUrl,
+    getExplorationEditorPageUrl,
+  } from '@mathesar/routes/urls';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconExploration } from '@mathesar/icons';
+  import { readable } from 'svelte/store';
 
   export let database: Database;
   export let schema: SchemaEntry;
+  export let queryId: number | undefined;
 
   let is404 = false;
 
   let queryManager: QueryManager | undefined;
   let queryLoadPromise: CancellablePromise<QueryInstance>;
 
-  $: queryStore = queryManager ? queryManager.query : readable(undefined);
-  $: query = $queryStore;
+  $: ({ query } = queryManager ?? { query: readable(undefined) });
 
   function createQueryManager(queryInstance: UnsavedQueryInstance) {
     queryManager?.destroy();
@@ -40,7 +41,7 @@
     is404 = false;
     queryManager.on('save', async (instance) => {
       try {
-        const url = getDataExplorerPageUrl(
+        const url = getExplorationEditorPageUrl(
           database.name,
           schema.id,
           instance.id,
@@ -66,45 +67,35 @@
       // An unsaved query is already open
       return;
     }
-    let newQueryModel = {
-      name: getAvailableName(
-        'New_Exploration',
-        new Set([...$queries.data.values()].map((e) => e.name)),
-      ),
-    };
     const { hash } = $router;
     if (hash) {
       try {
-        newQueryModel = {
-          ...newQueryModel,
-          ...constructQueryModelFromTerseSummarizationHash(hash),
-        };
+        const newQueryModel =
+          constructQueryModelFromTerseSummarizationHash(hash);
         router.location.hash.clear();
         createQueryManager(newQueryModel);
-        queryManager?.save();
         return;
       } catch {
         // fail silently
         console.error('Unable to create query model from hash', hash);
       }
     }
-    createQueryManager(newQueryModel);
+    createQueryManager({});
   }
 
-  async function loadSavedQuery(meta: TinroRouteMeta) {
-    const queryId = parseInt(meta.params.queryId, 10);
-    if (Number.isNaN(queryId)) {
+  async function loadSavedQuery(_queryId: number) {
+    if (Number.isNaN(_queryId)) {
       removeQueryManager();
       return;
     }
 
-    if (queryManager && queryManager.getQueryModel().id === queryId) {
+    if (queryManager && queryManager.getQueryModel().id === _queryId) {
       // The requested query is already open
       return;
     }
 
     queryLoadPromise?.cancel();
-    queryLoadPromise = getQuery(queryId);
+    queryLoadPromise = getQuery(_queryId);
     try {
       const queryInstance = await queryLoadPromise;
       createQueryManager(queryInstance);
@@ -113,32 +104,42 @@
       removeQueryManager();
     }
   }
+
+  function createOrLoadQuery(_queryId?: number) {
+    if (_queryId) {
+      void loadSavedQuery(_queryId);
+    } else {
+      createNewQuery();
+    }
+  }
+
+  $: createOrLoadQuery(queryId);
 </script>
 
-<AppendBreadcrumb
-  item={{
-    type: 'simple',
-    href: getDataExplorerPageUrl(database.name, schema.id, query?.id),
-    label: query?.name || 'Data Explorer',
-    icon: iconExploration,
-  }}
-/>
-
-<EventfulRoute
-  path="/:queryId"
-  on:routeUpdated={(e) => loadSavedQuery(e.detail)}
-  on:routeLoaded={(e) => loadSavedQuery(e.detail)}
-/>
-<EventfulRoute
-  path="/"
-  on:routeUpdated={createNewQuery}
-  on:routeLoaded={createNewQuery}
-/>
+{#if $query?.id}
+  <AppendBreadcrumb
+    item={{
+      type: 'simple',
+      href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
+      label: $query?.name ? `Edit: ${$query?.name}` : 'Data Explorer',
+      icon: iconExploration,
+    }}
+  />
+{:else}
+  <AppendBreadcrumb
+    item={{
+      type: 'simple',
+      href: getDataExplorerPageUrl(database.name, schema.id),
+      label: 'Data Explorer',
+      icon: iconExploration,
+    }}
+  />
+{/if}
 
 <!--TODO: Add loading state-->
 
 {#if queryManager}
-  <DataExplorerPage {database} {schema} {queryManager} />
+  <DataExplorerPage {schema} {queryManager} />
 {:else if is404}
   <ErrorPage>Exploration not found.</ErrorPage>
 {/if}

@@ -1,4 +1,13 @@
 <script lang="ts">
+  /**
+   * This component is currently used for objects where name and description
+   * need to be entered by the user. This is used in places such as:
+   * - Adding/Editing schema
+   * - Saving Exploration
+   *
+   * A more common modal-form component can be created by utilizing FormBuilder
+   * if such a need arises in the future.
+   */
   import { tick } from 'svelte';
   import type { ModalController } from '@mathesar-component-library';
   import {
