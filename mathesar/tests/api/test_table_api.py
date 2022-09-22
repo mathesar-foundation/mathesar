@@ -889,20 +889,6 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
     assert len(new_created) == 0
 
 
-def test_table_viewset_sets_cache(client):
-    cache.delete(reflection.DB_REFLECTION_KEY)
-    assert not cache.get(reflection.DB_REFLECTION_KEY)
-    client.get('/api/db/v0/schemas/')
-    assert cache.get(reflection.DB_REFLECTION_KEY)
-
-
-def test_table_viewset_checks_cache(client):
-    cache.delete(reflection.DB_REFLECTION_KEY)
-    with patch.object(reflection, 'reflect_tables_from_schema') as mock_reflect:
-        client.get('/api/db/v0/tables/')
-    mock_reflect.assert_called()
-
-
 def _get_patents_column_data(table):
     column_data = [{
         'name': 'id',
