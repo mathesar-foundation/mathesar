@@ -44,7 +44,6 @@ test.each(
     [
       3,
       {
-        column: 3,
         template: '{7__8__col__9}',
         data: { '7__8__col__9': 'Hi!' },
       },
