@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
+  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryTypes';
 
   export let recordId: unknown;
   export let dataForRecordSummaryInFkCell:

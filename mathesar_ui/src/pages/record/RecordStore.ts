@@ -7,8 +7,8 @@ import type { RequestStatus } from '@mathesar/utils/api';
 import { patchAPI, getAPI } from '@mathesar/utils/api';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { Response as ApiResponse } from '@mathesar/api/tables/records';
-import { renderSummaryFromFieldsAndFkData } from '@mathesar/utils/recordSummary';
-import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
+import { renderSummaryFromFieldsAndFkData } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryTypes';
 
 export default class RecordStore {
   fetchRequest = writable<RequestStatus | undefined>(undefined);

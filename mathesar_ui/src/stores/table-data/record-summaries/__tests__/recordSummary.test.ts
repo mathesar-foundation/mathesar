@@ -2,7 +2,7 @@ import { ImmutableMap } from '@mathesar-component-library';
 import {
   renderSummaryFromFieldsAndFkData,
   renderSummaryFromValuesObject,
-} from '../recordSummary';
+} from '../recordSummaryUtils';
 import type { DataForRecordSummaryInFkCell } from '../recordSummaryTypes';
 
 test.each(

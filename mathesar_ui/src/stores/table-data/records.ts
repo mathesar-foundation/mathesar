@@ -21,7 +21,7 @@ import type {
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
-import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
+import type { DataForRecordSummaryInFkCell } from './record-summaries/recordSummaryTypes';
 import type { Meta } from './meta';
 import type { RowKey } from './utils';
 import { validateRow, getCellKey } from './utils';
