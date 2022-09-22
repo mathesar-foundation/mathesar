@@ -1,40 +1,31 @@
-const sveltePreprocess = require('svelte-preprocess');
+const { mergeConfig } = require('vite');
+const preprocess = require('svelte-preprocess');
 const data = require('../tsconfig.json');
 const path = require('path');
 
 function getAlias() {
+  const alias = [];
   const { paths } = data.compilerOptions;
-  const newPaths = {};
-  Object.keys(paths).forEach((alias) => {
-    const strippedAlias = alias.replace('/*', '');
-    newPaths[strippedAlias] = path.resolve(
-      __dirname,
-      `../${paths[alias][0].replace('/*', '/')}`,
-    );
+  Object.keys(paths).forEach((key) => {
+    const find = (__dirname, key.replace('/*', ''));
+    const replacement = path.resolve(paths[key][0].replace('/*', ''));
+    alias.push({
+      find,
+      replacement,
+    });
   });
-  return newPaths;
+  return alias;
 }
 
 module.exports = {
-  core: { builder: 'webpack5' },
-  webpackFinal: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      ...getAlias(),
-      svelte: path.resolve('node_modules', 'svelte'),
-    };
-    config.resolve.extensions.push('.ts', '.tsx', '.mjs', '.js', '.svelte');
-    config.module.rules.push({
-      test: /\.scss$/,
-      use: ['style-loader', 'css-loader', 'sass-loader'],
-      include: path.resolve(__dirname, '../'),
+  core: { builder: '@storybook/builder-vite' },
+  async viteFinal(config) {
+    return mergeConfig(config, {
       resolve: {
-        alias: {
-          '@': path.resolve(__dirname, '../src/'),
-        },
+        alias: getAlias(),
+        dedupe: ["@storybook/client-api"],
       },
     });
-    return config;
   },
   stories: [
     '../src/**/*.stories.mdx',
@@ -47,10 +38,6 @@ module.exports = {
     '@storybook/addon-docs',
   ],
   svelteOptions: {
-    preprocess: sveltePreprocess({
-      scss: {
-        renderSync: true,
-      },
-    }),
+    preprocess: preprocess(),
   },
 };
