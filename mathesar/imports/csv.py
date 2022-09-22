@@ -14,6 +14,7 @@ from psycopg2.errors import IntegrityError, DataError
 
 from mathesar.state.django import reflect_columns_from_table
 from db.metadata import get_empty_metadata
+from mathesar.state import reset_reflection
 
 ALLOWED_DELIMITERS = ",\t:|"
 SAMPLE_SIZE = 20000
@@ -157,6 +158,7 @@ def create_db_table_from_data_file(data_file, name, schema):
             quote=dialect.quotechar,
             encoding=encoding
         )
+    reset_reflection()
     return table
 
 
@@ -168,13 +170,12 @@ def create_table_from_csv(data_file, name, schema):
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     # Using current_objects to create the table instead of objects. objects
     # triggers re-reflection, which will cause a race condition to create the table
-    table, _ = Table.current_objects.get_or_create(
+    table = Table.current_objects.get(
         oid=db_table_oid,
         schema=schema,
-        import_verified=False
     )
-    metadata = get_empty_metadata()
-    reflect_columns_from_table(table, metadata=metadata)
+    table.import_verified = False
+    table.save()
     data_file.table_imported_to = table
     data_file.save()
     return table
