@@ -49,11 +49,8 @@ class BaseModel(models.Model):
         abstract = True
 
 
-import logging
-logger = logging.getLogger(__name__)
 class DatabaseObjectManager(models.Manager):
     def get_queryset(self):
-        logger.debug('DatabaseObjectManager is reflecting.')
         make_sure_initial_reflection_happened()
         return super().get_queryset()
 
