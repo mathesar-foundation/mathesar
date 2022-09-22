@@ -8,6 +8,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import {
     getTablePageUrl,
+    getExplorationPageUrl,
     getDataExplorerPageUrl,
     getImportPageUrl,
     getImportPreviewPageUrl,
@@ -19,6 +20,12 @@
 
   export let database: Database;
   export let schema: SchemaEntry;
+
+  /**
+   * This property will be used for the latest design changes
+   * Based on the subroute, the desired tab/section will be selected
+   */
+  export let section = 'overview';
 
   $: tablesMap = $tablesStore.data;
   $: queriesMap = $queries.data;
@@ -90,7 +97,7 @@
     <ul class="entity-list">
       {#each [...queriesMap.values()] as query (query.id)}
         <li class="entity-list-item">
-          <a href={getDataExplorerPageUrl(database.name, schema.id, query.id)}>
+          <a href={getExplorationPageUrl(database.name, schema.id, query.id)}>
             <QueryName {query} />
           </a>
         </li>

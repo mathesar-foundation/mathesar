@@ -6,7 +6,7 @@
     createSchema,
     updateSchema,
   } from '@mathesar/stores/schemas';
-  import AddEditSchemaModalForm from '@mathesar/pages/database/AddEditSchemaModalForm.svelte';
+  import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { toast } from '@mathesar/stores/toast';
 
@@ -48,7 +48,7 @@
   }
 </script>
 
-<AddEditSchemaModalForm
+<NameAndDescInputModalForm
   {controller}
   {save}
   {getNameValidationErrors}
@@ -62,4 +62,4 @@
       Create Schema
     {/if}
   </span>
-</AddEditSchemaModalForm>
+</NameAndDescInputModalForm>

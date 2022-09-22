@@ -1,6 +1,9 @@
 import { ImmutableMap } from '@mathesar-component-library';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type { QueryResultColumn } from '@mathesar/api/queries/queryList';
+import type {
+  QueryResultColumn,
+  QueryRunResponse,
+} from '@mathesar/api/queries';
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,
@@ -24,6 +27,14 @@ import type {
 import type { Column } from '@mathesar/api/tables/columns';
 import type QueryModel from './QueryModel';
 
+export type ColumnOperationalState =
+  | {
+      state: 'processing';
+      processType?: 'creation' | 'deletion' | 'modification';
+    }
+  | { state: 'success' }
+  | { state: 'failure'; errors: string[] };
+
 export interface ProcessedQueryResultColumn extends CellColumnFabric {
   id: QueryResultColumn['alias'];
   column: QueryResultColumn;
@@ -31,6 +42,8 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   inputComponentAndProps: ComponentAndProps;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
+  // Make this mandatory later
+  operationalState?: ColumnOperationalState;
 }
 
 export type ProcessedQueryResultColumnMap = ImmutableMap<
@@ -316,4 +329,33 @@ export function getTablesThatReferenceBaseTable(
   });
 
   return references;
+}
+
+/** ======== */
+
+export function processColumns(
+  columnInformation: Pick<
+    QueryRunResponse,
+    'output_columns' | 'column_metadata'
+  >,
+  abstractTypeMap: AbstractTypesMap,
+): ProcessedQueryResultColumnMap {
+  return new ImmutableMap(
+    columnInformation.output_columns.map((alias) => {
+      const columnMetaData = columnInformation.column_metadata[alias];
+      return [
+        alias,
+        processColumn(
+          {
+            alias,
+            display_name: columnMetaData.display_name ?? alias,
+            type: columnMetaData.type ?? 'unknown',
+            type_options: columnMetaData.type_options,
+            display_options: columnMetaData.display_options,
+          },
+          abstractTypeMap,
+        ),
+      ];
+    }),
+  );
 }
