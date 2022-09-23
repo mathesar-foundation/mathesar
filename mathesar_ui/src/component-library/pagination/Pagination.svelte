@@ -48,7 +48,7 @@
   }
 </script>
 
-<nav role="navigation" aria-label={ariaLabel}>
+<nav aria-label={ariaLabel}>
   <ul class="pagination">
     {#if pageCount > 1}
       <li>

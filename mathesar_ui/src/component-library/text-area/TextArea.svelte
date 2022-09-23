@@ -6,8 +6,9 @@
     TextAreaProcessedKeyDown,
   } from '@mathesar-component-library-dir/text-area/TextAreaTypes';
 
-  const dispatch =
-    createEventDispatcher<{ processedKeyDown: TextAreaProcessedKeyDown }>();
+  const dispatch = createEventDispatcher<{
+    processedKeyDown: TextAreaProcessedKeyDown;
+  }>();
 
   type $$Props = TextAreaProps;
 

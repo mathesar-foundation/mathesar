@@ -91,7 +91,7 @@ function serializeMetaProps(p: MetaProps): string {
 
 /** @throws Error if string is not properly formatted. */
 function deserializeMetaProps(s: string): MetaProps {
-  return makeMetaProps(JSON.parse(Url64.decode(s)));
+  return makeMetaProps(JSON.parse(Url64.decode(s)) as TerseMetaProps);
 }
 
 const defaultMetaPropsSerialization = serializeMetaProps(getFullMetaProps());
