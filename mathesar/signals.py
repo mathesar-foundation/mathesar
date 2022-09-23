@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from mathesar.models.base import Column, PreviewColumnSettings, Table, TableSettings
+from mathesar.models.base import Column, Table, _create_table_settings
 from mathesar.reflection import reflect_new_table_constraints
 
 
@@ -17,8 +17,7 @@ def sync_table_constraints(**kwargs):
 def create_table_settings(**kwargs):
     if kwargs['created']:
         instance = kwargs['instance']
-        preview_column_settings = PreviewColumnSettings.objects.create(customized=False)
-        TableSettings.current_objects.create(table=instance, preview_settings=preview_column_settings)
+        _create_table_settings([instance])
 
 
 @receiver(post_save, sender=Column)

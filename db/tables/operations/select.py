@@ -54,16 +54,16 @@ def reflect_tables_from_oids(oids, engine, metadata=None, connection_to_use=None
     return tables
 
 
-def get_table_oids_from_schema(schema_oid, engine):
+def get_table_oids_from_schema(schema_oids, engine):
     metadata = MetaData()
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_class = Table("pg_class", metadata, autoload_with=engine)
     sel = (
-        select(pg_class.c.oid)
+        select(pg_class.c.oid, pg_class.c.relnamespace.label('schema_oid'))
         .where(
-            and_(pg_class.c.relkind == 'r', pg_class.c.relnamespace == schema_oid)
+            and_(pg_class.c.relkind == 'r', pg_class.c.relnamespace.in_(schema_oids))
         )
     )
     with engine.begin() as conn:

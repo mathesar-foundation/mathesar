@@ -50,13 +50,13 @@ def get_column_attnum_from_name(table_oid, column_name, engine, connection_to_us
     return execute_statement(engine, statement, connection_to_use).scalar()
 
 
-def get_column_attnums_from_table(table_oid, engine, connection_to_use=None):
+def get_column_attnums_from_table(table_oids, engine, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
-    sel = select(pg_attribute.c.attnum).where(
+    sel = select(pg_attribute.c.attnum, pg_attribute.c.attrelid.label('table_oid')).where(
         and_(
-            pg_attribute.c.attrelid == table_oid,
+            pg_attribute.c.attrelid.in_(table_oids),
             # Ignore system columns
             pg_attribute.c.attnum > 0,
             # Ignore removed columns
