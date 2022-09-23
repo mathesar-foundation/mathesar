@@ -426,11 +426,14 @@ class Table(DatabaseObject, Relation):
         ]
 
     def move_columns(self, columns_to_move, target_table):
+        # Collect various information about relevant columns before mutating
         columns_attnum_to_move = [column.attnum for column in columns_to_move]
         target_table_oid = target_table.oid
         column_names_to_move = [column.name for column in columns_to_move]
         target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
         column_names_id_map = self.get_column_name_id_bidirectional_map()
+
+        # Mutate on Postgres
         extracted_sa_table, remainder_sa_table = move_columns_between_related_tables(
             source_table_oid=self.oid,
             target_table_oid=target_table_oid,
@@ -439,6 +442,8 @@ class Table(DatabaseObject, Relation):
             engine=self._sa_engine
         )
         engine = self._sa_engine
+
+        # Replicate mutation on Django, so that Django-layer-specific information is preserved
         extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
         remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
         target_table.oid = extracted_table_oid
@@ -461,9 +466,12 @@ class Table(DatabaseObject, Relation):
             extracted_table_name,
             column_names_id_map,
     ):
+        # Collect various information about relevant columns before mutating
         columns_attnum_to_extract = [column.attnum for column in columns_to_extract]
         extracted_column_names = [column.name for column in columns_to_extract]
         remainder_column_names = column_names_id_map.keys() - extracted_column_names
+
+        # Mutate on Postgres
         extracted_sa_table, remainder_sa_table, remainder_fk = extract_columns_from_table(
             self.oid,
             columns_attnum_to_extract,
@@ -472,19 +480,17 @@ class Table(DatabaseObject, Relation):
             self._sa_engine
         )
         engine = self._sa_engine
+
+        # Replicate mutation on Django, so that Django-layer-specific information is preserved
         extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
         remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
-
         extracted_table = Table(oid=extracted_table_oid, schema=self.schema)
         extracted_table.save()
         # Update attnum as it would have changed due to columns moving to a new table.
         extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
-
         remainder_table = Table.current_objects.get(oid=remainder_table_oid)
         remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
-
         reset_reflection()
-
         return extracted_table, remainder_table, remainder_fk
 
     def update_column_reference(self, column_names, column_name_id_map):
