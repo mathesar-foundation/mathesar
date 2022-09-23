@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable prefer-template */
 /* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 /**
  * Detect Element Resize.

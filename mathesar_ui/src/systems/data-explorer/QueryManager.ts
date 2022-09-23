@@ -275,7 +275,10 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       if (summarizationTransforms.length > 0) {
         const lastTransform =
           summarizationTransforms[summarizationTransforms.length - 1];
-        const result = new Map();
+        const result = new Map<
+          ProcessedQueryResultColumn['id'],
+          ProcessedQueryResultColumn
+        >();
         lastTransform.getOutputColumnAliases().forEach((alias) => {
           const column =
             processedVirtualColumns.get(alias) ??
