@@ -1,4 +1,5 @@
 import warnings
+import re
 
 from pglast import Node, parse_sql
 from sqlalchemy import Table, and_, asc, cast, select, text
@@ -93,7 +94,15 @@ def get_columns_name_from_attnums(table_oid, attnums, engine, metadata, connecti
 
 def get_column_name_from_attnum(table_oid, attnum, engine, metadata, connection_to_use=None):
     statement = _get_columns_name_from_attnums(table_oid, [attnum], engine, metadata=metadata, connection_to_use=None)
-    return execute_statement(engine, statement, connection_to_use).scalar()
+    column_name = execute_statement(engine, statement, connection_to_use).scalar()
+    # If the column was recently dropped, it will have a name like "......pg.dropped.123....."
+    # See this example: https://stackoverflow.com/a/43050463/1714997
+    # Below line checks if the column was dropped
+    column_was_dropped = re.match(r"\.+\.pg.dropped.\d+\.\.+", column_name)
+    if column_was_dropped:
+        return None
+    else:
+        return column_name
 
 
 def get_column_default_dict(table_oid, attnum, engine, metadata, connection_to_use=None):

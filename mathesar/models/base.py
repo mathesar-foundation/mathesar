@@ -36,6 +36,7 @@ from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
 from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
+from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -568,9 +569,20 @@ class Column(ReflectionManagerMixin, BaseModel):
 
     @property
     def name(self):
-        return get_column_name_from_attnum(
-            self.table.oid, self.attnum, self._sa_engine, metadata=get_cached_metadata(),
+        name = get_column_name_from_attnum(
+            self.table.oid,
+            self.attnum,
+            self._sa_engine,
+            metadata=get_cached_metadata(),
         )
+        if name is None:
+            raise ProgrammingAPIException(
+                Exception(
+                    "attempted to access column's name after it was dropped"
+                )
+            )
+        else:
+            return name
 
     @property
     def ui_type(self):
