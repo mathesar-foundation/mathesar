@@ -34,7 +34,6 @@ def sa_call_sql_function(function_name, *parameters, return_type=None):
     return_type:   an SQLAlchemy type class
     """
     if return_type is None:
-        # TODO change back to warning
         warnings.warn(
             "sa_call_sql_function should be called with the return_type kwarg set"
         )
