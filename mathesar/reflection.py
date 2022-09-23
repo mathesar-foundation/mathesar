@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
@@ -49,46 +51,80 @@ def reflect_schemas_from_database(database_name):
     }
 
     database = models.Database.current_objects.get(name=database_name)
+    schemas = []
     for oid in db_schema_oids:
-        schema, boolean = models.Schema.current_objects.get_or_create(oid=oid, database=database)
-    for schema in models.Schema.current_objects.all():
+        schema = models.Schema(oid=oid, database=database)
+        schemas.append(schema)
+    models.Schema.current_objects.bulk_create(schemas, ignore_conflicts=True)
+    deleted_schemas = []
+    for schema in models.Schema.current_objects.all().select_related('database'):
         if schema.database.name == database and schema.oid not in db_schema_oids:
-            schema.delete()
+            deleted_schemas.append(schema.id)
+    models.Schema.current_objects.filter(id__in=deleted_schemas).delete()
     engine.dispose()
 
 
-def reflect_tables_from_schema(schema):
+def reflect_tables_from_schemas(schemas):
+    if len(schemas) < 1:
+        return
+    engine = schemas[0]._sa_engine
+    schema_oids = [schema.oid for schema in schemas]
     db_table_oids = {
-        table['oid']
-        for table in get_table_oids_from_schema(schema.oid, schema._sa_engine)
+        (table['oid'], table['schema_oid'])
+        for table in get_table_oids_from_schema(schema_oids, engine)
     }
-    for oid in db_table_oids:
-        models.Table.current_objects.get_or_create(oid=oid, schema=schema)
-    for table in models.Table.current_objects.filter(schema=schema):
-        if table.oid not in db_table_oids:
-            table.delete()
+    tables = []
+    for oid, schema_oid in db_table_oids:
+        schema = next(schema for schema in schemas if schema.oid == schema_oid)
+        table = models.Table(oid=oid, schema=schema)
+        tables.append(table)
+    models.Table.current_objects.bulk_create(tables, ignore_conflicts=True)
+    # Calling signals manually because bulk create does not emit any signals
+    models._create_table_settings(models.Table.current_objects.filter(settings__isnull=True))
+    deleted_tables = []
+    for table in models.Table.current_objects.filter(schema__in=schemas).select_related('schema'):
+        if (table.oid, table.schema.oid) not in db_table_oids:
+            deleted_tables.append(table.id)
+
+    models.Table.current_objects.filter(id__in=deleted_tables).delete()
 
 
-def reflect_columns_from_table(table):
+def reflect_columns_from_tables(tables):
+    if len(tables) < 1:
+        return
+    engine = tables[0]._sa_engine
+    table_oids = [table.oid for table in tables]
     attnums = {
-        column['attnum']
-        for column in get_column_attnums_from_table(table.oid, table.schema._sa_engine)
+        (column['attnum'], column['table_oid'])
+        for column in get_column_attnums_from_table(table_oids, engine)
     }
-    for attnum in attnums:
-        column, created = models.Column.current_objects.get_or_create(
-            attnum=attnum,
-            table=table,
-            defaults={'display_options': None})
-        if not created and column.display_options:
+    columns = []
+    for attnum, table_oid in attnums:
+        table = next(table for table in tables if table.oid == table_oid)
+        column = models.Column(attnum=attnum, table=table, display_options=None)
+        columns.append(column)
+    models.Column.current_objects.bulk_create(columns, ignore_conflicts=True)
+    attnums_mapped_by_table_oid = defaultdict(list)
+    for attnum, table_oid in attnums:
+        attnums_mapped_by_table_oid[table_oid].append(attnum)
+    queryset = models.Column.current_objects.none()
+    for table_oid, attnums in attnums_mapped_by_table_oid.items():
+        table = next(table for table in tables if table.oid == table_oid)
+        queryset = queryset.filter(Q(table=table) & ~Q(attnum__in=attnums))
+
+    columns = models.Column.current_objects.filter(table__in=tables)
+    columns_with_invalid_display_option = []
+    for column in columns:
+        if column.display_options:
             # If the type of column has changed, existing display options won't be valid anymore.
             serializer = DisplayOptionsMappingSerializer(
                 data=column.display_options,
                 context={DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: column.db_type}
             )
             if not serializer.is_valid(False):
-                column.display_options = None
-                column.save()
-    models.Column.current_objects.filter(table=table).filter(~Q(attnum__in=attnums)).delete()
+                columns_with_invalid_display_option.append(column.id)
+    if len(columns_with_invalid_display_option) > 0:
+        models.Column.current_objects.filter(id__in=columns_with_invalid_display_option).update(display_options=None)
 
 
 # TODO creating a one-off engine is expensive
@@ -127,9 +163,9 @@ def reflect_db_objects(skip_cache_check=False):
         reflect_databases()
         for database in models.Database.current_objects.filter(deleted=False):
             reflect_schemas_from_database(database.name)
-        for schema in models.Schema.current_objects.all():
-            reflect_tables_from_schema(schema)
-        for table in models.Table.current_objects.all():
-            reflect_columns_from_table(table)
+        schemas = models.Schema.current_objects.all()
+        reflect_tables_from_schemas(schemas)
+        tables = models.Table.current_objects.all().prefetch_related('schema')
+        reflect_columns_from_tables(tables)
         reflect_constraints_from_database(database.name)
         cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
