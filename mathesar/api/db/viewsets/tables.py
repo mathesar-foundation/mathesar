@@ -26,7 +26,7 @@ from mathesar.api.serializers.tables import (
     MoveTableRequestSerializer
 )
 from mathesar.models.base import Table
-from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
+from mathesar.reflection import reflect_db_objects, reflect_tables_from_schemas
 from mathesar.utils.tables import get_table_column_types
 from mathesar.utils.joins import get_processed_joinable_tables
 
@@ -106,7 +106,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
 
             # Reflect tables so that the newly created/extracted tables objects are created
-            reflect_tables_from_schema(table.schema)
+            reflect_tables_from_schemas([table.schema])
 
             extracted_table = Table.current_objects.get(oid=extracted_table_oid)
             # Update attnum as it would have changed due to columns moving to a new table.

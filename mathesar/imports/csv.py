@@ -12,7 +12,7 @@ from mathesar.errors import InvalidTableError
 from db.constants import ID, ID_ORIGINAL, COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
 
-from mathesar.reflection import reflect_columns_from_table
+from mathesar.reflection import reflect_columns_from_tables
 
 ALLOWED_DELIMITERS = ",\t:|"
 SAMPLE_SIZE = 20000
@@ -181,7 +181,7 @@ def create_table_from_csv(data_file, name, schema, comment=None):
         schema=schema,
         import_verified=False
     )
-    reflect_columns_from_table(table)
+    reflect_columns_from_tables([table])
     data_file.table_imported_to = table
     data_file.save()
     return table

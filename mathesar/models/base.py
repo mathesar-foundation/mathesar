@@ -5,7 +5,7 @@ from bidict import bidict
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import JSONField, Deferrable
+from django.db.models import JSONField
 from django.utils.functional import cached_property
 from django.contrib.auth.models import User
 
@@ -566,7 +566,7 @@ class Column(ReflectionManagerMixin, BaseModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["attnum", "table"], name="unique_column", deferrable=Deferrable.DEFERRED)
+            models.UniqueConstraint(fields=["attnum", "table"], name="unique_column")
         ]
 
     def __str__(self):
@@ -704,3 +704,10 @@ class PreviewColumnSettings(BaseModel):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
+
+
+def _create_table_settings(tables):
+    # TODO Bulk create preview settings to improve performance
+    for table in tables:
+        preview_column_settings = PreviewColumnSettings.objects.create(customized=False)
+        TableSettings.current_objects.create(table=table, preview_settings=preview_column_settings)
