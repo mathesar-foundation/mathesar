@@ -54,5 +54,5 @@ export function makeFkColumnName(
   targetTableName: string,
   existingColumns: Set<string> = new Set(),
 ): string {
-  return getAvailableName(`${targetTableName}_id`, existingColumns);
+  return getAvailableName(`${targetTableName}`, existingColumns);
 }
