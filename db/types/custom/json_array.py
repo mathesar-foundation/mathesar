@@ -1,14 +1,12 @@
-from sqlalchemy import text
-from sqlalchemy import String
-from sqlalchemy import func
-from sqlalchemy.dialects.postgresql import JSONB as SA_JSONB
+from sqlalchemy import cast, text
+from sqlalchemy.dialects.postgresql import JSONB as SA_JSONB, INTEGER, TEXT, BOOLEAN
 from sqlalchemy.types import TypeDecorator
-from db.types.base import MathesarCustomType
 from sqlalchemy.ext.compiler import compiles
 
 from db.functions import hints
-from db.functions.base import DBFunction, Equal, Greater, Lesser
+from db.functions.base import sa_call_sql_function, DBFunction, Equal, Greater, Lesser
 from db.functions.packed import DBFunctionPacked, GreaterOrEqual, LesserOrEqual
+from db.types.base import MathesarCustomType
 
 DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
 
@@ -21,7 +19,7 @@ class MathesarJsonArray(TypeDecorator):
         return DB_TYPE.upper()
 
     def column_expression(self, column):
-        return func.cast(column, String)
+        return cast(column, TEXT)
 
     def coerce_compared_value(self, op, value):
         return self.impl.coerce_compared_value(op, value)
@@ -62,7 +60,7 @@ class JsonArrayLength(DBFunction):
 
     @staticmethod
     def to_sa_expression(value):
-        return func.jsonb_array_length(value)
+        return sa_call_sql_function('jsonb_array_length', value, return_type=INTEGER)
 
 
 class JsonLengthEquals(DBFunctionPacked):
@@ -195,4 +193,4 @@ class JsonArrayContains(DBFunction):
 
     @staticmethod
     def to_sa_expression(value1, value2):
-        return func.jsonb_contains(value1, func.cast(value2, SA_JSONB))
+        return sa_call_sql_function('jsonb_contains', value1, cast(value2, SA_JSONB), return_type=BOOLEAN)

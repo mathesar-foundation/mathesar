@@ -1,9 +1,8 @@
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import INTEGER
 from sqlalchemy.sql.base import ColumnSet as SAColumnSet
+from sqlalchemy.sql.functions import count
 
 from db.columns.base import MathesarColumn
-from db.functions.base import sa_call_sql_function
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.types.operations.convert import get_db_type_enum_from_id
@@ -85,7 +84,7 @@ def get_records(
 def get_count(table, engine, filter=None, search=[]):
     col_name = "_count"
     columns_to_select = [
-        sa_call_sql_function('count', 1, return_type=INTEGER).label(col_name)
+        count(1).label(col_name)
     ]
     relation = apply_transformations_deprecated(
         table=table,

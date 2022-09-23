@@ -18,7 +18,7 @@ import warnings
 from sqlalchemy import column, not_, and_, or_, func, literal
 from sqlalchemy.dialects.postgresql import array_agg, INTEGER, TEXT
 from sqlalchemy.sql import quoted_name
-from sqlalchemy.sql.functions import GenericFunction
+from sqlalchemy.sql.functions import GenericFunction, concat
 
 from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
@@ -35,7 +35,7 @@ def sa_call_sql_function(function_name, *parameters, return_type=None):
     """
     if return_type is None:
         # TODO change back to warning
-        raise Exception(
+        warnings.warn(
             "sa_call_sql_function should be called with the return_type kwarg set"
         )
         # We can't use PostgresType since we don't want an engine here
@@ -290,7 +290,7 @@ class StartsWith(DBFunction):
 
     @staticmethod
     def to_sa_expression(string, prefix):
-        pattern = sa_call_sql_function('concat', prefix, '%', return_type=TEXT)
+        pattern = concat(prefix, '%')
         return string.like(pattern)
 
 
@@ -305,7 +305,7 @@ class Contains(DBFunction):
 
     @staticmethod
     def to_sa_expression(string, sub_string):
-        pattern = sa_call_sql_function('concat', '%', sub_string, '%', return_type=TEXT)
+        pattern = concat('%', sub_string, '%')
         return string.like(pattern)
 
 
@@ -321,7 +321,7 @@ class StartsWithCaseInsensitive(DBFunction):
 
     @staticmethod
     def to_sa_expression(string, prefix):
-        pattern = func.concat(prefix, '%')
+        pattern = concat(prefix, '%')
         return string.ilike(pattern)
 
 
@@ -337,7 +337,7 @@ class ContainsCaseInsensitive(DBFunction):
 
     @staticmethod
     def to_sa_expression(string, sub_string):
-        pattern = func.concat('%', sub_string, '%')
+        pattern = concat('%', sub_string, '%')
         return string.ilike(pattern)
 
 
@@ -353,46 +353,7 @@ class ToLowercase(DBFunction):
 
     @staticmethod
     def to_sa_expression(string):
-        return func.lower(string)
-
-
-class CurrentDate(DBFunction):
-    id = 'current_date'
-    name = 'current date'
-    hints = tuple([
-        hints.returns(hints.date),
-        hints.parameter_count(0),
-    ])
-
-    @staticmethod
-    def to_sa_expression():
-        return func.current_date()
-
-
-class CurrentTime(DBFunction):
-    id = 'current_time'
-    name = 'current time'
-    hints = tuple([
-        hints.returns(hints.time),
-        hints.parameter_count(0),
-    ])
-
-    @staticmethod
-    def to_sa_expression():
-        return func.current_time()
-
-
-class CurrentDateTime(DBFunction):
-    id = 'current_datetime'
-    name = 'current datetime'
-    hints = tuple([
-        hints.returns(hints.date, hints.time),
-        hints.parameter_count(0),
-    ])
-
-    @staticmethod
-    def to_sa_expression():
-        return func.current_timestamp()
+        return sa_call_sql_function('lower', string, TEXT)
 
 
 class Count(DBFunction):

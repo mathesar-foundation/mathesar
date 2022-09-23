@@ -1,4 +1,4 @@
-from sqlalchemy import case, func, and_, cast, TEXT
+from sqlalchemy import case, func, and_, TEXT
 from sqlalchemy.dialects.postgresql import DATE as SA_DATE
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.dialects.postgresql import TIME as SA_TIME
@@ -265,7 +265,7 @@ class TruncateToYear(DBFunction):
 
     @staticmethod
     def to_sa_expression(col):
-        return cast(sa_call_sql_function('to_char', col, 'YYYY'), TEXT)
+        return sa_call_sql_function('to_char', col, 'YYYY', return_type=TEXT)
 
 
 class TruncateToMonth(DBFunction):
@@ -275,7 +275,7 @@ class TruncateToMonth(DBFunction):
 
     @staticmethod
     def to_sa_expression(col):
-        return cast(sa_call_sql_function('to_char', col, 'YYYY-MM'), TEXT)
+        return sa_call_sql_function('to_char', col, 'YYYY-MM', return_type=TEXT)
 
 
 class TruncateToDay(DBFunction):
@@ -285,4 +285,38 @@ class TruncateToDay(DBFunction):
 
     @staticmethod
     def to_sa_expression(col):
-        return cast(sa_call_sql_function('to_char', col, 'YYYY-MM-DD'), TEXT)
+        return sa_call_sql_function('to_char', col, 'YYYY-MM-DD', return_type=TEXT)
+
+
+class CurrentDate(DBFunction):
+    id = 'current_date'
+    name = 'current date'
+    hints = tuple([db_hints.returns(db_hints.date), db_hints.parameter_count(0)])
+
+    @staticmethod
+    def to_sa_expression():
+        return sa_call_sql_function('current_date', return_type=DATE)
+
+
+class CurrentTime(DBFunction):
+    id = 'current_time'
+    name = 'current time'
+    hints = tuple([db_hints.returns(db_hints.time), db_hints.parameter_count(0)])
+
+    @staticmethod
+    def to_sa_expression():
+        return sa_call_sql_function(
+            'current_time', return_type=TIME_WITH_TIME_ZONE
+        )
+
+
+class CurrentDateTime(DBFunction):
+    id = 'current_datetime'
+    name = 'current datetime'
+    hints = tuple([db_hints.returns(db_hints.date, db_hints.time), db_hints.parameter_count(0)])
+
+    @staticmethod
+    def to_sa_expression():
+        return sa_call_sql_function(
+            'current_timestamp', return_type=TIMESTAMP_WITH_TIME_ZONE
+        )
