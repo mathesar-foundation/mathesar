@@ -428,6 +428,9 @@ class Table(DatabaseObject, Relation):
     def move_columns(self, columns_to_move, target_table):
         columns_attnum_to_move = [column.attnum for column in columns_to_move]
         target_table_oid = target_table.oid
+        column_names_to_move = [column.name for column in columns_to_move]
+        target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
+        column_names_id_map = self.get_column_name_id_bidirectional_map()
         extracted_sa_table, remainder_sa_table = move_columns_between_related_tables(
             source_table_oid=self.oid,
             target_table_oid=target_table_oid,
@@ -440,12 +443,9 @@ class Table(DatabaseObject, Relation):
         remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
         target_table.oid = extracted_table_oid
         target_table.save()
-        target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
         # Refresh existing target table columns to use correct attnum preventing conflicts with the moved column
         existing_target_column_names = target_columns_name_id_map.keys()
         target_table.update_column_reference(existing_target_column_names, target_columns_name_id_map)
-        column_names_id_map = self.get_column_name_id_bidirectional_map()
-        column_names_to_move = [column.name for column in columns_to_move]
         # Add the moved column
         target_table.update_column_reference(column_names_to_move, column_names_id_map)
         self.oid = remainder_table_oid
@@ -462,6 +462,8 @@ class Table(DatabaseObject, Relation):
             column_names_id_map,
     ):
         columns_attnum_to_extract = [column.attnum for column in columns_to_extract]
+        extracted_column_names = [column.name for column in columns_to_extract]
+        remainder_column_names = column_names_id_map.keys() - extracted_column_names
         extracted_sa_table, remainder_sa_table, remainder_fk = extract_columns_from_table(
             self.oid,
             columns_attnum_to_extract,
@@ -472,9 +474,6 @@ class Table(DatabaseObject, Relation):
         engine = self._sa_engine
         extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
         remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
-
-        extracted_column_names = [column.name for column in columns_to_extract]
-        remainder_column_names = column_names_id_map.keys() - extracted_column_names
 
         extracted_table = Table(oid=extracted_table_oid, schema=self.schema)
         extracted_table.save()
@@ -493,7 +492,7 @@ class Table(DatabaseObject, Relation):
         Will update the columns specified via column_names to have the right attnum and to be part
         of this table.
         """
-        columns_name_attnum_map = get_columns_attnum_from_names(
+        column_names_attnum_map = get_columns_attnum_from_names(
             self.oid,
             column_names,
             self._sa_engine,
@@ -501,7 +500,7 @@ class Table(DatabaseObject, Relation):
             metadata=get_cached_metadata(),
         )
         column_objs = []
-        for column_name, column_attnum in columns_name_attnum_map.items():
+        for column_name, column_attnum in column_names_attnum_map.items():
             column_id = column_name_id_map[column_name]
             column = Column.current_objects.get(id=column_id)
             column.table_id = self.id
