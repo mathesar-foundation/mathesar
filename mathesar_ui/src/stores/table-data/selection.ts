@@ -146,6 +146,9 @@ export class Selection {
 
     this.selectionBounds.endRowIndex = rowIndex;
     this.selectionBounds.endColumnIndex = columnIndex;
+
+    const cells = this.getIncludedCells(this.selectionBounds);
+    this.selectMultipleCells(cells);
   }
 
   get allRows(): Row[] {

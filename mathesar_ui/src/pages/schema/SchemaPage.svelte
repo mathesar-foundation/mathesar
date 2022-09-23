@@ -24,8 +24,14 @@
   /**
    * This property will be used for the latest design changes
    * Based on the subroute, the desired tab/section will be selected
+   * Make this a variable and pass value to it from SchemaRoute.svelte
+   *
+   * The eslint warning is in place because SchemaRoute will throw
+   * ts errors without it. We can remove it once we actually use the
+   * variable.
    */
-  export let section = 'overview';
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+  export const section: string = 'overview';
 
   $: tablesMap = $tablesStore.data;
   $: queriesMap = $queries.data;

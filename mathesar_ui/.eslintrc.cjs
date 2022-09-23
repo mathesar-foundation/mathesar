@@ -11,6 +11,7 @@ module.exports = {
   },
   plugins: ['svelte3', 'jest', '@typescript-eslint'],
   extends: [
+    'airbnb-base',
     'airbnb-typescript/base',
     'plugin:eslint-comments/recommended',
     'plugin:promise/recommended',
@@ -37,6 +38,7 @@ module.exports = {
     'array-bracket-spacing': 'off',
     'no-restricted-syntax': 0,
     '@typescript-eslint/require-await': 'off',
+    'class-methods-use-this': 'off',
   },
   overrides: [
     {
@@ -71,6 +73,7 @@ module.exports = {
         'no-confusing-arrow': 'off',
         'no-constant-condition': 'off',
         '@typescript-eslint/restrict-template-expressions': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
       },
     },
     {
@@ -83,6 +86,7 @@ module.exports = {
         '@typescript-eslint/no-unsafe-member-access': 'off',
         '@typescript-eslint/restrict-template-expressions': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
       },
     },
     {
