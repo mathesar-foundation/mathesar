@@ -48,7 +48,11 @@
       const targetNotWithinEditableCell =
         !target.closest('.editable-cell') &&
         !target.closest('.retain-active-cell');
-      clearActiveCell = targetNotWithinEditableCell;
+      const targetNotWithinTableInspector = !target.closest(
+        '.table-inspector-container',
+      );
+      clearActiveCell =
+        targetNotWithinEditableCell && targetNotWithinTableInspector;
     }
 
     if (clearActiveCell) {

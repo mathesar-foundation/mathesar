@@ -68,3 +68,20 @@ def test_schema_dependents(library_ma_tables, client):
     schema_dependents_ids = _get_object_dependent_ids(schema_dependents_graph, schema_id, 'schema')
 
     assert sorted(table_ids) == sorted(schema_dependents_ids)
+
+
+def test_column_dependents(library_ma_tables, client):
+    patrons = library_ma_tables['Patrons']
+    patronds_id_col = patrons.get_column_by_name('id')
+
+    patrons_id_dependents_graph = client.get(f'/api/db/v0/tables/{patrons.id}/columns/{patronds_id_col.id}/dependents/').json()
+    patrons_id_dependents_ids = _get_object_dependent_ids(patrons_id_dependents_graph, patrons.id, 'table column')
+
+    checkouts = library_ma_tables['Checkouts']
+    patrons_constraints = client.get(f'/api/db/v0/tables/{patrons.id}/constraints/').json()['results']
+    checkouts_constraints = client.get(f'/api/db/v0/tables/{checkouts.id}/constraints/').json()['results']
+
+    patrons_pk_id = [c['id'] for c in patrons_constraints if c['name'] == 'Patrons_pkey']
+    checkouts_patrons_fk_id = [c['id'] for c in checkouts_constraints if c['name'] == 'Checkouts_Patron id_fkey']
+
+    assert sorted(patrons_id_dependents_ids) == sorted([checkouts.id] + patrons_pk_id + checkouts_patrons_fk_id)

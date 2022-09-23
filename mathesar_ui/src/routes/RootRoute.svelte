@@ -3,7 +3,7 @@
 
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { databases } from '@mathesar/stores/databases';
-  import { setBreadcrumbItemsInContext } from '@mathesar/systems/app-header/breadcrumb/breadcrumbUtils';
+  import { setBreadcrumbItemsInContext } from '@mathesar/components/breadcrumb/breadcrumbUtils';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import { getDatabasePageUrl } from './urls';
 

@@ -67,17 +67,32 @@ def get_column_attnums_from_table(table_oid, engine, connection_to_use=None):
     return results
 
 
-def _get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None):
+def _get_columns_name_from_attnums(table_oids, attnums, engine, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
-    sel = select(pg_attribute.c.attname).where(
-        and_(
-            pg_attribute.c.attrelid == table_oid,
-            pg_attribute.c.attnum.in_(attnums)
-        )
-    )
+    sel = select(pg_attribute.c.attname, pg_attribute.c.attnum, pg_attribute.c.attrelid)
+    conditions = [pg_attribute.c.attrelid.in_(table_oids)]
+    if attnums is not None:
+        conditions.append(pg_attribute.c.attnum.in_(attnums))
+    else:
+        conditions.extend([pg_attribute.c.attisdropped.is_(False), pg_attribute.c.attnum > 0])
+    sel = sel.where(and_(*conditions))
     return sel
+
+
+def get_columns_name_from_tables(table_oids, engine, connection_to_use=None, fetch_as_map=False):
+    """
+    Returns the respective list of attnum of the column names passed.
+     The order is based on the column order in the table and not by the order of the column names argument.
+    """
+    statement = _get_columns_name_from_attnums(table_oids, None, engine, connection_to_use=None)
+    column_names_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
+    if fetch_as_map:
+        column_names = {(column_name_tuple[1], column_name_tuple[2]): column_name_tuple[0] for column_name_tuple in column_names_tuple}
+    else:
+        column_names = [column_name_tuple[0] for column_name_tuple in column_names_tuple]
+    return column_names
 
 
 def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None):
@@ -85,14 +100,14 @@ def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=
     Returns the respective list of attnum of the column names passed.
      The order is based on the column order in the table and not by the order of the column names argument.
     """
-    statement = _get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None)
+    statement = _get_columns_name_from_attnums([table_oid], attnums, engine, connection_to_use=None)
     column_names_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
     column_names = [column_name_tuple[0] for column_name_tuple in column_names_tuple]
     return column_names
 
 
 def get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use=None):
-    statement = _get_columns_name_from_attnums(table_oid, [attnum], engine, connection_to_use=None)
+    statement = _get_columns_name_from_attnums([table_oid], [attnum], engine, connection_to_use=None)
     return execute_statement(engine, statement, connection_to_use).scalar()
 
 
