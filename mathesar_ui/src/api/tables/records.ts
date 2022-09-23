@@ -28,7 +28,7 @@ export interface SortingEntry {
 export type FilterCombination = 'and' | 'or';
 export type FilterConditionParams = [
   { column_id: [number] },
-  ...{ literal: [unknown] }[]
+  ...{ literal: [unknown] }[],
 ];
 export type FilterCondition = Record<string, FilterConditionParams>;
 type MakeFilteringOption<U> = U extends string

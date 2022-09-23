@@ -50,7 +50,7 @@
   export let selectedItems = new Set();
   let searchText = '';
 
-  $: displayData = filterTree(data, getLabel, getAndSetChildren, searchText);
+  $: displayData = filterTree(data, getLabel, searchText, getAndSetChildren);
 </script>
 
 <div class="tree">

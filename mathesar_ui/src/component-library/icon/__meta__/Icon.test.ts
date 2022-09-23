@@ -33,7 +33,7 @@ test('renders icon based on passed props', () => {
     props: {
       data: faCat,
       flip: 'both',
-      rotate: '180',
+      rotate: 180,
       class: 'custom-class',
       spin: true,
       pulse: true,

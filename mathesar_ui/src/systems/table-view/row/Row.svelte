@@ -85,10 +85,10 @@
       columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
       isStatic
       isControlCell
-      let:htmlAttributes
+      let:htmlAttributes={cellHtmlAttr}
       let:style
     >
-      <div {...htmlAttributes} {style} on:click={handleRowClick}>
+      <div {...cellHtmlAttr} {style} on:click={handleRowClick}>
         {#if row.record}
           <RowControl
             {primaryKeyColumnId}

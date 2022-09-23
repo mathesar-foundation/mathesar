@@ -1,10 +1,17 @@
 import { render } from '@testing-library/svelte';
 import SteppedInputCell from '../SteppedInputCell.svelte';
 
+const requiredProps = {
+  isActive: false,
+  isSelectedInRange: false,
+  disabled: false,
+};
+
 describe('StepperInputCell', () => {
   test('renders valid string', () => {
     const { container } = render(SteppedInputCell, {
       props: {
+        ...requiredProps,
         value: 'string value',
       },
     });
@@ -17,6 +24,7 @@ describe('StepperInputCell', () => {
   test('renders valid numbers', () => {
     const { container } = render(SteppedInputCell, {
       props: {
+        ...requiredProps,
         value: 0,
       },
     });
@@ -29,6 +37,7 @@ describe('StepperInputCell', () => {
   test('renders Null component', () => {
     const { container } = render(SteppedInputCell, {
       props: {
+        ...requiredProps,
         value: null,
       },
     });
@@ -41,6 +50,7 @@ describe('StepperInputCell', () => {
   test('renders nothing on invalid values', () => {
     const { container } = render(SteppedInputCell, {
       props: {
+        ...requiredProps,
         value: undefined,
       },
     });
