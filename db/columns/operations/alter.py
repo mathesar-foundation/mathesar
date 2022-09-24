@@ -9,7 +9,7 @@ from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, Invalid
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
 )
-from db.columns.utils import get_mathesar_column_with_engine, get_type_options
+from db.columns.utils import to_mathesar_column_with_engine, get_type_options
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.types.operations.convert import get_db_type_enum_from_class, get_db_type_enum_from_id
 from db.types.operations.cast import get_cast_function_name
@@ -61,7 +61,7 @@ def alter_column(engine, table_oid, column_attnum, column_data):
         metadata=get_empty_metadata(),
     )
     reflected_column = reflected_table.columns[column_name]
-    reflected_column = get_mathesar_column_with_engine(
+    reflected_column = to_mathesar_column_with_engine(
         reflected_column,
         engine,
     )

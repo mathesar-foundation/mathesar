@@ -10,7 +10,7 @@ from sqlalchemy import text
 from db.columns.operations.select import get_columns_attnum_from_names
 from db.types.base import PostgresType, MathesarCustomType
 
-from mathesar import reflection
+from mathesar.state import django as reflection, reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import base as models_base
 from mathesar.models.base import Column, Table, DataFile
@@ -692,25 +692,13 @@ def test_table_delete(create_patents_table, client):
     table = create_patents_table(table_name)
     table_count = len(Table.objects.all())
 
-    with patch.object(models_base, 'drop_table') as mock_delete:
-        response = client.delete(f'/api/db/v0/tables/{table.id}/')
+    response = client.delete(f'/api/db/v0/tables/{table.id}/')
     assert response.status_code == 204
 
     # Ensure the Django model was deleted
     new_table_count = len(Table.objects.all())
     assert table_count - 1 == new_table_count
     assert Table.objects.filter(id=table.id).exists() is False
-
-    # Ensure the backend table would have been deleted
-    assert mock_delete.call_args is not None
-    assert mock_delete.call_args[0] == (
-        table.name,
-        table.schema.name,
-        table.schema._sa_engine,
-    )
-    assert mock_delete.call_args[1] == {
-        'cascade': True
-    }
 
 
 def test_table_dependencies(client, create_patents_table):
@@ -892,27 +880,13 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
     assert len(orig_created) == 1
     with engine.begin() as conn:
         conn.execute(text(f'DROP TABLE {schema_name}.{table_name};'))
-    cache.clear()
+    reset_reflection()
     response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     new_created = [
         table for table in response_data['results'] if table['name'] == table_name
     ]
     assert len(new_created) == 0
-
-
-def test_table_viewset_sets_cache(client):
-    cache.delete(reflection.DB_REFLECTION_KEY)
-    assert not cache.get(reflection.DB_REFLECTION_KEY)
-    client.get('/api/db/v0/schemas/')
-    assert cache.get(reflection.DB_REFLECTION_KEY)
-
-
-def test_table_viewset_checks_cache(client):
-    cache.delete(reflection.DB_REFLECTION_KEY)
-    with patch.object(reflection, 'reflect_tables_from_schema') as mock_reflect:
-        client.get('/api/db/v0/tables/')
-    mock_reflect.assert_called()
 
 
 def _get_patents_column_data(table):

@@ -31,12 +31,11 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
 
-from mathesar import reflection
 from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
-from mathesar.metadata import get_metadata
+from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -50,12 +49,9 @@ class BaseModel(models.Model):
         abstract = True
 
 
-import logging
-logger = logging.getLogger(__name__)
 class DatabaseObjectManager(models.Manager):
     def get_queryset(self):
-        logger.error('DatabaseObjectManager is reflecting.')
-        reflection.reflect_db_objects(metadata=get_metadata())
+        make_sure_initial_reflection_happened()
         return super().get_queryset()
 
 
@@ -142,7 +138,7 @@ class Schema(DatabaseObject):
     def _sa_engine(self):
         return self.database._sa_engine
 
-    @cached_property
+    @property
     def name(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"
         try:
@@ -167,10 +163,14 @@ class Schema(DatabaseObject):
         return True
 
     def update_sa_schema(self, update_params):
-        return model_utils.update_sa_schema(self, update_params)
+        result = model_utils.update_sa_schema(self, update_params)
+        reset_reflection()
+        return result
 
     def delete_sa_schema(self):
-        return drop_schema(self.name, self._sa_engine, cascade=True)
+        result = drop_schema(self.name, self._sa_engine, cascade=True)
+        reset_reflection()
+        return result
 
     def clear_name_cache(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"
@@ -206,7 +206,7 @@ class Table(DatabaseObject, Relation):
         super().save(*args, **kwargs)
 
     # TODO referenced from outside so much that it probably shouldn't be private
-    @cached_property
+    @property
     def _sa_table(self):
         # We're caching since we want different Django Table instances to return the same SA
         # Table, when they're referencing the same Postgres table.
@@ -214,6 +214,7 @@ class Table(DatabaseObject, Relation):
             sa_table = reflect_table_from_oid(
                 oid=self.oid,
                 engine=self._sa_engine,
+                metadata=get_cached_metadata(),
             )
         # We catch these errors, since it lets us decouple the cadence of
         # overall DB reflection from the cadence of cache expiration for
@@ -226,22 +227,23 @@ class Table(DatabaseObject, Relation):
 
     # NOTE: it's a problem that we hve both _sa_table and _enriched_column_sa_table. at the moment
     # it has to be this way because enriched column is not always interachangeable with sa column.
-    @cached_property
+    @property
     def _enriched_column_sa_table(self):
         return column_utils.get_enriched_column_table(
             table=self._sa_table,
             engine=self._sa_engine,
+            metadata=get_cached_metadata(),
         )
 
-    @cached_property
+    @property
     def sa_columns(self):
         return self._enriched_column_sa_table.columns
 
-    @cached_property
+    @property
     def _sa_engine(self):
         return self.schema._sa_engine
 
-    @cached_property
+    @property
     def name(self):
         return self._sa_table.name
 
@@ -269,19 +271,23 @@ class Table(DatabaseObject, Relation):
         )
 
     def add_column(self, column_data):
-        return create_column(
+        result = create_column(
             self.schema._sa_engine,
             self.oid,
             column_data,
         )
+        reset_reflection()
+        return result
 
     def alter_column(self, column_attnum, column_data):
-        return alter_column(
+        result = alter_column(
             self.schema._sa_engine,
             self.oid,
             column_attnum,
             column_data,
         )
+        reset_reflection()
+        return result
 
     def drop_column(self, column_attnum):
         drop_column(
@@ -289,9 +295,10 @@ class Table(DatabaseObject, Relation):
             column_attnum,
             self.schema._sa_engine,
         )
+        reset_reflection()
 
     def duplicate_column(self, column_attnum, copy_data, copy_constraints, name=None):
-        return duplicate_column(
+        result = duplicate_column(
             self.oid,
             column_attnum,
             self.schema._sa_engine,
@@ -299,6 +306,8 @@ class Table(DatabaseObject, Relation):
             copy_data=copy_data,
             copy_constraints=copy_constraints,
         )
+        reset_reflection()
+        return result
 
     def get_preview(self, column_definitions):
         return get_column_cast_records(
@@ -322,10 +331,14 @@ class Table(DatabaseObject, Relation):
         )
 
     def update_sa_table(self, update_params):
-        return model_utils.update_sa_table(self, update_params)
+        result = model_utils.update_sa_table(self, update_params)
+        reset_reflection()
+        return result
 
     def delete_sa_table(self):
-        return drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
+        result = drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
+        reset_reflection()
+        return result
 
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
@@ -376,9 +389,17 @@ class Table(DatabaseObject, Relation):
         engine = self.schema.database._sa_engine
         name = constraint_obj.name
         if not name:
-            name = constraint_utils.get_constraint_name(engine, constraint_obj.constraint_type(), self.oid, constraint_obj.columns_attnum[0])
+            name = constraint_utils.get_constraint_name(
+                engine=engine,
+                constraint_type=constraint_obj.constraint_type(),
+                table_oid=self.oid,
+                column_0_attnum=constraint_obj.columns_attnum[0],
+                metadata=get_cached_metadata(),
+            )
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
-        return Constraint.current_objects.create(oid=constraint_oid, table=self)
+        result = Constraint.current_objects.create(oid=constraint_oid, table=self)
+        reset_reflection()
+        return result
 
     def get_column_name_id_bidirectional_map(self):
         # TODO: Prefetch column names to avoid N+1 queries
@@ -407,34 +428,77 @@ class Table(DatabaseObject, Relation):
     def move_columns(self, columns_to_move, target_table):
         columns_attnum_to_move = [column.attnum for column in columns_to_move]
         target_table_oid = target_table.oid
-        return move_columns_between_related_tables(
-            self.oid,
-            target_table_oid,
-            columns_attnum_to_move,
-            self.schema.name,
-            self._sa_engine
+        extracted_sa_table, remainder_sa_table = move_columns_between_related_tables(
+            source_table_oid=self.oid,
+            target_table_oid=target_table_oid,
+            column_attnums_to_move=columns_attnum_to_move,
+            schema=self.schema.name,
+            engine=self._sa_engine
         )
+        engine = self._sa_engine
+        extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
+        remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
+        target_table.oid = extracted_table_oid
+        target_table.save()
+        target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
+        # Refresh existing target table columns to use correct attnum preventing conflicts with the moved column
+        existing_target_column_names = target_columns_name_id_map.keys()
+        target_table.update_column_reference(existing_target_column_names, target_columns_name_id_map)
+        column_names_id_map = self.get_column_name_id_bidirectional_map()
+        column_names_to_move = [column.name for column in columns_to_move]
+        # Add the moved column
+        target_table.update_column_reference(column_names_to_move, column_names_id_map)
+        self.oid = remainder_table_oid
+        self.save()
+        remainder_column_names = column_names_id_map.keys() - column_names_to_move
+        self.update_column_reference(remainder_column_names, column_names_id_map)
+        reset_reflection()
+        return extracted_sa_table, remainder_sa_table
 
     def split_table(
             self,
             columns_to_extract,
             extracted_table_name,
+            column_names_id_map,
     ):
         columns_attnum_to_extract = [column.attnum for column in columns_to_extract]
-        return extract_columns_from_table(
+        extracted_sa_table, remainder_sa_table, remainder_fk = extract_columns_from_table(
             self.oid,
             columns_attnum_to_extract,
             extracted_table_name,
             self.schema.name,
             self._sa_engine
         )
+        engine = self._sa_engine
+        extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
+        remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
 
-    def update_column_reference(self, columns_name, column_name_id_map):
+        extracted_column_names = [column.name for column in columns_to_extract]
+        remainder_column_names = column_names_id_map.keys() - extracted_column_names
+
+        extracted_table = Table(oid=extracted_table_oid, schema=self.schema)
+        extracted_table.save()
+        # Update attnum as it would have changed due to columns moving to a new table.
+        extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
+
+        remainder_table = Table.current_objects.get(oid=remainder_table_oid)
+        remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
+
+        reset_reflection()
+
+        return extracted_table, remainder_table, remainder_fk
+
+    def update_column_reference(self, column_names, column_name_id_map):
+        """
+        Will update the columns specified via column_names to have the right attnum and to be part
+        of this table.
+        """
         columns_name_attnum_map = get_columns_attnum_from_names(
             self.oid,
-            columns_name,
+            column_names,
             self._sa_engine,
-            return_as_name_map=True
+            return_as_name_map=True,
+            metadata=get_cached_metadata(),
         )
         column_objs = []
         for column_name, column_attnum in columns_name_attnum_map.items():
@@ -500,7 +564,7 @@ class Column(ReflectionManagerMixin, BaseModel):
     @property
     def name(self):
         return get_column_name_from_attnum(
-            self.table.oid, self.attnum, self._sa_engine,
+            self.table.oid, self.attnum, self._sa_engine, metadata=get_cached_metadata(),
         )
 
     @property
@@ -516,7 +580,7 @@ class Column(ReflectionManagerMixin, BaseModel):
 class Constraint(DatabaseObject):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
 
-    @cached_property
+    @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
         return get_constraint_from_oid(self.oid, engine, self.table._sa_table)
@@ -529,14 +593,14 @@ class Constraint(DatabaseObject):
     def type(self):
         return constraint_utils.get_constraint_type_from_class(self._sa_constraint)
 
-    @cached_property
+    @property
     def columns(self):
         column_names = [column.name for column in self._sa_constraint.columns]
         engine = self.table.schema.database._sa_engine
-        column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
+        column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine, metadata=get_cached_metadata())]
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
 
-    @cached_property
+    @property
     def referent_columns(self):
         if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
             column_names = [fk.column.name for fk in self._sa_constraint.elements]
@@ -545,27 +609,27 @@ class Constraint(DatabaseObject):
                                      self._sa_constraint.referred_table.schema,
                                      engine)
             table = Table.objects.get(oid=oid, schema=self.table.schema)
-            column_attnum_list = get_columns_attnum_from_names(oid, column_names, table.schema._sa_engine)
+            column_attnum_list = get_columns_attnum_from_names(oid, column_names, table.schema._sa_engine, metadata=get_cached_metadata())
             columns = Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
             return columns
         return None
 
-    @cached_property
+    @property
     def ondelete(self):
         if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
             return self._sa_constraint.ondelete
 
-    @cached_property
+    @property
     def onupdate(self):
         if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
             return self._sa_constraint.onupdate
 
-    @cached_property
+    @property
     def deferrable(self):
         if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
             return self._sa_constraint.deferrable
 
-    @cached_property
+    @property
     def match(self):
         if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
             return self._sa_constraint.match
@@ -578,6 +642,7 @@ class Constraint(DatabaseObject):
             self.name
         )
         self.delete()
+        reset_reflection()
 
 
 class DataFile(BaseModel):

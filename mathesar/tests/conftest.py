@@ -2,6 +2,7 @@
 This inherits the fixtures in the root conftest.py
 """
 import pytest
+import logging
 from copy import deepcopy
 
 from django.core.files import File
@@ -23,6 +24,14 @@ from mathesar.models.base import Column as mathesar_model_column
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
+from mathesar.state import reset_reflection
+from mathesar.state.base import set_initial_reflection_happened
+from db.metadata import get_empty_metadata
+
+
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    pass
 
 
 @pytest.fixture(scope="session")
@@ -34,12 +43,18 @@ def django_db_modify_db_settings(
 
 
 @pytest.fixture(autouse=True)
-def automatically_clear_cache():
+def reflection_fixture():
     """
-    Makes sure Django cache is cleared before every test.
+    During setup, makes sure reflection is reset when one of our models' querysets is next
+    accessed. During teardown, eagerly resets reflection; unfortunately that currently causes
+    redundant reflective calls to Postgres.
     """
-    cache.clear()
+    logger = logging.getLogger('mark_reflection_as_not_having_happened')
+    logger.debug('setup')
+    set_initial_reflection_happened(False)
     yield
+    reset_reflection()
+    logger.debug('teardown')
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -92,7 +107,8 @@ def test_db_model(request, test_db_name, django_db_blocker):
     add_db_to_dj_settings(test_db_name)
     with django_db_blocker.unblock():
         database_model = Database.current_objects.create(name=test_db_name)
-    return database_model
+    yield database_model
+    database_model.delete()
 
 
 def add_db_to_dj_settings(request):
@@ -142,11 +158,6 @@ def dj_databases():
 # MOD_dj_databases
 # SES_dj_databases
 create_scoped_fixtures(globals(), dj_databases)
-
-
-@pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(db):
-    pass
 
 
 @pytest.fixture(scope='session')
@@ -304,7 +315,7 @@ def _get_datafile_for_path(path):
 def create_column():
     def _create_column(table, column_data):
         column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine)
+        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine, metadata=get_empty_metadata())
         column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
         return column[0]
     return _create_column
@@ -319,7 +330,7 @@ def custom_types_schema_url(schema, live_server):
 def create_column_with_display_options():
     def _create_column(table, column_data):
         column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine)
+        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine, metadata=get_empty_metadata())
         # passing table object caches sa_columns, missing out any new columns
         # So table.id is passed to get new instance of table.
         column = mathesar_model_column.current_objects.get_or_create(

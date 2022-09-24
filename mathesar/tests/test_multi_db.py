@@ -3,7 +3,9 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 
 from mathesar.models.base import Table, Schema, Database
-from mathesar.reflection import reflect_db_objects
+from mathesar.state.django import reflect_db_objects
+
+from db.metadata import get_empty_metadata
 
 
 @pytest.fixture(autouse=True)
@@ -62,7 +64,7 @@ def test_multi_db_oid_unique():
     """
     Ensure the same OID is allowed for different dbs
     """
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     schema_oid = 5000
     table_oid = 5001
     for db in Database.objects.all():
@@ -71,7 +73,7 @@ def test_multi_db_oid_unique():
 
 
 def test_single_db_oid_unique_exception():
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     table_oid = 5001
     dbs = Database.objects.all()
     assert len(dbs) > 0
