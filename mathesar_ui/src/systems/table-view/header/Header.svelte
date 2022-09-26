@@ -19,7 +19,7 @@
   export let hasNewColumnButton = false;
 
   $: ({ columnsDataStore, selection, processedColumns } = $tabularData);
-  $: ({ selectedCells, selectedColumns } = selection);
+  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
   function addColumn(e: CustomEvent<Partial<Column>>) {
     void columnsDataStore.add(e.detail);
@@ -44,7 +44,7 @@
           {processedColumn}
           isSelected={isColumnSelected(
             $selectedCells,
-            $selectedColumns,
+            $columnsSelectedWhenTheTableIsEmpty,
             processedColumn.column,
           )}
           on:click={() =>

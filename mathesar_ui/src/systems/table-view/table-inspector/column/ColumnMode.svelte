@@ -10,11 +10,11 @@
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ processedColumns, selection } = $tabularData);
-  $: ({ selectedCells, selectedColumns: selectedColumnsFromStore } = selection);
+  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
   $: selectedColumns = (() => {
     const ids = getSelectedUniqueColumnsId(
       $selectedCells,
-      $selectedColumnsFromStore,
+      $columnsSelectedWhenTheTableIsEmpty,
     );
     const columns = [];
     for (const id of ids) {
