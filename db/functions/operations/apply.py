@@ -34,7 +34,7 @@ def _assert_that_all_referenced_columns_exist(relation, db_function):
 
 
 def _get_columns_that_exist(relation):
-    columns = relation.columns
+    columns = relation.cte().columns
     return set(column.name for column in columns)
 
 

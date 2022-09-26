@@ -1,5 +1,7 @@
-from sqlalchemy import MetaData, Table, any_, column, exists, func, literal, select, text, true, union, and_
+from sqlalchemy import MetaData, any_, column, exists, func, literal, select, text, true, union, and_
 from sqlalchemy.dialects.postgresql import array
+
+from db.utils import get_pg_catalog_table
 
 # OIDs assigned during normal database operation are constrained to be 16384 or higher.
 USER_DEFINED_OBJECTS_MIN_OID = 16384
@@ -156,15 +158,15 @@ def _get_dependency_pairs_stmt(pg_depend, pg_identify_object):
 
 
 def _get_pg_depend_table(engine, metadata):
-    return Table("pg_depend", metadata, autoload_with=engine)
+    return get_pg_catalog_table("pg_depend", engine, metadata=metadata)
 
 
 def _get_pg_constraint_table(engine, metadata):
-    return Table("pg_constraint", metadata, autoload_with=engine)
+    return get_pg_catalog_table("pg_constraint", engine, metadata=metadata)
 
 
 def _get_pg_rewrite(engine, metadata):
-    return Table("pg_rewrite", metadata, autoload_with=engine)
+    return get_pg_catalog_table("pg_rewrite", engine, metadata=metadata)
 
 
 def _get_pg_identify_object_lateral_stmt(classid, objid, objsubid):
