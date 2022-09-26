@@ -7,6 +7,7 @@ from db.types.base import PostgresType
 
 class CHAR(TypeDecorator):
     impl = SA_CHAR
+    cache_ok = True
 
     @classmethod
     def __str__(cls):
