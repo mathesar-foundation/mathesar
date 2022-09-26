@@ -39,8 +39,10 @@ export const isRowSelected = (
 
 export const isColumnSelected = (
   selectedCells: ImmutableSet<string>,
+  selectedColumns: ImmutableSet<number>,
   column: Column,
 ): boolean =>
+  selectedColumns.has(column.id) ||
   selectedCells.valuesArray().some((cell) => cell.endsWith(`-${column.id}`));
 
 export const isCellSelected = (
@@ -57,6 +59,16 @@ export function getSelectedRowId(selectedCell: string): number {
   return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[0]);
 }
 
+export function getSelectedUniqueColumnsId(selectedCells: ImmutableSet<string>, selectedColumns: ImmutableSet<number>): number[] {
+  const setOfUniqueColumnIds = new Set(
+    [
+      ...[...selectedCells].map(getSelectedColumnId),
+      ...selectedColumns
+    ]
+  );
+  return Array.from(setOfUniqueColumnIds);
+}
+
 export class Selection {
   private columnsDataStore: ColumnsDataStore;
 
@@ -68,6 +80,12 @@ export class Selection {
 
   selectedCells: WritableSet<string>;
 
+  /**
+   * NOTE: This is only used when there are no cells in the table
+   * DO NOT USE THIS FOR ANY OTHER PURPOSES WHEN THERE IS ATLEAST ONE CELL IN THE TABLE
+   */
+  selectedColumns: WritableSet<number>;
+
   freezeSelection: boolean;
 
   display: Display;
@@ -78,6 +96,7 @@ export class Selection {
     display: Display,
   ) {
     this.selectedCells = new WritableSet<string>();
+    this.selectedColumns = new WritableSet<number>();
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
     this.freezeSelection = false;
@@ -199,17 +218,21 @@ export class Selection {
 
   resetSelection(): void {
     this.selectionBounds = undefined;
+    this.selectedColumns.clear();
     this.selectedCells.clear();
   }
 
   isCompleteColumnSelected(column: Column): boolean {
-    return this.allRows.every((row) =>
-      isCellSelected(get(this.selectedCells), row, column),
-    );
+    if (this.allRows.length) {
+      return this.selectedColumns.getHas(column.id) || this.allRows.every((row) =>
+        isCellSelected(get(this.selectedCells), row, column),
+      );
+    }
+      return this.selectedColumns.getHas(column.id);
   }
 
   isCompleteRowSelected(row: Row): boolean {
-    return this.allColumns.every((column) =>
+    return !!this.allColumns.length && this.allColumns.every((column) =>
       isCellSelected(get(this.selectedCells), row, column),
     );
   }
@@ -220,18 +243,21 @@ export class Selection {
     if (isCompleteColumnSelected) {
       // Clear the selection - deselect the column
       this.resetSelection();
-    } else {
-      const cells: Cell[] = [];
-      this.allRows.forEach((row) => {
-        cells.push([row, column]);
-      });
+    } else if (!this.allRows.length) {
+        this.resetSelection();
+        this.selectedColumns.add(column.id);
+      } else {
+        const cells: Cell[] = [];
+        this.allRows.forEach((row) => {
+          cells.push([row, column]);
+        });
 
-      // Clearing the selection
-      // since we do not have cmd+click to select
-      // disjointed cells
-      this.resetSelection();
-      this.selectMultipleCells(cells);
-    }
+        // Clearing the selection
+        // since we do not have cmd+click to select
+        // disjointed cells
+        this.resetSelection();
+        this.selectMultipleCells(cells);
+      }
   }
 
   toggleRowSelection(row: Row): void {
