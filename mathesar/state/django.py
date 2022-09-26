@@ -22,7 +22,7 @@ def clear_dj_cache():
 # queryset is created, and will recurse if used in these functions.
 
 
-def reflect_db_objects(metadata, skip_cache_check=False):
+def reflect_db_objects(metadata):
     reflect_databases()
     for database in models.Database.current_objects.filter(deleted=False):
         reflect_schemas_from_database(database.name)
