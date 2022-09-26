@@ -44,6 +44,9 @@ def sa_call_sql_function(function_name, *parameters, return_type=None):
         warnings.filterwarnings("ignore", message="The GenericFunction")
         # Creating this type registers the function (more importantly,
         # its return type) with SQLAlchemy. **magic!!**
+        # Note that it's not necessary to assign the type to a variable,
+        # since it gets picked up whenever the type is defined for the
+        # interpreter, which happens when the function `type` is called.
         type(
             function_name,
             (GenericFunction,),
