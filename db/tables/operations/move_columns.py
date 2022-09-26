@@ -32,7 +32,9 @@ def move_columns_between_related_tables(
     extracted_columns = [MathesarColumn.from_column(col) for col in moving_columns]
     bulk_create_mathesar_column(engine, target_table_oid, extracted_columns, schema)
     # TODO reuse metadata
-    target_table = reflect_table_from_oid(target_table_oid, engine, metadata=get_empty_metadata())
+    # Re reflect the target table as we have added a new column
+    # Metadata needs to be shared so that target table is the same object as the table returned from the relation finding function
+    target_table = reflect_table_from_oid(target_table_oid, engine, metadata=metadata)
     if relationship["referenced"] == target_table:
         extracted_columns_update_stmt = _create_move_referrer_table_columns_update_stmt(
             source_table,
