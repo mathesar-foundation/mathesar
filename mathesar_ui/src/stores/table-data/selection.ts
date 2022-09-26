@@ -228,7 +228,7 @@ export class Selection {
         isCellSelected(get(this.selectedCells), row, column),
       );
     }
-      return this.selectedColumns.getHas(column.id);
+    return this.selectedColumns.getHas(column.id);
   }
 
   isCompleteRowSelected(row: Row): boolean {
@@ -244,20 +244,20 @@ export class Selection {
       // Clear the selection - deselect the column
       this.resetSelection();
     } else if (!this.allRows.length) {
-        this.resetSelection();
-        this.selectedColumns.add(column.id);
-      } else {
-        const cells: Cell[] = [];
-        this.allRows.forEach((row) => {
-          cells.push([row, column]);
-        });
+      this.resetSelection();
+      this.selectedColumns.add(column.id);
+    } else {
+      const cells: Cell[] = [];
+      this.allRows.forEach((row) => {
+        cells.push([row, column]);
+      });
 
-        // Clearing the selection
-        // since we do not have cmd+click to select
-        // disjointed cells
-        this.resetSelection();
-        this.selectMultipleCells(cells);
-      }
+      // Clearing the selection
+      // since we do not have cmd+click to select
+      // disjointed cells
+      this.resetSelection();
+      this.selectMultipleCells(cells);
+    }
   }
 
   toggleRowSelection(row: Row): void {

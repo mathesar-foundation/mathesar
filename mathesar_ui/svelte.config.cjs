@@ -9,6 +9,6 @@ module.exports = {
   preprocess: sveltePreprocess(),
   vitePlugin: {
     emitCss: true,
-    hot: !production,
+    hot: !production && !process.env.VITEST,
   },
 };
