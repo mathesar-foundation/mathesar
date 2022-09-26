@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, any_, column, exists, func, literal, select, text, true, union, and_
+from sqlalchemy import MetaData, Table, any_, column, exists, func, literal, select, text, true, union, and_, String, cast, collate
 from sqlalchemy.dialects.postgresql import array
 
 # OIDs assigned during normal database operation are constrained to be 16384 or higher.
@@ -105,6 +105,31 @@ def _get_index_dependents(pg_identify_object, dependency_pairs):
 def _get_rule_dependents(pg_identify_object, dependency_pairs):
     return dependency_pairs.where(pg_identify_object.c.type == 'rule')
 
+    
+def _get_trigger_dependents(pg_depend, pg_identify_object, pg_trigger):
+    return (
+        select(
+            pg_depend,
+            # for some reason, tgname column is in C collation which collides with other columns collations
+            collate(pg_trigger.c.tgname, 'default').label('objname'),
+            pg_identify_object.c.type.label('objtype')
+        )
+        .select_from(pg_depend)
+        .join(pg_identify_object, true())
+        .join(pg_trigger, pg_trigger.c.oid == pg_depend.c.objid)
+        .where(pg_depend.c.deptype == any_(array(PG_DEPENDENT_TYPES)))
+        .where(pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID)
+        .where(pg_identify_object.c.type == 'trigger')
+        .group_by(
+            pg_depend,
+            pg_trigger.c.tgname,
+            pg_identify_object.c.type)
+    )
+
+
+def _get_sequence_dependents(pg_identify_object, dependency_pairs):
+    return dependency_pairs.where(pg_identify_object.c.type == 'sequence')
+
 
 def _get_view_dependents(pg_identify_object, pg_rewrite_table, rule_dependents):
     pg_identify_object = _get_pg_identify_object_lateral_stmt(
@@ -167,6 +192,10 @@ def _get_pg_rewrite(engine, metadata):
     return Table("pg_rewrite", metadata, autoload_with=engine)
 
 
+def _get_pg_trigger(engine, metadata):
+    return Table('pg_trigger', metadata, autoload_with=engine)
+
+
 def _get_pg_identify_object_lateral_stmt(classid, objid, objsubid):
     return (
         select(
@@ -189,6 +218,7 @@ def _get_typed_dependency_pairs_stmt(engine):
         pg_depend.c.classid, pg_depend.c.objid, pg_depend.c.objsubid)
     pg_constraint = _get_pg_constraint_table(engine, metadata)
     pg_rewrite = _get_pg_rewrite(engine, metadata)
+    pg_trigger = _get_pg_trigger(engine, metadata)
 
     # each statement filters the base statement extracting dependents of a specific type
     # so it's easy to exclude particular types or add new
@@ -205,12 +235,17 @@ def _get_typed_dependency_pairs_stmt(engine):
 
     index_dependents = _get_index_dependents(pg_identify_object, dependency_pairs).cte('index_dependents')
 
+    trigger_dependents = _get_trigger_dependents(pg_depend, pg_identify_object, pg_trigger).cte('trigger_dependents')
+    sequence_dependents = _get_sequence_dependents(pg_identify_object, dependency_pairs).cte('sequence_dependents')
+
     return union(
         select(foreign_key_constraint_dependents),
         select(table_dependents),
         select(table_from_fk_dependents),
         select(view_dependents),
-        select(index_dependents))
+        select(index_dependents),
+        select(trigger_dependents),
+        select(sequence_dependents))
 
 
 def has_dependents(referenced_object_id, engine, attnum=None):
