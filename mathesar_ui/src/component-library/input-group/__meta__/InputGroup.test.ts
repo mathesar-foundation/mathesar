@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import { render } from '@testing-library/svelte';
 import InputGroupTest from './InputGroupTest.svelte';
 
