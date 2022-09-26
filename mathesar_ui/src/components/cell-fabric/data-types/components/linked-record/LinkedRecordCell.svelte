@@ -23,6 +23,8 @@
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
 
+  let wasActiveBeforeClick = false;
+
   $: hasValue = value !== undefined && value !== null;
 
   async function launchRecordSelector(event?: MouseEvent) {
@@ -64,8 +66,13 @@
   }
 
   function handleMouseDown() {
-    if (!isActive) {
-      dispatch('activate');
+    wasActiveBeforeClick = isActive;
+    dispatch('activate');
+  }
+
+  function handleClick() {
+    if (wasActiveBeforeClick) {
+      void launchRecordSelector();
     }
   }
 </script>
@@ -78,6 +85,7 @@
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
   on:mousedown={handleMouseDown}
+  on:click={handleClick}
   on:dblclick={launchRecordSelector}
   hasPadding={false}
 >
