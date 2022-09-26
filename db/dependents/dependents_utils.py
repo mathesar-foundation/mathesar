@@ -1,3 +1,4 @@
+import warnings
 from sqlalchemy import MetaData, any_, column, exists, func, literal, select, text, true, union, and_
 from sqlalchemy.dialects.postgresql import array
 
@@ -61,8 +62,10 @@ def get_dependents_graph(referenced_object_id, engine, attnum=None):
     recursive_stmt = anchor.union(recursive)
     stmt = select(recursive_stmt)
 
-    with engine.connect() as conn:
-        result = conn.execute(stmt)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="SELECT statement has a cartesian product")
+        with engine.connect() as conn:
+            result = conn.execute(stmt)
 
     return _get_structured_result(result)
 
