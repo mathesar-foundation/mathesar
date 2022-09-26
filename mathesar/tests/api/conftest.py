@@ -203,9 +203,6 @@ def table_for_reflection(engine):
 
 @pytest.fixture
 def column_test_table(patent_schema):
-    import logging
-    logger = logging.getLogger(f'column_test_table')
-    logger.debug('enter')
     engine = patent_schema._sa_engine
     column_list_in = [
         Column("mycolumn0", INTEGER, primary_key=True),

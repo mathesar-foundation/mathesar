@@ -1,7 +1,6 @@
 from frozendict import frozendict
 
 import pytest
-from unittest.mock import patch
 
 from django.core.cache import cache
 from django.core.files.base import File, ContentFile
@@ -11,9 +10,8 @@ from db.columns.operations.select import get_columns_attnum_from_names
 from db.types.base import PostgresType, MathesarCustomType
 from db.metadata import get_empty_metadata
 
-from mathesar.state import django as reflection, reset_reflection
+from mathesar.state import django as reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models import base as models_base
 from mathesar.models.base import Column, Table, DataFile
 
 

@@ -1,6 +1,5 @@
 from mathesar.api.display_options import DISPLAY_OPTIONS_BY_UI_TYPE
 from mathesar.models.base import Database
-from mathesar.state.django import reflect_db_objects
 from mathesar.database.types import get_ui_type_from_id, UIType
 from db.types.base import PostgresType, MathesarCustomType
 
@@ -50,7 +49,6 @@ def test_database_types_installed(client, test_db_name):
             'display_options': None
         },
     ]
-    #reflect_db_objects()
     default_database = Database.objects.get(name=test_db_name)
 
     response = client.get(f'/api/ui/v0/databases/{default_database.id}/types/')

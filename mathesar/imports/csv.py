@@ -12,8 +12,6 @@ from mathesar.errors import InvalidTableError
 from db.constants import ID, ID_ORIGINAL, COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
 
-from mathesar.state.django import reflect_columns_from_table
-from db.metadata import get_empty_metadata
 from mathesar.state import reset_reflection
 
 ALLOWED_DELIMITERS = ",\t:|"

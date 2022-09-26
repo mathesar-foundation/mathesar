@@ -166,7 +166,7 @@ def _duplicate_column_constraints(table_oid, from_column_attnum, to_column_attnu
 
 def duplicate_column(table_oid, copy_from_attnum, engine, new_column_name=None, copy_data=True, copy_constraints=True):
     # TODO reuse metadata
-    metadata=get_empty_metadata()
+    metadata = get_empty_metadata()
     table = reflect_table_from_oid(table_oid, engine, metadata=metadata)
     copy_from_name = get_column_name_from_attnum(table_oid, copy_from_attnum, engine, metadata=metadata)
     from_column = MathesarColumn.from_column(table.c[copy_from_name])
@@ -202,7 +202,7 @@ def duplicate_column(table_oid, copy_from_attnum, engine, new_column_name=None, 
         )
 
     # TODO reuse metadata
-    metadata=get_empty_metadata()
+    metadata = get_empty_metadata()
     table = reflect_table_from_oid(table_oid, engine, metadata=metadata)
     column_name = get_column_name_from_attnum(table_oid, new_column_attnum, engine, metadata=metadata)
     return to_mathesar_column_with_engine(table.c[column_name], engine)

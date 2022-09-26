@@ -1,11 +1,8 @@
 from django.core.cache import cache
 from sqlalchemy import text
-from unittest.mock import patch
 
 from db.schemas.utils import get_mathesar_schemas, get_schema_oid_from_name
-from mathesar.models import base as models_base
 from mathesar.models.base import Schema
-from mathesar.state import django as reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
@@ -276,7 +273,6 @@ def test_schema_delete(create_schema, client):
     schema_name = 'NASA Schema Delete'
     schema = create_schema(schema_name)
 
-    #with patch('mathesar.models.base.drop_schema') as mock_infer:
     response = client.delete(f'/api/db/v0/schemas/{schema.id}/')
     assert response.status_code == 204
 

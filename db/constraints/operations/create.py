@@ -26,7 +26,7 @@ def create_constraint(schema, engine, constraint_obj):
 
 def copy_constraint(table_oid, engine, constraint, from_column_attnum, to_column_attnum):
     # TODO reuse metadata
-    metadata=get_empty_metadata()
+    metadata = get_empty_metadata()
     table = reflect_table_from_oid(table_oid, engine, metadata=metadata)
     constraint_type = get_constraint_type_from_char(constraint.contype)
     if constraint_type == ConstraintType.UNIQUE.value:

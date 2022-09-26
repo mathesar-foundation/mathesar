@@ -2,12 +2,8 @@ from mathesar.state.django import reflect_db_objects, clear_dj_cache
 from mathesar.state.metadata import reset_cached_metadata, get_cached_metadata
 
 
-import logging
-logger = logging.getLogger(__name__)
 def make_sure_initial_reflection_happened():
-    logger.debug(f"make_sure_initial_reflection_happened")
     if not _has_initial_reflection_happened():
-        logger.debug(f"make_sure_initial_reflection_happened reset_reflection()")
         reset_reflection()
 
 
@@ -31,7 +27,6 @@ def reset_reflection():
 
 def _trigger_django_model_reflection():
     reflect_db_objects(metadata=get_cached_metadata())
-
 
 
 def set_initial_reflection_happened(has_it_happened=True):

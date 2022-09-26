@@ -6,7 +6,6 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveMode
 from rest_framework.response import Response
 from sqlalchemy.exc import DataError, IntegrityError
 
-from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.serializers.dependents import DependentSerializer
 from mathesar.api.utils import get_table_or_404
@@ -25,8 +24,6 @@ from mathesar.api.serializers.tables import (
     MoveTableRequestSerializer
 )
 from mathesar.models.base import Table
-from mathesar.state.django import reflect_db_objects, reflect_tables_from_schema
-from mathesar.state import reset_reflection, get_cached_metadata
 from mathesar.utils.tables import get_table_column_types
 from mathesar.utils.joins import get_processed_joinable_tables
 
