@@ -59,13 +59,14 @@ export function getSelectedRowId(selectedCell: string): number {
   return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[0]);
 }
 
-export function getSelectedUniqueColumnsId(selectedCells: ImmutableSet<string>, selectedColumns: ImmutableSet<number>): number[] {
-  const setOfUniqueColumnIds = new Set(
-    [
-      ...[...selectedCells].map(getSelectedColumnId),
-      ...selectedColumns
-    ]
-  );
+export function getSelectedUniqueColumnsId(
+  selectedCells: ImmutableSet<string>,
+  selectedColumns: ImmutableSet<number>,
+): number[] {
+  const setOfUniqueColumnIds = new Set([
+    ...[...selectedCells].map(getSelectedColumnId),
+    ...selectedColumns,
+  ]);
   return Array.from(setOfUniqueColumnIds);
 }
 
@@ -224,16 +225,22 @@ export class Selection {
 
   isCompleteColumnSelected(column: Column): boolean {
     if (this.allRows.length) {
-      return this.selectedColumns.getHas(column.id) || this.allRows.every((row) =>
-        isCellSelected(get(this.selectedCells), row, column),
+      return (
+        this.selectedColumns.getHas(column.id) ||
+        this.allRows.every((row) =>
+          isCellSelected(get(this.selectedCells), row, column),
+        )
       );
     }
     return this.selectedColumns.getHas(column.id);
   }
 
   isCompleteRowSelected(row: Row): boolean {
-    return !!this.allColumns.length && this.allColumns.every((column) =>
-      isCellSelected(get(this.selectedCells), row, column),
+    return (
+      !!this.allColumns.length &&
+      this.allColumns.every((column) =>
+        isCellSelected(get(this.selectedCells), row, column),
+      )
     );
   }
 

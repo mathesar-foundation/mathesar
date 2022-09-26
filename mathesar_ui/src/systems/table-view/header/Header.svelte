@@ -42,7 +42,11 @@
       <div {...htmlAttributes} {style}>
         <HeaderCell
           {processedColumn}
-          isSelected={isColumnSelected($selectedCells, $selectedColumns, processedColumn.column)}
+          isSelected={isColumnSelected(
+            $selectedCells,
+            $selectedColumns,
+            processedColumn.column,
+          )}
           on:click={() =>
             selection.toggleColumnSelection(processedColumn.column)}
         />
