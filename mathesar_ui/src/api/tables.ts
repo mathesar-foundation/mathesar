@@ -18,6 +18,14 @@ export interface TableEntry {
   import_verified: boolean;
   data_files?: number[];
   columns: MinimalColumnDetails[];
+  settings: {
+    /** This is the settings id, not the table id */
+    id: number;
+    preview_settings: {
+      customized: boolean;
+      template: string;
+    };
+  };
 }
 
 export interface SplitTableResponse {

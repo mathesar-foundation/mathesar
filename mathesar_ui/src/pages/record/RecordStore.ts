@@ -1,32 +1,42 @@
+import type { Readable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
+
 import type { TableEntry } from '@mathesar/api/tables';
 import { WritableMap } from '@mathesar/component-library';
 import type { RequestStatus } from '@mathesar/utils/api';
 import { patchAPI, getAPI } from '@mathesar/utils/api';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { Response as ApiResponse } from '@mathesar/api/tables/records';
+import { renderSummaryFromFieldsAndFkData } from '@mathesar/utils/recordSummary';
+import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
 
 export default class RecordStore {
-  fetchRequest: RequestStatus | undefined;
+  fetchRequest = writable<RequestStatus | undefined>(undefined);
 
   /** Keys are column ids */
   fields = new WritableMap<number, unknown>();
 
-  table: Pick<TableEntry, 'id'>;
+  /** Keys are column ids */
+  fkSummaryData = new WritableMap<number, DataForRecordSummaryInFkCell>();
+
+  summary: Readable<string>;
+
+  table: TableEntry;
 
   recordId: number;
 
   private url: string;
 
-  constructor({
-    table,
-    recordId,
-  }: {
-    table: Pick<TableEntry, 'id'>;
-    recordId: number;
-  }) {
+  constructor({ table, recordId }: { table: TableEntry; recordId: number }) {
     this.table = table;
     this.recordId = recordId;
     this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordId}/`;
+    const { template } = this.table.settings.preview_settings;
+    this.summary = derived(
+      [this.fields, this.fkSummaryData],
+      ([fields, fkSummaryData]) =>
+        renderSummaryFromFieldsAndFkData(template, fields, fkSummaryData),
+    );
     void this.fetch();
   }
 
@@ -35,18 +45,26 @@ export default class RecordStore {
     this.fields.reconstruct(
       Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
     );
+    if (response.preview_data) {
+      this.fkSummaryData.reconstruct(
+        response.preview_data.map(({ column, template, data }) => [
+          column,
+          { column, template, data: data[0] },
+        ]),
+      );
+    }
   }
 
   async fetch(): Promise<void> {
-    this.fetchRequest = { state: 'processing' };
+    this.fetchRequest.set({ state: 'processing' });
     try {
       this.setFieldsFromResponse(await getAPI(this.url));
-      this.fetchRequest = { state: 'success' };
+      this.fetchRequest.set({ state: 'success' });
     } catch (error) {
-      this.fetchRequest = {
+      this.fetchRequest.set({
         state: 'failure',
         errors: [getErrorMessage(error)],
-      };
+      });
     }
   }
 

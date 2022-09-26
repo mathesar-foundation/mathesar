@@ -1,7 +1,7 @@
 import type {
   QueryInstanceInitialColumn,
   QueryInstanceTransformation,
-} from '@mathesar/api/queries/queryList';
+} from '@mathesar/api/queries';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
@@ -156,22 +156,6 @@ export default class QueryModel {
     };
   }
 
-  withTransformations(
-    transformations?: QueryInstanceTransformation[],
-  ): QueryModelUpdateDiff {
-    const model = new QueryModel({
-      ...this,
-      transformations,
-    });
-    return {
-      model,
-      type: 'transformations',
-      diff: {
-        transformations,
-      },
-    };
-  }
-
   withTransformationModels(
     transformationModels?: QueryTransformationModel[],
   ): QueryModelUpdateDiff {
@@ -202,5 +186,9 @@ export default class QueryModel {
         entry.toJSON(),
       ),
     };
+  }
+
+  isSaved(): boolean {
+    return !!this.id;
   }
 }

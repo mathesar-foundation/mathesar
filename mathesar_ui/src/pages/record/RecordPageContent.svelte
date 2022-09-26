@@ -9,15 +9,15 @@
   import { currentTable } from '@mathesar/stores/tables';
   import { getAPI } from '@mathesar/utils/api';
   import DirectField from './DirectField.svelte';
-  import RecordStore from './RecordStore';
+  import type RecordStore from './RecordStore';
   import Widgets from './Widgets.svelte';
 
-  export let recordId: number;
+  export let record: RecordStore;
   export let tableStructure: TableStructure;
 
   $: table = $currentTable as TableEntry;
   $: ({ processedColumns } = tableStructure);
-  $: record = new RecordStore({ table, recordId });
+  $: ({ recordId, summary } = record);
 
   function getJoinableTablesResult(tableId: number) {
     return getAPI<JoinableTablesResult>(
@@ -27,7 +27,7 @@
 </script>
 
 <div><EntityType><Identifier>{table.name}</Identifier> Record</EntityType></div>
-<h1><Icon {...iconRecord} />{recordId}</h1>
+<h1><Icon {...iconRecord} />{$summary}</h1>
 
 <section class="fields-section">
   <div class="fields">

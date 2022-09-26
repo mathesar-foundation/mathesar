@@ -117,6 +117,15 @@
       z-index: 5;
     }
 
+    :global([data-sheet-element='cell'][data-cell-control='true']) {
+      font-size: var(--text-size-x-small);
+      padding: 0 1.5rem;
+      color: var(--color-text-muted);
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
+    }
+
     :global([data-sheet-element='row']) {
       transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
     }

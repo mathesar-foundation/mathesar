@@ -76,15 +76,14 @@ function getResultFromRequest<T>(request: XMLHttpRequest): T | undefined {
   if (request.status === NO_CONTENT) {
     return undefined;
   }
-  // I don't understand why we're getting this ESLint error here.
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { response } = request;
-  if (typeof response === 'string' && response.trim().length === 0) {
+
+  const response = String(request.response);
+  if (response.trim().length === 0) {
     // This is to accommodate poorly-behaving APIs that return an empty string
     // when they should instead respond with HTTP 204.
     return undefined;
   }
-  return JSON.parse(response) as T;
+  return JSON.parse(String(response)) as T;
 }
 
 function sendXHRRequest<T>(
@@ -113,7 +112,7 @@ function sendXHRRequest<T>(
           resolve(getResultFromRequest<T>(request));
         } else {
           try {
-            reject(new ApiMultiError(JSON.parse(request.response)));
+            reject(new ApiMultiError(JSON.parse(String(request.response))));
           } catch {
             const msg = [
               'When making an XHR request, the server responded with an',
@@ -188,10 +187,10 @@ export function uploadFile<T>(
       request.addEventListener('load', () => {
         if (successStatusCodes.has(request.status)) {
           try {
-            const response = JSON.parse(request.response) as T;
+            const response = JSON.parse(String(request.response)) as T;
             resolve(response);
           } catch (exp) {
-            resolve(request.response);
+            resolve(request.response as T);
           }
         } else {
           reject(new Error('An error has occurred while uploading file'));

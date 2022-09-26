@@ -1,8 +1,10 @@
 import type { Column } from '@mathesar/api/tables/columns';
 import { ImmutableSet, WritableSet } from '@mathesar-component-library';
 import { get } from 'svelte/store';
+import type { Unsubscriber } from 'svelte/store';
 import type { Row, RecordsData } from './records';
 import type { ColumnsDataStore } from './columns';
+import type { Display } from './display';
 
 const DEFAULT_ROW_INDEX = 0;
 const ROW_COLUMN_SEPARATOR = '-';
@@ -37,8 +39,10 @@ export const isRowSelected = (
 
 export const isColumnSelected = (
   selectedCells: ImmutableSet<string>,
+  columnsSelectedWhenTheTableIsEmpty: ImmutableSet<number>,
   column: Column,
 ): boolean =>
+  columnsSelectedWhenTheTableIsEmpty.has(column.id) ||
   selectedCells.valuesArray().some((cell) => cell.endsWith(`-${column.id}`));
 
 export const isCellSelected = (
@@ -55,6 +59,17 @@ export function getSelectedRowId(selectedCell: string): number {
   return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[0]);
 }
 
+export function getSelectedUniqueColumnsId(
+  selectedCells: ImmutableSet<string>,
+  columnsSelectedWhenTheTableIsEmpty: ImmutableSet<number>,
+): number[] {
+  const setOfUniqueColumnIds = new Set([
+    ...[...selectedCells].map(getSelectedColumnId),
+    ...columnsSelectedWhenTheTableIsEmpty,
+  ]);
+  return Array.from(setOfUniqueColumnIds);
+}
+
 export class Selection {
   private columnsDataStore: ColumnsDataStore;
 
@@ -62,15 +77,36 @@ export class Selection {
 
   private selectionBounds: SelectionBounds | undefined;
 
+  private activeCellUnsubscriber: Unsubscriber;
+
   selectedCells: WritableSet<string>;
+
+  /**
+   * When the table has a non-zero number of rows, we store the user's selection
+   * in the `selectedCells` store. But when the table has no rows (and thus no
+   * cells) we still need a way to select columns to configure the data types,
+   * so we use this store as a workaround. More elegant solutions are being
+   * discussed in [1732][1].
+   *
+   * [1]: https://github.com/centerofci/mathesar/issues/1732
+   */
+  columnsSelectedWhenTheTableIsEmpty: WritableSet<number>;
 
   freezeSelection: boolean;
 
-  constructor(columnsDataStore: ColumnsDataStore, recordsData: RecordsData) {
+  display: Display;
+
+  constructor(
+    columnsDataStore: ColumnsDataStore,
+    recordsData: RecordsData,
+    display: Display,
+  ) {
     this.selectedCells = new WritableSet<string>();
+    this.columnsSelectedWhenTheTableIsEmpty = new WritableSet<number>();
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
     this.freezeSelection = false;
+    this.display = display;
 
     // This event terminates the cell selection process
     // specially useful when selecting multiple cells
@@ -79,6 +115,32 @@ export class Selection {
     document.addEventListener('mouseup', () => {
       this.onEndSelection();
     });
+
+    // Keep active cell and selected cell in sync
+    this.activeCellUnsubscriber = this.display.activeCell.subscribe(
+      (activeCell) => {
+        if (activeCell) {
+          const activeCellRow = this.allRows.find(
+            (row) => row.rowIndex === activeCell.rowIndex,
+          );
+          const activeCellColumn = this.allColumns.find(
+            (column) => column.id === activeCell.columnId,
+          );
+          if (activeCellRow && activeCellColumn) {
+            /**
+             * This handles the very rare edge case
+             * when the user starts the selection using mouse
+             * but before ending(mouseup event)
+             * she change the active cell using keyboard
+             */
+            this.selectionBounds = undefined;
+            this.selectMultipleCells([[activeCellRow, activeCellColumn]]);
+          }
+        } else {
+          this.resetSelection();
+        }
+      },
+    );
   }
 
   onStartSelection(row: Row, column: Column): void {
@@ -109,6 +171,9 @@ export class Selection {
 
     this.selectionBounds.endRowIndex = rowIndex;
     this.selectionBounds.endColumnIndex = columnIndex;
+
+    const cells = this.getIncludedCells(this.selectionBounds);
+    this.selectMultipleCells(cells);
   }
 
   get allRows(): Row[] {
@@ -154,23 +219,33 @@ export class Selection {
     const identifiers = cells.map(([row, column]) =>
       createSelectedCellIdentifier(row, column),
     );
-    this.selectedCells.addMultiple(identifiers);
+    this.selectedCells.reconstruct(identifiers);
   }
 
   resetSelection(): void {
     this.selectionBounds = undefined;
+    this.columnsSelectedWhenTheTableIsEmpty.clear();
     this.selectedCells.clear();
   }
 
   isCompleteColumnSelected(column: Column): boolean {
-    return this.allRows.every((row) =>
-      isCellSelected(get(this.selectedCells), row, column),
-    );
+    if (this.allRows.length) {
+      return (
+        this.columnsSelectedWhenTheTableIsEmpty.getHas(column.id) ||
+        this.allRows.every((row) =>
+          isCellSelected(get(this.selectedCells), row, column),
+        )
+      );
+    }
+    return this.columnsSelectedWhenTheTableIsEmpty.getHas(column.id);
   }
 
   isCompleteRowSelected(row: Row): boolean {
-    return this.allColumns.every((column) =>
-      isCellSelected(get(this.selectedCells), row, column),
+    return (
+      !!this.allColumns.length &&
+      this.allColumns.every((column) =>
+        isCellSelected(get(this.selectedCells), row, column),
+      )
     );
   }
 
@@ -180,6 +255,9 @@ export class Selection {
     if (isCompleteColumnSelected) {
       // Clear the selection - deselect the column
       this.resetSelection();
+    } else if (!this.allRows.length) {
+      this.resetSelection();
+      this.columnsSelectedWhenTheTableIsEmpty.add(column.id);
     } else {
       const cells: Cell[] = [];
       this.allRows.forEach((row) => {
@@ -212,5 +290,9 @@ export class Selection {
       this.resetSelection();
       this.selectMultipleCells(cells);
     }
+  }
+
+  destroy(): void {
+    this.activeCellUnsubscriber();
   }
 }

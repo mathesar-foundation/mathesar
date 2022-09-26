@@ -50,7 +50,10 @@
   tabindex={-1}
   {...$$restProps}
 >
-  <CellBackground color="rgba(14, 101, 235, 0.1)" when={isSelectedInRange} />
+  <CellBackground
+    color="rgba(14, 101, 235, 0.1)"
+    when={isSelectedInRange && mode !== 'edit'}
+  />
   <div class="cell-wrapper-content"><slot /></div>
   <div class="icon"><slot name="icon" /></div>
 </div>
