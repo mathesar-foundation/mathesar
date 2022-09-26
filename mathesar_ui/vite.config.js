@@ -44,4 +44,9 @@ export default defineConfig({
     emptyOutDir: true,
   },
   base: '/static/',
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    testTimeout: 30000,
+  },
 });
