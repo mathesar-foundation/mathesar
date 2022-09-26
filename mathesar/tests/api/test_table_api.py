@@ -917,7 +917,7 @@ def test_table_viewset_sets_cache(client):
 
 def test_table_viewset_checks_cache(client):
     cache.delete(reflection.DB_REFLECTION_KEY)
-    with patch.object(reflection, 'reflect_tables_from_schema') as mock_reflect:
+    with patch.object(reflection, 'reflect_tables_from_schemas') as mock_reflect:
         client.get('/api/db/v0/tables/')
     mock_reflect.assert_called()
 
