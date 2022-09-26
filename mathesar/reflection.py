@@ -94,18 +94,19 @@ def reflect_columns_from_tables(tables):
         return
     engine = tables[0]._sa_engine
     table_oids = [table.oid for table in tables]
+    # Using dictionary as it maintains insertions ordered
     attnums = {
-        (column['attnum'], column['table_oid'])
+        column['attnum']: column['table_oid']
         for column in get_column_attnums_from_table(table_oids, engine)
     }
     columns = []
-    for attnum, table_oid in attnums:
+    for attnum, table_oid in attnums.items():
         table = next(table for table in tables if table.oid == table_oid)
         column = models.Column(attnum=attnum, table=table, display_options=None)
         columns.append(column)
     models.Column.current_objects.bulk_create(columns, ignore_conflicts=True)
     attnums_mapped_by_table_oid = defaultdict(list)
-    for attnum, table_oid in attnums:
+    for attnum, table_oid in attnums.items():
         attnums_mapped_by_table_oid[table_oid].append(attnum)
     queryset = models.Column.current_objects.none()
     for table_oid, attnums in attnums_mapped_by_table_oid.items():
@@ -163,9 +164,11 @@ def reflect_db_objects(skip_cache_check=False):
         reflect_databases()
         for database in models.Database.current_objects.filter(deleted=False):
             reflect_schemas_from_database(database.name)
-        schemas = models.Schema.current_objects.all()
-        reflect_tables_from_schemas(schemas)
-        tables = models.Table.current_objects.all().prefetch_related('schema')
-        reflect_columns_from_tables(tables)
-        reflect_constraints_from_database(database.name)
+        # Prefetching queries make use of a single db engine, so we need to
+        for database in models.Database.current_objects.filter(deleted=False):
+            schemas = models.Schema.current_objects.filter(database=database)
+            reflect_tables_from_schemas(schemas)
+            tables = models.Table.current_objects.filter(schema__in=schemas).prefetch_related('schema')
+            reflect_columns_from_tables(tables)
+            reflect_constraints_from_database(database.name)
         cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
