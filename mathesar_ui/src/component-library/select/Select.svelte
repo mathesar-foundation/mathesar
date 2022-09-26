@@ -104,6 +104,19 @@
   }
 
   $: setValueOnOptionChange(options);
+
+  /**
+   * This type cast is essential since `ListBoxOptions` does not
+   * get a direct prop with it's genertic type `Option`. The slot prop
+   * `option` is identified as `unknown` instead.
+   *
+   * Related issues:
+   * https://github.com/sveltejs/language-tools/issues/442
+   * https://github.com/sveltejs/language-tools/issues/1344
+   */
+  function getOptionWithTypeCast(option: unknown): Option {
+    return option as Option;
+  }
 </script>
 
 <BaseInput {...$$restProps} {id} {disabled} />
@@ -133,11 +146,21 @@
     on:keydown={(e) => api.handleKeyDown(e)}
   >
     <svelte:fragment slot="trigger">
-      <StringOrComponent arg={getLabel(value)} />
+      {#if $$slots.default}
+        <slot option={value} label={getLabel(value)} />
+      {:else}
+        <StringOrComponent arg={getLabel(value)} />
+      {/if}
     </svelte:fragment>
 
     <svelte:fragment slot="content">
-      <ListBoxOptions id="{id}-select-options" />
+      {#if $$slots.default}
+        <ListBoxOptions id="{id}-select-options" let:option let:label>
+          <slot option={getOptionWithTypeCast(option)} {label} />
+        </ListBoxOptions>
+      {:else}
+        <ListBoxOptions id="{id}-select-options" />
+      {/if}
     </svelte:fragment>
   </Dropdown>
 </ListBox>

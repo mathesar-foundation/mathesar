@@ -18,19 +18,6 @@ from db.utils import execute_statement
 DYNAMIC_NODE_TAGS = {"SQLValueFunction", "FuncCall"}
 
 
-def _get_columns_attnum_from_names(table_oid, column_names, engine, metadata):
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", metadata, autoload_with=engine)
-    sel = select(pg_attribute.c.attnum, pg_attribute.c.attname).where(
-        and_(
-            pg_attribute.c.attrelid == table_oid,
-            pg_attribute.c.attname.in_(column_names)
-        )
-    ).order_by(asc(pg_attribute.c.attnum))
-    return sel
-
-
 def get_columns_attnum_from_names(table_oid, column_names, engine, metadata, connection_to_use=None, return_as_name_map=False):
     """
     Returns the respective list of attnum of the column names passed.
@@ -51,6 +38,19 @@ def get_column_attnum_from_name(table_oid, column_name, engine, metadata, connec
     return execute_statement(engine, statement, connection_to_use).scalar()
 
 
+def _get_columns_attnum_from_names(table_oid, column_names, engine, metadata):
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_attribute = Table("pg_attribute", metadata, autoload_with=engine)
+    sel = select(pg_attribute.c.attnum, pg_attribute.c.attname).where(
+        and_(
+            pg_attribute.c.attrelid == table_oid,
+            pg_attribute.c.attname.in_(column_names)
+        )
+    ).order_by(asc(pg_attribute.c.attnum))
+    return sel
+
+
 def get_column_attnums_from_table(table_oid, engine, metadata, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
@@ -68,17 +68,18 @@ def get_column_attnums_from_table(table_oid, engine, metadata, connection_to_use
     return results
 
 
-def _get_columns_name_from_attnums(table_oid, attnums, engine, metadata, connection_to_use=None):
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", metadata, autoload_with=engine)
-    sel = select(pg_attribute.c.attname).where(
-        and_(
-            pg_attribute.c.attrelid == table_oid,
-            pg_attribute.c.attnum.in_(attnums)
-        )
-    )
-    return sel
+def get_columns_name_from_tables(table_oids, engine, metadata, connection_to_use=None, fetch_as_map=False):
+    """
+    Returns the respective list of attnum of the column names passed.
+     The order is based on the column order in the table and not by the order of the column names argument.
+    """
+    statement = _get_columns_name_from_attnums(table_oids, None, engine, metadata=metadata, connection_to_use=None)
+    column_names_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
+    if fetch_as_map:
+        column_names = {(column_name_tuple[1], column_name_tuple[2]): column_name_tuple[0] for column_name_tuple in column_names_tuple}
+    else:
+        column_names = [column_name_tuple[0] for column_name_tuple in column_names_tuple]
+    return column_names
 
 
 def get_columns_name_from_attnums(table_oid, attnums, engine, metadata, connection_to_use=None):
@@ -86,23 +87,10 @@ def get_columns_name_from_attnums(table_oid, attnums, engine, metadata, connecti
     Returns the respective list of attnum of the column names passed.
      The order is based on the column order in the table and not by the order of the column names argument.
     """
-    statement = _get_columns_name_from_attnums(table_oid, attnums, engine, metadata=metadata, connection_to_use=None)
+    statement = _get_columns_name_from_attnums([table_oid], attnums, engine, metadata=metadata, connection_to_use=None)
     column_names_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
     column_names = [column_name_tuple[0] for column_name_tuple in column_names_tuple]
     return column_names
-
-
-def get_column_name_from_attnum(table_oid, attnum, engine, metadata, connection_to_use=None):
-    statement = _get_columns_name_from_attnums(table_oid, [attnum], engine, metadata=metadata, connection_to_use=None)
-    column_name = execute_statement(engine, statement, connection_to_use).scalar()
-    # If the column was recently dropped, it will have a name like "......pg.dropped.123....."
-    # See this example: https://stackoverflow.com/a/43050463/1714997
-    # Below line checks if the column was dropped
-    column_was_dropped = re.match(r"\.+\.pg.dropped.\d+\.\.+", column_name)
-    if column_was_dropped:
-        return None
-    else:
-        return column_name
 
 
 def get_column_default_dict(table_oid, attnum, engine, metadata, connection_to_use=None):
@@ -131,6 +119,33 @@ def get_column_default_dict(table_oid, attnum, engine, metadata, connection_to_u
         ).scalar()
 
     return {"value": default_value, "is_dynamic": is_dynamic}
+
+
+def get_column_name_from_attnum(table_oid, attnum, engine, metadata, connection_to_use=None):
+    statement = _get_columns_name_from_attnums([table_oid], [attnum], engine, metadata=metadata, connection_to_use=None)
+    column_name = execute_statement(engine, statement, connection_to_use).scalar()
+    # If the column was recently dropped, it will have a name like "......pg.dropped.123....."
+    # See this example: https://stackoverflow.com/a/43050463/1714997
+    # Below line checks if the column was dropped
+    column_was_dropped = re.match(r"\.+\.pg.dropped.\d+\.\.+", column_name)
+    if column_was_dropped:
+        return None
+    else:
+        return column_name
+
+
+def _get_columns_name_from_attnums(table_oids, attnums, engine, metadata, connection_to_use=None):
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_attribute = Table("pg_attribute", metadata, autoload_with=engine)
+    sel = select(pg_attribute.c.attname, pg_attribute.c.attnum, pg_attribute.c.attrelid)
+    conditions = [pg_attribute.c.attrelid.in_(table_oids)]
+    if attnums is not None:
+        conditions.append(pg_attribute.c.attnum.in_(attnums))
+    else:
+        conditions.extend([pg_attribute.c.attisdropped.is_(False), pg_attribute.c.attnum > 0])
+    sel = sel.where(and_(*conditions))
+    return sel
 
 
 def get_column_default(table_oid, attnum, engine, metadata, connection_to_use=None):

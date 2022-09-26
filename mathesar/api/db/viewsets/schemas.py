@@ -1,10 +1,12 @@
 from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
 from mathesar.api.dj_filters import SchemaFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
+from mathesar.api.serializers.dependents import DependentSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.models.base import Schema
 from mathesar.utils.schemas import create_schema_and_object
@@ -23,8 +25,11 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
         serializer = SchemaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        schema = create_schema_and_object(serializer.validated_data['name'],
-                                          serializer.validated_data['database'])
+        schema = create_schema_and_object(
+            serializer.validated_data['name'],
+            serializer.validated_data['database'],
+            comment=serializer.validated_data.get('description')
+        )
         serializer = SchemaSerializer(schema)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -47,3 +52,9 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
         schema = self.get_object()
         schema.delete_sa_schema()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['get'], detail=True)
+    def dependents(self, request, pk=None):
+        schema = self.get_object()
+        serializer = DependentSerializer(schema.dependents, many=True, context={'request': request})
+        return Response(serializer.data)

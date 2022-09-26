@@ -4,7 +4,7 @@
   This component is meant to be common for tables, queries, and for import preview
 -->
 <script lang="ts">
-  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
+  import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
   import RecordPageLink from '../RecordPageLink.svelte';
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';

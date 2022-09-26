@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { writable } from 'svelte/store';
   import { router } from 'tinro';
 
   import type { Column } from '@mathesar/api/tables/columns';
   import type { Result as ApiRecord } from '@mathesar/api/tables/records';
   import { ImmutableSet, Spinner } from '@mathesar/component-library';
-  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
+  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import { constraintIsFk } from '@mathesar/stores/table-data/constraintsUtils';
   import {
@@ -29,8 +28,7 @@
   export let tabularData: TabularData;
 
   const nestedController = setNewRecordSelectorControllerInContext();
-  const tabularDataStore = writable(tabularData);
-  setTabularDataStoreInContext(tabularDataStore);
+  const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
   let columnWithFocus: Column | undefined = undefined;
   let isSubmittingNewRecord = false;
@@ -122,7 +120,7 @@
     <div class="row header" style="width: {rowWidth}px">
       <CellArranger {display} let:style let:processedColumn>
         <CellWrapper header {style}>
-          <TableColumnName column={processedColumn} />
+          <ProcessedColumnName {processedColumn} />
           <ColumnResizer columnId={processedColumn.column.id} />
         </CellWrapper>
       </CellArranger>

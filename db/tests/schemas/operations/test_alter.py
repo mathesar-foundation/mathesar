@@ -1,9 +1,11 @@
 import pytest
+from sqlalchemy import func, select
 from sqlalchemy.exc import ProgrammingError
 
 from db.schemas import utils as schema_utils
-from db.schemas.operations.alter import rename_schema
+from db.schemas.operations.alter import comment_on_schema, rename_schema
 from db.schemas.operations.create import create_schema
+from db.schemas.operations.select import reflect_schema
 from db.tables.operations.select import reflect_table
 from db.tests.schemas.utils import create_related_table
 from db.metadata import get_empty_metadata
@@ -26,6 +28,27 @@ def test_rename_schema(engine):
 def test_rename_schema_missing(engine):
     with pytest.raises(ProgrammingError):
         rename_schema("test_rename_schema_missing", engine, "new_name")
+
+
+def test_comment_on_schema(engine_with_schema):
+    engine, schema = engine_with_schema
+    schema_oid = reflect_schema(engine, name=schema)['oid']
+
+    expect_comment = 'test comment'
+    comment_on_schema(schema, engine, expect_comment)
+    with engine.begin() as conn:
+        res = conn.execute(select(func.obj_description(schema_oid, 'pg_namespace')))
+    actual_comment = res.fetchone()[0]
+
+    assert actual_comment == expect_comment
+
+    expect_new_comment = 'test comment new'
+    comment_on_schema(schema, engine, expect_new_comment)
+    with engine.begin() as conn:
+        res = conn.execute(select(func.obj_description(schema_oid, 'pg_namespace')))
+    actual_new_comment = res.fetchone()[0]
+
+    assert actual_new_comment == expect_new_comment
 
 
 def test_rename_schema_foreign_key(engine):

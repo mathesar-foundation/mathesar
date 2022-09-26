@@ -226,11 +226,18 @@ class MathesarColumn(Column):
 
     @property
     def type_options(self):
+        item_type = getattr(self.type, "item_type", None)
+        if item_type is not None:
+            item_type_name = get_db_type_enum_from_class(item_type.__class__).id
+        else:
+            item_type_name = None
         full_type_options = {
             "length": getattr(self.type, "length", None),
             "precision": getattr(self.type, "precision", None),
             "scale": getattr(self.type, "scale", None),
             "fields": getattr(self.type, "fields", None),
+            "item_type": item_type_name,
+            "dimensions": getattr(self.type, "dimensions", None)
         }
         _type_options = {k: v for k, v in full_type_options.items() if v is not None}
         return _type_options if _type_options else None

@@ -76,4 +76,15 @@ export class ApiMultiError extends Error {
   }
 }
 
+/**
+ * This error should be thrown when a union type has not been sufficiently
+ * narrowed by exhaustiveness checking.
+ */
+export class MissingExhaustiveConditionError extends Error {
+  constructor(value: never, message?: string) {
+    super(`${JSON.stringify(value)}${message ? ` ${message}` : ''}`);
+    this.name = 'MissingExhaustiveConditionError';
+  }
+}
+
 /* eslint-enable max-classes-per-file */

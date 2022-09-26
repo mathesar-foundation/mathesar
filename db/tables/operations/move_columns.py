@@ -52,7 +52,10 @@ def move_columns_between_related_tables(
         )
     with engine.begin() as conn:
         conn.execute(extracted_columns_update_stmt)
-        deletion_column_data = [{'attnum': column_attnum} for column_attnum in column_attnums_to_move]
+        deletion_column_data = [
+            {'attnum': column_attnum, 'delete': True}
+            for column_attnum in column_attnums_to_move
+        ]
         batch_alter_table_drop_columns(source_table_oid, deletion_column_data, conn, engine)
     # TODO reuse metadata
     source_table = reflect_table_from_oid(source_table_oid, engine, metadata=get_empty_metadata())

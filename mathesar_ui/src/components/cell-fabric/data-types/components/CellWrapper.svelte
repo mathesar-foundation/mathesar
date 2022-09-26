@@ -1,4 +1,5 @@
 <script lang="ts">
+  import CellBackground from '@mathesar/systems/table-view/row/CellBackground.svelte';
   import { tick } from 'svelte';
   import type { HorizontalAlignment } from './typeDefinitions';
 
@@ -34,7 +35,6 @@
 <div
   class="cell-wrapper"
   class:is-active={isActive}
-  class:is-selected-in-range={isSelectedInRange}
   class:disabled
   class:is-edit-mode={mode === 'edit'}
   class:truncate={multiLineTruncate}
@@ -50,6 +50,10 @@
   tabindex={-1}
   {...$$restProps}
 >
+  <CellBackground
+    color="rgba(14, 101, 235, 0.1)"
+    when={isSelectedInRange && mode !== 'edit'}
+  />
   <div class="cell-wrapper-content"><slot /></div>
   <div class="icon"><slot name="icon" /></div>
 </div>
@@ -100,10 +104,6 @@
       &.disabled {
         box-shadow: 0 0 0 2px #a8a8a8;
       }
-    }
-
-    &.is-selected-in-range {
-      background-color: rgba(14, 101, 235, 0.1);
     }
 
     :global(.input-element) {

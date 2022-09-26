@@ -32,6 +32,7 @@ export default defineConfig({
     exclude: ['tinro'],
   },
   server: {
+    port: 3000,
     host: true,
   },
   build: {
@@ -42,4 +43,5 @@ export default defineConfig({
     outDir: '../mathesar/static/mathesar/',
     emptyOutDir: true,
   },
+  base: '/static/',
 });

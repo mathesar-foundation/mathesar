@@ -57,6 +57,7 @@
   aria-controls={ariaControls}
   aria-haspopup="listbox"
   aria-label={ariaLabel}
+  title={ariaLabel}
   {size}
   on:keydown
   on:focus
@@ -82,6 +83,7 @@
   on:close={close}
   on:open
   on:close
+  let:close
 >
-  <slot name="content" />
+  <slot name="content" {close} />
 </AttachableDropdown>

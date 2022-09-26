@@ -32,6 +32,7 @@
     "src/**/*.ts",
     "src/**/*.svelte",
     "**.cjs",
+    "**/*.cjs",
     "**.config.js"
   ]
 }

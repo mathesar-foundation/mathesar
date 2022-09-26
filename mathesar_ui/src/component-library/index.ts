@@ -20,11 +20,13 @@ export { default as Icon } from './icon/Icon.svelte';
 export { InputGroup, InputGroupText } from './input-group';
 export { default as Label } from './label/Label.svelte';
 export { default as LabeledInput } from './labeled-input/LabeledInput.svelte';
+export { default as MatchHighlighter } from './match-highlighter/MatchHighlighter.svelte';
 export {
   NumberInput,
   StringifiedNumberInput,
   StringifiedNumberFormatter,
 } from './number-input';
+export { default as MultiSelect } from './multi-select/MultiSelect.svelte';
 export { default as Progress } from './progress/Progress.svelte';
 export { default as Radio } from './radio/Radio.svelte';
 export { default as RadioGroup } from './radio-group/RadioGroup.svelte';

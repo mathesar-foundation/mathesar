@@ -1,5 +1,5 @@
 <script lang="ts">
-  import AppHeader from '@mathesar/systems/app-header/AppHeader.svelte';
+  import AppHeader from '@mathesar/components/AppHeader.svelte';
 
   export let fitViewport = false;
 </script>
@@ -27,6 +27,5 @@
   }
   .app-layout:not(.fit-viewport) .app-layout-content {
     padding: var(--page-padding);
-    overflow: auto;
   }
 </style>

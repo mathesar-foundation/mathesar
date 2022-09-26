@@ -231,10 +231,10 @@ def _check_type_option_equivalence(type_options_1, type_options_2):
 
 
 def _validate_columns_for_batch_update(table, column_data):
-    ALLOWED_KEYS = ['attnum', 'name', 'type', 'type_options']
-    if len(column_data) != len(table.columns):
-        raise ValueError('Number of columns passed in must equal number of columns in table')
+    ALLOWED_KEYS = ['attnum', 'name', 'type', 'type_options', 'delete']
     for single_column_data in column_data:
+        if 'attnum' not in single_column_data.keys():
+            raise ValueError('Key "attnum" is required')
         for key in single_column_data.keys():
             if key not in ALLOWED_KEYS:
                 allowed_key_list = ', '.join(ALLOWED_KEYS)
@@ -242,8 +242,8 @@ def _validate_columns_for_batch_update(table, column_data):
 
 
 def _batch_update_column_types(table_oid, column_data_list, connection, engine):
-    for index, column_data in enumerate(column_data_list):
-        column_attnum = column_data.get('attnum', None)
+    for column_data in column_data_list:
+        column_attnum = column_data.get('attnum')
         if 'type' in column_data and column_attnum is not None:
             new_type = get_db_type_enum_from_id(column_data['type'])
             type_options = column_data.get('type_options', {})
@@ -263,7 +263,7 @@ def _batch_alter_table_rename_columns(table_oid, column_data_list, connection, e
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
     with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
-        for index, column_data in enumerate(column_data_list):
+        for column_data in column_data_list:
             column_attnum = column_data.get('attnum', None)
             if column_attnum is not None:
                 # TODO reuse metadata
@@ -287,10 +287,9 @@ def batch_alter_table_drop_columns(table_oid, column_data_list, connection, engi
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
     with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
-        for index, column_data in enumerate(column_data_list):
-            column_attnum = column_data.get('attnum', None)
-            if column_attnum is not None and len(column_data.keys()) == 1:
-                # TODO reuse metadata
+        for column_data in column_data_list:
+            column_attnum = column_data.get('attnum')
+            if column_attnum is not None and column_data.get('delete') is not None:
                 name = get_column_name_from_attnum(table_oid, column_attnum, engine=engine, metadata=get_empty_metadata(), connection_to_use=connection)
                 batch_op.drop_column(name)
 

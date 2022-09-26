@@ -34,6 +34,7 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
+            'has_dependents': True
         },
         {
             'name': 'mycolumn1',
@@ -49,6 +50,7 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
+            'has_dependents': False
         },
         {
             'name': 'mycolumn2',
@@ -67,6 +69,7 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
+            'has_dependents': True
         },
         {
             'name': 'mycolumn3',
@@ -86,6 +89,7 @@ def test_column_list(column_test_table, client):
                 'timestamp with time zone', 'timestamp without time zone',
             ],
             'default': None,
+            'has_dependents': False
         }
     ]
     check_columns_response(response_data['results'], expect_results)

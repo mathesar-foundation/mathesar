@@ -1,7 +1,8 @@
 <script lang="ts">
+  import type { Row as RowObject } from '@mathesar/stores/table-data/records';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { SheetVirtualRows } from '@mathesar/components/sheet';
-  import RowComponent from './row/Row.svelte';
+  import Row from './row/Row.svelte';
   import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
   import {
     rowHeightPx,
@@ -11,21 +12,25 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
+  export let usesVirtualList = false;
+
   $: ({ id, recordsData, display } = $tabularData);
   $: ({ displayableRecords } = display);
 
-  function getItemSize(index: number) {
-    const allRecords = $displayableRecords;
-    const record = allRecords?.[index];
-    if (record) {
-      if (record.isNewHelpText) {
-        return helpTextRowHeightPx;
-      }
-      if (record.isGroupHeader) {
-        return groupHeaderRowHeightPx;
-      }
+  function getItemSizeFromRow(row: RowObject) {
+    if (row.isNewHelpText) {
+      return helpTextRowHeightPx;
+    }
+    if (row.isGroupHeader) {
+      return groupHeaderRowHeightPx;
     }
     return rowHeightPx;
+  }
+
+  function getItemSizeFromIndex(index: number) {
+    const allRecords = $displayableRecords;
+    const record = allRecords?.[index];
+    return record ? getItemSizeFromRow(record) : rowHeightPx;
   }
 
   function checkAndResetActiveCell(e: Event) {
@@ -43,7 +48,11 @@
       const targetNotWithinEditableCell =
         !target.closest('.editable-cell') &&
         !target.closest('.retain-active-cell');
-      clearActiveCell = targetNotWithinEditableCell;
+      const targetNotWithinTableInspector = !target.closest(
+        '.table-inspector-container',
+      );
+      clearActiveCell =
+        targetNotWithinEditableCell && targetNotWithinTableInspector;
     }
 
     if (clearActiveCell) {
@@ -58,22 +67,31 @@
 />
 
 {#key id}
-  <SheetVirtualRows
-    itemCount={$displayableRecords.length}
-    paddingBottom={30}
-    itemSize={getItemSize}
-    itemKey={(index) => recordsData.getIterationKey(index)}
-    let:items
-    let:api
-  >
-    <ScrollAndResetHandler {api} />
-    {#each items as item (item.key)}
-      {#if $displayableRecords[item.index]}
-        <RowComponent
-          style={item.style}
-          bind:row={$displayableRecords[item.index]}
-        />
-      {/if}
+  {#if usesVirtualList}
+    <SheetVirtualRows
+      itemCount={$displayableRecords.length}
+      paddingBottom={30}
+      itemSize={getItemSizeFromIndex}
+      itemKey={(index) => recordsData.getIterationKey(index)}
+      let:items
+      let:api
+    >
+      <ScrollAndResetHandler {api} />
+      {#each items as item (item.key)}
+        {#if $displayableRecords[item.index]}
+          <Row style={item.style} bind:row={$displayableRecords[item.index]} />
+        {/if}
+      {/each}
+    </SheetVirtualRows>
+  {:else}
+    {#each $displayableRecords as displayableRecord}
+      <Row
+        style={{
+          position: 'relative',
+          height: getItemSizeFromRow(displayableRecord),
+        }}
+        row={displayableRecord}
+      />
     {/each}
-  </SheetVirtualRows>
+  {/if}
 {/key}

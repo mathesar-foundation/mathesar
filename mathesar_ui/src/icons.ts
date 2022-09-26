@@ -10,10 +10,12 @@ import {
   faClock,
   faClone,
   faCogs,
+  faCopy,
   faDatabase,
   faDollarSign,
   faEnvelope,
   faExternalLinkAlt,
+  faFileAlt,
   faFileContract,
   faFilter,
   faGlobe,
@@ -45,6 +47,7 @@ import {
   faUnlink,
   faUpload,
   faUser,
+  faSave,
 } from '@fortawesome/free-solid-svg-icons';
 
 import type { IconProps } from '@mathesar-component-library/types';
@@ -71,6 +74,8 @@ export const iconDelete: IconProps = { data: faTrashAlt };
 export const iconEdit: IconProps = { data: faPencilAlt };
 export const iconExpandRight: IconProps = { data: faChevronRight };
 export const iconImportData: IconProps = { data: faUpload };
+export const iconMoveColumnsToNewLinkedTable = { data: faLink };
+export const iconMoveColumnsToExistingLinkedTable = { data: faLink };
 export const iconRedo: IconProps = { data: faRedo };
 export const iconRefresh: IconProps = { data: faSync };
 export const iconRename: IconProps = { data: faICursor };
@@ -80,6 +85,7 @@ export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
 export const iconSortDescending: IconProps = { data: faSortAmountDown };
 export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
+export const iconSave: IconProps = { data: faSave };
 
 // THINGS
 //
@@ -90,12 +96,14 @@ export const iconConstraintUnique: IconProps = { data: faSnowflake };
 export const iconDatabase: IconProps = { data: faDatabase };
 export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
+export const iconExploration: IconProps = { data: faFileContract };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faThList };
 export const iconInwardLink: IconProps = { data: faArrowRight };
 export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };
+export const iconMultipleRecords: IconProps = { data: faCopy };
 export const iconOutwardLink: IconProps = { data: faArrowLeft };
-export const iconQuery: IconProps = { data: faFileContract };
+export const iconRecord: IconProps = { data: faFileAlt };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: faTable };

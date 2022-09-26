@@ -21,7 +21,7 @@
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
-  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
+  import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
   import { iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -53,8 +53,25 @@
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: ({ selectedCells } = selection);
+
+  /**
+   * The name indicates that this boolean is only true when more than one cell
+   * is selected. However, because of the bug that [the active cell and selected
+   * cells do not remain in sync when using keyboard][1] this boolean is
+   * sometimes true even when multiple cells are selected. This is to
+   * differentiate between different active and selected cell using blue
+   * background styling for selected cell and blue border styling for active
+   * cell.
+   *
+   * The above bug can be fixed when following two conditions are met
+   *
+   * - We are working on keyboard accessability of the application.
+   * - `selectedCells` and `activeCell` are merged in a single store.
+   *
+   * [1]: https://github.com/centerofci/mathesar/issues/1534
+   */
   $: isSelectedInRange =
-    $selectedCells?.size > 1 && isCellSelected($selectedCells, row, column);
+    isCellSelected($selectedCells, row, column) && $selectedCells.size > 1;
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];

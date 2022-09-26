@@ -1,3 +1,5 @@
+from functools import reduce
+
 from bidict import bidict
 
 from django.core.cache import cache
@@ -10,28 +12,36 @@ from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
-from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names
+from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names, get_columns_name_from_tables
 from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
-from db.dependents.dependents_utils import get_dependents_graph, has_dependencies
+from db.dependents.dependents_utils import get_dependents_graph, has_dependents
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
 from db.records.operations.select import get_records_with_default_order as db_get_records_with_default_order
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
+from db.schemas.operations.select import get_schema_description
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
 from db.tables.operations.move_columns import move_columns_between_related_tables
-from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
+from db.tables.operations.select import (
+    get_oid_from_table,
+    reflect_table_from_oid,
+    get_table_description,
+    reflect_tables_from_oids
+)
 from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
+from db.tables.utils import get_primary_key_column
 
 from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
+from mathesar.utils.prefetch import PrefetchManager, Prefetcher
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
 from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
@@ -49,7 +59,7 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class DatabaseObjectManager(models.Manager):
+class DatabaseObjectManager(PrefetchManager):
     def get_queryset(self):
         make_sure_initial_reflection_happened()
         return super().get_queryset()
@@ -157,10 +167,29 @@ class Schema(DatabaseObject):
         except TypeError:
             return 'MISSING'
 
-    # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
-    def has_dependencies(self):
-        return True
+    def has_dependents(self):
+        return has_dependents(
+            self.oid,
+            self._sa_engine
+        )
+
+    # Returns only schema-scoped dependents on the top level
+    # However, returns dependents from other schemas for other
+    # objects down the graph.
+    # E.g: TableA from SchemaA depends on TableB from SchemaB
+    # SchemaA won't return as a dependent for SchemaB, however
+    # TableA will be a dependent of TableB which in turn depends on its schema
+    @property
+    def dependents(self):
+        return get_dependents_graph(
+            self.oid,
+            self._sa_engine
+        )
+
+    @property
+    def description(self):
+        return get_schema_description(self.oid, self._sa_engine)
 
     def update_sa_schema(self, update_params):
         result = model_utils.update_sa_schema(self, update_params)
@@ -177,10 +206,66 @@ class Schema(DatabaseObject):
         cache.delete(cache_key)
 
 
+class ColumnNamePrefetcher(Prefetcher):
+    def filter(self, column_attnums, columns):
+        pass
+
+    def mapper(self, column):
+        return column.attnum
+
+    def reverse_mapper(self, column):
+        return
+
+    def decorator(self, column, name):
+        setattr(column, 'name', name)
+
+
+class ColumnPrefetcher(Prefetcher):
+    def filter(self, table_ids, tables):
+        if len(tables) < 1:
+            return []
+        columns = reduce(lambda column_objs, table: column_objs + list(table.columns.all()), tables, [])
+        table_oids = [table.oid for table in tables]
+
+        def _get_column_names_from_tables(table_oids):
+            return get_columns_name_from_tables(
+                table_oids,
+                list(tables)[0]._sa_engine
+                if len(tables) > 0 else [],
+                fetch_as_map=True
+            )
+        return ColumnNamePrefetcher(
+            filter=lambda column_attnums, columns: _get_column_names_from_tables(table_oids),
+            mapper=lambda column: (column.attnum, column.table.oid)
+        ).fetch(columns, 'columns__name', Column, [])
+
+    def reverse_mapper(self, column):
+        return [column.table_id]
+
+    def decorator(self, table, columns):
+        pass
+
+
 class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
     MODEL_FIELDS = ['import_verified']
-
+    current_objects = models.Manager()
+    objects = DatabaseObjectManager(
+        # TODO Move the Prefetcher into a separate class and replace lambdas with proper function
+        _sa_table=Prefetcher(
+            filter=lambda oids, tables: reflect_tables_from_oids(oids, list(tables)[0]._sa_engine)
+            if len(tables) > 0 else [],
+            mapper=lambda table: table.oid,
+            # A filler statement, just used to satisfy the library. It does not affect the prefetcher in any way as we bypass reverse mapping if the prefetcher returns a dictionary
+            reverse_mapper=lambda table: table.oid,
+            decorator=lambda table, _sa_table: setattr(
+                table,
+                '_sa_table',
+                _sa_table
+            )
+        ),
+        columns=ColumnPrefetcher,
+    )
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
@@ -236,6 +321,11 @@ class Table(DatabaseObject, Relation):
         )
 
     @property
+    def primary_key_column_name(self):
+        pk_column = get_primary_key_column(self._sa_table)
+        return pk_column.name
+
+    @property
     def sa_columns(self):
         return self._enriched_column_sa_table.columns
 
@@ -255,13 +345,16 @@ class Table(DatabaseObject, Relation):
     def sa_constraints(self):
         return self._sa_table.constraints
 
-    # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
-    def has_dependencies(self):
-        return has_dependencies(
+    def has_dependents(self):
+        return has_dependents(
             self.oid,
             self.schema._sa_engine
         )
+
+    @property
+    def description(self):
+        return get_table_description(self.oid, self._sa_engine)
 
     @property
     def dependents(self):
@@ -591,6 +684,22 @@ class Column(ReflectionManagerMixin, BaseModel):
     @property
     def db_type(self):
         return self._sa_column.db_type
+
+    @property
+    def has_dependents(self):
+        return has_dependents(
+            self.table.oid,
+            self._sa_engine,
+            self.attnum
+        )
+
+    @property
+    def dependents(self):
+        return get_dependents_graph(
+            self.table.oid,
+            self._sa_engine,
+            self.attnum
+        )
 
 
 class Constraint(DatabaseObject):

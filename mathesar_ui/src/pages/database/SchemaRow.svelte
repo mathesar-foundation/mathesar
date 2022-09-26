@@ -37,24 +37,41 @@
   <div class="details">
     <div class="title">
       <a {href}><SchemaName {schema} /></a>
+
       {#if isLocked}
+        {#if isDefault}<span class="default">Default</span>{/if}
         <span class="lock"><Icon {...iconNotEditable} /></span>
       {/if}
+
+      {#if !isLocked}
+        <div class="controls">
+          <Button
+            class="edit"
+            size="small"
+            on:click={() => dispatch('edit', schema)}
+            aria-label="Edit Schema"
+          >
+            <Icon {...iconEdit} />
+          </Button>
+          <Button
+            class="delete"
+            size="small"
+            on:click={handleDelete}
+            aria-label="Delete Schema"
+          >
+            <Icon {...iconDelete} />
+          </Button>
+
+          <slot />
+        </div>
+      {/if}
     </div>
-    {#if isDefault}<div class="default">Default</div>{/if}
+    {#if schema.description}
+      <p class="description">{schema.description}</p>
+    {/if}
   </div>
   {#if !isLocked}
     <div class="controls">
-      <Button
-        class="edit"
-        on:click={() => dispatch('edit', schema)}
-        aria-label="Edit Schema"
-      >
-        <Icon {...iconEdit} />
-      </Button>
-      <Button class="delete" on:click={handleDelete} aria-label="Delete Schema">
-        <Icon {...iconDelete} />
-      </Button>
       <slot />
     </div>
   {/if}
@@ -68,33 +85,46 @@
   $font-size-info: 0.875rem;
 
   .schema-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+    border-radius: 0.25rem;
     color: $color-dark;
     padding: 1em;
+    border: 1px solid var(--color-gray-medium);
+    height: 100%;
   }
 
   .title {
     display: flex;
     flex-direction: row;
-    gap: 0.5em;
+    gap: 0.25em;
+    font-size: var(--text-size-large);
+    align-items: center;
+    margin-bottom: 0.25rem;
   }
   .title a {
-    color: $color-link;
+    color: var(--color-link);
+    font-weight: 500;
     text-decoration: none;
+    flex-grow: 1;
   }
   .title a:hover {
     text-decoration: underline;
   }
+  .description {
+    color: var(--color-text-muted);
+    margin: 0;
+  }
   .lock {
-    color: $color-muted;
+    color: var(--color-text-muted);
+    font-size: var(--text-size-small);
+    padding: 0.25rem;
   }
   .default {
-    margin-top: 0.5em;
-    color: $color-muted;
-    font-size: $font-size-info;
-    font-weight: 600;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    font-size: var(--text-size-small);
+    border: 1px solid var(--color-gray-medium);
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
   }
   .controls {
     margin-left: auto;

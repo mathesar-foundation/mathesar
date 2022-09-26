@@ -19,7 +19,7 @@ import { currentDBName } from './databases';
 const commonData = preloadCommonData();
 
 export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
-  writable(commonData?.current_schema || undefined);
+  writable(commonData?.current_schema ?? undefined);
 
 export interface DBSchemaStoreData {
   state: States;
@@ -190,9 +190,11 @@ export function getSchemaInfo(
 export async function createSchema(
   database: Database['name'],
   schemaName: SchemaEntry['name'],
+  schemaDescription: SchemaEntry['description'],
 ): Promise<SchemaResponse> {
   const response = await postAPI<SchemaResponse>('/api/db/v0/schemas/', {
     name: schemaName,
+    description: schemaDescription,
     database,
   });
   updateSchemaInDBSchemaStore(database, response);
@@ -204,7 +206,10 @@ export async function updateSchema(
   schema: SchemaEntry,
 ): Promise<SchemaResponse> {
   const url = `/api/db/v0/schemas/${schema.id}/`;
-  const response = await patchAPI<SchemaResponse>(url, { name: schema.name });
+  const response = await patchAPI<SchemaResponse>(url, {
+    name: schema.name,
+    description: schema.description,
+  });
   updateSchemaInDBSchemaStore(database, response);
   return response;
 }

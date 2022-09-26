@@ -84,15 +84,11 @@
     <SheetCell
       columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
       isStatic
-      let:htmlAttributes
+      isControlCell
+      let:htmlAttributes={cellHtmlAttr}
       let:style
     >
-      <div
-        class="row-control"
-        {...htmlAttributes}
-        {style}
-        on:click={handleRowClick}
-      >
+      <div {...cellHtmlAttr} {style} on:click={handleRowClick}>
         {#if row.record}
           <RowControl
             {primaryKeyColumnId}
@@ -145,15 +141,6 @@
 
     &:not(:hover) :global(.cell-bg-row-hover) {
       display: none;
-    }
-
-    .row-control {
-      font-size: var(--text-size-x-small);
-      padding: 0 1.5rem;
-      color: var(--color-text-muted);
-      display: inline-flex;
-      align-items: center;
-      height: 100%;
     }
 
     &.is-add-placeholder {

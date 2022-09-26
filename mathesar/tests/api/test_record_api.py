@@ -669,6 +669,36 @@ def test_record_list_groups(
     _test_group_equality(grouping_dict['groups'], expected_groups)
 
 
+def test_group_filter_combo_order(create_patents_table, client):
+    table_name = 'NASA Record List Group Filter'
+    table = create_patents_table(table_name)
+    name_id_map = table.get_column_name_id_bidirectional_map()
+
+    raw_grouping = {'columns': ['Center']}
+    raw_filter = {
+        "contains": [
+            {"column_id": [name_id_map["Case Number"]]}, {"literal": ["11"]}
+        ]
+    }
+    raw_order_by = [{'field': name_id_map['id'], 'direction': 'asc'}]
+    group_by_col_ids = [name_id_map[col_name] for col_name in raw_grouping['columns']]
+    ids_converted_group_by = {**raw_grouping, 'columns': group_by_col_ids}
+
+    grouping = json.dumps(ids_converted_group_by)
+    filter_ = json.dumps(raw_filter)
+    order_by = json.dumps(raw_order_by)
+
+    limit = 10
+    query_str = f'grouping={grouping}&order_by={order_by}&limit={limit}&filter={filter_}'
+
+    response = client.get(f'/api/db/v0/tables/{table.id}/records/?{query_str}')
+    response_data = response.json()
+
+    expect_group_counts = [2, 3, 2, 1, 7]
+    actual_group_counts = [g['count'] for g in response_data['grouping']['groups']]
+    assert actual_group_counts == expect_group_counts
+
+
 def test_record_list_pagination_limit(create_patents_table, client):
     table_name = 'NASA Record List Pagination Limit'
     table = create_patents_table(table_name)
@@ -783,22 +813,37 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     assert preview_data == expected_preview_data
 
 
-def test_record_detail(create_patents_table, client):
-    table_name = 'NASA Record Detail'
-    table = create_patents_table(table_name)
+def test_record_detail(publication_tables, client):
+    author_table, publisher_table, publication_table, checkouts_table = publication_tables
     record_id = 1
-    record = table.get_record(record_id)
+    record = checkouts_table.get_record(record_id)
 
-    response = client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
-    record_data = response.json()
+    response = client.get(f'/api/db/v0/tables/{checkouts_table.id}/records/{record_id}/')
+    record_data = response.json()['results'][0]
+    preview_data = response.json()['preview_data']
     record_as_dict = record._asdict()
 
     assert response.status_code == 200
-    columns_name_id_map = table.get_column_name_id_bidirectional_map()
-    for column_name in table.sa_column_names:
+    columns_name_id_map = checkouts_table.get_column_name_id_bidirectional_map()
+    for column_name in checkouts_table.sa_column_names:
         column_id_str = str(columns_name_id_map[column_name])
         assert column_id_str in record_data
         assert record_as_dict[column_name] == record_data[column_id_str]
+    checkouts_table_publication_fk_column = checkouts_table.get_column_by_name('publication')
+    preview_column = next(
+        preview
+        for preview in preview_data
+        if preview['column'] == checkouts_table_publication_fk_column.id
+    )
+    publication_template_columns = publication_table.get_columns_by_name(['title', 'id'])
+    publication_path = [[checkouts_table_publication_fk_column.id, publication_template_columns[-1].id]]
+    publication_title_alias = compute_path_str(
+        compute_path_prefix(publication_path),
+        publication_template_columns[0].id
+    )
+    preview_column_alias = f'{{{publication_title_alias}}}'
+
+    assert preview_column['template'] == preview_column_alias
 
 
 def test_record_create(create_patents_table, client):
@@ -817,7 +862,7 @@ def test_record_create(create_patents_table, client):
         columns_name_id_map['Patent Expiration Date']: ''
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
-    record_data = response.json()
+    record_data = response.json()['results'][0]
     assert response.status_code == 201
     assert len(table.get_records()) == original_num_records + 1
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
@@ -836,14 +881,14 @@ def test_record_partial_update(create_patents_table, client):
     record_id = records[0]['id']
 
     original_response = client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
-    original_data = original_response.json()
+    original_data = original_response.json()['results'][0]
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     data = {
         columns_name_id_map['Center']: 'NASA Example Space Center',
         columns_name_id_map['Status']: 'Example',
     }
     response = client.patch(f'/api/db/v0/tables/{table.id}/records/{record_id}/', data=data)
-    record_data = response.json()
+    record_data = response.json()['results'][0]
     assert response.status_code == 200
     for column_name in table.sa_column_names:
         column_id_str = str(columns_name_id_map[column_name])
@@ -997,3 +1042,31 @@ def test_number_input_api_validation(empty_nasa_table, client):
         }
         response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
         assert response.status_code == status_code
+
+
+def test_record_patch_invalid_date(create_patents_table, client):
+    table_name = 'NASA Invalid Date'
+    table = create_patents_table(table_name)
+    column_id_with_date_type = table.get_column_name_id_bidirectional_map()['Patent Expiration Date']
+    column_attnum = table.columns.get(id=column_id_with_date_type).attnum
+    table.alter_column(column_attnum, {'type': 'date'})
+    data = {f"{column_id_with_date_type}": "99/99/9999"}
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/17/', data=data)
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data[0]['code'] == ErrorCodes.InvalidDateError.value
+    assert response_data[0]['message'] == 'Invalid date'
+
+
+def test_record_patch_invalid_date_format(create_patents_table, client):
+    table_name = 'NASA Invalid Date Format'
+    table = create_patents_table(table_name)
+    column_id_with_date_type = table.get_column_name_id_bidirectional_map()['Patent Expiration Date']
+    column_attnum = table.columns.get(id=column_id_with_date_type).attnum
+    table.alter_column(column_attnum, {'type': 'date'})
+    data = {f"{column_id_with_date_type}": "5555/5555"}
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/17/', data=data)
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data[0]['code'] == ErrorCodes.InvalidDateFormatError.value
+    assert response_data[0]['message'] == 'Invalid date format'

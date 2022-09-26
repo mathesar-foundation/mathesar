@@ -94,6 +94,6 @@
     }}
     on:click={checkAndCloseOnInnerClick}
   >
-    <slot />
+    <slot {close} />
   </div>
 {/if}

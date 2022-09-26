@@ -4,9 +4,10 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
-from sqlalchemy.exc import DataError, IntegrityError
+from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError
 
 from db.types.exceptions import UnsupportedTypeException
+from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
 from mathesar.api.serializers.dependents import DependentSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
@@ -35,7 +36,11 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     filterset_class = TableFilter
 
     def get_queryset(self):
-        return Table.objects.all().order_by('-created_at')
+        # Better to use prefetch_related for schema and database,
+        # because select_related would lead to duplicate object instances and could result in multiple engines instances
+        # We prefetch `columns` using Django prefetch_related to get list of column objects and
+        # then prefetch column properties like `column name` using prefetch library.
+        return Table.objects.prefetch_related('schema', 'schema__database', 'columns').prefetch('_sa_table', 'columns').order_by('-created_at')
 
     def partial_update(self, request, pk=None):
         table = self.get_object()
@@ -168,9 +173,46 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             temp_table.insert_records_to_existing_table(
                 target_table, data_files, mappings
             )
-        except Exception as e:
-            # ToDo raise specific exceptions.
-            raise e
+        except NotNullError as e:
+            raise database_api_exceptions.NotNullViolationAPIException(
+                e,
+                message='Null values cannot be inserted into this column',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except ForeignKeyError as e:
+            raise database_api_exceptions.ForeignKeyViolationAPIException(
+                e,
+                message='Cannot add an invalid reference to a record',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except TypeMismatchError as e:
+            raise database_api_exceptions.TypeMismatchViolationAPIException(
+                e,
+                message='Type mismatch error',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except UniqueValueError as e:
+            raise database_api_exceptions.UniqueImportViolationAPIException(
+                e,
+                message='This column has uniqueness constraint set so non-unique values cannot be inserted',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except ExclusionError as e:
+            raise database_api_exceptions.ExclusionViolationAPIException(
+                e,
+                message='This record violates exclusion constraint',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except IntegrityError as e:
+            raise database_base_api_exceptions.IntegrityAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except ProgrammingError as e:
+            raise database_base_api_exceptions.ProgrammingAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         # Reload the table to avoid cached properties
         existing_table = get_table_or_404(target_table.id)
         serializer = TableSerializer(

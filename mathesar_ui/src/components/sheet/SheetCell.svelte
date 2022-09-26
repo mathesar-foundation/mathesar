@@ -11,10 +11,12 @@
   $: styleMap = $columnStyleMap.get(columnIdentifierKey);
 
   export let isStatic = false;
+  export let isControlCell = false;
 
   $: htmlAttributes = {
     'data-sheet-element': 'cell',
     'data-cell-static': isStatic ? true : undefined,
+    'data-cell-control': isControlCell ? true : undefined,
   };
 </script>
 

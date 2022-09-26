@@ -516,8 +516,14 @@ def test_batch_update_column_drop_columns(engine_with_schema):
 
     column_data = _get_pizza_column_data(table_oid, engine)
     metadata = get_empty_metadata()
-    column_data[0] = {'attnum': get_column_attnum_from_name(table_oid, column_data[0]['name'], engine, metadata=metadata)}
-    column_data[1] = {'attnum': get_column_attnum_from_name(table_oid, column_data[1]['name'], engine, metadata=metadata)}
+    column_data[0] = {
+        'attnum': get_column_attnum_from_name(table_oid, column_data[0]['name'], engine, metadata=metadata),
+        'delete': True
+    }
+    column_data[1] = {
+        'attnum': get_column_attnum_from_name(table_oid, column_data[1]['name'], engine, metadata=metadata),
+        'delete': True
+    }
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine, metadata=get_empty_metadata())
@@ -540,7 +546,10 @@ def test_batch_update_column_all_operations(engine_with_schema):
     column_data[0]['type'] = PostgresType.INTEGER.id
     column_data[1]['name'] = 'Pizza Style'
     column_data[2]['type'] = PostgresType.BOOLEAN.id
-    column_data[3] = {'attnum': get_column_attnum_from_name(table_oid, column_data[3]['name'], engine, metadata=get_empty_metadata())}
+    column_data[3] = {
+        'attnum': get_column_attnum_from_name(table_oid, column_data[3]['name'], engine, metadata=get_empty_metadata()),
+        'delete': True
+    }
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine, metadata=get_empty_metadata())

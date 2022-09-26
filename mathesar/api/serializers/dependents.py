@@ -1,12 +1,13 @@
 from mathesar.api.serializers.shared_serializers import MathesarPolymorphicErrorMixin, ReadOnlyPolymorphicSerializerMappingMixin
 from rest_framework import serializers
 
-from mathesar.models.base import Constraint, Table
+from mathesar.models.base import Constraint, Schema, Table
 
 
 class DependentMathesarObjectSerializer(serializers.Serializer):
     id = serializers.CharField()
     type = serializers.CharField()
+    attnum = serializers.CharField(required=False)
 
     def _get_object_type(self, instance):
         return instance.get('type', None)
@@ -16,10 +17,15 @@ class DependentMathesarObjectSerializer(serializers.Serializer):
         object_oid = instance.get('objid', None)
         object_type = self._get_object_type(instance)
         object_id = 0
-        if object_type == 'table':
+
+        if object_type == 'table' or object_type == 'table column':
             object_id = Table.objects.get(oid=object_oid).id
+            if object_type == 'table column':
+                instance['attnum'] = instance.get('objsubid', None)
         elif object_type == 'table constraint':
             object_id = Constraint.objects.get(oid=object_oid).id
+        elif object_type == 'schema':
+            object_id = Schema.objects.get(oid=object_oid).id
 
         instance['id'] = object_id
         return super().to_representation(instance)
@@ -28,6 +34,7 @@ class DependentMathesarObjectSerializer(serializers.Serializer):
 class DependentNonMathesarObjectSerializer(serializers.Serializer):
     objid = serializers.CharField()
     type = serializers.CharField()
+    name = serializers.CharField()
 
 
 class BaseDependentObjectSerializer(
@@ -37,7 +44,9 @@ class BaseDependentObjectSerializer(
 ):
     serializers_mapping = {
         'table': DependentMathesarObjectSerializer,
-        'table constraint': DependentMathesarObjectSerializer
+        'table constraint': DependentMathesarObjectSerializer,
+        'schema': DependentMathesarObjectSerializer,
+        'table column': DependentMathesarObjectSerializer
     }
 
     def create(self, validated_data):

@@ -2,7 +2,7 @@ import { writable, get as getStoreValue } from 'svelte/store';
 import {
   States,
   getAPI,
-  // deleteAPI,
+  deleteAPI,
   patchAPI,
   postAPI,
 } from '@mathesar/utils/api';
@@ -17,13 +17,13 @@ import type {
   GroupingMode,
   DataForRecordSummariesInFkColumn,
   GetRequestParams as ApiGetRequestParams,
-  RecordSummaryInputData,
 } from '@mathesar/api/tables/records';
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
+import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
 import type { Meta } from './meta';
-// import type { RowKey } from './utils';
+import type { RowKey } from './utils';
 import { validateRow, getCellKey } from './utils';
 import type { ColumnsDataStore } from './columns';
 import type { Sorting } from './sorting';
@@ -91,12 +91,6 @@ function buildGrouping(apiGrouping: ApiGrouping): Grouping {
     mode: apiGrouping.mode,
     groups: apiGrouping.groups.map(buildGroup),
   };
-}
-
-export interface DataForRecordSummaryInFkCell {
-  column: number;
-  template: string;
-  data: RecordSummaryInputData;
 }
 
 type DataForRecordSummariesInRow = Record<string, DataForRecordSummaryInFkCell>;
@@ -396,74 +390,71 @@ export class RecordsData {
     return undefined;
   }
 
-  async deleteSelected(): Promise<void> {
-    // TODO: Implement me!
-    console.log(this);
-    return Promise.resolve();
-    // const rowKeys = [...this.meta.selectedRows.getValues()];
+  async deleteSelected(selectedRowsKey: number[]): Promise<void> {
+    const rowKeys = selectedRowsKey.map((key) => String(key));
 
-    // if (rowKeys.length > 0) {
-    //   this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
+    if (rowKeys.length > 0) {
+      this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
 
-    //   const successRowKeys = new Set<RowKey>();
-    //   /** Values are error messages */
-    //   const failures = new Map<RowKey, string>();
-    //   // TODO: Convert this to single request
-    //   const promises = rowKeys.map((pk) =>
-    //     deleteAPI<RowKey>(`${this.url}${pk}/`)
-    //       .then(() => {
-    //         successRowKeys.add(pk);
-    //         return successRowKeys;
-    //       })
-    //       .catch((error: unknown) => {
-    //         failures.set(pk, getErrorMessage(error));
-    //         return failures;
-    //       }),
-    //   );
-    //   await Promise.all(promises);
-    //   await this.fetch(true);
+      const successRowKeys = new Set<RowKey>();
+      /** Values are error messages */
+      const failures = new Map<RowKey, string>();
+      // TODO: Convert this to single request
+      const promises = rowKeys.map((pk) =>
+        deleteAPI<RowKey>(`${this.url}${pk}/`)
+          .then(() => {
+            successRowKeys.add(pk);
+            return successRowKeys;
+          })
+          .catch((error: unknown) => {
+            failures.set(pk, getErrorMessage(error));
+            return failures;
+          }),
+      );
+      await Promise.all(promises);
+      await this.fetch(true);
 
-    //   const { offset } = getStoreValue(this.meta.pagination);
-    //   const savedRecords = getStoreValue(this.savedRecords);
-    //   const savedRecordsLength = savedRecords?.length || 0;
-    //   const pkColumnId = this.columnsDataStore.get()?.primaryKeyColumnId;
-    //   const savedRecordKeys = new Set(
-    //     savedRecords.map((row) => getRowKey(row, pkColumnId)),
-    //   );
+      const { offset } = getStoreValue(this.meta.pagination);
+      const savedRecords = getStoreValue(this.savedRecords);
+      const savedRecordsLength = savedRecords?.length || 0;
+      const pkColumnId = this.columnsDataStore.get()?.primaryKeyColumnId;
+      const savedRecordKeys = new Set(
+        savedRecords.map((row) => getRowKey(row, pkColumnId)),
+      );
 
-    //   this.newRecords.update((existing) => {
-    //     let retained = existing.filter(
-    //       (row) => !successRowKeys.has(getRowKey(row, pkColumnId)),
-    //     );
-    //     retained = retained.filter(
-    //       (row) => !savedRecordKeys.has(getRowKey(row, pkColumnId)),
-    //     );
+      this.newRecords.update((existing) => {
+        let retained = existing.filter(
+          (row) => !successRowKeys.has(getRowKey(row, pkColumnId)),
+        );
+        retained = retained.filter(
+          (row) => !savedRecordKeys.has(getRowKey(row, pkColumnId)),
+        );
 
-    //     if (retained.length === existing.length) {
-    //       return existing;
-    //     }
-    //     let index = -1;
-    //     retained = retained.map((row) => {
-    //       index += 1;
-    //       return {
-    //         ...row,
-    //         rowIndex: savedRecordsLength + index,
-    //         identifier: generateRowIdentifier('new', offset, index),
-    //       };
-    //     });
-    //     return retained;
-    //   });
-    //   this.meta.rowCreationStatus.delete([...savedRecordKeys]);
-    //   this.meta.rowCreationStatus.delete([...successRowKeys]);
-    //   this.meta.rowDeletionStatus.delete([...successRowKeys]);
-    //   this.meta.selectedRows.delete([...successRowKeys]);
-    //   this.meta.rowDeletionStatus.setEntries(
-    //     [...failures.entries()].map(([rowKey, errorMsg]) => [
-    //       rowKey,
-    //       { state: 'failure', errors: [errorMsg] },
-    //     ]),
-    //   );
-    // }
+        if (retained.length === existing.length) {
+          return existing;
+        }
+        let index = -1;
+        retained = retained.map((row) => {
+          index += 1;
+          return {
+            ...row,
+            rowIndex: savedRecordsLength + index,
+            identifier: generateRowIdentifier('new', offset, index),
+          };
+        });
+        return retained;
+      });
+      this.meta.rowCreationStatus.delete([...savedRecordKeys]);
+      this.meta.rowCreationStatus.delete([...successRowKeys]);
+      this.meta.rowDeletionStatus.delete([...successRowKeys]);
+      // this.meta.selectedRows.delete([...successRowKeys]);
+      this.meta.rowDeletionStatus.setEntries(
+        [...failures.entries()].map(([rowKey, errorMsg]) => [
+          rowKey,
+          { state: 'failure', errors: [errorMsg] },
+        ]),
+      );
+    }
   }
 
   // TODO: It would be better to throw errors instead of silently failing
@@ -493,7 +484,7 @@ export class RecordsData {
     const cellKey = getCellKey(rowKey, column.id);
     this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
-    const promise = patchAPI<ApiRecord>(
+    const promise = patchAPI<ApiRecordsResponse>(
       `${this.url}${String(primaryKeyValue)}/`,
       { [column.id]: record[column.id] },
     );
@@ -507,7 +498,7 @@ export class RecordsData {
       this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
       return {
         ...row,
-        record: result,
+        record: result.results[0],
       };
     } catch (err) {
       this.meta.cellModificationStatus.set(cellKey, {
