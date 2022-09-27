@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from mathesar.api.dj_filters import SchemaFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
-from mathesar.api.serializers.dependents import DependentSerializer
+from mathesar.api.serializers.dependents import DependentSerializer, DependentFilterSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.models.base import Schema
 from mathesar.utils.schemas import create_schema_and_object
@@ -56,6 +56,10 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
     @action(methods=['get'], detail=True)
     def dependents(self, request, pk=None):
+        serializer = DependentFilterSerializer(data=request.GET)
+        serializer.is_valid(raise_exception=True)
+        types_exclude = serializer.validated_data['exclude']
+
         schema = self.get_object()
-        serializer = DependentSerializer(schema.dependents, many=True, context={'request': request})
+        serializer = DependentSerializer(schema.get_dependents(types_exclude), many=True, context={'request': request})
         return Response(serializer.data)
