@@ -12,7 +12,14 @@ from mathesar.api.serializers.records import RecordListParameterSerializer
 from mathesar.models.query import UIQuery
 
 
-class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListModelMixin, DestroyModelMixin, viewsets.GenericViewSet):
+class QueryViewSet(
+        CreateModelMixin,
+        UpdateModelMixin,
+        RetrieveModelMixin,
+        ListModelMixin,
+        DestroyModelMixin,
+        viewsets.GenericViewSet
+):
     serializer_class = QuerySerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -28,56 +35,53 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
     def records(self, request, pk=None):
         paginator = TableLimitOffsetPagination()
         query = self.get_object()
-        if query.not_partial:
-            serializer = RecordListParameterSerializer(data=request.GET)
-            serializer.is_valid(raise_exception=True)
-            records = paginator.paginate_queryset(
-                queryset=self.get_queryset(),
-                request=request,
-                table=query,
-                filters=serializer.validated_data['filter'],
-                order_by=serializer.validated_data['order_by'],
-                grouping=serializer.validated_data['grouping'],
-                search=serializer.validated_data['search_fuzzy'],
-                duplicate_only=serializer.validated_data['duplicate_only'],
-            )
-            return paginator.get_paginated_response(records)
+        serializer = RecordListParameterSerializer(data=request.GET)
+        serializer.is_valid(raise_exception=True)
+        records = paginator.paginate_queryset(
+            queryset=self.get_queryset(),
+            request=request,
+            table=query,
+            filters=serializer.validated_data['filter'],
+            order_by=serializer.validated_data['order_by'],
+            grouping=serializer.validated_data['grouping'],
+            search=serializer.validated_data['search_fuzzy'],
+            duplicate_only=serializer.validated_data['duplicate_only'],
+        )
+        return paginator.get_paginated_response(records)
 
     @action(methods=['get'], detail=True)
     def columns(self, request, pk=None):
         query = self.get_object()
-        if query.not_partial:
-            output_col_desc = query.output_columns_described
-            return Response(output_col_desc)
+        output_col_desc = query.output_columns_described
+        return Response(output_col_desc)
 
     @action(methods=['get'], detail=True)
     def results(self, request, pk=None):
         paginator = TableLimitOffsetPagination()
         query = self.get_object()
-        if query.not_partial:
-            serializer = RecordListParameterSerializer(data=request.GET)
-            serializer.is_valid(raise_exception=True)
-            records = paginator.paginate_queryset(
-                queryset=self.get_queryset(),
-                request=request,
-                table=query,
-                filters=serializer.validated_data['filter'],
-                order_by=serializer.validated_data['order_by'],
-                grouping=serializer.validated_data['grouping'],
-                search=serializer.validated_data['search_fuzzy'],
-                duplicate_only=serializer.validated_data['duplicate_only'],
-            )
-            paginated_records = paginator.get_paginated_response(records)
-            columns = query.output_columns_simple
-            column_metadata = query.all_columns_description_map
-            return Response(
-                {
-                    "records": paginated_records.data,
-                    "output_columns": columns,
-                    "column_metadata": column_metadata,
-                    "parameters": {k: json.loads(request.GET[k]) for k in request.GET},
-                }
-            )
+        serializer = RecordListParameterSerializer(data=request.GET)
+        serializer.is_valid(raise_exception=True)
+        records = paginator.paginate_queryset(
+            queryset=self.get_queryset(),
+            request=request,
+            table=query,
+            filters=serializer.validated_data['filter'],
+            order_by=serializer.validated_data['order_by'],
+            grouping=serializer.validated_data['grouping'],
+            search=serializer.validated_data['search_fuzzy'],
+            duplicate_only=serializer.validated_data['duplicate_only'],
+        )
+        paginated_records = paginator.get_paginated_response(records)
+        columns = query.output_columns_simple
+        column_metadata = query.all_columns_description_map
+        return Response(
+            {
+                "records": paginated_records.data,
+                "output_columns": columns,
+                "column_metadata": column_metadata,
+                "parameters": {k: json.loads(request.GET[k]) for k in request.GET},
+            }
+        )
 
     @action(methods=['post'], detail=False)
     def run(self, request):
@@ -89,8 +93,6 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
         query = UIQuery(**input_serializer.validated_data)
         record_serializer = RecordListParameterSerializer(data=request.GET)
         record_serializer.is_valid(raise_exception=True)
-        # TODO This should be removed
-        records = query.get_records()
         records = paginator.paginate_queryset(
             queryset=self.get_queryset(),
             request=request,
