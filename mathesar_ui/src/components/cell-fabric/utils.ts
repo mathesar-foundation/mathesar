@@ -3,7 +3,7 @@ import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
-import type { AbstractTypeConfiguration } from '@mathesar/stores/abstract-types/types';
+import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import type { TableEntry } from '@mathesar/api/tables';
 import DataTypes from './data-types';
@@ -16,19 +16,17 @@ export type CellValueFormatter<T> = (
   value: T | null | undefined,
 ) => string | null | undefined;
 
-function getCellInfo(
-  dbType: CellColumnLike['type'],
-): AbstractTypeConfiguration['cell'] | undefined {
+function getCellInfo(dbType: CellColumnLike['type']): CellInfo | undefined {
   const abstractTypeOfColumn = getAbstractTypeForDbType(
     dbType,
     get(currentDbAbstractTypes)?.data,
   );
-  return abstractTypeOfColumn?.cell;
+  return abstractTypeOfColumn?.cellInfo;
 }
 
 function getCellConfiguration(
   dbType: CellColumnLike['type'],
-  cellInfo?: AbstractTypeConfiguration['cell'],
+  cellInfo?: CellInfo,
 ): Record<string, unknown> {
   const config = cellInfo?.config ?? {};
   const conditionalConfig = cellInfo?.conditionalConfig?.[dbType] ?? {};
@@ -38,11 +36,15 @@ function getCellConfiguration(
   };
 }
 
-export function getCellCap(
-  cellInfo: AbstractTypeConfiguration['cell'],
-  column: CellColumnLike,
-  fkTargetTableId?: TableEntry['id'],
-): ComponentAndProps {
+export function getCellCap({
+  cellInfo,
+  column,
+  fkTargetTableId,
+}: {
+  cellInfo: CellInfo;
+  column: CellColumnLike;
+  fkTargetTableId?: TableEntry['id'];
+}): ComponentAndProps {
   if (fkTargetTableId) {
     const props: LinkedRecordCellExternalProps = {
       tableId: fkTargetTableId,
@@ -59,7 +61,7 @@ export function getCellCap(
 export function getDbTypeBasedInputCap(
   column: CellColumnLike,
   fkTargetTableId?: TableEntry['id'],
-  cellInfoConfig?: AbstractTypeConfiguration['cell'],
+  optionalCellInfo?: CellInfo,
 ): ComponentAndProps {
   if (fkTargetTableId) {
     const props: LinkedRecordCellExternalProps = {
@@ -70,7 +72,7 @@ export function getDbTypeBasedInputCap(
       props,
     };
   }
-  const cellInfo = cellInfoConfig ?? getCellInfo(column.type);
+  const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }

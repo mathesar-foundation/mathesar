@@ -120,7 +120,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 
 const booleanType: AbstractTypeConfiguration = {
   icon: { ...iconUiTypeBoolean, label: 'Boolean' },
-  cell: {
+  cellInfo: {
     type: 'boolean',
   },
   getDisplayConfig: () => ({

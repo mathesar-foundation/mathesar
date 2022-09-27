@@ -71,15 +71,15 @@ export function processColumn(
     sharedConstraints,
     linkFk,
     abstractType,
-    cellComponentAndProps: getCellCap(
-      abstractType.cell,
+    cellComponentAndProps: getCellCap({
+      cellInfo: abstractType.cellInfo,
       column,
-      linkFk ? linkFk.referent_table : undefined,
-    ),
+      fkTargetTableId: linkFk ? linkFk.referent_table : undefined,
+    }),
     inputComponentAndProps: getDbTypeBasedInputCap(
       column,
       linkFk ? linkFk.referent_table : undefined,
-      abstractType.cell,
+      abstractType.cellInfo,
     ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
     preprocFunctions: getPreprocFunctionsForAbstractType(

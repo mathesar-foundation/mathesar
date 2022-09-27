@@ -102,7 +102,10 @@
         id: column.id,
         column,
         abstractType,
-        cellComponentAndProps: getCellCap(abstractType.cell, column),
+        cellComponentAndProps: getCellCap({
+          cellInfo: abstractType.cellInfo,
+          column,
+        }),
       };
     });
   }

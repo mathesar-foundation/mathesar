@@ -66,7 +66,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 
 const durationType: AbstractTypeConfiguration = {
   icon: { ...iconUiTypeDuration, label: 'Duration' },
-  cell: {
+  cellInfo: {
     type: 'duration',
   },
   getDisplayConfig: () => ({

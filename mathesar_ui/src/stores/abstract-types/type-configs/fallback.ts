@@ -3,7 +3,7 @@ import type { AbstractTypeConfiguration } from '../types';
 
 const fallbackType: AbstractTypeConfiguration = {
   icon: { ...iconUiTypeUnknown, label: 'Unknown column type' },
-  cell: {
+  cellInfo: {
     type: 'string',
   },
 };

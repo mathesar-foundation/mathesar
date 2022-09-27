@@ -53,7 +53,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 
 const dateType: AbstractTypeConfiguration = {
   icon: { ...iconUiTypeDate, label: 'Date' },
-  cell: {
+  cellInfo: {
     type: 'date',
   },
   getDisplayConfig: () => ({
