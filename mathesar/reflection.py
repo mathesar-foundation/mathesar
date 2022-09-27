@@ -108,11 +108,12 @@ def reflect_columns_from_tables(tables):
     attnums_mapped_by_table_oid = defaultdict(list)
     for attnum, table_oid in attnums.items():
         attnums_mapped_by_table_oid[table_oid].append(attnum)
-    queryset = models.Column.current_objects.none()
-    for table_oid, attnums in attnums_mapped_by_table_oid.items():
-        table = next(table for table in tables if table.oid == table_oid)
-        queryset = queryset.filter(Q(table=table) & ~Q(attnum__in=attnums))
-
+    if len(attnums_mapped_by_table_oid.keys()) > 0:
+        queryset = models.Column.current_objects
+        for table_oid, attnums in attnums_mapped_by_table_oid.items():
+            table = next(table for table in tables if table.oid == table_oid)
+            queryset = queryset.filter(Q(table=table) & ~Q(attnum__in=attnums))
+        queryset.delete()
     columns = models.Column.current_objects.filter(table__in=tables)
     columns_with_invalid_display_option = []
     for column in columns:
