@@ -23,4 +23,4 @@ def create_table_settings(**kwargs):
 @receiver(post_save, sender=Column)
 def compute_preview_column_settings(**kwargs):
     instance = kwargs['instance']
-    _compute_preview_template(instance)
+    _compute_preview_template(instance.table)

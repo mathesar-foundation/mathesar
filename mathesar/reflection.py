@@ -94,32 +94,21 @@ def reflect_columns_from_tables(tables):
         return
     engine = tables[0]._sa_engine
     table_oids = [table.oid for table in tables]
-    # We need it later for creating only newly created columns
-    existing_columns = list(models.Column.current_objects.filter(table__in=tables).values_list('id', flat=True))
-    # Using dictionary as it maintains insertions ordered
-    attnums = {
-        column['attnum']: column['table_oid']
-        for column in get_column_attnums_from_table(table_oids, engine)
-    }
-    columns = []
-    for attnum, table_oid in attnums.items():
-        table = next(table for table in tables if table.oid == table_oid)
-        column = models.Column(attnum=attnum, table=table, display_options=None)
-        columns.append(column)
-    models.Column.current_objects.bulk_create(columns, ignore_conflicts=True)
-    attnums_mapped_by_table_oid = defaultdict(list)
-    for attnum, table_oid in attnums.items():
-        attnums_mapped_by_table_oid[table_oid].append(attnum)
+    attnum_tuples = get_column_attnums_from_table(table_oids, engine)
 
-    stale_columns_queryset = models.Column.current_objects
-    for table_oid, attnums in attnums_mapped_by_table_oid.items():
-        table = next(table for table in tables if table.oid == table_oid)
-        stale_columns_queryset = stale_columns_queryset.filter(Q(table=table) & ~Q(attnum__in=attnums))
-    stale_columns_queryset.delete()
-    new_columns = models.Column.current_objects.filter(~Q(id__in=existing_columns) & Q(table__in=tables))
-    for new_column in new_columns:
-        models._compute_preview_template(new_column)
+    _create_reflected_columns(attnum_tuples, tables)
+
+    _delete_stale_columns(attnum_tuples, tables)
+    # Manually trigger preview templates computation signal
+    for table in tables:
+        models._compute_preview_template(table)
+
+    _invalidate_columns_with_incorrect_display_options(tables)
+
+
+def _invalidate_columns_with_incorrect_display_options(tables):
     columns_with_invalid_display_option = []
+    columns = models.Column.current_objects.filter(table__in=tables)
     for column in columns:
         if column.display_options:
             # If the type of column has changed, existing display options won't be valid anymore.
@@ -131,6 +120,26 @@ def reflect_columns_from_tables(tables):
                 columns_with_invalid_display_option.append(column.id)
     if len(columns_with_invalid_display_option) > 0:
         models.Column.current_objects.filter(id__in=columns_with_invalid_display_option).update(display_options=None)
+
+
+def _create_reflected_columns(attnum_tuples, tables):
+    columns = []
+    for attnum, table_oid in attnum_tuples:
+        table = next(table for table in tables if table.oid == table_oid)
+        column = models.Column(attnum=attnum, table=table, display_options=None)
+        columns.append(column)
+    models.Column.current_objects.bulk_create(columns, ignore_conflicts=True)
+
+
+def _delete_stale_columns(attnum_tuples, tables):
+    attnums_mapped_by_table_oid = defaultdict(list)
+    for attnum, table_oid in attnum_tuples:
+        attnums_mapped_by_table_oid[table_oid].append(attnum)
+    stale_columns_queryset = models.Column.current_objects
+    for table_oid, attnums in attnums_mapped_by_table_oid.items():
+        table = next(table for table in tables if table.oid == table_oid)
+        stale_columns_queryset = stale_columns_queryset.filter(Q(table=table) & ~Q(attnum__in=attnums))
+    stale_columns_queryset.delete()
 
 
 # TODO creating a one-off engine is expensive
