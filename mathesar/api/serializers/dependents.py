@@ -64,4 +64,4 @@ class DependentSerializer(serializers.Serializer):
 
 
 class DependentFilterSerializer(serializers.Serializer):
-    filter = serializers.JSONField(required=False, default={})
+    exclude = serializers.MultipleChoiceField(['table', 'table constraint'], required=False)
