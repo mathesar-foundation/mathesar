@@ -105,7 +105,7 @@ See [Integration tests](../mathesar/tests/integration/README.md).
 
 ### Unit tests
 
-We use [Jest](https://jestjs.io/) to run our unit tests, and we use [Testing Library](https://testing-library.com/docs/svelte-testing-library/intro/) to test our Svelte components.
+We use [Vitest](https://vitest.dev/) to run our unit tests, and we use [Testing Library](https://testing-library.com/docs/svelte-testing-library/intro/) to test our Svelte components.
 
 #### Running unit tests
 
@@ -118,7 +118,7 @@ We use [Jest](https://jestjs.io/) to run our unit tests, and we use [Testing Lib
 - Re-run a specific test by name:
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npx jest TextInput
+  docker exec -it -w /code/mathesar_ui mathesar_service npm run test TextInput
   ```
 
   This will run all test files with file names containing `TextInput`.
@@ -150,8 +150,8 @@ We use [Jest](https://jestjs.io/) to run our unit tests, and we use [Testing Lib
   });
   ```
 
-- Functions like `test` and `expect` are automatically imported into scope by the test runner. Your editor should hopefully be smart enough to see that Jest is configured for our project and provide you some assistance in using those functions. You can find more in the [Jest docs](https://jestjs.io/docs/getting-started), but there's not much else you'll need if you follow the pattern above.
-- After, `expect`, you'll use a [matcher](https://jestjs.io/docs/using-matchers). In the example above, we've used `toBe` which is one of the simplest matchers. However `toBe` only works for primitives like numbers, booleans, and strings. If you want to compare two objects or arrays, you'll need to use `toEqual` instead, which performs a deep comparison.
+- Functions like `test` and `expect` are globally imported into scope by the test runner. Your editor should hopefully be smart enough to see that Vitest is configured for our project and provide you some assistance in using those functions. You can find more in the [Vitest docs](https://vitest.dev/guide/), but there's not much else you'll need if you follow the pattern above.
+- After, `expect`, you'll use a [matcher](https://vitest.dev/api/#expect). In the example above, we've used `toBe` which is one of the simplest matchers. However `toBe` only works for primitives like numbers, booleans, and strings. If you want to compare two objects or arrays, you'll need to use `toEqual` instead, which performs a deep comparison.
 - The `expect` call is an "assertion". We can put many of them within the same test, but the test will stop running when it hits the first failure.
 - We can put many tests within the same file.
 - Commonly we'll have one test for each function, and many assertions within that test. You can also declare variables and do other logic within the test too if you're trying to build up complex scenarios with assertions throughout a workflow. As the scenarios get more complex, it can be helpful to create multiple tests for the same function.

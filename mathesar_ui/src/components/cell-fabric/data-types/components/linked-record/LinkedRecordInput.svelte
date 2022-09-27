@@ -88,7 +88,7 @@
   on:blur
 >
   {#if hasValue}
-    <span class="content">
+    <span class="content {classes}">
       <LinkedRecord recordId={value} {dataForRecordSummaryInFkCell} />
     </span>
     <ClearCue on:click={clear} />

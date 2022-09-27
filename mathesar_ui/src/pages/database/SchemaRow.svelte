@@ -66,7 +66,9 @@
         </div>
       {/if}
     </div>
-    <p class="description">Description</p>
+    {#if schema.description}
+      <p class="description">{schema.description}</p>
+    {/if}
   </div>
   {#if !isLocked}
     <div class="controls">

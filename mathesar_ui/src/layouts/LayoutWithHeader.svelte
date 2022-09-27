@@ -1,5 +1,5 @@
 <script lang="ts">
-  import AppHeader from '@mathesar/systems/app-header/AppHeader.svelte';
+  import AppHeader from '@mathesar/components/AppHeader.svelte';
 
   export let fitViewport = false;
 </script>

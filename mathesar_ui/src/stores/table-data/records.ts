@@ -17,11 +17,11 @@ import type {
   GroupingMode,
   DataForRecordSummariesInFkColumn,
   GetRequestParams as ApiGetRequestParams,
-  RecordSummaryInputData,
 } from '@mathesar/api/tables/records';
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
+import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
 import type { Meta } from './meta';
 import type { RowKey } from './utils';
 import { validateRow, getCellKey } from './utils';
@@ -91,12 +91,6 @@ function buildGrouping(apiGrouping: ApiGrouping): Grouping {
     mode: apiGrouping.mode,
     groups: apiGrouping.groups.map(buildGroup),
   };
-}
-
-export interface DataForRecordSummaryInFkCell {
-  column: number;
-  template: string;
-  data: RecordSummaryInputData;
 }
 
 type DataForRecordSummariesInRow = Record<string, DataForRecordSummaryInFkCell>;

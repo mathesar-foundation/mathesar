@@ -19,7 +19,7 @@
   export let hasNewColumnButton = false;
 
   $: ({ columnsDataStore, selection, processedColumns } = $tabularData);
-  $: ({ selectedCells } = selection);
+  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
   function addColumn(e: CustomEvent<Partial<Column>>) {
     void columnsDataStore.add(e.detail);
@@ -30,6 +30,7 @@
   <SheetCell
     columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
     isStatic
+    isControlCell
     let:htmlAttributes
     let:style
   >
@@ -41,7 +42,11 @@
       <div {...htmlAttributes} {style}>
         <HeaderCell
           {processedColumn}
-          isSelected={isColumnSelected($selectedCells, processedColumn.column)}
+          isSelected={isColumnSelected(
+            $selectedCells,
+            $columnsSelectedWhenTheTableIsEmpty,
+            processedColumn.column,
+          )}
           on:click={() =>
             selection.toggleColumnSelection(processedColumn.column)}
         />

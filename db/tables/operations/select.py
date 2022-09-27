@@ -1,11 +1,9 @@
-import warnings
-
 from sqlalchemy import (
     Table, MetaData, select, join, inspect, and_, cast, func, Integer, literal, or_
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
-from db.utils import execute_statement
+from db.utils import execute_statement, get_pg_catalog_table
 
 BASE = 'base'
 DEPTH = 'depth'
@@ -32,10 +30,8 @@ def reflect_tables_from_oids(oids, engine, metadata=None, connection_to_use=None
     if metadata is None:
         metadata = MetaData(bind=engine)
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_class = Table("pg_class", metadata, autoload_with=engine)
-        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+    pg_class = get_pg_catalog_table("pg_class", engine, metadata=metadata)
+    pg_namespace = get_pg_catalog_table("pg_namespace", engine, metadata=metadata)
     sel = (
         select(pg_namespace.c.nspname, pg_class.c.relname, pg_class.c.oid)
         .select_from(
@@ -55,11 +51,7 @@ def reflect_tables_from_oids(oids, engine, metadata=None, connection_to_use=None
 
 
 def get_table_oids_from_schema(schema_oid, engine):
-    metadata = MetaData()
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_class = Table("pg_class", metadata, autoload_with=engine)
+    pg_class = get_pg_catalog_table("pg_class", engine)
     sel = (
         select(pg_class.c.oid)
         .where(
@@ -97,9 +89,7 @@ def get_joinable_tables(
 
     jba = func.jsonb_build_array
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_constraint = Table("pg_constraint", MetaData(), autoload_with=engine)
+    pg_constraint = get_pg_catalog_table("pg_constraint", engine)
 
     symmetric_fkeys = select(
         cast(pg_constraint.c.oid, Integer).label(FK_OID),

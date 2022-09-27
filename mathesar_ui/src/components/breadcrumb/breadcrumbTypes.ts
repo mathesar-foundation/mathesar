@@ -20,10 +20,18 @@ export interface BreadcrumbItemTable {
   table: TableEntry;
 }
 
+export interface BreadcrumbItemSimple {
+  type: 'simple';
+  href: string;
+  label: string;
+  icon?: IconProps;
+}
+
 export type BreadcrumbItem =
   | BreadcrumbItemDatabase
   | BreadcrumbItemSchema
-  | BreadcrumbItemTable;
+  | BreadcrumbItemTable
+  | BreadcrumbItemSimple;
 
 export interface BaseBreadcrumbSelectorEntry {
   href: string;

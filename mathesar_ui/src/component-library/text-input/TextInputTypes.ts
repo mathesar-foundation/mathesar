@@ -6,3 +6,5 @@ export interface TextInputProps extends SimplifiedInputProps, BaseInputProps {
   element?: HTMLInputElement;
   hasError?: boolean;
 }
+
+export type SimplifiedTextInputProps = Omit<TextInputProps, 'value'>;
