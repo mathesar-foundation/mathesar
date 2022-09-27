@@ -1,5 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+
+  import { Icon, iconExpandDown } from '@mathesar-component-library';
   import Default from '@mathesar/components/Default.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
@@ -7,7 +9,6 @@
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import CellWrapper from '../CellWrapper.svelte';
   import type { LinkedRecordCellProps } from '../typeDefinitions';
-  import LaunchCue from './LaunchCue.svelte';
 
   type $$Props = LinkedRecordCellProps;
 
@@ -24,7 +25,8 @@
 
   $: hasValue = value !== undefined && value !== null;
 
-  async function launchRecordSelector() {
+  async function launchRecordSelector(event?: MouseEvent) {
+    event?.stopPropagation();
     const newValue = await recordSelector.acquireUserInput({ tableId });
     if (newValue === undefined) {
       return;
@@ -77,16 +79,53 @@
   on:keydown={handleWrapperKeyDown}
   on:mousedown={handleMouseDown}
   on:dblclick={launchRecordSelector}
-  hasPadding={!isActive || hasValue}
+  hasPadding={false}
 >
-  <slot name="icon" slot="icon" />
-  {#if hasValue}
-    <LinkedRecord recordId={value} {dataForRecordSummaryInFkCell} />
-  {:else if isActive}
-    <LaunchCue />
-  {:else if value === undefined}
-    <Default />
-  {:else}
-    <Null />
-  {/if}
+  <div class="linked-record-cell">
+    <div class="value">
+      {#if hasValue}
+        <LinkedRecord recordId={value} {dataForRecordSummaryInFkCell} />
+      {:else if value === undefined}
+        <Default />
+      {:else}
+        <Null />
+      {/if}
+    </div>
+    <button
+      class="dropdown-button passthrough"
+      on:click={launchRecordSelector}
+      {disabled}
+      label="Pick a record"
+      title="Pick a record"
+    >
+      <Icon {...iconExpandDown} />
+    </button>
+  </div>
 </CellWrapper>
+
+<style>
+  .linked-record-cell {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template: auto / 1fr auto;
+  }
+  .value {
+    padding-left: var(--cell-padding);
+    align-self: center;
+    overflow: hidden;
+  }
+  .dropdown-button {
+    cursor: pointer;
+    padding: 0 var(--cell-padding);
+    display: flex;
+    align-items: center;
+    color: var(--color-gray-dark);
+  }
+  .dropdown-button:hover {
+    color: var(--color-text);
+  }
+</style>

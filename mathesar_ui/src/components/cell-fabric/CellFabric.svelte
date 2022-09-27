@@ -5,7 +5,6 @@
 -->
 <script lang="ts">
   import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
-  import RecordPageLink from '../RecordPageLink.svelte';
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';
 
@@ -40,13 +39,7 @@
     on:activate
     on:update
     on:mouseenter
-  >
-    <svelte:fragment slot="icon">
-      {#if recordPageLinkHref}
-        <RecordPageLink href={recordPageLinkHref} />
-      {/if}
-    </svelte:fragment>
-  </svelte:component>
+  />
 
   {#if showAsSkeleton}
     <div class="loader" />

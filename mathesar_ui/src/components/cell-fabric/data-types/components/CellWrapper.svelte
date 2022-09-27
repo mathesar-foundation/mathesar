@@ -39,7 +39,6 @@
   class:is-edit-mode={mode === 'edit'}
   class:truncate={multiLineTruncate}
   class:h-align-right={horizontalAlignment === 'right'}
-  class:h-align-center={horizontalAlignment === 'center'}
   class:has-padding={hasPadding}
   bind:this={element}
   on:click
@@ -54,47 +53,23 @@
     color="rgba(14, 101, 235, 0.1)"
     when={isSelectedInRange && mode !== 'edit'}
   />
-  <div class="cell-wrapper-content"><slot /></div>
-  <div class="icon"><slot name="icon" /></div>
+  <slot />
 </div>
 
 <style lang="scss">
   .cell-wrapper {
+    width: 100%;
     overflow: hidden;
     position: relative;
-    display: flex;
-    flex: 1 1 auto;
     min-height: var(--cell-height);
-    align-items: center;
-    width: 100%;
-
-    .cell-wrapper-content {
-      flex: 1 1 100%;
-      overflow: hidden;
-    }
-    .icon {
-      flex: 0 0 auto;
-    }
-    .icon:not(:empty) {
-      margin-left: 0.5rem;
-    }
+    --cell-padding: 0.5rem;
 
     &.has-padding {
-      padding: 6px 8px;
+      padding: var(--cell-padding);
     }
 
     &.h-align-right {
-      flex-direction: row-reverse;
-      .cell-wrapper-content {
-        text-align: right;
-      }
-      .icon:not(:empty) {
-        margin-left: 0;
-        margin-right: 0.5rem;
-      }
-    }
-    &.h-align-center {
-      justify-content: center;
+      text-align: right;
     }
 
     &.is-active {
@@ -121,11 +96,6 @@
         resize: vertical;
         min-height: 5em;
       }
-    }
-  }
-  @media (hover: hover) {
-    .cell-wrapper:not(:hover) .icon {
-      display: none;
     }
   }
 </style>
