@@ -80,7 +80,10 @@ export default class QueryRunner<
       });
       const response = await this.runPromise;
       this.processedColumns.set(processColumns(response, this.abstractTypeMap));
-      this.records.set(response.records);
+      this.records.set({
+        count: response.records.count,
+        results: response.records.results ?? [],
+      });
       await this.dispatch('run', response);
       this.runState.set({ state: 'success' });
       return response;
@@ -147,6 +150,7 @@ export default class QueryRunner<
   }
 
   destroy(): void {
+    super.destroy();
     this.runPromise?.cancel();
   }
 }

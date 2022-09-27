@@ -1,7 +1,6 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import {
-  EventHandler,
   ImmutableMap,
   isDefinedNonNullable,
   CancellablePromise,
@@ -82,9 +81,6 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     tablesThatReferenceBaseTable: new Map(),
     columnInformationMap: new Map(),
   });
-
-  private eventHandler: EventHandler<{ save: QueryInstance }> =
-    new EventHandler();
 
   // Processed columns
 
@@ -445,5 +441,8 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
 
   destroy(): void {
     super.destroy();
+    this.baseTableFetchPromise?.cancel();
+    this.joinableColumnsfetchPromise?.cancel();
+    this.querySavePromise?.cancel();
   }
 }

@@ -70,7 +70,16 @@ export type QueriesList = PaginatedResponse<QueryInstance>;
  * endpoint: /api/db/v0/queries/<query_id>/records/
  */
 
-export type QueryResultRecords = PaginatedResponse<Record<string, unknown>>;
+/**
+ *  TODO: The API always returns empty array for table results,
+ * however for queries it returns null. Remove the union once
+ * the API is made consistent.
+ *
+ * Tracked in https://github.com/centerofci/mathesar/issues/1716
+ */
+export type QueryResultRecords =
+  | PaginatedResponse<Record<string, unknown>>
+  | { count: 0; results: null };
 
 /**
  * endpoint: /api/db/v0/queries/<query_id>/columns/

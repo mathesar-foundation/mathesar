@@ -35,10 +35,10 @@
   $: sheetColumns = columnList.length
     ? [{ id: ID_ROW_CONTROL_COLUMN }, ...columnList]
     : [];
+  $: results = $records.results ?? [];
   // Show a dummy ghost row when there are no records
-  $: showDummyGhostRow =
-    recordRunState === 'success' && !$records.results.length;
-  $: sheetItemCount = showDummyGhostRow ? 1 : $records.results.length;
+  $: showDummyGhostRow = recordRunState === 'success' && !results.length;
+  $: sheetItemCount = showDummyGhostRow ? 1 : results.length;
 
   const columnWidths = new ImmutableMap([[ID_ROW_CONTROL_COLUMN, 70]]);
 
@@ -142,7 +142,7 @@
         let:items
       >
         {#each items as item (item.key)}
-          {#if $records.results[item.index] || showDummyGhostRow}
+          {#if results[item.index] || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div {...htmlAttributes} style={styleString}>
                 <SheetCell
@@ -171,12 +171,10 @@
                         ? 'selected'
                         : ''}
                     >
-                      {#if $records.results[item.index]}
+                      {#if results[item.index]}
                         <CellFabric
                           columnFabric={processedQueryColumn}
-                          value={$records.results[item.index][
-                            processedQueryColumn.id
-                          ]}
+                          value={results[item.index][processedQueryColumn.id]}
                           showAsSkeleton={recordRunState === 'processing'}
                           disabled={true}
                         />
