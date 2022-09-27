@@ -169,7 +169,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
     def dependents(self, request, pk=None, table_pk=None):
         serializer = DependentFilterSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
-        types_exclude = serializer.validated_data['filter'].get('types_exclude', [])
+        types_exclude = serializer.validated_data['exclude']
 
         column = self.get_object()
         serializer = DependentSerializer(column.get_dependents(types_exclude), many=True, context={'request': request})

@@ -58,7 +58,7 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
     def dependents(self, request, pk=None):
         serializer = DependentFilterSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
-        types_exclude = serializer.validated_data['filter'].get('types_exclude', [])
+        types_exclude = serializer.validated_data['exclude']
 
         schema = self.get_object()
         serializer = DependentSerializer(schema.get_dependents(types_exclude), many=True, context={'request': request})
