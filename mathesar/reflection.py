@@ -94,6 +94,8 @@ def reflect_columns_from_tables(tables):
         return
     engine = tables[0]._sa_engine
     table_oids = [table.oid for table in tables]
+    # We need it later for creating only newly created columns
+    existing_columns = list(models.Column.current_objects.filter(table__in=tables).values_list('id', flat=True))
     # Using dictionary as it maintains insertions ordered
     attnums = {
         column['attnum']: column['table_oid']
@@ -108,13 +110,15 @@ def reflect_columns_from_tables(tables):
     attnums_mapped_by_table_oid = defaultdict(list)
     for attnum, table_oid in attnums.items():
         attnums_mapped_by_table_oid[table_oid].append(attnum)
-    if len(attnums_mapped_by_table_oid.keys()) > 0:
-        queryset = models.Column.current_objects
-        for table_oid, attnums in attnums_mapped_by_table_oid.items():
-            table = next(table for table in tables if table.oid == table_oid)
-            queryset = queryset.filter(Q(table=table) & ~Q(attnum__in=attnums))
-        queryset.delete()
-    columns = models.Column.current_objects.filter(table__in=tables)
+
+    stale_columns_queryset = models.Column.current_objects
+    for table_oid, attnums in attnums_mapped_by_table_oid.items():
+        table = next(table for table in tables if table.oid == table_oid)
+        stale_columns_queryset = stale_columns_queryset.filter(Q(table=table) & ~Q(attnum__in=attnums))
+    stale_columns_queryset.delete()
+    new_columns = models.Column.current_objects.filter(~Q(id__in=existing_columns) & Q(table__in=tables))
+    for new_column in new_columns:
+        models._compute_preview_template(new_column)
     columns_with_invalid_display_option = []
     for column in columns:
         if column.display_options:

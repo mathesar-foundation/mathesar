@@ -711,3 +711,21 @@ def _create_table_settings(tables):
     for table in tables:
         preview_column_settings = PreviewColumnSettings.objects.create(customized=False)
         TableSettings.current_objects.create(table=table, preview_settings=preview_column_settings)
+
+
+def _compute_preview_template(column_obj):
+    columns = Column.current_objects.filter(table_id=column_obj.table_id).order_by('attnum')
+    preview_column = None
+    primary_key_column = None
+    for column in columns:
+        if column.primary_key:
+            primary_key_column = column
+        else:
+            preview_column = column
+            break
+    if preview_column is None:
+        preview_column = primary_key_column
+    preview_template = f"{{{preview_column.id}}}"
+    preview_settings = column_obj.table.settings.preview_settings
+    preview_settings.template = preview_template
+    preview_settings.save()
