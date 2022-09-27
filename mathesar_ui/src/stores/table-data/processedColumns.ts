@@ -48,11 +48,15 @@ export interface ProcessedColumn extends CellColumnFabric {
 /** Maps column ids to processed columns */
 export type ProcessedColumnsStore = Readable<Map<number, ProcessedColumn>>;
 
-export function processColumn(
-  column: Column,
-  constraints: Constraint[],
-  abstractTypeMap: AbstractTypesMap,
-): ProcessedColumn {
+export function processColumn({
+  column,
+  constraints,
+  abstractTypeMap,
+}: {
+  column: Column;
+  constraints: Constraint[];
+  abstractTypeMap: AbstractTypesMap;
+}): ProcessedColumn {
   const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
   const relevantConstraints = constraints.filter((c) =>
     c.columns.includes(column.id),

@@ -37,11 +37,11 @@ export class TableStructure {
         new Map(
           columnsData.columns.map((column) => [
             column.id,
-            processColumn(
+            processColumn({
               column,
-              constraintsData.constraints,
-              props.abstractTypesMap,
-            ),
+              constraints: constraintsData.constraints,
+              abstractTypeMap: props.abstractTypesMap,
+            }),
           ]),
         ),
     );
