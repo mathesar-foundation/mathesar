@@ -24,6 +24,7 @@ from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
 from db.types.custom.json_array import MathesarJsonArray
 from db.types.custom.datetime import DATE, TIME_WITH_TIME_ZONE, TIMESTAMP_WITH_TIME_ZONE
+from db.types.custom.email import EMAIL_DOMAIN_NAME
 from db.types.custom.uri import URIFunction
 
 
@@ -523,3 +524,17 @@ class CurrentDateTime(DBFunction):
         return sa_call_sql_function(
             'current_timestamp', return_type=TIMESTAMP_WITH_TIME_ZONE
         )
+
+
+class ExtractEmailDomain(DBFunction):
+    id = 'extract_email_domain'
+    name = 'extract email domain'
+    hints = tuple([
+        hints.parameter_count(1),
+        hints.parameter(1, hints.email),
+    ])
+    depends_on = tuple([EMAIL_DOMAIN_NAME])
+
+    @staticmethod
+    def to_sa_expression(email):
+        return sa_call_sql_function(EMAIL_DOMAIN_NAME, email, return_type=TEXT)

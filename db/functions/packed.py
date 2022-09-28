@@ -8,6 +8,7 @@ from abc import abstractmethod
 
 from db.functions import hints, base
 from db.types.custom.uri import URIFunction
+from db.types.custom.email import EMAIL_DOMAIN_NAME
 
 
 class DBFunctionPacked(base.DBFunction):
@@ -225,5 +226,47 @@ class URISchemeEquals(DBFunctionPacked):
         param1 = self.parameters[1]
         return base.Equal([
             base.ExtractURIScheme([param0]),
+            param1,
+        ])
+
+
+class EmailDomainContains(DBFunctionPacked):
+    id = 'email_domain_contains'
+    name = 'email domain contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.email),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+    depends_on = tuple([EMAIL_DOMAIN_NAME])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return base.Contains([
+            base.ExtractEmailDomain([param0]),
+            param1,
+        ])
+
+
+class EmailDomainEquals(DBFunctionPacked):
+    id = 'email_domain_equals'
+    name = 'email domain is'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.email),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+    depends_on = tuple([EMAIL_DOMAIN_NAME])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return base.Equal([
+            base.ExtractEmailDomain([param0]),
             param1,
         ])
