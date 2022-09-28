@@ -23,6 +23,7 @@ from sqlalchemy.sql.functions import GenericFunction, concat
 from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
 from db.types.custom.json_array import MathesarJsonArray
+from db.types.custom.uri import URIFunction
 
 
 def sa_call_sql_function(function_name, *parameters, return_type=None):
@@ -429,3 +430,31 @@ class JsonArrayContains(DBFunction):
             cast(value2, MathesarJsonArray),
             return_type=BOOLEAN
         )
+
+
+class ExtractURIAuthority(DBFunction):
+    id = 'extract_uri_authority'
+    name = 'extract URI authority'
+    hints = tuple([
+        hints.parameter_count(1),
+        hints.parameter(1, hints.uri),
+    ])
+    depends_on = tuple([URIFunction.AUTHORITY])
+
+    @staticmethod
+    def to_sa_expression(uri):
+        return sa_call_sql_function(URIFunction.AUTHORITY.value, uri, return_type=TEXT)
+
+
+class ExtractURIScheme(DBFunction):
+    id = 'extract_uri_scheme'
+    name = 'extract URI scheme'
+    hints = tuple([
+        hints.parameter_count(1),
+        hints.parameter(1, hints.uri),
+    ])
+    depends_on = tuple([URIFunction.SCHEME])
+
+    @staticmethod
+    def to_sa_expression(uri):
+        return sa_call_sql_function(URIFunction.SCHEME.value, uri, return_type=TEXT)

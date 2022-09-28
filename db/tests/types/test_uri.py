@@ -5,7 +5,8 @@ from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.exc import IntegrityError
 from db.types.custom import uri
 from db.utils import execute_pg_query
-from db.functions.base import ColumnName, Literal, sa_call_sql_function
+from db.functions.base import ColumnName, Contains, Literal, sa_call_sql_function
+from db.functions.packed import URIAuthorityContains, URISchemeEquals
 from db.functions.operations.apply import apply_db_function_as_filter
 
 
@@ -227,10 +228,10 @@ def test_uri_type_domain_rejects_malformed_uris(engine_with_schema, test_str):
 
 
 @pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
-    (uri.URIAuthorityContains, "soundcloud", 4),
-    (uri.URIAuthorityContains, "http", 0),
-    (uri.URISchemeEquals, "ftp", 2),
-    (uri.Contains, ".com/31421017", 1),
+    (URIAuthorityContains, "soundcloud", 4),
+    (URIAuthorityContains, "http", 0),
+    (URISchemeEquals, "ftp", 2),
+    (Contains, ".com/31421017", 1),
 ])
 def test_uri_db_functions(uris_table_obj, main_db_function, literal_param, expected_count):
     table, engine = uris_table_obj

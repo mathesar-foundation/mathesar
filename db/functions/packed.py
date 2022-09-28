@@ -7,6 +7,7 @@ Mathesar filters not supporting composition.
 from abc import abstractmethod
 
 from db.functions import hints, base
+from db.types.custom.uri import URIFunction
 
 
 class DBFunctionPacked(base.DBFunction):
@@ -183,4 +184,46 @@ class JsonNotEmpty(DBFunctionPacked):
         return base.Greater([
             base.JsonArrayLength([param0]),
             0,
+        ])
+
+
+class URIAuthorityContains(DBFunctionPacked):
+    id = 'uri_authority_contains'
+    name = 'URI authority contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.uri),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+    depends_on = tuple([URIFunction.AUTHORITY])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return base.Contains([
+            base.ExtractURIAuthority([param0]),
+            param1,
+        ])
+
+
+class URISchemeEquals(DBFunctionPacked):
+    id = 'uri_scheme_equals'
+    name = 'URI scheme is'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.uri),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+    depends_on = tuple([URIFunction.SCHEME])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return base.Equal([
+            base.ExtractURIScheme([param0]),
+            param1,
         ])
