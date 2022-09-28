@@ -2,7 +2,7 @@
   import { tick } from 'svelte';
   import {
     ContextMenu,
-    MenuItem,
+    ButtonMenuItem,
     WritableMap,
   } from '@mathesar-component-library';
   import {
@@ -179,13 +179,13 @@
       }}
     />
     <ContextMenu>
-      <MenuItem
+      <ButtonMenuItem
         icon={iconSetToNull}
         disabled={!canSetNull}
         on:click={() => setValue(null)}
       >
         Set to <Null />
-      </MenuItem>
+      </ButtonMenuItem>
     </ContextMenu>
     {#if errors.length}
       <CellErrors {errors} forceShowErrors={isActive} />
