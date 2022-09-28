@@ -4,6 +4,7 @@
   import { Icon } from '@mathesar/component-library';
   import { iconLinkToRecordPage } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import Default from '@mathesar/components/Default.svelte';
   import CellWrapper from '../CellWrapper.svelte';
   import type { PrimaryKeyCellProps } from '../typeDefinitions';
 
@@ -39,7 +40,13 @@
   hasPadding={false}
 >
   <div class="primary-key-cell">
-    <span class="value" on:mousedown={handleValueMouseDown}>{value}</span>
+    <span class="value" on:mousedown={handleValueMouseDown}>
+      {#if value === undefined}
+        <Default />
+      {:else}
+        {value}
+      {/if}
+    </span>
     <a
       {href}
       class="link"
