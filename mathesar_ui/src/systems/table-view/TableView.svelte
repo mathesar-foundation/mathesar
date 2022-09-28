@@ -7,6 +7,7 @@
     ID_ROW_CONTROL_COLUMN,
   } from '@mathesar/stores/table-data';
   import Body from './Body.svelte';
+  import { rowHeaderWidthPx } from './geometry';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
   import TableInspector from './table-inspector/TableInspector.svelte';
@@ -38,7 +39,7 @@
   })();
 
   const columnWidths = new ImmutableMap([
-    [ID_ROW_CONTROL_COLUMN, 70],
+    [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
     [ID_ADD_NEW_COLUMN, 100],
   ]);
   $: showTableInspector =

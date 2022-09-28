@@ -11,6 +11,7 @@
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { rowHeaderWidthPx } from '@mathesar/systems/table-view/geometry';
   import type QueryRunner from '../QueryRunner';
 
   export let queryRunner: QueryRunner;
@@ -40,7 +41,9 @@
     recordRunState === 'success' && !$records.results.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : $records.results.length;
 
-  const columnWidths = new ImmutableMap([[ID_ROW_CONTROL_COLUMN, 70]]);
+  const columnWidths = new ImmutableMap([
+    [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
+  ]);
 
   function checkAndUnselectColumn(e: MouseEvent) {
     const target = e.target as HTMLElement;
