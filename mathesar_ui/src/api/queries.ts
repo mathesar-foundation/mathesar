@@ -20,7 +20,7 @@ export interface QueryInstanceInitialColumn {
 // Requires UX reconsideration
 type FilterConditionParams = [
   { column_name: [string] },
-  ...{ literal: [unknown] }[]
+  ...{ literal: [unknown] }[],
 ];
 type FilterCondition = Record<string, FilterConditionParams>;
 

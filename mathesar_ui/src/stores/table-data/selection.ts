@@ -39,8 +39,10 @@ export const isRowSelected = (
 
 export const isColumnSelected = (
   selectedCells: ImmutableSet<string>,
+  columnsSelectedWhenTheTableIsEmpty: ImmutableSet<number>,
   column: Column,
 ): boolean =>
+  columnsSelectedWhenTheTableIsEmpty.has(column.id) ||
   selectedCells.valuesArray().some((cell) => cell.endsWith(`-${column.id}`));
 
 export const isCellSelected = (
@@ -57,6 +59,17 @@ export function getSelectedRowId(selectedCell: string): number {
   return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[0]);
 }
 
+export function getSelectedUniqueColumnsId(
+  selectedCells: ImmutableSet<string>,
+  columnsSelectedWhenTheTableIsEmpty: ImmutableSet<number>,
+): number[] {
+  const setOfUniqueColumnIds = new Set([
+    ...[...selectedCells].map(getSelectedColumnId),
+    ...columnsSelectedWhenTheTableIsEmpty,
+  ]);
+  return Array.from(setOfUniqueColumnIds);
+}
+
 export class Selection {
   private columnsDataStore: ColumnsDataStore;
 
@@ -68,6 +81,17 @@ export class Selection {
 
   selectedCells: WritableSet<string>;
 
+  /**
+   * When the table has a non-zero number of rows, we store the user's selection
+   * in the `selectedCells` store. But when the table has no rows (and thus no
+   * cells) we still need a way to select columns to configure the data types,
+   * so we use this store as a workaround. More elegant solutions are being
+   * discussed in [1732][1].
+   *
+   * [1]: https://github.com/centerofci/mathesar/issues/1732
+   */
+  columnsSelectedWhenTheTableIsEmpty: WritableSet<number>;
+
   freezeSelection: boolean;
 
   display: Display;
@@ -78,6 +102,7 @@ export class Selection {
     display: Display,
   ) {
     this.selectedCells = new WritableSet<string>();
+    this.columnsSelectedWhenTheTableIsEmpty = new WritableSet<number>();
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
     this.freezeSelection = false;
@@ -146,6 +171,9 @@ export class Selection {
 
     this.selectionBounds.endRowIndex = rowIndex;
     this.selectionBounds.endColumnIndex = columnIndex;
+
+    const cells = this.getIncludedCells(this.selectionBounds);
+    this.selectMultipleCells(cells);
   }
 
   get allRows(): Row[] {
@@ -196,18 +224,28 @@ export class Selection {
 
   resetSelection(): void {
     this.selectionBounds = undefined;
+    this.columnsSelectedWhenTheTableIsEmpty.clear();
     this.selectedCells.clear();
   }
 
   isCompleteColumnSelected(column: Column): boolean {
-    return this.allRows.every((row) =>
-      isCellSelected(get(this.selectedCells), row, column),
-    );
+    if (this.allRows.length) {
+      return (
+        this.columnsSelectedWhenTheTableIsEmpty.getHas(column.id) ||
+        this.allRows.every((row) =>
+          isCellSelected(get(this.selectedCells), row, column),
+        )
+      );
+    }
+    return this.columnsSelectedWhenTheTableIsEmpty.getHas(column.id);
   }
 
   isCompleteRowSelected(row: Row): boolean {
-    return this.allColumns.every((column) =>
-      isCellSelected(get(this.selectedCells), row, column),
+    return (
+      !!this.allColumns.length &&
+      this.allColumns.every((column) =>
+        isCellSelected(get(this.selectedCells), row, column),
+      )
     );
   }
 
@@ -217,6 +255,9 @@ export class Selection {
     if (isCompleteColumnSelected) {
       // Clear the selection - deselect the column
       this.resetSelection();
+    } else if (!this.allRows.length) {
+      this.resetSelection();
+      this.columnsSelectedWhenTheTableIsEmpty.add(column.id);
     } else {
       const cells: Cell[] = [];
       this.allRows.forEach((row) => {

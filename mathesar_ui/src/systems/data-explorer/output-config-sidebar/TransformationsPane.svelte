@@ -15,7 +15,6 @@
   import type QueryManager from '../QueryManager';
   import FilterTransformation from './FilterTransformation.svelte';
   import QueryFilterTransformationModel from '../QueryFilterTransformationModel';
-  import type { QueryTransformationModel } from '../QueryModel';
   import { calcAllowedColumnsPerTransformation } from './transformationUtils';
   import QuerySummarizationTransformationModel from '../QuerySummarizationTransformationModel';
   import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
@@ -89,12 +88,16 @@
     );
   }
 
-  async function updateTransformation(
-    model: QueryTransformationModel,
-    index: number,
-  ) {
-    // Check if transformation is different from what is present in query
-    // before updating
+  /**
+   * Transformations are currently mutable within the FilterTransformation &
+   * SummarizationTransformation components.
+   *
+   * TODO:
+   * 1. Make them immutable.
+   * 2. Check if transformations are different from what is present in query
+   *    before updating.
+   */
+  async function updateTransformations() {
     await queryManager.update((q) =>
       q.withTransformationModels(transformationModels),
     );
@@ -131,7 +134,7 @@
             columns={allowedColumnsPerTransformation[index]}
             model={transformationModel}
             limitEditing={allowedColumnsPerTransformation[index].size === 0}
-            on:update={() => updateTransformation(transformationModel, index)}
+            on:update={() => updateTransformations()}
           />
         {:else if transformationModel instanceof QuerySummarizationTransformationModel}
           <SummarizationTransformation
@@ -139,7 +142,7 @@
             model={transformationModel}
             limitEditing={allowedColumnsPerTransformation[index].size === 0 ||
               index < transformationModels.length - 1}
-            on:update={(e) => updateTransformation(e.detail, index)}
+            on:update={() => updateTransformations()}
           />
         {/if}
       </div>
