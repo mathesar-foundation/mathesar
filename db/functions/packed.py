@@ -6,12 +6,10 @@ Mathesar filters not supporting composition.
 
 from abc import abstractmethod
 
-from db.functions.base import DBFunction, Or, Lesser, Equal, Greater
-
-from db.functions import hints
+from db.functions import hints, base
 
 
-class DBFunctionPacked(DBFunction):
+class DBFunctionPacked(base.DBFunction):
     """
     A DBFunction that is meant to be unpacked into another DBFunction. A way to define a DBFunction
     as a combination of DBFunctions. Its to_sa_expression method is not used. Its concrete
@@ -44,9 +42,9 @@ class LesserOrEqual(DBFunctionPacked):
     def unpack(self):
         param0 = self.parameters[0]
         param1 = self.parameters[1]
-        return Or([
-            Lesser([param0, param1]),
-            Equal([param0, param1]),
+        return base.Or([
+            base.Lesser([param0, param1]),
+            base.Equal([param0, param1]),
         ])
 
 
@@ -64,7 +62,125 @@ class GreaterOrEqual(DBFunctionPacked):
     def unpack(self):
         param0 = self.parameters[0]
         param1 = self.parameters[1]
-        return Or([
-            Greater([param0, param1]),
-            Equal([param0, param1]),
+        return base.Or([
+            base.Greater([param0, param1]),
+            base.Equal([param0, param1]),
+        ])
+
+
+class JsonLengthEquals(DBFunctionPacked):
+    id = 'json_array_length_equals'
+    name = 'Number of elements is'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return base.Equal([
+            base.JsonArrayLength([param0]),
+            param1,
+        ])
+
+
+class JsonLengthGreaterThan(DBFunctionPacked):
+    id = 'json_array_length_greater_than'
+    name = 'Number of elements is greater than'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return base.Greater([
+            base.JsonArrayLength([param0]),
+            param1,
+        ])
+
+
+class JsonLengthGreaterorEqual(DBFunctionPacked):
+    id = 'json_array_length_greater_or_equal'
+    name = 'Number of elements is greater than or equal to'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return GreaterOrEqual([
+            base.JsonArrayLength([param0]),
+            param1,
+        ])
+
+
+class JsonLengthLessThan(DBFunctionPacked):
+    id = 'json_array_length_less_than'
+    name = 'Number of elements is less than'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return base.Lesser([
+            base.JsonArrayLength([param0]),
+            param1,
+        ])
+
+
+class JsonLengthLessorEqual(DBFunctionPacked):
+    id = 'json_array_length_less_or_equal'
+    name = 'Number of elements is less than or equal to'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return LesserOrEqual([
+            base.JsonArrayLength([param0]),
+            param1,
+        ])
+
+
+class JsonNotEmpty(DBFunctionPacked):
+    id = 'json_array_not_empty'
+    name = 'Is not empty'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(1),
+        hints.parameter(0, hints.json_array),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        return base.Greater([
+            base.JsonArrayLength([param0]),
+            0,
         ])

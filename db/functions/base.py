@@ -15,13 +15,14 @@ access hints on what composition of functions and parameters should be valid.
 from abc import ABC, abstractmethod
 import warnings
 
-from sqlalchemy import column, not_, and_, or_, func, literal
-from sqlalchemy.dialects.postgresql import array_agg, INTEGER, TEXT
+from sqlalchemy import column, not_, and_, or_, func, literal, cast
+from sqlalchemy.dialects.postgresql import array_agg, INTEGER, TEXT, BOOLEAN
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat
 
 from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
+from db.types.custom.json_array import MathesarJsonArray
 
 
 def sa_call_sql_function(function_name, *parameters, return_type=None):
@@ -393,3 +394,38 @@ class Alias(DBFunction):
     @staticmethod
     def to_sa_expression(expr, alias):
         return expr.label(alias)
+
+
+class JsonArrayLength(DBFunction):
+    id = 'json_array_length'
+    name = 'length'
+    hints = tuple([
+        hints.returns(hints.comparable),
+        hints.parameter_count(1),
+        hints.parameter(0, hints.json_array),
+        hints.mathesar_filter,
+    ])
+
+    @staticmethod
+    def to_sa_expression(value):
+        return sa_call_sql_function('jsonb_array_length', value, return_type=INTEGER)
+
+
+class JsonArrayContains(DBFunction):
+    id = 'json_array_contains'
+    name = 'contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.json_array),
+        hints.parameter(1, hints.array),
+    ])
+
+    @staticmethod
+    def to_sa_expression(value1, value2):
+        return sa_call_sql_function(
+            'jsonb_contains',
+            value1,
+            cast(value2, MathesarJsonArray),
+            return_type=BOOLEAN
+        )
