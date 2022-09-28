@@ -69,6 +69,7 @@ export class TabularData {
           columnsData.columns.map((column) => [
             column.id,
             processColumn({
+              tableId: this.id,
               column,
               constraints: constraintsData.constraints,
               abstractTypeMap: props.abstractTypesMap,

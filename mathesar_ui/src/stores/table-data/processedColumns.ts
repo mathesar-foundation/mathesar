@@ -20,6 +20,7 @@ import {
   getDbTypeBasedInputCap,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import type { TableEntry } from '@mathesar/api/tables';
 import { findFkConstraintsForColumn } from './constraintsUtils';
 
 export interface ProcessedColumn extends CellColumnFabric {
@@ -49,10 +50,12 @@ export interface ProcessedColumn extends CellColumnFabric {
 export type ProcessedColumnsStore = Readable<Map<number, ProcessedColumn>>;
 
 export function processColumn({
+  tableId,
   column,
   constraints,
   abstractTypeMap,
 }: {
+  tableId: TableEntry['id'];
   column: Column;
   constraints: Constraint[];
   abstractTypeMap: AbstractTypesMap;
@@ -79,6 +82,7 @@ export function processColumn({
       cellInfo: abstractType.cellInfo,
       column,
       fkTargetTableId: linkFk ? linkFk.referent_table : undefined,
+      pkTargetTableId: column.primary_key ? tableId : undefined,
     }),
     inputComponentAndProps: getDbTypeBasedInputCap(
       column,

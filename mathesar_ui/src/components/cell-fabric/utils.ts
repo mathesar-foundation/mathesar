@@ -10,6 +10,7 @@ import DataTypes from './data-types';
 import type { CellColumnLike } from './data-types/typeDefinitions';
 import type { LinkedRecordCellExternalProps } from './data-types/components/typeDefinitions';
 import LinkedRecordCell from './data-types/components/linked-record/LinkedRecordCell.svelte';
+import PrimaryKeyCell from './data-types/components/primary-key/PrimaryKeyCell.svelte';
 import LinkedRecordInput from './data-types/components/linked-record/LinkedRecordInput.svelte';
 
 export type CellValueFormatter<T> = (
@@ -40,10 +41,20 @@ export function getCellCap({
   cellInfo,
   column,
   fkTargetTableId,
+  pkTargetTableId,
 }: {
   cellInfo: CellInfo;
   column: CellColumnLike;
+  /**
+   * When the cell falls within an FK column, this value will give the id of the
+   * table to which the FK points.
+   */
   fkTargetTableId?: TableEntry['id'];
+  /**
+   * When the cell falls within a PK column, this value will give the id of the
+   * table.
+   */
+  pkTargetTableId?: TableEntry['id'];
 }): ComponentAndProps {
   if (fkTargetTableId) {
     const props: LinkedRecordCellExternalProps = {
@@ -52,6 +63,12 @@ export function getCellCap({
     return {
       component: LinkedRecordCell,
       props,
+    };
+  }
+  if (pkTargetTableId) {
+    return {
+      component: PrimaryKeyCell,
+      props: { tableId: pkTargetTableId },
     };
   }
   const config = getCellConfiguration(column.type, cellInfo);

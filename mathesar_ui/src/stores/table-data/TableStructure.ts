@@ -38,6 +38,7 @@ export class TableStructure {
           columnsData.columns.map((column) => [
             column.id,
             processColumn({
+              tableId: this.id,
               column,
               constraints: constraintsData.constraints,
               abstractTypeMap: props.abstractTypesMap,

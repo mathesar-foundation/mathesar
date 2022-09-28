@@ -14,11 +14,24 @@ export interface CellTypeProps<Value> {
   disabled: boolean;
 }
 
+// Primary key
+
+export type PrimaryKeyCellValue = string | number;
+
+export interface PrimaryKeyCellExternalProps {
+  tableId: DBObjectEntry['id'];
+}
+
+export interface PrimaryKeyCellProps
+  extends CellTypeProps<ForeignKeyCellValue>,
+    LinkedRecordCellExternalProps {
+  dataForRecordSummaryInFkCell?: DataForRecordSummaryInFkCell;
+}
+
 // Foreign key
 
 export type ForeignKeyCellValue = string | number | null;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LinkedRecordCellExternalProps {
   tableId: DBObjectEntry['id'];
 }
