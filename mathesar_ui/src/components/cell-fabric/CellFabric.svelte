@@ -17,7 +17,6 @@
   export let isSelectedInRange = false;
   export let disabled = false;
   export let showAsSkeleton = false;
-  export let recordPageLinkHref: string | undefined = undefined;
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
 
   $: ({ cellComponentAndProps } = columnFabric);
