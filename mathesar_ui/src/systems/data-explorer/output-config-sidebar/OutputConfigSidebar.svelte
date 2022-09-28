@@ -16,13 +16,13 @@
 
   $: ({ selectedColumnAlias, query, inputColumns, state } = queryManager);
   $: ({ inputColumnsFetchState } = $state);
-  $: ({ columnInformationMap } = $inputColumns);
+  $: ({ inputColumnInformationMap } = $inputColumns);
 
   $: initialColumn = $selectedColumnAlias
     ? $query.getColumn($selectedColumnAlias)
     : undefined;
   $: columnInformation = initialColumn
-    ? columnInformationMap.get(initialColumn.id)
+    ? inputColumnInformationMap.get(initialColumn.id)
     : undefined;
 
   let timer: number;

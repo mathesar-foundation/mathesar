@@ -37,7 +37,9 @@
     : [];
   $: results = $records.results ?? [];
   // Show a dummy ghost row when there are no records
-  $: showDummyGhostRow = recordRunState === 'success' && !results.length;
+  $: showDummyGhostRow =
+    (recordRunState === 'success' || recordRunState === 'processing') &&
+    !results.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : results.length;
 
   const columnWidths = new ImmutableMap([[ID_ROW_CONTROL_COLUMN, 70]]);
@@ -171,10 +173,10 @@
                         ? 'selected'
                         : ''}
                     >
-                      {#if results[item.index]}
+                      {#if results[item.index] || recordRunState === 'processing'}
                         <CellFabric
                           columnFabric={processedQueryColumn}
-                          value={results[item.index][processedQueryColumn.id]}
+                          value={results[item.index]?.[processedQueryColumn.id]}
                           showAsSkeleton={recordRunState === 'processing'}
                           disabled={true}
                         />

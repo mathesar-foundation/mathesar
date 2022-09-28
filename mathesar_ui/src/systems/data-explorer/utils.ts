@@ -86,82 +86,7 @@ export interface ReferencedByTable extends LinkedTable {
 export interface InputColumnsStoreSubstance {
   baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
   tablesThatReferenceBaseTable: Map<ReferencedByTable['id'], ReferencedByTable>;
-  columnInformationMap: Map<InputColumn['id'], InputColumn>;
-}
-
-export function processColumn(
-  column: QueryResultColumn,
-  abstractTypeMap: AbstractTypesMap,
-): ProcessedQueryResultColumn {
-  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
-  return {
-    id: column.alias,
-    column,
-    abstractType,
-    cellComponentAndProps: getCellCap(abstractType.cell, column),
-    inputComponentAndProps: getDbTypeBasedInputCap(
-      column,
-      undefined,
-      abstractType.cell,
-    ),
-    allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
-    preprocFunctions: getPreprocFunctionsForAbstractType(
-      abstractType.identifier,
-    ),
-  };
-}
-
-export function processInitialColumns(
-  initialColumns: QueryModel['initial_columns'],
-  existingProcessedColumns: ProcessedQueryResultColumnMap,
-  abstractTypeMap: AbstractTypesMap,
-  inputColumnInformationMap: InputColumnsStoreSubstance['columnInformationMap'],
-): ProcessedQueryResultColumnMap {
-  let isChangeRequired =
-    initialColumns.length !== existingProcessedColumns.size;
-  const newProcessedColumns: ProcessedQueryResultColumnMap = new ImmutableMap(
-    initialColumns.map((column) => {
-      const existingProcessedColumn = existingProcessedColumns.get(
-        column.alias,
-      );
-      if (existingProcessedColumn) {
-        if (
-          existingProcessedColumn.column.display_name !== column.display_name
-        ) {
-          isChangeRequired = true;
-          return [
-            column.alias,
-            {
-              ...existingProcessedColumn,
-              column: {
-                ...existingProcessedColumn.column,
-                display_name: column.display_name,
-              },
-            },
-          ];
-        }
-
-        return [column.alias, existingProcessedColumn];
-      }
-
-      isChangeRequired = true;
-      return [
-        column.alias,
-        processColumn(
-          {
-            alias: column.alias,
-            display_name: column.display_name,
-            type: inputColumnInformationMap.get(column.id)?.type ?? 'unknown',
-            type_options: null,
-            display_options: null,
-          },
-          abstractTypeMap,
-        ),
-      ];
-    }),
-  );
-
-  return isChangeRequired ? newProcessedColumns : existingProcessedColumns;
+  inputColumnInformationMap: Map<InputColumn['id'], InputColumn>;
 }
 
 // Inorder to place all columns with links at the end while sorting
@@ -232,8 +157,9 @@ export function getLinkFromColumn(
 export function getColumnInformationMap(
   result: JoinableTablesResult,
   baseTable: TableEntry,
-): InputColumnsStoreSubstance['columnInformationMap'] {
-  const map: InputColumnsStoreSubstance['columnInformationMap'] = new Map();
+): InputColumnsStoreSubstance['inputColumnInformationMap'] {
+  const map: InputColumnsStoreSubstance['inputColumnInformationMap'] =
+    new Map();
   baseTable.columns.forEach((column) => {
     map.set(column.id, {
       id: column.id,
@@ -333,29 +259,138 @@ export function getTablesThatReferenceBaseTable(
 
 /** ======== */
 
-export function processColumns(
-  columnInformation: Pick<
-    QueryRunResponse,
-    'output_columns' | 'column_metadata'
-  >,
+function processColumn(
+  columnInfo: Pick<QueryResultColumn, 'alias'> & Partial<QueryResultColumn>,
+  abstractTypeMap: AbstractTypesMap,
+): ProcessedQueryResultColumn {
+  const column = {
+    alias: columnInfo.alias,
+    display_name: columnInfo.display_name ?? columnInfo.alias,
+    type: columnInfo.type ?? 'unknown',
+    type_options: columnInfo.type_options ?? null,
+    display_options: columnInfo.display_options ?? null,
+  };
+
+  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
+  return {
+    id: column.alias,
+    column,
+    abstractType,
+    cellComponentAndProps: getCellCap(abstractType.cell, column),
+    inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      undefined,
+      abstractType.cell,
+    ),
+    allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
+    preprocFunctions: getPreprocFunctionsForAbstractType(
+      abstractType.identifier,
+    ),
+  };
+}
+
+export function processColumnMetaData(
+  columnMetaData: QueryRunResponse['column_metadata'],
   abstractTypeMap: AbstractTypesMap,
 ): ProcessedQueryResultColumnMap {
   return new ImmutableMap(
-    columnInformation.output_columns.map((alias) => {
-      const columnMetaData = columnInformation.column_metadata[alias];
-      return [
-        alias,
+    Object.entries(columnMetaData).map(([alias, columnMeta]) => [
+      alias,
+      processColumn(columnMeta, abstractTypeMap),
+    ]),
+  );
+}
+
+export function speculateColumnMetaData({
+  currentProcessedColumnsMetaData,
+  inputColumnInformationMap,
+  queryModel,
+  abstractTypeMap,
+}: {
+  currentProcessedColumnsMetaData: ProcessedQueryResultColumnMap;
+  inputColumnInformationMap: InputColumnsStoreSubstance['inputColumnInformationMap'];
+  queryModel: QueryModel;
+  abstractTypeMap: AbstractTypesMap;
+}): ProcessedQueryResultColumnMap {
+  const initialColumns = queryModel.initial_columns;
+  const summarizationTransforms = queryModel.getSummarizationTransforms();
+  const initialColumnsRequiringChange = initialColumns.filter(
+    (column) =>
+      !currentProcessedColumnsMetaData.has(column.alias) ||
+      currentProcessedColumnsMetaData.get(column.alias)?.column.display_name !==
+        column.display_name,
+  );
+  const summarizationTransformsWithoutMetaData = summarizationTransforms.filter(
+    (transformation) =>
+      transformation
+        .getOutputColumnAliases()
+        .some(
+          (outputAlias) => !currentProcessedColumnsMetaData.has(outputAlias),
+        ),
+  );
+  let updatedColumnsMetaData = currentProcessedColumnsMetaData;
+  const isUpdateRequired =
+    initialColumnsRequiringChange.length > 0 ||
+    summarizationTransformsWithoutMetaData.length > 0;
+  if (initialColumnsRequiringChange.length > 0) {
+    initialColumnsRequiringChange.forEach((initialColumn) => {
+      updatedColumnsMetaData = updatedColumnsMetaData.with(
+        initialColumn.alias,
         processColumn(
           {
-            alias,
-            display_name: columnMetaData.display_name ?? alias,
-            type: columnMetaData.type ?? 'unknown',
-            type_options: columnMetaData.type_options,
-            display_options: columnMetaData.display_options,
+            alias: initialColumn.alias,
+            display_name: initialColumn.display_name,
+            type: inputColumnInformationMap.get(initialColumn.id)?.type,
           },
           abstractTypeMap,
         ),
-      ];
-    }),
+      );
+    });
+  }
+  if (summarizationTransformsWithoutMetaData.length > 0) {
+    summarizationTransformsWithoutMetaData.forEach((transform) => {
+      [...transform.aggregations.values()].forEach((aggregation) => {
+        if (!updatedColumnsMetaData.has(aggregation.outputAlias)) {
+          updatedColumnsMetaData = updatedColumnsMetaData.with(
+            aggregation.outputAlias,
+            processColumn(
+              {
+                alias: aggregation.outputAlias,
+                display_name: aggregation.displayName,
+                type:
+                  aggregation.function === 'aggregate_to_array'
+                    ? '_array'
+                    : 'integer',
+                type_options:
+                  aggregation.function === 'aggregate_to_array'
+                    ? {
+                        type:
+                          updatedColumnsMetaData.get(aggregation.inputAlias)
+                            ?.column.type ?? 'unknown',
+                      }
+                    : null,
+                display_options: null,
+              },
+              abstractTypeMap,
+            ),
+          );
+        }
+      });
+    });
+  }
+  return isUpdateRequired
+    ? new ImmutableMap(updatedColumnsMetaData)
+    : currentProcessedColumnsMetaData;
+}
+
+export function getProcessedOutputColumns(
+  outputColumnAliases: QueryRunResponse['output_columns'],
+  processedColumnMetaData: ProcessedQueryResultColumnMap,
+): ProcessedQueryResultColumnMap {
+  return new ImmutableMap(
+    outputColumnAliases.map((alias) => [
+      alias,
+      processedColumnMetaData.get(alias) ?? processColumn({ alias }, new Map()),
+    ]),
   );
 }
