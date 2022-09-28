@@ -85,3 +85,18 @@ def test_column_dependents(library_ma_tables, client):
     checkouts_patrons_fk_id = [c['id'] for c in checkouts_constraints if c['name'] == 'Checkouts_Patron id_fkey']
 
     assert sorted(patrons_id_dependents_ids) == sorted([checkouts.id] + patrons_pk_id + checkouts_patrons_fk_id)
+
+
+def test_dependents_filters(library_ma_tables, client):
+    publishers_id = library_ma_tables['Publishers'].id
+    exclude_types = ['table constraint']
+    query_params = {'exclude': exclude_types}
+    publishers_dependents_graph = client.get(f'/api/db/v0/tables/{publishers_id}/dependents/', data=query_params).json()
+
+    dependents_types = [dependent['obj']['type'] for dependent in publishers_dependents_graph]
+
+    assert all(
+        [
+            type not in dependents_types for type in exclude_types
+        ]
+    )
