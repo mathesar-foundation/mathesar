@@ -23,6 +23,7 @@ from sqlalchemy.sql.functions import GenericFunction, concat
 from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
 from db.types.custom.json_array import MathesarJsonArray
+from db.types.custom.datetime import DATE, TIME_WITH_TIME_ZONE, TIMESTAMP_WITH_TIME_ZONE
 from db.types.custom.uri import URIFunction
 
 
@@ -458,3 +459,67 @@ class ExtractURIScheme(DBFunction):
     @staticmethod
     def to_sa_expression(uri):
         return sa_call_sql_function(URIFunction.SCHEME.value, uri, return_type=TEXT)
+
+
+class TruncateToYear(DBFunction):
+    id = 'truncate_to_year'
+    name = 'Truncate to Year'
+    hints = tuple([hints.parameter_count(1)])  # TODO extend hints
+
+    @staticmethod
+    def to_sa_expression(col):
+        return sa_call_sql_function('to_char', col, 'YYYY', return_type=TEXT)
+
+
+class TruncateToMonth(DBFunction):
+    id = 'truncate_to_month'
+    name = 'Truncate to Month'
+    hints = tuple([hints.parameter_count(1)])  # TODO extend hints
+
+    @staticmethod
+    def to_sa_expression(col):
+        return sa_call_sql_function('to_char', col, 'YYYY-MM', return_type=TEXT)
+
+
+class TruncateToDay(DBFunction):
+    id = 'truncate_to_day'
+    name = 'Truncate to Day'
+    hints = tuple([hints.parameter_count(1)])  # TODO extend hints
+
+    @staticmethod
+    def to_sa_expression(col):
+        return sa_call_sql_function('to_char', col, 'YYYY-MM-DD', return_type=TEXT)
+
+
+class CurrentDate(DBFunction):
+    id = 'current_date'
+    name = 'current date'
+    hints = tuple([hints.returns(hints.date), hints.parameter_count(0)])
+
+    @staticmethod
+    def to_sa_expression():
+        return sa_call_sql_function('current_date', return_type=DATE)
+
+
+class CurrentTime(DBFunction):
+    id = 'current_time'
+    name = 'current time'
+    hints = tuple([hints.returns(hints.time), hints.parameter_count(0)])
+
+    @staticmethod
+    def to_sa_expression():
+        return sa_call_sql_function(
+            'current_time', return_type=TIME_WITH_TIME_ZONE
+        )
+
+
+class CurrentDateTime(DBFunction):
+    id = 'current_datetime'
+    name = 'current datetime'
+    hints = tuple([hints.returns(hints.date, hints.time), hints.parameter_count(0)])
+
+    @staticmethod
+    def to_sa_expression():
+        return sa_call_sql_function(
+            'current_timestamp', return_type=TIMESTAMP_WITH_TIME_ZONE
+        )
