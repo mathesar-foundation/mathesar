@@ -16,7 +16,7 @@ def test_domain_func_wrapper(engine_with_schema):
         sa_call_sql_function(
             email.EMAIL_DOMAIN_NAME,
             text("'test@example.com'"),
-            return_type=PostgresType.TEXT.get_sa_class(engine)
+            return_type=PostgresType.TEXT
         )
     )
     with engine.begin() as conn:
@@ -30,7 +30,7 @@ def test_local_part_func_wrapper(engine_with_schema):
         sa_call_sql_function(
             email.EMAIL_LOCAL_PART,
             text("'test@example.com'"),
-            return_type=PostgresType.TEXT.get_sa_class(engine)
+            return_type=PostgresType.TEXT
         )
     )
     with engine.begin() as conn:

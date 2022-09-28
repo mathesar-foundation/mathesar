@@ -1,13 +1,13 @@
 from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import text, select, Table, MetaData, Column
-from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.exc import IntegrityError
 from db.types.custom import uri
 from db.utils import execute_pg_query
 from db.functions.base import ColumnName, Contains, Literal, sa_call_sql_function
 from db.functions.packed import URIAuthorityContains, URISchemeEquals
 from db.functions.operations.apply import apply_db_function_as_filter
+from db.types.base import PostgresType
 
 
 RFC_3986_EXAMPLES = [
@@ -137,7 +137,7 @@ def test_uri_func_wrapper(engine_with_schema, test_uri, part_dict, part, uri_fun
         sa_call_sql_function(
             uri_function_name,
             text(f"'{test_uri}'"),
-            return_type=TEXT
+            return_type=PostgresType.TEXT
         )
     )
     with engine.begin() as conn:

@@ -16,14 +16,15 @@ from abc import ABC, abstractmethod
 import warnings
 
 from sqlalchemy import column, not_, and_, or_, func, literal, cast
-from sqlalchemy.dialects.postgresql import array_agg, INTEGER, TEXT, BOOLEAN
+from sqlalchemy.dialects.postgresql import array_agg, TEXT
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat
 
+from db.engine import get_dummy_engine
 from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
+from db.types.base import PostgresType
 from db.types.custom.json_array import MathesarJsonArray
-from db.types.custom.datetime import DATE, TIME_WITH_TIME_ZONE, TIMESTAMP_WITH_TIME_ZONE
 from db.types.custom.email import EMAIL_DOMAIN_NAME
 from db.types.custom.uri import URIFunction
 
@@ -37,12 +38,13 @@ def sa_call_sql_function(function_name, *parameters, return_type=None):
     *parameters:   these will be passed directly to the generated function.
     return_type:   an SQLAlchemy type class
     """
+    engine = get_dummy_engine()
     if return_type is None:
         warnings.warn(
             "sa_call_sql_function should be called with the return_type kwarg set"
         )
         # We can't use PostgresType since we don't want an engine here
-        return_type = TEXT
+        return_type = PostgresType.TEXT
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="The GenericFunction")
@@ -55,7 +57,7 @@ def sa_call_sql_function(function_name, *parameters, return_type=None):
             function_name,
             (GenericFunction,),
             {
-                "type": return_type,
+                "type": return_type.get_sa_class(engine),
                 "name": quoted_name(function_name, False),
                 "identifier": function_name,
             }
@@ -371,7 +373,7 @@ class Count(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
-        return sa_call_sql_function('count', column_expr, return_type=INTEGER)
+        return sa_call_sql_function('count', column_expr, return_type=PostgresType.INTEGER)
 
 
 class ArrayAgg(DBFunction):
@@ -411,7 +413,7 @@ class JsonArrayLength(DBFunction):
 
     @staticmethod
     def to_sa_expression(value):
-        return sa_call_sql_function('jsonb_array_length', value, return_type=INTEGER)
+        return sa_call_sql_function('jsonb_array_length', value, return_type=PostgresType.INTEGER)
 
 
 class JsonArrayContains(DBFunction):
@@ -430,7 +432,7 @@ class JsonArrayContains(DBFunction):
             'jsonb_contains',
             value1,
             cast(value2, MathesarJsonArray),
-            return_type=BOOLEAN
+            return_type=PostgresType.BOOLEAN
         )
 
 
@@ -445,7 +447,7 @@ class ExtractURIAuthority(DBFunction):
 
     @staticmethod
     def to_sa_expression(uri):
-        return sa_call_sql_function(URIFunction.AUTHORITY.value, uri, return_type=TEXT)
+        return sa_call_sql_function(URIFunction.AUTHORITY.value, uri, return_type=PostgresType.TEXT)
 
 
 class ExtractURIScheme(DBFunction):
@@ -459,7 +461,7 @@ class ExtractURIScheme(DBFunction):
 
     @staticmethod
     def to_sa_expression(uri):
-        return sa_call_sql_function(URIFunction.SCHEME.value, uri, return_type=TEXT)
+        return sa_call_sql_function(URIFunction.SCHEME.value, uri, return_type=PostgresType.TEXT)
 
 
 class TruncateToYear(DBFunction):
@@ -469,7 +471,7 @@ class TruncateToYear(DBFunction):
 
     @staticmethod
     def to_sa_expression(col):
-        return sa_call_sql_function('to_char', col, 'YYYY', return_type=TEXT)
+        return sa_call_sql_function('to_char', col, 'YYYY', return_type=PostgresType.TEXT)
 
 
 class TruncateToMonth(DBFunction):
@@ -479,7 +481,7 @@ class TruncateToMonth(DBFunction):
 
     @staticmethod
     def to_sa_expression(col):
-        return sa_call_sql_function('to_char', col, 'YYYY-MM', return_type=TEXT)
+        return sa_call_sql_function('to_char', col, 'YYYY-MM', return_type=PostgresType.TEXT)
 
 
 class TruncateToDay(DBFunction):
@@ -489,7 +491,7 @@ class TruncateToDay(DBFunction):
 
     @staticmethod
     def to_sa_expression(col):
-        return sa_call_sql_function('to_char', col, 'YYYY-MM-DD', return_type=TEXT)
+        return sa_call_sql_function('to_char', col, 'YYYY-MM-DD', return_type=PostgresType.TEXT)
 
 
 class CurrentDate(DBFunction):
@@ -499,7 +501,7 @@ class CurrentDate(DBFunction):
 
     @staticmethod
     def to_sa_expression():
-        return sa_call_sql_function('current_date', return_type=DATE)
+        return sa_call_sql_function('current_date', return_type=PostgresType.DATE)
 
 
 class CurrentTime(DBFunction):
@@ -510,7 +512,7 @@ class CurrentTime(DBFunction):
     @staticmethod
     def to_sa_expression():
         return sa_call_sql_function(
-            'current_time', return_type=TIME_WITH_TIME_ZONE
+            'current_time', return_type=PostgresType.TIME_WITH_TIME_ZONE
         )
 
 
@@ -522,7 +524,7 @@ class CurrentDateTime(DBFunction):
     @staticmethod
     def to_sa_expression():
         return sa_call_sql_function(
-            'current_timestamp', return_type=TIMESTAMP_WITH_TIME_ZONE
+            'current_timestamp', return_type=PostgresType.TIMESTAMP_WITH_TIME_ZONE
         )
 
 
@@ -537,4 +539,4 @@ class ExtractEmailDomain(DBFunction):
 
     @staticmethod
     def to_sa_expression(email):
-        return sa_call_sql_function(EMAIL_DOMAIN_NAME, email, return_type=TEXT)
+        return sa_call_sql_function(EMAIL_DOMAIN_NAME, email, return_type=PostgresType.TEXT)
