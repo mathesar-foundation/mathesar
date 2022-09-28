@@ -11,7 +11,7 @@
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import { rowHeaderWidthPx } from '@mathesar/systems/table-view/geometry';
+  import { rowHeaderWidthPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
 
   export let queryRunner: QueryRunner;

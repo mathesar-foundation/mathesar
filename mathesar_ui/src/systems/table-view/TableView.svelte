@@ -6,8 +6,8 @@
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
   } from '@mathesar/stores/table-data';
+  import { rowHeaderWidthPx } from '@mathesar/geometry';
   import Body from './Body.svelte';
-  import { rowHeaderWidthPx } from './geometry';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
   import TableInspector from './table-inspector/TableInspector.svelte';

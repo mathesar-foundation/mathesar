@@ -2,13 +2,13 @@
   import type { Row as RowObject } from '@mathesar/stores/table-data/records';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { SheetVirtualRows } from '@mathesar/components/sheet';
-  import Row from './row/Row.svelte';
-  import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
   import {
     rowHeightPx,
     helpTextRowHeightPx,
     groupHeaderRowHeightPx,
-  } from './geometry';
+  } from '@mathesar/geometry';
+  import Row from './row/Row.svelte';
+  import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
