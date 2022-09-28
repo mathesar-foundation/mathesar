@@ -209,3 +209,5 @@ MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPT
 # https://vitejs.dev/guide/assets.html
 # https://vitejs.dev/guide/backend-integration.html
 STATICFILES_DIRS = [MATHESAR_UI_SOURCE_LOCATION] if MATHESAR_MODE == 'DEVELOPMENT' else [MATHESAR_UI_BUILD_LOCATION]
+
+LOGIN_REDIRECT_URL = '/'
