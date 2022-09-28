@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
     path('api/db/v0/', include(db_table_router.urls)),
     path('api/ui/v0/', include(ui_router.urls)),
+    path('api/ui/v0/login/', views.LoginView.as_view()),
 
     path('', views.home, name="home"),
     path('<db_name>/', views.schemas, name="schemas"),
