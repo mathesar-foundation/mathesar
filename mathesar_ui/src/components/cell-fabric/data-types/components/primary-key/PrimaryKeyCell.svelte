@@ -20,9 +20,9 @@
 
   $: href = $storeToGetRecordPageUrl({ tableId, recordId: value });
 
-  function handleClickLink(e: MouseEvent) {
-    // This is so users can click (and right-click) on the link without
-    // triggering the Mathesar context menu or cell selection.
+  function handleContextMenu(e: MouseEvent) {
+    // This is so users can right-click on the link without triggering the
+    // Mathesar context menu or cell selection.
     e.stopPropagation();
   }
 
@@ -51,7 +51,7 @@
       {href}
       class="link"
       title="Go To Record {value}"
-      on:click={handleClickLink}
+      on:contextmenu={handleContextMenu}
     >
       <Icon {...iconLinkToRecordPage} />
     </a>
