@@ -229,13 +229,6 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     }));
   }
 
-  private resetState(): void {
-    this.state.update((state) => ({
-      ...state,
-    }));
-    this.resetResults();
-  }
-
   async update(
     callback: (queryModel: QueryModel) => QueryModelUpdateDiff,
   ): Promise<void> {
@@ -251,7 +244,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     if (isValid) {
       switch (updateDiff.type) {
         case 'baseTable':
-          this.resetState();
+          this.resetResults();
           this.undoRedoManager.clear();
           this.setUndoRedoStates();
           await this.calculateInputColumnTree();
@@ -262,7 +255,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
         case 'initialColumnsArray':
           if (!updateDiff.diff.initial_columns?.length) {
             // All columns have been deleted
-            this.resetState();
+            this.resetResults();
           } else {
             this.speculateColumns();
             await this.run();

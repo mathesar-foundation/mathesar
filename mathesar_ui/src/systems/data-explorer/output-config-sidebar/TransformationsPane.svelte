@@ -129,6 +129,7 @@
             columns={allowedColumnsPerTransformation[index]}
             model={transformationModel}
             limitEditing={allowedColumnsPerTransformation[index].size === 0}
+            totalTransformations={transformationModels.length}
             on:update={() => updateTransformations()}
           />
         {:else if transformationModel instanceof QuerySummarizationTransformationModel}
