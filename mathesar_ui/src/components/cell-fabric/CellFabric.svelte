@@ -24,25 +24,29 @@
   $: props = cellComponentAndProps.props as Record<string, unknown>;
 </script>
 
-<div class="cell-fabric" data-column-identifier={columnFabric.id}>
-  <svelte:component
-    this={component}
-    {...props}
-    {isActive}
-    {isSelectedInRange}
-    {disabled}
-    {horizontalAlignment}
-    {dataForRecordSummaryInFkCell}
-    bind:value
-    on:movementKeyDown
-    on:activate
-    on:update
-    on:mouseenter
-  />
+<div
+  class="cell-fabric"
+  data-column-identifier={columnFabric.id}
+  class:show-as-skeleton={showAsSkeleton}
+>
+  <div class="component">
+    <svelte:component
+      this={component}
+      {...props}
+      {isActive}
+      {isSelectedInRange}
+      {disabled}
+      {horizontalAlignment}
+      {dataForRecordSummaryInFkCell}
+      bind:value
+      on:movementKeyDown
+      on:activate
+      on:update
+      on:mouseenter
+    />
+  </div>
 
-  {#if showAsSkeleton}
-    <div class="loader" />
-  {/if}
+  <div class="loader" />
 </div>
 
 <style lang="scss">
@@ -54,16 +58,23 @@
     min-height: var(--cell-height);
     align-items: center;
     width: 100%;
+    --cell-padding: 0.5rem;
   }
-
-  .cell-fabric {
-    .loader {
-      top: 6px;
-      left: 8px;
-      right: 8px;
-      bottom: 6px;
-      position: absolute;
-      background: #efefef;
-    }
+  .loader {
+    top: var(--cell-padding);
+    left: var(--cell-padding);
+    right: var(--cell-padding);
+    bottom: var(--cell-padding);
+    position: absolute;
+    background: #efefef;
+  }
+  .cell-fabric:not(.show-as-skeleton) .loader {
+    display: none;
+  }
+  .cell-fabric .component {
+    display: contents;
+  }
+  .cell-fabric.show-as-skeleton .component {
+    display: none;
   }
 </style>

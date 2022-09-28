@@ -62,7 +62,6 @@
     overflow: hidden;
     position: relative;
     min-height: var(--cell-height);
-    --cell-padding: 0.5rem;
 
     &.has-padding {
       padding: var(--cell-padding);
