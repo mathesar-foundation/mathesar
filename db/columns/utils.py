@@ -58,8 +58,10 @@ def find_match(temp_table_col_list, target_table_col_list):
     if perfect_match := perfect_map(temp_table_col_list, target_table_col_list) is not None:
         return perfect_match
     else:
-        def lowercase(x): return [(i[0].lower(), *i[1:]) for i in x]
-        def replace_(x): return [(i[0].replace('_', ' '), *i[1:]) for i in x]
+        def lowercase(x):
+            return [(i[0].lower(), *i[1:]) for i in x]
+        def replace_(x):
+            return [(i[0].replace('_', ' '), *i[1:]) for i in x]
         if case_insensitive_match := perfect_map(lowercase(temp_table_col_list), lowercase(target_table_col_list)) is not None:
             return case_insensitive_match
         elif space_switched_match := perfect_map(replace_(temp_table_col_list), replace_(target_table_col_list)) is not None:
