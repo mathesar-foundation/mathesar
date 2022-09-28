@@ -39,6 +39,7 @@
   hasPadding={false}
 >
   <div class="primary-key-cell">
+    <span class="value" on:mousedown={handleValueMouseDown}>{value}</span>
     <a
       {href}
       class="link"
@@ -47,7 +48,6 @@
     >
       <Icon {...iconLinkToRecordPage} />
     </a>
-    <span class="value" on:mousedown={handleValueMouseDown}>{value}</span>
   </div>
 </CellWrapper>
 
@@ -59,13 +59,12 @@
     width: 100%;
     height: 100%;
     display: grid;
-    grid-template: auto / auto 1fr;
+    grid-template: auto / 1fr auto;
   }
   .value {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    padding-right: var(--cell-padding);
+    padding-left: var(--cell-padding);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
