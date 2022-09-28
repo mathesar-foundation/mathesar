@@ -74,8 +74,6 @@ def process_annotated_records(record_list, column_name_id_map=None, preview_meta
 
     if preview_metadata and column_name_id_map is not None:
         column_id_name_map = {i: n for n, i in column_name_id_map.items()}
-        # raise Exception(f"name_id_map: {column_id_name_map} \n id_name_map: {column_id_name_map}")
-        # raise Exception(f"name_id_map: {column_name_id_map} \n id_name_map: {column_id_name_map} \n name_id_map.items(): {column_name_id_map.items()}")
         # Extract preview data from the records
         # TODO Replace modifying the parameter directly
         for preview_colum_id, preview_info in preview_metadata.items():
