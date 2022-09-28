@@ -14,8 +14,10 @@ from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
 
 
 @pytest.fixture
-def client():
-    return APIClient()
+def client(admin_user):
+    client = APIClient()
+    client.login(username='admin', password='password')
+    return client
 
 
 @pytest.fixture
