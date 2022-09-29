@@ -145,15 +145,27 @@ def _delete_stale_columns(attnum_tuples, tables):
 def reflect_constraints_from_database(database):
     engine = create_mathesar_engine(database)
     db_constraints = get_constraints_with_oids(engine)
+    db_constraint_mapped_table = defaultdict(list)
     for db_constraint in db_constraints:
-        try:
-            table = models.Table.current_objects.get(oid=db_constraint['conrelid'])
-        except models.Table.DoesNotExist:
-            continue
-        models.Constraint.current_objects.get_or_create(oid=db_constraint['oid'], table=table)
+        table_oid = db_constraint['conrelid']
+        constraint_oid = db_constraint['oid']
+        db_constraint_mapped_table[table_oid].append(constraint_oid)
+
+    table_oids = db_constraint_mapped_table.keys()
+    tables = models.Table.current_objects.filter(oid__in=table_oids)
+    constraint_objs_to_create = []
+    for table in tables:
+        constraint_oids = db_constraint_mapped_table.get(table.oid, [])
+        for constraint_oid in constraint_oids:
+            constraint_obj = models.Constraint(oid=constraint_oid, table=table)
+            constraint_objs_to_create.append(constraint_obj)
+    models.Constraint.current_objects.bulk_create(constraint_objs_to_create, ignore_conflicts=True)
+
+    stale_constraint_ids = []
     for constraint in models.Constraint.current_objects.all():
         if constraint.oid not in [db_constraint['oid'] for db_constraint in db_constraints]:
-            constraint.delete()
+            stale_constraint_ids.append(constraint.id)
+    models.Constraint.current_objects.filter(id__in=stale_constraint_ids).delete()
     engine.dispose()
 
 
