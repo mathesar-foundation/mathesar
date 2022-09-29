@@ -120,6 +120,7 @@
     :global([data-sheet-element='cell'][data-cell-control='true']) {
       font-size: var(--text-size-x-small);
       padding: 0 1.5rem;
+      justify-content: center;
       color: var(--color-text-muted);
       display: inline-flex;
       align-items: center;

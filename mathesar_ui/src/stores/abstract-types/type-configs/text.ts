@@ -105,7 +105,7 @@ function constructDbFormValuesFromTypeOptions(
 const textType: AbstractTypeConfiguration = {
   icon: { ...iconUiTypeText, label: 'Text' },
   defaultDbType: DB_TYPES.VARCHAR,
-  cell: {
+  cellInfo: {
     type: 'string',
     config: {
       multiLine: true,
