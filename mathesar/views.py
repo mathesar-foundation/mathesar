@@ -106,13 +106,13 @@ def render_schema(request, database, schema):
         return redirect('schema_home', db_name=database.name, schema_id=schema.id)
 
 
-@login_required(login_url='/auth/login/')
+@login_required
 def home(request):
     database = get_current_database(request, None)
     return redirect('schemas', db_name=database.name)
 
 
-@login_required(login_url='/auth/login/')
+@login_required
 def schema_home(request, db_name, schema_id, **kwargs):
     database = get_current_database(request, db_name)
     schema = get_current_schema(request, schema_id, database)
@@ -121,7 +121,7 @@ def schema_home(request, db_name, schema_id, **kwargs):
     })
 
 
-@login_required(login_url='/auth/login/')
+@login_required
 def schemas(request, db_name):
     database = get_current_database(request, db_name)
     return render(request, 'mathesar/index.html', {
