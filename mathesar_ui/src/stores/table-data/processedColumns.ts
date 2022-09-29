@@ -20,6 +20,7 @@ import {
   getDbTypeBasedInputCap,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import type { TableEntry } from '@mathesar/api/tables';
 import { findFkConstraintsForColumn } from './constraintsUtils';
 
 export interface ProcessedColumn extends CellColumnFabric {
@@ -48,11 +49,17 @@ export interface ProcessedColumn extends CellColumnFabric {
 /** Maps column ids to processed columns */
 export type ProcessedColumnsStore = Readable<Map<number, ProcessedColumn>>;
 
-export function processColumn(
-  column: Column,
-  constraints: Constraint[],
-  abstractTypeMap: AbstractTypesMap,
-): ProcessedColumn {
+export function processColumn({
+  tableId,
+  column,
+  constraints,
+  abstractTypeMap,
+}: {
+  tableId: TableEntry['id'];
+  column: Column;
+  constraints: Constraint[];
+  abstractTypeMap: AbstractTypesMap;
+}): ProcessedColumn {
   const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
   const relevantConstraints = constraints.filter((c) =>
     c.columns.includes(column.id),
@@ -71,15 +78,16 @@ export function processColumn(
     sharedConstraints,
     linkFk,
     abstractType,
-    cellComponentAndProps: getCellCap(
-      abstractType.cell,
+    cellComponentAndProps: getCellCap({
+      cellInfo: abstractType.cellInfo,
       column,
-      linkFk ? linkFk.referent_table : undefined,
-    ),
+      fkTargetTableId: linkFk ? linkFk.referent_table : undefined,
+      pkTargetTableId: column.primary_key ? tableId : undefined,
+    }),
     inputComponentAndProps: getDbTypeBasedInputCap(
       column,
       linkFk ? linkFk.referent_table : undefined,
-      abstractType.cell,
+      abstractType.cellInfo,
     ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
     preprocFunctions: getPreprocFunctionsForAbstractType(
