@@ -1,13 +1,7 @@
 from enum import Enum
 import os
-from sqlalchemy import text, Text, Table, Column, String, MetaData
-from sqlalchemy.sql import quoted_name
-from sqlalchemy.sql.functions import GenericFunction
+from sqlalchemy import text, Table, Column, String, MetaData
 from sqlalchemy.types import UserDefinedType
-
-from db.functions import hints
-from db.functions.base import DBFunction, Contains, sa_call_sql_function, Equal
-from db.functions.packed import DBFunctionPacked
 
 from db.types.base import MathesarCustomType, PostgresType, get_qualified_name, get_ma_qualified_schema
 
@@ -40,24 +34,6 @@ class URI(UserDefinedType):
         # This results in the type name being upper case when viewed.
         # Actual usage in the DB is case-insensitive.
         return DB_TYPE.upper()
-
-
-# This function lets us avoid having to define repetitive classes for
-# adding custom SQL functions to SQLAlchemy
-def build_generic_function_def_class(name):
-    class_dict = {
-        "type": Text,
-        "name": quoted_name(URIFunction[name].value, False),
-        "identifier": URIFunction[name].value
-    }
-    return type(class_dict["identifier"], (GenericFunction,), class_dict)
-
-
-# We need to add these classes to the globals() dict so they get picked
-# up by SQLAlchemy
-globals().update(
-    {f.name: build_generic_function_def_class(f.name) for f in URIFunction}
-)
 
 
 def install(engine):
@@ -116,73 +92,3 @@ def install_tld_lookup_table(engine):
             tlds_table.insert(),
             [{"tld": tld.strip().lower()} for tld in f if tld[:2] != "# "],
         )
-
-
-class ExtractURIAuthority(DBFunction):
-    id = 'extract_uri_authority'
-    name = 'extract URI authority'
-    hints = tuple([
-        hints.parameter_count(1),
-        hints.parameter(1, hints.uri),
-    ])
-    depends_on = tuple([URIFunction.AUTHORITY])
-
-    @staticmethod
-    def to_sa_expression(uri):
-        return sa_call_sql_function(URIFunction.AUTHORITY.value, uri)
-
-
-class ExtractURIScheme(DBFunction):
-    id = 'extract_uri_scheme'
-    name = 'extract URI scheme'
-    hints = tuple([
-        hints.parameter_count(1),
-        hints.parameter(1, hints.uri),
-    ])
-    depends_on = tuple([URIFunction.SCHEME])
-
-    @staticmethod
-    def to_sa_expression(uri):
-        return sa_call_sql_function(URIFunction.SCHEME.value, uri)
-
-
-class URIAuthorityContains(DBFunctionPacked):
-    id = 'uri_authority_contains'
-    name = 'URI authority contains'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.uri),
-        hints.parameter(1, hints.string_like),
-        hints.mathesar_filter,
-    ])
-    depends_on = tuple([URIFunction.AUTHORITY])
-
-    def unpack(self):
-        param0 = self.parameters[0]
-        param1 = self.parameters[1]
-        return Contains([
-            ExtractURIAuthority([param0]),
-            param1,
-        ])
-
-
-class URISchemeEquals(DBFunctionPacked):
-    id = 'uri_scheme_equals'
-    name = 'URI scheme is'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.uri),
-        hints.parameter(1, hints.string_like),
-        hints.mathesar_filter,
-    ])
-    depends_on = tuple([URIFunction.SCHEME])
-
-    def unpack(self):
-        param0 = self.parameters[0]
-        param1 = self.parameters[1]
-        return Equal([
-            ExtractURIScheme([param0]),
-            param1,
-        ])

@@ -1,13 +1,7 @@
-from sqlalchemy import text, Text
-from sqlalchemy.sql import quoted_name
-from sqlalchemy.sql.functions import GenericFunction
+from sqlalchemy import text
 from sqlalchemy.types import UserDefinedType
 
 from db.types.base import MathesarCustomType
-
-from db.functions import hints
-from db.functions.base import DBFunction, Contains, sa_call_sql_function, Equal
-from db.functions.packed import DBFunctionPacked
 
 DB_TYPE = MathesarCustomType.EMAIL.id
 
@@ -28,22 +22,6 @@ class Email(UserDefinedType):
         # This results in the type name being upper case when viewed.
         # Actual usage in the DB is case-insensitive.
         return DB_TYPE.upper()
-
-
-# This will register our custom email_domain_name function with sqlalchemy so
-# it can be used via `func.email_domain_name`
-class email_domain_name(GenericFunction):
-    type = Text
-    name = quoted_name(EMAIL_DOMAIN_NAME, False)
-    identifier = EMAIL_DOMAIN_NAME
-
-
-# This will register our custom email_local_part function with sqlalchemy so
-# it can be used via `func.email_local_part`
-class email_local_part(GenericFunction):
-    type = Text
-    name = quoted_name(EMAIL_LOCAL_PART, False)
-    identifier = EMAIL_LOCAL_PART
 
 
 def install(engine):
@@ -76,59 +54,3 @@ def install(engine):
         conn.execute(text(create_email_domain_name_query))
         conn.execute(text(create_email_local_part_query))
         conn.commit()
-
-
-class ExtractEmailDomain(DBFunction):
-    id = 'extract_email_domain'
-    name = 'extract email domain'
-    hints = tuple([
-        hints.parameter_count(1),
-        hints.parameter(1, hints.email),
-    ])
-    depends_on = tuple([EMAIL_DOMAIN_NAME])
-
-    @staticmethod
-    def to_sa_expression(uri):
-        return sa_call_sql_function(EMAIL_DOMAIN_NAME, uri)
-
-
-class EmailDomainContains(DBFunctionPacked):
-    id = 'email_domain_contains'
-    name = 'email domain contains'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.email),
-        hints.parameter(1, hints.string_like),
-        hints.mathesar_filter,
-    ])
-    depends_on = tuple([EMAIL_DOMAIN_NAME])
-
-    def unpack(self):
-        param0 = self.parameters[0]
-        param1 = self.parameters[1]
-        return Contains([
-            ExtractEmailDomain([param0]),
-            param1,
-        ])
-
-
-class EmailDomainEquals(DBFunctionPacked):
-    id = 'email_domain_equals'
-    name = 'email domain is'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.email),
-        hints.parameter(1, hints.string_like),
-        hints.mathesar_filter,
-    ])
-    depends_on = tuple([EMAIL_DOMAIN_NAME])
-
-    def unpack(self):
-        param0 = self.parameters[0]
-        param1 = self.parameters[1]
-        return Equal([
-            ExtractEmailDomain([param0]),
-            param1,
-        ])

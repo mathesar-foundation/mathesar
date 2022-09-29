@@ -3,14 +3,22 @@ import pytest
 from sqlalchemy import text, select, Table, Column, MetaData
 from sqlalchemy.exc import IntegrityError
 from db.types.custom import email
+from db.types.base import PostgresType
 from db.utils import execute_pg_query
 from db.functions.base import ColumnName, Literal, sa_call_sql_function
+from db.functions.packed import EmailDomainContains, EmailDomainEquals
 from db.functions.operations.apply import apply_db_function_as_filter
 
 
 def test_domain_func_wrapper(engine_with_schema):
     engine, _ = engine_with_schema
-    sel = select(sa_call_sql_function(email.EMAIL_DOMAIN_NAME, text("'test@example.com'")))
+    sel = select(
+        sa_call_sql_function(
+            email.EMAIL_DOMAIN_NAME,
+            text("'test@example.com'"),
+            return_type=PostgresType.TEXT
+        )
+    )
     with engine.begin() as conn:
         res = conn.execute(sel)
         assert res.fetchone()[0] == "example.com"
@@ -18,7 +26,13 @@ def test_domain_func_wrapper(engine_with_schema):
 
 def test_local_part_func_wrapper(engine_with_schema):
     engine, _ = engine_with_schema
-    sel = select(sa_call_sql_function(email.EMAIL_LOCAL_PART, text("'test@example.com'")))
+    sel = select(
+        sa_call_sql_function(
+            email.EMAIL_LOCAL_PART,
+            text("'test@example.com'"),
+            return_type=PostgresType.TEXT
+        )
+    )
     with engine.begin() as conn:
         res = conn.execute(sel)
         assert res.fetchone()[0] == "test"
@@ -91,10 +105,10 @@ def test_create_email_type_domain_checks_broken_emails(engine_with_schema):
 
 
 @pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
-    (email.EmailDomainContains, "mail", 588),
-    (email.EmailDomainEquals, "gmail.com", 303),
-    (email.EmailDomainContains, "krista", 0),
-    (email.EmailDomainEquals, "kristaramirez@yahoo.com", 0),
+    (EmailDomainContains, "mail", 588),
+    (EmailDomainEquals, "gmail.com", 303),
+    (EmailDomainContains, "krista", 0),
+    (EmailDomainEquals, "kristaramirez@yahoo.com", 0),
 ])
 def test_email_db_functions(roster_table_obj, main_db_function, literal_param, expected_count):
     table, engine = roster_table_obj
