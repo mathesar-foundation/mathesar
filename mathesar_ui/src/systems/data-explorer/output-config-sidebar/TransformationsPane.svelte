@@ -3,7 +3,7 @@
     Button,
     Icon,
     DropdownMenu,
-    MenuItem,
+    ButtonMenuItem,
     ImmutableMap,
   } from '@mathesar-component-library';
   import {
@@ -151,8 +151,12 @@
   icon={iconAddNew}
   disabled={$processedColumns.size === 0}
 >
-  <MenuItem icon={iconFiltering} on:click={addFilter}>Filter</MenuItem>
-  <MenuItem icon={iconGrouping} on:click={addSummarization}>Summarize</MenuItem>
+  <ButtonMenuItem icon={iconFiltering} on:click={addFilter}>
+    Filter
+  </ButtonMenuItem>
+  <ButtonMenuItem icon={iconGrouping} on:click={addSummarization}>
+    Summarize
+  </ButtonMenuItem>
 </DropdownMenu>
 
 <style lang="scss">

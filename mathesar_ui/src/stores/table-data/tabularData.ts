@@ -68,11 +68,12 @@ export class TabularData {
         new Map(
           columnsData.columns.map((column) => [
             column.id,
-            processColumn(
+            processColumn({
+              tableId: this.id,
               column,
-              constraintsData.constraints,
-              props.abstractTypesMap,
-            ),
+              constraints: constraintsData.constraints,
+              abstractTypeMap: props.abstractTypesMap,
+            }),
           ]),
         ),
     );

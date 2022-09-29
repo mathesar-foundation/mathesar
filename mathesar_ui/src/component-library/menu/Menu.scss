@@ -48,6 +48,7 @@
   .menu-item {
     display: contents;
     cursor: pointer;
+    color: inherit;
 
     &:not(.disabled):hover .cell {
       background-color: #f0f0f0;

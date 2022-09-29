@@ -5,13 +5,9 @@
     faTimes,
   } from '@fortawesome/free-solid-svg-icons';
   import { Meta, Story } from '@storybook/addon-svelte-csf';
-  import MenuItem from '@mathesar-component-library-dir/menu/MenuItem.svelte';
-  import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
+  import ButtonMenuItem from '@mathesar-component-library-dir/menu/ButtonMenuItem.svelte';
+  import CheckboxMenuItem from '@mathesar-component-library-dir/menu/CheckboxMenuItem.svelte';
   import ContextMenu from '../ContextMenu.svelte';
-
-  const meta = {
-    title: 'Components/ContextMenu',
-  };
 
   let count = 0;
   let hasBackground = true;
@@ -19,13 +15,9 @@
   function incrementCount() {
     count += 1;
   }
-
-  function toggleBackground() {
-    hasBackground = !hasBackground;
-  }
 </script>
 
-<Meta {...meta} />
+<Meta title="Components/ContextMenu" />
 
 <Story name="Basic">
   <div class="box without-context">
@@ -36,20 +28,24 @@
     <p>This box has a context menu.</p>
     <p>The count is: <strong>{count}</strong>.</p>
     <ContextMenu>
-      <MenuItem icon={{ data: faFillDrip }} on:click={toggleBackground}>
-        <Checkbox slot="control" checked={hasBackground} />
+      <CheckboxMenuItem
+        icon={{ data: faFillDrip }}
+        bind:checked={hasBackground}
+      >
         Use Background
-      </MenuItem>
-      <MenuItem icon={{ data: faPlus }} on:click={incrementCount}>
+      </CheckboxMenuItem>
+      <ButtonMenuItem icon={{ data: faPlus }} on:click={incrementCount}>
         Increment Counter
-      </MenuItem>
+      </ButtonMenuItem>
     </ContextMenu>
   </div>
 
   <div class="box with-context" has-background>
     <p>This box <em>also</em> has a context menu.</p>
     <ContextMenu>
-      <MenuItem icon={{ data: faTimes }}>I don't do anything</MenuItem>
+      <ButtonMenuItem icon={{ data: faTimes }}
+        >I don't do anything</ButtonMenuItem
+      >
     </ContextMenu>
   </div>
 

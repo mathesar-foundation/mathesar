@@ -276,11 +276,14 @@ function processColumn(
     id: column.alias,
     column,
     abstractType,
-    cellComponentAndProps: getCellCap(abstractType.cell, column),
+    cellComponentAndProps: getCellCap({
+      cellInfo: abstractType.cellInfo,
+      column,
+    }),
     inputComponentAndProps: getDbTypeBasedInputCap(
       column,
       undefined,
-      abstractType.cell,
+      abstractType.cellInfo,
     ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
     preprocFunctions: getPreprocFunctionsForAbstractType(

@@ -62,7 +62,6 @@
   on:mouseenter
   on:update
 >
-  <slot name="icon" slot="icon" />
   <NumberCellInput
     {disabled}
     bind:value

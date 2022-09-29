@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DropdownMenu, MenuItem } from '@mathesar-component-library';
+  import { DropdownMenu, ButtonMenuItem } from '@mathesar-component-library';
   import type { Writable } from 'svelte/store';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { Grouping } from '@mathesar/stores/table-data/types';
@@ -70,9 +70,9 @@
       disabled={availableColumns.length === 0}
     >
       {#each availableColumns as column (column.id)}
-        <MenuItem on:click={() => addGroupColumn(column)}
-          >{$processedColumns.get(column.id)?.column.name}</MenuItem
-        >
+        <ButtonMenuItem on:click={() => addGroupColumn(column)}>
+          {$processedColumns.get(column.id)?.column.name}
+        </ButtonMenuItem>
       {/each}
     </DropdownMenu>
   </footer>
