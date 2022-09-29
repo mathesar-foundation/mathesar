@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 
 from db.columns.operations.select import get_column_attnums_from_table
 from db.constraints.operations.select import get_constraints_with_oids
@@ -44,13 +44,12 @@ def reflect_databases():
 
 
 # TODO creating a one-off engine is expensive
-def reflect_schemas_from_database(database_name):
-    engine = create_mathesar_engine(database_name)
+def reflect_schemas_from_database(database):
+    engine = create_mathesar_engine(database.name)
     db_schema_oids = {
         schema['oid'] for schema in get_mathesar_schemas_with_oids(engine)
     }
 
-    database = models.Database.current_objects.get(name=database_name)
     schemas = []
     for oid in db_schema_oids:
         schema = models.Schema(oid=oid, database=database)
@@ -176,13 +175,13 @@ def reflect_new_table_constraints(table):
 def reflect_db_objects(skip_cache_check=False):
     if skip_cache_check or not cache.get(DB_REFLECTION_KEY):
         reflect_databases()
-        for database in models.Database.current_objects.filter(deleted=False):
-            reflect_schemas_from_database(database.name)
+        databases = models.Database.current_objects.filter(deleted=False)
+        for database in databases:
+            reflect_schemas_from_database(database)
         # Prefetching queries make use of a single db engine, so we need to
-        for database in models.Database.current_objects.filter(deleted=False):
-            schemas = models.Schema.current_objects.filter(database=database)
+            schemas = models.Schema.current_objects.filter(database=database).prefetch_related(Prefetch('database', queryset=databases))
             reflect_tables_from_schemas(schemas)
-            tables = models.Table.current_objects.filter(schema__in=schemas).prefetch_related('schema')
+            tables = models.Table.current_objects.filter(schema__in=schemas).prefetch_related(Prefetch('schema', queryset=schemas))
             reflect_columns_from_tables(tables)
             reflect_constraints_from_database(database.name)
         cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)

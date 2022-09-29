@@ -715,7 +715,7 @@ def _create_table_settings(tables):
 
 def _compute_preview_template(table):
     if not table.settings.preview_settings.customized:
-        columns = Column.current_objects.filter(table=table).order_by('attnum')
+        columns = Column.current_objects.filter(table=table).prefetch_related('table', 'table__schema', 'table__schema__database').order_by('attnum')
         preview_column = None
         primary_key_column = None
         for column in columns:
