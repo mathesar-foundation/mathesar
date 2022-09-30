@@ -176,6 +176,23 @@ export default class QueryModel {
     return this.initial_columns.find((column) => column.alias === columnAlias);
   }
 
+  getSummarizationTransforms(): QuerySummarizationTransformationModel[] {
+    return this.transformationModels.filter(
+      (transform): transform is QuerySummarizationTransformationModel =>
+        transform instanceof QuerySummarizationTransformationModel,
+    );
+  }
+
+  getOutputColumnAliases(): string[] {
+    const summarizationTransforms = this.getSummarizationTransforms();
+    if (summarizationTransforms.length > 0) {
+      return summarizationTransforms[
+        summarizationTransforms.length - 1
+      ].getOutputColumnAliases();
+    }
+    return this.initial_columns.map((entry) => entry.alias);
+  }
+
   toJSON(): UnsavedQueryInstance {
     return {
       id: this.id,
