@@ -13,7 +13,11 @@ from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSer
 from mathesar.database.base import create_mathesar_engine
 
 
+import logging
+logger = logging.getLogger(__name__)
+
 def clear_dj_cache():
+    logger.debug('clear_dj_cache')
     dj_cache.clear()
 
 

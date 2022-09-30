@@ -12,6 +12,7 @@ from db.tables.operations.select import get_oid_from_table
 from db.types.base import PostgresType
 from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
 from db.metadata import get_empty_metadata
+from mathesar.state import reset_reflection
 
 
 @pytest.fixture
@@ -268,3 +269,13 @@ def column_test_table_with_service_layer_options(patent_schema):
         )[0]
         service_columns.append(first_column)
     return table, service_columns
+
+
+@pytest.fixture
+def library_ma_tables(db_table_to_dj_table, library_db_tables):
+    reset_reflection()
+    return {
+        table_name: db_table_to_dj_table(db_table)
+        for table_name, db_table
+        in library_db_tables.items()
+    }

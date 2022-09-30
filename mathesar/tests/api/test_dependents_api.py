@@ -12,18 +12,10 @@ def _get_constraint_ids(table_constraint_results):
     return [r['id'] for r in table_constraint_results]
 
 
-@pytest.fixture
-def library_ma_tables(db_table_to_dj_table, library_db_tables):
-    return {
-        table_name: db_table_to_dj_table(db_table)
-        for table_name, db_table
-        in library_db_tables.items()
-    }
-
-
 def test_dependents_response_attrs(library_ma_tables, client):
     items_id = library_ma_tables["Items"].id
     response = client.get(f'/api/db/v0/tables/{items_id}/dependents/')
+    assert response.status_code == 200
     response_data = response.json()
 
     dependent_expected_attrs = ['obj', 'parent_obj']
@@ -42,14 +34,20 @@ def test_dependents_response_attrs(library_ma_tables, client):
     )
 
 
+import logging
+logger = logging.getLogger(__name__)
 def test_dependents_response(library_ma_tables, client):
+    from mathesar.state import reset_reflection; reset_reflection()
     items_id = library_ma_tables["Items"].id
     checkouts_id = library_ma_tables["Checkouts"].id
 
+    logger.debug("client.get(f'/api/db/v0/tables/{items_id}/dependents/')")
     items_dependents = client.get(f'/api/db/v0/tables/{items_id}/dependents/').json()
     items_dependent_ids = _get_object_dependent_ids(items_dependents, items_id, 'table')
 
+    logger.debug("client.get(f'/api/db/v0/tables/{items_id}/constraints/')")
     items_constraints = client.get(f'/api/db/v0/tables/{items_id}/constraints/').json()['results']
+    logger.debug("client.get(f'/api/db/v0/tables/{checkouts_id}/constraints/')")
     checkouts_constraints = client.get(f'/api/db/v0/tables/{checkouts_id}/constraints/').json()['results']
 
     items_constraints_ids = _get_constraint_ids(items_constraints)

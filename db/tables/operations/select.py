@@ -27,6 +27,50 @@ def reflect_table_from_oid(oid, engine, metadata, connection_to_use=None):
 
 
 def reflect_tables_from_oids(oids, engine, metadata, connection_to_use=None):
+   #with warnings.catch_warnings():
+   #    warnings.filterwarnings("ignore", message="Did not recognize type")
+   #    pg_class = Table("pg_class", metadata, autoload_with=engine)
+   #    pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+   #sel = (
+   #    select(pg_namespace.c.nspname, pg_class.c.relname, pg_class.c.oid)
+   #    .select_from(
+   #        join(
+   #            pg_class,
+   #            pg_namespace,
+   #            pg_class.c.relnamespace == pg_namespace.c.oid
+   #        )
+   #    )
+   #    .where(pg_class.c.oid.in_(oids))
+   #)
+   #results = execute_statement(engine, sel, connection_to_use).fetchall()
+    oids_to_schema_and_table_names = (
+        get_map_of_table_oid_to_schema_name_and_table_name(
+            oids,
+            engine,
+            metadata=metadata,
+            connection_to_use=connection_to_use,
+        )
+    )
+    table_oids_to_sa_tables = {}
+    for table_oid, (schema_name, table_name) in oids_to_schema_and_table_names.items():
+        table_oids_to_sa_tables[table_oid] = reflect_table(
+            table_name,
+            schema_name,
+            engine,
+            metadata=metadata,
+            connection_to_use=connection_to_use,
+        )
+    return table_oids_to_sa_tables
+
+
+def get_map_of_table_oid_to_schema_name_and_table_name(
+        table_oids,
+        engine,
+        metadata,
+        connection_to_use=None,
+    ):
+    if len(table_oids) == 0:
+        return {}
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_class = Table("pg_class", metadata, autoload_with=engine)
@@ -40,13 +84,15 @@ def reflect_tables_from_oids(oids, engine, metadata, connection_to_use=None):
                 pg_class.c.relnamespace == pg_namespace.c.oid
             )
         )
-        .where(pg_class.c.oid.in_(oids))
+        .where(pg_class.c.oid.in_(table_oids))
     )
-    results = execute_statement(engine, sel, connection_to_use).fetchall()
-    tables = {}
-    for (schema, table_name, table_oid) in results:
-        tables[table_oid] = reflect_table(table_name, schema, engine, metadata=metadata, connection_to_use=connection_to_use)
-    return tables
+    result_rows = execute_statement(engine, sel, connection_to_use).fetchall()
+    table_oids_to_schema_names_and_table_names = {
+        table_oid: (schema_name, table_name)
+        for schema_name, table_name, table_oid
+        in result_rows
+    }
+    return table_oids_to_schema_names_and_table_names
 
 
 def get_table_oids_from_schema(schema_oid, engine, metadata):

@@ -216,7 +216,7 @@ def db_table_to_dj_table(engine, create_schema):
         db_table_oid = get_oid_from_table(
             db_table.name, schema_name, engine
         )
-        dj_table = Table.current_objects.create(
+        dj_table, _ = Table.current_objects.get_or_create(
             oid=db_table_oid, schema=dj_schema
         )
         return dj_table

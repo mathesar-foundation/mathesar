@@ -1,5 +1,6 @@
 from mathesar.state.django import reflect_db_objects, clear_dj_cache
 from mathesar.state.metadata import reset_cached_metadata, get_cached_metadata
+from mathesar.state.cached_property import clear_property_cache
 
 
 def make_sure_initial_reflection_happened():
@@ -20,6 +21,7 @@ def reset_reflection():
     Note, this causes immediate calls to Postgres.
     """
     clear_dj_cache()
+    clear_property_cache()
     set_initial_reflection_happened()
     reset_cached_metadata()
     _trigger_django_model_reflection()

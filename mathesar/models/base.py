@@ -45,6 +45,8 @@ from mathesar.utils.prefetch import PrefetchManager, Prefetcher
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
 from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
+from mathesar.state.cached_property import key_cached_property, cached_property
+#from django.utils.functional import cached_property
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 
 
@@ -105,6 +107,7 @@ _engine_cache = {}
 
 class Database(ReflectionManagerMixin, BaseModel):
     current_objects = models.Manager()
+    # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
     objects = DatabaseObjectManager()
     name = models.CharField(max_length=128, unique=True)
     deleted = models.BooleanField(blank=True, default=False)
@@ -217,6 +220,7 @@ class ColumnNamePrefetcher(Prefetcher):
         return
 
     def decorator(self, column, name):
+        #pass
         setattr(column, 'name', name)
 
 
@@ -232,6 +236,7 @@ class ColumnPrefetcher(Prefetcher):
                 table_oids,
                 list(tables)[0]._sa_engine
                 if len(tables) > 0 else [],
+                metadata=get_cached_metadata(),
                 fetch_as_map=True
             )
         return ColumnNamePrefetcher(
@@ -243,8 +248,27 @@ class ColumnPrefetcher(Prefetcher):
         return [column.table_id]
 
     def decorator(self, table, columns):
-        pass
+        #pass
+        table.columns = columns
 
+
+import logging
+logger = logging.getLogger(__name__)
+
+_sa_table_prefetcher = Prefetcher(
+    filter=lambda oids, tables: reflect_tables_from_oids(oids, list(tables)[0]._sa_engine, metadata=get_cached_metadata())
+        if len(tables) > 0 else [],
+    mapper=lambda table: table.oid,
+    # A filler statement, just used to satisfy the library. It does not affect the prefetcher in
+    # any way as we bypass reverse mapping if the prefetcher returns a dictionary
+    reverse_mapper=lambda table: table.oid,
+    #decorator=lambda table, _sa_table: None,
+    decorator=lambda table, _sa_table: setattr(
+            table,
+            '_sa_table',
+            _sa_table
+        )
+)
 
 class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
@@ -252,18 +276,7 @@ class Table(DatabaseObject, Relation):
     current_objects = models.Manager()
     objects = DatabaseObjectManager(
         # TODO Move the Prefetcher into a separate class and replace lambdas with proper function
-        _sa_table=Prefetcher(
-            filter=lambda oids, tables: reflect_tables_from_oids(oids, list(tables)[0]._sa_engine)
-            if len(tables) > 0 else [],
-            mapper=lambda table: table.oid,
-            # A filler statement, just used to satisfy the library. It does not affect the prefetcher in any way as we bypass reverse mapping if the prefetcher returns a dictionary
-            reverse_mapper=lambda table: table.oid,
-            decorator=lambda table, _sa_table: setattr(
-                table,
-                '_sa_table',
-                _sa_table
-            )
-        ),
+        _sa_table=_sa_table_prefetcher,
         columns=ColumnPrefetcher,
     )
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
@@ -291,7 +304,16 @@ class Table(DatabaseObject, Relation):
         super().save(*args, **kwargs)
 
     # TODO referenced from outside so much that it probably shouldn't be private
-    @property
+    # NOTE key_cached_property's key_fn below presumes that an SA table's oid is
+    #@property
+   #@key_cached_property(
+   #    key_fn=lambda table: (
+   #            'sa_table',
+   #            table.schema.database.name,
+   #            table.oid,
+   #        )
+   #)
+    @cached_property
     def _sa_table(self):
         # We're caching since we want different Django Table instances to return the same SA
         # Table, when they're referencing the same Postgres table.
@@ -650,6 +672,17 @@ class Column(ReflectionManagerMixin, BaseModel):
             else:
                 raise e
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        column = self
+        logger.debug((
+                         "column name",
+                         column.table.schema.database.name,
+                         column.table.schema.name,
+                         column.table.oid,
+                         column.attnum,
+                     ))
+
     @property
     def _sa_engine(self):
         return self.table._sa_engine
@@ -659,7 +692,17 @@ class Column(ReflectionManagerMixin, BaseModel):
     def _sa_column(self):
         return self.table.sa_columns[self.name]
 
-    @property
+   #@key_cached_property(
+   #    key_fn=lambda column: (
+   #            "column name",
+   #            column.table.schema.database.name,
+   #            column.table.schema.name,
+   #            column.table.oid,
+   #            column.attnum,
+   #        )
+   #)
+    @cached_property
+    #@property
     def name(self):
         name = get_column_name_from_attnum(
             self.table.oid,
@@ -708,7 +751,10 @@ class Constraint(DatabaseObject):
     @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
-        return get_constraint_from_oid(self.oid, engine, self.table._sa_table)
+        del self.table._sa_table
+        sa_constraint = get_constraint_from_oid(self.oid, engine, self.table._sa_table)
+        assert sa_constraint is not None
+        return sa_constraint
 
     @property
     def name(self):
