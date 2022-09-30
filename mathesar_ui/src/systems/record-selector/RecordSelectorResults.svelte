@@ -25,6 +25,7 @@
     getPkValueInRecord,
     getValidOffsetSelection,
   } from './recordSelectorUtils';
+  import { buildDataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -60,6 +61,7 @@
   $: ({ display, recordsData, meta, columnsDataStore, isLoading } =
     $tabularData);
   $: recordsStore = recordsData.savedRecords;
+  $: ({ dataForRecordSummariesInFkColumns } = recordsData);
   $: ({ searchFuzzy } = meta);
   $: records = $recordsStore;
   $: resultCount = records.length;
@@ -199,13 +201,17 @@
         on:buttonClick={() => submitIndex(index)}
       >
         <CellArranger {display} let:style let:processedColumn>
+          {@const value = row?.record?.[processedColumn.id]}
           <CellWrapper {style}>
             <CellFabric
               columnFabric={processedColumn}
-              value={row?.record?.[processedColumn.column.id]}
-              dataForRecordSummaryInFkCell={row?.dataForRecordSummariesInRow?.[
-                processedColumn.column.id
-              ]}
+              {value}
+              dataForRecordSummaryInFkCell={buildDataForRecordSummaryInFkCell({
+                recordId: String(value),
+                stringifiedColumnId: String(processedColumn.id),
+                dataForRecordSummariesInFkColumns:
+                  $dataForRecordSummariesInFkColumns,
+              })}
               disabled
               showAsSkeleton={!rowHasRecord(row)}
             />

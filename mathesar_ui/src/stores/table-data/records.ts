@@ -7,7 +7,10 @@ import {
   postAPI,
 } from '@mathesar/utils/api';
 import type { Writable, Unsubscriber } from 'svelte/store';
-import type { CancellablePromise } from '@mathesar-component-library';
+import {
+  ImmutableMap,
+  type CancellablePromise,
+} from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type {
   Result as ApiRecord,
@@ -15,13 +18,15 @@ import type {
   Group as ApiGroup,
   Grouping as ApiGrouping,
   GroupingMode,
-  ApiDataForRecordSummariesInFkColumn,
   GetRequestParams as ApiGetRequestParams,
 } from '@mathesar/api/tables/records';
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
-import type { DataForRecordSummaryInFkCell } from './record-summaries/recordSummaryTypes';
+import {
+  buildDataForRecordSummariesInFkColumns,
+  type DataForRecordSummariesInFkColumns,
+} from './record-summaries/recordSummaryUtils';
 import type { Meta } from './meta';
 import type { RowKey } from './utils';
 import { validateRow, getCellKey } from './utils';
@@ -68,11 +73,6 @@ export interface Grouping {
   mode: GroupingMode;
   groups: Group[];
 }
-/** Keys are stringified column ids */
-type DataForRecordSummariesInFkColumns = Record<
-  string,
-  ApiDataForRecordSummariesInFkColumn
->;
 
 function buildGroup(apiGroup: ApiGroup): Group {
   return {
@@ -93,8 +93,6 @@ function buildGrouping(apiGrouping: ApiGrouping): Grouping {
   };
 }
 
-type DataForRecordSummariesInRow = Record<string, DataForRecordSummaryInFkCell>;
-
 export interface Row {
   /**
    * Can be `undefined` because some rows don't have an associated record, e.g.
@@ -108,7 +106,6 @@ export interface Row {
   isGroupHeader?: boolean;
   group?: Group;
   rowIndex?: number;
-  dataForRecordSummariesInRow?: DataForRecordSummariesInRow;
   groupValues?: ApiGroup['first_value'];
 }
 
@@ -160,21 +157,9 @@ function getProcessedRecordRow(
   record: ApiRecord,
   recordIndex: number,
   offset: number,
-  dataForRecordSummariesInFkColumns?: DataForRecordSummariesInFkColumns,
 ): Row {
-  const dataForRecordSummariesInRow: DataForRecordSummariesInRow | undefined =
-    dataForRecordSummariesInFkColumns
-      ? Object.entries(dataForRecordSummariesInFkColumns).reduce(
-          (fkColumnSummaryRecord, [columnId, summaryObj]) => ({
-            ...fkColumnSummaryRecord,
-            [columnId]: { ...summaryObj, data: summaryObj.data[recordIndex] },
-          }),
-          {},
-        )
-      : undefined;
   return {
     record,
-    dataForRecordSummariesInRow,
     identifier: generateRowIdentifier('normal', offset, recordIndex),
     rowIndex: recordIndex,
   };
@@ -184,12 +169,10 @@ function preprocessRecords({
   records,
   offset,
   grouping,
-  dataForRecordSummariesInFkColumns,
 }: {
   records: ApiRecord[];
   offset: number;
   grouping?: Grouping;
-  dataForRecordSummariesInFkColumns?: DataForRecordSummariesInFkColumns;
 }): Row[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
@@ -216,12 +199,7 @@ function preprocessRecords({
       group.resultIndices.forEach((resultIndex) => {
         const record = records[resultIndex];
         combinedRecords.push(
-          getProcessedRecordRow(
-            record,
-            recordIndex,
-            offset,
-            dataForRecordSummariesInFkColumns,
-          ),
+          getProcessedRecordRow(record, recordIndex, offset),
         );
         recordIndex += 1;
       });
@@ -230,12 +208,7 @@ function preprocessRecords({
   }
 
   return records.map((record, index) =>
-    getProcessedRecordRow(
-      record,
-      index,
-      offset,
-      dataForRecordSummariesInFkColumns,
-    ),
+    getProcessedRecordRow(record, index, offset),
   );
 }
 
@@ -257,6 +230,9 @@ export class RecordsData {
   savedRecords: Writable<Row[]>;
 
   newRecords: Writable<Row[]>;
+
+  dataForRecordSummariesInFkColumns: Writable<DataForRecordSummariesInFkColumns> =
+    writable(new ImmutableMap());
 
   grouping: Writable<Grouping | undefined>;
 
@@ -352,20 +328,15 @@ export class RecordsData {
       const grouping = response.grouping
         ? buildGrouping(response.grouping)
         : undefined;
-      // Converting an array to a map type as it would be easier to reference
-      const dataForRecordSummariesInFkColumns: DataForRecordSummariesInFkColumns =
-        (response.preview_data ?? []).reduce(
-          (acc, item) => ({
-            ...acc,
-            [item.column]: item,
-          }),
-          {},
+      if (response.preview_data) {
+        this.dataForRecordSummariesInFkColumns.set(
+          buildDataForRecordSummariesInFkColumns(response.preview_data),
         );
+      }
       const records = preprocessRecords({
         records: response.results,
         offset,
         grouping,
-        dataForRecordSummariesInFkColumns,
       });
 
       const tableRecordsData: TableRecordsData = {

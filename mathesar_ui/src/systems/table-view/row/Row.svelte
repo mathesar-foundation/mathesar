@@ -35,7 +35,7 @@
     cellModificationStatus,
     cellClientSideErrors,
   } = meta);
-  $: ({ grouping } = recordsData);
+  $: ({ grouping, dataForRecordSummariesInFkColumns } = recordsData);
 
   $: ({ primaryKeyColumnId } = $columnsDataStore);
   $: rowKey = getRowKey(row, primaryKeyColumnId);
@@ -122,9 +122,7 @@
           modificationStatusMap={cellModificationStatus}
           clientSideErrorMap={cellClientSideErrors}
           bind:value={row.record[columnId]}
-          dataForRecordSummaryInFkCell={row.dataForRecordSummariesInRow?.[
-            columnId
-          ]}
+          dataForRecordSummariesInFkColumns={$dataForRecordSummariesInFkColumns}
           {processedColumn}
           {recordsData}
         />

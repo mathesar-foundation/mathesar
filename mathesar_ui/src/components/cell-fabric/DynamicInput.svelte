@@ -12,7 +12,7 @@ during Sheet component creation.
     BaseInputProps,
     SimplifiedInputProps,
   } from '@mathesar-component-library/types';
-  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryTypes';
+  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 
   // TODO: Provide this as a discriminated union of all input types
   interface $$Props

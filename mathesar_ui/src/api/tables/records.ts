@@ -103,17 +103,19 @@ export interface Group {
  * The keys in this type below are column aliases. The values are the data to be
  * rendered for that column.
  */
-export type RecordSummaryInputData = Record<string, ResultValue>;
+export type ApiRecordSummaryInputData = Record<string, ResultValue>;
 
 export interface ApiDataForRecordSummariesInFkColumn {
   column: number;
   template: string;
   /**
-   * Each item in this array provides the inputs for one cell within the column.
-   * The array is to be matched, index for index, with the records in the
-   * results.
+   * Keys represent PK values of the table which contains the column. Values
+   * represent the data necessary to render the record summary for the record
+   * having that PK value. All key values are string. If the PK values as stored
+   * in the database is a number, then it will be stringified for transmission
+   * through the API.
    */
-  data: RecordSummaryInputData[];
+  data: Record<string, ApiRecordSummaryInputData>;
 }
 
 export interface Response {

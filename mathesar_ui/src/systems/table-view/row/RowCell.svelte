@@ -21,7 +21,10 @@
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
-  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryTypes';
+  import {
+    buildDataForRecordSummaryInFkCell,
+    type DataForRecordSummariesInFkColumns,
+  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -44,9 +47,7 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
-  export let dataForRecordSummaryInFkCell:
-    | DataForRecordSummaryInFkCell
-    | undefined = undefined;
+  export let dataForRecordSummariesInFkColumns: DataForRecordSummariesInFkColumns;
 
   $: recordsDataState = recordsData.state;
   $: ({ column, linkFk } = processedColumn);
@@ -92,6 +93,11 @@
     }
     return undefined;
   })();
+  $: dataForRecordSummaryInFkCell = buildDataForRecordSummaryInFkCell({
+    recordId: String(value),
+    stringifiedColumnId: String(column.id),
+    dataForRecordSummariesInFkColumns,
+  });
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
