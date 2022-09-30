@@ -2,7 +2,8 @@
   import { tick } from 'svelte';
   import {
     ContextMenu,
-    MenuItem,
+    ButtonMenuItem,
+    LinkMenuItem,
     WritableMap,
   } from '@mathesar-component-library';
   import {
@@ -25,7 +26,7 @@
     buildDataForRecordSummaryInFkCell,
     type DataForRecordSummariesInFkColumns,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import { iconSetToNull } from '@mathesar/icons';
+  import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     isCellSelected,
@@ -83,16 +84,9 @@
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isEditable = !column.primary_key;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
-  $: recordPageLinkHref = (() => {
-    if (linkFk) {
-      const tableId = linkFk.referent_table;
-      return getRecordPageUrl({ tableId, recordId: value });
-    }
-    if (column.primary_key) {
-      return getRecordPageUrl({ recordId: value });
-    }
-    return undefined;
-  })();
+  $: linkedRecordHref = linkFk
+    ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
+    : undefined;
   $: dataForRecordSummaryInFkCell = buildDataForRecordSummaryInFkCell({
     recordId: String(value),
     stringifiedColumnId: String(column.id),
@@ -176,7 +170,6 @@
         selection.onStartSelection(row, column);
       }}
       on:update={valueUpdated}
-      {recordPageLinkHref}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
       on:mouseenter={() => {
         // This enables the click + drag to
@@ -185,13 +178,18 @@
       }}
     />
     <ContextMenu>
-      <MenuItem
+      <ButtonMenuItem
         icon={iconSetToNull}
         disabled={!canSetNull}
         on:click={() => setValue(null)}
       >
         Set to <Null />
-      </MenuItem>
+      </ButtonMenuItem>
+      {#if linkedRecordHref}
+        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
+          Go To Linked Record
+        </LinkMenuItem>
+      {/if}
     </ContextMenu>
     {#if errors.length}
       <CellErrors {errors} forceShowErrors={isActive} />

@@ -11,7 +11,7 @@
   import type { Row } from '@mathesar/stores/table-data/records';
   import { rowHasRecord } from '@mathesar/stores/table-data/records';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
-  import { rowHeightPx } from '@mathesar/systems/table-view/geometry';
+  import { rowHeightPx } from '@mathesar/geometry';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import NewIndicator from './NewIndicator.svelte';
