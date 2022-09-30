@@ -110,6 +110,7 @@
         grouping={$grouping}
         group={row.group}
         processedColumnsMap={$processedColumns}
+        dataForRecordSummariesInFkColumns={$dataForRecordSummariesInFkColumns}
       />
     {:else if row.record}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}

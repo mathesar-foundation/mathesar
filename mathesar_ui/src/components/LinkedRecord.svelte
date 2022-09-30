@@ -28,5 +28,6 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    box-sizing: content-box;
   }
 </style>
