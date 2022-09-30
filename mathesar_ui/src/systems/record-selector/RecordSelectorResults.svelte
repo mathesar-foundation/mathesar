@@ -7,11 +7,11 @@
   import type { Column } from '@mathesar/api/tables/columns';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import type { Row } from '@mathesar/stores/table-data/records';
-  import { rowHasRecord } from '@mathesar/stores/table-data/records';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
   import { rowHeightPx } from '@mathesar/geometry';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { buildDataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import { rowHasRecord, type Row } from '@mathesar/stores/table-data/records';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import NewIndicator from './NewIndicator.svelte';
@@ -25,7 +25,6 @@
     getPkValueInRecord,
     getValidOffsetSelection,
   } from './recordSelectorUtils';
-  import { buildDataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 
   const tabularData = getTabularDataStoreFromContext();
 
