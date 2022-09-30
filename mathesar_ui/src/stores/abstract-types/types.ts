@@ -54,15 +54,17 @@ export interface AbstractTypeDisplayConfig {
   ) => FormValues;
 }
 
+export interface CellInfo {
+  type: CellDataType;
+  config?: Record<string, unknown>;
+  conditionalConfig?: Record<DbType, Record<string, unknown>>;
+}
+
 export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
   icon: IconProps;
   allowSettingDefaultValue?: boolean;
-  cell: {
-    type: CellDataType;
-    config?: Record<string, unknown>;
-    conditionalConfig?: Record<DbType, Record<string, unknown>>;
-  };
+  cellInfo: CellInfo;
   getDbConfig?: (selectedDbType?: DbType) => AbstractTypeDbConfig;
   getDisplayConfig?: () => AbstractTypeDisplayConfig;
 }

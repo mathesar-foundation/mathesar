@@ -91,8 +91,6 @@ class UIQuery(BaseModel, Relation):
 
     # sequence of dicts
     initial_columns = models.JSONField(
-        null=True,
-        blank=True,
         validators=[_validate_list_of_dicts, _validate_initial_columns],
     )
 
@@ -109,13 +107,6 @@ class UIQuery(BaseModel, Relation):
         blank=True,
         validators=[_validate_dict],
     )
-
-    @property
-    def not_partial(self):
-        return (
-            (self.base_table is not None)
-            and (self.initial_columns is not None)
-        )
 
     def get_records(self, **kwargs):
         return self.db_query.get_records(**kwargs)

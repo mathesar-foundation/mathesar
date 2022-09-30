@@ -4,6 +4,19 @@ from rest_framework import serializers
 from mathesar.models.base import Constraint, Schema, Table
 
 
+DATABASE_OBJECT_TYPES = [
+    'table',
+    'table column',
+    'table constraint',
+    'view',
+    'index',
+    'trigger',
+    'sequence',
+    'type',
+    'function'
+]
+
+
 class DependentMathesarObjectSerializer(serializers.Serializer):
     id = serializers.CharField()
     type = serializers.CharField()
@@ -61,3 +74,7 @@ class DependentSerializer(serializers.Serializer):
     obj = BaseDependentObjectSerializer()
     parent_obj = BaseDependentObjectSerializer()
     level = serializers.IntegerField()
+
+
+class DependentFilterSerializer(serializers.Serializer):
+    exclude = serializers.MultipleChoiceField(DATABASE_OBJECT_TYPES, required=False)

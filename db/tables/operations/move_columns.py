@@ -72,7 +72,7 @@ def _create_move_referent_table_columns_update_stmt(
     moved_column_names = [col.name for col in columns_to_move]
     extract_cte = select(
         source_table
-    )
+    ).cte()
     extracted_columns_update_dict = {column_name: extract_cte.c[column_name] for column_name in moved_column_names}
     extract_ins = (
         target_table
