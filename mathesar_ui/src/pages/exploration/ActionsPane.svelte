@@ -23,9 +23,9 @@
   $: isLoading = $runState?.state === 'processing';
   $: isError = $runState?.state === 'failure';
 
-  function handleDeleteTable() {
+  function handleDeleteExploration() {
     void confirmDelete({
-      identifierType: 'Table',
+      identifierType: 'Exploration',
       onProceed: async () => {
         await deleteQuery(query.id);
         router.goto(getSchemaPageUrl(database.name, schema.id));
@@ -45,7 +45,7 @@
       <span>Edit</span>
     </Button>
   </a>
-  <Button disabled={isLoading} size="medium" on:click={handleDeleteTable}>
+  <Button disabled={isLoading} size="medium" on:click={handleDeleteExploration}>
     <Icon {...iconDelete} />
     <span>Delete</span>
   </Button>
