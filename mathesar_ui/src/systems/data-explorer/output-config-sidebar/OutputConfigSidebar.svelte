@@ -8,7 +8,7 @@
     Icon,
   } from '@mathesar-component-library';
   import { slide } from 'svelte/transition';
-  import { iconDelete } from '@mathesar/icons';
+  import { iconDeleteMajor } from '@mathesar/icons';
   import type QueryManager from '../QueryManager';
   import TransformationsPane from './TransformationsPane.svelte';
 
@@ -96,7 +96,7 @@
         </div>
         <div>
           <Button on:click={deleteSelectedColumn}>
-            <Icon {...iconDelete} />
+            <Icon {...iconDeleteMajor} />
             <span>Delete column</span>
           </Button>
         </div>

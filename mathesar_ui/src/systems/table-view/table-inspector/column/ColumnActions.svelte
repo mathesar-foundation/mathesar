@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button, Icon } from '@mathesar/component-library';
   import {
-    iconDelete,
+    iconDeleteMajor,
     iconMoveColumnsToNewLinkedTable,
     iconMoveColumnsToExistingLinkedTable,
   } from '@mathesar/icons';
@@ -56,7 +56,7 @@
       appearance="plain"
       on:click={() => column && handleDeleteColumn(column)}
     >
-      <Icon {...iconDelete} />
+      <Icon {...iconDeleteMajor} />
       <span>Delete Column</span>
     </Button>
   {/if}

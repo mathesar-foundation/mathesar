@@ -1,6 +1,10 @@
 <script lang="ts">
   import { Button, Icon } from '@mathesar/component-library';
-  import { iconDelete, iconExploration, iconTableLink } from '@mathesar/icons';
+  import {
+    iconDeleteMajor,
+    iconExploration,
+    iconTableLink,
+  } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
@@ -53,7 +57,7 @@
   {/if}
 
   <Button appearance="ghost" on:click={handleDeleteTable}>
-    <Icon {...iconDelete} />
+    <Icon {...iconDeleteMajor} />
     <span>Delete Table</span>
   </Button>
 </div>

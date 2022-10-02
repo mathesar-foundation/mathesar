@@ -20,7 +20,7 @@
   import {
     iconSortDescending,
     iconRename,
-    iconDelete,
+    iconDeleteMajor,
     iconSortAscending,
     iconUnlink,
     iconGrouping,
@@ -202,7 +202,7 @@
   </li>
   <li>
     <Button appearance="plain" on:click={deleteColumn}>
-      <Icon class="opt" {...iconDelete} />
+      <Icon class="opt" {...iconDeleteMajor} />
       <span> Delete column </span>
     </Button>
   </li>

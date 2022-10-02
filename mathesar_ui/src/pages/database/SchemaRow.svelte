@@ -5,7 +5,7 @@
   import { deleteSchema } from '@mathesar/stores/schemas';
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { iconDelete, iconNotEditable, iconEdit } from '@mathesar/icons';
+  import { iconDeleteMajor, iconNotEditable, iconEdit } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
@@ -59,7 +59,7 @@
             on:click={handleDelete}
             aria-label="Delete Schema"
           >
-            <Icon {...iconDelete} />
+            <Icon {...iconDeleteMajor} />
           </Button>
 
           <slot />
