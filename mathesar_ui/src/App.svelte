@@ -111,9 +111,9 @@
    * don't have any browser styling but still have functionality.
    */
   .passthrough {
-    background: inherit;
-    border-radius: inherit;
-    border: inherit;
+    background: none;
+    border-radius: 0;
+    border: none;
     color: inherit;
     cursor: inherit;
     font-family: inherit;
