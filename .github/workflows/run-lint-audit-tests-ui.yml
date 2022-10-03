@@ -15,6 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
+        with:
+          node-version: 14
       - id: npm-cache-dir
         run: echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v2
@@ -38,6 +40,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
+        with:
+          node-version: 14
       - id: npm-cache-dir
         run: echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v2
@@ -61,6 +65,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
+        with:
+          node-version: 14
       - id: npm-cache-dir
         run: echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v2
@@ -84,6 +90,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
+        with:
+          node-version: 14
       - id: npm-cache-dir
         run: echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v2
@@ -113,14 +121,11 @@ jobs:
       run:
         working-directory: ./mathesar_ui
     timeout-minutes: 15
-    strategy:
-      matrix:
-        node-version: [14, 15]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 14
       - id: npm-cache-dir
         run: echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v2

@@ -1,3 +1,18 @@
+/**
+ * @file
+ *
+ * TODO This file **badly** needs to be refactored, cleaned up, and made to
+ * function more consistently with the rest of the codebase.
+ *
+ * - For values of type `Writable<DBTablesStoreData>`, we seem to be using using
+ *   names like `schemaStore`, `tableStore`, `tablesStore`, `schemaTablesStore`
+ *   almost interchangeably which is a readability nightmare.
+ *
+ * - Tables need to be sorted before being stored, but that sorting happens in
+ *   many different places. I suggest having a derived store that does the
+ *   sorting.
+ */
+
 import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
 import {
@@ -9,7 +24,11 @@ import {
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
-import type { TableEntry, MinimalColumnDetails } from '@mathesar/api/tables';
+import type {
+  SplitTableResponse,
+  TableEntry,
+  MinimalColumnDetails,
+} from '@mathesar/api/tables';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import { CancellablePromise } from '@mathesar-component-library';
 
@@ -273,10 +292,32 @@ export function getTable(id: TableEntry['id']): CancellablePromise<TableEntry> {
   return getAPI(`/api/db/v0/tables/${id}/`);
 }
 
+export function splitTable(
+  id: number,
+  idsOfColumnsToExtract: number[],
+  extractedTableName: string,
+): CancellablePromise<SplitTableResponse> {
+  return postAPI(`/api/db/v0/tables/${id}/split_table/`, {
+    extract_columns: idsOfColumnsToExtract,
+    extracted_table_name: extractedTableName,
+  });
+}
+
+export function moveColumns(
+  tableId: number,
+  idsOfColumnsToMove: number[],
+  targetTableId: number,
+): CancellablePromise<null> {
+  return postAPI(`/api/db/v0/tables/${tableId}/move_columns/`, {
+    move_columns: idsOfColumnsToMove,
+    target_table: targetTableId,
+  });
+}
+
 /**
  * Replace getTable with this function once the above mentioned changes are done.
  */
-export function getTableFromStore(
+export function getTableFromStoreOrApi(
   id: TableEntry['id'],
 ): CancellablePromise<TableEntry> {
   const schemaStore = findSchemaStoreForTable(id);
@@ -288,7 +329,31 @@ export function getTableFromStore(
       });
     }
   }
-  return getTable(id);
+  const promise = getTable(id);
+  return new CancellablePromise(
+    (resolve, reject) => {
+      void promise.then((table) => {
+        const store = schemaTablesStoreMap.get(table.schema);
+        if (store) {
+          store.update((existing) => {
+            const tableMap = new Map<number, TableEntry>();
+            const tables = [...existing.data.values(), table];
+            sortedTableEntries(tables).forEach((t) => {
+              tableMap.set(t.id, t);
+            });
+            return {
+              ...existing,
+              data: tableMap,
+            };
+          });
+        }
+        return resolve(table);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
 }
 
 export function getTypeSuggestionsForTable(

@@ -133,7 +133,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 
 const moneyType: AbstractTypeConfiguration = {
   icon: iconUiTypeMoney,
-  cell: {
+  cellInfo: {
     type: 'money',
   },
   defaultDbType: DB_TYPES.MATHESAR_TYPES__MATHESAR_MONEY,

@@ -32,7 +32,9 @@ interface ToastEntryProps {
    * If provided, will be used in place of `title` and `message`.
    */
   contentComponent?: typeof SvelteComponent;
-  contentComponentProps?: Readable<unknown> | unknown;
+  contentComponentProps?:
+    | Readable<Record<string, unknown>>
+    | Record<string, unknown>;
   icon?: Readable<IconProps> | IconProps;
   backgroundColor: Readable<string> | string;
   textColor: Readable<string> | string;

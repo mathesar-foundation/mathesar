@@ -2,7 +2,6 @@ from pathlib import Path
 
 from django.core.files import File
 import pytest
-from rest_framework.test import APIClient
 from sqlalchemy import Column, INTEGER, VARCHAR, MetaData, BOOLEAN, TIMESTAMP, text
 from sqlalchemy import Table as SATable
 
@@ -11,11 +10,6 @@ from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import PostgresType
 from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
-
-
-@pytest.fixture
-def client():
-    return APIClient()
 
 
 @pytest.fixture

@@ -183,11 +183,11 @@ class Schema(DatabaseObject):
     # E.g: TableA from SchemaA depends on TableB from SchemaB
     # SchemaA won't return as a dependent for SchemaB, however
     # TableA will be a dependent of TableB which in turn depends on its schema
-    @property
-    def dependents(self):
+    def get_dependents(self, exclude=[]):
         return get_dependents_graph(
             self.oid,
-            self._sa_engine
+            self._sa_engine,
+            exclude
         )
 
     @property
@@ -357,11 +357,11 @@ class Table(DatabaseObject, Relation):
     def description(self):
         return get_table_description(self.oid, self._sa_engine)
 
-    @property
-    def dependents(self):
+    def get_dependents(self, exclude=[]):
         return get_dependents_graph(
             self.oid,
-            self.schema._sa_engine
+            self.schema._sa_engine,
+            exclude
         )
 
     def add_column(self, column_data):
@@ -611,6 +611,22 @@ class Column(ReflectionManagerMixin, BaseModel):
     @property
     def db_type(self):
         return self._sa_column.db_type
+
+    @property
+    def has_dependents(self):
+        return has_dependents(
+            self.table.oid,
+            self._sa_engine,
+            self.attnum
+        )
+
+    def get_dependents(self, exclude):
+        return get_dependents_graph(
+            self.table.oid,
+            self._sa_engine,
+            exclude,
+            self.attnum
+        )
 
 
 class Constraint(DatabaseObject):

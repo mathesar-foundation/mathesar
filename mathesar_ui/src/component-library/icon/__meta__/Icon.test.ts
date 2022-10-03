@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import { render } from '@testing-library/svelte';
 import { faCat } from '@fortawesome/free-solid-svg-icons';
 import Icon from '../Icon.svelte';
@@ -33,7 +34,7 @@ test('renders icon based on passed props', () => {
     props: {
       data: faCat,
       flip: 'both',
-      rotate: '180',
+      rotate: 180,
       class: 'custom-class',
       spin: true,
       pulse: true,

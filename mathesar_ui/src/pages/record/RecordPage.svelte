@@ -5,22 +5,31 @@
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { TableStructure } from '@mathesar/stores/table-data/TableStructure';
   import { currentTable } from '@mathesar/stores/tables';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import RecordPageContent from './RecordPageContent.svelte';
+  import type RecordStore from './RecordStore';
 
-  export let recordId: number;
+  export let record: RecordStore;
 
   $: table = $currentTable as TableEntry;
   $: tableStructure = new TableStructure({
     id: table.id,
     abstractTypesMap: $currentDbAbstractTypes.data,
   });
-  $: ({ isLoading } = tableStructure);
+  $: tableStructureIsLoading = tableStructure.isLoading;
+  $: recordStoreFetchRequest = record.fetchRequest;
+  $: ({ summary } = record);
+  $: recordStoreIsLoading = $recordStoreFetchRequest?.state === 'processing';
+  $: isLoading = $tableStructureIsLoading || recordStoreIsLoading;
+  $: title = recordStoreIsLoading ? '' : $summary;
 </script>
 
+<svelte:head><title>{makeSimplePageTitle(title)}</title></svelte:head>
+
 <LayoutWithHeader>
-  {#if $isLoading}
+  {#if isLoading}
     <Spinner />
   {:else}
-    <RecordPageContent {tableStructure} {recordId} />
+    <RecordPageContent {tableStructure} {record} />
   {/if}
 </LayoutWithHeader>

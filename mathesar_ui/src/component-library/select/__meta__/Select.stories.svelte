@@ -8,8 +8,8 @@
   };
 
   const aValues = [1, 2, 3];
-  const aDefault = aValues[0];
-  let a = 2;
+  const aDefault = aValues[1];
+  let a = aDefault;
 
   const bValues = [
     { foo: 'arst', bar: 'oien' },
@@ -18,7 +18,7 @@
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   const bGetLabel = (o) => `${o.foo}-${o.bar}`;
   const bDefault = bValues[0];
-  let b = bValues[0];
+  let b = bDefault;
 </script>
 
 <Meta {...meta} />

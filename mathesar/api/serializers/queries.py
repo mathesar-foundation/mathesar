@@ -1,10 +1,11 @@
 from django.urls import reverse
 from rest_framework import serializers
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models.query import UIQuery
 from django.core.exceptions import ValidationError
 
 
-class BaseQuerySerializer(serializers.ModelSerializer):
+class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     schema = serializers.SerializerMethodField('get_schema')
 
     class Meta:
@@ -24,6 +25,7 @@ class BaseQuerySerializer(serializers.ModelSerializer):
 
 
 class QuerySerializer(BaseQuerySerializer):
+    results_url = serializers.SerializerMethodField('get_results_url')
     records_url = serializers.SerializerMethodField('get_records_url')
     columns_url = serializers.SerializerMethodField('get_columns_url')
 
@@ -44,5 +46,13 @@ class QuerySerializer(BaseQuerySerializer):
             # Only get columns_url if we are serializing an existing persisted UIQuery
             request = self.context['request']
             return request.build_absolute_uri(reverse('query-columns', kwargs={'pk': obj.pk}))
+        else:
+            return None
+
+    def get_results_url(self, obj):
+        if isinstance(obj, UIQuery) and obj.pk is not None:
+            # Only get records_url if we are serializing an existing persisted UIQuery
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('query-results', kwargs={'pk': obj.pk}))
         else:
             return None

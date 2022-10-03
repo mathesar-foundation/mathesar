@@ -1,6 +1,9 @@
-import type { Action } from './actionsTypes';
+import type { ActionReturn } from 'svelte/action';
 
-export default function portal(node: Element, target?: HTMLElement): Action {
+export default function portal(
+  node: Element,
+  target?: HTMLElement,
+): ActionReturn {
   const targetElement = target ?? document.querySelector('body') ?? undefined;
 
   function update(newTarget: HTMLElement | undefined) {
@@ -16,7 +19,6 @@ export default function portal(node: Element, target?: HTMLElement): Action {
   update(targetElement);
 
   return {
-    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     update,
     destroy,
   };

@@ -121,7 +121,8 @@ class ColumnSerializer(SimpleColumnSerializer):
             'copy_source_data',
             'copy_source_constraints',
             'valid_target_types',
-            'default'
+            'default',
+            'has_dependents',
         )
         model_fields = (DISPLAY_OPTIONS_KEY,)
 

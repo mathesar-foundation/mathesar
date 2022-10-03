@@ -7,6 +7,7 @@ from copy import deepcopy
 from django.core.files import File
 from django.core.cache import cache
 from django.conf import settings
+from rest_framework.test import APIClient
 
 from sqlalchemy import Column, MetaData, Integer
 from sqlalchemy import Table as SATable
@@ -329,3 +330,10 @@ def create_column_with_display_options():
         )
         return column[0]
     return _create_column
+
+
+@pytest.fixture
+def client(admin_user):
+    client = APIClient()
+    client.login(username='admin', password='password')
+    return client

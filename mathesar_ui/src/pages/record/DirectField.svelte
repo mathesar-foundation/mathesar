@@ -5,7 +5,7 @@
     LabeledInput,
   } from '@mathesar/component-library';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
-  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
+  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
@@ -34,7 +34,7 @@
 </script>
 
 <LabeledInput layout="stacked">
-  <TableColumnName column={processedColumn} slot="label" />
+  <ProcessedColumnName {processedColumn} slot="label" />
   <DynamicInput
     {value}
     {disabled}
