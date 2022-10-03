@@ -14,7 +14,7 @@ from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import (
-    get_column_name_from_attnum, get_columns_attnum_from_names,
+    get_column_attnum_from_names_as_map, get_column_name_from_attnum, get_columns_attnum_from_names,
     get_columns_name_from_attnums, get_columns_name_from_tables,
 )
 from db.constraints.operations.create import create_constraint
@@ -526,11 +526,10 @@ class Table(DatabaseObject, Relation):
         )
 
     def update_column_reference(self, columns_name, column_name_id_map):
-        columns_name_attnum_map = get_columns_attnum_from_names(
+        columns_name_attnum_map = get_column_attnum_from_names_as_map(
             self.oid,
             columns_name,
             self._sa_engine,
-            return_as_name_map=True
         )
         column_objs = []
         for column_name, column_attnum in columns_name_attnum_map.items():

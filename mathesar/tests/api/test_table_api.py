@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.core.files.base import File, ContentFile
 from sqlalchemy import text
 
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import get_column_attnum_from_names_as_map
 from db.types.base import PostgresType, MathesarCustomType
 
 from mathesar import reflection
@@ -1426,14 +1426,14 @@ def test_table_extract_columns_drop_original_table(create_patents_table, client)
 
     remainder_columns = remainder_table.columns.all()
     remainder_columns_map = {column.name: column for column in remainder_columns}
-    columns_with_attnum = get_columns_attnum_from_names(remainder_table.oid, remainder_column_names, remainder_table._sa_engine, return_as_name_map=True)
+    columns_with_attnum = get_column_attnum_from_names_as_map(remainder_table.oid, remainder_column_names, remainder_table._sa_engine)
     for remainder_column_name in remainder_column_names:
         remainder_column = remainder_columns_map[remainder_column_name]
         assert remainder_column.attnum == columns_with_attnum[remainder_column.name]
         assert remainder_column.id == column_name_id_map[remainder_column.name]
 
     extracted_columns = extracted_table.columns.all()
-    columns_with_attnum = get_columns_attnum_from_names(extracted_table.oid, column_names_to_extract, extracted_table._sa_engine, return_as_name_map=True)
+    columns_with_attnum = get_column_attnum_from_names_as_map(extracted_table.oid, column_names_to_extract, extracted_table._sa_engine)
     for extracted_column in extracted_columns:
         if extracted_column.name != 'id':
             assert extracted_column.attnum == columns_with_attnum[extracted_column.name]

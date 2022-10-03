@@ -28,19 +28,22 @@ def _get_columns_attnum_from_names(table_oid, column_names, engine):
     return sel
 
 
-def get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None, return_as_name_map=False):
+def get_column_attnum_from_names_as_map(table_oid, column_names, engine, connection_to_use=None):
+    statement = _get_columns_attnum_from_names(table_oid, column_names, engine)
+    attnums_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
+    name_attnum_map = {attnum_tuple['attname']: attnum_tuple['attnum'] for attnum_tuple in attnums_tuple}
+    return name_attnum_map
+
+
+def get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None):
     """
     Returns the respective list of attnum of the column names passed.
      The order is based on the column order in the table and not by the order of the column names argument.
     """
     statement = _get_columns_attnum_from_names(table_oid, column_names, engine)
     attnums_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
-    if return_as_name_map:
-        name_attnum_map = {attnum_tuple[1]: attnum_tuple[0] for attnum_tuple in attnums_tuple}
-        return name_attnum_map
-    else:
-        attnums = [attnum_tuple[0] for attnum_tuple in attnums_tuple]
-        return attnums
+    attnums = [attnum_tuple[0] for attnum_tuple in attnums_tuple]
+    return attnums
 
 
 def get_column_attnum_from_name(table_oid, column_name, engine, connection_to_use=None):
