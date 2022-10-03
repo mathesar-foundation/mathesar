@@ -61,7 +61,7 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class DatabaseObjectManager(PrefetchManager):
+class DatabaseObjectManager(models.Manager):
     def get_queryset(self):
         make_sure_initial_reflection_happened()
         return super().get_queryset()
@@ -209,76 +209,14 @@ class Schema(DatabaseObject):
         cache.delete(cache_key)
 
 
-class ColumnNamePrefetcher(Prefetcher):
-    def filter(self, column_attnums, columns):
-        pass
-
-    def mapper(self, column):
-        return column.attnum
-
-    def reverse_mapper(self, column):
-        return
-
-    def decorator(self, column, name):
-        #pass
-        setattr(column, 'name', name)
-
-
-class ColumnPrefetcher(Prefetcher):
-    def filter(self, table_ids, tables):
-        if len(tables) < 1:
-            return []
-        columns = reduce(lambda column_objs, table: column_objs + list(table.columns.all()), tables, [])
-        table_oids = [table.oid for table in tables]
-
-        def _get_column_names_from_tables(table_oids):
-            return get_columns_name_from_tables(
-                table_oids,
-                list(tables)[0]._sa_engine
-                if len(tables) > 0 else [],
-                metadata=get_cached_metadata(),
-                fetch_as_map=True
-            )
-        return ColumnNamePrefetcher(
-            filter=lambda column_attnums, columns: _get_column_names_from_tables(table_oids),
-            mapper=lambda column: (column.attnum, column.table.oid)
-        ).fetch(columns, 'columns__name', Column, [])
-
-    def reverse_mapper(self, column):
-        return [column.table_id]
-
-    def decorator(self, table, columns):
-        #pass
-        table.columns = columns
-
-
 import logging
 logger = logging.getLogger(__name__)
-
-_sa_table_prefetcher = Prefetcher(
-    filter=lambda oids, tables: reflect_tables_from_oids(oids, list(tables)[0]._sa_engine, metadata=get_cached_metadata())
-        if len(tables) > 0 else [],
-    mapper=lambda table: table.oid,
-    # A filler statement, just used to satisfy the library. It does not affect the prefetcher in
-    # any way as we bypass reverse mapping if the prefetcher returns a dictionary
-    reverse_mapper=lambda table: table.oid,
-    #decorator=lambda table, _sa_table: None,
-    decorator=lambda table, _sa_table: setattr(
-            table,
-            '_sa_table',
-            _sa_table
-        )
-)
 
 class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
     MODEL_FIELDS = ['import_verified']
     current_objects = models.Manager()
-    objects = DatabaseObjectManager(
-        # TODO Move the Prefetcher into a separate class and replace lambdas with proper function
-        _sa_table=_sa_table_prefetcher,
-        columns=ColumnPrefetcher,
-    )
+    objects = DatabaseObjectManager()
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
@@ -305,7 +243,7 @@ class Table(DatabaseObject, Relation):
 
     # TODO referenced from outside so much that it probably shouldn't be private
     # NOTE key_cached_property's key_fn below presumes that an SA table's oid is
-    @property
+    #@property
    #@key_cached_property(
    #    key_fn=lambda table: (
    #            'sa_table',
@@ -313,7 +251,7 @@ class Table(DatabaseObject, Relation):
    #            table.oid,
    #        )
    #)
-    #@cached_property
+    @cached_property
     def _sa_table(self):
         # We're caching since we want different Django Table instances to return the same SA
         # Table, when they're referencing the same Postgres table.
@@ -496,6 +434,7 @@ class Table(DatabaseObject, Relation):
             self.schema._sa_engine,
             constraint_obj
         )
+        # TODO everything below until reset_reflection() call might be unnecessary now that state handling is different
         try:
             # Clearing cache so that new constraint shows up.
             del self._sa_table
