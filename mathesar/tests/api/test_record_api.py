@@ -1081,6 +1081,7 @@ def test_record_post_unique_violation(create_patents_table, client):
     actual_exception = response.json()[0]
     assert actual_exception['code'] == ErrorCodes.UniqueViolation.value
     assert actual_exception['message'] == 'The requested insert violates a uniqueness constraint'
+    assert actual_exception['detail']['constraint_columns'] == [id_column_id]
     constraint_id = actual_exception['detail']['constraint']
     actual_constraint_details = client.get(
         f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/'
@@ -1097,6 +1098,7 @@ def test_record_patch_unique_violation(create_patents_table, client):
     actual_exception = response.json()[0]
     assert actual_exception['code'] == ErrorCodes.UniqueViolation.value
     assert actual_exception['message'] == 'The requested update violates a uniqueness constraint'
+    assert actual_exception['detail']['constraint_columns'] == [id_column_id]
     constraint_id = actual_exception['detail']['constraint']
     actual_constraint_details = client.get(
         f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/'

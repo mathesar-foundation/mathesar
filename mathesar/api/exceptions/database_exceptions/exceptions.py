@@ -30,6 +30,7 @@ class UniqueViolationAPIException(MathesarAPIException):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
         if details is None and table is not None:
+            details = {}
             try:
                 constraint_oid = get_constraint_oid_by_name_and_table_oid(
                     exception.orig.diag.constraint_name,
@@ -39,7 +40,7 @@ class UniqueViolationAPIException(MathesarAPIException):
                 constraint = Constraint.objects.get(oid=constraint_oid)
                 details = {
                     "constraint": constraint.id,
-                    "original_details": exception.orig.diag.message_detail,
+                    "constraint_columns": [c.id for c in constraint.columns],
                 }
             except TypeError:
                 details = {
