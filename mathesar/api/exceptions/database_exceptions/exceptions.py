@@ -1,16 +1,23 @@
 from rest_framework import status
 
 from db.columns.operations.select import get_column_attnum_from_name
+from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
     MathesarAPIException,
     get_default_exception_detail,
 )
-from mathesar.models.base import Column
+from mathesar.models.base import Column, Constraint
 
 
 class UniqueViolationAPIException(MathesarAPIException):
+    """
+    Exception raised when trying to:
+
+    - Add unique constraint to column with non-unique values, or
+    - trying to add non-unique value to a column with unique constraint, or
+    """
     error_code = ErrorCodes.UniqueViolation.value
 
     def __init__(
@@ -19,9 +26,34 @@ class UniqueViolationAPIException(MathesarAPIException):
             message="This column has non-unique values so a unique constraint cannot be set",
             field=None,
             details=None,
+            table=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
-        exception_detail = get_default_exception_detail(exception, self.error_code, message, field, details)._asdict()
+        if details is None and table is not None:
+            try:
+                constraint_oid = get_constraint_oid_by_name_and_table_oid(
+                    exception.orig.diag.constraint_name,
+                    table.oid,
+                    table._sa_engine
+                )
+                constraint = Constraint.objects.get(oid=constraint_oid)
+                details = {
+                    "constraint": constraint.id,
+                    "original_details": exception.orig.diag.message_detail,
+                }
+            except TypeError:
+                details = {
+                    "constraint": None,
+                }
+            details.update(
+                {
+                    "original_details": exception.orig.diag.message_detail,
+                }
+            )
+
+        exception_detail = get_default_exception_detail(
+            exception, self.error_code, message, field, details
+        )._asdict()
         self.detail = [exception_detail]
         self.status_code = status_code
 
