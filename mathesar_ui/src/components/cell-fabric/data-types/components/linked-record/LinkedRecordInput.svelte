@@ -14,6 +14,7 @@
   } from '@mathesar-component-library';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
 
   type $$Props = LinkedRecordCellProps & {
     class?: string;
@@ -21,6 +22,7 @@
     id?: string;
   };
 
+  const labelController = getLabelControllerFromContainingLabel();
   const recordSelector = getRecordSelectorFromContext();
   const dispatch = createEventDispatcher();
 
@@ -33,12 +35,14 @@
   export { classes as class };
   export let containerClass = '';
 
-  let labelController = getLabelControllerFromContainingLabel();
   let isAcquiringInput = false;
   let element: HTMLSpanElement;
 
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
+  $: recordPageHref = hasValue
+    ? $storeToGetRecordPageUrl({ tableId, recordId: value })
+    : undefined;
 
   function clear() {
     value = undefined;
@@ -108,6 +112,8 @@
         {dataForRecordSummaryInFkCell}
         hasDeleteButton
         on:delete={clear}
+        {recordPageHref}
+        on:click={(e) => e.stopPropagation()}
       />
     {/if}
   </span>
