@@ -305,7 +305,7 @@ class Table(DatabaseObject, Relation):
 
     # TODO referenced from outside so much that it probably shouldn't be private
     # NOTE key_cached_property's key_fn below presumes that an SA table's oid is
-    #@property
+    @property
    #@key_cached_property(
    #    key_fn=lambda table: (
    #            'sa_table',
@@ -313,7 +313,7 @@ class Table(DatabaseObject, Relation):
    #            table.oid,
    #        )
    #)
-    @cached_property
+    #@cached_property
     def _sa_table(self):
         # We're caching since we want different Django Table instances to return the same SA
         # Table, when they're referencing the same Postgres table.
@@ -701,8 +701,8 @@ class Column(ReflectionManagerMixin, BaseModel):
    #            column.attnum,
    #        )
    #)
-    @cached_property
-    #@property
+    #@cached_property
+    @property
     def name(self):
         name = get_column_name_from_attnum(
             self.table.oid,
@@ -751,7 +751,8 @@ class Constraint(DatabaseObject):
     @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
-        del self.table._sa_table
+        #debugging: reset cached property
+        #del self.table._sa_table
         sa_constraint = get_constraint_from_oid(self.oid, engine, self.table._sa_table)
         assert sa_constraint is not None
         return sa_constraint
