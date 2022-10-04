@@ -750,8 +750,8 @@ class Constraint(DatabaseObject):
     @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
-        #debugging: reset cached property
-        #del self.table._sa_table
+        # TODO HACK reset cached property, otherwise it can be out of date here
+        del self.table._sa_table
         sa_constraint = get_constraint_from_oid(self.oid, engine, self.table._sa_table)
         assert sa_constraint is not None
         return sa_constraint
