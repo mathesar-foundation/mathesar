@@ -9,7 +9,7 @@ from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError
 from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
 from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
-from mathesar.api.serializers.dependents import DependentSerializer
+from mathesar.api.serializers.dependents import DependentFilterSerializer, DependentSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.exceptions.database_exceptions import (
@@ -38,7 +38,11 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     filterset_class = TableFilter
 
     def get_queryset(self):
-        return Table.objects.prefetch('_sa_table').order_by('-created_at')
+        # Better to use prefetch_related for schema and database,
+        # because select_related would lead to duplicate object instances and could result in multiple engines instances
+        # We prefetch `columns` using Django prefetch_related to get list of column objects and
+        # then prefetch column properties like `column name` using prefetch library.
+        return Table.objects.prefetch_related('schema', 'schema__database', 'columns').prefetch('_sa_table', 'columns').order_by('-created_at')
 
     def partial_update(self, request, pk=None):
         table = self.get_object()
@@ -61,8 +65,12 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
 
     @action(methods=['get'], detail=True)
     def dependents(self, request, pk=None):
+        serializer = DependentFilterSerializer(data=request.GET)
+        serializer.is_valid(raise_exception=True)
+        types_exclude = serializer.validated_data['exclude']
+
         table = self.get_object()
-        serializer = DependentSerializer(table.dependents, many=True, context={'request': request})
+        serializer = DependentSerializer(table.get_dependents(types_exclude), many=True, context={'request': request})
         return Response(serializer.data)
 
     @action(methods=['get'], detail=True)

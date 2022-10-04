@@ -13,18 +13,38 @@ export function getImportPageUrl(
   databaseName: string,
   schemaId: number,
 ): string {
-  return `/${databaseName}/${schemaId}/import`;
+  return `/${databaseName}/${schemaId}/import/`;
+}
+
+export function getImportPreviewPageUrl(
+  databaseName: string,
+  schemaId: number,
+  previewTableId: number,
+): string {
+  return `/${databaseName}/${schemaId}/import/${previewTableId}/`;
 }
 
 export function getDataExplorerPageUrl(
   databaseName: string,
   schemaId: number,
-  queryId?: number,
 ): string {
-  if (queryId !== undefined) {
-    return `/${databaseName}/${schemaId}/data-explorer/${queryId}/`;
-  }
   return `/${databaseName}/${schemaId}/data-explorer/`;
+}
+
+export function getExplorationPageUrl(
+  databaseName: string,
+  schemaId: number,
+  queryId: number,
+): string {
+  return `/${databaseName}/${schemaId}/explorations/${queryId}/`;
+}
+
+export function getExplorationEditorPageUrl(
+  databaseName: string,
+  schemaId: number,
+  queryId: number,
+): string {
+  return `/${databaseName}/${schemaId}/explorations/edit/${queryId}/`;
 }
 
 export function getTablePageUrl(
@@ -32,7 +52,7 @@ export function getTablePageUrl(
   schemaId: number,
   tableId: number,
 ): string {
-  return `/${databaseName}/${schemaId}/${tableId}/`;
+  return `/${databaseName}/${schemaId}/tables/${tableId}/`;
 }
 
 export function getRecordPageUrl(
@@ -41,5 +61,5 @@ export function getRecordPageUrl(
   tableId: number,
   recordId: unknown,
 ): string {
-  return `/${databaseName}/${schemaId}/${tableId}/${String(recordId)}`;
+  return `/${databaseName}/${schemaId}/tables/${tableId}/${String(recordId)}`;
 }

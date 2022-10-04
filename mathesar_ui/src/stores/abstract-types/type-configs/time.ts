@@ -99,7 +99,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 const timeType: AbstractTypeConfiguration = {
   icon: { ...iconUiTypeTime, label: 'Time' },
   defaultDbType: DB_TYPES.TIME_WITH_TZ,
-  cell: {
+  cellInfo: {
     type: 'time',
     conditionalConfig: {
       [DB_TYPES.TIME_WITH_TZ]: {

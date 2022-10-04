@@ -6,15 +6,10 @@ function filterRecords(
   childKey: string,
   searchTerm: string,
 ): Record<string, unknown>[] {
-  return filterTree(
-    data,
-    (e) => String(e[labelKey]),
-    {
-      get: (e) => e[childKey] as Record<string, unknown>[],
-      set: (e, v) => ({ ...e, [childKey]: v }),
-    },
-    searchTerm,
-  );
+  return filterTree(data, (e) => String(e[labelKey]), searchTerm, {
+    get: (e) => e[childKey] as Record<string, unknown>[],
+    set: (e, v) => ({ ...e, [childKey]: v }),
+  });
 }
 
 const dummyData = [

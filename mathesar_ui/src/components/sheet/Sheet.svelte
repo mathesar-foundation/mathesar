@@ -12,6 +12,7 @@
 
   export let columns: SheetColumnType[];
   export let usesVirtualList = false;
+  export let restrictWidthToRowWidth = false;
 
   export let getColumnIdentifier: (
     c: SheetColumnType,
@@ -76,9 +77,11 @@
   $: stores.scrollOffset.set(scrollOffset);
 
   setSheetContext({ stores, api });
+
+  $: style = restrictWidthToRowWidth ? `width:${rowWidth + 2}px;` : undefined;
 </script>
 
-<div class="sheet" class:uses-virtual-list={usesVirtualList} on:click>
+<div class="sheet" class:uses-virtual-list={usesVirtualList} {style} on:click>
   {#if columns.length}
     <slot />
   {/if}
@@ -112,6 +115,16 @@
     :global([data-sheet-element='cell'][data-cell-static='true']) {
       position: sticky;
       z-index: 5;
+    }
+
+    :global([data-sheet-element='cell'][data-cell-control='true']) {
+      font-size: var(--text-size-x-small);
+      padding: 0 1.5rem;
+      justify-content: center;
+      color: var(--color-text-muted);
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
     }
 
     :global([data-sheet-element='row']) {

@@ -1,4 +1,4 @@
-import type { Readable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 import { writable, derived } from 'svelte/store';
 import ModalStack from './ModalStack';
 import ModalController from './ModalController';
@@ -22,10 +22,18 @@ export default class ModalMultiplexer {
     return this.maxId;
   }
 
-  spawnModalController(): ModalController {
-    return new ModalController({
-      modalId: this.getId(),
+  getPropsForNewModal(): {
+    modalId: number;
+    modalStackStore: Writable<ModalStack>;
+  } {
+    const modalId = this.getId();
+    return {
+      modalId,
       modalStackStore: this.stack,
-    });
+    };
+  }
+
+  spawnModalController(): ModalController {
+    return new ModalController(this.getPropsForNewModal());
   }
 }

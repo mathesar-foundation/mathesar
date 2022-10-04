@@ -1,8 +1,14 @@
+export function isDefinedObject(
+  object: unknown,
+): object is Record<string, unknown> {
+  return typeof object === 'object' && object !== null;
+}
+
 export function hasProperty<PropertyName extends string>(
   object: unknown,
   property: PropertyName,
 ): object is { [k in PropertyName]: unknown } {
-  return typeof object === 'object' && object !== null && property in object;
+  return isDefinedObject(object) && property in object;
 }
 
 export function hasStringProperty<PropertyName extends string>(

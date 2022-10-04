@@ -45,15 +45,6 @@ class PrefetchManager(PrefetchManagerMixin):
         super(PrefetchManager, self).__init__()
 
 
-class PrefetchIterable(query.ModelIterable):
-    def __iter__(self):
-        data = list(super(PrefetchIterable, self).__iter__())
-        for name, (forwarders, prefetcher) in self.queryset._prefetch.items():
-            prefetcher.fetch(data, name, self.queryset.model, forwarders,
-                             getattr(self.queryset, '_db', None))
-        return iter(data)
-
-
 class InvalidPrefetch(Exception):
     pass
 
@@ -74,7 +65,6 @@ class PrefetchQuerySet(query.QuerySet):
         super(PrefetchQuerySet, self).__init__(model, query, using, **kwargs)
         self._prefetch = {}
         self.prefetch_definitions = prefetch_definitions
-        self._iterable_class = PrefetchIterable
 
     if django.VERSION < (2, 0):
         def _clone(self, **kwargs):
@@ -143,8 +133,29 @@ class PrefetchQuerySet(query.QuerySet):
                 obj = obj.select_related('__'.join(forwarders))
         return obj
 
-    def iterator(self):
-        return self._iterable_class(self)
+    def _fetch_all(self):
+        # We are storing the prefetch state to call our own prefetch related,
+        # we store it before calling _fetch_all() as it would end up marking prefetch as true
+        prefetch_done = self._prefetch_done
+        super()._fetch_all()
+        obj_list = self._result_cache
+        good_objects = True
+        if not prefetch_done:
+            for obj in obj_list:
+                if not hasattr(obj, '_prefetched_objects_cache'):
+                    try:
+                        obj._prefetched_objects_cache = {}
+                    except (AttributeError, TypeError):
+                        # Must be an immutable object from
+                        # values_list(flat=True), for example (TypeError) or
+                        # a QuerySet subclass that isn't returning Model
+                        # instances (AttributeError), either in Django or a 3rd
+                        # party. prefetch_related() doesn't make sense, so quit.
+                        good_objects = False
+                        break
+            if good_objects:
+                for name, (forwarders, prefetcher) in self._prefetch.items():
+                    prefetcher.fetch(obj_list, name, self.model, forwarders)
 
 
 class Prefetcher(object):
@@ -234,7 +245,7 @@ class Prefetcher(object):
     def mapper(obj):
         return obj.pk
 
-    def fetch(self, dataset, name, model, forwarders, db):
+    def fetch(self, dataset, name, model, forwarders):
         collect = self.collect or forwarders
 
         try:

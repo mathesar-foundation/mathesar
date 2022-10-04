@@ -1,4 +1,5 @@
 import inspect
+import warnings
 
 from psycopg2.errors import UndefinedFunction
 
@@ -76,3 +77,25 @@ def get_module_members_that_satisfy(module, predicate):
         for _, member in all_members_in_defining_module
         if predicate(member)
     )
+
+
+def ignore_type_warning(f):
+    """
+    When loading PostgreSQL system tables, an SAWarning is often generated
+    since they use some exotic, postgres-specific types.
+
+    This decorator allows one to ignore those warnings.
+    """
+    def warning_ignored_func(*args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="Did not recognize type")
+            return f(*args, **kwargs)
+
+    return warning_ignored_func
+
+
+@ignore_type_warning
+def get_pg_catalog_table(table_name, engine, metadata=None):
+    if metadata is None:
+        metadata = sqlalchemy.MetaData()
+    return sqlalchemy.Table(table_name, metadata, autoload_with=engine, schema='pg_catalog')

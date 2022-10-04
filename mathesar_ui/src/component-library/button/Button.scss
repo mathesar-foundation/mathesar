@@ -100,17 +100,17 @@ button.btn {
   /* Sizes */
   &.size-medium {
     padding: 0.5rem 0.75rem;
-    font-size: var(--text-size-base);
+    font-size: 1em;
   }
 
   &.size-small {
     padding: 0.25rem 0.5rem;
-    font-size: var(--text-size-small);
+    font-size: 0.889em;
   }
 
   &.size-large {
     padding: 8px 14px;
-    font-size: 1.2rem;
+    font-size: 1.2em;
   }
 
   &.padding-zero {

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { TableEntry } from '@mathesar/api/tables';
   import EntityType from '@mathesar/components/EntityType.svelte';
   import QueryName from '@mathesar/components/QueryName.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
@@ -7,23 +8,50 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import {
     getTablePageUrl,
+    getExplorationPageUrl,
     getDataExplorerPageUrl,
     getImportPageUrl,
+    getImportPreviewPageUrl,
   } from '@mathesar/routes/urls';
   import { queries } from '@mathesar/stores/queries';
   import { tables as tablesStore } from '@mathesar/stores/tables';
   import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
 
   export let database: Database;
   export let schema: SchemaEntry;
 
+  /**
+   * This property will be used for the latest design changes
+   * Based on the subroute, the desired tab/section will be selected
+   * Make this a variable and pass value to it from SchemaRoute.svelte
+   *
+   * The eslint warning is in place because SchemaRoute will throw
+   * ts errors without it. We can remove it once we actually use the
+   * variable.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+  export const section: string = 'overview';
+
   $: tablesMap = $tablesStore.data;
   $: queriesMap = $queries.data;
+
+  // TODO: Move this function to a common location
+  function isTableImportConfirmationRequired(table: TableEntry): boolean {
+    /**
+     * table.import_verified can be null when tables have been
+     * manually added to the db/already present in db in which
+     * case we should not ask for re-confirmation.
+     */
+    return (
+      table.import_verified === false &&
+      table.data_files !== undefined &&
+      table.data_files.length > 0
+    );
+  }
 </script>
 
-<svelte:head>
-  <title>{schema.name} | Mathesar</title>
-</svelte:head>
+<svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
 
 <LayoutWithHeader>
   <div class="schema-page-header">
@@ -48,12 +76,21 @@
     <ul class="entity-list">
       {#each [...tablesMap.values()] as table (table.id)}
         <li class="entity-list-item">
-          <a href={getTablePageUrl(database.name, schema.id, table.id)}>
+          <a
+            href={isTableImportConfirmationRequired(table)
+              ? getImportPreviewPageUrl(database.name, schema.id, table.id)
+              : getTablePageUrl(database.name, schema.id, table.id)}
+          >
             <TableName {table} />
+            {#if isTableImportConfirmationRequired(table)}
+              *
+            {/if}
           </a>
-          <span class="record-selector-for-table">
-            <RecordSelectorNavigationButton {table} />
-          </span>
+          {#if !isTableImportConfirmationRequired(table)}
+            <span class="record-selector-for-table">
+              <RecordSelectorNavigationButton {table} />
+            </span>
+          {/if}
         </li>
       {/each}
     </ul>
@@ -66,7 +103,7 @@
     <ul class="entity-list">
       {#each [...queriesMap.values()] as query (query.id)}
         <li class="entity-list-item">
-          <a href={getDataExplorerPageUrl(database.name, schema.id, query.id)}>
+          <a href={getExplorationPageUrl(database.name, schema.id, query.id)}>
             <QueryName {query} />
           </a>
         </li>

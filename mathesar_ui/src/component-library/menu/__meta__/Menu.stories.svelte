@@ -11,9 +11,10 @@
     faVideo,
   } from '@fortawesome/free-solid-svg-icons';
   import { Meta, Story } from '@storybook/addon-svelte-csf';
-  import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
   import Menu from '../Menu.svelte';
-  import MenuItem from '../MenuItem.svelte';
+  import ButtonMenuItem from '../ButtonMenuItem.svelte';
+  import CheckboxMenuItem from '../CheckboxMenuItem.svelte';
+  import LinkMenuItem from '../LinkMenuItem.svelte';
   import MenuDivider from '../MenuDivider.svelte';
   import MenuHeading from '../MenuHeading.svelte';
 
@@ -26,40 +27,36 @@
 
 <Story name="Basic">
   <Menu>
-    <MenuHeading>Lorem ipsum</MenuHeading>
-    <MenuItem icon={{ data: faAirFreshener }}>Dolor sit amet</MenuItem>
-    <MenuItem icon={{ data: faLeaf }}>Eiusmod tempor</MenuItem>
+    <MenuHeading>Link Menu Items</MenuHeading>
+    <LinkMenuItem href="/FOO" icon={{ data: faAirFreshener }}>
+      Dolor sit amet
+    </LinkMenuItem>
+    <LinkMenuItem href="/BAR" icon={{ data: faLeaf }}>
+      Eiusmod tempor
+    </LinkMenuItem>
     <MenuDivider />
-    <MenuHeading>Officia deserunt</MenuHeading>
-    <MenuItem icon={{ data: faChair }} disabled>
+
+    <MenuHeading>Button Menu Items</MenuHeading>
+    <ButtonMenuItem icon={{ data: faChair }} disabled>
       Consectetur adipiscing
-    </MenuItem>
-    <MenuItem icon={{ data: faHammer }}>Labore et dolore magna</MenuItem>
-    <MenuItem icon={{ data: faMagnet, rotate: 90 }}>
+    </ButtonMenuItem>
+    <ButtonMenuItem icon={{ data: faHammer }}>
+      Labore et dolore magna
+    </ButtonMenuItem>
+    <ButtonMenuItem icon={{ data: faMagnet, rotate: 90 }}>
       Sed do <em>eiusmod</em>
-    </MenuItem>
-    <MenuItem icon={{ data: faVideo }}>Minim veniam</MenuItem>
+    </ButtonMenuItem>
+    <ButtonMenuItem icon={{ data: faVideo }}>Minim veniam</ButtonMenuItem>
     <MenuDivider />
-    <MenuHeading>Non proident</MenuHeading>
-    <MenuItem icon={{ data: faPhone }}>
-      <Checkbox slot="control" />
-      Ut aliqua
-    </MenuItem>
-    <MenuItem>
-      <Checkbox slot="control" checked />
-      Nostrud exercitation
-    </MenuItem>
-    <MenuItem icon={{ data: faShip }} disabled>
-      <!--
-        NOTE: to disable the form control when the MenuItem is disabled, you
-        need to explicitly set the `disabled` attribute on the form control.
-      -->
-      <Checkbox slot="control" checked disabled />
+
+    <MenuHeading>Checkbox Menu Items</MenuHeading>
+    <CheckboxMenuItem icon={{ data: faPhone }}>Ut aliqua</CheckboxMenuItem>
+    <CheckboxMenuItem checked>Nostrud exercitation</CheckboxMenuItem>
+    <CheckboxMenuItem icon={{ data: faShip }} checked disabled>
       Aliquip ex ea commod
-    </MenuItem>
-    <MenuItem icon={{ data: faClock }}>
-      <Checkbox slot="control" checked />
+    </CheckboxMenuItem>
+    <CheckboxMenuItem icon={{ data: faClock }} checked>
       Sinlar po ret leucdal aud
-    </MenuItem>
+    </CheckboxMenuItem>
   </Menu>
 </Story>
