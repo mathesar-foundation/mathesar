@@ -110,8 +110,6 @@ def test_column_create(column_test_table, client):
         data=data,
     )
     assert response.status_code == 201
-    from mathesar.state import reset_reflection
-    reset_reflection()
     new_columns_response = client.get(
         f"/api/db/v0/tables/{column_test_table.id}/columns/"
     )
