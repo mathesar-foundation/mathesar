@@ -2,7 +2,6 @@ from pathlib import Path
 
 from django.core.files import File
 import pytest
-from rest_framework.test import APIClient
 from sqlalchemy import Column, INTEGER, VARCHAR, MetaData, BOOLEAN, TIMESTAMP, text
 from sqlalchemy import Table as SATable
 
@@ -13,11 +12,6 @@ from db.types.base import PostgresType
 from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
 from db.metadata import get_empty_metadata
 from mathesar.state import reset_reflection
-
-
-@pytest.fixture
-def client():
-    return APIClient()
 
 
 @pytest.fixture

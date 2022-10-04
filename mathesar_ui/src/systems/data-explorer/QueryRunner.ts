@@ -15,7 +15,7 @@ import type {
 import { runQuery } from '@mathesar/stores/queries';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type QueryModel from './QueryModel';
-import { processColumns } from './utils';
+import { processColumnMetaData, getProcessedOutputColumns } from './utils';
 import type { ProcessedQueryResultColumnMap } from './utils';
 
 // TODO: Find a better way to implement type safety here
@@ -34,6 +34,10 @@ export default class QueryRunner<
   pagination: Writable<Pagination> = writable(new Pagination({ size: 100 }));
 
   records: Writable<QueryResultRecords> = writable({ count: 0, results: [] });
+
+  columnsMetaData: Writable<ProcessedQueryResultColumnMap> = writable(
+    new ImmutableMap(),
+  );
 
   processedColumns: Writable<ProcessedQueryResultColumnMap> = writable(
     new ImmutableMap(),
@@ -59,6 +63,7 @@ export default class QueryRunner<
 
     if (queryModel.base_table === undefined) {
       const records = { count: 0, results: [] };
+      this.columnsMetaData.set(new ImmutableMap());
       this.processedColumns.set(new ImmutableMap());
       this.records.set(records);
       this.runState.set({ state: 'success' });
@@ -79,8 +84,20 @@ export default class QueryRunner<
         },
       });
       const response = await this.runPromise;
-      this.processedColumns.set(processColumns(response, this.abstractTypeMap));
-      this.records.set(response.records);
+      const columnsMetaData = processColumnMetaData(
+        response.column_metadata,
+        this.abstractTypeMap,
+      );
+      this.columnsMetaData.set(columnsMetaData);
+      this.processedColumns.set(
+        new ImmutableMap(
+          getProcessedOutputColumns(response.output_columns, columnsMetaData),
+        ),
+      );
+      this.records.set({
+        count: response.records.count,
+        results: response.records.results ?? [],
+      });
       await this.dispatch('run', response);
       this.runState.set({ state: 'success' });
       return response;
@@ -147,6 +164,7 @@ export default class QueryRunner<
   }
 
   destroy(): void {
+    super.destroy();
     this.runPromise?.cancel();
   }
 }
