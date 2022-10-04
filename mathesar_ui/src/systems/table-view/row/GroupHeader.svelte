@@ -5,7 +5,7 @@
     RecordGroup,
     GroupHeaderRow,
     ProcessedColumn,
-  } from '@mathesar/stores/table-data/types';
+  } from '@mathesar/stores/table-data';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import CellBackground from './CellBackground.svelte';
 

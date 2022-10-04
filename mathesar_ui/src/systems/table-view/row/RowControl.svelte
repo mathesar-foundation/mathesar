@@ -6,12 +6,10 @@
     isNewRecordRow,
     isPlaceholderRow,
     rowHasRecord,
+    type Meta,
+    type RecordsData,
+    type Row,
   } from '@mathesar/stores/table-data';
-  import type {
-    Meta,
-    RecordsData,
-    Row,
-  } from '@mathesar/stores/table-data/types';
   import CellBackground from './CellBackground.svelte';
   import CellErrors from './CellErrors.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';

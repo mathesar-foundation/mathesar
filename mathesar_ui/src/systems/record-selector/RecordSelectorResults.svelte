@@ -8,11 +8,11 @@
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import type { RecordRow } from '@mathesar/stores/table-data/types';
   import {
     rowHasSavedRecord,
     getTabularDataStoreFromContext,
     filterRecordRows,
+    type RecordRow,
   } from '@mathesar/stores/table-data';
   import { rowHeightPx } from '@mathesar/geometry';
   import CellArranger from './CellArranger.svelte';

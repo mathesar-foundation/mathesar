@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { Row as RowType } from '@mathesar/stores/table-data/types';
   import {
     getTabularDataStoreFromContext,
     isGroupHeaderRow,
     isHelpTextRow,
+    type Row as RowType,
   } from '@mathesar/stores/table-data';
   import { SheetVirtualRows } from '@mathesar/components/sheet';
   import {

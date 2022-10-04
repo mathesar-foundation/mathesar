@@ -1,7 +1,7 @@
 <script lang="ts">
   import { MultiSelect } from '@mathesar-component-library';
   import type { ComponentAndProps } from '@mathesar-component-library/types';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import ProcessedColumnName from './column/ProcessedColumnName.svelte';
 
   export let availableColumns: ProcessedColumn[];

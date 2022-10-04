@@ -10,19 +10,17 @@
     isCellActive,
     scrollBasedOnActiveCell,
     isNewRecordRow,
+    type RecordRow,
+    type Display,
+    type RecordsData,
+    type CellKey,
+    type ProcessedColumn,
   } from '@mathesar/stores/table-data';
-  import type {
-    RecordRow,
-    Display,
-    RecordsData,
-    CellKey,
-  } from '@mathesar/stores/table-data/types';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';

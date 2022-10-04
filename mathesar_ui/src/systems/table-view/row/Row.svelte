@@ -7,11 +7,9 @@
     rowHasRecord,
     isGroupHeaderRow,
     isHelpTextRow,
-  } from '@mathesar/stores/table-data';
-  import type { Row } from '@mathesar/stores/table-data/types';
-  import {
     getRowKey,
     ID_ROW_CONTROL_COLUMN,
+    type Row,
   } from '@mathesar/stores/table-data';
   import { SheetRow, SheetCell } from '@mathesar/components/sheet';
   import { isRowSelected } from '@mathesar/stores/table-data/selection';
