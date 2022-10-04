@@ -15,6 +15,8 @@
     type RecordsData,
     type CellKey,
     type ProcessedColumn,
+    isCellSelected,
+    Selection,
   } from '@mathesar/stores/table-data';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
@@ -24,10 +26,6 @@
   import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import {
-    isCellSelected,
-    Selection,
-  } from '@mathesar/stores/table-data/selection';
   import CellErrors from './CellErrors.svelte';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';

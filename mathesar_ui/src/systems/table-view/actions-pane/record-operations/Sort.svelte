@@ -3,8 +3,7 @@
 
   import type { Writable } from 'svelte/store';
   import { Icon, Button, iconClose } from '@mathesar-component-library';
-  import { SortDirection } from '@mathesar/stores/table-data';
-  import type { Sorting } from '@mathesar/stores/table-data';
+  import { SortDirection, type Sorting } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/tables/columns';
   import SelectSortDirection from '@mathesar/components/SelectSortDirection.svelte';
   import SelectColumn from '@mathesar/components/SelectColumn.svelte';

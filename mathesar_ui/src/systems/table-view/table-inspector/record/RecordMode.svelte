@@ -1,7 +1,9 @@
 <script lang="ts">
   import { Collapsible } from '@mathesar-component-library';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { getSelectedRowIndex } from '@mathesar/stores/table-data/selection';
+  import {
+    getTabularDataStoreFromContext,
+    getSelectedRowIndex,
+  } from '@mathesar/stores/table-data';
   import RowActions from './RowActions.svelte';
 
   const tabularData = getTabularDataStoreFromContext();

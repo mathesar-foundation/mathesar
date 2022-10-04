@@ -10,9 +10,9 @@
     getRowKey,
     ID_ROW_CONTROL_COLUMN,
     type Row,
+    isRowSelected,
   } from '@mathesar/stores/table-data';
   import { SheetRow, SheetCell } from '@mathesar/components/sheet';
-  import { isRowSelected } from '@mathesar/stores/table-data/selection';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';

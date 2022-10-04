@@ -14,9 +14,9 @@
     type Meta,
     type ColumnsDataStore,
     type ConstraintsDataStore,
+    findFkConstraintsForColumn,
   } from '@mathesar/stores/table-data';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
   import {
     iconSortDescending,
     iconRename,

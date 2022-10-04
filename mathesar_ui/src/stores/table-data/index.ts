@@ -45,7 +45,7 @@ export { getTabularData, initTabularData, removeTabularData } from './manager';
 export {
   setTabularDataStoreInContext,
   getTabularDataStoreFromContext,
-  type TabularData,
+  TabularData,
   type TabularDataProps,
 } from './tabularData';
 export {
@@ -57,3 +57,14 @@ export {
   type ConstraintsData,
   type ConstraintsDataStore,
 } from './constraints';
+export { TableStructure } from './TableStructure';
+export { SearchFuzzy } from './searchFuzzy';
+export { constraintIsFk, findFkConstraintsForColumn } from './constraintsUtils';
+export {
+  Selection,
+  isColumnSelected,
+  isRowSelected,
+  isCellSelected,
+  getSelectedUniqueColumnsId,
+  getSelectedRowIndex,
+} from './selection';

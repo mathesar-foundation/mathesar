@@ -1,8 +1,7 @@
 <script lang="ts">
   import { Button, Icon, iconLoading } from '@mathesar/component-library';
   import { iconDelete } from '@mathesar/icons';
-  import type { Selection } from '@mathesar/stores/table-data/selection';
-  import type { RecordsData } from '@mathesar/stores/table-data';
+  import type { RecordsData, Selection } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
 
   export let selectedRowIndices: number[];
