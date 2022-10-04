@@ -2,6 +2,7 @@ from sqlalchemy import Table, MetaData
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
+from db.types.operations.cast import get_full_cast_map
 from db import constants
 
 
@@ -50,7 +51,7 @@ def perfect_map(temp_table_col_list, target_table_col_list):
     match = list(zip(sorted(temp_table_col_list), sorted(target_table_col_list)))
     result = [(temp_table_col_list.index(i1), target_table_col_list.index(i2)) for i1, i2 in match] if all(i1[0] == i2[0] for i1, i2 in match) else None
     if result is not None:
-        check_type_casting(temp_table_col_list, target_table_col_list, match)
+        check_type_casting(match, engine=None)
     return result
 
 
@@ -72,5 +73,6 @@ def find_match(temp_table_col_list, target_table_col_list):
             return space_switched_case_insensetive_match
 
 
-def check_type_casting(temp_table_col_list, target_table_col_list, match):
-    pass
+def check_type_casting(match, engine):
+    cast_map = get_full_cast_map(engine)
+    return True if all(temp[1] in cast_map.get(target[1]) for temp, target in match) else False
