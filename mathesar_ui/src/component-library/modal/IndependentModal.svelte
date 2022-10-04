@@ -1,8 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
-  import { Button, Icon, portal } from '@mathesar-component-library';
-  import { iconClose } from '@mathesar-component-library-dir/common/icons';
+
+  import Window from '@mathesar-component-library-dir/window/Window.svelte';
+  import portal from '@mathesar-component-library-dir/common/actions/portal';
+
   import type {
     ModalCloseAction,
     ModalWidth,
@@ -15,7 +17,6 @@
   export let title: string | undefined = undefined;
   let classes = '';
   export { classes as class };
-  export let style = '';
   export let size: ModalWidth = 'medium';
   export let allowClose = true;
   export let hasOverlay = true;
@@ -53,13 +54,7 @@
 <svelte:window on:keydown={handleKeydown} />
 
 {#if isOpen}
-  <div
-    class="modal-wrapper"
-    use:portal
-    class:v-align-top={verticalAlign === 'top'}
-    class:v-align-center={verticalAlign === 'center'}
-    class:v-align-bottom={verticalAlign === 'bottom'}
-  >
+  <div class="modal" use:portal>
     {#if hasOverlay}
       <div
         class="overlay"
@@ -68,31 +63,23 @@
         out:fade={{ duration: 150 }}
       />
     {/if}
-    <div
-      class={['modal', `modal-size-${size}`, classes].join(' ')}
-      {style}
-      in:fly={{ y: 20, duration: 150 }}
-      out:fly={{ y: 20, duration: 150 }}
-    >
-      {#if $$slots.title || title || closeOnButton}
-        <div class="title-bar">
-          <div class="title">
-            <slot name="title" />
-            {title ?? ''}
-          </div>
-          {#if closeOnButton}
-            <Button appearance="plain" class="close-button" on:click={close}>
-              <Icon {...iconClose} />
-            </Button>
-          {/if}
-        </div>
-      {/if}
-
-      <div class="body">
-        <slot {close} />
+    <div class="inset">
+      <div
+        class="window-positioner"
+        class:width-medium={size === 'medium'}
+        class:width-large={size === 'large'}
+        class:v-align-top={verticalAlign === 'top'}
+        class:v-align-center={verticalAlign === 'center'}
+        class:v-align-bottom={verticalAlign === 'bottom'}
+        in:fly={{ y: 20, duration: 150 }}
+        out:fly={{ y: 20, duration: 150 }}
+      >
+        <Window hasCloseButton={closeOnButton} on:close={close}>
+          <div slot="title"><slot name="title" />{title ?? ''}</div>
+          <slot />
+          <slot name="footer" slot="footer" />
+        </Window>
       </div>
-
-      <div class="footer"><slot name="footer" /></div>
     </div>
   </div>
 {/if}

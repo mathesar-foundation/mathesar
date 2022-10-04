@@ -60,6 +60,8 @@
     --text-size-large: 1.125rem;
     --text-size-x-large: 1.266rem;
     --display-size-large: 1.953rem;
+
+    --modal-z-index: 50;
   }
 
   body {

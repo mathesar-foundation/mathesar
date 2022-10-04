@@ -11,7 +11,6 @@
   export let title: string | undefined = undefined;
   let classes = '';
   export { classes as class };
-  export let style = '';
   export let size: ModalWidth | undefined = undefined;
   export let allowClose = true;
   export let closeOn: ModalCloseAction[] = ['button'];
@@ -25,7 +24,6 @@
   hasOverlay={$isOnTop}
   {title}
   class={classes}
-  {style}
   {size}
   allowClose={allowClose && $isOnTop}
   {closeOn}

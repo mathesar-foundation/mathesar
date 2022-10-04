@@ -1,23 +1,11 @@
-.modal-wrapper {
+.modal {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 50;
-  display: flex;
-  justify-content: center;
-  --modal-margin: 1rem;
-
-  &.v-align-top {
-    align-items: flex-start;
-  }
-  &.v-align-center {
-    align-items: center;
-  }
-  &.v-align-bottom {
-    align-items: flex-end;
-  }
+  z-index: var(--modal-z-index, auto);
+  isolation: isolate;
 
   .overlay {
     background-color: rgba(0, 0, 0, 0.2);
@@ -26,65 +14,46 @@
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: 51;
+    z-index: 1;
+  }
+  .inset {
+    position: absolute;
+    --inset: 1rem;
+    top: var(--inset);
+    bottom: var(--inset);
+    left: var(--inset);
+    right: var(--inset);
+    display: flex;
+    justify-content: center;
+    z-index: 2;
   }
 
-  .modal {
-    background-color: white;
-    border-radius: 0.4em;
-    max-height: calc(100% - 2 * var(--modal-margin));
-    min-height: 7em;
-    position: relative;
-    overflow: hidden;
-    margin: var(--modal-margin);
-    z-index: 52;
+  .window-positioner {
+    width: var(--width, auto);
     display: flex;
-    flex-direction: column;
-    box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 
-    .title-bar {
-      display: flex;
-      justify-content: flex-end;
+    > * {
+      width: var(--width);
+    }
+
+    &.v-align-top {
       align-items: flex-start;
-      .title {
-        &:empty {
-          display: none;
-        }
-        flex: 1 1 100%;
-        padding: 1em 1em 0.5em 1em;
-        font-weight: bold;
-      }
+    }
+    &.v-align-center {
+      align-items: center;
+    }
+    &.v-align-bottom {
+      align-items: flex-end;
     }
 
-    > .body,
-    > .footer {
-      padding: 1em;
-      &:empty {
-        display: none;
-      }
-
-      > :first-child {
-        margin-top: 0;
-      }
-      > :last-child {
-        margin-bottom: 0;
-      }
+    &.width-medium {
+      --width: 500px;
     }
-
-    > .body {
-      overflow-y: auto;
-    }
-
-    > .footer {
-      border-top: 1px solid #f5f5f5;
-      background: #f3f6f8;
-    }
-
-    &.modal-size-medium {
-      width: 500px;
-    }
-    &.modal-size-large {
-      width: 800px;
+    &.width-large {
+      --width: 800px;
     }
   }
 }

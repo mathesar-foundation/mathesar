@@ -1,0 +1,50 @@
+.window {
+  background-color: white;
+  border-radius: 0.4em;
+  max-height: 100%;
+  min-height: 7em;
+  position: relative;
+  z-index: var(--window-z-index, auto);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
+
+  .title-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    .title {
+      &:empty {
+        display: none;
+      }
+      flex: 1 1 100%;
+      padding: 1em 1em 0.5em 1em;
+      font-weight: bold;
+    }
+  }
+
+  > .body,
+  > .footer {
+    padding: 1em;
+    &:empty {
+      display: none;
+    }
+
+    > :first-child {
+      margin-top: 0;
+    }
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  > .body {
+    overflow-y: auto;
+  }
+
+  > .footer {
+    border-top: 1px solid #f5f5f5;
+    background: #f3f6f8;
+  }
+}
