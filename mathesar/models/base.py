@@ -244,14 +244,14 @@ class Table(DatabaseObject, Relation):
     # TODO referenced from outside so much that it probably shouldn't be private
     # NOTE key_cached_property's key_fn below presumes that an SA table's oid is
     #@property
-    @key_cached_property(
-        key_fn=lambda table: (
-                'sa_table',
-                table.schema.database.name,
-                table.oid,
-            )
-    )
-    #@cached_property
+   #@key_cached_property(
+   #    key_fn=lambda table: (
+   #            'sa_table',
+   #            table.schema.database.name,
+   #            table.oid,
+   #        )
+   #)
+    @cached_property
     def _sa_table(self):
         # We're caching since we want different Django Table instances to return the same SA
         # Table, when they're referencing the same Postgres table.
@@ -631,16 +631,16 @@ class Column(ReflectionManagerMixin, BaseModel):
     def _sa_column(self):
         return self.table.sa_columns[self.name]
 
-    @key_cached_property(
-        key_fn=lambda column: (
-                "column name",
-                column.table.schema.database.name,
-                column.table.schema.name,
-                column.table.oid,
-                column.attnum,
-            )
-    )
-    #@cached_property
+   #@key_cached_property(
+   #    key_fn=lambda column: (
+   #            "column name",
+   #            column.table.schema.database.name,
+   #            column.table.schema.name,
+   #            column.table.oid,
+   #            column.attnum,
+   #        )
+   #)
+    @cached_property
     #@property
     def name(self):
         name = get_column_name_from_attnum(

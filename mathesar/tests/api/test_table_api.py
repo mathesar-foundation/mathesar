@@ -8,7 +8,7 @@ from db.columns.operations.select import get_columns_attnum_from_names
 from db.types.base import PostgresType, MathesarCustomType
 from db.metadata import get_empty_metadata
 
-from mathesar.state import django as reset_reflection
+from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.base import Column, Table, DataFile
 

@@ -2,6 +2,7 @@ from db.queries.base import DBQuery, InitialColumn
 from db.columns.operations.select import get_column_attnum_from_name as get_attnum
 from db.tables.operations.select import get_oid_from_table
 from db.transforms import base as tbase
+from db.metadata import get_empty_metadata
 
 
 def _extract_col_properties_dict(col):
@@ -17,33 +18,33 @@ def test_DBQuery_all_sa_columns_map_initial_columns(engine_with_academics):
     initial_columns = [
         InitialColumn(
             acad_oid,
-            get_attnum(acad_oid, 'id', engine),
+            get_attnum(acad_oid, 'id', engine, metadata=get_empty_metadata()),
             alias='id',
         ),
         InitialColumn(
             acad_oid,
-            get_attnum(acad_oid, 'institution', engine),
+            get_attnum(acad_oid, 'institution', engine, metadata=get_empty_metadata()),
             alias='institution',
         ),
         InitialColumn(
             acad_oid,
-            get_attnum(acad_oid, 'name', engine),
+            get_attnum(acad_oid, 'name', engine, metadata=get_empty_metadata()),
             alias='advisor name',
             jp_path=[
                 [
-                    (acad_oid, get_attnum(acad_oid, 'advisor', engine)),
-                    (acad_oid, get_attnum(acad_oid, 'id', engine)),
+                    (acad_oid, get_attnum(acad_oid, 'advisor', engine, metadata=get_empty_metadata())),
+                    (acad_oid, get_attnum(acad_oid, 'id', engine, metadata=get_empty_metadata())),
                 ]
             ],
         ),
         InitialColumn(
             acad_oid,
-            get_attnum(acad_oid, 'name', engine),
+            get_attnum(acad_oid, 'name', engine, metadata=get_empty_metadata()),
             alias='advisee name',
             jp_path=[
                 [
-                    (acad_oid, get_attnum(acad_oid, 'id', engine)),
-                    (acad_oid, get_attnum(acad_oid, 'advisor', engine)),
+                    (acad_oid, get_attnum(acad_oid, 'id', engine, metadata=get_empty_metadata())),
+                    (acad_oid, get_attnum(acad_oid, 'advisor', engine, metadata=get_empty_metadata())),
                 ]
             ],
         ),
@@ -72,33 +73,33 @@ def test_DBQuery_all_sa_columns_map_output_columns(engine_with_academics):
     initial_columns = [
         InitialColumn(
             acad_oid,
-            get_attnum(acad_oid, 'id', engine),
+            get_attnum(acad_oid, 'id', engine, metadata=get_empty_metadata()),
             alias='id',
         ),
         InitialColumn(
             acad_oid,
-            get_attnum(acad_oid, 'institution', engine),
+            get_attnum(acad_oid, 'institution', engine, metadata=get_empty_metadata()),
             alias='institution',
         ),
         InitialColumn(
             acad_oid,
-            get_attnum(acad_oid, 'name', engine),
+            get_attnum(acad_oid, 'name', engine, metadata=get_empty_metadata()),
             alias='advisor name',
             jp_path=[
                 [
-                    (acad_oid, get_attnum(acad_oid, 'advisor', engine)),
-                    (acad_oid, get_attnum(acad_oid, 'id', engine)),
+                    (acad_oid, get_attnum(acad_oid, 'advisor', engine, metadata=get_empty_metadata())),
+                    (acad_oid, get_attnum(acad_oid, 'id', engine, metadata=get_empty_metadata())),
                 ]
             ],
         ),
         InitialColumn(
             acad_oid,
-            get_attnum(acad_oid, 'name', engine),
+            get_attnum(acad_oid, 'name', engine, metadata=get_empty_metadata()),
             alias='advisee name',
             jp_path=[
                 [
-                    (acad_oid, get_attnum(acad_oid, 'id', engine)),
-                    (acad_oid, get_attnum(acad_oid, 'advisor', engine)),
+                    (acad_oid, get_attnum(acad_oid, 'id', engine, metadata=get_empty_metadata())),
+                    (acad_oid, get_attnum(acad_oid, 'advisor', engine, metadata=get_empty_metadata())),
                 ]
             ],
         ),
@@ -137,32 +138,32 @@ def test_DBQuery_all_sa_columns_map_summarized_columns(engine_with_library):
     initial_columns = [
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'id', engine),
+            get_attnum(checkouts_oid, 'id', engine, metadata=get_empty_metadata()),
             alias='Checkouts id'
         ),
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'Item', engine),
+            get_attnum(checkouts_oid, 'Item', engine, metadata=get_empty_metadata()),
             alias='Collection items'
         ),
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'Patron', engine),
+            get_attnum(checkouts_oid, 'Patron', engine, metadata=get_empty_metadata()),
             alias='Library patron'
         ),
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'Due Date', engine),
+            get_attnum(checkouts_oid, 'Due Date', engine, metadata=get_empty_metadata()),
             alias='Due Date'
         ),
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'Checkout Time', engine),
+            get_attnum(checkouts_oid, 'Checkout Time', engine, metadata=get_empty_metadata()),
             alias='Checkout Time'
         ),
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'Check In Time', engine),
+            get_attnum(checkouts_oid, 'Check In Time', engine, metadata=get_empty_metadata()),
             alias='Check In Time'
         )
     ]
@@ -221,32 +222,32 @@ def test_DBQuery_all_sa_columns_map_overwriting(engine_with_library):
     initial_columns = [
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'id', engine),
+            get_attnum(checkouts_oid, 'id', engine, metadata=get_empty_metadata()),
             alias='Checkout'
         ),
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'Item', engine),
+            get_attnum(checkouts_oid, 'Item', engine, metadata=get_empty_metadata()),
             alias='Collection items'
         ),
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'Patron', engine),
+            get_attnum(checkouts_oid, 'Patron', engine, metadata=get_empty_metadata()),
             alias='Library patron'
         ),
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'Due Date', engine),
+            get_attnum(checkouts_oid, 'Due Date', engine, metadata=get_empty_metadata()),
             alias='Due Date'
         ),
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'Checkout Time', engine),
+            get_attnum(checkouts_oid, 'Checkout Time', engine, metadata=get_empty_metadata()),
             alias='Checkout Time'
         ),
         InitialColumn(
             checkouts_oid,
-            get_attnum(checkouts_oid, 'Check In Time', engine),
+            get_attnum(checkouts_oid, 'Check In Time', engine, metadata=get_empty_metadata()),
             alias='Check In Time'
         )
     ]
