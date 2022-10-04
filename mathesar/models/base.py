@@ -559,7 +559,7 @@ class Table(DatabaseObject, Relation):
     def get_mappings(self, existing_table):
         temp_table_col_list = self.get_column_name_type_map()
         target_table_col_list = existing_table.get_column_name_type_map()
-        return column_utils.get_mappings(temp_table_col_list, target_table_col_list)
+        return column_utils.find_match(temp_table_col_list, target_table_col_list, self._sa_engine)
 
 
 class Column(ReflectionManagerMixin, BaseModel):
