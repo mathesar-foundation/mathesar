@@ -9,9 +9,10 @@
   import {
     isCellActive,
     scrollBasedOnActiveCell,
+    isNewRecordRow,
   } from '@mathesar/stores/table-data';
   import type {
-    Row,
+    RecordRow,
     Display,
     RecordsData,
     CellKey,
@@ -36,7 +37,7 @@
   export let recordsData: RecordsData;
   export let display: Display;
   export let selection: Selection;
-  export let row: Row;
+  export let row: RecordRow;
   export let rowIsSelected = false;
   export let rowIsProcessing = false;
   export let rowHasErrors = false;
@@ -112,7 +113,7 @@
       return;
     }
     value = newValue;
-    const updatedRow = row.isNew
+    const updatedRow = isNewRecordRow(row)
       ? await recordsData.createOrUpdateRecord(row, column)
       : await recordsData.updateCell(row, column);
     value = updatedRow.record?.[column.id] ?? value;

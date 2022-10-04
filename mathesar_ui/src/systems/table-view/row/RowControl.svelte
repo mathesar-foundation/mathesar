@@ -1,7 +1,12 @@
 <script lang="ts">
   import { Icon, iconLoading } from '@mathesar-component-library';
   import { iconAddNew } from '@mathesar/icons';
-  import { getRowKey } from '@mathesar/stores/table-data';
+  import {
+    getRowKey,
+    isNewRecordRow,
+    isPlaceholderRow,
+    rowHasRecord,
+  } from '@mathesar/stores/table-data';
   import type {
     Meta,
     RecordsData,
@@ -29,16 +34,16 @@
 <CellBackground color="var(--cell-bg-color-header)" />
 <RowCellBackgrounds {isSelected} {hasErrors} />
 <div class="control">
-  {#if row.isAddPlaceholder}
+  {#if isPlaceholderRow(row)}
     <Icon {...iconAddNew} />
-  {:else if typeof row.rowIndex === 'number'}
+  {:else if rowHasRecord(row)}
     <span class="number">
       {row.rowIndex +
-        (row.isNew
+        (isNewRecordRow(row)
           ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
           : $pagination.offset) +
         1}
-      {#if row.isNew}
+      {#if isNewRecordRow(row)}
         *
       {/if}
     </span>

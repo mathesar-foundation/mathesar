@@ -14,7 +14,17 @@ export {
 } from './filtering';
 export { Sorting, SortDirection, getDirectionLabel } from './sorting';
 export { Grouping } from './grouping';
-export { getRowKey } from './records';
+export {
+  getRowKey,
+  rowHasRecord,
+  rowHasNewRecord,
+  isHelpTextRow,
+  isGroupHeaderRow,
+  isPlaceholderRow,
+  isNewRecordRow,
+  filterRecordRows,
+  rowHasSavedRecord,
+} from './records';
 export { getCellKey, ID_ROW_CONTROL_COLUMN, ID_ADD_NEW_COLUMN } from './utils';
 
 export { getTabularData, initTabularData, removeTabularData } from './manager';

@@ -1,5 +1,15 @@
 export type { TabularData, TabularDataProps } from './tabularData';
-export type { RecordsData, Row } from './records';
+export type {
+  RecordsData,
+  Row,
+  RecordRow,
+  NewRecordRow,
+  GroupHeaderRow,
+  HelpTextRow,
+  PlaceholderRow,
+  RecordGroup,
+  RecordGrouping,
+} from './records';
 export type { ColumnsData, ColumnsDataStore } from './columns';
 export type {
   ProcessedColumn,

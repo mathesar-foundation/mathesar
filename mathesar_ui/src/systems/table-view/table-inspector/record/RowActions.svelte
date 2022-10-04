@@ -5,7 +5,7 @@
   import type { RecordsData } from '@mathesar/stores/table-data/types';
   import { toast } from '@mathesar/stores/toast';
 
-  export let selectedRoweKey: number[];
+  export let selectedRowIndices: number[];
   export let recordsData: RecordsData;
   export let selection: Selection;
 
@@ -16,7 +16,7 @@
       try {
         isDeleting = true;
         selection.freezeSelection = true;
-        await recordsData.deleteSelected(selectedRoweKey);
+        await recordsData.deleteSelected(selectedRowIndices);
         selection.resetSelection();
       } catch (e) {
         toast.fromError(e);
@@ -32,7 +32,7 @@
   <Button appearance="ghost" on:click={handleDeleteRecords}>
     <Icon {...isDeleting ? iconLoading : iconDelete} />
     <span>
-      Delete {selectedRoweKey.length} record{selectedRoweKey.length > 1
+      Delete {selectedRowIndices.length} record{selectedRowIndices.length > 1
         ? 's'
         : ''}
     </span>

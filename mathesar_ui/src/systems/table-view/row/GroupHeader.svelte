@@ -1,14 +1,18 @@
 <script lang="ts">
   import { SheetPositionableCell } from '@mathesar/components/sheet';
-  import type { Grouping, Group } from '@mathesar/stores/table-data/records';
-  import type { Row, ProcessedColumn } from '@mathesar/stores/table-data/types';
+  import type {
+    RecordGrouping,
+    RecordGroup,
+    GroupHeaderRow,
+    ProcessedColumn,
+  } from '@mathesar/stores/table-data/types';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import CellBackground from './CellBackground.svelte';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
-  export let row: Row;
-  export let grouping: Grouping;
-  export let group: Group;
+  export let row: GroupHeaderRow;
+  export let grouping: RecordGrouping;
+  export let group: RecordGroup;
 
   $: ({ columnIds, preprocIds } = grouping);
 

@@ -2,6 +2,11 @@
   import {
     getCellKey,
     getTabularDataStoreFromContext,
+    isNewRecordRow,
+    isPlaceholderRow,
+    rowHasRecord,
+    isGroupHeaderRow,
+    isHelpTextRow,
   } from '@mathesar/stores/table-data';
   import type { Row } from '@mathesar/stores/table-data/types';
   import {
@@ -49,17 +54,13 @@
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
 
   function checkAndCreateEmptyRow() {
-    if (row.isAddPlaceholder) {
+    if (isPlaceholderRow(row)) {
       void recordsData.addEmptyRecord();
     }
   }
 
   const handleRowClick = () => {
-    if (
-      row.record &&
-      !row.isAddPlaceholder &&
-      typeof row.rowIndex === 'number'
-    ) {
+    if (rowHasRecord(row) && !isPlaceholderRow(row)) {
       selection.toggleRowSelection(row);
     }
   };
@@ -72,10 +73,10 @@
     class:processing={wholeRowState === 'processing'}
     class:failed={hasWholeRowErrors}
     class:created={creationStatus === 'success'}
-    class:add-placeholder={row.isAddPlaceholder}
-    class:new={row.isNew}
-    class:is-group-header={row.isGroupHeader}
-    class:is-add-placeholder={row.isAddPlaceholder}
+    class:add-placeholder={isPlaceholderRow(row)}
+    class:new={isNewRecordRow(row)}
+    class:is-group-header={isGroupHeaderRow(row)}
+    class:is-add-placeholder={isHelpTextRow(row)}
     {...htmlAttributes}
     style={styleString}
     data-row-identifier={row.identifier}
@@ -89,7 +90,7 @@
       let:style
     >
       <div {...cellHtmlAttr} {style} on:click={handleRowClick}>
-        {#if row.record}
+        {#if rowHasRecord(row)}
           <RowControl
             {primaryKeyColumnId}
             {row}
@@ -102,16 +103,16 @@
       </div>
     </SheetCell>
 
-    {#if row.isNewHelpText}
+    {#if isHelpTextRow(row)}
       <NewRecordMessage columnCount={$processedColumns.size} />
-    {:else if row.isGroupHeader && $grouping && row.group}
+    {:else if isGroupHeaderRow(row) && $grouping && row.group}
       <GroupHeader
         {row}
         grouping={$grouping}
         group={row.group}
         processedColumnsMap={$processedColumns}
       />
-    {:else if row.record}
+    {:else if rowHasRecord(row)}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
           {display}
