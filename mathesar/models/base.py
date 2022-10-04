@@ -640,8 +640,8 @@ class Column(ReflectionManagerMixin, BaseModel):
    #            column.attnum,
    #        )
    #)
-    #@cached_property
-    @property
+    @cached_property
+    #@property
     def name(self):
         name = get_column_name_from_attnum(
             self.table.oid,
@@ -649,6 +649,7 @@ class Column(ReflectionManagerMixin, BaseModel):
             self._sa_engine,
             metadata=get_cached_metadata(),
         )
+        assert type(name) is str
         if name is None:
             raise ProgrammingAPIException(
                 Exception(
