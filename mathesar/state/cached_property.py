@@ -1,42 +1,3 @@
-"""
-OUTDATED, to be rewritten!
-
-    Extends the built-in property decorator in two ways:
-
-    - uses a django cache instance,
-        - so that the cache may be cleared from our central state-clearing logic (principal
-        motivation),
-        - also, this means that the cache may be shared;
-    - accepts a key_fn parameter to define the cache_key,
-        - a function which takes the owner as argument,
-        - and, is meant to return the key identifying the item to be cached,
-        - if one is not provided, the cache key is a random uuid.
-
-    Usage with a key_fn:
-
-    ```
-    class Column:
-        @key_cached_property(
-            key_fn=lambda column: (
-                    "column name",
-                    column.table.database.name,
-                    column.table.oid,
-                    column.attnum,
-                )
-        )
-        def name(self):
-            ...
-    ```
-
-    Usage without a key_fn: notice the empty `()`:
-
-    ```
-    class Column:
-        @key_cached_property()
-        def name(self):
-            ...
-    ```
-"""
 import uuid
 import logging
 
@@ -70,10 +31,8 @@ def clear_cached_property_cache():
     """
     logger.debug("clear_cached_property_cache")
     global _central_ache
-    _central_cache = {}
+    _central_cache = {}  # noqa: F841
 
-
-counter = 0
 
 class _cached_property:
     def __init__(self, fn, key_fn=None):
@@ -90,38 +49,22 @@ class _cached_property:
         elif name != self.attribute_name:
             raise TypeError(
                 "Cannot assign the same cached_property to two different names "
-                    f"({self.attribute_name!r} and {name!r})."
+                f"({self.attribute_name!r} and {name!r})."
             )
 
     def __get__(self, instance, _):
         key = self._get_ip_key(instance=instance)
         cached_value = _get_from_central_cache(key=key)
-        logger.debug(f"_get_value key {key}")
-        global counter
-        counter += 1
-        if counter > 100:
-            #breakpoint()
-            pass
         if cached_value is not NO_VALUE:
-            logger.debug(f"_get_value cached_value {cached_value}")
             return cached_value
         else:
             assert self.original_get_fn is not None
             new_value = self.original_get_fn(instance)
             _set_on_central_cache(key=key, value=new_value)
-            logger.debug(f"_get_value new_value {new_value}")
             return new_value
 
     def __set__(self, instance, value):
         key = self._get_ip_key(instance)
-        _set_on_central_cache(key=key, value=value)
-
-    def _set_on_central_cache(self, key, value):
-        current_value = _get_from_central_cache(key=key)
-        if current_value is not NO_VALUE:
-            logger.debug(
-                f"OVERWRITING key {key}, \n previous value {current_value}, \n new value {value}"
-            )
         _set_on_central_cache(key=key, value=value)
 
     def __delete__(self, instance):

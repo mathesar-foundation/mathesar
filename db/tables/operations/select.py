@@ -25,22 +25,6 @@ def reflect_table_from_oid(oid, engine, metadata, connection_to_use=None):
 
 
 def reflect_tables_from_oids(oids, engine, metadata, connection_to_use=None):
-   #with warnings.catch_warnings():
-   #    warnings.filterwarnings("ignore", message="Did not recognize type")
-   #    pg_class = Table("pg_class", metadata, autoload_with=engine)
-   #    pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
-   #sel = (
-   #    select(pg_namespace.c.nspname, pg_class.c.relname, pg_class.c.oid)
-   #    .select_from(
-   #        join(
-   #            pg_class,
-   #            pg_namespace,
-   #            pg_class.c.relnamespace == pg_namespace.c.oid
-   #        )
-   #    )
-   #    .where(pg_class.c.oid.in_(oids))
-   #)
-   #results = execute_statement(engine, sel, connection_to_use).fetchall()
     oids_to_schema_and_table_names = (
         get_map_of_table_oid_to_schema_name_and_table_name(
             oids,
@@ -66,7 +50,7 @@ def get_map_of_table_oid_to_schema_name_and_table_name(
         engine,
         metadata,
         connection_to_use=None,
-    ):
+):
     if len(table_oids) == 0:
         return {}
     pg_class = get_pg_catalog_table("pg_class", engine, metadata=metadata)
@@ -104,7 +88,6 @@ def get_table_oids_from_schema(schema_oid, engine, metadata):
     return table_oids
 
 
-# TODO how to not make redundant queries when getting oids?
 def get_oid_from_table(name, schema, engine):
     inspector = inspect(engine)
     return inspector.get_table_oid(name, schema=schema)

@@ -1,6 +1,3 @@
-import pytest
-
-
 def _get_object_dependent_ids(dependents, object_id, type):
     return [
         int(d['obj']['id'])
@@ -34,20 +31,14 @@ def test_dependents_response_attrs(library_ma_tables, client):
     )
 
 
-import logging
-logger = logging.getLogger(__name__)
 def test_dependents_response(library_ma_tables, client):
-    from mathesar.state import reset_reflection; reset_reflection()
     items_id = library_ma_tables["Items"].id
     checkouts_id = library_ma_tables["Checkouts"].id
 
-    logger.debug("client.get(f'/api/db/v0/tables/{items_id}/dependents/')")
     items_dependents = client.get(f'/api/db/v0/tables/{items_id}/dependents/').json()
     items_dependent_ids = _get_object_dependent_ids(items_dependents, items_id, 'table')
 
-    logger.debug("client.get(f'/api/db/v0/tables/{items_id}/constraints/')")
     items_constraints = client.get(f'/api/db/v0/tables/{items_id}/constraints/').json()['results']
-    logger.debug("client.get(f'/api/db/v0/tables/{checkouts_id}/constraints/')")
     checkouts_constraints = client.get(f'/api/db/v0/tables/{checkouts_id}/constraints/').json()['results']
 
     items_constraints_ids = _get_constraint_ids(items_constraints)

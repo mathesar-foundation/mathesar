@@ -1,4 +1,3 @@
-import pytest
 from sqlalchemy import MetaData, select
 
 from db.columns.operations.select import get_columns_attnum_from_names

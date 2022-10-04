@@ -45,8 +45,7 @@ from mathesar.utils.prefetch import PrefetchManager, Prefetcher
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
 from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
-from mathesar.state.cached_property import key_cached_property, cached_property
-#from django.utils.functional import cached_property
+from mathesar.state.cached_property import cached_property
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 
 
@@ -220,7 +219,6 @@ class ColumnNamePrefetcher(Prefetcher):
         return
 
     def decorator(self, column, name):
-        #pass
         setattr(column, 'name', name)
 
 
@@ -251,22 +249,21 @@ class ColumnPrefetcher(Prefetcher):
         pass
 
 
-import logging
-logger = logging.getLogger(__name__)
-
 _sa_table_prefetcher = Prefetcher(
-    filter=lambda oids, tables: reflect_tables_from_oids(oids, list(tables)[0]._sa_engine, metadata=get_cached_metadata())
-        if len(tables) > 0 else [],
+    filter=lambda oids, tables: reflect_tables_from_oids(
+        oids, list(tables)[0]._sa_engine, metadata=get_cached_metadata()
+    ) if len(tables) > 0 else [],
     mapper=lambda table: table.oid,
     # A filler statement, just used to satisfy the library. It does not affect the prefetcher in
     # any way as we bypass reverse mapping if the prefetcher returns a dictionary
     reverse_mapper=lambda table: table.oid,
     decorator=lambda table, _sa_table: setattr(
-            table,
-            '_sa_table',
-            _sa_table
-        )
+        table,
+        '_sa_table',
+        _sa_table
+    )
 )
+
 
 class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
@@ -302,15 +299,16 @@ class Table(DatabaseObject, Relation):
         super().save(*args, **kwargs)
 
     # TODO referenced from outside so much that it probably shouldn't be private
-    # NOTE key_cached_property's key_fn below presumes that an SA table's oid is
-    #@property
-   #@key_cached_property(
-   #    key_fn=lambda table: (
-   #            'sa_table',
-   #            table.schema.database.name,
-   #            table.oid,
-   #        )
-   #)
+    # TODO use below decorator in place of cached_property to prevent redundant reflection from
+    # redundant model instances.
+    #
+    # @key_cached_property(
+    #     key_fn=lambda table: (
+    #             'sa_table',
+    #             table.schema.database.name,
+    #             table.oid,
+    #         )
+    # )
     @cached_property
     def _sa_table(self):
         # We're caching since we want different Django Table instances to return the same SA
@@ -670,17 +668,6 @@ class Column(ReflectionManagerMixin, BaseModel):
             else:
                 raise e
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        column = self
-        logger.debug((
-                         "column name",
-                         column.table.schema.database.name,
-                         column.table.schema.name,
-                         column.table.oid,
-                         column.attnum,
-                     ))
-
     @property
     def _sa_engine(self):
         return self.table._sa_engine
@@ -690,17 +677,19 @@ class Column(ReflectionManagerMixin, BaseModel):
     def _sa_column(self):
         return self.table.sa_columns[self.name]
 
-   #@key_cached_property(
-   #    key_fn=lambda column: (
-   #            "column name",
-   #            column.table.schema.database.name,
-   #            column.table.schema.name,
-   #            column.table.oid,
-   #            column.attnum,
-   #        )
-   #)
+    # TODO use below decorator in place of cached_property to prevent redundant reflection from
+    # redundant model instances.
+    #
+    # @key_cached_property(
+    #     key_fn=lambda column: (
+    #             "column name",
+    #             column.table.schema.database.name,
+    #             column.table.schema.name,
+    #             column.table.oid,
+    #             column.attnum,
+    #         )
+    # )
     @cached_property
-    #@property
     def name(self):
         name = get_column_name_from_attnum(
             self.table.oid,
