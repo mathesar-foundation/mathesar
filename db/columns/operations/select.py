@@ -104,6 +104,11 @@ def get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use=Non
 
 
 def _get_columns_name_from_attnums(table_oids, attnums, engine, connection_to_use=None):
+    """
+    Returns (column name, column attnum, column table's oid) tuples for each column that's in the
+    tables specified via `table_oids`, and, when `attnums` is not None, that has an attnum
+    specified in `attnums`.
+    """
     pg_attribute = get_pg_catalog_table("pg_attribute", engine)
     sel = select(pg_attribute.c.attname, pg_attribute.c.attnum, pg_attribute.c.attrelid)
     conditions = [pg_attribute.c.attrelid.in_(table_oids)]
