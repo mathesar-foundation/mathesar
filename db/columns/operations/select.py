@@ -68,16 +68,14 @@ def get_column_attnums_from_table(table_oid, engine, connection_to_use=None):
 
 def get_columns_name_from_tables(table_oids, engine, connection_to_use=None):
     """
-    Returns the respective list of attnum of the column names passed.
-     The order is based on the column order in the table and not by the order of the column names argument.
+    Order determined by the column order in the table.
     """
     return get_columns_name_from_tables_as_map(table_oids, engine, connection_to_use).values()
 
 
 def get_columns_name_from_tables_as_map(table_oids, engine, connection_to_use=None):
     """
-    Returns the respective list of attnum of the column names passed.
-     The order is based on the column order in the table and not by the order of the column names argument.
+    Order determined by the column order in the table.
     """
     triples_of_col_info = _get_triples_of_column_name_and_attnum_and_table_oid(
         table_oids, None, engine, connection_to_use
@@ -91,8 +89,7 @@ def get_columns_name_from_tables_as_map(table_oids, engine, connection_to_use=No
 
 def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None, fetch_as_map=False):
     """
-    Returns the respective list of attnum of the column names passed.
-     The order is based on the column order in the table and not by the order of the column names argument.
+    Order determined by the column order in the table.
     """
     triples_of_col_info = _get_triples_of_column_name_and_attnum_and_table_oid(
         [table_oid], attnums, engine, connection_to_use
@@ -131,6 +128,8 @@ def _statement_for_triples_of_column_name_and_attnum_and_table_oid(
     Returns (column name, column attnum, column table's oid) tuples for each column that's in the
     tables specified via `table_oids`, and, when `attnums` is not None, that has an attnum
     specified in `attnums`.
+
+    The order is based on the column order in the table and not on the order of the arguments.
     """
     pg_attribute = get_pg_catalog_table("pg_attribute", engine)
     sel = select(pg_attribute.c.attname, pg_attribute.c.attnum, pg_attribute.c.attrelid)
