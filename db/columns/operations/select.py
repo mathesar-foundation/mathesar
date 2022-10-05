@@ -71,7 +71,9 @@ def get_columns_name_from_tables(table_oids, engine, connection_to_use=None, fet
     Returns the respective list of attnum of the column names passed.
      The order is based on the column order in the table and not by the order of the column names argument.
     """
-    column_names_tuple = _get_column_names_tuple(table_oids, None, engine, connection_to_use)
+    column_names_tuple = _get_triples_of_column_name_and_attnum_and_table_oid(
+        table_oids, None, engine, connection_to_use
+    )
     if fetch_as_map:
         column_names = {(column_name_tuple[1], column_name_tuple[2]): column_name_tuple[0] for column_name_tuple in column_names_tuple}
     else:
@@ -84,7 +86,9 @@ def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=
     Returns the respective list of attnum of the column names passed.
      The order is based on the column order in the table and not by the order of the column names argument.
     """
-    column_names_tuple = _get_column_names_tuple([table_oid], attnums, engine, connection_to_use)
+    column_names_tuple = _get_triples_of_column_name_and_attnum_and_table_oid(
+        [table_oid], attnums, engine, connection_to_use
+    )
     if fetch_as_map:
         column_names = {column_name_tuple[1]: column_name_tuple[0] for column_name_tuple in column_names_tuple}
     else:
@@ -92,7 +96,9 @@ def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=
     return column_names
 
 
-def _get_column_names_tuple(table_oids, attnums, engine, connection_to_use):
+def _get_triples_of_column_name_and_attnum_and_table_oid(
+    table_oids, attnums, engine, connection_to_use
+):
     statement = _statement_for_triples_of_column_name_and_attnum_and_table_oid(
         table_oids, attnums, engine, connection_to_use=connection_to_use
     )
