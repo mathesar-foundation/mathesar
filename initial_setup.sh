@@ -52,3 +52,5 @@ done
 # run migrations and install.py
 execute docker exec mathesar_service sh -c "\"python manage.py migrate && python install.py\""
 
+# create superuser
+execute docker exec mathesar_service sh -c "\"python manage.py createsuperuser --no-input --username admin --email admin@example.com\""

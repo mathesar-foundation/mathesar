@@ -1,4 +1,4 @@
 [tool.vulture]
 exclude = ["mathesar/migrations"]
-ignore_names = ["go_to_patents_data_table", "go_to_all_types_table", "go_to_table_with_numbers_in_text"]
+ignore_names = ["go_to_patents_data_table", "go_to_all_types_table", "go_to_table_with_numbers_in_text", "admin_user"]
 min_confidence = 90
