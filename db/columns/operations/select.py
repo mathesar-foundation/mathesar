@@ -88,7 +88,7 @@ def get_columns_name_from_tables_as_map(table_oids, engine, connection_to_use=No
 
 
 
-def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None):
+def get_column_names_from_attnums(table_oid, attnums, engine, connection_to_use=None):
     return get_map_of_attnum_to_column_name(table_oid, attnums, engine, connection_to_use).values()
 
 
