@@ -15,7 +15,7 @@ from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import (
     get_column_attnum_from_names_as_map, get_column_name_from_attnum, get_columns_attnum_from_names,
-    get_columns_name_from_attnums, get_columns_name_from_tables,
+    get_columns_name_from_attnums_as_map, get_columns_name_from_tables_as_map,
 )
 from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
@@ -210,7 +210,7 @@ class ColumnNamePrefetcher(Prefetcher):
         if len(columns) < 1:
             return []
         table = list(columns)[0].table
-        return get_columns_name_from_attnums(table.oid, column_attnums, table._sa_engine, fetch_as_map=True)
+        return get_columns_name_from_attnums_as_map(table.oid, column_attnums, table._sa_engine)
 
     def mapper(self, column):
         return column.attnum
@@ -231,11 +231,10 @@ class ColumnPrefetcher(Prefetcher):
         table_oids = [table.oid for table in tables]
 
         def _get_column_names_from_tables(table_oids):
-            return get_columns_name_from_tables(
+            return get_columns_name_from_tables_as_map(
                 table_oids,
                 list(tables)[0]._sa_engine
                 if len(tables) > 0 else [],
-                fetch_as_map=True
             )
         return ColumnNamePrefetcher(
             filter=lambda column_attnums, columns: _get_column_names_from_tables(table_oids),
