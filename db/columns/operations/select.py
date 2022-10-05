@@ -70,10 +70,9 @@ def get_columns_name_from_tables(table_oids, engine, connection_to_use=None):
     """
     Order determined by the column order in the table.
     """
-    return list(get_columns_name_from_tables_as_map(table_oids, engine, connection_to_use).values())
+    return list(get_map_of_attnum_and_table_oid_to_column_name(table_oids, engine, connection_to_use).values())
 
-
-def get_columns_name_from_tables_as_map(table_oids, engine, connection_to_use=None):
+def get_map_of_attnum_and_table_oid_to_column_name(table_oids, engine, connection_to_use=None):
     """
     Order determined by the column order in the table.
     """
