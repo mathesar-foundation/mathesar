@@ -87,22 +87,23 @@ def get_columns_name_from_tables_as_map(table_oids, engine, connection_to_use=No
     }
 
 
-def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None, fetch_as_map=False):
+
+def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=None):
+    return get_columns_name_from_attnums_as_map(table_oid, attnums, engine, connection_to_use).values()
+
+
+def get_columns_name_from_attnums_as_map(table_oid, attnums, engine, connection_to_use=None):
     """
     Order determined by the column order in the table.
     """
     triples_of_col_info = _get_triples_of_column_name_and_attnum_and_table_oid(
         [table_oid], attnums, engine, connection_to_use
     )
-    if fetch_as_map:
-        column_names = {
-            attnum: column_name
-            for column_name, attnum, _
-            in triples_of_col_info
-        }
-    else:
-        column_names = [column_name_tuple[0] for column_name_tuple in triples_of_col_info]
-    return column_names
+    return {
+        attnum: column_name
+        for column_name, attnum, _
+        in triples_of_col_info
+    }
 
 
 def _get_triples_of_column_name_and_attnum_and_table_oid(
