@@ -2,12 +2,12 @@ from functools import reduce
 
 from bidict import bidict
 
+from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField, Deferrable
 from django.utils.functional import cached_property
-from django.contrib.auth.models import User
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -698,7 +698,7 @@ class DataFile(BaseModel):
     created_from_choices = models.TextChoices("created_from", "FILE PASTE URL")
 
     file = models.FileField(upload_to=model_utils.user_directory_path)
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.CASCADE)
     created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
                                           null=True, on_delete=models.SET_NULL)
