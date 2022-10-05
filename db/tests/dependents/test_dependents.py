@@ -211,7 +211,7 @@ def test_views_as_dependents(engine_with_schema, library_db_tables, library_tabl
     assert publications_view_dependent['name'] == view_name
 
 
-def test_indexex_as_dependents(engine, library_db_tables, library_tables_oids):
+def test_indexes_as_dependents(engine, library_db_tables, library_tables_oids):
     index_name = 'index'
     index = Index(index_name, library_db_tables['Publishers'].c.id)
     index.create(engine)
@@ -241,3 +241,12 @@ def test_filter(engine, library_tables_oids, exclude_types):
             type not in dependents_types for type in exclude_types
         ]
     )
+
+
+def test_sequences_as_dependents(engine, library_tables_oids):
+    publishers_oid = library_tables_oids['Publishers']
+    publishers_sequence_name = '"Publishers_id_seq"'
+    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, [])
+    publishers_sequence_dependent = _get_object_dependents_by_name(publishers_dependents_graph, publishers_oid, publishers_sequence_name)[0]
+
+    assert publishers_sequence_dependent['name'] == publishers_sequence_name

@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, any_, column, exists, func, literal, select, text, true, union, and_, String, cast, collate
+from sqlalchemy import MetaData, any_, column, exists, func, literal, select, text, true, union, and_, collate
 import warnings
 from sqlalchemy.dialects.postgresql import array
 
@@ -110,7 +110,7 @@ def _get_index_dependents(pg_identify_object, dependency_pairs):
 def _get_rule_dependents(pg_identify_object, dependency_pairs):
     return dependency_pairs.where(pg_identify_object.c.type == 'rule')
 
-    
+
 def _get_trigger_dependents(pg_depend, pg_identify_object, pg_trigger):
     return (
         select(
@@ -164,6 +164,27 @@ def _get_table_dependents(pg_identify_object, base):
     return base.where(pg_identify_object.c.type == 'table')
 
 
+def _get_function_dependents(pg_depend, pg_identify_object, pg_proc):
+    return (
+        select(
+            pg_depend,
+            # the same as with pg_trigger table
+            collate(pg_proc.c.proname, 'default').label('objname'),
+            pg_identify_object.c.type.label('objtype')
+        )
+        .select_from(pg_depend)
+        .join(pg_identify_object, true())
+        .join(pg_proc, pg_proc.c.oid == pg_depend.c.objid)
+        .where(pg_depend.c.deptype == any_(array(PG_DEPENDENT_TYPES)))
+        .where(pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID)
+        .where(pg_identify_object.c.type == 'function')
+        .group_by(
+            pg_depend,
+            pg_proc.c.proname,
+            pg_identify_object.c.type)
+    )
+
+
 # stmt for getting a full list of dependents and identifying them
 def _get_dependency_pairs_stmt(pg_depend, pg_identify_object):
     result = (
@@ -201,6 +222,10 @@ def _get_pg_trigger(engine, metadata):
     return get_pg_catalog_table('pg_trigger', engine, metadata=metadata)
 
 
+def _get_pg_proc(engine, metadata):
+    return get_pg_catalog_table('pg_proc', engine, metadata=metadata)
+
+
 def _get_pg_identify_object_lateral_stmt(classid, objid, objsubid):
     return (
         select(
@@ -224,6 +249,7 @@ def _get_typed_dependency_pairs_stmt(engine, exclude_types):
     pg_constraint = _get_pg_constraint_table(engine, metadata)
     pg_rewrite = _get_pg_rewrite(engine, metadata)
     pg_trigger = _get_pg_trigger(engine, metadata)
+    pg_proc = _get_pg_proc(engine, metadata)
 
     type_dependents = {}
     # each statement filters the base statement extracting dependents of a specific type
@@ -251,6 +277,10 @@ def _get_typed_dependency_pairs_stmt(engine, exclude_types):
 
     sequence_dependents = _get_sequence_dependents(pg_identify_object, dependency_pairs).cte('sequence_dependents')
     type_dependents['sequence'] = [sequence_dependents]
+
+    # only schemas' function dependents
+    function_dependents = _get_function_dependents(pg_depend, pg_identify_object, pg_proc).cte('function_dependents')
+    type_dependents['function'] = [function_dependents]
 
     dependent_selects = [
         select(dependent)
