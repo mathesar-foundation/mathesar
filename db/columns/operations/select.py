@@ -100,20 +100,20 @@ def _get_triples_of_column_name_and_attnum_and_table_oid(
     table_oids, attnums, engine, connection_to_use
 ):
     statement = _statement_for_triples_of_column_name_and_attnum_and_table_oid(
-        table_oids, attnums, engine, connection_to_use=connection_to_use
+        table_oids, attnums, engine
     )
     return execute_statement(engine, statement, connection_to_use).fetchall()
 
 
 def get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use=None):
     statement = _statement_for_triples_of_column_name_and_attnum_and_table_oid(
-        [table_oid], [attnum], engine, connection_to_use=None
+        [table_oid], [attnum], engine
     )
     return execute_statement(engine, statement, connection_to_use).scalar()
 
 
 def _statement_for_triples_of_column_name_and_attnum_and_table_oid(
-    table_oids, attnums, engine, connection_to_use=None
+    table_oids, attnums, engine
 ):
     """
     Returns (column name, column attnum, column table's oid) tuples for each column that's in the
