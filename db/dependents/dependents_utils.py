@@ -1,5 +1,8 @@
 from sqlalchemy import MetaData, Table, any_, column, exists, func, literal, select, text, true, union, and_, String, cast, collate
+import warnings
 from sqlalchemy.dialects.postgresql import array
+
+from db.utils import get_pg_catalog_table
 
 # OIDs assigned during normal database operation are constrained to be 16384 or higher.
 USER_DEFINED_OBJECTS_MIN_OID = 16384
@@ -11,8 +14,8 @@ START_LEVEL = 1
 MAX_LEVEL = 10
 
 
-def get_dependents_graph(referenced_object_id, engine, attnum=None):
-    dependency_pairs = _get_typed_dependency_pairs_stmt(engine)
+def get_dependents_graph(referenced_object_id, engine, exclude_types, attnum=None):
+    dependency_pairs = _get_typed_dependency_pairs_stmt(engine, exclude_types)
     dependency_pairs_cte = dependency_pairs.cte(recursive=True, name='dependency_pairs_cte')
 
     pg_identify_refobject = _get_pg_identify_object_lateral_stmt(
@@ -59,8 +62,10 @@ def get_dependents_graph(referenced_object_id, engine, attnum=None):
     recursive_stmt = anchor.union(recursive)
     stmt = select(recursive_stmt)
 
-    with engine.connect() as conn:
-        result = conn.execute(stmt)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="SELECT statement has a cartesian product")
+        with engine.connect() as conn:
+            result = conn.execute(stmt)
 
     return _get_structured_result(result)
 
@@ -181,19 +186,19 @@ def _get_dependency_pairs_stmt(pg_depend, pg_identify_object):
 
 
 def _get_pg_depend_table(engine, metadata):
-    return Table("pg_depend", metadata, autoload_with=engine)
+    return get_pg_catalog_table("pg_depend", engine, metadata=metadata)
 
 
 def _get_pg_constraint_table(engine, metadata):
-    return Table("pg_constraint", metadata, autoload_with=engine)
+    return get_pg_catalog_table("pg_constraint", engine, metadata=metadata)
 
 
 def _get_pg_rewrite(engine, metadata):
-    return Table("pg_rewrite", metadata, autoload_with=engine)
+    return get_pg_catalog_table("pg_rewrite", engine, metadata=metadata)
 
 
 def _get_pg_trigger(engine, metadata):
-    return Table('pg_trigger', metadata, autoload_with=engine)
+    return get_pg_catalog_table('pg_trigger', engine, metadata=metadata)
 
 
 def _get_pg_identify_object_lateral_stmt(classid, objid, objsubid):
@@ -210,7 +215,7 @@ def _get_pg_identify_object_lateral_stmt(classid, objid, objsubid):
     )
 
 
-def _get_typed_dependency_pairs_stmt(engine):
+def _get_typed_dependency_pairs_stmt(engine, exclude_types):
     metadata = MetaData()
 
     pg_depend = _get_pg_depend_table(engine, metadata)
@@ -220,32 +225,41 @@ def _get_typed_dependency_pairs_stmt(engine):
     pg_rewrite = _get_pg_rewrite(engine, metadata)
     pg_trigger = _get_pg_trigger(engine, metadata)
 
+    type_dependents = {}
     # each statement filters the base statement extracting dependents of a specific type
     # so it's easy to exclude particular types or add new
     dependency_pairs = _get_dependency_pairs_stmt(pg_depend, pg_identify_object)
     foreign_key_constraint_dependents = _get_foreign_key_constraint_dependents(pg_identify_object, dependency_pairs).cte('foreign_key_constraint_dependents')
+    type_dependents['table constraint'] = [foreign_key_constraint_dependents]
+
     table_from_fk_dependents = _get_table_dependents_from_fk(foreign_key_constraint_dependents, pg_constraint).cte('table_from_fk_dependents')
     table_dependents = _get_table_dependents(pg_identify_object, dependency_pairs).cte('table_dependents')
+    type_dependents['table'] = [table_from_fk_dependents, table_dependents]
 
     # should not be returned directly, used for getting views
     # this relation is required because views in PostgreSQL are implemented using the rule system
     # views don't depend on tables directly but through rules, that are mapped one-to-one
     rule_dependents = _get_rule_dependents(pg_identify_object, dependency_pairs).cte('rule_dependents')
     view_dependents = _get_view_dependents(pg_identify_object, pg_rewrite, rule_dependents).cte('view_dependents')
+    type_dependents['view'] = [view_dependents]
 
     index_dependents = _get_index_dependents(pg_identify_object, dependency_pairs).cte('index_dependents')
+    type_dependents['index'] = [index_dependents]
 
     trigger_dependents = _get_trigger_dependents(pg_depend, pg_identify_object, pg_trigger).cte('trigger_dependents')
-    sequence_dependents = _get_sequence_dependents(pg_identify_object, dependency_pairs).cte('sequence_dependents')
+    type_dependents['trigger'] = [trigger_dependents]
 
-    return union(
-        select(foreign_key_constraint_dependents),
-        select(table_dependents),
-        select(table_from_fk_dependents),
-        select(view_dependents),
-        select(index_dependents),
-        select(trigger_dependents),
-        select(sequence_dependents))
+    sequence_dependents = _get_sequence_dependents(pg_identify_object, dependency_pairs).cte('sequence_dependents')
+    type_dependents['sequence'] = [sequence_dependents]
+
+    dependent_selects = [
+        select(dependent)
+        for type, dependents in type_dependents.items()
+        if type not in exclude_types
+        for dependent in dependents
+    ]
+
+    return union(*dependent_selects)
 
 
 def has_dependents(referenced_object_id, engine, attnum=None):

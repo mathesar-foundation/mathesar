@@ -11,6 +11,7 @@
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { rowHeaderWidthPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
 
   export let queryRunner: QueryRunner;
@@ -35,12 +36,16 @@
   $: sheetColumns = columnList.length
     ? [{ id: ID_ROW_CONTROL_COLUMN }, ...columnList]
     : [];
+  $: results = $records.results ?? [];
   // Show a dummy ghost row when there are no records
   $: showDummyGhostRow =
-    recordRunState === 'success' && !$records.results.length;
-  $: sheetItemCount = showDummyGhostRow ? 1 : $records.results.length;
+    (recordRunState === 'success' || recordRunState === 'processing') &&
+    !results.length;
+  $: sheetItemCount = showDummyGhostRow ? 1 : results.length;
 
-  const columnWidths = new ImmutableMap([[ID_ROW_CONTROL_COLUMN, 70]]);
+  const columnWidths = new ImmutableMap([
+    [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
+  ]);
 
   function checkAndUnselectColumn(e: MouseEvent) {
     const target = e.target as HTMLElement;
@@ -142,7 +147,7 @@
         let:items
       >
         {#each items as item (item.key)}
-          {#if $records.results[item.index] || showDummyGhostRow}
+          {#if results[item.index] || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div {...htmlAttributes} style={styleString}>
                 <SheetCell
@@ -171,12 +176,10 @@
                         ? 'selected'
                         : ''}
                     >
-                      {#if $records.results[item.index]}
+                      {#if results[item.index] || recordRunState === 'processing'}
                         <CellFabric
                           columnFabric={processedQueryColumn}
-                          value={$records.results[item.index][
-                            processedQueryColumn.id
-                          ]}
+                          value={results[item.index]?.[processedQueryColumn.id]}
                           showAsSkeleton={recordRunState === 'processing'}
                           disabled={true}
                         />

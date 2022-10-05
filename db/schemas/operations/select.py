@@ -1,9 +1,8 @@
-import warnings
-
-from sqlalchemy import MetaData, select, and_, not_, or_, Table, func
+from sqlalchemy import select, and_, not_, or_, func
 
 from db import constants
 from db import types
+from db.utils import get_pg_catalog_table
 
 TYPES_SCHEMA = types.base.SCHEMA
 TEMP_INFER_SCHEMA = constants.INFERENCE_SCHEMA
@@ -16,10 +15,7 @@ def reflect_schema(engine, name=None, oid=None):
         assert name is None or oid is None
     except AssertionError as e:
         raise e
-    metadata = MetaData()
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+    pg_namespace = get_pg_catalog_table("pg_namespace", engine)
     sel = (
         select(pg_namespace.c.oid, pg_namespace.c.nspname.label("name"))
         .where(or_(pg_namespace.c.nspname == name, pg_namespace.c.oid == oid))
@@ -30,10 +26,7 @@ def reflect_schema(engine, name=None, oid=None):
 
 
 def get_mathesar_schemas_with_oids(engine):
-    metadata = MetaData()
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+    pg_namespace = get_pg_catalog_table("pg_namespace", engine)
     sel = (
         select(pg_namespace.c.nspname.label('schema'), pg_namespace.c.oid)
         .where(

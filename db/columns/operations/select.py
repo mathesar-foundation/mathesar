@@ -1,11 +1,11 @@
 import warnings
 
 from pglast import Node, parse_sql
-from sqlalchemy import MetaData, Table, and_, asc, cast, select, text
+from sqlalchemy import and_, asc, cast, select, text
 
 from db.columns.exceptions import DynamicDefaultWarning
 from db.tables.operations.select import reflect_table_from_oid
-from db.utils import execute_statement
+from db.utils import execute_statement, get_pg_catalog_table
 
 # These tags define which nodes in the AST built by pglast we consider to be
 # "dynamic" when found in a column default clause.  The nodes are best
@@ -18,9 +18,7 @@ DYNAMIC_NODE_TAGS = {"SQLValueFunction", "FuncCall"}
 
 
 def _get_columns_attnum_from_names(table_oid, column_names, engine):
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
+    pg_attribute = get_pg_catalog_table("pg_attribute", engine)
     sel = select(pg_attribute.c.attnum, pg_attribute.c.attname).where(
         and_(
             pg_attribute.c.attrelid == table_oid,
@@ -51,9 +49,7 @@ def get_column_attnum_from_name(table_oid, column_name, engine, connection_to_us
 
 
 def get_column_attnums_from_table(table_oid, engine, connection_to_use=None):
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
+    pg_attribute = get_pg_catalog_table("pg_attribute", engine)
     sel = select(pg_attribute.c.attnum).where(
         and_(
             pg_attribute.c.attrelid == table_oid,
@@ -68,9 +64,7 @@ def get_column_attnums_from_table(table_oid, engine, connection_to_use=None):
 
 
 def _get_columns_name_from_attnums(table_oids, attnums, engine, connection_to_use=None):
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
+    pg_attribute = get_pg_catalog_table("pg_attribute", engine)
     sel = select(pg_attribute.c.attname, pg_attribute.c.attnum, pg_attribute.c.attrelid)
     conditions = [pg_attribute.c.attrelid.in_(table_oids)]
     if attnums is not None:

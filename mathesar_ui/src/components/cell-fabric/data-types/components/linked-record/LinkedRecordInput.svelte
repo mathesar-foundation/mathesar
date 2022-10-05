@@ -5,7 +5,6 @@
   // eslint-disable-next-line import/no-cycle
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
-  import LaunchCue from './LaunchCue.svelte';
   import ClearCue from './ClearCue.svelte';
 
   type $$Props = LinkedRecordCellProps & {
@@ -93,7 +92,7 @@
     </span>
     <ClearCue on:click={clear} />
   {:else if !isAcquiringInput}
-    <LaunchCue on:click={launchRecordSelector} />
+    <!-- TODO: add dropdown arrow -->
   {/if}
 </span>
 

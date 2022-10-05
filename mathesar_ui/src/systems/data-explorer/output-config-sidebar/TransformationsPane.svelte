@@ -3,7 +3,7 @@
     Button,
     Icon,
     DropdownMenu,
-    MenuItem,
+    ButtonMenuItem,
     ImmutableMap,
   } from '@mathesar-component-library';
   import {
@@ -21,22 +21,17 @@
 
   export let queryManager: QueryManager;
 
-  $: ({
-    query,
-    processedResultColumns,
-    processedInitialColumns,
-    processedVirtualColumns,
-  } = queryManager);
-  $: ({ transformationModels } = $query);
+  $: ({ query, processedColumns, columnsMetaData } = queryManager);
+  $: ({ initial_columns, transformationModels } = $query);
 
   $: allowedColumnsPerTransformation = calcAllowedColumnsPerTransformation(
+    initial_columns,
     transformationModels,
-    $processedInitialColumns,
-    $processedVirtualColumns,
+    $columnsMetaData,
   );
 
   async function addFilter() {
-    const firstColumn = [...$processedResultColumns.values()][0];
+    const firstColumn = [...$processedColumns.values()][0];
     if (!firstColumn) {
       return;
     }
@@ -55,7 +50,7 @@
   }
 
   async function addSummarization() {
-    const allColumns = [...$processedResultColumns.values()];
+    const allColumns = [...$processedColumns.values()];
     const firstColumn = allColumns[0];
     if (!firstColumn) {
       return;
@@ -118,7 +113,7 @@
             Summarization
           {/if}
         </span>
-        {#if index === transformationModels.length - 1}
+        {#if transformationModel instanceof QueryFilterTransformationModel || index === transformationModels.length - 1}
           <Button
             appearance="plain"
             class="padding-zero"
@@ -134,6 +129,7 @@
             columns={allowedColumnsPerTransformation[index]}
             model={transformationModel}
             limitEditing={allowedColumnsPerTransformation[index].size === 0}
+            totalTransformations={transformationModels.length}
             on:update={() => updateTransformations()}
           />
         {:else if transformationModel instanceof QuerySummarizationTransformationModel}
@@ -153,10 +149,14 @@
 <DropdownMenu
   label="Add transformation step"
   icon={iconAddNew}
-  disabled={$processedResultColumns.size === 0}
+  disabled={$processedColumns.size === 0}
 >
-  <MenuItem icon={iconFiltering} on:click={addFilter}>Filter</MenuItem>
-  <MenuItem icon={iconGrouping} on:click={addSummarization}>Summarize</MenuItem>
+  <ButtonMenuItem icon={iconFiltering} on:click={addFilter}>
+    Filter
+  </ButtonMenuItem>
+  <ButtonMenuItem icon={iconGrouping} on:click={addSummarization}>
+    Summarize
+  </ButtonMenuItem>
 </DropdownMenu>
 
 <style lang="scss">

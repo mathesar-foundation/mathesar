@@ -2,12 +2,12 @@ from functools import reduce
 
 from bidict import bidict
 
+from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField, Deferrable
 from django.utils.functional import cached_property
-from django.contrib.auth.models import User
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -180,11 +180,11 @@ class Schema(DatabaseObject):
     # E.g: TableA from SchemaA depends on TableB from SchemaB
     # SchemaA won't return as a dependent for SchemaB, however
     # TableA will be a dependent of TableB which in turn depends on its schema
-    @property
-    def dependents(self):
+    def get_dependents(self, exclude=[]):
         return get_dependents_graph(
             self.oid,
-            self._sa_engine
+            self._sa_engine,
+            exclude
         )
 
     @property
@@ -350,11 +350,11 @@ class Table(DatabaseObject, Relation):
     def description(self):
         return get_table_description(self.oid, self._sa_engine)
 
-    @property
-    def dependents(self):
+    def get_dependents(self, exclude=[]):
         return get_dependents_graph(
             self.oid,
-            self.schema._sa_engine
+            self.schema._sa_engine,
+            exclude
         )
 
     def add_column(self, column_data):
@@ -609,11 +609,11 @@ class Column(ReflectionManagerMixin, BaseModel):
             self.attnum
         )
 
-    @property
-    def dependents(self):
+    def get_dependents(self, exclude):
         return get_dependents_graph(
             self.table.oid,
             self._sa_engine,
+            exclude,
             self.attnum
         )
 
@@ -689,7 +689,7 @@ class DataFile(BaseModel):
     created_from_choices = models.TextChoices("created_from", "FILE PASTE URL")
 
     file = models.FileField(upload_to=model_utils.user_directory_path)
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.CASCADE)
     created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
                                           null=True, on_delete=models.SET_NULL)
