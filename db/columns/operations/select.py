@@ -75,7 +75,11 @@ def get_columns_name_from_tables(table_oids, engine, connection_to_use=None, fet
         table_oids, None, engine, connection_to_use
     )
     if fetch_as_map:
-        column_names = {(column_name_tuple[1], column_name_tuple[2]): column_name_tuple[0] for column_name_tuple in triples_of_col_info}
+        column_names = {
+            (attnum, table_oid): column_name
+            for column_name, attnum, table_oid
+            in triples_of_col_info
+        }
     else:
         column_names = [column_name_tuple[0] for column_name_tuple in triples_of_col_info]
     return column_names
@@ -90,7 +94,11 @@ def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=
         [table_oid], attnums, engine, connection_to_use
     )
     if fetch_as_map:
-        column_names = {column_name_tuple[1]: column_name_tuple[0] for column_name_tuple in triples_of_col_info}
+        column_names = {
+            attnum: column_name
+            for column_name, attnum, _
+            in triples_of_col_info
+        }
     else:
         column_names = [column_name_tuple[0] for column_name_tuple in triples_of_col_info]
     return column_names
