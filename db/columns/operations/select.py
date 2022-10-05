@@ -93,17 +93,22 @@ def get_columns_name_from_attnums(table_oid, attnums, engine, connection_to_use=
 
 
 def _get_column_names_tuple(table_oids, attnums, engine, connection_to_use):
-    statement = _get_columns_name_from_attnums(table_oids, attnums, engine, connection_to_use=connection_to_use)
-    column_names_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
-    return column_names_tuple
+    statement = _statement_for_triples_of_column_name_and_attnum_and_table_oid(
+        table_oids, attnums, engine, connection_to_use=connection_to_use
+    )
+    return execute_statement(engine, statement, connection_to_use).fetchall()
 
 
 def get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use=None):
-    statement = _get_columns_name_from_attnums([table_oid], [attnum], engine, connection_to_use=None)
+    statement = _statement_for_triples_of_column_name_and_attnum_and_table_oid(
+        [table_oid], [attnum], engine, connection_to_use=None
+    )
     return execute_statement(engine, statement, connection_to_use).scalar()
 
 
-def _get_columns_name_from_attnums(table_oids, attnums, engine, connection_to_use=None):
+def _statement_for_triples_of_column_name_and_attnum_and_table_oid(
+    table_oids, attnums, engine, connection_to_use=None
+):
     """
     Returns (column name, column attnum, column table's oid) tuples for each column that's in the
     tables specified via `table_oids`, and, when `attnums` is not None, that has an attnum
