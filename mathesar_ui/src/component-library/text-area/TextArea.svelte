@@ -33,9 +33,19 @@
 
   export let hasError = false;
 
+  let duplicate = {accept:true,value:""}; 
   function handleKeyDown(e: KeyboardEvent) {
     let type: TextAreaProcessedKeyDown['type'] = 'normal';
-    if (
+    if(duplicate.accept && element){
+      duplicate.value=element.value
+      duplicate.accept=false
+    }
+    if(e.key === 'Escape' && element){
+      element.value=duplicate.value
+      value = element.value;
+      type = 'EnterorEscKeyCombination'
+    }
+    else if (
       element &&
       e.key === 'Enter' &&
       (e.ctrlKey || e.metaKey || e.shiftKey)
@@ -50,7 +60,7 @@
         element.selectionStart = pos;
         element.selectionEnd = pos;
       }
-      type = 'newlineWithEnterKeyCombination';
+      type = 'EnterorEscKeyCombination';
     }
     dispatch('processedKeyDown', {
       type,
@@ -60,7 +70,6 @@
 </script>
 
 <BaseInput {...$$restProps} bind:id {disabled} />
-
 <textarea
   bind:this={element}
   {...$$restProps}

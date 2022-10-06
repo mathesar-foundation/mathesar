@@ -19,7 +19,7 @@
     handler: (e: KeyboardEvent) => void,
   ) {
     const { type, originalEvent } = e;
-    if (type === 'newlineWithEnterKeyCombination') {
+    if (type === 'EnterorEscKeyCombination') {
       originalEvent.stopPropagation();
     } else {
       handler(originalEvent);

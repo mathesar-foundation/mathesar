@@ -8,6 +8,6 @@ export interface TextAreaProps extends SimplifiedInputProps, BaseInputProps {
 }
 
 export interface TextAreaProcessedKeyDown {
-  type: 'normal' | 'newlineWithEnterKeyCombination';
+  type: 'normal' | 'EnterorEscKeyCombination';
   originalEvent: KeyboardEvent;
 }
