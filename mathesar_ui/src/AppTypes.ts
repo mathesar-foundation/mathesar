@@ -10,6 +10,7 @@ export interface Database {
 export interface DBObjectEntry {
   id: number;
   name: string;
+  description: string | null;
 }
 
 export interface SchemaEntry extends DBObjectEntry {

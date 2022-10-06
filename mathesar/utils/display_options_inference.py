@@ -6,6 +6,7 @@ from db.columns.operations.select import get_column_attnum_from_name
 from db.types import base
 from db.types.base import get_qualified_name
 from db.types.custom.money import get_first_money_array_with_symbol
+from db.metadata import get_empty_metadata
 
 MATHESAR_MONEY = get_qualified_name(base.MathesarCustomType.MATHESAR_MONEY.value)
 
@@ -49,7 +50,8 @@ def infer_table_column_display_options(table, col_name_type_dict):
     for column_name, columnn_type in col_name_type_dict.items():
         inference_fn = display_options_inference_map.get(columnn_type.lower())
         if inference_fn is not None:
-            column_attnum = get_column_attnum_from_name(table.oid, column_name, table.schema._sa_engine)
+            # TODO reuse metadata
+            column_attnum = get_column_attnum_from_name(table.oid, column_name, table.schema._sa_engine, metadata=get_empty_metadata())
             inferred_display_options[column_name] = inference_fn(table.oid, table.schema._sa_engine, column_attnum)
         else:
             inferred_display_options[column_name] = None

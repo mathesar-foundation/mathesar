@@ -1,6 +1,7 @@
 import warnings
 from psycopg2.errors import DuplicateColumn
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError
@@ -15,11 +16,13 @@ from db.columns.exceptions import (
 )
 from db.columns.operations.select import get_column_attnum_from_name
 from db.types.exceptions import InvalidTypeParameters
+from mathesar.api.serializers.dependents import DependentSerializer, DependentFilterSerializer
 from db.records.exceptions import UndefinedFunction
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models.base import Column
+from mathesar.state import get_cached_metadata
 
 
 class ColumnViewSet(viewsets.ModelViewSet):
@@ -92,12 +95,23 @@ class ColumnViewSet(viewsets.ModelViewSet):
                     message='This type casting is invalid.',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-        dj_column = Column(
-            table=table,
-            attnum=get_column_attnum_from_name(table.oid, column.name, table.schema._sa_engine),
-            **serializer.validated_model_fields
+        column_attnum = get_column_attnum_from_name(
+            table.oid,
+            column.name,
+            table.schema._sa_engine,
+            metadata=get_cached_metadata(),
         )
-        dj_column.save()
+        # The created column's Django model was automatically reflected. It can be reflected.
+        dj_column = Column.objects.get(
+            table=table,
+            attnum=column_attnum,
+        )
+        # Some properties of the column are not reflected (e.g. display options). Here we add those
+        # attributes to the reflected model.
+        if serializer.validated_model_fields:
+            for k, v in serializer.validated_model_fields.items():
+                setattr(dj_column, k, v)
+            dj_column.save()
         out_serializer = ColumnSerializer(dj_column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
@@ -167,12 +181,21 @@ class ColumnViewSet(viewsets.ModelViewSet):
         out_serializer = ColumnSerializer(column_instance)
         return Response(out_serializer.data)
 
+    @action(methods=['get'], detail=True)
+    def dependents(self, request, pk=None, table_pk=None):
+        serializer = DependentFilterSerializer(data=request.GET)
+        serializer.is_valid(raise_exception=True)
+        types_exclude = serializer.validated_data['exclude']
+
+        column = self.get_object()
+        serializer = DependentSerializer(column.get_dependents(types_exclude), many=True, context={'request': request})
+        return Response(serializer.data)
+
     def destroy(self, request, pk=None, table_pk=None):
         column_instance = self.get_object()
         table = column_instance.table
         try:
             table.drop_column(column_instance.attnum)
-            column_instance.delete()
         except IndexError:
             raise NotFound
         return Response(status=status.HTTP_204_NO_CONTENT)

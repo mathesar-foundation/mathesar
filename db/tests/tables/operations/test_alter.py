@@ -6,6 +6,7 @@ from db.tables.operations.alter import comment_on_table, rename_table
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tests.tables import utils as test_utils
+from db.metadata import get_empty_metadata
 
 
 def test_rename_table(engine_with_schema):
@@ -16,14 +17,14 @@ def test_rename_table(engine_with_schema):
     old_oid = get_oid_from_table(old_table.name, old_table.schema, engine)
 
     rename_table(table_name, schema, engine, new_table_name)
-    new_table = reflect_table(new_table_name, schema, engine)
+    new_table = reflect_table(new_table_name, schema, engine, metadata=get_empty_metadata())
     new_oid = get_oid_from_table(new_table.name, new_table.schema, engine)
 
     assert old_oid == new_oid
     assert new_table.name == new_table_name
 
     with pytest.raises(NoSuchTableError):
-        reflect_table(table_name, schema, engine)
+        reflect_table(table_name, schema, engine, metadata=get_empty_metadata())
 
 
 def test_comment_on_table(engine_with_roster, roster_table_name):
@@ -57,6 +58,6 @@ def test_rename_table_foreign_key(engine_with_schema):
 
     rename_table(table_name, schema, engine, new_table_name)
 
-    related_table = reflect_table(related_table_name, schema, engine)
+    related_table = reflect_table(related_table_name, schema, engine, metadata=get_empty_metadata())
     fk = list(related_table.foreign_keys)[0]
     assert fk.column.table.name == new_table_name

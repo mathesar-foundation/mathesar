@@ -1071,3 +1071,37 @@ def test_record_patch_invalid_date_format(create_patents_table, client):
     assert response.status_code == 400
     assert response_data[0]['code'] == ErrorCodes.InvalidDateFormatError.value
     assert response_data[0]['message'] == 'Invalid date format'
+
+
+def test_record_post_unique_violation(create_patents_table, client):
+    table_name = 'NASA unique record POST'
+    table = create_patents_table(table_name)
+    id_column_id = table.get_column_name_id_bidirectional_map()['id']
+    data = {str(id_column_id): 1}
+    response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
+    actual_exception = response.json()[0]
+    assert actual_exception['code'] == ErrorCodes.UniqueViolation.value
+    assert actual_exception['message'] == 'The requested insert violates a uniqueness constraint'
+    assert actual_exception['detail']['constraint_columns'] == [id_column_id]
+    constraint_id = actual_exception['detail']['constraint']
+    actual_constraint_details = client.get(
+        f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/'
+    ).json()
+    assert actual_constraint_details['name'] == 'NASA unique record POST_pkey'
+
+
+def test_record_patch_unique_violation(create_patents_table, client):
+    table_name = 'NASA unique record PATCH'
+    table = create_patents_table(table_name)
+    id_column_id = table.get_column_name_id_bidirectional_map()['id']
+    data = {str(id_column_id): 1}
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/{2}/', data=data)
+    actual_exception = response.json()[0]
+    assert actual_exception['code'] == ErrorCodes.UniqueViolation.value
+    assert actual_exception['message'] == 'The requested update violates a uniqueness constraint'
+    assert actual_exception['detail']['constraint_columns'] == [id_column_id]
+    constraint_id = actual_exception['detail']['constraint']
+    actual_constraint_details = client.get(
+        f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/'
+    ).json()
+    assert actual_constraint_details['name'] == 'NASA unique record PATCH_pkey'

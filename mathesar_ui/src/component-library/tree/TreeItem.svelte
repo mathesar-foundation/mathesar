@@ -35,8 +35,9 @@
   $: childrenOfEntry = getAndSetChildren?.get(entry) ?? undefined;
 
   $: isOpen = searchText?.trim() || expandedItems.has(id);
-  $: activeClass = selectedItems.has(getId(entry)) ? 'active' : '';
+  $: isActive = selectedItems.has(getId(entry));
   $: padding = 12 + 12 * level;
+  $: ariaSelected = isActive ? true : undefined;
 
   function toggle() {
     if (searchText?.trim()) {
@@ -62,7 +63,12 @@
 </script>
 
 {#if childrenOfEntry}
-  <li aria-level={level + 1} role="treeitem" tabindex="-1">
+  <li
+    aria-level={level + 1}
+    role="treeitem"
+    tabindex="-1"
+    aria-selected={ariaSelected}
+  >
     <Button appearance="plain" class="item parent" on:click={toggle}>
       <Icon {...iconVerticallyCollapsed} rotate={isOpen ? 90 : undefined} />
       <span>{getLabel(entry)}</span>
@@ -94,7 +100,9 @@
   <li role="none" class="nav-item">
     {#if link}
       <a
-        class="item {activeClass}"
+        class="item"
+        class:active={isActive}
+        aria-selected={ariaSelected}
         role="treeitem"
         href={link}
         style="padding-left:{padding}px"
@@ -106,8 +114,9 @@
     {:else}
       <Button
         appearance="plain"
-        class="item {activeClass}"
+        class="item {isActive ? 'active' : ''}"
         role="treeitem"
+        aria-selected={ariaSelected}
         style="padding-left:{padding}px"
         on:click={nodeSelected}
       >

@@ -5,6 +5,7 @@ from db.types.base import MathesarCustomType
 from db.columns.operations.select import get_column_name_from_attnum
 from db.tables.operations.select import reflect_table_from_oid
 from db.types.base import get_ma_qualified_schema
+from db.metadata import get_empty_metadata
 
 MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
 DB_TYPE = MathesarCustomType.MATHESAR_MONEY.id
@@ -31,8 +32,10 @@ def install(engine):
 
 
 def get_money_array_select_statement(table_oid, engine, column_attnum):
-    table = reflect_table_from_oid(table_oid, engine)
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    table = reflect_table_from_oid(table_oid, engine, metadata=metadata)
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=metadata)
     package_func = getattr(func, get_ma_qualified_schema())
     money_func = getattr(package_func, MONEY_ARR_FUNC_NAME)
     money_select = money_func((table.c[column_name]), type_=ARRAY(String))

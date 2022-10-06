@@ -1,8 +1,11 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from mathesar.models.base import Column, Table, _compute_preview_template, _create_table_settings
-from mathesar.reflection import reflect_new_table_constraints
+from mathesar.models.base import (
+    Column, Table, _compute_preview_template,
+    _create_table_settings,
+)
+from mathesar.state.django import reflect_new_table_constraints
 
 
 @receiver(post_save, sender=Table)

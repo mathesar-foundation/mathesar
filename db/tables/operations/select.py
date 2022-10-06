@@ -1,11 +1,9 @@
-import warnings
-
 from sqlalchemy import (
-    Table, MetaData, select, join, inspect, and_, cast, func, Integer, literal, or_
+    Table, select, join, inspect, and_, cast, func, Integer, literal, or_
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
-from db.utils import execute_statement
+from db.utils import execute_statement, get_pg_catalog_table
 
 BASE = 'base'
 DEPTH = 'depth'
@@ -16,26 +14,47 @@ TARGET = 'target'
 MULTIPLE_RESULTS = 'multiple_results'
 
 
-def reflect_table(name, schema, engine, metadata=None, connection_to_use=None):
-    if metadata is None:
-        metadata = MetaData(bind=engine)
+def reflect_table(name, schema, engine, metadata, connection_to_use=None):
     autoload_with = engine if connection_to_use is None else connection_to_use
     return Table(name, metadata, schema=schema, autoload_with=autoload_with, extend_existing=True)
 
 
-def reflect_table_from_oid(oid, engine, metadata=None, connection_to_use=None):
+def reflect_table_from_oid(oid, engine, metadata, connection_to_use=None):
     tables = reflect_tables_from_oids([oid], engine, metadata=metadata, connection_to_use=connection_to_use)
     return tables.get(oid, None)
 
 
-def reflect_tables_from_oids(oids, engine, metadata=None, connection_to_use=None):
-    if metadata is None:
-        metadata = MetaData(bind=engine)
+def reflect_tables_from_oids(oids, engine, metadata, connection_to_use=None):
+    oids_to_schema_and_table_names = (
+        get_map_of_table_oid_to_schema_name_and_table_name(
+            oids,
+            engine,
+            metadata=metadata,
+            connection_to_use=connection_to_use,
+        )
+    )
+    table_oids_to_sa_tables = {}
+    for table_oid, (schema_name, table_name) in oids_to_schema_and_table_names.items():
+        table_oids_to_sa_tables[table_oid] = reflect_table(
+            table_name,
+            schema_name,
+            engine,
+            metadata=metadata,
+            connection_to_use=connection_to_use,
+        )
+    return table_oids_to_sa_tables
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_class = Table("pg_class", metadata, autoload_with=engine)
-        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+
+def get_map_of_table_oid_to_schema_name_and_table_name(
+        table_oids,
+        engine,
+        metadata,
+        connection_to_use=None,
+):
+    if len(table_oids) == 0:
+        return {}
+    pg_class = get_pg_catalog_table("pg_class", engine, metadata=metadata)
+    pg_namespace = get_pg_catalog_table("pg_namespace", engine, metadata=metadata)
     sel = (
         select(pg_namespace.c.nspname, pg_class.c.relname, pg_class.c.oid)
         .select_from(
@@ -45,21 +64,19 @@ def reflect_tables_from_oids(oids, engine, metadata=None, connection_to_use=None
                 pg_class.c.relnamespace == pg_namespace.c.oid
             )
         )
-        .where(pg_class.c.oid.in_(oids))
+        .where(pg_class.c.oid.in_(table_oids))
     )
-    results = execute_statement(engine, sel, connection_to_use).fetchall()
-    tables = {}
-    for (schema, table_name, table_oid) in results:
-        tables[table_oid] = reflect_table(table_name, schema, engine, metadata=metadata, connection_to_use=connection_to_use)
-    return tables
+    result_rows = execute_statement(engine, sel, connection_to_use).fetchall()
+    table_oids_to_schema_names_and_table_names = {
+        table_oid: (schema_name, table_name)
+        for schema_name, table_name, table_oid
+        in result_rows
+    }
+    return table_oids_to_schema_names_and_table_names
 
 
-def get_table_oids_from_schema(schema_oids, engine):
-    metadata = MetaData()
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_class = Table("pg_class", metadata, autoload_with=engine)
+def get_table_oids_from_schema(schema_oids, engine, metadata):
+    pg_class = get_pg_catalog_table("pg_class", engine, metadata)
     sel = (
         select(pg_class.c.oid, pg_class.c.relnamespace.label('schema_oid'))
         .where(
@@ -83,7 +100,7 @@ def get_table_description(oid, engine):
 
 
 def get_joinable_tables(
-        engine, base_table_oid=None, max_depth=3, limit=None, offset=None
+        engine, metadata, base_table_oid=None, max_depth=3, limit=None, offset=None
 ):
     FK_OID = 'fk_oid'
     LEFT_REL = 'left_rel'
@@ -97,9 +114,7 @@ def get_joinable_tables(
 
     jba = func.jsonb_build_array
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_constraint = Table("pg_constraint", MetaData(), autoload_with=engine)
+    pg_constraint = get_pg_catalog_table("pg_constraint", engine, metadata=metadata)
 
     symmetric_fkeys = select(
         cast(pg_constraint.c.oid, Integer).label(FK_OID),

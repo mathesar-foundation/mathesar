@@ -1,8 +1,7 @@
 <script lang="ts">
   import { Collapsible } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { getSelectedColumnId } from '@mathesar/stores/table-data/selection';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import { getSelectedUniqueColumnsId } from '@mathesar/stores/table-data/selection';
   import RenameColumn from './RenameColumn.svelte';
   import ColumnDisplayProperties from './ColumnDisplayProperties.svelte';
   import ColumnActions from './ColumnActions.svelte';
@@ -11,59 +10,67 @@
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ processedColumns, selection } = $tabularData);
-  $: ({ selectedCells } = selection);
-  $: selectedColumnsId = $selectedCells
-    .valuesArray()
-    .map((cell) => getSelectedColumnId(cell));
-  $: uniquelySelectedColumnsId = Array.from(new Set(selectedColumnsId));
-
-  function getSelectedColumn(selectedColumnId: number): ProcessedColumn {
-    return $processedColumns.get(selectedColumnId)!;
-  }
+  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
+  $: selectedColumns = (() => {
+    const ids = getSelectedUniqueColumnsId(
+      $selectedCells,
+      $columnsSelectedWhenTheTableIsEmpty,
+    );
+    const columns = [];
+    for (const id of ids) {
+      const c = $processedColumns.get(id);
+      if (c !== undefined) {
+        columns.push(c);
+      }
+    }
+    return columns;
+  })();
+  /** When only one column is selected */
+  $: column = selectedColumns.length === 1 ? selectedColumns[0] : undefined;
 </script>
 
 <div class="column-mode-container">
-  {#if uniquelySelectedColumnsId.length === 1}
-    <Collapsible isOpen>
-      <span slot="header">Column Properties</span>
-      <div slot="content" class="property-container">
-        <RenameColumn
-          column={getSelectedColumn(uniquelySelectedColumnsId[0])}
-          columnsDataStore={$tabularData.columnsDataStore}
-        />
-        <ColumnDisplayProperties
-          column={getSelectedColumn(uniquelySelectedColumnsId[0])}
-          meta={$tabularData.meta}
-        />
-        <ColumnOptions
-          column={getSelectedColumn(uniquelySelectedColumnsId[0])}
-          columnsDataStore={$tabularData.columnsDataStore}
-          constraintsDataStore={$tabularData.constraintsDataStore}
-        />
-      </div>
-    </Collapsible>
+  {#if selectedColumns.length === 0}
+    <span>
+      Select one or more cells to view columns properties and actions.
+    </span>
+  {:else}
+    {#if column}
+      <Collapsible isOpen>
+        <span slot="header">Column Properties</span>
+        <div slot="content" class="property-container">
+          <RenameColumn
+            {column}
+            columnsDataStore={$tabularData.columnsDataStore}
+          />
+          <ColumnDisplayProperties {column} meta={$tabularData.meta} />
+          <ColumnOptions
+            {column}
+            columnsDataStore={$tabularData.columnsDataStore}
+            constraintsDataStore={$tabularData.constraintsDataStore}
+          />
+        </div>
+      </Collapsible>
+    {/if}
 
-    <Collapsible isOpen>
-      <span slot="header">Data Type</span>
-      <div slot="content" class="actions-container">
-        <ColumnType column={getSelectedColumn(uniquelySelectedColumnsId[0])} />
-      </div>
-    </Collapsible>
+    {#if column}
+      <Collapsible isOpen>
+        <span slot="header">Data Type</span>
+        <div slot="content" class="actions-container">
+          <ColumnType {column} />
+        </div>
+      </Collapsible>
+    {/if}
 
     <Collapsible isOpen>
       <span slot="header">Actions</span>
       <div slot="content" class="actions-container">
         <ColumnActions
-          column={getSelectedColumn(uniquelySelectedColumnsId[0])}
+          columns={selectedColumns}
           columnsDataStore={$tabularData.columnsDataStore}
         />
       </div>
     </Collapsible>
-  {:else}
-    <span
-      >Select a single column or mulitple cells belonging to a single column to
-      see column properties and actions</span
-    >
   {/if}
 </div>
 

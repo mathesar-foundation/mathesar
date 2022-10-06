@@ -1,8 +1,9 @@
 from enum import Enum
 
-from sqlalchemy import select, Table, MetaData, join, literal
+from sqlalchemy import select, MetaData, join, literal
 
 from db.functions.known_db_functions import known_db_functions
+from db.utils import get_pg_catalog_table
 
 
 def get_supported_db_functions(engine):
@@ -21,12 +22,13 @@ def get_supported_db_functions(engine):
 # TODO consider caching
 def _get_functions_defined_on_database(engine):
     """
-    Constructs and executes a query that returns the set of schema-qualified function names on
-    the database. E.g. `{'mathesar_types.uri_scheme', ..., ...}`.
+    Constructs and executes a query that returns the set of schema-
+    qualified function names on the database. E.g.
+    `{'mathesar_types.uri_scheme', ..., ...}`.
     """
     metadata = MetaData()
-    pg_proc = Table('pg_proc', metadata, autoload_with=engine, schema='pg_catalog')
-    pg_namespace = Table('pg_namespace', metadata, autoload_with=engine, schema='pg_catalog')
+    pg_proc = get_pg_catalog_table('pg_proc', engine, metadata=metadata)
+    pg_namespace = get_pg_catalog_table('pg_namespace', engine, metadata=metadata)
     join_statement = join(pg_proc, pg_namespace, pg_proc.c.pronamespace == pg_namespace.c.oid)
     select_statement = (
         select(pg_namespace.c.nspname + literal('.') + pg_proc.c.proname)

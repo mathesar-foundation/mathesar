@@ -6,7 +6,7 @@
   import DatabasePage from '@mathesar/pages/database/DatabasePage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { currentDBName, databases } from '@mathesar/stores/databases';
-  import AppendBreadcrumb from '@mathesar/systems/app-header/breadcrumb/AppendBreadcrumb.svelte';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import SchemaRoute from './SchemaRoute.svelte';
 
   export let databaseName: string;
@@ -22,12 +22,13 @@
 </script>
 
 {#if database}
+  <AppendBreadcrumb item={{ type: 'database', database }} />
+
   <Route path="/">
     <DatabasePage />
   </Route>
 
   <Route path="/:schemaId/*" let:meta firstmatch>
-    <AppendBreadcrumb item={{ type: 'database', database }} />
     <SchemaRoute {database} schemaId={parseInt(meta.params.schemaId, 10)} />
   </Route>
 {:else}
