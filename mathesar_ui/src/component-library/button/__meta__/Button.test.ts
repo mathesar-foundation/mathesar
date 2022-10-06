@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import '@testing-library/jest-dom';
 import { render, fireEvent } from '@testing-library/svelte';
 import SlotTest from '@mathesar-component-library-dir/__meta__/utils/SlotTest.svelte';
 import Button from '../Button.svelte';
@@ -29,7 +31,7 @@ test('renders button based on passed props', () => {
 test('handles click event', async () => {
   const { getByRole, component } = render(Button);
 
-  const mock = jest.fn();
+  const mock = vi.fn();
   const off = component.$on('click', mock);
 
   const button = getByRole('button');

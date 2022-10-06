@@ -1,6 +1,7 @@
+import { vi } from 'vitest';
 import CancellablePromise from '../CancellablePromise';
 
-const dummyOnCancel = jest.fn().mockReturnValueOnce('cancelled');
+const dummyOnCancel = vi.fn().mockReturnValueOnce('cancelled');
 test('CancellablePromise cancelled', () => {
   const fakePromise = new CancellablePromise((resolve, reject) => {
     try {

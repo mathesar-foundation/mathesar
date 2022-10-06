@@ -27,7 +27,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.pull_request.node_id }} --status Started --priority Active
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Started --priority High
 
       - name: Add issue to project
         if: ${{ github.event_name == 'issues' }}
@@ -35,4 +35,4 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --status Triage --priority Backlog
+          python project_update.py ${{ github.event.issue.node_id }} --status Triage --priority Low

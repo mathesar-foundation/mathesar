@@ -72,6 +72,20 @@ export interface PaginatedResponse<T> {
 const NO_CONTENT = 204;
 const successStatusCodes = new Set([200, 201, NO_CONTENT]);
 
+function getResultFromRequest<T>(request: XMLHttpRequest): T | undefined {
+  if (request.status === NO_CONTENT) {
+    return undefined;
+  }
+
+  const response = String(request.response);
+  if (response.trim().length === 0) {
+    // This is to accommodate poorly-behaving APIs that return an empty string
+    // when they should instead respond with HTTP 204.
+    return undefined;
+  }
+  return JSON.parse(String(response)) as T;
+}
+
 function sendXHRRequest<T>(
   method: string,
   url: string,
@@ -95,14 +109,10 @@ function sendXHRRequest<T>(
     (resolve, reject) => {
       request.addEventListener('load', () => {
         if (successStatusCodes.has(request.status)) {
-          const result =
-            request.status === NO_CONTENT
-              ? undefined
-              : (JSON.parse(request.response) as T);
-          resolve(result);
+          resolve(getResultFromRequest<T>(request));
         } else {
           try {
-            reject(new ApiMultiError(JSON.parse(request.response)));
+            reject(new ApiMultiError(JSON.parse(String(request.response))));
           } catch {
             const msg = [
               'When making an XHR request, the server responded with an',
@@ -177,10 +187,10 @@ export function uploadFile<T>(
       request.addEventListener('load', () => {
         if (successStatusCodes.has(request.status)) {
           try {
-            const response = JSON.parse(request.response) as T;
+            const response = JSON.parse(String(request.response)) as T;
             resolve(response);
           } catch (exp) {
-            resolve(request.response);
+            resolve(request.response as T);
           }
         } else {
           reject(new Error('An error has occurred while uploading file'));

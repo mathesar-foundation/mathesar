@@ -1,8 +1,9 @@
 import pytest
 from django.core.cache import cache
 
-from mathesar.reflection import reflect_db_objects
+from mathesar.state.django import reflect_db_objects
 from mathesar.models.base import Table, Schema, Database
+from db.metadata import get_empty_metadata
 
 
 @pytest.fixture(scope="module")
@@ -13,24 +14,24 @@ def database_api_db(MOD_create_dj_db, get_uid):
 
 
 def test_database_reflection_new(database_api_db):
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     assert Database.objects.filter(name=database_api_db).exists()
 
 
 def test_database_reflection_delete(database_api_db, FUN_dj_databases):
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     db = Database.objects.get(name=database_api_db)
     assert db.deleted is False
 
     del FUN_dj_databases[database_api_db]
     cache.clear()
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     db.refresh_from_db()
     assert db.deleted is True
 
 
 def test_database_reflection_delete_schema(database_api_db, FUN_dj_databases):
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     db = Database.objects.get(name=database_api_db)
 
     Schema.objects.create(oid=1, database=db)
@@ -39,12 +40,12 @@ def test_database_reflection_delete_schema(database_api_db, FUN_dj_databases):
 
     del FUN_dj_databases[database_api_db]
     cache.clear()
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     assert Schema.objects.filter(database=db).count() == 0
 
 
 def test_database_reflection_delete_table(database_api_db, FUN_dj_databases):
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     db = Database.objects.get(name=database_api_db)
 
     schema = Schema.objects.create(oid=1, database=db)
@@ -53,7 +54,7 @@ def test_database_reflection_delete_table(database_api_db, FUN_dj_databases):
 
     del FUN_dj_databases[database_api_db]
     cache.clear()
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     assert Table.objects.filter(schema__database=db).count() == 0
 
 
@@ -84,7 +85,7 @@ def test_database_list(client, test_db_name, database_api_db):
 
 
 def test_database_list_deleted(client, test_db_name, database_api_db, FUN_dj_databases):
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     del FUN_dj_databases[database_api_db]
 
     cache.clear()
@@ -106,7 +107,7 @@ def test_database_list_deleted(client, test_db_name, database_api_db, FUN_dj_dat
 
 @pytest.mark.parametrize('deleted', [True, False])
 def test_database_list_filter_deleted(client, deleted, test_db_name, database_api_db, FUN_dj_databases):
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
     del FUN_dj_databases[database_api_db]
 
     cache.clear()
@@ -132,7 +133,7 @@ def test_database_list_sorted_by(client, test_db_name, database_api_db, FUN_crea
     """
     Notice that we must pull in databases that are already setup in this scope.
     """
-    reflect_db_objects()
+    reflect_db_objects(metadata=get_empty_metadata())
 
     # I appended a lowercase letter in front of the random string, because I suspected that Python
     # and Postgres might be sorting multi-case string sets differently.

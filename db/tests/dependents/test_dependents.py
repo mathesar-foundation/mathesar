@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import Column, ForeignKey, Integer, MetaData, Table, select, Index
 from sqlalchemy_utils import create_view
 from db.constraints.base import ForeignKeyConstraint
@@ -8,6 +9,7 @@ from db.columns.operations.create import create_column
 from db.columns.operations.select import get_column_attnum_from_name
 from db.constraints.operations.create import create_constraint
 from db.types.base import PostgresType
+from db.metadata import get_empty_metadata
 
 
 def _get_object_dependents(dependents_graph, object_oid):
@@ -23,7 +25,7 @@ def _get_object_dependents_by_name(dependents_graph, object_oid, name):
 
 
 def test_correct_dependents_amount_and_level(engine, library_tables_oids):
-    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
+    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine, [])
 
     publishers_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Publishers'])
     publications_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Publications'])
@@ -61,7 +63,7 @@ def test_correct_dependents_amount_and_level(engine, library_tables_oids):
 
 
 def test_response_format(engine, library_tables_oids):
-    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
+    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine, [])
 
     dependent_expected_attrs = ['obj', 'parent_obj', 'level']
     obj_expected_attrs = ['objid', 'type']
@@ -88,7 +90,7 @@ def test_response_format(engine, library_tables_oids):
 # TODO: add other types when they are added as dependents
 def test_specific_object_types(engine, library_tables_oids, library_db_tables):
     items_oid = library_tables_oids['Items']
-    items_dependents_graph = get_dependents_graph(items_oid, engine)
+    items_dependents_graph = get_dependents_graph(items_oid, engine, [])
     items_dependents_oids = _get_object_dependents_oids(items_dependents_graph, items_oid)
 
     items_constraint_oids = [
@@ -110,12 +112,12 @@ def test_self_reference(engine_with_schema, library_tables_oids):
 
     # remove when library_without_checkouts.sql is updated and includes self-reference case
     fk_column = create_column(engine, publishers_oid, {'name': 'Parent Publisher', 'type': PostgresType.INTEGER.id})
-    pk_column_attnum = get_column_attnum_from_name(publishers_oid, 'id', engine)
+    pk_column_attnum = get_column_attnum_from_name(publishers_oid, 'id', engine, metadata=get_empty_metadata())
     fk_constraint = ForeignKeyConstraint('Publishers_Publisher_fkey', publishers_oid, [fk_column.column_attnum], publishers_oid, [pk_column_attnum], {})
     create_constraint(schema, engine, fk_constraint)
 
     publishers_oid = library_tables_oids['Publishers']
-    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine)
+    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, [])
 
     publishers_dependents_oids = _get_object_dependents_oids(publishers_dependents_graph, publishers_oid)
     assert publishers_oid not in publishers_dependents_oids
@@ -131,11 +133,11 @@ def test_circular_reference(engine_with_schema, library_tables_oids):
 
     # remove when library_without_checkouts.sql is updated and includes circular reference case
     fk_column = create_column(engine, publishers_oid, {'name': 'Top Publication', 'type': PostgresType.INTEGER.id})
-    publications_pk_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine)
+    publications_pk_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine, metadata=get_empty_metadata())
     fk_constraint = ForeignKeyConstraint('Publishers_Publications_fkey', publishers_oid, [fk_column.column_attnum], publications_oid, [publications_pk_column_attnum], {})
     create_constraint(schema, engine, fk_constraint)
 
-    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine)
+    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, [])
     publications_dependents_oids = _get_object_dependents_oids(publishers_dependents_graph, publications_oid)
 
     assert publishers_oid not in publications_dependents_oids
@@ -157,7 +159,7 @@ def test_dependents_graph_max_level(engine_with_schema):
         t.create()
 
     t0_oid = get_oid_from_table(t0.name, schema, engine)
-    t0_dependents_graph = get_dependents_graph(t0_oid, engine)
+    t0_dependents_graph = get_dependents_graph(t0_oid, engine, [])
 
     tables_count = len(metadata.tables.keys())
     assert tables_count == 12
@@ -166,6 +168,31 @@ def test_dependents_graph_max_level(engine_with_schema):
     dependents_by_level = sorted(t0_dependents_graph, key=lambda x: x['level'])
     assert dependents_by_level[0]['level'] == 1
     assert dependents_by_level[-1]['level'] == 10
+
+
+def test_column_dependents(engine, library_tables_oids):
+    publications_oid = library_tables_oids['Publications']
+    items_oid = library_tables_oids['Items']
+    publications_id_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine, metadata=get_empty_metadata())
+    publishers_dependents_graph = get_dependents_graph(publications_oid, engine, [], publications_id_column_attnum)
+
+    publications_pk_oid = get_constraint_oid_by_name_and_table_oid('Publications_pkey', publications_oid, engine)
+    items_publications_fk_oid = get_constraint_oid_by_name_and_table_oid('Items_Publications_id_fkey', items_oid, engine)
+
+    publications_dependents = _get_object_dependents(publishers_dependents_graph, publications_oid)
+    publications_dependent_oids = _get_object_dependents_oids(publishers_dependents_graph, publications_oid)
+    assert all(
+        [
+            r['parent_obj']['objsubid'] == 1
+            for r in publications_dependents
+        ]
+    )
+    assert all(
+        [
+            oid in publications_dependent_oids
+            for oid in [publications_pk_oid, items_oid, items_publications_fk_oid]
+        ]
+    )
 
 
 def test_views_as_dependents(engine_with_schema, library_db_tables, library_tables_oids):
@@ -179,7 +206,7 @@ def test_views_as_dependents(engine_with_schema, library_db_tables, library_tabl
     metadata.create_all(engine)
 
     publications_oid = library_tables_oids['Publications']
-    publications_dependents_graph = get_dependents_graph(publications_oid, engine)
+    publications_dependents_graph = get_dependents_graph(publications_oid, engine, [])
     publications_view_dependent = _get_object_dependents_by_name(publications_dependents_graph, publications_oid, view_name)[0]
 
     assert publications_view_dependent['name'] == view_name
@@ -190,7 +217,28 @@ def test_indexex_as_dependents(engine, library_db_tables, library_tables_oids):
     index = Index(index_name, library_db_tables['Publishers'].c.id)
     index.create(engine)
 
-    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine)
+    publishers_dependents_graph = get_dependents_graph(library_tables_oids['Publishers'], engine, [])
     publishers_index_dependent = _get_object_dependents_by_name(publishers_dependents_graph, library_tables_oids['Publishers'], index_name)[0]
 
     assert publishers_index_dependent['name'] == index_name
+
+
+types = [
+    ['table'],
+    ['table constraint'],
+    ['table', 'table constraint'],
+]
+
+
+@pytest.mark.parametrize("exclude_types", types)
+def test_filter(engine, library_tables_oids, exclude_types):
+    publishers_oid = library_tables_oids['Publishers']
+
+    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, exclude_types)
+    dependents_types = [dependent['obj']['type'] for dependent in publishers_dependents_graph]
+
+    assert all(
+        [
+            type not in dependents_types for type in exclude_types
+        ]
+    )

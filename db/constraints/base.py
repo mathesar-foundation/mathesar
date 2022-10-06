@@ -4,9 +4,10 @@ from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import MetaData
 
-from db.columns.operations.select import get_columns_name_from_attnums
+from db.columns.operations.select import get_column_names_from_attnums
 from db.constraints.utils import naming_convention
 from db.tables.operations.select import reflect_table_from_oid
+from db.metadata import get_empty_metadata
 
 
 class Constraint(ABC):
@@ -40,15 +41,19 @@ class ForeignKeyConstraint(Constraint):
         self.options = options
 
     def add_constraint(self, schema, engine, connection_to_use):
-        table = reflect_table_from_oid(self.table_oid, engine, connection_to_use=connection_to_use)
-        referent_table = reflect_table_from_oid(self.referent_table_oid, engine, connection_to_use=connection_to_use)
-        columns_name = get_columns_name_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use)
-        referent_columns_name = get_columns_name_from_attnums(
+        # TODO reuse metadata
+        metadata = get_empty_metadata()
+        table = reflect_table_from_oid(self.table_oid, engine, connection_to_use=connection_to_use, metadata=metadata)
+        referent_table = reflect_table_from_oid(self.referent_table_oid, engine, connection_to_use=connection_to_use, metadata=metadata)
+        columns_name = get_column_names_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use=connection_to_use, metadata=metadata)
+        referent_columns_name = get_column_names_from_attnums(
             [self.referent_table_oid],
             self.referent_columns,
             engine,
-            connection_to_use
+            connection_to_use=connection_to_use,
+            metadata=metadata,
         )
+        # TODO reuse metadata
         metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
         opts = {
             'target_metadata': metadata
@@ -75,8 +80,10 @@ class UniqueConstraint(Constraint):
         self.columns_attnum = columns_attnum
 
     def add_constraint(self, schema, engine, connection_to_use):
-        table = reflect_table_from_oid(self.table_oid, engine, connection_to_use=connection_to_use)
-        columns = get_columns_name_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use)
+        # TODO reuse metadata
+        metadata = get_empty_metadata()
+        table = reflect_table_from_oid(self.table_oid, engine, connection_to_use=connection_to_use, metadata=metadata)
+        columns = get_column_names_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use=connection_to_use, metadata=metadata)
         metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
         opts = {
             'target_metadata': metadata

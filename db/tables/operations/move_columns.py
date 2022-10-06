@@ -5,50 +5,9 @@ from db import constants
 from db.columns.base import MathesarColumn
 from db.columns.operations.alter import batch_alter_table_drop_columns
 from db.columns.operations.create import bulk_create_mathesar_column
-from db.columns.operations.select import get_columns_name_from_attnums
+from db.columns.operations.select import get_column_names_from_attnums
 from db.tables.operations.select import reflect_table_from_oid
-
-
-def _find_table_relationship(table_one, table_two):
-    """
-    This function takes two tables, and returns a dict defining the direction
-    of the foreign key constraint relating the tables (if one exists)
-    """
-    one_referencing_two = [
-        fkey_constraint for fkey_constraint in table_one.foreign_key_constraints
-        if fkey_constraint.referred_table == table_two
-    ]
-    two_referencing_one = [
-        fkey_constraint for fkey_constraint in table_two.foreign_key_constraints
-        if fkey_constraint.referred_table == table_one
-    ]
-    if one_referencing_two and not two_referencing_one:
-        relationship = {"referencing": table_one, "referenced": table_two, "constraint": one_referencing_two[0]}
-    elif two_referencing_one and not one_referencing_two:
-        relationship = {"referencing": table_two, "referenced": table_one, "constraint": two_referencing_one[0]}
-    else:
-        relationship = None
-    return relationship
-
-
-def _check_columns(relationship, moving_columns):
-    return (
-        relationship is not None
-        and all([not c.foreign_keys for c in moving_columns])
-    )
-
-
-def _get_table_connecting_columns(relationship, target_table):
-    constraint = relationship['constraint']
-    referrer_column = constraint.columns[0]
-    referent_column = constraint.elements[0].column
-    if relationship["referenced"] == target_table:
-        source_table_reference_column = referrer_column
-        target_table_reference_column = referent_column
-    else:
-        source_table_reference_column = referent_column
-        target_table_reference_column = referrer_column
-    return source_table_reference_column, target_table_reference_column
+from db.metadata import get_empty_metadata
 
 
 def move_columns_between_related_tables(
@@ -58,11 +17,13 @@ def move_columns_between_related_tables(
         schema,
         engine
 ):
-    source_table = reflect_table_from_oid(source_table_oid, engine)
-    target_table = reflect_table_from_oid(target_table_oid, engine, metadata=source_table.metadata)
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    source_table = reflect_table_from_oid(source_table_oid, engine, metadata=metadata)
+    target_table = reflect_table_from_oid(target_table_oid, engine, metadata=metadata)
     relationship = _find_table_relationship(source_table, target_table)
-    column_names_to_move = get_columns_name_from_attnums(source_table_oid, column_attnums_to_move, engine)
-    moving_columns = [source_table.columns[n] for n in column_names_to_move]
+    column_names_to_move = get_column_names_from_attnums(source_table_oid, column_attnums_to_move, engine, metadata=metadata)
+    moving_columns = [source_table.columns[name] for name in column_names_to_move]
     assert _check_columns(relationship, moving_columns)
     source_table_reference_column, target_table_reference_column = _get_table_connecting_columns(
         relationship,
@@ -70,7 +31,10 @@ def move_columns_between_related_tables(
     )
     extracted_columns = [MathesarColumn.from_column(col) for col in moving_columns]
     bulk_create_mathesar_column(engine, target_table_oid, extracted_columns, schema)
-    target_table = reflect_table_from_oid(target_table_oid, engine, metadata=source_table.metadata)
+    # TODO reuse metadata
+    # Re reflect the target table as we have added a new column
+    # Metadata needs to be shared so that target table is the same object as the table returned from the relation finding function
+    target_table = reflect_table_from_oid(target_table_oid, engine, metadata=metadata)
     if relationship["referenced"] == target_table:
         extracted_columns_update_stmt = _create_move_referrer_table_columns_update_stmt(
             source_table,
@@ -93,7 +57,8 @@ def move_columns_between_related_tables(
             for column_attnum in column_attnums_to_move
         ]
         batch_alter_table_drop_columns(source_table_oid, deletion_column_data, conn, engine)
-    source_table = reflect_table_from_oid(source_table_oid, engine)
+    # TODO reuse metadata
+    source_table = reflect_table_from_oid(source_table_oid, engine, metadata=get_empty_metadata())
     return target_table, source_table
 
 
@@ -107,7 +72,7 @@ def _create_move_referent_table_columns_update_stmt(
     moved_column_names = [col.name for col in columns_to_move]
     extract_cte = select(
         source_table
-    )
+    ).cte()
     extracted_columns_update_dict = {column_name: extract_cte.c[column_name] for column_name in moved_column_names}
     extract_ins = (
         target_table
@@ -178,3 +143,45 @@ def _create_move_referrer_table_columns_update_stmt(
         )
     )
     return split_ins
+
+
+def _find_table_relationship(table_one, table_two):
+    """
+    This function takes two tables, and returns a dict defining the direction
+    of the foreign key constraint relating the tables (if one exists)
+    """
+    one_referencing_two = [
+        fkey_constraint for fkey_constraint in table_one.foreign_key_constraints
+        if fkey_constraint.referred_table == table_two
+    ]
+    two_referencing_one = [
+        fkey_constraint for fkey_constraint in table_two.foreign_key_constraints
+        if fkey_constraint.referred_table == table_one
+    ]
+    if one_referencing_two and not two_referencing_one:
+        relationship = {"referencing": table_one, "referenced": table_two, "constraint": one_referencing_two[0]}
+    elif two_referencing_one and not one_referencing_two:
+        relationship = {"referencing": table_two, "referenced": table_one, "constraint": two_referencing_one[0]}
+    else:
+        relationship = None
+    return relationship
+
+
+def _check_columns(relationship, moving_columns):
+    return (
+        relationship is not None
+        and all([not c.foreign_keys for c in moving_columns])
+    )
+
+
+def _get_table_connecting_columns(relationship, target_table):
+    constraint = relationship['constraint']
+    referrer_column = constraint.columns[0]
+    referent_column = constraint.elements[0].column
+    if relationship["referenced"] == target_table:
+        source_table_reference_column = referrer_column
+        target_table_reference_column = referent_column
+    else:
+        source_table_reference_column = referent_column
+        target_table_reference_column = referrer_column
+    return source_table_reference_column, target_table_reference_column

@@ -56,7 +56,11 @@ export class TabularData {
       this.columnsDataStore,
       this.recordsData,
     );
-    this.selection = new Selection(this.columnsDataStore, this.recordsData);
+    this.selection = new Selection(
+      this.columnsDataStore,
+      this.recordsData,
+      this.display,
+    );
 
     this.processedColumns = derived(
       [this.columnsDataStore, this.constraintsDataStore],
@@ -64,11 +68,12 @@ export class TabularData {
         new Map(
           columnsData.columns.map((column) => [
             column.id,
-            processColumn(
+            processColumn({
+              tableId: this.id,
               column,
-              constraintsData.constraints,
-              props.abstractTypesMap,
-            ),
+              constraints: constraintsData.constraints,
+              abstractTypeMap: props.abstractTypesMap,
+            }),
           ]),
         ),
     );
@@ -119,6 +124,7 @@ export class TabularData {
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
+    this.selection.destroy();
   }
 }
 

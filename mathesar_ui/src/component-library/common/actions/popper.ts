@@ -6,17 +6,19 @@ import type {
   Instance,
   VirtualElement,
 } from '@popperjs/core/lib/types';
-import type { Action } from './actionsTypes';
+import type { ActionReturn } from 'svelte/action';
+
+interface Parameters {
+  reference?: VirtualElement;
+  options?: Partial<Options>;
+}
 
 export default function popper(
   node: HTMLElement,
-  actionOpts: {
-    reference?: VirtualElement;
-    options?: Partial<Options>;
-  },
-): Action {
+  actionOpts: Parameters,
+): ActionReturn<Parameters> {
   let popperInstance: Instance;
-  let prevReference: HTMLElement | undefined;
+  let prevReference: VirtualElement | undefined;
 
   function create(reference?: VirtualElement, options?: Partial<Options>) {
     if (!reference) {
@@ -65,26 +67,34 @@ export default function popper(
     prevReference = undefined;
   }
 
-  async function update(opts: { reference: HTMLElement; options?: Options }) {
+  function update(opts: Parameters) {
     const { reference, options } = opts;
 
-    if (popperInstance) {
-      if (prevReference !== reference) {
-        destroy();
-        create(reference, options);
-        prevReference = reference;
-      } else if (options) {
-        await popperInstance.setOptions(options);
-      }
-    } else {
+    if (!reference) {
+      destroy();
+      return;
+    }
+
+    if (!popperInstance) {
       create(reference, options);
+      return;
+    }
+
+    if (prevReference !== reference) {
+      destroy();
+      create(reference, options);
+      prevReference = reference;
+      return;
+    }
+
+    if (options) {
+      void popperInstance.setOptions(options);
     }
   }
 
   create(actionOpts.reference, actionOpts.options);
 
   return {
-    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     update,
     destroy,
   };

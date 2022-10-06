@@ -4,7 +4,7 @@ import type {
   AbstractTypeResponse,
 } from '@mathesar/AppTypes';
 import type { TableEntry } from '@mathesar/api/tables';
-import type { QueryInstance } from '@mathesar/api/queries/queryList';
+import type { QueryInstance } from '@mathesar/api/queries';
 
 interface CommonData {
   databases: Database[];

@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import type { Readable } from 'svelte/store';
-import type { Action } from './actionsTypes';
+import type { ActionReturn } from 'svelte/action';
 
 type CallbackFn = (e: Event) => void;
 interface Options {
@@ -11,7 +11,7 @@ interface Options {
 export default function clickOffBounds(
   node: Element,
   options: Options,
-): Action {
+): ActionReturn {
   let { callback, references } = options;
 
   function outOfBoundsListener(event: Event) {
@@ -52,7 +52,6 @@ export default function clickOffBounds(
   }
 
   return {
-    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     update,
     destroy,
   };

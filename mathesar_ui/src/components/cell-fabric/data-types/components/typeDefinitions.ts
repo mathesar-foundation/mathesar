@@ -5,7 +5,7 @@ import type {
 } from '@mathesar-component-library/types';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
-import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
+import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
 
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
@@ -14,11 +14,24 @@ export interface CellTypeProps<Value> {
   disabled: boolean;
 }
 
+// Primary key
+
+export type PrimaryKeyCellValue = string | number;
+
+export interface PrimaryKeyCellExternalProps {
+  tableId: DBObjectEntry['id'];
+}
+
+export interface PrimaryKeyCellProps
+  extends CellTypeProps<ForeignKeyCellValue>,
+    LinkedRecordCellExternalProps {
+  dataForRecordSummaryInFkCell?: DataForRecordSummaryInFkCell;
+}
+
 // Foreign key
 
 export type ForeignKeyCellValue = string | number | null;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LinkedRecordCellExternalProps {
   tableId: DBObjectEntry['id'];
 }

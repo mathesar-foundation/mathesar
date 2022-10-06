@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, Icon } from '@mathesar/component-library';
-  import { iconDelete, iconQuery, iconTableLink } from '@mathesar/icons';
+  import { iconDelete, iconExploration, iconTableLink } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
@@ -43,7 +43,7 @@
 
   {#if $currentDatabase && $currentSchemaId}
     <Button appearance="ghost">
-      <Icon {...iconQuery} />
+      <Icon {...iconExploration} />
       <a
         class="btn-link"
         href={getDataExplorerPageUrl($currentDatabase.name, $currentSchemaId)}

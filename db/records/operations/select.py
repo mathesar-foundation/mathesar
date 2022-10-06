@@ -1,5 +1,6 @@
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.sql.base import ColumnSet as SAColumnSet
+from sqlalchemy.sql.functions import count
 
 from db.columns.base import MathesarColumn
 from db.tables.utils import get_primary_key_column
@@ -82,7 +83,9 @@ def get_records(
 
 def get_count(table, engine, filter=None, search=[]):
     col_name = "_count"
-    columns_to_select = [func.count().label(col_name)]
+    columns_to_select = [
+        count(1).label(col_name)
+    ]
     relation = apply_transformations_deprecated(
         table=table,
         limit=None,

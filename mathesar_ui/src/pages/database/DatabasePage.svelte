@@ -9,6 +9,7 @@
   import { modal } from '@mathesar/stores/modal';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import { schemas as schemasStore } from '@mathesar/stores/schemas';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import SchemasHelp from './__help__/SchemasHelp.svelte';
@@ -53,9 +54,7 @@
   }
 </script>
 
-<svelte:head>
-  <title>{database.name} | Mathesar</title>
-</svelte:head>
+<svelte:head><title>{makeSimplePageTitle(database.name)}</title></svelte:head>
 
 <LayoutWithHeader>
   <div class="database-page-header">

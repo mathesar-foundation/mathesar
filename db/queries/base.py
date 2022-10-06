@@ -1,10 +1,11 @@
-from sqlalchemy import MetaData, select
+from sqlalchemy import select
 
 from db.records.operations import select as records_select
 from db.columns.base import MathesarColumn
 from db.columns.operations.select import get_column_name_from_attnum
 from db.tables.operations.select import reflect_table_from_oid
 from db.transforms.operations.apply import apply_transformations
+from db.metadata import get_empty_metadata
 
 
 class DBQuery:
@@ -96,7 +97,8 @@ class DBQuery:
 
     @property
     def initial_relation(self):
-        metadata = MetaData()
+        # TODO reuse metadata
+        metadata = get_empty_metadata()
         base_table = reflect_table_from_oid(
             self.base_table_oid, self.engine, metadata=metadata
         )
@@ -111,12 +113,12 @@ class DBQuery:
             """
             return reflect_table_from_oid(oid, self.engine, metadata=metadata)
 
-        def _get_column_name(oid, attnum):
-            return get_column_name_from_attnum(oid, attnum, self.engine)
+        def _get_column_name(oid, attnum, metadata):
+            return get_column_name_from_attnum(oid, attnum, self.engine, metadata=metadata)
 
-        def _process_initial_column(col):
+        def _process_initial_column(col, metadata):
             nonlocal from_clause
-            col_name = _get_column_name(col.reloid, col.attnum)
+            col_name = _get_column_name(col.reloid, col.attnum, metadata=metadata)
             # Make the path hashable so it can be a dict key
             jp_path = _guarantee_jp_path_tuples(col.jp_path)
             right = base_table
@@ -125,8 +127,10 @@ class DBQuery:
                 left = jp_path_alias_map[jp_path[:i]]
                 right = _get_table(jp[1][0]).alias()
                 jp_path_alias_map[jp_path[:i + 1]] = right
-                left_col = left.columns[_get_column_name(jp[0][0], jp[0][1])]
-                right_col = right.columns[_get_column_name(jp[1][0], jp[1][1])]
+                left_col_name = _get_column_name(jp[0][0], jp[0][1], metadata=metadata)
+                right_col_name = _get_column_name(jp[1][0], jp[1][1], metadata=metadata)
+                left_col = left.columns[left_col_name]
+                right_col = right.columns[right_col_name]
                 from_clause = from_clause.join(
                     right, onclause=left_col == right_col, isouter=True,
                 )
@@ -134,7 +138,7 @@ class DBQuery:
             return right.columns[col_name].label(col.alias)
 
         stmt = select(
-            [_process_initial_column(col) for col in self.initial_columns]
+            [_process_initial_column(col, metadata=metadata) for col in self.initial_columns]
         ).select_from(from_clause)
         return stmt.cte()
 
