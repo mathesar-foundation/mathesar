@@ -2,6 +2,7 @@ from functools import reduce
 
 from bidict import bidict
 
+from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -12,7 +13,10 @@ from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
-from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names, get_columns_name_from_tables
+from db.columns.operations.select import (
+    get_column_attnum_from_names_as_map, get_column_name_from_attnum, get_columns_attnum_from_names,
+    get_map_of_attnum_to_column_name, get_map_of_attnum_and_table_oid_to_column_name,
+)
 from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
@@ -210,13 +214,22 @@ class Schema(DatabaseObject):
 
 class ColumnNamePrefetcher(Prefetcher):
     def filter(self, column_attnums, columns):
-        pass
+        if len(columns) < 1:
+            return []
+        table = list(columns)[0].table
+        return get_map_of_attnum_to_column_name(
+            table.oid,
+            column_attnums,
+            table._sa_engine,
+            metadata=get_cached_metadata(),
+        )
 
     def mapper(self, column):
         return column.attnum
 
     def reverse_mapper(self, column):
-        return
+        # We return maps mostly, so a reverse mapper is not needed
+        pass
 
     def decorator(self, column, name):
         setattr(column, 'name', name)
@@ -230,12 +243,12 @@ class ColumnPrefetcher(Prefetcher):
         table_oids = [table.oid for table in tables]
 
         def _get_column_names_from_tables(table_oids):
-            return get_columns_name_from_tables(
+            # TODO why is the fallback engine an empty list? looks like a bug
+            engine = list(tables)[0]._sa_engine if len(tables) > 0 else []
+            return get_map_of_attnum_and_table_oid_to_column_name(
                 table_oids,
-                list(tables)[0]._sa_engine
-                if len(tables) > 0 else [],
+                engine=engine,
                 metadata=get_cached_metadata(),
-                fetch_as_map=True
             )
         return ColumnNamePrefetcher(
             filter=lambda column_attnums, columns: _get_column_names_from_tables(table_oids),
@@ -597,6 +610,7 @@ class Table(DatabaseObject, Relation):
         remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
         extracted_table = Table(oid=extracted_table_oid, schema=self.schema)
         extracted_table.save()
+
         # Update attnum as it would have changed due to columns moving to a new table.
         extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
         remainder_table = Table.current_objects.get(oid=remainder_table_oid)
@@ -609,11 +623,10 @@ class Table(DatabaseObject, Relation):
         Will update the columns specified via column_names to have the right attnum and to be part
         of this table.
         """
-        column_names_attnum_map = get_columns_attnum_from_names(
+        column_names_attnum_map = get_column_attnum_from_names_as_map(
             self.oid,
             column_names,
             self._sa_engine,
-            return_as_name_map=True,
             metadata=get_cached_metadata(),
         )
         column_objs = []
@@ -662,11 +675,15 @@ class Column(ReflectionManagerMixin, BaseModel):
         except AttributeError as e:
             # Blacklist Django attribute names that cause recursion by trying to fetch an invalid cache.
             # TODO Find a better way to avoid finding Django related columns
-            blacklisted_attribute_names = ['resolve_expression']
+            blacklisted_attribute_names = ['resolve_expression', '_prefetched_objects_cache']
             if name not in blacklisted_attribute_names:
                 return getattr(self._sa_column, name)
             else:
                 raise e
+    current_objects = models.Manager()
+    objects = DatabaseObjectManager(
+        name=ColumnNamePrefetcher
+    )
 
     @property
     def _sa_engine(self):
@@ -809,7 +826,7 @@ class DataFile(BaseModel):
     created_from_choices = models.TextChoices("created_from", "FILE PASTE URL")
 
     file = models.FileField(upload_to=model_utils.user_directory_path)
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.CASCADE)
     created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
                                           null=True, on_delete=models.SET_NULL)

@@ -5,7 +5,7 @@ from db import constants
 from db.columns.base import MathesarColumn
 from db.columns.operations.alter import batch_alter_table_drop_columns
 from db.columns.operations.create import bulk_create_mathesar_column
-from db.columns.operations.select import get_columns_name_from_attnums
+from db.columns.operations.select import get_column_names_from_attnums
 from db.tables.operations.select import reflect_table_from_oid
 from db.metadata import get_empty_metadata
 
@@ -22,7 +22,7 @@ def move_columns_between_related_tables(
     source_table = reflect_table_from_oid(source_table_oid, engine, metadata=metadata)
     target_table = reflect_table_from_oid(target_table_oid, engine, metadata=metadata)
     relationship = _find_table_relationship(source_table, target_table)
-    column_names_to_move = get_columns_name_from_attnums(source_table_oid, column_attnums_to_move, engine, metadata=metadata)
+    column_names_to_move = get_column_names_from_attnums(source_table_oid, column_attnums_to_move, engine, metadata=metadata)
     moving_columns = [source_table.columns[name] for name in column_names_to_move]
     assert _check_columns(relationship, moving_columns)
     source_table_reference_column, target_table_reference_column = _get_table_connecting_columns(

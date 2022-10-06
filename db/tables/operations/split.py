@@ -3,7 +3,7 @@ from sqlalchemy import exists, func, literal, select
 from db import constants
 from db.columns.base import MathesarColumn
 from db.columns.operations.alter import batch_alter_table_drop_columns
-from db.columns.operations.select import get_columns_name_from_attnums
+from db.columns.operations.select import get_column_names_from_attnums
 from db.links.operations.create import create_foreign_key_link
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table, reflect_table_from_oid
@@ -72,7 +72,7 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
         col for col in old_columns if not col.is_default
     ]
     # TODO reuse metadata
-    extracted_column_names = get_columns_name_from_attnums(old_table_oid, extracted_column_attnums, engine, metadata=get_empty_metadata())
+    extracted_column_names = get_column_names_from_attnums(old_table_oid, extracted_column_attnums, engine, metadata=get_empty_metadata())
     extracted_columns = [
         col for col in old_non_default_columns if col.name in extracted_column_names
     ]
