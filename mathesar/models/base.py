@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import JSONField, Deferrable
+from django.db.models import JSONField
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -662,7 +662,7 @@ class Column(ReflectionManagerMixin, BaseModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["attnum", "table"], name="unique_column", deferrable=Deferrable.DEFERRED)
+            models.UniqueConstraint(fields=["attnum", "table"], name="unique_column")
         ]
 
     def __str__(self):
@@ -845,3 +845,29 @@ class PreviewColumnSettings(BaseModel):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
+
+
+def _create_table_settings(tables):
+    # TODO Bulk create preview settings to improve performance
+    for table in tables:
+        preview_column_settings = PreviewColumnSettings.objects.create(customized=False)
+        TableSettings.current_objects.create(table=table, preview_settings=preview_column_settings)
+
+
+def _compute_preview_template(table):
+    if not table.settings.preview_settings.customized:
+        columns = Column.current_objects.filter(table=table).prefetch_related('table', 'table__schema', 'table__schema__database').order_by('attnum')
+        preview_column = None
+        primary_key_column = None
+        for column in columns:
+            if column.primary_key:
+                primary_key_column = column
+            else:
+                preview_column = column
+                break
+        if preview_column is None:
+            preview_column = primary_key_column
+        preview_template = f"{{{preview_column.id}}}"
+        preview_settings = table.settings.preview_settings
+        preview_settings.template = preview_template
+        preview_settings.save()
