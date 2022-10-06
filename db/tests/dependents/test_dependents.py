@@ -31,10 +31,10 @@ def test_correct_dependents_amount_and_level(engine, library_tables_oids):
     items_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Items'])
     checkouts_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Checkouts'])
 
-    assert len(publishers_dependents) == 3
-    assert len(publications_dependents) == 5
-    assert len(items_dependents) == 4
-    assert len(checkouts_dependents) == 3
+    assert len(publishers_dependents) == 4
+    assert len(publications_dependents) == 6
+    assert len(items_dependents) == 5
+    assert len(checkouts_dependents) == 4
     assert all(
         [
             r['level'] == 1
@@ -86,8 +86,7 @@ def test_response_format(engine, library_tables_oids):
     )
 
 
-# TODO: add other types when they are added as dependents
-def test_specific_object_types(engine, library_tables_oids, library_db_tables):
+def test_constrains_as_dependents(engine, library_tables_oids, library_db_tables):
     items_oid = library_tables_oids['Items']
     items_dependents_graph = get_dependents_graph(items_oid, engine, [])
     items_dependents_oids = _get_object_dependents_oids(items_dependents_graph, items_oid)
@@ -100,7 +99,12 @@ def test_specific_object_types(engine, library_tables_oids, library_db_tables):
     checkouts_items_fk = [c for c in library_db_tables['Checkouts'].foreign_key_constraints if 'Item' in c][0]
     checkouts_items_fk_oid = get_constraint_oid_by_name_and_table_oid(checkouts_items_fk.name, checkouts_oid, engine)
 
-    assert sorted(items_dependents_oids) == sorted(items_constraint_oids + [checkouts_oid] + [checkouts_items_fk_oid])
+    assert all(
+        [
+            oid in items_dependents_oids
+            for oid in items_constraint_oids + [checkouts_oid] + [checkouts_items_fk_oid]
+        ]
+    )
 
 
 # if a table contains a foreign key referencing itself, it shouldn't be treated as a dependent

@@ -4,7 +4,10 @@ import pytest
 def _get_object_dependent_ids(dependents, object_id, type):
     return [
         int(d['obj']['id'])
-        for d in dependents if int(d['parent_obj']['id']) == object_id and d['parent_obj']['type'] == type
+        for d in dependents
+        if int(d['parent_obj']['id']) == object_id
+        and d['parent_obj']['type'] == type
+        and 'id' in d['obj']
     ]
 
 
@@ -27,7 +30,7 @@ def test_dependents_response_attrs(library_ma_tables, client):
     response_data = response.json()
 
     dependent_expected_attrs = ['obj', 'parent_obj']
-    assert len(response_data) == 7
+    assert len(response_data) == 9
     assert all(
         [
             all(attr in dependent for attr in dependent_expected_attrs)
@@ -84,7 +87,12 @@ def test_column_dependents(library_ma_tables, client):
     patrons_pk_id = [c['id'] for c in patrons_constraints if c['name'] == 'Patrons_pkey']
     checkouts_patrons_fk_id = [c['id'] for c in checkouts_constraints if c['name'] == 'Checkouts_Patron id_fkey']
 
-    assert sorted(patrons_id_dependents_ids) == sorted([checkouts.id] + patrons_pk_id + checkouts_patrons_fk_id)
+    assert all(
+        [
+            oid in patrons_id_dependents_ids
+            for oid in [checkouts.id] + patrons_pk_id + checkouts_patrons_fk_id
+        ]
+    )
 
 
 def test_dependents_filters(library_ma_tables, client):
