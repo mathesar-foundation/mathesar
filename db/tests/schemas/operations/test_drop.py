@@ -8,6 +8,7 @@ from db.schemas.utils import get_mathesar_schemas
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import reflect_table
 from db.tests.schemas.utils import create_related_table
+from db.metadata import get_empty_metadata
 
 
 @pytest.mark.parametrize("if_exists", [True, False])
@@ -59,7 +60,7 @@ def test_drop_schema_cascade(engine):
     current_schemas = get_mathesar_schemas(engine)
     assert test_schema not in current_schemas
     with pytest.raises(NoSuchTableError):
-        reflect_table(table.name, test_schema, engine)
+        reflect_table(table.name, test_schema, engine, metadata=get_empty_metadata())
 
 
 def test_drop_schema_cascade_foreign_key(engine):
@@ -74,5 +75,5 @@ def test_drop_schema_cascade_foreign_key(engine):
 
     drop_schema(test_schema, engine, cascade=True)
 
-    related_table = reflect_table(related_table.name, related_schema, engine)
+    related_table = reflect_table(related_table.name, related_schema, engine, metadata=get_empty_metadata())
     assert len(related_table.foreign_keys) == 0

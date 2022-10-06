@@ -4,6 +4,7 @@ from db.constraints.operations.create import create_unique_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tests.constraints import utils as test_utils
+from db.metadata import get_empty_metadata
 
 
 def test_drop_unique_constraint(engine_with_schema):
@@ -20,10 +21,10 @@ def test_drop_unique_constraint(engine_with_schema):
 
     table_oid = get_oid_from_table(table_name, schema, engine)
     create_unique_constraint(table.name, schema, engine, [unique_column_name])
-    altered_table = reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     test_utils.assert_primary_key_and_unique_present(altered_table)
     unique_constraint = test_utils.get_first_unique_constraint(altered_table)
 
     drop_constraint(table_name, schema, engine, unique_constraint.name)
-    new_altered_table = reflect_table_from_oid(table_oid, engine)
+    new_altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     test_utils.assert_only_primary_key_present(new_altered_table)

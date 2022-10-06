@@ -1,6 +1,3 @@
-import pytest
-
-
 def _get_object_dependent_ids(dependents, object_id, type):
     return [
         int(d['obj']['id'])
@@ -12,18 +9,10 @@ def _get_constraint_ids(table_constraint_results):
     return [r['id'] for r in table_constraint_results]
 
 
-@pytest.fixture
-def library_ma_tables(db_table_to_dj_table, library_db_tables):
-    return {
-        table_name: db_table_to_dj_table(db_table)
-        for table_name, db_table
-        in library_db_tables.items()
-    }
-
-
 def test_dependents_response_attrs(library_ma_tables, client):
     items_id = library_ma_tables["Items"].id
     response = client.get(f'/api/db/v0/tables/{items_id}/dependents/')
+    assert response.status_code == 200
     response_data = response.json()
 
     dependent_expected_attrs = ['obj', 'parent_obj']

@@ -139,6 +139,7 @@ class ConstraintSerializer(
             constraint_type = data.type
         else:
             constraint_type = data.get('type', None)
+        assert constraint_type is not None
         return constraint_type
 
     def create(self, validated_data):
