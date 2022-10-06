@@ -752,6 +752,11 @@ class Column(ReflectionManagerMixin, BaseModel):
 class Constraint(DatabaseObject):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["oid", "table"], name="unique_constraint")
+        ]
+
     @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
