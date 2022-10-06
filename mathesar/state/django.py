@@ -38,7 +38,9 @@ def reflect_db_objects(metadata):
             Prefetch('database', queryset=databases)
         )
         reflect_tables_from_schemas(schemas, metadata=metadata)
-        tables = models.Table.current_objects.filter(schema__in=schemas).prefetch_related(Prefetch('schema', queryset=schemas))
+        tables = models.Table.current_objects.filter(schema__in=schemas).prefetch_related(
+            Prefetch('schema', queryset=schemas)
+        )
         reflect_columns_from_tables(tables, metadata=metadata)
         reflect_constraints_from_database(database.name)
 
