@@ -13,7 +13,10 @@ from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
-from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names, get_columns_name_from_tables
+from db.columns.operations.select import (
+    get_column_attnum_from_names_as_map, get_column_name_from_attnum, get_columns_attnum_from_names,
+    get_map_of_attnum_to_column_name, get_map_of_attnum_and_table_oid_to_column_name,
+)
 from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
@@ -204,13 +207,17 @@ class Schema(DatabaseObject):
 
 class ColumnNamePrefetcher(Prefetcher):
     def filter(self, column_attnums, columns):
-        pass
+        if len(columns) < 1:
+            return []
+        table = list(columns)[0].table
+        return get_map_of_attnum_to_column_name(table.oid, column_attnums, table._sa_engine)
 
     def mapper(self, column):
         return column.attnum
 
     def reverse_mapper(self, column):
-        return
+        # We return maps mostly, so a reverse mapper is not needed
+        pass
 
     def decorator(self, column, name):
         setattr(column, 'name', name)
@@ -224,11 +231,10 @@ class ColumnPrefetcher(Prefetcher):
         table_oids = [table.oid for table in tables]
 
         def _get_column_names_from_tables(table_oids):
-            return get_columns_name_from_tables(
+            return get_map_of_attnum_and_table_oid_to_column_name(
                 table_oids,
                 list(tables)[0]._sa_engine
                 if len(tables) > 0 else [],
-                fetch_as_map=True
             )
         return ColumnNamePrefetcher(
             filter=lambda column_attnums, columns: _get_column_names_from_tables(table_oids),
@@ -519,11 +525,10 @@ class Table(DatabaseObject, Relation):
         )
 
     def update_column_reference(self, columns_name, column_name_id_map):
-        columns_name_attnum_map = get_columns_attnum_from_names(
+        columns_name_attnum_map = get_column_attnum_from_names_as_map(
             self.oid,
             columns_name,
             self._sa_engine,
-            return_as_name_map=True
         )
         column_objs = []
         for column_name, column_attnum in columns_name_attnum_map.items():
@@ -571,11 +576,15 @@ class Column(ReflectionManagerMixin, BaseModel):
         except AttributeError as e:
             # Blacklist Django attribute names that cause recursion by trying to fetch an invalid cache.
             # TODO Find a better way to avoid finding Django related columns
-            blacklisted_attribute_names = ['resolve_expression']
+            blacklisted_attribute_names = ['resolve_expression', '_prefetched_objects_cache']
             if name not in blacklisted_attribute_names:
                 return getattr(self._sa_column, name)
             else:
                 raise e
+    current_objects = models.Manager()
+    objects = DatabaseObjectManager(
+        name=ColumnNamePrefetcher
+    )
 
     @property
     def _sa_engine(self):
