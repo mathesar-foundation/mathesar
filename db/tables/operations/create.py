@@ -34,7 +34,6 @@ def create_mathesar_table(name, schema, columns, engine, metadata=None, comment=
     table.create(engine)
     if comment is not None:  # this check avoids an unneeded DB call
         comment_on_table(name, schema, engine, comment)
-
     return table
 
 

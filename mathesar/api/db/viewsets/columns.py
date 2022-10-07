@@ -22,6 +22,7 @@ from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models.base import Column
+from mathesar.state import get_cached_metadata
 
 
 class ColumnViewSet(viewsets.ModelViewSet):
@@ -94,12 +95,23 @@ class ColumnViewSet(viewsets.ModelViewSet):
                     message='This type casting is invalid.',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-        dj_column = Column(
-            table=table,
-            attnum=get_column_attnum_from_name(table.oid, column.name, table.schema._sa_engine),
-            **serializer.validated_model_fields
+        column_attnum = get_column_attnum_from_name(
+            table.oid,
+            column.name,
+            table.schema._sa_engine,
+            metadata=get_cached_metadata(),
         )
-        dj_column.save()
+        # The created column's Django model was automatically reflected. It can be reflected.
+        dj_column = Column.objects.get(
+            table=table,
+            attnum=column_attnum,
+        )
+        # Some properties of the column are not reflected (e.g. display options). Here we add those
+        # attributes to the reflected model.
+        if serializer.validated_model_fields:
+            for k, v in serializer.validated_model_fields.items():
+                setattr(dj_column, k, v)
+            dj_column.save()
         out_serializer = ColumnSerializer(dj_column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
@@ -184,7 +196,6 @@ class ColumnViewSet(viewsets.ModelViewSet):
         table = column_instance.table
         try:
             table.drop_column(column_instance.attnum)
-            column_instance.delete()
         except IndexError:
             raise NotFound
         return Response(status=status.HTTP_204_NO_CONTENT)

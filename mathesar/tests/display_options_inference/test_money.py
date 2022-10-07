@@ -2,6 +2,7 @@ import pytest
 from django.core.files.base import File
 
 from db.columns.operations.select import get_column_attnum_from_name
+from db.metadata import get_empty_metadata
 from mathesar.models.base import DataFile, Table
 from mathesar.utils.display_options_inference import infer_mathesar_money_display_options
 
@@ -34,6 +35,6 @@ def test_display_options_inference(client, patent_schema, col_name, expected_dis
     }
     response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
-    column_attnum = get_column_attnum_from_name(table.oid, col_name, engine)
+    column_attnum = get_column_attnum_from_name(table.oid, col_name, engine, metadata=get_empty_metadata())
     inferred_display_options = infer_mathesar_money_display_options(table.oid, engine, column_attnum)
     assert inferred_display_options == expected_display_options

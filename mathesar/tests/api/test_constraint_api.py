@@ -7,6 +7,7 @@ from db.constraints.base import UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from mathesar.models.base import Table, Column
 from mathesar.api.exceptions.error_codes import ErrorCodes
+from db.metadata import get_empty_metadata
 
 
 def _verify_primary_and_unique_constraints(response):
@@ -116,9 +117,9 @@ def test_existing_foreign_key_constraint_list(patent_schema, client):
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
-    column_attnum = get_column_attnum_from_name(db_table_oid, [fk_column_name], engine)
+    column_attnum = get_column_attnum_from_name(db_table_oid, [fk_column_name], engine, metadata=get_empty_metadata())
     columns = list(Column.objects.filter(table=table, attnum=column_attnum).values_list('id', flat=True))
-    referent_column_attnum = get_column_attnum_from_name(referent_table_oid, [referent_col_name], engine)
+    referent_column_attnum = get_column_attnum_from_name(referent_table_oid, [referent_col_name], engine, metadata=get_empty_metadata())
     referent_columns = list(Column.objects.filter(table=referent_table, attnum=referent_column_attnum).values_list('id', flat=True))
     for constraint_data in response_data['results']:
         if constraint_data['type'] == 'foreignkey':
