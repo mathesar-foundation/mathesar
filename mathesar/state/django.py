@@ -5,10 +5,10 @@ from django.conf import settings
 from django.core.cache import cache as dj_cache
 from django.db.models import Prefetch, Q
 
-from db.columns.operations.select import get_column_attnums_from_table
+from db.columns.operations.select import get_column_attnums_from_tables
 from db.constraints.operations.select import get_constraints_with_oids
 from db.schemas.operations.select import get_mathesar_schemas_with_oids
-from db.tables.operations.select import get_table_oids_from_schema
+from db.tables.operations.select import get_table_oids_from_schemas
 # We import the entire models.base module to avoid a circular import error
 from mathesar.models import base as models
 from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer, \
@@ -90,7 +90,7 @@ def reflect_tables_from_schemas(schemas, metadata):
     schema_oids = [schema.oid for schema in schemas]
     db_table_oids = {
         (table['oid'], table['schema_oid'])
-        for table in get_table_oids_from_schema(schema_oids, engine, metadata=metadata)
+        for table in get_table_oids_from_schemas(schema_oids, engine, metadata=metadata)
     }
     tables = []
     for oid, schema_oid in db_table_oids:
@@ -113,7 +113,7 @@ def reflect_columns_from_tables(tables, metadata):
         return
     engine = tables[0]._sa_engine
     table_oids = [table.oid for table in tables]
-    attnum_tuples = get_column_attnums_from_table(table_oids, engine, metadata=metadata)
+    attnum_tuples = get_column_attnums_from_tables(table_oids, engine, metadata=metadata)
 
     _create_reflected_columns(attnum_tuples, tables)
 

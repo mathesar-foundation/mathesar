@@ -75,7 +75,7 @@ def get_map_of_table_oid_to_schema_name_and_table_name(
     return table_oids_to_schema_names_and_table_names
 
 
-def get_table_oids_from_schema(schema_oids, engine, metadata):
+def get_table_oids_from_schemas(schema_oids, engine, metadata):
     pg_class = get_pg_catalog_table("pg_class", engine, metadata)
     sel = (
         select(pg_class.c.oid, pg_class.c.relnamespace.label('schema_oid'))
