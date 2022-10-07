@@ -165,17 +165,17 @@ def _delete_stale_columns(attnum_tuples, tables):
 def reflect_constraints_from_database(database):
     engine = create_mathesar_engine(database)
     db_constraints = get_constraints_with_oids(engine)
-    db_constraint_mapped_by_table = defaultdict(list)
+    map_of_table_oid_to_constraint_oids = defaultdict(list)
     for db_constraint in db_constraints:
         table_oid = db_constraint['conrelid']
         constraint_oid = db_constraint['oid']
-        db_constraint_mapped_by_table[table_oid].append(constraint_oid)
+        map_of_table_oid_to_constraint_oids[table_oid].append(constraint_oid)
 
-    table_oids = db_constraint_mapped_by_table.keys()
+    table_oids = map_of_table_oid_to_constraint_oids.keys()
     tables = models.Table.current_objects.filter(oid__in=table_oids)
     constraint_objs_to_create = []
     for table in tables:
-        constraint_oids = db_constraint_mapped_by_table.get(table.oid, [])
+        constraint_oids = map_of_table_oid_to_constraint_oids.get(table.oid, [])
         for constraint_oid in constraint_oids:
             constraint_obj = models.Constraint(oid=constraint_oid, table=table)
             constraint_objs_to_create.append(constraint_obj)
