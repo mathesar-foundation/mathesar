@@ -11,6 +11,7 @@
   const recordSelectorController = setNewRecordSelectorControllerInContext({
     onOpen: () => recordSelectorModal.open(),
     onClose: () => recordSelectorModal.close(),
+    nestingLevel: 0,
   });
 </script>
 
@@ -62,6 +63,7 @@
     --display-size-large: 1.953rem;
 
     --modal-z-index: 50;
+    --modal-record-selector-z-index: 50;
   }
 
   body {
