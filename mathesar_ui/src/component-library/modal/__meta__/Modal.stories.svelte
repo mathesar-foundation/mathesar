@@ -62,9 +62,9 @@
 
   <ControlledModal controller={basicModal} title="Basic modal">
     Here is modal content
-    <div slot="footer">
+    <svelte:fragment slot="footer">
       <p>This is the modal footer</p>
-    </div>
+    </svelte:fragment>
   </ControlledModal>
 
   <ControlledModal

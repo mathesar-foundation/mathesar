@@ -4,11 +4,12 @@
   min-height: var(--window-min-height, 7em);
   width: var(--window-width, 100%);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template: auto 1fr auto / auto;
   box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
 
   .title-bar {
+    grid-row: 1;
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
@@ -20,6 +21,17 @@
       padding: 1em 1em 0.5em 1em;
       font-weight: bold;
     }
+  }
+
+  > .body {
+    grid-row: 2;
+    overflow-y: auto;
+  }
+
+  > .footer {
+    grid-row: 3;
+    border-top: 1px solid #f5f5f5;
+    background: #f3f6f8;
   }
 
   > .body,
@@ -35,14 +47,5 @@
     > :last-child {
       margin-bottom: 0;
     }
-  }
-
-  > .body {
-    overflow-y: auto;
-  }
-
-  > .footer {
-    border-top: 1px solid #f5f5f5;
-    background: #f3f6f8;
   }
 }
