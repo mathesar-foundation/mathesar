@@ -5,23 +5,16 @@
   import Window from '@mathesar-component-library-dir/window/Window.svelte';
   import portal from '@mathesar-component-library-dir/common/actions/portal';
 
-  import type {
-    ModalCloseAction,
-    ModalWidth,
-    VerticalAlign,
-  } from './modalTypes';
+  import type { ModalCloseAction, ModalWidth } from './modalTypes';
 
   const dispatch = createEventDispatcher();
 
   export let isOpen = false;
   export let title: string | undefined = undefined;
-  let classes = '';
-  export { classes as class };
   export let size: ModalWidth = 'medium';
   export let allowClose = true;
   export let hasOverlay = true;
   export let closeOn: ModalCloseAction[] = ['button'];
-  export let verticalAlign: VerticalAlign | undefined = 'center';
 
   $: closeOnButton = allowClose && closeOn.includes('button');
   $: closeOnEsc = allowClose && closeOn.includes('esc');
@@ -63,23 +56,18 @@
         out:fade={{ duration: 150 }}
       />
     {/if}
-    <div class="inset">
-      <div
-        class="window-positioner"
-        class:width-medium={size === 'medium'}
-        class:width-large={size === 'large'}
-        class:v-align-top={verticalAlign === 'top'}
-        class:v-align-center={verticalAlign === 'center'}
-        class:v-align-bottom={verticalAlign === 'bottom'}
-        in:fly={{ y: 20, duration: 150 }}
-        out:fly={{ y: 20, duration: 150 }}
-      >
-        <Window hasCloseButton={closeOnButton} on:close={close}>
-          <div slot="title"><slot name="title" />{title ?? ''}</div>
-          <slot />
-          <slot name="footer" slot="footer" />
-        </Window>
-      </div>
+    <div
+      class="window-positioner"
+      class:width-medium={size === 'medium'}
+      class:width-large={size === 'large'}
+      in:fly={{ y: 20, duration: 150 }}
+      out:fly={{ y: 20, duration: 150 }}
+    >
+      <Window hasCloseButton={closeOnButton} on:close={close}>
+        <div slot="title"><slot name="title" />{title ?? ''}</div>
+        <slot />
+        <slot name="footer" slot="footer" />
+      </Window>
     </div>
   </div>
 {/if}
