@@ -9,13 +9,14 @@
 
   export let title: string | undefined = undefined;
   export let hasCloseButton = true;
+  export let canScrollBody = true;
 
   function handleCloseButtonClick() {
     dispatch('close');
   }
 </script>
 
-<div class="window">
+<div class="window" class:can-scroll-body={canScrollBody}>
   {#if $$slots.title || title || hasCloseButton}
     <div class="title-bar">
       <div class="title">

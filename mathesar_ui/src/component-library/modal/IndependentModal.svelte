@@ -15,6 +15,7 @@
   export let allowClose = true;
   export let hasOverlay = true;
   export let closeOn: ModalCloseAction[] = ['button'];
+  export let canScrollBody = true;
 
   $: closeOnButton = allowClose && closeOn.includes('button');
   $: closeOnEsc = allowClose && closeOn.includes('esc');
@@ -63,7 +64,7 @@
       in:fly={{ y: 20, duration: 150 }}
       out:fly={{ y: 20, duration: 150 }}
     >
-      <Window hasCloseButton={closeOnButton} on:close={close}>
+      <Window {canScrollBody} hasCloseButton={closeOnButton} on:close={close}>
         <div slot="title"><slot name="title" />{title ?? ''}</div>
         <slot />
         <slot name="footer" slot="footer" />

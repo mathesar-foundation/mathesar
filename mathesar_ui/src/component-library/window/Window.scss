@@ -25,7 +25,6 @@
 
   > .body {
     grid-row: 2;
-    overflow-y: auto;
   }
 
   > .footer {
@@ -37,6 +36,7 @@
   > .body,
   > .footer {
     padding: 1em;
+    overflow: hidden;
     &:empty {
       display: none;
     }
@@ -46,6 +46,17 @@
     }
     > :last-child {
       margin-bottom: 0;
+    }
+  }
+
+  &.can-scroll-body > .body {
+    overflow-y: auto;
+  }
+  &:not(.can-scroll-body) > .body {
+    display: flex;
+    flex-direction: column;
+    > * {
+      flex: 0 1 auto;
     }
   }
 }

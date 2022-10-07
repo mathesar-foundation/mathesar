@@ -13,6 +13,7 @@
   const extraLongTitleModal = modal.spawnModalController();
   const richTextTitle = modal.spawnModalController();
   const verboseModal = modal.spawnModalController();
+  const innerScrollModal = modal.spawnModalController();
 
   let answer = '';
   $: answerIsCorrect = answer === '4';
@@ -56,6 +57,11 @@
     <li>
       <Button appearance="primary" on:click={() => verboseModal.open()}>
         Long content
+      </Button>
+    </li>
+    <li>
+      <Button appearance="primary" on:click={() => innerScrollModal.open()}>
+        Scrolling within a smaller area
       </Button>
     </li>
   </ul>
@@ -149,10 +155,44 @@
     </p>
     <div slot="footer">This is the footer</div>
   </ControlledModal>
+
+  <ControlledModal
+    controller={innerScrollModal}
+    title="Scrolling within a smaller area"
+    canScrollBody={false}
+  >
+    <div class="fixed-header">
+      <div class="top">
+        This content is in the body, but it won't scroll with the rest of the
+        modal.
+      </div>
+      <div class="bottom">
+        <p>This part scrolls</p>
+        <ul>
+          {#each Array(20) as _, i}
+            <li>{i}</li>
+          {/each}
+        </ul>
+      </div>
+    </div>
+  </ControlledModal>
 </Story>
 
 <style>
   li {
     margin: 1em 0;
+  }
+
+  .fixed-header {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .fixed-header .top {
+    flex: 0 0 auto;
+  }
+  .fixed-header .bottom {
+    flex: 0 1 auto;
+    overflow-y: auto;
   }
 </style>
