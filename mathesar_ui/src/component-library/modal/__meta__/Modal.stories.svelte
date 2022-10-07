@@ -4,10 +4,6 @@
   import ControlledModal from '../ControlledModal.svelte';
   import ModalMultiplexer from '../ModalMultiplexer';
 
-  const meta = {
-    title: 'Systems/Modal',
-  };
-
   const modal = new ModalMultiplexer();
 
   const basicModal = modal.spawnModalController();
@@ -22,45 +18,45 @@
   $: answerIsCorrect = answer === '4';
 </script>
 
-<Meta {...meta} />
+<Meta title="Systems/Modal" />
 
 <Story name="Basic">
   <h2>Example modals</h2>
   <ul>
     <li>
-      <Button appearance="primary" on:click={() => basicModal.open()}
-        >Basic</Button
-      >
+      <Button appearance="primary" on:click={() => basicModal.open()}>
+        Basic
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => chainModal.open()}
-        >Nested</Button
-      >
+      <Button appearance="primary" on:click={() => chainModal.open()}>
+        Nested
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => hardToCloseModal.open()}
-        >Hard to close</Button
-      >
+      <Button appearance="primary" on:click={() => hardToCloseModal.open()}>
+        Hard to close
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => titleFreeModal.open()}
-        >No title</Button
-      >
+      <Button appearance="primary" on:click={() => titleFreeModal.open()}>
+        No title
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => extraLongTitleModal.open()}
-        >Long title</Button
-      >
+      <Button appearance="primary" on:click={() => extraLongTitleModal.open()}>
+        Long title
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => richTextTitle.open()}
-        >Rich text title</Button
-      >
+      <Button appearance="primary" on:click={() => richTextTitle.open()}>
+        Rich text title
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => verboseModal.open()}
-        >Long content</Button
-      >
+      <Button appearance="primary" on:click={() => verboseModal.open()}>
+        Long content
+      </Button>
     </li>
   </ul>
 
@@ -80,7 +76,7 @@
       >Open that basic modal</Button
     >
     <p>
-      Notice that this modal remains open undeneath the overlay and there is no
+      Notice that this modal remains open underneath the overlay and there is no
       way to close it until the upper modal is closed.
     </p>
   </ControlledModal>
@@ -93,7 +89,7 @@
       answer = '';
     }}
   >
-    <p>Answer the quesion to unlock the close button.</p>
+    <p>Answer the question to unlock the close button.</p>
     <p>2 + 2 = <input type="text" bind:value={answer} /></p>
   </ControlledModal>
 
