@@ -3,7 +3,6 @@ centerofci/mathesar-ansible:
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-assign.yml
   - .github/workflows/update-project-on-issue-close.yml
   - .github/workflows/update-project-on-issue-edit.yml
   - .github/workflows/update-project-on-issue-label.yml
@@ -14,7 +13,6 @@ centerofci/mathesar-data-playground:
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-assign.yml
   - .github/workflows/update-project-on-issue-close.yml
   - .github/workflows/update-project-on-issue-edit.yml
   - .github/workflows/update-project-on-issue-label.yml
@@ -25,7 +23,6 @@ centerofci/mathesar-design:
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-assign.yml
   - .github/workflows/update-project-on-issue-close.yml
   - .github/workflows/update-project-on-issue-edit.yml
   - .github/workflows/update-project-on-issue-label.yml
@@ -36,7 +33,6 @@ centerofci/mathesar-private-notes:
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-assign.yml
   - .github/workflows/update-project-on-issue-close.yml
   - .github/workflows/update-project-on-issue-edit.yml
   - .github/workflows/update-project-on-issue-label.yml
@@ -47,7 +43,6 @@ centerofci/mathesar-scripts:
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-assign.yml
   - .github/workflows/update-project-on-issue-close.yml
   - .github/workflows/update-project-on-issue-edit.yml
   - .github/workflows/update-project-on-issue-label.yml
@@ -58,7 +53,6 @@ centerofci/mathesar-wiki:
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-assign.yml
   - .github/workflows/update-project-on-issue-close.yml
   - .github/workflows/update-project-on-issue-edit.yml
   - .github/workflows/update-project-on-issue-label.yml

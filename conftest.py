@@ -323,8 +323,9 @@ def library_db_tables(engine_with_library):
         "Publications",
         "Publishers",
     }
-    return {
+    tables = {
         table_name: make_table(table_name)
         for table_name
         in table_names
     }
+    return tables

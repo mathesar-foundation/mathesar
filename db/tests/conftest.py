@@ -9,6 +9,7 @@ from db.tables.operations.split import extract_columns_from_table
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import MathesarCustomType
 from db.columns.operations.alter import alter_column_type
+from db.metadata import get_empty_metadata
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
@@ -158,7 +159,7 @@ def books_import_target_table_name():
 def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_extracted_cols, teachers_table_name):
     engine, schema = engine_with_roster
     roster_table_oid = get_oid_from_table(roster_table_name, schema, engine)
-    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine)
+    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine, metadata=get_empty_metadata())
     extract_columns_from_table(
         roster_table_oid,
         roster_extracted_col_attnums,
@@ -166,11 +167,10 @@ def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_ext
         schema,
         engine,
     )
-    metadata = MetaData(bind=engine, schema=schema)
-    metadata.reflect()
-    teachers = metadata.tables[f"{schema}.{teachers_table_name}"]
-    roster_no_teachers = metadata.tables[f"{schema}.{roster_table_name}"]
-    return teachers, roster_no_teachers, engine, schema
+    metadata = get_empty_metadata()
+    extracted = Table(teachers_table_name, metadata, schema=schema, autoload_with=engine)
+    remainder = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
+    return extracted, remainder, engine, schema
 
 
 @pytest.fixture

@@ -9,6 +9,7 @@ from db.schemas.operations.create import create_schema
 from db.tables.operations.create import CreateTableAs
 from db.tables.operations.select import reflect_table
 from db.types.operations.convert import get_db_type_enum_from_class
+from db.metadata import get_empty_metadata
 
 
 TEMP_SCHEMA = constants.INFERENCE_SCHEMA
@@ -16,7 +17,8 @@ TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
 
 
 def update_table_column_types(schema, table_name, engine):
-    table = reflect_table(table_name, schema, engine)
+    # TODO reuse metadata
+    table = reflect_table(table_name, schema, engine, metadata=get_empty_metadata())
     # we only want to infer (modify) the type of non-default columns
     inferable_column_names = (
         col.name for col in table.columns
@@ -35,7 +37,8 @@ def update_table_column_types(schema, table_name, engine):
 
 # TODO consider returning a mapping of column identifiers to types
 def infer_table_column_types(schema, table_name, engine):
-    table = reflect_table(table_name, schema, engine)
+    # TODO reuse metadata
+    table = reflect_table(table_name, schema, engine, metadata=get_empty_metadata())
 
     temp_name = TEMP_TABLE % (int(time()))
     create_schema(TEMP_SCHEMA, engine)
@@ -48,7 +51,8 @@ def infer_table_column_types(schema, table_name, engine):
     select_table = select(table)
     with engine.begin() as conn:
         conn.execute(CreateTableAs(full_temp_name, select_table))
-    temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
+    # TODO reuse metadata
+    temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine, metadata=get_empty_metadata())
 
     try:
         update_table_column_types(
@@ -56,14 +60,15 @@ def infer_table_column_types(schema, table_name, engine):
         )
     except Exception as e:
         # Ensure the temp table is deleted
-        temp_table.drop()
+        temp_table.drop(bind=engine)
         raise e
     else:
-        temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
+        # TODO reuse metadata
+        temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine, metadata=get_empty_metadata())
         types = tuple(
             get_db_type_enum_from_class(c.type.__class__)
             for c
             in temp_table.columns
         )
-        temp_table.drop()
+        temp_table.drop(bind=engine)
         return types

@@ -1,9 +1,13 @@
 from db.utils import get_pg_catalog_table
+from db.metadata import get_empty_metadata
+
 from sqlalchemy import select, and_
 
 
 def get_constraints_with_oids(engine, table_oid=None):
-    pg_constraint = get_pg_catalog_table("pg_constraint", engine)
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    pg_constraint = get_pg_catalog_table("pg_constraint", engine, metadata=metadata)
     # conrelid is the table's OID.
     if table_oid:
         where_clause = pg_constraint.c.conrelid == table_oid
@@ -11,14 +15,15 @@ def get_constraints_with_oids(engine, table_oid=None):
         # We only want to select constraints attached to a table.
         where_clause = pg_constraint.c.conrelid != 0
     query = select(pg_constraint).where(where_clause)
-
     with engine.begin() as conn:
         result = conn.execute(query).fetchall()
     return result
 
 
 def get_constraint_from_oid(oid, engine, table):
-    pg_constraint = get_pg_catalog_table("pg_constraint", engine)
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    pg_constraint = get_pg_catalog_table("pg_constraint", engine, metadata=metadata)
     # conrelid is the table's OID.
     query = select(pg_constraint).where(pg_constraint.c.oid == oid)
     with engine.begin() as conn:
@@ -30,7 +35,9 @@ def get_constraint_from_oid(oid, engine, table):
 
 
 def get_constraint_oid_by_name_and_table_oid(name, table_oid, engine):
-    pg_constraint = get_pg_catalog_table("pg_constraint", engine)
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    pg_constraint = get_pg_catalog_table("pg_constraint", engine, metadata=metadata)
     # We only want to select constraints attached to a table.
     # conrelid is the table's OID.
     query = select(pg_constraint).where(
@@ -42,7 +49,9 @@ def get_constraint_oid_by_name_and_table_oid(name, table_oid, engine):
 
 
 def get_column_constraints(column_attnum, table_oid, engine):
-    pg_constraint = get_pg_catalog_table("pg_constraint", engine)
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    pg_constraint = get_pg_catalog_table("pg_constraint", engine, metadata=metadata)
     query = (
         select(pg_constraint)
         .where(and_(
@@ -53,7 +62,6 @@ def get_column_constraints(column_attnum, table_oid, engine):
             pg_constraint.c.conkey.bool_op("&&")(f"{{{column_attnum}}}")
         ))
     )
-
     with engine.begin() as conn:
         result = conn.execute(query).fetchall()
     return result
