@@ -291,3 +291,21 @@ def test_schema_role_create_with_incorrect_schema(client, user):
 
     assert response.status_code == 400
     assert response_data[0]['code'] == 2151
+
+
+def test_database_role_destroy(client, user):
+    role = 'viewer'
+    database = Database.objects.all()[0]
+    database_role = DatabaseRole.objects.create(user=user, database=database, role=role)
+
+    response = client.delete(f'/api/ui/v0/database_roles/{database_role.id}/')
+    assert response.status_code == 204
+
+
+def test_schema_role_destroy(client, user):
+    role = 'viewer'
+    schema = Schema.objects.all()[0]
+    schema_role = SchemaRole.objects.create(user=user, schema=schema, role=role)
+
+    response = client.delete(f'/api/ui/v0/schema_roles/{schema_role.id}/')
+    assert response.status_code == 204
