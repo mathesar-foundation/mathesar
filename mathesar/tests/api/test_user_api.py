@@ -176,19 +176,6 @@ def test_database_role_update(client, user):
     assert response_data[0]['code'] == 4006
 
 
-def test_database_role_partial_update(client, user):
-    role = 'viewer'
-    database = Database.objects.all()[0]
-    database_role = DatabaseRole.objects.create(user=user, database=database, role=role)
-    data = {'role': 'editor'}
-
-    response = client.patch(f'/api/ui/v0/database_roles/{database_role.id}/', data)
-    response_data = response.json()
-
-    assert response.status_code == 405
-    assert response_data[0]['code'] == 4006
-
-
 def test_schema_role_update(client, user):
     role = 'viewer'
     schema = Schema.objects.all()[0]
@@ -196,6 +183,19 @@ def test_schema_role_update(client, user):
     data = {'user': user.id, 'role': role, 'schema': schema.id}
 
     response = client.put(f'/api/ui/v0/schema_roles/{schema_role.id}/', data)
+    response_data = response.json()
+
+    assert response.status_code == 405
+    assert response_data[0]['code'] == 4006
+
+
+def test_database_role_partial_update(client, user):
+    role = 'viewer'
+    database = Database.objects.all()[0]
+    database_role = DatabaseRole.objects.create(user=user, database=database, role=role)
+    data = {'role': 'editor'}
+
+    response = client.patch(f'/api/ui/v0/database_roles/{database_role.id}/', data)
     response_data = response.json()
 
     assert response.status_code == 405
@@ -213,3 +213,33 @@ def test_schema_role_partial_update(client, user):
 
     assert response.status_code == 405
     assert response_data[0]['code'] == 4006
+
+
+def test_database_role_create(client, user):
+    role = 'editor'
+    database = Database.objects.all()[0]
+    data = {'user': user.id, 'role': role, 'database': database.id}
+
+    response = client.post('/api/ui/v0/database_roles/', data)
+    response_data = response.json()
+
+    assert response.status_code == 201
+    assert 'id' in response_data
+    assert response_data['user'] == user.id
+    assert response_data['role'] == role
+    assert response_data['database'] == database.id
+
+
+def test_schema_role_create(client, user):
+    role = 'editor'
+    schema = Schema.objects.all()[0]
+    data = {'user': user.id, 'role': role, 'schema': schema.id}
+
+    response = client.post('/api/ui/v0/schema_roles/', data)
+    response_data = response.json()
+
+    assert response.status_code == 201
+    assert 'id' in response_data
+    assert response_data['user'] == user.id
+    assert response_data['role'] == role
+    assert response_data['schema'] == schema.id
