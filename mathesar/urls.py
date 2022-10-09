@@ -22,6 +22,8 @@ db_table_router.register(r'constraints', db_viewsets.ConstraintViewSet, basename
 ui_router = routers.DefaultRouter()
 ui_router.register(r'databases', ui_viewsets.DatabaseViewSet, basename='database')
 ui_router.register(r'users', ui_viewsets.UserViewSet, basename='user')
+ui_router.register(r'database_roles', ui_viewsets.DatabaseRoleViewSet, basename='database_role')
+ui_router.register(r'schema_roles', ui_viewsets.SchemaRoleViewSet, basename='schema_role')
 
 urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
