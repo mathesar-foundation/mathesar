@@ -1,4 +1,19 @@
-from mathesar.models.users import User
+import pytest
+
+from mathesar.models.base import Database, Schema
+from mathesar.models.users import User, DatabaseRole, SchemaRole
+
+
+@pytest.fixture
+def user():
+    user = User.objects.create(
+        username='bob',
+        email='bob@example.com',
+        full_name='Bob Smith',
+        short_name='Bob'
+    )
+    yield user
+    user.delete()
 
 
 def test_user_list(client):
@@ -65,15 +80,11 @@ def test_user_create(client):
     assert response_data['short_name'] == data['short_name']
     assert response_data['full_name'] == data['full_name']
 
+    # clean up
+    User.objects.get(id=response_data['id']).delete()
 
-def test_user_delete(client):
-    user = User.objects.create(
-        username='bob',
-        email='bob@example.com',
-        full_name='Bob Smith',
-        short_name='Bob'
-    )
 
+def test_user_delete(client, user):
     # Ensure we can access the user via API
     initial_response = client.get(f'/api/ui/v0/users/{user.id}/')
     initial_response_data = initial_response.json()
@@ -84,3 +95,39 @@ def test_user_delete(client):
     # Ensure that the deletion happened
     assert response.status_code == 204
     assert User.objects.filter(id=user.id).exists() is False
+
+
+def test_database_role_list(client, user):
+    role = 'manager'
+    database = Database.objects.all()[0]
+    DatabaseRole.objects.create(user=user, database=database, role=role)
+
+    response = client.get('/api/ui/v0/database_roles/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == response_data['count']
+    role_data = response_data['results'][0]
+    assert 'id' in role_data
+    assert role_data['user'] == user.id
+    assert role_data['role'] == role
+    assert role_data['database'] == database.id
+
+
+def test_schema_role_list(client, user):
+    role = 'manager'
+    schema = Schema.objects.all()[0]
+    SchemaRole.objects.create(user=user, schema=schema, role=role)
+
+    response = client.get('/api/ui/v0/schema_roles/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == response_data['count']
+    role_data = response_data['results'][0]
+    assert 'id' in role_data
+    assert role_data['user'] == user.id
+    assert role_data['role'] == role
+    assert role_data['schema'] == schema.id
