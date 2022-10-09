@@ -2,15 +2,6 @@ import pytest
 
 
 @pytest.fixture
-def library_ma_tables(db_table_to_dj_table, library_db_tables):
-    return {
-        table_name: db_table_to_dj_table(db_table)
-        for table_name, db_table
-        in library_db_tables.items()
-    }
-
-
-@pytest.fixture
 def create_overdue_books_query(library_ma_tables, get_uid, client):
     checkouts = library_ma_tables["Checkouts"]
     patrons = library_ma_tables["Patrons"]

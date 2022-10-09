@@ -9,6 +9,7 @@ from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
     get_default_exception_detail,
 )
 from mathesar.models.base import Column, Constraint
+from mathesar.state import get_cached_metadata
 
 
 class UniqueViolationAPIException(MathesarAPIException):
@@ -265,7 +266,8 @@ class NotNullViolationAPIException(MathesarAPIException):
         column_attnum = get_column_attnum_from_name(
             table.oid,
             exception.orig.diag.column_name,
-            table.schema._sa_engine
+            table.schema._sa_engine,
+            metadata=get_cached_metadata(),
         )
         column = Column.objects.get(attnum=column_attnum)
         details = {

@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import patch
 
 from django.core.cache import cache
 from django.core.files.base import File, ContentFile
@@ -7,10 +6,10 @@ from sqlalchemy import text
 
 from db.columns.operations.select import get_column_attnum_from_names_as_map
 from db.types.base import PostgresType, MathesarCustomType
+from db.metadata import get_empty_metadata
 
-from mathesar import reflection
+from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models import base as models_base
 from mathesar.models.base import Column, Table, DataFile
 
 
@@ -699,25 +698,13 @@ def test_table_delete(create_patents_table, client):
     table = create_patents_table(table_name)
     table_count = len(Table.objects.all())
 
-    with patch.object(models_base, 'drop_table') as mock_delete:
-        response = client.delete(f'/api/db/v0/tables/{table.id}/')
+    response = client.delete(f'/api/db/v0/tables/{table.id}/')
     assert response.status_code == 204
 
     # Ensure the Django model was deleted
     new_table_count = len(Table.objects.all())
     assert table_count - 1 == new_table_count
     assert Table.objects.filter(id=table.id).exists() is False
-
-    # Ensure the backend table would have been deleted
-    assert mock_delete.call_args is not None
-    assert mock_delete.call_args[0] == (
-        table.name,
-        table.schema.name,
-        table.schema._sa_engine,
-    )
-    assert mock_delete.call_args[1] == {
-        'cascade': True
-    }
 
 
 def test_table_dependencies(client, create_patents_table):
@@ -899,27 +886,13 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
     assert len(orig_created) == 1
     with engine.begin() as conn:
         conn.execute(text(f'DROP TABLE {schema_name}.{table_name};'))
-    cache.clear()
+    reset_reflection()
     response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     new_created = [
         table for table in response_data['results'] if table['name'] == table_name
     ]
     assert len(new_created) == 0
-
-
-def test_table_viewset_sets_cache(client):
-    cache.delete(reflection.DB_REFLECTION_KEY)
-    assert not cache.get(reflection.DB_REFLECTION_KEY)
-    client.get('/api/db/v0/schemas/')
-    assert cache.get(reflection.DB_REFLECTION_KEY)
-
-
-def test_table_viewset_checks_cache(client):
-    cache.delete(reflection.DB_REFLECTION_KEY)
-    with patch.object(reflection, 'reflect_tables_from_schema') as mock_reflect:
-        client.get('/api/db/v0/tables/')
-    mock_reflect.assert_called()
 
 
 def _get_patents_column_data(table):
@@ -1426,14 +1399,15 @@ def test_table_extract_columns_drop_original_table(create_patents_table, client)
 
     remainder_columns = remainder_table.columns.all()
     remainder_columns_map = {column.name: column for column in remainder_columns}
-    columns_with_attnum = get_column_attnum_from_names_as_map(remainder_table.oid, remainder_column_names, remainder_table._sa_engine)
+    metadata = get_empty_metadata()
+    columns_with_attnum = get_column_attnum_from_names_as_map(remainder_table.oid, remainder_column_names, remainder_table._sa_engine, metadata=metadata)
     for remainder_column_name in remainder_column_names:
         remainder_column = remainder_columns_map[remainder_column_name]
         assert remainder_column.attnum == columns_with_attnum[remainder_column.name]
         assert remainder_column.id == column_name_id_map[remainder_column.name]
 
     extracted_columns = extracted_table.columns.all()
-    columns_with_attnum = get_column_attnum_from_names_as_map(extracted_table.oid, column_names_to_extract, extracted_table._sa_engine)
+    columns_with_attnum = get_column_attnum_from_names_as_map(extracted_table.oid, column_names_to_extract, extracted_table._sa_engine, metadata=metadata)
     for extracted_column in extracted_columns:
         if extracted_column.name != 'id':
             assert extracted_column.attnum == columns_with_attnum[extracted_column.name]
