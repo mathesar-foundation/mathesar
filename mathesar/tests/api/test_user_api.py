@@ -18,6 +18,9 @@ def test_user_detail(client, admin_user):
     assert response_data['username'] == 'admin'
     assert 'password' not in response_data
     assert response_data['email'] == 'admin@example.com'
+    assert response_data['is_superuser'] is True
+    assert response_data['database_roles'] == []
+    assert response_data['schema_roles'] == []
 
 
 def test_user_patch(client, admin_user):

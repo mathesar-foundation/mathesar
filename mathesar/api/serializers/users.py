@@ -17,8 +17,8 @@ class NestedSchemaRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSer
 
 
 class UserSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
-    database_roles = NestedDatabaseRoleSerializer(many=True)
-    schema_roles = NestedSchemaRoleSerializer(many=True)
+    database_roles = NestedDatabaseRoleSerializer(many=True, required=False)
+    schema_roles = NestedSchemaRoleSerializer(many=True, required=False)
 
     class Meta:
         model = User
@@ -35,7 +35,9 @@ class UserSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
         ]
         extra_kwargs = {
             'password': {'write_only': True},
-            'is_superuser': {'read_only': True}
+            'is_superuser': {'read_only': True},
+            'database_roles': {'read_only': True},
+            'schema_roles': {'read_only': True}
         }
 
     def create(self, validated_data):
