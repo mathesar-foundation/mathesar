@@ -131,3 +131,85 @@ def test_schema_role_list(client, user):
     assert role_data['user'] == user.id
     assert role_data['role'] == role
     assert role_data['schema'] == schema.id
+
+
+def test_database_role_detail(client, user):
+    role = 'editor'
+    database = Database.objects.all()[0]
+    database_role = DatabaseRole.objects.create(user=user, database=database, role=role)
+
+    response = client.get(f'/api/ui/v0/database_roles/{database_role.id}/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert 'id' in response_data
+    assert response_data['user'] == user.id
+    assert response_data['role'] == role
+    assert response_data['database'] == database.id
+
+
+def test_schema_role_detail(client, user):
+    role = 'editor'
+    schema = Schema.objects.all()[0]
+    schema_role = SchemaRole.objects.create(user=user, schema=schema, role=role)
+
+    response = client.get(f'/api/ui/v0/schema_roles/{schema_role.id}/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert 'id' in response_data
+    assert response_data['user'] == user.id
+    assert response_data['role'] == role
+    assert response_data['schema'] == schema.id
+
+
+def test_database_role_update(client, user):
+    role = 'viewer'
+    database = Database.objects.all()[0]
+    database_role = DatabaseRole.objects.create(user=user, database=database, role=role)
+    data = {'user': user.id, 'role': role, 'database': database.id}
+
+    response = client.put(f'/api/ui/v0/database_roles/{database_role.id}/', data)
+    response_data = response.json()
+
+    assert response.status_code == 405
+    assert response_data[0]['code'] == 4006
+
+
+def test_database_role_partial_update(client, user):
+    role = 'viewer'
+    database = Database.objects.all()[0]
+    database_role = DatabaseRole.objects.create(user=user, database=database, role=role)
+    data = {'role': 'editor'}
+
+    response = client.patch(f'/api/ui/v0/database_roles/{database_role.id}/', data)
+    response_data = response.json()
+
+    assert response.status_code == 405
+    assert response_data[0]['code'] == 4006
+
+
+def test_schema_role_update(client, user):
+    role = 'viewer'
+    schema = Schema.objects.all()[0]
+    schema_role = SchemaRole.objects.create(user=user, schema=schema, role=role)
+    data = {'user': user.id, 'role': role, 'schema': schema.id}
+
+    response = client.put(f'/api/ui/v0/schema_roles/{schema_role.id}/', data)
+    response_data = response.json()
+
+    assert response.status_code == 405
+    assert response_data[0]['code'] == 4006
+
+
+def test_schema_role_partial_update(client, user):
+    role = 'viewer'
+    schema = Schema.objects.all()[0]
+    schema_role = SchemaRole.objects.create(user=user, schema=schema, role=role)
+    data = {'role': 'editor'}
+
+    response = client.patch(f'/api/ui/v0/schema_roles/{schema_role.id}/', data)
+    response_data = response.json()
+
+    assert response.status_code == 405
+    assert response_data[0]['code'] == 4006
