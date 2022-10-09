@@ -1,4 +1,5 @@
 import pytest
+from django.db import transaction
 
 from mathesar.models.base import Database, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
@@ -309,3 +310,37 @@ def test_schema_role_destroy(client, user):
 
     response = client.delete(f'/api/ui/v0/schema_roles/{schema_role.id}/')
     assert response.status_code == 204
+
+
+def test_database_role_create_multiple_roles_on_same_object(client, user):
+    role = 'manager'
+    database = Database.objects.all()[0]
+    DatabaseRole.objects.create(user=user, database=database, role=role)
+    data = {'user': user.id, 'role': 'editor', 'database': database.id}
+
+    # The IntegrityError triggered here was causing issues with tearing down the
+    # pytest user fixture. This answer suggested this solution:
+    # https://stackoverflow.com/a/23326971/287415
+    with transaction.atomic():
+        response = client.post('/api/ui/v0/database_roles/', data)
+        response_data = response.json()
+
+        assert response.status_code == 500
+        assert response_data[0]['code'] == 4201
+
+
+def test_schema_role_create_multiple_roles_on_same_object(client, user):
+    role = 'manager'
+    schema = Schema.objects.all()[0]
+    SchemaRole.objects.create(user=user, schema=schema, role=role)
+    data = {'user': user.id, 'role': 'editor', 'schema': schema.id}
+
+    # The IntegrityError triggered here was causing issues with tearing down the
+    # pytest user fixture. This answer suggested this solution:
+    # https://stackoverflow.com/a/23326971/287415
+    with transaction.atomic():
+        response = client.post('/api/ui/v0/schema_roles/', data)
+        response_data = response.json()
+
+        assert response.status_code == 500
+        assert response_data[0]['code'] == 4201
