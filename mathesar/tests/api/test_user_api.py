@@ -243,3 +243,51 @@ def test_schema_role_create(client, user):
     assert response_data['user'] == user.id
     assert response_data['role'] == role
     assert response_data['schema'] == schema.id
+
+
+def test_database_role_create_with_incorrect_role(client, user):
+    role = 'nonsense'
+    database = Database.objects.all()[0]
+    data = {'user': user.id, 'role': role, 'database': database.id}
+
+    response = client.post('/api/ui/v0/database_roles/', data)
+    response_data = response.json()
+
+    assert response.status_code == 400
+    assert response_data[0]['code'] == 2081
+
+
+def test_schema_role_create_with_incorrect_role(client, user):
+    role = 'nonsense'
+    schema = Schema.objects.all()[0]
+    data = {'user': user.id, 'role': role, 'schema': schema.id}
+
+    response = client.post('/api/ui/v0/schema_roles/', data)
+    response_data = response.json()
+
+    assert response.status_code == 400
+    assert response_data[0]['code'] == 2081
+
+
+def test_database_role_create_with_incorrect_database(client, user):
+    role = 'editor'
+    database = Database.objects.order_by('-id')[0]
+    data = {'user': user.id, 'role': role, 'database': database.id + 1}
+
+    response = client.post('/api/ui/v0/database_roles/', data)
+    response_data = response.json()
+
+    assert response.status_code == 400
+    assert response_data[0]['code'] == 2151
+
+
+def test_schema_role_create_with_incorrect_schema(client, user):
+    role = 'editor'
+    schema = Schema.objects.order_by('-id')[0]
+    data = {'user': user.id, 'role': role, 'schema': schema.id + 1}
+
+    response = client.post('/api/ui/v0/schema_roles/', data)
+    response_data = response.json()
+
+    assert response.status_code == 400
+    assert response_data[0]['code'] == 2151
