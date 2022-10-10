@@ -22,10 +22,7 @@
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
-  import {
-    buildDataForRecordSummaryInFkCell,
-    type DataForRecordSummariesInFkColumns,
-  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -48,7 +45,7 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
-  export let dataForRecordSummariesInFkColumns: DataForRecordSummariesInFkColumns;
+  export let recordSummariesForSheet: RecordSummariesForSheet;
 
   $: recordsDataState = recordsData.state;
   $: ({ column, linkFk } = processedColumn);
@@ -87,11 +84,6 @@
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
-  $: dataForRecordSummaryInFkCell = buildDataForRecordSummaryInFkCell({
-    recordId: String(value),
-    stringifiedColumnId: String(column.id),
-    dataForRecordSummariesInFkColumns,
-  });
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -160,7 +152,8 @@
       {isActive}
       {isSelectedInRange}
       {value}
-      {dataForRecordSummaryInFkCell}
+      getRecordSummary={(recordId) =>
+        recordSummariesForSheet.get(String(column.id))?.get(recordId)}
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}

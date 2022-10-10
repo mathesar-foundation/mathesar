@@ -1,21 +1,10 @@
 <script lang="ts">
-  import {
-    renderTransitiveRecordSummary,
-    type DataForRecordSummaryInFkCell,
-  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-
   export let recordId: unknown;
-  export let dataForRecordSummaryInFkCell:
-    | DataForRecordSummaryInFkCell
-    | undefined;
-
-  $: recordSummary = dataForRecordSummaryInFkCell
-    ? renderTransitiveRecordSummary(dataForRecordSummaryInFkCell)
-    : String(recordId);
+  export let recordSummary: string | undefined = undefined;
 </script>
 
 <span class="linked-record">
-  {recordSummary}
+  {recordSummary ?? String(recordId)}
 </span>
 
 <style>

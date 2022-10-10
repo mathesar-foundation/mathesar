@@ -1,25 +1,20 @@
 <script lang="ts">
   import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
   import CellValue from '@mathesar/components/CellValue.svelte';
-  import {
-    buildDataForRecordSummaryInFkCell,
-    type DataForRecordSummariesInFkColumns,
-  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import type { ResultValue } from '@mathesar/api/tables/records';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
-  export let dataForRecordSummariesInFkColumns: DataForRecordSummariesInFkColumns;
+  export let recordSummariesForSheet: RecordSummariesForSheet;
   export let columnId: number;
   export let preprocName: string | undefined = undefined;
   export let cellValue: ResultValue | undefined = undefined;
 
   $: recordId = String(cellValue);
-  $: dataForRecordSummaryInFkCell = buildDataForRecordSummaryInFkCell({
-    recordId,
-    stringifiedColumnId: String(columnId),
-    dataForRecordSummariesInFkColumns,
-  });
+  $: recordSummary = recordSummariesForSheet
+    .get(String(columnId))
+    ?.get(recordId);
 </script>
 
 <span class="tag">
@@ -30,8 +25,8 @@
     {/if}
   </span>
   <span class="value">
-    {#if dataForRecordSummaryInFkCell}
-      <LinkedRecord {dataForRecordSummaryInFkCell} {recordId} />
+    {#if recordSummary}
+      <LinkedRecord {recordSummary} {recordId} />
     {:else}
       <CellValue value={cellValue} />
     {/if}

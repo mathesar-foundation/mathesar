@@ -18,7 +18,7 @@
   export let isActive: $$Props['isActive'];
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
-  export let dataForRecordSummaryInFkCell: $$Props['dataForRecordSummaryInFkCell'] =
+  export let getRecordSummary: Required<$$Props>['getRecordSummary'] = () =>
     undefined;
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
@@ -26,6 +26,7 @@
   let wasActiveBeforeClick = false;
 
   $: hasValue = value !== undefined && value !== null;
+  $: recordSummary = getRecordSummary(String(value));
 
   async function launchRecordSelector(event?: MouseEvent) {
     event?.stopPropagation();
@@ -92,7 +93,7 @@
   <div class="linked-record-cell">
     <div class="value">
       {#if hasValue}
-        <LinkedRecord recordId={value} {dataForRecordSummaryInFkCell} />
+        <LinkedRecord recordId={value} {recordSummary} />
       {:else if value === undefined}
         <Default />
       {:else}

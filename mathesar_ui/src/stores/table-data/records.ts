@@ -24,8 +24,8 @@ import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
 import {
-  buildDataForRecordSummariesInFkColumns,
-  type DataForRecordSummariesInFkColumns,
+  buildRecordSummariesForSheet,
+  type RecordSummariesForSheet,
 } from './record-summaries/recordSummaryUtils';
 import type { Meta } from './meta';
 import type { RowKey } from './utils';
@@ -231,8 +231,9 @@ export class RecordsData {
 
   newRecords: Writable<Row[]>;
 
-  dataForRecordSummariesInFkColumns: Writable<DataForRecordSummariesInFkColumns> =
-    writable(new ImmutableMap());
+  recordSummariesForSheet: Writable<RecordSummariesForSheet> = writable(
+    new ImmutableMap(),
+  );
 
   grouping: Writable<Grouping | undefined>;
 
@@ -329,8 +330,8 @@ export class RecordsData {
         ? buildGrouping(response.grouping)
         : undefined;
       if (response.preview_data) {
-        this.dataForRecordSummariesInFkColumns.set(
-          buildDataForRecordSummariesInFkColumns(response.preview_data),
+        this.recordSummariesForSheet.set(
+          buildRecordSummariesForSheet(response.preview_data),
         );
       }
       const records = preprocessRecords({

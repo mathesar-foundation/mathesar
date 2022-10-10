@@ -9,7 +9,6 @@
   import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
   import { rowHeightPx } from '@mathesar/geometry';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { buildDataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { rowHasRecord, type Row } from '@mathesar/stores/table-data/records';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
   import CellArranger from './CellArranger.svelte';
@@ -60,7 +59,7 @@
   $: ({ display, recordsData, meta, columnsDataStore, isLoading } =
     $tabularData);
   $: recordsStore = recordsData.savedRecords;
-  $: ({ dataForRecordSummariesInFkColumns } = recordsData);
+  $: ({ recordSummariesForSheet } = recordsData);
   $: ({ searchFuzzy } = meta);
   $: records = $recordsStore;
   $: resultCount = records.length;
@@ -200,17 +199,14 @@
         on:buttonClick={() => submitIndex(index)}
       >
         <CellArranger {display} let:style let:processedColumn>
-          {@const value = row?.record?.[processedColumn.id]}
+          {@const columnId = processedColumn.id}
+          {@const value = row?.record?.[columnId]}
           <CellWrapper {style}>
             <CellFabric
               columnFabric={processedColumn}
               {value}
-              dataForRecordSummaryInFkCell={buildDataForRecordSummaryInFkCell({
-                recordId: String(value),
-                stringifiedColumnId: String(processedColumn.id),
-                dataForRecordSummariesInFkColumns:
-                  $dataForRecordSummariesInFkColumns,
-              })}
+              getRecordSummary={(recordId) =>
+                $recordSummariesForSheet.get(String(columnId))?.get(recordId)}
               disabled
               showAsSkeleton={!rowHasRecord(row)}
             />

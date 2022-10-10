@@ -35,7 +35,7 @@
     cellModificationStatus,
     cellClientSideErrors,
   } = meta);
-  $: ({ grouping, dataForRecordSummariesInFkColumns } = recordsData);
+  $: ({ grouping, recordSummariesForSheet } = recordsData);
 
   $: ({ primaryKeyColumnId } = $columnsDataStore);
   $: rowKey = getRowKey(row, primaryKeyColumnId);
@@ -110,7 +110,7 @@
         grouping={$grouping}
         group={row.group}
         processedColumnsMap={$processedColumns}
-        dataForRecordSummariesInFkColumns={$dataForRecordSummariesInFkColumns}
+        recordSummariesForSheet={$recordSummariesForSheet}
       />
     {:else if row.record}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
@@ -123,7 +123,7 @@
           modificationStatusMap={cellModificationStatus}
           clientSideErrorMap={cellClientSideErrors}
           bind:value={row.record[columnId]}
-          dataForRecordSummariesInFkColumns={$dataForRecordSummariesInFkColumns}
+          recordSummariesForSheet={$recordSummariesForSheet}
           {processedColumn}
           {recordsData}
         />

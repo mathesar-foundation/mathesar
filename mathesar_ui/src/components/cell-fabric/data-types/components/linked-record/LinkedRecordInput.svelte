@@ -16,7 +16,7 @@
   const dispatch = createEventDispatcher();
 
   export let value: $$Props['value'] = undefined;
-  export let dataForRecordSummaryInFkCell: $$Props['dataForRecordSummaryInFkCell'] =
+  export let getRecordSummary: Required<$$Props>['getRecordSummary'] = () =>
     undefined;
   export let tableId: $$Props['tableId'];
   let classes: $$Props['class'] = '';
@@ -27,6 +27,7 @@
   let element: HTMLSpanElement;
 
   $: hasValue = value !== undefined && value !== null;
+  $: recordSummary = getRecordSummary(String(value));
 
   function clear() {
     value = undefined;
@@ -88,7 +89,7 @@
 >
   {#if hasValue}
     <span class="content {classes}">
-      <LinkedRecord recordId={value} {dataForRecordSummaryInFkCell} />
+      <LinkedRecord recordId={value} {recordSummary} />
     </span>
     <ClearCue on:click={clear} />
   {:else if !isAcquiringInput}

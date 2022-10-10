@@ -12,7 +12,6 @@ during Sheet component creation.
     BaseInputProps,
     SimplifiedInputProps,
   } from '@mathesar-component-library/types';
-  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 
   // TODO: Provide this as a discriminated union of all input types
   interface $$Props
@@ -27,7 +26,7 @@ during Sheet component creation.
      * property here.
      */
     containerClass?: string;
-    dataForRecordSummaryInFkCell?: DataForRecordSummaryInFkCell;
+    getRecordSummary?: (recordId: string) => string | undefined;
   }
 
   export let value: unknown;
