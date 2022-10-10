@@ -24,9 +24,9 @@ def _verify_foreign_key_constraint(
         name,
         referent_columns,
         referent_table_id,
-        onupdate=None,
-        ondelete=None,
-        deferrable=None,
+        onupdate='NO ACTION',
+        ondelete='NO ACTION',
+        deferrable=False,
 ):
     assert constraint_data['columns'] == columns
     assert constraint_data['referent_columns'] == referent_columns
@@ -268,7 +268,7 @@ def test_create_single_column_foreign_key_constraint_with_options(
         referent_table.id,
         onupdate='RESTRICT',
         ondelete='CASCADE',
-        deferrable=None
+        deferrable=False,
     )
 
 
