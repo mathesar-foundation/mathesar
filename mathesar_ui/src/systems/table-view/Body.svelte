@@ -1,6 +1,10 @@
 <script lang="ts">
-  import type { Row as RowObject } from '@mathesar/stores/table-data/records';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    getTabularDataStoreFromContext,
+    isGroupHeaderRow,
+    isHelpTextRow,
+    type Row as RowType,
+  } from '@mathesar/stores/table-data';
   import { SheetVirtualRows } from '@mathesar/components/sheet';
   import {
     rowHeightPx,
@@ -17,11 +21,11 @@
   $: ({ id, recordsData, display } = $tabularData);
   $: ({ displayableRecords } = display);
 
-  function getItemSizeFromRow(row: RowObject) {
-    if (row.isNewHelpText) {
+  function getItemSizeFromRow(row: RowType) {
+    if (isHelpTextRow(row)) {
       return helpTextRowHeightPx;
     }
-    if (row.isGroupHeader) {
+    if (isGroupHeaderRow(row)) {
       return groupHeaderRowHeightPx;
     }
     return rowHeightPx;

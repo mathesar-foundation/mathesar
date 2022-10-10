@@ -9,26 +9,23 @@
   import {
     isCellActive,
     scrollBasedOnActiveCell,
+    isNewRecordRow,
+    type RecordRow,
+    type Display,
+    type RecordsData,
+    type CellKey,
+    type ProcessedColumn,
+    isCellSelected,
+    Selection,
   } from '@mathesar/stores/table-data';
-  import type {
-    Row,
-    Display,
-    RecordsData,
-    CellKey,
-  } from '@mathesar/stores/table-data/types';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import {
-    isCellSelected,
-    Selection,
-  } from '@mathesar/stores/table-data/selection';
   import CellErrors from './CellErrors.svelte';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
@@ -36,7 +33,7 @@
   export let recordsData: RecordsData;
   export let display: Display;
   export let selection: Selection;
-  export let row: Row;
+  export let row: RecordRow;
   export let rowIsSelected = false;
   export let rowIsProcessing = false;
   export let rowHasErrors = false;
@@ -110,7 +107,7 @@
       return;
     }
     value = newValue;
-    const updatedRow = row.isNew
+    const updatedRow = isNewRecordRow(row)
       ? await recordsData.createOrUpdateRecord(row, column)
       : await recordsData.updateCell(row, column);
     value = updatedRow.record?.[column.id] ?? value;

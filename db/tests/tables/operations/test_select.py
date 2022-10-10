@@ -3,6 +3,7 @@ from sqlalchemy import text
 from db.columns.operations.select import get_column_name_from_attnum
 from db.tables.operations import select as ma_sel
 import pytest
+from db.metadata import get_empty_metadata
 
 sys.stdout = sys.stderr
 
@@ -34,14 +35,15 @@ MULTIPLE_RESULTS = ma_sel.MULTIPLE_RESULTS
 
 
 def _transform_row_to_names(row, engine):
+    metadata = get_empty_metadata()
     output_dict = {
-        BASE: ma_sel.reflect_table_from_oid(row[BASE], engine).name,
-        TARGET: ma_sel.reflect_table_from_oid(row[TARGET], engine).name,
+        BASE: ma_sel.reflect_table_from_oid(row[BASE], engine, metadata=metadata).name,
+        TARGET: ma_sel.reflect_table_from_oid(row[TARGET], engine, metadata=metadata).name,
         JP_PATH: [
             [
                 [
-                    ma_sel.reflect_table_from_oid(oid, engine).name,
-                    get_column_name_from_attnum(oid, attnum, engine)
+                    ma_sel.reflect_table_from_oid(oid, engine, metadata=metadata).name,
+                    get_column_name_from_attnum(oid, attnum, engine, metadata=metadata)
                 ]
                 for oid, attnum in edge
             ]
@@ -203,7 +205,7 @@ def test_get_joinable_tables_query_paths(engine_with_academics, table, depth):
     engine, schema = engine_with_academics
     academics_oid = ma_sel.get_oid_from_table(table, schema, engine)
     joinable_tables = ma_sel.get_joinable_tables(
-        engine, base_table_oid=academics_oid, max_depth=depth
+        engine, base_table_oid=academics_oid, max_depth=depth, metadata=get_empty_metadata()
     )
     all_row_lists = [
         _get_expect_joinable_tables(table, d) for d in range(1, depth + 1)

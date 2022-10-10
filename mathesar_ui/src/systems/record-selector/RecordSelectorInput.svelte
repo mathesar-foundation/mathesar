@@ -8,7 +8,7 @@
   } from '@mathesar-component-library';
   import type { ComponentAndProps } from '@mathesar-component-library/types';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
-  import type { SearchFuzzy } from '@mathesar/stores/table-data/searchFuzzy';
+  import type { SearchFuzzy } from '@mathesar/stores/table-data';
 
   let classes = '';
   export { classes as class };

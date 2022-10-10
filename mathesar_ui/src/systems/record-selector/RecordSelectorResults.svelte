@@ -7,10 +7,14 @@
   import type { Column } from '@mathesar/api/tables/columns';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
-  import { rowHeightPx } from '@mathesar/geometry';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { rowHasRecord, type Row } from '@mathesar/stores/table-data/records';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
+  import {
+    rowHasSavedRecord,
+    getTabularDataStoreFromContext,
+    filterRecordRows,
+    type RecordRow,
+  } from '@mathesar/stores/table-data';
+  import { rowHeightPx } from '@mathesar/geometry';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import NewIndicator from './NewIndicator.svelte';
@@ -61,7 +65,7 @@
   $: recordsStore = recordsData.savedRecords;
   $: ({ recordSummariesForSheet } = recordsData);
   $: ({ searchFuzzy } = meta);
-  $: records = $recordsStore;
+  $: records = filterRecordRows($recordsStore);
   $: resultCount = records.length;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
@@ -95,7 +99,7 @@
     );
   }
 
-  function getPkValue(row: Row): string | number | undefined {
+  function getPkValue(row: RecordRow): string | number | undefined {
     const { record } = row;
     if (!record || Object.keys(record).length === 0) {
       return undefined;
@@ -103,7 +107,7 @@
     return getPkValueInRecord(record, columns);
   }
 
-  function getRowHref(row: Row): string | undefined {
+  function getRowHref(row: RecordRow): string | undefined {
     if (rowType === 'button') {
       return undefined;
     }
@@ -208,7 +212,7 @@
               getRecordSummary={(recordId) =>
                 $recordSummariesForSheet.get(String(columnId))?.get(recordId)}
               disabled
-              showAsSkeleton={!rowHasRecord(row)}
+              showAsSkeleton={!rowHasSavedRecord(row)}
             />
             <RowCellBackgrounds isSelected={indexIsSelected(index)} />
           </CellWrapper>

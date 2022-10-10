@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import type { ResultValue } from '@mathesar/api/tables/records';

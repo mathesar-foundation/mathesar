@@ -7,6 +7,7 @@ from db.constraints.utils import naming_convention
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import reflect_table_from_oid, reflect_tables_from_oids
 from db.tables.utils import get_primary_key_column
+from db.metadata import get_empty_metadata
 
 
 def create_foreign_key_link(
@@ -18,9 +19,22 @@ def create_foreign_key_link(
         unique_link=False
 ):
     with engine.begin() as conn:
-        referent_table = reflect_table_from_oid(referent_table_oid, engine, connection_to_use=conn)
-        referrer_table = reflect_table_from_oid(referrer_table_oid, engine, connection_to_use=conn)
+        referent_table = reflect_table_from_oid(
+            referent_table_oid,
+            engine,
+            connection_to_use=conn,
+            # TODO reuse metadata
+            metadata=get_empty_metadata(),
+        )
+        referrer_table = reflect_table_from_oid(
+            referrer_table_oid,
+            engine,
+            connection_to_use=conn,
+            # TODO reuse metadata
+            metadata=get_empty_metadata(),
+        )
         primary_key_column = get_primary_key_column(referent_table)
+        # TODO reuse metadata
         metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
         opts = {
             'target_metadata': metadata
@@ -47,7 +61,9 @@ def create_foreign_key_link(
 def create_many_to_many_link(engine, schema, map_table_name, referents):
     with engine.begin() as conn:
         referent_tables_oid = [referent['referent_table'] for referent in referents]
-        referent_tables = reflect_tables_from_oids(referent_tables_oid, engine, connection_to_use=conn)
+        referent_tables = reflect_tables_from_oids(
+            referent_tables_oid, engine, connection_to_use=conn, metadata=get_empty_metadata()
+        )
         metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
         # Throws sqlalchemy.exc.NoReferencedTableError if metadata is not reflected.
         metadata.reflect()
