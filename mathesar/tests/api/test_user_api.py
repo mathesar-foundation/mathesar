@@ -48,6 +48,15 @@ def test_user_patch(client, admin_user):
     assert response_data['short_name'] == desired_short_name
 
 
+def test_user_patch_different_user(client_bob, user_alice):
+    # Change name
+    data = {'short_name': 'Bob'}
+    response = client_bob.patch(f'/api/ui/v0/users/{user_alice.id}/', data)
+
+    assert response.status_code == 403
+    assert response.json()[0]['code'] == 4004
+
+
 def test_user_create(client):
     data = {
         'username': 'alice',
@@ -81,10 +90,9 @@ def test_user_create_no_superuser(client_bob):
         'full_name': 'Alice Jones'
     }
     response = client_bob.post('/api/ui/v0/users/', data)
-    response_data = response.json()
 
     assert response.status_code == 403
-    assert response_data[0]['code'] == 4004
+    assert response.json()[0]['code'] == 4004
 
 
 def test_user_delete(client, user_bob):
@@ -98,6 +106,21 @@ def test_user_delete(client, user_bob):
     # Ensure that the deletion happened
     assert response.status_code == 204
     assert User.objects.filter(id=user_bob.id).exists() is False
+
+
+def test_user_delete_self(client_bob, user_bob):
+    # Delete the user
+    response = client_bob.delete(f'/api/ui/v0/users/{user_bob.id}/')
+    # Ensure that the deletion happened
+    assert response.status_code == 204
+    assert User.objects.filter(id=user_bob.id).exists() is False
+
+
+def test_user_delete_different_user(client_bob, user_alice):
+    # Delete the user
+    response = client_bob.delete(f'/api/ui/v0/users/{user_alice.id}/')
+    assert response.status_code == 403
+    assert response.json()[0]['code'] == 4004
 
 
 def test_database_role_list(client, user_bob):
