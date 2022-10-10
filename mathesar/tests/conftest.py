@@ -19,9 +19,10 @@ from db.columns.operations.select import get_column_attnum_from_name
 from db.schemas.utils import get_schema_oid_from_name
 
 import mathesar.tests.conftest
-from mathesar.models.base import Schema, Table, Database, DataFile
 from mathesar.imports.csv import create_table_from_csv
+from mathesar.models.base import Schema, Table, Database, DataFile
 from mathesar.models.base import Column as mathesar_model_column
+from mathesar.models.users import User
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
@@ -344,7 +345,42 @@ def create_column_with_display_options():
 
 
 @pytest.fixture
+def user_alice():
+    user = User.objects.create(
+        username='alice',
+        email='alice@example.com',
+        full_name='Alice Jones',
+        short_name='Alice'
+    )
+    user.set_password('password')
+    user.save()
+    yield user
+    user.delete()
+
+
+@pytest.fixture
+def user_bob():
+    user = User.objects.create(
+        username='bob',
+        email='bob@example.com',
+        full_name='Bob Smith',
+        short_name='Bob'
+    )
+    user.set_password('password')
+    user.save()
+    yield user
+    user.delete()
+
+
+@pytest.fixture
 def client(admin_user):
     client = APIClient()
     client.login(username='admin', password='password')
+    return client
+
+
+@pytest.fixture
+def client_bob(user_bob):
+    client = APIClient()
+    client.login(username='bob', password='password')
     return client

@@ -1,20 +1,7 @@
-import pytest
 from django.db import transaction
 
 from mathesar.models.base import Database, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
-
-
-@pytest.fixture
-def user():
-    user = User.objects.create(
-        username='bob',
-        email='bob@example.com',
-        full_name='Bob Smith',
-        short_name='Bob'
-    )
-    yield user
-    user.delete()
 
 
 def test_user_list(client):
@@ -85,23 +72,38 @@ def test_user_create(client):
     User.objects.get(id=response_data['id']).delete()
 
 
-def test_user_delete(client, user):
+def test_user_create_no_superuser(client_bob):
+    data = {
+        'username': 'alice',
+        'email': 'alice@example.com',
+        'password': 'password',
+        'short_name': 'Alice',
+        'full_name': 'Alice Jones'
+    }
+    response = client_bob.post('/api/ui/v0/users/', data)
+    response_data = response.json()
+
+    assert response.status_code == 403
+    assert response_data[0]['code'] == 4004
+
+
+def test_user_delete(client, user_bob):
     # Ensure we can access the user via API
-    initial_response = client.get(f'/api/ui/v0/users/{user.id}/')
+    initial_response = client.get(f'/api/ui/v0/users/{user_bob.id}/')
     initial_response_data = initial_response.json()
-    assert initial_response_data['username'] == user.username
+    assert initial_response_data['username'] == user_bob.username
 
     # Delete the user
-    response = client.delete(f'/api/ui/v0/users/{user.id}/')
+    response = client.delete(f'/api/ui/v0/users/{user_bob.id}/')
     # Ensure that the deletion happened
     assert response.status_code == 204
-    assert User.objects.filter(id=user.id).exists() is False
+    assert User.objects.filter(id=user_bob.id).exists() is False
 
 
-def test_database_role_list(client, user):
+def test_database_role_list(client, user_bob):
     role = 'manager'
     database = Database.objects.all()[0]
-    DatabaseRole.objects.create(user=user, database=database, role=role)
+    DatabaseRole.objects.create(user=user_bob, database=database, role=role)
 
     response = client.get('/api/ui/v0/database_roles/')
     response_data = response.json()
@@ -111,15 +113,15 @@ def test_database_role_list(client, user):
     assert len(response_data['results']) == response_data['count']
     role_data = response_data['results'][0]
     assert 'id' in role_data
-    assert role_data['user'] == user.id
+    assert role_data['user'] == user_bob.id
     assert role_data['role'] == role
     assert role_data['database'] == database.id
 
 
-def test_schema_role_list(client, user):
+def test_schema_role_list(client, user_bob):
     role = 'manager'
     schema = Schema.objects.all()[0]
-    SchemaRole.objects.create(user=user, schema=schema, role=role)
+    SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
 
     response = client.get('/api/ui/v0/schema_roles/')
     response_data = response.json()
@@ -129,46 +131,46 @@ def test_schema_role_list(client, user):
     assert len(response_data['results']) == response_data['count']
     role_data = response_data['results'][0]
     assert 'id' in role_data
-    assert role_data['user'] == user.id
+    assert role_data['user'] == user_bob.id
     assert role_data['role'] == role
     assert role_data['schema'] == schema.id
 
 
-def test_database_role_detail(client, user):
+def test_database_role_detail(client, user_bob):
     role = 'editor'
     database = Database.objects.all()[0]
-    database_role = DatabaseRole.objects.create(user=user, database=database, role=role)
+    database_role = DatabaseRole.objects.create(user=user_bob, database=database, role=role)
 
     response = client.get(f'/api/ui/v0/database_roles/{database_role.id}/')
     response_data = response.json()
 
     assert response.status_code == 200
     assert 'id' in response_data
-    assert response_data['user'] == user.id
+    assert response_data['user'] == user_bob.id
     assert response_data['role'] == role
     assert response_data['database'] == database.id
 
 
-def test_schema_role_detail(client, user):
+def test_schema_role_detail(client, user_bob):
     role = 'editor'
     schema = Schema.objects.all()[0]
-    schema_role = SchemaRole.objects.create(user=user, schema=schema, role=role)
+    schema_role = SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
 
     response = client.get(f'/api/ui/v0/schema_roles/{schema_role.id}/')
     response_data = response.json()
 
     assert response.status_code == 200
     assert 'id' in response_data
-    assert response_data['user'] == user.id
+    assert response_data['user'] == user_bob.id
     assert response_data['role'] == role
     assert response_data['schema'] == schema.id
 
 
-def test_database_role_update(client, user):
+def test_database_role_update(client, user_bob):
     role = 'viewer'
     database = Database.objects.all()[0]
-    database_role = DatabaseRole.objects.create(user=user, database=database, role=role)
-    data = {'user': user.id, 'role': role, 'database': database.id}
+    database_role = DatabaseRole.objects.create(user=user_bob, database=database, role=role)
+    data = {'user': user_bob.id, 'role': role, 'database': database.id}
 
     response = client.put(f'/api/ui/v0/database_roles/{database_role.id}/', data)
     response_data = response.json()
@@ -177,11 +179,11 @@ def test_database_role_update(client, user):
     assert response_data[0]['code'] == 4006
 
 
-def test_schema_role_update(client, user):
+def test_schema_role_update(client, user_bob):
     role = 'viewer'
     schema = Schema.objects.all()[0]
-    schema_role = SchemaRole.objects.create(user=user, schema=schema, role=role)
-    data = {'user': user.id, 'role': role, 'schema': schema.id}
+    schema_role = SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
+    data = {'user': user_bob.id, 'role': role, 'schema': schema.id}
 
     response = client.put(f'/api/ui/v0/schema_roles/{schema_role.id}/', data)
     response_data = response.json()
@@ -190,10 +192,10 @@ def test_schema_role_update(client, user):
     assert response_data[0]['code'] == 4006
 
 
-def test_database_role_partial_update(client, user):
+def test_database_role_partial_update(client, user_bob):
     role = 'viewer'
     database = Database.objects.all()[0]
-    database_role = DatabaseRole.objects.create(user=user, database=database, role=role)
+    database_role = DatabaseRole.objects.create(user=user_bob, database=database, role=role)
     data = {'role': 'editor'}
 
     response = client.patch(f'/api/ui/v0/database_roles/{database_role.id}/', data)
@@ -203,10 +205,10 @@ def test_database_role_partial_update(client, user):
     assert response_data[0]['code'] == 4006
 
 
-def test_schema_role_partial_update(client, user):
+def test_schema_role_partial_update(client, user_bob):
     role = 'viewer'
     schema = Schema.objects.all()[0]
-    schema_role = SchemaRole.objects.create(user=user, schema=schema, role=role)
+    schema_role = SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
     data = {'role': 'editor'}
 
     response = client.patch(f'/api/ui/v0/schema_roles/{schema_role.id}/', data)
@@ -216,40 +218,40 @@ def test_schema_role_partial_update(client, user):
     assert response_data[0]['code'] == 4006
 
 
-def test_database_role_create(client, user):
+def test_database_role_create(client, user_bob):
     role = 'editor'
     database = Database.objects.all()[0]
-    data = {'user': user.id, 'role': role, 'database': database.id}
+    data = {'user': user_bob.id, 'role': role, 'database': database.id}
 
     response = client.post('/api/ui/v0/database_roles/', data)
     response_data = response.json()
 
     assert response.status_code == 201
     assert 'id' in response_data
-    assert response_data['user'] == user.id
+    assert response_data['user'] == user_bob.id
     assert response_data['role'] == role
     assert response_data['database'] == database.id
 
 
-def test_schema_role_create(client, user):
+def test_schema_role_create(client, user_bob):
     role = 'editor'
     schema = Schema.objects.all()[0]
-    data = {'user': user.id, 'role': role, 'schema': schema.id}
+    data = {'user': user_bob.id, 'role': role, 'schema': schema.id}
 
     response = client.post('/api/ui/v0/schema_roles/', data)
     response_data = response.json()
 
     assert response.status_code == 201
     assert 'id' in response_data
-    assert response_data['user'] == user.id
+    assert response_data['user'] == user_bob.id
     assert response_data['role'] == role
     assert response_data['schema'] == schema.id
 
 
-def test_database_role_create_with_incorrect_role(client, user):
+def test_database_role_create_with_incorrect_role(client, user_bob):
     role = 'nonsense'
     database = Database.objects.all()[0]
-    data = {'user': user.id, 'role': role, 'database': database.id}
+    data = {'user': user_bob.id, 'role': role, 'database': database.id}
 
     response = client.post('/api/ui/v0/database_roles/', data)
     response_data = response.json()
@@ -258,10 +260,10 @@ def test_database_role_create_with_incorrect_role(client, user):
     assert response_data[0]['code'] == 2081
 
 
-def test_schema_role_create_with_incorrect_role(client, user):
+def test_schema_role_create_with_incorrect_role(client, user_bob):
     role = 'nonsense'
     schema = Schema.objects.all()[0]
-    data = {'user': user.id, 'role': role, 'schema': schema.id}
+    data = {'user': user_bob.id, 'role': role, 'schema': schema.id}
 
     response = client.post('/api/ui/v0/schema_roles/', data)
     response_data = response.json()
@@ -270,10 +272,10 @@ def test_schema_role_create_with_incorrect_role(client, user):
     assert response_data[0]['code'] == 2081
 
 
-def test_database_role_create_with_incorrect_database(client, user):
+def test_database_role_create_with_incorrect_database(client, user_bob):
     role = 'editor'
     database = Database.objects.order_by('-id')[0]
-    data = {'user': user.id, 'role': role, 'database': database.id + 1}
+    data = {'user': user_bob.id, 'role': role, 'database': database.id + 1}
 
     response = client.post('/api/ui/v0/database_roles/', data)
     response_data = response.json()
@@ -282,10 +284,10 @@ def test_database_role_create_with_incorrect_database(client, user):
     assert response_data[0]['code'] == 2151
 
 
-def test_schema_role_create_with_incorrect_schema(client, user):
+def test_schema_role_create_with_incorrect_schema(client, user_bob):
     role = 'editor'
     schema = Schema.objects.order_by('-id')[0]
-    data = {'user': user.id, 'role': role, 'schema': schema.id + 1}
+    data = {'user': user_bob.id, 'role': role, 'schema': schema.id + 1}
 
     response = client.post('/api/ui/v0/schema_roles/', data)
     response_data = response.json()
@@ -294,29 +296,29 @@ def test_schema_role_create_with_incorrect_schema(client, user):
     assert response_data[0]['code'] == 2151
 
 
-def test_database_role_destroy(client, user):
+def test_database_role_destroy(client, user_bob):
     role = 'viewer'
     database = Database.objects.all()[0]
-    database_role = DatabaseRole.objects.create(user=user, database=database, role=role)
+    database_role = DatabaseRole.objects.create(user=user_bob, database=database, role=role)
 
     response = client.delete(f'/api/ui/v0/database_roles/{database_role.id}/')
     assert response.status_code == 204
 
 
-def test_schema_role_destroy(client, user):
+def test_schema_role_destroy(client, user_bob):
     role = 'viewer'
     schema = Schema.objects.all()[0]
-    schema_role = SchemaRole.objects.create(user=user, schema=schema, role=role)
+    schema_role = SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
 
     response = client.delete(f'/api/ui/v0/schema_roles/{schema_role.id}/')
     assert response.status_code == 204
 
 
-def test_database_role_create_multiple_roles_on_same_object(client, user):
+def test_database_role_create_multiple_roles_on_same_object(client, user_bob):
     role = 'manager'
     database = Database.objects.all()[0]
-    DatabaseRole.objects.create(user=user, database=database, role=role)
-    data = {'user': user.id, 'role': 'editor', 'database': database.id}
+    DatabaseRole.objects.create(user=user_bob, database=database, role=role)
+    data = {'user': user_bob.id, 'role': 'editor', 'database': database.id}
 
     # The IntegrityError triggered here was causing issues with tearing down the
     # pytest user fixture. This answer suggested this solution:
@@ -329,11 +331,11 @@ def test_database_role_create_multiple_roles_on_same_object(client, user):
         assert response_data[0]['code'] == 4201
 
 
-def test_schema_role_create_multiple_roles_on_same_object(client, user):
+def test_schema_role_create_multiple_roles_on_same_object(client, user_bob):
     role = 'manager'
     schema = Schema.objects.all()[0]
-    SchemaRole.objects.create(user=user, schema=schema, role=role)
-    data = {'user': user.id, 'role': 'editor', 'schema': schema.id}
+    SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
+    data = {'user': user_bob.id, 'role': 'editor', 'schema': schema.id}
 
     # The IntegrityError triggered here was causing issues with tearing down the
     # pytest user fixture. This answer suggested this solution:
