@@ -5,11 +5,11 @@
     ButtonMenuItem,
     iconLoading,
   } from '@mathesar-component-library';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import type {
-    Constraint,
-    ConstraintsDataStore,
-  } from '@mathesar/stores/table-data/types';
+  import {
+    getTabularDataStoreFromContext,
+    type Constraint,
+    type ConstraintsDataStore,
+  } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/utils/api';
   import { modal } from '@mathesar/stores/modal';
   import {

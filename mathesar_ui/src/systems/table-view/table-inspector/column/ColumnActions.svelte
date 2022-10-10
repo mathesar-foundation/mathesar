@@ -10,7 +10,7 @@
   import type {
     ColumnsDataStore,
     ProcessedColumn,
-  } from '@mathesar/stores/table-data/types';
+  } from '@mathesar/stores/table-data';
   import ExtractColumnsModal from './column-extraction/ExtractColumnsModal.svelte';
   import { ExtractColumnsModalController } from './column-extraction/ExtractColumnsModalController';
 
