@@ -26,6 +26,33 @@ def test_user_detail(client, admin_user):
     assert response_data['schema_roles'] == []
 
 
+def test_same_user_detail_as_non_superuser(client_bob, user_bob):
+    response = client_bob.get(f'/api/ui/v0/users/{user_bob.id}/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['username'] == 'bob'
+    assert 'password' not in response_data
+    assert response_data['email'] == 'bob@example.com'
+    assert response_data['is_superuser'] is False
+    assert response_data['database_roles'] == []
+    assert response_data['schema_roles'] == []
+
+
+def test_diff_user_detail_as_non_superuser(client_bob, admin_user):
+    response = client_bob.get(f'/api/ui/v0/users/{admin_user.id}/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['username'] == 'admin'
+    assert 'password' not in response_data
+    # email should not be visible
+    assert 'email' not in response_data
+    assert response_data['is_superuser'] is True
+    assert response_data['database_roles'] == []
+    assert response_data['schema_roles'] == []
+
+
 def test_user_patch(client, admin_user):
     desired_full_name = 'Administrator'
     desired_short_name = 'Admin'

@@ -25,3 +25,10 @@ class UserAccessPolicy(AccessPolicy):
             "condition_expression": ["(is_superuser or is_self)"]
         },
     ]
+
+    @classmethod
+    def scope_fields(cls, request, fields, instance=None):
+        # Don't show emails except to admins or self
+        if not (request.user.is_superuser or request.user == instance):
+            fields.pop('email', None)
+        return fields
