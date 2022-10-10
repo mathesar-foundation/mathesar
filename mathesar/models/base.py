@@ -762,7 +762,6 @@ class Constraint(DatabaseObject):
     # TODO try to cache this for an entire request
     @property
     def _constraint_record(self):
-        print("\n\nCALL\n\n")
         engine = self.table.schema.database._sa_engine
         return get_constraint_record_from_oid(self.oid, engine)
 
