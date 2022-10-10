@@ -6,7 +6,7 @@
   } from '@mathesar/component-library';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import type RecordStore from './RecordStore';
