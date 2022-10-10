@@ -8,6 +8,7 @@ from db.schemas.operations.create import create_schema
 from db.schemas.operations.select import reflect_schema
 from db.tables.operations.select import reflect_table
 from db.tests.schemas.utils import create_related_table
+from db.metadata import get_empty_metadata
 
 
 def test_rename_schema(engine):
@@ -63,6 +64,6 @@ def test_rename_schema_foreign_key(engine):
 
     rename_schema(test_schema, engine, new_test_schema)
 
-    related_table = reflect_table(related_table.name, related_schema, engine)
+    related_table = reflect_table(related_table.name, related_schema, engine, metadata=get_empty_metadata())
     fk = list(related_table.foreign_keys)[0]
     assert fk.column.table.schema == new_test_schema

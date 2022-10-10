@@ -759,6 +759,7 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     publisher_table_settings_id = publisher_table.settings.id
     data = {
         "preview_settings": {
+            'customized': True,
             'template': publisher_preview_template,
         }
     }

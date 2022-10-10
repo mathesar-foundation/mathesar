@@ -51,7 +51,6 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
     def destroy(self, request, pk=None):
         schema = self.get_object()
         schema.delete_sa_schema()
-        schema.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
