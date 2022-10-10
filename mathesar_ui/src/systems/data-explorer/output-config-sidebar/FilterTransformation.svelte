@@ -8,6 +8,7 @@
 
   export let columns: ProcessedQueryResultColumnMap;
   export let model: QueryFilterTransformationModel;
+  export let totalTransformations: number;
 
   export let limitEditing = false;
 
@@ -25,5 +26,6 @@
   bind:columnIdentifier={model.columnIdentifier}
   bind:conditionIdentifier={model.conditionIdentifier}
   bind:value={model.value}
+  numberOfFilters={totalTransformations}
   on:update={updateFilter}
 />

@@ -1,16 +1,20 @@
 <script lang="ts">
   import { SheetPositionableCell } from '@mathesar/components/sheet';
-  import type { Grouping, Group } from '@mathesar/stores/table-data/records';
-  import type { Row, ProcessedColumn } from '@mathesar/stores/table-data/types';
-  import type { DataForRecordSummariesInFkColumns } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import type {
+    RecordGrouping,
+    RecordGroup,
+    GroupHeaderRow,
+    ProcessedColumn,
+  } from '@mathesar/stores/table-data';
+  import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import CellBackground from './CellBackground.svelte';
   import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
-  export let row: Row;
-  export let grouping: Grouping;
-  export let group: Group;
-  export let dataForRecordSummariesInFkColumns: DataForRecordSummariesInFkColumns;
+  export let row: GroupHeaderRow;
+  export let grouping: RecordGrouping;
+  export let group: RecordGroup;
+  export let recordSummariesForSheet: RecordSummariesForSheet;
 
   $: ({ columnIds, preprocIds } = grouping);
   $: preProcFunctionsForColumn = columnIds.map(
@@ -37,7 +41,7 @@
       <GroupHeaderCellValue
         {processedColumnsMap}
         cellValue={row.groupValues ? row.groupValues[columnId] : undefined}
-        {dataForRecordSummariesInFkColumns}
+        {recordSummariesForSheet}
         {columnId}
         preprocName={preprocNames[index]}
       />

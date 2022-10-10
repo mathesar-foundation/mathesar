@@ -6,8 +6,8 @@ import { ImmutableMap, WritableMap } from '@mathesar/component-library';
 import {
   renderTransitiveRecordSummary,
   prepareFieldsAsRecordSummaryInputData,
-  buildDataForRecordSummariesInFkColumns,
-  type DataForRecordSummariesInFkColumns,
+  buildRecordSummariesForSheet,
+  type RecordSummariesForSheet,
 } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 import { getAPI, patchAPI, type RequestStatus } from '@mathesar/utils/api';
 import { getErrorMessage } from '@mathesar/utils/errors';
@@ -18,8 +18,9 @@ export default class RecordStore {
   /** Keys are column ids */
   fields = new WritableMap<number, unknown>();
 
-  dataForRecordSummariesInFkColumns: Writable<DataForRecordSummariesInFkColumns> =
-    writable(new ImmutableMap());
+  recordSummariesForSheet: Writable<RecordSummariesForSheet> = writable(
+    new ImmutableMap(),
+  );
 
   summary: Readable<string>;
 
@@ -35,7 +36,7 @@ export default class RecordStore {
     this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordId}/`;
     const { template } = this.table.settings.preview_settings;
     this.summary = derived(
-      [this.fields, this.dataForRecordSummariesInFkColumns],
+      [this.fields, this.recordSummariesForSheet],
       ([fields, fkSummaryData]) =>
         renderTransitiveRecordSummary({
           template,
@@ -52,8 +53,8 @@ export default class RecordStore {
       Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
     );
     if (response.preview_data) {
-      this.dataForRecordSummariesInFkColumns.set(
-        buildDataForRecordSummariesInFkColumns(response.preview_data),
+      this.recordSummariesForSheet.set(
+        buildRecordSummariesForSheet(response.preview_data),
       );
     }
   }

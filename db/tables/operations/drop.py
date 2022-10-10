@@ -4,6 +4,7 @@ from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
 from db.tables.operations.select import reflect_table
+from db.metadata import get_empty_metadata
 
 
 class DropTableCascade(DropTable):
@@ -23,7 +24,8 @@ def compile_drop_table(element, compiler, **_):
 
 def drop_table(name, schema, engine, cascade=False, if_exists=False):
     try:
-        table = reflect_table(name, schema, engine)
+        # TODO reuse metadata
+        table = reflect_table(name, schema, engine, metadata=get_empty_metadata())
     except NoSuchTableError:
         if if_exists:
             return

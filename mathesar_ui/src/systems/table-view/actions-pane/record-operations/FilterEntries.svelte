@@ -5,8 +5,8 @@
     filterCombinations,
     defaultFilterCombination,
     getTabularDataStoreFromContext,
+    type FilterEntry,
   } from '@mathesar/stores/table-data';
-  import type { FilterEntry } from '@mathesar/stores/table-data/types';
   import type { FilterCombination } from '@mathesar/api/tables/records';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
 

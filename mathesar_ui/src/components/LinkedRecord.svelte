@@ -1,27 +1,18 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+
   import { Icon } from '@mathesar-component-library';
   import { iconDeleteMinor } from '@mathesar/icons';
-  import {
-    renderTransitiveRecordSummary,
-    type DataForRecordSummaryInFkCell,
-  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher();
 
   export let recordId: unknown;
-  export let dataForRecordSummaryInFkCell:
-    | DataForRecordSummaryInFkCell
-    | undefined;
+  export let recordSummary: string | undefined = undefined;
   export let hasDeleteButton = false;
   export let recordPageHref: string | undefined = undefined;
 
   let isHoveringDelete = false;
   let isHoveringRecordPageLink = false;
-
-  $: recordSummary = dataForRecordSummaryInFkCell
-    ? renderTransitiveRecordSummary(dataForRecordSummaryInFkCell)
-    : String(recordId);
 
   function handleDeleteButtonClick() {
     dispatch('delete');
@@ -46,7 +37,7 @@
         isHoveringRecordPageLink = false;
       }}
     >
-      {recordSummary}
+      {recordSummary ?? String(recordId)}
     </a>
   {:else}
     <span class="record-summary">{recordSummary}</span>

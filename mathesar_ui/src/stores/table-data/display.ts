@@ -4,7 +4,7 @@ import { WritableMap } from '@mathesar-component-library';
 import type { Column } from '@mathesar/api/tables/columns';
 import type { Meta } from './meta';
 import type { ColumnsDataStore } from './columns';
-import type { Row, RecordsData } from './records';
+import type { Row, RecordsData, RecordRow } from './records';
 
 // TODO: Select active cell using primary key instead of index
 // Checkout scenarios with pk consisting multiple columns
@@ -69,7 +69,7 @@ function getVerticalDelta(direction: Direction): number {
 
 export function isCellActive(
   activeCell: ActiveCell,
-  row: Row,
+  row: RecordRow,
   column: Column,
 ): boolean {
   return (
@@ -214,7 +214,7 @@ export class Display {
     this.displayableRecords = derived(
       [savedRecords, newRecords],
       ([$savedRecords, $newRecords], set) => {
-        let allRecords = $savedRecords;
+        let allRecords: Row[] = $savedRecords;
         if ($newRecords.length > 0) {
           allRecords = allRecords
             .concat({
@@ -236,7 +236,7 @@ export class Display {
     this.activeCell.set(undefined);
   }
 
-  selectCell(row: Row, column: Column): void {
+  selectCell(row: RecordRow, column: Column): void {
     this.activeCell.set({
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       rowIndex: row.rowIndex,

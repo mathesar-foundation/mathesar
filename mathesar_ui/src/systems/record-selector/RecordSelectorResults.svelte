@@ -7,11 +7,14 @@
   import type { Column } from '@mathesar/api/tables/columns';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
-  import { rowHeightPx } from '@mathesar/geometry';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { buildDataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import { rowHasRecord, type Row } from '@mathesar/stores/table-data/records';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
+  import {
+    rowHasSavedRecord,
+    getTabularDataStoreFromContext,
+    filterRecordRows,
+    type RecordRow,
+  } from '@mathesar/stores/table-data';
+  import { rowHeightPx } from '@mathesar/geometry';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import NewIndicator from './NewIndicator.svelte';
@@ -60,9 +63,9 @@
   $: ({ display, recordsData, meta, columnsDataStore, isLoading } =
     $tabularData);
   $: recordsStore = recordsData.savedRecords;
-  $: ({ dataForRecordSummariesInFkColumns } = recordsData);
+  $: ({ recordSummariesForSheet } = recordsData);
   $: ({ searchFuzzy } = meta);
-  $: records = $recordsStore;
+  $: records = filterRecordRows($recordsStore);
   $: resultCount = records.length;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
@@ -96,7 +99,7 @@
     );
   }
 
-  function getPkValue(row: Row): string | number | undefined {
+  function getPkValue(row: RecordRow): string | number | undefined {
     const { record } = row;
     if (!record || Object.keys(record).length === 0) {
       return undefined;
@@ -104,7 +107,7 @@
     return getPkValueInRecord(record, columns);
   }
 
-  function getRowHref(row: Row): string | undefined {
+  function getRowHref(row: RecordRow): string | undefined {
     if (rowType === 'button') {
       return undefined;
     }
@@ -200,19 +203,16 @@
         on:buttonClick={() => submitIndex(index)}
       >
         <CellArranger {display} let:style let:processedColumn>
-          {@const value = row?.record?.[processedColumn.id]}
+          {@const columnId = processedColumn.id}
+          {@const value = row?.record?.[columnId]}
           <CellWrapper {style}>
             <CellFabric
               columnFabric={processedColumn}
               {value}
-              dataForRecordSummaryInFkCell={buildDataForRecordSummaryInFkCell({
-                recordId: String(value),
-                stringifiedColumnId: String(processedColumn.id),
-                dataForRecordSummariesInFkColumns:
-                  $dataForRecordSummariesInFkColumns,
-              })}
+              getRecordSummary={(recordId) =>
+                $recordSummariesForSheet.get(String(columnId))?.get(recordId)}
               disabled
-              showAsSkeleton={!rowHasRecord(row)}
+              showAsSkeleton={!rowHasSavedRecord(row)}
             />
             <RowCellBackgrounds isSelected={indexIsSelected(index)} />
           </CellWrapper>

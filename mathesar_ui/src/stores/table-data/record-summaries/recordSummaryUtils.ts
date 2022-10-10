@@ -10,53 +10,63 @@ interface LookerUpper<Key, Value> {
 }
 
 /**
+ * - Sometimes tokens contain only a column id, like "{1}".
+ * - Other times, tokens contain a full join path to the column, like
+ *   "{2__9___10__21__col__22}"
+ * - Tokens will only ever contain numbers, underscores, and lower case letters.
+ */
+const tokenPattern = /\{[0-9_a-z]+\}/g;
+
+export function renderRecordSummary(
+  template: string,
+  inputData: LookerUpper<string, string>,
+): string {
+  function getReplacementValueForToken(token: string): string {
+    return inputData.get(token.slice(1, -1)) ?? token;
+  }
+  return template.replace(tokenPattern, getReplacementValueForToken);
+}
+
+/**
  * Maps column aliases (as used in the template) to cell values (as should be
  * rendered in the template). This is the front end analog of
  * `ApiRecordSummaryInputData` from the API.
  */
-export type RecordSummaryInputData = ImmutableMap<string, string>;
+type InputData = ImmutableMap<string, string>;
 
-function buildRecordSummaryInputData(
-  apiData: ApiRecordSummaryInputData,
-): RecordSummaryInputData {
+function buildInputData(apiData: ApiRecordSummaryInputData): InputData {
   const entries = Object.entries(apiData);
   return new ImmutableMap(entries.map(([k, v]) => [k, String(v)]));
 }
 
-export interface DataForRecordSummariesInFkColumn {
-  template: string;
-  /** Keys are stringifed record ids */
-  mapRecordIdsToInputData: ImmutableMap<string, RecordSummaryInputData>;
-}
+/** Keys are stringifed record ids */
+export type RecordSummariesForColumn = ImmutableMap<string, string>;
 
-function buildDataForRecordSummariesInFkColumn(
+function buildRecordSummariesForColumn(
   apiData: Pick<ApiDataForRecordSummariesInFkColumn, 'data' | 'template'>,
-): DataForRecordSummariesInFkColumn {
+): RecordSummariesForColumn {
   const entries = Object.entries(apiData.data);
-  return {
-    template: apiData.template,
-    mapRecordIdsToInputData: new ImmutableMap(
-      entries.map(([recordId, inputData]) => [
-        recordId,
-        buildRecordSummaryInputData(inputData),
-      ]),
-    ),
-  };
+  return new ImmutableMap(
+    entries.map(([recordId, apiInputData]) => [
+      recordId,
+      renderRecordSummary(apiData.template, buildInputData(apiInputData)),
+    ]),
+  );
 }
 
-/** Keys are column aliases */
-export type DataForRecordSummariesInFkColumns = ImmutableMap<
+/** Keys are stringified column ids */
+export type RecordSummariesForSheet = ImmutableMap<
   string,
-  DataForRecordSummariesInFkColumn
+  RecordSummariesForColumn
 >;
 
-export function buildDataForRecordSummariesInFkColumns(
+export function buildRecordSummariesForSheet(
   a: ApiDataForRecordSummariesInFkColumn[],
-): DataForRecordSummariesInFkColumns {
+): RecordSummariesForSheet {
   return new ImmutableMap(
     a.map((apiData) => [
       String(apiData.column),
-      buildDataForRecordSummariesInFkColumn(apiData),
+      buildRecordSummariesForColumn(apiData),
     ]),
   );
 }
@@ -77,73 +87,26 @@ function stringifyFieldValue(v: unknown): string {
 export function prepareFieldsAsRecordSummaryInputData(
   fields: Iterable<[number, unknown]>,
   _stringifyFieldValue = stringifyFieldValue,
-): RecordSummaryInputData {
+): InputData {
   return new ImmutableMap(
     [...fields].map(([k, v]) => [String(k), _stringifyFieldValue(v)]),
   );
-}
-
-/**
- * - Sometimes tokens contain only a column id, like "{1}".
- * - Other times, tokens contain a full join path to the column, like
- *   "{2__9___10__21__col__22}"
- * - Tokens will only ever contain numbers, underscores, and lower case letters.
- */
-const tokenPattern = /\{[0-9_a-z]+\}/g;
-
-export function renderRecordSummary(
-  template: string,
-  inputData: LookerUpper<string, string>,
-): string {
-  function getReplacementValueForToken(token: string): string {
-    return inputData.get(token.slice(1, -1)) ?? token;
-  }
-  return template.replace(tokenPattern, getReplacementValueForToken);
-}
-
-export interface DataForRecordSummaryInFkCell {
-  template: string;
-  inputData: RecordSummaryInputData;
-  /**
-   * Extra data we have to render transitive summaries in the case the the
-   * summary for this record depends on the summary of a record linked via an FK
-   * column on this record.
-   */
-  transitiveData: DataForRecordSummariesInFkColumns;
-}
-
-export function buildDataForRecordSummaryInFkCell({
-  recordId,
-  stringifiedColumnId,
-  dataForRecordSummariesInFkColumns,
-}: {
-  recordId: string;
-  stringifiedColumnId: string;
-  dataForRecordSummariesInFkColumns: DataForRecordSummariesInFkColumns;
-}): DataForRecordSummaryInFkCell | undefined {
-  const dataForRecordSummariesInFkColumn =
-    dataForRecordSummariesInFkColumns.get(stringifiedColumnId);
-  if (!dataForRecordSummariesInFkColumn) {
-    return undefined;
-  }
-  const { template, mapRecordIdsToInputData } =
-    dataForRecordSummariesInFkColumn;
-  const inputData = mapRecordIdsToInputData.get(recordId);
-  if (!inputData) {
-    return undefined;
-  }
-  return {
-    template,
-    inputData,
-    transitiveData: dataForRecordSummariesInFkColumns,
-  };
 }
 
 export function renderTransitiveRecordSummary({
   template,
   inputData,
   transitiveData,
-}: DataForRecordSummaryInFkCell): string {
+}: {
+  template: string;
+  inputData: InputData;
+  /**
+   * Extra data we have to render transitive summaries in the case that the
+   * summary for this record depends on the summary of a record linked via an FK
+   * column on this record.
+   */
+  transitiveData: RecordSummariesForSheet;
+}): string {
   /**
    * Finds the value to use in place of one column alias, using transitive
    * summary data when available.
@@ -153,17 +116,11 @@ export function renderTransitiveRecordSummary({
     if (cellValue === undefined) {
       return undefined;
     }
-    const dataForRecordSummariesInFkColumn = transitiveData.get(columnAlias);
-    if (dataForRecordSummariesInFkColumn === undefined) {
+    const recordSummariesForColumn = transitiveData.get(columnAlias);
+    if (recordSummariesForColumn === undefined) {
       return cellValue;
     }
-    const innerTemplate = dataForRecordSummariesInFkColumn.template;
-    const { mapRecordIdsToInputData } = dataForRecordSummariesInFkColumn;
-    const recordSummaryInputData = mapRecordIdsToInputData.get(cellValue);
-    if (recordSummaryInputData === undefined) {
-      return cellValue;
-    }
-    return renderRecordSummary(innerTemplate, recordSummaryInputData);
+    return recordSummariesForColumn.get(cellValue) ?? cellValue;
   }
 
   return renderRecordSummary(template, { get: getValueTransitively });

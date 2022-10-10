@@ -1,3 +1,27 @@
+/**
+ * @file
+ *
+ * TODO: Our store structures need a complete refactoring.
+ *
+ * 1. We have to avoid exporting stores directly and export
+ * functions that return promises and wait on the promise
+ * wherever we use the stores.
+ *
+ * 2. The map structure used in individual stores should be more linear.
+ * Eg., Schemas store should contain the ids of it's tables and queries,
+ * and each individual store should only contain a map with the id and
+ * the db object associated with the store.
+ *
+ * 3. Each operation within a store file, should update the store.
+ * Eg., create should create a new object and update the respective queries
+ * and schemas store.
+ *
+ * 4. Pure API calls should be separated and moved to the /api directory.
+ *
+ * This store would be a good place to start since the usage
+ * is limited compared to the other stores.
+ */
+
 import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
 import { deleteAPI, getAPI, postAPI, putAPI } from '@mathesar/utils/api';
@@ -200,25 +224,23 @@ export function getQuery(
   if (schemaId) {
     return new CancellablePromise<QueryInstance>(
       (resolve, reject) => {
-        const store = schemasCacheManager.get(schemaId);
-        if (store) {
-          const storeSubstance = get(store);
-          const queryResponse = storeSubstance.data.get(queryId);
-          if (queryResponse) {
-            resolve(queryResponse);
-            return;
-          }
-          if (storeSubstance.requestStatus.state !== 'success') {
-            innerRequest = getAPI<QueryInstance>(
-              `/api/db/v0/queries/${queryId}/`,
-            );
-            void innerRequest.then(
-              (result) => resolve(result),
-              (reason) => reject(reason),
-            );
-          } else {
-            reject(new Error('Query not found'));
-          }
+        const store = getQueriesStoreForSchema(schemaId);
+        const storeSubstance = get(store);
+        const queryResponse = storeSubstance.data.get(queryId);
+        if (queryResponse) {
+          resolve(queryResponse);
+          return;
+        }
+        if (storeSubstance.requestStatus.state !== 'success') {
+          innerRequest = getAPI<QueryInstance>(
+            `/api/db/v0/queries/${queryId}/`,
+          );
+          void innerRequest.then(
+            (result) => resolve(result),
+            (reason) => reject(reason),
+          );
+        } else {
+          reject(new Error('Query not found'));
         }
       },
       () => {

@@ -4,12 +4,14 @@ from sqlalchemy import text
 
 from db.columns.operations.alter import batch_update_columns
 from db.tables.operations.select import reflect_table
+from db.metadata import get_empty_metadata
 
 SUPPORTED_TABLE_ALTER_ARGS = {'name', 'columns', 'description'}
 
 
 def rename_table(name, schema, engine, rename_to):
-    table = reflect_table(name, schema, engine)
+    # TODO reuse metadata
+    table = reflect_table(name, schema, engine, metadata=get_empty_metadata())
     if rename_to == table.name:
         return
     with engine.begin() as conn:

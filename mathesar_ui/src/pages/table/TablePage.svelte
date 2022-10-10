@@ -6,11 +6,11 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import { Meta } from '@mathesar/stores/table-data';
   import {
     setTabularDataStoreInContext,
     TabularData,
-  } from '@mathesar/stores/table-data/tabularData';
+    Meta,
+  } from '@mathesar/stores/table-data';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';

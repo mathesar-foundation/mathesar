@@ -109,11 +109,10 @@ export interface ApiDataForRecordSummariesInFkColumn {
   column: number;
   template: string;
   /**
-   * Keys represent PK values of the table which contains the column. Values
-   * represent the data necessary to render the record summary for the record
-   * having that PK value. All key values are string. If the PK values as stored
-   * in the database is a number, then it will be stringified for transmission
-   * through the API.
+   * Keys represent the record ids. Values represent the data necessary to
+   * render the record summary for the record having that PK value. All key
+   * values are string. If the PK values as stored in the database is a number,
+   * then it will be stringified for transmission through the API.
    */
   data: Record<string, ApiRecordSummaryInputData>;
 }
