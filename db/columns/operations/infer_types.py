@@ -7,6 +7,7 @@ from db.columns.exceptions import DagCycleError
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.types.base import PostgresType, MathesarCustomType, get_available_known_db_types
+from db.metadata import get_empty_metadata
 
 
 logger = logging.getLogger(__name__)
@@ -60,11 +61,13 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
     if depth > MAX_INFERENCE_DAG_DEPTH:
         raise DagCycleError("The type_inference_dag likely has a cycle")
     type_classes_to_dag_nodes = _get_type_classes_mapped_to_dag_nodes(engine)
-    column_type_class = get_column_class(
+    column_type_class = _get_column_class(
         engine=engine,
         schema=schema,
         table_name=table_name,
-        column_name=column_name
+        column_name=column_name,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
     )
     # a DAG node will be a DatabaseType Enum
     dag_node = type_classes_to_dag_nodes.get(column_type_class)
@@ -94,8 +97,8 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
     return column_type_class
 
 
-def get_column_class(engine, schema, table_name, column_name):
-    table = reflect_table(table_name, schema, engine)
+def _get_column_class(engine, schema, table_name, column_name, metadata):
+    table = reflect_table(table_name, schema, engine, metadata=metadata)
     column_type_class = table.columns[column_name].type.__class__
     return column_type_class
 

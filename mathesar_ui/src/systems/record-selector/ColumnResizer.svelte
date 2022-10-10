@@ -1,6 +1,6 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
 
   const MIN_COLUMN_WIDTH = 50;
   const tabularData = getTabularDataStoreFromContext();

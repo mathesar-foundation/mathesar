@@ -2,8 +2,7 @@
   import { Window } from '@mathesar/component-library';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import { Meta } from '@mathesar/stores/table-data';
-  import { TabularData } from '@mathesar/stores/table-data/tabularData';
+  import { TabularData, Meta } from '@mathesar/stores/table-data';
   import { getTableName } from '@mathesar/stores/tables';
   import Pagination from '@mathesar/utils/Pagination';
   import type { RecordSelectorController } from './RecordSelectorController';

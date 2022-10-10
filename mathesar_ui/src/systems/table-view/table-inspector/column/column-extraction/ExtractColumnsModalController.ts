@@ -1,5 +1,5 @@
 import { ModalController } from '@mathesar-component-library';
-import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import { writable } from 'svelte/store';
 import type { ColumnExtractionTargetType } from './columnExtractionTypes';
 

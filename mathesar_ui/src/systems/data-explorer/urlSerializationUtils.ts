@@ -1,6 +1,6 @@
 import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
-import type { TerseGrouping } from '@mathesar/stores/table-data/types';
+import type { TerseGrouping } from '@mathesar/stores/table-data';
 import Url64 from '@mathesar/utils/Url64';
 
 export interface TerseSummarization {

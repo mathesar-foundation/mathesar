@@ -6,11 +6,11 @@
   import { ImmutableSet, portal, Spinner } from '@mathesar-component-library';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { constraintIsFk } from '@mathesar/stores/table-data/constraintsUtils';
   import {
     setTabularDataStoreInContext,
     TabularData,
-  } from '@mathesar/stores/table-data/tabularData';
+    constraintIsFk,
+  } from '@mathesar/stores/table-data';
   import { postAPI, States } from '@mathesar/utils/api';
   import Arrow from './Arrow.svelte';
   import CellArranger from './CellArranger.svelte';
