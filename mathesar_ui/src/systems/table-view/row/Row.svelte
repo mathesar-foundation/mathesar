@@ -71,10 +71,9 @@
     class:processing={wholeRowState === 'processing'}
     class:failed={hasWholeRowErrors}
     class:created={creationStatus === 'success'}
-    class:add-placeholder={isPlaceholderRow(row)}
-    class:new={isNewRecordRow(row)}
+    class:is-new={isNewRecordRow(row)}
     class:is-group-header={isGroupHeaderRow(row)}
-    class:is-add-placeholder={isHelpTextRow(row)}
+    class:is-add-placeholder={isPlaceholderRow(row)}
     {...htmlAttributes}
     style={styleString}
     data-row-identifier={row.identifier}

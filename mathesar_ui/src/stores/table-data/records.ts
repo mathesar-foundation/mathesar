@@ -157,7 +157,7 @@ export function isPlaceholderRow(row: Row): row is PlaceholderRow {
 }
 
 export function isNewRecordRow(row: Row): row is NewRecordRow {
-  return rowHasNewRecord(row) && !('isAddPlaceHolder' in row);
+  return rowHasNewRecord(row) && !isPlaceholderRow(row);
 }
 
 export function filterRecordRows(rows: Row[]): RecordRow[] {
