@@ -7,10 +7,11 @@
   import {
     setTabularDataStoreInContext,
     TabularData,
-  } from '@mathesar/stores/table-data/tabularData';
+    Filtering,
+    Meta,
+  } from '@mathesar/stores/table-data';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import { Filtering, Meta } from '@mathesar/stores/table-data';
   import Pagination from '@mathesar/utils/Pagination';
   import MiniActionsPane from '@mathesar/systems/table-view/actions-pane/MiniActionsPane.svelte';
 

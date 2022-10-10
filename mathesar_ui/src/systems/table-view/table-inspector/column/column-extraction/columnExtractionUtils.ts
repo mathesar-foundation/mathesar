@@ -1,9 +1,11 @@
 import type { TableEntry } from '@mathesar/api/tables';
 import type { FkConstraint } from '@mathesar/api/tables/constraints';
 import { isDefinedNonNullable } from '@mathesar/component-library';
-import type { Constraint } from '@mathesar/stores/table-data/constraints';
-import { constraintIsFk } from '@mathesar/stores/table-data/constraintsUtils';
-import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+import {
+  constraintIsFk,
+  type Constraint,
+  type ProcessedColumn,
+} from '@mathesar/stores/table-data';
 import type { LinkedTable } from './columnExtractionTypes';
 
 function getLinkedTable({

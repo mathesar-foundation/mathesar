@@ -1,7 +1,9 @@
 <script lang="ts">
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
-  import type { ColumnsDataStore } from '@mathesar/stores/table-data';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import type {
+    ColumnsDataStore,
+    ProcessedColumn,
+  } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
 
