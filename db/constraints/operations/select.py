@@ -21,17 +21,21 @@ def get_constraints_with_oids(engine, table_oid=None):
 
 
 def get_constraint_from_oid(oid, engine, table):
-    # TODO reuse metadata
+    constraint_record = get_constraint_record_from_oid(oid, engine)
+    for constraint in table.constraints:
+        if constraint.name == constraint_record['conname']:
+            return constraint
+    return None
+
+
+def get_constraint_record_from_oid(oid, engine):
     metadata = get_empty_metadata()
     pg_constraint = get_pg_catalog_table("pg_constraint", engine, metadata=metadata)
     # conrelid is the table's OID.
     query = select(pg_constraint).where(pg_constraint.c.oid == oid)
     with engine.begin() as conn:
         constraint_record = conn.execute(query).first()
-    for constraint in table.constraints:
-        if constraint.name == constraint_record['conname']:
-            return constraint
-    return None
+    return constraint_record
 
 
 def get_constraint_oid_by_name_and_table_oid(name, table_oid, engine):
