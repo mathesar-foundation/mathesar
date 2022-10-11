@@ -8,13 +8,15 @@
   } from '@mathesar-component-library';
   import { CancelOrProceedButtonPair } from '@mathesar-component-library';
   import { ControlledModal } from '@mathesar-component-library';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    getTabularDataStoreFromContext,
+    type ProcessedColumn,
+  } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
   import FormField from '@mathesar/components/FormField.svelte';
   import { toast } from '@mathesar/stores/toast';
   import Form from '@mathesar/components/Form.svelte';
   import { getAvailableName } from '@mathesar/utils/db';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import UniqueConstraintsHelp from './__help__/UniqueConstraintsHelp.svelte';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';

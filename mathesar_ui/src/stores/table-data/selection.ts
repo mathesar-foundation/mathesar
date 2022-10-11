@@ -2,14 +2,19 @@ import type { Column } from '@mathesar/api/tables/columns';
 import { ImmutableSet, WritableSet } from '@mathesar-component-library';
 import { get } from 'svelte/store';
 import type { Unsubscriber } from 'svelte/store';
-import type { Row, RecordsData } from './records';
+import {
+  type Row,
+  type RecordsData,
+  type RecordRow,
+  rowHasRecord,
+} from './records';
 import type { ColumnsDataStore } from './columns';
 import type { Display } from './display';
 
 const DEFAULT_ROW_INDEX = 0;
 const ROW_COLUMN_SEPARATOR = '-';
 
-type Cell = [Row, Column];
+type Cell = [RecordRow, Column];
 
 type SelectionBounds = {
   startRowIndex: number;
@@ -23,19 +28,19 @@ type SelectionBounds = {
  * Storing this identifier instead of an object {rowIndex: number, columnId: number}
  * enables easier usage of the Set data type & faster equality checks
  */
-export const createSelectedCellIdentifier = (
-  { rowIndex }: Row,
+const createSelectedCellIdentifier = (
+  { rowIndex }: RecordRow,
   { id }: Column,
-): string => `${rowIndex || DEFAULT_ROW_INDEX}${ROW_COLUMN_SEPARATOR}${id}`;
+): string => `${rowIndex ?? DEFAULT_ROW_INDEX}${ROW_COLUMN_SEPARATOR}${id}`;
 
 export const isRowSelected = (
   selectedCells: ImmutableSet<string>,
   row: Row,
 ): boolean =>
-  !!row.record &&
+  rowHasRecord(row) &&
   selectedCells
     .valuesArray()
-    .some((cell) => cell.startsWith(`${row.rowIndex || DEFAULT_ROW_INDEX}-`));
+    .some((cell) => cell.startsWith(`${row.rowIndex ?? DEFAULT_ROW_INDEX}-`));
 
 export const isColumnSelected = (
   selectedCells: ImmutableSet<string>,
@@ -47,7 +52,7 @@ export const isColumnSelected = (
 
 export const isCellSelected = (
   selectedCells: ImmutableSet<string>,
-  row: Row,
+  row: RecordRow,
   column: Column,
 ): boolean => selectedCells.has(createSelectedCellIdentifier(row, column));
 
@@ -55,7 +60,7 @@ export function getSelectedColumnId(selectedCell: string): number {
   return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[1]);
 }
 
-export function getSelectedRowId(selectedCell: string): number {
+export function getSelectedRowIndex(selectedCell: string): number {
   return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[0]);
 }
 
@@ -108,6 +113,12 @@ export class Selection {
     this.freezeSelection = false;
     this.display = display;
 
+    /**
+     * TODO:
+     * - This adds a document level event listener for each selection
+     * store instance, and the listener doesn't seem to get removed.
+     * - Refactor this logic and avoid such listeners within the store instance.
+     */
     // This event terminates the cell selection process
     // specially useful when selecting multiple cells
     // Adding this on document to enable boundry cells selection
@@ -143,7 +154,7 @@ export class Selection {
     );
   }
 
-  onStartSelection(row: Row, column: Column): void {
+  onStartSelection(row: RecordRow, column: Column): void {
     if (this.freezeSelection) {
       return;
     }
@@ -154,12 +165,12 @@ export class Selection {
     this.selectionBounds = {
       startColumnIndex: column.id,
       endColumnIndex: column.id,
-      startRowIndex: row.rowIndex || DEFAULT_ROW_INDEX,
-      endRowIndex: row.rowIndex || DEFAULT_ROW_INDEX,
+      startRowIndex: row.rowIndex ?? DEFAULT_ROW_INDEX,
+      endRowIndex: row.rowIndex ?? DEFAULT_ROW_INDEX,
     };
   }
 
-  onMouseEnterWhileSelection(row: Row, column: Column): void {
+  onMouseEnterWhileSelection(row: RecordRow, column: Column): void {
     const { rowIndex = DEFAULT_ROW_INDEX } = row;
     const columnIndex = column.id;
 
@@ -176,9 +187,8 @@ export class Selection {
     this.selectMultipleCells(cells);
   }
 
-  get allRows(): Row[] {
-    const { savedRecords, newRecords } = this.recordsData;
-    return [...get(savedRecords), ...get(newRecords)];
+  get allRows(): RecordRow[] {
+    return this.recordsData.getRecordRows();
   }
 
   get allColumns(): Column[] {
@@ -228,7 +238,7 @@ export class Selection {
     this.selectedCells.clear();
   }
 
-  isCompleteColumnSelected(column: Column): boolean {
+  private isCompleteColumnSelected(column: Column): boolean {
     if (this.allRows.length) {
       return (
         this.columnsSelectedWhenTheTableIsEmpty.getHas(column.id) ||
@@ -240,7 +250,7 @@ export class Selection {
     return this.columnsSelectedWhenTheTableIsEmpty.getHas(column.id);
   }
 
-  isCompleteRowSelected(row: Row): boolean {
+  private isCompleteRowSelected(row: RecordRow): boolean {
     return (
       !!this.allColumns.length &&
       this.allColumns.every((column) =>
@@ -272,7 +282,7 @@ export class Selection {
     }
   }
 
-  toggleRowSelection(row: Row): void {
+  toggleRowSelection(row: RecordRow): void {
     const isCompleteRowSelected = this.isCompleteRowSelected(row);
 
     if (isCompleteRowSelected) {

@@ -2,8 +2,10 @@
   import { writable } from 'svelte/store';
   import type { Writable } from 'svelte/store';
   import { Button } from '@mathesar-component-library';
-  import type { Filtering } from '@mathesar/stores/table-data';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    getTabularDataStoreFromContext,
+    type Filtering,
+  } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/api/tables/records';
   import { validateFilterEntry } from '@mathesar/components/filter-entry';
   import FilterEntries from './FilterEntries.svelte';

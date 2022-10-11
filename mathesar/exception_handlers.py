@@ -1,6 +1,7 @@
 import warnings
 
 from django.conf import settings
+from django.db import IntegrityError as DjangoIntegrityError
 from django.utils.encoding import force_str
 from rest_framework.views import exception_handler
 from rest_framework_friendly_errors.settings import FRIENDLY_EXCEPTION_DICT
@@ -19,6 +20,7 @@ from mathesar.errors import URLDownloadError, URLNotReachable, URLInvalidContent
 
 exception_map = {
     IntegrityError: integrity_error_mapper,
+    DjangoIntegrityError: integrity_error_mapper,
     UnsupportedTypeException: lambda exc: database_api_exceptions.UnsupportedTypeAPIException(exc),
     ProgrammingError: lambda exc: base_api_exceptions.ProgrammingAPIException(exc),
     URLDownloadError: lambda exc: data_import_api_exceptions.URLDownloadErrorAPIException(exc),
@@ -41,10 +43,10 @@ def standardize_error_response(data):
 
 def mathesar_exception_handler(exc, context):
     response = exception_handler(exc, context)
-    # DRF default exception handler does not handle non Api errors,
-    # So we convert it to proper api response
+    # DRF default exception handler does not handle non API errors,
+    # So we convert it to proper API response
     if not response:
-        # Check if we have an equivalent Api exception that is able to convert the exception to proper error
+        # Check if we have an equivalent API exception that is able to convert the exception to proper error
         mapped_exception_class = exception_map.get(exc.__class__)
         if mapped_exception_class is None:
             if getattr(settings, 'MATHESAR_CAPTURE_UNHANDLED_EXCEPTION', False):

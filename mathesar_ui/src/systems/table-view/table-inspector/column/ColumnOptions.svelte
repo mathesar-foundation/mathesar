@@ -9,7 +9,7 @@
     ColumnsDataStore,
     ProcessedColumn,
     ConstraintsDataStore,
-  } from '@mathesar/stores/table-data/types';
+  } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { createEventDispatcher } from 'svelte';
 

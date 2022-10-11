@@ -7,7 +7,10 @@ import {
   postAPI,
 } from '@mathesar/utils/api';
 import type { Writable, Unsubscriber } from 'svelte/store';
-import type { CancellablePromise } from '@mathesar-component-library';
+import {
+  isDefinedNonNullable,
+  type CancellablePromise,
+} from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type {
   Result as ApiRecord,
@@ -54,7 +57,7 @@ function buildFetchQueryString(data: RecordsRequestParamsData): string {
   return new URLSearchParams(entries).toString();
 }
 
-export interface Group {
+export interface RecordGroup {
   count: number;
   eqValue: ApiGroup['eq_value'];
   firstValue: ApiGroup['first_value'];
@@ -62,11 +65,11 @@ export interface Group {
   resultIndices: number[];
 }
 
-export interface Grouping {
+export interface RecordGrouping {
   columnIds: number[];
   preprocIds: (string | null)[];
   mode: GroupingMode;
-  groups: Group[];
+  groups: RecordGroup[];
 }
 /** Keys are stringified column ids */
 type DataForRecordSummariesInFkColumns = Record<
@@ -74,7 +77,7 @@ type DataForRecordSummariesInFkColumns = Record<
   DataForRecordSummariesInFkColumn
 >;
 
-function buildGroup(apiGroup: ApiGroup): Group {
+function buildGroup(apiGroup: ApiGroup): RecordGroup {
   return {
     count: apiGroup.count,
     eqValue: apiGroup.eq_value,
@@ -84,7 +87,7 @@ function buildGroup(apiGroup: ApiGroup): Group {
   };
 }
 
-function buildGrouping(apiGrouping: ApiGrouping): Grouping {
+function buildGrouping(apiGrouping: ApiGrouping): RecordGrouping {
   return {
     columnIds: apiGrouping.columns,
     preprocIds: apiGrouping.preproc ?? [],
@@ -95,36 +98,74 @@ function buildGrouping(apiGrouping: ApiGrouping): Grouping {
 
 type DataForRecordSummariesInRow = Record<string, DataForRecordSummaryInFkCell>;
 
-export interface Row {
-  /**
-   * Can be `undefined` because some rows don't have an associated record, e.g.
-   * group headers, dummy rows, etc.
-   */
-  record?: ApiRecord;
+interface BaseRow {
   identifier: string;
-  isAddPlaceholder?: boolean;
-  isNew?: boolean;
-  isNewHelpText?: boolean;
-  isGroupHeader?: boolean;
-  group?: Group;
-  rowIndex?: number;
-  dataForRecordSummariesInRow?: DataForRecordSummariesInRow;
-  groupValues?: ApiGroup['first_value'];
 }
 
-export type RecordRow = Omit<Row, 'record'> & Required<Pick<Row, 'record'>>;
+export interface RecordRow extends BaseRow {
+  rowIndex: number;
+  record: ApiRecord;
+  dataForRecordSummariesInRow?: DataForRecordSummariesInRow;
+}
 
-export function rowHasRecord(row: Row): row is RecordRow {
-  // Why do we also need to check that the record object is not empty?
-  //
-  // Because somewhere else in the code (I don't know where) we are producing
-  // row objects which contain empty records. That behavior was causing a bug.
-  // This function is a way to work around that bug without taking the time to
-  // track down the root cause and fix/test it. At some point we should refactor
-  // `Row` to be a union of different row types, none of which contain optional
-  // properties. With that approach we can simplify this function to be more
-  // straightforward.
-  return row.record !== undefined && Object.entries(row.record).length > 0;
+export interface NewRecordRow extends RecordRow {
+  isNew: true;
+}
+
+export interface GroupHeaderRow extends BaseRow {
+  group: RecordGroup;
+  groupValues: ApiGroup['first_value'];
+}
+
+export interface HelpTextRow extends BaseRow {
+  isNewHelpText: true;
+}
+
+export interface PlaceholderRow extends NewRecordRow {
+  isAddPlaceholder: true;
+}
+
+export type Row =
+  | RecordRow
+  | NewRecordRow
+  | GroupHeaderRow
+  | HelpTextRow
+  | PlaceholderRow;
+
+export function rowHasRecord(
+  row: Row,
+): row is RecordRow | NewRecordRow | PlaceholderRow {
+  return 'record' in row;
+}
+
+export function rowHasNewRecord(
+  row: Row,
+): row is NewRecordRow | PlaceholderRow {
+  return 'record' in row && 'isNew' in row && row.isNew;
+}
+
+export function isHelpTextRow(row: Row): row is HelpTextRow {
+  return 'isNewHelpText' in row;
+}
+
+export function isGroupHeaderRow(row: Row): row is GroupHeaderRow {
+  return 'group' in row;
+}
+
+export function isPlaceholderRow(row: Row): row is PlaceholderRow {
+  return 'isAddPlaceholder' in row;
+}
+
+export function isNewRecordRow(row: Row): row is NewRecordRow {
+  return rowHasNewRecord(row) && !isPlaceholderRow(row);
+}
+
+export function filterRecordRows(rows: Row[]): RecordRow[] {
+  return rows.filter((row): row is RecordRow => rowHasRecord(row));
+}
+
+export function rowHasSavedRecord(row: Row): row is RecordRow {
+  return rowHasRecord(row) && Object.entries(row.record).length > 0;
 }
 
 export interface TableRecordsData {
@@ -132,17 +173,17 @@ export interface TableRecordsData {
   error?: string;
   savedRecords: Row[];
   totalCount: number;
-  grouping?: Grouping;
+  grouping?: RecordGrouping;
 }
 
 export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
-  if (row.record && primaryKeyColumnId !== undefined) {
+  if (rowHasRecord(row) && primaryKeyColumnId !== undefined) {
     const primaryKeyCellValue = row.record[primaryKeyColumnId];
-    if (primaryKeyCellValue) {
+    if (isDefinedNonNullable(primaryKeyCellValue)) {
       return String(primaryKeyCellValue);
     }
   }
-  if (row.isNew) {
+  if (rowHasNewRecord(row)) {
     return row.identifier;
   }
   return '';
@@ -161,7 +202,7 @@ function getProcessedRecordRow(
   recordIndex: number,
   offset: number,
   dataForRecordSummariesInFkColumns?: DataForRecordSummariesInFkColumns,
-): Row {
+): RecordRow {
   const dataForRecordSummariesInRow: DataForRecordSummariesInRow | undefined =
     dataForRecordSummariesInFkColumns
       ? Object.entries(dataForRecordSummariesInFkColumns).reduce(
@@ -188,14 +229,14 @@ function preprocessRecords({
 }: {
   records: ApiRecord[];
   offset: number;
-  grouping?: Grouping;
+  grouping?: RecordGrouping;
   dataForRecordSummariesInFkColumns?: DataForRecordSummariesInFkColumns;
-}): Row[] {
+}): (RecordRow | GroupHeaderRow)[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
 
   if (isResultGrouped) {
-    const combinedRecords: Row[] = [];
+    const combinedRecords: (RecordRow | GroupHeaderRow)[] = [];
     let recordIndex = 0;
 
     grouping?.groups.forEach((group, groupIndex) => {
@@ -208,7 +249,6 @@ function preprocessRecords({
         }
       });
       combinedRecords.push({
-        isGroupHeader: true,
         group,
         identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
         groupValues,
@@ -239,10 +279,6 @@ function preprocessRecords({
   );
 }
 
-function prepareRowForRequest(row: Row): ApiRecord {
-  return row.record ?? {};
-}
-
 export class RecordsData {
   private parentId: DBObjectEntry['id'];
 
@@ -254,11 +290,11 @@ export class RecordsData {
 
   state: Writable<States>;
 
-  savedRecords: Writable<Row[]>;
+  savedRecords: Writable<(RecordRow | GroupHeaderRow)[]>;
 
-  newRecords: Writable<Row[]>;
+  newRecords: Writable<NewRecordRow[]>;
 
-  grouping: Writable<Grouping | undefined>;
+  grouping: Writable<RecordGrouping | undefined>;
 
   totalCount: Writable<number | undefined>;
 
@@ -459,15 +495,14 @@ export class RecordsData {
 
   // TODO: It would be better to throw errors instead of silently failing
   // and returning a value.
-  async updateCell(row: Row, column: Column): Promise<Row> {
+  async updateCell(
+    row: RecordRow | NewRecordRow | PlaceholderRow,
+    column: Column,
+  ): Promise<RecordRow> {
     // TODO compute and validate client side errors before saving
     const { record } = row;
-    if (!record) {
-      console.error('Unable to update row that does not have a record');
-      return row;
-    }
     const { primaryKeyColumnId } = this.columnsDataStore.get();
-    if (!primaryKeyColumnId) {
+    if (primaryKeyColumnId === undefined) {
       // eslint-disable-next-line no-console
       console.error('Unable to update record for a row without a primary key');
       return row;
@@ -513,7 +548,7 @@ export class RecordsData {
     return row;
   }
 
-  getNewEmptyRecord(): Row {
+  getNewEmptyRecord(): NewRecordRow {
     const { offset } = getStoreValue(this.meta.pagination);
     const savedRecords = getStoreValue(this.savedRecords);
     const savedRecordsLength = savedRecords?.length || 0;
@@ -537,7 +572,9 @@ export class RecordsData {
     return newRow;
   }
 
-  async createRecord(row: Row): Promise<Row> {
+  private async createRecord(
+    row: NewRecordRow | PlaceholderRow,
+  ): Promise<NewRecordRow> {
     const { primaryKeyColumnId, columns } = this.columnsDataStore.get();
     const rowKey = getRowKey(row, primaryKeyColumnId);
     validateRow({
@@ -553,19 +590,24 @@ export class RecordsData {
     const rowKeyOfBlankRow = getRowKey(row, primaryKeyColumnId);
     this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
     this.createPromises?.get(rowKeyOfBlankRow)?.cancel();
-    const promise = postAPI<ApiRecord>(this.url, prepareRowForRequest(row));
+    const promise = postAPI<ApiRecordsResponse>(this.url, row.record);
     if (!this.createPromises) {
       this.createPromises = new Map();
     }
     this.createPromises.set(rowKeyOfBlankRow, promise);
 
     try {
-      const record = await promise;
-      const newRow: Row = {
+      const response = await promise;
+      const record = response.results[0];
+      let newRow: NewRecordRow = {
         ...row,
         record,
-        isAddPlaceholder: false,
       };
+      if (isPlaceholderRow(newRow)) {
+        const { isAddPlaceholder, ...newRecordRow } = newRow;
+        newRow = newRecordRow;
+      }
+
       const rowKeyWithRecord = getRowKey(newRow, primaryKeyColumnId);
       this.meta.rowCreationStatus.delete(rowKeyOfBlankRow);
       this.meta.rowCreationStatus.set(rowKeyWithRecord, { state: 'success' });
@@ -592,7 +634,10 @@ export class RecordsData {
     return row;
   }
 
-  async createOrUpdateRecord(row: Row, column: Column): Promise<Row> {
+  async createOrUpdateRecord(
+    row: RecordRow | NewRecordRow | PlaceholderRow,
+    column: Column,
+  ): Promise<RecordRow | NewRecordRow> {
     const { primaryKeyColumnId } = this.columnsDataStore.get();
 
     // Row may not have been updated yet in view when additional request is made.
@@ -601,22 +646,23 @@ export class RecordsData {
       (entry) => entry.identifier === row.identifier,
     );
 
-    if (!existingNewRecordRow && row.isAddPlaceholder) {
+    if (!existingNewRecordRow && isPlaceholderRow(row)) {
       this.newRecords.update((existing) => {
+        const { isAddPlaceholder: unused, ...newRow } = row;
         existing.push({
-          ...row,
-          isAddPlaceholder: false,
+          ...newRow,
+          isNew: true,
         });
         return existing;
       });
     }
 
-    let result = row;
+    let result: RecordRow;
     if (
       primaryKeyColumnId &&
-      !existingNewRecordRow?.record?.[primaryKeyColumnId] &&
-      row.isNew &&
-      !row.record?.[primaryKeyColumnId]
+      existingNewRecordRow?.record[primaryKeyColumnId] === undefined &&
+      rowHasNewRecord(row) &&
+      row.record[primaryKeyColumnId] === undefined
     ) {
       result = await this.createRecord(row);
     } else {
@@ -642,6 +688,14 @@ export class RecordsData {
       return newRecordsData[index + savedLength].identifier;
     }
     return `__index_${index}`;
+  }
+
+  getRecordRows(): RecordRow[] {
+    const savedRecordRows = getStoreValue(this.savedRecords).filter(
+      (row): row is RecordRow => !isGroupHeaderRow(row),
+    );
+
+    return [...savedRecordRows, ...getStoreValue(this.newRecords)];
   }
 
   destroy(): void {

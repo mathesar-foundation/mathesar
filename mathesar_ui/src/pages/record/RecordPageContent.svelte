@@ -5,7 +5,7 @@
   import EntityType from '@mathesar/components/EntityType.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { iconRecord } from '@mathesar/icons';
-  import type { TableStructure } from '@mathesar/stores/table-data/TableStructure';
+  import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
   import { getAPI } from '@mathesar/utils/api';
   import DirectField from './DirectField.svelte';

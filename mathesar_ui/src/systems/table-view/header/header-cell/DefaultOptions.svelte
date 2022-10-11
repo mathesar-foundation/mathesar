@@ -6,17 +6,17 @@
     Checkbox,
     iconLoading,
   } from '@mathesar-component-library';
-  import type {
-    Meta,
-    ColumnsDataStore,
-    ConstraintsDataStore,
-  } from '@mathesar/stores/table-data/types';
   import type { Column } from '@mathesar/api/tables/columns';
   import { toast } from '@mathesar/stores/toast';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { SortDirection } from '@mathesar/stores/table-data';
+  import {
+    SortDirection,
+    type Meta,
+    type ColumnsDataStore,
+    type ConstraintsDataStore,
+    findFkConstraintsForColumn,
+  } from '@mathesar/stores/table-data';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
   import {
     iconSortDescending,
     iconRename,
