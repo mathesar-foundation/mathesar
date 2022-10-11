@@ -8,6 +8,8 @@ export { default as popper } from './common/actions/popper';
 export { default as portal } from './common/actions/portal';
 
 // Simple Components
+export { default as Alert } from './alert/Alert.svelte';
+export { default as Tutorial } from './tutorial/Tutorial.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';

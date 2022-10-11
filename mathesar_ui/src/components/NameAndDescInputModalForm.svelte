@@ -9,7 +9,11 @@
    * if such a need arises in the future.
    */
   import { tick } from 'svelte';
-  import type { ModalController } from '@mathesar-component-library';
+  import {
+    Alert,
+    LabeledInput,
+    type ModalController,
+  } from '@mathesar-component-library';
   import {
     CancelOrProceedButtonPair,
     ControlledModal,
@@ -18,6 +22,8 @@
   import { toast } from '@mathesar/stores/toast';
   import TextArea from '@mathesar/component-library/text-area/TextArea.svelte';
 
+  export let helpText = '';
+  export let saveButtonLabel = 'Save';
   export let controller: ModalController;
   export let getNameValidationErrors: (name: string) => string[];
   export let getInitialName: () => string = () => '';
@@ -67,44 +73,54 @@
   closeOn={['button', 'esc', 'overlay']}
 >
   <slot slot="title" name="title" {initialName} />
+
   <div class="form-container">
+    {#if helpText}
+      <Alert appearance="info">
+        <slot slot="content">{helpText}</slot>
+      </Alert>
+    {/if}
     <div class="input-container">
-      <TextInput
-        bind:value={name}
-        bind:element={inputElement}
-        aria-label="name"
-        on:input={() => {
-          nameHasChanged = true;
-        }}
-        disabled={isSubmitting}
-        placeholder="Name"
-      />
-      {#if nameHasChanged && nameValidationErrors.length}
-        <p class="error">
-          {nameValidationErrors.join(' ')}
-        </p>
-      {/if}
+      <LabeledInput label="Name" layout="stacked">
+        <TextInput
+          bind:value={name}
+          bind:element={inputElement}
+          aria-label="name"
+          on:input={() => {
+            nameHasChanged = true;
+          }}
+          disabled={isSubmitting}
+          placeholder="Name"
+          id="name"
+        />
+        {#if nameHasChanged && nameValidationErrors.length}
+          <p class="error">
+            {nameValidationErrors.join(' ')}
+          </p>
+        {/if}
+      </LabeledInput>
     </div>
 
     <div class="input-container">
-      <TextArea
-        bind:value={description}
-        aria-label="description"
-        disabled={isSubmitting}
-        placeholder="Description"
-      />
+      <LabeledInput label="Description" layout="stacked">
+        <TextArea
+          bind:value={description}
+          aria-label="description"
+          disabled={isSubmitting}
+          placeholder="Description"
+        />
+      </LabeledInput>
     </div>
-
-    <CancelOrProceedButtonPair
-      slot="footer"
-      proceedButton={{ label: 'Save' }}
-      onCancel={() => {
-        controller.close();
-      }}
-      onProceed={handleSave}
-      {canProceed}
-    />
   </div>
+  <CancelOrProceedButtonPair
+    proceedButton={{ label: saveButtonLabel }}
+    onCancel={() => {
+      controller.close();
+    }}
+    onProceed={handleSave}
+    {canProceed}
+    slot="footer"
+  />
 </ControlledModal>
 
 <style>
@@ -116,6 +132,7 @@
   .form-container {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
   }
 
   .form-container > .input-container {

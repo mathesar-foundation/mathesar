@@ -1,4 +1,5 @@
 .cancel-or-proceed-button-pair {
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
+  gap: 1rem;
 }

@@ -1,0 +1,17 @@
+.alert-container {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border-radius: var(--border-radius-m);
+
+  &.alert-info {
+    background-color: var(--sky-200);
+
+    .content {
+      font-size: 1rem;
+      color: var(--slate-800);
+      font-weight: 400;
+    }
+  }
+}
