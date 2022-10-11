@@ -3,11 +3,13 @@
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import Spinner from '@mathesar-component-library-dir/spinner/Spinner.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import { iconProceed } from '@mathesar-component-library-dir/common/icons';
   import type { Size } from '@mathesar-component-library-dir/commonTypes';
 
   export let label = 'Proceed';
-  export let icon: IconProps = iconProceed;
+
+  // TODO: Removing this default proceed icon
+  // Change if needed in other designs
+  export let icon: IconProps | undefined;
   export let onClick: () => Promise<void>;
   export let disabled = false;
   export let isProcessing = false;
@@ -36,7 +38,7 @@
 >
   {#if isProcessing}
     <Spinner />
-  {:else}
+  {:else if icon}
     <Icon {...icon} />
   {/if}
   <span>{label}</span>

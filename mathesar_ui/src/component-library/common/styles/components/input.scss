@@ -1,7 +1,7 @@
 .input-element {
-  border: 1px solid #dfdfdf;
+  border: 1px solid var(--slate-200);
   align-items: center;
-  border-radius: 0.25rem;
+  border-radius: 0.285rem;
   background: #fff;
   margin: 0;
   padding: 6px 8px;
@@ -13,10 +13,12 @@
   box-sizing: border-box;
   text-align: var(--input-element-text-align, 'left');
 
-  &:focus {
-    border-color: #489ee4;
+  // Using focus-within to show the focus state
+  // when the input is wrapped and is focused
+  &:focus-within {
+    border-color: var(--brand-500);
     outline: 0;
-    box-shadow: 0 0 0 2px #2087e633;
+    box-shadow: 0 0 0 2px var(--brand-box-shadow);
   }
 
   &:disabled {

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
+  import Icon from '../icon/Icon.svelte';
+  import BaseTextInput from './BaseTextInput.svelte';
   import type { TextInputProps } from './TextInputTypes';
 
   type $$Props = TextInputProps;
@@ -14,29 +15,46 @@
   let classes = '';
   export { classes as class };
 
-  // Underlying DOM element for direct access
-  export let element: $$Props['element'] = undefined;
-
-  export let hasError = false;
-
-  // Id for the input
-  export let id: $$Props['id'] = undefined;
+  export let prefixIcon: $$Props['prefixIcon'];
 </script>
 
-<BaseInput {...$$restProps} bind:id />
+{#if prefixIcon}
+  <span class="input-element prefix-wrapper">
+    <Icon {...prefixIcon} />
+    <BaseTextInput
+      class={['prefixed-input', 'text-input', classes].join(' ')}
+      {...$$restProps}
+      bind:value
+      on:input
+      on:focus
+      on:blur
+      on:keydown
+      on:beforeinput
+      on:change
+    />
+  </span>
+{:else}
+  <BaseTextInput
+    {...$$restProps}
+    class={['input-element', 'text-input', classes].join(' ')}
+    bind:value
+    on:input
+    on:focus
+    on:blur
+    on:keydown
+    on:beforeinput
+    on:change
+  />
+{/if}
 
-<input
-  bind:this={element}
-  {...$$restProps}
-  type="text"
-  class={['input-element', 'text-input', classes].join(' ')}
-  class:has-error={hasError}
-  bind:value
-  {id}
-  on:input
-  on:focus
-  on:blur
-  on:keydown
-  on:beforeinput
-  on:change
-/>
+<style>
+  .prefix-wrapper {
+    position: relative;
+    display: flex;
+  }
+  :global(.prefix-wrapper .prefixed-input) {
+    flex: 1;
+    margin-left: 0.2rem;
+    border: 0;
+  }
+</style>

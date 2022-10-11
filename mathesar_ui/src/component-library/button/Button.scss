@@ -23,43 +23,48 @@ button.btn {
   /* Appearances */
   &.btn-default {
     background: var(--color-white);
-    border-color: var(--color-gray-medium);
+    border-color: var(--brand-500);
+    color: var(--brand-500);
 
     &:not(:disabled) {
       &:focus {
-        border-color: #39a0f5;
+        border-color: var(--brand-500);
       }
     }
   }
 
   &.btn-primary {
-    background: #39a0f5;
-    border-color: #39a0f5;
-    color: #fff;
+    background: var(--brand-500);
+    border-color: var(--brand-500);
+    color: var(--white);
+    font-weight: 500;
 
     &:not(:disabled) {
       &:hover {
-        background: #3995e0;
+        background: var(--brand-600);
+        border-color: var(--brand-600);
       }
 
       &:active {
-        background: #3288ce;
+        background: var(--brand-600);
+        border-color: var(--brand-600);
       }
     }
   }
 
   &.btn-secondary {
-    background: #434a57;
-    border-color: #434a57;
-    color: #fff;
+    background: var(--slate-100);
+    border-color: var(--slate-100);
+    font-weight: 500;
 
     &:not(:disabled) {
       &:hover {
-        background: #333c4b;
+        background: var(--slate-300);
+        border-color: var(--slate-300);
       }
 
       &:active {
-        background: #1d222c;
+        background: var(--slate-100);
       }
     }
   }

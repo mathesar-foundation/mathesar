@@ -4,6 +4,10 @@
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
+  // TODO: Find some way to provide better typings
+  // for the inherited props from the Dropdown component
+  // interface $$RestProps extends ComponentProps<Dropdown> {};
+
   export let label: string;
   export let icon: IconProps | undefined = undefined;
   export let closeOnInnerClick = true;
@@ -14,7 +18,9 @@
     {#if icon}
       <Icon {...icon} />
     {/if}
-    <span class="label">{label}</span>
+    {#if label}
+      <span class="label">{label}</span>
+    {/if}
   </span>
   <Menu slot="content" --min-width="100%">
     <slot />

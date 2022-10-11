@@ -32,8 +32,9 @@
   .app-header {
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid var(--color-gray-dark);
-    padding: 0.25rem;
+    padding: 0.25rem 1rem;
+    height: var(--header-height, 60px);
+    background-color: var(--slate-800);
   }
 
   .left {
@@ -56,11 +57,10 @@
   }
 
   .database-switcher a {
-    color: var(--color-text-muted);
+    color: white;
     text-decoration: none;
   }
   .database-switcher a:hover {
     text-decoration: underline;
-    color: black;
   }
 </style>
