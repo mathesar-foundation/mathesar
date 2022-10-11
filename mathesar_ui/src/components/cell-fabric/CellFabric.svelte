@@ -12,6 +12,9 @@
   export let getRecordSummary:
     | ((recordId: string) => string | undefined)
     | undefined = undefined;
+  export let setRecordSummary:
+    | ((recordId: string, recordSummary: string) => void)
+    | undefined = undefined;
   export let isActive = false;
   export let isSelectedInRange = false;
   export let disabled = false;
@@ -37,6 +40,7 @@
       {disabled}
       {horizontalAlignment}
       {getRecordSummary}
+      {setRecordSummary}
       bind:value
       on:movementKeyDown
       on:activate

@@ -23,7 +23,6 @@
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
-  import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import CellErrors from './CellErrors.svelte';
@@ -42,10 +41,11 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
-  export let recordSummariesForSheet: RecordSummariesForSheet;
 
   $: recordsDataState = recordsData.state;
+  $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
+  $: columnId = column.id;
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: ({ selectedCells } = selection);
@@ -150,7 +150,13 @@
       {isSelectedInRange}
       {value}
       getRecordSummary={(recordId) =>
-        recordSummariesForSheet.get(String(column.id))?.get(recordId)}
+        $recordSummaries.get(String(column.id))?.get(recordId)}
+      setRecordSummary={(recordId, recordSummary) =>
+        recordSummaries.addBespokeRecordSummary({
+          columnId: String(columnId),
+          recordId,
+          recordSummary,
+        })}
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}

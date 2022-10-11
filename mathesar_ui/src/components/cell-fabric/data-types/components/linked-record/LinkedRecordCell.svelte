@@ -20,6 +20,7 @@
   export let value: $$Props['value'] = undefined;
   export let getRecordSummary: Required<$$Props>['getRecordSummary'] = () =>
     undefined;
+  export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
 
@@ -30,11 +31,12 @@
 
   async function launchRecordSelector(event?: MouseEvent) {
     event?.stopPropagation();
-    const newValue = await recordSelector.acquireUserInput({ tableId });
-    if (newValue === undefined) {
+    const result = await recordSelector.acquireUserInput({ tableId });
+    if (result === undefined) {
       return;
     }
-    value = newValue;
+    value = result.recordId;
+    setRecordSummary(String(result.recordId), result.recordSummary);
     dispatch('update', { value });
 
     // This is a band-aid to make the cell remain selected after opening and

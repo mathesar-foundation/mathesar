@@ -16,7 +16,7 @@ def test_dependents_response_attrs(library_ma_tables, client):
     response_data = response.json()
 
     dependent_expected_attrs = ['obj', 'parent_obj']
-    assert len(response_data) == 7
+    assert len(response_data) == 3
     assert all(
         [
             all(attr in dependent for attr in dependent_expected_attrs)
@@ -44,7 +44,7 @@ def test_dependents_response(library_ma_tables, client):
     items_constraints_ids = _get_constraint_ids(items_constraints)
     checkouts_items_fkey_id = [c['id'] for c in checkouts_constraints if "Item" in c['name']]
 
-    assert sorted(items_dependent_ids) == sorted(items_constraints_ids + [checkouts_id] + checkouts_items_fkey_id)
+    assert sorted(items_dependent_ids) == sorted(items_constraints_ids + checkouts_items_fkey_id)
 
 
 def test_schema_dependents(library_ma_tables, client):
@@ -73,7 +73,7 @@ def test_column_dependents(library_ma_tables, client):
     patrons_pk_id = [c['id'] for c in patrons_constraints if c['name'] == 'Patrons_pkey']
     checkouts_patrons_fk_id = [c['id'] for c in checkouts_constraints if c['name'] == 'Checkouts_Patron id_fkey']
 
-    assert sorted(patrons_id_dependents_ids) == sorted([checkouts.id] + patrons_pk_id + checkouts_patrons_fk_id)
+    assert sorted(patrons_id_dependents_ids) == sorted(patrons_pk_id + checkouts_patrons_fk_id)
 
 
 def test_dependents_filters(library_ma_tables, client):

@@ -8,7 +8,6 @@ import {
 } from '@mathesar/utils/api';
 import type { Writable, Unsubscriber } from 'svelte/store';
 import {
-  ImmutableMap,
   isDefinedNonNullable,
   type CancellablePromise,
 } from '@mathesar-component-library';
@@ -24,10 +23,7 @@ import type {
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
-import {
-  buildRecordSummariesForSheet,
-  type RecordSummariesForSheet,
-} from './record-summaries/recordSummaryUtils';
+import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
 import type { Meta } from './meta';
 import type { RowKey } from './utils';
 import { validateRow, getCellKey } from './utils';
@@ -36,6 +32,7 @@ import type { Sorting } from './sorting';
 import type { Grouping as GroupingRequest } from './grouping';
 import type { Filtering } from './filtering';
 import type { SearchFuzzy } from './searchFuzzy';
+import RecordSummaryStore from './record-summaries/RecordSummaryStore';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
@@ -265,9 +262,7 @@ export class RecordsData {
 
   newRecords: Writable<NewRecordRow[]>;
 
-  recordSummariesForSheet: Writable<RecordSummariesForSheet> = writable(
-    new ImmutableMap(),
-  );
+  recordSummaries = new RecordSummaryStore();
 
   grouping: Writable<RecordGrouping | undefined>;
 
@@ -364,7 +359,7 @@ export class RecordsData {
         ? buildGrouping(response.grouping)
         : undefined;
       if (response.preview_data) {
-        this.recordSummariesForSheet.set(
+        this.recordSummaries.setFetchedSummaries(
           buildRecordSummariesForSheet(response.preview_data),
         );
       }
@@ -560,14 +555,15 @@ export class RecordsData {
     const rowKeyOfBlankRow = getRowKey(row, primaryKeyColumnId);
     this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
     this.createPromises?.get(rowKeyOfBlankRow)?.cancel();
-    const promise = postAPI<ApiRecord>(this.url, row.record);
+    const promise = postAPI<ApiRecordsResponse>(this.url, row.record);
     if (!this.createPromises) {
       this.createPromises = new Map();
     }
     this.createPromises.set(rowKeyOfBlankRow, promise);
 
     try {
-      const record = await promise;
+      const response = await promise;
+      const record = response.results[0];
       let newRow: NewRecordRow = {
         ...row,
         record,

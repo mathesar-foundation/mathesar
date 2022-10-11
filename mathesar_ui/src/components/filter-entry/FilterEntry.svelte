@@ -11,6 +11,7 @@
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
   import { iconDeleteMajor } from '@mathesar/icons';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { FilterEntryColumnLike } from './types';
   import { validateFilterEntry } from './utils';
 
@@ -18,6 +19,7 @@
   type ColumnLikeType = FilterEntryColumnLike & T;
 
   const dispatch = createEventDispatcher();
+  const tabularData = getTabularDataStoreFromContext();
 
   export let columns: ColumnLikeType[];
   export let getColumnLabel: (column: ColumnLikeType) => string;
@@ -52,6 +54,8 @@
     ? selectedColumnFiltersMap.get(conditionIdentifier)
     : undefined;
   $: selectedColumnInputCap = selectedColumn?.inputComponentAndProps;
+  $: ({ recordsData } = $tabularData);
+  $: ({ recordSummaries } = recordsData);
 
   const initialNoOfFilters = numberOfFilters;
   let showError = false;
@@ -191,6 +195,14 @@
           on:change={onValueChangeFromUser}
           class="filter-input"
           hasError={showError && !isValid}
+          getRecordSummary={(recordId) =>
+            $recordSummaries.get(String(columnIdentifier))?.get(recordId)}
+          setRecordSummary={(recordId, recordSummary) =>
+            recordSummaries.addBespokeRecordSummary({
+              columnId: String(columnIdentifier),
+              recordId,
+              recordSummary,
+            })}
         />
       {/if}
     {/key}

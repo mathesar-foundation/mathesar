@@ -1,16 +1,16 @@
-import { derived, writable, type Readable, type Writable } from 'svelte/store';
+import { derived, writable, type Readable } from 'svelte/store';
 
 import type { TableEntry } from '@mathesar/api/tables';
 import type { Response as ApiResponse } from '@mathesar/api/tables/records';
-import { ImmutableMap, WritableMap } from '@mathesar/component-library';
+import { WritableMap } from '@mathesar/component-library';
 import {
   renderTransitiveRecordSummary,
   prepareFieldsAsRecordSummaryInputData,
   buildRecordSummariesForSheet,
-  type RecordSummariesForSheet,
 } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 import { getAPI, patchAPI, type RequestStatus } from '@mathesar/utils/api';
 import { getErrorMessage } from '@mathesar/utils/errors';
+import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 
 export default class RecordStore {
   fetchRequest = writable<RequestStatus | undefined>(undefined);
@@ -18,9 +18,7 @@ export default class RecordStore {
   /** Keys are column ids */
   fields = new WritableMap<number, unknown>();
 
-  recordSummariesForSheet: Writable<RecordSummariesForSheet> = writable(
-    new ImmutableMap(),
-  );
+  recordSummaries = new RecordSummaryStore();
 
   summary: Readable<string>;
 
@@ -36,7 +34,7 @@ export default class RecordStore {
     this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordId}/`;
     const { template } = this.table.settings.preview_settings;
     this.summary = derived(
-      [this.fields, this.recordSummariesForSheet],
+      [this.fields, this.recordSummaries],
       ([fields, fkSummaryData]) =>
         renderTransitiveRecordSummary({
           template,
@@ -53,7 +51,7 @@ export default class RecordStore {
       Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
     );
     if (response.preview_data) {
-      this.recordSummariesForSheet.set(
+      this.recordSummaries.setFetchedSummaries(
         buildRecordSummariesForSheet(response.preview_data),
       );
     }
