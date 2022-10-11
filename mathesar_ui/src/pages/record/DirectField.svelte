@@ -43,5 +43,11 @@
     on:artificialChange={(e) => updateField(getValueFromArtificialEvent(e))}
     getRecordSummary={(recordId) =>
       $recordSummaries.get(String(column.id))?.get(recordId)}
+    setRecordSummary={(recordId, recordSummary) =>
+      recordSummaries.addBespokeRecordSummary({
+        columnId: String(column.id),
+        recordId,
+        recordSummary,
+      })}
   />
 </LabeledInput>
