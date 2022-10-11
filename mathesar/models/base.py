@@ -6,19 +6,21 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import JSONField, Deferrable
+from django.db.models import JSONField
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import (
-    get_column_attnum_from_names_as_map, get_column_name_from_attnum, get_columns_attnum_from_names,
+    get_column_attnum_from_names_as_map, get_column_name_from_attnum,
     get_map_of_attnum_to_column_name, get_map_of_attnum_and_table_oid_to_column_name,
 )
 from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
-from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
+from db.constraints.operations.select import (
+    get_constraint_oid_by_name_and_table_oid, get_constraint_record_from_oid
+)
 from db.constraints import utils as constraint_utils
 from db.dependents.dependents_utils import get_dependents_graph, has_dependents
 from db.records.operations.delete import delete_record
@@ -662,7 +664,7 @@ class Column(ReflectionManagerMixin, BaseModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["attnum", "table"], name="unique_column", deferrable=Deferrable.DEFERRED)
+            models.UniqueConstraint(fields=["attnum", "table"], name="unique_column")
         ]
 
     def __str__(self):
@@ -752,63 +754,57 @@ class Column(ReflectionManagerMixin, BaseModel):
 class Constraint(DatabaseObject):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["oid", "table"], name="unique_constraint")
+        ]
+
+    # TODO try to cache this for an entire request
     @property
-    def _sa_constraint(self):
+    def _constraint_record(self):
         engine = self.table.schema.database._sa_engine
-        # TODO HACK reset cached property, otherwise it can be out of date here
-        del self.table._sa_table
-        sa_constraint = get_constraint_from_oid(self.oid, engine, self.table._sa_table)
-        assert sa_constraint is not None
-        return sa_constraint
+        return get_constraint_record_from_oid(self.oid, engine)
 
     @property
     def name(self):
-        return self._sa_constraint.name
+        return self._constraint_record['conname']
 
     @property
     def type(self):
-        return constraint_utils.get_constraint_type_from_class(self._sa_constraint)
+        return constraint_utils.get_constraint_type_from_char(self._constraint_record['contype'])
 
     @property
     def columns(self):
-        column_names = [column.name for column in self._sa_constraint.columns]
-        engine = self.table.schema.database._sa_engine
-        column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine, metadata=get_cached_metadata())]
+        column_attnum_list = self._constraint_record['conkey']
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
 
     @property
     def referent_columns(self):
-        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
-            column_names = [fk.column.name for fk in self._sa_constraint.elements]
-            engine = self.table.schema._sa_engine
-            oid = get_oid_from_table(self._sa_constraint.referred_table.name,
-                                     self._sa_constraint.referred_table.schema,
-                                     engine)
-            table = Table.objects.get(oid=oid, schema=self.table.schema)
-            column_attnum_list = get_columns_attnum_from_names(oid, column_names, table.schema._sa_engine, metadata=get_cached_metadata())
+        column_attnum_list = self._constraint_record['confkey']
+        if column_attnum_list:
+            foreign_relation_oid = self._constraint_record['confrelid']
+            table = Table.objects.get(oid=foreign_relation_oid, schema=self.table.schema)
             columns = Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
             return columns
-        return None
 
     @property
     def ondelete(self):
-        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
-            return self._sa_constraint.ondelete
+        action_char = self._constraint_record['confdeltype']
+        return constraint_utils.get_constraint_action_from_char(action_char)
 
     @property
     def onupdate(self):
-        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
-            return self._sa_constraint.onupdate
+        action_char = self._constraint_record['confupdtype']
+        return constraint_utils.get_constraint_action_from_char(action_char)
 
     @property
     def deferrable(self):
-        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
-            return self._sa_constraint.deferrable
+        return self._constraint_record['condeferrable']
 
     @property
     def match(self):
-        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
-            return self._sa_constraint.match
+        type_char = self._constraint_record['confmatchtype']
+        return constraint_utils.get_constraint_match_type_from_char(type_char)
 
     def drop(self):
         drop_constraint(
@@ -845,3 +841,29 @@ class PreviewColumnSettings(BaseModel):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
+
+
+def _create_table_settings(tables):
+    # TODO Bulk create preview settings to improve performance
+    for table in tables:
+        preview_column_settings = PreviewColumnSettings.objects.create(customized=False)
+        TableSettings.current_objects.create(table=table, preview_settings=preview_column_settings)
+
+
+def _compute_preview_template(table):
+    if not table.settings.preview_settings.customized:
+        columns = Column.current_objects.filter(table=table).prefetch_related('table', 'table__schema', 'table__schema__database').order_by('attnum')
+        preview_column = None
+        primary_key_column = None
+        for column in columns:
+            if column.primary_key:
+                primary_key_column = column
+            else:
+                preview_column = column
+                break
+        if preview_column is None:
+            preview_column = primary_key_column
+        preview_template = f"{{{preview_column.id}}}"
+        preview_settings = table.settings.preview_settings
+        preview_settings.template = preview_template
+        preview_settings.save()

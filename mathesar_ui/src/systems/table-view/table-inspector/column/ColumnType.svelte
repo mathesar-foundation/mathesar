@@ -1,8 +1,10 @@
 <script lang="ts">
   import { Button, Icon } from '@mathesar/component-library';
   import { iconEdit } from '@mathesar/icons';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
+  import {
+    getTabularDataStoreFromContext,
+    type ProcessedColumn,
+  } from '@mathesar/stores/table-data';
   import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import type { ColumnTypeOptionsSaveArgs } from '@mathesar/components/abstract-type-control/types';

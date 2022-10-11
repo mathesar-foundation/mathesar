@@ -52,11 +52,11 @@ def _get_columns_attnum_from_names(table_oid, column_names, engine, metadata):
     return sel
 
 
-def get_column_attnums_from_table(table_oid, engine, metadata, connection_to_use=None):
+def get_column_attnums_from_tables(table_oids, engine, metadata, connection_to_use=None):
     pg_attribute = get_pg_catalog_table("pg_attribute", engine, metadata=metadata)
-    sel = select(pg_attribute.c.attnum).where(
+    sel = select(pg_attribute.c.attnum, pg_attribute.c.attrelid.label('table_oid')).where(
         and_(
-            pg_attribute.c.attrelid == table_oid,
+            pg_attribute.c.attrelid.in_(table_oids),
             # Ignore system columns
             pg_attribute.c.attnum > 0,
             # Ignore removed columns

@@ -5,8 +5,11 @@
     iconSortAscending,
     iconGrouping,
   } from '@mathesar/icons';
-  import { Meta, SortDirection } from '@mathesar/stores/table-data';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import {
+    Meta,
+    SortDirection,
+    type ProcessedColumn,
+  } from '@mathesar/stores/table-data';
 
   export let column: ProcessedColumn;
   export let meta: Meta;

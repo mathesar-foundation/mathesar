@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import ColumnName from './ColumnName.svelte';
   import type { DisplayColumn } from './types';
 
