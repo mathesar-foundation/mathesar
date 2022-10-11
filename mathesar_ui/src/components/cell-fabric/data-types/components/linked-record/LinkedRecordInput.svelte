@@ -18,6 +18,7 @@
   export let value: $$Props['value'] = undefined;
   export let getRecordSummary: Required<$$Props>['getRecordSummary'] = () =>
     undefined;
+  export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
   export let tableId: $$Props['tableId'];
   let classes: $$Props['class'] = '';
   export { classes as class };
@@ -42,13 +43,14 @@
   async function launchRecordSelector() {
     dispatch('recordSelectorOpen');
     isAcquiringInput = true;
-    const newValue = await recordSelector.acquireUserInput({ tableId });
+    const result = await recordSelector.acquireUserInput({ tableId });
     isAcquiringInput = false;
-    if (newValue === undefined) {
+    if (result === undefined) {
       dispatch('recordSelectorCancel');
       return;
     }
-    value = newValue;
+    value = result.recordId;
+    setRecordSummary(String(result.recordId), result.recordSummary);
     dispatch('recordSelectorSubmit');
     dispatch('artificialChange', value);
     dispatch('artificialInput', value);

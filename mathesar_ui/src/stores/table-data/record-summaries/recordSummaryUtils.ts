@@ -34,7 +34,7 @@ export function renderRecordSummary(
  */
 type InputData = ImmutableMap<string, string>;
 
-function buildInputData(apiData: ApiRecordSummaryInputData): InputData {
+export function buildInputData(apiData: ApiRecordSummaryInputData): InputData {
   const entries = Object.entries(apiData);
   return new ImmutableMap(entries.map(([k, v]) => [k, String(v)]));
 }

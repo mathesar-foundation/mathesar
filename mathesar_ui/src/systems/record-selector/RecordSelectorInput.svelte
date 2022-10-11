@@ -17,6 +17,10 @@
   export let componentAndProps: ComponentAndProps;
   export let searchFuzzy: Writable<SearchFuzzy>;
   export let getRecordSummary: (recordId: string) => string | undefined;
+  export let setRecordSummary: (
+    recordId: string,
+    recordSummary: string,
+  ) => void;
 
   $: value = $searchFuzzy.get(columnId);
 
@@ -33,6 +37,7 @@
     {componentAndProps}
     {value}
     {getRecordSummary}
+    {setRecordSummary}
     on:input={(e) =>
       handleNewValue({ value: getValueFromEvent(e), debounce: true })}
     on:artificialInput={(e) =>

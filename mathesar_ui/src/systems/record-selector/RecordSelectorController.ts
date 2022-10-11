@@ -12,6 +12,11 @@ interface RecordSelectorControllerProps {
 
 type FkCellValue = string | number;
 
+export interface RecordSelectorResult {
+  recordId: FkCellValue;
+  recordSummary: string;
+}
+
 export class RecordSelectorController {
   private onOpen: () => void;
 
@@ -21,7 +26,7 @@ export class RecordSelectorController {
 
   isOpen = writable(false);
 
-  submit: (v: FkCellValue) => void = () => {};
+  submit: (v: RecordSelectorResult) => void = () => {};
 
   cancel: () => void = () => {};
 
@@ -50,7 +55,7 @@ export class RecordSelectorController {
     tableId,
   }: {
     tableId: DBObjectEntry['id'];
-  }): Promise<FkCellValue | undefined> {
+  }): Promise<RecordSelectorResult | undefined> {
     this.tableId.set(tableId);
     this.rowType.set('button');
     this.open();

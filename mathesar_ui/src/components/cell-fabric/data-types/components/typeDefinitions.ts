@@ -37,6 +37,7 @@ export interface LinkedRecordCellProps
   extends CellTypeProps<ForeignKeyCellValue>,
     LinkedRecordCellExternalProps {
   getRecordSummary?: (recordId: string) => string | undefined;
+  setRecordSummary?: (recordId: string, recordSummary: string) => void;
 }
 
 // TextBox

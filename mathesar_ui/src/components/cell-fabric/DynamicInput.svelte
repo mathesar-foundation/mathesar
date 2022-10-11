@@ -27,6 +27,7 @@ during Sheet component creation.
      */
     containerClass?: string;
     getRecordSummary?: (recordId: string) => string | undefined;
+    setRecordSummary?: (recordId: string, recordSummary: string) => void;
   }
 
   export let value: unknown;

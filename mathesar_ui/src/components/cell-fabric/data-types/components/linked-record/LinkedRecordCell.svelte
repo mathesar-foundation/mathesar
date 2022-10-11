@@ -30,11 +30,12 @@
 
   async function launchRecordSelector(event?: MouseEvent) {
     event?.stopPropagation();
-    const newValue = await recordSelector.acquireUserInput({ tableId });
-    if (newValue === undefined) {
+    const result = await recordSelector.acquireUserInput({ tableId });
+    if (result === undefined) {
       return;
     }
-    value = newValue;
+    value = result.recordId;
+    // TODO store `result.recordSummary`
     dispatch('update', { value });
 
     // This is a band-aid to make the cell remain selected after opening and
