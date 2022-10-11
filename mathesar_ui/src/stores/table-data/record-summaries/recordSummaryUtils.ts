@@ -54,6 +54,13 @@ function buildRecordSummariesForColumn(
   );
 }
 
+function mergeRecordSummariesForColumn(
+  a: RecordSummariesForColumn,
+  b: RecordSummariesForColumn,
+): RecordSummariesForColumn {
+  return a.withEntries(b);
+}
+
 /** Keys are stringified column ids */
 export type RecordSummariesForSheet = ImmutableMap<
   string,
@@ -69,6 +76,13 @@ export function buildRecordSummariesForSheet(
       buildRecordSummariesForColumn(apiData),
     ]),
   );
+}
+
+export function mergeRecordSummariesForSheet(
+  a: RecordSummariesForSheet,
+  b: RecordSummariesForSheet,
+): RecordSummariesForSheet {
+  return a.withEntries(b, mergeRecordSummariesForColumn);
 }
 
 function stringifyFieldValue(v: unknown): string {

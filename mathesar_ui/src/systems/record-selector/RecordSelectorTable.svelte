@@ -42,7 +42,9 @@
     isLoading,
     columnsDataStore,
     id: tableId,
+    recordsData,
   } = tabularData);
+  $: ({ recordSummariesForSheet } = recordsData);
   $: ({ constraints, state: constraintsState } = $constraintsDataStore);
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: rowWidthStore = display.rowWidth;
@@ -150,6 +152,8 @@
             componentAndProps={processedColumn.inputComponentAndProps}
             searchFuzzy={meta.searchFuzzy}
             columnId={column.id}
+            getRecordSummary={(recordId) =>
+              $recordSummariesForSheet.get(String(column.id))?.get(recordId)}
             on:focus={() => handleInputFocus(column)}
             on:blur={() => handleInputBlur()}
             on:recordSelectorOpen={() => {

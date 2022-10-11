@@ -1,4 +1,9 @@
-import { writable, get as getStoreValue } from 'svelte/store';
+import {
+  writable,
+  get as getStoreValue,
+  type Readable,
+  derived,
+} from 'svelte/store';
 import {
   States,
   getAPI,
@@ -26,6 +31,7 @@ import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
 import {
   buildRecordSummariesForSheet,
+  mergeRecordSummariesForSheet,
   type RecordSummariesForSheet,
 } from './record-summaries/recordSummaryUtils';
 import type { Meta } from './meta';
@@ -265,9 +271,23 @@ export class RecordsData {
 
   newRecords: Writable<NewRecordRow[]>;
 
-  recordSummariesForSheet: Writable<RecordSummariesForSheet> = writable(
+  /** Record summary data we got from the API when fetching the records */
+  fetchedRecordSummariesForSheet: Writable<RecordSummariesForSheet> = writable(
     new ImmutableMap(),
   );
+
+  /**
+   * This stores record summary data we got from the Record Selector. This data
+   * does not get wiped out when re-fetching the records from the API. In fact,
+   * it doesn't get clear at all, unless the records store is destroyed. This is
+   * not a big deal though (for memory leaks) because it only grows a tiny bit
+   * each time the user selects a record with the record selector.
+   */
+  bespokeRecordSummariesForSheet: Writable<RecordSummariesForSheet> = writable(
+    new ImmutableMap(),
+  );
+
+  recordSummariesForSheet: Readable<RecordSummariesForSheet>;
 
   grouping: Writable<RecordGrouping | undefined>;
 
@@ -313,6 +333,14 @@ export class RecordsData {
       this.meta.recordsRequestParamsData.subscribe(() => {
         void this.fetch();
       });
+
+    this.recordSummariesForSheet = derived(
+      [
+        this.fetchedRecordSummariesForSheet,
+        this.bespokeRecordSummariesForSheet,
+      ],
+      ([a, b]) => mergeRecordSummariesForSheet(a, b),
+    );
   }
 
   async fetch(
@@ -364,7 +392,7 @@ export class RecordsData {
         ? buildGrouping(response.grouping)
         : undefined;
       if (response.preview_data) {
-        this.recordSummariesForSheet.set(
+        this.fetchedRecordSummariesForSheet.set(
           buildRecordSummariesForSheet(response.preview_data),
         );
       }

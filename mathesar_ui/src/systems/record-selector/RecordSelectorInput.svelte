@@ -16,6 +16,7 @@
   export let columnId: number;
   export let componentAndProps: ComponentAndProps;
   export let searchFuzzy: Writable<SearchFuzzy>;
+  export let getRecordSummary: (recordId: string) => string | undefined;
 
   $: value = $searchFuzzy.get(columnId);
 
@@ -31,6 +32,7 @@
     {containerClass}
     {componentAndProps}
     {value}
+    {getRecordSummary}
     on:input={(e) =>
       handleNewValue({ value: getValueFromEvent(e), debounce: true })}
     on:artificialInput={(e) =>
