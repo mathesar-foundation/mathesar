@@ -121,7 +121,6 @@
           modificationStatusMap={cellModificationStatus}
           clientSideErrorMap={cellClientSideErrors}
           bind:value={row.record[columnId]}
-          recordSummariesForSheet={$recordSummariesForSheet}
           {processedColumn}
           {recordsData}
         />

@@ -336,8 +336,8 @@ export class RecordsData {
 
     this.recordSummariesForSheet = derived(
       [
-        this.fetchedRecordSummariesForSheet,
         this.bespokeRecordSummariesForSheet,
+        this.fetchedRecordSummariesForSheet,
       ],
       ([a, b]) => mergeRecordSummariesForSheet(a, b),
     );
@@ -693,6 +693,23 @@ export class RecordsData {
     );
 
     return [...savedRecordRows, ...getStoreValue(this.newRecords)];
+  }
+
+  setBespokeRecordSummary({
+    columnId,
+    recordId,
+    recordSummary,
+  }: {
+    columnId: number;
+    recordId: string;
+    recordSummary: string;
+  }): void {
+    const additional: RecordSummariesForSheet = new ImmutableMap([
+      [String(columnId), new ImmutableMap([[recordId, recordSummary]])],
+    ]);
+    this.bespokeRecordSummariesForSheet.update((existing) =>
+      mergeRecordSummariesForSheet(existing, additional),
+    );
   }
 
   destroy(): void {

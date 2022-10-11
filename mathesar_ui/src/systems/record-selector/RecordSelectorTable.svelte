@@ -3,11 +3,7 @@
 
   import type { Column } from '@mathesar/api/tables/columns';
   import type { Response as ApiRecordsResponse } from '@mathesar/api/tables/records';
-  import {
-    ImmutableMap,
-    ImmutableSet,
-    Spinner,
-  } from '@mathesar-component-library';
+  import { ImmutableSet, Spinner } from '@mathesar-component-library';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -20,9 +16,7 @@
   import {
     buildInputData,
     buildRecordSummariesForSheet,
-    mergeRecordSummariesForSheet,
     renderTransitiveRecordSummary,
-    type RecordSummariesForSheet,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import Arrow from './Arrow.svelte';
   import CellArranger from './CellArranger.svelte';
@@ -59,8 +53,7 @@
     id: tableId,
     recordsData,
   } = tabularData);
-  $: ({ recordSummariesForSheet, bespokeRecordSummariesForSheet } =
-    recordsData);
+  $: ({ recordSummariesForSheet } = recordsData);
   $: ({ constraints, state: constraintsState } = $constraintsDataStore);
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: rowWidthStore = display.rowWidth;
@@ -133,19 +126,6 @@
   function handleInputBlur() {
     columnWithFocus = undefined;
   }
-
-  function setBespokeRecordSummary(
-    columnId: number,
-    recordId: string,
-    recordSummary: string,
-  ) {
-    const additional: RecordSummariesForSheet = new ImmutableMap([
-      [String(columnId), new ImmutableMap([[recordId, recordSummary]])],
-    ]);
-    bespokeRecordSummariesForSheet.update((existing) =>
-      mergeRecordSummariesForSheet(existing, additional),
-    );
-  }
 </script>
 
 <div
@@ -174,6 +154,7 @@
 
     <div class="row inputs">
       <CellArranger {display} let:style let:processedColumn let:column>
+        {@const columnId = processedColumn.id}
         {#if column === $columnWithNestedSelectorOpen}
           <div class="active-fk-cell-indicator" {style}>
             <div class="border" />
@@ -190,15 +171,19 @@
           style="{style}{column === columnWithFocus ? 'z-index: 101;' : ''}"
         >
           <RecordSelectorInput
-            class="record-selector-input column-{column.id}"
+            class="record-selector-input column-{columnId}"
             containerClass="record-selector-input-container"
             componentAndProps={processedColumn.inputComponentAndProps}
             searchFuzzy={meta.searchFuzzy}
-            columnId={column.id}
+            {columnId}
             getRecordSummary={(recordId) =>
-              $recordSummariesForSheet.get(String(column.id))?.get(recordId)}
+              $recordSummariesForSheet.get(String(columnId))?.get(recordId)}
             setRecordSummary={(recordId, recordSummary) =>
-              setBespokeRecordSummary(column.id, recordId, recordSummary)}
+              recordsData.setBespokeRecordSummary({
+                columnId,
+                recordId,
+                recordSummary,
+              })}
             on:focus={() => handleInputFocus(column)}
             on:blur={() => handleInputBlur()}
             on:recordSelectorOpen={() => {
