@@ -8,6 +8,7 @@ from db.columns.operations.create import create_column
 from db.columns.operations.select import get_column_attnum_from_name
 from db.constraints.operations.create import create_constraint
 from db.types.base import PostgresType
+from db.metadata import get_empty_metadata
 
 
 def _get_object_dependents(dependents_graph, object_oid):
@@ -85,7 +86,7 @@ def test_self_reference(engine_with_schema, library_tables_oids):
 
     # remove when library_without_checkouts.sql is updated and includes self-reference case
     fk_column = create_column(engine, publishers_oid, {'name': 'Parent Publisher', 'type': PostgresType.INTEGER.id})
-    pk_column_attnum = get_column_attnum_from_name(publishers_oid, 'id', engine)
+    pk_column_attnum = get_column_attnum_from_name(publishers_oid, 'id', engine, metadata=get_empty_metadata())
     fk_constraint = ForeignKeyConstraint('Publishers_Publisher_fkey', publishers_oid, [fk_column.column_attnum], publishers_oid, [pk_column_attnum], {})
     create_constraint(schema, engine, fk_constraint)
 
@@ -106,7 +107,7 @@ def test_circular_reference(engine_with_schema, library_tables_oids):
 
     # remove when library_without_checkouts.sql is updated and includes circular reference case
     fk_column = create_column(engine, publishers_oid, {'name': 'Top Publication', 'type': PostgresType.INTEGER.id})
-    publications_pk_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine)
+    publications_pk_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine, metadata=get_empty_metadata())
     fk_constraint = ForeignKeyConstraint('Publishers_Publications_fkey', publishers_oid, [fk_column.column_attnum], publications_oid, [publications_pk_column_attnum], {})
     create_constraint(schema, engine, fk_constraint)
 
@@ -137,7 +138,7 @@ def test_dependents_graph_max_level(engine_with_schema, library_db_tables, libra
 def test_column_dependents(engine, library_tables_oids):
     publications_oid = library_tables_oids['Publications']
     items_oid = library_tables_oids['Items']
-    publications_id_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine)
+    publications_id_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine, metadata=get_empty_metadata())
     publications_id_column_dependents_graph = get_dependents_graph(publications_oid, engine, [], publications_id_column_attnum)
 
     publications_pk_oid = get_constraint_oid_by_name_and_table_oid('Publications_pkey', publications_oid, engine)

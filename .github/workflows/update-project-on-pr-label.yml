@@ -65,7 +65,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.pull_request.node_id }} --status Started --priority Active
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Started --priority High
 
       - name: Update Review PRs
         if: "${{ contains(github.event.pull_request.labels.*.name, 'status: review') }}"
@@ -73,7 +73,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.pull_request.node_id }} --status Review --priority Active
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Review --priority High
 
       - name: Update Done PRs
         if: "${{ contains(github.event.pull_request.labels.*.name, 'status: done') }}"
@@ -81,7 +81,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.pull_request.node_id }} --status Done --priority Active
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Done
 
       - name: Update Future PRs
         if: "${{ contains(github.event.pull_request.labels.*.name, 'priority: future') }}"
@@ -89,7 +89,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.pull_request.node_id }} --status Draft --priority Future
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Draft
 
       - name: Update Urgent PRs
         if: "${{ contains(github.event.pull_request.labels.*.name, 'priority: urgent') }}"
@@ -97,7 +97,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.pull_request.node_id }} --priority Active
+          python project_update.py ${{ github.event.pull_request.node_id }} --priority Critical
 
       - name: Update documentation PRs
         if: "${{ contains(github.event.pull_request.labels.*.name, 'work: documentation') }}"

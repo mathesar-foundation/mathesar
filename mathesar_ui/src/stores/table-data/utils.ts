@@ -8,7 +8,7 @@ import type { Column } from '@mathesar/api/tables/columns';
 import type { RequestStatus } from '@mathesar/utils/api';
 import { getMostImportantRequestStatusState } from '@mathesar/utils/api';
 import type { RowStatus } from './meta';
-import type { Row } from './records';
+import type { RecordRow } from './records';
 
 export type CellKey = string;
 export type RowKey = string;
@@ -154,14 +154,14 @@ export function validateRow({
   columns,
   cellClientSideErrors,
 }: {
-  row: Row;
+  row: RecordRow;
   rowKey: RowKey;
   columns: Column[];
   cellClientSideErrors: WritableMap<CellKey, string[]>;
 }): void {
   columns.forEach((column) => {
     validateCell({
-      cellValue: row.record?.[String(column.id)],
+      cellValue: row.record[String(column.id)],
       column,
       cellKey: getCellKey(rowKey, column.id),
       cellClientSideErrors,
