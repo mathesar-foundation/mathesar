@@ -2,7 +2,6 @@
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Column } from '@mathesar/api/tables/columns';
   import { Icon } from '@mathesar/component-library';
-  import Identifier from '@mathesar/components/Identifier.svelte';
   import { iconMultipleRecords } from '@mathesar/icons';
   import {
     setTabularDataStoreInContext,
@@ -47,12 +46,7 @@
   <div class="top">
     <div class="left">
       <Icon {...iconMultipleRecords} size="1.4rem" />
-      <h2 class="heading">
-        <Identifier>{table.name}</Identifier> Records
-      </h2>
-      <div class="fk-column">
-        (with <Identifier>{fkColumn.name}</Identifier> set to this record)
-      </div>
+      <h3 class="heading">{table.name}</h3>
     </div>
     <div class="right">
       <MiniActionsPane />
@@ -91,10 +85,5 @@
     flex: 1 0 auto;
     display: flex;
     justify-content: flex-end;
-  }
-  .fk-column {
-    font-size: 1rem;
-    font-weight: normal;
-    color: var(--color-text-muted);
   }
 </style>
