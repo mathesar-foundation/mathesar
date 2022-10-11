@@ -180,7 +180,7 @@
               $recordSummariesForSheet.get(String(columnId))?.get(recordId)}
             setRecordSummary={(recordId, recordSummary) =>
               recordsData.setBespokeRecordSummary({
-                columnId,
+                columnId: String(columnId),
                 recordId,
                 recordSummary,
               })}

@@ -700,12 +700,12 @@ export class RecordsData {
     recordId,
     recordSummary,
   }: {
-    columnId: number;
+    columnId: string;
     recordId: string;
     recordSummary: string;
   }): void {
     const additional: RecordSummariesForSheet = new ImmutableMap([
-      [String(columnId), new ImmutableMap([[recordId, recordSummary]])],
+      [columnId, new ImmutableMap([[recordId, recordSummary]])],
     ]);
     this.bespokeRecordSummariesForSheet.update((existing) =>
       mergeRecordSummariesForSheet(existing, additional),
