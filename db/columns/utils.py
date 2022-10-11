@@ -53,7 +53,7 @@ def perfect_map(temp_table_col_list, target_table_col_list, engine):
 
 
 def find_match(temp_table_col_list, target_table_col_list, engine):
-    if perfect_match := perfect_map(temp_table_col_list, target_table_col_list, engine) is not None:
+    if perfect_match := perfect_map(temp_table_col_list, target_table_col_list, engine):
         return perfect_match
     else:
         def lowercase(x):
@@ -62,13 +62,13 @@ def find_match(temp_table_col_list, target_table_col_list, engine):
         def replace_(x):
             return [(i[0].replace('_', ' '), *i[1:]) for i in x]
 
-        if case_insensitive_match := perfect_map(lowercase(temp_table_col_list), lowercase(target_table_col_list), engine) is not None:
+        if case_insensitive_match := perfect_map(lowercase(temp_table_col_list), lowercase(target_table_col_list), engine):
             return case_insensitive_match
-        elif space_switched_match := perfect_map(replace_(temp_table_col_list), replace_(target_table_col_list), engine) is not None:
+        elif space_switched_match := perfect_map(replace_(temp_table_col_list), replace_(target_table_col_list), engine):
             return space_switched_match
-        elif space_switched_case_insensetive_match := perfect_map(lowercase(replace_(temp_table_col_list)), lowercase(replace_(target_table_col_list)), engine) is not None:
+        elif space_switched_case_insensetive_match := perfect_map(lowercase(replace_(temp_table_col_list)), lowercase(replace_(target_table_col_list)), engine):
             return space_switched_case_insensetive_match
-
+    # raise match not found
 
 def is_type_casting_valid(match, engine):
     # Checks if the column of the temporary table can be type casted to that of a target table if a valid match is found between them.
