@@ -55,7 +55,7 @@
     : undefined;
   $: selectedColumnInputCap = selectedColumn?.inputComponentAndProps;
   $: ({ recordsData } = $tabularData);
-  $: ({ recordSummariesForSheet } = recordsData);
+  $: ({ recordSummaries } = recordsData);
 
   const initialNoOfFilters = numberOfFilters;
   let showError = false;
@@ -196,11 +196,9 @@
           class="filter-input"
           hasError={showError && !isValid}
           getRecordSummary={(recordId) =>
-            $recordSummariesForSheet
-              .get(String(columnIdentifier))
-              ?.get(recordId)}
+            $recordSummaries.get(String(columnIdentifier))?.get(recordId)}
           setRecordSummary={(recordId, recordSummary) =>
-            recordsData.setBespokeRecordSummary({
+            recordSummaries.addBespokeRecordSummary({
               columnId: String(columnIdentifier),
               recordId,
               recordSummary,

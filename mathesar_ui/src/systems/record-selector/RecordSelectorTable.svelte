@@ -53,7 +53,7 @@
     id: tableId,
     recordsData,
   } = tabularData);
-  $: ({ recordSummariesForSheet } = recordsData);
+  $: ({ recordSummaries } = recordsData);
   $: ({ constraints, state: constraintsState } = $constraintsDataStore);
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: rowWidthStore = display.rowWidth;
@@ -177,9 +177,9 @@
             searchFuzzy={meta.searchFuzzy}
             {columnId}
             getRecordSummary={(recordId) =>
-              $recordSummariesForSheet.get(String(columnId))?.get(recordId)}
+              $recordSummaries.get(String(columnId))?.get(recordId)}
             setRecordSummary={(recordId, recordSummary) =>
-              recordsData.setBespokeRecordSummary({
+              recordSummaries.addBespokeRecordSummary({
                 columnId: String(columnId),
                 recordId,
                 recordSummary,

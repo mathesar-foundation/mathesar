@@ -43,7 +43,7 @@
   export let value: unknown = undefined;
 
   $: recordsDataState = recordsData.state;
-  $: ({ recordSummariesForSheet } = recordsData);
+  $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
   $: columnId = column.id;
   $: ({ activeCell } = display);
@@ -150,9 +150,9 @@
       {isSelectedInRange}
       {value}
       getRecordSummary={(recordId) =>
-        $recordSummariesForSheet.get(String(column.id))?.get(recordId)}
+        $recordSummaries.get(String(column.id))?.get(recordId)}
       setRecordSummary={(recordId, recordSummary) =>
-        recordsData.setBespokeRecordSummary({
+        recordSummaries.addBespokeRecordSummary({
           columnId: String(columnId),
           recordId,
           recordSummary,

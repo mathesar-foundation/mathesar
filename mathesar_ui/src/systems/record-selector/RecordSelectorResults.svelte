@@ -69,7 +69,7 @@
   $: ({ display, recordsData, meta, columnsDataStore, isLoading } =
     $tabularData);
   $: recordsStore = recordsData.savedRecords;
-  $: ({ recordSummariesForSheet } = recordsData);
+  $: ({ recordSummaries } = recordsData);
   $: ({ searchFuzzy } = meta);
   $: records = filterRecordRows($recordsStore);
   $: resultCount = records.length;
@@ -136,7 +136,7 @@
     const recordSummary = renderTransitiveRecordSummary({
       template,
       inputData: buildInputData(record),
-      transitiveData: $recordSummariesForSheet,
+      transitiveData: $recordSummaries,
     });
     submitResult({ recordId, recordSummary });
   }
@@ -204,7 +204,7 @@
               value={$searchFuzzy.get(column.id) ??
                 (processedColumn.column.nullable ? null : undefined)}
               getRecordSummary={(recordId) =>
-                $recordSummariesForSheet.get(String(column.id))?.get(recordId)}
+                $recordSummaries.get(String(column.id))?.get(recordId)}
               disabled
             />
             <RowCellBackgrounds isSelected={selection.type === 'ghost'} />
@@ -228,7 +228,7 @@
               columnFabric={processedColumn}
               {value}
               getRecordSummary={(recordId) =>
-                $recordSummariesForSheet.get(String(columnId))?.get(recordId)}
+                $recordSummaries.get(String(columnId))?.get(recordId)}
               disabled
               showAsSkeleton={!rowHasSavedRecord(row)}
             />

@@ -1,9 +1,4 @@
-import {
-  writable,
-  get as getStoreValue,
-  type Readable,
-  derived,
-} from 'svelte/store';
+import { writable, get as getStoreValue } from 'svelte/store';
 import {
   States,
   getAPI,
@@ -13,7 +8,6 @@ import {
 } from '@mathesar/utils/api';
 import type { Writable, Unsubscriber } from 'svelte/store';
 import {
-  ImmutableMap,
   isDefinedNonNullable,
   type CancellablePromise,
 } from '@mathesar-component-library';
@@ -29,11 +23,7 @@ import type {
 import type { Column } from '@mathesar/api/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
-import {
-  buildRecordSummariesForSheet,
-  mergeRecordSummariesForSheet,
-  type RecordSummariesForSheet,
-} from './record-summaries/recordSummaryUtils';
+import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
 import type { Meta } from './meta';
 import type { RowKey } from './utils';
 import { validateRow, getCellKey } from './utils';
@@ -42,6 +32,7 @@ import type { Sorting } from './sorting';
 import type { Grouping as GroupingRequest } from './grouping';
 import type { Filtering } from './filtering';
 import type { SearchFuzzy } from './searchFuzzy';
+import RecordSummaryStore from './record-summaries/RecordSummaryStore';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
@@ -271,23 +262,7 @@ export class RecordsData {
 
   newRecords: Writable<NewRecordRow[]>;
 
-  /** Record summary data we got from the API when fetching the records */
-  fetchedRecordSummariesForSheet: Writable<RecordSummariesForSheet> = writable(
-    new ImmutableMap(),
-  );
-
-  /**
-   * This stores record summary data we got from the Record Selector. This data
-   * does not get wiped out when re-fetching the records from the API. In fact,
-   * it doesn't get clear at all, unless the records store is destroyed. This is
-   * not a big deal though (for memory leaks) because it only grows a tiny bit
-   * each time the user selects a record with the record selector.
-   */
-  bespokeRecordSummariesForSheet: Writable<RecordSummariesForSheet> = writable(
-    new ImmutableMap(),
-  );
-
-  recordSummariesForSheet: Readable<RecordSummariesForSheet>;
+  recordSummaries = new RecordSummaryStore();
 
   grouping: Writable<RecordGrouping | undefined>;
 
@@ -333,14 +308,6 @@ export class RecordsData {
       this.meta.recordsRequestParamsData.subscribe(() => {
         void this.fetch();
       });
-
-    this.recordSummariesForSheet = derived(
-      [
-        this.bespokeRecordSummariesForSheet,
-        this.fetchedRecordSummariesForSheet,
-      ],
-      ([a, b]) => mergeRecordSummariesForSheet(a, b),
-    );
   }
 
   async fetch(
@@ -392,7 +359,7 @@ export class RecordsData {
         ? buildGrouping(response.grouping)
         : undefined;
       if (response.preview_data) {
-        this.fetchedRecordSummariesForSheet.set(
+        this.recordSummaries.setFetchedSummaries(
           buildRecordSummariesForSheet(response.preview_data),
         );
       }
@@ -694,23 +661,6 @@ export class RecordsData {
     );
 
     return [...savedRecordRows, ...getStoreValue(this.newRecords)];
-  }
-
-  setBespokeRecordSummary({
-    columnId,
-    recordId,
-    recordSummary,
-  }: {
-    columnId: string;
-    recordId: string;
-    recordSummary: string;
-  }): void {
-    const additional: RecordSummariesForSheet = new ImmutableMap([
-      [columnId, new ImmutableMap([[recordId, recordSummary]])],
-    ]);
-    this.bespokeRecordSummariesForSheet.update((existing) =>
-      mergeRecordSummariesForSheet(existing, additional),
-    );
   }
 
   destroy(): void {
