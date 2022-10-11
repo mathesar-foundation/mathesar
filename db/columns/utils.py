@@ -73,4 +73,4 @@ def find_match(temp_table_col_list, target_table_col_list, engine):
 def is_type_casting_valid(match, engine):
     # Checks if the column of the temporary table can be type casted to that of a target table if a valid match is found between them.
     cast_map = get_full_cast_map(engine)
-    return True if all(temp[1] in cast_map.get(target[1]) for temp, target in match) else False
+    return all(temp[1] in cast_map.get(target[1]) for temp, target in match)
