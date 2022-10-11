@@ -203,6 +203,8 @@
               columnFabric={processedColumn}
               value={$searchFuzzy.get(column.id) ??
                 (processedColumn.column.nullable ? null : undefined)}
+              getRecordSummary={(recordId) =>
+                $recordSummariesForSheet.get(String(column.id))?.get(recordId)}
               disabled
             />
             <RowCellBackgrounds isSelected={selection.type === 'ghost'} />
