@@ -588,14 +588,15 @@ export class RecordsData {
     const rowKeyOfBlankRow = getRowKey(row, primaryKeyColumnId);
     this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
     this.createPromises?.get(rowKeyOfBlankRow)?.cancel();
-    const promise = postAPI<ApiRecord>(this.url, row.record);
+    const promise = postAPI<ApiRecordsResponse>(this.url, row.record);
     if (!this.createPromises) {
       this.createPromises = new Map();
     }
     this.createPromises.set(rowKeyOfBlankRow, promise);
 
     try {
-      const record = await promise;
+      const response = await promise;
+      const record = response.results[0];
       let newRow: NewRecordRow = {
         ...row,
         record,
