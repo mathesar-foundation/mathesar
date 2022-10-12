@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError
 
 from db.types.exceptions import UnsupportedTypeException
-from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
+from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError, ColumnMappingsNotFound
 from mathesar.api.serializers.dependents import DependentFilterSerializer, DependentSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
@@ -231,5 +231,8 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         target_table = request.get('import_target', None)
         try:
             temp_table.get_mappings(target_table)
-        except Exception as e:
-            raise e
+        except ColumnMappingsNotFound as e:
+            raise database_api_exceptions.ColumnMappingsNotFound(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
