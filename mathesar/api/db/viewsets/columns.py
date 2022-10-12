@@ -180,6 +180,8 @@ class ColumnViewSet(viewsets.ModelViewSet):
                         status_code=status.HTTP_400_BAD_REQUEST,
                         table=table,
                     )
+                else:
+                    raise base_api_exceptions.MathesarAPIException(e)
             except Exception as e:
                 raise base_api_exceptions.MathesarAPIException(e)
 
