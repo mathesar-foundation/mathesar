@@ -57,7 +57,7 @@
   }
 
   .database-switcher a {
-    color: white;
+    color: var(--white);
     text-decoration: none;
   }
   .database-switcher a:hover {

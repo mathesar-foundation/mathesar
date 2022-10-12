@@ -56,7 +56,7 @@
   .mathesar {
     font-weight: 500;
     display: block;
-    color: white;
+    color: var(--white);
     font-size: var(--text-size-x-large);
     margin: 0 var(--spacing);
   }

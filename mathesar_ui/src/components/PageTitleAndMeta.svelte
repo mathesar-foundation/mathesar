@@ -46,9 +46,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-
-    /* TODO: Do we want to tokenize this? */
-    border-radius: 8px;
+    border-radius: var(--border-radius-l);
   }
 
   .left-meta-container {

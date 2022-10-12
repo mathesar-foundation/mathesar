@@ -19,7 +19,7 @@
     height: 1.71rem;
     border-radius: var(--border-radius-m);
     background-color: var(--brand-500);
-    color: white;
+    color: var(--white);
     padding: 0.3rem;
     opacity: 1;
   }

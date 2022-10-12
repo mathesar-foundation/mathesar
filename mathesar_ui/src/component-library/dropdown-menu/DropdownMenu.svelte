@@ -15,6 +15,7 @@
 
 <Dropdown {closeOnInnerClick} ariaLabel={label} {...$$restProps}>
   <span class="dropdown-menu-trigger" slot="trigger">
+    <!-- TODO: Figure out a way to make exactly one out of label and icon mandatory in props using TS -->
     {#if icon}
       <Icon {...icon} />
     {/if}

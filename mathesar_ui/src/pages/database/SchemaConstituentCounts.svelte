@@ -32,6 +32,6 @@
     width: 4px;
     height: 4px;
     background-color: var(--slate-400);
-    border-radius: 4px;
+    border-radius: var(--border-radius-m);
   }
 </style>
