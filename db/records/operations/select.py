@@ -24,8 +24,7 @@ def get_records_with_default_order(
         order_by=[],
         **kwargs,
 ):
-    if not order_by:
-        order_by = get_default_order_by(table, order_by)
+    order_by = get_default_order_by(table, order_by=order_by)
     return get_records(
         table=table,
         engine=engine,
@@ -99,7 +98,7 @@ def get_count(table, engine, filter=None, search=[]):
     return execute_pg_query(engine, relation)[0][col_name]
 
 
-def get_default_order_by(table, order_by):
+def get_default_order_by(table, order_by=[]):
     # Set default ordering if none was requested
     relation_has_pk = hasattr(table, 'primary_key')
     if relation_has_pk:
@@ -111,7 +110,7 @@ def get_default_order_by(table, order_by):
             pk_cols = pk
         # If there are primary keys, order by all primary keys
         if pk_cols is not None and len(pk_cols) > 0:
-            order_by = [
+            order_by += [
                 {'field': str(col.name), 'direction': 'asc'}
                 for col
                 in pk_cols
