@@ -1,10 +1,10 @@
 import warnings
-from psycopg2.errors import DuplicateColumn
+from psycopg2.errors import DuplicateColumn, NotNullViolation
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.exc import ProgrammingError, IntegrityError
 
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions,
@@ -172,6 +172,14 @@ class ColumnViewSet(viewsets.ModelViewSet):
                     message='This type casting is invalid.',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
+            except IntegrityError as e:
+                if type(e.orig) == NotNullViolation:
+                    raise database_api_exceptions.NotNullViolationAPIException(
+                        e,
+                        field="nullable",
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        table=table,
+                    )
             except Exception as e:
                 raise base_api_exceptions.MathesarAPIException(e)
 
