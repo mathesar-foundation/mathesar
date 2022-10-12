@@ -2,6 +2,7 @@ from sqlalchemy import Table
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
+from db.columns.exceptions import ColumnMappingsNotFound
 from db.types.operations.cast import get_full_cast_map
 from db import constants
 
@@ -69,8 +70,7 @@ def find_match(temp_table_col_list, target_table_col_list, engine):
         elif space_switched_case_insensetive_match := perfect_map(lowercase(replace_(temp_table_col_list)), lowercase(replace_(target_table_col_list)), engine):
             return space_switched_case_insensetive_match
         else:
-            raise Exception
-    # raise match not found
+            raise ColumnMappingsNotFound
 
 
 def is_type_casting_valid(match, engine):
