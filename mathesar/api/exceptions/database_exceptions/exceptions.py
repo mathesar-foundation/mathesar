@@ -269,7 +269,7 @@ class NotNullViolationAPIException(MathesarAPIException):
             table.schema._sa_engine,
             metadata=get_cached_metadata(),
         )
-        column = Column.objects.get(attnum=column_attnum)
+        column = Column.objects.get(attnum=column_attnum, table=table)
         details = {
             'record_detail': exception_diagnostics.message_detail,
             'column_id': column.id
