@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
     path('api/db/v0/', include(db_table_router.urls)),
     path('api/ui/v0/', include(ui_router.urls)),
+    path('api/ui/v0/reflect/', views.reflect_all, name='reflect_all'),
     path('auth/', include('django.contrib.auth.urls')),
 
     path('', views.home, name='home'),
