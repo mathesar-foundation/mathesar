@@ -65,7 +65,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --status Review --priority High
+          python project_update.py ${{ github.event.issue.node_id }} --status Review
 
       - name: Update Waiting issues
         if: "${{ contains(github.event.issue.labels.*.name, 'status: waiting') }}"
@@ -97,7 +97,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --priority Critical
+          python project_update.py ${{ github.event.issue.node_id }} --priority Urgent
 
       - name: Update documentation issues
         if: "${{ contains(github.event.issue.labels.*.name, 'work: documentation') }}"
