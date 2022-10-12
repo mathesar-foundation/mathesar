@@ -1,15 +1,18 @@
+from rest_access_policy import AccessViewSetMixin
 from rest_framework import viewsets
 from rest_framework.exceptions import MethodNotAllowed
 
-from mathesar.api.serializers.users import UserSerializer, DatabaseRoleSerializer, SchemaRoleSerializer
+from mathesar.api.ui.serializers.users import UserSerializer, DatabaseRoleSerializer, SchemaRoleSerializer
 from mathesar.api.pagination import DefaultLimitOffsetPagination
+from mathesar.api.ui.permissions.users import UserAccessPolicy
 from mathesar.models.users import User, DatabaseRole, SchemaRole
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
     pagination_class = DefaultLimitOffsetPagination
+    access_policy = UserAccessPolicy
 
 
 class DatabaseRoleViewSet(viewsets.ModelViewSet):
