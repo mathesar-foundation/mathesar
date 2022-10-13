@@ -113,8 +113,6 @@ export class Meta {
 
   searchFuzzy: Writable<SearchFuzzy>;
 
-  // selectedRows = new WritableSet<RowKey>();
-
   cellClientSideErrors = new WritableMap<CellKey, string[]>();
 
   rowsWithClientSideErrors: Readable<ImmutableSet<RowKey>>;
@@ -236,6 +234,29 @@ export class Meta {
         searchFuzzy,
       }),
     );
+  }
+
+  clearAllStatusesAndErrorsForRows(rowKeys: RowKey[]): void {
+    this.rowCreationStatus.delete(rowKeys);
+    this.rowDeletionStatus.delete(rowKeys);
+    const rowKeySet = new Set(rowKeys);
+    this.cellClientSideErrors.delete(
+      [...this.cellClientSideErrors.getKeys()].filter(([cellkey]) =>
+        rowKeySet.has(extractRowKeyFromCellKey(cellkey)),
+      ),
+    );
+    this.cellModificationStatus.delete(
+      [...this.cellModificationStatus.getKeys()].filter(([cellkey]) =>
+        rowKeySet.has(extractRowKeyFromCellKey(cellkey)),
+      ),
+    );
+  }
+
+  clearAllStatusesAndErrors(): void {
+    this.rowCreationStatus.clear();
+    this.rowDeletionStatus.clear();
+    this.cellClientSideErrors.clear();
+    this.cellModificationStatus.clear();
   }
 
   static fromSerialization(s: string): Meta | undefined {
