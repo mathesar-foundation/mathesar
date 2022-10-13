@@ -1,4 +1,11 @@
-import { writable, get as getStoreValue } from 'svelte/store';
+import {
+  writable,
+  get as getStoreValue,
+  type Readable,
+  type Writable,
+  type Unsubscriber,
+  derived,
+} from 'svelte/store';
 import {
   States,
   getAPI,
@@ -6,10 +13,10 @@ import {
   patchAPI,
   postAPI,
 } from '@mathesar/utils/api';
-import type { Writable, Unsubscriber } from 'svelte/store';
 import {
   isDefinedNonNullable,
   type CancellablePromise,
+  getGloballyUniqueId,
 } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type {
@@ -171,7 +178,7 @@ export function rowHasSavedRecord(row: Row): row is RecordRow {
 export interface TableRecordsData {
   state: States;
   error?: string;
-  savedRecords: Row[];
+  savedRecordRowsWithGroupHeaders: Row[];
   totalCount: number;
   grouping?: RecordGrouping;
 }
@@ -183,18 +190,15 @@ export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
       return String(primaryKeyCellValue);
     }
   }
-  if (rowHasNewRecord(row)) {
-    return row.identifier;
-  }
-  return '';
+  return row.identifier;
 }
 
 function generateRowIdentifier(
   type: 'groupHeader' | 'normal' | 'dummy' | 'new',
   offset: number,
-  index: number,
+  reference: number | string,
 ): string {
-  return `__${offset}_${type}_${index}`;
+  return `__${offset}_${type}_${reference}`;
 }
 
 function getProcessedRecordRow(
@@ -290,7 +294,9 @@ export class RecordsData {
 
   state: Writable<States>;
 
-  savedRecords: Writable<(RecordRow | GroupHeaderRow)[]>;
+  savedRecords: Readable<RecordRow[]>;
+
+  savedRecordRowsWithGroupHeaders: Writable<(RecordRow | GroupHeaderRow)[]>;
 
   newRecords: Writable<NewRecordRow[]>;
 
@@ -316,13 +322,19 @@ export class RecordsData {
     parentId: number,
     meta: Meta,
     columnsDataStore: ColumnsDataStore,
-    fetchCallback?: (storeData: TableRecordsData) => void,
   ) {
     this.parentId = parentId;
 
     this.state = writable(States.Loading);
-    this.savedRecords = writable([]);
+    this.savedRecordRowsWithGroupHeaders = writable([]);
     this.newRecords = writable([]);
+    this.savedRecords = derived(
+      this.savedRecordRowsWithGroupHeaders,
+      ($savedRecordRowsWithGroupHeaders) =>
+        $savedRecordRowsWithGroupHeaders.filter(
+          (row): row is RecordRow => !isGroupHeaderRow(row),
+        ),
+    );
     this.grouping = writable(undefined);
     this.totalCount = writable(undefined);
     this.error = writable(undefined);
@@ -330,7 +342,6 @@ export class RecordsData {
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
     this.url = `/api/db/v0/tables/${this.parentId}/records/`;
-    this.fetchCallback = fetchCallback;
     void this.fetch();
 
     // TODO: Create base class to abstract subscriptions and unsubscriptions
@@ -346,7 +357,7 @@ export class RecordsData {
     this.promise?.cancel();
     const { offset } = getStoreValue(this.meta.pagination);
 
-    this.savedRecords.update((existingData) => {
+    this.savedRecordRowsWithGroupHeaders.update((existingData) => {
       let data = [...existingData];
       data.length = Math.min(
         data.length,
@@ -373,10 +384,7 @@ export class RecordsData {
     if (!retainExistingRows) {
       this.state.set(States.Loading);
       this.newRecords.set([]);
-      this.meta.cellClientSideErrors.clear();
-      this.meta.cellModificationStatus.clear();
-      this.meta.rowCreationStatus.clear();
-      this.meta.rowDeletionStatus.clear();
+      this.meta.clearAllStatusesAndErrors();
     }
 
     try {
@@ -406,11 +414,11 @@ export class RecordsData {
 
       const tableRecordsData: TableRecordsData = {
         state: States.Done,
-        savedRecords: records,
+        savedRecordRowsWithGroupHeaders: records,
         grouping,
         totalCount,
       };
-      this.savedRecords.set(records);
+      this.savedRecordRowsWithGroupHeaders.set(records);
       this.state.set(States.Done);
       this.grouping.set(grouping);
       this.totalCount.set(totalCount);
@@ -426,8 +434,26 @@ export class RecordsData {
     return undefined;
   }
 
-  async deleteSelected(selectedRowsKey: number[]): Promise<void> {
-    const rowKeys = selectedRowsKey.map((key) => String(key));
+  async deleteSelected(selectedRowIndices: number[]): Promise<void> {
+    const recordRows = this.getRecordRows();
+    const { primaryKeyColumnId } = this.columnsDataStore.get();
+    const primaryKeysOfSavedRows: string[] = [];
+    const identifiersOfUnsavedRows: string[] = [];
+    selectedRowIndices.forEach((index) => {
+      const row = recordRows[index];
+      if (row) {
+        const rowKey = getRowKey(row, primaryKeyColumnId);
+        if (
+          primaryKeyColumnId &&
+          isDefinedNonNullable(row.record[primaryKeyColumnId])
+        ) {
+          primaryKeysOfSavedRows.push(rowKey);
+        } else {
+          identifiersOfUnsavedRows.push(rowKey);
+        }
+      }
+    });
+    const rowKeys = [...primaryKeysOfSavedRows, ...identifiersOfUnsavedRows];
 
     if (rowKeys.length > 0) {
       this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
@@ -435,55 +461,50 @@ export class RecordsData {
       const successRowKeys = new Set<RowKey>();
       /** Values are error messages */
       const failures = new Map<RowKey, string>();
-      // TODO: Convert this to single request
-      const promises = rowKeys.map((pk) =>
-        deleteAPI<RowKey>(`${this.url}${pk}/`)
-          .then(() => {
-            successRowKeys.add(pk);
-            return successRowKeys;
-          })
-          .catch((error: unknown) => {
-            failures.set(pk, getErrorMessage(error));
-            return failures;
-          }),
-      );
-      await Promise.all(promises);
-      await this.fetch(true);
 
-      const { offset } = getStoreValue(this.meta.pagination);
+      if (identifiersOfUnsavedRows.length > 0) {
+        identifiersOfUnsavedRows.forEach((identifier) =>
+          successRowKeys.add(identifier),
+        );
+      }
+      if (primaryKeysOfSavedRows.length > 0) {
+        // TODO: Convert this to single request
+        const promises = primaryKeysOfSavedRows.map((pk) =>
+          deleteAPI<RowKey>(`${this.url}${pk}/`)
+            .then(() => {
+              successRowKeys.add(pk);
+              return successRowKeys;
+            })
+            .catch((error: unknown) => {
+              failures.set(pk, getErrorMessage(error));
+              return failures;
+            }),
+        );
+        await Promise.all(promises);
+        await this.fetch(true);
+      }
+
       const savedRecords = getStoreValue(this.savedRecords);
-      const savedRecordsLength = savedRecords?.length || 0;
-      const pkColumnId = this.columnsDataStore.get()?.primaryKeyColumnId;
+      const savedRecordsLength = savedRecords.length;
       const savedRecordKeys = new Set(
-        savedRecords.map((row) => getRowKey(row, pkColumnId)),
+        savedRecords.map((row) => getRowKey(row, primaryKeyColumnId)),
       );
 
       this.newRecords.update((existing) => {
-        let retained = existing.filter(
-          (row) => !successRowKeys.has(getRowKey(row, pkColumnId)),
-        );
-        retained = retained.filter(
-          (row) => !savedRecordKeys.has(getRowKey(row, pkColumnId)),
-        );
-
+        const retained = existing.filter((row) => {
+          const rowKey = getRowKey(row, primaryKeyColumnId);
+          return !successRowKeys.has(rowKey) && !savedRecordKeys.has(rowKey);
+        });
         if (retained.length === existing.length) {
           return existing;
         }
-        let index = -1;
-        retained = retained.map((row) => {
-          index += 1;
-          return {
-            ...row,
-            rowIndex: savedRecordsLength + index,
-            identifier: generateRowIdentifier('new', offset, index),
-          };
-        });
-        return retained;
+        return retained.map((row, index) => ({
+          ...row,
+          rowIndex: savedRecordsLength + index,
+        }));
       });
       this.meta.rowCreationStatus.delete([...savedRecordKeys]);
-      this.meta.rowCreationStatus.delete([...successRowKeys]);
-      this.meta.rowDeletionStatus.delete([...successRowKeys]);
-      // this.meta.selectedRows.delete([...successRowKeys]);
+      this.meta.clearAllStatusesAndErrorsForRows([...successRowKeys]);
       this.meta.rowDeletionStatus.setEntries(
         [...failures.entries()].map(([rowKey, errorMsg]) => [
           rowKey,
@@ -550,13 +571,11 @@ export class RecordsData {
 
   getNewEmptyRecord(): NewRecordRow {
     const { offset } = getStoreValue(this.meta.pagination);
-    const savedRecords = getStoreValue(this.savedRecords);
-    const savedRecordsLength = savedRecords?.length || 0;
-    const existingNewRecords = getStoreValue(this.newRecords);
+    const existingRecordRows = this.getRecordRows();
     const identifier = generateRowIdentifier(
       'new',
       offset,
-      existingNewRecords.length,
+      getGloballyUniqueId(),
     );
     const record = Object.fromEntries(
       getStoreValue(this.columnsDataStore)
@@ -567,7 +586,7 @@ export class RecordsData {
       record,
       identifier,
       isNew: true,
-      rowIndex: existingNewRecords.length + savedRecordsLength,
+      rowIndex: existingRecordRows.length,
     };
     return newRow;
   }
@@ -649,18 +668,13 @@ export class RecordsData {
     if (!existingNewRecordRow && isPlaceholderRow(row)) {
       this.newRecords.update((existing) => {
         const { isAddPlaceholder: unused, ...newRow } = row;
-        existing.push({
-          ...newRow,
-          isNew: true,
-        });
-        return existing;
+        return [...existing, newRow];
       });
     }
 
     let result: RecordRow;
     if (
       primaryKeyColumnId &&
-      existingNewRecordRow?.record[primaryKeyColumnId] === undefined &&
       rowHasNewRecord(row) &&
       row.record[primaryKeyColumnId] === undefined
     ) {
@@ -677,25 +691,11 @@ export class RecordsData {
     await this.createRecord(row);
   }
 
-  getIterationKey(index: number): string {
-    const savedRecords = getStoreValue(this.savedRecords);
-    if (savedRecords?.[index]) {
-      return savedRecords[index].identifier;
-    }
-    const savedLength = savedRecords?.length || 0;
-    const newRecordsData = getStoreValue(this.newRecords);
-    if (newRecordsData?.[index + savedLength]) {
-      return newRecordsData[index + savedLength].identifier;
-    }
-    return `__index_${index}`;
-  }
-
   getRecordRows(): RecordRow[] {
-    const savedRecordRows = getStoreValue(this.savedRecords).filter(
-      (row): row is RecordRow => !isGroupHeaderRow(row),
-    );
-
-    return [...savedRecordRows, ...getStoreValue(this.newRecords)];
+    return [
+      ...getStoreValue(this.savedRecords),
+      ...getStoreValue(this.newRecords),
+    ];
   }
 
   destroy(): void {
