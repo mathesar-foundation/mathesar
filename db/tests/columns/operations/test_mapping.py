@@ -95,7 +95,7 @@ def test_type_cast_validator_valid_castings(engine):
                              ]
     sorted_zip = list(zip(sorted(temp_table_col_list), sorted(target_table_col_list)))
     is_valid = is_type_casting_valid(sorted_zip, engine)
-    assert is_valid == True
+    assert is_valid is True
 
 
 def test_type_cast_validator_invalid_castings(engine):
@@ -110,4 +110,4 @@ def test_type_cast_validator_invalid_castings(engine):
                              ]
     sorted_zip = list(zip(sorted(temp_table_col_list), sorted(target_table_col_list)))
     is_valid = is_type_casting_valid(sorted_zip, engine)
-    assert is_valid == False
+    assert is_valid is False
