@@ -32,7 +32,6 @@
     selection,
   } = $tabularData);
   $: ({
-    // selectedRows,
     rowStatus,
     rowCreationStatus,
     cellModificationStatus,
@@ -76,7 +75,6 @@
     class:is-add-placeholder={isPlaceholderRow(row)}
     {...htmlAttributes}
     style={styleString}
-    data-row-identifier={row.identifier}
     on:mousedown={checkAndCreateEmptyRow}
   >
     <SheetCell
