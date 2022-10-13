@@ -1,64 +1,69 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { ImmutableMap } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import {
+    getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
-    setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
-  import type { TabularData } from '@mathesar/stores/table-data/types';
-  import { writable } from 'svelte/store';
-  import ActionsPane from './actions-pane/ActionsPane.svelte';
+  import { rowHeaderWidthPx } from '@mathesar/geometry';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
   import TableInspector from './table-inspector/TableInspector.svelte';
 
-  export let database: Database;
-  export let schema: SchemaEntry;
-  export let tabularData: TabularData;
-  export let table: TableEntry;
+  const tabularData = getTabularDataStoreFromContext();
 
-  const tabularDataContextStore = writable(tabularData);
-  setTabularDataStoreInContext(tabularDataContextStore);
+  export let usesVirtualList = false;
+  export let allowsDdlOperations = false;
 
-  $: tabularDataContextStore.set(tabularData);
-  $: ({ processedColumns, display } = tabularData);
+  $: ({ processedColumns, display, isLoading } = $tabularData);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
-
-  $: sheetColumns = [
-    { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-    ...$processedColumns.values(),
-    { column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW_COLUMN_PHANTOM' } },
-  ];
+  $: hasNewColumnButton = allowsDdlOperations;
+  /**
+   * These are separate variables for readability and also to keep the door open
+   * to more easily displaying the Table Inspector even if DDL operations are
+   * not supported.
+   */
+  $: supportsTableInspector = allowsDdlOperations;
+  $: sheetColumns = (() => {
+    const columns = [
+      { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
+      ...$processedColumns.values(),
+    ];
+    if (hasNewColumnButton) {
+      columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });
+    }
+    return columns;
+  })();
 
   const columnWidths = new ImmutableMap([
-    [ID_ROW_CONTROL_COLUMN, 70],
+    [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
     [ID_ADD_NEW_COLUMN, 100],
   ]);
+  $: showTableInspector =
+    $isTableInspectorVisible && !$isLoading && supportsTableInspector;
 </script>
 
 <div class="table-view">
-  <ActionsPane {database} {schema} {table} on:deleteTable />
   <div class="table-inspector-view">
     <div class="sheet-area">
       {#if $processedColumns.size}
         <Sheet
           columns={sheetColumns}
           getColumnIdentifier={(entry) => entry.column.id}
+          {usesVirtualList}
           {columnWidths}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
         >
-          <Header />
-          <Body />
+          <Header {hasNewColumnButton} />
+          <Body {usesVirtualList} />
         </Sheet>
       {/if}
     </div>
-    {#if $isTableInspectorVisible}
+    {#if showTableInspector}
       <TableInspector />
     {/if}
   </div>
@@ -68,15 +73,17 @@
 <style>
   .table-view {
     display: grid;
-    grid-template: auto 1fr auto / 1fr;
+    grid-template: 1fr auto / 1fr;
     height: 100%;
   }
   .table-inspector-view {
     display: flex;
     flex-direction: row;
+    overflow: hidden;
   }
   .sheet-area {
     position: relative;
+    overflow-x: auto;
     flex: 1;
   }
 </style>

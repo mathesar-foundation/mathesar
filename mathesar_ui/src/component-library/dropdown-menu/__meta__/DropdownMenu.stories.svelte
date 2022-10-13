@@ -2,7 +2,7 @@
   import { faPlus, faTable, faUpload } from '@fortawesome/free-solid-svg-icons';
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import DropdownMenu from '@mathesar-component-library-dir/dropdown-menu/DropdownMenu.svelte';
-  import MenuItem from '@mathesar-component-library-dir/menu/MenuItem.svelte';
+  import ButtonMenuItem from '@mathesar-component-library-dir/menu/ButtonMenuItem.svelte';
 
   const meta = {
     title: 'Components/DropdownMenu',
@@ -17,8 +17,8 @@
     label="New Table"
     icon={{ data: faPlus }}
   >
-    <MenuItem icon={{ data: faTable }}>Empty Table</MenuItem>
-    <MenuItem icon={{ data: faUpload }}>Import Data</MenuItem>
+    <ButtonMenuItem icon={{ data: faTable }}>Empty Table</ButtonMenuItem>
+    <ButtonMenuItem icon={{ data: faUpload }}>Import Data</ButtonMenuItem>
   </DropdownMenu>
 </Story>
 
@@ -28,16 +28,18 @@
     label="Lorem ipsum dolor sit amet"
     icon={{ data: faPlus }}
   >
-    <MenuItem icon={{ data: faTable }}>Foo bar</MenuItem>
-    <MenuItem icon={{ data: faUpload }}>Baz bat</MenuItem>
+    <ButtonMenuItem icon={{ data: faTable }}>Foo bar</ButtonMenuItem>
+    <ButtonMenuItem icon={{ data: faUpload }}>Baz bat</ButtonMenuItem>
   </DropdownMenu>
 </Story>
 
 <Story name="Long Entries">
   <DropdownMenu closeOnInnerClick={true} label="Lorem" icon={{ data: faPlus }}>
-    <MenuItem icon={{ data: faTable }}>Ut enim ad minim veniam</MenuItem>
-    <MenuItem icon={{ data: faUpload }}>
+    <ButtonMenuItem icon={{ data: faTable }}>
+      Ut enim ad minim veniam
+    </ButtonMenuItem>
+    <ButtonMenuItem icon={{ data: faUpload }}>
       Duis aute irure dolor in reprehenderit
-    </MenuItem>
+    </ButtonMenuItem>
   </DropdownMenu>
 </Story>

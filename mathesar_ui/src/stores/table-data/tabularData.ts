@@ -1,6 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import type { Readable, Writable } from 'svelte/store';
-import { derived } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/utils/api';
@@ -56,7 +56,11 @@ export class TabularData {
       this.columnsDataStore,
       this.recordsData,
     );
-    this.selection = new Selection(this.columnsDataStore, this.recordsData);
+    this.selection = new Selection(
+      this.columnsDataStore,
+      this.recordsData,
+      this.display,
+    );
 
     this.processedColumns = derived(
       [this.columnsDataStore, this.constraintsDataStore],
@@ -64,11 +68,12 @@ export class TabularData {
         new Map(
           columnsData.columns.map((column) => [
             column.id,
-            processColumn(
+            processColumn({
+              tableId: this.id,
               column,
-              constraintsData.constraints,
-              props.abstractTypesMap,
-            ),
+              constraints: constraintsData.constraints,
+              abstractTypeMap: props.abstractTypesMap,
+            }),
           ]),
         ),
     );
@@ -119,13 +124,18 @@ export class TabularData {
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
+    this.selection.destroy();
   }
 }
 
 const tabularDataStoreContextKey = {};
 
-export function setTabularDataStoreInContext(s: Writable<TabularData>): void {
-  setContext(tabularDataStoreContextKey, s);
+export function setTabularDataStoreInContext(
+  t: TabularData,
+): Writable<TabularData> {
+  const store = writable(t);
+  setContext(tabularDataStoreContextKey, store);
+  return store;
 }
 
 export function getTabularDataStoreFromContext(): Writable<TabularData> {

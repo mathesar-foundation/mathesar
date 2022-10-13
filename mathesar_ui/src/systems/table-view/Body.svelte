@@ -1,31 +1,49 @@
 <script lang="ts">
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    getTabularDataStoreFromContext,
+    isGroupHeaderRow,
+    isHelpTextRow,
+    type Row as RowType,
+    getRowKey,
+  } from '@mathesar/stores/table-data';
   import { SheetVirtualRows } from '@mathesar/components/sheet';
-  import RowComponent from './row/Row.svelte';
-  import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
   import {
     rowHeightPx,
     helpTextRowHeightPx,
     groupHeaderRowHeightPx,
-  } from './geometry';
+  } from '@mathesar/geometry';
+  import Row from './row/Row.svelte';
+  import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ id, recordsData, display } = $tabularData);
-  $: ({ displayableRecords } = display);
+  export let usesVirtualList = false;
 
-  function getItemSize(index: number) {
-    const allRecords = $displayableRecords;
-    const record = allRecords?.[index];
-    if (record) {
-      if (record.isNewHelpText) {
-        return helpTextRowHeightPx;
-      }
-      if (record.isGroupHeader) {
-        return groupHeaderRowHeightPx;
-      }
+  $: ({ id, display, columnsDataStore } = $tabularData);
+  $: ({ displayableRecords } = display);
+  $: ({ primaryKeyColumnId } = $columnsDataStore);
+
+  function getItemSizeFromRow(row: RowType) {
+    if (isHelpTextRow(row)) {
+      return helpTextRowHeightPx;
+    }
+    if (isGroupHeaderRow(row)) {
+      return groupHeaderRowHeightPx;
     }
     return rowHeightPx;
+  }
+
+  function getIterationKey(index: number, row: RowType | undefined): string {
+    if (row) {
+      return getRowKey(row, primaryKeyColumnId);
+    }
+    return `__index_${index}`;
+  }
+
+  function getItemSizeFromIndex(index: number) {
+    const allRecords = $displayableRecords;
+    const record = allRecords?.[index];
+    return record ? getItemSizeFromRow(record) : rowHeightPx;
   }
 
   function checkAndResetActiveCell(e: Event) {
@@ -43,7 +61,11 @@
       const targetNotWithinEditableCell =
         !target.closest('.editable-cell') &&
         !target.closest('.retain-active-cell');
-      clearActiveCell = targetNotWithinEditableCell;
+      const targetNotWithinTableInspector = !target.closest(
+        '.table-inspector-container',
+      );
+      clearActiveCell =
+        targetNotWithinEditableCell && targetNotWithinTableInspector;
     }
 
     if (clearActiveCell) {
@@ -58,22 +80,31 @@
 />
 
 {#key id}
-  <SheetVirtualRows
-    itemCount={$displayableRecords.length}
-    paddingBottom={30}
-    itemSize={getItemSize}
-    itemKey={(index) => recordsData.getIterationKey(index)}
-    let:items
-    let:api
-  >
-    <ScrollAndResetHandler {api} />
-    {#each items as item (item.key)}
-      {#if $displayableRecords[item.index]}
-        <RowComponent
-          style={item.style}
-          bind:row={$displayableRecords[item.index]}
-        />
-      {/if}
+  {#if usesVirtualList}
+    <SheetVirtualRows
+      itemCount={$displayableRecords.length}
+      paddingBottom={30}
+      itemSize={getItemSizeFromIndex}
+      itemKey={(index) => getIterationKey(index, $displayableRecords[index])}
+      let:items
+      let:api
+    >
+      <ScrollAndResetHandler {api} />
+      {#each items as item (item.key)}
+        {#if $displayableRecords[item.index]}
+          <Row style={item.style} bind:row={$displayableRecords[item.index]} />
+        {/if}
+      {/each}
+    </SheetVirtualRows>
+  {:else}
+    {#each $displayableRecords as displayableRecord (displayableRecord)}
+      <Row
+        style={{
+          position: 'relative',
+          height: getItemSizeFromRow(displayableRecord),
+        }}
+        row={displayableRecord}
+      />
     {/each}
-  </SheetVirtualRows>
+  {/if}
 {/key}

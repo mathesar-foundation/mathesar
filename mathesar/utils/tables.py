@@ -6,7 +6,8 @@ from db.tables.operations.infer_types import infer_table_column_types
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.models.base import Table
-from mathesar.reflection import reflect_columns_from_table
+from mathesar.state.django import reflect_columns_from_tables
+from mathesar.state import get_cached_metadata
 
 TABLE_NAME_TEMPLATE = 'Table'
 
@@ -56,13 +57,13 @@ def gen_table_name(schema, data_files=None):
     return name
 
 
-def create_table_from_datafile(data_files, name, schema):
+def create_table_from_datafile(data_files, name, schema, comment=None):
     data_file = data_files[0]
-    table = create_table_from_csv(data_file, name, schema)
+    table = create_table_from_csv(data_file, name, schema, comment=comment)
     return table
 
 
-def create_empty_table(name, schema):
+def create_empty_table(name, schema, comment=None):
     """
     Create an empty table, with only Mathesar's internal columns.
 
@@ -71,10 +72,10 @@ def create_empty_table(name, schema):
     :return: the newly created blank table
     """
     engine = create_mathesar_engine(schema.database.name)
-    db_table = create_mathesar_table(name, schema.name, [], engine)
+    db_table = create_mathesar_table(name, schema.name, [], engine, comment=comment)
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     # Using current_objects to create the table instead of objects. objects
     # triggers re-reflection, which will cause a race condition to create the table
     table, _ = Table.current_objects.get_or_create(oid=db_table_oid, schema=schema)
-    reflect_columns_from_table(table)
+    reflect_columns_from_tables([table], metadata=get_cached_metadata())
     return table

@@ -8,10 +8,12 @@
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import type { Row } from '@mathesar/stores/table-data/records';
-  import { rowHasRecord } from '@mathesar/stores/table-data/records';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
-  import { rowHeightPx } from '@mathesar/systems/table-view/geometry';
+  import {
+    rowHasSavedRecord,
+    getTabularDataStoreFromContext,
+    type RecordRow,
+  } from '@mathesar/stores/table-data';
+  import { rowHeightPx } from '@mathesar/geometry';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import NewIndicator from './NewIndicator.svelte';
@@ -95,7 +97,7 @@
     );
   }
 
-  function getPkValue(row: Row): string | number | undefined {
+  function getPkValue(row: RecordRow): string | number | undefined {
     const { record } = row;
     if (!record || Object.keys(record).length === 0) {
       return undefined;
@@ -103,7 +105,7 @@
     return getPkValueInRecord(record, columns);
   }
 
-  function getRowHref(row: Row): string | undefined {
+  function getRowHref(row: RecordRow): string | undefined {
     if (rowType === 'button') {
       return undefined;
     }
@@ -207,7 +209,7 @@
                 processedColumn.column.id
               ]}
               disabled
-              showAsSkeleton={!rowHasRecord(row)}
+              showAsSkeleton={!rowHasSavedRecord(row)}
             />
             <RowCellBackgrounds isSelected={indexIsSelected(index)} />
           </CellWrapper>

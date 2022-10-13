@@ -9,11 +9,12 @@ from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, Invalid
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
 )
-from db.columns.utils import get_mathesar_column_with_engine, get_type_options
+from db.columns.utils import to_mathesar_column_with_engine, get_type_options
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.types.operations.convert import get_db_type_enum_from_class, get_db_type_enum_from_id
 from db.types.operations.cast import get_cast_function_name
 from db.utils import execute_statement
+from db.metadata import get_empty_metadata
 
 
 def alter_column(engine, table_oid, column_attnum, column_data):
@@ -51,10 +52,18 @@ def alter_column(engine, table_oid, column_attnum, column_data):
             # since previous operations need the name to work
             name = column_data[NAME_KEY]
             rename_column(table_oid, column_attnum, engine, conn, name)
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
-    reflected_column = get_mathesar_column_with_engine(
-        reflect_table_from_oid(table_oid, engine).columns[column_name],
-        engine
+    # TODO reuse metadata
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=get_empty_metadata())
+    reflected_table = reflect_table_from_oid(
+        table_oid,
+        engine,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
+    )
+    reflected_column = reflected_table.columns[column_name]
+    reflected_column = to_mathesar_column_with_engine(
+        reflected_column,
+        engine,
     )
     return reflected_column
 
@@ -62,8 +71,15 @@ def alter_column(engine, table_oid, column_attnum, column_data):
 def retype_column(
     table_oid, column_attnum, engine, connection, new_type=None, type_options={},
 ):
-    table = reflect_table_from_oid(table_oid, engine, connection_to_use=connection)
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
+    table = reflect_table_from_oid(
+        table_oid,
+        engine,
+        connection_to_use=connection,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
+    )
+    # TODO reuse metadata
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=get_empty_metadata())
     column = table.columns[column_name]
     column_db_type = get_db_type_enum_from_class(column.type.__class__)
     new_type = new_type if new_type is not None else column_db_type
@@ -99,18 +115,30 @@ def alter_column_type(
     table_oid, column_name, engine, connection, target_type, type_options={}
 ):
     type_options = type_options if type_options is not None else {}
-    table = reflect_table_from_oid(table_oid, engine, connection_to_use=connection)
+    table = reflect_table_from_oid(
+        table_oid,
+        engine,
+        connection_to_use=connection,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
+    )
     _preparer = engine.dialect.identifier_preparer
     schema = table.schema
 
     table_oid = get_oid_from_table(table.name, schema, engine)
     # Re-reflect table so that column is accurate
     # TODO unclear why re-reflection is needed; comment more if possible
-    table = reflect_table_from_oid(table_oid, engine, connection_to_use=connection)
+    table = reflect_table_from_oid(
+        table_oid,
+        engine,
+        connection_to_use=connection,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
+    )
     column = table.columns[column_name]
-    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine, connection)
+    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine=engine, metadata=get_empty_metadata(), connection_to_use=connection)
 
-    default = get_column_default(table_oid, column_attnum, engine, connection)
+    default = get_column_default(table_oid, column_attnum, engine=engine, metadata=get_empty_metadata(), connection_to_use=connection)
     if default is not None:
         default_text = column.server_default.arg.text
     set_column_default(table_oid, column_attnum, engine, connection, None)
@@ -138,9 +166,16 @@ def alter_column_type(
         set_column_default(table_oid, column_attnum, engine, connection, new_default)
 
 
-def change_column_nullable(table_oid, column_attum, engine, connection, nullable):
-    table = reflect_table_from_oid(table_oid, engine, connection_to_use=connection)
-    column_name = get_column_name_from_attnum(table_oid, column_attum, engine)
+def change_column_nullable(table_oid, column_attnum, engine, connection, nullable):
+    table = reflect_table_from_oid(
+        table_oid,
+        engine,
+        connection_to_use=connection,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
+    )
+    # TODO reuse metadata
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=get_empty_metadata())
     column = table.columns[column_name]
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
@@ -148,8 +183,15 @@ def change_column_nullable(table_oid, column_attum, engine, connection, nullable
 
 
 def set_column_default(table_oid, column_attnum, engine, connection, default):
-    table = reflect_table_from_oid(table_oid, engine, connection_to_use=connection)
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
+    table = reflect_table_from_oid(
+        table_oid,
+        engine,
+        connection_to_use=connection,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
+    )
+    # TODO reuse metadata
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=get_empty_metadata())
     column = table.columns[column_name]
     default_clause = DefaultClause(str(default)) if default is not None else default
     try:
@@ -164,8 +206,15 @@ def set_column_default(table_oid, column_attnum, engine, connection, default):
 
 
 def rename_column(table_oid, column_attnum, engine, connection, new_name):
-    table = reflect_table_from_oid(table_oid, engine, connection_to_use=connection)
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
+    table = reflect_table_from_oid(
+        table_oid,
+        engine,
+        connection_to_use=connection,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
+    )
+    # TODO reuse metadata
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine=engine, metadata=get_empty_metadata())
     column = table.columns[column_name]
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
@@ -182,10 +231,10 @@ def _check_type_option_equivalence(type_options_1, type_options_2):
 
 
 def _validate_columns_for_batch_update(table, column_data):
-    ALLOWED_KEYS = ['attnum', 'name', 'type', 'type_options']
-    if len(column_data) != len(table.columns):
-        raise ValueError('Number of columns passed in must equal number of columns in table')
+    ALLOWED_KEYS = ['attnum', 'name', 'type', 'type_options', 'delete']
     for single_column_data in column_data:
+        if 'attnum' not in single_column_data.keys():
+            raise ValueError('Key "attnum" is required')
         for key in single_column_data.keys():
             if key not in ALLOWED_KEYS:
                 allowed_key_list = ', '.join(ALLOWED_KEYS)
@@ -193,8 +242,8 @@ def _validate_columns_for_batch_update(table, column_data):
 
 
 def _batch_update_column_types(table_oid, column_data_list, connection, engine):
-    for index, column_data in enumerate(column_data_list):
-        column_attnum = column_data.get('attnum', None)
+    for column_data in column_data_list:
+        column_attnum = column_data.get('attnum')
         if 'type' in column_data and column_attnum is not None:
             new_type = get_db_type_enum_from_id(column_data['type'])
             type_options = column_data.get('type_options', {})
@@ -204,14 +253,22 @@ def _batch_update_column_types(table_oid, column_data_list, connection, engine):
 
 
 def _batch_alter_table_rename_columns(table_oid, column_data_list, connection, engine):
-    table = reflect_table_from_oid(table_oid, engine, connection_to_use=connection)
+    table = reflect_table_from_oid(
+        table_oid,
+        engine,
+        connection_to_use=connection,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
+    )
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
     with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
-        for index, column_data in enumerate(column_data_list):
+        for column_data in column_data_list:
             column_attnum = column_data.get('attnum', None)
             if column_attnum is not None:
-                name = get_column_name_from_attnum(table_oid, column_attnum, engine, connection)
+                # TODO reuse metadata
+                name = get_column_name_from_attnum(table_oid, column_attnum, engine=engine, metadata=get_empty_metadata(), connection_to_use=connection)
+            # TODO name can be unbound below; unclear if there's a bug here; clarify logic
             if 'name' in column_data and name != column_data['name']:
                 batch_op.alter_column(
                     name,
@@ -220,19 +277,30 @@ def _batch_alter_table_rename_columns(table_oid, column_data_list, connection, e
 
 
 def batch_alter_table_drop_columns(table_oid, column_data_list, connection, engine):
-    table = reflect_table_from_oid(table_oid, engine, connection_to_use=connection)
+    table = reflect_table_from_oid(
+        table_oid,
+        engine,
+        connection_to_use=connection,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
+    )
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
     with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
-        for index, column_data in enumerate(column_data_list):
-            column_attnum = column_data.get('attnum', None)
-            if column_attnum is not None and len(column_data.keys()) == 1:
-                name = get_column_name_from_attnum(table_oid, column_attnum, engine, connection)
+        for column_data in column_data_list:
+            column_attnum = column_data.get('attnum')
+            if column_attnum is not None and column_data.get('delete') is not None:
+                name = get_column_name_from_attnum(table_oid, column_attnum, engine=engine, metadata=get_empty_metadata(), connection_to_use=connection)
                 batch_op.drop_column(name)
 
 
 def batch_update_columns(table_oid, engine, column_data_list):
-    table = reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(
+        table_oid,
+        engine,
+        # TODO reuse metadata
+        metadata=get_empty_metadata(),
+    )
     _validate_columns_for_batch_update(table, column_data_list)
     with engine.begin() as conn:
         _batch_update_column_types(table_oid, column_data_list, conn, engine)

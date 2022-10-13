@@ -4,12 +4,12 @@
   function getInitials(_text: string) {
     const splitText = _text?.split(/,|_| |\./) || [];
     if (splitText.length > 1) {
-      return (
-        splitText[0][0]?.toUpperCase() +
-        splitText[splitText.length - 1][0]?.toUpperCase()
-      );
+      const firstLetter = splitText[0][0]?.toUpperCase() ?? '';
+      const secondLetter =
+        splitText[splitText.length - 1][0]?.toUpperCase() ?? '';
+      return `${firstLetter}${secondLetter}`;
     }
-    return splitText[0]?.[0]?.toUpperCase() || '';
+    return splitText[0]?.[0]?.toUpperCase() ?? '';
   }
 
   function calcColor(_text: string) {

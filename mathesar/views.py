@@ -1,5 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
+from mathesar.state import reset_reflection
 from mathesar.models.base import Database, Schema, Table
 from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
@@ -42,7 +47,7 @@ def get_queries_list(request, schema):
     if schema is None:
         return []
     query_serializer = QuerySerializer(
-        UIQuery.objects.all(),
+        UIQuery.objects.filter(base_table__schema=schema),
         many=True,
         context={'request': request}
     )
@@ -105,18 +110,20 @@ def render_schema(request, database, schema):
         return redirect('schema_home', db_name=database.name, schema_id=schema.id)
 
 
+@login_required
+@api_view(['POST'])
+def reflect_all(_):
+    reset_reflection()
+    return Response(status=status.HTTP_200_OK)
+
+
+@login_required
 def home(request):
     database = get_current_database(request, None)
-    schema = get_current_schema(request, None, database)
-    return render_schema(request, database, schema)
+    return redirect('schemas', db_name=database.name)
 
 
-def db_home(request, db_name):
-    database = get_current_database(request, db_name)
-    schema = get_current_schema(request, None, database)
-    return render_schema(request, database, schema)
-
-
+@login_required
 def schema_home(request, db_name, schema_id, **kwargs):
     database = get_current_database(request, db_name)
     schema = get_current_schema(request, schema_id, database)
@@ -125,9 +132,9 @@ def schema_home(request, db_name, schema_id, **kwargs):
     })
 
 
+@login_required
 def schemas(request, db_name):
     database = get_current_database(request, db_name)
-    schema = get_current_schema(request, None, database)
     return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request, database, schema)
+        'common_data': get_common_data(request, database, None)
     })

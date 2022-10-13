@@ -9,12 +9,12 @@ module.exports = {
     project: ['./tsconfig.json'],
     extraFileExtensions: ['.svelte', '.cjs'],
   },
-  plugins: ['svelte3', 'jest', '@typescript-eslint'],
+  plugins: ['svelte3', '@typescript-eslint'],
   extends: [
+    'airbnb-base',
     'airbnb-typescript/base',
     'plugin:eslint-comments/recommended',
     'plugin:promise/recommended',
-    'plugin:jest/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
   ],
@@ -37,6 +37,7 @@ module.exports = {
     'array-bracket-spacing': 'off',
     'no-restricted-syntax': 0,
     '@typescript-eslint/require-await': 'off',
+    'class-methods-use-this': 'off',
   },
   overrides: [
     {
@@ -71,6 +72,7 @@ module.exports = {
         'no-confusing-arrow': 'off',
         'no-constant-condition': 'off',
         '@typescript-eslint/restrict-template-expressions': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
       },
     },
     {
@@ -83,6 +85,7 @@ module.exports = {
         '@typescript-eslint/no-unsafe-member-access': 'off',
         '@typescript-eslint/restrict-template-expressions': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
       },
     },
     {
@@ -126,7 +129,9 @@ module.exports = {
     es6: true,
     browser: true,
     node: true,
-    'jest/globals': true,
+  },
+  globals: {
+    vi: true,
   },
   settings: {
     'svelte3/typescript': () => typescript,
@@ -137,9 +142,6 @@ module.exports = {
         moduleDirectory: ['node_modules', 'src/'],
       },
       typescript: {},
-    },
-    jest: {
-      version: 26,
     },
   },
 };

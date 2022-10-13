@@ -2,10 +2,8 @@
   import {
     Button,
     Dropdown,
-    DropdownMenu,
     Icon,
     iconError,
-    MenuItem,
   } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
@@ -14,37 +12,24 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import {
     iconAddNew,
-    iconConfigure,
-    iconConstraint,
-    iconDelete,
     iconFiltering,
     iconGrouping,
     iconRefresh,
     iconSorting,
-    iconTableLink,
     iconTableInspector,
   } from '@mathesar/icons';
-  import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { modal } from '@mathesar/stores/modal';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { States } from '@mathesar/utils/api';
-  import { createEventDispatcher } from 'svelte';
-  import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/query-builder/urlSerializationUtils';
-  import LinkTableModal from '../link-table/LinkTableModal.svelte';
+  import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/data-explorer';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
   import Group from './record-operations/Group.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
-  export let table: TableEntry;
+  export let table: Pick<TableEntry, 'name'>;
 
   const tabularData = getTabularDataStoreFromContext();
-  const dispatch = createEventDispatcher();
-
-  const tableConstraintsModal = modal.spawnModalController();
-  const linkTableModal = modal.spawnModalController();
 
   $: ({
     id,
@@ -85,18 +70,6 @@
     void $tabularData.refresh();
   }
 
-  function handleDeleteTable() {
-    void confirmDelete({
-      identifierType: 'Table',
-      onProceed: async () => {
-        await deleteTable($tabularData.id);
-        // TODO handle error when deleting
-        dispatch('deleteTable');
-        await refetchTablesForSchema(schema.id);
-      },
-    });
-  }
-
   function toggleTableInspector() {
     isTableInspectorVisible.set(!$isTableInspectorVisible);
   }
@@ -107,22 +80,6 @@
     <EntityType>Table</EntityType>
     <h1><TableName {table} /></h1>
   </div>
-  <DropdownMenu label="Actions" icon={iconConfigure}>
-    <MenuItem on:click={handleDeleteTable} icon={iconDelete}>Delete</MenuItem>
-    <MenuItem
-      on:click={() => tableConstraintsModal.open()}
-      icon={iconConstraint}
-    >
-      Constraints
-    </MenuItem>
-  </DropdownMenu>
-
-  <LinkTableModal
-    controller={linkTableModal}
-    on:goToConstraints={() => tableConstraintsModal.open()}
-  />
-
-  <div class="divider" />
 
   <Dropdown showArrow={false} contentClass="filter-dropdown-content">
     <svelte:fragment slot="trigger">
@@ -184,17 +141,6 @@
   >
     <Icon {...iconAddNew} />
     <span>New Record</span>
-  </Button>
-
-  <div class="divider" />
-
-  <Button
-    disabled={$isLoading}
-    size="medium"
-    on:click={() => linkTableModal.open()}
-  >
-    <Icon {...iconTableLink} />
-    <span>Link Table</span>
   </Button>
 
   <!-- TODO: Bring back the delete functionality -->

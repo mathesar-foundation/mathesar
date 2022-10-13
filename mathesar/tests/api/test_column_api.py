@@ -34,6 +34,7 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
+            'has_dependents': True
         },
         {
             'name': 'mycolumn1',
@@ -49,6 +50,7 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
+            'has_dependents': False
         },
         {
             'name': 'mycolumn2',
@@ -67,6 +69,7 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
+            'has_dependents': True
         },
         {
             'name': 'mycolumn3',
@@ -86,6 +89,7 @@ def test_column_list(column_test_table, client):
                 'timestamp with time zone', 'timestamp without time zone',
             ],
             'default': None,
+            'has_dependents': False
         }
     ]
     check_columns_response(response_data['results'], expect_results)
@@ -478,6 +482,29 @@ def test_column_update_invalid_type(create_patents_table, client):
     response_json = response.json()
     assert response_json[0]['code'] == ErrorCodes.InvalidTypeCast.value
     assert response_json[0]['message'] == "This type casting is invalid."
+
+
+def test_column_update_invalid_nullable(create_patents_table, client):
+    table = create_patents_table('Column Invalid Nullable')
+    body = {"nullable": False}
+    response = client.get(
+        f"/api/db/v0/tables/{table.id}/columns/"
+    )
+    assert response.status_code == 200
+    columns = response.json()['results']
+    column_index = 4
+    column_id = columns[column_index]['id']
+    response = client.patch(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+        body
+    )
+    assert response.status_code == 400
+    response_json = response.json()
+    assert response_json[0]['code'] == ErrorCodes.NotNullViolation.value
+    assert response_json[0]['message'] == (
+        'column "Patent Number" of relation'
+        ' "Column Invalid Nullable" contains null values'
+    )
 
 
 def test_column_update_returns_table_dependent_fields(column_test_table, client):

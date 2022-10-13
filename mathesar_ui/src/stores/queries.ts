@@ -1,11 +1,40 @@
+/**
+ * @file
+ *
+ * TODO: Our store structures need a complete refactoring.
+ *
+ * 1. We have to avoid exporting stores directly and export
+ * functions that return promises and wait on the promise
+ * wherever we use the stores.
+ *
+ * 2. The map structure used in individual stores should be more linear.
+ * Eg., Schemas store should contain the ids of it's tables and queries,
+ * and each individual store should only contain a map with the id and
+ * the db object associated with the store.
+ *
+ * 3. Each operation within a store file, should update the store.
+ * Eg., create should create a new object and update the respective queries
+ * and schemas store.
+ *
+ * 4. Pure API calls should be separated and moved to the /api directory.
+ *
+ * This store would be a good place to start since the usage
+ * is limited compared to the other stores.
+ */
+
 import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-import { getAPI, postAPI, putAPI } from '@mathesar/utils/api';
+import { deleteAPI, getAPI, postAPI, putAPI } from '@mathesar/utils/api';
 import type { RequestStatus, PaginatedResponse } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { SchemaEntry } from '@mathesar/AppTypes';
-import type { QueryInstance } from '@mathesar/api/queries/queryList';
+import type {
+  QueryInstance,
+  QueryGetResponse,
+  QueryRunRequest,
+  QueryRunResponse,
+} from '@mathesar/api/queries';
 import { CancellablePromise } from '@mathesar-component-library';
 
 import { currentSchemaId } from './schemas';
@@ -58,6 +87,12 @@ function setSchemaQueriesStore(
     store.set(storeValue);
   }
   return store;
+}
+
+function findSchemaStoreForTable(id: QueryInstance['id']) {
+  return [...schemasCacheManager.cache.values()].find((entry) =>
+    get(entry).data.has(id),
+  );
 }
 
 export async function refetchQueriesForSchema(
@@ -114,12 +149,12 @@ export function getQueriesStoreForSchema(
       data: new Map(),
     });
     schemasCacheManager.set(schemaId, store);
-    if (preload) {
-      preload = false;
+    if (preload && commonData?.current_schema === schemaId) {
       store = setSchemaQueriesStore(schemaId, commonData?.queries ?? []);
     } else {
       void refetchQueriesForSchema(schemaId);
     }
+    preload = false;
   } else if (get(store).requestStatus.state === 'failure') {
     void refetchQueriesForSchema(schemaId);
   }
@@ -151,14 +186,10 @@ export const queries: Readable<QueriesStoreSubstance> = derived(
 
 export function createQuery(
   newQuery: UnsavedQueryInstance,
-): CancellablePromise<QueryInstance> {
-  const promise = postAPI<QueryInstance>('/api/db/v0/queries/', newQuery);
-  void promise.then(() => {
-    // TODO: Get schemaId as a query property
-    const schemaId = get(currentSchemaId);
-    if (schemaId) {
-      void refetchQueriesForSchema(schemaId);
-    }
+): CancellablePromise<QueryGetResponse> {
+  const promise = postAPI<QueryGetResponse>('/api/db/v0/queries/', newQuery);
+  void promise.then((instance) => {
+    void refetchQueriesForSchema(instance.schema);
     return undefined;
   });
   return promise;
@@ -193,25 +224,23 @@ export function getQuery(
   if (schemaId) {
     return new CancellablePromise<QueryInstance>(
       (resolve, reject) => {
-        const store = schemasCacheManager.get(schemaId);
-        if (store) {
-          const storeSubstance = get(store);
-          const queryResponse = storeSubstance.data.get(queryId);
-          if (queryResponse) {
-            resolve(queryResponse);
-            return;
-          }
-          if (storeSubstance.requestStatus.state !== 'success') {
-            innerRequest = getAPI<QueryInstance>(
-              `/api/db/v0/queries/${queryId}/`,
-            );
-            void innerRequest.then(
-              (result) => resolve(result),
-              (reason) => reject(reason),
-            );
-          } else {
-            reject(new Error('Query not found'));
-          }
+        const store = getQueriesStoreForSchema(schemaId);
+        const storeSubstance = get(store);
+        const queryResponse = storeSubstance.data.get(queryId);
+        if (queryResponse) {
+          resolve(queryResponse);
+          return;
+        }
+        if (storeSubstance.requestStatus.state !== 'success') {
+          innerRequest = getAPI<QueryInstance>(
+            `/api/db/v0/queries/${queryId}/`,
+          );
+          void innerRequest.then(
+            (result) => resolve(result),
+            (reason) => reject(reason),
+          );
+        } else {
+          reject(new Error('Query not found'));
         }
       },
       () => {
@@ -220,4 +249,23 @@ export function getQuery(
     );
   }
   return new CancellablePromise((resolve) => resolve());
+}
+
+export function runQuery(
+  request: QueryRunRequest,
+): CancellablePromise<QueryRunResponse> {
+  return postAPI('/api/db/v0/queries/run/', request);
+}
+
+export function deleteQuery(queryId: number): CancellablePromise<void> {
+  const promise = deleteAPI<void>(`/api/db/v0/queries/${queryId}/`);
+
+  void promise.then(() => {
+    findSchemaStoreForTable(queryId)?.update((storeData) => {
+      storeData.data.delete(queryId);
+      return { ...storeData, data: new Map(storeData.data) };
+    });
+    return undefined;
+  });
+  return promise;
 }

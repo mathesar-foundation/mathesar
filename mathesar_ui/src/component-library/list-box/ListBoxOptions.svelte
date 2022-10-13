@@ -55,15 +55,19 @@
   class:truncate={truncateOnOverflow}
 >
   {#each $displayedOptions as option, index (option)}
+    {@const isSelected = $value.some((opt) =>
+      $staticProps.checkEquality(opt, option),
+    )}
     <li
       role="option"
-      class:selected={$value.some((opt) =>
-        $staticProps.checkEquality(opt, option),
-      )}
+      class:selected={isSelected}
       class:in-focus={index === $focusedOptionIndex}
+      aria-selected={isSelected ? true : undefined}
       on:click={() => api.pick(option)}
     >
-      <StringOrComponent arg={$staticProps.getLabel(option)} />
+      <slot {option} label={$staticProps.getLabel(option)}>
+        <StringOrComponent arg={$staticProps.getLabel(option)} />
+      </slot>
     </li>
   {/each}
 </ul>

@@ -1,7 +1,8 @@
-from psycopg2.errors import NotNullViolation
+from psycopg2.errors import NotNullViolation, UniqueViolation
 from rest_framework import serializers
 from rest_framework import status
 from sqlalchemy.exc import IntegrityError
+from db.records.exceptions import InvalidDate, InvalidDateFormat
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
@@ -21,7 +22,34 @@ class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Seria
 class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
     def update(self, instance, validated_data):
         table = self.context['table']
-        record = table.update_record(instance['id'], validated_data)
+        try:
+            record = table.update_record(instance['id'], validated_data)
+        except InvalidDate as e:
+            raise database_api_exceptions.InvalidDateAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except InvalidDateFormat as e:
+            raise database_api_exceptions.InvalidDateFormatAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except IntegrityError as e:
+            if type(e.orig) == NotNullViolation:
+                raise database_api_exceptions.NotNullViolationAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    table=table
+                )
+            elif type(e.orig) == UniqueViolation:
+                raise database_api_exceptions.UniqueViolationAPIException(
+                    e,
+                    message="The requested update violates a uniqueness constraint",
+                    table=table,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         return record
 
     def create(self, validated_data):
@@ -34,6 +62,13 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
                     table=table
+                )
+            elif type(e.orig) == UniqueViolation:
+                raise database_api_exceptions.UniqueViolationAPIException(
+                    e,
+                    message="The requested insert violates a uniqueness constraint",
+                    table=table,
+                    status_code=status.HTTP_400_BAD_REQUEST,
                 )
             else:
                 raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)

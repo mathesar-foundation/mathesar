@@ -3,6 +3,7 @@
     getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
+    isColumnSelected,
   } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/tables/columns';
   import {
@@ -10,14 +11,15 @@
     SheetCell,
     SheetCellResizer,
   } from '@mathesar/components/sheet';
-  import { isColumnSelected } from '@mathesar/stores/table-data/selection';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
+  export let hasNewColumnButton = false;
+
   $: ({ columnsDataStore, selection, processedColumns } = $tabularData);
-  $: ({ selectedCells } = selection);
+  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
   function addColumn(e: CustomEvent<Partial<Column>>) {
     void columnsDataStore.add(e.detail);
@@ -28,6 +30,7 @@
   <SheetCell
     columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
     isStatic
+    isControlCell
     let:htmlAttributes
     let:style
   >
@@ -39,7 +42,11 @@
       <div {...htmlAttributes} {style}>
         <HeaderCell
           {processedColumn}
-          isSelected={isColumnSelected($selectedCells, processedColumn.column)}
+          isSelected={isColumnSelected(
+            $selectedCells,
+            $columnsSelectedWhenTheTableIsEmpty,
+            processedColumn.column,
+          )}
           on:click={() =>
             selection.toggleColumnSelection(processedColumn.column)}
         />
@@ -48,16 +55,18 @@
     </SheetCell>
   {/each}
 
-  <SheetCell
-    columnIdentifierKey={ID_ADD_NEW_COLUMN}
-    let:htmlAttributes
-    let:style
-  >
-    <div {...htmlAttributes} {style}>
-      <NewColumnCell
-        columns={$columnsDataStore.columns}
-        on:addColumn={addColumn}
-      />
-    </div>
-  </SheetCell>
+  {#if hasNewColumnButton}
+    <SheetCell
+      columnIdentifierKey={ID_ADD_NEW_COLUMN}
+      let:htmlAttributes
+      let:style
+    >
+      <div {...htmlAttributes} {style}>
+        <NewColumnCell
+          columns={$columnsDataStore.columns}
+          on:addColumn={addColumn}
+        />
+      </div>
+    </SheetCell>
+  {/if}
 </SheetHeader>

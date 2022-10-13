@@ -5,8 +5,8 @@
  -->
 <script lang="ts">
   import { Button } from '@mathesar-component-library';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
-  import TableColumnName from '@mathesar/components/TableColumnName.svelte';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   // TODO: Check if this component should be moved to
   // some common place??
   import CellBackground from '../../row/CellBackground.svelte';
@@ -18,7 +18,7 @@
 <div>
   <CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
   <Button appearance="ghost" on:click>
-    <TableColumnName column={processedColumn} />
+    <ProcessedColumnName {processedColumn} />
   </Button>
 </div>
 

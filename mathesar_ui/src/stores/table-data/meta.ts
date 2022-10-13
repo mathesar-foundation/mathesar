@@ -91,7 +91,7 @@ function serializeMetaProps(p: MetaProps): string {
 
 /** @throws Error if string is not properly formatted. */
 function deserializeMetaProps(s: string): MetaProps {
-  return makeMetaProps(JSON.parse(Url64.decode(s)));
+  return makeMetaProps(JSON.parse(Url64.decode(s)) as TerseMetaProps);
 }
 
 const defaultMetaPropsSerialization = serializeMetaProps(getFullMetaProps());
@@ -112,8 +112,6 @@ export class Meta {
   filtering: Writable<Filtering>;
 
   searchFuzzy: Writable<SearchFuzzy>;
-
-  // selectedRows = new WritableSet<RowKey>();
 
   cellClientSideErrors = new WritableMap<CellKey, string[]>();
 
@@ -236,6 +234,29 @@ export class Meta {
         searchFuzzy,
       }),
     );
+  }
+
+  clearAllStatusesAndErrorsForRows(rowKeys: RowKey[]): void {
+    this.rowCreationStatus.delete(rowKeys);
+    this.rowDeletionStatus.delete(rowKeys);
+    const rowKeySet = new Set(rowKeys);
+    this.cellClientSideErrors.delete(
+      [...this.cellClientSideErrors.getKeys()].filter(([cellkey]) =>
+        rowKeySet.has(extractRowKeyFromCellKey(cellkey)),
+      ),
+    );
+    this.cellModificationStatus.delete(
+      [...this.cellModificationStatus.getKeys()].filter(([cellkey]) =>
+        rowKeySet.has(extractRowKeyFromCellKey(cellkey)),
+      ),
+    );
+  }
+
+  clearAllStatusesAndErrors(): void {
+    this.rowCreationStatus.clear();
+    this.rowDeletionStatus.clear();
+    this.cellClientSideErrors.clear();
+    this.cellModificationStatus.clear();
   }
 
   static fromSerialization(s: string): Meta | undefined {

@@ -43,6 +43,28 @@ def test_json_sort_array(json_table_obj):
     ]
 
 
+def test_json_sort_object(json_table_obj):
+    roster, engine = json_table_obj
+    order_list = [{"field": "json_object", "direction": "asc"}]
+    record_list = get_records(roster, engine, order_by=order_list)
+    assert [row["json_object"] for row in record_list] == [
+        '{}',
+        '{"name": "John"}',
+        '{"age": 30, "name": "John"}',
+        '{"30": "age", "car": null, "name": "John"}',
+        '{"age": 30, "car": null, "name": null}',
+        '{"age": 30, "car": null, "name": "Amy"}',
+        '{"age": 30, "car": null, "name": "John"}',
+        '{"age": 30, "car": null, "name": "John11"}',
+        '{"age": 30, "car": null, "name": 11}',
+        '{"age": 30, "car": null, "name": 12}',
+        '{"age": 30, "car": null, "name": false}',
+        '{"age": 30, "car": null, "name": true}',
+        '{"age": 30, "car": null, "name1": "John"}',
+        '{"car": null, "name": "John", "age11": 30}',
+    ]
+
+
 def test_get_records_gets_ordered_records_str_col_obj(roster_table_obj):
     roster, engine = roster_table_obj
     order_list = [{"field": roster.columns["Teacher"], "direction": "asc"}]

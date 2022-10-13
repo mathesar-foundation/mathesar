@@ -176,20 +176,28 @@ class MathesarColumn(Column):
         """
         engine_exists = self.engine is not None
         table_exists = self.table_ is not None
-        engine_has_table = inspect(self.engine).has_table(self.table_.name, schema=self.table_.schema)
+        # TODO are we checking here that the table exists on the database? explain why we have to do
+        # that.
+        engine_has_table = inspect(self.engine).has_table(
+            self.table_.name,
+            schema=self.table_.schema,
+        )
         if engine_exists and table_exists and engine_has_table:
+            metadata = self.table_.metadata
             return get_column_attnum_from_name(
                 self.table_oid,
                 self.name,
-                self.engine
+                self.engine,
+                metadata=metadata,
             )
 
     @property
     def column_default_dict(self):
         if self.table_ is None:
             return
+        metadata = self.table_.metadata
         default_dict = get_column_default_dict(
-            self.table_oid, self.column_attnum, self.engine
+            self.table_oid, self.column_attnum, self.engine, metadata=metadata,
         )
         if default_dict:
             return {
@@ -200,7 +208,13 @@ class MathesarColumn(Column):
     @property
     def default_value(self):
         if self.table_ is not None:
-            return get_column_default(self.table_oid, self.column_attnum, self.engine)
+            metadata = self.table_.metadata
+            return get_column_default(
+                self.table_oid,
+                self.column_attnum,
+                self.engine,
+                metadata=metadata,
+            )
 
     @property
     def db_type(self):
@@ -212,11 +226,18 @@ class MathesarColumn(Column):
 
     @property
     def type_options(self):
+        item_type = getattr(self.type, "item_type", None)
+        if item_type is not None:
+            item_type_name = get_db_type_enum_from_class(item_type.__class__).id
+        else:
+            item_type_name = None
         full_type_options = {
             "length": getattr(self.type, "length", None),
             "precision": getattr(self.type, "precision", None),
             "scale": getattr(self.type, "scale", None),
             "fields": getattr(self.type, "fields", None),
+            "item_type": item_type_name,
+            "dimensions": getattr(self.type, "dimensions", None)
         }
         _type_options = {k: v for k, v in full_type_options.items() if v is not None}
         return _type_options if _type_options else None

@@ -6,7 +6,7 @@
     "module": "esnext",
     "types": [
       "svelte",
-      "jest",
+      "vitest/globals",
       "@testing-library/jest-dom",
       "js-cookie",
       "svelte2tsx/svelte-jsx"
@@ -32,6 +32,7 @@
     "src/**/*.ts",
     "src/**/*.svelte",
     "**.cjs",
+    "**/*.cjs",
     "**.config.js"
   ]
 }

@@ -1,7 +1,5 @@
-from sqlalchemy import text
-from sqlalchemy import String
-from sqlalchemy import func
-from sqlalchemy.dialects.postgresql import JSONB as SA_JSONB
+from sqlalchemy import cast, text
+from sqlalchemy.dialects.postgresql import JSONB as SA_JSONB, TEXT
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.compiler import compiles
 
@@ -18,7 +16,7 @@ class MathesarJsonObject(TypeDecorator):
         return DB_TYPE.upper()
 
     def column_expression(self, column):
-        return func.cast(column, String)
+        return cast(column, TEXT)
 
     def coerce_compared_value(self, op, value):
         return self.impl.coerce_compared_value(op, value)

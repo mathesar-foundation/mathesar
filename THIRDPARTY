@@ -33,3 +33,11 @@ License: MIT
 License Text: https://github.com/sdecima/javascript-detect-element-resize/blob/master/LICENSE
 Derivative files:
     /mathesar_ui/src/sections/table-view/virtual-list/detectElementResize.ts
+
+Component: django-prefetch
+Version: 1.2.3
+Copyright: 2012-2021, Ionel Cristian Mărieș
+License: BSD 2-Clause
+License Text: https://github.com/ionelmc/django-prefetch/blob/master/LICENSE
+Derivative files:
+    /mathesar/utils/prefetch.py

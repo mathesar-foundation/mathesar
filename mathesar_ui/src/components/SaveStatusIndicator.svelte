@@ -16,7 +16,7 @@
     class:error={status === 'failure'}
   >
     {#if !status}
-      *Unsaved
+      *Has unsaved changes
     {:else if status === 'success'}
       All changes saved
     {:else if status === 'processing'}

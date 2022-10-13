@@ -2,7 +2,6 @@ import pytest
 from unittest.mock import patch
 from django.core.cache import cache
 
-from mathesar import reflection
 from mathesar.models.base import Database, Schema, Table, schema_utils
 from mathesar.utils.models import attempt_dumb_query
 
@@ -53,14 +52,14 @@ def test_schema_name_handles_missing(monkeypatch, test_db_model):
 
 @pytest.mark.parametrize("model", [Database, Schema, Table])
 def test_model_queryset_reflects_db_objects(model):
-    with patch.object(reflection, 'reflect_db_objects') as mock_reflect:
+    with patch('mathesar.state.base.reflect_db_objects') as mock_reflect:
         model.objects.all()
     mock_reflect.assert_called()
 
 
 @pytest.mark.parametrize("model", [Database, Schema, Table])
 def test_model_current_queryset_does_not_reflects_db_objects(model):
-    with patch.object(reflection, 'reflect_db_objects') as mock_reflect:
+    with patch('mathesar.state.base.reflect_db_objects') as mock_reflect:
         model.current_objects.all()
     mock_reflect.assert_not_called()
 

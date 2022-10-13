@@ -39,7 +39,27 @@ Clone the repository and then run the following command for performing initial s
 make initial_setup
 ```
 
-You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 
+You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. 
+
+To get the UI working, you need to login at
+
+`http://localhost:8000/auth/login/`
+
+with username:
+
+`admin` 
+
+and password:
+
+`password` 
+
+If you'd prefer to develop using the Django Rest Framework browsable API, you can use the login functionality at the top right with the same username and password. If you prefer a non-browser tool for API development, you'll have to:
+- Use browser to execute one of the methods above, then
+- Extract the key, value pair for the cookie named `sessionid` using dev tools.
+- submit that cookie with each request until it expires.
+- Repeat as necessary (e.g., when the cookie expires).
+
+For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 
 
 It is recommended that you keep the Docker containers running while you make changes to the code. Any change to the code made locally will sync to the container and the version deployed at `http://localhost:8000` will always be the latest local version of the code.
 

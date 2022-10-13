@@ -4,11 +4,11 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
-from sqlalchemy.exc import DataError, IntegrityError
+from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError
 
-from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
-from mathesar.api.serializers.dependents import DependentSerializer
+from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
+from mathesar.api.serializers.dependents import DependentFilterSerializer, DependentSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.exceptions.database_exceptions import (
@@ -25,7 +25,6 @@ from mathesar.api.serializers.tables import (
     MoveTableRequestSerializer
 )
 from mathesar.models.base import Table
-from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
 from mathesar.utils.tables import get_table_column_types
 from mathesar.utils.joins import get_processed_joinable_tables
 
@@ -37,7 +36,11 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     filterset_class = TableFilter
 
     def get_queryset(self):
-        return Table.objects.all().order_by('-created_at')
+        # Better to use prefetch_related for schema and database,
+        # because select_related would lead to duplicate object instances and could result in multiple engines instances
+        # We prefetch `columns` using Django prefetch_related to get list of column objects and
+        # then prefetch column properties like `column name` using prefetch library.
+        return Table.objects.prefetch_related('schema', 'schema__database', 'columns').prefetch('_sa_table', 'columns').order_by('-created_at')
 
     def partial_update(self, request, pk=None):
         table = self.get_object()
@@ -55,13 +58,16 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     def destroy(self, request, pk=None):
         table = self.get_object()
         table.delete_sa_table()
-        table.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
     def dependents(self, request, pk=None):
+        serializer = DependentFilterSerializer(data=request.GET)
+        serializer.is_valid(raise_exception=True)
+        types_exclude = serializer.validated_data['exclude']
+
         table = self.get_object()
-        serializer = DependentSerializer(table.dependents, many=True, context={'request': request})
+        serializer = DependentSerializer(table.get_dependents(types_exclude), many=True, context={'request': request})
         return Response(serializer.data)
 
     @action(methods=['get'], detail=True)
@@ -89,33 +95,16 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         if serializer.is_valid(True):
             # We need to get the column names before splitting the table,
             # as they are the only reference to the new column after it is moved to a new table
-            extracted_column_names = [column.name for column in serializer.validated_data['extract_columns']]
-            remainder_column_names = column_names_id_map.keys() - extracted_column_names
+            columns_to_extract = serializer.validated_data['extract_columns']
             extracted_table_name = serializer.validated_data['extracted_table_name']
-            engine = table._sa_engine
-            extracted_sa_table, remainder_sa_table, remainder_fk = table.split_table(
-                serializer.validated_data['extract_columns'],
-                extracted_table_name,
+            extracted_table, remainder_table, _ = table.split_table(
+                columns_to_extract=columns_to_extract,
+                extracted_table_name=extracted_table_name,
+                column_names_id_map=column_names_id_map,
             )
-            extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
-            remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
-
-            # Reflect tables so that the newly created/extracted tables objects are created
-            reflect_tables_from_schema(table.schema)
-
-            extracted_table = Table.current_objects.get(oid=extracted_table_oid)
-            # Update attnum as it would have changed due to columns moving to a new table.
-            extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
-
-            remainder_table = Table.current_objects.get(oid=remainder_table_oid)
-            remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
-
-            reflect_db_objects(skip_cache_check=True)
-            extracted_table = Table.objects.get(oid=extracted_table_oid)
-            remainder_table_obj = Table.objects.get(oid=remainder_table_oid)
             split_table_response = {
                 'extracted_table': extracted_table.id,
-                'remainder_table': remainder_table_obj.id
+                'remainder_table': remainder_table.id
             }
             response_serializer = SplitTableResponseSerializer(data=split_table_response)
             response_serializer.is_valid(True)
@@ -124,35 +113,15 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     @action(methods=['post'], detail=True)
     def move_columns(self, request, pk=None):
         table = self.get_object()
-        column_names_id_map = table.get_column_name_id_bidirectional_map()
         serializer = MoveTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
         if serializer.is_valid(True):
             target_table = serializer.validated_data['target_table']
             move_columns = serializer.validated_data['move_columns']
-            column_names_to_move = [column.name for column in move_columns]
-            target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
-            extracted_sa_table, remainder_sa_table = table.move_columns(
-                move_columns,
-                target_table,
+            table.move_columns(
+                columns_to_move=move_columns,
+                target_table=target_table,
             )
-            engine = table._sa_engine
-            extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
-            remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
-
-            target_table.oid = extracted_table_oid
-            target_table.save()
-            # Refresh existing target table columns to use correct attnum preventing conflicts with the moved column
-            existing_target_column_names = target_columns_name_id_map.keys()
-            target_table.update_column_reference(existing_target_column_names, target_columns_name_id_map)
-            # Add the moved column
-            target_table.update_column_reference(column_names_to_move, column_names_id_map)
-
-            table.oid = remainder_table_oid
-            table.save()
-            remainder_column_names = column_names_id_map.keys() - column_names_to_move
-            table.update_column_reference(remainder_column_names, column_names_id_map)
-
-        return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], detail=True)
     def previews(self, request, pk=None):
@@ -208,9 +177,46 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             temp_table.insert_records_to_existing_table(
                 target_table, data_files, mappings
             )
-        except Exception as e:
-            # ToDo raise specific exceptions.
-            raise e
+        except NotNullError as e:
+            raise database_api_exceptions.NotNullViolationAPIException(
+                e,
+                message='Null values cannot be inserted into this column',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except ForeignKeyError as e:
+            raise database_api_exceptions.ForeignKeyViolationAPIException(
+                e,
+                message='Cannot add an invalid reference to a record',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except TypeMismatchError as e:
+            raise database_api_exceptions.TypeMismatchViolationAPIException(
+                e,
+                message='Type mismatch error',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except UniqueValueError as e:
+            raise database_api_exceptions.UniqueImportViolationAPIException(
+                e,
+                message='This column has uniqueness constraint set so non-unique values cannot be inserted',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except ExclusionError as e:
+            raise database_api_exceptions.ExclusionViolationAPIException(
+                e,
+                message='This record violates exclusion constraint',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except IntegrityError as e:
+            raise database_base_api_exceptions.IntegrityAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except ProgrammingError as e:
+            raise database_base_api_exceptions.ProgrammingAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         # Reload the table to avoid cached properties
         existing_table = get_table_or_404(target_table.id)
         serializer = TableSerializer(

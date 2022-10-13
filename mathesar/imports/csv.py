@@ -12,7 +12,7 @@ from mathesar.errors import InvalidTableError
 from db.constants import ID, ID_ORIGINAL, COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
 
-from mathesar.reflection import reflect_columns_from_table
+from mathesar.state import reset_reflection
 
 ALLOWED_DELIMITERS = ",\t:|"
 SAMPLE_SIZE = 20000
@@ -107,7 +107,7 @@ def get_sv_reader(file, header, dialect=None):
     return reader
 
 
-def create_db_table_from_data_file(data_file, name, schema):
+def create_db_table_from_data_file(data_file, name, schema, comment=None):
     engine = create_mathesar_engine(schema.database.name)
     sv_filename = data_file.file.path
     header = data_file.header
@@ -117,13 +117,20 @@ def create_db_table_from_data_file(data_file, name, schema):
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = [column_name.strip() for column_name in sv_reader.fieldnames]
-        column_names = [f"{COLUMN_NAME_TEMPLATE}{i}" if name == '' else name for i, name in enumerate(column_names)]
-        column_names_alt = [fieldname if fieldname != ID else ID_ORIGINAL for fieldname in column_names]
+        column_names = [
+            f"{COLUMN_NAME_TEMPLATE}{i}" if name == '' else name
+            for i, name in enumerate(column_names)
+        ]
+        column_names_alt = [
+            fieldname if fieldname != ID else ID_ORIGINAL
+            for fieldname in column_names
+        ]
         table = create_string_column_table(
             name=name,
             schema=schema.name,
             column_names=column_names,
-            engine=engine
+            engine=engine,
+            comment=comment,
         )
     try:
         insert_records_from_csv(
@@ -143,7 +150,8 @@ def create_db_table_from_data_file(data_file, name, schema):
             name=name,
             schema=schema.name,
             column_names=column_names_alt,
-            engine=engine
+            engine=engine,
+            comment=comment,
         )
         insert_records_from_csv(
             table,
@@ -156,23 +164,24 @@ def create_db_table_from_data_file(data_file, name, schema):
             quote=dialect.quotechar,
             encoding=encoding
         )
+    reset_reflection()
     return table
 
 
-def create_table_from_csv(data_file, name, schema):
+def create_table_from_csv(data_file, name, schema, comment=None):
     engine = create_mathesar_engine(schema.database.name)
     db_table = create_db_table_from_data_file(
-        data_file, name, schema
+        data_file, name, schema, comment=comment
     )
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     # Using current_objects to create the table instead of objects. objects
     # triggers re-reflection, which will cause a race condition to create the table
-    table, _ = Table.current_objects.get_or_create(
+    table = Table.current_objects.get(
         oid=db_table_oid,
         schema=schema,
-        import_verified=False
     )
-    reflect_columns_from_table(table)
+    table.import_verified = False
+    table.save()
     data_file.table_imported_to = table
     data_file.save()
     return table

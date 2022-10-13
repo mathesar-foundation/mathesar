@@ -1,18 +1,15 @@
-from frozendict import frozendict
-
 import pytest
-from unittest.mock import patch
 
 from django.core.cache import cache
 from django.core.files.base import File, ContentFile
 from sqlalchemy import text
 
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import get_column_attnum_from_names_as_map
 from db.types.base import PostgresType, MathesarCustomType
+from db.metadata import get_empty_metadata
 
-from mathesar import reflection
+from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models import base as models_base
 from mathesar.models.base import Column, Table, DataFile
 
 
@@ -67,10 +64,11 @@ def check_table_response(response_table, table, table_name):
     assert response_table['id'] == table.id
     assert response_table['name'] == table_name
     assert response_table['schema'] == table.schema.id
+    assert response_table['settings']['preview_settings']['template'] == table.settings.preview_settings.template
     assert 'import_target' in response_table
     assert 'created_at' in response_table
     assert 'updated_at' in response_table
-    assert 'has_dependencies' in response_table
+    assert 'has_dependents' in response_table
     assert 'import_verified' in response_table
     assert len(response_table['columns']) == len(table.sa_column_names)
     for column in response_table['columns']:
@@ -102,10 +100,11 @@ def check_table_filter_response(response, status_code=None, count=None):
         assert len(response_data['results']) == count
 
 
-def _create_table(client, data_files, table_name, schema, import_target_table):
+def _create_table(client, data_files, table_name, schema, import_target_table, description=None):
     body = {
         'name': table_name,
         'schema': schema.id,
+        'description': description
     }
     if data_files is not None:
         body['data_files'] = [df.id for df in data_files]
@@ -401,13 +400,13 @@ def _check_columns(actual_column_list, expected_column_list):
         for actual_column, expected_column
         in zip(actual_column_list, expected_column_list)
     ]
-    _assert_sets_of_dicts_are_equal(actual_column_list, expected_column_list)
+    _assert_lists_of_dicts_are_equal(actual_column_list, expected_column_list)
 
 
-def _assert_sets_of_dicts_are_equal(a, b):
-    a = set([frozendict(d) for d in a])
-    b = set([frozendict(d) for d in b])
-    assert a == b
+def _assert_lists_of_dicts_are_equal(a, b):
+    assert len(a) == len(b)
+    for d in a:
+        assert d in b
 
 
 @pytest.fixture
@@ -552,14 +551,18 @@ def test_table_create_without_datafile(client, schema, data_files, table_name):
     num_tables = Table.objects.count()
     expt_name = _get_expected_name(table_name)
 
+    expect_comment = 'test comment for table create'
     response, response_table, table = _create_table(
-        client, data_files, table_name, schema, import_target_table=None
+        client, data_files, table_name, schema, import_target_table=None,
+        description=expect_comment
     )
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
     assert len(table.sa_columns) == 1  # only the internal `id` column
     assert len(table.get_records()) == 0
+    assert table.description == expect_comment
+    assert response_table['description'] == expect_comment
     check_table_response(response_table, table, expt_name)
 
 
@@ -651,11 +654,14 @@ def test_table_partial_update(create_patents_table, client):
     new_table_name = 'NASA Table Partial Update New'
     table = create_patents_table(table_name)
 
-    body = {'name': new_table_name}
+    expect_comment = 'a super new test comment'
+    body = {'name': new_table_name, 'description': expect_comment}
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
     response_table = response.json()
     assert response.status_code == 200
+    assert response_table
+    assert response_table['description'] == expect_comment
     check_table_response(response_table, table, new_table_name)
 
     table = Table.objects.get(oid=table.oid)
@@ -692,25 +698,13 @@ def test_table_delete(create_patents_table, client):
     table = create_patents_table(table_name)
     table_count = len(Table.objects.all())
 
-    with patch.object(models_base, 'drop_table') as mock_delete:
-        response = client.delete(f'/api/db/v0/tables/{table.id}/')
+    response = client.delete(f'/api/db/v0/tables/{table.id}/')
     assert response.status_code == 204
 
     # Ensure the Django model was deleted
     new_table_count = len(Table.objects.all())
     assert table_count - 1 == new_table_count
     assert Table.objects.filter(id=table.id).exists() is False
-
-    # Ensure the backend table would have been deleted
-    assert mock_delete.call_args is not None
-    assert mock_delete.call_args[0] == (
-        table.name,
-        table.schema.name,
-        table.schema._sa_engine,
-    )
-    assert mock_delete.call_args[1] == {
-        'cascade': True
-    }
 
 
 def test_table_dependencies(client, create_patents_table):
@@ -720,7 +714,7 @@ def test_table_dependencies(client, create_patents_table):
     response = client.get(f'/api/db/v0/tables/{table.id}/')
     response_table = response.json()
     assert response.status_code == 200
-    assert response_table['has_dependencies'] is True
+    assert response_table['has_dependents'] is True
 
 
 def test_table_404(client):
@@ -892,27 +886,13 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
     assert len(orig_created) == 1
     with engine.begin() as conn:
         conn.execute(text(f'DROP TABLE {schema_name}.{table_name};'))
-    cache.clear()
+    reset_reflection()
     response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     new_created = [
         table for table in response_data['results'] if table['name'] == table_name
     ]
     assert len(new_created) == 0
-
-
-def test_table_viewset_sets_cache(client):
-    cache.delete(reflection.DB_REFLECTION_KEY)
-    assert not cache.get(reflection.DB_REFLECTION_KEY)
-    client.get('/api/db/v0/schemas/')
-    assert cache.get(reflection.DB_REFLECTION_KEY)
-
-
-def test_table_viewset_checks_cache(client):
-    cache.delete(reflection.DB_REFLECTION_KEY)
-    with patch.object(reflection, 'reflect_tables_from_schema') as mock_reflect:
-        client.get('/api/db/v0/tables/')
-    mock_reflect.assert_called()
 
 
 def _get_patents_column_data(table):
@@ -973,9 +953,9 @@ def test_table_patch_columns_and_table_name(create_patents_table, client):
     # as a multi-part form, which can't handle nested keys.
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
-    response_error = response.json()[0]
-    assert response.status_code == 400
-    assert response_error['message'] == 'Only name or columns can be passed in, not both.'
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json['name'] == 'PATCH COLUMNS 1'
 
 
 def test_table_patch_columns_no_changes(create_patents_table, client):
@@ -1045,19 +1025,14 @@ def test_table_patch_columns_one_type_change(create_patents_table, client):
 def _get_data_types_column_data(table):
     column_data = [{
         'name': 'id',
-        'type': PostgresType.INTEGER.id
     }, {
         'name': 'Integer',
-        'type': PostgresType.TEXT.id
     }, {
         'name': 'Boolean',
-        'type': PostgresType.TEXT.id
     }, {
         'name': 'Text',
-        'type': PostgresType.TEXT.id
     }, {
         'name': 'Decimal',
-        'type': PostgresType.TEXT.id
     }]
     bidirectmap = table.get_column_name_id_bidirectional_map()
     for data in column_data:
@@ -1083,17 +1058,11 @@ def test_table_patch_columns_multiple_type_change(create_data_types_table, clien
     _check_columns(response_json['columns'], column_data)
 
 
-def _check_columns_with_dropped(response_column_data, request_column_data, dropped_indices):
-    assert len(response_column_data) == len(request_column_data) - len(dropped_indices)
-    expected_column_data = [data for index, data in enumerate(request_column_data) if index not in dropped_indices]
-    _check_columns(response_column_data, expected_column_data)
-
-
 def test_table_patch_columns_one_drop(create_data_types_table, client):
     table_name = 'PATCH columns 7'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data(table)
-    column_data[1] = {'id': column_data[1]['id']}
+    column_data.pop(1)
 
     body = {
         'columns': column_data
@@ -1102,16 +1071,15 @@ def test_table_patch_columns_one_drop(create_data_types_table, client):
     response_json = response.json()
 
     assert response.status_code == 200
-    _check_columns_with_dropped(response_json['columns'], column_data, [1])
+    _check_columns(response_json['columns'], column_data)
 
 
 def test_table_patch_columns_multiple_drop(create_data_types_table, client):
-    INDICES_TO_DROP = [1, 2]
     table_name = 'PATCH columns 8'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data(table)
-    for index in INDICES_TO_DROP:
-        column_data[index] = {'id': column_data[index]['id']}
+    column_data.pop(1)
+    column_data.pop(1)
 
     body = {
         'columns': column_data
@@ -1120,7 +1088,7 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client):
     response_json = response.json()
 
     assert response.status_code == 200
-    _check_columns_with_dropped(response_json['columns'], column_data, INDICES_TO_DROP)
+    _check_columns(response_json['columns'], column_data)
 
 
 def test_table_patch_columns_diff_name_type_change(create_data_types_table, client):
@@ -1182,7 +1150,7 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     column_data = _get_data_types_column_data(table)
     column_data[1]['type'] = PostgresType.INTEGER.id
     column_data[2]['name'] = 'Checkbox'
-    column_data[3] = {'id': column_data[3]['id']}
+    column_data.pop(3)
 
     body = {
         'columns': column_data
@@ -1191,7 +1159,64 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     response_json = response.json()
 
     assert response.status_code == 200
-    _check_columns_with_dropped(response_json['columns'], column_data, [3])
+    _check_columns(response_json['columns'], column_data)
+
+
+def test_table_patch_columns_display_options(create_data_types_table, client):
+    table_name = 'patch_cols_one'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data(table)
+    display_options = {"use_grouping": "auto"}
+    column_data[0]['display_options'] = display_options
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    actual_id_col = [c for c in response.json()['columns'] if c['name'] == 'id'][0]
+
+    assert response.status_code == 200
+    actual_display_options = actual_id_col['display_options']
+    for k in display_options:
+        assert actual_display_options[k] == display_options[k]
+
+
+def test_table_patch_columns_invalid_display_options(create_data_types_table, client):
+    table_name = 'patch_cols_two'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data(table)
+    # despite its name, the last column is of type text
+    display_options = {"use_grouping": "auto"}
+
+    column_data[-1]['display_options'] = display_options
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    actual_col = [c for c in response.json()['columns'] if c['name'] == 'Decimal'][0]
+
+    assert response.status_code == 200
+    assert actual_col['display_options'] == {}
+
+
+def test_table_patch_columns_type_plus_display_options(create_data_types_table, client):
+    table_name = 'patch_cols_three'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data(table)
+    # despite its name, the last column is of type text
+    display_options = {"use_grouping": "auto"}
+    column_data[-1].update(
+        {'type': PostgresType.NUMERIC.id, 'display_options': display_options}
+    )
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    actual_col = [c for c in response.json()['columns'] if c['name'] == 'Decimal'][0]
+
+    assert response.status_code == 200
+    assert actual_col['type'] == PostgresType.NUMERIC.id
+    for k, v in display_options.items():
+        assert actual_col['display_options'][k] == v
 
 
 def test_table_patch_columns_same_name_type_drop(create_data_types_table, client):
@@ -1201,7 +1226,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     column_data[1] = {'id': column_data[1]['id']}
     column_data[2]['type'] = PostgresType.BOOLEAN.id
     column_data[2]['name'] = 'Checkbox'
-    column_data[3] = {'id': column_data[3]['id']}
+    column_data.pop(3)
 
     body = {
         'columns': column_data
@@ -1210,7 +1235,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     response_json = response.json()
 
     assert response.status_code == 200
-    _check_columns_with_dropped(response_json['columns'], column_data, [1, 3])
+    _check_columns(response_json['columns'], column_data)
 
 
 def test_table_patch_columns_invalid_type(create_data_types_table, client):
@@ -1374,14 +1399,15 @@ def test_table_extract_columns_drop_original_table(create_patents_table, client)
 
     remainder_columns = remainder_table.columns.all()
     remainder_columns_map = {column.name: column for column in remainder_columns}
-    columns_with_attnum = get_columns_attnum_from_names(remainder_table.oid, remainder_column_names, remainder_table._sa_engine, return_as_name_map=True)
+    metadata = get_empty_metadata()
+    columns_with_attnum = get_column_attnum_from_names_as_map(remainder_table.oid, remainder_column_names, remainder_table._sa_engine, metadata=metadata)
     for remainder_column_name in remainder_column_names:
         remainder_column = remainder_columns_map[remainder_column_name]
         assert remainder_column.attnum == columns_with_attnum[remainder_column.name]
         assert remainder_column.id == column_name_id_map[remainder_column.name]
 
     extracted_columns = extracted_table.columns.all()
-    columns_with_attnum = get_columns_attnum_from_names(extracted_table.oid, column_names_to_extract, extracted_table._sa_engine, return_as_name_map=True)
+    columns_with_attnum = get_column_attnum_from_names_as_map(extracted_table.oid, column_names_to_extract, extracted_table._sa_engine, metadata=metadata)
     for extracted_column in extracted_columns:
         if extracted_column.name != 'id':
             assert extracted_column.attnum == columns_with_attnum[extracted_column.name]

@@ -1,4 +1,5 @@
 from db.tables.operations import select as ma_sel
+from db.metadata import get_empty_metadata
 from mathesar.models.base import Table, Column, Constraint
 
 TARGET = 'target'
@@ -16,6 +17,7 @@ TYPE = 'type'
 def get_processed_joinable_tables(table, limit=None, offset=None, max_depth=2):
     raw_joinable_tables = ma_sel.get_joinable_tables(
         table.schema._sa_engine,
+        get_empty_metadata(),
         base_table_oid=table.oid,
         max_depth=max_depth,
         limit=limit,

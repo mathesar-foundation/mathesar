@@ -3,6 +3,7 @@ from sqlalchemy import String, Integer, Column, Table, MetaData
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
+from db.metadata import get_empty_metadata
 
 
 def test_drop_column_correct_column(engine_with_schema):
@@ -18,9 +19,11 @@ def test_drop_column_correct_column(engine_with_schema):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
+    # TODO reuse metadata
+    column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
     drop_column(table_oid, column_attnum, engine)
-    altered_table = reflect_table_from_oid(table_oid, engine)
+    # TODO reuse metadata
+    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 1
     assert nontarget_column_name in altered_table.columns
     assert target_column_name not in altered_table.columns

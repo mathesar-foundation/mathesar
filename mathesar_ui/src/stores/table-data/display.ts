@@ -4,7 +4,12 @@ import { WritableMap } from '@mathesar-component-library';
 import type { Column } from '@mathesar/api/tables/columns';
 import type { Meta } from './meta';
 import type { ColumnsDataStore } from './columns';
-import type { Row, RecordsData } from './records';
+import {
+  type Row,
+  type RecordsData,
+  type RecordRow,
+  filterRecordRows,
+} from './records';
 
 // TODO: Select active cell using primary key instead of index
 // Checkout scenarios with pk consisting multiple columns
@@ -69,7 +74,7 @@ function getVerticalDelta(direction: Direction): number {
 
 export function isCellActive(
   activeCell: ActiveCell,
-  row: Row,
+  row: RecordRow,
   column: Column,
 ): boolean {
   return (
@@ -185,7 +190,7 @@ export class Display {
     this.horizontalScrollOffset = writable(0);
     this.scrollOffset = writable(0);
     this.activeCell = writable<ActiveCell | undefined>(undefined);
-    this.isTableInspectorVisible = writable(false);
+    this.isTableInspectorVisible = writable(true);
 
     this.customizedColumnWidths = new WritableMap();
 
@@ -210,11 +215,20 @@ export class Display {
       ),
     );
 
-    const { savedRecords, newRecords } = this.recordsData;
+    const { savedRecordRowsWithGroupHeaders, newRecords } = this.recordsData;
     this.displayableRecords = derived(
-      [savedRecords, newRecords],
-      ([$savedRecords, $newRecords], set) => {
-        let allRecords = $savedRecords;
+      [savedRecordRowsWithGroupHeaders, newRecords],
+      ([$savedRecordRowsWithGroupHeaders, $newRecords]) => {
+        let allRecords: Row[] = $savedRecordRowsWithGroupHeaders;
+        /**
+         * Why are we calculating savedRecords here?
+         * 1. We need it to properly calculate the row index of the
+         *    placeholder row.
+         * 2. Adding the savedRecords store as a dependency will
+         *    execute this derived store's callback twice everytime
+         *    records are fetched. So, it's calculated here instead.
+         */
+        const savedRecords = filterRecordRows(allRecords);
         if ($newRecords.length > 0) {
           allRecords = allRecords
             .concat({
@@ -225,9 +239,10 @@ export class Display {
         }
         allRecords = allRecords.concat({
           ...this.recordsData.getNewEmptyRecord(),
+          rowIndex: savedRecords.length + $newRecords.length,
           isAddPlaceholder: true,
         });
-        set(allRecords);
+        return allRecords;
       },
     );
   }
@@ -236,7 +251,7 @@ export class Display {
     this.activeCell.set(undefined);
   }
 
-  selectCell(row: Row, column: Column): void {
+  selectCell(row: RecordRow, column: Column): void {
     this.activeCell.set({
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       rowIndex: row.rowIndex,
@@ -260,6 +275,10 @@ export class Display {
       const { offset } = pagination;
       const pageSize = pagination.size;
       const minRowIndex = 0;
+      /**
+       * We are not subtracting 1 from the below maxRowIndex calculation
+       * inorder to account for the add-new-record placeholder row
+       */
       const maxRowIndex =
         Math.min(pageSize, totalCount - offset, savedRecords.length) +
         newRecords.length;

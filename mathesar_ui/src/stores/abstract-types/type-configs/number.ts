@@ -306,7 +306,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 
 const numberType: AbstractTypeConfiguration = {
   icon: { ...iconUiTypeNumber, label: 'Number' },
-  cell: {
+  cellInfo: {
     type: 'number',
     conditionalConfig: {
       [DB_TYPES.DECIMAL]: { floatAllowanceStrategy: 'scale-based' },

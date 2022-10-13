@@ -2,32 +2,30 @@
   import { tick } from 'svelte';
   import {
     ContextMenu,
-    MenuItem,
+    ButtonMenuItem,
+    LinkMenuItem,
     WritableMap,
   } from '@mathesar-component-library';
   import {
     isCellActive,
     scrollBasedOnActiveCell,
+    rowHasNewRecord,
+    type RecordRow,
+    type Display,
+    type RecordsData,
+    type CellKey,
+    type ProcessedColumn,
+    isCellSelected,
+    Selection,
   } from '@mathesar/stores/table-data';
-  import type {
-    Row,
-    Display,
-    RecordsData,
-    CellKey,
-  } from '@mathesar/stores/table-data/types';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
-  import type { DataForRecordSummaryInFkCell } from '@mathesar/stores/table-data/records';
-  import { iconSetToNull } from '@mathesar/icons';
+  import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
+  import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import {
-    isCellSelected,
-    Selection,
-  } from '@mathesar/stores/table-data/selection';
   import CellErrors from './CellErrors.svelte';
   import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
@@ -35,7 +33,7 @@
   export let recordsData: RecordsData;
   export let display: Display;
   export let selection: Selection;
-  export let row: Row;
+  export let row: RecordRow;
   export let rowIsSelected = false;
   export let rowIsProcessing = false;
   export let rowHasErrors = false;
@@ -53,8 +51,25 @@
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: ({ selectedCells } = selection);
+
+  /**
+   * The name indicates that this boolean is only true when more than one cell
+   * is selected. However, because of the bug that [the active cell and selected
+   * cells do not remain in sync when using keyboard][1] this boolean is
+   * sometimes true even when multiple cells are selected. This is to
+   * differentiate between different active and selected cell using blue
+   * background styling for selected cell and blue border styling for active
+   * cell.
+   *
+   * The above bug can be fixed when following two conditions are met
+   *
+   * - We are working on keyboard accessability of the application.
+   * - `selectedCells` and `activeCell` are merged in a single store.
+   *
+   * [1]: https://github.com/centerofci/mathesar/issues/1534
+   */
   $: isSelectedInRange =
-    $selectedCells?.size > 1 && isCellSelected($selectedCells, row, column);
+    isCellSelected($selectedCells, row, column) && $selectedCells.size > 1;
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -65,16 +80,9 @@
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isEditable = !column.primary_key;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
-  $: recordPageLinkHref = (() => {
-    if (linkFk) {
-      const tableId = linkFk.referent_table;
-      return getRecordPageUrl({ tableId, recordId: value });
-    }
-    if (column.primary_key) {
-      return getRecordPageUrl({ recordId: value });
-    }
-    return undefined;
-  })();
+  $: linkedRecordHref = linkFk
+    ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
+    : undefined;
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -101,7 +109,7 @@
       return;
     }
     value = newValue;
-    const updatedRow = row.isNew
+    const updatedRow = rowHasNewRecord(row)
       ? await recordsData.createOrUpdateRecord(row, column)
       : await recordsData.updateCell(row, column);
     value = updatedRow.record?.[column.id] ?? value;
@@ -153,7 +161,6 @@
         selection.onStartSelection(row, column);
       }}
       on:update={valueUpdated}
-      {recordPageLinkHref}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
       on:mouseenter={() => {
         // This enables the click + drag to
@@ -162,13 +169,18 @@
       }}
     />
     <ContextMenu>
-      <MenuItem
+      <ButtonMenuItem
         icon={iconSetToNull}
         disabled={!canSetNull}
         on:click={() => setValue(null)}
       >
         Set to <Null />
-      </MenuItem>
+      </ButtonMenuItem>
+      {#if linkedRecordHref}
+        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
+          Go To Linked Record
+        </LinkMenuItem>
+      {/if}
     </ContextMenu>
     {#if errors.length}
       <CellErrors {errors} forceShowErrors={isActive} />

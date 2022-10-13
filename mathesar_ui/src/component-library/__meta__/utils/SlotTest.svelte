@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { SvelteComponent } from 'svelte';
 
-  export let component: SvelteComponent;
+  export let component: typeof SvelteComponent;
 </script>
 
 <svelte:component this={component} {...$$restProps}>

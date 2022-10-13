@@ -9,6 +9,7 @@ from db.tests.columns.utils import create_test_table
 from db.types.base import get_available_known_db_types, known_db_types, PostgresType
 from db.types.operations.convert import get_db_type_enum_from_class
 from db.constants import COLUMN_NAME_TEMPLATE
+from db.metadata import get_empty_metadata
 
 
 duplicate_column_options = [
@@ -20,7 +21,7 @@ duplicate_column_options = [
 
 
 def _check_duplicate_data(table_oid, engine, copy_data):
-    table = reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
 
     with engine.begin() as conn:
         rows = conn.execute(table.select()).fetchall()
@@ -79,7 +80,7 @@ def test_create_column(engine_with_schema, target_type):
         target_type_id = target_type.id
         column_data = {"name": new_column_name, "type": target_type_id}
         created_col = create_column(engine, table_oid, column_data)
-        altered_table = reflect_table_from_oid(table_oid, engine)
+        altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
         assert len(altered_table.columns) == 2
         assert created_col.name == new_column_name
         reflected_type = get_db_type_enum_from_class(created_col.type.__class__)
@@ -105,7 +106,7 @@ def test_create_column_options(engine_with_schema, target_type):
         "type_options": {"precision": 5, "scale": 3},
     }
     created_col = create_column(engine, table_oid, column_data)
-    altered_table = reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
     assert created_col.db_type == PostgresType.NUMERIC
@@ -131,7 +132,7 @@ def test_create_column_length_options(engine_with_schema, target_type):
         "type_options": {"length": 5},
     }
     created_col = create_column(engine, table_oid, column_data)
-    altered_table = reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
     assert created_col.db_type == target_type
@@ -160,7 +161,7 @@ def test_create_column_interval_options(engine_with_schema, type_options):
         "type_options": type_options,
     }
     created_col = create_column(engine, table_oid, column_data)
-    altered_table = reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
     assert created_col.db_type == PostgresType.INTERVAL
@@ -201,9 +202,9 @@ def test_duplicate_column_name(engine_with_schema):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    col_attnum = get_column_attnum_from_name(table_oid, filler_column_name, engine)
+    col_attnum = get_column_attnum_from_name(table_oid, filler_column_name, engine, metadata=get_empty_metadata())
     duplicate_column(table_oid, col_attnum, engine, new_col_name)
-    table = reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert new_col_name in table.c
 
 
@@ -218,12 +219,12 @@ def test_duplicate_column_single_unique(engine_with_schema, copy_data, copy_cons
     create_test_table(table_name, cols, insert_data, schema, engine)
 
     table_oid = get_oid_from_table(table_name, schema, engine)
-    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
+    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
     duplicate_column(
         table_oid, target_col_attnum, engine, new_col_name, copy_data, copy_constraints
     )
 
-    col_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine)
+    col_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine, metadata=get_empty_metadata())
     _check_duplicate_data(table_oid, engine, copy_data)
     _check_duplicate_unique_constraint(
         table_oid, col_attnum, [col_attnum], engine, copy_constraints
@@ -246,13 +247,13 @@ def test_duplicate_column_multi_unique(engine_with_schema, copy_data, copy_const
     create_test_table(table_name, cols, insert_data, schema, engine)
 
     table_oid = get_oid_from_table(table_name, schema, engine)
-    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
+    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
     duplicate_column(
         table_oid, target_col_attnum, engine, new_col_name, copy_data, copy_constraints
     )
 
-    new_col_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine)
-    filler_col_attnum = get_column_attnum_from_name(table_oid, filler_col_name, engine)
+    new_col_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine, metadata=get_empty_metadata())
+    filler_col_attnum = get_column_attnum_from_name(table_oid, filler_col_name, engine, metadata=get_empty_metadata())
     _check_duplicate_data(table_oid, engine, copy_data)
     _check_duplicate_unique_constraint(
         table_oid, new_col_attnum, [filler_col_attnum, new_col_attnum], engine, copy_constraints
@@ -273,7 +274,7 @@ def test_duplicate_column_nullable(
     create_test_table(table_name, cols, insert_data, schema, engine)
 
     table_oid = get_oid_from_table(table_name, schema, engine)
-    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
+    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
     col = duplicate_column(
         table_oid, target_col_attnum, engine, new_col_name, copy_data, copy_constraints
     )
@@ -304,7 +305,7 @@ def test_duplicate_non_unique_constraint(engine_with_schema):
             conn.execute(table.insert().values(data))
 
     table_oid = get_oid_from_table(table_name, schema, engine)
-    col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
+    col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
     col = duplicate_column(table_oid, col_attnum, engine, new_col_name)
 
     _check_duplicate_data(table_oid, engine, True)
@@ -322,13 +323,13 @@ def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraint
     create_test_table(table_name, cols, [], schema, engine)
 
     table_oid = get_oid_from_table(table_name, schema, engine)
-    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
+    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
     duplicate_column(
         table_oid, target_col_attnum, engine, new_col_name, copy_data, copy_constraints
     )
 
-    column_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine)
-    default = get_column_default(table_oid, column_attnum, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine, metadata=get_empty_metadata())
+    default = get_column_default(table_oid, column_attnum, engine, metadata=get_empty_metadata())
     if copy_data:
         assert default == expt_default
     else:
@@ -349,7 +350,7 @@ def test_create_column_accepts_column_data_without_name_attribute(engine_with_sc
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_data = {"type": "BOOLEAN"}
     created_col = create_column(engine, table_oid, column_data)
-    altered_table = reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 2
     assert created_col.name == expected_column_name
 
@@ -368,7 +369,7 @@ def test_create_column_accepts_column_data_with_name_as_empty_string(engine_with
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_data = {"name": "", "type": "BOOLEAN"}
     created_col = create_column(engine, table_oid, column_data)
-    altered_table = reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 2
     assert created_col.name == expected_column_name
 
@@ -397,7 +398,7 @@ def test_generate_column_name(engine_with_schema):
     for name in name_set:
         column_data = {"name": name, "type": "BOOLEAN"}
         create_column(engine, table_oid, column_data)
-    altered_table = reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     n = len(name_set) + 1
     # Expected column name should be 'Column n'
     # where n is length of number of columns already in the table

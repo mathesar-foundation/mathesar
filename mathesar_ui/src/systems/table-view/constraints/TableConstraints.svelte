@@ -2,14 +2,14 @@
   import {
     Icon,
     DropdownMenu,
-    MenuItem,
+    ButtonMenuItem,
     iconLoading,
   } from '@mathesar-component-library';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import type {
-    Constraint,
-    ConstraintsDataStore,
-  } from '@mathesar/stores/table-data/types';
+  import {
+    getTabularDataStoreFromContext,
+    type Constraint,
+    type ConstraintsDataStore,
+  } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/utils/api';
   import { modal } from '@mathesar/stores/modal';
   import {
@@ -60,15 +60,18 @@
 </div>
 
 <DropdownMenu label="New Constraint" icon={iconAddNew}>
-  <MenuItem
+  <ButtonMenuItem
     on:click={() => newUniqueConstraintModal.open()}
     icon={iconConstraintUnique}
   >
     Unique
-  </MenuItem>
-  <MenuItem on:click={() => newFkConstraintModal.open()} icon={iconTableLink}>
+  </ButtonMenuItem>
+  <ButtonMenuItem
+    on:click={() => newFkConstraintModal.open()}
+    icon={iconTableLink}
+  >
     Foreign Key
-  </MenuItem>
+  </ButtonMenuItem>
 </DropdownMenu>
 
 <NewUniqueConstraintModal controller={newUniqueConstraintModal} />

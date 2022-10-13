@@ -2,14 +2,17 @@
   import {
     getCellKey,
     getTabularDataStoreFromContext,
-  } from '@mathesar/stores/table-data';
-  import type { Row } from '@mathesar/stores/table-data/types';
-  import {
+    isNewRecordRow,
+    isPlaceholderRow,
+    rowHasRecord,
+    isGroupHeaderRow,
+    isHelpTextRow,
     getRowKey,
     ID_ROW_CONTROL_COLUMN,
+    type Row,
+    isRowSelected,
   } from '@mathesar/stores/table-data';
   import { SheetRow, SheetCell } from '@mathesar/components/sheet';
-  import { isRowSelected } from '@mathesar/stores/table-data/selection';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
@@ -29,7 +32,6 @@
     selection,
   } = $tabularData);
   $: ({
-    // selectedRows,
     rowStatus,
     rowCreationStatus,
     cellModificationStatus,
@@ -49,17 +51,13 @@
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
 
   function checkAndCreateEmptyRow() {
-    if (row.isAddPlaceholder) {
+    if (isPlaceholderRow(row)) {
       void recordsData.addEmptyRecord();
     }
   }
 
   const handleRowClick = () => {
-    if (
-      row.record &&
-      !row.isAddPlaceholder &&
-      typeof row.rowIndex === 'number'
-    ) {
+    if (rowHasRecord(row) && !isPlaceholderRow(row)) {
       selection.toggleRowSelection(row);
     }
   };
@@ -72,28 +70,22 @@
     class:processing={wholeRowState === 'processing'}
     class:failed={hasWholeRowErrors}
     class:created={creationStatus === 'success'}
-    class:add-placeholder={row.isAddPlaceholder}
-    class:new={row.isNew}
-    class:is-group-header={row.isGroupHeader}
-    class:is-add-placeholder={row.isAddPlaceholder}
+    class:is-new={isNewRecordRow(row)}
+    class:is-group-header={isGroupHeaderRow(row)}
+    class:is-add-placeholder={isPlaceholderRow(row)}
     {...htmlAttributes}
     style={styleString}
-    data-row-identifier={row.identifier}
     on:mousedown={checkAndCreateEmptyRow}
   >
     <SheetCell
       columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
       isStatic
-      let:htmlAttributes
+      isControlCell
+      let:htmlAttributes={cellHtmlAttr}
       let:style
     >
-      <div
-        class="row-control"
-        {...htmlAttributes}
-        {style}
-        on:click={handleRowClick}
-      >
-        {#if row.record}
+      <div {...cellHtmlAttr} {style} on:click={handleRowClick}>
+        {#if rowHasRecord(row)}
           <RowControl
             {primaryKeyColumnId}
             {row}
@@ -106,16 +98,16 @@
       </div>
     </SheetCell>
 
-    {#if row.isNewHelpText}
+    {#if isHelpTextRow(row)}
       <NewRecordMessage columnCount={$processedColumns.size} />
-    {:else if row.isGroupHeader && $grouping && row.group}
+    {:else if isGroupHeaderRow(row) && $grouping && row.group}
       <GroupHeader
         {row}
         grouping={$grouping}
         group={row.group}
         processedColumnsMap={$processedColumns}
       />
-    {:else if row.record}
+    {:else if rowHasRecord(row)}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
           {display}
@@ -145,15 +137,6 @@
 
     &:not(:hover) :global(.cell-bg-row-hover) {
       display: none;
-    }
-
-    .row-control {
-      font-size: var(--text-size-x-small);
-      padding: 0 1.5rem;
-      color: var(--color-text-muted);
-      display: inline-flex;
-      align-items: center;
-      height: 100%;
     }
 
     &.is-add-placeholder {
