@@ -10,5 +10,28 @@ def apply_relation_sorting(relation, sort_spec):
 
 
 def _get_sorted_column_obj_from_spec(relation, spec):
-    column = get_column_obj_from_relation(relation, spec['field'])
-    return getattr(column, spec['direction'])()
+    try:
+        field = spec['field']
+        direction = spec['direction']
+    except (KeyError, TypeError):
+        raise BadSortFormat
+
+    try:
+        column = get_column_obj_from_relation(relation, field)
+    except KeyError:
+        raise SortFieldNotFound
+    except AttributeError:
+        raise BadSortFormat
+
+    try:
+        return getattr(column, direction)()
+    except AttributeError:
+        raise BadSortFormat
+
+
+class BadSortFormat(Exception):
+    pass
+
+
+class SortFieldNotFound(Exception):
+    pass

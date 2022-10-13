@@ -2,9 +2,9 @@ import pytest
 
 from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import DropConstraint
-from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.records.operations.select import get_records, get_records_with_default_order
+from db.records.operations.sort import BadSortFormat, SortFieldNotFound
 
 
 def test_get_records_gets_ordered_records_str_col_name(roster_table_obj):
