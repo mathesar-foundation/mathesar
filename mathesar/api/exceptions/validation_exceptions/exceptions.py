@@ -115,9 +115,11 @@ class InvalidValueType(MathesarValidationException):
 
     def __init__(
             self,
+            message=None,
             field=None,
     ):
-        message = "Value's type is invalid."
+        if message is None:
+            message = "Value's type is invalid."
         super().__init__(None, self.error_code, message, field, None)
 
 
@@ -126,7 +128,9 @@ class DictHasBadKeys(MathesarValidationException):
 
     def __init__(
             self,
+            message=None,
             field=None,
     ):
-        message = "Dictionary's keys are invalid or obligatory keys are missing."
+        if message is None:
+            message = "Dictionary's keys are invalid or obligatory keys are missing."
         super().__init__(None, self.error_code, message, field, None)
