@@ -41,3 +41,24 @@ def init_mathesar_table_column_list_with_defaults(column_list):
             if c.name == constants.ID:
                 c.autoincrement = False
     return default_columns + given_columns
+
+
+def get_column_obj_from_relation(relation, column):
+    try:
+        column = find_column_by_name_in_relation(relation, column)
+    except AttributeError:
+        column = relation.columns[column.name]
+
+    return column
+
+
+# TODO deal with quotes; still better than the default
+def find_column_by_name_in_relation(relation, col_name_string):
+    try:
+        return relation.columns[col_name_string]
+    except KeyError:
+        col_name_split = col_name_string.split(sep='.', maxsplit=1)
+        if len(col_name_split) <= 1:
+            raise KeyError(col_name_string)
+        else:
+            return find_column_by_name_in_relation(relation, col_name_split[-1])
