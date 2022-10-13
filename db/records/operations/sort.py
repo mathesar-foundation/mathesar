@@ -13,7 +13,10 @@ def _get_sorted_column_obj_from_spec(relation, spec):
     try:
         field = spec['field']
         direction = spec['direction']
-    except (KeyError, TypeError):
+        nullsfirst = spec.get('nullsfirst', False)
+        nullslast = spec.get('nullslast', False)
+        assert not nullsfirst or not nullslast
+    except (KeyError, TypeError, AssertionError):
         raise BadSortFormat
 
     try:
@@ -24,7 +27,13 @@ def _get_sorted_column_obj_from_spec(relation, spec):
         raise BadSortFormat
 
     try:
-        return getattr(column, direction)()
+        directed_col = getattr(column, direction)()
+        if nullsfirst:
+            directed_col = directed_col.nulls_first()
+        elif nullslast:
+            directed_col = directed_col.nulls_last()
+        return directed_col
+
     except AttributeError:
         raise BadSortFormat
 
