@@ -1,3 +1,4 @@
+from functools import wraps
 from django.db import models
 from django.utils.functional import cached_property
 
@@ -9,7 +10,9 @@ from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValu
 from db.transforms.operations.deserialize import deserialize_transformation
 
 
-def _validate_list_of_dicts(field_name):
+def _get_validator_for_list_of_dicts(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_list_of_dicts)
     def _validator(value):
         if not isinstance(value, list):
             message = f"{value} should be a list."
@@ -21,7 +24,9 @@ def _validate_list_of_dicts(field_name):
     return _validator
 
 
-def _validate_initial_columns(field_name):
+def _get_validator_for_initial_columns(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_initial_columns)
     def _validator(initial_cols):
         for initial_col in initial_cols:
             keys = set(initial_col.keys())
@@ -49,11 +54,13 @@ def _validate_initial_columns(field_name):
                 message = f"{initial_col} contains unexpected keys: {unexpected_keys}."
                 raise DictHasBadKeys(message, field=field_name)
             jp_path = initial_col.get('jp_path')
-            _validate_jp_path(jp_path)
+            _get_validator_for_jp_path(field_name)(jp_path)
     return _validator
 
 
-def _validate_jp_path(field_name):
+def _get_validator_for_jp_path(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_jp_path)
     def _validator(jp_path):
         if jp_path:
             if not isinstance(jp_path, list):
@@ -82,7 +89,9 @@ def _validate_jp_path(field_name):
     return _validator
 
 
-def _validate_transformations(field_name):
+def _get_validator_for_transformations(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_transformations)
     def _validator(transformations):
         for transformation in transformations:
             if "type" not in transformation:
@@ -94,7 +103,9 @@ def _validate_transformations(field_name):
     return _validator
 
 
-def _validate_dict(field_name):
+def _get_validator_for_dict(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_dict)
     def _validator(value):
         if not isinstance(value, dict):
             message = f"{value} should be a dict."
@@ -115,8 +126,8 @@ class UIQuery(BaseModel, Relation):
     # sequence of dicts
     initial_columns = models.JSONField(
         validators=[
-            _validate_list_of_dicts(field_name="initial_columns"),
-            _validate_initial_columns(field_name="initial_columns"),
+            _get_validator_for_list_of_dicts(field_name="initial_columns"),
+            _get_validator_for_initial_columns(field_name="initial_columns"),
         ],
     )
 
@@ -125,8 +136,8 @@ class UIQuery(BaseModel, Relation):
         null=True,
         blank=True,
         validators=[
-            _validate_list_of_dicts(field_name="transformations"),
-            _validate_transformations(field_name="transformations"),
+            _get_validator_for_list_of_dicts(field_name="transformations"),
+            _get_validator_for_transformations(field_name="transformations"),
         ],
     )
 
@@ -135,7 +146,7 @@ class UIQuery(BaseModel, Relation):
         null=True,
         blank=True,
         validators=[
-            _validate_dict(field_name="display_options"),
+            _get_validator_for_dict(field_name="display_options"),
         ],
     )
 
