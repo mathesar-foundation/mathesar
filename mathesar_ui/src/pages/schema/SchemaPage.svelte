@@ -14,9 +14,12 @@
     getImportPreviewPageUrl,
   } from '@mathesar/routes/urls';
   import { queries } from '@mathesar/stores/queries';
-  import { tables as tablesStore } from '@mathesar/stores/tables';
+  import { createTable, tables as tablesStore } from '@mathesar/stores/tables';
   import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import Button from '@mathesar/component-library/button/Button.svelte';
+  import { router } from 'tinro';
+  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -33,6 +36,8 @@
   // eslint-disable-next-line @typescript-eslint/no-inferrable-types
   export const section: string = 'overview';
 
+  let isCreatingNewTable = false;
+
   $: tablesMap = $tablesStore.data;
   $: queriesMap = $queries.data;
 
@@ -48,6 +53,13 @@
       table.data_files !== undefined &&
       table.data_files.length > 0
     );
+  }
+
+  async function handleCreateEmptyTable() {
+    isCreatingNewTable = true;
+    const tableInfo = await createTable(schema.id, {});
+    isCreatingNewTable = false;
+    router.goto(getTablePageUrl(database.name, schema.id, tableInfo.id), false);
   }
 </script>
 
@@ -67,6 +79,14 @@
         <a href={getDataExplorerPageUrl(database.name, schema.id)}
           >Data Explorer</a
         >
+      </li>
+      <li>
+        <Button on:click={handleCreateEmptyTable}>
+          {#if isCreatingNewTable}
+            <Spinner />
+          {/if}
+          <span>New Empty Table</span>
+        </Button>
       </li>
     </ul>
   </div>
