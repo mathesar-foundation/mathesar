@@ -1,5 +1,26 @@
 from sqlalchemy import select
 from db.columns.utils import get_column_obj_from_relation
+from db.records.exceptions import BadSortFormat, SortFieldNotFound
+
+
+def get_default_order_by(relation, order_by=[]):
+    # Set default ordering if none was requested
+    pkey = getattr(relation, 'primary_key', None)
+    pk_cols = getattr(pkey, 'columns', pkey)
+    if pk_cols is not None:
+        order_by += [
+            {'field': col, 'direction': 'asc'}
+            for col
+            in set(pk_cols).intersection(relation.columns)
+        ]
+    if not order_by:
+        # If we don't detect primary keys, order by all columns
+        order_by = [
+            {'field': col, 'direction': 'asc'}
+            for col
+            in relation.columns
+        ]
+    return order_by
 
 
 def apply_relation_sorting(relation, sort_spec):
@@ -21,8 +42,8 @@ def _get_sorted_column_obj_from_spec(relation, spec):
 
     try:
         column = get_column_obj_from_relation(relation, field)
-    except KeyError:
-        raise SortFieldNotFound
+    except KeyError as e:
+        raise SortFieldNotFound(e)
     except AttributeError:
         raise BadSortFormat
 
@@ -36,11 +57,3 @@ def _get_sorted_column_obj_from_spec(relation, spec):
 
     except AttributeError:
         raise BadSortFormat
-
-
-class BadSortFormat(Exception):
-    pass
-
-
-class SortFieldNotFound(Exception):
-    pass
