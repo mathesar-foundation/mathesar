@@ -75,7 +75,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         table = self.get_object()
         limit = request.query_params.get('limit')
         offset = request.query_params.get('offset')
-        max_depth = request.query_params.get('max_depth', 2)
+        max_depth = request.query_params.get('max_depth', 3)
         processed_joinable_tables = get_processed_joinable_tables(
             table, limit=limit, offset=offset, max_depth=max_depth
         )
