@@ -1,7 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { get } from 'svelte/store';
-
   import type { ModalController } from '@mathesar-component-library';
   import {
     CancelOrProceedButtonPair,
@@ -28,7 +26,6 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { refetchTablesForSchema, tables } from '@mathesar/stores/tables';
   import {
-    getTabularData,
     ColumnsDataStore,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
@@ -36,7 +33,6 @@
   import { postAPI, States } from '@mathesar/utils/api';
   import { getAvailableName } from '@mathesar/utils/db';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { iconTechnicalExplanation, iconTableLink } from '@mathesar/icons';
   import type { RelationshipType } from './linkTableUtils';
   import {
@@ -220,13 +216,8 @@
     if (!tableWithNewColumn) {
       return;
     }
-    const abstractTypesMap = get(currentDbAbstractTypes).data;
-    const tabularDataWithNewColumn = getTabularData({
-      id: tableWithNewColumn.id,
-      abstractTypesMap,
-    });
-    if (tabularDataWithNewColumn) {
-      void tabularDataWithNewColumn.refresh();
+    if (tableWithNewColumn.id === $tabularData.id) {
+      void $tabularData.refresh();
     }
   }
 
