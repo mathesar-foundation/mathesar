@@ -108,3 +108,29 @@ class ConstraintColumnEmptyAPIException(MathesarValidationException):
     ):
         message = "Constraint column field cannot be empty"
         super().__init__(None, self.error_code, message, field, None)
+
+
+class InvalidValueType(MathesarValidationException):
+    error_code = ErrorCodes.InvalidValueType.value
+
+    def __init__(
+            self,
+            message=None,
+            field=None,
+    ):
+        if message is None:
+            message = "Value's type is invalid."
+        super().__init__(None, self.error_code, message, field, None)
+
+
+class DictHasBadKeys(MathesarValidationException):
+    error_code = ErrorCodes.DictHasBadKeys.value
+
+    def __init__(
+            self,
+            message=None,
+            field=None,
+    ):
+        if message is None:
+            message = "Dictionary's keys are invalid or obligatory keys are missing."
+        super().__init__(None, self.error_code, message, field, None)

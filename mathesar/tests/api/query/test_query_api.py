@@ -11,6 +11,7 @@ def post_minimal_query(_post_query, create_patents_table, get_uid):
         "initial_columns": [
             {
                 "id": 1,
+                # Mock Django IDs; their correctness is not checked
                 "jp_path": [[1, 3], [4, 5]],
                 "alias": "alias_x",
             },
@@ -67,6 +68,7 @@ def test_query_with_bad_base_table(get_uid, client):
         "initial_columns": [
             {
                 "id": 1,
+                # Mock Django IDs; their correctness is not checked
                 "jp_path": [[1, 3], [4, 5]],
                 "alias": "alias_x",
             },
@@ -87,6 +89,7 @@ def test_query_with_initial_column_without_id(create_patents_table, get_uid, cli
         "base_table": base_table.id,
         "initial_columns": [
             {
+                # Mock Django IDs; their correctness is not checked
                 "jp_path": [[1, 3], [4, 5]],
                 "alias": "alias_x",
             },
@@ -101,6 +104,9 @@ def test_query_with_initial_column_without_id(create_patents_table, get_uid, cli
 
 
 def test_query_with_initial_column_with_bad_jp_path(create_patents_table, get_uid, client):
+    """
+    A jp path that is not made up of a sequence of integer tuples.
+    """
     base_table = create_patents_table(table_name=get_uid())
     request_data = {
         "name": get_uid(),
@@ -108,6 +114,7 @@ def test_query_with_initial_column_with_bad_jp_path(create_patents_table, get_ui
         "initial_columns": [
             {
                 "id": 1,
+                # Mock Django ID; its correctness is not checked
                 "jp_path": [1],
                 "alias": "alias_x",
             },
@@ -129,6 +136,7 @@ def test_query_with_initial_column_without_alias(create_patents_table, get_uid, 
         "initial_columns": [
             {
                 "id": 1,
+                # Mock Django IDs; their correctness is not checked
                 "jp_path": [[1, 3], [4, 5]],
             },
             {
@@ -149,6 +157,7 @@ def test_query_with_initial_column_with_unexpected_key(create_patents_table, get
         "initial_columns": [
             {
                 "id": 1,
+                # Mock Django IDs; their correctness is not checked
                 "jp_path": [[1, 3], [4, 5]],
                 "alias": "alias_x",
                 "bad_key": 1,
@@ -172,6 +181,7 @@ def test_query_with_with_unexpected_key(create_patents_table, get_uid, client):
         "initial_columns": [
             {
                 "id": 1,
+                # Mock Django IDs; their correctness is not checked
                 "jp_path": [[1, 3], [4, 5]],
                 "alias": "alias_x",
             },
@@ -193,6 +203,7 @@ def test_update(post_minimal_query, client):
         "initial_columns": [
             {
                 "id": 3,
+                # Mock Django IDs; their correctness is not checked
                 "jp_path": [[1, 3]],
                 "alias": "alias_x",
             }
