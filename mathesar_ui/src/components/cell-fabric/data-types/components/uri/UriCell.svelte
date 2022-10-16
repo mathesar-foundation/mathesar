@@ -10,6 +10,19 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
+
+  let datafromdbcopyhelper = false;
+  let datafromdb: string;
+  function Escbehave(e: KeyboardEvent) {
+    datafromdb = datafromdbcopyhelper === false && value !== undefined && value!==null ? value : datafromdb;
+    datafromdbcopyhelper = true;
+    if (e.key === 'Escape') {
+      value = datafromdb;
+    }
+    if (e.key === 'Enter') {
+      datafromdb = value !== undefined && value!==null ? value : '';
+    }
+  }
 </script>
 
 <SteppedInputCell
@@ -39,6 +52,9 @@
     bind:value
     on:blur={handleInputBlur}
     on:keydown={handleInputKeydown}
+    on:keydown={(e) => {
+      Escbehave(e);
+    }}
   />
 </SteppedInputCell>
 
