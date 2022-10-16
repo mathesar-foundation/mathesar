@@ -19,13 +19,16 @@
     e: TextAreaProcessedKeyDown,
     handler: (e: KeyboardEvent) => void,
   ) {
-    datafromdb = datafromdbcopyhelper === false && value !== undefined && value !== null  ? value : datafromdb;
+    datafromdb =
+      datafromdbcopyhelper === false && value !== undefined && value !== null
+        ? value
+        : datafromdb;
     datafromdbcopyhelper = true;
     if (e.originalEvent.key === 'Escape') {
       value = datafromdb;
     }
     if (e.originalEvent.key === 'Enter') {
-      datafromdb = value !== undefined  && value !== null ? value : '';
+      datafromdb = value !== undefined && value !== null ? value : '';
     }
     const { type, originalEvent } = e;
     if (type === 'newlineWithEnterKeyCombination') {

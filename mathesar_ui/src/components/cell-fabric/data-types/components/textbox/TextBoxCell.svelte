@@ -16,13 +16,16 @@
   let datafromdbcopyhelper = false;
   let datafromdb: string;
   const Escbehave = (e: KeyboardEvent) => {
-    datafromdb =datafromdbcopyhelper === false && value !== undefined && value!==null ? value : datafromdb;
+    datafromdb =
+      datafromdbcopyhelper === false && value !== undefined && value !== null
+        ? value
+        : datafromdb;
     datafromdbcopyhelper = true;
     if (e.key === 'Escape') {
       value = datafromdb;
     }
     if (e.key === 'Enter') {
-      datafromdb = value !== undefined && value!==null ? value : '';
+      datafromdb = value !== undefined && value !== null ? value : '';
     }
   };
 </script>

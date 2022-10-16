@@ -58,7 +58,10 @@
   let datafromdbcopyhelper = false;
   let datafromdb: number;
   function Escbehave(e: KeyboardEvent) {
-    datafromdb = datafromdbcopyhelper === false && value !== undefined? Number(value): datafromdb;
+    datafromdb =
+      datafromdbcopyhelper === false && value !== undefined
+        ? Number(value)
+        : datafromdb;
     datafromdbcopyhelper = true;
     if (e.key === 'Escape') {
       value = datafromdb;
