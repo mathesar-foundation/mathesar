@@ -79,7 +79,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         # Only tables have columns on the Service layer that hold data necessary for preview template.
         if isinstance(table, Table):
             columns_query = table.columns.all()
-            preview_metadata, preview_columns = get_preview_info(table.id)
+            preview_metadata, preview_columns = get_preview_info(table)
             table_columns = [{'id': column.id, 'alias': column.name} for column in columns_query]
             columns_to_fetch = table_columns + preview_columns
 

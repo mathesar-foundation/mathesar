@@ -1,26 +1,51 @@
 import re
+from collections import defaultdict, namedtuple
 
-from db.constraints.utils import ConstraintType
-from mathesar.models.base import Column, Constraint
+from db.metadata import get_empty_metadata
+from db.tables.operations.select import get_joinable_tables
+from mathesar.models.base import Column, Table
 
 
-def _preview_info_by_column_id(fk_constraints, previous_path=[], exising_columns=[]):
+def _preview_info_by_column_id(
+    referrer_table,
+    referent_column_obj_by_column_attnum,
+    prefetched_objects,
+    previous_path=[],
+    exising_columns=[]
+):
     preview_info = {}
     preview_columns = exising_columns
-    for fk_constraint in fk_constraints:
-        constrained_column = fk_constraint.columns[0]
+    for fk_constrained_column_attnum, referent_tuple in referent_column_obj_by_column_attnum.items():
+        constrained_column = next(
+            constrained_column
+            for constrained_column in prefetched_objects.possible_columns
+            if fk_constrained_column_attnum == constrained_column.attnum and constrained_column.table.oid == referrer_table.oid
+        )
+        referent_column_oid = referent_tuple[1]
+        referent_table_oid = referent_tuple[0]
+        referent_column = next(
+            referent_column
+            for referent_column in prefetched_objects.possible_columns
+            if referent_column_oid == referent_column.attnum and referent_column.table.oid == referent_table_oid
+        )
         # For now only single column foreign key is used.
-        referent_column = fk_constraint.referent_columns[0]
-        referent_table = referent_column.table
+        referent_table = next(
+            table for table in prefetched_objects.possible_referent_tables if table.oid == referent_table_oid
+        )
+
         referent_table_settings = referent_table.settings
         preview_template = referent_table_settings.preview_settings.template
         preview_data_column_ids = column_ids_from_preview_template(preview_template)
-        preview_data_columns = Column.objects.filter(id__in=preview_data_column_ids)
+        preview_data_columns = filter(
+            lambda column: column.id in preview_data_column_ids,
+            prefetched_objects.possible_columns
+        )
         current_position = [[constrained_column.id, referent_column.id]]
         current_path = previous_path + current_position
         # Extract the template for foreign key columns of the referent table
-        referent_preview_info, referent_preview_columns = get_preview_info(
-            referent_table.id,
+        referent_preview_info, referent_preview_columns = _get_table_preview_info(
+            referent_table,
+            prefetched_objects,
             preview_data_columns,
             current_path,
             exising_columns
@@ -65,21 +90,50 @@ def column_alias_from_preview_template(preview_template):
     return preview_data_column_ids
 
 
-def get_preview_info(referrer_table_pk, restrict_columns=None, path=[], existing_columns=[]):
-    table_constraints = Constraint.objects.filter(table_id=referrer_table_pk)
-    fk_constraints = [
-        table_constraint
-        for table_constraint in table_constraints
-        if table_constraint.type == ConstraintType.FOREIGN_KEY.value
-    ]
+def get_preview_info(referrer_table):
+    joinable_tables = get_joinable_tables(referrer_table.schema._sa_engine, get_empty_metadata(), referrer_table.oid)
+    # Some foreign key columns might not be in the summary template
+    possible_summary_table_oids = []
+    constrained_columns_by_table = defaultdict(dict)
+    referent_column_identifiers = set()
+    for joinable_table in joinable_tables:
+        if not joinable_table.multiple_results:
+            possible_summary_table_oids.append(joinable_table.target)
+            for path_between_related_table in joinable_table.jp_path:
+                constrained_columns_by_table[path_between_related_table[0][0]][path_between_related_table[0][1]] = \
+                    path_between_related_table[1]
+                referent_column_identifiers.add(tuple(path_between_related_table[1]))
+    possible_referent_tables = Table.objects.filter(oid__in=possible_summary_table_oids).select_related(
+        'settings__preview_settings'
+    )
+    possible_columns = Column.objects.filter(table__in=possible_referent_tables).union(
+        Column.objects.filter(table=referrer_table)
+    )
+    PrefetchedObjects = namedtuple(
+        "PrefetchedObjects",
+        "possible_referent_tables possible_columns constrained_columns_by_table"
+    )
+    prefetched_objects = PrefetchedObjects(
+        possible_referent_tables, possible_columns, constrained_columns_by_table
+    )
+    return _get_table_preview_info(referrer_table, prefetched_objects)
+
+
+def _get_table_preview_info(referrer_table, prefetched_objects, restrict_columns=None, path=[], existing_columns=[]):
+    constrained_columns_by_table = prefetched_objects.constrained_columns_by_table
+    referent_columns_by_column_attnum = constrained_columns_by_table[referrer_table.oid]
     if restrict_columns:
-        fk_constraints = filter(
-            _get_filter_restricted_columns_fn(restrict_columns),
-            fk_constraints
+        referent_columns_by_column_attnum = dict(
+            filter(
+                _get_filter_restricted_columns_fn(restrict_columns),
+                referent_columns_by_column_attnum.items()
+            )
         )
 
     preview_info, columns = _preview_info_by_column_id(
-        fk_constraints,
+        referrer_table,
+        referent_columns_by_column_attnum,
+        prefetched_objects,
         path,
         existing_columns
     )
@@ -87,8 +141,7 @@ def get_preview_info(referrer_table_pk, restrict_columns=None, path=[], existing
 
 
 def _get_filter_restricted_columns_fn(restricted_columns):
-    def _filter_restricted_columns(fk_constraint):
-        constrained_column = fk_constraint.columns[0]
-        return constrained_column in restricted_columns
+    def _filter_restricted_columns(constrained_column_item):
+        return constrained_column_item[0] in restricted_columns
 
     return _filter_restricted_columns
