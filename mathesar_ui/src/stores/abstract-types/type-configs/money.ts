@@ -38,8 +38,8 @@ const displayForm: AbstractTypeConfigForm = {
     },
     useGrouping: {
       type: 'string',
-      enum: ['true', 'false', 'auto'],
-      default: 'auto',
+      enum: ['true', 'false'],
+      default: 'true',
     },
   },
   layout: {
@@ -71,7 +71,6 @@ const displayForm: AbstractTypeConfigForm = {
         options: {
           true: { label: 'On' },
           false: { label: 'Off' },
-          auto: { label: 'Auto' },
         },
       },
       {
@@ -126,7 +125,7 @@ function constructDisplayFormValuesFromDisplayOptions(
     decimalPlaces,
     currencySymbolLocation:
       displayOptions?.currency_symbol_location ?? 'after-minus',
-    useGrouping: displayOptions?.use_grouping ?? 'auto',
+    useGrouping: displayOptions?.use_grouping ?? 'true',
   };
   return displayFormValues;
 }

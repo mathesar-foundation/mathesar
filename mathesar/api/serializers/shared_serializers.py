@@ -157,7 +157,7 @@ class AbstractNumberDisplayOptionSerializer(BaseDisplayOptionsSerializer):
         choices=['english', 'german', 'french', 'hindi', 'swiss']
     )
 
-    use_grouping = serializers.ChoiceField(required=False, choices=['true', 'false', 'auto'], default='auto')
+    use_grouping = serializers.ChoiceField(required=False, choices=['true', 'false'], default='false')
     """
     The choices here correspond to the options available for the `useGrouping`
     property within the [Intl API][1]. True and False are encoded as strings

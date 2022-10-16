@@ -28,6 +28,7 @@ test.each([
   const { getByLabelText } = render(NumberInput, {
     locale,
     'aria-label': label,
+    useGrouping: true,
   });
   const input = getByLabelText(label) as HTMLInputElement;
   expect(input.value).toBe('');
