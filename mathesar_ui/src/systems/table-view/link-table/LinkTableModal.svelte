@@ -77,11 +77,10 @@
    * process) before the entry for the table is set into the `$tables` store.
    */
   $: thisTable = $tables.data.get($tabularData.id);
-  $: isSelfReferential = thisTable?.id === thatTable?.id;
-  $: canProceed =
-    thatTable &&
-    thisHasManyOfThat !== undefined &&
-    thatHasManyOfThis !== undefined;
+  $: isSelfReferential =
+    thisTable !== undefined &&
+    thatTable !== undefined &&
+    thisTable.id === thatTable.id;
   $: unavailableTableNames = new Set(
     [...$tables.data.values()].map((t) => t.name),
   ); // TODO: include constraint names too
@@ -119,6 +118,17 @@
     thatHasManyOfThis,
     isSelfReferential,
   );
+
+  /**
+   * `canProceed` has to be placed after `handleChangeThatTable` since
+   * svelte executes reactive calls in specified order at each tick
+   * and we the variables used here like `thisHasManyOfThat` and
+   * `thatHasManyOfThis` are manipulated within `handleChangeThatTable`.
+   */
+  $: canProceed =
+    thatTable &&
+    thisHasManyOfThat !== undefined &&
+    (isSelfReferential || thatHasManyOfThis !== undefined);
 
   function setColumnNames(
     _relationshipType: RelationshipType | undefined,
@@ -159,7 +169,6 @@
       throw new Error('Unable to determine target table id.');
     }
     switch (relationshipType) {
-      case 'one-to-one':
       case 'one-to-many': {
         const oneToOneOrOneToMany: OneToOne | OneToMany = {
           link_type: relationshipType,
@@ -169,6 +178,7 @@
         };
         return oneToOneOrOneToMany;
       }
+      case 'one-to-one':
       case 'many-to-one': {
         const oneToMany: OneToMany = {
           link_type: 'one-to-many',
