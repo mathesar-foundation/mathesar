@@ -71,7 +71,15 @@
       close();
     }
   }
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && isVisible) {
+      close();
+    }
+  }
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <div bind:this={element} class="context-menu-wrapper">
   {#if isVisible}
