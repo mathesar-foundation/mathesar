@@ -20,10 +20,10 @@ class DatabaseRoleViewSet(viewsets.ModelViewSet):
     serializer_class = DatabaseRoleSerializer
     pagination_class = DefaultLimitOffsetPagination
 
-    def update(self, request, pk=None):
+    def update(self, request, database_pk=None, pk=None):
         raise MethodNotAllowed(request.method)
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, database_pk=None, pk=None):
         raise MethodNotAllowed(request.method)
 
 
@@ -32,8 +32,8 @@ class SchemaRoleViewSet(viewsets.ModelViewSet):
     serializer_class = SchemaRoleSerializer
     pagination_class = DefaultLimitOffsetPagination
 
-    def update(self, request, pk=None):
+    def update(self, request, database_pk=None, pk=None):
         raise MethodNotAllowed(request.method)
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, database_pk=None, pk=None):
         raise MethodNotAllowed(request.method)
