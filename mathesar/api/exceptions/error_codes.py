@@ -38,7 +38,7 @@ class ErrorCodes(Enum):
     # Validation Error
     ColumnSizeMismatch = 4401
     DistinctColumnNameRequired = 4402
-    MappingsNotFound = 4415
+    MappingsNotFound = 4417
     MultipleDataFiles = 4400
     MoneyDisplayOptionConflict = 4407
     UnsupportedAlter = 4403

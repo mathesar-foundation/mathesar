@@ -661,7 +661,7 @@ class Table(DatabaseObject, Relation):
             raise e
         return table
 
-    def get_mappings(self, existing_table):
+    def suggest_col_mappings_for_import(self, existing_table):
         temp_table_col_list = self.get_column_name_type_map()
         target_table_col_list = existing_table.get_column_name_type_map()
         return column_utils.find_match(temp_table_col_list, target_table_col_list, self._sa_engine)

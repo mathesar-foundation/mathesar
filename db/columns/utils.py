@@ -45,35 +45,95 @@ def init_mathesar_table_column_list_with_defaults(column_list):
     return default_columns + given_columns
 
 
-def perfect_map(temp_table_col_list, target_table_col_list, engine):
-    match = list(zip(sorted(temp_table_col_list), sorted(target_table_col_list)))
-    result = [(temp_table_col_list.index(i1), target_table_col_list.index(i2)) for i1, i2 in match] if all(i1[0] == i2[0] for i1, i2 in match) else None
-    if result and is_type_casting_valid(match, engine):
-        return result
-    return None
+def perfect_map(temp_col_list, target_col_list, engine):
+    """
+    Returns a list of tuples which contain index of temp table column and its equivalent
+    target table column.
+
+    e.g. 
+    temp_col_list = [('A', PostgresType.INTEGER), ('B', PostgresType.TEXT),
+                           ('C', PostgresType.DATE)]
+
+    target_col_list = [('B', PostgresType.TEXT), ('A', PostgresType.INTEGER),
+                             ('C', PostgresType.DATE)]
+    
+    perfect_map will return [(0, 1), (1, 0), (2, 2)] 
+    """
+    match = list(zip(sorted(temp_col_list), sorted(target_col_list)))
+    if all(temp_col[0] == target_col[0] for temp_col, target_col in match):
+        result = _build_match_tuple(temp_col_list, target_col_list, match)
+        if result and is_type_casting_valid(match, engine):
+            return result
 
 
-def find_match(temp_table_col_list, target_table_col_list, engine):
-    if perfect_match := perfect_map(temp_table_col_list, target_table_col_list, engine):
+def _build_match_tuple(tmp_col_list, trgt_col_list, match):
+    return [
+        (tmp_col_list.index(temp_col), trgt_col_list.index(target_col))
+        for temp_col, target_col in match
+        ]
+
+
+def find_match(temp_col_list, target_col_list, engine):
+    """ 
+    Suggests column mappings based on the columns of the temp table and the target table.
+    
+    How are column mappings suggested:
+    - First it check if only the order of the columns are wrong.
+    - Otherwise check if one of the following transforms on the column names return a mapping:
+        - Making the column names case insensitive.
+        - Replacing an '_'(underscore) between words of column names to a ' '(space). 
+        - Making the column names case insensitive and replacing an underscore with a space.
+    - If none of the above return a column mapping it raises ColumnMappingsNotFound exception. 
+    """
+    if perfect_match := perfect_map(temp_col_list, target_col_list, engine):
         return perfect_match
     else:
-        def lowercase(x):
-            return [(i[0].lower(), *i[1:]) for i in x]
+        def lowercase(*col_lists):
+            """ 
+            Transforms the column names to lowercase.
 
-        def replace_(x):
-            return [(i[0].replace('_', ' '), *i[1:]) for i in x]
+            e.g.
+            lowercase(col_list = [('A', ...), ('B', ...), ('C', ...)], [...])
+    
+            returns [[('a', ...), ('b', ...), ('c', ...)], [...]]
+            """
+            return [
+                [(col[0].lower(), *col[1:]) for col in col_list]
+                for col_list in col_lists
+                ]
 
-        if case_insensitive_match := perfect_map(lowercase(temp_table_col_list), lowercase(target_table_col_list), engine):
+        def replace_(*col_lists):
+            """ 
+            Transforms the column names by replacing '_'(underscore) with a ' '(space)
+
+            e.g.
+            replace_(col_lists = [('A_a', ...), ('B_b', ...), ('C_c', ...)], [...])
+
+            returns [[('A a', ...), ('B b', ...), ('C c', ...)], [...]]
+            """
+            return [
+                [(col[0].replace('_', ' '), *col[1:]) for col in col_list]
+                for col_list in col_lists
+                ]
+
+        if case_insensitive_match := perfect_map(
+            *lowercase(temp_col_list, target_col_list), engine
+            ):
             return case_insensitive_match
-        elif space_switched_match := perfect_map(replace_(temp_table_col_list), replace_(target_table_col_list), engine):
+        elif space_switched_match := perfect_map(
+            *replace_(temp_col_list, target_col_list), engine
+            ):
             return space_switched_match
-        elif space_switched_case_insensetive_match := perfect_map(lowercase(replace_(temp_table_col_list)), lowercase(replace_(target_table_col_list)), engine):
+        elif space_switched_case_insensetive_match := perfect_map(
+            *lowercase(*replace_(temp_col_list, target_col_list)), engine
+            ):
             return space_switched_case_insensetive_match
         else:
             raise ColumnMappingsNotFound
 
 
 def is_type_casting_valid(match, engine):
-    # Checks if the column of the temporary table can be type casted to that of a target table if a valid match is found between them.
+    """ Checks if the column of the temporary table can be type casted
+    to that of a target table if a valid match is found between them. """
     cast_map = get_full_cast_map(engine)
     return all(temp[1] in cast_map.get(target[1]) for temp, target in match)

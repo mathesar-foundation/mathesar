@@ -226,11 +226,11 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         return Response(table_data)
 
     @action(methods=['post'], detail=True)
-    def mapper(self, request, pk=None):
+    def map_imported_columns(self, request, pk=None):
         temp_table = self.get_object()
         target_table = request.get('import_target', None)
         try:
-            temp_table.get_mappings(target_table)
+            temp_table.suggest_col_mappings_for_import(target_table)
         except ColumnMappingsNotFound as e:
             raise database_api_exceptions.ColumnMappingsNotFound(
                 e,
