@@ -4,7 +4,6 @@
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     setTabularDataStoreInContext,
@@ -40,22 +39,13 @@
   }
   $: metaSerialization = tabularData.meta.serialization;
   $: handleMetaSerializationChange($metaSerialization);
-
-  function handleDeleteTable() {
-    router.goto(getSchemaPageUrl(database.name, schema.id));
-  }
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(table.name)}</title></svelte:head>
 
 <LayoutWithHeader fitViewport>
   <div class="table-page">
-    <ActionsPane
-      {database}
-      {schema}
-      {table}
-      on:deleteTable={handleDeleteTable}
-    />
+    <ActionsPane {database} {schema} {table} />
     <TableView usesVirtualList allowsDdlOperations />
   </div>
 </LayoutWithHeader>
