@@ -12,6 +12,19 @@
 
   // Db options
   export let length: $$Props['length'] = undefined;
+
+  let datafromdbcopyhelper = false;
+  let datafromdb: string;
+  const Escbehave = (e: KeyboardEvent) => {
+    datafromdb =datafromdbcopyhelper === false && value !== undefined && value!==null ? value : datafromdb;
+    datafromdbcopyhelper = true;
+    if (e.key === 'Escape') {
+      value = datafromdb;
+    }
+    if (e.key === 'Enter') {
+      datafromdb = value !== undefined && value!==null ? value : '';
+    }
+  };
 </script>
 
 <SteppedInputCell
@@ -33,5 +46,8 @@
     bind:value
     on:blur={handleInputBlur}
     on:keydown={handleInputKeydown}
+    on:keydown={(e) => {
+      Escbehave(e);
+    }}
   />
 </SteppedInputCell>
