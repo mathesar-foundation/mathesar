@@ -268,7 +268,10 @@ def _batch_alter_table_rename_columns(table_oid, column_data_list, connection, e
             if column_attnum is not None:
                 # TODO reuse metadata
                 name = get_column_name_from_attnum(table_oid, column_attnum, engine=engine, metadata=get_empty_metadata(), connection_to_use=connection)
-            # TODO name can be unbound below; unclear if there's a bug here; clarify logic
+            # TODO seems like name can be unbound below; improve logic/structure
+            #   Brent's explanation (copy-pasted from GH review):
+            #   I think there's a problem here, but it would only happen if this function is called
+            #   without an attnum for some passed column data blob, which should never happen.
             if 'name' in column_data and name != column_data['name']:
                 batch_op.alter_column(
                     name,
