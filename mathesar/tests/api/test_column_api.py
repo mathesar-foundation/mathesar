@@ -558,7 +558,8 @@ def test_column_update_when_missing(column_test_table, client):
     assert response_data['code'] == ErrorCodes.NotFound.value
 
 
-def test_column_destroy(column_test_table, client):
+def test_column_destroy(column_test_table, create_patents_table, client):
+    create_patents_table('Dummy Table')
     num_columns = len(column_test_table.sa_columns)
     col_one_name = column_test_table.sa_columns[1].name
     column = column_test_table.get_columns_by_name(['mycolumn1'])[0]

@@ -71,6 +71,19 @@
       close();
     }
   }
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && isVisible) {
+      close();
+    }
+    event.stopPropagation();
+  }
+
+  $: if (isVisible) {
+    document.addEventListener('keydown', handleKeydown, { capture: true });
+  } else {
+    document.removeEventListener('keydown', handleKeydown, { capture: true });
+  }
 </script>
 
 <div bind:this={element} class="context-menu-wrapper">
