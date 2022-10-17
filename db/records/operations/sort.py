@@ -4,21 +4,37 @@ from db.records.exceptions import BadSortFormat, SortFieldNotFound
 
 
 def get_default_order_by(relation, order_by=[]):
+    order_by = _append_primary_key_sort(relation, order_by)
     # Set default ordering if none was requested
-    pkey = getattr(relation, 'primary_key', None)
-    pk_cols = getattr(pkey, 'columns', pkey)
-    if pk_cols is not None:
-        order_by += [
-            {'field': col, 'direction': 'asc'}
-            for col
-            in set(pk_cols).intersection(relation.columns)
-        ]
     if not order_by:
         # If we don't detect primary keys, order by all columns
         order_by = [
             {'field': col, 'direction': 'asc'}
             for col
             in relation.columns
+        ]
+    return order_by
+
+
+def _get_primary_key_column_collection_from_relation(relation):
+    """
+    [why?]
+    """
+    pkey = getattr(relation, 'primary_key', None)
+    pk_cols = getattr(pkey, 'columns', pkey)
+    return pk_cols
+
+
+def _append_primary_key_sort(relation, order_by):
+    """
+    [why?]
+    """
+    pk_cols = _get_primary_key_column_collection_from_relation(relation)
+    if pk_cols is not None:
+        order_by += [
+            {'field': col, 'direction': 'asc'}
+            for col
+            in set(pk_cols).intersection(relation.columns)
         ]
     return order_by
 
