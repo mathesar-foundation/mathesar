@@ -1,5 +1,4 @@
 import warnings
-import re
 
 from pglast import Node, parse_sql
 from sqlalchemy import and_, asc, cast, select, text
@@ -153,14 +152,7 @@ def get_column_name_from_attnum(table_oid, attnum, engine, metadata, connection_
         [table_oid], [attnum], engine, metadata=metadata,
     )
     column_name = execute_statement(engine, statement, connection_to_use).scalar()
-    # If the column was recently dropped, it will have a name like "......pg.dropped.123....."
-    # See this example: https://stackoverflow.com/a/43050463/1714997
-    # Below line checks if the column was dropped
-    column_was_dropped = re.match(r"\.+\.pg.dropped.\d+\.\.+", column_name)
-    if column_was_dropped:
-        return None
-    else:
-        return column_name
+    return column_name
 
 
 def _statement_for_triples_of_column_name_and_attnum_and_table_oid(
@@ -175,11 +167,15 @@ def _statement_for_triples_of_column_name_and_attnum_and_table_oid(
     """
     pg_attribute = get_pg_catalog_table("pg_attribute", engine, metadata=metadata)
     sel = select(pg_attribute.c.attname, pg_attribute.c.attnum, pg_attribute.c.attrelid)
-    conditions = [pg_attribute.c.attrelid.in_(table_oids)]
+    wasnt_dropped = pg_attribute.c.attisdropped.is_(False)
+    table_oid_matches = pg_attribute.c.attrelid.in_(table_oids)
+    conditions = [wasnt_dropped, table_oid_matches]
     if attnums is not None:
-        conditions.append(pg_attribute.c.attnum.in_(attnums))
+        attnum_matches = pg_attribute.c.attnum.in_(attnums)
+        conditions.append(attnum_matches)
     else:
-        conditions.extend([pg_attribute.c.attisdropped.is_(False), pg_attribute.c.attnum > 0])
+        attnum_positive = pg_attribute.c.attnum > 0
+        conditions.append(attnum_positive)
     sel = sel.where(and_(*conditions))
     return sel
 
