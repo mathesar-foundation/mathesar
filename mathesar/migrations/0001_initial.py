@@ -114,9 +114,9 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=128, unique=True)),
-                ('initial_columns', models.JSONField(validators=[mathesar.models.query._validate_list_of_dicts, mathesar.models.query._validate_initial_columns])),
-                ('transformations', models.JSONField(blank=True, null=True, validators=[mathesar.models.query._validate_list_of_dicts, mathesar.models.query._validate_transformations])),
-                ('display_options', models.JSONField(blank=True, null=True, validators=[mathesar.models.query._validate_dict])),
+                ('initial_columns', models.JSONField(validators=[mathesar.models.query._get_validator_for_list_of_dicts(field_name='initial_columns'), mathesar.models.query._get_validator_for_initial_columns(field_name='initial_columns')])),
+                ('transformations', models.JSONField(blank=True, null=True, validators=[mathesar.models.query._get_validator_for_list_of_dicts(field_name='transformations'), mathesar.models.query._get_validator_for_transformations(field_name='transformations')])),
+                ('display_options', models.JSONField(blank=True, null=True, validators=[mathesar.models.query._get_validator_for_dict(field_name='display_options')])),
                 ('base_table', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='queries', to='mathesar.table')),
             ],
             options={
