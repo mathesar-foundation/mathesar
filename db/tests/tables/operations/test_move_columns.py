@@ -113,7 +113,6 @@ def test_move_columns_moves_correct_data_from_rem_to_extract(extracted_remainder
     ]
     expect_tuple_sel = (
         select([*existing_extracted_table_columns, remainder.columns[moving_col]]).join(extracted)
-        # NOTE below distinct's purpose is unclear
         .distinct()
     )
     with engine.begin() as conn:
