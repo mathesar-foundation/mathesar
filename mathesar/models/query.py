@@ -1,3 +1,4 @@
+from functools import wraps
 from django.db import models
 from django.utils.functional import cached_property
 
@@ -5,78 +6,111 @@ from db.queries.base import DBQuery, InitialColumn
 
 from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
-from django.core.exceptions import ValidationError
+from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValueType, DictHasBadKeys
 from db.transforms.operations.deserialize import deserialize_transformation
 
 
-def _validate_list_of_dicts(value):
-    if not isinstance(value, list):
-        raise ValidationError(f"{value} should be a list.")
-    for subvalue in value:
-        if not isinstance(subvalue, dict):
-            raise ValidationError(f"{value} should contain only dicts.")
+def _get_validator_for_list_of_dicts(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_list_of_dicts)
+    def _validator(value):
+        if not isinstance(value, list):
+            message = f"{value} should be a list."
+            raise InvalidValueType(message, field=field_name)
+        for subvalue in value:
+            if not isinstance(subvalue, dict):
+                message = f"{value} should contain only dicts."
+                raise InvalidValueType(message, field=field_name)
+    return _validator
 
 
-def _validate_initial_columns(initial_cols):
-    for initial_col in initial_cols:
-        keys = set(initial_col.keys())
-        obligatory_keys = {
-            "id",
-            "alias",
-        }
-        missing_obligatory_keys = obligatory_keys.difference(keys)
-        if missing_obligatory_keys:
-            raise ValidationError(
-                f"{initial_col} doesn't contain"
-                f" following obligatory keys: {missing_obligatory_keys}."
-            )
-        optional_keys = {
-            "display_name",
-            "jp_path",
-        }
-        valid_keys = {
-            *obligatory_keys,
-            *optional_keys,
-        }
-        unexpected_keys = keys.difference(valid_keys)
-        if unexpected_keys:
-            raise ValidationError(
-                f"{initial_col} contains unexpected keys: {unexpected_keys}."
-            )
-        jp_path = initial_col.get('jp_path')
-        _validate_jp_path(jp_path)
-
-
-def _validate_jp_path(jp_path):
-    if jp_path:
-        if not isinstance(jp_path, list):
-            raise ValidationError(
-                f"jp_path must be a list, instead: {jp_path}."
-            )
-        for jp in jp_path:
-            if not isinstance(jp, list):
-                raise ValidationError(
-                    f"jp_path elements must be 2-item lists, instead: {jp}."
+def _get_validator_for_initial_columns(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_initial_columns)
+    def _validator(initial_cols):
+        for initial_col in initial_cols:
+            keys = set(initial_col.keys())
+            obligatory_keys = {
+                "id",
+                "alias",
+            }
+            missing_obligatory_keys = obligatory_keys.difference(keys)
+            if missing_obligatory_keys:
+                message = (
+                    f"{initial_col} doesn't contain"
+                    f" following obligatory keys: {missing_obligatory_keys}."
                 )
-            for col_id in jp:
-                if not isinstance(col_id, int):
-                    raise ValidationError(
-                        "jp_path elements must only contain integer column"
-                        f" ids, instead: {jp}."
+                raise DictHasBadKeys(message, field=field_name)
+            optional_keys = {
+                "display_name",
+                "jp_path",
+            }
+            valid_keys = {
+                *obligatory_keys,
+                *optional_keys,
+            }
+            unexpected_keys = keys.difference(valid_keys)
+            if unexpected_keys:
+                message = f"{initial_col} contains unexpected keys: {unexpected_keys}."
+                raise DictHasBadKeys(message, field=field_name)
+            jp_path = initial_col.get('jp_path')
+            _get_validator_for_jp_path(field_name)(jp_path)
+    return _validator
+
+
+def _get_validator_for_jp_path(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_jp_path)
+    def _validator(jp_path):
+        if jp_path:
+            if not isinstance(jp_path, list):
+                message = f"jp_path must be a list, instead: {jp_path}."
+                raise InvalidValueType(
+                    message,
+                    field=field_name,
+                )
+            for jp in jp_path:
+                if not isinstance(jp, list):
+                    message = f"jp_path elements must be 2-item lists, instead: {jp}."
+                    raise InvalidValueType(
+                        message,
+                        field=field_name,
                     )
+                for col_id in jp:
+                    if not isinstance(col_id, int):
+                        message = (
+                            "jp_path elements must only contain integer column"
+                            f" ids, instead: {jp}."
+                        )
+                        raise InvalidValueType(
+                            message,
+                            field=field_name,
+                        )
+    return _validator
 
 
-def _validate_transformations(transformations):
-    for transformation in transformations:
-        if "type" not in transformation:
-            raise ValidationError("Each 'transformations' sub-dict must have a 'type' key.")
-        if "spec" not in transformation:
-            raise ValidationError("Each 'transformations' sub-dict must have a 'spec' key.")
+def _get_validator_for_transformations(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_transformations)
+    def _validator(transformations):
+        for transformation in transformations:
+            if "type" not in transformation:
+                message = "Each 'transformations' sub-dict must have a 'type' key."
+                raise DictHasBadKeys(message, field=field_name)
+            if "spec" not in transformation:
+                message = "Each 'transformations' sub-dict must have a 'spec' key."
+                raise DictHasBadKeys(message, field=field_name)
+    return _validator
 
 
-def _validate_dict(value):
-    if not isinstance(value, dict):
-        raise ValidationError(f"{value} should be a dict.")
+def _get_validator_for_dict(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_dict)
+    def _validator(value):
+        if not isinstance(value, dict):
+            message = f"{value} should be a dict."
+            raise InvalidValueType(message, field=field_name)
+    return _validator
 
 
 class UIQuery(BaseModel, Relation):
@@ -91,21 +125,29 @@ class UIQuery(BaseModel, Relation):
 
     # sequence of dicts
     initial_columns = models.JSONField(
-        validators=[_validate_list_of_dicts, _validate_initial_columns],
+        validators=[
+            _get_validator_for_list_of_dicts(field_name="initial_columns"),
+            _get_validator_for_initial_columns(field_name="initial_columns"),
+        ],
     )
 
     # sequence of dicts
     transformations = models.JSONField(
         null=True,
         blank=True,
-        validators=[_validate_list_of_dicts, _validate_transformations],
+        validators=[
+            _get_validator_for_list_of_dicts(field_name="transformations"),
+            _get_validator_for_transformations(field_name="transformations"),
+        ],
     )
 
     # dict of column ids/aliases to display options
     display_options = models.JSONField(
         null=True,
         blank=True,
-        validators=[_validate_dict],
+        validators=[
+            _get_validator_for_dict(field_name="display_options"),
+        ],
     )
 
     def get_records(self, **kwargs):
