@@ -4,34 +4,23 @@
   import NameWithIcon from './NameWithIcon.svelte';
 
   export let schema: SchemaEntry;
-  export let isLocked = false;
+  export let iconHasBox = false;
+
+  $: isLocked = schema.name === 'public';
 </script>
 
-<div class="container" class:is-locked={isLocked}>
-  <NameWithIcon icon={iconSchema}>{schema.name}</NameWithIcon>
-</div>
+<span class="schema-name" class:is-locked={isLocked}>
+  <NameWithIcon icon={iconSchema} {iconHasBox}>
+    {schema.name}
+  </NameWithIcon>
+</span>
 
-<style lang="scss">
-  // TODO: Is there a better way to do style
-  // the icon and name inside NameWithIcon component?
-  :global(.container .icon) {
-    width: 1.71rem;
-    height: 1.71rem;
-    border-radius: var(--border-radius-m);
-    background-color: var(--brand-500);
-    color: var(--white);
-    padding: 0.3rem;
-    opacity: 1;
+<style>
+  .schema-name {
+    --icon-color: var(--brand-500);
+    --icon-opacity: 1;
   }
-
-  :global(.container.is-locked .icon) {
-    background-color: var(--slate-800);
-  }
-
-  :global(.container .name) {
-    font-size: 1.428rem;
-    font-weight: normal;
-    color: var(--slate-800);
-    margin-left: 0.25rem;
+  .schema-name.is-locked {
+    --icon-color: var(--slate-800);
   }
 </style>

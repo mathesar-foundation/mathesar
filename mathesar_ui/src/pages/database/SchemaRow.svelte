@@ -27,7 +27,7 @@
 <a {href} class="schema-details-link">
   <div class="schema-row" class:is-locked={isLocked}>
     <div class="title-and-meta">
-      <SchemaName {schema} {isLocked} />
+      <span class="name"><SchemaName {schema} iconHasBox /></span>
 
       {#if isLocked}
         <span class="lock"><Icon {...iconNotEditable} /></span>
@@ -104,6 +104,9 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+  }
+  .name {
+    font-size: var(--text-size-x-large);
   }
 
   .lock {
