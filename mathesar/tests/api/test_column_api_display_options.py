@@ -33,7 +33,7 @@ def column_test_table_with_service_layer_options(patent_schema):
             'display_options': {
                 'show_as_percentage': True,
                 'number_format': "english",
-                "use_grouping": 'auto',
+                "use_grouping": 'true',
                 "minimum_fraction_digits": None,
                 "maximum_fraction_digits": None,
             }
@@ -122,7 +122,7 @@ _create_display_options_test_list = [
         {
             "show_as_percentage": False,
             'number_format': None,
-            'use_grouping': 'auto',
+            'use_grouping': 'true',
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },
@@ -149,14 +149,14 @@ _create_display_options_test_list = [
         {
             "show_as_percentage": True,
             'number_format': "english",
-            'use_grouping': 'auto',
+            'use_grouping': 'true',
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },
         {
             "show_as_percentage": True,
             'number_format': "english",
-            'use_grouping': 'auto',
+            'use_grouping': 'true',
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },
