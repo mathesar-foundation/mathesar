@@ -11,7 +11,6 @@
   import {
     rowHasSavedRecord,
     getTabularDataStoreFromContext,
-    filterRecordRows,
     type RecordRow,
   } from '@mathesar/stores/table-data';
   import { rowHeightPx } from '@mathesar/geometry';
@@ -64,7 +63,7 @@
     $tabularData);
   $: recordsStore = recordsData.savedRecords;
   $: ({ searchFuzzy } = meta);
-  $: records = filterRecordRows($recordsStore);
+  $: records = $recordsStore;
   $: resultCount = records.length;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;

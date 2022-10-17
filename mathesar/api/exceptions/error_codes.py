@@ -51,3 +51,5 @@ class ErrorCodes(Enum):
     IncompatibleFractionDigitValues = 4410
     UnsupportedConstraint = 4411
     ConstraintColumnEmpty = 4412
+    InvalidValueType = 4415
+    DictHasBadKeys = 4416

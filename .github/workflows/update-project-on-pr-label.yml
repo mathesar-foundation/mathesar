@@ -65,7 +65,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.pull_request.node_id }} --status Started --priority High
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Started
 
       - name: Update Review PRs
         if: "${{ contains(github.event.pull_request.labels.*.name, 'status: review') }}"
@@ -73,7 +73,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.pull_request.node_id }} --status Review --priority High
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Review
 
       - name: Update Done PRs
         if: "${{ contains(github.event.pull_request.labels.*.name, 'status: done') }}"
@@ -97,7 +97,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.pull_request.node_id }} --priority Critical
+          python project_update.py ${{ github.event.pull_request.node_id }} --priority Urgent
 
       - name: Update documentation PRs
         if: "${{ contains(github.event.pull_request.labels.*.name, 'work: documentation') }}"
