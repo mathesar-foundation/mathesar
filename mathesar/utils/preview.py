@@ -40,13 +40,14 @@ def _preview_info_by_column_id(
             lambda column: column.id in preview_data_column_ids,
             prefetched_objects.possible_columns
         )
+        preview_data_column_attnums = [column.attnum for column in preview_data_columns]
         current_position = [[constrained_column.id, referent_column.id]]
         current_path = previous_path + current_position
         # Extract the template for foreign key columns of the referent table
         referent_preview_info, referent_preview_columns = _get_table_preview_info(
             referent_table,
             prefetched_objects,
-            preview_data_columns,
+            preview_data_column_attnums,
             current_path,
             exising_columns
         )
@@ -95,14 +96,12 @@ def get_preview_info(referrer_table):
     # Some foreign key columns might not be in the summary template
     possible_summary_table_oids = []
     constrained_columns_by_table = defaultdict(dict)
-    referent_column_identifiers = set()
     for joinable_table in joinable_tables:
         if not joinable_table.multiple_results:
             possible_summary_table_oids.append(joinable_table.target)
             for path_between_related_table in joinable_table.jp_path:
                 constrained_columns_by_table[path_between_related_table[0][0]][path_between_related_table[0][1]] = \
                     path_between_related_table[1]
-                referent_column_identifiers.add(tuple(path_between_related_table[1]))
     possible_referent_tables = Table.objects.filter(oid__in=possible_summary_table_oids).select_related(
         'settings__preview_settings'
     )
@@ -119,13 +118,13 @@ def get_preview_info(referrer_table):
     return _get_table_preview_info(referrer_table, prefetched_objects)
 
 
-def _get_table_preview_info(referrer_table, prefetched_objects, restrict_columns=None, path=[], existing_columns=[]):
+def _get_table_preview_info(referrer_table, prefetched_objects, summary_columns=None, path=[], existing_columns=[]):
     constrained_columns_by_table = prefetched_objects.constrained_columns_by_table
     referent_columns_by_column_attnum = constrained_columns_by_table[referrer_table.oid]
-    if restrict_columns:
+    if summary_columns:
         referent_columns_by_column_attnum = dict(
             filter(
-                _get_filter_restricted_columns_fn(restrict_columns),
+                _get_allowed_columns_filter_fn(summary_columns),
                 referent_columns_by_column_attnum.items()
             )
         )
@@ -140,8 +139,8 @@ def _get_table_preview_info(referrer_table, prefetched_objects, restrict_columns
     return preview_info, columns
 
 
-def _get_filter_restricted_columns_fn(restricted_columns):
-    def _filter_restricted_columns(constrained_column_item):
-        return constrained_column_item[0] in restricted_columns
+def _get_allowed_columns_filter_fn(allowed_columns):
+    def allowed_columns_filter(allowed_column_item):
+        return allowed_column_item[0] in allowed_columns
 
-    return _filter_restricted_columns
+    return allowed_columns_filter
