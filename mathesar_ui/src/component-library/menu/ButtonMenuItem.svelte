@@ -7,6 +7,7 @@
 
   export let icon: IconProps | undefined = undefined;
   export let disabled = false;
+  /** Visually indicates that the action is destructive */
   export let danger = false;
 
   function handleClick() {
