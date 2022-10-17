@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from db.records.operations.group import GroupBy
 from mathesar.api.utils import get_table_or_404, process_annotated_records
-from mathesar.models.base import Table
+from mathesar.models.base import Column, Table
 from mathesar.models.query import UIQuery
 from mathesar.utils.preview import get_preview_info
 
@@ -78,7 +78,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         preview_metadata = None
         # Only tables have columns on the Service layer that hold data necessary for preview template.
         if isinstance(table, Table):
-            columns_query = table.columns.all()
+            columns_query = Column.objects.filter(table=table).prefetch('name')
             preview_metadata, preview_columns = get_preview_info(table)
             table_columns = [{'id': column.id, 'alias': column.name} for column in columns_query]
             columns_to_fetch = table_columns + preview_columns

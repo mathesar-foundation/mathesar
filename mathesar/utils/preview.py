@@ -28,7 +28,6 @@ def _preview_info_by_column_id(
             for referent_column in prefetched_objects.possible_columns
             if referent_column_oid == referent_column.attnum and referent_column.table.oid == referent_table_oid
         )
-        # For now only single column foreign key is used.
         referent_table = next(
             table for table in prefetched_objects.possible_referent_tables if table.oid == referent_table_oid
         )
@@ -63,7 +62,11 @@ def _preview_info_by_column_id(
                 # Replace the column id in the template with the path alias
                 # To avoid conflict in case of multiple column referencing same table
                 preview_template = preview_template.replace(f'{{{preview_data_column_id}}}', f'{{{column_alias_name}}}')
-                initial_column = {'id': preview_data_column_id, "alias": column_alias_name, "jp_path": current_path}
+                initial_column = {
+                    'id': preview_data_column_id,
+                    "alias": column_alias_name,
+                    "jp_path": current_path
+                }
                 preview_columns.append(initial_column)
         preview_info[constrained_column.id] = {"template": preview_template, 'path': current_path}
     return preview_info, preview_columns
@@ -105,9 +108,11 @@ def get_preview_info(referrer_table):
     possible_referent_tables = Table.objects.filter(oid__in=possible_summary_table_oids).select_related(
         'settings__preview_settings'
     )
-    possible_columns = Column.objects.filter(table__in=possible_referent_tables).union(
-        Column.objects.filter(table=referrer_table)
-    )
+    possible_referent_table_ids = [referrer_table.id] + [
+        possible_referent_table.id
+        for possible_referent_table in possible_referent_tables
+    ]
+    possible_columns = Column.objects.filter(table_id__in=possible_referent_table_ids).select_related('table')
     PrefetchedObjects = namedtuple(
         "PrefetchedObjects",
         "possible_referent_tables possible_columns constrained_columns_by_table"
