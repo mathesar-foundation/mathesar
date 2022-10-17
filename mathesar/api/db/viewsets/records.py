@@ -49,7 +49,6 @@ class RecordViewSet(viewsets.ViewSet):
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
         column_ids_to_names = column_names_to_ids.inverse
         if filter_unprocessed:
-            table = get_table_or_404(table_pk)
             filter_processed = rewrite_db_function_spec_column_ids_to_names(
                 column_ids_to_names=column_ids_to_names,
                 spec=filter_unprocessed,
