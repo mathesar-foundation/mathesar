@@ -527,8 +527,7 @@ class Table(DatabaseObject, Relation):
         return result
 
     def get_column_name_id_bidirectional_map(self):
-        # TODO: Prefetch column names to avoid N+1 queries
-        columns = Column.objects.filter(table_id=self.id)
+        columns = Column.objects.filter(table_id=self.id).prefetch('name')
         columns_map = bidict({column.name: column.id for column in columns})
         return columns_map
 
