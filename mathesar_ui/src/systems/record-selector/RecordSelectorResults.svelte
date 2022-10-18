@@ -221,30 +221,33 @@
       No {#if hasSearchQueries}matching{:else}existing{/if} records
     </div>
   {/each}
+</div>
 
-  <div class="tips">
-    {#if fkColumnWithFocus}
-      <div>
-        <KeyboardKey>Enter</KeyboardKey>: Input a value for
-        {fkColumnWithFocus.name}
-      </div>
+<div class="tips" class:loading={$isLoading}>
+  {#if fkColumnWithFocus}
+    <div>
+      <KeyboardKey>Enter</KeyboardKey>: Input a value for
+      {fkColumnWithFocus.name}
+    </div>
+  {/if}
+  <div>
+    <KeyboardKey>{keyComboToSubmit}</KeyboardKey>:
+    {#if selection.type === 'ghost'}
+      <strong>Create new record</strong>, select it, and exit.
+    {:else}
+      Choose selected record and exit.
     {/if}
-    <div>
-      <KeyboardKey>{keyComboToSubmit}</KeyboardKey>:
-      {#if selection.type === 'ghost'}
-        <strong>Create new record</strong>, select it, and exit.
-      {:else}
-        Choose selected record and exit.
-      {/if}
-    </div>
-    <div>
-      <KeyboardKey>Up</KeyboardKey>/<KeyboardKey>Down</KeyboardKey>: Modify
-      selection.
-    </div>
+  </div>
+  <div>
+    <KeyboardKey>Up</KeyboardKey>/<KeyboardKey>Down</KeyboardKey>: Modify
+    selection.
   </div>
 </div>
 
 <style>
+  .record-selector-results {
+    overflow-y: auto;
+  }
   .row {
     position: relative;
     cursor: pointer;
@@ -281,7 +284,7 @@
   }
 
   .record-selector-results.loading .no-results,
-  .record-selector-results.loading .tips {
+  .tips.loading {
     display: none;
   }
 </style>

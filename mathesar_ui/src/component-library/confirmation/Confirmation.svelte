@@ -53,12 +53,7 @@
   }
 </script>
 
-<ControlledModal
-  controller={modal}
-  {allowClose}
-  on:close={onClose}
-  class="confirmation"
->
+<ControlledModal controller={modal} {allowClose} on:close={onClose}>
   <svelte:fragment slot="title">
     {#if title}
       <StringOrComponent arg={title} />
