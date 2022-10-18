@@ -33,7 +33,7 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
-  import { postAPI, States } from '@mathesar/utils/api';
+  import { postAPI } from '@mathesar/utils/api';
   import { getAvailableName } from '@mathesar/utils/db';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';

@@ -22,7 +22,6 @@
   import type { Column } from '@mathesar/api/tables/columns';
   import { tables as tablesStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { States } from '@mathesar/utils/api';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { getAvailableName } from '@mathesar/utils/db';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
