@@ -37,11 +37,11 @@
     {componentAndProps}
     {value}
     {recordSummary}
-    setRecordSummary={(recordId, recordSummary) =>
+    setRecordSummary={(recordId, _recordSummary) =>
       recordSummaryStore.addBespokeRecordSummary({
         columnId: String(columnId),
         recordId,
-        recordSummary,
+        recordSummary: _recordSummary,
       })}
     on:input={(e) =>
       handleNewValue({ value: getValueFromEvent(e), debounce: true })}

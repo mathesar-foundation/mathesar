@@ -1,24 +1,25 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from 'svelte';
+  import { readable } from 'svelte/store';
+
   import {
-    InputGroup,
-    Icon,
     Button,
+    Icon,
+    InputGroup,
     Select,
   } from '@mathesar-component-library';
   import {
     ImmutableMap,
     type ComponentAndProps,
   } from '@mathesar-component-library/types';
-  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
   import { iconDelete } from '@mathesar/icons';
+  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
+  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
+  import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import type { FilterEntryColumnLike } from './types';
   import { validateFilterEntry } from './utils';
-  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
-  import { readable } from 'svelte/store';
-  import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 
   type T = $$Generic;
   type ColumnLikeType = FilterEntryColumnLike & T;
@@ -159,9 +160,9 @@
     dispatch('update');
   }
 
-  $: readableRecordSummaryStore = recordSummaryStore
-    ? recordSummaryStore
-    : readable(new ImmutableMap<string, RecordSummariesForColumn>());
+  $: readableRecordSummaryStore =
+    recordSummaryStore ??
+    readable(new ImmutableMap<string, RecordSummariesForColumn>());
   $: recordSummaries = $readableRecordSummaryStore;
 
   function setRecordSummary(recordId: string, recordSummary: string) {
