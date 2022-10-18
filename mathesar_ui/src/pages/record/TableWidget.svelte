@@ -6,7 +6,6 @@
   import {
     setTabularDataStoreInContext,
     TabularData,
-    Filtering,
     Meta,
   } from '@mathesar/stores/table-data';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
@@ -19,25 +18,20 @@
     // below.
     undefined as unknown as TabularData,
   );
+  const meta = new Meta({
+    pagination: new Pagination({ size: 10 }),
+  });
 
   export let recordId: number;
   export let table: Pick<TableEntry, 'id' | 'name'>;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
-  $: meta = new Meta({
-    pagination: new Pagination({ size: 10 }),
-    filtering: new Filtering({
-      combination: 'and',
-      entries: [
-        { columnId: fkColumn.id, conditionId: 'equal', value: recordId },
-      ],
-    }),
-  });
   $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: tabularData = new TabularData({
     id: table.id,
     abstractTypesMap,
     meta,
+    contextualFilters: new Map([[fkColumn.id, recordId]]),
   });
   $: tabularDataStore.set(tabularData);
 </script>

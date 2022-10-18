@@ -20,8 +20,14 @@ export interface TabularDataProps {
   id: DBObjectEntry['id'];
   abstractTypesMap: AbstractTypesMap;
   meta?: Meta;
-  /** Values are column ids */
-  hiddenColumns?: Iterable<number>;
+  /**
+   * Keys are columns ids. Values are cell values.
+   *
+   * Setting an entry in this Map will apply a filter condition which the user
+   * cannot see or remove. And the column used for the filter condition will be
+   * removed from view.
+   */
+  contextualFilters?: Map<number, number | string>;
 }
 
 export class TabularData {
@@ -44,14 +50,24 @@ export class TabularData {
   selection: Selection;
 
   constructor(props: TabularDataProps) {
+    const contextualFilters =
+      props.contextualFilters ?? new Map<number, string | number>();
+    const contextualFilterEntries = [...contextualFilters].map(
+      ([columnId, value]) => ({ columnId, conditionId: 'equal', value }),
+    );
     this.id = props.id;
     this.meta = props.meta ?? new Meta();
-    this.columnsDataStore = new ColumnsDataStore({ parentId: this.id });
+    this.meta.filtering.update((f) => f.withEntries(contextualFilterEntries));
+    this.columnsDataStore = new ColumnsDataStore({
+      parentId: this.id,
+      hiddenColumns: contextualFilters.keys(),
+    });
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
       this.id,
       this.meta,
       this.columnsDataStore,
+      contextualFilters,
     );
     this.display = new Display(
       this.meta,

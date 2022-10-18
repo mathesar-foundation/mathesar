@@ -318,10 +318,17 @@ export class RecordsData {
 
   private requestParamsUnsubscriber: Unsubscriber;
 
+  /**
+   * This maps column ids to cell values. It is used to supply default values
+   * for the cells within hidden columns when creating new records.
+   */
+  private contextualFilters: Map<number, number | string>;
+
   constructor(
     parentId: number,
     meta: Meta,
     columnsDataStore: ColumnsDataStore,
+    contextualFilters: Map<number, number | string>,
   ) {
     this.parentId = parentId;
 
@@ -341,6 +348,7 @@ export class RecordsData {
 
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
+    this.contextualFilters = contextualFilters;
     this.url = `/api/db/v0/tables/${this.parentId}/records/`;
     void this.fetch();
 
@@ -604,7 +612,11 @@ export class RecordsData {
     const rowKeyOfBlankRow = getRowKey(row, pkColumn?.id);
     this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
     this.createPromises?.get(rowKeyOfBlankRow)?.cancel();
-    const promise = postAPI<ApiRecordsResponse>(this.url, row.record);
+    const requestRecord = {
+      ...Object.fromEntries(this.contextualFilters),
+      ...row.record,
+    };
+    const promise = postAPI<ApiRecordsResponse>(this.url, requestRecord);
     if (!this.createPromises) {
       this.createPromises = new Map();
     }
