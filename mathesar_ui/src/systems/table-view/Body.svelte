@@ -4,6 +4,7 @@
     isGroupHeaderRow,
     isHelpTextRow,
     type Row as RowType,
+    getRowKey,
   } from '@mathesar/stores/table-data';
   import { SheetVirtualRows } from '@mathesar/components/sheet';
   import {
@@ -18,8 +19,9 @@
 
   export let usesVirtualList = false;
 
-  $: ({ id, recordsData, display } = $tabularData);
+  $: ({ id, display, columnsDataStore } = $tabularData);
   $: ({ displayableRecords } = display);
+  $: ({ primaryKeyColumnId } = $columnsDataStore);
 
   function getItemSizeFromRow(row: RowType) {
     if (isHelpTextRow(row)) {
@@ -29,6 +31,13 @@
       return groupHeaderRowHeightPx;
     }
     return rowHeightPx;
+  }
+
+  function getIterationKey(index: number, row: RowType | undefined): string {
+    if (row) {
+      return getRowKey(row, primaryKeyColumnId);
+    }
+    return `__index_${index}`;
   }
 
   function getItemSizeFromIndex(index: number) {
@@ -76,7 +85,7 @@
       itemCount={$displayableRecords.length}
       paddingBottom={30}
       itemSize={getItemSizeFromIndex}
-      itemKey={(index) => recordsData.getIterationKey(index)}
+      itemKey={(index) => getIterationKey(index, $displayableRecords[index])}
       let:items
       let:api
     >
@@ -88,7 +97,7 @@
       {/each}
     </SheetVirtualRows>
   {:else}
-    {#each $displayableRecords as displayableRecord}
+    {#each $displayableRecords as displayableRecord (displayableRecord)}
       <Row
         style={{
           position: 'relative',

@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
+from mathesar.state import reset_reflection
 from mathesar.models.base import Database, Schema, Table
 from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
@@ -104,6 +108,13 @@ def render_schema(request, database, schema):
     else:
         # We are redirecting so that the correct URL is passed to the frontend.
         return redirect('schema_home', db_name=database.name, schema_id=schema.id)
+
+
+@login_required
+@api_view(['POST'])
+def reflect_all(_):
+    reset_reflection()
+    return Response(status=status.HTTP_200_OK)
 
 
 @login_required

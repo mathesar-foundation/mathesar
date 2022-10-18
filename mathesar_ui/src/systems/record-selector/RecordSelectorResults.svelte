@@ -11,7 +11,6 @@
   import {
     rowHasSavedRecord,
     getTabularDataStoreFromContext,
-    filterRecordRows,
     type RecordRow,
   } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
@@ -71,7 +70,7 @@
   $: recordsStore = recordsData.savedRecords;
   $: ({ recordSummaries } = recordsData);
   $: ({ searchFuzzy } = meta);
-  $: records = filterRecordRows($recordsStore);
+  $: records = $recordsStore;
   $: resultCount = records.length;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;

@@ -1,6 +1,8 @@
+from rest_access_policy import FieldAccessMixin
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.api.ui.permissions.users import UserAccessPolicy
 from mathesar.models.users import User, DatabaseRole, SchemaRole
 
 
@@ -16,9 +18,10 @@ class NestedSchemaRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSer
         fields = ['id', 'schema', 'role']
 
 
-class UserSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
+class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.ModelSerializer):
     database_roles = NestedDatabaseRoleSerializer(many=True, required=False)
     schema_roles = NestedSchemaRoleSerializer(many=True, required=False)
+    access_policy = UserAccessPolicy
 
     class Meta:
         model = User
