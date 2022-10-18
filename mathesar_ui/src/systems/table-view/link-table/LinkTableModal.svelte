@@ -86,16 +86,19 @@
     [...$tables.data.values()].map((t) => t.name),
   ); // TODO: include constraint names too
   $: ({ columnsDataStore } = $tabularData);
-  $: namesOfColumnsInThisTable = new Set(
-    $columnsDataStore.columns.map((c) => c.name),
-  );
-  $: thatTableColumnsStore = ensureReadable(
-    thatTable ? new ColumnsDataStore(thatTable.id) : undefined,
+  $: ({ columns } = columnsDataStore);
+  $: namesOfColumnsInThisTable = new Set($columns.map((c) => c.name));
+  $: thatTableColumnsStore = thatTable
+    ? new ColumnsDataStore({ parentId: thatTable.id })
+    : undefined;
+  $: thatTableColumns = ensureReadable(thatTableColumnsStore?.columns);
+  $: thatTableColumnsFetchStatus = ensureReadable(
+    thatTableColumnsStore?.fetchStatus,
   );
   $: thatTableColumnsAreLoading =
-    $thatTableColumnsStore?.state === States.Loading;
+    $thatTableColumnsFetchStatus?.state === 'processing';
   $: namesOfColumnsInThatTable = new Set(
-    ($thatTableColumnsStore?.columns ?? []).map((c) => c.name),
+    ($thatTableColumns ?? []).map((c) => c.name),
   );
 
   function init() {

@@ -50,7 +50,7 @@
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
-  $: ({ columns, state: columnsState } = $columnsDataStore);
+  $: ({ columns, fetchStatus } = columnsDataStore);
   $: fkColumnIds = new ImmutableSet(
     constraints
       .filter(constraintIsFk)
@@ -64,7 +64,7 @@
     return fkColumnIds.has(columnWithFocus.id) ? columnWithFocus : undefined;
   })();
   $: isInitialized =
-    columnsState === States.Done && constraintsState === States.Done;
+    $fetchStatus?.state === 'success' && constraintsState === States.Done;
 
   $: if ($isOpen) {
     meta.searchFuzzy.update((s) => s.drained());
@@ -87,7 +87,7 @@
     try {
       isSubmittingNewRecord = true;
       const record = await postAPI<ApiRecord>(url, Object.fromEntries(v));
-      const recordId = getPkValueInRecord(record, columns);
+      const recordId = getPkValueInRecord(record, $columns);
       handleSubmitPkValue(recordId);
     } catch (err) {
       // TODO set errors in tabularData to appear within cells

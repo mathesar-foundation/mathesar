@@ -40,7 +40,8 @@
     isLoading,
     display,
   } = $tabularData);
-  $: ({ columns } = $columnsDataStore);
+  $: ({ columns } = columnsDataStore);
+  $: columnsFetchStatus = columnsDataStore.fetchStatus;
   $: ({
     filtering,
     sorting,
@@ -52,7 +53,7 @@
   $: recordState = recordsData.state;
 
   $: isError =
-    $columnsDataStore.state === States.Error ||
+    $columnsFetchStatus?.state === 'failure' ||
     $recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
 
@@ -61,7 +62,7 @@
     schema.id,
     {
       baseTableId: id,
-      columns,
+      columns: $columns,
       terseGrouping: $grouping.terse(),
     },
   );
@@ -107,7 +108,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <Sort {columns} sorting={meta.sorting} />
+      <Sort columns={$columns} sorting={meta.sorting} />
     </svelte:fragment>
   </Dropdown>
 
