@@ -197,13 +197,16 @@
       <RecordSelectorRow on:buttonClick={() => submitGhost()}>
         <div class="new-indicator-wrapper"><NewIndicator /></div>
         <CellArranger {display} let:style let:processedColumn let:column>
+          {@const value =
+            $searchFuzzy.get(column.id) ??
+            (processedColumn.column.nullable ? null : undefined)}
           <CellWrapper {style}>
             <CellFabric
               columnFabric={processedColumn}
-              value={$searchFuzzy.get(column.id) ??
-                (processedColumn.column.nullable ? null : undefined)}
-              getRecordSummary={(recordId) =>
-                $recordSummaries.get(String(column.id))?.get(recordId)}
+              {value}
+              recordSummary={$recordSummaries
+                .get(String(column.id))
+                ?.get(String(value))}
               disabled
             />
             <RowCellBackgrounds isSelected={selection.type === 'ghost'} />
@@ -226,8 +229,9 @@
             <CellFabric
               columnFabric={processedColumn}
               {value}
-              getRecordSummary={(recordId) =>
-                $recordSummaries.get(String(columnId))?.get(recordId)}
+              recordSummary={$recordSummaries
+                .get(String(columnId))
+                ?.get(String(value))}
               disabled
               showAsSkeleton={!rowHasSavedRecord(row)}
             />

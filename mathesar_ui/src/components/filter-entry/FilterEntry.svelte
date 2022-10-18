@@ -213,8 +213,9 @@
           on:change={onValueChangeFromUser}
           class="filter-input"
           hasError={showError && !isValid}
-          getRecordSummary={(recordId) =>
-            recordSummaries.get(String(columnIdentifier))?.get(recordId)}
+          recordSummary={recordSummaries
+            .get(String(columnIdentifier))
+            ?.get(String(value))}
           {setRecordSummary}
         />
       {/if}

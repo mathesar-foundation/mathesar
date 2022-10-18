@@ -36,7 +36,7 @@ export interface LinkedRecordCellExternalProps {
 export interface LinkedRecordCellProps
   extends CellTypeProps<ForeignKeyCellValue>,
     LinkedRecordCellExternalProps {
-  getRecordSummary?: (recordId: string) => string | undefined;
+  recordSummary?: string;
   setRecordSummary?: (recordId: string, recordSummary: string) => void;
 }
 

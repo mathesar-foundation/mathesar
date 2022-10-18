@@ -9,6 +9,7 @@
   import type { ComponentAndProps } from '@mathesar-component-library/types';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import type { SearchFuzzy } from '@mathesar/stores/table-data';
+  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 
   let classes = '';
   export { classes as class };
@@ -16,13 +17,12 @@
   export let columnId: number;
   export let componentAndProps: ComponentAndProps;
   export let searchFuzzy: Writable<SearchFuzzy>;
-  export let getRecordSummary: (recordId: string) => string | undefined;
-  export let setRecordSummary: (
-    recordId: string,
-    recordSummary: string,
-  ) => void;
+  export let recordSummaryStore: RecordSummaryStore;
 
   $: value = $searchFuzzy.get(columnId);
+  $: recordSummary = $recordSummaryStore
+    .get(String(columnId))
+    ?.get(String(value));
 
   function updateValue(e: CustomEvent<unknown>) {
     const newValue = e.detail;
@@ -36,8 +36,13 @@
     {containerClass}
     {componentAndProps}
     {value}
-    {getRecordSummary}
-    {setRecordSummary}
+    {recordSummary}
+    setRecordSummary={(recordId, recordSummary) =>
+      recordSummaryStore.addBespokeRecordSummary({
+        columnId: String(columnId),
+        recordId,
+        recordSummary,
+      })}
     on:input={(e) =>
       handleNewValue({ value: getValueFromEvent(e), debounce: true })}
     on:artificialInput={(e) =>

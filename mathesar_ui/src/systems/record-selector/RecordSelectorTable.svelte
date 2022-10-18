@@ -176,14 +176,7 @@
             componentAndProps={processedColumn.inputComponentAndProps}
             searchFuzzy={meta.searchFuzzy}
             {columnId}
-            getRecordSummary={(recordId) =>
-              $recordSummaries.get(String(columnId))?.get(recordId)}
-            setRecordSummary={(recordId, recordSummary) =>
-              recordSummaries.addBespokeRecordSummary({
-                columnId: String(columnId),
-                recordId,
-                recordSummary,
-              })}
+            recordSummaryStore={recordSummaries}
             on:focus={() => handleInputFocus(column)}
             on:blur={() => handleInputBlur()}
             on:recordSelectorOpen={() => {

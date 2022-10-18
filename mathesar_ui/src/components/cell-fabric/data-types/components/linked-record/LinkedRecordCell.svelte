@@ -18,8 +18,7 @@
   export let isActive: $$Props['isActive'];
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
-  export let getRecordSummary: Required<$$Props>['getRecordSummary'] = () =>
-    undefined;
+  export let recordSummary: $$Props['recordSummary'] = undefined;
   export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
@@ -27,7 +26,6 @@
   let wasActiveBeforeClick = false;
 
   $: hasValue = value !== undefined && value !== null;
-  $: recordSummary = getRecordSummary(String(value));
 
   async function launchRecordSelector(event?: MouseEvent) {
     event?.stopPropagation();
