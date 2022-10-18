@@ -122,7 +122,7 @@ _create_display_options_test_list = [
         {
             "show_as_percentage": False,
             'number_format': None,
-            'use_grouping': 'true',
+            'use_grouping': 'false',
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },
