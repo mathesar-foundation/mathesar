@@ -8,6 +8,7 @@ import type { RecordSelectorRowType } from './recordSelectorTypes';
 interface RecordSelectorControllerProps {
   onOpen?: () => void;
   onClose?: () => void;
+  nestingLevel: number;
 }
 
 type FkCellValue = string | number;
@@ -16,6 +17,9 @@ export class RecordSelectorController {
   private onOpen: () => void;
 
   private onClose: () => void;
+
+  /** 0 = root level */
+  nestingLevel: number;
 
   rowType = writable<RecordSelectorRowType>('button');
 
@@ -29,9 +33,10 @@ export class RecordSelectorController {
 
   columnWithNestedSelectorOpen = writable<Column | undefined>(undefined);
 
-  constructor(props: RecordSelectorControllerProps = {}) {
+  constructor(props: RecordSelectorControllerProps) {
     this.onOpen = props.onOpen ?? (() => {});
     this.onClose = props.onClose ?? (() => {});
+    this.nestingLevel = props.nestingLevel;
   }
 
   private open(): void {
@@ -79,7 +84,7 @@ export class RecordSelectorController {
 const contextKey = {};
 
 export function setNewRecordSelectorControllerInContext(
-  props: RecordSelectorControllerProps = {},
+  props: RecordSelectorControllerProps,
 ): RecordSelectorController {
   const recordSelectorController = new RecordSelectorController(props);
   setContext(contextKey, recordSelectorController);

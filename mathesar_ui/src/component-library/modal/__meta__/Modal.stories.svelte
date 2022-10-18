@@ -4,10 +4,6 @@
   import ControlledModal from '../ControlledModal.svelte';
   import ModalMultiplexer from '../ModalMultiplexer';
 
-  const meta = {
-    title: 'Systems/Modal',
-  };
-
   const modal = new ModalMultiplexer();
 
   const basicModal = modal.spawnModalController();
@@ -17,58 +13,64 @@
   const extraLongTitleModal = modal.spawnModalController();
   const richTextTitle = modal.spawnModalController();
   const verboseModal = modal.spawnModalController();
+  const innerScrollModal = modal.spawnModalController();
 
   let answer = '';
   $: answerIsCorrect = answer === '4';
 </script>
 
-<Meta {...meta} />
+<Meta title="Systems/Modal" />
 
 <Story name="Basic">
   <h2>Example modals</h2>
   <ul>
     <li>
-      <Button appearance="primary" on:click={() => basicModal.open()}
-        >Basic</Button
-      >
+      <Button appearance="primary" on:click={() => basicModal.open()}>
+        Basic
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => chainModal.open()}
-        >Nested</Button
-      >
+      <Button appearance="primary" on:click={() => chainModal.open()}>
+        Nested
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => hardToCloseModal.open()}
-        >Hard to close</Button
-      >
+      <Button appearance="primary" on:click={() => hardToCloseModal.open()}>
+        Hard to close
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => titleFreeModal.open()}
-        >No title</Button
-      >
+      <Button appearance="primary" on:click={() => titleFreeModal.open()}>
+        No title
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => extraLongTitleModal.open()}
-        >Long title</Button
-      >
+      <Button appearance="primary" on:click={() => extraLongTitleModal.open()}>
+        Long title
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => richTextTitle.open()}
-        >Rich text title</Button
-      >
+      <Button appearance="primary" on:click={() => richTextTitle.open()}>
+        Rich text title
+      </Button>
     </li>
     <li>
-      <Button appearance="primary" on:click={() => verboseModal.open()}
-        >Long content</Button
-      >
+      <Button appearance="primary" on:click={() => verboseModal.open()}>
+        Long content
+      </Button>
+    </li>
+    <li>
+      <Button appearance="primary" on:click={() => innerScrollModal.open()}>
+        Scrolling within a smaller area
+      </Button>
     </li>
   </ul>
 
   <ControlledModal controller={basicModal} title="Basic modal">
     Here is modal content
-    <div slot="footer">
+    <svelte:fragment slot="footer">
       <p>This is the modal footer</p>
-    </div>
+    </svelte:fragment>
   </ControlledModal>
 
   <ControlledModal
@@ -80,7 +82,7 @@
       >Open that basic modal</Button
     >
     <p>
-      Notice that this modal remains open undeneath the overlay and there is no
+      Notice that this modal remains open underneath the overlay and there is no
       way to close it until the upper modal is closed.
     </p>
   </ControlledModal>
@@ -93,7 +95,7 @@
       answer = '';
     }}
   >
-    <p>Answer the quesion to unlock the close button.</p>
+    <p>Answer the question to unlock the close button.</p>
     <p>2 + 2 = <input type="text" bind:value={answer} /></p>
   </ControlledModal>
 
@@ -153,10 +155,44 @@
     </p>
     <div slot="footer">This is the footer</div>
   </ControlledModal>
+
+  <ControlledModal
+    controller={innerScrollModal}
+    title="Scrolling within a smaller area"
+    canScrollBody={false}
+  >
+    <div class="fixed-header">
+      <div class="top">
+        This content is in the body, but it won't scroll with the rest of the
+        modal.
+      </div>
+      <div class="bottom">
+        <p>This part scrolls</p>
+        <ul>
+          {#each Array(20) as _, i}
+            <li>{i}</li>
+          {/each}
+        </ul>
+      </div>
+    </div>
+  </ControlledModal>
 </Story>
 
 <style>
   li {
     margin: 1em 0;
+  }
+
+  .fixed-header {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .fixed-header .top {
+    flex: 0 0 auto;
+  }
+  .fixed-header .bottom {
+    flex: 0 1 auto;
+    overflow-y: auto;
   }
 </style>
