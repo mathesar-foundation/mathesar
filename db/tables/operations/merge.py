@@ -12,10 +12,9 @@ def merge_tables(table_name_one, table_name_two, merged_table_name, schema, engi
     unique rows).  It may not work in other contexts (yet).
     """
     # TODO reuse metadata
-    table_one = reflect_table(table_name_one, schema, engine, metadata=get_empty_metadata())
-    table_two = reflect_table(
-        table_name_two, schema, engine, metadata=table_one.metadata
-    )
+    metadata = get_empty_metadata()
+    table_one = reflect_table(table_name_one, schema, engine, metadata=metadata)
+    table_two = reflect_table(table_name_two, schema, engine, metadata=metadata)
     merge_join = table_one.join(table_two)
     referencing_columns = [
         col for col in [merge_join.onclause.left, merge_join.onclause.right]

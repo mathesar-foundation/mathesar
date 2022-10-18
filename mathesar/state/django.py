@@ -1,6 +1,8 @@
 import logging
 from collections import defaultdict
+from functools import reduce
 
+import operator
 from django.conf import settings
 from django.core.cache import cache as dj_cache
 from django.db.models import Prefetch, Q
@@ -154,11 +156,15 @@ def _delete_stale_columns(attnum_tuples, tables):
     attnums_mapped_by_table_oid = defaultdict(list)
     for attnum, table_oid in attnum_tuples:
         attnums_mapped_by_table_oid[table_oid].append(attnum)
-    stale_columns_queryset = models.Column.current_objects
+    stale_columns_conditions = []
     for table_oid, attnums in attnums_mapped_by_table_oid.items():
         table = next(table for table in tables if table.oid == table_oid)
-        stale_columns_queryset = stale_columns_queryset.filter(Q(table=table) & ~Q(attnum__in=attnums))
-    stale_columns_queryset.delete()
+        stale_columns_conditions.append(Q(table=table) & ~Q(attnum__in=attnums))
+    stale_columns_query = reduce(
+        operator.or_,
+        stale_columns_conditions
+    )
+    models.Column.objects.filter(stale_columns_query).delete()
 
 
 # TODO pass in a cached engine instead of creating a new one
