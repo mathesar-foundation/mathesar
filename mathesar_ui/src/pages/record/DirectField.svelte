@@ -41,8 +41,7 @@
     componentAndProps={processedColumn.inputComponentAndProps}
     on:change={(e) => updateField(getValueFromEvent(e))}
     on:artificialChange={(e) => updateField(getValueFromArtificialEvent(e))}
-    getRecordSummary={(recordId) =>
-      $recordSummaries.get(String(column.id))?.get(recordId)}
+    recordSummary={$recordSummaries.get(String(column.id))?.get(String(value))}
     setRecordSummary={(recordId, recordSummary) =>
       recordSummaries.addBespokeRecordSummary({
         columnId: String(column.id),

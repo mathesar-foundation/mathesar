@@ -28,8 +28,7 @@
 
   export let id = getGloballyUniqueId();
   export let value: $$Props['value'] = undefined;
-  export let getRecordSummary: Required<$$Props>['getRecordSummary'] = () =>
-    undefined;
+  export let recordSummary: $$Props['recordSummary'] = undefined;
   export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
   export let tableId: $$Props['tableId'];
   let classes: $$Props['class'] = '';
@@ -40,7 +39,6 @@
   let element: HTMLSpanElement;
 
   $: hasValue = value !== undefined && value !== null;
-  $: recordSummary = getRecordSummary(String(value));
   $: labelController?.inputId.set(id);
   $: recordPageHref = hasValue
     ? $storeToGetRecordPageUrl({ tableId, recordId: value })

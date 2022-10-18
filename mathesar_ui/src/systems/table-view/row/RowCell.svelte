@@ -9,7 +9,7 @@
   import {
     isCellActive,
     scrollBasedOnActiveCell,
-    isNewRecordRow,
+    rowHasNewRecord,
     type RecordRow,
     type Display,
     type RecordsData,
@@ -107,7 +107,7 @@
       return;
     }
     value = newValue;
-    const updatedRow = isNewRecordRow(row)
+    const updatedRow = rowHasNewRecord(row)
       ? await recordsData.createOrUpdateRecord(row, column)
       : await recordsData.updateCell(row, column);
     value = updatedRow.record?.[column.id] ?? value;
@@ -149,8 +149,9 @@
       {isActive}
       {isSelectedInRange}
       {value}
-      getRecordSummary={(recordId) =>
-        $recordSummaries.get(String(column.id))?.get(recordId)}
+      recordSummary={$recordSummaries
+        .get(String(column.id))
+        ?.get(String(value))}
       setRecordSummary={(recordId, recordSummary) =>
         recordSummaries.addBespokeRecordSummary({
           columnId: String(columnId),

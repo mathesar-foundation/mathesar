@@ -9,9 +9,7 @@
 
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
-  export let getRecordSummary:
-    | ((recordId: string) => string | undefined)
-    | undefined = undefined;
+  export let recordSummary: string | undefined = undefined;
   export let setRecordSummary:
     | ((recordId: string, recordSummary: string) => void)
     | undefined = undefined;
@@ -39,7 +37,7 @@
       {isSelectedInRange}
       {disabled}
       {horizontalAlignment}
-      {getRecordSummary}
+      {recordSummary}
       {setRecordSummary}
       bind:value
       on:movementKeyDown

@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError
 
 from db.types.exceptions import UnsupportedTypeException
-from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
+from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError, ColumnMappingsNotFound
 from mathesar.api.serializers.dependents import DependentFilterSerializer, DependentSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
@@ -75,7 +75,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         table = self.get_object()
         limit = request.query_params.get('limit')
         offset = request.query_params.get('offset')
-        max_depth = request.query_params.get('max_depth', 2)
+        max_depth = request.query_params.get('max_depth', 3)
         processed_joinable_tables = get_processed_joinable_tables(
             table, limit=limit, offset=offset, max_depth=max_depth
         )
@@ -224,3 +224,15 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         )
         table_data = serializer.data
         return Response(table_data)
+
+    @action(methods=['post'], detail=True)
+    def map_imported_columns(self, request, pk=None):
+        temp_table = self.get_object()
+        target_table = request.get('import_target', None)
+        try:
+            temp_table.suggest_col_mappings_for_import(target_table)
+        except ColumnMappingsNotFound as e:
+            raise database_api_exceptions.ColumnMappingsNotFound(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )

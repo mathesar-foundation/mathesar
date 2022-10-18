@@ -3,7 +3,7 @@
 
   import type { Column } from '@mathesar/api/tables/columns';
   import type { Response as ApiRecordsResponse } from '@mathesar/api/tables/records';
-  import { ImmutableSet, Spinner } from '@mathesar-component-library';
+  import { ImmutableSet, portal, Spinner } from '@mathesar-component-library';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -22,7 +22,6 @@
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import ColumnResizer from './ColumnResizer.svelte';
-  import NestedRecordSelector from './NestedRecordSelector.svelte';
   import QuarterCircle from './QuarterCircle.svelte';
   import type {
     RecordSelectorController,
@@ -32,11 +31,15 @@
   import RecordSelectorInput from './RecordSelectorInput.svelte';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
   import { getPkValueInRecord } from './recordSelectorUtils';
+  import RecordSelectorWindow from './RecordSelectorWindow.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
+  export let windowPositionerElement: HTMLElement;
 
-  const nestedController = setNewRecordSelectorControllerInContext();
+  const nestedController = setNewRecordSelectorControllerInContext({
+    nestingLevel: controller.nestingLevel + 1,
+  });
   const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
   let columnWithFocus: Column | undefined = undefined;
@@ -176,14 +179,7 @@
             componentAndProps={processedColumn.inputComponentAndProps}
             searchFuzzy={meta.searchFuzzy}
             {columnId}
-            getRecordSummary={(recordId) =>
-              $recordSummaries.get(String(columnId))?.get(recordId)}
-            setRecordSummary={(recordId, recordSummary) =>
-              recordSummaries.addBespokeRecordSummary({
-                columnId: String(columnId),
-                recordId,
-                recordSummary,
-              })}
+            recordSummaryStore={recordSummaries}
             on:focus={() => handleInputFocus(column)}
             on:blur={() => handleInputBlur()}
             on:recordSelectorOpen={() => {
@@ -208,7 +204,12 @@
     </div>
 
     {#if $nestedSelectorIsOpen}
-      <NestedRecordSelector />
+      <div class="nested-record-selector" use:portal={windowPositionerElement}>
+        <RecordSelectorWindow
+          {windowPositionerElement}
+          controller={nestedController}
+        />
+      </div>
     {:else}
       <RecordSelectorResults
         {tableId}
@@ -226,6 +227,8 @@
   .record-selector-table {
     position: relative;
     min-height: 6rem;
+    display: flex;
+    flex-direction: column;
     --divider-height: 0.7rem;
     --divider-color: #e7e7e7;
     --color-highlight: #428af4;
@@ -246,6 +249,11 @@
   .loading-spinner.prevent-user-entry {
     pointer-events: all;
     background: rgba(255, 255, 255, 0.5);
+  }
+  .header,
+  .inputs,
+  .divider {
+    flex: 0 0 auto;
   }
   .row {
     position: relative;

@@ -1,17 +1,23 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from 'svelte';
+  import { readable } from 'svelte/store';
+
   import {
-    InputGroup,
-    Icon,
     Button,
+    Icon,
+    InputGroup,
     Select,
   } from '@mathesar-component-library';
-  import type { ComponentAndProps } from '@mathesar-component-library/types';
-  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
+  import {
+    ImmutableMap,
+    type ComponentAndProps,
+  } from '@mathesar-component-library/types';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
+  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
+  import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import type { FilterEntryColumnLike } from './types';
   import { validateFilterEntry } from './utils';
 
@@ -19,7 +25,6 @@
   type ColumnLikeType = FilterEntryColumnLike & T;
 
   const dispatch = createEventDispatcher();
-  const tabularData = getTabularDataStoreFromContext();
 
   export let columns: ColumnLikeType[];
   export let getColumnLabel: (column: ColumnLikeType) => string;
@@ -32,6 +37,7 @@
   export let disableColumnChange = false;
   export let allowDelete = true;
   export let numberOfFilters = 0;
+  export let recordSummaryStore: RecordSummaryStore | undefined = undefined;
 
   /**
    * Eslint recognizes an unnecessary type assertion that typecheck fails to
@@ -54,8 +60,6 @@
     ? selectedColumnFiltersMap.get(conditionIdentifier)
     : undefined;
   $: selectedColumnInputCap = selectedColumn?.inputComponentAndProps;
-  $: ({ recordsData } = $tabularData);
-  $: ({ recordSummaries } = recordsData);
 
   const initialNoOfFilters = numberOfFilters;
   let showError = false;
@@ -155,6 +159,21 @@
     }
     dispatch('update');
   }
+
+  $: readableRecordSummaryStore =
+    recordSummaryStore ??
+    readable(new ImmutableMap<string, RecordSummariesForColumn>());
+  $: recordSummaries = $readableRecordSummaryStore;
+
+  function setRecordSummary(recordId: string, recordSummary: string) {
+    if (recordSummaryStore) {
+      recordSummaryStore.addBespokeRecordSummary({
+        columnId: String(columnIdentifier),
+        recordId,
+        recordSummary,
+      });
+    }
+  }
 </script>
 
 <div class="filter-entry {layout}">
@@ -195,14 +214,10 @@
           on:change={onValueChangeFromUser}
           class="filter-input"
           hasError={showError && !isValid}
-          getRecordSummary={(recordId) =>
-            $recordSummaries.get(String(columnIdentifier))?.get(recordId)}
-          setRecordSummary={(recordId, recordSummary) =>
-            recordSummaries.addBespokeRecordSummary({
-              columnId: String(columnIdentifier),
-              recordId,
-              recordSummary,
-            })}
+          recordSummary={recordSummaries
+            .get(String(columnIdentifier))
+            ?.get(String(value))}
+          {setRecordSummary}
         />
       {/if}
     {/key}

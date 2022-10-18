@@ -11,7 +11,6 @@
   import {
     rowHasSavedRecord,
     getTabularDataStoreFromContext,
-    filterRecordRows,
     type RecordRow,
   } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
@@ -71,7 +70,7 @@
   $: recordsStore = recordsData.savedRecords;
   $: ({ recordSummaries } = recordsData);
   $: ({ searchFuzzy } = meta);
-  $: records = filterRecordRows($recordsStore);
+  $: records = $recordsStore;
   $: resultCount = records.length;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
@@ -198,13 +197,16 @@
       <RecordSelectorRow on:buttonClick={() => submitGhost()}>
         <div class="new-indicator-wrapper"><NewIndicator /></div>
         <CellArranger {display} let:style let:processedColumn let:column>
+          {@const value =
+            $searchFuzzy.get(column.id) ??
+            (processedColumn.column.nullable ? null : undefined)}
           <CellWrapper {style}>
             <CellFabric
               columnFabric={processedColumn}
-              value={$searchFuzzy.get(column.id) ??
-                (processedColumn.column.nullable ? null : undefined)}
-              getRecordSummary={(recordId) =>
-                $recordSummaries.get(String(column.id))?.get(recordId)}
+              {value}
+              recordSummary={$recordSummaries
+                .get(String(column.id))
+                ?.get(String(value))}
               disabled
             />
             <RowCellBackgrounds isSelected={selection.type === 'ghost'} />
@@ -227,8 +229,9 @@
             <CellFabric
               columnFabric={processedColumn}
               {value}
-              getRecordSummary={(recordId) =>
-                $recordSummaries.get(String(columnId))?.get(recordId)}
+              recordSummary={$recordSummaries
+                .get(String(columnId))
+                ?.get(String(value))}
               disabled
               showAsSkeleton={!rowHasSavedRecord(row)}
             />
@@ -242,30 +245,33 @@
       No {#if hasSearchQueries}matching{:else}existing{/if} records
     </div>
   {/each}
+</div>
 
-  <div class="tips">
-    {#if fkColumnWithFocus}
-      <div>
-        <KeyboardKey>Enter</KeyboardKey>: Input a value for
-        {fkColumnWithFocus.name}
-      </div>
+<div class="tips" class:loading={$isLoading}>
+  {#if fkColumnWithFocus}
+    <div>
+      <KeyboardKey>Enter</KeyboardKey>: Input a value for
+      {fkColumnWithFocus.name}
+    </div>
+  {/if}
+  <div>
+    <KeyboardKey>{keyComboToSubmit}</KeyboardKey>:
+    {#if selection.type === 'ghost'}
+      <strong>Create new record</strong>, select it, and exit.
+    {:else}
+      Choose selected record and exit.
     {/if}
-    <div>
-      <KeyboardKey>{keyComboToSubmit}</KeyboardKey>:
-      {#if selection.type === 'ghost'}
-        <strong>Create new record</strong>, select it, and exit.
-      {:else}
-        Choose selected record and exit.
-      {/if}
-    </div>
-    <div>
-      <KeyboardKey>Up</KeyboardKey>/<KeyboardKey>Down</KeyboardKey>: Modify
-      selection.
-    </div>
+  </div>
+  <div>
+    <KeyboardKey>Up</KeyboardKey>/<KeyboardKey>Down</KeyboardKey>: Modify
+    selection.
   </div>
 </div>
 
 <style>
+  .record-selector-results {
+    overflow-y: auto;
+  }
   .row {
     position: relative;
     cursor: pointer;
@@ -302,7 +308,7 @@
   }
 
   .record-selector-results.loading .no-results,
-  .record-selector-results.loading .tips {
+  .tips.loading {
     display: none;
   }
 </style>
