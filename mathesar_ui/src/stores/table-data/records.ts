@@ -394,7 +394,13 @@ export class RecordsData {
 
     try {
       const params = get(this.meta.recordsRequestParamsData);
-      const queryString = buildFetchQueryString(params);
+      const contextualFilterEntries = [...this.contextualFilters].map(
+        ([columnId, value]) => ({ columnId, conditionId: 'equal', value }),
+      );
+      const queryString = buildFetchQueryString({
+        ...params,
+        filtering: params.filtering.withEntries(contextualFilterEntries),
+      });
       this.promise = getAPI<ApiRecordsResponse>(`${this.url}?${queryString}`);
       const response = await this.promise;
       const totalCount = response.count || 0;

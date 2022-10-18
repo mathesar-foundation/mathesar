@@ -52,12 +52,8 @@ export class TabularData {
   constructor(props: TabularDataProps) {
     const contextualFilters =
       props.contextualFilters ?? new Map<number, string | number>();
-    const contextualFilterEntries = [...contextualFilters].map(
-      ([columnId, value]) => ({ columnId, conditionId: 'equal', value }),
-    );
     this.id = props.id;
     this.meta = props.meta ?? new Meta();
-    this.meta.filtering.update((f) => f.withEntries(contextualFilterEntries));
     this.columnsDataStore = new ColumnsDataStore({
       parentId: this.id,
       hiddenColumns: contextualFilters.keys(),
