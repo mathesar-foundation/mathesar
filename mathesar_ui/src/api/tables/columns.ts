@@ -21,10 +21,8 @@ interface FormattedNumberDisplayOptions {
   /**
    * - "true": display grouping separators even if the locale prefers otherwise.
    * - "false": do not display grouping separators.
-   * - "auto": display grouping separators based on the locale preference, which
-   *   may also be dependent on the currency"
    */
-  use_grouping: 'true' | 'false' | 'auto';
+  use_grouping: 'true' | 'false';
 
   minimum_fraction_digits: number | null;
   maximum_fraction_digits: number | null;

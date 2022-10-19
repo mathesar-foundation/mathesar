@@ -45,6 +45,7 @@ export function makeFormatter(
       // need to be able to enter numbers in the same format which they are
       // displayed, and we don't yet have support to accept entry of numbers in
       // Bengali, Persian, or Marathi.
+      // @ts-ignore because TypeScript's Intl.NumberFormatOptions is not up-to-date
       numberingSystem: 'latn',
       minimumFractionDigits: opts.minimumFractionDigits,
       // Ensure that max is greater or equal to min, for safety's sake.
