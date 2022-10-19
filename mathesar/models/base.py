@@ -342,7 +342,7 @@ class Table(DatabaseObject, Relation):
             sa_table = table_utils.get_empty_table("MISSING")
         return sa_table
 
-    # NOTE: it's a problem that we hve both _sa_table and _enriched_column_sa_table. at the moment
+    # NOTE: it's a problem that we have both _sa_table and _enriched_column_sa_table. at the moment
     # it has to be this way because enriched column is not always interachangeable with sa column.
     @property
     def _enriched_column_sa_table(self):

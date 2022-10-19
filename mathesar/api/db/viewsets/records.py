@@ -2,8 +2,6 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
-from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
-
 from mathesar.api.exceptions.error_codes import ErrorCodes
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as generic_api_exceptions
@@ -11,7 +9,7 @@ from db.functions.exceptions import (
     BadDBFunctionFormat, ReferencedColumnsDontExist, UnknownDBFunctionID,
 )
 from db.records.exceptions import (
-    BadGroupFormat, GroupFieldNotFound, InvalidGroupType, UndefinedFunction,
+    BadGroupFormat, GroupFieldNotFound, InvalidGroupType, UndefinedFunction, BadSortFormat, SortFieldNotFound
 )
 from mathesar.api.pagination import TableLimitOffsetPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
