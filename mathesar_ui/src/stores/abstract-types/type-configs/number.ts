@@ -209,8 +209,8 @@ const displayForm: AbstractTypeConfigForm = {
     },
     useGrouping: {
       type: 'string',
-      enum: ['true', 'false', 'auto'],
-      default: 'auto',
+      enum: ['true', 'false'],
+      default: 'false',
     },
     numberFormat: {
       type: 'string',
@@ -233,7 +233,6 @@ const displayForm: AbstractTypeConfigForm = {
         options: {
           true: { label: 'On' },
           false: { label: 'Off' },
-          auto: { label: 'Auto' },
         },
       },
       {
@@ -265,7 +264,7 @@ function determineDisplayOptions(
     use_grouping:
       (formValues.useGrouping as
         | NumberDisplayOptions['use_grouping']
-        | undefined) ?? 'auto',
+        | undefined) ?? 'false',
     minimum_fraction_digits: decimalPlaces ?? undefined,
     maximum_fraction_digits: decimalPlaces ?? undefined,
   };
@@ -298,7 +297,7 @@ function constructDisplayFormValuesFromDisplayOptions(
   );
   const formValues: FormValues = {
     numberFormat: displayOptions?.number_format ?? 'none',
-    useGrouping: displayOptions?.use_grouping ?? 'auto',
+    useGrouping: displayOptions?.use_grouping ?? 'false',
     decimalPlaces,
   };
   return formValues;
