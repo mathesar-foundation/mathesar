@@ -28,8 +28,8 @@ def get_constraint_from_oid(oid, engine, table):
     return None
 
 
-def get_constraint_record_from_oid(oid, engine):
-    metadata = get_empty_metadata()
+def get_constraint_record_from_oid(oid, engine, metadata=None):
+    metadata = metadata if metadata else get_empty_metadata()
     pg_constraint = get_pg_catalog_table("pg_constraint", engine, metadata=metadata)
     # conrelid is the table's OID.
     query = select(pg_constraint).where(pg_constraint.c.oid == oid)
