@@ -8,6 +8,7 @@ from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
 from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValueType, DictHasBadKeys
 from db.transforms.operations.deserialize import deserialize_transformation
+from mathesar.state import get_cached_metadata
 
 
 def _get_validator_for_list_of_dicts(field_name):
@@ -216,6 +217,7 @@ class UIQuery(BaseModel, Relation):
             engine=self._sa_engine,
             transformations=self._db_transformations,
             name=self.name,
+            metadata=get_cached_metadata()
         )
 
     @property
