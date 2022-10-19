@@ -6,7 +6,6 @@
 
   import type { Column } from '@mathesar/api/tables/columns';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     rowHasSavedRecord,
@@ -21,18 +20,13 @@
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
-  import NewIndicator from './NewIndicator.svelte';
   import RecordSelectorRow from './RecordSelectorRow.svelte';
-  import type {
-    RecordSelectorPurpose,
-    RecordSelectorSelection,
-  } from './recordSelectorTypes';
-  import {
-    findNearestValidSelection,
-    getPkValueInRecord,
-    getValidOffsetSelection,
-  } from './recordSelectorUtils';
+  import type { RecordSelectorPurpose } from './recordSelectorTypes';
+  import { getPkValueInRecord } from './recordSelectorUtils';
   import type { RecordSelectorResult } from './RecordSelectorController';
+  import Button from '@mathesar/component-library/button/Button.svelte';
+  import { Icon } from '@mathesar/component-library';
+  import { iconAddNew } from '@mathesar/icons';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -42,28 +36,7 @@
   export let submitNewRecord: (v: Iterable<[number, unknown]>) => void;
   export let fkColumnWithFocus: Column | undefined = undefined;
 
-  let selection: RecordSelectorSelection = { type: 'record', index: 0 };
-
-  /**
-   * The ghost row will appear and disappear based on whether the user has
-   * entered values into the search fields. Here's the situation that this
-   * variable helps us with:
-   *
-   * 1. The user record selector loads with 10 rows.
-   * 1. The user enters a search term which filters the number of rows to 0.
-   * 1. The ghost row is automatically selected (good).
-   * 1. The user modifies their search term, allowing 5 rows to display.
-   * 1. At this point, we'd like to automatically select the first result row
-   *    (instead of the ghost row) because we know that the user never manually
-   *    selected the ghost row. If we leave the ghost row selected, there's a
-   *    chance the user (if they're not paying close attention) could select the
-   *    ghost, inadvertently creating a new record. We want to make sure that
-   *    when they select the ghost row, they mean it!
-   * 1. Because we also want to support the user case where they've manually
-   *    selected the ghost row and are continuing to build a new record, we need
-   *    this variable.
-   */
-  let userHasManuallySelectedGhostRow = false;
+  let selectionIndex = 0;
 
   $: ({ display, recordsData, meta, columnsDataStore, isLoading } =
     $tabularData);
@@ -76,32 +49,12 @@
   $: rowWidth = $rowWidthStore;
   $: rowStyle = `width: ${rowWidth as number}px; height: ${rowHeightPx}px;`;
   $: hasSearchQueries = $searchFuzzy.size > 0;
-  $: hasGhostRow = hasSearchQueries;
-  $: indexIsSelected = (index: number) =>
-    selection.type === 'record' && selection.index === index;
+  $: indexIsSelected = (index: number) => selectionIndex === index;
   $: ({ columns } = $columnsDataStore);
-  $: keyComboToSubmit = `${fkColumnWithFocus ? 'Shift+' : ''}Enter`;
-
-  $: selection = findNearestValidSelection({
-    selection,
-    resultCount,
-    hasGhostRow,
-    userHasManuallySelectedGhostRow,
-  });
 
   function moveSelectionByOffset(offset: number) {
-    userHasManuallySelectedGhostRow =
-      userHasManuallySelectedGhostRow ||
-      (selection.type === 'record' && selection.index === 0 && offset < 0);
-    selection = getValidOffsetSelection(
-      {
-        selection,
-        resultCount,
-        hasGhostRow,
-        userHasManuallySelectedGhostRow,
-      },
-      offset,
-    );
+    const newSelectionIndex = selectionIndex + offset;
+    selectionIndex = Math.min(Math.max(newSelectionIndex, 0), resultCount - 1);
   }
 
   function getPkValue(row: RecordRow): string | number | undefined {
@@ -140,16 +93,8 @@
     submitResult({ recordId, recordSummary });
   }
 
-  function submitGhost() {
-    submitNewRecord($searchFuzzy);
-  }
-
   function submitSelection() {
-    if (selection.type === 'record') {
-      submitIndex(selection.index);
-    } else {
-      submitGhost();
-    }
+    submitIndex(selectionIndex);
   }
 
   function handleKeydown(e: KeyboardEvent) {
@@ -192,29 +137,6 @@
 </script>
 
 <div class="record-selector-results" class:loading={$isLoading}>
-  {#if hasGhostRow}
-    <div class="row ghost" style={rowStyle}>
-      <RecordSelectorRow on:buttonClick={() => submitGhost()}>
-        <div class="new-indicator-wrapper"><NewIndicator /></div>
-        <CellArranger {display} let:style let:processedColumn let:column>
-          {@const value =
-            $searchFuzzy.get(column.id) ??
-            (processedColumn.column.nullable ? null : undefined)}
-          <CellWrapper {style}>
-            <CellFabric
-              columnFabric={processedColumn}
-              {value}
-              recordSummary={$recordSummaries
-                .get(String(column.id))
-                ?.get(String(value))}
-              disabled
-            />
-            <RowCellBackgrounds isSelected={selection.type === 'ghost'} />
-          </CellWrapper>
-        </CellArranger>
-      </RecordSelectorRow>
-    </div>
-  {/if}
   {#each records as row, index}
     <div class="row" style={rowStyle}>
       <RecordSelectorRow
@@ -247,26 +169,18 @@
   {/each}
 </div>
 
-<div class="tips" class:loading={$isLoading}>
-  {#if fkColumnWithFocus}
-    <div>
-      <KeyboardKey>Enter</KeyboardKey>: Input a value for
-      {fkColumnWithFocus.name}
-    </div>
-  {/if}
-  <div>
-    <KeyboardKey>{keyComboToSubmit}</KeyboardKey>:
-    {#if selection.type === 'ghost'}
-      <strong>Create new record</strong>, select it, and exit.
-    {:else}
-      Choose selected record and exit.
-    {/if}
+{#if hasSearchQueries}
+  <div class="add-new">
+    <Button
+      size="small"
+      appearance="secondary"
+      on:click={() => submitNewRecord($searchFuzzy)}
+    >
+      <Icon {...iconAddNew} />
+      Create Record From Search Criteria
+    </Button>
   </div>
-  <div>
-    <KeyboardKey>Up</KeyboardKey>/<KeyboardKey>Down</KeyboardKey>: Modify
-    selection.
-  </div>
-</div>
+{/if}
 
 <style>
   .record-selector-results {
@@ -279,36 +193,13 @@
   .row:not(:hover) :global(.cell-bg-row-hover) {
     display: none;
   }
-  .new-indicator-wrapper {
-    position: absolute;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    left: -0.5rem;
-  }
-  .ghost {
-    border-bottom: dashed 2px #aaa;
-  }
-  .ghost :global(.cell-wrapper) {
-    opacity: 75%;
-  }
   .no-results {
     padding: 1.5rem;
     text-align: center;
     color: var(--color-gray-dark);
   }
-  .tips {
-    margin-top: 0.7rem;
-    font-size: var(--text-size-x-small);
-    color: var(--color-gray-dark);
-    display: flex;
-  }
-  .tips > * + * {
-    margin-left: 1.5rem;
-  }
-
-  .record-selector-results.loading .no-results,
-  .tips.loading {
-    display: none;
+  .add-new {
+    margin-top: 1rem;
+    text-align: right;
   }
 </style>
