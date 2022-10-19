@@ -9,7 +9,7 @@
   import type { SchemaEntry } from '@mathesar/AppTypes';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
-  import type { DBSchemaStoreData, schemas } from '@mathesar/stores/schemas';
+  import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import { schemas as schemasStore } from '@mathesar/stores/schemas';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';

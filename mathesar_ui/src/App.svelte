@@ -75,6 +75,9 @@
     --slate-400: #343a41;
     --slate-800: #25292e;
 
+    --sand-100: #f9f8f6;
+    --sand-200: #e1ddd6;
+
     --sky-200: #e8f1fd;
 
     --yellow-100: #fdf7ed;
@@ -133,7 +136,7 @@
 
     --page-padding: 1em;
 
-    --max-layout-width: 700px;
+    --max-layout-width: 54rem;
     // Setting the header height here
     // since when the header is fixed
     // we can use this variable to add margin-top

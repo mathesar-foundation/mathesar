@@ -1,3 +1,4 @@
+<!-- TODO: Should this be schema page instead? -->
 <script lang="ts">
   import type { ModalController } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';

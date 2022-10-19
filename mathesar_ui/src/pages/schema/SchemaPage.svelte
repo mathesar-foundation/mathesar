@@ -1,25 +1,19 @@
 <script lang="ts">
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import type { TableEntry } from '@mathesar/api/tables';
-  import EntityType from '@mathesar/components/EntityType.svelte';
-  import QueryName from '@mathesar/components/QueryName.svelte';
-  import SchemaName from '@mathesar/components/SchemaName.svelte';
-  import TableName from '@mathesar/components/TableName.svelte';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import {
-    getTablePageUrl,
-    getExplorationPageUrl,
-    getDataExplorerPageUrl,
-    getImportPageUrl,
-    getImportPreviewPageUrl,
-  } from '@mathesar/routes/urls';
   import { queries } from '@mathesar/stores/queries';
-  import { createTable, tables as tablesStore } from '@mathesar/stores/tables';
-  import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
+  import { tables as tablesStore } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import Button from '@mathesar/component-library/button/Button.svelte';
-  import { router } from 'tinro';
-  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
+  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
+  import { iconSchema, iconEdit } from '@mathesar/icons';
+  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
+  import { modal } from '@mathesar/stores/modal';
+  import TabContainer from '@mathesar/component-library/tabs/TabContainer.svelte';
+  import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
+  import SchemOverview from './SchemOverview.svelte';
+  import SchemaTables from './SchemaTables.svelte';
+  import SchemaExplorations from './SchemaExplorations.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -36,183 +30,81 @@
   // eslint-disable-next-line @typescript-eslint/no-inferrable-types
   export const section: string = 'overview';
 
-  let isCreatingNewTable = false;
+  const addEditModal = modal.spawnModalController();
 
+  type TabsKey = 'overview' | 'tables' | 'explorations';
+  type TabItem = { label: string; id: TabsKey };
+  const tabs: TabItem[] = [
+    {
+      label: 'Overview',
+      id: 'overview',
+    },
+    {
+      label: 'Tables',
+      id: 'tables',
+    },
+    {
+      label: 'Explorations',
+      id: 'explorations',
+    },
+  ];
+  let activeTab: TabItem;
   $: tablesMap = $tablesStore.data;
-  $: queriesMap = $queries.data;
+  $: explorationsMap = $queries.data;
 
-  // TODO: Move this function to a common location
-  function isTableImportConfirmationRequired(table: TableEntry): boolean {
-    /**
-     * table.import_verified can be null when tables have been
-     * manually added to the db/already present in db in which
-     * case we should not ask for re-confirmation.
-     */
-    return (
-      table.import_verified === false &&
-      table.data_files !== undefined &&
-      table.data_files.length > 0
-    );
-  }
-
-  async function handleCreateEmptyTable() {
-    isCreatingNewTable = true;
-    const tableInfo = await createTable(schema.id, {});
-    isCreatingNewTable = false;
-    router.goto(getTablePageUrl(database.name, schema.id, tableInfo.id), false);
+  function handleEditSchema() {
+    addEditModal.open();
   }
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
 
-<LayoutWithHeader>
-  <div class="schema-page-header">
-    <div class="schema-page-name">
-      <div><EntityType>Schema</EntityType></div>
-      <h1><SchemaName {schema} /></h1>
-    </div>
-    <ul class="actions-list">
-      <li class="actions-list-item">
-        <a href={getImportPageUrl(database.name, schema.id)}>Data Import</a>
-      </li>
-      <li class="actions-list-item">
-        <a href={getDataExplorerPageUrl(database.name, schema.id)}
-          >Data Explorer</a
-        >
-      </li>
-      <li>
-        <Button on:click={handleCreateEmptyTable}>
-          {#if isCreatingNewTable}
-            <Spinner />
-          {/if}
-          <span>New Empty Table</span>
-        </Button>
-      </li>
-    </ul>
-  </div>
+<LayoutWithHeader2 --max-layout-width="64rem">
+  <AppSecondaryHeader
+    slot="secondary-header"
+    theme="light"
+    pageTitleAndMetaProps={{
+      name: schema.name,
+      type: 'schema',
+      icon: iconSchema,
+    }}
+  >
+    <Button slot="action" on:click={handleEditSchema} appearance="secondary">
+      <Icon {...iconEdit} />
+      <span>Edit Schema</span>
+    </Button>
+    <slot slot="bottom">
+      {#if schema.description}
+        <span class="description">
+          {schema.description}
+        </span>
+      {/if}
+    </slot>
+  </AppSecondaryHeader>
 
-  <div class="entity-list-wrapper">
-    <h2 class="entity-list-title">Tables ({schema.num_tables})</h2>
-    <ul class="entity-list">
-      {#each [...tablesMap.values()] as table (table.id)}
-        <li class="entity-list-item">
-          <a
-            href={isTableImportConfirmationRequired(table)
-              ? getImportPreviewPageUrl(database.name, schema.id, table.id)
-              : getTablePageUrl(database.name, schema.id, table.id)}
-          >
-            <TableName {table} />
-            {#if isTableImportConfirmationRequired(table)}
-              *
-            {/if}
-          </a>
-          {#if !isTableImportConfirmationRequired(table)}
-            <span class="record-selector-for-table">
-              <RecordSelectorNavigationButton {table} />
-            </span>
-          {/if}
-        </li>
-      {/each}
-    </ul>
-  </div>
+  <TabContainer bind:activeTab {tabs}>
+    <slot>
+      {#if activeTab?.id === 'overview'}
+        <div class="tab-container">
+          <SchemOverview {tablesMap} {explorationsMap} {database} {schema} />
+        </div>
+      {:else if activeTab?.id === 'tables'}
+        <div class="tab-container">
+          <SchemaTables {tablesMap} {database} {schema} />
+        </div>
+      {:else}
+        <div class="tab-container">
+          <SchemaExplorations {explorationsMap} {database} {schema} />
+        </div>
+      {/if}
+    </slot>
+  </TabContainer>
+</LayoutWithHeader2>
 
-  <div class="entity-list-wrapper">
-    <h2 class="entity-list-title">
-      Explorations ({schema.num_queries})
-    </h2>
-    <ul class="entity-list">
-      {#each [...queriesMap.values()] as query (query.id)}
-        <li class="entity-list-item">
-          <a href={getExplorationPageUrl(database.name, schema.id, query.id)}>
-            <QueryName {query} />
-          </a>
-        </li>
-      {/each}
-    </ul>
-  </div>
-</LayoutWithHeader>
+<AddEditSchemaModal controller={addEditModal} {database} {schema} />
 
 <style lang="scss">
-  .schema-page-header {
-    margin: 0.5rem 0;
-    display: flex;
-    align-items: flex-end;
-    margin-bottom: 1rem;
-  }
-  .schema-page-name {
-    h1 {
-      margin: 0;
-      font-weight: 500;
-      font-size: var(--display-size-large);
-    }
-  }
-
-  .entity-list-wrapper {
-    display: flex;
-    flex-direction: column;
-
-    .entity-list-title {
-      font-size: var(--text-size-large);
-      margin: 0.5rem 0;
-      font-weight: 500;
-    }
-  }
-
-  .entity-list {
-    list-style: none;
-    margin: 0;
-    padding-left: 0;
-    border: 1px solid var(--color-gray-medium);
-    border-radius: 0.25rem;
-
-    margin-bottom: 1rem;
-
-    .entity-list-item {
-      border-bottom: 1px solid var(--color-gray-medium);
-    }
-    .entity-list-item:last-child {
-      border-bottom: none;
-    }
-    .entity-list-item > a {
-      display: inline-block;
-      text-decoration: none;
-      padding: 0.5rem;
-      color: var(--color-link);
-      font-size: var(--text-size-large);
-    }
-    .entity-list-item > a:hover {
-      text-decoration: underline;
-    }
-  }
-  .actions-list {
-    list-style: none;
-    margin: 0;
-    padding: 0 2rem;
-    display: flex;
-    align-items: flex-end;
-    gap: 1rem;
-
-    .actions-list-item {
-      font-size: var(--text-size-x-large);
-    }
-    .actions-list-item > a {
-      color: var(--color-link);
-      display: block;
-      text-decoration: none;
-      padding: 0.5rem;
-    }
-  }
-  .record-selector-for-table {
-    margin-left: 0.5em;
-    color: var(--color-gray-dark);
-  }
-  .record-selector-for-table:hover {
-    color: black;
-  }
-
-  @media (hover: hover) {
-    .entity-list-item:not(:hover) .record-selector-for-table {
-      visibility: hidden;
-    }
+  .tab-container {
+    padding-top: 1rem;
   }
 </style>
