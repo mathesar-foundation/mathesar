@@ -2,7 +2,7 @@
   import { router } from 'tinro';
 
   import type { Column } from '@mathesar/api/tables/columns';
-  import type { Result as ApiRecord } from '@mathesar/api/tables/records';
+  import type { Response as ApiRecordsResponse } from '@mathesar/api/tables/records';
   import { ImmutableSet, portal, Spinner } from '@mathesar-component-library';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -12,12 +12,21 @@
     constraintIsFk,
   } from '@mathesar/stores/table-data';
   import { postAPI, States } from '@mathesar/utils/api';
+  import { tables } from '@mathesar/stores/tables';
+  import {
+    buildInputData,
+    buildRecordSummariesForSheet,
+    renderTransitiveRecordSummary,
+  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import Arrow from './Arrow.svelte';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import ColumnResizer from './ColumnResizer.svelte';
   import QuarterCircle from './QuarterCircle.svelte';
-  import type { RecordSelectorController } from './RecordSelectorController';
+  import type {
+    RecordSelectorController,
+    RecordSelectorResult,
+  } from './RecordSelectorController';
   import { setNewRecordSelectorControllerInContext } from './RecordSelectorController';
   import RecordSelectorInput from './RecordSelectorInput.svelte';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
@@ -45,7 +54,9 @@
     isLoading,
     columnsDataStore,
     id: tableId,
+    recordsData,
   } = tabularData);
+  $: ({ recordSummaries } = recordsData);
   $: ({ constraints, state: constraintsState } = $constraintsDataStore);
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: rowWidthStore = display.rowWidth;
@@ -70,10 +81,11 @@
     meta.searchFuzzy.update((s) => s.drained());
   }
 
-  function handleSubmitPkValue(recordId: string | number) {
+  function submitResult(result: RecordSelectorResult) {
     if ($rowType === 'button') {
-      controller.submit(recordId);
+      controller.submit(result);
     } else if ($rowType === 'hyperlink') {
+      const { recordId } = result;
       const recordPageUrl = $storeToGetRecordPageUrl({ tableId, recordId });
       if (recordPageUrl) {
         router.goto(recordPageUrl);
@@ -84,11 +96,24 @@
 
   async function handleSubmitNewRecord(v: Iterable<[number, unknown]>) {
     const url = `/api/db/v0/tables/${tableId}/records/`;
+    const body = Object.fromEntries(v);
     try {
       isSubmittingNewRecord = true;
-      const record = await postAPI<ApiRecord>(url, Object.fromEntries(v));
+      const response = await postAPI<ApiRecordsResponse>(url, body);
+      const record = response.results[0];
       const recordId = getPkValueInRecord(record, columns);
-      handleSubmitPkValue(recordId);
+      const previewData = response.preview_data ?? [];
+      const tableEntry = $tables.data.get(tableId);
+      const template = tableEntry?.settings?.preview_settings?.template;
+      if (!template) {
+        throw new Error('No record summary template found in API response.');
+      }
+      const recordSummary = renderTransitiveRecordSummary({
+        inputData: buildInputData(record),
+        template,
+        transitiveData: buildRecordSummariesForSheet(previewData),
+      });
+      submitResult({ recordId, recordSummary });
     } catch (err) {
       // TODO set errors in tabularData to appear within cells
     } finally {
@@ -132,6 +157,7 @@
 
     <div class="row inputs">
       <CellArranger {display} let:style let:processedColumn let:column>
+        {@const columnId = processedColumn.id}
         {#if column === $columnWithNestedSelectorOpen}
           <div class="active-fk-cell-indicator" {style}>
             <div class="border" />
@@ -148,11 +174,12 @@
           style="{style}{column === columnWithFocus ? 'z-index: 101;' : ''}"
         >
           <RecordSelectorInput
-            class="record-selector-input column-{column.id}"
+            class="record-selector-input column-{columnId}"
             containerClass="record-selector-input-container"
             componentAndProps={processedColumn.inputComponentAndProps}
             searchFuzzy={meta.searchFuzzy}
-            columnId={column.id}
+            {columnId}
+            recordSummaryStore={recordSummaries}
             on:focus={() => handleInputFocus(column)}
             on:blur={() => handleInputBlur()}
             on:recordSelectorOpen={() => {
@@ -188,7 +215,7 @@
         {tableId}
         {fkColumnWithFocus}
         rowType={$rowType}
-        submitPkValue={handleSubmitPkValue}
+        {submitResult}
         submitNewRecord={handleSubmitNewRecord}
         on:linkClick={() => controller.cancel()}
       />

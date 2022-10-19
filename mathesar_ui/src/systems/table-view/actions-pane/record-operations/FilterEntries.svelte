@@ -17,7 +17,7 @@
   }>();
 
   const tabularData = getTabularDataStoreFromContext();
-  $: ({ processedColumns } = $tabularData);
+  $: ({ processedColumns, recordsData } = $tabularData);
 
   export let entries: FilterEntry[];
   export let filterCombination: FilterCombination = defaultFilterCombination;
@@ -34,6 +34,7 @@
     numberOfFilters={entries.length}
     on:removeFilter={() => dispatch('remove', index)}
     on:update
+    recordSummaryStore={recordsData.recordSummaries}
   >
     {#if index === 0}
       <InputGroupText>where</InputGroupText>
