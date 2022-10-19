@@ -24,7 +24,7 @@
   import NewIndicator from './NewIndicator.svelte';
   import RecordSelectorRow from './RecordSelectorRow.svelte';
   import type {
-    RecordSelectorRowType,
+    RecordSelectorPurpose,
     RecordSelectorSelection,
   } from './recordSelectorTypes';
   import {
@@ -37,7 +37,7 @@
   const tabularData = getTabularDataStoreFromContext();
 
   export let tableId: number;
-  export let rowType: RecordSelectorRowType;
+  export let rowType: RecordSelectorPurpose;
   export let submitResult: (result: RecordSelectorResult) => void;
   export let submitNewRecord: (v: Iterable<[number, unknown]>) => void;
   export let fkColumnWithFocus: Column | undefined = undefined;
@@ -113,7 +113,7 @@
   }
 
   function getRowHref(row: RecordRow): string | undefined {
-    if (rowType === 'button') {
+    if (rowType === 'dataEntry') {
       return undefined;
     }
     const recordId = getPkValue(row);

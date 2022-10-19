@@ -17,7 +17,7 @@ export interface SelectionDetails {
 }
 
 /**
- * - 'button' - each row is a button that submits the recordId via a Promise.
- * - 'hyperlink' - each row is a hyperlink to a Record Page.
+ * - 'dataEntry' - each row is a button that submits the recordId via a Promise.
+ * - 'navigation' - each row is a hyperlink to a Record Page.
  */
-export type RecordSelectorRowType = 'button' | 'hyperlink';
+export type RecordSelectorPurpose = 'dataEntry' | 'navigation';

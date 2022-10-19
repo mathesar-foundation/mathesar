@@ -45,7 +45,7 @@
   let columnWithFocus: Column | undefined = undefined;
   let isSubmittingNewRecord = false;
 
-  $: ({ columnWithNestedSelectorOpen, isOpen, rowType } = controller);
+  $: ({ columnWithNestedSelectorOpen, isOpen, purpose: rowType } = controller);
   $: tabularDataStore.set(tabularData);
   $: ({
     constraintsDataStore,
@@ -82,9 +82,9 @@
   }
 
   function submitResult(result: RecordSelectorResult) {
-    if ($rowType === 'button') {
+    if ($rowType === 'dataEntry') {
       controller.submit(result);
-    } else if ($rowType === 'hyperlink') {
+    } else if ($rowType === 'navigation') {
       const { recordId } = result;
       const recordPageUrl = $storeToGetRecordPageUrl({ tableId, recordId });
       if (recordPageUrl) {
