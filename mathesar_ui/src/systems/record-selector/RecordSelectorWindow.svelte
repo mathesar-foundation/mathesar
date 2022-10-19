@@ -4,6 +4,7 @@
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { TabularData, Meta } from '@mathesar/stores/table-data';
   import { getTableName } from '@mathesar/stores/tables';
+  import { getArticleForWord } from '@mathesar/utils/languageUtils';
   import Pagination from '@mathesar/utils/Pagination';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
@@ -25,15 +26,17 @@
         meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
       })
     : undefined;
+  $: tableName = $tableId ? getTableName($tableId) : undefined;
   $: verb = verbMap.get($purpose) ?? '';
 </script>
 
 {#if tabularData}
   <Window on:close={() => controller.cancel()} canScrollBody={false}>
     <span slot="title">
-      {verb} a
-      {#if $tableId}
-        <Identifier>{getTableName($tableId)}</Identifier>
+      {verb}
+      {#if tableName}
+        {getArticleForWord(tableName)}
+        <Identifier>{tableName}</Identifier>
       {/if}
       Record
     </span>
