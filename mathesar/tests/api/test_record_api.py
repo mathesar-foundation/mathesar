@@ -3,11 +3,11 @@ import pytest
 from copy import deepcopy
 from unittest.mock import patch
 
-from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
-
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
+from db.records.operations.sort import BadSortFormat, SortFieldNotFound
+
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.utils import follows_json_number_spec
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
@@ -241,7 +241,7 @@ def test_record_list_sort(create_patents_table, client):
     assert len(response_data['results']) == 50
 
     assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['order_by'] == order_by
+    assert mock_get.call_args[1]['order_by'][:len(order_by)] == order_by
 
 
 def test_record_search(create_patents_table, client):
