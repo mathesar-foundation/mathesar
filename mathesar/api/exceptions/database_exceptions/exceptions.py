@@ -362,3 +362,17 @@ class InvalidDateFormatAPIException(MathesarAPIException):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
         super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class ColumnMappingsNotFound(MathesarAPIException):
+    error_code = ErrorCodes.MappingsNotFound.value
+
+    def __init__(
+            self,
+            exception,
+            message="Valid column mappings not found",
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        super().__init__(exception, self.error_code, message, field, details, status_code)
