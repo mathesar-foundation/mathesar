@@ -11,8 +11,9 @@ import Date from './type-configs/date';
 import Time from './type-configs/time';
 import DateTime from './type-configs/datetime';
 import Fallback from './type-configs/fallback';
-import Array from './type-configs/jsonArray';
+import JsonArray from './type-configs/jsonArray';
 import Object from './type-configs/jsonObject';
+import Array from './type-configs/array';
 import type {
   AbstractType,
   AbstractTypesMap,
@@ -38,8 +39,9 @@ const abstractTypeCategories: Partial<
   [abstractTypeCategory.Date]: Date,
   [abstractTypeCategory.Time]: Time,
   [abstractTypeCategory.DateTime]: DateTime,
-  [abstractTypeCategory.Array]: Array,
+  [abstractTypeCategory.JsonArray]: JsonArray,
   [abstractTypeCategory.Object]: Object,
+  [abstractTypeCategory.Array]: Array,
   [abstractTypeCategory.Other]: Fallback,
 };
 

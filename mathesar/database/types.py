@@ -112,12 +112,18 @@ class UIType(Enum):
             MathesarCustomType.MATHESAR_JSON_OBJECT,
         }
     )
+    ARRAY = (
+        'array',
+        'Array',
+        {
+            PostgresType._ARRAY,
+        }
+    )
     # These are default Postgres types that we don't have specific behavior for yet in the UI.
     OTHER = (
         'other',
         'Other',
         {
-            PostgresType._ARRAY,
             PostgresType.BIT_VARYING,
             PostgresType.BIT,
             PostgresType.BYTEA,
