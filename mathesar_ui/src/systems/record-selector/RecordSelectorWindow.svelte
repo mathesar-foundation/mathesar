@@ -7,11 +7,17 @@
   import Pagination from '@mathesar/utils/Pagination';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
+  import type { RecordSelectorPurpose } from './recordSelectorTypes';
 
   export let controller: RecordSelectorController;
   export let windowPositionerElement: HTMLElement;
 
-  $: ({ tableId } = controller);
+  const verbMap = new Map<RecordSelectorPurpose, string>([
+    ['dataEntry', 'Pick'],
+    ['navigation', 'Go to'],
+  ]);
+
+  $: ({ tableId, purpose } = controller);
   $: tabularData = $tableId
     ? new TabularData({
         id: $tableId,
@@ -19,12 +25,13 @@
         meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
       })
     : undefined;
+  $: verb = verbMap.get($purpose) ?? '';
 </script>
 
 {#if tabularData}
   <Window on:close={() => controller.cancel()} canScrollBody={false}>
     <span slot="title">
-      Locate or Create One
+      {verb} a
       {#if $tableId}
         <Identifier>{getTableName($tableId)}</Identifier>
       {/if}
