@@ -311,7 +311,7 @@ class ForeignKeyViolationAPIException(MathesarAPIException):
     ):
         try:
             diagnostics = exception.orig.diag
-            message = diagnostics.message_primary if message is None else message
+            message = diagnostics.message_detail if message is None else message
             details = {} if details is None else details
             constraint_oid = get_fkey_constraint_oid_by_name_and_referent_table_oid(
                 diagnostics.constraint_name,
