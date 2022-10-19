@@ -1,9 +1,16 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { router } from 'tinro';
 
   import type { Column } from '@mathesar/api/tables/columns';
   import type { Response as ApiRecordsResponse } from '@mathesar/api/tables/records';
-  import { ImmutableSet, portal, Spinner } from '@mathesar-component-library';
+  import {
+    ImmutableSet,
+    portal,
+    Spinner,
+    Icon,
+    Button,
+  } from '@mathesar-component-library';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -18,6 +25,7 @@
     buildRecordSummariesForSheet,
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import { iconAddNew } from '@mathesar/icons';
   import Arrow from './Arrow.svelte';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
@@ -44,6 +52,7 @@
 
   let columnWithFocus: Column | undefined = undefined;
   let isSubmittingNewRecord = false;
+  let selectionIndex = 0;
 
   $: ({ columnWithNestedSelectorOpen, isOpen, purpose: rowType } = controller);
   $: tabularDataStore.set(tabularData);
@@ -62,6 +71,8 @@
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
   $: ({ columns, state: columnsState } = $columnsDataStore);
+  $: ({ searchFuzzy } = meta);
+  $: hasSearchQueries = $searchFuzzy.size > 0;
   $: fkColumnIds = new ImmutableSet(
     constraints
       .filter(constraintIsFk)
@@ -94,9 +105,9 @@
     }
   }
 
-  async function handleSubmitNewRecord(v: Iterable<[number, unknown]>) {
+  async function submitNewRecord() {
     const url = `/api/db/v0/tables/${tableId}/records/`;
-    const body = Object.fromEntries(v);
+    const body = Object.fromEntries($searchFuzzy);
     try {
       isSubmittingNewRecord = true;
       const response = await postAPI<ApiRecordsResponse>(url, body);
@@ -129,6 +140,13 @@
   function handleInputBlur() {
     columnWithFocus = undefined;
   }
+
+  onMount(() =>
+    searchFuzzy.subscribe(() => {
+      // Reset the selection index when the search query changes.
+      selectionIndex = 0;
+    }),
+  );
 </script>
 
 <div
@@ -140,7 +158,9 @@
       class="loading-spinner"
       class:prevent-user-entry={isSubmittingNewRecord}
     >
-      <Spinner size="2em" />
+      {#if isSubmittingNewRecord || !isInitialized}
+        <Spinner size="2em" />
+      {/if}
     </div>
   {/if}
 
@@ -177,7 +197,7 @@
             class="record-selector-input column-{columnId}"
             containerClass="record-selector-input-container"
             componentAndProps={processedColumn.inputComponentAndProps}
-            searchFuzzy={meta.searchFuzzy}
+            {searchFuzzy}
             {columnId}
             recordSummaryStore={recordSummaries}
             on:focus={() => handleInputFocus(column)}
@@ -212,16 +232,26 @@
       </div>
     {:else}
       <RecordSelectorResults
+        bind:selectionIndex
         {tableId}
         {fkColumnWithFocus}
+        {hasSearchQueries}
         rowType={$rowType}
         {submitResult}
-        submitNewRecord={handleSubmitNewRecord}
         on:linkClick={() => controller.cancel()}
       />
     {/if}
   {/if}
 </div>
+
+{#if hasSearchQueries}
+  <div class="add-new">
+    <Button size="small" appearance="secondary" on:click={submitNewRecord}>
+      <Icon {...iconAddNew} />
+      Create Record From Search Criteria
+    </Button>
+  </div>
+{/if}
 
 <style>
   .record-selector-table {
@@ -350,5 +380,9 @@
   }
   .record-selector-table:not(.has-open-nested-selector) .overlay {
     display: none;
+  }
+  .add-new {
+    margin-top: 1rem;
+    text-align: right;
   }
 </style>

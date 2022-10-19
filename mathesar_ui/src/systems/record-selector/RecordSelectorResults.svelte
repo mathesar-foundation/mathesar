@@ -4,6 +4,7 @@
   // TODO: Remove route dependency in systems
   import RowCellBackgrounds from '@mathesar/systems/table-view/row/RowCellBackgrounds.svelte';
 
+  import { Spinner } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/tables/columns';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -24,31 +25,24 @@
   import type { RecordSelectorPurpose } from './recordSelectorTypes';
   import { getPkValueInRecord } from './recordSelectorUtils';
   import type { RecordSelectorResult } from './RecordSelectorController';
-  import Button from '@mathesar/component-library/button/Button.svelte';
-  import { Icon } from '@mathesar/component-library';
-  import { iconAddNew } from '@mathesar/icons';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let tableId: number;
   export let rowType: RecordSelectorPurpose;
   export let submitResult: (result: RecordSelectorResult) => void;
-  export let submitNewRecord: (v: Iterable<[number, unknown]>) => void;
   export let fkColumnWithFocus: Column | undefined = undefined;
+  export let hasSearchQueries = false;
+  export let selectionIndex: number;
 
-  let selectionIndex = 0;
-
-  $: ({ display, recordsData, meta, columnsDataStore, isLoading } =
-    $tabularData);
+  $: ({ display, recordsData, columnsDataStore, isLoading } = $tabularData);
   $: recordsStore = recordsData.savedRecords;
   $: ({ recordSummaries } = recordsData);
-  $: ({ searchFuzzy } = meta);
   $: records = $recordsStore;
   $: resultCount = records.length;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
   $: rowStyle = `width: ${rowWidth as number}px; height: ${rowHeightPx}px;`;
-  $: hasSearchQueries = $searchFuzzy.size > 0;
   $: indexIsSelected = (index: number) => selectionIndex === index;
   $: ({ columns } = $columnsDataStore);
 
@@ -77,7 +71,11 @@
   }
 
   function submitIndex(index: number) {
-    const row = records[index];
+    const row = records[index] as RecordRow | undefined;
+    if (!row) {
+      // e.g. if there are no results and the user pressed Enter to submit
+      return;
+    }
     const { record } = row;
     const recordId = getPkValue(row);
     if (!record || recordId === undefined) {
@@ -136,7 +134,7 @@
   });
 </script>
 
-<div class="record-selector-results" class:loading={$isLoading}>
+<div class="record-selector-results">
   {#each records as row, index}
     <div class="row" style={rowStyle}>
       <RecordSelectorRow
@@ -163,24 +161,17 @@
       </RecordSelectorRow>
     </div>
   {:else}
-    <div class="no-results">
-      No {#if hasSearchQueries}matching{:else}existing{/if} records
-    </div>
+    {#if $isLoading}
+      <div class="loading-indicator">
+        <Spinner size="2em" />
+      </div>
+    {:else}
+      <div class="no-results">
+        No {#if hasSearchQueries}matching{:else}existing{/if} records
+      </div>
+    {/if}
   {/each}
 </div>
-
-{#if hasSearchQueries}
-  <div class="add-new">
-    <Button
-      size="small"
-      appearance="secondary"
-      on:click={() => submitNewRecord($searchFuzzy)}
-    >
-      <Icon {...iconAddNew} />
-      Create Record From Search Criteria
-    </Button>
-  </div>
-{/if}
 
 <style>
   .record-selector-results {
@@ -193,13 +184,16 @@
   .row:not(:hover) :global(.cell-bg-row-hover) {
     display: none;
   }
+  .loading-indicator {
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #aaa;
+  }
   .no-results {
     padding: 1.5rem;
     text-align: center;
     color: var(--color-gray-dark);
-  }
-  .add-new {
-    margin-top: 1rem;
-    text-align: right;
   }
 </style>
