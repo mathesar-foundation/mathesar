@@ -52,29 +52,6 @@ export type ResultValue = string | number | boolean | null;
 /** keys are stringified column ids */
 export type Result = Record<string, ResultValue>;
 
-/**
- * Provides the data necessary to render one Record Summary, given a summary
- * template. The template will contain column aliases enclosed in curly braces
- * as in the following example template which contains only one column alias.
- *
- * ```
- * {65__66__col__67}
- * ```
- *
- * The column alias, "65__66__col__67" is a unique serialization of the full
- * path traversed through foreign keys to find the column which contains the
- * value to be rendered within the template. Because record summaries can be
- * transitive, the value may lie within a column several tables away. The alias
- * needs to represent the full path so that we avoid collisions between two FK
- * columns which point to the same table. The front end does not need to parse
- * the column alias -- it just needs to match aliases within templates to
- * aliases within sets of input data.
- *
- * The keys in this type below are column aliases. The values are the data to be
- * rendered for that column.
- */
-export type RecordSummaryInputData = Record<string, ResultValue>;
-
 export type GroupingMode = 'distinct' | 'percentile';
 
 export interface Group {
@@ -105,15 +82,39 @@ export interface Group {
   result_indices: number[];
 }
 
-export interface DataForRecordSummariesInFkColumn {
+/**
+ * Provides the data necessary to render one Record Summary, given a summary
+ * template. The template will contain column aliases enclosed in curly braces
+ * as in the following example template which contains only one column alias.
+ *
+ * ```
+ * {65__66__col__67}
+ * ```
+ *
+ * The column alias, "65__66__col__67" is a unique serialization of the full
+ * path traversed through foreign keys to find the column which contains the
+ * value to be rendered within the template. Because record summaries can be
+ * transitive, the value may lie within a column several tables away. The alias
+ * needs to represent the full path so that we avoid collisions between two FK
+ * columns which point to the same table. The front end does not need to parse
+ * the column alias -- it just needs to match aliases within templates to
+ * aliases within sets of input data.
+ *
+ * The keys in this type below are column aliases. The values are the data to be
+ * rendered for that column.
+ */
+export type ApiRecordSummaryInputData = Record<string, ResultValue>;
+
+export interface ApiDataForRecordSummariesInFkColumn {
   column: number;
   template: string;
   /**
-   * Each item in this array provides the inputs for one cell within the column.
-   * The array is to be matched, index for index, with the records in the
-   * results.
+   * Keys represent the record ids. Values represent the data necessary to
+   * render the record summary for the record having that PK value. All key
+   * values are string. If the PK values as stored in the database is a number,
+   * then it will be stringified for transmission through the API.
    */
-  data: RecordSummaryInputData[];
+  data: Record<string, ApiRecordSummaryInputData>;
 }
 
 export interface Response {
@@ -123,5 +124,5 @@ export interface Response {
   /**
    * Each item in this array can be matched to each FK column in the table.
    */
-  preview_data: DataForRecordSummariesInFkColumn[] | null;
+  preview_data: ApiDataForRecordSummariesInFkColumn[] | null;
 }

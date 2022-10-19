@@ -807,7 +807,7 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     preview_column_alias = f'{{{publication_title_alias}}} Published By: {{{ publisher_name_alias}}} and Authored by Full Name: {{{author_first_name_alias}}} {{{author_last_name_alias}}} along with Full Name: {{{co_author_first_name_alias}}} {{{co_author_last_name_alias}}}'
 
     assert preview_column['template'] == preview_column_alias
-    preview_data = preview_column['data'][0]
+    preview_data = preview_column['data']['1']
     assert all([key in preview_data for key in [publication_title_alias, publisher_name_alias, author_first_name_alias, author_last_name_alias, co_author_first_name_alias, co_author_last_name_alias]])
 
     expected_preview_data = {publication_title_alias: 'Pressure Should Old', publisher_name_alias: 'Ruiz', author_first_name_alias: 'Matthew', author_last_name_alias: 'Brown', co_author_first_name_alias: 'Mark', co_author_last_name_alias: 'Smith'}

@@ -13,7 +13,12 @@
     getTabularDataStoreFromContext,
     type RecordRow,
   } from '@mathesar/stores/table-data';
+  import { tables } from '@mathesar/stores/tables';
   import { rowHeightPx } from '@mathesar/geometry';
+  import {
+    renderTransitiveRecordSummary,
+    buildInputData,
+  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import NewIndicator from './NewIndicator.svelte';
@@ -27,12 +32,13 @@
     getPkValueInRecord,
     getValidOffsetSelection,
   } from './recordSelectorUtils';
+  import type { RecordSelectorResult } from './RecordSelectorController';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let tableId: number;
   export let rowType: RecordSelectorRowType;
-  export let submitPkValue: (v: string | number) => void;
+  export let submitResult: (result: RecordSelectorResult) => void;
   export let submitNewRecord: (v: Iterable<[number, unknown]>) => void;
   export let fkColumnWithFocus: Column | undefined = undefined;
 
@@ -62,6 +68,7 @@
   $: ({ display, recordsData, meta, columnsDataStore, isLoading } =
     $tabularData);
   $: recordsStore = recordsData.savedRecords;
+  $: ({ recordSummaries } = recordsData);
   $: ({ searchFuzzy } = meta);
   $: records = $recordsStore;
   $: resultCount = records.length;
@@ -117,10 +124,20 @@
   }
 
   function submitIndex(index: number) {
-    const pkValue = getPkValue(records[index]);
-    if (pkValue !== undefined) {
-      submitPkValue(pkValue);
+    const row = records[index];
+    const { record } = row;
+    const recordId = getPkValue(row);
+    if (!record || recordId === undefined) {
+      return;
     }
+    const tableEntry = $tables.data.get(tableId);
+    const template = tableEntry?.settings?.preview_settings?.template ?? '';
+    const recordSummary = renderTransitiveRecordSummary({
+      template,
+      inputData: buildInputData(record),
+      transitiveData: $recordSummaries,
+    });
+    submitResult({ recordId, recordSummary });
   }
 
   function submitGhost() {
@@ -180,11 +197,16 @@
       <RecordSelectorRow on:buttonClick={() => submitGhost()}>
         <div class="new-indicator-wrapper"><NewIndicator /></div>
         <CellArranger {display} let:style let:processedColumn let:column>
+          {@const value =
+            $searchFuzzy.get(column.id) ??
+            (processedColumn.column.nullable ? null : undefined)}
           <CellWrapper {style}>
             <CellFabric
               columnFabric={processedColumn}
-              value={$searchFuzzy.get(column.id) ??
-                (processedColumn.column.nullable ? null : undefined)}
+              {value}
+              recordSummary={$recordSummaries
+                .get(String(column.id))
+                ?.get(String(value))}
               disabled
             />
             <RowCellBackgrounds isSelected={selection.type === 'ghost'} />
@@ -201,13 +223,15 @@
         on:buttonClick={() => submitIndex(index)}
       >
         <CellArranger {display} let:style let:processedColumn>
+          {@const columnId = processedColumn.id}
+          {@const value = row?.record?.[columnId]}
           <CellWrapper {style}>
             <CellFabric
               columnFabric={processedColumn}
-              value={row?.record?.[processedColumn.column.id]}
-              dataForRecordSummaryInFkCell={row?.dataForRecordSummariesInRow?.[
-                processedColumn.column.id
-              ]}
+              {value}
+              recordSummary={$recordSummaries
+                .get(String(columnId))
+                ?.get(String(value))}
               disabled
               showAsSkeleton={!rowHasSavedRecord(row)}
             />
