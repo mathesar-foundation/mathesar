@@ -1,7 +1,11 @@
+import warnings
 from rest_framework import status
 
 from db.columns.operations.select import get_column_attnum_from_name
-from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid
+from db.constraints.operations.select import (
+    get_constraint_oid_by_name_and_table_oid,
+    get_fkey_constraint_oid_by_name_and_referent_table_oid,
+)
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
@@ -302,9 +306,29 @@ class ForeignKeyViolationAPIException(MathesarAPIException):
             message=None,
             field=None,
             details=None,
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            referent_table=None,
     ):
-        super().__init__(exception, self.error_code, message, field, details, status_code)
+        try:
+            diagnostics = exception.orig.diag
+            message = diagnostics.message_primary if message is None else message
+            details = {} if details is None else details
+            constraint_oid = get_fkey_constraint_oid_by_name_and_referent_table_oid(
+                diagnostics.constraint_name,
+                referent_table.oid,
+                referent_table._sa_engine,
+            )
+            constraint = Constraint.objects.get(oid=constraint_oid)
+            details.update({
+                "constraint": constraint.id,
+                "constraint_columns": [c.id for c in constraint.columns],
+                "constraint_referent_columns": [c.id for c in constraint.referent_columns],
+            })
+        except Exception:
+            warnings.warn("Could not enrich Exception")
+        super().__init__(
+            exception, self.error_code, message, field, details, status_code
+        )
 
 
 class UniqueImportViolationAPIException(MathesarAPIException):
