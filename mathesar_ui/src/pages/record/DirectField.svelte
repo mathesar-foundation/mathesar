@@ -17,7 +17,7 @@
   let isUpdating = false;
 
   $: ({ column } = processedColumn);
-  $: ({ fields } = record);
+  $: ({ fields, recordSummaries } = record);
   $: value = $fields.get(column.id);
   $: disabled = column.primary_key || isUpdating;
 
@@ -41,5 +41,12 @@
     componentAndProps={processedColumn.inputComponentAndProps}
     on:change={(e) => updateField(getValueFromEvent(e))}
     on:artificialChange={(e) => updateField(getValueFromArtificialEvent(e))}
+    recordSummary={$recordSummaries.get(String(column.id))?.get(String(value))}
+    setRecordSummary={(recordId, recordSummary) =>
+      recordSummaries.addBespokeRecordSummary({
+        columnId: String(column.id),
+        recordId,
+        recordSummary,
+      })}
   />
 </LabeledInput>

@@ -116,12 +116,11 @@ class RecordViewSet(viewsets.ViewSet):
             ]
         }
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
-        column_ids_to_names = column_names_to_ids.inverse
         records = paginator.paginate_queryset(
             table,
             request,
             table,
-            column_ids_to_names,
+            column_names_to_ids,
             filters=record_filters
         )
         if not records:
@@ -150,12 +149,11 @@ class RecordViewSet(viewsets.ViewSet):
             ]
         }
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
-        column_ids_to_names = column_names_to_ids.inverse
         records = paginator.paginate_queryset(
             table,
             request,
             table,
-            column_ids_to_names,
+            column_names_to_ids,
             filters=record_filters
         )
         serializer = RecordSerializer(
@@ -186,12 +184,11 @@ class RecordViewSet(viewsets.ViewSet):
             ]
         }
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
-        column_ids_to_names = column_names_to_ids.inverse
         records = paginator.paginate_queryset(
             table,
             request,
             table,
-            column_ids_to_names,
+            column_names_to_ids,
             filters=record_filters
         )
         serializer = RecordSerializer(
