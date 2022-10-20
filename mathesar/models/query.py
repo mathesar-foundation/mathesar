@@ -222,21 +222,10 @@ class UIQuery(BaseModel, Relation):
 
     @property
     def _db_initial_columns(self):
-        self._prefetch_query_column_objs(self.initial_columns)
         return tuple(
             _db_initial_column_from_json(json_col)
             for json_col in self.initial_columns
         )
-
-    def _prefetch_query_column_objs(self, initial_columns_json):
-        column_ids_to_prefetch = set()
-        for json_col in initial_columns_json:
-            column_ids_to_prefetch.add(json_col["id"])
-            for edge in json_col.get("jp_path", []):
-                column_ids_to_prefetch.update(edge)
-        prefetched_columns = Column.objects.filter(id__in=column_ids_to_prefetch).select_related('table')
-        prefetched_columns_map = {col.id: col for col in prefetched_columns}
-        return prefetched_columns_map
 
     @property
     def _db_transformations(self):
