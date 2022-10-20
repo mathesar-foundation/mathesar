@@ -198,6 +198,9 @@
   }
 
   function handleKeydown(e: KeyboardEvent) {
+    if ($nestedSelectorIsOpen) {
+      return;
+    }
     let handled = true;
     switch (e.key) {
       case 'ArrowUp':
