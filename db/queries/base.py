@@ -31,7 +31,7 @@ class DBQuery:
         # transformations.  this reflects fact that we can form a query, and
         # then apply temporary transforms on it, like how you can apply
         # temporary transforms to a table when in a table view.
-        return records_select.get_records(
+        return records_select.get_records_with_default_order(
             table=self.transformed_relation, engine=self.engine, **kwargs,
         )
 
