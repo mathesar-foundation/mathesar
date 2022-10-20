@@ -30,6 +30,7 @@
       class="record-summary record-page-link"
       title="Go to record"
       href={recordPageHref}
+      tabindex="-1"
       on:mouseenter={() => {
         isHoveringRecordPageLink = true;
       }}
@@ -54,6 +55,7 @@
       class="delete-button"
       on:click={handleDeleteButtonClick}
       role="button"
+      tabindex="-1"
       aria-label="Clear value"
       title="Clear value"
       on:mouseenter={() => {

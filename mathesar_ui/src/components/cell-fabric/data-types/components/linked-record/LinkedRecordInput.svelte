@@ -128,6 +128,7 @@
     class="dropdown-button"
     on:click={launchRecordSelector}
     role="button"
+    tabindex="-1"
     aria-label="Pick a record"
     title="Pick a record"
   >
