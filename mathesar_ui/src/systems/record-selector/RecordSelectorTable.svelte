@@ -33,7 +33,7 @@
     RecordSelectorResult,
   } from './RecordSelectorController';
   import { setRecordSelectorControllerInContext } from './RecordSelectorController';
-  import RecordSelectorInputCell from './RecordSelectorInput.svelte';
+  import RecordSelectorInputCell from './RecordSelectorInputCell.svelte';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
   import { getPkValueInRecord } from './recordSelectorUtils';
 
