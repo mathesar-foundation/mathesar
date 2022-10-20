@@ -2,6 +2,9 @@
   import { onMount } from 'svelte';
   import { router } from 'tinro';
 
+  // TODO: Remove route dependency in systems
+  import RowCellBackgrounds from '@mathesar/systems/table-view/row/RowCellBackgrounds.svelte';
+
   import type { Column } from '@mathesar/api/tables/columns';
   import type { Response as ApiRecordsResponse } from '@mathesar/api/tables/records';
   import {
@@ -25,6 +28,12 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { iconAddNew } from '@mathesar/icons';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import {
+    rowHasSavedRecord,
+    type RecordRow,
+  } from '@mathesar/stores/table-data';
+  import { rowHeightPx } from '@mathesar/geometry';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './RecordSelectorCellWrapper.svelte';
   import ColumnResizer from './ColumnResizer.svelte';
@@ -34,8 +43,8 @@
   } from './RecordSelectorController';
   import { setRecordSelectorControllerInContext } from './RecordSelectorController';
   import RecordSelectorInputCell from './RecordSelectorInputCell.svelte';
-  import RecordSelectorResults from './RecordSelectorResults.svelte';
   import { getPkValueInRecord } from './recordSelectorUtils';
+  import RecordSelectorRow from './RecordSelectorRow.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -73,6 +82,11 @@
       .filter((c) => c.columns.length === 1)
       .map((c) => c.columns[0]),
   );
+  $: recordsStore = recordsData.savedRecords;
+  $: records = $recordsStore;
+  $: resultCount = records.length;
+  $: rowStyle = `width: ${rowWidth as number}px; height: ${rowHeightPx}px;`;
+  $: indexIsSelected = (index: number) => selectionIndex === index;
   $: fkColumnWithFocus = (() => {
     if (columnWithFocus === undefined) {
       return undefined;
@@ -81,7 +95,6 @@
   })();
   $: isInitialized =
     columnsState === States.Done && constraintsState === States.Done;
-
   $: if ($isOpen) {
     meta.searchFuzzy.update((s) => s.drained());
   }
@@ -135,12 +148,99 @@
     columnWithFocus = undefined;
   }
 
+  function moveSelectionByOffset(offset: number) {
+    const newSelectionIndex = selectionIndex + offset;
+    selectionIndex = Math.min(Math.max(newSelectionIndex, 0), resultCount - 1);
+  }
+
+  function getPkValue(row: RecordRow): string | number | undefined {
+    const { record } = row;
+    if (!record || Object.keys(record).length === 0) {
+      return undefined;
+    }
+    return getPkValueInRecord(record, columns);
+  }
+
+  function getRowHref(row: RecordRow): string | undefined {
+    if ($rowType === 'dataEntry') {
+      return undefined;
+    }
+    const recordId = getPkValue(row);
+    if (!recordId) {
+      return undefined;
+    }
+    return $storeToGetRecordPageUrl({ tableId, recordId });
+  }
+
+  function submitIndex(index: number) {
+    const row = records[index] as RecordRow | undefined;
+    if (!row) {
+      // e.g. if there are no results and the user pressed Enter to submit
+      return;
+    }
+    const { record } = row;
+    const recordId = getPkValue(row);
+    if (!record || recordId === undefined) {
+      return;
+    }
+    const tableEntry = $tables.data.get(tableId);
+    const template = tableEntry?.settings?.preview_settings?.template ?? '';
+    const recordSummary = renderTransitiveRecordSummary({
+      template,
+      inputData: buildInputData(record),
+      transitiveData: $recordSummaries,
+    });
+    submitResult({ recordId, recordSummary });
+  }
+
+  function submitSelection() {
+    submitIndex(selectionIndex);
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    let handled = true;
+    switch (e.key) {
+      case 'ArrowUp':
+        moveSelectionByOffset(-1);
+        break;
+      case 'ArrowDown':
+        moveSelectionByOffset(1);
+        break;
+      case 'Enter':
+        // When we have a FK search cell selected, we use `Enter` to open the
+        // nested selector. That event is handled by LinkedRecordInput, so we
+        // don't need to handle it here -- we just need to make sure to _not_
+        // handle other events here in that case. We still let the user submit
+        // the selected record by using Shift+Enter.
+        if (!fkColumnWithFocus || e.shiftKey) {
+          submitSelection();
+        } else {
+          handled = false;
+        }
+        break;
+      default:
+        handled = false;
+    }
+
+    if (handled) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }
+
   onMount(() =>
     searchFuzzy.subscribe(() => {
       // Reset the selection index when the search query changes.
       selectionIndex = 0;
     }),
   );
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown, { capture: true });
+    return () => {
+      window.removeEventListener('keydown', handleKeydown, { capture: true });
+    };
+  });
 </script>
 
 <div
@@ -198,15 +298,44 @@
       </CellArranger>
     </div>
 
-    <RecordSelectorResults
-      bind:selectionIndex
-      {tableId}
-      {fkColumnWithFocus}
-      {hasSearchQueries}
-      rowType={$rowType}
-      {submitResult}
-      on:linkClick={() => controller.cancel()}
-    />
+    <div class="record-selector-results">
+      {#each records as row, index}
+        <div class="row" style={rowStyle}>
+          <RecordSelectorRow
+            href={getRowHref(row)}
+            on:linkClick
+            on:buttonClick={() => submitIndex(index)}
+          >
+            <CellArranger {display} let:style let:processedColumn>
+              {@const columnId = processedColumn.id}
+              {@const value = row?.record?.[columnId]}
+              <CellWrapper {style} cellType="data">
+                <CellFabric
+                  columnFabric={processedColumn}
+                  {value}
+                  recordSummary={$recordSummaries
+                    .get(String(columnId))
+                    ?.get(String(value))}
+                  disabled
+                  showAsSkeleton={!rowHasSavedRecord(row)}
+                />
+                <RowCellBackgrounds isSelected={indexIsSelected(index)} />
+              </CellWrapper>
+            </CellArranger>
+          </RecordSelectorRow>
+        </div>
+      {:else}
+        {#if $isLoading}
+          <div class="loading-indicator">
+            <Spinner size="2em" />
+          </div>
+        {:else}
+          <div class="no-results">
+            No {#if hasSearchQueries}matching{:else}existing{/if} records
+          </div>
+        {/if}
+      {/each}
+    </div>
   {/if}
 </div>
 
@@ -228,6 +357,7 @@
     --divider-height: 0.7rem;
     --divider-color: #e7e7e7;
   }
+
   .loading-overlay {
     position: absolute;
     top: 0;
@@ -245,6 +375,7 @@
     pointer-events: all;
     background: rgba(255, 255, 255, 0.5);
   }
+
   .header,
   .inputs,
   .divider {
@@ -259,6 +390,30 @@
     height: var(--divider-height);
     box-sizing: content-box;
   }
+
+  .record-selector-results {
+    overflow-y: auto;
+  }
+  .row {
+    position: relative;
+    cursor: pointer;
+  }
+  .row:not(:hover) :global(.cell-bg-row-hover) {
+    display: none;
+  }
+  .loading-indicator {
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #aaa;
+  }
+  .no-results {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--color-gray-dark);
+  }
+
   .add-new {
     margin-top: 1rem;
     text-align: right;
