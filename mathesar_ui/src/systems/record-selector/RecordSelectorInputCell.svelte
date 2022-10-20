@@ -13,6 +13,7 @@
   } from '@mathesar/stores/table-data';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import CellWrapper from './RecordSelectorCellWrapper.svelte';
+  import { getCellState } from './recordSelectorUtils';
 
   export let processedColumn: ProcessedColumn;
   export let searchFuzzy: Writable<SearchFuzzy>;
@@ -26,6 +27,7 @@
   $: recordSummary = $recordSummaryStore
     .get(String(column.id))
     ?.get(String(value));
+  $: state = getCellState({ hasFocus, hasNestedSelectorOpen });
 
   function updateValue(e: CustomEvent<unknown>) {
     const newValue = e.detail;
@@ -33,15 +35,7 @@
   }
 </script>
 
-<CellWrapper
-  style={cellWrapperStyle}
-  cellType="searchInput"
-  state={hasNestedSelectorOpen
-    ? 'acquiringFkValue'
-    : hasFocus
-    ? 'focused'
-    : undefined}
->
+<CellWrapper style={cellWrapperStyle} cellType="searchInput" {state}>
   <Debounce on:artificialChange={updateValue} let:handleNewValue>
     <DynamicInput
       class="record-selector-input"

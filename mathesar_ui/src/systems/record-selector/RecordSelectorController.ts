@@ -3,7 +3,7 @@ import { writable } from 'svelte/store';
 
 import type { Column } from '@mathesar/api/tables/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { RecordSelectorPurpose } from './recordSelectorTypes';
+import type { RecordSelectorPurpose } from './recordSelectorUtils';
 
 interface RecordSelectorControllerProps {
   onOpen?: () => void;

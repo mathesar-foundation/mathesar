@@ -7,7 +7,7 @@
   import { getArticleForWord } from '@mathesar/utils/languageUtils';
   import Pagination from '@mathesar/utils/Pagination';
   import { RecordSelectorController } from './RecordSelectorController';
-  import type { RecordSelectorPurpose } from './recordSelectorTypes';
+  import type { RecordSelectorPurpose } from './recordSelectorUtils';
   import {} from './RecordSelectorController';
   import RecordSelectorContent from './RecordSelectorContent.svelte';
 

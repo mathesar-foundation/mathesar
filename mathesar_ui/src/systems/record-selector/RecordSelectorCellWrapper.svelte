@@ -1,14 +1,11 @@
 <script lang="ts">
+  import type { CellState, CellType } from './recordSelectorUtils';
+
   let className = '';
   export { className as class };
   export let style: string | undefined = undefined;
-  export let cellType:
-    | 'columnHeader'
-    | 'searchInput'
-    | 'divider'
-    | 'rowHeader'
-    | 'data';
-  export let state: 'focused' | 'acquiringFkValue' | undefined = undefined;
+  export let cellType: CellType;
+  export let state: CellState | undefined = undefined;
 </script>
 
 <div
