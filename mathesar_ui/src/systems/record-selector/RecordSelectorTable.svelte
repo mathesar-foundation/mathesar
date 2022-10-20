@@ -191,10 +191,7 @@
   });
 </script>
 
-<div
-  class="record-selector-table"
-  class:has-open-nested-selector={$nestedSelectorIsOpen}
->
+<div class="record-selector-table">
   <div class="row header" style="width: {rowWidth}px">
     <CellArranger {display} let:style let:processedColumn>
       <CellWrapper {style} cellType="columnHeader">
