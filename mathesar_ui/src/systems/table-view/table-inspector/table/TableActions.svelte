@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { Button, Icon } from '@mathesar/component-library';
+  import { router } from 'tinro';
+
+  import { Button, Icon } from '@mathesar-component-library';
   import {
     iconDeleteMajor,
     iconExploration,
@@ -8,14 +10,15 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
-  import { createEventDispatcher } from 'svelte';
   import { currentSchemaId } from '@mathesar/stores/schemas';
-  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import {
+    getDataExplorerPageUrl,
+    getSchemaPageUrl,
+  } from '@mathesar/routes/urls';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import LinkTableModal from '../../link-table/LinkTableModal.svelte';
 
-  const dispatch = createEventDispatcher();
   const tabularData = getTabularDataStoreFromContext();
   const linkTableModal = modal.spawnModalController();
   const tableConstraintsModal = modal.spawnModalController();
@@ -26,9 +29,13 @@
       onProceed: async () => {
         await deleteTable($tabularData.id);
         // TODO handle error when deleting
-        dispatch('deleteTable');
-        if ($currentSchemaId) {
+        // TODO: Get db and schema from prop or context
+        if ($currentDatabase && $currentSchemaId) {
           await refetchTablesForSchema($currentSchemaId);
+          router.goto(
+            getSchemaPageUrl($currentDatabase.name, $currentSchemaId),
+            true,
+          );
         }
       },
     });

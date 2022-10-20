@@ -48,10 +48,8 @@ export function getUseGrouping(
     case 'true':
       return true;
     case 'false':
-      return false;
-    case 'auto':
     default:
-      return 'auto';
+      return false;
   }
 }
 
@@ -63,7 +61,7 @@ function getProps(
   const format = displayOptions?.number_format ?? null;
   return {
     locale: (format && localeMap.get(format)) ?? undefined,
-    useGrouping: getUseGrouping(displayOptions?.use_grouping ?? 'auto'),
+    useGrouping: getUseGrouping(displayOptions?.use_grouping ?? 'false'),
     allowFloat: getAllowFloat(column, config?.floatAllowanceStrategy),
     minimumFractionDigits: displayOptions?.minimum_fraction_digits ?? undefined,
     maximumFractionDigits: displayOptions?.maximum_fraction_digits ?? undefined,
