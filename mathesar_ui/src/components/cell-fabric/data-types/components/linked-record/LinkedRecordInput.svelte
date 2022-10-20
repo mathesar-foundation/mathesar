@@ -142,6 +142,7 @@
     display: grid;
     grid-template: auto / 1fr auto;
     position: relative;
+    isolation: isolate;
     border: 1px solid #dfdfdf;
     border-radius: 0.25rem;
     background: #fff;

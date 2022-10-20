@@ -87,7 +87,6 @@
     align-items: center;
     justify-content: flex-end;
     --inset: 1rem;
-    --nested-selector-overlap: 1rem;
     /**
      * The space between the top of the bottom-most nested selector and the top
      * of the viewport when the viewport is short enough to cause the upper
@@ -130,9 +129,7 @@
       );
     }
     :global(.nested-record-selector) {
-      margin-top: calc(
-        -1 * var(--nested-selector-overlap) + -1 * var(--nested-selector-extra-top-inset)
-      );
+      margin-top: calc(-1 * var(--nested-selector-extra-top-inset));
       padding-top: var(--nested-selector-extra-top-inset);
       max-height: calc(
         100vh - var(--nested-selector-extra-top-inset) - 2 * var(--inset)

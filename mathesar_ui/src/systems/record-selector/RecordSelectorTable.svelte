@@ -6,7 +6,6 @@
   import type { Response as ApiRecordsResponse } from '@mathesar/api/tables/records';
   import {
     ImmutableSet,
-    portal,
     Spinner,
     Icon,
     Button,
@@ -26,34 +25,29 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { iconAddNew } from '@mathesar/icons';
-  import Arrow from './Arrow.svelte';
   import CellArranger from './CellArranger.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import ColumnResizer from './ColumnResizer.svelte';
-  import QuarterCircle from './QuarterCircle.svelte';
   import type {
     RecordSelectorController,
     RecordSelectorResult,
   } from './RecordSelectorController';
-  import { setNewRecordSelectorControllerInContext } from './RecordSelectorController';
+  import { setRecordSelectorControllerInContext } from './RecordSelectorController';
   import RecordSelectorInput from './RecordSelectorInput.svelte';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
   import { getPkValueInRecord } from './recordSelectorUtils';
-  import RecordSelectorWindow from './RecordSelectorWindow.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
-  export let windowPositionerElement: HTMLElement;
+  export let nestedController: RecordSelectorController;
 
-  const nestedController = setNewRecordSelectorControllerInContext({
-    nestingLevel: controller.nestingLevel + 1,
-  });
   const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
   let columnWithFocus: Column | undefined = undefined;
   let isSubmittingNewRecord = false;
   let selectionIndex = 0;
 
+  $: setRecordSelectorControllerInContext(nestedController);
   $: ({ columnWithNestedSelectorOpen, isOpen, purpose: rowType } = controller);
   $: tabularDataStore.set(tabularData);
   $: ({
@@ -155,7 +149,7 @@
 >
   {#if $isLoading || isSubmittingNewRecord}
     <div
-      class="loading-spinner"
+      class="loading-overlay"
       class:prevent-user-entry={isSubmittingNewRecord}
     >
       {#if isSubmittingNewRecord || !isInitialized}
@@ -172,27 +166,29 @@
           <ColumnResizer columnId={processedColumn.column.id} />
         </CellWrapper>
       </CellArranger>
-      <div class="overlay" />
     </div>
 
     <div class="row inputs">
+      <!-- TODO clean up the code in here, potentially moving into
+      RecordSelectorInput or another component -->
       <CellArranger {display} let:style let:processedColumn let:column>
         {@const columnId = processedColumn.id}
-        {#if column === $columnWithNestedSelectorOpen}
-          <div class="active-fk-cell-indicator" {style}>
-            <div class="border" />
-            <div class="knockout">
-              <div class="smoother left"><QuarterCircle /></div>
-              <div class="smoother right"><QuarterCircle /></div>
-            </div>
-            <div class="arrow"><Arrow /></div>
-          </div>
-        {:else if column === columnWithFocus}
-          <div class="highlight" {style} />
+        {@const hasFocus = column == columnWithFocus}
+        {@const hasNestedSelectorOpen =
+          column === $columnWithNestedSelectorOpen}
+        {#if hasFocus || hasNestedSelectorOpen}
+          <div
+            class="highlight"
+            class:has-nested-selector-open={hasNestedSelectorOpen}
+            {style}
+          />
         {/if}
-        <CellWrapper
-          style="{style}{column === columnWithFocus ? 'z-index: 101;' : ''}"
-        >
+        {@const z =
+          'z-index: var(--z-index-above-overlay); pointer-events: none;'}
+        {@const s = `${style}${
+          column === $columnWithNestedSelectorOpen ? z : ''
+        }`}
+        <CellWrapper style={s}>
           <RecordSelectorInput
             class="record-selector-input column-{columnId}"
             containerClass="record-selector-input-container"
@@ -214,7 +210,6 @@
           />
         </CellWrapper>
       </CellArranger>
-      <div class="overlay" />
     </div>
 
     <div class="divider">
@@ -223,24 +218,15 @@
       </CellArranger>
     </div>
 
-    {#if $nestedSelectorIsOpen}
-      <div class="nested-record-selector" use:portal={windowPositionerElement}>
-        <RecordSelectorWindow
-          {windowPositionerElement}
-          controller={nestedController}
-        />
-      </div>
-    {:else}
-      <RecordSelectorResults
-        bind:selectionIndex
-        {tableId}
-        {fkColumnWithFocus}
-        {hasSearchQueries}
-        rowType={$rowType}
-        {submitResult}
-        on:linkClick={() => controller.cancel()}
-      />
-    {/if}
+    <RecordSelectorResults
+      bind:selectionIndex
+      {tableId}
+      {fkColumnWithFocus}
+      {hasSearchQueries}
+      rowType={$rowType}
+      {submitResult}
+      on:linkClick={() => controller.cancel()}
+    />
   {/if}
 </div>
 
@@ -263,7 +249,7 @@
     --divider-color: #e7e7e7;
     --color-highlight: #428af4;
   }
-  .loading-spinner {
+  .loading-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -273,10 +259,10 @@
     justify-content: center;
     align-items: center;
     color: #aaa;
-    z-index: 100;
+    z-index: var(--z-index-overlay);
     pointer-events: none;
   }
-  .loading-spinner.prevent-user-entry {
+  .loading-overlay.prevent-user-entry {
     pointer-events: all;
     background: rgba(255, 255, 255, 0.5);
   }
@@ -309,77 +295,16 @@
     box-shadow: none;
   }
   .highlight {
+    --color: var(--color-highlight);
     position: absolute;
     height: 100%;
-    z-index: 100;
+    z-index: var(--z-index-above-overlay);
     border-radius: 2px;
-    box-shadow: 0 0 0 2px var(--color-highlight);
+    box-shadow: 0 0 0 3px var(--color);
     pointer-events: none;
   }
-  .active-fk-cell-indicator {
-    --border-width: 3px;
-    position: absolute;
-    height: 100%;
-    z-index: 102;
-    pointer-events: none;
-  }
-  .active-fk-cell-indicator .border {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    top: calc(-1 * var(--border-width));
-    left: calc(-1 * var(--border-width));
-    box-sizing: content-box;
-    border: dashed var(--border-width) var(--color-highlight);
-    z-index: 2;
-  }
-  .active-fk-cell-indicator .knockout {
-    position: absolute;
-    height: var(--divider-height);
-    width: calc(100% + 2 * (var(--divider-height) + var(--border-width)));
-    bottom: calc(-1 * var(--divider-height));
-    left: calc(-1 * var(--border-width) + -1 * var(--divider-height));
-    background: white;
-    z-index: 1;
-  }
-  .active-fk-cell-indicator .smoother {
-    position: absolute;
-    color: var(--divider-color);
-    height: var(--divider-height);
-    width: var(--divider-height);
-  }
-  .active-fk-cell-indicator .smoother.right {
-    right: 0;
-    /* 1px forces some overlap to prevent sub-pixel gaps */
-    transform: translate(1px) scaleX(-1);
-  }
-  .active-fk-cell-indicator :global(svg) {
-    display: block;
-    height: 100%;
-    width: 100%;
-  }
-  .active-fk-cell-indicator .arrow {
-    color: var(--color-highlight);
-    position: absolute;
-    --size: 1.2rem;
-    width: var(--size);
-    bottom: -1.5rem;
-    left: calc(50% - var(--size) / 2);
-    z-index: 3;
-    transform: scaleY(-1);
-  }
-  .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.5);
-    z-index: 100;
-    pointer-events: none;
-  }
-  .record-selector-table:not(.has-open-nested-selector) .overlay {
-    display: none;
+  .highlight.has-nested-selector-open {
+    --color: #888;
   }
   .add-new {
     margin-top: 1rem;

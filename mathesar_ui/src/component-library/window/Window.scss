@@ -7,6 +7,8 @@
   display: grid;
   grid-template: auto 1fr auto / auto;
   box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
+  position: relative;
+  isolation: isolate;
 
   .title-bar {
     grid-row: 1;

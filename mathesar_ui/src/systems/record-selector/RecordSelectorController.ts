@@ -88,12 +88,10 @@ export class RecordSelectorController {
 
 const contextKey = {};
 
-export function setNewRecordSelectorControllerInContext(
-  props: RecordSelectorControllerProps,
-): RecordSelectorController {
-  const recordSelectorController = new RecordSelectorController(props);
-  setContext(contextKey, recordSelectorController);
-  return recordSelectorController;
+export function setRecordSelectorControllerInContext(
+  c: RecordSelectorController,
+): void {
+  setContext(contextKey, c);
 }
 
 export function getRecordSelectorFromContext(): RecordSelectorController {

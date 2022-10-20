@@ -75,6 +75,7 @@
     display: grid;
     grid-template: auto / 1fr auto;
     position: relative;
+    isolation: isolate;
   }
   .background {
     position: absolute;
