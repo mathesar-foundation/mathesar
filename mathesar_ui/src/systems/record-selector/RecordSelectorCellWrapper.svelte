@@ -2,11 +2,23 @@
   let className = '';
   export { className as class };
   export let style: string | undefined = undefined;
-  export let header = false;
-  export let divider = false;
+  export let cellType:
+    | 'columnHeader'
+    | 'searchInput'
+    | 'divider'
+    | 'rowHeader'
+    | 'data';
+  export let state: 'focused' | 'acquiringFkValue' | undefined = undefined;
 </script>
 
-<div class="cell-wrapper {className}" class:header class:divider {style}>
+<div
+  class="cell-wrapper {className}"
+  class:is-column-header={cellType === 'columnHeader'}
+  class:is-divider={cellType === 'divider'}
+  class:has-outline={state === 'focused' || state === 'acquiringFkValue'}
+  class:is-acquiring-fk-value={state === 'acquiringFkValue'}
+  {style}
+>
   <slot />
 </div>
 
@@ -25,7 +37,7 @@
   .cell-wrapper:first-child {
     border-left: var(--cell-border-vertical);
   }
-  .header {
+  .is-column-header {
     background: #f7f8f8;
     border-top: var(--cell-border-horizontal);
     /**
@@ -34,7 +46,17 @@
      */
     padding: 5px 26px 5px 12px;
   }
-  .divider {
+  .is-divider {
     background: var(--divider-color);
+  }
+  .has-outline {
+    --outline-color: #428af4;
+    z-index: var(--z-index-above-overlay);
+    border-radius: 2px;
+    box-shadow: 0 0 0 3px var(--outline-color);
+  }
+  .is-acquiring-fk-value {
+    --outline-color: #888;
+    pointer-events: none;
   }
 </style>

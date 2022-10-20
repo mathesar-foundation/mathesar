@@ -20,7 +20,7 @@
     buildInputData,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import CellArranger from './CellArranger.svelte';
-  import CellWrapper from './CellWrapper.svelte';
+  import CellWrapper from './RecordSelectorCellWrapper.svelte';
   import RecordSelectorRow from './RecordSelectorRow.svelte';
   import type { RecordSelectorPurpose } from './recordSelectorTypes';
   import { getPkValueInRecord } from './recordSelectorUtils';
@@ -145,7 +145,7 @@
         <CellArranger {display} let:style let:processedColumn>
           {@const columnId = processedColumn.id}
           {@const value = row?.record?.[columnId]}
-          <CellWrapper {style}>
+          <CellWrapper {style} cellType="data">
             <CellFabric
               columnFabric={processedColumn}
               {value}

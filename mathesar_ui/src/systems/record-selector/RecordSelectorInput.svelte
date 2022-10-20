@@ -6,58 +6,91 @@
     getValueFromArtificialEvent,
     getValueFromEvent,
   } from '@mathesar-component-library';
-  import type { ComponentAndProps } from '@mathesar-component-library/types';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
-  import type { SearchFuzzy } from '@mathesar/stores/table-data';
+  import type {
+    ProcessedColumn,
+    SearchFuzzy,
+  } from '@mathesar/stores/table-data';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
+  import CellWrapper from './RecordSelectorCellWrapper.svelte';
 
-  let classes = '';
-  export { classes as class };
-  export let containerClass: string | undefined;
-  export let columnId: number;
-  export let componentAndProps: ComponentAndProps;
+  export let processedColumn: ProcessedColumn;
   export let searchFuzzy: Writable<SearchFuzzy>;
   export let recordSummaryStore: RecordSummaryStore;
+  export let cellWrapperStyle: string;
+  export let hasFocus: boolean;
+  export let hasNestedSelectorOpen: boolean;
 
-  $: value = $searchFuzzy.get(columnId);
+  $: ({ column } = processedColumn);
+  $: value = $searchFuzzy.get(column.id);
   $: recordSummary = $recordSummaryStore
-    .get(String(columnId))
+    .get(String(column.id))
     ?.get(String(value));
 
   function updateValue(e: CustomEvent<unknown>) {
     const newValue = e.detail;
-    searchFuzzy.update((s) => s.with(columnId, newValue));
+    searchFuzzy.update((s) => s.with(column.id, newValue));
   }
 </script>
 
-<Debounce on:artificialChange={updateValue} let:handleNewValue>
-  <DynamicInput
-    class={classes}
-    {containerClass}
-    {componentAndProps}
-    {value}
-    {recordSummary}
-    setRecordSummary={(recordId, _recordSummary) =>
-      recordSummaryStore.addBespokeRecordSummary({
-        columnId: String(columnId),
-        recordId,
-        recordSummary: _recordSummary,
-      })}
-    on:input={(e) =>
-      handleNewValue({ value: getValueFromEvent(e), debounce: true })}
-    on:artificialInput={(e) =>
-      handleNewValue({ value: getValueFromArtificialEvent(e), debounce: true })}
-    on:change={(e) =>
-      handleNewValue({ value: getValueFromEvent(e), debounce: false })}
-    on:artificialChange={(e) =>
-      handleNewValue({
-        value: getValueFromArtificialEvent(e),
-        debounce: false,
-      })}
-    on:focus
-    on:blur
-    on:recordSelectorOpen
-    on:recordSelectorSubmit
-    on:recordSelectorCancel
-  />
-</Debounce>
+<CellWrapper
+  style={cellWrapperStyle}
+  cellType="searchInput"
+  state={hasNestedSelectorOpen
+    ? 'acquiringFkValue'
+    : hasFocus
+    ? 'focused'
+    : undefined}
+>
+  <Debounce on:artificialChange={updateValue} let:handleNewValue>
+    <DynamicInput
+      class="record-selector-input"
+      containerClass="record-selector-input-container"
+      componentAndProps={processedColumn.inputComponentAndProps}
+      {value}
+      {recordSummary}
+      setRecordSummary={(recordId, _recordSummary) =>
+        recordSummaryStore.addBespokeRecordSummary({
+          columnId: String(column.id),
+          recordId,
+          recordSummary: _recordSummary,
+        })}
+      on:input={(e) =>
+        handleNewValue({ value: getValueFromEvent(e), debounce: true })}
+      on:artificialInput={(e) =>
+        handleNewValue({
+          value: getValueFromArtificialEvent(e),
+          debounce: true,
+        })}
+      on:change={(e) =>
+        handleNewValue({ value: getValueFromEvent(e), debounce: false })}
+      on:artificialChange={(e) =>
+        handleNewValue({
+          value: getValueFromArtificialEvent(e),
+          debounce: false,
+        })}
+      on:focus
+      on:blur
+      on:recordSelectorOpen
+      on:recordSelectorSubmit
+      on:recordSelectorCancel
+    />
+  </Debounce>
+</CellWrapper>
+
+<style>
+  :global(.record-selector-input-container) {
+    height: 100%;
+    width: 100%;
+  }
+  :global(.record-selector-input) {
+    height: 100%;
+    width: 100%;
+    border: none;
+  }
+  :global(.record-selector-input:focus) {
+    outline: none;
+    border: none;
+    box-shadow: none;
+  }
+</style>

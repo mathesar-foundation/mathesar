@@ -26,14 +26,14 @@
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { iconAddNew } from '@mathesar/icons';
   import CellArranger from './CellArranger.svelte';
-  import CellWrapper from './CellWrapper.svelte';
+  import CellWrapper from './RecordSelectorCellWrapper.svelte';
   import ColumnResizer from './ColumnResizer.svelte';
   import type {
     RecordSelectorController,
     RecordSelectorResult,
   } from './RecordSelectorController';
   import { setRecordSelectorControllerInContext } from './RecordSelectorController';
-  import RecordSelectorInput from './RecordSelectorInput.svelte';
+  import RecordSelectorInputCell from './RecordSelectorInput.svelte';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
   import { getPkValueInRecord } from './recordSelectorUtils';
 
@@ -161,7 +161,7 @@
   {#if isInitialized}
     <div class="row header" style="width: {rowWidth}px">
       <CellArranger {display} let:style let:processedColumn>
-        <CellWrapper header {style}>
+        <CellWrapper {style} cellType="columnHeader">
           <ProcessedColumnName {processedColumn} />
           <ColumnResizer columnId={processedColumn.column.id} />
         </CellWrapper>
@@ -169,52 +169,32 @@
     </div>
 
     <div class="row inputs">
-      <!-- TODO clean up the code in here, potentially moving into
-      RecordSelectorInput or another component -->
       <CellArranger {display} let:style let:processedColumn let:column>
-        {@const columnId = processedColumn.id}
-        {@const hasFocus = column == columnWithFocus}
-        {@const hasNestedSelectorOpen =
-          column === $columnWithNestedSelectorOpen}
-        {#if hasFocus || hasNestedSelectorOpen}
-          <div
-            class="highlight"
-            class:has-nested-selector-open={hasNestedSelectorOpen}
-            {style}
-          />
-        {/if}
-        {@const z =
-          'z-index: var(--z-index-above-overlay); pointer-events: none;'}
-        {@const s = `${style}${
-          column === $columnWithNestedSelectorOpen ? z : ''
-        }`}
-        <CellWrapper style={s}>
-          <RecordSelectorInput
-            class="record-selector-input column-{columnId}"
-            containerClass="record-selector-input-container"
-            componentAndProps={processedColumn.inputComponentAndProps}
-            {searchFuzzy}
-            {columnId}
-            recordSummaryStore={recordSummaries}
-            on:focus={() => handleInputFocus(column)}
-            on:blur={() => handleInputBlur()}
-            on:recordSelectorOpen={() => {
-              $columnWithNestedSelectorOpen = column;
-            }}
-            on:recordSelectorSubmit={() => {
-              $columnWithNestedSelectorOpen = undefined;
-            }}
-            on:recordSelectorCancel={() => {
-              $columnWithNestedSelectorOpen = undefined;
-            }}
-          />
-        </CellWrapper>
+        <RecordSelectorInputCell
+          cellWrapperStyle={style}
+          hasFocus={column === columnWithFocus}
+          hasNestedSelectorOpen={column === $columnWithNestedSelectorOpen}
+          {processedColumn}
+          {searchFuzzy}
+          recordSummaryStore={recordSummaries}
+          on:focus={() => handleInputFocus(column)}
+          on:blur={() => handleInputBlur()}
+          on:recordSelectorOpen={() => {
+            $columnWithNestedSelectorOpen = column;
+          }}
+          on:recordSelectorSubmit={() => {
+            $columnWithNestedSelectorOpen = undefined;
+          }}
+          on:recordSelectorCancel={() => {
+            $columnWithNestedSelectorOpen = undefined;
+          }}
+        />
       </CellArranger>
     </div>
 
     <div class="divider">
       <CellArranger {display} let:style>
-        <CellWrapper {style} divider />
+        <CellWrapper {style} cellType="divider" />
       </CellArranger>
     </div>
 
@@ -247,7 +227,6 @@
     flex-direction: column;
     --divider-height: 0.7rem;
     --divider-color: #e7e7e7;
-    --color-highlight: #428af4;
   }
   .loading-overlay {
     position: absolute;
@@ -279,32 +258,6 @@
     position: relative;
     height: var(--divider-height);
     box-sizing: content-box;
-  }
-  .inputs :global(.record-selector-input-container) {
-    height: 100%;
-    width: 100%;
-  }
-  .inputs :global(.record-selector-input) {
-    height: 100%;
-    width: 100%;
-    border: none;
-  }
-  .inputs :global(.record-selector-input:focus) {
-    outline: none;
-    border: none;
-    box-shadow: none;
-  }
-  .highlight {
-    --color: var(--color-highlight);
-    position: absolute;
-    height: 100%;
-    z-index: var(--z-index-above-overlay);
-    border-radius: 2px;
-    box-shadow: 0 0 0 3px var(--color);
-    pointer-events: none;
-  }
-  .highlight.has-nested-selector-open {
-    --color: #888;
   }
   .add-new {
     margin-top: 1rem;
