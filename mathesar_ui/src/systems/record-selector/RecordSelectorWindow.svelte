@@ -7,9 +7,9 @@
   import { getArticleForWord } from '@mathesar/utils/languageUtils';
   import Pagination from '@mathesar/utils/Pagination';
   import { RecordSelectorController } from './RecordSelectorController';
-  import RecordSelectorTable from './RecordSelectorTable.svelte';
   import type { RecordSelectorPurpose } from './recordSelectorTypes';
   import {} from './RecordSelectorController';
+  import RecordSelectorContent from './RecordSelectorContent.svelte';
 
   const verbMap = new Map<RecordSelectorPurpose, string>([
     ['dataEntry', 'Pick'],
@@ -27,7 +27,7 @@
   export let controller: RecordSelectorController;
   export let windowPositionerElement: HTMLElement;
 
-  let tableHeight = 0;
+  let contentHeight = 0;
 
   $: nestedController = new RecordSelectorController({
     nestingLevel: controller.nestingLevel + 1,
@@ -44,7 +44,7 @@
   $: verb = verbMap.get($purpose) ?? '';
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: marginBottom = $nestedSelectorIsOpen
-    ? `calc(${nestedSelectorVerticalOffset} - ${tableHeight}px)`
+    ? `calc(${nestedSelectorVerticalOffset} - ${contentHeight}px)`
     : '0';
 </script>
 
@@ -60,8 +60,8 @@
         Record
       </span>
 
-      <div bind:clientHeight={tableHeight}>
-        <RecordSelectorTable {tabularData} {controller} {nestedController} />
+      <div bind:clientHeight={contentHeight}>
+        <RecordSelectorContent {tabularData} {controller} {nestedController} />
       </div>
 
       {#if $nestedSelectorIsOpen}
