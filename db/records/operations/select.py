@@ -1,8 +1,8 @@
 from sqlalchemy import select
-from sqlalchemy.sql.base import ColumnSet as SAColumnSet
 from sqlalchemy.sql.functions import count
 
 from db.columns.base import MathesarColumn
+from db.records.operations.sort import get_default_order_by
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.types.operations.convert import get_db_type_enum_from_id
@@ -24,8 +24,7 @@ def get_records_with_default_order(
         order_by=[],
         **kwargs,
 ):
-    if not order_by:
-        order_by = get_default_order_by(table, order_by)
+    order_by = get_default_order_by(table, order_by=order_by)
     return get_records(
         table=table,
         engine=engine,
@@ -97,33 +96,6 @@ def get_count(table, engine, filter=None, search=[]):
         search=search,
     )
     return execute_pg_query(engine, relation)[0][col_name]
-
-
-def get_default_order_by(table, order_by):
-    # Set default ordering if none was requested
-    relation_has_pk = hasattr(table, 'primary_key')
-    if relation_has_pk:
-        pk = table.primary_key
-        pk_cols = None
-        if hasattr(pk, 'columns'):
-            pk_cols = pk.columns
-        elif isinstance(pk, SAColumnSet):
-            pk_cols = pk
-        # If there are primary keys, order by all primary keys
-        if pk_cols is not None and len(pk_cols) > 0:
-            order_by = [
-                {'field': str(col.name), 'direction': 'asc'}
-                for col
-                in pk_cols
-            ]
-    if not order_by:
-        # If there aren't primary keys, order by all columns
-        order_by = [
-            {'field': col, 'direction': 'asc'}
-            for col
-            in table.columns
-        ]
-    return order_by
 
 
 def get_column_cast_records(engine, table, column_definitions, num_records=20):

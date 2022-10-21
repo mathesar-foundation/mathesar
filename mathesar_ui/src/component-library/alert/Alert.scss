@@ -1,9 +1,12 @@
 .alert-container {
   display: flex;
   flex-direction: row;
-  gap: 0.5rem;
   padding: 0.7rem;
   border-radius: var(--border-radius-m);
+
+  > * + * {
+    margin-left: 0.5rem;
+  }
 
   &.alert-info {
     background-color: var(--sky-200);

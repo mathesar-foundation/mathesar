@@ -16,7 +16,7 @@
 
 <style lang="scss">
   .constituent {
-    font-size: 1.142rem;
+    font-size: var(--text-size-large);
     font-weight: 400;
     margin: 0;
   }
@@ -25,7 +25,10 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.5rem;
+
+    > :global(* + *) {
+      margin-left: 0.5rem;
+    }
   }
 
   .divider {

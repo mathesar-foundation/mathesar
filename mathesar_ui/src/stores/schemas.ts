@@ -70,6 +70,7 @@ function updateSchemaInDBSchemaStore(
       value.data?.set(schema.id, schema);
       return {
         ...value,
+        data: new Map(value.data),
       };
     });
   }
@@ -85,6 +86,7 @@ function removeSchemaInDBSchemaStore(
       value.data?.delete(schemaId);
       return {
         ...value,
+        data: new Map(value.data),
       };
     });
   }

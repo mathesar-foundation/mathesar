@@ -71,7 +71,9 @@ def process_annotated_records(record_list, column_name_id_map=None, preview_meta
             return _replace_column_names_with_ids(group_metadata_item)
         else:
             return group_metadata_item
-    if preview_metadata:
+
+    if preview_metadata and column_name_id_map is not None:
+        column_id_name_map = {i: n for n, i in column_name_id_map.items()}
         # Extract preview data from the records
         # TODO Replace modifying the parameter directly
         for preview_colum_id, preview_info in preview_metadata.items():
@@ -81,13 +83,13 @@ def process_annotated_records(record_list, column_name_id_map=None, preview_meta
             # Move column id into the object so that dict can be flattened into a list
             preview_metadata[preview_colum_id]['column'] = preview_colum_id
             preview_data_column_aliases = column_alias_from_preview_template(preview_template)
-            preview_records = []
-            for record_index, record in enumerate(processed_records):
+            preview_records = {}
+            for record in processed_records:
                 column_preview_data = {}
                 for preview_data_column_alias in preview_data_column_aliases:
-                    preview_value = processed_records[record_index].pop(preview_data_column_alias)
+                    preview_value = record.pop(preview_data_column_alias)
                     column_preview_data.update({preview_data_column_alias: preview_value})
-                preview_records.append(column_preview_data)
+                preview_records[str(record[column_id_name_map[preview_colum_id]])] = column_preview_data
             preview_metadata[preview_colum_id]['data'] = preview_records
         # Flatten the preview objects
         preview_metadata = preview_metadata.values()

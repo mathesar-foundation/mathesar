@@ -11,6 +11,7 @@
   const recordSelectorController = setNewRecordSelectorControllerInContext({
     onOpen: () => recordSelectorModal.open(),
     onClose: () => recordSelectorModal.close(),
+    nestingLevel: 0,
   });
 </script>
 
@@ -98,6 +99,8 @@
     --border-radius-s: 0.142rem; //2px
     --border-radius-m: 0.285rem; //4px
     --border-radius-l: 0.571rem; //8px
+    --modal-z-index: 50;
+    --modal-record-selector-z-index: 50;
   }
 
   body {
@@ -141,7 +144,7 @@
     // since when the header is fixed
     // we can use this variable to add margin-top
     // to the below header content container
-    --header-height: 60px;
+    --header-height: 4.285rem;
 
     color: var(--slate-400);
   }

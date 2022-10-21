@@ -78,7 +78,7 @@
 
   .description {
     font-weight: 400;
-    font-size: 1.142rem;
+    font-size: var(--text-size-large);
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -92,7 +92,10 @@
     border: 1px solid var(--slate-300);
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+
+    > :global(* + *) {
+      margin-top: 0.75rem;
+    }
   }
 
   .schema-row.is-locked {

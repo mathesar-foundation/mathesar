@@ -123,7 +123,7 @@
   />
 </ControlledModal>
 
-<style>
+<style lang="scss">
   .error {
     color: var(--color-error);
     font-size: 0.8rem;
@@ -132,7 +132,10 @@
   .form-container {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+
+    > :global(* + *) {
+      margin-top: 1rem;
+    }
   }
 
   .form-container > .input-container {

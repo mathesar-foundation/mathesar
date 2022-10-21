@@ -46,7 +46,7 @@
   .menu-item {
     display: contents;
     cursor: pointer;
-    font-size: 1.142rem;
+    font-size: var(--text-size-large);
     color: var(--slate-800);
 
     &.danger {
