@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
 
 import sqlalchemy
-import sqlalchemy_filters
 from sqlalchemy import select
 
 from db.functions.operations import apply
 from db.functions.operations.deserialize import get_db_function_subclass_by_id
-from db.records.operations import group, relevance
+from db.records.operations import group, relevance, sort as rec_sort
 
 
 class Transform(ABC):
@@ -56,9 +55,10 @@ class Order(Transform):
     def apply_to_relation(self, relation):
         order_by = self.spec
         enforce_relation_type_expectations(relation)
-        executable = _to_executable(relation)
         if order_by is not None:
-            executable = sqlalchemy_filters.apply_sort(executable, order_by)
+            executable = rec_sort.apply_relation_sorting(relation, order_by)
+        else:
+            executable = _to_executable(relation)
         return _to_non_executable(executable)
 
 

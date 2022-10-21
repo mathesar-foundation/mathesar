@@ -1,7 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { get } from 'svelte/store';
-
   import type { ModalController } from '@mathesar-component-library';
   import {
     CancelOrProceedButtonPair,
@@ -28,7 +26,6 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { refetchTablesForSchema, tables } from '@mathesar/stores/tables';
   import {
-    getTabularData,
     ColumnsDataStore,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
@@ -36,7 +33,6 @@
   import { postAPI, States } from '@mathesar/utils/api';
   import { getAvailableName } from '@mathesar/utils/db';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { iconTechnicalExplanation, iconTableLink } from '@mathesar/icons';
   import type { RelationshipType } from './linkTableUtils';
   import {
@@ -77,11 +73,10 @@
    * process) before the entry for the table is set into the `$tables` store.
    */
   $: thisTable = $tables.data.get($tabularData.id);
-  $: isSelfReferential = thisTable?.id === thatTable?.id;
-  $: canProceed =
-    thatTable &&
-    thisHasManyOfThat !== undefined &&
-    thatHasManyOfThis !== undefined;
+  $: isSelfReferential =
+    thisTable !== undefined &&
+    thatTable !== undefined &&
+    thisTable.id === thatTable.id;
   $: unavailableTableNames = new Set(
     [...$tables.data.values()].map((t) => t.name),
   ); // TODO: include constraint names too
@@ -119,6 +114,17 @@
     thatHasManyOfThis,
     isSelfReferential,
   );
+
+  /**
+   * `canProceed` has to be placed after `handleChangeThatTable` since
+   * svelte executes reactive calls in specified order at each tick
+   * and we the variables used here like `thisHasManyOfThat` and
+   * `thatHasManyOfThis` are manipulated within `handleChangeThatTable`.
+   */
+  $: canProceed =
+    thatTable &&
+    thisHasManyOfThat !== undefined &&
+    (isSelfReferential || thatHasManyOfThis !== undefined);
 
   function setColumnNames(
     _relationshipType: RelationshipType | undefined,
@@ -159,7 +165,6 @@
       throw new Error('Unable to determine target table id.');
     }
     switch (relationshipType) {
-      case 'one-to-one':
       case 'one-to-many': {
         const oneToOneOrOneToMany: OneToOne | OneToMany = {
           link_type: relationshipType,
@@ -169,6 +174,7 @@
         };
         return oneToOneOrOneToMany;
       }
+      case 'one-to-one':
       case 'many-to-one': {
         const oneToMany: OneToMany = {
           link_type: 'one-to-many',
@@ -210,13 +216,8 @@
     if (!tableWithNewColumn) {
       return;
     }
-    const abstractTypesMap = get(currentDbAbstractTypes).data;
-    const tabularDataWithNewColumn = getTabularData({
-      id: tableWithNewColumn.id,
-      abstractTypesMap,
-    });
-    if (tabularDataWithNewColumn) {
-      void tabularDataWithNewColumn.refresh();
+    if (tableWithNewColumn.id === $tabularData.id) {
+      void $tabularData.refresh();
     }
   }
 

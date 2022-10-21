@@ -31,7 +31,7 @@ class DBQuery:
         # transformations.  this reflects fact that we can form a query, and
         # then apply temporary transforms on it, like how you can apply
         # temporary transforms to a table when in a table view.
-        return records_select.get_records(
+        return records_select.get_records_with_default_order(
             table=self.transformed_relation, engine=self.engine, **kwargs,
         )
 
@@ -113,12 +113,12 @@ class DBQuery:
             """
             return reflect_table_from_oid(oid, self.engine, metadata=metadata)
 
-        def _get_column_name(oid, attnum, metadata):
+        def _get_column_name(oid, attnum):
             return get_column_name_from_attnum(oid, attnum, self.engine, metadata=metadata)
 
-        def _process_initial_column(col, metadata):
+        def _process_initial_column(col):
             nonlocal from_clause
-            col_name = _get_column_name(col.reloid, col.attnum, metadata=metadata)
+            col_name = _get_column_name(col.reloid, col.attnum)
             # Make the path hashable so it can be a dict key
             jp_path = _guarantee_jp_path_tuples(col.jp_path)
             right = base_table
@@ -127,8 +127,8 @@ class DBQuery:
                 left = jp_path_alias_map[jp_path[:i]]
                 right = _get_table(jp[1][0]).alias()
                 jp_path_alias_map[jp_path[:i + 1]] = right
-                left_col_name = _get_column_name(jp[0][0], jp[0][1], metadata=metadata)
-                right_col_name = _get_column_name(jp[1][0], jp[1][1], metadata=metadata)
+                left_col_name = _get_column_name(jp[0][0], jp[0][1])
+                right_col_name = _get_column_name(jp[1][0], jp[1][1])
                 left_col = left.columns[left_col_name]
                 right_col = right.columns[right_col_name]
                 from_clause = from_clause.join(
@@ -138,7 +138,7 @@ class DBQuery:
             return right.columns[col_name].label(col.alias)
 
         stmt = select(
-            [_process_initial_column(col, metadata=metadata) for col in self.initial_columns]
+            [_process_initial_column(col) for col in self.initial_columns]
         ).select_from(from_clause)
         return stmt.cte()
 

@@ -24,3 +24,11 @@ class InvalidDate(Exception):
 
 class InvalidDateFormat(Exception):
     pass
+
+
+class BadSortFormat(Exception):
+    pass
+
+
+class SortFieldNotFound(Exception):
+    pass

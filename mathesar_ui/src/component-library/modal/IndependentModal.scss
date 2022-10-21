@@ -1,23 +1,11 @@
-.modal-wrapper {
+.modal {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 50;
-  display: flex;
-  justify-content: center;
-  --modal-margin: 1rem;
-
-  &.v-align-top {
-    align-items: flex-start;
-  }
-  &.v-align-center {
-    align-items: center;
-  }
-  &.v-align-bottom {
-    align-items: flex-end;
-  }
+  z-index: var(--modal-z-index, auto);
+  isolation: isolate;
 
   .overlay {
     background-color: rgba(0, 0, 0, 0.2);
@@ -26,66 +14,32 @@
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: 51;
+    z-index: 1;
   }
 
-  .modal {
-    background-color: var(--slate-100);
-    border-radius: var(--border-radius-m);
-    max-height: calc(100% - 2 * var(--modal-margin));
-    min-height: 7em;
-    position: relative;
-    overflow: hidden;
-    margin: var(--modal-margin);
-    z-index: 52;
+  .title-bar {
+    font-size: var(--text-size-large);
+  }
+
+  .window-positioner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
-    padding: 2.5em;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 
-    > * + * {
-      margin-top: 2rem;
+    &.width-medium {
+      --window-width: calc(min(500px, 100%));
     }
-
-    .title-bar {
-      display: flex;
-      justify-content: flex-end;
-      align-items: flex-start;
-      .title {
-        &:empty {
-          display: none;
-        }
-        flex: 1 1 100%;
-        font-weight: bold;
-        font-size: var(--text-size-large);
-        color: var(--slate-800);
-      }
-    }
-
-    > .body,
-    > .footer {
-      &:empty {
-        display: none;
-      }
-
-      > :first-child {
-        margin-top: 0;
-      }
-      > :last-child {
-        margin-bottom: 0;
-      }
-    }
-
-    > .body {
-      overflow-y: auto;
-      font-size: 1.142rem;
-    }
-
-    &.modal-size-medium {
-      width: 500px;
-    }
-    &.modal-size-large {
-      width: 800px;
+    &.width-large {
+      --window-width: calc(min(800px, 100%));
     }
   }
 }

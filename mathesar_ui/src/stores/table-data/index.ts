@@ -41,7 +41,6 @@ export {
   type RowKey,
   type CellKey,
 } from './utils';
-export { getTabularData, initTabularData, removeTabularData } from './manager';
 export {
   setTabularDataStoreInContext,
   getTabularDataStoreFromContext,

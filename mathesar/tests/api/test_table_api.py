@@ -1166,7 +1166,7 @@ def test_table_patch_columns_display_options(create_data_types_table, client):
     table_name = 'patch_cols_one'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data(table)
-    display_options = {"use_grouping": "auto"}
+    display_options = {"use_grouping": "false"}
     column_data[0]['display_options'] = display_options
     body = {
         'columns': column_data
@@ -1185,7 +1185,7 @@ def test_table_patch_columns_invalid_display_options(create_data_types_table, cl
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data(table)
     # despite its name, the last column is of type text
-    display_options = {"use_grouping": "auto"}
+    display_options = {"use_grouping": "false"}
 
     column_data[-1]['display_options'] = display_options
     body = {
@@ -1203,7 +1203,7 @@ def test_table_patch_columns_type_plus_display_options(create_data_types_table, 
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data(table)
     # despite its name, the last column is of type text
-    display_options = {"use_grouping": "auto"}
+    display_options = {"use_grouping": "false"}
     column_data[-1].update(
         {'type': PostgresType.NUMERIC.id, 'display_options': display_options}
     )

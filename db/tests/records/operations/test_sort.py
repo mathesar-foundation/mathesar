@@ -2,9 +2,9 @@ import pytest
 
 from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import DropConstraint
-from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.records.operations.select import get_records, get_records_with_default_order
+from db.records.operations.sort import BadSortFormat, SortFieldNotFound
 
 
 def test_get_records_gets_ordered_records_str_col_name(roster_table_obj):
@@ -140,6 +140,15 @@ def test_get_records_default_order_single_primary_key(roster_table_obj):
     primary_column = roster.primary_key.columns[0].name
     record_list = get_records_with_default_order(roster, engine)
     check_single_field_ordered(record_list, primary_column, 'asc')
+
+
+def test_get_records_default_order_adds_primary_key(roster_table_obj):
+    roster, engine = roster_table_obj
+    primary_column = roster.primary_key.columns[0].name
+    passed_order_by = [{"field": "Subject", "direction": "asc"}]
+    record_list = get_records_with_default_order(roster, engine, order_by=passed_order_by)
+    field_dir_pairs = [("Subject", "asc"), (primary_column, "asc")]
+    check_multi_field_ordered(record_list, field_dir_pairs)
 
 
 def test_get_records_default_order_composite_primary_key(filter_sort_table_obj):
