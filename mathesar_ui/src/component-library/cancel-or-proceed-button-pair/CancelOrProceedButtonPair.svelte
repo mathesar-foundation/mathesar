@@ -4,13 +4,16 @@
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import type { Size } from '@mathesar-component-library-dir/commonTypes';
   import type { ButtonDetails } from './CancelOrProceedButtonPairTypes';
+  import { iconCancel, iconProceed } from '../common/icons';
 
   const cancelButtonDefaults: ButtonDetails = {
     label: 'Cancel',
+    icon: iconCancel,
   };
 
   const proceedButtonDefaults: ButtonDetails = {
     label: 'Proceed',
+    icon: iconProceed,
   };
 
   export let cancelButton: Partial<ButtonDetails> = {};
