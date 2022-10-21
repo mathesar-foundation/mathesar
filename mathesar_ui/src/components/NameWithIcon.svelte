@@ -57,11 +57,11 @@
     height: 100%;
     width: 100%;
   }
-
   .name {
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: var(--name-color, var(--slate-400));
   }
 </style>
