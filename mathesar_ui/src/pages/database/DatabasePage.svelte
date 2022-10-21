@@ -3,7 +3,7 @@
     Button,
     Icon,
     iconSearch,
-    TextInput,
+    TextInputWithPrefix,
   } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/AppTypes';
   import { currentDatabase } from '@mathesar/stores/databases';
@@ -101,7 +101,7 @@
         Schemas ({schemasMap.size})
       </h2>
     </div>
-    <TextInput
+    <TextInputWithPrefix
       placeholder="Search Schemas..."
       bind:value={filterQuery}
       prefixIcon={iconSearch}

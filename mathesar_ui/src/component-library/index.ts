@@ -40,6 +40,7 @@ export { default as SpinnerButton } from './spinner-button/SpinnerButton.svelte'
 export { default as TextArea } from './text-area/TextArea.svelte';
 export { default as TextAvatar } from './text-avatar/TextAvatar.svelte';
 export { default as TextInput } from './text-input/TextInput.svelte';
+export { default as TextInputWithPrefix } from './text-input/TextInputWithPrefix.svelte';
 
 // Compound Components (Ordered)
 export { AttachableDropdown, Dropdown } from './dropdown';
