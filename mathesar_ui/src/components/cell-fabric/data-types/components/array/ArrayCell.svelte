@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { isDefinedNonNullable } from '@mathesar-component-library';
+  import { isDefinedNonNullable, Chip } from '@mathesar-component-library';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import CellWrapper from '../CellWrapper.svelte';
   import type { ArrayCellProps } from '../typeDefinitions';
@@ -48,7 +48,11 @@
 >
   <CellValue {value}>
     {#if isDefinedNonNullable(value)}
-      [{value.join(',')}]
+      {#each value as entry}
+        <Chip display="inline" background="var(--color-array-element)"
+          >{entry}</Chip
+        >
+      {/each}
     {/if}
   </CellValue>
 </CellWrapper>

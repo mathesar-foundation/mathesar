@@ -96,6 +96,7 @@
     --color-fk: #dfd0b3;
     --color-error: #f47171;
     --cell-text-color-processing: #888;
+    --color-array-element: #c1e8e8;
 
     --cell-border-horizontal: 1px solid #e7e7e7;
     --cell-border-vertical: 1px solid #efefef;

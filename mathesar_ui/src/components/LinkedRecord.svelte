@@ -1,22 +1,10 @@
 <script lang="ts">
+  import { Chip } from '@mathesar-component-library';
+
   export let recordId: unknown;
   export let recordSummary: string | undefined = undefined;
 </script>
 
-<span class="linked-record">
+<Chip class="linked-record" background="var(--color-fk)">
   {recordSummary ?? String(recordId)}
-</span>
-
-<style>
-  .linked-record {
-    background: var(--color-fk);
-    padding: 0.1rem 0.4rem;
-    border-radius: 0.25rem;
-    display: block;
-    max-width: max-content;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    box-sizing: content-box;
-  }
-</style>
+</Chip>
