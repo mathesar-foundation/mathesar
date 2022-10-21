@@ -20,6 +20,9 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { tables } from '@mathesar/stores/tables';
+  import overflowObserver, {
+    makeOverflowDetails,
+  } from '@mathesar/utils/overflowObserver';
   import Cell from './RecordSelectorCellWrapper.svelte';
   import type {
     RecordSelectorController,
@@ -186,85 +189,133 @@
       window.removeEventListener('keydown', handleKeydown, { capture: true });
     };
   });
+
+  const overflowDetails = makeOverflowDetails();
+  const {
+    hasOverflowTop,
+    hasOverflowRight,
+    hasOverflowBottom,
+    hasOverflowLeft,
+  } = overflowDetails;
 </script>
 
-<table class="record-selector-table">
-  <thead>
-    <tr class="header">
-      {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-        <Cell cellType="columnHeader">
-          <ProcessedColumnName {processedColumn} />
-        </Cell>
-      {/each}
-      <Cell cellType="columnHeader" />
-    </tr>
-    <tr class="inputs">
-      {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-        {@const column = processedColumn.column}
-        <RecordSelectorInputCell
-          hasFocus={column === columnWithFocus}
-          hasNestedSelectorOpen={column === $columnWithNestedSelectorOpen}
-          {processedColumn}
-          {searchFuzzy}
-          recordSummaryStore={recordSummaries}
-          on:focus={() => handleInputFocus(column)}
-          on:blur={() => handleInputBlur()}
-          on:recordSelectorOpen={() => {
-            $columnWithNestedSelectorOpen = column;
-          }}
-          on:recordSelectorSubmit={() => {
-            $columnWithNestedSelectorOpen = undefined;
-          }}
-          on:recordSelectorCancel={() => {
-            $columnWithNestedSelectorOpen = undefined;
-          }}
-        />
-      {/each}
-      <Cell cellType="searchInput" />
-    </tr>
-  </thead>
-  <tbody>
-    {#each records as row}
-      <tr class="row" style={rowStyle}>
+<div
+  class="scroll-container"
+  class:has-overflow-top={$hasOverflowTop}
+  class:has-overflow-bottom={$hasOverflowBottom}
+  use:overflowObserver={overflowDetails}
+>
+  <table class="record-selector-table">
+    <thead>
+      <tr class="header">
         {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-          {@const value = row?.record?.[columnId]}
-          <Cell cellType="data">
-            <CellFabric
-              columnFabric={processedColumn}
-              {value}
-              recordSummary={$recordSummaries
-                .get(String(columnId))
-                ?.get(String(value))}
-              disabled
-              showAsSkeleton={!rowHasSavedRecord(row)}
-            />
+          <Cell cellType="columnHeader">
+            <ProcessedColumnName {processedColumn} />
           </Cell>
         {/each}
-        <Cell cellType="rowHeader">
-          <Button size="small" appearance="primary">
-            <Icon {...icon} />
-            {buttonPhrase}
-          </Button>
-        </Cell>
+        <Cell cellType="columnHeader" />
       </tr>
-    {/each}
-  </tbody>
-</table>
+      <tr class="inputs">
+        {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+          {@const column = processedColumn.column}
+          <RecordSelectorInputCell
+            hasFocus={column === columnWithFocus}
+            hasNestedSelectorOpen={column === $columnWithNestedSelectorOpen}
+            {processedColumn}
+            {searchFuzzy}
+            recordSummaryStore={recordSummaries}
+            on:focus={() => handleInputFocus(column)}
+            on:blur={() => handleInputBlur()}
+            on:recordSelectorOpen={() => {
+              $columnWithNestedSelectorOpen = column;
+            }}
+            on:recordSelectorSubmit={() => {
+              $columnWithNestedSelectorOpen = undefined;
+            }}
+            on:recordSelectorCancel={() => {
+              $columnWithNestedSelectorOpen = undefined;
+            }}
+          />
+        {/each}
+        <Cell cellType="searchInput" />
+      </tr>
+    </thead>
+    <tbody>
+      {#each records as row}
+        <tr class="row" style={rowStyle}>
+          {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+            {@const value = row?.record?.[columnId]}
+            <Cell cellType="data">
+              <CellFabric
+                columnFabric={processedColumn}
+                {value}
+                recordSummary={$recordSummaries
+                  .get(String(columnId))
+                  ?.get(String(value))}
+                disabled
+                showAsSkeleton={!rowHasSavedRecord(row)}
+              />
+            </Cell>
+          {/each}
+          <Cell cellType="rowHeader">
+            <Button size="small" appearance="primary">
+              <Icon {...icon} />
+              {buttonPhrase}
+            </Button>
+          </Cell>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+</div>
 
-<style lang="scss">
-  .record-selector-table {
+<style>
+  .scroll-container {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding-right: var(--body-padding);
+    position: relative;
+    --overflow-shadow-size: 0.75rem;
+    --overflow-shadow-color: rgba(0, 0, 0, 0.4);
+    --clip-path-size: calc(-1 * var(--overflow-shadow-size));
+    --overflow-shadow: 0 0 var(--overflow-shadow-size)
+      var(--overflow-shadow-color);
+  }
+  table {
     flex: 0 1 auto;
     overflow: auto;
     position: relative;
     border-spacing: 0;
+    --border-width: 1px;
+    --border-color: #e7e7e7;
+  }
+  thead tr:first-child {
+    /**
+     * This, along with the somewhat complex border CSS on `.cell-wrapper` is a
+     * hacky way of getting collapsing borders.
+     *
+     * We can't use `border-collapse: collapse;` because it doesn't play well
+     * with `thead` being sticky. We also can't set a border on `table` for the
+     * same reason. In those cases the borders end up scrolling when we don't
+     * want them to scroll.
+     */
+    --border-top-width: var(--border-width);
+  }
 
-    thead {
-      display: table-header-group;
-      position: sticky;
-      z-index: 2;
-      top: 0;
-      box-shadow: 0 0 0.75rem rgba(0, 0, 0, 0.4);
-      clip-path: inset(0 0 -0.75rem 0);
-    }
+  thead {
+    display: table-header-group;
+    position: sticky;
+    z-index: 2;
+    top: 0;
+  }
+
+  .has-overflow-top thead {
+    box-shadow: var(--overflow-shadow);
+    clip-path: inset(0 0 var(--clip-path-size) 0);
+  }
+  .has-overflow-bottom {
+    box-shadow: 0 -1rem var(--overflow-shadow-size) -1rem
+      var(--overflow-shadow-color) inset;
   }
 </style>

@@ -35,9 +35,15 @@
     background: #f3f6f8;
   }
 
-  > .body,
+  &.has-body-padding > .body {
+    padding: 1em;
+  }
   > .footer {
     padding: 1em;
+  }
+
+  > .body,
+  > .footer {
     overflow: hidden;
     &:empty {
       display: none;

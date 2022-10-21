@@ -50,7 +50,11 @@
 
 {#if tabularData}
   <div class="record-selector-window" style="margin-bottom: {marginBottom};">
-    <Window on:close={() => controller.cancel()} canScrollBody={false}>
+    <Window
+      on:close={() => controller.cancel()}
+      canScrollBody={false}
+      hasBodyPadding={false}
+    >
       <span slot="title">
         {verb}
         {#if tableName}

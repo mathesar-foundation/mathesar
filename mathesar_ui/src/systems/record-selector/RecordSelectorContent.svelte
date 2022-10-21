@@ -98,16 +98,14 @@
     </div>
   {/if}
 
-  <div class="table">
-    {#if isInitialized}
-      <RecordSelectorTable
-        {tabularData}
-        {controller}
-        {nestedController}
-        {submitResult}
-      />
-    {/if}
-  </div>
+  {#if isInitialized}
+    <RecordSelectorTable
+      {tabularData}
+      {controller}
+      {nestedController}
+      {submitResult}
+    />
+  {/if}
 
   {#if !records.length}
     {#if $isLoading}
@@ -141,11 +139,10 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-  }
-  .table {
-    flex: 0 1 auto;
-    min-height: 0;
-    overflow: auto;
+    --body-padding: 1rem;
+    padding: var(--body-padding);
+    /** So that the table's vertical scroll bar is flush against window */
+    padding-right: 0;
   }
 
   .content-loading {
@@ -179,7 +176,8 @@
   }
 
   .footer {
-    margin-top: 1rem;
     text-align: right;
+    margin-top: var(--body-padding);
+    padding-right: var(--body-padding);
   }
 </style>
