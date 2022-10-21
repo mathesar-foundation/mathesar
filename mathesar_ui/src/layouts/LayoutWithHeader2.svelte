@@ -32,7 +32,7 @@
     position: relative;
   }
   .app-layout-content.max-width {
-    max-width: var(--max-layout-width, 750px);
+    max-width: var(--max-layout-width, 54rem);
     margin-left: auto;
     margin-right: auto;
     width: 100%;

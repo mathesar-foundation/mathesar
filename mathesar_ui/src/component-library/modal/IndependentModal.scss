@@ -47,7 +47,6 @@
       margin-top: 2rem;
     }
 
-
     .title-bar {
       display: flex;
       justify-content: flex-end;
@@ -58,7 +57,7 @@
         }
         flex: 1 1 100%;
         font-weight: bold;
-        font-size: 1.42rem;
+        font-size: var(--text-size-large);
         color: var(--slate-800);
       }
     }

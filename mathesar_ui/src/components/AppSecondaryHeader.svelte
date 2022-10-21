@@ -28,7 +28,7 @@
     padding: 2rem;
   }
   .content.max-width {
-    max-width: var(--max-layout-width, 700px);
+    max-width: var(--max-layout-width, 54rem);
     margin-left: auto;
     margin-right: auto;
   }

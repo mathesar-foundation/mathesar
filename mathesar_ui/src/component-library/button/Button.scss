@@ -37,7 +37,6 @@ button.btn {
     background: var(--brand-500);
     border-color: var(--brand-500);
     color: var(--white);
-    font-weight: 500;
 
     &:not(:disabled) {
       &:hover {
@@ -55,7 +54,6 @@ button.btn {
   &.btn-secondary {
     background: var(--slate-100);
     border-color: var(--slate-100);
-    font-weight: 500;
 
     &:not(:disabled) {
       &:hover {

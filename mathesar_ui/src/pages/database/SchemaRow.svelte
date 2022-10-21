@@ -78,7 +78,7 @@
 
   .description {
     font-weight: 400;
-    font-size: 1.142rem;
+    font-size: var(--text-size-large);
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;

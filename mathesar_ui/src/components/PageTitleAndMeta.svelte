@@ -56,14 +56,13 @@
   }
 
   .entity-type {
-    font-weight: 600;
     font-size: 0.857rem;
     text-transform: uppercase;
     color: var(--white);
   }
 
   .entity-name {
-    font-weight: 600;
+    font-weight: 700;
     font-size: 2.28rem;
     color: var(--white);
   }

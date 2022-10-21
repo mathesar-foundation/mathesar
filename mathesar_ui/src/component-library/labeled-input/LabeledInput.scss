@@ -4,7 +4,7 @@
 
   .label {
     display: inline-block;
-    font-size: 1.142rem;
+    font-size: var(--text-size-large);
     color: var(--slate-800);
   }
   .input {

@@ -6,7 +6,7 @@
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  
+
   > * + * {
     margin-top: 1rem;
   }
@@ -18,14 +18,14 @@
     justify-content: space-between;
 
     .title {
-      font-size: 1.142rem;
+      font-size: var(--text-size-large);
       color: var(--slate-800);
       font-weight: 500;
     }
   }
 
   .body {
-    font-size: 1.142rem;
+    font-size: var(--text-size-large);
     color: var(--slate-800);
     font-weight: 300;
   }

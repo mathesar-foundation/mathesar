@@ -133,12 +133,12 @@
 
     --page-padding: 1em;
 
-    --max-layout-width: 700px;
+    --max-layout-width: 54rem;
     // Setting the header height here
     // since when the header is fixed
     // we can use this variable to add margin-top
     // to the below header content container
-    --header-height: 60px;
+    --header-height: 4.285rem;
 
     color: var(--slate-400);
   }
