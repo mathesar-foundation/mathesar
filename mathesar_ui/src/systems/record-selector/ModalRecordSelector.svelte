@@ -86,7 +86,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    --inset: 1rem;
     /**
      * The space between the top of the bottom-most nested selector and the top
      * of the viewport when the viewport is short enough to cause the upper
@@ -107,7 +106,6 @@
     width: 100%;
     flex: 1 0 max-content;
     z-index: 2;
-    padding: var(--inset);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -124,16 +122,12 @@
       justify-content: center;
     }
     .root-record-selector {
-      max-height: calc(
-        100vh - var(--nested-selector-extra-top-inset) - 2 * var(--inset)
-      );
+      max-height: calc(100vh - var(--nested-selector-extra-top-inset));
     }
     :global(.nested-record-selector) {
       margin-top: calc(-1 * var(--nested-selector-extra-top-inset));
       padding-top: var(--nested-selector-extra-top-inset);
-      max-height: calc(
-        100vh - var(--nested-selector-extra-top-inset) - 2 * var(--inset)
-      );
+      max-height: calc(100vh - var(--nested-selector-extra-top-inset));
     }
   }
 </style>

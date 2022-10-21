@@ -23,6 +23,7 @@
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
   export let nestedController: RecordSelectorController;
+  export let height = 0;
 
   let isSubmittingNewRecord = false;
 
@@ -85,7 +86,7 @@
   }
 </script>
 
-<div class="record-selector-content">
+<div class="record-selector-content" bind:clientHeight={height}>
   {#if $isLoading || isSubmittingNewRecord}
     <div
       class="content-loading"
@@ -97,14 +98,16 @@
     </div>
   {/if}
 
-  {#if isInitialized}
-    <RecordSelectorTable
-      {tabularData}
-      {controller}
-      {nestedController}
-      {submitResult}
-    />
-  {/if}
+  <div class="table">
+    {#if isInitialized}
+      <RecordSelectorTable
+        {tabularData}
+        {controller}
+        {nestedController}
+        {submitResult}
+      />
+    {/if}
+  </div>
 
   {#if !records.length}
     {#if $isLoading}
@@ -123,7 +126,7 @@
   {/if}
 
   {#if hasSearchQueries}
-    <div class="add-new">
+    <div class="footer">
       <Button size="small" appearance="secondary" on:click={submitNewRecord}>
         <Icon {...iconAddNew} />
         Create Record From Search Criteria
@@ -135,7 +138,16 @@
 <style>
   .record-selector-content {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
+  .table {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow: auto;
+  }
+
   .content-loading {
     position: absolute;
     top: 0;
@@ -153,7 +165,6 @@
     pointer-events: all;
     background: rgba(255, 255, 255, 0.5);
   }
-
   .results-loading {
     padding: 1rem;
     display: flex;
@@ -167,7 +178,7 @@
     color: var(--color-gray-dark);
   }
 
-  .add-new {
+  .footer {
     margin-top: 1rem;
     text-align: right;
   }

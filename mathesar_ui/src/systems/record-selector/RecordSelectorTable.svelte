@@ -1,15 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  // TODO: Remove route dependency in systems
-  import RowCellBackgrounds from '@mathesar/systems/table-view/row/RowCellBackgrounds.svelte';
-
+  import { Button, Icon, ImmutableSet } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/tables/columns';
-
-  import { ImmutableSet } from '@mathesar-component-library';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { rowHeightPx } from '@mathesar/geometry';
+  import { iconLinkToRecordPage, iconPickRecord } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     constraintIsFk,
@@ -23,16 +20,13 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { tables } from '@mathesar/stores/tables';
-  import CellArranger from './CellArranger.svelte';
-  import ColumnResizer from './ColumnResizer.svelte';
-  import CellWrapper from './RecordSelectorCellWrapper.svelte';
+  import Cell from './RecordSelectorCellWrapper.svelte';
   import type {
     RecordSelectorController,
     RecordSelectorResult,
   } from './RecordSelectorController';
   import { setRecordSelectorControllerInContext } from './RecordSelectorController';
   import RecordSelectorInputCell from './RecordSelectorInputCell.svelte';
-  import RecordSelectorRow from './RecordSelectorRow.svelte';
   import { getPkValueInRecord } from './recordSelectorUtils';
 
   export let controller: RecordSelectorController;
@@ -46,7 +40,7 @@
   let selectionIndex = 0;
 
   $: setRecordSelectorControllerInContext(nestedController);
-  $: ({ columnWithNestedSelectorOpen, isOpen, purpose: rowType } = controller);
+  $: ({ columnWithNestedSelectorOpen, isOpen, purpose } = controller);
   $: tabularDataStore.set(tabularData);
   $: ({
     constraintsDataStore,
@@ -55,6 +49,7 @@
     columnsDataStore,
     id: tableId,
     recordsData,
+    processedColumns,
   } = tabularData);
   $: ({ recordSummaries } = recordsData);
   $: ({ constraints } = $constraintsDataStore);
@@ -72,6 +67,8 @@
   $: recordsStore = recordsData.savedRecords;
   $: records = $recordsStore;
   $: resultCount = records.length;
+  $: icon = $purpose === 'dataEntry' ? iconPickRecord : iconLinkToRecordPage;
+  $: buttonPhrase = $purpose === 'dataEntry' ? 'Pick' : 'Open';
   $: rowStyle = `width: ${rowWidth as number}px; height: ${rowHeightPx}px;`;
   $: indexIsSelected = (index: number) => selectionIndex === index;
   $: fkColumnWithFocus = (() => {
@@ -107,7 +104,7 @@
   }
 
   function getRowHref(row: RecordRow): string | undefined {
-    if ($rowType === 'dataEntry') {
+    if ($purpose === 'dataEntry') {
       return undefined;
     }
     const recordId = getPkValue(row);
@@ -191,109 +188,83 @@
   });
 </script>
 
-<div class="record-selector-table">
-  <div class="row header" style="width: {rowWidth}px">
-    <CellArranger {display} let:style let:processedColumn>
-      <CellWrapper {style} cellType="columnHeader">
-        <ProcessedColumnName {processedColumn} />
-        <ColumnResizer columnId={processedColumn.column.id} />
-      </CellWrapper>
-    </CellArranger>
-  </div>
-
-  <div class="row inputs">
-    <CellArranger {display} let:style let:processedColumn let:column>
-      <RecordSelectorInputCell
-        cellWrapperStyle={style}
-        hasFocus={column === columnWithFocus}
-        hasNestedSelectorOpen={column === $columnWithNestedSelectorOpen}
-        {processedColumn}
-        {searchFuzzy}
-        recordSummaryStore={recordSummaries}
-        on:focus={() => handleInputFocus(column)}
-        on:blur={() => handleInputBlur()}
-        on:recordSelectorOpen={() => {
-          $columnWithNestedSelectorOpen = column;
-        }}
-        on:recordSelectorSubmit={() => {
-          $columnWithNestedSelectorOpen = undefined;
-        }}
-        on:recordSelectorCancel={() => {
-          $columnWithNestedSelectorOpen = undefined;
-        }}
-      />
-    </CellArranger>
-  </div>
-
-  <div class="divider">
-    <CellArranger {display} let:style>
-      <CellWrapper {style} cellType="divider" />
-    </CellArranger>
-  </div>
-
-  <div class="record-selector-results">
-    {#each records as row, index}
-      <div class="row" style={rowStyle}>
-        <RecordSelectorRow
-          href={getRowHref(row)}
-          on:linkClick
-          on:buttonClick={() => submitIndex(index)}
-        >
-          <CellArranger {display} let:style let:processedColumn>
-            {@const columnId = processedColumn.id}
-            {@const value = row?.record?.[columnId]}
-            <CellWrapper {style} cellType="data">
-              <CellFabric
-                columnFabric={processedColumn}
-                {value}
-                recordSummary={$recordSummaries
-                  .get(String(columnId))
-                  ?.get(String(value))}
-                disabled
-                showAsSkeleton={!rowHasSavedRecord(row)}
-              />
-              <RowCellBackgrounds isSelected={indexIsSelected(index)} />
-            </CellWrapper>
-          </CellArranger>
-        </RecordSelectorRow>
-      </div>
+<table class="record-selector-table">
+  <thead>
+    <tr class="header">
+      {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+        <Cell cellType="columnHeader">
+          <ProcessedColumnName {processedColumn} />
+        </Cell>
+      {/each}
+      <Cell cellType="columnHeader" />
+    </tr>
+    <tr class="inputs">
+      {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+        {@const column = processedColumn.column}
+        <RecordSelectorInputCell
+          hasFocus={column === columnWithFocus}
+          hasNestedSelectorOpen={column === $columnWithNestedSelectorOpen}
+          {processedColumn}
+          {searchFuzzy}
+          recordSummaryStore={recordSummaries}
+          on:focus={() => handleInputFocus(column)}
+          on:blur={() => handleInputBlur()}
+          on:recordSelectorOpen={() => {
+            $columnWithNestedSelectorOpen = column;
+          }}
+          on:recordSelectorSubmit={() => {
+            $columnWithNestedSelectorOpen = undefined;
+          }}
+          on:recordSelectorCancel={() => {
+            $columnWithNestedSelectorOpen = undefined;
+          }}
+        />
+      {/each}
+      <Cell cellType="searchInput" />
+    </tr>
+  </thead>
+  <tbody>
+    {#each records as row}
+      <tr class="row" style={rowStyle}>
+        {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+          {@const value = row?.record?.[columnId]}
+          <Cell cellType="data">
+            <CellFabric
+              columnFabric={processedColumn}
+              {value}
+              recordSummary={$recordSummaries
+                .get(String(columnId))
+                ?.get(String(value))}
+              disabled
+              showAsSkeleton={!rowHasSavedRecord(row)}
+            />
+          </Cell>
+        {/each}
+        <Cell cellType="rowHeader">
+          <Button size="small" appearance="primary">
+            <Icon {...icon} />
+            {buttonPhrase}
+          </Button>
+        </Cell>
+      </tr>
     {/each}
-  </div>
-</div>
+  </tbody>
+</table>
 
-<style>
+<style lang="scss">
   .record-selector-table {
+    flex: 0 1 auto;
+    overflow: auto;
     position: relative;
-    min-height: 6rem;
-    display: flex;
-    flex-direction: column;
-    --divider-height: 0.7rem;
-    --divider-color: #e7e7e7;
-  }
+    border-spacing: 0;
 
-  .header,
-  .inputs,
-  .divider {
-    flex: 0 0 auto;
-  }
-  .row {
-    position: relative;
-    height: 30px;
-  }
-  .divider {
-    position: relative;
-    height: var(--divider-height);
-    box-sizing: content-box;
-  }
-
-  .record-selector-results {
-    overflow-y: auto;
-  }
-  .row {
-    position: relative;
-    cursor: pointer;
-  }
-  .row:not(:hover) :global(.cell-bg-row-hover) {
-    display: none;
+    thead {
+      display: table-header-group;
+      position: sticky;
+      z-index: 2;
+      top: 0;
+      box-shadow: 0 0 0.75rem rgba(0, 0, 0, 0.4);
+      clip-path: inset(0 0 -0.75rem 0);
+    }
   }
 </style>

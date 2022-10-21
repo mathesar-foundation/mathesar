@@ -18,7 +18,6 @@
   export let processedColumn: ProcessedColumn;
   export let searchFuzzy: Writable<SearchFuzzy>;
   export let recordSummaryStore: RecordSummaryStore;
-  export let cellWrapperStyle: string;
   export let hasFocus: boolean;
   export let hasNestedSelectorOpen: boolean;
 
@@ -35,7 +34,7 @@
   }
 </script>
 
-<CellWrapper style={cellWrapperStyle} cellType="searchInput" {state}>
+<CellWrapper cellType="searchInput" {state}>
   <Debounce on:artificialChange={updateValue} let:handleNewValue>
     <DynamicInput
       class="record-selector-input"

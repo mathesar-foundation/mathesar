@@ -13,7 +13,7 @@
 
   const verbMap = new Map<RecordSelectorPurpose, string>([
     ['dataEntry', 'Pick'],
-    ['navigation', 'Go to'],
+    ['navigation', 'Open'],
   ]);
   /**
    * This is the distance between the top of the nested selector window and the
@@ -60,9 +60,12 @@
         Record
       </span>
 
-      <div bind:clientHeight={contentHeight}>
-        <RecordSelectorContent {tabularData} {controller} {nestedController} />
-      </div>
+      <RecordSelectorContent
+        bind:height={contentHeight}
+        {tabularData}
+        {controller}
+        {nestedController}
+      />
 
       {#if $nestedSelectorIsOpen}
         <div class="overlay" />
@@ -84,6 +87,10 @@
   .record-selector-window {
     --z-index-overlay: 1;
     --z-index-above-overlay: 2;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 1rem;
   }
   .overlay {
     position: absolute;

@@ -3,48 +3,38 @@
 
   let className = '';
   export { className as class };
-  export let style: string | undefined = undefined;
   export let cellType: CellType;
   export let state: CellState | undefined = undefined;
+
+  $: element = cellType === 'columnHeader' ? 'th' : 'td';
 </script>
 
-<div
+<svelte:element
+  this={element}
   class="cell-wrapper {className}"
   class:is-column-header={cellType === 'columnHeader'}
-  class:is-divider={cellType === 'divider'}
+  class:is-input={cellType === 'searchInput'}
   class:has-outline={state === 'focused' || state === 'acquiringFkValue'}
   class:is-acquiring-fk-value={state === 'acquiringFkValue'}
-  {style}
 >
   <slot />
-</div>
+</svelte:element>
 
 <style>
-  /* TODO: resolve code duplication between here and TableView.scss */
   .cell-wrapper {
-    position: absolute;
-    height: 100%;
-    top: 0;
-    border-bottom: var(--cell-border-horizontal);
-    border-right: var(--cell-border-vertical);
-    display: flex;
-    align-items: center;
+    --border-color: #e7e7e7;
+    border: solid 1px var(--border-color);
     overflow: hidden;
-  }
-  .cell-wrapper:first-child {
-    border-left: var(--cell-border-vertical);
+    font-weight: inherit;
+    text-align: inherit;
+    font-size: inherit;
   }
   .is-column-header {
     background: #f7f8f8;
-    border-top: var(--cell-border-horizontal);
-    /**
-     * Padding is chosen to match `button.dropdown.trigger`. It would be good to
-     * eliminate this code duplication somehow.
-     */
-    padding: 5px 26px 5px 12px;
   }
-  .is-divider {
-    background: var(--divider-color);
+  .is-input {
+    border-bottom: solid 10px var(--border-color);
+    background: white;
   }
   .has-outline {
     --outline-color: #428af4;
