@@ -42,7 +42,11 @@
     flex-direction: column;
     box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
     padding: 2.5em;
-    gap: 2em;
+
+    > * + * {
+      margin-top: 2rem;
+    }
+
 
     .title-bar {
       display: flex;
