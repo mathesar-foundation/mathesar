@@ -202,7 +202,9 @@
 <div
   class="scroll-container"
   class:has-overflow-top={$hasOverflowTop}
+  class:has-overflow-right={$hasOverflowRight}
   class:has-overflow-bottom={$hasOverflowBottom}
+  class:has-overflow-left={$hasOverflowLeft}
   use:overflowObserver={overflowDetails}
 >
   <table class="record-selector-table">
@@ -213,7 +215,7 @@
             <ProcessedColumnName {processedColumn} />
           </Cell>
         {/each}
-        <Cell cellType="columnHeader" />
+        <Cell cellType="rowHeader" />
       </tr>
       <tr class="inputs">
         {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
@@ -237,7 +239,13 @@
             }}
           />
         {/each}
-        <Cell cellType="searchInput" />
+        <Cell cellType="rowHeader" />
+      </tr>
+      <tr class="inputs">
+        {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+          <Cell cellType="divider" />
+        {/each}
+        <Cell cellType="divider" />
       </tr>
     </thead>
     <tbody>
@@ -274,7 +282,6 @@
     flex: 0 1 auto;
     min-height: 0;
     overflow: auto;
-    padding-right: var(--body-padding);
     position: relative;
     --overflow-shadow-size: 0.75rem;
     --overflow-shadow-color: rgba(0, 0, 0, 0.4);
@@ -304,15 +311,18 @@
   }
 
   thead {
-    display: table-header-group;
     position: sticky;
-    z-index: 2;
+    z-index: 3;
     top: 0;
   }
 
-  .has-overflow-top thead {
+  .has-overflow-top :global(.divider-bg) {
     box-shadow: var(--overflow-shadow);
     clip-path: inset(0 0 var(--clip-path-size) 0);
+  }
+  .has-overflow-right :global(.row-header) {
+    box-shadow: var(--overflow-shadow);
+    clip-path: inset(0 0 0 var(--clip-path-size));
   }
   .has-overflow-bottom {
     box-shadow: 0 -1rem var(--overflow-shadow-size) -1rem

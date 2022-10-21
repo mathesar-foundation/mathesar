@@ -7,7 +7,12 @@ import type { Result as ApiRecord } from '@mathesar/api/tables/records';
  */
 export type RecordSelectorPurpose = 'dataEntry' | 'navigation';
 
-export type CellType = 'columnHeader' | 'searchInput' | 'rowHeader' | 'data';
+export type CellType =
+  | 'columnHeader'
+  | 'searchInput'
+  | 'divider'
+  | 'rowHeader'
+  | 'data';
 
 export type CellState = 'focused' | 'acquiringFkValue';
 

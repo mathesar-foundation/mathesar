@@ -12,13 +12,17 @@
 <svelte:element
   this={element}
   class="cell-wrapper {className}"
-  class:is-column-header={cellType === 'columnHeader'}
-  class:is-input={cellType === 'searchInput'}
-  class:is-row-header={cellType === 'rowHeader'}
+  class:column-header={cellType === 'columnHeader'}
+  class:input={cellType === 'searchInput'}
+  class:divider={cellType === 'divider'}
+  class:row-header={cellType === 'rowHeader'}
   class:has-outline={state === 'focused' || state === 'acquiringFkValue'}
-  class:is-acquiring-fk-value={state === 'acquiringFkValue'}
+  class:acquiring-fk-value={state === 'acquiringFkValue'}
 >
   <slot />
+  {#if cellType === 'divider'}
+    <div class="divider-bg" />
+  {/if}
 </svelte:element>
 
 <style>
@@ -39,15 +43,38 @@
   .cell-wrapper:first-child {
     border-left-width: var(--border-width);
   }
-  .is-column-header {
+  .column-header {
     background: #f7f8f8;
   }
-  .is-input {
-    border-bottom-width: 10px;
+  .input {
     background: white;
   }
-  .is-row-header {
+  .divider {
+    height: 10px;
     border: none;
+    position: relative;
+    background: white;
+  }
+  .divider .divider-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--border-color);
+  }
+  .divider:last-child .divider-bg {
+    width: calc(100% - var(--body-padding) + 1px);
+  }
+  .row-header,
+  .divider:last-child {
+    padding-left: 0.5rem;
+    border: none;
+    background: white;
+    padding-right: var(--body-padding);
+    position: sticky;
+    z-index: 2;
+    right: 0;
   }
   /* TODO Re-do outline with a nested element */
   /* .has-outline {
@@ -56,7 +83,7 @@
     border-radius: 2px;
     box-shadow: 0 0 0 3px var(--outline-color);
   } */
-  .is-acquiring-fk-value {
+  .acquiring-fk-value {
     --outline-color: #888;
     pointer-events: none;
   }
