@@ -4,12 +4,11 @@
     Icon,
     iconSearch,
     TextInput,
-    // Tutorial,
   } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/AppTypes';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
-  import type { DBSchemaStoreData, schemas } from '@mathesar/stores/schemas';
+  import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import { schemas as schemasStore } from '@mathesar/stores/schemas';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
@@ -50,7 +49,6 @@
   }
 
   $: displayList = filterSchemas(schemasMap, filterQuery);
-  $: hasOnlyPublicSchema = schemasMap.size === 1;
 
   function addSchema() {
     targetSchema = undefined;
@@ -95,17 +93,6 @@
       <Icon {...iconAddNew} />
       Create Schema
     </Button>
-    <!-- TODO: Still fixing this... -->
-    <!-- <Tutorial slot="tutorial" class="db-page-tutorial-container">
-      <span slot="title">Get organized with schemas</span>
-      <span slot="body">
-        Schemas are a way to organize your data, you can think of them as
-        applications or projects. For example, you might have a schema for your
-        personal finances, and another for your movie collection. You can have
-        as many schemas as you want.
-      </span>
-      <Button slot="footer" on:click={addSchema}>Create Schema</Button>
-    </Tutorial> -->
   </AppSecondaryHeader>
 
   <div class="schema-list-wrapper">
@@ -160,22 +147,10 @@
 />
 
 <style lang="scss">
-  // :root {
-  //   --tutorial-bottom-margin: 80px;
-  // }
-
-  // :global(.db-page-tutorial-container) {
-  //   margin-bottom: calc(var(--tutorial-bottom-margin) * -1);
-  // }
-
   .schema-list-wrapper {
     display: flex;
     flex-direction: column;
     width: 100%;
-
-    // &.adjust-tutorial {
-    //   margin-top: var(--tutorial-bottom-margin);
-    // }
 
     .schema-list-title-container {
       border-bottom: 1px solid var(--slate-200);
@@ -193,7 +168,7 @@
       align-items: center;
 
       p {
-        font-size: 1.142rem;
+        font-size: var(--text-size-large);
       }
     }
 
