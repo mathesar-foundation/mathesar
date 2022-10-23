@@ -28,7 +28,7 @@ function getProps(column: MoneyColumn): MoneyCellExternalProps {
   const format = displayOptions?.number_format ?? null;
   const props: MoneyCellExternalProps = {
     locale: (format && localeMap.get(format)) ?? undefined,
-    useGrouping: getUseGrouping(displayOptions?.use_grouping ?? 'auto'),
+    useGrouping: getUseGrouping(displayOptions?.use_grouping ?? 'true'),
     allowFloat: !moneyColumnIsInteger(column),
     minimumFractionDigits: displayOptions?.minimum_fraction_digits ?? undefined,
     maximumFractionDigits: displayOptions?.maximum_fraction_digits ?? undefined,

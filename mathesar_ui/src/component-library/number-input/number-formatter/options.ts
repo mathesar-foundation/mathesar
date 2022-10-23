@@ -14,7 +14,7 @@ export interface Options {
    * [1]:
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
    */
-  useGrouping: boolean | 'auto';
+  useGrouping: boolean;
   minimumFractionDigits: number;
   maximumFractionDigits: number;
   forceTrailingDecimal: boolean;
@@ -27,7 +27,7 @@ export interface Options {
 export const defaultOptions: Options = {
   allowFloat: false,
   allowNegative: false,
-  useGrouping: 'auto',
+  useGrouping: false,
   minimumFractionDigits: 0,
   maximumFractionDigits: 20,
   forceTrailingDecimal: false,

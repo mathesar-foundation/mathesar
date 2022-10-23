@@ -3,11 +3,11 @@ import pytest
 from copy import deepcopy
 from unittest.mock import patch
 
-from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
-
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
+from db.records.operations.sort import BadSortFormat, SortFieldNotFound
+
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.utils import follows_json_number_spec
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
@@ -241,7 +241,7 @@ def test_record_list_sort(create_patents_table, client):
     assert len(response_data['results']) == 50
 
     assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['order_by'] == order_by
+    assert mock_get.call_args[1]['order_by'][:len(order_by)] == order_by
 
 
 def test_record_search(create_patents_table, client):
@@ -807,7 +807,7 @@ def test_foreign_key_record_api_all_column_previews(publication_tables, client):
     preview_column_alias = f'{{{publication_title_alias}}} Published By: {{{ publisher_name_alias}}} and Authored by Full Name: {{{author_first_name_alias}}} {{{author_last_name_alias}}} along with Full Name: {{{co_author_first_name_alias}}} {{{co_author_last_name_alias}}}'
 
     assert preview_column['template'] == preview_column_alias
-    preview_data = preview_column['data'][0]
+    preview_data = preview_column['data']['1']
     assert all([key in preview_data for key in [publication_title_alias, publisher_name_alias, author_first_name_alias, author_last_name_alias, co_author_first_name_alias, co_author_last_name_alias]])
 
     expected_preview_data = {publication_title_alias: 'Pressure Should Old', publisher_name_alias: 'Ruiz', author_first_name_alias: 'Matthew', author_last_name_alias: 'Brown', co_author_first_name_alias: 'Mark', co_author_last_name_alias: 'Smith'}
