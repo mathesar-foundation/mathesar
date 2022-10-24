@@ -1,24 +1,14 @@
-import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
-import { writable, get as getStoreValue } from 'svelte/store';
+import { type Readable, derived, writable } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { CancellablePromise } from '@mathesar-component-library';
-import { EventHandler } from '@mathesar-component-library';
-import type { Column } from '@mathesar/api/tables/columns';
-import type { PaginatedResponse } from '@mathesar/utils/api';
 import {
-  deleteAPI,
-  getAPI,
-  patchAPI,
-  postAPI,
-  States,
-} from '@mathesar/utils/api';
-
-export interface ColumnsData {
-  state: States;
-  error?: string;
-  columns: Column[];
-  primaryKeyColumnId?: number;
-}
+  type CancellablePromise,
+  EventHandler,
+  WritableSet,
+} from '@mathesar-component-library';
+import type { Column } from '@mathesar/api/tables/columns';
+import type { PaginatedResponse, RequestStatus } from '@mathesar/utils/api';
+import { deleteAPI, getAPI, patchAPI, postAPI } from '@mathesar/utils/api';
+import { getErrorMessage } from '@mathesar/utils/errors';
 
 function api(url: string) {
   return {
@@ -37,96 +27,69 @@ function api(url: string) {
   };
 }
 
-export class ColumnsDataStore
-  extends EventHandler<{
-    columnRenamed: number;
-    columnAdded: Partial<Column>;
-    columnDeleted: number;
-    columnPatched: Partial<Column>;
-    columnsFetched: Column[];
-  }>
-  implements Writable<ColumnsData>
-{
+export class ColumnsDataStore extends EventHandler<{
+  columnRenamed: number;
+  columnAdded: Partial<Column>;
+  columnDeleted: number;
+  columnPatched: Partial<Column>;
+  columnsFetched: Column[];
+}> {
   private parentId: DBObjectEntry['id'];
-
-  private store: Writable<ColumnsData>;
 
   private promise: CancellablePromise<PaginatedResponse<Column>> | undefined;
 
   private api: ReturnType<typeof api>;
 
-  private fetchCallback: (storeData: ColumnsData) => void;
+  private fetchedColumns = writable<Column[]>([]);
 
-  constructor(
-    parentId: number,
-    fetchCallback: (storeData: ColumnsData) => void = () => {},
-  ) {
+  fetchStatus = writable<RequestStatus | undefined>(undefined);
+
+  hiddenColumns: WritableSet<number>;
+
+  /** Will only show visible columns */
+  columns: Readable<Column[]>;
+
+  pkColumn: Readable<Column | undefined>;
+
+  constructor({
+    parentId,
+    hiddenColumns,
+  }: {
+    parentId: number;
+    /** Values are column ids */
+    hiddenColumns?: Iterable<number>;
+  }) {
     super();
     this.parentId = parentId;
-    this.store = writable({
-      state: States.Loading,
-      columns: [],
-      primaryKey: undefined,
-    });
     this.api = api(`/api/db/v0/tables/${this.parentId}/columns/`);
-    this.fetchCallback = fetchCallback;
+    this.hiddenColumns = new WritableSet(hiddenColumns);
+    this.columns = derived(
+      [this.fetchedColumns, this.hiddenColumns],
+      ([fetched, hidden]) => fetched.filter((column) => !hidden.has(column.id)),
+    );
+    this.pkColumn = derived(this.fetchedColumns, (fetched) =>
+      fetched.find((c) => c.primary_key),
+    );
     void this.fetch();
   }
 
-  set(value: ColumnsData): void {
-    this.store.set(value);
-  }
-
-  update(updater: Updater<ColumnsData>): void {
-    this.store.update(updater);
-  }
-
-  subscribe(run: Subscriber<ColumnsData>): Unsubscriber {
-    return this.store.subscribe(run);
-  }
-
-  get(): ColumnsData {
-    return getStoreValue(this.store);
-  }
-
-  getColumnsByIds(ids: Column['id'][]): Column[] {
-    return this.get().columns.filter((column) => ids.includes(column.id));
-  }
-
-  async fetch(): Promise<ColumnsData | undefined> {
-    this.update((existingData) => ({
-      ...existingData,
-      state: States.Loading,
-    }));
-
+  async fetch(): Promise<Column[] | undefined> {
     try {
+      this.fetchStatus.set({ state: 'processing' });
       this.promise?.cancel();
       this.promise = this.api.get();
-
       const response = await this.promise;
       const columns = response.results;
-      const pkColumn = columns.find((column) => column.primary_key);
-
-      const storeData: ColumnsData = {
-        state: States.Done,
-        columns,
-        primaryKeyColumnId: pkColumn?.id,
-      };
-      this.set(storeData);
-      this.fetchCallback?.(storeData);
-      await this.dispatch('columnsFetched', storeData.columns);
-      return storeData;
-    } catch (err) {
-      this.set({
-        state: States.Error,
-        error: err instanceof Error ? err.message : undefined,
-        columns: [],
-        primaryKeyColumnId: undefined,
-      });
+      this.fetchedColumns.set(columns);
+      this.fetchStatus.set({ state: 'success' });
+      await this.dispatch('columnsFetched', columns);
+      return columns;
+    } catch (e) {
+      this.fetchStatus.set({ state: 'failure', errors: [getErrorMessage(e)] });
+      return undefined;
     } finally {
       this.promise = undefined;
     }
-    return undefined;
   }
 
   async add(columnDetails: Partial<Column>): Promise<Partial<Column>> {

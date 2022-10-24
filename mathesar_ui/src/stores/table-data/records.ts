@@ -1,10 +1,10 @@
 import {
   writable,
-  get as getStoreValue,
   type Readable,
   type Writable,
   type Unsubscriber,
   derived,
+  get,
 } from 'svelte/store';
 import {
   States,
@@ -288,10 +288,17 @@ export class RecordsData {
 
   private requestParamsUnsubscriber: Unsubscriber;
 
+  /**
+   * This maps column ids to cell values. It is used to supply default values
+   * for the cells within hidden columns when creating new records.
+   */
+  private contextualFilters: Map<number, number | string>;
+
   constructor(
     parentId: number,
     meta: Meta,
     columnsDataStore: ColumnsDataStore,
+    contextualFilters: Map<number, number | string>,
   ) {
     this.parentId = parentId;
 
@@ -311,6 +318,7 @@ export class RecordsData {
 
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
+    this.contextualFilters = contextualFilters;
     this.url = `/api/db/v0/tables/${this.parentId}/records/`;
     void this.fetch();
 
@@ -325,14 +333,11 @@ export class RecordsData {
     retainExistingRows = false,
   ): Promise<TableRecordsData | undefined> {
     this.promise?.cancel();
-    const { offset } = getStoreValue(this.meta.pagination);
+    const { offset } = get(this.meta.pagination);
 
     this.savedRecordRowsWithGroupHeaders.update((existingData) => {
       let data = [...existingData];
-      data.length = Math.min(
-        data.length,
-        getStoreValue(this.meta.pagination).size,
-      );
+      data.length = Math.min(data.length, get(this.meta.pagination).size);
 
       let index = -1;
       data = data.map((entry) => {
@@ -358,8 +363,14 @@ export class RecordsData {
     }
 
     try {
-      const params = getStoreValue(this.meta.recordsRequestParamsData);
-      const queryString = buildFetchQueryString(params);
+      const params = get(this.meta.recordsRequestParamsData);
+      const contextualFilterEntries = [...this.contextualFilters].map(
+        ([columnId, value]) => ({ columnId, conditionId: 'equal', value }),
+      );
+      const queryString = buildFetchQueryString({
+        ...params,
+        filtering: params.filtering.withEntries(contextualFilterEntries),
+      });
       this.promise = getAPI<ApiRecordsResponse>(`${this.url}?${queryString}`);
       const response = await this.promise;
       const totalCount = response.count || 0;
@@ -401,17 +412,14 @@ export class RecordsData {
 
   async deleteSelected(selectedRowIndices: number[]): Promise<void> {
     const recordRows = this.getRecordRows();
-    const { primaryKeyColumnId } = this.columnsDataStore.get();
+    const pkColumn = get(this.columnsDataStore.pkColumn);
     const primaryKeysOfSavedRows: string[] = [];
     const identifiersOfUnsavedRows: string[] = [];
     selectedRowIndices.forEach((index) => {
       const row = recordRows[index];
       if (row) {
-        const rowKey = getRowKey(row, primaryKeyColumnId);
-        if (
-          primaryKeyColumnId &&
-          isDefinedNonNullable(row.record[primaryKeyColumnId])
-        ) {
+        const rowKey = getRowKey(row, pkColumn?.id);
+        if (pkColumn?.id && isDefinedNonNullable(row.record[pkColumn?.id])) {
           primaryKeysOfSavedRows.push(rowKey);
         } else {
           identifiersOfUnsavedRows.push(rowKey);
@@ -449,15 +457,15 @@ export class RecordsData {
         await this.fetch(true);
       }
 
-      const savedRecords = getStoreValue(this.savedRecords);
+      const savedRecords = get(this.savedRecords);
       const savedRecordsLength = savedRecords.length;
       const savedRecordKeys = new Set(
-        savedRecords.map((row) => getRowKey(row, primaryKeyColumnId)),
+        savedRecords.map((row) => getRowKey(row, pkColumn?.id)),
       );
 
       this.newRecords.update((existing) => {
         const retained = existing.filter((row) => {
-          const rowKey = getRowKey(row, primaryKeyColumnId);
+          const rowKey = getRowKey(row, pkColumn?.id);
           return !successRowKeys.has(rowKey) && !savedRecordKeys.has(rowKey);
         });
         if (retained.length === existing.length) {
@@ -487,13 +495,13 @@ export class RecordsData {
   ): Promise<RecordRow> {
     // TODO compute and validate client side errors before saving
     const { record } = row;
-    const { primaryKeyColumnId } = this.columnsDataStore.get();
-    if (primaryKeyColumnId === undefined) {
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+    if (pkColumn === undefined) {
       // eslint-disable-next-line no-console
       console.error('Unable to update record for a row without a primary key');
       return row;
     }
-    const primaryKeyValue = record[primaryKeyColumnId];
+    const primaryKeyValue = record[pkColumn.id];
     if (primaryKeyValue === undefined) {
       // eslint-disable-next-line no-console
       console.error(
@@ -501,7 +509,7 @@ export class RecordsData {
       );
       return row;
     }
-    const rowKey = getRowKey(row, primaryKeyColumnId);
+    const rowKey = getRowKey(row, pkColumn.id);
     const cellKey = getCellKey(rowKey, column.id);
     this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
@@ -535,7 +543,7 @@ export class RecordsData {
   }
 
   getNewEmptyRecord(): NewRecordRow {
-    const { offset } = getStoreValue(this.meta.pagination);
+    const { offset } = get(this.meta.pagination);
     const existingRecordRows = this.getRecordRows();
     const identifier = generateRowIdentifier(
       'new',
@@ -543,8 +551,8 @@ export class RecordsData {
       getGloballyUniqueId(),
     );
     const record = Object.fromEntries(
-      getStoreValue(this.columnsDataStore)
-        .columns.filter((column) => column.default === null)
+      get(this.columnsDataStore.columns)
+        .filter((column) => column.default === null)
         .map((column) => [String(column.id), null]),
     );
     const newRow: Row = {
@@ -559,22 +567,27 @@ export class RecordsData {
   private async createRecord(
     row: NewRecordRow | PlaceholderRow,
   ): Promise<NewRecordRow> {
-    const { primaryKeyColumnId, columns } = this.columnsDataStore.get();
-    const rowKey = getRowKey(row, primaryKeyColumnId);
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+    const columns = get(this.columnsDataStore.columns);
+    const rowKey = getRowKey(row, pkColumn?.id);
     validateRow({
       row,
       rowKey,
       columns,
       cellClientSideErrors: this.meta.cellClientSideErrors,
     });
-    if (getStoreValue(this.meta.rowsWithClientSideErrors).has(rowKey)) {
+    if (get(this.meta.rowsWithClientSideErrors).has(rowKey)) {
       return row;
     }
 
-    const rowKeyOfBlankRow = getRowKey(row, primaryKeyColumnId);
+    const rowKeyOfBlankRow = getRowKey(row, pkColumn?.id);
     this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
     this.createPromises?.get(rowKeyOfBlankRow)?.cancel();
-    const promise = postAPI<ApiRecordsResponse>(this.url, row.record);
+    const requestRecord = {
+      ...Object.fromEntries(this.contextualFilters),
+      ...row.record,
+    };
+    const promise = postAPI<ApiRecordsResponse>(this.url, requestRecord);
     if (!this.createPromises) {
       this.createPromises = new Map();
     }
@@ -592,7 +605,7 @@ export class RecordsData {
         newRow = newRecordRow;
       }
 
-      const rowKeyWithRecord = getRowKey(newRow, primaryKeyColumnId);
+      const rowKeyWithRecord = getRowKey(newRow, pkColumn?.id);
       this.meta.rowCreationStatus.delete(rowKeyOfBlankRow);
       this.meta.rowCreationStatus.set(rowKeyWithRecord, { state: 'success' });
       this.newRecords.update((existing) =>
@@ -622,11 +635,11 @@ export class RecordsData {
     row: RecordRow | NewRecordRow | PlaceholderRow,
     column: Column,
   ): Promise<RecordRow | NewRecordRow> {
-    const { primaryKeyColumnId } = this.columnsDataStore.get();
+    const pkColumn = get(this.columnsDataStore.pkColumn);
 
     // Row may not have been updated yet in view when additional request is made.
     // So check current values to ensure another row has not been created.
-    const existingNewRecordRow = getStoreValue(this.newRecords).find(
+    const existingNewRecordRow = get(this.newRecords).find(
       (entry) => entry.identifier === row.identifier,
     );
 
@@ -639,9 +652,9 @@ export class RecordsData {
 
     let result: RecordRow;
     if (
-      primaryKeyColumnId &&
+      pkColumn?.id &&
       rowHasNewRecord(row) &&
-      row.record[primaryKeyColumnId] === undefined
+      row.record[pkColumn?.id] === undefined
     ) {
       result = await this.createRecord(row);
     } else {
@@ -657,10 +670,7 @@ export class RecordsData {
   }
 
   getRecordRows(): RecordRow[] {
-    return [
-      ...getStoreValue(this.savedRecords),
-      ...getStoreValue(this.newRecords),
-    ];
+    return [...get(this.savedRecords), ...get(this.newRecords)];
   }
 
   destroy(): void {

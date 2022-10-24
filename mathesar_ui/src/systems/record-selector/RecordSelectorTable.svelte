@@ -61,7 +61,7 @@
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
-  $: ({ columns, state: columnsState } = $columnsDataStore);
+  $: ({ columns, fetchStatus } = columnsDataStore);
   $: fkColumnIds = new ImmutableSet(
     constraints
       .filter(constraintIsFk)
@@ -75,7 +75,7 @@
     return fkColumnIds.has(columnWithFocus.id) ? columnWithFocus : undefined;
   })();
   $: isInitialized =
-    columnsState === States.Done && constraintsState === States.Done;
+    $fetchStatus?.state === 'success' && constraintsState === States.Done;
 
   $: if ($isOpen) {
     meta.searchFuzzy.update((s) => s.drained());
@@ -101,7 +101,7 @@
       isSubmittingNewRecord = true;
       const response = await postAPI<ApiRecordsResponse>(url, body);
       const record = response.results[0];
-      const recordId = getPkValueInRecord(record, columns);
+      const recordId = getPkValueInRecord(record, $columns);
       const previewData = response.preview_data ?? [];
       const tableEntry = $tables.data.get(tableId);
       const template = tableEntry?.settings?.preview_settings?.template;

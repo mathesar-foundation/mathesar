@@ -30,7 +30,7 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
-  import { postAPI, States } from '@mathesar/utils/api';
+  import { postAPI } from '@mathesar/utils/api';
   import { getAvailableName } from '@mathesar/utils/db';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { iconTechnicalExplanation, iconTableLink } from '@mathesar/icons';
@@ -81,16 +81,19 @@
     [...$tables.data.values()].map((t) => t.name),
   ); // TODO: include constraint names too
   $: ({ columnsDataStore } = $tabularData);
-  $: namesOfColumnsInThisTable = new Set(
-    $columnsDataStore.columns.map((c) => c.name),
-  );
-  $: thatTableColumnsStore = ensureReadable(
-    thatTable ? new ColumnsDataStore(thatTable.id) : undefined,
+  $: ({ columns } = columnsDataStore);
+  $: namesOfColumnsInThisTable = new Set($columns.map((c) => c.name));
+  $: thatTableColumnsStore = thatTable
+    ? new ColumnsDataStore({ parentId: thatTable.id })
+    : undefined;
+  $: thatTableColumns = ensureReadable(thatTableColumnsStore?.columns);
+  $: thatTableColumnsFetchStatus = ensureReadable(
+    thatTableColumnsStore?.fetchStatus,
   );
   $: thatTableColumnsAreLoading =
-    $thatTableColumnsStore?.state === States.Loading;
+    $thatTableColumnsFetchStatus?.state === 'processing';
   $: namesOfColumnsInThatTable = new Set(
-    ($thatTableColumnsStore?.columns ?? []).map((c) => c.name),
+    ($thatTableColumns ?? []).map((c) => c.name),
   );
 
   function init() {
