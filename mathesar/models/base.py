@@ -342,7 +342,7 @@ class Table(DatabaseObject, Relation):
             sa_table = table_utils.get_empty_table("MISSING")
         return sa_table
 
-    # NOTE: it's a problem that we hve both _sa_table and _enriched_column_sa_table. at the moment
+    # NOTE: it's a problem that we have both _sa_table and _enriched_column_sa_table. at the moment
     # it has to be this way because enriched column is not always interachangeable with sa column.
     @property
     def _enriched_column_sa_table(self):
@@ -532,6 +532,11 @@ class Table(DatabaseObject, Relation):
         columns_map = bidict({column.name: column.id for column in columns})
         return columns_map
 
+    def get_column_name_type_map(self):
+        columns = Column.objects.filter(table_id=self.id)
+        columns_map = [(column.name, column.db_type) for column in columns]
+        return columns_map
+
     def get_column_by_name(self, name):
         columns = self.get_columns_by_name(name_list=[name])
         if len(columns) > 0:
@@ -655,6 +660,11 @@ class Table(DatabaseObject, Relation):
             # ToDo raise specific exceptions.
             raise e
         return table
+
+    def suggest_col_mappings_for_import(self, existing_table):
+        temp_table_col_list = self.get_column_name_type_map()
+        target_table_col_list = existing_table.get_column_name_type_map()
+        return column_utils.find_match(temp_table_col_list, target_table_col_list, self._sa_engine)
 
 
 class Column(ReflectionManagerMixin, BaseModel):

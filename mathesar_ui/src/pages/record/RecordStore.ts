@@ -1,14 +1,16 @@
-import type { Readable } from 'svelte/store';
-import { writable, derived } from 'svelte/store';
+import { derived, writable, type Readable } from 'svelte/store';
 
 import type { TableEntry } from '@mathesar/api/tables';
-import { WritableMap } from '@mathesar/component-library';
-import type { RequestStatus } from '@mathesar/utils/api';
-import { patchAPI, getAPI } from '@mathesar/utils/api';
-import { getErrorMessage } from '@mathesar/utils/errors';
 import type { Response as ApiResponse } from '@mathesar/api/tables/records';
-import { renderSummaryFromFieldsAndFkData } from '@mathesar/utils/recordSummary';
-import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
+import { WritableMap } from '@mathesar/component-library';
+import {
+  renderTransitiveRecordSummary,
+  prepareFieldsAsRecordSummaryInputData,
+  buildRecordSummariesForSheet,
+} from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+import { getAPI, patchAPI, type RequestStatus } from '@mathesar/utils/api';
+import { getErrorMessage } from '@mathesar/utils/errors';
+import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 
 export default class RecordStore {
   fetchRequest = writable<RequestStatus | undefined>(undefined);
@@ -16,8 +18,7 @@ export default class RecordStore {
   /** Keys are column ids */
   fields = new WritableMap<number, unknown>();
 
-  /** Keys are column ids */
-  fkSummaryData = new WritableMap<number, DataForRecordSummaryInFkCell>();
+  recordSummaries = new RecordSummaryStore();
 
   summary: Readable<string>;
 
@@ -33,24 +34,25 @@ export default class RecordStore {
     this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordId}/`;
     const { template } = this.table.settings.preview_settings;
     this.summary = derived(
-      [this.fields, this.fkSummaryData],
+      [this.fields, this.recordSummaries],
       ([fields, fkSummaryData]) =>
-        renderSummaryFromFieldsAndFkData(template, fields, fkSummaryData),
+        renderTransitiveRecordSummary({
+          template,
+          inputData: prepareFieldsAsRecordSummaryInputData(fields),
+          transitiveData: fkSummaryData,
+        }),
     );
     void this.fetch();
   }
 
-  private setFieldsFromResponse(response: ApiResponse): void {
+  private updateSelfWithApiResponseData(response: ApiResponse): void {
     const result = response.results[0];
     this.fields.reconstruct(
       Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
     );
     if (response.preview_data) {
-      this.fkSummaryData.reconstruct(
-        response.preview_data.map(({ column, template, data }) => [
-          column,
-          { column, template, data: data[0] },
-        ]),
+      this.recordSummaries.setFetchedSummaries(
+        buildRecordSummariesForSheet(response.preview_data),
       );
     }
   }
@@ -58,7 +60,7 @@ export default class RecordStore {
   async fetch(): Promise<void> {
     this.fetchRequest.set({ state: 'processing' });
     try {
-      this.setFieldsFromResponse(await getAPI(this.url));
+      this.updateSelfWithApiResponseData(await getAPI(this.url));
       this.fetchRequest.set({ state: 'success' });
     } catch (error) {
       this.fetchRequest.set({
@@ -70,6 +72,6 @@ export default class RecordStore {
 
   async updateField(columnId: number, value: unknown): Promise<void> {
     const body = { [columnId]: value };
-    this.setFieldsFromResponse(await patchAPI(this.url, body));
+    this.updateSelfWithApiResponseData(await patchAPI(this.url, body));
   }
 }

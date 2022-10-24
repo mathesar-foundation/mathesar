@@ -36,3 +36,7 @@ class UniqueValueError(Exception):
 
 class ExclusionError(Exception):
     pass
+
+
+class ColumnMappingsNotFound(Exception):
+    pass
