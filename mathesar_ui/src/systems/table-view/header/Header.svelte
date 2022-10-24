@@ -19,6 +19,7 @@
   export let hasNewColumnButton = false;
 
   $: ({ columnsDataStore, selection, processedColumns } = $tabularData);
+  $: ({ columns } = columnsDataStore);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
   function addColumn(e: CustomEvent<Partial<Column>>) {
@@ -62,10 +63,7 @@
       let:style
     >
       <div {...htmlAttributes} {style}>
-        <NewColumnCell
-          columns={$columnsDataStore.columns}
-          on:addColumn={addColumn}
-        />
+        <NewColumnCell columns={$columns} on:addColumn={addColumn} />
       </div>
     </SheetCell>
   {/if}

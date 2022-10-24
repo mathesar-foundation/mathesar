@@ -2,12 +2,10 @@
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Column } from '@mathesar/api/tables/columns';
   import { Icon } from '@mathesar/component-library';
-  import Identifier from '@mathesar/components/Identifier.svelte';
   import { iconMultipleRecords } from '@mathesar/icons';
   import {
     setTabularDataStoreInContext,
     TabularData,
-    Filtering,
     Meta,
   } from '@mathesar/stores/table-data';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
@@ -20,25 +18,20 @@
     // below.
     undefined as unknown as TabularData,
   );
+  const meta = new Meta({
+    pagination: new Pagination({ size: 10 }),
+  });
 
   export let recordId: number;
   export let table: Pick<TableEntry, 'id' | 'name'>;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
-  $: meta = new Meta({
-    pagination: new Pagination({ size: 10 }),
-    filtering: new Filtering({
-      combination: 'and',
-      entries: [
-        { columnId: fkColumn.id, conditionId: 'equal', value: recordId },
-      ],
-    }),
-  });
   $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: tabularData = new TabularData({
     id: table.id,
     abstractTypesMap,
     meta,
+    contextualFilters: new Map([[fkColumn.id, recordId]]),
   });
   $: tabularDataStore.set(tabularData);
 </script>
@@ -47,12 +40,7 @@
   <div class="top">
     <div class="left">
       <Icon {...iconMultipleRecords} size="1.4rem" />
-      <h2 class="heading">
-        <Identifier>{table.name}</Identifier> Records
-      </h2>
-      <div class="fk-column">
-        (with <Identifier>{fkColumn.name}</Identifier> set to this record)
-      </div>
+      <h3 class="heading">{table.name}</h3>
     </div>
     <div class="right">
       <MiniActionsPane />
@@ -91,10 +79,5 @@
     flex: 1 0 auto;
     display: flex;
     justify-content: flex-end;
-  }
-  .fk-column {
-    font-size: 1rem;
-    font-weight: normal;
-    color: var(--color-text-muted);
   }
 </style>

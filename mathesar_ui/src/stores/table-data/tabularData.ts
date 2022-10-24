@@ -4,8 +4,8 @@ import { derived, writable } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/utils/api';
+import type { Column } from '@mathesar/api/tables/columns';
 import { Meta } from './meta';
-import type { ColumnsData } from './columns';
 import { ColumnsDataStore } from './columns';
 import type { TableRecordsData } from './records';
 import { RecordsData } from './records';
@@ -20,6 +20,14 @@ export interface TabularDataProps {
   id: DBObjectEntry['id'];
   abstractTypesMap: AbstractTypesMap;
   meta?: Meta;
+  /**
+   * Keys are columns ids. Values are cell values.
+   *
+   * Setting an entry in this Map will apply a filter condition which the user
+   * cannot see or remove. And the column used for the filter condition will be
+   * removed from view.
+   */
+  contextualFilters?: Map<number, number | string>;
 }
 
 export class TabularData {
@@ -42,14 +50,20 @@ export class TabularData {
   selection: Selection;
 
   constructor(props: TabularDataProps) {
+    const contextualFilters =
+      props.contextualFilters ?? new Map<number, string | number>();
     this.id = props.id;
     this.meta = props.meta ?? new Meta();
-    this.columnsDataStore = new ColumnsDataStore(this.id);
+    this.columnsDataStore = new ColumnsDataStore({
+      parentId: this.id,
+      hiddenColumns: contextualFilters.keys(),
+    });
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
       this.id,
       this.meta,
       this.columnsDataStore,
+      contextualFilters,
     );
     this.display = new Display(
       this.meta,
@@ -63,10 +77,10 @@ export class TabularData {
     );
 
     this.processedColumns = derived(
-      [this.columnsDataStore, this.constraintsDataStore],
-      ([columnsData, constraintsData]) =>
+      [this.columnsDataStore.columns, this.constraintsDataStore],
+      ([columns, constraintsData]) =>
         new Map(
-          columnsData.columns.map((column) => [
+          columns.map((column) => [
             column.id,
             processColumn({
               tableId: this.id,
@@ -80,12 +94,12 @@ export class TabularData {
 
     this.isLoading = derived(
       [
-        this.columnsDataStore,
+        this.columnsDataStore.fetchStatus,
         this.constraintsDataStore,
         this.recordsData.state,
       ],
-      ([columnsData, constraintsData, recordsDataState]) =>
-        columnsData.state === States.Loading ||
+      ([columnsStatus, constraintsData, recordsDataState]) =>
+        columnsStatus?.state === 'processing' ||
         constraintsData.state === States.Loading ||
         recordsDataState === States.Loading,
     );
@@ -108,7 +122,7 @@ export class TabularData {
 
   refresh(): Promise<
     [
-      ColumnsData | undefined,
+      Column[] | undefined,
       TableRecordsData | undefined,
       ConstraintsData | undefined,
     ]

@@ -79,7 +79,7 @@
   $: hasGhostRow = hasSearchQueries;
   $: indexIsSelected = (index: number) =>
     selection.type === 'record' && selection.index === index;
-  $: ({ columns } = $columnsDataStore);
+  $: ({ columns } = columnsDataStore);
   $: keyComboToSubmit = `${fkColumnWithFocus ? 'Shift+' : ''}Enter`;
 
   $: selection = findNearestValidSelection({
@@ -109,7 +109,7 @@
     if (!record || Object.keys(record).length === 0) {
       return undefined;
     }
-    return getPkValueInRecord(record, columns);
+    return getPkValueInRecord(record, $columns);
   }
 
   function getRowHref(row: RecordRow): string | undefined {
