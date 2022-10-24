@@ -10,14 +10,14 @@ from db.tables.operations.select import get_oid_from_table, reflect_table, refle
 from db.metadata import get_empty_metadata
 
 
-def _create_split_tables(extracted_table_name, extracted_columns, remainder_table_name, schema, engine):
+def _create_split_tables(extracted_table_name, extracted_columns, remainder_table_name, schema, engine, fk_column_name=None):
     extracted_table = create_mathesar_table(
         extracted_table_name,
         schema,
         extracted_columns,
         engine,
     )
-    fk_column_name = f"{extracted_table.name}_{constants.ID}"
+    fk_column_name = fk_column_name if fk_column_name else f"{extracted_table.name}_{constants.ID}"
     remainder_table_oid = get_oid_from_table(remainder_table_name, schema, engine)
     extracted_table_oid = get_oid_from_table(extracted_table_name, schema, engine)
     create_foreign_key_link(engine, schema, fk_column_name, remainder_table_oid, extracted_table_oid)
@@ -60,13 +60,10 @@ def _create_split_insert_stmt(old_table, extracted_table, extracted_columns, rem
     return split_ins
 
 
-def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracted_table_name, schema, engine,):
+def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracted_table_name, schema, engine, relationship_fk_column_name):
     # TODO reuse metadata
     old_table = reflect_table_from_oid(old_table_oid, engine, metadata=get_empty_metadata())
     old_table_name = old_table.name
-    # TODO why is old_table reflected twice here? does reflect_table_from_oid return same thing as reflect_table?
-    # TODO reuse metadata
-    old_table = reflect_table(old_table_name, schema, engine, metadata=get_empty_metadata())
     old_columns = (MathesarColumn.from_column(col) for col in old_table.columns)
     old_non_default_columns = [
         col for col in old_columns if not col.is_default
@@ -83,6 +80,7 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
             old_table_name,
             schema,
             engine,
+            relationship_fk_column_name
         )
         split_ins = _create_split_insert_stmt(
             remainder_table_with_fk_column,
