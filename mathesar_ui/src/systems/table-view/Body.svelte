@@ -21,7 +21,7 @@
 
   $: ({ id, display, columnsDataStore } = $tabularData);
   $: ({ displayableRecords } = display);
-  $: ({ primaryKeyColumnId } = $columnsDataStore);
+  $: ({ pkColumn } = columnsDataStore);
 
   function getItemSizeFromRow(row: RowType) {
     if (isHelpTextRow(row)) {
@@ -35,7 +35,7 @@
 
   function getIterationKey(index: number, row: RowType | undefined): string {
     if (row) {
-      return getRowKey(row, primaryKeyColumnId);
+      return getRowKey(row, $pkColumn?.id);
     }
     return `__index_${index}`;
   }
