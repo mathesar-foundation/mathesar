@@ -60,7 +60,7 @@ def _create_split_insert_stmt(old_table, extracted_table, extracted_columns, rem
     return split_ins
 
 
-def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracted_table_name, schema, engine, relationship_fk_column_name):
+def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracted_table_name, schema, engine, relationship_fk_column_name=None):
     # TODO reuse metadata
     old_table = reflect_table_from_oid(old_table_oid, engine, metadata=get_empty_metadata())
     old_table_name = old_table.name
