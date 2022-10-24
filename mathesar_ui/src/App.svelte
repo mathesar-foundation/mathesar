@@ -128,6 +128,7 @@
     font-size: inherit;
     font-weight: inherit;
     text-align: inherit;
+    text-decoration: inherit;
     margin: 0;
     padding: 0;
   }
