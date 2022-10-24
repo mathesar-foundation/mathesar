@@ -922,7 +922,7 @@ def test_record_delete_fkey_violation(library_ma_tables, client):
     response = client.delete(f'/api/db/v0/tables/{publications.id}/records/1/')
     assert response.status_code == 400
     response_exception = response.json()[0]
-    assert response_exception['code'] == 4212
+    assert response_exception['code'] == ErrorCodes.ForeignKeyViolation.value
     assert 'Items' in response_exception['message']
 
 
