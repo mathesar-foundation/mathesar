@@ -195,11 +195,11 @@ export class Display {
     this.customizedColumnWidths = new WritableMap();
 
     this.columnPlacements = derived(
-      [this.columnsDataStore, this.customizedColumnWidths],
-      ([columnsData, customizedColumnWidths]) => {
+      [this.columnsDataStore.columns, this.customizedColumnWidths],
+      ([columns, customizedColumnWidths]) => {
         let left = 0;
         const map = new Map<number, ColumnPlacement>();
-        columnsData.columns.forEach(({ id }) => {
+        columns.forEach(({ id }) => {
           const width = customizedColumnWidths.get(id) ?? DEFAULT_COLUMN_WIDTH;
           map.set(id, { width, left });
           left += width;
@@ -297,7 +297,7 @@ export class Display {
       if (delta === 0) {
         return activeCell.columnId;
       }
-      const { columns } = this.columnsDataStore.get();
+      const columns = get(this.columnsDataStore.columns);
       const index = columns.findIndex((c) => c.id === activeCell.columnId);
       const target = columns[index + delta] as Column | undefined;
       return target?.id;

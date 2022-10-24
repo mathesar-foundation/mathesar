@@ -1,5 +1,5 @@
 export { RecordsData } from './records';
-export { ColumnsDataStore, type ColumnsData } from './columns';
+export { ColumnsDataStore } from './columns';
 export { Meta, type MetaProps } from './meta';
 export {
   Display,

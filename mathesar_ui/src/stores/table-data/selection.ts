@@ -192,7 +192,7 @@ export class Selection {
   }
 
   get allColumns(): Column[] {
-    return this.columnsDataStore.get().columns;
+    return get(this.columnsDataStore.columns);
   }
 
   onEndSelection(): void {
