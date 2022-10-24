@@ -33,14 +33,27 @@
     }));
 </script>
 
-{#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
-  <section class="table-widget-positioner">
-    <TableWidget {table} {fkColumn} {recordId} />
-  </section>
-{/each}
+{#if tableWidgetInputs.length}
+  <div class="widgets-area">
+    <h2>Linked Records</h2>
+    <div class="widgets">
+      {#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
+        <section class="table-widget-positioner">
+          <TableWidget {table} {fkColumn} {recordId} />
+        </section>
+      {/each}
+    </div>
+  </div>
+{/if}
 
-<style>
+<style lang="scss">
   .table-widget-positioner {
     margin: 4rem 0;
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 </style>
