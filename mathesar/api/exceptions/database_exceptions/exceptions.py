@@ -323,6 +323,7 @@ class ForeignKeyViolationAPIException(MathesarAPIException):
                 "constraint": constraint.id,
                 "constraint_columns": [c.id for c in constraint.columns],
                 "constraint_referent_columns": [c.id for c in constraint.referent_columns],
+                "constraint_referent_table": constraint.referent_columns[0].table.id,
             })
         except Exception:
             warnings.warn("Could not enrich Exception")
