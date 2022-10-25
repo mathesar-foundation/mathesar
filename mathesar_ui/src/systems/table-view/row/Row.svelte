@@ -23,14 +23,8 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({
-    recordsData,
-    columnsDataStore,
-    meta,
-    display,
-    processedColumns,
-    selection,
-  } = $tabularData);
+  $: ({ recordsData, columnsDataStore, meta, processedColumns, selection } =
+    $tabularData);
   $: ({
     rowStatus,
     rowCreationStatus,
@@ -112,7 +106,6 @@
     {:else if rowHasRecord(row)}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
-          {display}
           {selection}
           {row}
           rowHasErrors={hasWholeRowErrors}

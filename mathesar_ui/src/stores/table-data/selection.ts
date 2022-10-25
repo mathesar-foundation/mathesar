@@ -1,15 +1,14 @@
 import type { Column } from '@mathesar/api/tables/columns';
 import { ImmutableSet, WritableSet } from '@mathesar-component-library';
-import { get } from 'svelte/store';
-import type { Unsubscriber } from 'svelte/store';
+import { get, writable, type Unsubscriber, type Writable } from 'svelte/store';
 import {
   type Row,
   type RecordsData,
   type RecordRow,
   rowHasRecord,
 } from './records';
+import type { Meta } from './meta';
 import type { ColumnsDataStore } from './columns';
-import type { Display } from './display';
 
 const DEFAULT_ROW_INDEX = 0;
 const ROW_COLUMN_SEPARATOR = '-';
@@ -75,10 +74,122 @@ export function getSelectedUniqueColumnsId(
   return Array.from(setOfUniqueColumnIds);
 }
 
+// TODO: Select active cell using primary key instead of index
+// Checkout scenarios with pk consisting multiple columns
+export interface ActiveCell {
+  rowIndex: number;
+  columnId: number;
+}
+
+enum Direction {
+  Up = 'up',
+  Down = 'down',
+  Left = 'left',
+  Right = 'right',
+}
+
+function getDirection(event: KeyboardEvent): Direction | undefined {
+  const { key } = event;
+  const shift = event.shiftKey;
+  switch (true) {
+    case shift && key === 'Tab':
+      return Direction.Left;
+    case shift:
+      return undefined;
+    case key === 'ArrowUp':
+      return Direction.Up;
+    case key === 'ArrowDown':
+      return Direction.Down;
+    case key === 'ArrowLeft':
+      return Direction.Left;
+    case key === 'ArrowRight':
+    case key === 'Tab':
+      return Direction.Right;
+    default:
+      return undefined;
+  }
+}
+
+function getHorizontalDelta(direction: Direction): number {
+  switch (direction) {
+    case Direction.Left:
+      return -1;
+    case Direction.Right:
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+function getVerticalDelta(direction: Direction): number {
+  switch (direction) {
+    case Direction.Up:
+      return -1;
+    case Direction.Down:
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+export function isCellActive(
+  activeCell: ActiveCell,
+  row: RecordRow,
+  column: Column,
+): boolean {
+  return (
+    activeCell &&
+    activeCell?.columnId === column.id &&
+    activeCell.rowIndex === row.rowIndex
+  );
+}
+
+// TODO: Create a common utility action to handle active element based scroll
+export function scrollBasedOnActiveCell(): void {
+  const activeCell: HTMLElement | null =
+    document.querySelector('.cell.is-active');
+  const activeRow = activeCell?.parentElement;
+  const container = document.querySelector('.virtual-list.outerElement');
+  if (!container || !activeRow) {
+    return;
+  }
+  // Vertical scroll
+  if (
+    activeRow.offsetTop + activeRow.clientHeight + 40 >
+    container.scrollTop + container.clientHeight
+  ) {
+    const offsetValue: number =
+      container.getBoundingClientRect().bottom -
+      activeRow.getBoundingClientRect().bottom -
+      40;
+    container.scrollTop -= offsetValue;
+  } else if (activeRow.offsetTop - 30 < container.scrollTop) {
+    container.scrollTop = activeRow.offsetTop - 30;
+  }
+
+  // Horizontal scroll
+  if (
+    activeCell.offsetLeft + activeRow.clientWidth + 30 >
+    container.scrollLeft + container.clientWidth
+  ) {
+    const offsetValue: number =
+      container.getBoundingClientRect().right -
+      activeCell.getBoundingClientRect().right -
+      30;
+    container.scrollLeft -= offsetValue;
+  } else if (activeCell.offsetLeft - 30 < container.scrollLeft) {
+    container.scrollLeft = activeCell.offsetLeft - 30;
+  }
+}
+
 export class Selection {
   private columnsDataStore: ColumnsDataStore;
 
   private recordsData: RecordsData;
+
+  private meta: Meta;
+
+  activeCell: Writable<ActiveCell | undefined>;
 
   private selectionBounds: SelectionBounds | undefined;
 
@@ -99,19 +210,18 @@ export class Selection {
 
   freezeSelection: boolean;
 
-  display: Display;
-
   constructor(
     columnsDataStore: ColumnsDataStore,
     recordsData: RecordsData,
-    display: Display,
+    meta: Meta,
   ) {
     this.selectedCells = new WritableSet<string>();
     this.columnsSelectedWhenTheTableIsEmpty = new WritableSet<number>();
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
     this.freezeSelection = false;
-    this.display = display;
+    this.activeCell = writable<ActiveCell | undefined>(undefined);
+    this.meta = meta;
 
     /**
      * TODO:
@@ -128,30 +238,28 @@ export class Selection {
     });
 
     // Keep active cell and selected cell in sync
-    this.activeCellUnsubscriber = this.display.activeCell.subscribe(
-      (activeCell) => {
-        if (activeCell) {
-          const activeCellRow = this.allRows.find(
-            (row) => row.rowIndex === activeCell.rowIndex,
-          );
-          const activeCellColumn = this.allColumns.find(
-            (column) => column.id === activeCell.columnId,
-          );
-          if (activeCellRow && activeCellColumn) {
-            /**
-             * This handles the very rare edge case
-             * when the user starts the selection using mouse
-             * but before ending(mouseup event)
-             * she change the active cell using keyboard
-             */
-            this.selectionBounds = undefined;
-            this.selectMultipleCells([[activeCellRow, activeCellColumn]]);
-          }
-        } else {
-          this.resetSelection();
+    this.activeCellUnsubscriber = this.activeCell.subscribe((activeCell) => {
+      if (activeCell) {
+        const activeCellRow = this.allRows.find(
+          (row) => row.rowIndex === activeCell.rowIndex,
+        );
+        const activeCellColumn = this.allColumns.find(
+          (column) => column.id === activeCell.columnId,
+        );
+        if (activeCellRow && activeCellColumn) {
+          /**
+           * This handles the very rare edge case
+           * when the user starts the selection using mouse
+           * but before ending(mouseup event)
+           * she change the active cell using keyboard
+           */
+          this.selectionBounds = undefined;
+          this.selectMultipleCells([[activeCellRow, activeCellColumn]]);
         }
-      },
-    );
+      } else {
+        this.resetSelection();
+      }
+    });
   }
 
   onStartSelection(row: RecordRow, column: Column): void {
@@ -300,6 +408,89 @@ export class Selection {
       this.resetSelection();
       this.selectMultipleCells(cells);
     }
+  }
+
+  resetActiveCell(): void {
+    this.activeCell.set(undefined);
+  }
+
+  activateCell(row: RecordRow, column: Column): void {
+    this.activeCell.set({
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+      rowIndex: row.rowIndex,
+      columnId: column.id,
+    });
+  }
+
+  private getAdjacentCell(
+    activeCell: ActiveCell,
+    direction: Direction,
+  ): ActiveCell | undefined {
+    const rowIndex = (() => {
+      const delta = getVerticalDelta(direction);
+      if (delta === 0) {
+        return activeCell.rowIndex;
+      }
+      const totalCount = get(this.recordsData.totalCount) ?? 0;
+      const savedRecords = get(this.recordsData.savedRecords);
+      const newRecords = get(this.recordsData.newRecords);
+      const pagination = get(this.meta.pagination);
+      const { offset } = pagination;
+      const pageSize = pagination.size;
+      const minRowIndex = 0;
+      /**
+       * We are not subtracting 1 from the below maxRowIndex calculation
+       * inorder to account for the add-new-record placeholder row
+       */
+      const maxRowIndex =
+        Math.min(pageSize, totalCount - offset, savedRecords.length) +
+        newRecords.length;
+      const newRowIndex = activeCell.rowIndex + delta;
+      if (newRowIndex < minRowIndex || newRowIndex > maxRowIndex) {
+        return undefined;
+      }
+      return newRowIndex;
+    })();
+    if (rowIndex === undefined) {
+      return undefined;
+    }
+
+    const columnId = (() => {
+      const delta = getHorizontalDelta(direction);
+      if (delta === 0) {
+        return activeCell.columnId;
+      }
+      const columns = get(this.columnsDataStore.columns);
+      const index = columns.findIndex((c) => c.id === activeCell.columnId);
+      const target = columns[index + delta] as Column | undefined;
+      return target?.id;
+    })();
+    if (columnId === undefined) {
+      return undefined;
+    }
+
+    return { rowIndex, columnId };
+  }
+
+  handleKeyEventsOnActiveCell(key: KeyboardEvent): 'moved' | undefined {
+    const direction = getDirection(key);
+    if (!direction) {
+      return undefined;
+    }
+    let moved = false;
+    this.activeCell.update((activeCell) => {
+      if (!activeCell) {
+        return undefined;
+      }
+      const adjacentCell = this.getAdjacentCell(activeCell, direction);
+      if (adjacentCell) {
+        moved = true;
+        return adjacentCell;
+      }
+      return activeCell;
+    });
+
+    return moved ? 'moved' : undefined;
   }
 
   destroy(): void {

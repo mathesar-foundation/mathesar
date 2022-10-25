@@ -11,7 +11,6 @@
     scrollBasedOnActiveCell,
     rowHasNewRecord,
     type RecordRow,
-    type Display,
     type RecordsData,
     type CellKey,
     type ProcessedColumn,
@@ -30,7 +29,6 @@
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let recordsData: RecordsData;
-  export let display: Display;
   export let selection: Selection;
   export let row: RecordRow;
   export let rowIsSelected = false;
@@ -46,9 +44,8 @@
   $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
   $: columnId = column.id;
-  $: ({ activeCell } = display);
+  $: ({ activeCell, selectedCells } = selection);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
-  $: ({ selectedCells } = selection);
 
   /**
    * The name indicates that this boolean is only true when more than one cell
@@ -93,7 +90,7 @@
     event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
   ) {
     const { originalEvent } = event.detail;
-    const type = display.handleKeyEventsOnActiveCell(originalEvent);
+    const type = selection.handleKeyEventsOnActiveCell(originalEvent);
     if (type) {
       originalEvent.stopPropagation();
       originalEvent.preventDefault();
@@ -162,7 +159,7 @@
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}
       on:activate={() => {
-        display.selectCell(row, column);
+        selection.activateCell(row, column);
         // Activate event initaites the selection process
         selection.onStartSelection(row, column);
       }}

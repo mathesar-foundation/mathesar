@@ -1,12 +1,7 @@
 export { RecordsData } from './records';
 export { ColumnsDataStore } from './columns';
 export { Meta, type MetaProps } from './meta';
-export {
-  Display,
-  isCellActive,
-  scrollBasedOnActiveCell,
-  getCellStyle,
-} from './display';
+export { Display, getCellStyle } from './display';
 export {
   filterCombinations,
   defaultFilterCombination,
@@ -66,4 +61,6 @@ export {
   isCellSelected,
   getSelectedUniqueColumnsId,
   getSelectedRowIndex,
+  isCellActive,
+  scrollBasedOnActiveCell,
 } from './selection';

@@ -73,7 +73,7 @@ export class TabularData {
     this.selection = new Selection(
       this.columnsDataStore,
       this.recordsData,
-      this.display,
+      this.meta,
     );
 
     this.processedColumns = derived(
