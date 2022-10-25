@@ -77,8 +77,11 @@ export type QueriesList = PaginatedResponse<QueryInstance>;
  *
  * Tracked in https://github.com/centerofci/mathesar/issues/1716
  */
+
+export type QueryResultRecord = Record<string, unknown>;
+
 export type QueryResultRecords =
-  | PaginatedResponse<Record<string, unknown>>
+  | PaginatedResponse<QueryResultRecord>
   | { count: 0; results: null };
 
 /**

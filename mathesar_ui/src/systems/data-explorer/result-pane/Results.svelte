@@ -21,7 +21,7 @@
   $: ({
     query,
     processedColumns,
-    records,
+    rowsData,
     selectedColumnAlias,
     pagination,
     runState,
@@ -36,12 +36,13 @@
   $: sheetColumns = columnList.length
     ? [{ id: ID_ROW_CONTROL_COLUMN }, ...columnList]
     : [];
-  $: results = $records.results ?? [];
+  $: rows = $rowsData.rows;
+  $: totalCount = $rowsData.totalCount;
   // Show a dummy ghost row when there are no records
   $: showDummyGhostRow =
     (recordRunState === 'success' || recordRunState === 'processing') &&
-    !results.length;
-  $: sheetItemCount = showDummyGhostRow ? 1 : results.length;
+    !rows.length;
+  $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
 
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
@@ -147,7 +148,7 @@
         let:items
       >
         {#each items as item (item.key)}
-          {#if results[item.index] || showDummyGhostRow}
+          {#if rows[item.index] || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div {...htmlAttributes} style={styleString}>
                 <SheetCell
@@ -176,10 +177,12 @@
                         ? 'selected'
                         : ''}
                     >
-                      {#if results[item.index] || recordRunState === 'processing'}
+                      {#if rows[item.index] || recordRunState === 'processing'}
                         <CellFabric
                           columnFabric={processedQueryColumn}
-                          value={results[item.index]?.[processedQueryColumn.id]}
+                          value={rows[item.index]?.record[
+                            processedQueryColumn.id
+                          ]}
                           showAsSkeleton={recordRunState === 'processing'}
                           disabled={true}
                         />
@@ -194,19 +197,19 @@
       </SheetVirtualRows>
     </Sheet>
     <div data-identifier="status-bar">
-      {#if $records.count}
+      {#if totalCount}
         <div>
           Showing {$pagination.leftBound}-{Math.min(
-            $records.count,
+            totalCount,
             $pagination.rightBound,
-          )} of {$records.count}
+          )} of {totalCount}
         </div>
       {:else if recordRunState === 'success'}
         No results found
       {/if}
       <PaginationGroup
         pagination={$pagination}
-        totalCount={$records.count}
+        {totalCount}
         on:change={(e) => {
           void queryRunner.setPagination(e.detail);
         }}
