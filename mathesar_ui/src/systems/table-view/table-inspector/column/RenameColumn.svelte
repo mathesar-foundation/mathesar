@@ -10,6 +10,8 @@
   export let column: ProcessedColumn;
   export let columnsDataStore: ColumnsDataStore;
 
+  $: ({ columns } = columnsDataStore);
+
   function getValidationErrors(newName: string): string[] {
     if (newName === column.column.name) {
       return [];
@@ -17,7 +19,7 @@
     if (!newName) {
       return ['Name cannot be empty.'];
     }
-    const columnNames = $columnsDataStore.columns.map((c) => c.name);
+    const columnNames = $columns.map((c) => c.name);
     if (columnNames.includes(newName)) {
       return ['A column with that name already exists.'];
     }

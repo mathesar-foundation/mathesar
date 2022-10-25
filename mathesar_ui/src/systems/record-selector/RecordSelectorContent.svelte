@@ -36,10 +36,10 @@
     id: tableId,
   } = tabularData);
   $: ({ purpose: rowType } = controller);
-  $: ({ columns, state: columnsState } = $columnsDataStore);
+  $: ({ columns, fetchStatus } = columnsDataStore);
   $: ({ state: constraintsState } = $constraintsDataStore);
   $: isInitialized =
-    columnsState === States.Done && constraintsState === States.Done;
+    $fetchStatus?.state !== 'processing' && constraintsState === States.Done;
   $: ({ searchFuzzy } = meta);
   $: hasSearchQueries = $searchFuzzy.size > 0;
   $: recordsStore = recordsData.savedRecords;
@@ -65,7 +65,7 @@
       isSubmittingNewRecord = true;
       const response = await postAPI<ApiRecordsResponse>(url, body);
       const record = response.results[0];
-      const recordId = getPkValueInRecord(record, columns);
+      const recordId = getPkValueInRecord(record, $columns);
       const previewData = response.preview_data ?? [];
       const tableEntry = $tables.data.get(tableId);
       const template = tableEntry?.settings?.preview_settings?.template;

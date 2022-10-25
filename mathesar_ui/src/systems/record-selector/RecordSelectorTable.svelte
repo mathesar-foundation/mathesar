@@ -57,7 +57,7 @@
   $: ({ recordSummaries } = recordsData);
   $: ({ constraints } = $constraintsDataStore);
   $: nestedSelectorIsOpen = nestedController.isOpen;
-  $: ({ columns } = $columnsDataStore);
+  $: ({ columns } = columnsDataStore);
   $: ({ searchFuzzy } = meta);
   $: fkColumnIds = new ImmutableSet(
     constraints
@@ -97,7 +97,7 @@
     if (!record || Object.keys(record).length === 0) {
       return undefined;
     }
-    return getPkValueInRecord(record, columns);
+    return getPkValueInRecord(record, $columns);
   }
 
   function getRowHref(row: RecordRow): string | undefined {
