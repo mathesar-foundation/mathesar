@@ -5,3 +5,13 @@ export { default as SheetPositionableCell } from './SheetPositionableCell.svelte
 export { default as SheetCellResizer } from './SheetCellResizer.svelte';
 export { default as SheetVirtualRows } from './SheetVirtualRows.svelte';
 export { default as SheetRow } from './SheetRow.svelte';
+export { default as SheetSelection } from './SheetSelection';
+export {
+  isColumnSelected,
+  isRowSelected,
+  isCellSelected,
+  getSelectedUniqueColumnsId,
+  getSelectedRowIndex,
+  isCellActive,
+  scrollBasedOnActiveCell,
+} from './SheetSelection';
