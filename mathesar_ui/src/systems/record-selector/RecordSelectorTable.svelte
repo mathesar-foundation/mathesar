@@ -3,6 +3,7 @@
 
   import { ImmutableSet } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/tables/columns';
+  import type { ResultValue } from '@mathesar/api/tables/records';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -27,11 +28,10 @@
     RecordSelectorResult,
   } from './RecordSelectorController';
   import { setRecordSelectorControllerInContext } from './RecordSelectorController';
-  import RecordSelectorInputCell from './RecordSelectorInputCell.svelte';
-  import { getPkValueInRecord } from './recordSelectorUtils';
-  import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
   import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
-  import type { ResultValue } from '@mathesar/api/tables/records';
+  import RecordSelectorInputCell from './RecordSelectorInputCell.svelte';
+  import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
+  import { getPkValueInRecord } from './recordSelectorUtils';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
