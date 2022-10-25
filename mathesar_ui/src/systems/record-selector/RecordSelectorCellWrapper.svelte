@@ -42,6 +42,7 @@
   }
   .column-header {
     background: #f7f8f8;
+    padding: 0.5rem;
   }
   .input {
     background: white;
