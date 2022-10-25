@@ -90,8 +90,13 @@
 
 <style>
   .record-selector-window {
-    --z-index-overlay: 1;
-    --z-index-above-overlay: 2;
+    --z-index-row-header: 1;
+    --z-index-thead: 2;
+    --z-index-focused-input: 3;
+    --z-index-thead-row-header: 4;
+    --z-index-shadow-inset: 5;
+    --z-index-overlay: 6;
+    --z-index-above-overlay: 7;
     display: flex;
     flex-direction: column;
     overflow: hidden;

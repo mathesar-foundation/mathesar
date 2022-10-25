@@ -212,11 +212,11 @@
       <div class="thead">
         <div class="tr header">
           {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-            <Cell cellType="columnHeader">
+            <Cell rowType="columnHeaderRow" columnType="dataColumn">
               <ProcessedColumnName {processedColumn} />
             </Cell>
           {/each}
-          <Cell cellType="rowHeader" />
+          <Cell rowType="columnHeaderRow" columnType="rowHeaderColumn" />
         </div>
         <div class="tr inputs">
           {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
@@ -240,13 +240,13 @@
               }}
             />
           {/each}
-          <Cell cellType="rowHeader" />
+          <Cell rowType="searchInputRow" columnType="rowHeaderColumn" />
         </div>
         <div class="tr inputs">
           {#each [...$processedColumns] as [columnId, _] (columnId)}
-            <Cell cellType="divider" />
+            <Cell rowType="dividerRow" columnType="dataColumn" />
           {/each}
-          <Cell cellType="divider" />
+          <Cell rowType="dividerRow" columnType="rowHeaderColumn" />
         </div>
       </div>
       <div class="tbody">
@@ -264,7 +264,7 @@
           >
             {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
               {@const value = row?.record?.[columnId]}
-              <Cell cellType="data">
+              <Cell rowType="dataRow" columnType="dataColumn">
                 <CellFabric
                   columnFabric={processedColumn}
                   {value}
@@ -274,7 +274,7 @@
                 />
               </Cell>
             {/each}
-            <Cell cellType="rowHeader">
+            <Cell rowType="dataRow" columnType="rowHeaderColumn">
               <RecordSelectorSubmitButton
                 purpose={$purpose}
                 on:click={() => submitIndex(index)}
@@ -307,7 +307,6 @@
     min-height: 0;
     overflow: auto;
     position: relative;
-    z-index: 3;
   }
   .table {
     display: table;
@@ -317,12 +316,13 @@
     border-spacing: 0;
     --border-width: 1px;
     --border-color: #e7e7e7;
+    --row-height: 2.25rem;
   }
   .thead {
     display: table-header-group;
-    position: sticky;
-    z-index: 3;
+    /* position: sticky;
     top: 0;
+    z-index: 0; */
   }
   .thead .tr:first-child {
     /**
@@ -332,10 +332,8 @@
      * We can't use semantic table elements with `border-collapse: collapse;`
      * because those elements don't let us make the entire row into a hyperlink.
      *
-     * it doesn't play well
-     * with `thead` being sticky. We also can't set a border on `table` for the
-     * same reason. In those cases the borders end up scrolling when we don't
-     * want them to scroll.
+     * We also can't set a border on `.table` because the border ends up
+     * scrolling when we don't want it to scroll.
      */
     --border-top-width: var(--border-width);
   }
@@ -355,7 +353,7 @@
     height: 100%;
     width: calc(100% - var(--body-padding));
     pointer-events: none;
-    z-index: 4;
+    z-index: var(--z-index-shadow-inset);
   }
   .has-overflow-top :global(.divider-bg) {
     box-shadow: var(--overflow-shadow);

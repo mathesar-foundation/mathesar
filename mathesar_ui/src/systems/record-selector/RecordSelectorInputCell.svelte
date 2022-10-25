@@ -34,7 +34,7 @@
   }
 </script>
 
-<CellWrapper cellType="searchInput" {state}>
+<CellWrapper rowType="searchInputRow" columnType="dataColumn" {state}>
   <Debounce on:artificialChange={updateValue} let:handleNewValue>
     <DynamicInput
       class="record-selector-input"
