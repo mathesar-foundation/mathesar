@@ -22,7 +22,6 @@
   import type { Column } from '@mathesar/api/tables/columns';
   import { tables as tablesStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { States } from '@mathesar/utils/api';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { getAvailableName } from '@mathesar/utils/db';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
@@ -85,13 +84,18 @@
   $: tables = [...$tablesStore.data.values()];
   $: baseTableName = $tablesStore.data.get($tabularData.id)?.name ?? '';
   $: columnsDataStore = $tabularData.columnsDataStore;
-  $: baseTableColumns = $columnsDataStore.columns;
-  $: targetTableColumnsStore = ensureReadable(
-    targetTable ? new ColumnsDataStore(targetTable.id) : undefined,
+  $: baseTableColumns = columnsDataStore.columns;
+  $: targetTableColumnsStore = targetTable
+    ? new ColumnsDataStore({ parentId: targetTable.id })
+    : undefined;
+  $: targetTableColumnsStatus = ensureReadable(
+    targetTableColumnsStore?.fetchStatus,
   );
   $: targetTableColumnsAreLoading =
-    $targetTableColumnsStore?.state === States.Loading;
-  $: targetTableColumns = $targetTableColumnsStore?.columns ?? [];
+    $targetTableColumnsStatus?.state === 'processing';
+  $: targetTableColumns = ensureReadable(
+    targetTableColumnsStore?.columns ?? [],
+  );
   $: nameValidationErrors = getNameValidationErrors(
     namingStrategy,
     constraintName,
@@ -150,7 +154,7 @@
         <span slot="label">
           Column in This Table Which References the Target Table
         </span>
-        <SelectColumn columns={baseTableColumns} bind:column={baseColumn} />
+        <SelectColumn columns={$baseTableColumns} bind:column={baseColumn} />
       </LabeledInput>
     </FormField>
 
@@ -172,7 +176,7 @@
               Table
             </span>
             <SelectColumn
-              columns={targetTableColumns}
+              columns={$targetTableColumns}
               bind:column={targetColumn}
             />
           </LabeledInput>

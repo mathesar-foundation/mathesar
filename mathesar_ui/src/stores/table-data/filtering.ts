@@ -55,11 +55,15 @@ export class Filtering {
     this.entries = entries ?? [];
   }
 
-  withEntry(entry: FilterEntry): Filtering {
+  withEntries(entries: Iterable<FilterEntry>): Filtering {
     return new Filtering({
       combination: this.combination,
-      entries: [...this.entries, entry],
+      entries: [...this.entries, ...entries],
     });
+  }
+
+  withEntry(entry: FilterEntry): Filtering {
+    return this.withEntries([entry]);
   }
 
   withoutEntry(entryIndex: number): Filtering {
