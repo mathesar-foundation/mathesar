@@ -41,6 +41,7 @@ export {
   getTabularDataStoreFromContext,
   TabularData,
   type TabularDataProps,
+  type TabularDataSelection,
 } from './tabularData';
 export {
   type ProcessedColumn,
@@ -54,13 +55,3 @@ export {
 export { TableStructure } from './TableStructure';
 export { SearchFuzzy } from './searchFuzzy';
 export { constraintIsFk, findFkConstraintsForColumn } from './constraintsUtils';
-export {
-  Selection,
-  isColumnSelected,
-  isRowSelected,
-  isCellSelected,
-  getSelectedUniqueColumnsId,
-  getSelectedRowIndex,
-  isCellActive,
-  scrollBasedOnActiveCell,
-} from './selection';

@@ -7,16 +7,18 @@
     WritableMap,
   } from '@mathesar-component-library';
   import {
-    isCellActive,
-    scrollBasedOnActiveCell,
     rowHasNewRecord,
     type RecordRow,
     type RecordsData,
     type CellKey,
     type ProcessedColumn,
-    isCellSelected,
-    Selection,
+    type TabularDataSelection,
   } from '@mathesar/stores/table-data';
+  import {
+    isCellActive,
+    scrollBasedOnActiveCell,
+    isCellSelected,
+  } from '@mathesar/components/sheet';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
@@ -29,7 +31,7 @@
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let recordsData: RecordsData;
-  export let selection: Selection;
+  export let selection: TabularDataSelection;
   export let row: RecordRow;
   export let rowIsSelected = false;
   export let rowIsProcessing = false;
@@ -45,7 +47,7 @@
   $: ({ column, linkFk } = processedColumn);
   $: columnId = column.id;
   $: ({ activeCell, selectedCells } = selection);
-  $: isActive = $activeCell && isCellActive($activeCell, row, column);
+  $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
 
   /**
    * The name indicates that this boolean is only true when more than one cell
@@ -64,7 +66,8 @@
    * [1]: https://github.com/centerofci/mathesar/issues/1534
    */
   $: isSelectedInRange =
-    isCellSelected($selectedCells, row, column) && $selectedCells.size > 1;
+    isCellSelected($selectedCells, row, processedColumn) &&
+    $selectedCells.size > 1;
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -159,16 +162,16 @@
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}
       on:activate={() => {
-        selection.activateCell(row, column);
+        selection.activateCell(row, processedColumn);
         // Activate event initaites the selection process
-        selection.onStartSelection(row, column);
+        selection.onStartSelection(row, processedColumn);
       }}
       on:update={valueUpdated}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
       on:mouseenter={() => {
         // This enables the click + drag to
         // select multiple cells
-        selection.onMouseEnterWhileSelection(row, column);
+        selection.onMouseEnterWhileSelection(row, processedColumn);
       }}
     />
     <ContextMenu>

@@ -3,13 +3,13 @@
     getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
-    isColumnSelected,
   } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/tables/columns';
   import {
     SheetHeader,
     SheetCell,
     SheetCellResizer,
+    isColumnSelected,
   } from '@mathesar/components/sheet';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
@@ -46,10 +46,9 @@
           isSelected={isColumnSelected(
             $selectedCells,
             $columnsSelectedWhenTheTableIsEmpty,
-            processedColumn.column,
+            processedColumn,
           )}
-          on:click={() =>
-            selection.toggleColumnSelection(processedColumn.column)}
+          on:click={() => selection.toggleColumnSelection(processedColumn)}
         />
         <SheetCellResizer columnIdentifierKey={columnId} />
       </div>

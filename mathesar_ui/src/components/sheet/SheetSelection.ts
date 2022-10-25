@@ -183,9 +183,9 @@ export function getSelectedUniqueColumnsId(
   return Array.from(setOfUniqueColumnIds);
 }
 
-export default abstract class SheetSelection<
-  Column extends SelectionColumn,
+export default class SheetSelection<
   Row extends SelectionRow,
+  Column extends SelectionColumn,
 > {
   private getColumns: () => Column[];
 

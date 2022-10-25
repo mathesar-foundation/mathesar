@@ -10,9 +10,12 @@
     getRowKey,
     ID_ROW_CONTROL_COLUMN,
     type Row,
-    isRowSelected,
   } from '@mathesar/stores/table-data';
-  import { SheetRow, SheetCell } from '@mathesar/components/sheet';
+  import {
+    SheetRow,
+    SheetCell,
+    isRowSelected,
+  } from '@mathesar/components/sheet';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
@@ -40,7 +43,7 @@
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
   $: ({ selectedCells } = selection);
-  $: isSelected = isRowSelected($selectedCells, row);
+  $: isSelected = rowHasRecord(row) && isRowSelected($selectedCells, row);
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;

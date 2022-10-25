@@ -1,9 +1,7 @@
 <script lang="ts">
   import { Collapsible } from '@mathesar-component-library';
-  import {
-    getTabularDataStoreFromContext,
-    getSelectedUniqueColumnsId,
-  } from '@mathesar/stores/table-data';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { getSelectedUniqueColumnsId } from '@mathesar/components/sheet';
   import RenameColumn from './RenameColumn.svelte';
   import ColumnDisplayProperties from './ColumnDisplayProperties.svelte';
   import ColumnActions from './ColumnActions.svelte';
