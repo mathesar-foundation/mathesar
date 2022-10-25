@@ -36,6 +36,7 @@
     border-right-width: var(--border-width);
     border-bottom-width: var(--border-width);
     min-width: 8ch;
+    max-width: 30ch;
   }
   .td:first-child {
     border-left-width: var(--border-width);
@@ -46,6 +47,22 @@
   }
   .input {
     background: white;
+    position: relative;
+    height: 2.25em;
+  }
+  .input :global(.input-element) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+  }
+  .input :global(.input-element:focus) {
+    border: none;
+    outline: none;
   }
   .divider {
     height: 10px;

@@ -93,7 +93,7 @@
 
 <span
   {id}
-  class="linked-record-input {containerClass}"
+  class="input-element linked-record-input {containerClass}"
   class:has-value={hasValue}
   class:is-acquiring-input={isAcquiringInput}
   tabindex={isAcquiringInput ? undefined : 0}
@@ -148,6 +148,7 @@
     border-radius: 0.25rem;
     background: #fff;
     min-height: 2.25em;
+    padding: 0;
     --padding: 0.5rem;
     cursor: default;
   }
