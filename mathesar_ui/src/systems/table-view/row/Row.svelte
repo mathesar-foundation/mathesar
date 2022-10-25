@@ -39,7 +39,8 @@
   } = meta);
   $: ({ grouping, recordSummaries } = recordsData);
 
-  $: ({ primaryKeyColumnId } = $columnsDataStore);
+  $: ({ pkColumn } = columnsDataStore);
+  $: primaryKeyColumnId = $pkColumn?.id;
   $: rowKey = getRowKey(row, primaryKeyColumnId);
   $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
   $: status = $rowStatus.get(rowKey);
