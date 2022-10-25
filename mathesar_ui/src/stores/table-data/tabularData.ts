@@ -28,6 +28,9 @@ export interface TabularDataProps {
    * removed from view.
    */
   contextualFilters?: Map<number, number | string>;
+  hasEnhancedPrimaryKeyCell?: Parameters<
+    typeof processColumn
+  >[0]['hasEnhancedPrimaryKeyCell'];
 }
 
 export class TabularData {
@@ -87,6 +90,7 @@ export class TabularData {
               column,
               constraints: constraintsData.constraints,
               abstractTypeMap: props.abstractTypesMap,
+              hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
             }),
           ]),
         ),

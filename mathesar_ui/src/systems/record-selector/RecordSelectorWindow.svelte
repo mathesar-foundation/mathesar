@@ -38,6 +38,7 @@
         id: $tableId,
         abstractTypesMap: $currentDbAbstractTypes.data,
         meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
+        hasEnhancedPrimaryKeyCell: false,
       })
     : undefined;
   $: tableName = $tableId ? getTableName($tableId) : undefined;
