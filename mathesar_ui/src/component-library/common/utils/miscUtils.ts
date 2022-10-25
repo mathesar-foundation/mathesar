@@ -19,5 +19,5 @@ export function withDefaults<T>(
 }
 
 export function getRandomInteger(min = 0, max = 100): number {
-  return Math.floor(Math.random() * (max - min + 1) ) + min;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
