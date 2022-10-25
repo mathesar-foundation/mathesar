@@ -27,6 +27,7 @@ from db.types.base import PostgresType
 from db.types.custom.json_array import MathesarJsonArray
 from db.types.custom.email import EMAIL_DOMAIN_NAME
 from db.types.custom.uri import URIFunction
+from db.types.custom.underlying_type import HasUnderlyingType
 
 
 def sa_call_sql_function(function_name, *parameters, return_type=None):
@@ -385,6 +386,9 @@ class ArrayAgg(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
+        column_expr_type = column_expr.type
+        if isinstance(column_expr_type, HasUnderlyingType):
+            column_expr = column_expr_type.cast_to_underlying_type(column_expr)
         return array_agg(column_expr)
 
 
