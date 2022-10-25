@@ -52,6 +52,23 @@ def get_constraint_oid_by_name_and_table_oid(name, table_oid, engine):
     return result['oid']
 
 
+def get_fkey_constraint_oid_by_name_and_referent_table_oid(name, table_oid, engine):
+    """
+    Sometimes, we need to find a foreign key by the referent table OID.
+    """
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    pg_constraint = get_pg_catalog_table("pg_constraint", engine, metadata=metadata)
+    # We only want to select constraints attached to a table.
+    # confrelid is the referent table's OID.
+    query = select(pg_constraint).where(
+        and_(pg_constraint.c.confrelid == table_oid, pg_constraint.c.conname == name)
+    )
+    with engine.begin() as conn:
+        result = conn.execute(query).first()
+    return result['oid']
+
+
 def get_column_constraints(column_attnum, table_oid, engine):
     # TODO reuse metadata
     metadata = get_empty_metadata()

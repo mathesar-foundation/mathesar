@@ -4,7 +4,7 @@ import { derived } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/utils/api';
-import type { ColumnsData } from './columns';
+import type { Column } from '@mathesar/api/tables/columns';
 import { ColumnsDataStore } from './columns';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
@@ -29,13 +29,13 @@ export class TableStructure {
 
   constructor(props: TableStructureProps) {
     this.id = props.id;
-    this.columnsDataStore = new ColumnsDataStore(this.id);
+    this.columnsDataStore = new ColumnsDataStore({ parentId: this.id });
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.processedColumns = derived(
-      [this.columnsDataStore, this.constraintsDataStore],
-      ([columnsData, constraintsData]) =>
+      [this.columnsDataStore.columns, this.constraintsDataStore],
+      ([columns, constraintsData]) =>
         new Map(
-          columnsData.columns.map((column) => [
+          columns.map((column) => [
             column.id,
             processColumn({
               tableId: this.id,
@@ -47,14 +47,14 @@ export class TableStructure {
         ),
     );
     this.isLoading = derived(
-      [this.columnsDataStore, this.constraintsDataStore],
-      ([columnsData, constraintsData]) =>
-        columnsData.state === States.Loading ||
+      [this.columnsDataStore.fetchStatus, this.constraintsDataStore],
+      ([columnsFetchStatus, constraintsData]) =>
+        columnsFetchStatus?.state === 'processing' ||
         constraintsData.state === States.Loading,
     );
   }
 
-  refresh(): Promise<[ColumnsData | undefined, ConstraintsData | undefined]> {
+  refresh(): Promise<[Column[] | undefined, ConstraintsData | undefined]> {
     return Promise.all([
       this.columnsDataStore.fetch(),
       this.constraintsDataStore.fetch(),
