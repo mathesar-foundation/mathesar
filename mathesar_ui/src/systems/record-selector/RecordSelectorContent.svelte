@@ -107,7 +107,7 @@
     />
   {/if}
 
-  {#if !records.length}
+  {#if isInitialized && !records.length}
     {#if $isLoading}
       <!--
         This only shows when there are no results. When there are results, the
