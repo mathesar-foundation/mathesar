@@ -36,6 +36,7 @@
   export let tabularData: TabularData;
   export let nestedController: RecordSelectorController;
   export let submitResult: (result: RecordSelectorResult) => void;
+  export let isHoveringCreate = false;
 
   const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
@@ -87,6 +88,8 @@
     }
   }
   $: handleRecordsLoadingStateChange(recordsDataIsLoading);
+
+  $: effectiveSelectionIndex = isHoveringCreate ? undefined : selectionIndex;
 
   function handleInputFocus(column: Column) {
     nestedController.cancel();
@@ -146,10 +149,10 @@
   }
 
   function submitSelection() {
-    if (selectionIndex === undefined) {
+    if (effectiveSelectionIndex === undefined) {
       return;
     }
-    submitIndex(selectionIndex);
+    submitIndex(effectiveSelectionIndex);
   }
 
   function handleKeydown(e: KeyboardEvent) {
@@ -185,13 +188,6 @@
       e.preventDefault();
     }
   }
-
-  onMount(() =>
-    searchFuzzy.subscribe(() => {
-      // Reset the selection index when the search query changes.
-      selectionIndex = 0;
-    }),
-  );
 
   onMount(() => {
     window.addEventListener('keydown', handleKeydown, { capture: true });
@@ -286,7 +282,10 @@
             href={getRowHref(row)}
             on:click={() => submitIndex(index)}
             {index}
-            bind:selectionIndex
+            selectionIndex={effectiveSelectionIndex}
+            setSelectionIndex={(i) => {
+              selectionIndex = i;
+            }}
           >
             {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
               <RecordSelectorDataCell
@@ -303,7 +302,7 @@
               <RecordSelectorSubmitButton
                 purpose={$purpose}
                 on:click={() => submitIndex(index)}
-                isSelected={selectionIndex === index}
+                isSelected={effectiveSelectionIndex === index}
               />
             </Cell>
           </RecordSelectorDataRow>

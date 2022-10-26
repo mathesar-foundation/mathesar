@@ -26,6 +26,8 @@
   export let height = 0;
 
   let isSubmittingNewRecord = false;
+  /** true when the user is hover on the "Create new record" button. */
+  let isHoveringCreate = false;
 
   $: ({
     constraintsDataStore,
@@ -104,6 +106,7 @@
       {controller}
       {nestedController}
       {submitResult}
+      {isHoveringCreate}
     />
   {/if}
 
@@ -125,7 +128,17 @@
 
   {#if hasSearchQueries}
     <div class="footer">
-      <Button size="small" appearance="secondary" on:click={submitNewRecord}>
+      <Button
+        size="small"
+        appearance="secondary"
+        on:click={submitNewRecord}
+        on:mouseenter={() => {
+          isHoveringCreate = true;
+        }}
+        on:mouseleave={() => {
+          isHoveringCreate = false;
+        }}
+      >
         <Icon {...iconAddNew} />
         <span>Create Record From Search Criteria</span>
       </Button>

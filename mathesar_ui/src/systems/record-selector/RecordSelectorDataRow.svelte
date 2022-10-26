@@ -6,6 +6,7 @@
   export let href: string | undefined = undefined;
   export let index: number;
   export let selectionIndex: number | undefined = undefined;
+  export let setSelectionIndex: (i: number) => void;
 
   $: element = href ? 'a' : 'div';
   $: isSelected = selectionIndex === index;
@@ -22,7 +23,7 @@
     if (selectionIndex === undefined) {
       return;
     }
-    selectionIndex = index;
+    setSelectionIndex(index);
   }
 </script>
 
