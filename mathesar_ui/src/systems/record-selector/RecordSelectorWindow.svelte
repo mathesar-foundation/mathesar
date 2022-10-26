@@ -90,13 +90,14 @@
 
 <style>
   .record-selector-window {
-    --z-index-row-header: 1;
-    --z-index-thead: 2;
-    --z-index-focused-input: 3;
-    --z-index-thead-row-header: 4;
-    --z-index-shadow-inset: 5;
-    --z-index-overlay: 6;
-    --z-index-above-overlay: 7;
+    --z-index-divider: 1;
+    --z-index-row-header: 2;
+    --z-index-thead: 3;
+    --z-index-focused-input: 4;
+    --z-index-thead-row-header: 5;
+    --z-index-shadow-inset: 6;
+    --z-index-overlay: 7;
+    --z-index-above-overlay: 8;
     display: flex;
     flex-direction: column;
     overflow: hidden;

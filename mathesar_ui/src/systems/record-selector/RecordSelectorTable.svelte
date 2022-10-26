@@ -216,7 +216,11 @@
               <ProcessedColumnName {processedColumn} />
             </Cell>
           {/each}
-          <Cell rowType="columnHeaderRow" columnType="rowHeaderColumn" />
+          <Cell
+            rowType="columnHeaderRow"
+            columnType="rowHeaderColumn"
+            {overflowDetails}
+          />
         </div>
         <div class="tr inputs">
           {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
@@ -240,13 +244,25 @@
               }}
             />
           {/each}
-          <Cell rowType="searchInputRow" columnType="rowHeaderColumn" />
+          <Cell
+            rowType="searchInputRow"
+            columnType="rowHeaderColumn"
+            {overflowDetails}
+          />
         </div>
         <div class="tr inputs">
           {#each [...$processedColumns] as [columnId, _] (columnId)}
-            <Cell rowType="dividerRow" columnType="dataColumn" />
+            <Cell
+              rowType="dividerRow"
+              columnType="dataColumn"
+              {overflowDetails}
+            />
           {/each}
-          <Cell rowType="dividerRow" columnType="rowHeaderColumn" />
+          <Cell
+            rowType="dividerRow"
+            columnType="rowHeaderColumn"
+            {overflowDetails}
+          />
         </div>
       </div>
       <div class="tbody">
@@ -274,7 +290,11 @@
                 />
               </Cell>
             {/each}
-            <Cell rowType="dataRow" columnType="rowHeaderColumn">
+            <Cell
+              rowType="dataRow"
+              columnType="rowHeaderColumn"
+              {overflowDetails}
+            >
               <RecordSelectorSubmitButton
                 purpose={$purpose}
                 on:click={() => submitIndex(index)}
@@ -320,9 +340,6 @@
   }
   .thead {
     display: table-header-group;
-    /* position: sticky;
-    top: 0;
-    z-index: 0; */
   }
   .thead .tr:first-child {
     /**
@@ -344,8 +361,6 @@
     display: table-row;
   }
 
-  /** TODO: this element needs to move into a wrapper so that the shadow doesn't
-   * scroll with the content. */
   .inset-shadow {
     position: absolute;
     top: 0;
@@ -354,14 +369,6 @@
     width: calc(100% - var(--body-padding));
     pointer-events: none;
     z-index: var(--z-index-shadow-inset);
-  }
-  .has-overflow-top :global(.divider-bg) {
-    box-shadow: var(--overflow-shadow);
-    clip-path: inset(0 0 var(--clip-path-size) 0);
-  }
-  .has-overflow-right :global(.row-header) {
-    box-shadow: var(--overflow-shadow);
-    clip-path: inset(0 0 0 var(--clip-path-size));
   }
   .has-overflow-bottom .inset-shadow {
     box-shadow: 0 -1rem var(--overflow-shadow-size) -1rem

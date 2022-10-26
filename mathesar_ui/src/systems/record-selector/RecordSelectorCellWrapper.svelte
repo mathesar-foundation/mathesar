@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { ensureReadable } from '@mathesar-component-library';
+  import type { OverflowDetails } from '@mathesar/utils/overflowObserver';
   import type {
     CellLayoutRowType,
     CellState,
@@ -8,6 +10,12 @@
   export let rowType: CellLayoutRowType;
   export let columnType: CellLayoutColumnType;
   export let state: CellState | undefined = undefined;
+  export let overflowDetails: OverflowDetails | undefined = undefined;
+
+  $: hasOverflowTop = ensureReadable(overflowDetails?.hasOverflowTop ?? false);
+  $: hasOverflowRight = ensureReadable(
+    overflowDetails?.hasOverflowRight ?? false,
+  );
 </script>
 
 <div
@@ -18,11 +26,11 @@
   class:row-header={columnType === 'rowHeaderColumn'}
   class:has-outline={state === 'focused' || state === 'acquiringFkValue'}
   class:acquiring-fk-value={state === 'acquiringFkValue'}
+  class:table-overflow-top={$hasOverflowTop}
+  class:table-overflow-right={$hasOverflowRight}
 >
   <slot />
   {#if rowType === 'dividerRow'}
-    <!-- TODO I'm not sure we need this extra element anymore. Can we just set a
-  background on the main element instead? -->
     <div class="divider-bg" />
   {/if}
   {#if rowType === 'searchInputRow'}
@@ -84,7 +92,7 @@
     height: 10px;
     border: none;
     position: sticky;
-    z-index: var(--z-index-thead);
+    z-index: var(--z-index-divider);
     top: calc(2 * var(--row-height));
     background: white;
     overflow: visible;
@@ -96,10 +104,6 @@
     width: 100%;
     height: 100%;
     background: var(--border-color);
-  }
-  .divider:last-child .divider-bg {
-    background: white;
-    width: calc(100% - var(--body-padding) + 1px);
   }
 
   /** Column types ************************************************************/
@@ -118,6 +122,10 @@
   .input.row-header,
   .divider.row-header {
     z-index: var(--z-index-thead-row-header);
+  }
+  .divider.row-header .divider-bg {
+    background: white;
+    width: calc(100% - var(--body-padding) + 1px);
   }
 
   /** Focus indicator *********************************************************/
@@ -140,5 +148,18 @@
   .acquiring-fk-value {
     --outline-color: #888;
     z-index: var(--z-index-above-overlay);
+  }
+
+  /** Overflow shadows ********************************************************/
+  .table-overflow-top.divider .divider-bg {
+    box-shadow: var(--overflow-shadow);
+    clip-path: inset(0 0 var(--clip-path-size) 0);
+  }
+  .table-overflow-top.divider .divider-bg {
+    background: var(--border-color);
+  }
+  .table-overflow-right.row-header {
+    box-shadow: var(--overflow-shadow);
+    clip-path: inset(0 0 0 var(--clip-path-size));
   }
 </style>
