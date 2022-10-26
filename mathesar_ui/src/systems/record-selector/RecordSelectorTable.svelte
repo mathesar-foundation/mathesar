@@ -3,13 +3,10 @@
 
   import { ImmutableSet } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/tables/columns';
-  import type { ResultValue } from '@mathesar/api/tables/records';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     constraintIsFk,
-    rowHasSavedRecord,
     setTabularDataStoreInContext,
     TabularData,
     type RecordRow,
@@ -33,6 +30,7 @@
   import RecordSelectorInputCell from './RecordSelectorInputCell.svelte';
   import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
   import { getPkValueInRecord } from './recordSelectorUtils';
+  import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -188,13 +186,6 @@
     }
   }
 
-  function getRecordSummary(
-    columnId: number,
-    value: ResultValue,
-  ): string | undefined {
-    return $recordSummaries.get(String(columnId))?.get(String(value));
-  }
-
   onMount(() =>
     searchFuzzy.subscribe(() => {
       // Reset the selection index when the search query changes.
@@ -298,16 +289,11 @@
             bind:selectionIndex
           >
             {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-              {@const value = row?.record?.[columnId]}
-              <Cell rowType="dataRow" columnType="dataColumn">
-                <CellFabric
-                  columnFabric={processedColumn}
-                  {value}
-                  recordSummary={getRecordSummary(columnId, value)}
-                  disabled
-                  showAsSkeleton={!rowHasSavedRecord(row)}
-                />
-              </Cell>
+              <RecordSelectorDataCell
+                {row}
+                {processedColumn}
+                {recordSummaries}
+              />
             {/each}
             <Cell
               rowType="dataRow"
