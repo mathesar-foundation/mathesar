@@ -6,7 +6,7 @@
     InputGroup,
     Select,
   } from '@mathesar-component-library';
-  import { iconDelete } from '@mathesar/icons';
+  import { iconDeleteMajor } from '@mathesar/icons';
   import type { ReadableMapLike, GroupEntryColumnLike } from './types';
 
   type T = $$Generic;
@@ -107,7 +107,7 @@
   {/if}
   {#if allowDelete}
     <Button on:click={() => dispatch('removeGroup')}>
-      <Icon size="0.8rem" {...iconDelete} />
+      <Icon size="0.8rem" {...iconDeleteMajor} />
     </Button>
   {/if}
 </InputGroup>
