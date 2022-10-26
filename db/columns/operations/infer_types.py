@@ -41,7 +41,7 @@ TYPE_INFERENCE_DAG = {
 }
 
 
-def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=TYPE_INFERENCE_DAG):
+def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=TYPE_INFERENCE_DAG, metadata=None):
     """
     Attempts to cast the column to the best type for it, given the mappings defined in TYPE_INFERENCE_DAG
     and _get_type_classes_mapped_to_dag_nodes. Returns the resulting column type's class.
@@ -58,6 +58,7 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
             - if none of the column type alterations succeed, return the current column type's
             class.
     """
+    metadata = metadata if metadata else get_empty_metadata()
     if depth > MAX_INFERENCE_DAG_DEPTH:
         raise DagCycleError("The type_inference_dag likely has a cycle")
     type_classes_to_dag_nodes = _get_type_classes_mapped_to_dag_nodes(engine)
@@ -66,8 +67,7 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
         schema=schema,
         table_name=table_name,
         column_name=column_name,
-        # TODO reuse metadata
-        metadata=get_empty_metadata(),
+        metadata=metadata,
     )
     # a DAG node will be a DatabaseType Enum
     dag_node = type_classes_to_dag_nodes.get(column_type_class)
@@ -77,7 +77,7 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
     for db_type in types_to_cast_to:
         try:
             with engine.begin() as conn:
-                alter_column_type(table_oid, column_name, engine, conn, db_type)
+                alter_column_type(table_oid, column_name, engine, conn, db_type, metadata=metadata)
             logger.info(f"Column {column_name} altered to type {db_type.id}")
             column_type_class = infer_column_type(
                 schema,
@@ -86,6 +86,7 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
                 engine,
                 depth=depth + 1,
                 type_inference_dag=type_inference_dag,
+                metadata=metadata
             )
             break
         # It's expected we catch this error when the test to see whether
@@ -98,6 +99,7 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
 
 
 def _get_column_class(engine, schema, table_name, column_name, metadata):
+    # Metadata can be reused because reflect_table fetches the table details again
     table = reflect_table(table_name, schema, engine, metadata=metadata)
     column_type_class = table.columns[column_name].type.__class__
     return column_type_class
