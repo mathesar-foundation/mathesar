@@ -10,4 +10,6 @@ export interface TextInputProps extends SimplifiedInputProps, BaseInputProps {
 
 export type SimplifiedTextInputProps = Omit<TextInputProps, 'value'>;
 
-export type TextInputWithPrefixProps = TextInputProps & { prefixIcon: IconProps };
+export type TextInputWithPrefixProps = TextInputProps & {
+  prefixIcon: IconProps;
+};
