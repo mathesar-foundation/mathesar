@@ -28,6 +28,7 @@ during Sheet component creation.
     containerClass?: string;
     recordSummary?: string;
     setRecordSummary?: (recordId: string, recordSummary: string) => void;
+    allowsHyperlinks?: boolean;
   }
 
   export let value: unknown;

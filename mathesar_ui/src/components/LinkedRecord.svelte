@@ -39,6 +39,7 @@
       on:mouseleave={() => {
         isHoveringRecordPageLink = false;
       }}
+      on:click={(e) => e.stopPropagation()}
     >
       {label}
     </a>

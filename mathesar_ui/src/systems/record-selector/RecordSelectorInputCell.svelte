@@ -49,6 +49,7 @@
       componentAndProps={processedColumn.inputComponentAndProps}
       {value}
       {recordSummary}
+      allowsHyperlinks={false}
       setRecordSummary={(recordId, _recordSummary) =>
         recordSummaryStore.addBespokeRecordSummary({
           columnId: String(column.id),

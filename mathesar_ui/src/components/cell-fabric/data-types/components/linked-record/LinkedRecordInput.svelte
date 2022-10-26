@@ -20,6 +20,7 @@
     class?: string;
     containerClass?: string;
     id?: string;
+    allowsHyperlinks?: boolean;
   };
 
   const labelController = getLabelControllerFromContainingLabel();
@@ -34,15 +35,17 @@
   let classes: $$Props['class'] = '';
   export { classes as class };
   export let containerClass = '';
+  export let allowsHyperlinks = true;
 
   let isAcquiringInput = false;
   let element: HTMLSpanElement;
 
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
-  $: recordPageHref = hasValue
-    ? $storeToGetRecordPageUrl({ tableId, recordId: value })
-    : undefined;
+  $: recordPageHref =
+    hasValue && allowsHyperlinks
+      ? $storeToGetRecordPageUrl({ tableId, recordId: value })
+      : undefined;
 
   function clear() {
     value = undefined;
@@ -114,7 +117,6 @@
         hasDeleteButton
         on:delete={clear}
         {recordPageHref}
-        on:click={(e) => e.stopPropagation()}
       />
     {/if}
   </span>
