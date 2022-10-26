@@ -13,9 +13,7 @@
   box-sizing: border-box;
   text-align: var(--input-element-text-align, 'left');
 
-  // Using focus-within to style the focus state of the wrapper
-  // when the input is wrapped and is focused
-  &:focus-within {
+  &:focus {
     border-color: var(--brand-500);
     outline: 0;
     box-shadow: 0 0 0 2px var(--brand-box-shadow);

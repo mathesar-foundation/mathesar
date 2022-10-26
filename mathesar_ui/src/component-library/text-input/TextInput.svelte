@@ -1,8 +1,8 @@
 <script lang="ts">
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
-  import type { BaseTextInputProps } from './TextInputTypes';
+  import type { TextInputProps } from './TextInputTypes';
 
-  type $$Props = BaseTextInputProps;
+  type $$Props = TextInputProps;
 
   /**
    * Value of the input. Use bind tag for two-way binding.
@@ -30,7 +30,7 @@
   bind:this={element}
   {...$$restProps}
   type="text"
-  class={classes}
+  class={['input-element', 'text-input', classes].join(' ')}
   class:has-error={hasError}
   bind:value
   {id}

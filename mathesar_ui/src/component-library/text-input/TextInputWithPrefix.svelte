@@ -1,9 +1,9 @@
 <script lang="ts">
   import Icon from '../icon/Icon.svelte';
   import TextInput from './TextInput.svelte';
-  import type { TextInputProps } from './TextInputTypes';
+  import type { TextInputWithPrefixProps } from './TextInputTypes';
 
-  type $$Props = TextInputProps;
+  type $$Props = TextInputWithPrefixProps;
 
   /**
    * Value of the input. Use bind tag for two-way binding.
@@ -18,25 +18,13 @@
   export let prefixIcon: $$Props['prefixIcon'];
 </script>
 
-{#if prefixIcon}
-  <span class="input-element prefix-wrapper">
+<span class="prefix-wrapper">
+  <div class="input-prefix-icon-container">
     <Icon {...prefixIcon} />
-    <TextInput
-      class={['prefixed-input', 'text-input', classes].join(' ')}
-      {...$$restProps}
-      bind:value
-      on:input
-      on:focus
-      on:blur
-      on:keydown
-      on:beforeinput
-      on:change
-    />
-  </span>
-{:else}
+  </div>
   <TextInput
+    class={['prefixed-input', classes].join(' ')}
     {...$$restProps}
-    class={['input-element', 'text-input', classes].join(' ')}
     bind:value
     on:input
     on:focus
@@ -45,16 +33,25 @@
     on:beforeinput
     on:change
   />
-{/if}
+</span>
 
-<style>
+<style lang="scss">
   .prefix-wrapper {
+    --icon-width: 2.142rem;
     position: relative;
-    display: flex;
-  }
-  :global(.prefix-wrapper .prefixed-input) {
-    flex: 1;
-    margin-left: 0.2rem;
-    border: 0;
+    .input-prefix-icon-container {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: var(--icon-width);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    :global(.prefixed-input) {
+      padding-left: var(--icon-width);
+    }
   }
 </style>
