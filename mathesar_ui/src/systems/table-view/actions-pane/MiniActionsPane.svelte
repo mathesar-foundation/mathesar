@@ -21,11 +21,12 @@
 
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore, isLoading } =
     $tabularData);
-  $: ({ columns } = $columnsDataStore);
+  $: ({ columns } = columnsDataStore);
+  $: columnsFetchStatus = columnsDataStore.fetchStatus;
   $: recordState = recordsData.state;
 
   $: isError =
-    $columnsDataStore.state === States.Error ||
+    $columnsFetchStatus?.state === 'failure' ||
     $recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
 
@@ -42,7 +43,7 @@
 
   <Dropdown showArrow={false} ariaLabel="Sorting">
     <Icon slot="trigger" {...iconSorting} />
-    <Sort slot="content" {columns} sorting={meta.sorting} />
+    <Sort slot="content" columns={$columns} sorting={meta.sorting} />
   </Dropdown>
 
   <Dropdown showArrow={false} ariaLabel="Grouping">

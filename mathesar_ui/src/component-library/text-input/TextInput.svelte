@@ -25,6 +25,7 @@
 
 <BaseInput {...$$restProps} bind:id />
 
+<!-- TODO: Why do we have two base classes input-element & text-input -->
 <input
   bind:this={element}
   {...$$restProps}
