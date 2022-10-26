@@ -62,6 +62,8 @@
     overflow: hidden;
     position: relative;
     min-height: var(--cell-height);
+    display: flex;
+    flex-direction: column;
 
     &.has-padding {
       padding: var(--cell-padding);

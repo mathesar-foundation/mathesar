@@ -118,11 +118,7 @@
 
 <style>
   .linked-record-cell {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
+    flex: 1 0 auto;
     display: grid;
     grid-template: auto / 1fr auto;
   }
