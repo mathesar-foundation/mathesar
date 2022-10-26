@@ -1,14 +1,20 @@
 import time
 import warnings
 
+from sqlalchemy.exc import InterfaceError
 
-def cursor_closed_handler_middleware(get_response):
-    def middleware(request):
-        response = get_response(request)
-        if response.status_code == 500:
-            warnings.warn("Response Status Code 500; trying again.")
-            time.sleep(1)
-            response = get_response(request)
+
+class CursorClosedHandlerMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
         return response
 
-    return middleware
+    def process_exception(self, request, exception):
+        if isinstance(exception, InterfaceError):
+            warnings.warn("Response Status Code 500; trying again.")
+            time.sleep(1)
+            response = self.get_response(request)
+            return response
