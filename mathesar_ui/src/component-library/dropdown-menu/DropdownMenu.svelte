@@ -4,6 +4,10 @@
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
+  // TODO: Find some way to provide better typings
+  // for the inherited props from the Dropdown component
+  // interface $$RestProps extends ComponentProps<Dropdown> {};
+
   export let label: string;
   export let icon: IconProps | undefined = undefined;
   export let closeOnInnerClick = true;
@@ -11,10 +15,13 @@
 
 <Dropdown {closeOnInnerClick} ariaLabel={label} {...$$restProps}>
   <span class="dropdown-menu-trigger" slot="trigger">
+    <!-- TODO: Figure out a way to make exactly one out of label and icon mandatory in props using TS -->
     {#if icon}
       <Icon {...icon} />
     {/if}
-    <span class="label">{label}</span>
+    {#if label}
+      <span class="label">{label}</span>
+    {/if}
   </span>
   <Menu slot="content" --min-width="100%">
     <slot />

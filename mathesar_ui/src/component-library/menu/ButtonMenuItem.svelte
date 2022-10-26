@@ -7,6 +7,8 @@
 
   export let icon: IconProps | undefined = undefined;
   export let disabled = false;
+  /** Visually indicates that the action is destructive */
+  export let danger = false;
 
   function handleClick() {
     if (disabled) {
@@ -16,7 +18,7 @@
   }
 </script>
 
-<div class="menu-item" on:click={handleClick} class:disabled>
+<div class="menu-item" on:click={handleClick} class:disabled class:danger>
   <div class="spacer cell" />
   <div class="control cell" />
   <div class="icon cell">
