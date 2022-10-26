@@ -2,14 +2,14 @@
   import { portal, Window } from '@mathesar/component-library';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import { TabularData, Meta } from '@mathesar/stores/table-data';
+  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { Meta, TabularData } from '@mathesar/stores/table-data';
   import { getTableName } from '@mathesar/stores/tables';
   import { getArticleForWord } from '@mathesar/utils/languageUtils';
   import Pagination from '@mathesar/utils/Pagination';
+  import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
   import type { RecordSelectorPurpose } from './recordSelectorUtils';
-  import {} from './RecordSelectorController';
-  import RecordSelectorContent from './RecordSelectorContent.svelte';
 
   const verbMap = new Map<RecordSelectorPurpose, string>([
     ['dataEntry', 'Pick'],
@@ -42,6 +42,7 @@
       })
     : undefined;
   $: tableName = $tableId ? getTableName($tableId) : undefined;
+  $: tablePageHref = $storeToGetTablePageUrl({ tableId: $tableId });
   $: verb = verbMap.get($purpose) ?? '';
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: marginBottom = $nestedSelectorIsOpen
@@ -68,7 +69,9 @@
         {verb}
         {#if tableName}
           {getArticleForWord(tableName)}
-          <Identifier>{tableName}</Identifier>
+          <a href={tablePageHref} title="View All {tableName} Records">
+            <Identifier>{tableName}</Identifier>
+          </a>
         {/if}
         Record
       </span>
