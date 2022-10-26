@@ -1,6 +1,6 @@
 .menu {
-  --spacing-x: 0.4em;
-  --spacing-y: 0.4em;
+  --spacing-x: 0.5em;
+  --spacing-y: 0.9em;
   display: inline-grid;
   min-width: var(--min-width, 0);
   grid-template-columns:
@@ -9,7 +9,6 @@
     [icon] auto
     [label] 1fr
     [spacer-right] var(--spacing-x);
-  padding: var(--spacing-y) 0;
 
   .menu-heading {
     grid-column: 1 / -1;
@@ -20,9 +19,8 @@
 
   .menu-divider {
     grid-column: 1 / -1;
-    border-top: 0.1em solid #ccc;
+    border-top: 0.1em solid var(--slate-200);
     height: 0;
-    margin: var(--spacing-y, 0.4em) 0;
   }
 
   /**
@@ -48,13 +46,16 @@
   .menu-item {
     display: contents;
     cursor: pointer;
-    color: inherit;
+    color: var(--slate-800);
 
+    &.danger {
+      color: var(--red-500);
+    }
     &:not(.disabled):hover .cell {
-      background-color: #f0f0f0;
+      background-color: var(--slate-100);
     }
     &.disabled {
-      color: #999;
+      color: var(--slate-300);
       cursor: not-allowed;
     }
     .control {
