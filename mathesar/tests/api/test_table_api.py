@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.core.files.base import File, ContentFile
 from sqlalchemy import text
 
-from db.columns.operations.select import get_column_attnum_from_names_as_map
+from db.columns.operations.select import get_column_attnum_from_name, get_column_attnum_from_names_as_map
 from db.types.base import PostgresType, MathesarCustomType
 from db.metadata import get_empty_metadata
 
@@ -1412,6 +1412,30 @@ def test_table_extract_columns_drop_original_table(create_patents_table, client)
         if extracted_column.name != 'id':
             assert extracted_column.attnum == columns_with_attnum[extracted_column.name]
             assert extracted_column.id == column_name_id_map[extracted_column.name]
+
+
+def test_table_extract_columns_specify_fk_column_name(create_patents_table, client):
+    table_name = 'Patents'
+    table = create_patents_table(table_name)
+    column_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
+    column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
+    relationship_fk_column_name = "patent_info"
+    extract_table_name = "Patent Info"
+    split_data = {
+        'extract_columns': column_ids_to_extract,
+        'extracted_table_name': extract_table_name,
+        'relationship_fk_column_name': relationship_fk_column_name
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
+    assert current_table_response.status_code == 201
+    response_data = current_table_response.json()
+    remainder_table_id = response_data['remainder_table']
+    remainder_table = Table.objects.get(id=remainder_table_id)
+    metadata = get_empty_metadata()
+    relationship_fk_column_attnum = get_column_attnum_from_name(remainder_table.oid, relationship_fk_column_name, remainder_table._sa_engine, metadata=metadata)
+    assert relationship_fk_column_attnum is not None
+    Column.objects.get(table_id=remainder_table_id, attnum=relationship_fk_column_attnum)
 
 
 def test_table_extract_columns_with_display_options(create_patents_table, client):

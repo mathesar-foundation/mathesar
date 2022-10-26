@@ -16,7 +16,7 @@ POSTGRES_NAME_LEN_CAP = 63
 
 def get_table_column_types(table):
     schema = table.schema
-    db_types = infer_table_column_types(schema.name, table.name, schema._sa_engine)
+    db_types = infer_table_column_types(schema.name, table.name, schema._sa_engine, get_cached_metadata())
     col_types = {
         col.name: db_type.id
         for col, db_type in zip(table.sa_columns, db_types)
