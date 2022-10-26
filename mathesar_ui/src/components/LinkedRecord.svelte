@@ -55,7 +55,7 @@
     -->
     <span
       class="delete-button"
-      on:click={handleDeleteButtonClick}
+      on:click|stopPropagation={handleDeleteButtonClick}
       role="button"
       tabindex="-1"
       aria-label="Clear value"
