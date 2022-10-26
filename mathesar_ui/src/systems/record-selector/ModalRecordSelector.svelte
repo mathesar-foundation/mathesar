@@ -15,18 +15,11 @@
   $: ({ columnWithNestedSelectorOpen } = recordSelectorController);
   $: nestedSelectorIsOpen = !!$columnWithNestedSelectorOpen;
   $: ({ isOpen, isOnTop } = modalController);
-  $: closeOnEsc = $isOnTop && !nestedSelectorIsOpen;
   $: closeOnOverlay = $isOnTop && !nestedSelectorIsOpen;
 
   function close() {
     $isOpen = false;
     recordSelectorController.cancel();
-  }
-
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && isOpen && closeOnEsc) {
-      close();
-    }
   }
 
   function handleOverlayClick() {
@@ -42,8 +35,6 @@
 
   $: void dispatchOpenOrClose($isOpen);
 </script>
-
-<svelte:window on:keydown={handleKeydown} />
 
 {#if $isOpen}
   <div use:portal class="modal-record-selector">

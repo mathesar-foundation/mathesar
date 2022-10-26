@@ -47,7 +47,15 @@
   $: marginBottom = $nestedSelectorIsOpen
     ? `calc(${nestedSelectorVerticalOffset} - ${contentHeight}px)`
     : '0';
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && !$nestedSelectorIsOpen) {
+      controller.cancel();
+    }
+  }
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 {#if tabularData}
   <div class="record-selector-window" style="margin-bottom: {marginBottom};">
