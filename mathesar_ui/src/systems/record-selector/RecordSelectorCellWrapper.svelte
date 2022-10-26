@@ -148,6 +148,7 @@
   .acquiring-fk-value {
     --outline-color: #888;
     z-index: var(--z-index-above-overlay);
+    pointer-events: none;
   }
 
   /** Overflow shadows ********************************************************/

@@ -91,7 +91,7 @@
      * of the viewport when the viewport is short enough to cause the upper
      * record selector windows to overflow off the top of the viewport.
      */
-    --nested-selector-extra-top-inset: 0.75rem;
+    --nested-selector-extra-top-inset: 2rem;
   }
   .overlay {
     background-color: rgba(0, 0, 0, 0.2);
