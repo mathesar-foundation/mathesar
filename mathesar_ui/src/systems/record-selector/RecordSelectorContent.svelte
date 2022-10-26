@@ -127,7 +127,7 @@
     <div class="footer">
       <Button size="small" appearance="secondary" on:click={submitNewRecord}>
         <Icon {...iconAddNew} />
-        Create Record From Search Criteria
+        <span>Create Record From Search Criteria</span>
       </Button>
     </div>
   {/if}
@@ -140,6 +140,14 @@
     flex-direction: column;
     overflow: hidden;
     --body-padding: 1rem;
+    /** This is to give extra horizontal space between the right-most edge of
+     * the lower inset shadow and the right-most edge of the submit buttons when
+     * the content is scrolling vertically. Without it, the edge of the shadow
+     * is aligned directly with the edge of the button, and it doesn't look
+     * good. We're using a CSS variable here so that we can keep the right edges
+     * of the submit buttons aligned with the right edge of the "create new"
+     * button. */
+    --extra-body-padding: 0.5rem;
     padding: var(--body-padding);
     /** So that the table's vertical scroll bar is flush against window */
     padding-right: 0;
@@ -177,7 +185,7 @@
 
   .footer {
     text-align: right;
-    margin-top: var(--body-padding);
-    padding-right: var(--body-padding);
+    margin-top: 0.5rem;
+    padding-right: calc(var(--body-padding) + var(--extra-body-padding));
   }
 </style>

@@ -23,8 +23,8 @@
 
 <svelte:element
   this={element}
-  class="submit passthrough"
-  class:selected={isSelected}
+  class="submit btn btn-secondary size-small"
+  class:hover={isSelected}
   on:click={handleClick}
 >
   <span class="icon">
@@ -34,27 +34,3 @@
     {phrase}
   </span>
 </svelte:element>
-
-<style>
-  .submit {
-    display: inline-flex;
-    align-items: center;
-    border-radius: 0.2rem;
-    background: var(--color-gray-light);
-    border: 2px solid var(--color-gray-medium);
-    padding: 0.2rem 0.4rem;
-    font-size: var(--text-size-small);
-  }
-  .icon {
-    margin-right: 0.5em;
-    opacity: 0.5;
-  }
-  .selected {
-    background: var(--color-blue-light);
-    border: 2px solid var(--color-blue-medium);
-    font-weight: bold;
-  }
-  .selected .icon {
-    opacity: 1;
-  }
-</style>

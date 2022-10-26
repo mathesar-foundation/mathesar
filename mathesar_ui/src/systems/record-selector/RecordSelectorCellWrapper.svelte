@@ -113,7 +113,7 @@
     padding-left: 0.5rem;
     border: none;
     background: white;
-    padding-right: calc(var(--body-padding) + 0.5rem);
+    padding-right: calc(var(--body-padding) + var(--extra-body-padding));
     position: sticky;
     right: 0;
     z-index: var(--z-index-row-header);
