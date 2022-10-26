@@ -163,6 +163,7 @@
     position: relative;
     display: block;
     padding: var(--padding);
+    padding-right: 0;
     z-index: 2;
   }
   .dropdown-button {
