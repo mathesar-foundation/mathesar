@@ -11,6 +11,7 @@
   export let columnType: CellLayoutColumnType;
   export let state: CellState | undefined = undefined;
   export let overflowDetails: OverflowDetails | undefined = undefined;
+  export let title: string | undefined = undefined;
 
   $: hasOverflowTop = ensureReadable(overflowDetails?.hasOverflowTop ?? false);
   $: hasOverflowRight = ensureReadable(
@@ -28,6 +29,7 @@
   class:acquiring-fk-value={state === 'acquiringFkValue'}
   class:table-overflow-top={$hasOverflowTop}
   class:table-overflow-right={$hasOverflowRight}
+  {title}
 >
   <slot />
   {#if rowType === 'dividerRow'}
