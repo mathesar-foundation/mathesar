@@ -138,9 +138,9 @@
     left: 0;
     width: 100%;
     height: 100%;
-    border-radius: 0.2rem;
+    border-radius: var(--focus-highlight-width);
     pointer-events: none;
-    box-shadow: 0 0 0 0.2rem var(--outline-color);
+    box-shadow: 0 0 0 var(--focus-highlight-width) var(--outline-color);
   }
   .td:not(.has-outline) .outline {
     display: none;
@@ -149,6 +149,9 @@
     --outline-color: #888;
     z-index: var(--z-index-above-overlay);
     pointer-events: none;
+  }
+  .has-outline.table-overflow-right {
+    z-index: var(--z-index-focused-input-with-overflow);
   }
 
   /** Overflow shadows ********************************************************/

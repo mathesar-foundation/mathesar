@@ -12,6 +12,7 @@
     SearchFuzzy,
   } from '@mathesar/stores/table-data';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
+  import type { OverflowDetails } from '@mathesar/utils/overflowObserver';
   import CellWrapper from './RecordSelectorCellWrapper.svelte';
   import { getCellState } from './recordSelectorUtils';
 
@@ -20,6 +21,7 @@
   export let recordSummaryStore: RecordSummaryStore;
   export let hasFocus: boolean;
   export let hasNestedSelectorOpen: boolean;
+  export let overflowDetails: OverflowDetails | undefined = undefined;
 
   $: ({ column } = processedColumn);
   $: value = $searchFuzzy.get(column.id);
@@ -34,7 +36,12 @@
   }
 </script>
 
-<CellWrapper rowType="searchInputRow" columnType="dataColumn" {state}>
+<CellWrapper
+  rowType="searchInputRow"
+  columnType="dataColumn"
+  {state}
+  {overflowDetails}
+>
   <Debounce on:artificialChange={updateValue} let:handleNewValue>
     <DynamicInput
       class="record-selector-input"

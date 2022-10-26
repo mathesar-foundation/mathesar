@@ -228,6 +228,7 @@
             <RecordSelectorInputCell
               hasFocus={column === columnWithFocus}
               hasNestedSelectorOpen={column === $columnWithNestedSelectorOpen}
+              {overflowDetails}
               {processedColumn}
               {searchFuzzy}
               recordSummaryStore={recordSummaries}
@@ -321,6 +322,7 @@
     --clip-path-size: calc(-1 * var(--overflow-shadow-size));
     --overflow-shadow: 0 0 var(--overflow-shadow-size)
       var(--overflow-shadow-color);
+    --focus-highlight-width: 0.2rem;
   }
   .scroll-container {
     flex: 0 1 auto;
@@ -334,6 +336,7 @@
     overflow: auto;
     position: relative;
     border-spacing: 0;
+    margin-left: var(--focus-highlight-width);
     --border-width: 1px;
     --border-color: #e7e7e7;
     --row-height: 2.25rem;

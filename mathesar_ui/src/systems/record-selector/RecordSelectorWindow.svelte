@@ -93,11 +93,12 @@
     --z-index-divider: 1;
     --z-index-row-header: 2;
     --z-index-thead: 3;
-    --z-index-focused-input: 4;
+    --z-index-focused-input-with-overflow: 4;
     --z-index-thead-row-header: 5;
-    --z-index-shadow-inset: 6;
-    --z-index-overlay: 7;
-    --z-index-above-overlay: 8;
+    --z-index-focused-input: 6;
+    --z-index-shadow-inset: 7;
+    --z-index-overlay: 8;
+    --z-index-above-overlay: 9;
     display: flex;
     flex-direction: column;
     overflow: hidden;
