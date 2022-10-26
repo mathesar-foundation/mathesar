@@ -15,8 +15,9 @@
       | HTMLInputElement
       | undefined;
     // Why do we imperatively focus the input element when the DOM performs this
-    // behavior natively? Because we might need to associate a label with a
-    // custom input component that doesn't have that doesn't contain any native
+    // behavior natively? 
+    // Because we might need to associate a label with a
+    // custom input component that doesn't have or doesn't contain any native
     // DOM elements with that behavior.
     inputElement?.focus();
   }
