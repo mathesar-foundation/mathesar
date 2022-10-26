@@ -14,7 +14,7 @@ class CursorClosedHandlerMiddleware:
 
     def process_exception(self, request, exception):
         if isinstance(exception, InterfaceError):
-            warnings.warn("Response Status Code 500; trying again.")
+            warnings.warn("InterfaceError caught; trying again.")
             time.sleep(1)
             response = self.get_response(request)
             return response
