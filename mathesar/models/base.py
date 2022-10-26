@@ -595,6 +595,7 @@ class Table(DatabaseObject, Relation):
             columns_to_extract,
             extracted_table_name,
             column_names_id_map,
+            relationship_fk_column_name
     ):
         # Collect various information about relevant columns before mutating
         columns_attnum_to_extract = [column.attnum for column in columns_to_extract]
@@ -607,7 +608,8 @@ class Table(DatabaseObject, Relation):
             columns_attnum_to_extract,
             extracted_table_name,
             self.schema.name,
-            self._sa_engine
+            self._sa_engine,
+            relationship_fk_column_name
         )
         engine = self._sa_engine
 
