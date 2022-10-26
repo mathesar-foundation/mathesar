@@ -10,10 +10,12 @@
   $: element = href ? 'a' : 'div';
   $: isSelected = selectionIndex === index;
 
-  function handleClick() {
-    if (!href) {
-      dispatch('click');
-    }
+  function handleClick(event: MouseEvent) {
+    // Prevent default so that we handle navigation imperatively via functions
+    // in the parent component which also perform other side effects such as
+    // closing the modal after navigation.
+    event.preventDefault();
+    dispatch('click');
   }
 
   function handleMouseMove() {
