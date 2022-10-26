@@ -5,7 +5,7 @@
 
   export let href: string | undefined = undefined;
   export let index: number;
-  export let selectionIndex: number;
+  export let selectionIndex: number | undefined = undefined;
 
   $: element = href ? 'a' : 'div';
   $: isSelected = selectionIndex === index;
@@ -15,6 +15,13 @@
       dispatch('click');
     }
   }
+
+  function handleMouseMove() {
+    if (selectionIndex === undefined) {
+      return;
+    }
+    selectionIndex = index;
+  }
 </script>
 
 <svelte:element
@@ -23,9 +30,7 @@
   {href}
   on:click={handleClick}
   class:selected={isSelected}
-  on:mousemove={() => {
-    selectionIndex = index;
-  }}
+  on:mousemove={handleMouseMove}
 >
   <slot />
 </svelte:element>

@@ -19,6 +19,7 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { tables } from '@mathesar/stores/tables';
+  import { States } from '@mathesar/utils/api';
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';
@@ -41,7 +42,8 @@
   const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
   let columnWithFocus: Column | undefined = undefined;
-  let selectionIndex = 0;
+  /** It will be undefined if we're loading data, for example. */
+  let selectionIndex: number | undefined = undefined;
 
   $: setRecordSelectorControllerInContext(nestedController);
   $: ({ columnWithNestedSelectorOpen, isOpen, purpose } = controller);
@@ -54,7 +56,8 @@
     recordsData,
     processedColumns,
   } = tabularData);
-  $: ({ recordSummaries } = recordsData);
+  $: ({ recordSummaries, state: recordsDataState } = recordsData);
+  $: recordsDataIsLoading = $recordsDataState === States.Loading;
   $: ({ constraints } = $constraintsDataStore);
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: ({ columns } = columnsDataStore);
@@ -78,6 +81,15 @@
     meta.searchFuzzy.update((s) => s.drained());
   }
 
+  function handleRecordsLoadingStateChange(isLoading: boolean) {
+    if (isLoading) {
+      selectionIndex = undefined;
+    } else {
+      selectionIndex = 0;
+    }
+  }
+  $: handleRecordsLoadingStateChange(recordsDataIsLoading);
+
   function handleInputFocus(column: Column) {
     nestedController.cancel();
     columnWithFocus = column;
@@ -88,6 +100,9 @@
   }
 
   function moveSelectionByOffset(offset: number) {
+    if (selectionIndex === undefined) {
+      return;
+    }
     const newSelectionIndex = selectionIndex + offset;
     selectionIndex = Math.min(Math.max(newSelectionIndex, 0), resultCount - 1);
   }
@@ -133,6 +148,9 @@
   }
 
   function submitSelection() {
+    if (selectionIndex === undefined) {
+      return;
+    }
     submitIndex(selectionIndex);
   }
 
