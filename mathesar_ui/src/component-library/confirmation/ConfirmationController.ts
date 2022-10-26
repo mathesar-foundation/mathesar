@@ -3,10 +3,6 @@ import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
 import type { ModalController } from '@mathesar-component-library-dir/modal';
 import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
-import {
-  iconCancel,
-  iconProceed,
-} from '@mathesar-component-library-dir/common/icons';
 
 interface ButtonDetails {
   label: string;
@@ -28,11 +24,9 @@ const baseConfirmationProps: ConfirmationProps = {
   body: 'Are you sure?',
   proceedButton: {
     label: 'Yes',
-    icon: iconProceed,
   },
   cancelButton: {
     label: 'Cancel',
-    icon: iconCancel,
   },
   onProceed: () => Promise.resolve(),
   onSuccess: () => {},

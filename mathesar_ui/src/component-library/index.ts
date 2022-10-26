@@ -8,6 +8,8 @@ export { default as popper } from './common/actions/popper';
 export { default as portal } from './common/actions/portal';
 
 // Simple Components
+export { default as Alert } from './alert/Alert.svelte';
+export { default as Tutorial } from './tutorial/Tutorial.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
@@ -37,6 +39,7 @@ export { default as SpinnerButton } from './spinner-button/SpinnerButton.svelte'
 export { default as TextArea } from './text-area/TextArea.svelte';
 export { default as TextAvatar } from './text-avatar/TextAvatar.svelte';
 export { default as TextInput } from './text-input/TextInput.svelte';
+export { default as TextInputWithPrefix } from './text-input/TextInputWithPrefix.svelte';
 
 // Compound Components (Ordered)
 export { AttachableDropdown, Dropdown } from './dropdown';
