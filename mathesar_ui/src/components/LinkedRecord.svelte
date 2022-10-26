@@ -17,6 +17,8 @@
   function handleDeleteButtonClick() {
     dispatch('delete');
   }
+
+  $: label = recordSummary ?? String(recordId);
 </script>
 
 <span
@@ -38,10 +40,10 @@
         isHoveringRecordPageLink = false;
       }}
     >
-      {recordSummary ?? String(recordId)}
+      {label}
     </a>
   {:else}
-    <span class="record-summary">{recordSummary}</span>
+    <span class="record-summary">{label}</span>
   {/if}
   {#if hasDeleteButton}
     <!--
