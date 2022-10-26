@@ -1,5 +1,6 @@
 from sqlalchemy import cast
 
+
 class HasUnderlyingType:
     """
     We apply this mixin and its `underlying_type` property to a custom SQLAlchemy type to designate
