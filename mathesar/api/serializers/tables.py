@@ -198,6 +198,7 @@ class MoveTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializ
 class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     extract_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
     extracted_table_name = serializers.CharField()
+    relationship_fk_column_name = serializers.CharField(allow_blank=False, allow_null=True, default=None)
 
 
 class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serializer):
