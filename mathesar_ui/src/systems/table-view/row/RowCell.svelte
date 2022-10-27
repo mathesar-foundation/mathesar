@@ -27,8 +27,8 @@
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import CellErrors from './CellErrors.svelte';
-  import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;

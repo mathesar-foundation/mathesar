@@ -11,8 +11,8 @@
     type Row,
   } from '@mathesar/stores/table-data';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import CellErrors from './CellErrors.svelte';
-  import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let primaryKeyColumnId: number | undefined = undefined;
   export let row: Row;
