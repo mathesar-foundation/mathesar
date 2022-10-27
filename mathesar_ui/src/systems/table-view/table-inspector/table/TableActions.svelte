@@ -1,7 +1,7 @@
 <script lang="ts">
   import { router } from 'tinro';
 
-  import { Button, Icon } from '@mathesar-component-library';
+  import { Help, Icon } from '@mathesar-component-library';
   import {
     iconDeleteMajor,
     iconExploration,
@@ -18,6 +18,7 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import LinkTableModal from '../../link-table/LinkTableModal.svelte';
+  import ActionItem from '../ActionItem.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   const linkTableModal = modal.spawnModalController();
@@ -43,39 +44,56 @@
 </script>
 
 <div class="actions-container">
-  <Button appearance="ghost" on:click={() => linkTableModal.open()}>
+  <ActionItem on:click={() => linkTableModal.open()}>
     <Icon {...iconTableLink} />
     <span>Link Table</span>
-  </Button>
+  </ActionItem>
   <LinkTableModal
     controller={linkTableModal}
     on:goToConstraints={() => tableConstraintsModal.open()}
   />
 
   {#if $currentDatabase && $currentSchemaId}
-    <Button appearance="ghost">
+    <ActionItem type="link">
       <Icon {...iconExploration} />
       <a
         class="btn-link"
         href={getDataExplorerPageUrl($currentDatabase.name, $currentSchemaId)}
         >Explore Data</a
       >
-    </Button>
+      <span>
+        Explore Data
+        <Help>
+          Open this table in Data Explorer to query and analyze your data.
+        </Help>
+      </span>
+    </ActionItem>
   {/if}
 
-  <Button appearance="ghost" on:click={handleDeleteTable}>
+  <ActionItem danger on:click={handleDeleteTable}>
     <Icon {...iconDeleteMajor} />
     <span>Delete Table</span>
-  </Button>
+  </ActionItem>
 </div>
 
-<style>
+<style lang="scss">
   .actions-container {
     display: flex;
     flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 0.5rem;
+    }
   }
+  // TODO: Make this generic - maybe a component that tackles this internally?
   .btn-link {
+    position: absolute;
     color: inherit;
     text-decoration: none;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: transparent;
   }
 </style>

@@ -1,9 +1,9 @@
 <script lang="ts">
   import {
     Icon,
-    Button,
     Checkbox,
     iconLoading,
+    Help,
   } from '@mathesar-component-library';
   import type {
     ColumnsDataStore,
@@ -84,32 +84,58 @@
     TODO Once we have a DropdownMenu component, make this option
     disabled if the column is a primary key.
   -->
-  <Button appearance="plain" on:click={toggleAllowNull}>
+  <button class="passthrough" on:click={toggleAllowNull}>
     {#if isRequestingToggleAllowNull}
       <Icon class="opt" {...iconLoading} />
     {:else}
-      <span class="opt"><Checkbox checked={allowsNull} /></span>
+      <span class="opt"><Checkbox checked={!allowsNull} /></span>
     {/if}
-    <span>Allow NULL</span>
-  </Button>
+    <span>
+      Disallow <span class="null">NULL</span> Values
+      <Help>
+        Enable this option to prevent null values in the column. Null values are
+        empty values that are not the same as zero or an empty string.
+      </Help>
+    </span>
+  </button>
   <!--
     TODO Once we have a DropdownMenu component, make this option
     disabled if the column is a primary key.
   -->
-  <Button appearance="plain" on:click={toggleAllowDuplicates}>
+  <button class="passthrough" on:click={toggleAllowDuplicates}>
     {#if isRequestingToggleAllowDuplicates}
       <Icon class="opt" {...iconLoading} />
     {:else}
-      <span class="opt"><Checkbox checked={allowsDuplicates} /></span>
+      <span class="opt"><Checkbox checked={!allowsDuplicates} /></span>
     {/if}
-    <span>Allow Duplicates</span>
-  </Button>
+    <span>
+      Restrict to Unique
+      <Help>
+        Enable this option to make sure that the column only contains unique
+        values. <br /><br /> Useful for columns that contain identifiers, such as
+        a person's ID number or emails.
+      </Help>
+    </span>
+  </button>
 </div>
 
-<style>
+<style lang="scss">
   .properties-container {
-    padding: 0.5rem -0.5rem;
+    padding: 1rem 0;
     display: flex;
     flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 0.75rem;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .null {
+      font-style: italic;
+      color: var(--unknown-color-ask-ghislaine-2);
+    }
   }
 </style>

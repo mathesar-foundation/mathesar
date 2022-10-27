@@ -2,46 +2,47 @@
   import { Collapsible } from '@mathesar-component-library';
   import TableConstraints from '@mathesar/systems/table-view/constraints/TableConstraints.svelte';
   import RenameTable from './RenameTable.svelte';
-  import ConstraintHelp from '../../constraints/__help__/ConstraintHelp.svelte';
+  // import ConstraintHelp from '../../constraints/__help__/ConstraintHelp.svelte';
   import TableActions from './TableActions.svelte';
+  import CollapsibleHeader from '../CollapsibleHeader.svelte';
 </script>
 
 <div class="table-mode-container">
   <Collapsible isOpen>
-    <span slot="header">Table Properties</span>
-    <div slot="content" class="property-container">
+    <CollapsibleHeader
+      slot="header"
+      title="Properties"
+      isDBLevelConfiguration
+    />
+    <div slot="content" class="content-container">
       <RenameTable />
     </div>
   </Collapsible>
 
   <Collapsible isOpen>
-    <span slot="header">Constraints <ConstraintHelp /></span>
-    <div slot="content" class="property-container">
-      <TableConstraints />
+    <CollapsibleHeader slot="header" title="Actions" />
+    <div slot="content" class="content-container">
+      <TableActions />
     </div>
   </Collapsible>
 
-  <Collapsible isOpen>
-    <span slot="header">Actions</span>
-    <div slot="content" class="actions-container">
-      <TableActions />
+  <Collapsible>
+    <CollapsibleHeader slot="header" title="Advanced" />
+    <div slot="content" class="content-container">
+      <TableConstraints />
     </div>
   </Collapsible>
 </div>
 
 <style>
   .table-mode-container {
-    padding: 1rem 0;
+    padding-bottom: 1rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .property-container {
+  .content-container {
     padding: 1rem;
-  }
-
-  .actions-container {
-    padding: 1rem 0;
   }
 </style>

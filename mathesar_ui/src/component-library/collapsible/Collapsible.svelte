@@ -1,13 +1,12 @@
 <script lang="ts">
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import { iconExpandDown } from '@mathesar-component-library-dir/common/icons';
 
   export let isOpen = false;
 </script>
 
 <div class="collapsible">
-  <Button
+  <button
     class="collapsible-header"
     on:click={() => {
       isOpen = !isOpen;
@@ -17,7 +16,7 @@
       <slot name="header" />
     </div>
     <Icon {...iconExpandDown} size="0.7rem" rotate={isOpen ? 180 : undefined} />
-  </Button>
+  </button>
   {#if isOpen}
     <div class="collapsible-content">
       <slot name="content" />

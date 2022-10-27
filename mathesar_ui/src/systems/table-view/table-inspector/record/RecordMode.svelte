@@ -4,6 +4,7 @@
     getTabularDataStoreFromContext,
     getSelectedRowIndex,
   } from '@mathesar/stores/table-data';
+  import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import RowActions from './RowActions.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -17,9 +18,14 @@
 
 <div class="column-mode-container">
   {#if uniquelySelectedRowIndices.length}
+    {#if uniquelySelectedRowIndices.length > 1}
+      <span class="records-selected-count">
+        {uniquelySelectedRowIndices.length} records selected
+      </span>
+    {/if}
     <Collapsible isOpen>
-      <span slot="header">Actions</span>
-      <div slot="content" class="actions-container">
+      <CollapsibleHeader slot="header" title="Actions" />
+      <div slot="content" class="content-container">
         <RowActions
           selectedRowIndices={uniquelySelectedRowIndices}
           {recordsData}
@@ -28,19 +34,34 @@
       </div>
     </Collapsible>
   {:else}
-    <span>Select a cell to see record properties and actions</span>
+    <span class="no-records-selected"
+      >Select one or more cells to view associated record properties.</span
+    >
   {/if}
 </div>
 
-<style>
+<style lang="scss">
   .column-mode-container {
-    padding: 1rem 0;
+    padding-bottom: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
   }
 
-  .actions-container {
-    padding: 1rem 0;
+  .no-records-selected {
+    padding: 2rem;
+  }
+
+  .records-selected-count {
+    padding: 1rem;
+  }
+
+  .content-container {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 0.5rem;
+    }
   }
 </style>

@@ -49,14 +49,13 @@
   />
 </div>
 
-<style>
+<style lang="scss">
   .rename-table-property-container {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-  }
-  .label {
-    font-size: var(--text-size-small);
-    margin-left: 0.5rem;
+
+    > :global(* + *) {
+      margin-top: 0.5rem;
+    }
   }
 </style>

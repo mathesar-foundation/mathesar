@@ -16,6 +16,8 @@ import {
   faAngleRight,
   faCaretRight,
   faLightbulb,
+  faGears,
+  faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
@@ -51,6 +53,8 @@ export const iconUploadFile: IconProps = { data: faFileUpload };
 
 export const iconFile: IconProps = { data: faFile };
 export const iconInfo: IconProps = { data: faLightbulb };
+export const iconSettings: IconProps = { data: faGears };
+export const iconExternalLink: IconProps = { data: faArrowUpRightFromSquare };
 
 // STATUSES
 
