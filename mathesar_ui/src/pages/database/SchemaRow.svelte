@@ -5,7 +5,7 @@
     iconShowMore,
   } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { iconEdit, iconNotEditable, iconDelete } from '@mathesar/icons';
+  import { iconEdit, iconNotEditable, iconDeleteMajor } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
@@ -46,7 +46,7 @@
           <ButtonMenuItem
             danger
             on:click={() => dispatch('delete')}
-            icon={iconDelete}>Delete Schema</ButtonMenuItem
+            icon={iconDeleteMajor}>Delete Schema</ButtonMenuItem
           >
         </DropdownMenu>
       {/if}

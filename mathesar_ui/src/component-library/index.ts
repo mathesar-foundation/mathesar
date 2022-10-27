@@ -21,7 +21,6 @@ export { default as Debounce } from './debounce/Debounce.svelte';
 export { default as Help } from './help/Help.svelte';
 export { default as Icon } from './icon/Icon.svelte';
 export { InputGroup, InputGroupText } from './input-group';
-export { default as Label } from './label/Label.svelte';
 export { default as LabeledInput } from './labeled-input/LabeledInput.svelte';
 export { default as MatchHighlighter } from './match-highlighter/MatchHighlighter.svelte';
 export {
@@ -59,6 +58,7 @@ export { default as Tree } from './tree/Tree.svelte';
 export { default as Window } from './window/Window.svelte';
 
 // Systems
+export * from './label';
 export * from './confirmation';
 export * from './menu';
 export * from './modal';

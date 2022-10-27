@@ -5,7 +5,7 @@
   import QueryName from '@mathesar/components/QueryName.svelte';
   import EntityType from '@mathesar/components/EntityType.svelte';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { iconDelete, iconEdit, iconRefresh } from '@mathesar/icons';
+  import { iconDeleteMajor, iconEdit, iconRefresh } from '@mathesar/icons';
   import type { QueryRunner } from '@mathesar/systems/data-explorer/types';
   import type { QueryInstance } from '@mathesar/api/queries';
   import {
@@ -46,7 +46,7 @@
     </Button>
   </a>
   <Button disabled={isLoading} size="medium" on:click={handleDeleteExploration}>
-    <Icon {...iconDelete} />
+    <Icon {...iconDeleteMajor} />
     <span>Delete</span>
   </Button>
   <div class="loading-info">
