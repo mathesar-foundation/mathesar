@@ -33,8 +33,6 @@
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
   export let row: RecordRow;
-  export let rowIsSelected = false;
-  export let rowIsProcessing = false;
   export let rowHasErrors = false;
   export let key: CellKey;
   export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
@@ -137,11 +135,7 @@
       white background better communicates that the user can edit the active
       cell.
     -->
-      <RowCellBackgrounds
-        isSelected={rowIsSelected}
-        isProcessing={rowIsProcessing}
-        hasErrors={rowHasErrors}
-      />
+      <RowCellBackgrounds hasErrors={rowHasErrors} />
     {/if}
 
     <CellFabric

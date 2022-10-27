@@ -9,10 +9,10 @@
     SheetCellResizer,
   } from '@mathesar/components/sheet';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
+  import ResultRowCell from './ResultRowCell.svelte';
 
   export let queryRunner: QueryRunner;
 
@@ -25,6 +25,7 @@
     selectedColumnAlias,
     pagination,
     runState,
+    selection,
   } = queryRunner);
   $: ({ initial_columns } = $query);
 
@@ -164,31 +165,13 @@
                 </SheetCell>
 
                 {#each columnList as processedQueryColumn (processedQueryColumn.id)}
-                  <SheetCell
-                    columnIdentifierKey={processedQueryColumn.id}
-                    let:htmlAttributes
-                    let:style
-                  >
-                    <div
-                      {...htmlAttributes}
-                      {style}
-                      class={$selectedColumnAlias ===
-                      processedQueryColumn.column.alias
-                        ? 'selected'
-                        : ''}
-                    >
-                      {#if rows[item.index] || recordRunState === 'processing'}
-                        <CellFabric
-                          columnFabric={processedQueryColumn}
-                          value={rows[item.index]?.record[
-                            processedQueryColumn.id
-                          ]}
-                          showAsSkeleton={recordRunState === 'processing'}
-                          disabled={true}
-                        />
-                      {/if}
-                    </div>
-                  </SheetCell>
+                  <ResultRowCell
+                    {processedQueryColumn}
+                    row={rows[item.index]}
+                    {recordRunState}
+                    selectedColumnAlias={$selectedColumnAlias}
+                    {selection}
+                  />
                 {/each}
               </div>
             </SheetRow>

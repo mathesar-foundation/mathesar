@@ -82,10 +82,11 @@ export function isCellActive(
 
 // TODO: Create a common utility action to handle active element based scroll
 export function scrollBasedOnActiveCell(): void {
-  const activeCell: HTMLElement | null =
-    document.querySelector('.cell.is-active');
+  const activeCell: HTMLElement | null = document.querySelector(
+    '[data-sheet-element="cell"].is-active',
+  );
   const activeRow = activeCell?.parentElement;
-  const container = document.querySelector('.virtual-list.outerElement');
+  const container = document.querySelector('[data-sheet-body-element="list"]');
   if (!container || !activeRow) {
     return;
   }
