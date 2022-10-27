@@ -26,8 +26,8 @@
   import { SheetCell } from '@mathesar/components/sheet';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import CellErrors from './CellErrors.svelte';
-  import CellBackground from './CellBackground.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let recordsData: RecordsData;

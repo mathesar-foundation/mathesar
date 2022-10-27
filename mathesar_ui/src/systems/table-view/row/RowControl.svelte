@@ -10,7 +10,7 @@
     type RecordsData,
     type Row,
   } from '@mathesar/stores/table-data';
-  import CellBackground from './CellBackground.svelte';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import CellErrors from './CellErrors.svelte';
   import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 

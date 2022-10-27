@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CellBackground from './CellBackground.svelte';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
 
   export let isSelected = false;
   export let isProcessing = false;
