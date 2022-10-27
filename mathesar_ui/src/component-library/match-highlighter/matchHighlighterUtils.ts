@@ -1,5 +1,8 @@
 import { toAsciiLowerCase } from '@mathesar-component-library-dir/common/utils';
-import type { MatchPart } from './matchHighlighterTypes';
+import type {
+  MatchPart,
+  ValueComparisonOutcome,
+} from './matchHighlighterTypes';
 
 export function match(text: string): MatchPart {
   return { text, isMatch: true };
@@ -37,4 +40,16 @@ export function splitMatchParts(text: string, substring: string): MatchPart[] {
     startIndex = matchIndex + substring.length;
   }
   return matchParts;
+}
+
+export function getValueComparisonOutcome(
+  matchParts: MatchPart[],
+): ValueComparisonOutcome | undefined {
+  if (matchParts.length === 0) {
+    return undefined;
+  }
+  if (matchParts.length === 1) {
+    return matchParts[0].isMatch ? 'exactMatch' : 'NoMatch';
+  }
+  return 'substringMatch';
 }

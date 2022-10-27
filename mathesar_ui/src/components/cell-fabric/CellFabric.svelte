@@ -18,6 +18,7 @@
   export let disabled = false;
   export let showAsSkeleton = false;
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
+  export let searchValue: unknown | undefined = undefined;
 
   $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
@@ -38,6 +39,7 @@
     {horizontalAlignment}
     {recordSummary}
     {setRecordSummary}
+    {searchValue}
     bind:value
     on:movementKeyDown
     on:activate

@@ -292,6 +292,7 @@
                 {row}
                 {processedColumn}
                 {recordSummaries}
+                {searchFuzzy}
               />
             {/each}
             <Cell

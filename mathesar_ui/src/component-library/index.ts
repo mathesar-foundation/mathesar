@@ -21,7 +21,6 @@ export { default as Help } from './help/Help.svelte';
 export { default as Icon } from './icon/Icon.svelte';
 export { InputGroup, InputGroupText } from './input-group';
 export { default as LabeledInput } from './labeled-input/LabeledInput.svelte';
-export { default as MatchHighlighter } from './match-highlighter/MatchHighlighter.svelte';
 export {
   NumberInput,
   StringifiedNumberInput,
@@ -59,6 +58,7 @@ export { default as Window } from './window/Window.svelte';
 // Systems
 export * from './label';
 export * from './confirmation';
+export * from './match-highlighter';
 export * from './menu';
 export * from './modal';
 export * from './toast';

@@ -1,7 +1,10 @@
 <script lang="ts">
+  import type { Writable } from 'svelte/store';
+
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import {
     rowHasSavedRecord,
+    SearchFuzzy,
     type ProcessedColumn,
     type RecordRow,
   } from '@mathesar/stores/table-data';
@@ -37,8 +40,10 @@
   export let row: RecordRow;
   export let processedColumn: ProcessedColumn;
   export let recordSummaries: RecordSummaryStore;
+  export let searchFuzzy: Writable<SearchFuzzy>;
 
   $: ({ column } = processedColumn);
+  $: searchValue = $searchFuzzy.get(column.id);
   $: value = row?.record?.[column.id];
   $: recordSummary = $recordSummaries
     .get(String(column.id))
@@ -55,5 +60,6 @@
     {recordSummary}
     disabled
     showAsSkeleton={!rowHasSavedRecord(row)}
+    {searchValue}
   />
 </Cell>
