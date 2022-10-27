@@ -256,7 +256,7 @@
             {overflowDetails}
           />
         </div>
-        <div class="tr inputs">
+        <div class="tr divider">
           {#each [...$processedColumns] as [columnId, _] (columnId)}
             <Cell
               rowType="dividerRow"
