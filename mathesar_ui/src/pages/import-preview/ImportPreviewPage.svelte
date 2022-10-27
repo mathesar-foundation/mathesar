@@ -41,7 +41,7 @@
   } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import { iconDelete } from '@mathesar/icons';
+  import { iconDeleteMajor } from '@mathesar/icons';
   import { getCellCap } from '@mathesar/components/cell-fabric/utils';
   import { toast } from '@mathesar/stores/toast';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
@@ -418,7 +418,7 @@
           <CancelOrProceedButtonPair
             onCancel={handleCancel}
             onProceed={finishImport}
-            cancelButton={{ icon: iconDelete }}
+            cancelButton={{ icon: iconDeleteMajor }}
             proceedButton={{ label: 'Confirm & create table' }}
             {canProceed}
           />

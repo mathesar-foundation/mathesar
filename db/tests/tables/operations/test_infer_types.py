@@ -232,6 +232,7 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
     col2 = Column("col2", VARCHAR)
     column_list = [col1, col2]
     engine, schema = engine_with_schema
+    metadata = MetaData()
     table_name = "table_with_columns"
     create_mathesar_table(
         table_name, schema, column_list, engine
@@ -240,7 +241,8 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
         infer_operations.update_table_column_types(
             schema,
             table_name,
-            engine
+            engine,
+            metadata
         )
     expect_calls = [
         call(
@@ -248,12 +250,14 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
             table_name,
             col1.name,
             engine,
+            metadata=metadata
         ),
         call(
             schema,
             table_name,
             col2.name,
             engine,
+            metadata=metadata
         ),
     ]
     mock_infer.assert_has_calls(expect_calls)
