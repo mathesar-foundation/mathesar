@@ -23,6 +23,7 @@ from db.constraints.operations.select import (
 )
 from db.constraints import utils as constraint_utils
 from db.dependents.dependents_utils import get_dependents_graph, has_dependents
+from db.metadata import get_empty_metadata
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
@@ -351,7 +352,7 @@ class Table(DatabaseObject, Relation):
         return column_utils.get_enriched_column_table(
             table=self._sa_table,
             engine=self._sa_engine,
-            metadata=get_cached_metadata(),
+            metadata=get_empty_metadata(),
         )
 
     @property
