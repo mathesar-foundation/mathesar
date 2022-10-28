@@ -245,8 +245,10 @@ class ColumnPrefetcher(Prefetcher):
         table_oids = [table.oid for table in tables]
 
         def _get_column_names_from_tables(table_oids):
-            # TODO why is the fallback engine an empty list? looks like a bug
-            engine = list(tables)[0]._sa_engine if len(tables) > 0 else []
+            if len(tables) > 0:
+                engine = list(tables)[0]._sa_engine
+            else:
+                return []
             return get_map_of_attnum_and_table_oid_to_column_name(
                 table_oids,
                 engine=engine,
@@ -528,8 +530,7 @@ class Table(DatabaseObject, Relation):
         return result
 
     def get_column_name_id_bidirectional_map(self):
-        # TODO: Prefetch column names to avoid N+1 queries
-        columns = Column.objects.filter(table_id=self.id)
+        columns = Column.objects.filter(table_id=self.id).select_related('table__schema__database').prefetch('name')
         columns_map = bidict({column.name: column.id for column in columns})
         return columns_map
 
@@ -776,7 +777,7 @@ class Constraint(DatabaseObject):
     @property
     def _constraint_record(self):
         engine = self.table.schema.database._sa_engine
-        return get_constraint_record_from_oid(self.oid, engine)
+        return get_constraint_record_from_oid(self.oid, engine, get_cached_metadata())
 
     @property
     def name(self):
@@ -786,18 +787,17 @@ class Constraint(DatabaseObject):
     def type(self):
         return constraint_utils.get_constraint_type_from_char(self._constraint_record['contype'])
 
-    @property
+    @cached_property
     def columns(self):
         column_attnum_list = self._constraint_record['conkey']
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
 
-    @property
+    @cached_property
     def referent_columns(self):
         column_attnum_list = self._constraint_record['confkey']
         if column_attnum_list:
             foreign_relation_oid = self._constraint_record['confrelid']
-            table = Table.objects.get(oid=foreign_relation_oid, schema=self.table.schema)
-            columns = Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
+            columns = Column.objects.filter(table__oid=foreign_relation_oid, table__schema=self.table.schema, attnum__in=column_attnum_list).order_by("attnum")
             return columns
 
     @property

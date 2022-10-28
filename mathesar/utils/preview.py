@@ -1,7 +1,7 @@
 import re
 
 from db.constraints.utils import ConstraintType
-from mathesar.models.base import Column, Constraint
+from mathesar.models.base import Column, Constraint, Table
 
 
 def _preview_info_by_column_id(fk_constraints, previous_path=[], exising_columns=[]):
@@ -11,7 +11,7 @@ def _preview_info_by_column_id(fk_constraints, previous_path=[], exising_columns
         constrained_column = fk_constraint.columns[0]
         # For now only single column foreign key is used.
         referent_column = fk_constraint.referent_columns[0]
-        referent_table = referent_column.table
+        referent_table = Table.objects.select_related('settings__preview_settings').get(id=referent_column.table_id)
         referent_table_settings = referent_table.settings
         preview_template = referent_table_settings.preview_settings.template
         preview_data_column_ids = column_ids_from_preview_template(preview_template)
@@ -66,7 +66,7 @@ def column_alias_from_preview_template(preview_template):
 
 
 def get_preview_info(referrer_table_pk, restrict_columns=None, path=[], existing_columns=[]):
-    table_constraints = Constraint.objects.filter(table_id=referrer_table_pk)
+    table_constraints = Constraint.objects.filter(table_id=referrer_table_pk).select_related('table__schema__database')
     fk_constraints = [
         table_constraint
         for table_constraint in table_constraints
