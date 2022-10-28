@@ -386,9 +386,7 @@ class ArrayAgg(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
-        column_expr_type = column_expr.type
-        if isinstance(column_expr_type, HasUnderlyingType):
-            column_expr = column_expr_type.cast_to_underlying_type(column_expr)
+        _maybe_downcast(column_expr)
         return array_agg(column_expr)
 
 
@@ -544,3 +542,14 @@ class ExtractEmailDomain(DBFunction):
     @staticmethod
     def to_sa_expression(email):
         return sa_call_sql_function(EMAIL_DOMAIN_NAME, email, return_type=PostgresType.TEXT)
+
+
+def _maybe_downcast(column_expr):
+    """
+    We'll want to downcast some types to a psycopg-compatible type sometimes.
+    See documentation in `HasUnderlyingType`.
+    """
+    column_expr_type = column_expr.type
+    if isinstance(column_expr_type, HasUnderlyingType):
+        column_expr = column_expr_type.downcast_to_underlying_type(column_expr)
+    return column_expr
