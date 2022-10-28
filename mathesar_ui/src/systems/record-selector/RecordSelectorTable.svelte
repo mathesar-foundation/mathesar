@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
 
   import { ImmutableSet } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/tables/columns';
@@ -29,7 +29,10 @@
   import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
   import RecordSelectorInputCell from './RecordSelectorInputCell.svelte';
   import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
-  import { getPkValueInRecord } from './recordSelectorUtils';
+  import {
+    getColumnIdToFocusInitially,
+    getPkValueInRecord,
+  } from './recordSelectorUtils';
   import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
 
   export let controller: RecordSelectorController;
@@ -55,6 +58,7 @@
     recordsData,
     processedColumns,
   } = tabularData);
+  $: table = $tables.data.get(tableId);
   $: ({ recordSummaries, state: recordsDataState } = recordsData);
   $: recordsDataIsLoading = $recordsDataState === States.Loading;
   $: ({ constraints } = $constraintsDataStore);
@@ -191,6 +195,19 @@
     return () => {
       window.removeEventListener('keydown', handleKeydown, { capture: true });
     };
+  });
+
+  onMount(async () => {
+    const columnId = getColumnIdToFocusInitially({ table, columns: $columns });
+    if (columnId === undefined) {
+      return;
+    }
+    await tick();
+    const selector = `.record-selector-input.column-${columnId}`;
+    const input = document.querySelector(selector) as HTMLElement | null;
+    if (input) {
+      input.focus();
+    }
   });
 
   const overflowDetails = makeOverflowDetails();

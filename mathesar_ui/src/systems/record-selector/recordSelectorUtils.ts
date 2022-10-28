@@ -1,3 +1,4 @@
+import type { TableEntry } from '@mathesar/api/tables';
 import type { Column } from '@mathesar/api/tables/columns';
 import type { Result as ApiRecord } from '@mathesar/api/tables/records';
 
@@ -47,4 +48,34 @@ export function getPkValueInRecord(
     throw new Error('Primary key value is not a string or number.');
   }
   return pkValue;
+}
+
+export function getColumnIdToFocusInitially({
+  table,
+  columns,
+}: {
+  table: TableEntry | undefined;
+  columns: Column[];
+}): number | undefined {
+  function getFromRecordSummaryTemplate() {
+    if (!table) {
+      return undefined;
+    }
+    const { template } = table.settings.preview_settings;
+    const id = template.match(/(?<=\{)\d+(?=\})/)?.[0] ?? undefined;
+    if (!id) {
+      return undefined;
+    }
+    return parseInt(id, 10);
+  }
+
+  function getFromColumns() {
+    const column = columns.find((c) => !c.primary_key);
+    if (!column) {
+      return undefined;
+    }
+    return column.id;
+  }
+
+  return getFromRecordSummaryTemplate() ?? getFromColumns();
 }

@@ -18,7 +18,6 @@
 
   type $$Props = LinkedRecordCellProps & {
     class?: string;
-    containerClass?: string;
     id?: string;
     allowsHyperlinks?: boolean;
   };
@@ -34,7 +33,6 @@
   export let tableId: $$Props['tableId'];
   let classes: $$Props['class'] = '';
   export { classes as class };
-  export let containerClass = '';
   export let allowsHyperlinks = true;
 
   let isAcquiringInput = false;
@@ -96,7 +94,7 @@
 
 <span
   {id}
-  class="input-element linked-record-input {containerClass}"
+  class="input-element linked-record-input {classes}"
   class:has-value={hasValue}
   class:is-acquiring-input={isAcquiringInput}
   tabindex={isAcquiringInput ? undefined : 0}
@@ -109,7 +107,7 @@
   role="listbox"
   aria-labelledby={getLabelIdFromInputId(id)}
 >
-  <span class="content {classes}">
+  <span class="content">
     {#if hasValue}
       <LinkedRecord
         recordId={value}

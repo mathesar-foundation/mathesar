@@ -44,8 +44,7 @@
 >
   <Debounce on:artificialChange={updateValue} let:handleNewValue>
     <DynamicInput
-      class="record-selector-input"
-      containerClass="record-selector-input-container"
+      class="record-selector-input column-{column.id}"
       componentAndProps={processedColumn.inputComponentAndProps}
       {value}
       {recordSummary}
@@ -80,10 +79,6 @@
 </CellWrapper>
 
 <style>
-  :global(.record-selector-input-container) {
-    height: 100%;
-    width: 100%;
-  }
   :global(.record-selector-input) {
     height: 100%;
     width: 100%;
