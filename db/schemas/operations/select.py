@@ -10,14 +10,14 @@ TEMP_INFER_SCHEMA = constants.INFERENCE_SCHEMA
 EXCLUDED_SCHEMATA = [TYPES_SCHEMA, TEMP_INFER_SCHEMA, "information_schema"]
 
 
-def reflect_schema(engine, name=None, oid=None):
+def reflect_schema(engine, name=None, oid=None, metadata=None):
     # If we have both arguments, the behavior is undefined.
     try:
         assert name is None or oid is None
     except AssertionError as e:
         raise e
     # TODO reuse metadata
-    metadata = get_empty_metadata()
+    metadata = metadata if metadata else get_empty_metadata()
     pg_namespace = get_pg_catalog_table("pg_namespace", engine, metadata=metadata)
     sel = (
         select(pg_namespace.c.oid, pg_namespace.c.nspname.label("name"))

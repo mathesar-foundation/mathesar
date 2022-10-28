@@ -15,7 +15,7 @@
   import { getAPI } from '@mathesar/utils/api';
   import {
     iconAddNew,
-    iconDelete,
+    iconDeleteMajor,
     iconDbIdentifierDelimiter,
   } from '@mathesar/icons';
 
@@ -90,7 +90,7 @@
   </div>
   <div class="drop">
     <Button on:click={handleDrop} title={dropTitle}>
-      <Icon {...iconDelete} />
+      <Icon {...iconDeleteMajor} />
     </Button>
   </div>
 </div>

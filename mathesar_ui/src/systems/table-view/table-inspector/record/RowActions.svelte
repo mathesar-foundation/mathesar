@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, Icon, iconLoading } from '@mathesar/component-library';
-  import { iconDelete } from '@mathesar/icons';
+  import { iconDeleteMajor } from '@mathesar/icons';
   import type { RecordsData, Selection } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
 
@@ -29,7 +29,7 @@
 
 <div class="actions-container">
   <Button appearance="ghost" on:click={handleDeleteRecords}>
-    <Icon {...isDeleting ? iconLoading : iconDelete} />
+    <Icon {...isDeleting ? iconLoading : iconDeleteMajor} />
     <span>
       Delete {selectedRowIndices.length} record{selectedRowIndices.length > 1
         ? 's'
