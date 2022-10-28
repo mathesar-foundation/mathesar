@@ -11,7 +11,7 @@
   import { modal } from '@mathesar/stores/modal';
   import TabContainer from '@mathesar/component-library/tabs/TabContainer.svelte';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
-  import SchemOverview from './SchemOverview.svelte';
+  import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
 
@@ -86,7 +86,7 @@
     <slot>
       {#if activeTab?.id === 'overview'}
         <div class="tab-container">
-          <SchemOverview {tablesMap} {explorationsMap} {database} {schema} />
+          <SchemaOverview {tablesMap} {explorationsMap} {database} {schema} />
         </div>
       {:else if activeTab?.id === 'tables'}
         <div class="tab-container">
