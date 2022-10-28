@@ -1,6 +1,6 @@
 from functools import wraps
 from django.db import models
-from django.utils.functional import cached_property
+from mathesar.state.cached_property import cached_property
 
 from db.queries.base import DBQuery, InitialColumn
 
@@ -175,7 +175,8 @@ class UIQuery(BaseModel, Relation):
 
     @property
     def initial_dj_columns(self):
-        return Column.objects.filter(pk__in=[col['id'] for col in self.initial_columns])
+        dj_column_ids = [col['id'] for col in self.initial_columns]
+        return Column.objects.filter(pk__in=dj_column_ids)
 
     @property
     def initial_columns_described(self):
