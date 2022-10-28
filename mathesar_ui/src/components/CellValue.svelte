@@ -1,8 +1,7 @@
 <script lang="ts">
-  import type { CellValueFormatter } from './cell-fabric/utils';
-
   import { PrecomputedMatchHighlighter } from '@mathesar-component-library';
   import type { MatchPart } from '@mathesar-component-library/types';
+  import type { CellValueFormatter } from './cell-fabric/utils';
   import Default from './Default.svelte';
   import Null from './Null.svelte';
 
