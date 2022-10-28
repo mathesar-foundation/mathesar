@@ -66,12 +66,6 @@
       font-size: var(--text-size-large);
     }
 
-    // .description {
-    //   display: -webkit-box;
-    //   -webkit-line-clamp: 2;
-    //   -webkit-box-orient: vertical;
-    // }
-
     > :global(* + *) {
       margin-top: 0.75rem;
     }
