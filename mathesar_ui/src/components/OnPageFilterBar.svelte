@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { iconSearch, TextInput, Button } from '@mathesar-component-library';
+  import { iconSearch, Button } from '@mathesar-component-library';
+  import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
   import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher();
@@ -17,7 +18,7 @@
 <div class="container">
   <div class="actions-container">
     <div class="search-container">
-      <TextInput
+      <TextInputWithPrefix
         {placeholder}
         bind:value={searchQuery}
         prefixIcon={iconSearch}
