@@ -18,7 +18,7 @@
   export let prefixIcon: $$Props['prefixIcon'];
 </script>
 
-<span class="prefix-wrapper">
+<div class="prefix-wrapper">
   <div class="input-prefix-icon-container">
     <Icon {...prefixIcon} />
   </div>
@@ -33,12 +33,13 @@
     on:beforeinput
     on:change
   />
-</span>
+</div>
 
 <style lang="scss">
   .prefix-wrapper {
     --icon-width: 2.142rem;
     position: relative;
+
     .input-prefix-icon-container {
       position: absolute;
       top: 0;
