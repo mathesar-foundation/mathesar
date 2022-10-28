@@ -45,7 +45,7 @@
   let selectionIndex: number | undefined = undefined;
 
   $: setRecordSelectorControllerInContext(nestedController);
-  $: ({ columnWithNestedSelectorOpen, isOpen, purpose } = controller);
+  $: ({ columnWithNestedSelectorOpen, purpose } = controller);
   $: tabularDataStore.set(tabularData);
   $: ({
     constraintsDataStore,
@@ -76,9 +76,6 @@
     }
     return fkColumnIds.has(columnWithFocus.id) ? columnWithFocus : undefined;
   })();
-  $: if ($isOpen) {
-    meta.searchFuzzy.update((s) => s.drained());
-  }
 
   function handleRecordsLoadingStateChange(isLoading: boolean) {
     if (isLoading) {
