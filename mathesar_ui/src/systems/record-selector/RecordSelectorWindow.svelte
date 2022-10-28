@@ -69,7 +69,11 @@
         {verb}
         {#if tableName}
           {getArticleForWord(tableName)}
-          <a href={tablePageHref} title="View All {tableName} Records">
+          <a
+            href={tablePageHref}
+            title="View All {tableName} Records"
+            on:click={() => controller.cancel()}
+          >
             <Identifier>{tableName}</Identifier>
           </a>
         {/if}
