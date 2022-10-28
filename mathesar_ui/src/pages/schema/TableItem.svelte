@@ -10,6 +10,8 @@
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableName from '@mathesar/components/TableName.svelte';
 
+  const recordSelector = getRecordSelectorFromContext();
+
   export let table: TableEntry;
   export let database: Database;
   export let schema: SchemaEntry;
@@ -18,12 +20,6 @@
     return isTableImportConfirmationRequired(table)
       ? getImportPreviewPageUrl(database.name, schema.id, table.id)
       : getTablePageUrl(database.name, schema.id, table.id);
-  }
-
-  // TODO: Should this be inside the recordsSelector utility?
-  function handleRecordSelectorNavigation() {
-    const recordSelector = getRecordSelectorFromContext();
-    recordSelector.navigateToRecordPage({ tableId: table.id });
   }
 </script>
 
@@ -34,13 +30,16 @@
   </div>
   <div class="actions">
     <a class="action passthrough action-link" href={getGoToTableLink()}>
-      Go to Table</a
-    >
+      Go to Table
+    </a>
     <Button
-      on:click={handleRecordSelectorNavigation}
+      on:click={() =>
+        recordSelector.navigateToRecordPage({ tableId: table.id })}
       appearance="ghost"
-      class="action">Find Record</Button
+      class="action"
     >
+      Find Record
+    </Button>
   </div>
 </div>
 
