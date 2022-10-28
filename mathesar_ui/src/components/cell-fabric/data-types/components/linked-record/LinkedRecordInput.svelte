@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, tick } from 'svelte';
 
   // TODO remove dependency cycle
   // eslint-disable-next-line import/no-cycle
@@ -62,13 +62,15 @@
     isAcquiringInput = false;
     if (result === undefined) {
       dispatch('recordSelectorCancel');
-      return;
+    } else {
+      value = result.recordId;
+      setRecordSummary(String(result.recordId), result.recordSummary);
+      dispatch('recordSelectorSubmit');
+      dispatch('artificialChange', value);
+      dispatch('artificialInput', value);
     }
-    value = result.recordId;
-    setRecordSummary(String(result.recordId), result.recordSummary);
-    dispatch('recordSelectorSubmit');
-    dispatch('artificialChange', value);
-    dispatch('artificialInput', value);
+    await tick();
+    element.focus();
   }
 
   function handleKeydown(e: KeyboardEvent) {
