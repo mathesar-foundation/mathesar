@@ -204,7 +204,7 @@
     }
     await tick();
     const selector = `.record-selector-input.column-${columnId}`;
-    const input = document.querySelector(selector) as HTMLElement | null;
+    const input = document.querySelector<HTMLElement>(selector);
     if (input) {
       input.focus();
     }
