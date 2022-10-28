@@ -16,6 +16,9 @@ class DBQuery:
             engine,
             transformations=None,
             name=None,
+            # The same metadata will be used by all the methods within DBQuery
+            # So make sure to change the metadata in case the DBQuery methods are called
+            # after a mutation to the database object that could make the existing metadata invalid.
             metadata=None
     ):
         self.base_table_oid = base_table_oid
@@ -25,7 +28,7 @@ class DBQuery:
         self.engine = engine
         self.transformations = transformations
         self.name = name
-        self.metadata = metadata
+        self.metadata = metadata if metadata else get_empty_metadata()
 
     # mirrors a method in db.records.operations.select
     def get_records(self, **kwargs):
@@ -99,7 +102,7 @@ class DBQuery:
 
     @property
     def initial_relation(self):
-        metadata = self.metadata if self.metadata else get_empty_metadata()
+        metadata = self.metadata
         base_table = reflect_table_from_oid(
             self.base_table_oid, self.engine, metadata=metadata
         )
