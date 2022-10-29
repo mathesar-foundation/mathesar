@@ -6,6 +6,7 @@ from db.columns.base import MathesarColumn
 from db.columns.operations.alter import batch_alter_table_drop_columns
 from db.columns.operations.create import bulk_create_mathesar_column
 from db.columns.operations.select import get_column_names_from_attnums
+from db.constraints.operations.select import get_constraint_from_oid
 from db.tables.operations.select import reflect_table_from_oid
 from db.metadata import get_empty_metadata
 
@@ -15,13 +16,25 @@ def move_columns_between_related_tables(
         target_table_oid,
         column_attnums_to_move,
         schema,
-        engine
+        engine,
+        relation_fk_constraint_identifiers=None
 ):
     # TODO reuse metadata
     metadata = get_empty_metadata()
     source_table = reflect_table_from_oid(source_table_oid, engine, metadata=metadata)
     target_table = reflect_table_from_oid(target_table_oid, engine, metadata=metadata)
-    relationship = _find_table_relationship(source_table, target_table)
+    if relation_fk_constraint_identifiers is None:
+        relationship = _find_table_relationship(source_table, target_table)
+    else:
+        oid_of_table_with_relation_fk_column = relation_fk_constraint_identifiers[1]
+        relation_constraint_oid = relation_fk_constraint_identifiers[2]
+        relation_constraint = get_constraint_from_oid(relation_constraint_oid, engine, oid_of_table_with_relation_fk_column)
+        if source_table_oid == oid_of_table_with_relation_fk_column:
+            relationship = {"referencing": source_table, "referenced": target_table, "constraint": relation_constraint}
+        elif target_table_oid == oid_of_table_with_relation_fk_column:
+            relationship = {"referencing": target_table, "referenced": source_table, "constraint": relation_constraint}
+        else:
+            relationship = None
     column_names_to_move = get_column_names_from_attnums(source_table_oid, column_attnums_to_move, engine, metadata=metadata)
     moving_columns = [source_table.columns[name] for name in column_names_to_move]
     assert _check_columns(relationship, moving_columns)

@@ -557,21 +557,25 @@ class Table(DatabaseObject, Relation):
             in name_list
         ]
 
-    def move_columns(self, columns_to_move, target_table):
+    def move_columns(self, columns_to_move, target_table, relation_fk_constraint=None):
         # Collect various information about relevant columns before mutating
         columns_attnum_to_move = [column.attnum for column in columns_to_move]
         target_table_oid = target_table.oid
         column_names_to_move = [column.name for column in columns_to_move]
         target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
         column_names_id_map = self.get_column_name_id_bidirectional_map()
-
+        if relation_fk_constraint:
+            relation_fk_constraint_identifiers = (relation_fk_constraint.table_id, relation_fk_constraint.oid)
+        else:
+            relation_fk_constraint_identifiers = None
         # Mutate on Postgres
         extracted_sa_table, remainder_sa_table = move_columns_between_related_tables(
             source_table_oid=self.oid,
             target_table_oid=target_table_oid,
             column_attnums_to_move=columns_attnum_to_move,
             schema=self.schema.name,
-            engine=self._sa_engine
+            engine=self._sa_engine,
+            relation_fk_constraint_identifiers=relation_fk_constraint_identifiers
         )
         engine = self._sa_engine
 
