@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, tick } from 'svelte';
+  import { createEventDispatcher, getContext, tick } from 'svelte';
 
   // TODO remove dependency cycle
   // eslint-disable-next-line import/no-cycle
@@ -11,6 +11,7 @@
     getLabelIdFromInputId,
     Icon,
     iconExpandDown,
+    type AccompanyingElements,
   } from '@mathesar-component-library';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
@@ -24,6 +25,9 @@
 
   const labelController = getLabelControllerFromContainingLabel();
   const recordSelector = getRecordSelectorFromContext();
+  const dropdownAccompanyingElements = getContext<
+    AccompanyingElements | undefined
+  >('dropdownAccompanyingElements');
   const dispatch = createEventDispatcher();
 
   export let id = getGloballyUniqueId();
@@ -36,7 +40,7 @@
   export let allowsHyperlinks = true;
 
   let isAcquiringInput = false;
-  let element: HTMLSpanElement;
+  let element: HTMLSpanElement | undefined;
 
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
@@ -52,13 +56,28 @@
     // If the value is cleared via a button, the focus may shift to that button.
     // We'd like to shift it back to the input element to that the user can
     // press `Enter` to launch the record selector.
-    element.focus();
+    element?.focus();
+  }
+
+  /**
+   * If this LinkedRecordInput in placed inside an AttachableDropdown, we want
+   * to tell the dropdown not to close when the user clicks within the Record
+   * Selector UI, so we set the modal element to "accompany" the dropdown.
+   */
+  function setRecordSelectorToAccompanyDropdown() {
+    const modal = document.querySelector<HTMLElement>('.modal-record-selector');
+    if (dropdownAccompanyingElements && modal) {
+      dropdownAccompanyingElements.add(modal);
+    }
   }
 
   async function launchRecordSelector() {
     dispatch('recordSelectorOpen');
     isAcquiringInput = true;
-    const result = await recordSelector.acquireUserInput({ tableId });
+    const recordSelectorPromise = recordSelector.acquireUserInput({ tableId });
+    await tick();
+    setRecordSelectorToAccompanyDropdown();
+    const result = await recordSelectorPromise;
     isAcquiringInput = false;
     if (result === undefined) {
       dispatch('recordSelectorCancel');
@@ -70,7 +89,7 @@
       dispatch('artificialInput', value);
     }
     await tick();
-    element.focus();
+    element?.focus();
   }
 
   function handleKeydown(e: KeyboardEvent) {

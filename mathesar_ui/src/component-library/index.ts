@@ -41,7 +41,6 @@ export { default as TextInput } from './text-input/TextInput.svelte';
 export { default as TextInputWithPrefix } from './text-input/TextInputWithPrefix.svelte';
 
 // Compound Components (Ordered)
-export { AttachableDropdown, Dropdown } from './dropdown';
 export { DatePicker, InlineDateTimePicker } from './date-time-picker';
 export { default as DropdownMenu } from './dropdown-menu/DropdownMenu.svelte';
 export { default as DataTypeBasedInput } from './data-type-based-input/DataTypeBasedInput.svelte';
@@ -58,6 +57,7 @@ export { default as Window } from './window/Window.svelte';
 // Systems
 export * from './label';
 export * from './confirmation';
+export * from './dropdown';
 export * from './match-highlighter';
 export * from './menu';
 export * from './modal';
