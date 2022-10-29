@@ -119,9 +119,11 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         if serializer.is_valid(True):
             target_table = serializer.validated_data['target_table']
             move_columns = serializer.validated_data['move_columns']
+            relation_fk_constraint = serializer.validated_data['relation_fk_constraint']
             table.move_columns(
                 columns_to_move=move_columns,
                 target_table=target_table,
+                relation_fk_constraint=relation_fk_constraint
             )
             return Response(status=status.HTTP_201_CREATED)
 

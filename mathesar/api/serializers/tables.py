@@ -17,7 +17,7 @@ from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_a
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
 from mathesar.api.serializers.table_settings import TableSettingsSerializer
-from mathesar.models.base import Column, Table, DataFile
+from mathesar.models.base import Column, Constraint, Table, DataFile
 from mathesar.utils.tables import gen_table_name, create_table_from_datafile, create_empty_table
 
 
@@ -193,6 +193,7 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 class MoveTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     move_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
     target_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+    relation_fk_constraint = serializers.PrimaryKeyRelatedField(queryset=Constraint.current_objects.all(), allow_null=True)
 
 
 class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
