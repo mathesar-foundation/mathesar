@@ -3,11 +3,13 @@ from django.db import models
 from mathesar.state.cached_property import cached_property
 
 from db.queries.base import DBQuery, InitialColumn
+from db.queries.operations.process import get_processed_transformations
 
 from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
 from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValueType, DictHasBadKeys
 from db.transforms.operations.deserialize import deserialize_transformation
+from db.transforms.operations.serialize import serialize_transformation
 
 
 def _get_validator_for_list_of_dicts(field_name):
@@ -263,6 +265,22 @@ class UIQuery(BaseModel, Relation):
     @property
     def _sa_engine(self):
         return self.base_table._sa_engine
+
+
+    @property
+    def processed_transformations(self):
+        """
+        """
+        return tuple(
+            serialize_transformation(db_transformation)
+            for db_transformation
+            in self._processed_db_transformations
+        )
+
+    # TODO explain why we're not always using this in place of _db_transformations
+    @property
+    def _processed_db_transformations(self):
+        return get_processed_transformations(self.db_query)
 
 
 def _get_column_pair_from_id(col_id):

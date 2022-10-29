@@ -37,6 +37,33 @@ class Transform(ABC):
         )
 
 
+class UnprocessedTransform(Transform):
+    """
+    An unprocessed transform is a way to allow transformations that are not fully specified and
+    need to be processed into a regular transform before they can be applied to a relation.
+    """
+
+    def apply_to_relation(self, _):
+        message = (
+            "Programming error; "
+            "this is an unprocessed transform: it should never be applied."
+        )
+        raise Exception(message)
+
+    @abstractmethod
+    def get_processed(self, db_query, index_in_transformation_pipeline):
+        """
+        Processes this transform into a new transform, possibly of a different type, and returns
+        the new transform. Parametrized by the db_query that has this transform in its transform
+        pipeline and the index of this transform in that pipeline.
+
+        The index parameter is necessary, because a transform might require different
+        processing depending on its position in the pipeline, and we can't distinguish between
+        identical transforms in different pipeline positions via equality checks.
+        """
+        pass
+
+
 class Filter(Transform):
     type = "filter"
 

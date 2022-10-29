@@ -91,7 +91,7 @@ class QueryViewSet(
         input_serializer = BaseQuerySerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         query = UIQuery(**input_serializer.validated_data)
-        query.transformations = get_preprocessed_query_transformations(query)
+        query.transformations = query.processed_transformations
         record_serializer = RecordListParameterSerializer(data=request.GET)
         record_serializer.is_valid(raise_exception=True)
         records = paginator.paginate_queryset(
@@ -117,18 +117,3 @@ class QueryViewSet(
                 "parameters": {k: json.loads(request.GET[k]) for k in request.GET},
             }
         )
-
-
-# Not regular method on UIQuery, because we don't want to mutate and then have to trigger reset_reflection
-# Maybe could be a static method on UIQuery?
-def get_preprocessed_query_transformations(ui_query):
-    """
-    """
-    processed_transformations = []
-    for transformation in ui_query.transformations:
-        db_transformation = deserialize_transformation(transformation)
-        if isinstance(transformation, HasToBePreProcessed):
-            db_transformation = db_transformation.preprocess()
-            transformation = serialize_transformation(db_transformation)
-        processed_transformations.append(transformation)
-    return processed_transformations
