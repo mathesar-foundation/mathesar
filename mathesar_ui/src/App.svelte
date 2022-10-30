@@ -100,8 +100,6 @@
     --border-radius-s: 0.142rem; //2px
     --border-radius-m: 0.285rem; //4px
     --border-radius-l: 0.571rem; //8px
-    --modal-z-index: 50;
-    --modal-record-selector-z-index: 50;
   }
 
   body {
@@ -148,6 +146,11 @@
     --header-height: 4.285rem;
 
     color: var(--slate-400);
+
+    --modal-z-index: 1;
+    --dropdown-z-index: 1;
+    --cell-errors-z-index: 1;
+    --toast-z-index: 2;
   }
 
   h1 {

@@ -176,7 +176,7 @@
     justify-content: center;
     align-items: center;
     color: #aaa;
-    z-index: var(--z-index-overlay);
+    z-index: var(--z-index__record_selector__overlay);
     pointer-events: none;
   }
   .content-loading.prevent-user-entry {

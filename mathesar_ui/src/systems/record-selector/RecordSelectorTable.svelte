@@ -389,7 +389,7 @@
     height: 100%;
     width: calc(100% - var(--body-padding));
     pointer-events: none;
-    z-index: var(--z-index-shadow-inset);
+    z-index: var(--z-index__record_selector__shadow-inset);
   }
   .has-overflow-bottom .inset-shadow {
     box-shadow: 0 -1rem var(--overflow-shadow-size) -1rem

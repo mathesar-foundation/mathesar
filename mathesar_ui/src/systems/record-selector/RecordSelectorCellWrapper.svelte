@@ -66,7 +66,7 @@
     height: var(--row-height);
     position: sticky;
     top: 0;
-    z-index: var(--z-index-thead);
+    z-index: var(--z-index__record_selector__thead);
   }
   .input {
     background: white;
@@ -74,7 +74,7 @@
     height: var(--row-height);
     position: sticky;
     top: var(--row-height);
-    z-index: var(--z-index-thead);
+    z-index: var(--z-index__record_selector__thead);
   }
   .input :global(.input-element) {
     position: absolute;
@@ -94,7 +94,7 @@
     height: 10px;
     border: none;
     position: sticky;
-    z-index: var(--z-index-divider);
+    z-index: var(--z-index__record-selector__divider);
     top: calc(2 * var(--row-height));
     background: white;
     overflow: visible;
@@ -116,14 +116,14 @@
     padding-right: calc(var(--body-padding) + var(--extra-body-padding));
     position: sticky;
     right: 0;
-    z-index: var(--z-index-row-header);
+    z-index: var(--z-index__record_selector__row-header);
   }
 
   /** Upper right corner ******************************************************/
   .column-header.row-header,
   .input.row-header,
   .divider.row-header {
-    z-index: var(--z-index-thead-row-header);
+    z-index: var(--z-index__record_selector__thead-row-header);
   }
   .divider.row-header .divider-bg {
     background: white;
@@ -132,7 +132,7 @@
 
   /** Focus indicator *********************************************************/
   .has-outline {
-    z-index: var(--z-index-focused-input);
+    z-index: var(--z-index__record_selector__focused-input);
   }
   .outline {
     position: absolute;
@@ -149,11 +149,11 @@
   }
   .acquiring-fk-value {
     --outline-color: #888;
-    z-index: var(--z-index-above-overlay);
+    z-index: var(--z-index__record_selector__above-overlay);
     pointer-events: none;
   }
   .has-outline.table-overflow-right {
-    z-index: var(--z-index-focused-input-with-overflow);
+    z-index: var(--z-index__record_selector__focused-input-with-overflow);
   }
 
   /** Overflow shadows ********************************************************/

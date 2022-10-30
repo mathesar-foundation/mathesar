@@ -105,15 +105,15 @@
 
 <style>
   .record-selector-window {
-    --z-index-divider: 1;
-    --z-index-row-header: 2;
-    --z-index-thead: 3;
-    --z-index-focused-input-with-overflow: 4;
-    --z-index-thead-row-header: 5;
-    --z-index-focused-input: 6;
-    --z-index-shadow-inset: 7;
-    --z-index-overlay: 8;
-    --z-index-above-overlay: 9;
+    --z-index__record-selector__divider: 1;
+    --z-index__record_selector__row-header: 2;
+    --z-index__record_selector__thead: 3;
+    --z-index__record_selector__focused-input-with-overflow: 4;
+    --z-index__record_selector__thead-row-header: 5;
+    --z-index__record_selector__focused-input: 6;
+    --z-index__record_selector__shadow-inset: 7;
+    --z-index__record_selector__overlay: 8;
+    --z-index__record_selector__above-overlay: 9;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -126,6 +126,6 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.1);
-    z-index: var(--z-index-overlay);
+    z-index: var(--z-index__record_selector__overlay);
   }
 </style>

@@ -71,7 +71,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: var(--modal-record-selector-z-index, auto);
+    z-index: var(--modal-z-index, auto);
     isolation: isolate;
     display: flex;
     flex-direction: column;
