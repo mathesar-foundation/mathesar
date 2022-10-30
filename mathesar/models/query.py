@@ -211,6 +211,47 @@ class UIQuery(BaseModel, Relation):
             for alias, sa_col in self.db_query.all_sa_columns_map.items()
         }
 
+    def replace_transformations_with_processed_transformations(self):
+        """
+        The transformations attribute is normally specified via a HTTP request. Now we're
+        introducing the concept of processed transformations, where we look at the
+        transformations and we find special transformations that need processing (unprocessed
+        transformations), if any, and replace them with transformations resulting from processing
+        them. The frontend then reflects our updated transformations.
+
+        We're keeping this functionality somewhat separate from the default/simpler transformation
+        pipeline. Meaning that it is not enabled by default and has to be triggered on demand (by
+        calling this method). That is for multiple reasons.
+
+        Whereas before the transformations attribute was a one-way flow from the client,
+        now it's something that the backend may redefine. This a significant complication of the
+        data flow. For example, if you replace transformations on a UIQuery and save it, we must
+        trigger a reflection, which can have a performance impact. Also, frontend must expect that
+        certain transformations might alter the transformation pipeline, which would then need
+        reflecting by frontend; that might be a breaking change.
+
+        It is also not clear if we'll want to keep transformation processing in the long term. Our
+        motivation for doing processed queries at this time is to circumvent frontend technical
+        debt.
+
+        Also note, currently we only need transformation processing when using the `query/run`
+        endpoint, which means that we don't need to update any persisted queries, which means that
+        we don't need to trigger reflection.
+        """
+        self.transformations = self._processed_transformations
+
+    @property
+    def _processed_transformations(self):
+        return tuple(
+            serialize_transformation(db_transformation)
+            for db_transformation
+            in self._processed_db_transformations
+        )
+
+    @property
+    def _processed_db_transformations(self):
+        return get_processed_transformations(self.db_query)
+
     @property
     def db_query(self):
         return DBQuery(
@@ -265,22 +306,6 @@ class UIQuery(BaseModel, Relation):
     @property
     def _sa_engine(self):
         return self.base_table._sa_engine
-
-
-    @property
-    def processed_transformations(self):
-        """
-        """
-        return tuple(
-            serialize_transformation(db_transformation)
-            for db_transformation
-            in self._processed_db_transformations
-        )
-
-    # TODO explain why we're not always using this in place of _db_transformations
-    @property
-    def _processed_db_transformations(self):
-        return get_processed_transformations(self.db_query)
 
 
 def _get_column_pair_from_id(col_id):

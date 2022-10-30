@@ -91,7 +91,7 @@ class QueryViewSet(
         input_serializer = BaseQuerySerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         query = UIQuery(**input_serializer.validated_data)
-        query.transformations = query.processed_transformations
+        query = query.replace_transformations_with_processed_transformations()
         record_serializer = RecordListParameterSerializer(data=request.GET)
         record_serializer.is_valid(raise_exception=True)
         records = paginator.paginate_queryset(

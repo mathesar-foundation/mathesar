@@ -4,7 +4,7 @@ def get_processed_transformations(db_query):
     """
     Processes db_query's transformations and returns them. Resulting sequence is the db_query's
     transform sequence, but each unprocessed transform is replaced with a transform that's the
-    result of processing the unprocessed transform.
+    result of processing it.
 
     See UnprocessedTransform for more information.
     """
