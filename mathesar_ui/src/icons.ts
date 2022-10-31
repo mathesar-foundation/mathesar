@@ -49,6 +49,7 @@ import {
   faUser,
   faSave,
   faLayerGroup,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 
 import type { IconProps } from '@mathesar-component-library/types';
@@ -71,7 +72,10 @@ import type { IconProps } from '@mathesar-component-library/types';
 
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconConfigure: IconProps = { data: faCogs };
-export const iconDelete: IconProps = { data: faTrashAlt };
+/** When you're deleting something significant or difficult to recover */
+export const iconDeleteMajor: IconProps = { data: faTrashAlt };
+/** When you're deleting something smaller or more ephemeral */
+export const iconDeleteMinor: IconProps = { data: faTimes };
 export const iconEdit: IconProps = { data: faPencilAlt };
 export const iconExpandRight: IconProps = { data: faChevronRight };
 export const iconImportData: IconProps = { data: faUpload };
@@ -80,13 +84,13 @@ export const iconMoveColumnsToExistingLinkedTable = { data: faLink };
 export const iconRedo: IconProps = { data: faRedo };
 export const iconRefresh: IconProps = { data: faSync };
 export const iconRename: IconProps = { data: faICursor };
+export const iconSave: IconProps = { data: faSave };
 export const iconSelectRecord: IconProps = { data: faSearchPlus };
 export const iconSetToNull: IconProps = { data: faBackspace };
 export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
 export const iconSortDescending: IconProps = { data: faSortAmountDown };
 export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
-export const iconSave: IconProps = { data: faSave };
 
 // THINGS
 //

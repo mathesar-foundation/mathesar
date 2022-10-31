@@ -14,7 +14,7 @@
   } from '@mathesar-component-library/types';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
-  import { iconDelete } from '@mathesar/icons';
+  import { iconDeleteMajor } from '@mathesar/icons';
   import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
@@ -227,7 +227,7 @@
         class="filter-remove"
         on:click={() => dispatch('removeFilter')}
       >
-        <Icon {...iconDelete} />
+        <Icon {...iconDeleteMajor} />
       </Button>
     {/if}
   </InputGroup>
