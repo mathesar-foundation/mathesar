@@ -26,15 +26,15 @@ def move_columns_between_related_tables(
     if relation_fk_constraint_identifiers is None:
         relationship = _find_table_relationship(source_table, target_table)
     else:
-        oid_of_table_with_relation_fk_column = relation_fk_constraint_identifiers[1]
-        relation_constraint_oid = relation_fk_constraint_identifiers[2]
-        relation_constraint = get_constraint_from_oid(relation_constraint_oid, engine, oid_of_table_with_relation_fk_column)
-        if source_table_oid == oid_of_table_with_relation_fk_column:
-            relationship = {"referencing": source_table, "referenced": target_table, "constraint": relation_constraint}
-        elif target_table_oid == oid_of_table_with_relation_fk_column:
-            relationship = {"referencing": target_table, "referenced": source_table, "constraint": relation_constraint}
-        else:
-            relationship = None
+        relationship = _extract_relationship_from_fk_constraint(
+            engine,
+            metadata,
+            relation_fk_constraint_identifiers,
+            source_table,
+            source_table_oid,
+            target_table,
+            target_table_oid
+        )
     column_names_to_move = get_column_names_from_attnums(source_table_oid, column_attnums_to_move, engine, metadata=metadata)
     moving_columns = [source_table.columns[name] for name in column_names_to_move]
     assert _check_columns(relationship, moving_columns)
@@ -73,6 +73,32 @@ def move_columns_between_related_tables(
     # TODO reuse metadata
     source_table = reflect_table_from_oid(source_table_oid, engine, metadata=get_empty_metadata())
     return target_table, source_table
+
+
+def _extract_relationship_from_fk_constraint(
+        engine,
+        metadata,
+        relation_fk_constraint_identifiers,
+        source_table,
+        source_table_oid,
+        target_table,
+        target_table_oid
+):
+    oid_of_table_with_relation_fk_column = relation_fk_constraint_identifiers[0]
+    relation_constraint_oid = relation_fk_constraint_identifiers[1]
+    table_with_relation_fk_column = reflect_table_from_oid(
+        oid_of_table_with_relation_fk_column,
+        engine,
+        metadata=metadata
+    )
+    relation_constraint = get_constraint_from_oid(relation_constraint_oid, engine, table_with_relation_fk_column)
+    if source_table_oid == oid_of_table_with_relation_fk_column:
+        relationship = {"referencing": source_table, "referenced": target_table, "constraint": relation_constraint}
+    elif target_table_oid == oid_of_table_with_relation_fk_column:
+        relationship = {"referencing": target_table, "referenced": source_table, "constraint": relation_constraint}
+    else:
+        relationship = None
+    return relationship
 
 
 def _create_move_referent_table_columns_update_stmt(

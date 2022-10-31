@@ -565,7 +565,7 @@ class Table(DatabaseObject, Relation):
         target_columns_name_id_map = target_table.get_column_name_id_bidirectional_map()
         column_names_id_map = self.get_column_name_id_bidirectional_map()
         if relation_fk_constraint:
-            relation_fk_constraint_identifiers = (relation_fk_constraint.table_id, relation_fk_constraint.oid)
+            relation_fk_constraint_identifiers = (relation_fk_constraint.table.oid, relation_fk_constraint.oid)
         else:
             relation_fk_constraint_identifiers = None
         # Mutate on Postgres

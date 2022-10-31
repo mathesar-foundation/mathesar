@@ -10,7 +10,7 @@ from db.metadata import get_empty_metadata
 
 from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models.base import Column, Table, DataFile
+from mathesar.models.base import Column, Constraint, Table, DataFile
 
 
 @pytest.fixture
@@ -1503,3 +1503,39 @@ def test_table_move_columns_after_extracting(create_patents_table, client):
     extracted_column = Column.objects.get(id=extracted_column_id)
     assert extracted_column.id == extracted_column_id
     assert extracted_column.display_options == column_with_display_options.display_options
+
+
+def test_move_columns_with_specific_foreignkey(create_patents_table, client):
+    table_name = 'Patents'
+    table = create_patents_table(table_name)
+    column_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_names_to_extract = ['Title', 'Patent Expiration Date']
+    column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
+
+    extract_table_name = "Patent Info"
+    relationship_fk_column_name = "patent_info"
+    split_data = {
+        'extract_columns': column_ids_to_extract,
+        'extracted_table_name': extract_table_name,
+        'relationship_fk_column_name': relationship_fk_column_name
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
+    assert current_table_response.status_code == 201
+    remainder_table_id = current_table_response.json()['remainder_table']
+    extracted_table_id = current_table_response.json()['extracted_table']
+
+    column_names_to_move = ['Patent Number']
+    column_ids_to_move = [column_name_id_map[name] for name in column_names_to_move]
+    connecting_fk_constraint = next(
+        constraint
+        for constraint in Constraint.objects.filter(table=table)
+        if constraint.referent_columns is not None
+        and constraint.referent_columns.first().table_id == extracted_table_id
+    )
+    move_data = {
+        'move_columns': column_ids_to_move,
+        'target_table': extracted_table_id,
+        'relation_fk_constraint': connecting_fk_constraint.id
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{remainder_table_id}/move_columns/', data=move_data)
+    assert current_table_response.status_code == 201
