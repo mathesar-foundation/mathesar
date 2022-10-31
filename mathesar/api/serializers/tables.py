@@ -193,7 +193,11 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 class MoveTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     move_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
     target_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
-    relation_fk_constraint = serializers.PrimaryKeyRelatedField(queryset=Constraint.current_objects.all(), allow_null=True)
+    relation_fk_constraint = serializers.PrimaryKeyRelatedField(
+        queryset=Constraint.current_objects.all(),
+        required=False,
+        default=None
+    )
 
 
 class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
