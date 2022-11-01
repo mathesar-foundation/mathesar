@@ -74,6 +74,7 @@
     class="cell {selectedColumnAlias === processedQueryColumn.column.alias
       ? 'selected'
       : ''}"
+    class:is-active={isActive}
   >
     {#if row || recordRunState === 'processing'}
       <CellFabric

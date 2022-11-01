@@ -182,12 +182,11 @@ export default class QueryRunner<
   }
 
   selectColumn(alias: QueryResultColumn['alias']): void {
-    if (
-      get(this.query).initial_columns.some((column) => column.alias === alias)
-    ) {
-      this.selectedColumnAlias.set(alias);
+    const processedColumn = get(this.processedColumns).get(alias);
+    if (processedColumn) {
+      this.selection.toggleColumnSelection(processedColumn);
     } else {
-      this.selectedColumnAlias.set(undefined);
+      this.selection.resetSelection();
     }
   }
 

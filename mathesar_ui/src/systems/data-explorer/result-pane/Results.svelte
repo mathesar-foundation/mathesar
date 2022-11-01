@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { Button, ImmutableMap } from '@mathesar-component-library';
+  import { ImmutableMap } from '@mathesar-component-library';
   import {
     Sheet,
     SheetHeader,
     SheetVirtualRows,
     SheetRow,
     SheetCell,
-    SheetCellResizer,
+    isColumnSelected,
   } from '@mathesar/components/sheet';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
+  import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
 
   export let queryRunner: QueryRunner;
@@ -28,10 +28,9 @@
     selection,
   } = queryRunner);
   $: ({ initial_columns } = $query);
+  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
-  $: columnRunState = $runState?.state;
   $: recordRunState = $runState?.state;
-
   $: errors = $runState?.state === 'failure' ? $runState.errors : [];
   $: columnList = [...$processedColumns.values()];
   $: sheetColumns = columnList.length
@@ -107,38 +106,15 @@
         </SheetCell>
 
         {#each columnList as processedQueryColumn (processedQueryColumn.id)}
-          <SheetCell
-            columnIdentifierKey={processedQueryColumn.id}
-            let:htmlAttributes
-            let:style
-          >
-            <div {...htmlAttributes} {style}>
-              <Button
-                appearance="plain"
-                class="column-name-wrapper {$selectedColumnAlias ===
-                processedQueryColumn.column.alias
-                  ? 'selected'
-                  : ''}"
-                on:click={() => {
-                  queryRunner.selectColumn(processedQueryColumn.column.alias);
-                }}
-              >
-                <!--TODO: Use a separate prop to identify column that isn't fetched yet
-                      instead of type:unknown-->
-                <ColumnName
-                  isLoading={columnRunState === 'processing' &&
-                    processedQueryColumn.column.type === 'unknown'}
-                  column={{
-                    ...processedQueryColumn.column,
-                    name:
-                      processedQueryColumn.column.display_name ??
-                      processedQueryColumn.column.alias,
-                  }}
-                />
-              </Button>
-              <SheetCellResizer columnIdentifierKey={processedQueryColumn.id} />
-            </div>
-          </SheetCell>
+          <ResultHeaderCell
+            {processedQueryColumn}
+            {queryRunner}
+            isSelected={isColumnSelected(
+              $selectedCells,
+              $columnsSelectedWhenTheTableIsEmpty,
+              processedQueryColumn,
+            )}
+          />
         {/each}
       </SheetHeader>
 
