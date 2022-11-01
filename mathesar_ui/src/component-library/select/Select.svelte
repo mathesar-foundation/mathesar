@@ -144,6 +144,8 @@
     on:open={() => api.open()}
     on:close={() => api.close()}
     on:keydown={(e) => api.handleKeyDown(e)}
+    on:focus
+    on:blur
   >
     <svelte:fragment slot="trigger">
       {#if $$slots.default}
