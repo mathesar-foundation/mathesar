@@ -16,7 +16,9 @@ export interface BooleanLikeColumn extends CellColumnLike {
   display_options: Partial<BooleanDisplayOptions> | null;
 }
 
-type Props = CheckBoxCellExternalProps | SingleSelectCellExternalProps<boolean>;
+type Props =
+  | CheckBoxCellExternalProps
+  | SingleSelectCellExternalProps<boolean | null>;
 
 function getLabels(
   displayOptions?: BooleanLikeColumn['display_options'],
@@ -27,11 +29,11 @@ function getLabels(
 
 function getProps(
   column: BooleanLikeColumn,
-): SingleSelectCellExternalProps<boolean> {
+): SingleSelectCellExternalProps<boolean | null> {
   const labels = getLabels(column.display_options);
   return {
-    options: [true, false],
-    getLabel: (value?: boolean) => {
+    options: [null, true, false],
+    getLabel: (value?: boolean | null) => {
       if (isDefinedNonNullable(value)) {
         return value ? labels[0] : labels[1];
       }
@@ -53,7 +55,7 @@ const booleanType: CellComponentFactory = {
   },
   getInput: (
     column: BooleanLikeColumn,
-  ): ComponentAndProps<SelectProps<boolean>> => ({
+  ): ComponentAndProps<SelectProps<boolean | null>> => ({
     component: Select,
     props: getProps(column),
   }),
