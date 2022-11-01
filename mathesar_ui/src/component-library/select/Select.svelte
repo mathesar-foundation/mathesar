@@ -15,7 +15,12 @@
   type $$Props = SelectProps<Option>;
   type DefinedProps = Required<$$Props>;
 
-  const dispatch = createEventDispatcher<{ change: Option | undefined }>();
+  const dispatch = createEventDispatcher<{
+    change: Option | undefined;
+    input: Option | undefined;
+    artificialChange: Option | undefined;
+    artificialInput: Option | undefined;
+  }>();
 
   export let id: DefinedProps['id'] = getGloballyUniqueId();
   export let disabled: DefinedProps['disabled'] = false;
@@ -79,6 +84,9 @@
   function setValueFromArray(values: (Option | undefined)[]) {
     [value] = values;
     dispatch('change', value);
+    dispatch('input', value);
+    dispatch('artificialChange', value);
+    dispatch('artificialInput', value);
   }
 
   function setValueOnOptionChange(opts: Option[]) {
