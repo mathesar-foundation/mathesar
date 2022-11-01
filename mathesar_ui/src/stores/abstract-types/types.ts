@@ -60,9 +60,14 @@ export interface CellInfo {
   conditionalConfig?: Record<DbType, Record<string, unknown>>;
 }
 
+export interface AbstractTypeIconArgs {
+  dbType: DbType;
+  typeOptions: Column['type_options'];
+}
+
 export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
-  icon: IconProps;
+  getIcon: (args?: AbstractTypeIconArgs) => IconProps | IconProps[];
   allowSettingDefaultValue?: boolean;
   cellInfo: CellInfo;
   getDbConfig?: (selectedDbType?: DbType) => AbstractTypeDbConfig;

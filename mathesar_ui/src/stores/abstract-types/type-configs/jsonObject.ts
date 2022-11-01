@@ -2,7 +2,7 @@ import { iconUiTypeJsonObject } from '@mathesar/icons';
 import type { AbstractTypeConfiguration } from '../types';
 
 const jsonObjectType: AbstractTypeConfiguration = {
-  icon: iconUiTypeJsonObject,
+  getIcon: () => iconUiTypeJsonObject,
   defaultDbType: 'mathesar_json_object',
   cellInfo: {
     type: 'string',

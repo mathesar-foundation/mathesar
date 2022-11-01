@@ -2,7 +2,10 @@ import { iconUiTypeArray } from '@mathesar/icons';
 import type { AbstractTypeConfiguration } from '../types';
 
 const fallbackType: AbstractTypeConfiguration = {
-  icon: { ...iconUiTypeArray, label: 'Array' },
+  getIcon: () => [
+    { ...iconUiTypeArray, label: 'Array' },
+    { ...iconUiTypeArray, label: 'Array' },
+  ],
   cellInfo: {
     type: 'array',
   },
