@@ -119,13 +119,15 @@
 <style>
   .linked-record-cell {
     flex: 1 0 auto;
-    display: grid;
-    grid-template: auto / 1fr auto;
+    display: flex;
+    justify-content: space-between;
   }
   .value {
     padding-left: var(--cell-padding);
     align-self: center;
     overflow: hidden;
+    width: max-content;
+    max-width: 100%;
   }
   .disabled .value {
     padding-right: var(--cell-padding);
