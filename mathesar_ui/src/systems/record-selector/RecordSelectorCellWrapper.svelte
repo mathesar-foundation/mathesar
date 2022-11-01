@@ -76,7 +76,7 @@
     top: var(--row-height);
     z-index: var(--z-index__record_selector__thead);
   }
-  .input :global(.input-element) {
+  .input :global(.record-selector-input) {
     position: absolute;
     top: 0;
     left: 0;
@@ -85,6 +85,7 @@
     border: none;
     outline: none;
     resize: none;
+    color: inherit;
   }
   .input :global(.linked-record-input) {
     position: static;
@@ -92,7 +93,7 @@
     width: max-content;
     max-width: 100%;
   }
-  .input :global(.input-element:focus) {
+  .input :global(.record-selector-input:focus) {
     border: none;
     outline: none;
   }
