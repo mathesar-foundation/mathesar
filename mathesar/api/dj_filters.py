@@ -1,7 +1,7 @@
 from django_filters import BooleanFilter, DateTimeFromToRangeFilter, OrderingFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter, PropertyOrderingFilter
 
-from mathesar.models.base import Schema, Table, Database
+from mathesar.models.base import Schema, Table, Database, DataFile
 from mathesar.models.query import UIQuery
 
 
@@ -21,6 +21,23 @@ class DatabaseFilter(PropertyFilterSet):
     class Meta:
         model = Database
         fields = ['deleted']
+
+
+class DataFileFilter(PropertyFilterSet):
+    database = CharInFilter(field_name='table_imported_to__schema__database__name', lookup_expr='in')
+    name = CharInFilter(field_name='name', lookup_expr='in')
+
+    sort_by = PropertyOrderingFilter(
+        fields=(
+            ('id', 'id'),
+            ('name', 'name'),
+        ),
+        label="Sort By",
+    )
+
+    class Meta:
+        model = DataFile
+        fields = ['name']
 
 
 class SchemaFilter(PropertyFilterSet):
