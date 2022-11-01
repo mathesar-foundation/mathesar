@@ -31,7 +31,6 @@ def get_enriched_column_table(table, metadata, engine=None):
         metadata,
         *table_columns,
         schema=table.schema,
-        extend_existing=True,
     )
 
 
