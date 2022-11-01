@@ -1,12 +1,12 @@
 import { iconUiTypeJsonObject } from '@mathesar/icons';
-import type { AbstractTypeConfiguration } from '../types';
+import type { AbstractTypeConfigurationFactory } from '../../types';
 
-const jsonObjectType: AbstractTypeConfiguration = {
+const jsonObjectFactory: AbstractTypeConfigurationFactory = () => ({
   getIcon: () => iconUiTypeJsonObject,
   defaultDbType: 'mathesar_json_object',
   cellInfo: {
     type: 'string',
   },
-};
+});
 
-export default jsonObjectType;
+export default jsonObjectFactory;

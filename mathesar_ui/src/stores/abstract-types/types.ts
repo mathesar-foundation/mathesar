@@ -74,6 +74,14 @@ export interface AbstractTypeConfiguration {
   getDisplayConfig?: () => AbstractTypeDisplayConfig;
 }
 
+export type AbstractTypeConfigurationPartialMap = Partial<
+  Record<AbstractTypeCategoryIdentifier, AbstractTypeConfiguration>
+>;
+
+export type AbstractTypeConfigurationFactory = (
+  map: AbstractTypeConfigurationPartialMap,
+) => AbstractTypeConfiguration;
+
 export interface AbstractType
   extends Omit<AbstractTypeResponse, 'db_types'>,
     AbstractTypeConfiguration {
