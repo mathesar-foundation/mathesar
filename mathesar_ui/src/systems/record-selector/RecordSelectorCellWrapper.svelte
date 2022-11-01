@@ -86,6 +86,12 @@
     outline: none;
     resize: none;
   }
+  .input :global(.linked-record-input) {
+    position: static;
+    min-width: 100%;
+    width: max-content;
+    max-width: 100%;
+  }
   .input :global(.input-element:focus) {
     border: none;
     outline: none;
