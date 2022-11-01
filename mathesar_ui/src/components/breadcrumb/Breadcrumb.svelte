@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Logo from '@mathesar/components/Logo.svelte';
+  import WhiteLogo from '@mathesar/components/WhiteLogo.svelte';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import BreadcrumbItem from './BreadcrumbItem.svelte';
   import {
@@ -28,7 +28,7 @@
 <div class="breadcrumb">
   {#if isMinimal}
     <a href={minimalHref} class="home-link">
-      <Logo />
+      <WhiteLogo />
       <span class="mathesar">Mathesar</span>
     </a>
   {:else}
@@ -56,7 +56,7 @@
   .mathesar {
     font-weight: 500;
     display: block;
-    color: var(--color-gray-darker);
+    color: var(--white);
     font-size: var(--text-size-x-large);
     margin: 0 var(--spacing);
   }

@@ -11,24 +11,22 @@ import Date from './type-configs/date';
 import Time from './type-configs/time';
 import DateTime from './type-configs/datetime';
 import Fallback from './type-configs/fallback';
-import JsonArray from './type-configs/jsonArray';
-import Object from './type-configs/jsonObject';
-import Array from './type-configs/array';
+import jsonArrayFactory from './type-configs/comboTypes/jsonArrayFactory';
+import jsonObjectFactory from './type-configs/comboTypes/jsonObjectFactory';
+import arrayFactory from './type-configs/comboTypes/arrayFactory';
 import type {
   AbstractType,
   AbstractTypesMap,
   AbstractTypeResponse,
   AbstractTypeConfiguration,
-  AbstractTypeCategoryIdentifier,
+  AbstractTypeConfigurationPartialMap,
 } from './types';
 
 /**
  * This is meant to be serializable and replaced by an API
  * at a later point
  */
-const abstractTypeCategories: Partial<
-  Record<AbstractTypeCategoryIdentifier, AbstractTypeConfiguration>
-> = {
+const simpleAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
   [abstractTypeCategory.Text]: Text,
   [abstractTypeCategory.Money]: Money,
   [abstractTypeCategory.Email]: Email,
@@ -39,9 +37,21 @@ const abstractTypeCategories: Partial<
   [abstractTypeCategory.Date]: Date,
   [abstractTypeCategory.Time]: Time,
   [abstractTypeCategory.DateTime]: DateTime,
-  [abstractTypeCategory.JsonArray]: JsonArray,
-  [abstractTypeCategory.Object]: Object,
-  [abstractTypeCategory.Array]: Array,
+};
+
+const comboAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
+  [abstractTypeCategory.Array]: arrayFactory(simpleAbstractTypeCategories),
+  [abstractTypeCategory.JsonArray]: jsonArrayFactory(
+    simpleAbstractTypeCategories,
+  ),
+  [abstractTypeCategory.JsonObject]: jsonObjectFactory(
+    simpleAbstractTypeCategories,
+  ),
+};
+
+const abstractTypeCategories: AbstractTypeConfigurationPartialMap = {
+  ...simpleAbstractTypeCategories,
+  ...comboAbstractTypeCategories,
   [abstractTypeCategory.Other]: Fallback,
 };
 

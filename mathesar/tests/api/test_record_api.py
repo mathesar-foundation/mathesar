@@ -3,6 +3,7 @@ import pytest
 from copy import deepcopy
 from unittest.mock import patch
 
+from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
@@ -737,6 +738,59 @@ def test_record_list_pagination_offset(create_patents_table, client):
     assert record_1_data[str(columns_id[3])] != record_2_data[str(columns_id[3])]
     assert record_1_data[str(columns_id[4])] != record_2_data[str(columns_id[4])]
     assert record_1_data[str(columns_id[5])] != record_2_data[str(columns_id[5])]
+
+
+def test_self_referential_column_preview(self_referential_table, engine, client):
+    table = self_referential_table
+    pk_column = table.get_column_by_name("Id")
+    name_column = table.get_column_by_name("Name")
+    parent_column = table.get_column_by_name("Parent")
+    table.add_constraint(UniqueConstraint(None, table.oid, [pk_column.attnum]))
+    table.add_constraint(
+        ForeignKeyConstraint(
+            None,
+            table.oid,
+            [parent_column.attnum],
+            table.oid,
+            [pk_column.attnum], {}
+        )
+    )
+    recursive_preview_template = f'Name: {{{name_column.id}}} Parent: {{{parent_column.id}}}'
+    table_settings_id = table.settings.id
+    data = {
+        "preview_settings": {
+            'template': recursive_preview_template
+        }
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{table.id}/settings/{table_settings_id}/",
+        data=data,
+    )
+    assert response.status_code == 200
+    response = client.get(f'/api/db/v0/tables/{table.id}/records/')
+    response_data = response.json()
+    preview_data = response_data['preview_data']
+    self_referential_column_reference_path = [[parent_column.id, pk_column.id]]
+    self_referential_column_path_prefix = compute_path_prefix(self_referential_column_reference_path)
+    name_column_alias = compute_path_str(self_referential_column_path_prefix, name_column.id)
+    parent_column_alias = compute_path_str(self_referential_column_path_prefix, parent_column.id)
+    preview_column = next(
+        preview
+        for preview in preview_data
+        if preview['column'] == parent_column.id
+    )
+    preview_data = preview_column['data']['2']
+    assert all(
+        [
+            key in preview_data
+            for key in [name_column_alias, parent_column_alias]
+        ]
+    )
+
+    expected_preview_data = {
+        name_column_alias: 'Child1', parent_column_alias: '1'
+    }
+    assert preview_data == expected_preview_data
 
 
 def test_foreign_key_record_api_all_column_previews(publication_tables, client):

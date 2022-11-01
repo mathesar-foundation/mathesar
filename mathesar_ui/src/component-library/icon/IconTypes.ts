@@ -8,7 +8,9 @@ import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
  * should hopefully be able to clean up this code duplication a bit.
  */
 export interface IconProps {
-  data: IconDefinition;
+  data: {
+    icon: IconDefinition['icon'];
+  };
   size?: string;
   spin?: boolean;
   pulse?: boolean;

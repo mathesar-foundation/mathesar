@@ -1,18 +1,25 @@
 <script lang="ts">
-  import { Button, Icon, TextInput } from '@mathesar-component-library';
+  import {
+    Button,
+    Icon,
+    iconSearch,
+    TextInputWithPrefix,
+  } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/AppTypes';
-  import DatabaseName from '@mathesar/components/DatabaseName.svelte';
-  import EntityType from '@mathesar/components/EntityType.svelte';
-  import { iconAddNew } from '@mathesar/icons';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import { schemas as schemasStore } from '@mathesar/stores/schemas';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import AddEditSchemaModal from './AddEditSchemaModal.svelte';
+  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
+  import { iconDatabase, iconAddNew } from '@mathesar/icons';
+  import { deleteSchema as deleteSchemaAPI } from '@mathesar/stores/schemas';
+  import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
   import SchemaRow from './SchemaRow.svelte';
-  import SchemasHelp from './__help__/SchemasHelp.svelte';
+  import AddEditSchemaModal from './AddEditSchemaModal.svelte';
+  import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
 
   const addEditModal = modal.spawnModalController();
 
@@ -52,36 +59,86 @@
     targetSchema = schema;
     addEditModal.open();
   }
+
+  function deleteSchema(schema: SchemaEntry) {
+    void confirmDelete({
+      identifierType: 'Schema',
+      identifierName: schema.name,
+      body: deleteSchemaConfirmationBody,
+      onProceed: async () => {
+        await deleteSchemaAPI(database.name, schema.id);
+        // TODO: Create common util to handle data clearing & sync between stores
+        removeTablesInSchemaTablesStore(schema.id);
+      },
+    });
+  }
+
+  function handleClearFilterQuery() {
+    filterQuery = '';
+  }
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(database.name)}</title></svelte:head>
 
-<LayoutWithHeader>
-  <div class="database-page-header">
-    <div class="database-page-name">
-      <div><EntityType>Database</EntityType></div>
-      <h1><DatabaseName {database} /></h1>
-    </div>
-    <Button class="add" on:click={addSchema}>
-      <Icon {...iconAddNew} /> New Schema
+<LayoutWithHeader2>
+  <AppSecondaryHeader
+    slot="secondary-header"
+    pageTitleAndMetaProps={{
+      name: database.name,
+      type: 'database',
+      icon: iconDatabase,
+    }}
+  >
+    <Button slot="action" on:click={addSchema} appearance="primary">
+      <Icon {...iconAddNew} />
+      Create Schema
     </Button>
-  </div>
+  </AppSecondaryHeader>
 
   <div class="schema-list-wrapper">
-    <h2 class="schema-list-title">
-      Schemas ({schemasMap.size}) <SchemasHelp />
-    </h2>
-    <TextInput placeholder="Find a schema..." bind:value={filterQuery} />
+    <div class="schema-list-title-container">
+      <h2 class="schema-list-title">
+        Schemas ({schemasMap.size})
+      </h2>
+    </div>
+    <TextInputWithPrefix
+      placeholder="Search Schemas..."
+      bind:value={filterQuery}
+      prefixIcon={iconSearch}
+    />
+
+    {#if filterQuery}
+      <div class="search-results-info">
+        {#if displayList.length}
+          <p>
+            {displayList.length} result{displayList.length > 1 ? 's' : ''} for all
+            schemas matching <strong>{filterQuery}</strong>
+          </p>
+        {:else}
+          <p>
+            0 results for all schemas matching <strong>{filterQuery}</strong>
+          </p>
+        {/if}
+        <Button appearance="secondary" on:click={handleClearFilterQuery}
+          >Clear</Button
+        >
+      </div>
+    {/if}
 
     <ul class="schema-list">
       {#each displayList as schema (schema.id)}
         <li class="schema-list-item">
-          <SchemaRow {database} {schema} on:edit={() => editSchema(schema)} />
+          <SchemaRow
+            {database}
+            {schema}
+            on:edit={() => editSchema(schema)}
+            on:delete={() => deleteSchema(schema)}
+          />
         </li>
       {/each}
     </ul>
   </div>
-</LayoutWithHeader>
+</LayoutWithHeader2>
 
 <AddEditSchemaModal
   controller={addEditModal}
@@ -90,54 +147,40 @@
 />
 
 <style lang="scss">
-  .database-page-header {
-    margin: 0.5rem 0 1rem;
-    display: flex;
-    align-items: center;
-  }
-  .database-page-name {
-    flex-grow: 1;
-    h1 {
-      margin: 0;
-      font-weight: 500;
-      font-size: var(--display-size-large);
-    }
-  }
   .schema-list-wrapper {
     display: flex;
     flex-direction: column;
+    width: 100%;
+
+    .schema-list-title-container {
+      border-bottom: 1px solid var(--slate-200);
+      margin-bottom: 1rem;
+    }
 
     .schema-list-title {
       font-size: var(--text-size-large);
-      margin: 1rem 0;
-      font-weight: 500;
+      font-weight: 700;
+    }
+
+    .search-results-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      p {
+        font-size: var(--text-size-large);
+      }
     }
 
     .schema-list {
       width: 100%;
       list-style: none;
       padding: 0;
-      display: grid;
+      display: flex;
+      flex-direction: column;
 
-      grid-template-rows: 1fr;
-      grid-column-gap: 1rem;
-      grid-row-gap: 1rem;
-    }
-    @media only screen and (min-width: 768px) {
-      .schema-list {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media only screen and (min-width: 992px) {
-      .schema-list {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media only screen and (min-width: 1200px) {
-      .schema-list {
-        grid-template-columns: repeat(4, 1fr);
+      * + * {
+        margin-top: 0.714rem;
       }
     }
   }

@@ -10,7 +10,7 @@ from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
 )
 from db.columns.utils import to_mathesar_column_with_engine, get_type_options
-from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
+from db.tables.operations.select import reflect_table_from_oid
 from db.types.operations.convert import get_db_type_enum_from_class, get_db_type_enum_from_id
 from db.types.operations.cast import get_cast_function_name
 from db.utils import execute_statement
@@ -112,36 +112,24 @@ def retype_column(
 
 
 def alter_column_type(
-    table_oid, column_name, engine, connection, target_type, type_options={}
+    table_oid, column_name, engine, connection, target_type, type_options={}, metadata=None
 ):
+    metadata = metadata if metadata else get_empty_metadata()
     type_options = type_options if type_options is not None else {}
-    table = reflect_table_from_oid(
-        table_oid,
-        engine,
-        connection_to_use=connection,
-        # TODO reuse metadata
-        metadata=get_empty_metadata(),
-    )
     _preparer = engine.dialect.identifier_preparer
-    schema = table.schema
-
-    table_oid = get_oid_from_table(table.name, schema, engine)
-    # Re-reflect table so that column is accurate
-    # TODO unclear why re-reflection is needed; comment more if possible
     table = reflect_table_from_oid(
         table_oid,
         engine,
         connection_to_use=connection,
-        # TODO reuse metadata
-        metadata=get_empty_metadata(),
+        metadata=metadata,
     )
     column = table.columns[column_name]
-    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine=engine, metadata=get_empty_metadata(), connection_to_use=connection)
+    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine=engine, metadata=metadata, connection_to_use=connection)
 
-    default = get_column_default(table_oid, column_attnum, engine=engine, metadata=get_empty_metadata(), connection_to_use=connection)
+    default = get_column_default(table_oid, column_attnum, engine=engine, metadata=metadata, connection_to_use=connection)
     if default is not None:
         default_text = column.server_default.arg.text
-    set_column_default(table_oid, column_attnum, engine, connection, None)
+    set_column_default(table_oid, column_attnum, engine, connection, None, metadata=metadata)
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
@@ -182,22 +170,21 @@ def change_column_nullable(table_oid, column_attnum, engine, connection, nullabl
     op.alter_column(table.name, column.name, nullable=nullable, schema=table.schema)
 
 
-def set_column_default(table_oid, column_attnum, engine, connection, default):
+def set_column_default(table_oid, column_attnum, engine, connection, default, metadata=None):
+    metadata = metadata if metadata else get_empty_metadata()
     table = reflect_table_from_oid(
         table_oid,
         engine,
         connection_to_use=connection,
-        # TODO reuse metadata
-        metadata=get_empty_metadata(),
+        metadata=metadata,
     )
     # TODO reuse metadata
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=get_empty_metadata())
-    column = table.columns[column_name]
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=metadata)
     default_clause = DefaultClause(str(default)) if default is not None else default
     try:
         ctx = MigrationContext.configure(connection)
         op = Operations(ctx)
-        op.alter_column(table.name, column.name, schema=table.schema, server_default=default_clause)
+        op.alter_column(table.name, column_name, schema=table.schema, server_default=default_clause)
     except DataError as e:
         if (type(e.orig) == InvalidTextRepresentation):
             raise InvalidDefaultError

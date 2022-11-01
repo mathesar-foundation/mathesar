@@ -59,9 +59,43 @@
     --text-size-small: 0.889rem;
     --text-size-base: 1rem;
     --text-size-large: 1.125rem;
-    --text-size-x-large: 1.266rem;
+    --text-size-x-large: 1.428rem;
     --display-size-large: 1.953rem;
 
+    /*********** RESTYLING ***********/
+    // Idea here is to use the same token naming
+    // between the Figma designs and the codebase
+    // which then makes it easier and faster to create
+    // element from design into code.
+    --red-500: #eb5441;
+    --red-600: #c63826;
+
+    --slate-100: #eff1f1;
+    --slate-200: #d5d8dc;
+    --slate-300: #aeb4bc;
+    --slate-400: #444c55;
+    --slate-800: #25292e;
+
+    --sky-200: #e8f1fd;
+
+    --yellow-100: #fdf7ed;
+
+    --white: white;
+
+    --red-box-shadow: #eb544133;
+
+    // Setting a new variable as brand color
+    // provides the ability to later change its
+    // value and support white-labelling
+
+    // Brand Color
+    --brand-500: var(--red-500);
+    --brand-600: var(--red-600);
+    --brand-box-shadow: var(--red-box-shadow);
+
+    --border-radius-s: 0.142rem; //2px
+    --border-radius-m: 0.285rem; //4px
+    --border-radius-l: 0.571rem; //8px
     --modal-z-index: 50;
     --modal-record-selector-z-index: 50;
   }
@@ -103,7 +137,14 @@
 
     --page-padding: 1em;
 
-    color: var(--color-text);
+    --max-layout-width: 54rem;
+    // Setting the header height here
+    // since when the header is fixed
+    // we can use this variable to add margin-top
+    // to the below header content container
+    --header-height: 4.285rem;
+
+    color: var(--slate-400);
   }
 
   h1 {
@@ -116,9 +157,9 @@
    * don't have any browser styling but still have functionality.
    */
   .passthrough {
-    background: inherit;
-    border-radius: inherit;
-    border: inherit;
+    background: none;
+    border-radius: 0;
+    border: none;
     color: inherit;
     cursor: inherit;
     font-family: inherit;

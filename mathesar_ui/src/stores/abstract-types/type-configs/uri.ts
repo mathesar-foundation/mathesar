@@ -6,7 +6,7 @@ const DB_TYPES = {
 };
 
 const uriType: AbstractTypeConfiguration = {
-  icon: iconUiTypeUri,
+  getIcon: () => iconUiTypeUri,
   defaultDbType: DB_TYPES.MATHESAR_TYPES__URI,
   cellInfo: {
     type: 'uri',
