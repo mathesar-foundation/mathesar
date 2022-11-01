@@ -77,16 +77,3 @@
     />
   </Debounce>
 </CellWrapper>
-
-<style>
-  :global(.record-selector-input) {
-    height: 100%;
-    width: 100%;
-    border: none;
-  }
-  :global(.record-selector-input:focus) {
-    outline: none;
-    border: none;
-    box-shadow: none;
-  }
-</style>

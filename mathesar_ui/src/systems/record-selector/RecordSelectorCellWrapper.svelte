@@ -96,6 +96,7 @@
   .input :global(.record-selector-input:focus) {
     border: none;
     outline: none;
+    box-shadow: none;
   }
   .divider {
     height: 10px;
