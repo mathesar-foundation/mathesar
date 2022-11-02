@@ -53,6 +53,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mathesar.middleware.CursorClosedHandlerMiddleware",
+    "mathesar.middleware.LiveDemoModeMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -88,6 +89,15 @@ DATABASES = {
     for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
 }
 DATABASES[decouple_config('DJANGO_DATABASE_KEY')] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
+
+LIVE_DEMO = decouple_config('LIVE_DEMO', default=False)
+
+# TODO replace with lazy generation
+if LIVE_DEMO:
+    for i in range(10):
+        suffix = f'_ld{i}'
+        DATABASES[f'mathesar_tables{suffix}'] = {k: v for k, v in DATABASES['mathesar_tables'].items()}
+        DATABASES[f'mathesar_tables{suffix}'].update({'NAME': f'mathesar{suffix}'})
 
 for db_key, db_dict in DATABASES.items():
     # Engine can be '.postgresql' or '.postgresql_psycopg2'

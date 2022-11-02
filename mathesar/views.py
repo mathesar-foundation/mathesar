@@ -1,17 +1,18 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from mathesar.state import reset_reflection
-from mathesar.models.base import Database, Schema, Table
 from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
 from mathesar.database.types import UIType
+from mathesar.models.base import Database, Schema, Table
 from mathesar.models.query import UIQuery
+from mathesar.state import reset_reflection
 
 
 def get_schema_list(request, database):
@@ -81,6 +82,8 @@ def get_current_database(request, db_name):
     # if there's a DB name passed in, try to retrieve the database, or return a 404 error.
     if db_name is not None:
         return get_object_or_404(Database, name=db_name)
+    elif settings.LIVE_DEMO:
+        return Database.objects.get(name=request.GET.get('database', 'mathesar_tables'))
     else:
         try:
             # Try to get the first database available
