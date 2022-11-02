@@ -49,7 +49,7 @@ export function getValueComparisonOutcome(
     return undefined;
   }
   if (matchParts.length === 1) {
-    return matchParts[0].isMatch ? 'exactMatch' : 'NoMatch';
+    return matchParts[0].isMatch ? 'exactMatch' : 'noMatch';
   }
   return 'substringMatch';
 }

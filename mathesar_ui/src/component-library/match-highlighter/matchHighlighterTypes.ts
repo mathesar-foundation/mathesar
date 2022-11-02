@@ -6,4 +6,4 @@ export interface MatchPart {
 export type ValueComparisonOutcome =
   | 'exactMatch'
   | 'substringMatch'
-  | 'NoMatch';
+  | 'noMatch';

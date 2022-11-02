@@ -45,7 +45,7 @@
   class:has-padding={hasPadding}
   class:exact-match={valueComparisonOutcome === 'exactMatch'}
   class:substring-match={valueComparisonOutcome === 'substringMatch'}
-  class:no-match={valueComparisonOutcome === 'NoMatch'}
+  class:no-match={valueComparisonOutcome === 'noMatch'}
   bind:this={element}
   on:click
   on:dblclick

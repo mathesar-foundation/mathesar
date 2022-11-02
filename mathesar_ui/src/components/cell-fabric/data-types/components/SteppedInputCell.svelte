@@ -40,7 +40,7 @@
     const hasSearchValue =
       searchValue !== null && searchValue !== undefined && searchValue !== '';
     if (hasSearchValue) {
-      return searchValue === value ? 'exactMatch' : 'NoMatch';
+      return searchValue === value ? 'exactMatch' : 'noMatch';
     }
     return undefined;
   })();
