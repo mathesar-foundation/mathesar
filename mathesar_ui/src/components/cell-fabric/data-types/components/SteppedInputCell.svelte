@@ -140,7 +140,7 @@
       class:nowrap={!isActive}
       class:truncate={isActive && multiLineTruncate}
     >
-      <slot name="content" {value} {formatValue}>
+      <slot name="content" {value} {formatValue} {matchParts}>
         <CellValue {value} {formatValue} {matchParts} />
       </slot>
     </div>
