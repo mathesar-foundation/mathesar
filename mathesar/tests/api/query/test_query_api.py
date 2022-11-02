@@ -1,5 +1,7 @@
 import pytest
 
+from mathesar.models.base import Column
+
 
 @pytest.fixture
 def post_minimal_query(_post_query, create_patents_table, get_uid):
@@ -80,6 +82,34 @@ def test_query_with_bad_base_table(get_uid, client):
     }
     response = client.post('/api/db/v0/queries/', data=request_data)
     assert response.status_code == 400
+
+
+def test_query_deleted_table(library_ma_tables, client):
+
+    checkouts_table = library_ma_tables['Checkouts']
+    items_table = library_ma_tables['Items']
+    items_fk_column_id = checkouts_table.get_column_name_id_bidirectional_map()['Item']
+    items_id_column_id = items_table.get_column_name_id_bidirectional_map()['id']
+    request_data = {
+        "name": "Deleted Table Query",
+        "base_table": checkouts_table.id,
+        "initial_columns": [
+            {
+                "id": 1,
+                # Mock Django IDs; their correctness is not checked
+                "jp_path": [[items_fk_column_id, items_id_column_id]],
+                "alias": "alias_x",
+            },
+        ],
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    query_id = response.json()['id']
+    assert response.status_code == 201
+    items_fk_column = Column.objects.get(id=items_fk_column_id)
+    checkouts_table.drop_column(items_fk_column.attnum)
+    items_fk_column.delete()
+    response = client.get(f'/api/db/v0/queries/{query_id}/records/', data=request_data)
+    assert response.status_code == 200
 
 
 def test_query_with_initial_column_without_id(create_patents_table, get_uid, client):
