@@ -14,7 +14,6 @@
   export let processedQueryColumn: ProcessedQueryOutputColumn;
   export let row: QueryRow | undefined;
   export let recordRunState: RequestStatus['state'] | undefined;
-  export let selectedColumnAlias: string | undefined;
   export let selection: QuerySheetSelection;
 
   $: ({ activeCell, selectedCells } = selection);
@@ -68,14 +67,7 @@
   let:htmlAttributes
   let:style
 >
-  <div
-    {...htmlAttributes}
-    {style}
-    class="cell {selectedColumnAlias === processedQueryColumn.column.alias
-      ? 'selected'
-      : ''}"
-    class:is-active={isActive}
-  >
+  <div {...htmlAttributes} {style} class="cell" class:is-active={isActive}>
     {#if row || recordRunState === 'processing'}
       <CellFabric
         {isActive}

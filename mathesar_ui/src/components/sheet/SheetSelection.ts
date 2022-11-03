@@ -165,23 +165,17 @@ export const isCellSelected = (
   column: SelectionColumn,
 ): boolean => selectedCells.has(createSelectedCellIdentifier(row, column));
 
-export function getSelectedColumnId(selectedCell: string): number {
-  return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[1]);
+function getSelectedColumnId(selectedCell: string): SelectionColumn['id'] {
+  const columnId = selectedCell.split(ROW_COLUMN_SEPARATOR)[1];
+  const numericalColumnId = Number(columnId);
+  if (Number.isNaN(numericalColumnId)) {
+    return columnId;
+  }
+  return numericalColumnId;
 }
 
 export function getSelectedRowIndex(selectedCell: string): number {
   return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[0]);
-}
-
-export function getSelectedUniqueColumnsId(
-  selectedCells: ImmutableSet<string>,
-  columnsSelectedWhenTheTableIsEmpty: ImmutableSet<number>,
-): number[] {
-  const setOfUniqueColumnIds = new Set([
-    ...[...selectedCells].map(getSelectedColumnId),
-    ...columnsSelectedWhenTheTableIsEmpty,
-  ]);
-  return Array.from(setOfUniqueColumnIds);
 }
 
 export default class SheetSelection<
@@ -368,12 +362,19 @@ export default class SheetSelection<
     );
   }
 
-  toggleColumnSelection(column: Column): void {
+  clearColumnSelection(column: Column): boolean {
     const isCompleteColumnSelected = this.isCompleteColumnSelected(column);
 
     if (isCompleteColumnSelected) {
-      // Clear the selection - deselect the column
       this.resetSelection();
+      return true;
+    }
+
+    return false;
+  }
+
+  toggleColumnSelection(column: Column): void {
+    if (this.clearColumnSelection(column)) {
       return;
     }
 
@@ -489,6 +490,24 @@ export default class SheetSelection<
     });
 
     return moved ? 'moved' : undefined;
+  }
+
+  /**
+   * This method does not utilize class properties inorder
+   * to make it reactive during component usage.
+   *
+   * It is placed within the class inorder to make use of
+   * class types
+   */
+  getSelectedUniqueColumnsId(
+    selectedCells: ImmutableSet<string>,
+    columnsSelectedWhenTheTableIsEmpty: ImmutableSet<Column['id']>,
+  ): Column['id'][] {
+    const setOfUniqueColumnIds = new Set([
+      ...[...selectedCells].map(getSelectedColumnId),
+      ...columnsSelectedWhenTheTableIsEmpty,
+    ]);
+    return Array.from(setOfUniqueColumnIds);
   }
 
   destroy(): void {

@@ -65,11 +65,6 @@ export default class QueryRunner<
 
   selection: QuerySheetSelection;
 
-  // Display stores
-
-  selectedColumnAlias: Writable<QueryResultColumn['alias'] | undefined> =
-    writable(undefined);
-
   private runPromise: CancellablePromise<QueryRunResponse> | undefined;
 
   constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
@@ -168,7 +163,7 @@ export default class QueryRunner<
   }
 
   protected resetResults(): void {
-    this.selectedColumnAlias.set(undefined);
+    this.clearSelectedColumn();
     this.runPromise?.cancel();
     this.resetPagination();
     this.rowsData.set({ totalCount: 0, rows: [] });
@@ -191,7 +186,7 @@ export default class QueryRunner<
   }
 
   clearSelectedColumn(): void {
-    this.selectedColumnAlias.set(undefined);
+    this.selection.resetSelection();
   }
 
   getQueryModel(): QueryModel {

@@ -10,7 +10,6 @@ export {
   isColumnSelected,
   isRowSelected,
   isCellSelected,
-  getSelectedUniqueColumnsId,
   getSelectedRowIndex,
   isCellActive,
   scrollBasedOnActiveCell,

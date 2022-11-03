@@ -18,15 +18,8 @@
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
 
-  $: ({
-    query,
-    processedColumns,
-    rowsData,
-    selectedColumnAlias,
-    pagination,
-    runState,
-    selection,
-  } = queryRunner);
+  $: ({ query, processedColumns, rowsData, pagination, runState, selection } =
+    queryRunner);
   $: ({ initial_columns } = $query);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
@@ -47,31 +40,6 @@
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
   ]);
-
-  function checkAndUnselectColumn(e: MouseEvent) {
-    const target = e.target as HTMLElement;
-    if (
-      target.closest(
-        '[data-sheet-element="header"] [data-sheet-element="cell"]',
-      )
-    ) {
-      return;
-    }
-    if ($selectedColumnAlias) {
-      const closestCell = target.closest(
-        '[data-sheet-element="row"] [data-sheet-element="cell"]',
-      );
-      if (
-        closestCell &&
-        closestCell.querySelector(
-          `[data-column-identifier="${$selectedColumnAlias}"]`,
-        )
-      ) {
-        return;
-      }
-    }
-    queryRunner.clearSelectedColumn();
-  }
 </script>
 
 <div data-identifier="query-run-result">
@@ -91,7 +59,6 @@
       columns={sheetColumns}
       getColumnIdentifier={(c) => c.id}
       {columnWidths}
-      on:click={checkAndUnselectColumn}
       usesVirtualList
     >
       <SheetHeader>
@@ -145,7 +112,6 @@
                     {processedQueryColumn}
                     row={rows[item.index]}
                     {recordRunState}
-                    selectedColumnAlias={$selectedColumnAlias}
                     {selection}
                   />
                 {/each}
