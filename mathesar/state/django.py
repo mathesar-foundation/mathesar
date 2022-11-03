@@ -33,18 +33,21 @@ def clear_dj_cache():
 
 def reflect_db_objects(metadata):
     sync_databases_status()
-    databases = models.Database.current_objects.filter(deleted=False)
+    databases = models.Database.current_objects.all()
     for database in databases:
-        reflect_schemas_from_database(database)
-        schemas = models.Schema.current_objects.filter(database=database).prefetch_related(
-            Prefetch('database', queryset=databases)
-        )
-        reflect_tables_from_schemas(schemas, metadata=metadata)
-        tables = models.Table.current_objects.filter(schema__in=schemas).prefetch_related(
-            Prefetch('schema', queryset=schemas)
-        )
-        reflect_columns_from_tables(tables, metadata=metadata)
-        reflect_constraints_from_database(database.name)
+        if database.deleted is False:
+            reflect_schemas_from_database(database)
+            schemas = models.Schema.current_objects.filter(database=database).prefetch_related(
+                Prefetch('database', queryset=databases)
+            )
+            reflect_tables_from_schemas(schemas, metadata=metadata)
+            tables = models.Table.current_objects.filter(schema__in=schemas).prefetch_related(
+                Prefetch('schema', queryset=schemas)
+            )
+            reflect_columns_from_tables(tables, metadata=metadata)
+            reflect_constraints_from_database(database.name)
+        else:
+            models.Schema.current_objects.filter(database=database).delete()
 
 
 def sync_databases_status():
