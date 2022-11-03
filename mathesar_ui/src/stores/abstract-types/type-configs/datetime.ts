@@ -111,7 +111,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const dateTimeType: AbstractTypeConfiguration = {
-  icon: { ...iconUiTypeDateTime, label: 'Date & Time' },
+  getIcon: () => ({ ...iconUiTypeDateTime, label: 'Date & Time' }),
   defaultDbType: DB_TYPES.TIMESTAMP_WITH_TZ,
   cellInfo: {
     type: 'datetime',

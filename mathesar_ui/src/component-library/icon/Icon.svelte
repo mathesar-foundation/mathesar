@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
   import type { IconProps } from './IconTypes';
 
   // NOTE:
@@ -9,8 +8,8 @@
   // should hopefully be able to clean up this code duplication a bit.
 
   // The Font-awesome icon definition from 'fortawesome' package.
-  export let data: IconDefinition;
-  $: [viewBoxWith, viewBoxHeight, , , path] = data.icon;
+  export let data: IconProps['data'];
+  $: [viewBoxWidth, viewBoxHeight, , , path] = data.icon;
 
   // The size of the icon. Accepts a valid dimension with unit.
   export let size = '1em';
@@ -58,7 +57,7 @@
 
 <svg
   version="1.1"
-  viewBox="0 0 {viewBoxWith} {viewBoxHeight}"
+  viewBox="0 0 {viewBoxWidth} {viewBoxHeight}"
   width={size}
   height={size}
   class={faClasses}
