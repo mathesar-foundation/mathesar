@@ -186,6 +186,7 @@ export default class SheetSelection<
 
   private getRows: () => Row[];
 
+  // max index is inclusive
   private getMaxSelectionRowIndex: () => number;
 
   activeCell: Writable<ActiveCell | undefined>;
@@ -439,10 +440,6 @@ export default class SheetSelection<
         return activeCell.rowIndex;
       }
       const minRowIndex = 0;
-      /**
-       * We are not subtracting 1 from the below maxRowIndex calculation
-       * inorder to account for the add-new-record placeholder row
-       */
       const maxRowIndex = this.getMaxSelectionRowIndex();
       const newRowIndex = activeCell.rowIndex + delta;
       if (newRowIndex < minRowIndex || newRowIndex > maxRowIndex) {

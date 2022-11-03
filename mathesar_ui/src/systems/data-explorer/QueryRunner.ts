@@ -81,11 +81,7 @@ export default class QueryRunner<
         const pagination = get(this.pagination);
         const { offset } = pagination;
         const pageSize = pagination.size;
-        /**
-         * We are not subtracting 1 from the below maxRowIndex calculation
-         * inorder to account for the add-new-record placeholder row
-         */
-        return Math.min(pageSize, totalCount - offset, rowLength);
+        return Math.min(pageSize, totalCount - offset, rowLength) - 1;
       },
     });
   }
