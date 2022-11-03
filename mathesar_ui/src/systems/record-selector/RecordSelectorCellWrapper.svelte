@@ -63,7 +63,11 @@
   .column-header {
     background: #f7f8f8;
     padding: 0 0.5rem;
-    height: var(--row-height);
+    /** 0.5px below is a hack to deal with a Firefox-only issue. When vertically
+     * scrolling the table, the data cells were peeking through between a tiny
+     * sub-pixel gap between the column header cell and the input cell, but only
+     * at certain zoom levels.*/
+    height: calc(var(--row-height) - 2 * var(--border-width) + 0.5px);
     position: sticky;
     top: 0;
     z-index: var(--z-index__record_selector__thead);
