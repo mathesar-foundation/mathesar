@@ -46,9 +46,18 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   operationalState?: ColumnOperationalState;
 }
 
+export interface ProcessedQueryOutputColumn extends ProcessedQueryResultColumn {
+  columnIndex: number;
+}
+
 export type ProcessedQueryResultColumnMap = ImmutableMap<
   ProcessedQueryResultColumn['id'],
   ProcessedQueryResultColumn
+>;
+
+export type ProcessedQueryOutputColumnMap = ImmutableMap<
+  ProcessedQueryOutputColumn['id'],
+  ProcessedQueryOutputColumn
 >;
 
 export interface InputColumn {
@@ -389,11 +398,15 @@ export function speculateColumnMetaData({
 export function getProcessedOutputColumns(
   outputColumnAliases: QueryRunResponse['output_columns'],
   processedColumnMetaData: ProcessedQueryResultColumnMap,
-): ProcessedQueryResultColumnMap {
+): ProcessedQueryOutputColumnMap {
   return new ImmutableMap(
-    outputColumnAliases.map((alias) => [
+    outputColumnAliases.map((alias, index) => [
       alias,
-      processedColumnMetaData.get(alias) ?? processColumn({ alias }, new Map()),
+      {
+        ...(processedColumnMetaData.get(alias) ??
+          processColumn({ alias }, new Map())),
+        columnIndex: index,
+      },
     ]),
   );
 }

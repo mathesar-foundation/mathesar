@@ -50,8 +50,8 @@ import {
   faCrosshairs,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
-
 import type { IconProps } from '@mathesar-component-library/types';
+import { arrayIcon } from './customIcons';
 
 /**
  * @file
@@ -135,3 +135,4 @@ export const iconUiTypeText: IconProps = { data: faAlignLeft };
 export const iconUiTypeTime: IconProps = { data: faClock };
 export const iconUiTypeUnknown: IconProps = { data: faQuestion };
 export const iconUiTypeUri: IconProps = { data: faGlobe };
+export const iconUiTypeArray: IconProps = { data: arrayIcon };
