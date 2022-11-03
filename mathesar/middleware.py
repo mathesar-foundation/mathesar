@@ -34,7 +34,7 @@ class LiveDemoModeMiddleware:
         )
 
     def __call__(self, request):
-        if settings.LIVE_DEMO:
+        if settings.LIVE_DEMO and not settings.TEST:
             sessionid = request.COOKIES.get('sessionid', None)
             database = self._session_db_map[sessionid]
             print(f"Using database {database} for sessionid {sessionid}")
