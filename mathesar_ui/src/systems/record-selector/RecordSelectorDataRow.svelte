@@ -34,6 +34,7 @@
   on:click={handleClick}
   class:selected={isSelected}
   on:mousemove={handleMouseMove}
+  tabindex="-1"
 >
   <slot />
 </svelte:element>
