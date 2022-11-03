@@ -62,11 +62,15 @@ export function getColumnIdToFocusInitially({
       return undefined;
     }
     const { template } = table.settings.preview_settings;
-    const id = template.match(/(?<=\{)\d+(?=\})/)?.[0] ?? undefined;
-    if (!id) {
+    const match = template.match(/\{\d+\}/)?.[0] ?? undefined;
+    if (!match) {
       return undefined;
     }
-    return parseInt(id, 10);
+    const id = parseInt(match.slice(1, -1), 10);
+    if (Number.isNaN(id)) {
+      return undefined;
+    }
+    return id;
   }
 
   function getFromColumns() {
