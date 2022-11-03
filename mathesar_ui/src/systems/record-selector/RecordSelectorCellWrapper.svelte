@@ -67,6 +67,8 @@
     position: sticky;
     top: 0;
     z-index: var(--z-index__record_selector__thead);
+    min-width: max-content;
+    box-sizing: content-box;
   }
   .input {
     background: white;
