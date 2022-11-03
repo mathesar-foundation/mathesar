@@ -72,7 +72,6 @@
   }
   .input {
     background: white;
-    position: relative;
     height: var(--row-height);
     position: sticky;
     top: var(--row-height);
