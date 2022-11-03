@@ -12,7 +12,9 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { tables } from '@mathesar/stores/tables';
+  import { toast } from '@mathesar/stores/toast';
   import { postAPI, States } from '@mathesar/utils/api';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import type {
     RecordSelectorController,
     RecordSelectorResult,
@@ -81,6 +83,7 @@
       });
       submitResult({ recordId, recordSummary });
     } catch (err) {
+      toast.error(getErrorMessage(err));
       // TODO set errors in tabularData to appear within cells
     } finally {
       isSubmittingNewRecord = false;
