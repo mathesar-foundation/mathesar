@@ -90,10 +90,11 @@ DATABASES = {
 }
 DATABASES[decouple_config('DJANGO_DATABASE_KEY')] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
 
-LIVE_DEMO = decouple_config('LIVE_DEMO', default=False)
+LIVE_DEMO = decouple_config('LIVE_DEMO', default=False, cast=bool)
+TEST = decouple_config('TEST', default=False, cast=bool)
 
 # TODO replace with lazy generation
-if LIVE_DEMO:
+if LIVE_DEMO and not TEST:
     for i in range(10):
         suffix = f'_ld{i}'
         DATABASES[f'mathesar_tables{suffix}'] = {k: v for k, v in DATABASES['mathesar_tables'].items()}
@@ -110,7 +111,7 @@ for db_key, db_dict in DATABASES.items():
 
 # pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
-if decouple_config('TEST', default=False, cast=bool):
+if TEST:
     for db_key, _ in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim)):
         DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
 
