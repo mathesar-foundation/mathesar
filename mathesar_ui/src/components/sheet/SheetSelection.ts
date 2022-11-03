@@ -266,9 +266,6 @@ export default class SheetSelection<
     if (this.freezeSelection) {
       return;
     }
-    // Clear any existing selection
-    this.resetSelection();
-
     // Initialize the bounds of the selection
     this.selectionBounds = {
       startColumnIndex: column.columnIndex,
@@ -276,6 +273,9 @@ export default class SheetSelection<
       startRowIndex: row.rowIndex,
       endRowIndex: row.rowIndex,
     };
+
+    const cells = this.getIncludedCells(this.selectionBounds);
+    this.selectMultipleCells(cells);
   }
 
   onMouseEnterWhileSelection(row: SelectionRow, column: SelectionColumn): void {
