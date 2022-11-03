@@ -1,7 +1,8 @@
-from sqlalchemy import text
+from sqlalchemy import text, TEXT
 from sqlalchemy.types import UserDefinedType
 
 from db.types.base import MathesarCustomType
+from db.types.custom.underlying_type import HasUnderlyingType
 
 DB_TYPE = MathesarCustomType.EMAIL.id
 
@@ -16,7 +17,8 @@ EMAIL_REGEX_STR = (
 )
 
 
-class Email(UserDefinedType):
+class Email(UserDefinedType, HasUnderlyingType):
+    underlying_type = TEXT
 
     def get_col_spec(self, **_):
         # This results in the type name being upper case when viewed.
