@@ -74,10 +74,10 @@
     --red-500: #eb5441;
     --red-600: #c63826;
 
-    --slate-100: #f7f8f8;
-    --slate-200: #c7c9cc;
-    --slate-300: #a3aab3;
-    --slate-400: #343a41;
+    --slate-100: #eff1f1;
+    --slate-200: #d5d8dc;
+    --slate-300: #aeb4bc;
+    --slate-400: #444c55;
     --slate-800: #25292e;
 
     --sky-200: #e8f1fd;
@@ -132,6 +132,7 @@
     --color-fk: #dfd0b3;
     --color-error: #f47171;
     --cell-text-color-processing: #888;
+    --color-array-element: #c1e8e8;
 
     --cell-border-horizontal: 1px solid #e7e7e7;
     --cell-border-vertical: 1px solid #efefef;

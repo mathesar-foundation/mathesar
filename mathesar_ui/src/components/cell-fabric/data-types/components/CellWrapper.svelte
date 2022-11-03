@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
-  import CellBackground from '@mathesar/systems/table-view/row/CellBackground.svelte';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { tick } from 'svelte';
   import type { HorizontalAlignment } from './typeDefinitions';
 

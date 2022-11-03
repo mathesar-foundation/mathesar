@@ -304,7 +304,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const numberType: AbstractTypeConfiguration = {
-  icon: { ...iconUiTypeNumber, label: 'Number' },
+  getIcon: () => ({ ...iconUiTypeNumber, label: 'Number' }),
   cellInfo: {
     type: 'number',
     conditionalConfig: {

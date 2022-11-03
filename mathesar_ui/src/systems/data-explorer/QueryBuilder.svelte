@@ -44,11 +44,11 @@
     queryManager.clearSelectedColumn();
   }
 
-  function addColumn(column: ColumnWithLink) {
+  async function addColumn(column: ColumnWithLink) {
     const baseAlias = `${column.tableName}_${column.name}`;
     const allAliases = new Set($query.initial_columns.map((c) => c.alias));
     const alias = getAvailableName(baseAlias, allAliases);
-    void queryManager.update((q) =>
+    await queryManager.update((q) =>
       q.withColumn({
         alias,
         id: column.id,

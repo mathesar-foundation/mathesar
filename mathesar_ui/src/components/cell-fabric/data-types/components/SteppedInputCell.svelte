@@ -116,6 +116,12 @@
     dispatchUpdate();
     resetEditMode();
   }
+
+  function handleMouseDown() {
+    if (!isActive) {
+      dispatch('activate');
+    }
+  }
 </script>
 
 <CellWrapper
@@ -125,7 +131,7 @@
   bind:element={cellRef}
   on:dblclick={setModeToEdit}
   on:keydown={handleKeyDown}
-  on:mousedown={() => dispatch('activate')}
+  on:mousedown={handleMouseDown}
   on:mouseenter
   mode={isEditMode ? 'edit' : 'default'}
   {multiLineTruncate}

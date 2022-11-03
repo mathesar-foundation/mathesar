@@ -30,6 +30,7 @@ export interface ProcessedColumn extends CellColumnFabric {
    */
   id: Column['id'];
   column: Column;
+  columnIndex: number;
   /** Constraints whose columns include only this column */
   exclusiveConstraints: Constraint[];
   /** Constraints whose columns include this column and other columns too */
@@ -52,12 +53,14 @@ export type ProcessedColumnsStore = Readable<Map<number, ProcessedColumn>>;
 export function processColumn({
   tableId,
   column,
+  columnIndex,
   constraints,
   abstractTypeMap,
   hasEnhancedPrimaryKeyCell,
 }: {
   tableId: TableEntry['id'];
   column: Column;
+  columnIndex: number;
   constraints: Constraint[];
   abstractTypeMap: AbstractTypesMap;
   /**
@@ -84,6 +87,7 @@ export function processColumn({
   return {
     id: column.id,
     column,
+    columnIndex,
     exclusiveConstraints,
     sharedConstraints,
     linkFk,

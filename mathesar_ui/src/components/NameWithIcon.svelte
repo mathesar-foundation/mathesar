@@ -2,10 +2,13 @@
   import { Icon, Spinner } from '@mathesar-component-library';
   import type { IconProps } from '@mathesar-component-library/types';
 
-  export let icon: IconProps;
+  /** TODO: Update component and prop names */
+  export let icon: IconProps | IconProps[];
   export let isLoading = false;
   /** When true, the icon will be rendered within a box */
   export let iconHasBox = false;
+
+  $: icons = Array.isArray(icon) ? icon : [icon];
 </script>
 
 <span class="name-with-icon" on:click class:boxed={iconHasBox}>
@@ -13,13 +16,18 @@
     {#if isLoading}
       <Spinner />
     {:else}
-      <Icon {...icon} />
+      {#each icons as icon}
+        <Icon
+          {...icon}
+          style={icons.length > 1 ? `width:${100 / icons.length}%` : undefined}
+        />
+      {/each}
     {/if}
   </span>
   <span class="name"><slot /></span>
 </span>
 
-<style>
+<style lang="scss">
   .name-with-icon {
     display: inline-flex;
     align-items: center;
@@ -30,7 +38,7 @@
 
   .icon {
     flex: 0 0 auto;
-    display: inline-block;
+    display: inline-flex;
     margin-right: 0.4em;
     /**
      * This component gets used in headings and other places where the text is
@@ -42,6 +50,17 @@
     height: min(1em, 0.75em + 0.25rem);
     color: var(--icon-color, currentcolor);
     opacity: var(--icon-opacity, 0.75);
+    align-items: center;
+    vertical-align: middle;
+
+    > :global(svg) {
+      display: block;
+      height: 100%;
+      width: 100%;
+    }
+    > :global(svg + svg) {
+      margin-left: 0.2em;
+    }
   }
   .name-with-icon.boxed .icon {
     height: 1.2em;
@@ -51,11 +70,6 @@
   }
   .name-with-icon.boxed .icon > :global(svg) {
     color: var(--white);
-  }
-  .icon > :global(svg) {
-    display: block;
-    height: 100%;
-    width: 100%;
   }
   .name {
     display: block;

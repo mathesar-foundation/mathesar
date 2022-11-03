@@ -35,11 +35,12 @@ export class TableStructure {
       [this.columnsDataStore.columns, this.constraintsDataStore],
       ([columns, constraintsData]) =>
         new Map(
-          columns.map((column) => [
+          columns.map((column, columnIndex) => [
             column.id,
             processColumn({
               tableId: this.id,
               column,
+              columnIndex,
               constraints: constraintsData.constraints,
               abstractTypeMap: props.abstractTypesMap,
             }),
