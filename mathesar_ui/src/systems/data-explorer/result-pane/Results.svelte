@@ -1,76 +1,45 @@
 <script lang="ts">
-  import { Button, ImmutableMap } from '@mathesar-component-library';
+  import { ImmutableMap } from '@mathesar-component-library';
   import {
     Sheet,
     SheetHeader,
     SheetVirtualRows,
     SheetRow,
     SheetCell,
-    SheetCellResizer,
+    isColumnSelected,
   } from '@mathesar/components/sheet';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
+  import ResultHeaderCell from './ResultHeaderCell.svelte';
+  import ResultRowCell from './ResultRowCell.svelte';
 
   export let queryRunner: QueryRunner;
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
 
-  $: ({
-    query,
-    processedColumns,
-    records,
-    selectedColumnAlias,
-    pagination,
-    runState,
-  } = queryRunner);
+  $: ({ query, processedColumns, rowsData, pagination, runState, selection } =
+    queryRunner);
   $: ({ initial_columns } = $query);
+  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
-  $: columnRunState = $runState?.state;
   $: recordRunState = $runState?.state;
-
   $: errors = $runState?.state === 'failure' ? $runState.errors : [];
   $: columnList = [...$processedColumns.values()];
   $: sheetColumns = columnList.length
     ? [{ id: ID_ROW_CONTROL_COLUMN }, ...columnList]
     : [];
-  $: results = $records.results ?? [];
+  $: rows = $rowsData.rows;
+  $: totalCount = $rowsData.totalCount;
   // Show a dummy ghost row when there are no records
   $: showDummyGhostRow =
     (recordRunState === 'success' || recordRunState === 'processing') &&
-    !results.length;
-  $: sheetItemCount = showDummyGhostRow ? 1 : results.length;
+    !rows.length;
+  $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
 
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
   ]);
-
-  function checkAndUnselectColumn(e: MouseEvent) {
-    const target = e.target as HTMLElement;
-    if (
-      target.closest(
-        '[data-sheet-element="header"] [data-sheet-element="cell"]',
-      )
-    ) {
-      return;
-    }
-    if ($selectedColumnAlias) {
-      const closestCell = target.closest(
-        '[data-sheet-element="row"] [data-sheet-element="cell"]',
-      );
-      if (
-        closestCell &&
-        closestCell.querySelector(
-          `[data-column-identifier="${$selectedColumnAlias}"]`,
-        )
-      ) {
-        return;
-      }
-    }
-    queryRunner.clearSelectedColumn();
-  }
 </script>
 
 <div data-identifier="query-run-result">
@@ -90,7 +59,6 @@
       columns={sheetColumns}
       getColumnIdentifier={(c) => c.id}
       {columnWidths}
-      on:click={checkAndUnselectColumn}
       usesVirtualList
     >
       <SheetHeader>
@@ -105,38 +73,15 @@
         </SheetCell>
 
         {#each columnList as processedQueryColumn (processedQueryColumn.id)}
-          <SheetCell
-            columnIdentifierKey={processedQueryColumn.id}
-            let:htmlAttributes
-            let:style
-          >
-            <div {...htmlAttributes} {style}>
-              <Button
-                appearance="plain"
-                class="column-name-wrapper {$selectedColumnAlias ===
-                processedQueryColumn.column.alias
-                  ? 'selected'
-                  : ''}"
-                on:click={() => {
-                  queryRunner.selectColumn(processedQueryColumn.column.alias);
-                }}
-              >
-                <!--TODO: Use a separate prop to identify column that isn't fetched yet
-                      instead of type:unknown-->
-                <ColumnName
-                  isLoading={columnRunState === 'processing' &&
-                    processedQueryColumn.column.type === 'unknown'}
-                  column={{
-                    ...processedQueryColumn.column,
-                    name:
-                      processedQueryColumn.column.display_name ??
-                      processedQueryColumn.column.alias,
-                  }}
-                />
-              </Button>
-              <SheetCellResizer columnIdentifierKey={processedQueryColumn.id} />
-            </div>
-          </SheetCell>
+          <ResultHeaderCell
+            {processedQueryColumn}
+            {queryRunner}
+            isSelected={isColumnSelected(
+              $selectedCells,
+              $columnsSelectedWhenTheTableIsEmpty,
+              processedQueryColumn,
+            )}
+          />
         {/each}
       </SheetHeader>
 
@@ -147,7 +92,7 @@
         let:items
       >
         {#each items as item (item.key)}
-          {#if results[item.index] || showDummyGhostRow}
+          {#if rows[item.index] || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div {...htmlAttributes} style={styleString}>
                 <SheetCell
@@ -163,29 +108,12 @@
                 </SheetCell>
 
                 {#each columnList as processedQueryColumn (processedQueryColumn.id)}
-                  <SheetCell
-                    columnIdentifierKey={processedQueryColumn.id}
-                    let:htmlAttributes
-                    let:style
-                  >
-                    <div
-                      {...htmlAttributes}
-                      {style}
-                      class={$selectedColumnAlias ===
-                      processedQueryColumn.column.alias
-                        ? 'selected'
-                        : ''}
-                    >
-                      {#if results[item.index] || recordRunState === 'processing'}
-                        <CellFabric
-                          columnFabric={processedQueryColumn}
-                          value={results[item.index]?.[processedQueryColumn.id]}
-                          showAsSkeleton={recordRunState === 'processing'}
-                          disabled={true}
-                        />
-                      {/if}
-                    </div>
-                  </SheetCell>
+                  <ResultRowCell
+                    {processedQueryColumn}
+                    row={rows[item.index]}
+                    {recordRunState}
+                    {selection}
+                  />
                 {/each}
               </div>
             </SheetRow>
@@ -194,19 +122,19 @@
       </SheetVirtualRows>
     </Sheet>
     <div data-identifier="status-bar">
-      {#if $records.count}
+      {#if totalCount}
         <div>
           Showing {$pagination.leftBound}-{Math.min(
-            $records.count,
+            totalCount,
             $pagination.rightBound,
-          )} of {$records.count}
+          )} of {totalCount}
         </div>
       {:else if recordRunState === 'success'}
         No results found
       {/if}
       <PaginationGroup
         pagination={$pagination}
-        totalCount={$records.count}
+        {totalCount}
         on:change={(e) => {
           void queryRunner.setPagination(e.detail);
         }}

@@ -1,9 +1,10 @@
 from enum import Enum
 import os
-from sqlalchemy import text, Table, Column, String, MetaData
+from sqlalchemy import text, Table, Column, String, MetaData, TEXT
 from sqlalchemy.types import UserDefinedType
 
 from db.types.base import MathesarCustomType, PostgresType, get_qualified_name, get_ma_qualified_schema
+from db.types.custom.underlying_type import HasUnderlyingType
 
 DB_TYPE = MathesarCustomType.URI.id
 
@@ -29,7 +30,9 @@ class URIFunction(Enum):
 URI_REGEX_STR = r"'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?'"
 
 
-class URI(UserDefinedType):
+class URI(UserDefinedType, HasUnderlyingType):
+    underlying_type = TEXT
+
     def get_col_spec(self, **_):
         # This results in the type name being upper case when viewed.
         # Actual usage in the DB is case-insensitive.

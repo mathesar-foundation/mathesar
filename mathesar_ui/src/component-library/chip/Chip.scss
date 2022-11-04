@@ -1,0 +1,19 @@
+.chip {
+  padding: 0.1rem 0.5rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  box-sizing: content-box;
+
+  &.display-block {
+    display: block;
+    max-width: max-content;
+  }
+
+  &.display-inline {
+    & + .chip {
+      margin-left: 0.35rem;
+    }
+  }
+}

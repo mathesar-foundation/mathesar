@@ -60,14 +60,27 @@ export interface CellInfo {
   conditionalConfig?: Record<DbType, Record<string, unknown>>;
 }
 
+export interface AbstractTypeIconArgs {
+  dbType: DbType;
+  typeOptions: Column['type_options'];
+}
+
 export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
-  icon: IconProps;
+  getIcon: (args?: AbstractTypeIconArgs) => IconProps | IconProps[];
   allowSettingDefaultValue?: boolean;
   cellInfo: CellInfo;
   getDbConfig?: (selectedDbType?: DbType) => AbstractTypeDbConfig;
   getDisplayConfig?: () => AbstractTypeDisplayConfig;
 }
+
+export type AbstractTypeConfigurationPartialMap = Partial<
+  Record<AbstractTypeCategoryIdentifier, AbstractTypeConfiguration>
+>;
+
+export type AbstractTypeConfigurationFactory = (
+  map: AbstractTypeConfigurationPartialMap,
+) => AbstractTypeConfiguration;
 
 export interface AbstractType
   extends Omit<AbstractTypeResponse, 'db_types'>,

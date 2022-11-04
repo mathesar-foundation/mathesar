@@ -119,6 +119,12 @@ export interface DateTimeCellProps
   extends CellTypeProps<string>,
     DateTimeCellExternalProps {}
 
+// Array
+
+export type ArrayCellExternalProps = Record<string, never>;
+
+export type ArrayCellProps = CellTypeProps<unknown[]>;
+
 // Common
 
 export type HorizontalAlignment = 'left' | 'right' | 'center';
