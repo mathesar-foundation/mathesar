@@ -283,6 +283,17 @@ def test_database_role_create(client, user_bob):
     assert response_data['database'] == database.id
 
 
+def test_database_role_create_non_superuser(client_bob, user_bob):
+    role = 'editor'
+    database = Database.objects.all()[0]
+    data = {'user': user_bob.id, 'role': role, 'database': database.id}
+
+    response = client_bob.post('/api/ui/v0/database_roles/', data)
+
+    assert response.status_code == 403
+    assert response.json()[0]['code'] == 4004
+
+
 def test_schema_role_create(client, user_bob):
     role = 'editor'
     schema = Schema.objects.all()[0]
