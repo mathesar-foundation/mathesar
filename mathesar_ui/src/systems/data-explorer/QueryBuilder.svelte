@@ -120,7 +120,7 @@
       {/if}
 
       <div class="title">Exploring from</div>
-      <div class="base-table-holder">
+      <div class="base-table-holder" class:table-selected={currentTable}>
         {#if currentTable}
           <TableName table={currentTable} />
         {:else}
@@ -154,7 +154,7 @@
       />
       <InputGroup>
         <Button
-          appearance="default"
+          appearance="secondary"
           disabled={!$state.isUndoPossible}
           on:click={() => queryManager.undo()}
         >
@@ -162,7 +162,7 @@
           <span>Undo</span>
         </Button>
         <Button
-          appearance="default"
+          appearance="secondary"
           disabled={!$state.isRedoPossible}
           on:click={() => queryManager.redo()}
         >
@@ -228,6 +228,10 @@
           flex-grow: 0;
           flex-shrink: 0;
           margin-left: 1rem;
+
+          &.table-selected {
+            font-weight: 590;
+          }
 
           > :global(.select) {
             min-width: 14rem;
