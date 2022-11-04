@@ -1,7 +1,7 @@
 <script lang="ts">
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
-  import type { DisplayColumn } from './types';
   import { getColumnIconProps } from '@mathesar/utils/columnUtils';
+  import type { DisplayColumn } from './types';
 
   export let column: DisplayColumn;
   export let isLoading = false;

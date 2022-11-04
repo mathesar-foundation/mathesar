@@ -139,3 +139,16 @@ export function renderTransitiveRecordSummary({
 
   return renderRecordSummary(template, { get: getValueTransitively });
 }
+
+export function renderRecordSummaryForRow({
+  template,
+  record,
+}: {
+  template: string;
+  record: Record<string | number, unknown>;
+}) {
+  const entries = Object.entries(record);
+  const fields: [number, unknown][] = entries.map(([k, v]) => [Number(k), v]);
+  const inputData = prepareFieldsAsRecordSummaryInputData(fields);
+  return renderRecordSummary(template, inputData);
+}

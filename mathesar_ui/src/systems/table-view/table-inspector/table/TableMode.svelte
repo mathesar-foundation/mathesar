@@ -5,6 +5,7 @@
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import AdvancedActions from './AdvancedActions.svelte';
   import TableLinks from './links/TableLinks.svelte';
+  import RecordSummaryConfig from './record-summary/RecordSummaryConfig.svelte';
 </script>
 
 <div class="table-mode-container">
@@ -16,6 +17,13 @@
     />
     <div slot="content" class="content-container">
       <RenameTable />
+    </div>
+  </Collapsible>
+
+  <Collapsible isOpen>
+    <CollapsibleHeader slot="header" title="Record Summary" />
+    <div slot="content" class="content-container">
+      <RecordSummaryConfig />
     </div>
   </Collapsible>
 
