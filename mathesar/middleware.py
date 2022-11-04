@@ -1,9 +1,18 @@
-from collections import defaultdict
+import logging
 import time
 import warnings
 
 from django.conf import settings
 from sqlalchemy.exc import InterfaceError
+
+from demo.install import load_library_dataset
+from db.install import create_mathesar_database
+from mathesar.database.base import create_mathesar_engine
+from mathesar.models.base import Database
+from mathesar.state import reset_reflection
+
+
+logger = logging.getLogger(__name__)
 
 
 class CursorClosedHandlerMiddleware:
@@ -25,21 +34,29 @@ class CursorClosedHandlerMiddleware:
 class LiveDemoModeMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        self._available_dbs = (
-            name for name in settings.DATABASES
-            if name not in ['default', 'mathesar_tables']
-        )
-        self._session_db_map = defaultdict(
-            lambda: next(self._available_dbs), {None: 'mathesar_tables'}
-        )
 
     def __call__(self, request):
         if settings.LIVE_DEMO and not settings.TEST:
             sessionid = request.COOKIES.get('sessionid', None)
-            database = self._session_db_map[sessionid]
-            print(f"Using database {database} for sessionid {sessionid}")
+            # every 4th character obfuscates sessionid (a bit)
+            db_name = 'mathesar_' + str(sessionid)[::4].lower()
+            database, created = Database.current_objects.get_or_create(name=db_name)
+            if created:
+                create_mathesar_database(
+                    db_name,
+                    username=settings.DATABASES["default"]["USER"],
+                    password=settings.DATABASES["default"]["PASSWORD"],
+                    hostname=settings.DATABASES["default"]["HOST"],
+                    root_database=settings.DATABASES["default"]["NAME"],
+                    port=settings.DATABASES["default"]["PORT"],
+                )
+                engine = create_mathesar_engine(db_name)
+                load_library_dataset(engine)
+                reset_reflection()
+
+            logger.debug(f"Using database {db_name} for sessionid {sessionid}")
             params = request.GET.copy()
-            params.update({'database': database})
+            params.update({'database': db_name})
             request.GET = params
 
         response = self.get_response(request)
