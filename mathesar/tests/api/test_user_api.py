@@ -290,8 +290,8 @@ def test_database_role_create_non_superuser(client_bob, user_bob):
 
     response = client_bob.post('/api/ui/v0/database_roles/', data)
 
-    assert response.status_code == 403
-    assert response.json()[0]['code'] == 4004
+    assert response.status_code == 400
+    assert response.json()[0]['code'] == 2151
 
 
 def test_schema_role_create(client, user_bob):

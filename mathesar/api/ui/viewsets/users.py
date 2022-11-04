@@ -22,6 +22,11 @@ class DatabaseRoleViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     pagination_class = DefaultLimitOffsetPagination
     access_policy = DatabaseRoleAccessPolicy
 
+    def get_queryset(self):
+        return self.access_policy.scope_queryset(
+            self.request, super().get_queryset()
+        )
+
     def update(self, request, pk=None):
         raise MethodNotAllowed(request.method)
 
