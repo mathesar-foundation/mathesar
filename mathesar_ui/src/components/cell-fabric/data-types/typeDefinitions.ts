@@ -13,7 +13,8 @@ export type CellDataType =
   | 'date'
   | 'money'
   | 'time'
-  | 'datetime';
+  | 'datetime'
+  | 'array';
 
 export type CellColumnLike = Pick<
   Column,

@@ -275,6 +275,7 @@
 <div
   class={outerClass}
   style="height:{height}px;width:100%;direction:ltr;"
+  data-sheet-body-element="list"
   bind:this={outerRef}
 >
   <div style={innerStyle}>
