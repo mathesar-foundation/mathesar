@@ -7,15 +7,17 @@ from mathesar.models.users import DatabaseRole, Role
 
 class DatabaseRoleAccessPolicy(AccessPolicy):
     statements = [
-        # Creating a database role is allowed for everyone
+        # Listing and retrieving a database role is allowed for everyone.
+        # We cannot restrict access for creating a Database Role object here because database for which the role is created can be known only by inspecting the request body
+        # So Creating a database role API access permission is tied to the database object(sent in the body) validation done by the serializer when creating the database role.
         {
             'action': ['list', 'retrieve', 'create'],
             'principal': '*',
             'effect': 'allow',
         },
-        # Only superuser can assign a database role
+        # Only superuser or database manager can delete the database role
         {
-            'action': ['destroy', 'partial_update', 'update'],
+            'action': ['destroy'],
             'principal': ['*'],
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_db_manager)']
