@@ -17,7 +17,7 @@ class DatabaseRoleAccessPolicy(AccessPolicy):
         },
         # Only superuser or database manager can delete the database role
         {
-            'action': ['destroy'],
+            'action': ['destroy', 'update', 'partial_update'],
             'principal': ['*'],
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_db_manager)']
