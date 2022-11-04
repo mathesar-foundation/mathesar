@@ -63,7 +63,7 @@
     let:option
     let:label
   >
-    <NameWithIcon icon={option.icon}>
+    <NameWithIcon icon={option.getIcon()}>
       {label}
     </NameWithIcon>
   </Select>
