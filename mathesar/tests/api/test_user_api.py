@@ -150,7 +150,32 @@ def test_user_delete_different_user(client_bob, user_alice):
     assert response.json()[0]['code'] == 4004
 
 
-def test_database_role_list(client, user_bob):
+def test_database_role_list_user_without_view_permission(client_bob, user_alice):
+    role = 'manager'
+    database = Database.objects.all()[0]
+    DatabaseRole.objects.create(user=user_alice, database=database, role=role)
+
+    response = client_bob.get('/api/ui/v0/database_roles/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 0
+
+
+def test_database_role_list_user_with_view_permission(client_bob, user_alice, user_bob):
+    role = 'manager'
+    database = Database.objects.all()[0]
+    DatabaseRole.objects.create(user=user_alice, database=database, role=role)
+    DatabaseRole.objects.create(user=user_bob, database=database, role=role)
+
+    response = client_bob.get('/api/ui/v0/database_roles/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 2
+
+
+def test_database_role_list_superuser(client, user_bob):
     role = 'manager'
     database = Database.objects.all()[0]
     DatabaseRole.objects.create(user=user_bob, database=database, role=role)
@@ -256,7 +281,7 @@ def test_database_role_partial_update(client, user_bob):
 
 
 def test_schema_role_partial_update(client, user_bob):
-    role = 'viewer'
+    role = 'manager'
     schema = Schema.objects.all()[0]
     schema_role = SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
     data = {'role': 'editor'}
@@ -268,7 +293,7 @@ def test_schema_role_partial_update(client, user_bob):
     assert response_data[0]['code'] == 4006
 
 
-def test_database_role_create(client, user_bob):
+def test_database_role_create_by_superuser(client, user_bob):
     role = 'editor'
     database = Database.objects.all()[0]
     data = {'user': user_bob.id, 'role': role, 'database': database.id}
@@ -279,6 +304,23 @@ def test_database_role_create(client, user_bob):
     assert response.status_code == 201
     assert 'id' in response_data
     assert response_data['user'] == user_bob.id
+    assert response_data['role'] == role
+    assert response_data['database'] == database.id
+
+
+def test_database_role_create_by_manager(client_bob, user_bob, user_alice):
+    database = Database.objects.all()[0]
+    DatabaseRole.objects.create(user=user_bob, database=database, role='manager')
+
+    role = 'viewer'
+    data = {'user': user_alice.id, 'role': role, 'database': database.id}
+
+    response = client_bob.post('/api/ui/v0/database_roles/', data)
+    response_data = response.json()
+
+    assert response.status_code == 201
+    assert 'id' in response_data
+    assert response_data['user'] == user_alice.id
     assert response_data['role'] == role
     assert response_data['database'] == database.id
 
