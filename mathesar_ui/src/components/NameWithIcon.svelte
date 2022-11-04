@@ -34,6 +34,7 @@
     text-decoration: inherit;
     overflow: hidden;
     max-width: 100%;
+    vertical-align: middle;
   }
 
   .icon {

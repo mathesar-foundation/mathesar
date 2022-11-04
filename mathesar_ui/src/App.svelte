@@ -54,13 +54,12 @@
     --color-link: var(--color-blue-dark);
     --color-text: #171717;
     --color-text-muted: #6b7280;
-    --text-size-x-small: 0.79rem;
-    --text-size-xx-small: 0.69rem;
-    --text-size-small: 0.889rem;
-    --text-size-base: 1rem;
-    --text-size-large: 1.125rem;
-    --text-size-x-large: 1.428rem;
-    --display-size-large: 1.953rem;
+    --text-size-x-small: 0.5715rem; // 8px
+    --text-size-xx-small: 0.7143rem; // 10px
+    --text-size-small: 0.8572rem; // 12px
+    --text-size-base: 1rem; // 14px
+    --text-size-large: 1.1429rem; // 16px
+    --text-size-x-large: 1.4286rem; // 20px
 
     --modal-z-index: 50;
     --modal-record-selector-z-index: 50;
@@ -108,9 +107,11 @@
     // since when the header is fixed
     // we can use this variable to add margin-top
     // to the below header content container
-    --header-height: 4.285rem;
+    --header-height: 3.7378rem;
 
-    color: var(--slate-400);
+    --table-title-header-height: 4.6428rem;
+
+    color: var(--slate-800);
   }
 
   h1 {

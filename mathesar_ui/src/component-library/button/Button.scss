@@ -23,12 +23,11 @@ button.btn {
   /* Appearances */
   &.btn-default {
     background: var(--color-white);
-    border-color: var(--brand-500);
-    color: var(--brand-500);
+    border-color: var(--slate-200);
 
     &:not(:disabled) {
       &:focus {
-        border-color: var(--brand-500);
+        border-color: var(--slate-300);
       }
     }
   }
@@ -53,16 +52,16 @@ button.btn {
 
   &.btn-secondary {
     background: var(--slate-100);
-    border-color: var(--slate-100);
+    border-color: var(--slate-200);
 
     &:not(:disabled) {
       &:hover {
-        background: var(--slate-300);
+        background: var(--slate-200);
         border-color: var(--slate-300);
       }
 
       &:active {
-        background: var(--slate-100);
+        background: var(--slate-300);
       }
     }
   }
@@ -87,23 +86,23 @@ button.btn {
   &.btn-plain {
     &:not(:disabled) {
       &:hover {
-        background: #f3f4f5;
+        background: var(--slate-100);
       }
 
       &:active,
       &:focus {
-        box-shadow: 0 0 0 2px #2087e633 !important;
+        box-shadow: 0 0 0 2px var(--slate-100) !important;
       }
 
       &:active {
-        background: #e7e7e7;
+        background: var(--slate-200);
       }
     }
   }
 
   /* Sizes */
   &.size-medium {
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.5rem;
     font-size: 1em;
   }
 

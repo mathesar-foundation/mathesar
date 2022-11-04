@@ -3,7 +3,7 @@
   import AppHeader from '@mathesar/components/AppHeader.svelte';
 
   export let fitViewport = false;
-  export let maxWidth = true;
+  export let restrictWidth = true;
 </script>
 
 <div class="app-layout" class:fit-viewport={fitViewport}>
@@ -11,7 +11,7 @@
     <AppHeader />
   </div>
   <slot name="secondary-header" />
-  <main class="app-layout-content" class:max-width={maxWidth}>
+  <main class="app-layout-content" class:restrict-width={restrictWidth}>
     <slot />
   </main>
 </div>
@@ -31,7 +31,7 @@
   .app-layout-content {
     position: relative;
   }
-  .app-layout-content.max-width {
+  .app-layout-content.restrict-width {
     max-width: var(--max-layout-width, 54rem);
     margin-left: auto;
     margin-right: auto;

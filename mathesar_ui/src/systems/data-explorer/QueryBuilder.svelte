@@ -9,16 +9,12 @@
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
+  import TableName from '@mathesar/components/TableName.svelte';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import type { TableEntry } from '@mathesar/api/tables';
   import { queries } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
-  import {
-    iconExploration,
-    iconRedo,
-    iconUndo,
-    iconSave,
-  } from '@mathesar/icons';
+  import { iconRedo, iconUndo } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
   import type QueryManager from './QueryManager';
@@ -36,8 +32,9 @@
   $: currentTable = $query.base_table
     ? $tablesDataStore.data.get($query.base_table)
     : undefined;
+  $: isSaved = $query.isSaved();
 
-  function onBaseTableChange(tableEntry: TableEntry | undefined) {
+  function updateBaseTable(tableEntry: TableEntry | undefined) {
     void queryManager.update((q) =>
       q.withBaseTable(tableEntry ? tableEntry.id : undefined),
     );
@@ -114,30 +111,36 @@
 <div class="data-explorer">
   <div class="header">
     <div class="title-wrapper">
-      <div class="icon">
-        <Icon {...iconExploration} size="1.5em" />
-      </div>
-
-      {#if $query.isSaved()}
+      {#if isSaved}
         <EditableTitle
           value={$query.name}
           size={1.266}
           on:change={handleNameChange}
         />
-        <div class="base-table-holder">
-          Based on {currentTable?.name}
-        </div>
-      {:else}
-        <div class="title">Exploring</div>
-        <div class="base-table-holder">
+      {/if}
+
+      <div class="title">Exploring from</div>
+      <div class="base-table-holder">
+        {#if currentTable}
+          <TableName table={currentTable} />
+        {:else}
           <SelectTableWithinCurrentSchema
             autoSelect="none"
             table={currentTable}
-            on:change={(e) => onBaseTableChange(e.detail)}
+            on:change={(e) => updateBaseTable(e.detail)}
           />
-        </div>
-      {/if}
+        {/if}
+      </div>
     </div>
+
+    {#if !isSaved && currentTable}
+      <Button
+        appearance="secondary"
+        on:click={() => updateBaseTable(undefined)}
+      >
+        Start Over
+      </Button>
+    {/if}
 
     <div class="actions">
       {#if $query.isSaved()}
@@ -146,7 +149,6 @@
       <!-- TODO: Change disabled condition to is_valid(query) -->
       <SpinnerButton
         label="Save"
-        icon={iconSave}
         disabled={!$query.base_table}
         onClick={saveExistingOrCreateNew}
       />
@@ -210,35 +212,26 @@
     .header {
       display: flex;
       align-items: center;
-      height: 4rem;
-      border-bottom: 1px solid var(--color-gray-medium);
+      height: var(--table-title-header-height);
+      border-bottom: 1px solid var(--slate-300);
       position: relative;
       overflow: hidden;
-      background: var(--color-gray-lighter);
 
       .title-wrapper {
         display: flex;
         align-items: center;
         overflow: hidden;
-        padding: 0.7rem 1rem;
-
-        .title {
-          font-size: 1.266rem;
-        }
+        padding: 1rem;
+        font-size: var(--text-size-large);
 
         .base-table-holder {
           flex-grow: 0;
           flex-shrink: 0;
-          margin-left: 0.6rem;
-          min-width: 14rem;
-        }
-      }
+          margin-left: 1rem;
 
-      .icon {
-        margin-right: 0.25rem;
-        opacity: 0.8;
-        :global(svg.fa-icon) {
-          color: var(--color-gray-darker);
+          > :global(.select) {
+            min-width: 14rem;
+          }
         }
       }
 
@@ -260,7 +253,7 @@
     .content-pane {
       display: flex;
       position: absolute;
-      top: 4rem;
+      top: var(--table-title-header-height);
       bottom: 0;
       left: 0;
       right: 0;
