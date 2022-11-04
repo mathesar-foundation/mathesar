@@ -58,7 +58,11 @@ class DatabaseRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
         model = DatabaseRole
         fields = ['id', 'user', 'database', 'role']
 
-    database = PermittedPkRelatedField(access_policy=DatabaseAccessPolicy, queryset=Database.current_objects.all())
+    # Restrict the list of databases to which the user has access to create a database role
+    database = PermittedPkRelatedField(
+        access_policy=DatabaseAccessPolicy,
+        queryset=Database.current_objects.all()
+    )
 
 
 class SchemaRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):

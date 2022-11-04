@@ -5,20 +5,6 @@ from mathesar.models.users import Role
 
 
 class DatabaseAccessPolicy(AccessPolicy):
-    statements = [
-        # Anyone can read all schema
-        {
-            'action': ['list', 'retrieve'],
-            'principal': '*',
-            'effect': 'allow',
-        },
-        # Only superusers can create users
-        {
-            'action': ['create', 'destroy', 'partial_update', 'update'],
-            'principal': ['*'],
-            'effect': 'allow',
-        }
-    ]
 
     @classmethod
     def scope_queryset(cls, request, qs):
