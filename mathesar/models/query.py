@@ -233,7 +233,7 @@ class UIQuery(BaseModel, Relation):
         if db_transforms:
             for db_transform in db_transforms:
                 if isinstance(db_transform, SummarizeTransform):
-                    db_transform.get_input_alias_for_output_alias(output_alias)
+                    return db_transform.get_input_alias_for_output_alias(output_alias)
 
     def _get_db_initial_column_by_alias(self, alias):
         for db_initial_column in self._db_initial_columns:

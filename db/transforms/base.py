@@ -173,7 +173,7 @@ class Summarize(Transform):
         """
         grouping_expressions = self.spec['grouping_expressions']
         aggregation_expressions = self.spec['aggregation_expressions']
-        all_expressions = grouping_expressions | aggregation_expressions
+        all_expressions = grouping_expressions + aggregation_expressions
         for expression in all_expressions:
             expr_output_alias = expression.get('output_alias', None)
             is_origin_of_passed_output_alias = expr_output_alias == output_alias

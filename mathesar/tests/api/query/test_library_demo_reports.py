@@ -93,13 +93,19 @@ def check_overdue_books_columns(create_overdue_books_query, client):
             'display_name': 'Titles',
             'type': '_array',
             'type_options': {'item_type': 'text'},
-            'display_options': None
+            'display_options': None,
+            'is_initial_column': False,
+            'is_summarization_output_column': True,
+            'summarization_input_alias': 'Book Title',
         }, {
             'alias': 'email',
             'display_name': 'Patron Email',
             'type': 'mathesar_types.email',
             'type_options': None,
-            'display_options': None
+            'display_options': None,
+            'is_initial_column': True,
+            'base_table_name': 'Patrons',
+            'base_column_name': 'Email',
         }
     ]
     actual_response_data = client.get(f'/api/db/v0/queries/{query_id}/columns/').json()
@@ -199,13 +205,19 @@ def check_monthly_checkouts_columns(create_monthly_checkouts_query, client):
             'display_name': 'Month',
             'type': 'text',
             'type_options': None,
-            'display_options': None
+            'display_options': None,
+            'is_initial_column': False,
+            'is_summarization_output_column': True,
+            'summarization_input_alias': 'Checkout Time',
         }, {
             'alias': 'Count',
             'display_name': 'Number of Checkouts',
             'type': 'integer',
             'type_options': None,
-            'display_options': None
+            'display_options': None,
+            'is_initial_column': False,
+            'is_summarization_output_column': True,
+            'summarization_input_alias': 'id',
         }
     ]
     actual_response_data = client.get(f'/api/db/v0/queries/{query_id}/columns/').json()
