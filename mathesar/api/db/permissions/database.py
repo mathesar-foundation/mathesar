@@ -24,7 +24,7 @@ class DatabaseAccessPolicy(AccessPolicy):
     def scope_queryset(cls, request, qs):
         if not request.user.is_superuser:
             allowed_roles = (Role.MANAGER.value)
-            if request.method.lower() != 'post':
+            if request.method.lower() == 'get':
                 allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
             qs = qs.filter(Q(databaserole__role__in=allowed_roles) & Q(databaserole__user=request.user))
         return qs
