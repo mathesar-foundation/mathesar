@@ -3,11 +3,12 @@ from django.db import models
 from django.utils.functional import cached_property
 
 from db.queries.base import DBQuery, InitialColumn
+from db.transforms.operations.deserialize import deserialize_transformation
+from db.transforms.base import Summarize as SummarizeTransform
 
 from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
 from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValueType, DictHasBadKeys
-from db.transforms.operations.deserialize import deserialize_transformation
 from mathesar.state import get_cached_metadata
 
 
@@ -194,25 +195,50 @@ class UIQuery(BaseModel, Relation):
         )
 
     def _describe_query_column(self, sa_col):
-        is_aggregation_output_column = _is_aggregation_output_column(sa_col)
-        regular_information = {
-            'alias': sa_col.name,
-            'display_name': self._get_display_name_for_sa_col(sa_col),
+        """
+        Note, has some conditional fields depending on whether the column is an initial column or
+        is generated mid-query (created via a summarization).
+        """
+        alias = sa_col.name
+        initial_db_column = self._get_db_initial_column_by_alias(alias)
+        is_initial_column = initial_db_column is not None
+        output = {
+            'alias': alias,
+            'display_name': self._get_display_name_for_alias(alias),
             'type': sa_col.db_type.id,
             'type_options': sa_col.type_options,
-            'display_options': self._get_display_options_for_sa_col(sa_col),
-            'is_aggregation_output_column': is_aggregation_output_column,
+            'display_options': self._get_display_options_for_alias(alias),
+            'is_initial_column': is_initial_column,
         }
-        if is_aggregation_output_column:
-            conditional_information = {
-                'aggregation_input_alias': None,
+        if is_initial_column:
+            initial_dj_column = _get_dj_column_for_initial_db_column(initial_db_column)
+            output = output | {
+                'base_column_name': initial_dj_column.name,
+                'base_table_name': initial_dj_column.table.name,
             }
         else:
-            conditional_information = {
-                'base_column_name': None,
-                'base_table_name': None,
-            }
-        return regular_information | conditional_information
+            # NOTE currently only summarizations can "create" aliases; once that changes, this
+            # section should become more general.
+            summarization_input_alias = self._get_summarization_input_alias_for_output_alias(alias)
+            is_summarization_output_column = summarization_input_alias is not None
+            if is_summarization_output_column:
+                output = output | {
+                    'is_summarization_output_column': is_summarization_output_column,
+                    'summarization_input_alias': summarization_input_alias,
+                }
+        return output
+
+    def _get_summarization_input_alias_for_output_alias(self, output_alias):
+        db_transforms = self._db_transformations
+        if db_transforms:
+            for db_transform in db_transforms:
+                if isinstance(db_transform, SummarizeTransform):
+                    db_transform.get_input_alias_for_output_alias(output_alias)
+
+    def _get_db_initial_column_by_alias(self, alias):
+        for db_initial_column in self._db_initial_columns:
+            if db_initial_column.alias == alias:
+                return db_initial_column
 
     @property
     def all_columns_description_map(self):
@@ -232,6 +258,7 @@ class UIQuery(BaseModel, Relation):
             metadata=get_cached_metadata()
         )
 
+    # TODO reused; consider using cached_property
     @property
     def _db_initial_columns(self):
         return tuple(
@@ -249,12 +276,12 @@ class UIQuery(BaseModel, Relation):
                 in self.transformations
             )
 
-    def _get_display_name_for_sa_col(self, sa_col):
-        return self._alias_to_display_name.get(sa_col.name)
+    def _get_display_name_for_alias(self, alias):
+        return self._alias_to_display_name.get(alias)
 
-    def _get_display_options_for_sa_col(self, sa_col):
+    def _get_display_options_for_alias(self, alias):
         if self.display_options is not None:
-            return self.display_options.get(sa_col.name)
+            return self.display_options.get(alias)
 
     @cached_property
     def _alias_to_display_name(self):
@@ -278,9 +305,10 @@ class UIQuery(BaseModel, Relation):
         return self.base_table._sa_engine
 
 
-# TODO
-def _is_aggregation_output_column(sa_col):
-    return False
+def _get_dj_column_for_initial_db_column(initial_column):
+    oid = initial_column.reloid
+    attnum = initial_column.attnum
+    return Column.objects.get(table__oid=oid, attnum=attnum)
 
 
 def _get_column_pair_from_id(col_id):

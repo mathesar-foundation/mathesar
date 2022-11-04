@@ -167,6 +167,20 @@ class Summarize(Transform):
     """
     type = "summarize"
 
+    def get_input_alias_for_output_alias(self, output_alias):
+        """
+        Useful when looking for parent aliases of a given alias.
+        """
+        grouping_expressions = self.spec['grouping_expressions']
+        aggregation_expressions = self.spec['aggregation_expressions']
+        all_expressions = grouping_expressions | aggregation_expressions
+        for expression in all_expressions:
+            expr_output_alias = expression.get('output_alias', None)
+            is_origin_of_passed_output_alias = expr_output_alias == output_alias
+            if is_origin_of_passed_output_alias:
+                expr_input_alias = expression.get('input_alias', None)
+                return expr_input_alias
+
     def apply_to_relation(self, relation):
 
         def _get_grouping_column(col_spec):
