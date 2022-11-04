@@ -117,6 +117,10 @@ def get_table_description(oid, engine):
 def get_joinable_tables(
         engine, metadata, base_table_oid=None, max_depth=3, limit=None, offset=None
 ):
+    """
+    Output presumed to be a set of tuples that look like this: `(base table oid, target table oid,
+    join parameter path, foreign key path, depth, multiple results boolean flag).
+    """
     FK_OID = 'fk_oid'
     LEFT_REL = 'left_rel'
     RIGHT_REL = 'right_rel'

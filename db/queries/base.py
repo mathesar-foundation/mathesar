@@ -1,3 +1,4 @@
+from frozendict import frozendict
 from sqlalchemy import select
 
 from db.records.operations import select as records_select
@@ -169,7 +170,13 @@ class InitialColumn:
         self.alias = alias
         if jp_path is not None:
             self.jp_path = tuple(
-                [tuple([tuple(edge[0]), tuple(edge[1])]) for edge in jp_path]
+                # TODO explain the purpose of this transformation
+                tuple(
+                    [
+                        tuple(edge[0]),
+                        tuple(edge[1]),
+                    ]
+                ) for edge in jp_path
             )
         else:
             self.jp_path = None
@@ -177,3 +184,13 @@ class InitialColumn:
     @property
     def is_base_column(self):
         return self.jp_path is None
+
+    def __eq__(self, other):
+        """Instances are equal when attributes are equal."""
+        if type(other) is type(self):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __hash__(self):
+        """Hashes are equal when attributes are equal."""
+        return hash(frozendict(self.__dict__))
