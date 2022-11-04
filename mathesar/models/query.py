@@ -194,13 +194,25 @@ class UIQuery(BaseModel, Relation):
         )
 
     def _describe_query_column(self, sa_col):
-        return {
+        is_aggregation_output_column = _is_aggregation_output_column(sa_col)
+        regular_information = {
             'alias': sa_col.name,
             'display_name': self._get_display_name_for_sa_col(sa_col),
             'type': sa_col.db_type.id,
             'type_options': sa_col.type_options,
             'display_options': self._get_display_options_for_sa_col(sa_col),
+            'is_aggregation_output_column': is_aggregation_output_column,
         }
+        if is_aggregation_output_column:
+            conditional_information = {
+                'aggregation_input_alias': None,
+            }
+        else:
+            conditional_information = {
+                'base_column_name': None,
+                'base_table_name': None,
+            }
+        return regular_information | conditional_information
 
     @property
     def all_columns_description_map(self):
@@ -264,6 +276,11 @@ class UIQuery(BaseModel, Relation):
     @property
     def _sa_engine(self):
         return self.base_table._sa_engine
+
+
+# TODO
+def _is_aggregation_output_column(sa_col):
+    return False
 
 
 def _get_column_pair_from_id(col_id):
