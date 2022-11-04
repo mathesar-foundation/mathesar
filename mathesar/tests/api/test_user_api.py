@@ -419,6 +419,27 @@ def test_database_role_destroy_by_manager(client_bob, user_bob, user_alice):
     assert response.status_code == 204
 
 
+def test_database_role_destroy_by_non_manager(client_bob, user_bob, user_alice):
+    database = Database.objects.all()[0]
+    DatabaseRole.objects.create(user=user_bob, database=database, role='viewer')
+
+    role = 'viewer'
+    database_role = DatabaseRole.objects.create(user=user_alice, database=database, role=role)
+
+    response = client_bob.delete(f'/api/ui/v0/database_roles/{database_role.id}/')
+    assert response.status_code == 403
+
+
+def test_database_role_destroy_by_user_without_role(client_bob, user_alice):
+    database = Database.objects.all()[0]
+
+    role = 'viewer'
+    database_role = DatabaseRole.objects.create(user=user_alice, database=database, role=role)
+
+    response = client_bob.delete(f'/api/ui/v0/database_roles/{database_role.id}/')
+    assert response.status_code == 404
+
+
 def test_schema_role_destroy(client, user_bob):
     role = 'viewer'
     schema = Schema.objects.all()[0]
