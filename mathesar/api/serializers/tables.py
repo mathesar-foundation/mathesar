@@ -158,12 +158,12 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
                 instance.update_sa_table(validated_data)
             except InvalidTypeError as e:
                 raise InvalidTypeCastAPIException(
-                        e,
-                        message=f'{e.column_name} cannot be casted to {e.new_type}.'
-                        if e.column_name and e.new_type
-                        else 'This type casting is invalid.',
-                        status_code=status.HTTP_400_BAD_REQUEST
-                    )
+                    e,
+                    message=f'{e.column_name} cannot be casted to {e.new_type}.'
+                    if e.column_name and e.new_type
+                    else 'This type casting is invalid.',
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
             except ValueError as e:
                 raise base_api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         return instance
