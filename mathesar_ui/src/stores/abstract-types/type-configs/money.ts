@@ -131,7 +131,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const moneyType: AbstractTypeConfiguration = {
-  icon: iconUiTypeMoney,
+  getIcon: () => iconUiTypeMoney,
   cellInfo: {
     type: 'money',
   },
