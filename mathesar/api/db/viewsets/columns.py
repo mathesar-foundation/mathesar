@@ -92,7 +92,9 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except InvalidTypeError as e:
                 raise database_api_exceptions.InvalidTypeCastAPIException(
                     e,
-                    message='This type casting is invalid.',
+                    message=f'{e.column_name} cannot be casted to {e.new_type}.'
+                    if e.column_name and e.new_type
+                    else 'This type casting is invalid.',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
         column_attnum = get_column_attnum_from_name(
@@ -169,7 +171,9 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except InvalidTypeError as e:
                 raise database_api_exceptions.InvalidTypeCastAPIException(
                     e,
-                    message='This type casting is invalid.',
+                    message=f'{e.column_name} cannot be casted to {e.new_type}.'
+                    if e.column_name and e.new_type
+                    else 'This type casting is invalid.',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
             except IntegrityError as e:

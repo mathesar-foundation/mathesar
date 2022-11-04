@@ -5,12 +5,13 @@ from sqlalchemy.exc import ProgrammingError
 
 from db.types.operations.convert import get_db_type_enum_from_id
 from db.tables.operations.create import DuplicateTable
+from db.columns.exceptions import InvalidTypeError
 
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
     MultipleDataFileAPIException, UnknownDatabaseTypeIdentifier,
 )
-from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException
+from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException, InvalidTypeCastAPIException
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.validation_exceptions import base_exceptions as base_validation_exceptions
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
@@ -155,6 +156,14 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
             # Save the fields that are stored in the underlying DB.
             try:
                 instance.update_sa_table(validated_data)
+            except InvalidTypeError as e:
+                raise InvalidTypeCastAPIException(
+                        e,
+                        message=f'{e.column_name} cannot be casted to {e.new_type}.'
+                        if e.column_name and e.new_type
+                        else 'This type casting is invalid.',
+                        status_code=status.HTTP_400_BAD_REQUEST
+                    )
             except ValueError as e:
                 raise base_api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         return instance

@@ -104,14 +104,14 @@ def retype_column(
         if type(e.orig) == InvalidParameterValue:
             raise InvalidTypeOptionError
         elif type(e.orig) == InvalidTextRepresentation:
-            raise InvalidTypeError
+            raise InvalidTypeError(column_name, new_type)
         elif type(e.orig) == StringDataRightTruncation:
             raise InvalidStringTruncation
         else:
             raise e.orig
     except InternalError as e:
         if type(e.orig) == RaiseException:
-            raise InvalidTypeError
+            raise InvalidTypeError(column_name, new_type)
         else:
             raise e.orig
     except ProgrammingError as e:
