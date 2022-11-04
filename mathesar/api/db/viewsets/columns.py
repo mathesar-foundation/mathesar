@@ -12,7 +12,7 @@ from mathesar.api.exceptions.database_exceptions import (
 )
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.columns.exceptions import (
-    DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError,
+    DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError, InvalidStringTruncation
 )
 from db.columns.operations.select import get_column_attnum_from_name
 from db.types.exceptions import InvalidTypeParameters
@@ -182,6 +182,12 @@ class ColumnViewSet(viewsets.ModelViewSet):
                     )
                 else:
                     raise base_api_exceptions.MathesarAPIException(e)
+            except InvalidStringTruncation as e:
+                raise database_api_exceptions.InvalidTypeOptionAPIException(
+                    e,
+                    message='Invalid string truncation length.',
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
             except Exception as e:
                 raise base_api_exceptions.MathesarAPIException(e)
 
