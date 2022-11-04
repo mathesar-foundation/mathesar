@@ -8,6 +8,7 @@ from db.types import install
 def create_mathesar_database(
         user_database, username, password, hostname, root_database, port,
 ):
+    """Create database and install Mathesar on it."""
     user_db_engine = engine.create_future_engine(
         username, password, hostname, user_database, port
     )
