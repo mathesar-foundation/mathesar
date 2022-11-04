@@ -1,7 +1,5 @@
-export {
-  getAbstractTypeForDbType,
-  getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
-} from './abstractTypeCategories';
+export { getAllowedAbstractTypesForDbTypeAndItsTargetTypes } from './abstractTypeCategories';
+export { getAbstractTypeForDbType } from './utils';
 export { currentDbAbstractTypes, refetchTypesForDb } from './store';
 export {
   filterDefinitionMap,
