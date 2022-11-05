@@ -75,11 +75,8 @@
   <slot slot="title" name="title" {initialName} />
 
   <div class="form-container">
-    {#if helpText}
-      <Alert appearance="info">
-        <slot slot="content">{helpText}</slot>
-      </Alert>
-    {/if}
+    <slot name="helpText" />
+
     <div class="input-container">
       <LabeledInput label="Name" layout="stacked">
         <TextInput
