@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ModalController } from '@mathesar-component-library';
+  import { Alert, ModalController } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import {
     schemas,
@@ -14,8 +14,6 @@
   export let controller: ModalController;
   export let schema: SchemaEntry | undefined = undefined;
 
-  const createSchemaHelpText =
-    'Name your schema to reflect its purpose. For example, your personal financial schema may be called "Personal Finances" and your movie collection "Movies." Add a description to your schema to remember what it\'s for.';
 
   function nameIsDuplicate(name: string) {
     // Handling the condition when the new name is equal to the current name
@@ -58,8 +56,20 @@
   getInitialName={() => schema?.name ?? ''}
   getInitialDescription={() => schema?.description ?? ''}
   saveButtonLabel={schema ? 'Save' : 'Create New Schema'}
-  helpText={schema ? '' : createSchemaHelpText}
 >
+  <svelte:fragment slot="helpText">
+    {#if !schema}
+      <Alert appearance="info">
+        <slot slot="content">
+          Name your schema to reflect its purpose. For example, your personal
+          financial schema may be called "Personal Finances" and your movie
+          collection "Movies." Add a description to your schema to remember what
+          it's for.
+        </slot>
+      </Alert>
+    {/if}
+  </svelte:fragment>
+
   <span slot="title" let:initialName>
     {#if schema}
       Rename <Identifier>{initialName}</Identifier> Schema
