@@ -48,6 +48,7 @@
     extractColumns.columns.set(columns);
     extractColumns.open();
   }
+
 </script>
 
 <div class="actions-container">
@@ -70,7 +71,7 @@
   </Button>
 </div>
 
-<ExtractColumnsModal controller={extractColumns} />
+<ExtractColumnsModal controller={extractColumns} on:change/>
 
 <style>
   .actions-container {

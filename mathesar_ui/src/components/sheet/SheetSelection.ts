@@ -374,6 +374,19 @@ export default class SheetSelection<
     return false;
   }
 
+  selectColumns(columns: [Column]): void {
+    const selected_rows = this.getSelectedUniqueRowsId(new ImmutableSet(this.selectedCells.getValues()));
+    const cells: Cell<Row, Column>[] = [];
+    columns.forEach((column) => {
+      selected_rows.forEach((row_index) => {
+        let row = this.getRows()[row_index]
+        cells.push([row, column]);
+      });
+    });
+
+    this.selectMultipleCells(cells);
+  }
+
   toggleColumnSelection(column: Column): void {
     if (this.clearColumnSelection(column)) {
       return;
@@ -505,6 +518,15 @@ export default class SheetSelection<
       ...columnsSelectedWhenTheTableIsEmpty,
     ]);
     return Array.from(setOfUniqueColumnIds);
+  }
+
+  getSelectedUniqueRowsId(
+    selectedCells: ImmutableSet<string>
+  ): Row['rowIndex'][] {
+    const setOfUniqueRowIndex = new Set([
+      ...[...selectedCells].map(getSelectedRowIndex)
+    ]);
+    return Array.from(setOfUniqueRowIndex);
   }
 
   destroy(): void {
