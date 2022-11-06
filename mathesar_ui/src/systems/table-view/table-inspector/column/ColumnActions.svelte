@@ -48,7 +48,6 @@
     extractColumns.columns.set(columns);
     extractColumns.open();
   }
-
 </script>
 
 <div class="actions-container">

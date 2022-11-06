@@ -30,7 +30,6 @@
   function updateColumnSelection(change) {
     selection.selectColumns(change.detail);
   }
-
 </script>
 
 <div class="column-mode-container">
