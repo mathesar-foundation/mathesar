@@ -19,7 +19,7 @@
 
   export let usesVirtualList = false;
 
-  $: ({ id, display, columnsDataStore } = $tabularData);
+  $: ({ id, display, columnsDataStore, selection } = $tabularData);
   $: ({ displayableRecords } = display);
   $: ({ pkColumn } = columnsDataStore);
 
@@ -69,7 +69,7 @@
     }
 
     if (clearActiveCell) {
-      display.resetActiveCell();
+      selection.resetActiveCell();
     }
   }
 </script>
