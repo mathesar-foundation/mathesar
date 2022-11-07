@@ -95,8 +95,9 @@ def check_overdue_books_columns(create_overdue_books_query, client):
             'type_options': {'item_type': 'text'},
             'display_options': None,
             'is_initial_column': False,
-            'is_summarization_output_column': True,
-            'summarization_input_alias': 'Book Title',
+            'input_table_name': None,
+            'input_column_name': None,
+            'input_alias': 'Book Title',
         }, {
             'alias': 'email',
             'display_name': 'Patron Email',
@@ -106,6 +107,7 @@ def check_overdue_books_columns(create_overdue_books_query, client):
             'is_initial_column': True,
             'input_table_name': 'Patrons',
             'input_column_name': 'Email',
+            'input_alias': None,
         }
     ]
     actual_response_data = client.get(f'/api/db/v0/queries/{query_id}/columns/').json()
@@ -207,8 +209,9 @@ def check_monthly_checkouts_columns(create_monthly_checkouts_query, client):
             'type_options': None,
             'display_options': None,
             'is_initial_column': False,
-            'is_summarization_output_column': True,
-            'summarization_input_alias': 'Checkout Time',
+            'input_table_name': None,
+            'input_column_name': None,
+            'input_alias': 'Checkout Time',
         }, {
             'alias': 'Count',
             'display_name': 'Number of Checkouts',
@@ -216,8 +219,9 @@ def check_monthly_checkouts_columns(create_monthly_checkouts_query, client):
             'type_options': None,
             'display_options': None,
             'is_initial_column': False,
-            'is_summarization_output_column': True,
-            'summarization_input_alias': 'id',
+            'input_table_name': None,
+            'input_column_name': None,
+            'input_alias': 'id',
         }
     ]
     actual_response_data = client.get(f'/api/db/v0/queries/{query_id}/columns/').json()

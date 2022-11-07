@@ -37,7 +37,7 @@ def test_query_results_minimal(client, minimal_patents_query):
                 'is_initial_column': True,
                 'input_table_name': input_table_name,
                 'input_column_name': 'Center',
-
+                'input_alias': None,
             },
             'col2': {
                 'alias': 'col2',
@@ -48,6 +48,7 @@ def test_query_results_minimal(client, minimal_patents_query):
                 'is_initial_column': True,
                 'input_table_name': input_table_name,
                 'input_column_name': 'Case Number',
+                'input_alias': None,
             }
         },
         'parameters': {

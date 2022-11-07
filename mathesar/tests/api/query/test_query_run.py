@@ -52,6 +52,7 @@ def test_queries_run_minimal(create_patents_table, client):
                 'is_initial_column': True,
                 'input_table_name': 'patent_query_run_minimal_table',
                 'input_column_name': 'Center',
+                'input_alias': None,
             },
             'col2': {
                 'alias': 'col2',
@@ -62,6 +63,7 @@ def test_queries_run_minimal(create_patents_table, client):
                 'is_initial_column': True,
                 'input_table_name': 'patent_query_run_minimal_table',
                 'input_column_name': 'Case Number',
+                'input_alias': None,
             }
         },
         'parameters': {
