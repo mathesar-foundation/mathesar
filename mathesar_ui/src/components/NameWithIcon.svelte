@@ -77,6 +77,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: var(--name-color, var(--slate-400));
+    color: var(--name-color, var(--slate-800));
   }
 </style>

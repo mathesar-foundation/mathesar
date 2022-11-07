@@ -234,7 +234,7 @@
           }
 
           > :global(.select) {
-            min-width: 14rem;
+            min-width: 12rem;
           }
         }
       }

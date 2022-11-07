@@ -8,6 +8,7 @@
 
   export let tables: TableEntry[];
   export let table: TableEntry | undefined = undefined;
+  /** TODO: Discuss, do we need prependBlank? */
   export let prependBlank = false;
   export let autoSelect: SelectProps<TableEntry | undefined>['autoSelect'] =
     'first';
@@ -17,9 +18,25 @@
 
 <Select
   options={tableList}
-  getLabel={(t) => (t ? { component: TableName, props: { table: t } } : '')}
   valuesAreEqual={(a, b) => a?.id === b?.id}
   {autoSelect}
   bind:value={table}
   on:change
-/>
+  let:option
+>
+  {#if option}
+    <TableName table={option} />
+  {:else if !prependBlank}
+    <span class="placeholder">
+      <TableName table={{ name: 'Select Table' }} />
+    </span>
+  {/if}
+</Select>
+
+<style lang="scss">
+  .placeholder {
+    display: block;
+    --icon-color: var(--slate-400);
+    --name-color: var(--slate-400);
+  }
+</style>
