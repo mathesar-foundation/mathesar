@@ -138,7 +138,7 @@ class InvalidTypeCastAPIException(MathesarAPIException):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
         super().__init__(exception, self.error_code, self.err_msg(exception), field, details, status_code)
-    
+
     @staticmethod
     def err_msg(exception):
         if type(exception) is InvalidTypeError and exception.column_name and exception.new_type:
