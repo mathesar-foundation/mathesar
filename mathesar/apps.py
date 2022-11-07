@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db.models.signals import post_migrate
 
 
-def _prepare_database_model(sender, **kwargs):
+def _prepare_database_model(**kwargs):
     from mathesar.models.base import Database  # noqa
     from mathesar.state.django import sync_databases_status  # noqa
     dbs_in_settings = set(settings.DATABASES)
@@ -23,4 +23,4 @@ class MathesarConfig(AppConfig):
     def ready(self):
         """Perform initialization tasks."""
         import mathesar.signals  # noqa
-        post_migrate.connect(_prepare_database_model, sender=self)
+        post_migrate.connect(_prepare_database_model)
