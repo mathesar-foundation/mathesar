@@ -375,7 +375,9 @@ export default class SheetSelection<
   }
 
   selectColumns(columns: [Column]): void {
-    const selectedRows = this.getSelectedUniqueRowsId(new ImmutableSet(this.selectedCells.getValues()));
+    const selectedRows = this.getSelectedUniqueRowsId(
+      new ImmutableSet(this.selectedCells.getValues()),
+    );
     const cells: Cell<Row, Column>[] = [];
     columns.forEach((column) => {
       selectedRows.forEach((rowIndex) => {
@@ -521,10 +523,10 @@ export default class SheetSelection<
   }
 
   getSelectedUniqueRowsId(
-    selectedCells: ImmutableSet<string>
+    selectedCells: ImmutableSet<string>,
   ): Row['rowIndex'][] {
     const setOfUniqueRowIndex = new Set([
-      ...[...selectedCells].map(getSelectedRowIndex)
+      ...[...selectedCells].map(getSelectedRowIndex),
     ]);
     return Array.from(setOfUniqueRowIndex);
   }

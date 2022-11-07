@@ -133,7 +133,11 @@
             the linked table.
           </span>
         </span>
-        <SelectProcessedColumns {availableColumns} bind:columns={$columns} on:change/>
+        <SelectProcessedColumns
+          {availableColumns}
+          bind:columns={$columns}
+          on:change
+        />
       </LabeledInput>
     </FormField>
   </Form>

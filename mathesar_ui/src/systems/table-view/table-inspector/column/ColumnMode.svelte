@@ -6,6 +6,7 @@
   import ColumnActions from './ColumnActions.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ processedColumns, selection } = $tabularData);
@@ -27,7 +28,7 @@
   /** When only one column is selected */
   $: column = selectedColumns.length === 1 ? selectedColumns[0] : undefined;
 
-  function updateColumnSelection(change) {
+  function updateColumnSelection(change: CustomEvent) {
     selection.selectColumns(change.detail);
   }
 </script>
