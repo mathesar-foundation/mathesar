@@ -37,7 +37,6 @@ class Transform(ABC):
         )
 
     @property
-    @abstractmethod
     def map_of_output_alias_to_input_alias(self):
         """
         Expected to return a mapping of output aliases to input aliases.
