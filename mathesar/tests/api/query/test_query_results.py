@@ -3,7 +3,7 @@ import json
 
 def test_query_results_minimal(client, minimal_patents_query):
     ui_query = minimal_patents_query
-    base_table_name = ui_query.base_table.name
+    input_table_name = ui_query.base_table.name
     order_by = json.dumps(
         [
             {'field': 'col1', 'direction': 'asc'},
@@ -35,8 +35,8 @@ def test_query_results_minimal(client, minimal_patents_query):
                 'type_options': None,
                 'display_options': {'a': 1},
                 'is_initial_column': True,
-                'base_table_name': base_table_name,
-                'base_column_name': 'Center',
+                'input_table_name': input_table_name,
+                'input_column_name': 'Center',
 
             },
             'col2': {
@@ -46,8 +46,8 @@ def test_query_results_minimal(client, minimal_patents_query):
                 'type_options': None,
                 'display_options': {'b': 2},
                 'is_initial_column': True,
-                'base_table_name': base_table_name,
-                'base_column_name': 'Case Number',
+                'input_table_name': input_table_name,
+                'input_column_name': 'Case Number',
             }
         },
         'parameters': {

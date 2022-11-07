@@ -50,8 +50,8 @@ def test_queries_run_minimal(create_patents_table, client):
                 'type_options': None,
                 'display_options': None,
                 'is_initial_column': True,
-                'base_table_name': 'patent_query_run_minimal_table',
-                'base_column_name': 'Center',
+                'input_table_name': 'patent_query_run_minimal_table',
+                'input_column_name': 'Center',
             },
             'col2': {
                 'alias': 'col2',
@@ -60,8 +60,8 @@ def test_queries_run_minimal(create_patents_table, client):
                 'type_options': None,
                 'display_options': None,
                 'is_initial_column': True,
-                'base_table_name': 'patent_query_run_minimal_table',
-                'base_column_name': 'Case Number',
+                'input_table_name': 'patent_query_run_minimal_table',
+                'input_column_name': 'Case Number',
             }
         },
         'parameters': {

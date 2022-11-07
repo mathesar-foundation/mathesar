@@ -213,8 +213,8 @@ class UIQuery(BaseModel, Relation):
         if is_initial_column:
             initial_dj_column = _get_dj_column_for_initial_db_column(initial_db_column)
             output = output | {
-                'base_column_name': initial_dj_column.name,
-                'base_table_name': initial_dj_column.table.name,
+                'input_column_name': initial_dj_column.name,
+                'input_table_name': initial_dj_column.table.name,
             }
         else:
             # NOTE currently only summarizations can "create" aliases; once that changes, this

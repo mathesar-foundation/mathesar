@@ -104,8 +104,8 @@ def check_overdue_books_columns(create_overdue_books_query, client):
             'type_options': None,
             'display_options': None,
             'is_initial_column': True,
-            'base_table_name': 'Patrons',
-            'base_column_name': 'Email',
+            'input_table_name': 'Patrons',
+            'input_column_name': 'Email',
         }
     ]
     actual_response_data = client.get(f'/api/db/v0/queries/{query_id}/columns/').json()
