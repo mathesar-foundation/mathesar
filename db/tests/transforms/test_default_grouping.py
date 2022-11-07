@@ -20,12 +20,16 @@ def some_fixture(engine_with_academics):
     uni_oid = get_oid_from_table('universities', schema, engine)
     uni_name_attnum = get_attnum(uni_oid, 'name', engine, metadata=metadata)
     uni_id_attnum = get_attnum(uni_oid, 'id', engine, metadata=metadata)
+    arti_oid = get_oid_from_table('articles', schema, engine)
+    arti_title_attnum = get_attnum(arti_oid, 'title', engine, metadata=metadata)
+    arti_prim_author_attnum = get_attnum(arti_oid, 'primary_author', engine, metadata=metadata)
     initial_columns = [
         InitialColumn(
             acad_oid,
             acad_id_attnum,
             alias='id',
         ),
+        # Serves as a "single result" initial column
         InitialColumn(
             uni_oid,
             uni_name_attnum,
@@ -34,6 +38,18 @@ def some_fixture(engine_with_academics):
                 [
                     (acad_oid, acad_insitution_attnum),
                     (uni_oid, uni_id_attnum),
+                ],
+            ],
+        ),
+        # Serves as a "multiple result" initial column
+        InitialColumn(
+            arti_oid,
+            arti_title_attnum,
+            alias='article_title',
+            jp_path=[
+                [
+                    (acad_oid, acad_id_attnum),
+                    (arti_oid, arti_prim_author_attnum),
                 ],
             ],
         ),
