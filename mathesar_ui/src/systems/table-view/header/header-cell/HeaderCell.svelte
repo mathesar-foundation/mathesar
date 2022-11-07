@@ -5,11 +5,9 @@
  -->
 <script lang="ts">
   import { Button } from '@mathesar-component-library';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/types';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
-  // TODO: Check if this component should be moved to
-  // some common place??
-  import CellBackground from '../../row/CellBackground.svelte';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
 
   export let processedColumn: ProcessedColumn;
   export let isSelected = false;

@@ -18,8 +18,8 @@
   export let isActive: $$Props['isActive'];
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
-  export let dataForRecordSummaryInFkCell: $$Props['dataForRecordSummaryInFkCell'] =
-    undefined;
+  export let recordSummary: $$Props['recordSummary'] = undefined;
+  export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
 
@@ -29,11 +29,12 @@
 
   async function launchRecordSelector(event?: MouseEvent) {
     event?.stopPropagation();
-    const newValue = await recordSelector.acquireUserInput({ tableId });
-    if (newValue === undefined) {
+    const result = await recordSelector.acquireUserInput({ tableId });
+    if (result === undefined) {
       return;
     }
-    value = newValue;
+    value = result.recordId;
+    setRecordSummary(String(result.recordId), result.recordSummary);
     dispatch('update', { value });
 
     // This is a band-aid to make the cell remain selected after opening and
@@ -92,7 +93,7 @@
   <div class="linked-record-cell">
     <div class="value">
       {#if hasValue}
-        <LinkedRecord recordId={value} {dataForRecordSummaryInFkCell} />
+        <LinkedRecord recordId={value} {recordSummary} />
       {:else if value === undefined}
         <Default />
       {:else}

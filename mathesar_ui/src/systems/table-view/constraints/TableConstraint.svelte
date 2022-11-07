@@ -15,7 +15,7 @@
   import { getAPI } from '@mathesar/utils/api';
   import {
     iconAddNew,
-    iconDelete,
+    iconDeleteMajor,
     iconDbIdentifierDelimiter,
   } from '@mathesar/icons';
 
@@ -34,10 +34,13 @@
   }
 
   $: dropTitle = `Delete constraint '${constraint.name}'`;
-  $: columns = $tabularData.columnsDataStore.getColumnsByIds(
-    constraint.columns,
+  $: columnsInTable = $tabularData.columnsDataStore.columns;
+  $: columnsInConstraint = $columnsInTable.filter((c) =>
+    constraint.columns.includes(c.id),
   );
-  $: columnNames = columns.map((columnInConstraint) => columnInConstraint.name);
+  $: columnNames = columnsInConstraint.map(
+    (columnInConstraint) => columnInConstraint.name,
+  );
   $: columnSummary = columnNames.join(', ');
   $: referentTable =
     constraint.type === 'foreignkey'
@@ -87,7 +90,7 @@
   </div>
   <div class="drop">
     <Button on:click={handleDrop} title={dropTitle}>
-      <Icon {...iconDelete} />
+      <Icon {...iconDeleteMajor} />
     </Button>
   </div>
 </div>

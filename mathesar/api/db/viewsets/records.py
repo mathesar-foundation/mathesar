@@ -1,8 +1,9 @@
+from psycopg2.errors import ForeignKeyViolation
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
-from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
+from sqlalchemy.exc import IntegrityError
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
@@ -12,6 +13,7 @@ from db.functions.exceptions import (
 )
 from db.records.exceptions import (
     BadGroupFormat, GroupFieldNotFound, InvalidGroupType, UndefinedFunction,
+    BadSortFormat, SortFieldNotFound
 )
 from mathesar.api.pagination import TableLimitOffsetPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
@@ -49,7 +51,6 @@ class RecordViewSet(viewsets.ViewSet):
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
         column_ids_to_names = column_names_to_ids.inverse
         if filter_unprocessed:
-            table = get_table_or_404(table_pk)
             filter_processed = rewrite_db_function_spec_column_ids_to_names(
                 column_ids_to_names=column_ids_to_names,
                 spec=filter_unprocessed,
@@ -114,12 +115,11 @@ class RecordViewSet(viewsets.ViewSet):
             ]
         }
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
-        column_ids_to_names = column_names_to_ids.inverse
         records = paginator.paginate_queryset(
             table,
             request,
             table,
-            column_ids_to_names,
+            column_names_to_ids,
             filters=record_filters
         )
         if not records:
@@ -148,12 +148,11 @@ class RecordViewSet(viewsets.ViewSet):
             ]
         }
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
-        column_ids_to_names = column_names_to_ids.inverse
         records = paginator.paginate_queryset(
             table,
             request,
             table,
-            column_ids_to_names,
+            column_names_to_ids,
             filters=record_filters
         )
         serializer = RecordSerializer(
@@ -184,12 +183,11 @@ class RecordViewSet(viewsets.ViewSet):
             ]
         }
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
-        column_ids_to_names = column_names_to_ids.inverse
         records = paginator.paginate_queryset(
             table,
             request,
             table,
-            column_ids_to_names,
+            column_names_to_ids,
             filters=record_filters
         )
         serializer = RecordSerializer(
@@ -207,7 +205,16 @@ class RecordViewSet(viewsets.ViewSet):
                 error_code=ErrorCodes.RecordNotFound.value,
                 message="Record doesn't exist"
             )
-        table.delete_record(pk)
+        try:
+            table.delete_record(pk)
+        except IntegrityError as e:
+            if isinstance(e.orig, ForeignKeyViolation):
+                raise database_api_exceptions.ForeignKeyViolationAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    referent_table=table,
+                )
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_serializer_context(self, table):

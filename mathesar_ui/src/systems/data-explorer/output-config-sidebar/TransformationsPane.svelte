@@ -10,7 +10,7 @@
     iconAddNew,
     iconFiltering,
     iconGrouping,
-    iconDelete,
+    iconDeleteMajor,
   } from '@mathesar/icons';
   import type QueryManager from '../QueryManager';
   import FilterTransformation from './FilterTransformation.svelte';
@@ -119,7 +119,7 @@
             class="padding-zero"
             on:click={() => removeTransformation(index)}
           >
-            <Icon {...iconDelete} size="0.8rem" />
+            <Icon {...iconDeleteMajor} size="0.8rem" />
           </Button>
         {/if}
       </header>

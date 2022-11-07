@@ -40,19 +40,14 @@
     isLoading,
     display,
   } = $tabularData);
-  $: ({ columns } = $columnsDataStore);
-  $: ({
-    filtering,
-    sorting,
-    grouping,
-    // selectedRows,
-    sheetState,
-  } = meta);
+  $: ({ columns } = columnsDataStore);
+  $: columnsFetchStatus = columnsDataStore.fetchStatus;
+  $: ({ filtering, sorting, grouping, sheetState } = meta);
   $: ({ isTableInspectorVisible } = display);
   $: recordState = recordsData.state;
 
   $: isError =
-    $columnsDataStore.state === States.Error ||
+    $columnsFetchStatus?.state === 'failure' ||
     $recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
 
@@ -61,7 +56,7 @@
     schema.id,
     {
       baseTableId: id,
-      columns,
+      columns: $columns,
       terseGrouping: $grouping.terse(),
     },
   );
@@ -107,7 +102,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <Sort {columns} sorting={meta.sorting} />
+      <Sort columns={$columns} sorting={meta.sorting} />
     </svelte:fragment>
   </Dropdown>
 
@@ -142,16 +137,6 @@
     <Icon {...iconAddNew} />
     <span>New Record</span>
   </Button>
-
-  <!-- TODO: Bring back the delete functionality -->
-  <!-- {#if $selectedRows.size > 0}
-    <Button size="small" on:click={() => recordsData.deleteSelected()}>
-      <Icon {...iconDelete} />
-      <span>
-        Delete {$selectedRows.size} records
-      </span>
-    </Button>
-  {/if} -->
 
   {#if $sheetState}
     <div class="divider" />

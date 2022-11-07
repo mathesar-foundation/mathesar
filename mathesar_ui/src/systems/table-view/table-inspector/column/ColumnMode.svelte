@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Collapsible } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { getSelectedUniqueColumnsId } from '@mathesar/stores/table-data/selection';
   import RenameColumn from './RenameColumn.svelte';
   import ColumnDisplayProperties from './ColumnDisplayProperties.svelte';
   import ColumnActions from './ColumnActions.svelte';
@@ -12,7 +11,7 @@
   $: ({ processedColumns, selection } = $tabularData);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
   $: selectedColumns = (() => {
-    const ids = getSelectedUniqueColumnsId(
+    const ids = selection.getSelectedUniqueColumnsId(
       $selectedCells,
       $columnsSelectedWhenTheTableIsEmpty,
     );

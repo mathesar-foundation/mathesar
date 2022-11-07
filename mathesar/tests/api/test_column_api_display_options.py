@@ -7,6 +7,7 @@ from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import PostgresType, MathesarCustomType
 from db.types.custom.money import MathesarMoney
+from db.metadata import get_empty_metadata
 
 from mathesar.models.base import Table, Column
 
@@ -32,7 +33,7 @@ def column_test_table_with_service_layer_options(patent_schema):
             'display_options': {
                 'show_as_percentage': True,
                 'number_format': "english",
-                "use_grouping": 'auto',
+                "use_grouping": 'true',
                 "minimum_fraction_digits": None,
                 "maximum_fraction_digits": None,
             }
@@ -63,7 +64,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     service_columns = []
     for column_data in zip(column_list_in, column_data_list):
-        attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
+        attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine, metadata=get_empty_metadata())
         service_columns.append(
             Column.current_objects.get_or_create(
                 table=table,
@@ -121,7 +122,7 @@ _create_display_options_test_list = [
         {
             "show_as_percentage": False,
             'number_format': None,
-            'use_grouping': 'auto',
+            'use_grouping': 'false',
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },
@@ -148,14 +149,14 @@ _create_display_options_test_list = [
         {
             "show_as_percentage": True,
             'number_format': "english",
-            'use_grouping': 'auto',
+            'use_grouping': 'true',
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },
         {
             "show_as_percentage": True,
             'number_format': "english",
-            'use_grouping': 'auto',
+            'use_grouping': 'true',
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },

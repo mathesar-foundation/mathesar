@@ -17,6 +17,7 @@ from db.types.operations.convert import get_db_type_enum_from_class
 from db.types.base import (
     DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types,
 )
+from db.metadata import get_empty_metadata
 
 
 TARGET_DICT = "target_dict"
@@ -1277,8 +1278,9 @@ def test_alter_column_casts_data_gen(
     actual_value = res[0][0]
     assert actual_value == out_val
     table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
-    column_attnum = get_column_attnum_from_name(table_oid, COLUMN_NAME, engine)
-    actual_default = get_column_default(table_oid, column_attnum, engine)
+    metadata = get_empty_metadata()
+    column_attnum = get_column_attnum_from_name(table_oid, COLUMN_NAME, engine, metadata=metadata)
+    actual_default = get_column_default(table_oid, column_attnum, engine, metadata=metadata)
     # TODO This needs to be sorted out by fixing how server_default is set.
     if source_type not in default_unsupported and target_type not in default_unsupported:
         assert actual_default == out_val

@@ -3,6 +3,7 @@ from sqlalchemy import select
 from db.columns.base import MathesarColumn
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import reflect_table
+from db.metadata import get_empty_metadata
 
 
 def merge_tables(table_name_one, table_name_two, merged_table_name, schema, engine, drop_original_tables=False):
@@ -10,10 +11,10 @@ def merge_tables(table_name_one, table_name_two, merged_table_name, schema, engi
     This specifically undoes the `extract_columns_from_table` (up to
     unique rows).  It may not work in other contexts (yet).
     """
-    table_one = reflect_table(table_name_one, schema, engine)
-    table_two = reflect_table(
-        table_name_two, schema, engine, metadata=table_one.metadata
-    )
+    # TODO reuse metadata
+    metadata = get_empty_metadata()
+    table_one = reflect_table(table_name_one, schema, engine, metadata=metadata)
+    table_two = reflect_table(table_name_two, schema, engine, metadata=metadata)
     merge_join = table_one.join(table_two)
     referencing_columns = [
         col for col in [merge_join.onclause.left, merge_join.onclause.right]

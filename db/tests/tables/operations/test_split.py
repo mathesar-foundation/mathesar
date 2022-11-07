@@ -5,13 +5,14 @@ from db.columns.defaults import DEFAULT_COLUMNS
 from db.columns.operations.select import get_columns_attnum_from_names
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
+from db.metadata import get_empty_metadata
 
 
 def test_extract_columns_from_table_creates_tables(engine_with_roster, roster_table_name, teachers_table_name, roster_extracted_cols):
     engine, schema = engine_with_roster
     teachers = "Teachers"
     roster_table_oid = get_oid_from_table(roster_table_name, schema, engine)
-    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine)
+    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine, metadata=get_empty_metadata())
     extract_columns_from_table(
         roster_table_oid,
         roster_extracted_col_attnums,
@@ -79,9 +80,10 @@ def test_extract_columns_extracts_correct_data(engine_with_roster, roster_table_
     # with test_extract_columns_extracts_columns, since we assume the
     # extracted column list is correct
     engine, schema = engine_with_roster
-    roster = reflect_table(roster_table_name, schema, engine)
+    metadata = get_empty_metadata()
+    roster = reflect_table(roster_table_name, schema, engine, metadata=metadata)
     roster_table_oid = get_oid_from_table(roster_table_name, schema, engine)
-    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine)
+    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine, metadata=metadata)
     expect_tuple_sel = (
         select([roster.columns[name] for name in roster_extracted_cols])
         .distinct()
@@ -111,9 +113,10 @@ def test_extract_columns_leaves_correct_data(engine_with_roster, roster_table_na
     # with test_extract_columns_leaves_correct_columns, since we assume the
     # remainder column list is correct
     engine, schema = engine_with_roster
-    roster = reflect_table(roster_table_name, schema, engine)
+    metadata = get_empty_metadata()
+    roster = reflect_table(roster_table_name, schema, engine, metadata=metadata)
     roster_table_oid = get_oid_from_table(roster_table_name, schema, engine)
-    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine)
+    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine, metadata=metadata)
     remainder_column_names = [
         col.name for col in roster.columns
         if col.name not in DEFAULT_COLUMNS

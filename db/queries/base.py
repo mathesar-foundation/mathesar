@@ -1,10 +1,11 @@
-from sqlalchemy import MetaData, select
+from sqlalchemy import select
 
 from db.records.operations import select as records_select
 from db.columns.base import MathesarColumn
 from db.columns.operations.select import get_column_name_from_attnum
 from db.tables.operations.select import reflect_table_from_oid
 from db.transforms.operations.apply import apply_transformations
+from db.metadata import get_empty_metadata
 
 
 class DBQuery:
@@ -15,6 +16,10 @@ class DBQuery:
             engine,
             transformations=None,
             name=None,
+            # The same metadata will be used by all the methods within DBQuery
+            # So make sure to change the metadata in case the DBQuery methods are called
+            # after a mutation to the database object that could make the existing metadata invalid.
+            metadata=None
     ):
         self.base_table_oid = base_table_oid
         for initial_col in initial_columns:
@@ -23,6 +28,7 @@ class DBQuery:
         self.engine = engine
         self.transformations = transformations
         self.name = name
+        self.metadata = metadata if metadata else get_empty_metadata()
 
     # mirrors a method in db.records.operations.select
     def get_records(self, **kwargs):
@@ -30,7 +36,7 @@ class DBQuery:
         # transformations.  this reflects fact that we can form a query, and
         # then apply temporary transforms on it, like how you can apply
         # temporary transforms to a table when in a table view.
-        return records_select.get_records(
+        return records_select.get_records_with_default_order(
             table=self.transformed_relation, engine=self.engine, **kwargs,
         )
 
@@ -96,7 +102,7 @@ class DBQuery:
 
     @property
     def initial_relation(self):
-        metadata = MetaData()
+        metadata = self.metadata
         base_table = reflect_table_from_oid(
             self.base_table_oid, self.engine, metadata=metadata
         )
@@ -109,10 +115,10 @@ class DBQuery:
             We use the function-scoped metadata so all involved tables are aware
             of each other.
             """
-            return reflect_table_from_oid(oid, self.engine, metadata=metadata)
+            return reflect_table_from_oid(oid, self.engine, metadata=metadata, keep_existing=True)
 
         def _get_column_name(oid, attnum):
-            return get_column_name_from_attnum(oid, attnum, self.engine)
+            return get_column_name_from_attnum(oid, attnum, self.engine, metadata=metadata)
 
         def _process_initial_column(col):
             nonlocal from_clause
@@ -125,8 +131,10 @@ class DBQuery:
                 left = jp_path_alias_map[jp_path[:i]]
                 right = _get_table(jp[1][0]).alias()
                 jp_path_alias_map[jp_path[:i + 1]] = right
-                left_col = left.columns[_get_column_name(jp[0][0], jp[0][1])]
-                right_col = right.columns[_get_column_name(jp[1][0], jp[1][1])]
+                left_col_name = _get_column_name(jp[0][0], jp[0][1])
+                right_col_name = _get_column_name(jp[1][0], jp[1][1])
+                left_col = left.columns[left_col_name]
+                right_col = right.columns[right_col_name]
                 from_clause = from_clause.join(
                     right, onclause=left_col == right_col, isouter=True,
                 )

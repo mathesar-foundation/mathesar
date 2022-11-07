@@ -52,6 +52,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "mathesar.middleware.CursorClosedHandlerMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -214,3 +215,6 @@ STATICFILES_DIRS = [MATHESAR_UI_SOURCE_LOCATION] if MATHESAR_MODE == 'DEVELOPMEN
 AUTH_USER_MODEL = 'mathesar.User'
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
+DRF_ACCESS_POLICY = {
+    'reusable_conditions': ['mathesar.api.permission_conditions']
+}

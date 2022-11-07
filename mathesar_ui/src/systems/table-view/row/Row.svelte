@@ -2,14 +2,20 @@
   import {
     getCellKey,
     getTabularDataStoreFromContext,
-  } from '@mathesar/stores/table-data';
-  import type { Row } from '@mathesar/stores/table-data/types';
-  import {
+    isNewRecordRow,
+    isPlaceholderRow,
+    rowHasRecord,
+    isGroupHeaderRow,
+    isHelpTextRow,
     getRowKey,
     ID_ROW_CONTROL_COLUMN,
+    type Row,
   } from '@mathesar/stores/table-data';
-  import { SheetRow, SheetCell } from '@mathesar/components/sheet';
-  import { isRowSelected } from '@mathesar/stores/table-data/selection';
+  import {
+    SheetRow,
+    SheetCell,
+    isRowSelected,
+  } from '@mathesar/components/sheet';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
@@ -20,46 +26,36 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
+  $: ({ recordsData, columnsDataStore, meta, processedColumns, selection } =
+    $tabularData);
   $: ({
-    recordsData,
-    columnsDataStore,
-    meta,
-    display,
-    processedColumns,
-    selection,
-  } = $tabularData);
-  $: ({
-    // selectedRows,
     rowStatus,
     rowCreationStatus,
     cellModificationStatus,
     cellClientSideErrors,
   } = meta);
-  $: ({ grouping } = recordsData);
+  $: ({ grouping, recordSummaries } = recordsData);
 
-  $: ({ primaryKeyColumnId } = $columnsDataStore);
+  $: ({ pkColumn } = columnsDataStore);
+  $: primaryKeyColumnId = $pkColumn?.id;
   $: rowKey = getRowKey(row, primaryKeyColumnId);
   $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
   $: ({ selectedCells } = selection);
-  $: isSelected = isRowSelected($selectedCells, row);
+  $: isSelected = rowHasRecord(row) && isRowSelected($selectedCells, row);
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
 
   function checkAndCreateEmptyRow() {
-    if (row.isAddPlaceholder) {
+    if (isPlaceholderRow(row)) {
       void recordsData.addEmptyRecord();
     }
   }
 
   const handleRowClick = () => {
-    if (
-      row.record &&
-      !row.isAddPlaceholder &&
-      typeof row.rowIndex === 'number'
-    ) {
+    if (rowHasRecord(row) && !isPlaceholderRow(row)) {
       selection.toggleRowSelection(row);
     }
   };
@@ -72,13 +68,11 @@
     class:processing={wholeRowState === 'processing'}
     class:failed={hasWholeRowErrors}
     class:created={creationStatus === 'success'}
-    class:add-placeholder={row.isAddPlaceholder}
-    class:new={row.isNew}
-    class:is-group-header={row.isGroupHeader}
-    class:is-add-placeholder={row.isAddPlaceholder}
+    class:is-new={isNewRecordRow(row)}
+    class:is-group-header={isGroupHeaderRow(row)}
+    class:is-add-placeholder={isPlaceholderRow(row)}
     {...htmlAttributes}
     style={styleString}
-    data-row-identifier={row.identifier}
     on:mousedown={checkAndCreateEmptyRow}
   >
     <SheetCell
@@ -89,7 +83,7 @@
       let:style
     >
       <div {...cellHtmlAttr} {style} on:click={handleRowClick}>
-        {#if row.record}
+        {#if rowHasRecord(row)}
           <RowControl
             {primaryKeyColumnId}
             {row}
@@ -102,19 +96,19 @@
       </div>
     </SheetCell>
 
-    {#if row.isNewHelpText}
+    {#if isHelpTextRow(row)}
       <NewRecordMessage columnCount={$processedColumns.size} />
-    {:else if row.isGroupHeader && $grouping && row.group}
+    {:else if isGroupHeaderRow(row) && $grouping && row.group}
       <GroupHeader
         {row}
         grouping={$grouping}
         group={row.group}
         processedColumnsMap={$processedColumns}
+        recordSummariesForSheet={$recordSummaries}
       />
-    {:else if row.record}
+    {:else if rowHasRecord(row)}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
-          {display}
           {selection}
           {row}
           rowHasErrors={hasWholeRowErrors}
@@ -122,9 +116,6 @@
           modificationStatusMap={cellModificationStatus}
           clientSideErrorMap={cellClientSideErrors}
           bind:value={row.record[columnId]}
-          dataForRecordSummaryInFkCell={row.dataForRecordSummariesInRow?.[
-            columnId
-          ]}
           {processedColumn}
           {recordsData}
         />

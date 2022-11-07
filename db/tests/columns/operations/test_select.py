@@ -10,6 +10,7 @@ from db.columns.operations.select import (
 )
 from db.tables.operations.select import get_oid_from_table
 from db.tests.columns.utils import column_test_dict, get_default
+from db.metadata import get_empty_metadata
 
 
 def test_get_attnum_from_name(engine_with_schema):
@@ -25,10 +26,11 @@ def test_get_attnum_from_name(engine_with_schema):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    column_zero_attnum = get_column_attnum_from_name(table_oid, zero_name, engine)
-    column_one_attnum = get_column_attnum_from_name(table_oid, one_name, engine)
-    assert get_column_name_from_attnum(table_oid, column_zero_attnum, engine) == zero_name
-    assert get_column_name_from_attnum(table_oid, column_one_attnum, engine) == one_name
+    metadata = get_empty_metadata()
+    column_zero_attnum = get_column_attnum_from_name(table_oid, zero_name, engine, metadata=metadata)
+    column_one_attnum = get_column_attnum_from_name(table_oid, one_name, engine, metadata=metadata)
+    assert get_column_name_from_attnum(table_oid, column_zero_attnum, engine, metadata=metadata) == zero_name
+    assert get_column_name_from_attnum(table_oid, column_one_attnum, engine, metadata=metadata) == one_name
 
 
 def test_get_attnum_from_names(engine_with_schema):
@@ -44,9 +46,10 @@ def test_get_attnum_from_names(engine_with_schema):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    columns_attnum = get_columns_attnum_from_names(table_oid, [zero_name, one_name], engine)
-    assert get_column_name_from_attnum(table_oid, columns_attnum[0], engine) == zero_name
-    assert get_column_name_from_attnum(table_oid, columns_attnum[1], engine) == one_name
+    metadata = get_empty_metadata()
+    columns_attnum = get_columns_attnum_from_names(table_oid, [zero_name, one_name], engine, metadata=metadata)
+    assert get_column_name_from_attnum(table_oid, columns_attnum[0], engine, metadata=metadata) == zero_name
+    assert get_column_name_from_attnum(table_oid, columns_attnum[1], engine, metadata=metadata) == one_name
 
 
 @pytest.mark.parametrize("filler", [True, False])
@@ -69,8 +72,9 @@ def test_get_column_default(engine_with_schema, filler, col_type):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
-    default = get_column_default(table_oid, column_attnum, engine)
+    metadata = get_empty_metadata()
+    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine, metadata=metadata)
+    default = get_column_default(table_oid, column_attnum, engine, metadata=metadata)
     created_default = get_default(engine, table)
     assert default == expt_default
     assert default == created_default
@@ -94,10 +98,11 @@ def test_get_column_generated_default(engine_with_schema, col):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    column_attnum = get_column_attnum_from_name(table_oid, col.name, engine)
+    metadata = get_empty_metadata()
+    column_attnum = get_column_attnum_from_name(table_oid, col.name, engine, metadata=metadata)
     with warnings.catch_warnings(), pytest.raises(DynamicDefaultWarning):
         warnings.filterwarnings("error", category=DynamicDefaultWarning)
-        get_column_default(table_oid, column_attnum, engine)
+        get_column_default(table_oid, column_attnum, engine, metadata=metadata)
 
 
 default_expression_test_list = [

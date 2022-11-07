@@ -21,10 +21,8 @@ interface FormattedNumberDisplayOptions {
   /**
    * - "true": display grouping separators even if the locale prefers otherwise.
    * - "false": do not display grouping separators.
-   * - "auto": display grouping separators based on the locale preference, which
-   *   may also be dependent on the currency"
    */
-  use_grouping: 'true' | 'false' | 'auto';
+  use_grouping: 'true' | 'false';
 
   minimum_fraction_digits: number | null;
   maximum_fraction_digits: number | null;
@@ -141,7 +139,7 @@ export interface PostgresMoneyColumn extends Column {
 
 export type MoneyColumn = MathesarMoneyColumn | PostgresMoneyColumn;
 
-// TODO: Remove specification DB types here
+// TODO: Remove specification of DB types here
 export interface NumberColumn extends Column {
   type:
     | 'BIGINT'
@@ -156,4 +154,8 @@ export interface NumberColumn extends Column {
     | 'SMALLSERIAL';
   type_options: Partial<NumberTypeOptions> | null;
   display_options: Partial<NumberDisplayOptions> | null;
+}
+
+export interface ArrayTypeOptions extends Record<string, unknown> {
+  item_type: string;
 }

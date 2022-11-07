@@ -5,8 +5,8 @@
     filterCombinations,
     defaultFilterCombination,
     getTabularDataStoreFromContext,
+    type FilterEntry,
   } from '@mathesar/stores/table-data';
-  import type { FilterEntry } from '@mathesar/stores/table-data/types';
   import type { FilterCombination } from '@mathesar/api/tables/records';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
 
@@ -17,7 +17,7 @@
   }>();
 
   const tabularData = getTabularDataStoreFromContext();
-  $: ({ processedColumns } = $tabularData);
+  $: ({ processedColumns, recordsData } = $tabularData);
 
   export let entries: FilterEntry[];
   export let filterCombination: FilterCombination = defaultFilterCombination;
@@ -34,6 +34,7 @@
     numberOfFilters={entries.length}
     on:removeFilter={() => dispatch('remove', index)}
     on:update
+    recordSummaryStore={recordsData.recordSummaries}
   >
     {#if index === 0}
       <InputGroupText>where</InputGroupText>

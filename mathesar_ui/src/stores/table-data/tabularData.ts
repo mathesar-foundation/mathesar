@@ -1,26 +1,44 @@
 import { getContext, setContext } from 'svelte';
-import type { Readable, Writable } from 'svelte/store';
-import { derived, writable } from 'svelte/store';
+import {
+  derived,
+  writable,
+  get,
+  type Readable,
+  type Writable,
+} from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/utils/api';
+import type { Column } from '@mathesar/api/tables/columns';
+import { SheetSelection } from '@mathesar/components/sheet';
 import { Meta } from './meta';
-import type { ColumnsData } from './columns';
 import { ColumnsDataStore } from './columns';
-import type { TableRecordsData } from './records';
+import type { RecordRow, TableRecordsData } from './records';
 import { RecordsData } from './records';
 import { Display } from './display';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
-import type { ProcessedColumnsStore } from './processedColumns';
+import type {
+  ProcessedColumn,
+  ProcessedColumnsStore,
+} from './processedColumns';
 import { processColumn } from './processedColumns';
-import { Selection } from './selection';
 
 export interface TabularDataProps {
   id: DBObjectEntry['id'];
   abstractTypesMap: AbstractTypesMap;
   meta?: Meta;
+  /**
+   * Keys are columns ids. Values are cell values.
+   *
+   * Setting an entry in this Map will apply a filter condition which the user
+   * cannot see or remove. And the column used for the filter condition will be
+   * removed from view.
+   */
+  contextualFilters?: Map<number, number | string>;
 }
+
+export type TabularDataSelection = SheetSelection<RecordRow, ProcessedColumn>;
 
 export class TabularData {
   id: DBObjectEntry['id'];
@@ -39,38 +57,40 @@ export class TabularData {
 
   isLoading: Readable<boolean>;
 
-  selection: Selection;
+  selection: TabularDataSelection;
 
   constructor(props: TabularDataProps) {
+    const contextualFilters =
+      props.contextualFilters ?? new Map<number, string | number>();
     this.id = props.id;
     this.meta = props.meta ?? new Meta();
-    this.columnsDataStore = new ColumnsDataStore(this.id);
+    this.columnsDataStore = new ColumnsDataStore({
+      parentId: this.id,
+      hiddenColumns: contextualFilters.keys(),
+    });
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
       this.id,
       this.meta,
       this.columnsDataStore,
+      contextualFilters,
     );
     this.display = new Display(
       this.meta,
       this.columnsDataStore,
       this.recordsData,
     );
-    this.selection = new Selection(
-      this.columnsDataStore,
-      this.recordsData,
-      this.display,
-    );
 
     this.processedColumns = derived(
-      [this.columnsDataStore, this.constraintsDataStore],
-      ([columnsData, constraintsData]) =>
+      [this.columnsDataStore.columns, this.constraintsDataStore],
+      ([columns, constraintsData]) =>
         new Map(
-          columnsData.columns.map((column) => [
+          columns.map((column, columnIndex) => [
             column.id,
             processColumn({
               tableId: this.id,
               column,
+              columnIndex,
               constraints: constraintsData.constraints,
               abstractTypeMap: props.abstractTypesMap,
             }),
@@ -78,14 +98,35 @@ export class TabularData {
         ),
     );
 
+    this.selection = new SheetSelection({
+      getColumns: () => [...get(this.processedColumns).values()],
+      getRows: () => this.recordsData.getRecordRows(),
+      getMaxSelectionRowIndex: () => {
+        const totalCount = get(this.recordsData.totalCount) ?? 0;
+        const savedRecords = get(this.recordsData.savedRecords);
+        const newRecords = get(this.recordsData.newRecords);
+        const pagination = get(this.meta.pagination);
+        const { offset } = pagination;
+        const pageSize = pagination.size;
+        /**
+         * We are not subtracting 1 from the below maxRowIndex calculation
+         * inorder to account for the add-new-record placeholder row
+         */
+        return (
+          Math.min(pageSize, totalCount - offset, savedRecords.length) +
+          newRecords.length
+        );
+      },
+    });
+
     this.isLoading = derived(
       [
-        this.columnsDataStore,
+        this.columnsDataStore.fetchStatus,
         this.constraintsDataStore,
         this.recordsData.state,
       ],
-      ([columnsData, constraintsData, recordsDataState]) =>
-        columnsData.state === States.Loading ||
+      ([columnsStatus, constraintsData, recordsDataState]) =>
+        columnsStatus?.state === 'processing' ||
         constraintsData.state === States.Loading ||
         recordsDataState === States.Loading,
     );
@@ -108,7 +149,7 @@ export class TabularData {
 
   refresh(): Promise<
     [
-      ColumnsData | undefined,
+      Column[] | undefined,
       TableRecordsData | undefined,
       ConstraintsData | undefined,
     ]

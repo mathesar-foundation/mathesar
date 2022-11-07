@@ -1,20 +1,22 @@
 <script lang="ts">
   import { SheetPositionableCell } from '@mathesar/components/sheet';
-  import type { Grouping, Group } from '@mathesar/stores/table-data/records';
-  import type { Row, ProcessedColumn } from '@mathesar/stores/table-data/types';
-  import CellValue from '@mathesar/components/CellValue.svelte';
-  import CellBackground from './CellBackground.svelte';
+  import type {
+    RecordGrouping,
+    RecordGroup,
+    GroupHeaderRow,
+    ProcessedColumn,
+  } from '@mathesar/stores/table-data';
+  import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
-  export let row: Row;
-  export let grouping: Grouping;
-  export let group: Group;
+  export let row: GroupHeaderRow;
+  export let grouping: RecordGrouping;
+  export let group: RecordGroup;
+  export let recordSummariesForSheet: RecordSummariesForSheet;
 
   $: ({ columnIds, preprocIds } = grouping);
-
-  $: cellValue = (columnId: number) =>
-    row.groupValues ? row.groupValues[columnId] : undefined;
-
   $: preProcFunctionsForColumn = columnIds.map(
     (columnId) => processedColumnsMap.get(columnId)?.preprocFunctions ?? [],
   );
@@ -33,20 +35,16 @@
   let:htmlAttributes
   let:style
 >
-  <div {...htmlAttributes} {style} class="groupheader">
+  <div {...htmlAttributes} {style} class="group-header">
     <CellBackground color="var(--cell-bg-color-header)" />
     {#each columnIds as columnId, index (columnId)}
-      <span class="tag">
-        <span class="name">
-          {processedColumnsMap.get(columnId)?.column.name ?? ''}
-          {#if preprocNames[index]}
-            <span class="preproc">
-              {preprocNames[index]}
-            </span>
-          {/if}
-        </span>
-        <span class="value"><CellValue value={cellValue(columnId)} /></span>
-      </span>
+      <GroupHeaderCellValue
+        {processedColumnsMap}
+        cellValue={row.groupValues ? row.groupValues[columnId] : undefined}
+        {recordSummariesForSheet}
+        {columnId}
+        preprocName={preprocNames[index]}
+      />
     {/each}
     <span class="tag count">
       <span class="name">Count</span>
@@ -55,36 +53,10 @@
   </div>
 </SheetPositionableCell>
 
-<style lang="scss">
-  [data-sheet-element='cell'].groupheader {
+<style>
+  .group-header {
     padding: 0.5rem 0.4rem;
     align-items: end;
     gap: 1rem;
-
-    .tag {
-      overflow: hidden;
-      display: flex;
-      align-items: start;
-      flex-direction: column;
-      gap: 0.2rem;
-
-      .name {
-        font-size: var(--text-size-x-small);
-        color: var(--color-text-muted);
-        display: flex;
-        align-items: center;
-        gap: 0.14rem;
-
-        .preproc {
-          font-size: var(--text-size-xx-small);
-          border: 1px solid var(--color-text-muted);
-          padding: 0rem 0.3rem;
-          border-radius: 5rem;
-        }
-      }
-      .value {
-        font-weight: 500;
-      }
-    }
   }
 </style>

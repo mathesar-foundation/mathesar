@@ -10,6 +10,8 @@ from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import PostgresType
 from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
+from db.metadata import get_empty_metadata
+from mathesar.state import reset_reflection
 
 
 @pytest.fixture
@@ -212,6 +214,13 @@ def column_test_table(patent_schema):
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    metadata = get_empty_metadata()
+    for sa_column in column_list_in:
+        attnum = get_column_attnum_from_name(db_table_oid, sa_column.name, engine, metadata=metadata)
+        ServiceLayerColumn.current_objects.get_or_create(
+            table=table,
+            attnum=attnum,
+        )
     return table
 
 
@@ -245,7 +254,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     service_columns = []
     for column_data in zip(column_list_in, column_data_list):
-        attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
+        attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine, metadata=get_empty_metadata())
         display_options = column_data[1].get('display_options', None)
         first_column = ServiceLayerColumn.current_objects.get_or_create(
             table=table,
@@ -254,3 +263,13 @@ def column_test_table_with_service_layer_options(patent_schema):
         )[0]
         service_columns.append(first_column)
     return table, service_columns
+
+
+@pytest.fixture
+def library_ma_tables(db_table_to_dj_table, library_db_tables):
+    reset_reflection()
+    return {
+        table_name: db_table_to_dj_table(db_table)
+        for table_name, db_table
+        in library_db_tables.items()
+    }

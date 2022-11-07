@@ -9,8 +9,8 @@
     SheetHeader,
     SheetCell,
     SheetCellResizer,
+    isColumnSelected,
   } from '@mathesar/components/sheet';
-  import { isColumnSelected } from '@mathesar/stores/table-data/selection';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
@@ -19,6 +19,7 @@
   export let hasNewColumnButton = false;
 
   $: ({ columnsDataStore, selection, processedColumns } = $tabularData);
+  $: ({ columns } = columnsDataStore);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
   function addColumn(e: CustomEvent<Partial<Column>>) {
@@ -45,10 +46,9 @@
           isSelected={isColumnSelected(
             $selectedCells,
             $columnsSelectedWhenTheTableIsEmpty,
-            processedColumn.column,
+            processedColumn,
           )}
-          on:click={() =>
-            selection.toggleColumnSelection(processedColumn.column)}
+          on:click={() => selection.toggleColumnSelection(processedColumn)}
         />
         <SheetCellResizer columnIdentifierKey={columnId} />
       </div>
@@ -62,10 +62,7 @@
       let:style
     >
       <div {...htmlAttributes} {style}>
-        <NewColumnCell
-          columns={$columnsDataStore.columns}
-          on:addColumn={addColumn}
-        />
+        <NewColumnCell columns={$columns} on:addColumn={addColumn} />
       </div>
     </SheetCell>
   {/if}

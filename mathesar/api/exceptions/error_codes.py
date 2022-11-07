@@ -38,6 +38,7 @@ class ErrorCodes(Enum):
     # Validation Error
     ColumnSizeMismatch = 4401
     DistinctColumnNameRequired = 4402
+    MappingsNotFound = 4417
     MultipleDataFiles = 4400
     MoneyDisplayOptionConflict = 4407
     UnsupportedAlter = 4403
@@ -51,3 +52,5 @@ class ErrorCodes(Enum):
     IncompatibleFractionDigitValues = 4410
     UnsupportedConstraint = 4411
     ConstraintColumnEmpty = 4412
+    InvalidValueType = 4415
+    DictHasBadKeys = 4416

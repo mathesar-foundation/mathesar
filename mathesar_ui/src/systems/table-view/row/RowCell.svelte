@@ -7,53 +7,45 @@
     WritableMap,
   } from '@mathesar-component-library';
   import {
+    rowHasNewRecord,
+    type RecordRow,
+    type RecordsData,
+    type CellKey,
+    type ProcessedColumn,
+    type TabularDataSelection,
+  } from '@mathesar/stores/table-data';
+  import {
     isCellActive,
     scrollBasedOnActiveCell,
-  } from '@mathesar/stores/table-data';
-  import type {
-    Row,
-    Display,
-    RecordsData,
-    CellKey,
-  } from '@mathesar/stores/table-data/types';
+    isCellSelected,
+  } from '@mathesar/components/sheet';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
   import { SheetCell } from '@mathesar/components/sheet';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
-  import type { DataForRecordSummaryInFkCell } from '@mathesar/utils/recordSummaryTypes';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import {
-    isCellSelected,
-    Selection,
-  } from '@mathesar/stores/table-data/selection';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import CellErrors from './CellErrors.svelte';
-  import CellBackground from './CellBackground.svelte';
-  import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let recordsData: RecordsData;
-  export let display: Display;
-  export let selection: Selection;
-  export let row: Row;
-  export let rowIsSelected = false;
-  export let rowIsProcessing = false;
+  export let selection: TabularDataSelection;
+  export let row: RecordRow;
   export let rowHasErrors = false;
   export let key: CellKey;
   export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
-  export let dataForRecordSummaryInFkCell:
-    | DataForRecordSummaryInFkCell
-    | undefined = undefined;
 
   $: recordsDataState = recordsData.state;
+  $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
-  $: ({ activeCell } = display);
-  $: isActive = $activeCell && isCellActive($activeCell, row, column);
-  $: ({ selectedCells } = selection);
+  $: columnId = column.id;
+  $: ({ activeCell, selectedCells } = selection);
+  $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
 
   /**
    * The name indicates that this boolean is only true when more than one cell
@@ -72,7 +64,8 @@
    * [1]: https://github.com/centerofci/mathesar/issues/1534
    */
   $: isSelectedInRange =
-    isCellSelected($selectedCells, row, column) && $selectedCells.size > 1;
+    isCellSelected($selectedCells, row, processedColumn) &&
+    $selectedCells.size > 1;
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -98,7 +91,7 @@
     event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
   ) {
     const { originalEvent } = event.detail;
-    const type = display.handleKeyEventsOnActiveCell(originalEvent);
+    const type = selection.handleKeyEventsOnActiveCell(originalEvent);
     if (type) {
       originalEvent.stopPropagation();
       originalEvent.preventDefault();
@@ -112,7 +105,7 @@
       return;
     }
     value = newValue;
-    const updatedRow = row.isNew
+    const updatedRow = rowHasNewRecord(row)
       ? await recordsData.createOrUpdateRecord(row, column)
       : await recordsData.updateCell(row, column);
     value = updatedRow.record?.[column.id] ?? value;
@@ -142,11 +135,7 @@
       white background better communicates that the user can edit the active
       cell.
     -->
-      <RowCellBackgrounds
-        isSelected={rowIsSelected}
-        isProcessing={rowIsProcessing}
-        hasErrors={rowHasErrors}
-      />
+      <RowCellBackgrounds hasErrors={rowHasErrors} />
     {/if}
 
     <CellFabric
@@ -154,21 +143,29 @@
       {isActive}
       {isSelectedInRange}
       {value}
-      {dataForRecordSummaryInFkCell}
+      recordSummary={$recordSummaries
+        .get(String(column.id))
+        ?.get(String(value))}
+      setRecordSummary={(recordId, recordSummary) =>
+        recordSummaries.addBespokeRecordSummary({
+          columnId: String(columnId),
+          recordId,
+          recordSummary,
+        })}
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}
       on:activate={() => {
-        display.selectCell(row, column);
+        selection.activateCell(row, processedColumn);
         // Activate event initaites the selection process
-        selection.onStartSelection(row, column);
+        selection.onStartSelection(row, processedColumn);
       }}
       on:update={valueUpdated}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
       on:mouseenter={() => {
         // This enables the click + drag to
         // select multiple cells
-        selection.onMouseEnterWhileSelection(row, column);
+        selection.onMouseEnterWhileSelection(row, processedColumn);
       }}
     />
     <ContextMenu>

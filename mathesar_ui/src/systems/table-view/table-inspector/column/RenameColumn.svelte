@@ -1,12 +1,16 @@
 <script lang="ts">
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
-  import type { ColumnsDataStore } from '@mathesar/stores/table-data';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
+  import type {
+    ColumnsDataStore,
+    ProcessedColumn,
+  } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
 
   export let column: ProcessedColumn;
   export let columnsDataStore: ColumnsDataStore;
+
+  $: ({ columns } = columnsDataStore);
 
   function getValidationErrors(newName: string): string[] {
     if (newName === column.column.name) {
@@ -15,7 +19,7 @@
     if (!newName) {
       return ['Name cannot be empty.'];
     }
-    const columnNames = $columnsDataStore.columns.map((c) => c.name);
+    const columnNames = $columns.map((c) => c.name);
     if (columnNames.includes(newName)) {
       return ['A column with that name already exists.'];
     }

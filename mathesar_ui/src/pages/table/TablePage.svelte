@@ -4,13 +4,12 @@
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import { Meta } from '@mathesar/stores/table-data';
   import {
     setTabularDataStoreInContext,
     TabularData,
-  } from '@mathesar/stores/table-data/tabularData';
+    Meta,
+  } from '@mathesar/stores/table-data';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
@@ -40,22 +39,13 @@
   }
   $: metaSerialization = tabularData.meta.serialization;
   $: handleMetaSerializationChange($metaSerialization);
-
-  function handleDeleteTable() {
-    router.goto(getSchemaPageUrl(database.name, schema.id));
-  }
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(table.name)}</title></svelte:head>
 
 <LayoutWithHeader fitViewport>
   <div class="table-page">
-    <ActionsPane
-      {database}
-      {schema}
-      {table}
-      on:deleteTable={handleDeleteTable}
-    />
+    <ActionsPane {database} {schema} {table} />
     <TableView usesVirtualList allowsDdlOperations />
   </div>
 </LayoutWithHeader>

@@ -1,15 +1,18 @@
 <script lang="ts">
   import { Icon, iconLoading } from '@mathesar-component-library';
   import { iconAddNew } from '@mathesar/icons';
-  import { getRowKey } from '@mathesar/stores/table-data';
-  import type {
-    Meta,
-    RecordsData,
-    Row,
-  } from '@mathesar/stores/table-data/types';
-  import CellBackground from './CellBackground.svelte';
+  import {
+    getRowKey,
+    isNewRecordRow,
+    isPlaceholderRow,
+    rowHasRecord,
+    type Meta,
+    type RecordsData,
+    type Row,
+  } from '@mathesar/stores/table-data';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import CellErrors from './CellErrors.svelte';
-  import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let primaryKeyColumnId: number | undefined = undefined;
   export let row: Row;
@@ -29,16 +32,16 @@
 <CellBackground color="var(--cell-bg-color-header)" />
 <RowCellBackgrounds {isSelected} {hasErrors} />
 <div class="control">
-  {#if row.isAddPlaceholder}
+  {#if isPlaceholderRow(row)}
     <Icon {...iconAddNew} />
-  {:else if typeof row.rowIndex === 'number'}
+  {:else if rowHasRecord(row)}
     <span class="number">
       {row.rowIndex +
-        (row.isNew
+        (isNewRecordRow(row)
           ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
           : $pagination.offset) +
         1}
-      {#if row.isNew}
+      {#if isNewRecordRow(row)}
         *
       {/if}
     </span>

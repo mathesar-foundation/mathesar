@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button, Icon } from '@mathesar/component-library';
   import {
-    iconDelete,
+    iconDeleteMajor,
     iconMoveColumnsToNewLinkedTable,
     iconMoveColumnsToExistingLinkedTable,
   } from '@mathesar/icons';
@@ -10,7 +10,7 @@
   import type {
     ColumnsDataStore,
     ProcessedColumn,
-  } from '@mathesar/stores/table-data/types';
+  } from '@mathesar/stores/table-data';
   import ExtractColumnsModal from './column-extraction/ExtractColumnsModal.svelte';
   import { ExtractColumnsModalController } from './column-extraction/ExtractColumnsModalController';
 
@@ -56,7 +56,7 @@
       appearance="plain"
       on:click={() => column && handleDeleteColumn(column)}
     >
-      <Icon {...iconDelete} />
+      <Icon {...iconDeleteMajor} />
       <span>Delete Column</span>
     </Button>
   {/if}

@@ -1,13 +1,15 @@
 <script lang="ts">
   import { Button, Icon, iconLoading } from '@mathesar/component-library';
-  import { iconDelete } from '@mathesar/icons';
-  import type { Selection } from '@mathesar/stores/table-data/selection';
-  import type { RecordsData } from '@mathesar/stores/table-data/types';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import type {
+    RecordsData,
+    TabularDataSelection,
+  } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
 
-  export let selectedRoweKey: number[];
+  export let selectedRowIndices: number[];
   export let recordsData: RecordsData;
-  export let selection: Selection;
+  export let selection: TabularDataSelection;
 
   let isDeleting = false;
 
@@ -16,7 +18,7 @@
       try {
         isDeleting = true;
         selection.freezeSelection = true;
-        await recordsData.deleteSelected(selectedRoweKey);
+        await recordsData.deleteSelected(selectedRowIndices);
         selection.resetSelection();
       } catch (e) {
         toast.fromError(e);
@@ -30,9 +32,9 @@
 
 <div class="actions-container">
   <Button appearance="ghost" on:click={handleDeleteRecords}>
-    <Icon {...isDeleting ? iconLoading : iconDelete} />
+    <Icon {...isDeleting ? iconLoading : iconDeleteMajor} />
     <span>
-      Delete {selectedRoweKey.length} record{selectedRoweKey.length > 1
+      Delete {selectedRowIndices.length} record{selectedRowIndices.length > 1
         ? 's'
         : ''}
     </span>
