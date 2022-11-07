@@ -21,7 +21,6 @@
   import { toast } from '@mathesar/stores/toast';
   import TextArea from '@mathesar/component-library/text-area/TextArea.svelte';
 
-  export let helpText = '';
   export let saveButtonLabel = 'Save';
   export let controller: ModalController;
   export let getNameValidationErrors: (name: string) => string[];
