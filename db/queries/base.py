@@ -147,6 +147,19 @@ class DBQuery:
         ).select_from(from_clause)
         return stmt.cte()
 
+    def get_input_alias_for_output_alias(self, output_alias):
+        return self.map_of_output_alias_to_input_alias.get(output_alias)
+
+    # TODO consider caching; not urgent, since redundant calls don't trigger IO, it seems
+    @property
+    def map_of_output_alias_to_input_alias(self):
+        m = dict()
+        transforms = self.transformations
+        if transforms:
+            for transform in transforms:
+                m = m | transform.map_of_output_alias_to_input_alias
+        return m
+
 
 def _guarantee_jp_path_tuples(jp_path):
     if jp_path is not None:

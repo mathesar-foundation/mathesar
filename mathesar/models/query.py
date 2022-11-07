@@ -4,7 +4,6 @@ from django.utils.functional import cached_property
 
 from db.queries.base import DBQuery, InitialColumn
 from db.transforms.operations.deserialize import deserialize_transformation
-from db.transforms.base import Summarize as SummarizeTransform
 
 from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
@@ -202,38 +201,32 @@ class UIQuery(BaseModel, Relation):
         alias = sa_col.name
         initial_db_column = self._get_db_initial_column_by_alias(alias)
         is_initial_column = initial_db_column is not None
-        output = {
-            'alias': alias,
-            'display_name': self._get_display_name_for_alias(alias),
-            'type': sa_col.db_type.id,
-            'type_options': sa_col.type_options,
-            'display_options': self._get_display_options_for_alias(alias),
-            'is_initial_column': is_initial_column,
-        }
+        output = dict(
+            alias=alias,
+            display_name=self._get_display_name_for_alias(alias),
+            type=sa_col.db_type.id,
+            type_options=sa_col.type_options,
+            display_options=self._get_display_options_for_alias(alias),
+            is_initial_column=is_initial_column,
+        )
+        optionals = dict(
+            input_column_name=None,
+            input_table_name=None,
+            input_alias=None,
+        )
+        output = output | optionals
         if is_initial_column:
             initial_dj_column = _get_dj_column_for_initial_db_column(initial_db_column)
-            output = output | {
-                'input_column_name': initial_dj_column.name,
-                'input_table_name': initial_dj_column.table.name,
-            }
+            output = output | dict(
+                input_column_name=initial_dj_column.name,
+                input_table_name=initial_dj_column.table.name,
+            )
         else:
-            # NOTE currently only summarizations can "create" aliases; once that changes, this
-            # section should become more general.
-            summarization_input_alias = self._get_summarization_input_alias_for_output_alias(alias)
-            is_summarization_output_column = summarization_input_alias is not None
-            if is_summarization_output_column:
-                output = output | {
-                    'is_summarization_output_column': is_summarization_output_column,
-                    'summarization_input_alias': summarization_input_alias,
-                }
+            input_alias = self.db_query.get_input_alias_for_output_alias(alias)
+            output = output | dict(
+                input_alias=input_alias
+            )
         return output
-
-    def _get_summarization_input_alias_for_output_alias(self, output_alias):
-        db_transforms = self._db_transformations
-        if db_transforms:
-            for db_transform in db_transforms:
-                if isinstance(db_transform, SummarizeTransform):
-                    return db_transform.get_input_alias_for_output_alias(output_alias)
 
     def _get_db_initial_column_by_alias(self, alias):
         for db_initial_column in self._db_initial_columns:
