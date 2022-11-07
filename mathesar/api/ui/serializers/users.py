@@ -59,6 +59,7 @@ class DatabaseRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
         fields = ['id', 'user', 'database', 'role']
 
     # Restrict the list of databases to which the user has access to create a database role
+    # Refer https://rsinger86.github.io/drf-access-policy/policy_reuse/ for the usage of `PermittedPkRelatedField`
     database = PermittedPkRelatedField(
         access_policy=DatabaseAccessPolicy,
         queryset=Database.current_objects.all()
