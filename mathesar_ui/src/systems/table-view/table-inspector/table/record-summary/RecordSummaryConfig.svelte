@@ -83,7 +83,10 @@
 {#if nonconformantColumns.length}
   <Alert>
     <div class="nonconformant-columns">
-      <p>Because some column names contain curly braces:</p>
+      <p>
+        Because some column names contain curly braces, the following numerical
+        values are used in place of column names:
+      </p>
       <ul>
         {#each nonconformantColumns as column}
           <li>
