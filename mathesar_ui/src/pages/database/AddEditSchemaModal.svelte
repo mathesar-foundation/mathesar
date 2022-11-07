@@ -14,7 +14,6 @@
   export let controller: ModalController;
   export let schema: SchemaEntry | undefined = undefined;
 
-
   function nameIsDuplicate(name: string) {
     // Handling the condition when the new name is equal to the current name
     // But the user has made sone key down events
@@ -59,13 +58,11 @@
 >
   <svelte:fragment slot="helpText">
     {#if !schema}
-      <Alert appearance="info">
-        <slot slot="content">
-          Name your schema to reflect its purpose. For example, your personal
-          financial schema may be called "Personal Finances" and your movie
-          collection "Movies." Add a description to your schema to remember what
-          it's for.
-        </slot>
+      <Alert>
+        Name your schema to reflect its purpose. For example, your personal
+        financial schema may be called "Personal Finances" and your movie
+        collection "Movies." Add a description to your schema to remember what
+        it's for.
       </Alert>
     {/if}
   </svelte:fragment>

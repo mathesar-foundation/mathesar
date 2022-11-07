@@ -10,7 +10,6 @@
    */
   import { tick } from 'svelte';
   import {
-    Alert,
     LabeledInput,
     type ModalController,
   } from '@mathesar-component-library';
