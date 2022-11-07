@@ -16,7 +16,7 @@
 
 <div class={classes}>
   <Icon {...icon} />
-  <span class="content">
-    <slot name="content" />
-  </span>
+  <div class="content">
+    <slot />
+  </div>
 </div>
