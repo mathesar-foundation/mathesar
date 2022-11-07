@@ -375,11 +375,11 @@ export default class SheetSelection<
   }
 
   selectColumns(columns: [Column]): void {
-    const selected_rows = this.getSelectedUniqueRowsId(new ImmutableSet(this.selectedCells.getValues()));
+    const selectedRows = this.getSelectedUniqueRowsId(new ImmutableSet(this.selectedCells.getValues()));
     const cells: Cell<Row, Column>[] = [];
     columns.forEach((column) => {
-      selected_rows.forEach((row_index) => {
-        let row = this.getRows()[row_index]
+      selectedRows.forEach((rowIndex) => {
+        const row = this.getRows()[rowIndex];
         cells.push([row, column]);
       });
     });
