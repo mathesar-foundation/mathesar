@@ -42,7 +42,3 @@ class ExclusionError(Exception):
 
 class ColumnMappingsNotFound(Exception):
     pass
-
-
-class InvalidStringTruncation(Exception):
-    pass

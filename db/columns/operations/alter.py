@@ -5,7 +5,7 @@ from sqlalchemy.exc import DataError, InternalError, ProgrammingError
 from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue, StringDataRightTruncation, RaiseException, SyntaxError
 
 from db.columns.defaults import NAME, NULLABLE
-from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError, InvalidStringTruncation
+from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
 )
@@ -106,7 +106,7 @@ def retype_column(
         elif type(e.orig) == InvalidTextRepresentation:
             raise InvalidTypeError(column_name, new_type)
         elif type(e.orig) == StringDataRightTruncation:
-            raise InvalidStringTruncation
+            raise e.orig
         else:
             raise e.orig
     except InternalError as e:

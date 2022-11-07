@@ -1,5 +1,5 @@
 import warnings
-from psycopg2.errors import DuplicateColumn, NotNullViolation
+from psycopg2.errors import DuplicateColumn, NotNullViolation, StringDataRightTruncation
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -12,7 +12,7 @@ from mathesar.api.exceptions.database_exceptions import (
 )
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.columns.exceptions import (
-    DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError, InvalidStringTruncation
+    DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 )
 from db.columns.operations.select import get_column_attnum_from_name
 from db.types.exceptions import InvalidTypeParameters
@@ -92,9 +92,6 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except InvalidTypeError as e:
                 raise database_api_exceptions.InvalidTypeCastAPIException(
                     e,
-                    message=f'{e.column_name} cannot be casted to {e.new_type}.'
-                    if e.column_name and e.new_type
-                    else 'This type casting is invalid.',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
         column_attnum = get_column_attnum_from_name(
@@ -186,10 +183,10 @@ class ColumnViewSet(viewsets.ModelViewSet):
                     )
                 else:
                     raise base_api_exceptions.MathesarAPIException(e)
-            except InvalidStringTruncation as e:
+            except StringDataRightTruncation as e:
                 raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,
-                    message='Invalid string truncation length.',
+                    message='The requested string length is too short for the data in the selected column',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
             except Exception as e:

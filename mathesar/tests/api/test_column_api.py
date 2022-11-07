@@ -481,7 +481,7 @@ def test_column_update_invalid_type(create_patents_table, client):
     assert response.status_code == 400
     response_json = response.json()
     assert response_json[0]['code'] == ErrorCodes.InvalidTypeCast.value
-    assert response_json[0]['message'] == f"{columns[column_index]['name']} cannot be casted to bigint."
+    assert response_json[0]['message'] == f"{columns[column_index]['name']} cannot be cast to bigint."
 
 
 def test_column_update_invalid_nullable(create_patents_table, client):
