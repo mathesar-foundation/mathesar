@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { TabContainer } from '@mathesar-component-library';
   import { getAvailableName } from '@mathesar/utils/db';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import type QueryManager from '../QueryManager';
@@ -25,7 +26,24 @@
 </script>
 
 <div class="input-sidebar">
-  <ColumnSelectionPane {queryManager} on:add={(e) => addColumn(e.detail)} />
+  <div>Build your Exploration</div>
+  <div>
+    <TabContainer
+      tabs={[
+        { id: 'column-selection', label: 'Select Columns' },
+        { id: 'transform-results', label: 'Transform Results' },
+      ]}
+      fillWidth
+      let:activeTab
+    >
+      {#if activeTab.id === 'column-selection'}
+        <ColumnSelectionPane
+          {queryManager}
+          on:add={(e) => addColumn(e.detail)}
+        />
+      {/if}
+    </TabContainer>
+  </div>
 </div>
 
 <style lang="scss">

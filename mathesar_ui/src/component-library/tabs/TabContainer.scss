@@ -32,10 +32,9 @@
         white-space: nowrap;
         text-decoration: none;
         text-overflow: ellipsis;
-        display: flex;
-        align-items: center;
         overflow: hidden;
         color: inherit;
+        text-align: center;
       }
 
       &:hover {
@@ -72,6 +71,16 @@
       @media (hover: hover) {
         &:not(:hover) > button.remove {
           display: none;
+        }
+      }
+    }
+
+    &.fill-tab-width {
+      > li.tab {
+        flex-grow: 1;
+
+        > div {
+          width: 100%;
         }
       }
     }
