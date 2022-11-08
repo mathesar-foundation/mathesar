@@ -1,4 +1,4 @@
-export { default as DataExplorer } from './QueryBuilder.svelte';
+export { default as DataExplorer } from './DataExplorer.svelte';
 export { default as QueryManager } from './QueryManager';
 export { default as QueryRunner } from './QueryRunner';
 export { default as QueryModel } from './QueryModel';
