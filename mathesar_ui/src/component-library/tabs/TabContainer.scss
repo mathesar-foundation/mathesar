@@ -25,7 +25,8 @@
       overflow: hidden;
       transition: width 0.2s cubic-bezier(0.39, 0.575, 0.565, 1);
       border-radius: 2px 2px 0px 0px;
-      border-bottom: 4px solid transparent;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
 
       > div {
         padding: 0.5rem 1rem;
