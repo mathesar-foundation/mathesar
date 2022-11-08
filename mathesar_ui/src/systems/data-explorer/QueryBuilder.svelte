@@ -146,35 +146,39 @@
       {#if $query.isSaved()}
         <SaveStatusIndicator status={$state.saveState?.state} />
       {/if}
-      <!-- TODO: Change disabled condition to is_valid(query) -->
-      <SpinnerButton
-        label="Save"
-        disabled={!$query.base_table}
-        onClick={saveExistingOrCreateNew}
-      />
-      <InputGroup>
-        <Button
-          appearance="secondary"
-          disabled={!$state.isUndoPossible}
-          on:click={() => queryManager.undo()}
-        >
-          <Icon {...iconUndo} />
-          <span>Undo</span>
-        </Button>
-        <Button
-          appearance="secondary"
-          disabled={!$state.isRedoPossible}
-          on:click={() => queryManager.redo()}
-        >
-          <Icon {...iconRedo} />
-          <span>Redo</span>
-        </Button>
-      </InputGroup>
+      {#if currentTable}
+        <!-- TODO: Change disabled condition to is_valid(query) -->
+        <SpinnerButton
+          label="Save"
+          disabled={!$query.base_table}
+          onClick={saveExistingOrCreateNew}
+        />
+        <InputGroup>
+          <Button
+            appearance="secondary"
+            disabled={!$state.isUndoPossible}
+            on:click={() => queryManager.undo()}
+          >
+            <Icon {...iconUndo} />
+            <span>Undo</span>
+          </Button>
+          <Button
+            appearance="secondary"
+            disabled={!$state.isRedoPossible}
+            on:click={() => queryManager.redo()}
+          >
+            <Icon {...iconRedo} />
+            <span>Redo</span>
+          </Button>
+        </InputGroup>
+      {/if}
     </div>
   </div>
   <div class="content-pane">
     {#if !$query.base_table}
-      <div class="help-text">Please select a table to start exploring</div>
+      <div class="help-text">
+        Get started by selecting a table and adding columns
+      </div>
     {:else}
       <div class="input-sidebar">
         <ColumnSelectionPane
@@ -235,6 +239,7 @@
 
           > :global(.select) {
             min-width: 12rem;
+            font-size: var(--text-size-base);
           }
         }
       }
@@ -262,17 +267,25 @@
       left: 0;
       right: 0;
       overflow-x: auto;
+      background-color: var(--slate-100);
 
       .help-text {
-        padding: 1rem;
+        display: inline-block;
+        margin-top: 10rem;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: var(--text-size-x-large);
+        color: var(--slate-400);
       }
 
       .input-sidebar {
-        width: 20rem;
-        border-right: 1px solid var(--color-gray-medium);
+        --input-pane-width: 25.8rem;
+        width: var(--input-pane-width);
+        flex-basis: var(--input-pane-width);
+        border-right: 1px solid var(--slate-300);
+        background-color: var(--sand-100);
         flex-shrink: 0;
         flex-grow: 0;
-        flex-basis: 20rem;
         display: flex;
         flex-direction: column;
       }

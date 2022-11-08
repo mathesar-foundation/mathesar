@@ -35,7 +35,7 @@
 
 <style lang="scss">
   .placeholder {
-    display: block;
+    display: inherit;
     --icon-color: var(--slate-400);
     --name-color: var(--slate-400);
   }
