@@ -144,6 +144,7 @@ class Group(Transform):
 class Summarize(Transform):
     """
     "spec": {
+        "base_grouping_column": "col1",
         "grouping_expressions": [
             {
                 "input_alias": "col1",
@@ -167,13 +168,18 @@ class Summarize(Transform):
     """
     type = "summarize"
 
+    # Largely for testing; when generating specs, we want predictable output aliases.
+    default_group_output_alias_suffix = "_grouped"
+    default_agg_output_alias_suffix = "_agged"
+
     def apply_to_relation(self, relation):
 
         def _get_grouping_column(col_spec):
             preproc = col_spec.get('preproc')
             out_alias = col_spec.get('output_alias')
+            in_alias = col_spec['input_alias']
 
-            expr = relation.columns[col_spec['input_alias']]
+            expr = relation.columns[in_alias]
 
             if preproc is not None:
                 expr = get_db_function_subclass_by_id(preproc).to_sa_expression(expr)
@@ -184,7 +190,7 @@ class Summarize(Transform):
 
         grouping_expressions = [
             _get_grouping_column(col_spec)
-            for col_spec in self.spec.get("grouping_expressions", [])
+            for col_spec in self._grouping_col_specs
         ]
         aggregation_expressions = [
             (
@@ -192,7 +198,7 @@ class Summarize(Transform):
                 .to_sa_expression(relation.columns[col_spec['input_alias']])
                 .label(col_spec['output_alias'])
             )
-            for col_spec in self.spec["aggregation_expressions"]
+            for col_spec in self._aggregation_col_specs
         ]
 
         executable = (
@@ -200,6 +206,42 @@ class Summarize(Transform):
             .group_by(*grouping_expressions)
         )
         return _to_non_executable(executable)
+
+    @property
+    def base_grouping_column(self):
+        return self.spec['base_grouping_column']
+
+    @property
+    def grouping_input_aliases(self):
+        return [
+            col_spec['input_alias']
+            for col_spec
+            in self._grouping_col_specs
+        ]
+
+    @property
+    def aggregation_input_aliases(self):
+        return [
+            col_spec['input_alias']
+            for col_spec
+            in self._aggregation_col_specs
+        ]
+
+    @property
+    def _grouping_col_specs(self):
+        return [
+            col_spec
+            for col_spec
+            in self.spec.get("grouping_expressions", [])
+        ]
+
+    @property
+    def _aggregation_col_specs(self):
+        return [
+            col_spec
+            for col_spec
+            in self.spec.get("aggregation_expressions", [])
+        ]
 
 
 class SelectSubsetOfColumns(Transform):

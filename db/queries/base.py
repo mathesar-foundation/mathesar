@@ -158,6 +158,8 @@ def _guarantee_jp_path_tuples(jp_path):
 class InitialColumn:
     def __init__(
             self,
+            # TODO consider renaming to oid; reloid is not a term we use,
+            # even if it's what postgres uses; or use reloid more
             reloid,
             attnum,
             alias,
