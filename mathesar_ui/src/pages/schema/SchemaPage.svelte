@@ -103,6 +103,6 @@
 
 <style lang="scss">
   .tab-container {
-    padding-top: 1rem;
+    padding-top: 2rem;
   }
 </style>

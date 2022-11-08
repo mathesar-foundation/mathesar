@@ -29,13 +29,14 @@
 
 <aside class="input-sidebar">
   <div>Build your Exploration</div>
-  <div>
+  <div class="input-pane">
     <TabContainer
       tabs={[
         { id: 'column-selection', label: 'Select Columns' },
         { id: 'transform-results', label: 'Transform Results' },
       ]}
-      fillWidth
+      fillTabWidth
+      fillContainerHeight
       let:activeTab
     >
       {#if inputColumnsFetchState?.state === 'processing'}
@@ -67,5 +68,12 @@
     flex-grow: 0;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+
+    .input-pane {
+      flex-grow: 1;
+      overflow: hidden;
+      position: relative;
+    }
   }
 </style>
