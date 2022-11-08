@@ -1,13 +1,15 @@
 <script lang="ts">
-  import { TabContainer } from '@mathesar-component-library';
+  import { TabContainer, Spinner } from '@mathesar-component-library';
   import { getAvailableName } from '@mathesar/utils/db';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
+  import TransformationsPane from './transformations-pane/TransformationsPane.svelte';
   import type QueryManager from '../QueryManager';
   import type { ColumnWithLink } from '../utils';
 
   export let queryManager: QueryManager;
 
-  $: ({ query } = queryManager);
+  $: ({ query, state } = queryManager);
+  $: ({ inputColumnsFetchState } = $state);
 
   async function addColumn(column: ColumnWithLink) {
     const baseAlias = `${column.tableName}_${column.name}`;
@@ -25,7 +27,7 @@
   }
 </script>
 
-<div class="input-sidebar">
+<aside class="input-sidebar">
   <div>Build your Exploration</div>
   <div>
     <TabContainer
@@ -36,18 +38,26 @@
       fillWidth
       let:activeTab
     >
-      {#if activeTab.id === 'column-selection'}
-        <ColumnSelectionPane
-          {queryManager}
-          on:add={(e) => addColumn(e.detail)}
-        />
+      {#if inputColumnsFetchState?.state === 'processing'}
+        <Spinner />
+      {:else if inputColumnsFetchState?.state === 'success'}
+        {#if activeTab.id === 'column-selection'}
+          <ColumnSelectionPane
+            {queryManager}
+            on:add={(e) => addColumn(e.detail)}
+          />
+        {:else}
+          <TransformationsPane {queryManager} />
+        {/if}
+      {:else if inputColumnsFetchState?.state === 'failure'}
+        Failed to fetch column information
       {/if}
     </TabContainer>
   </div>
-</div>
+</aside>
 
 <style lang="scss">
-  .input-sidebar {
+  aside.input-sidebar {
     --input-pane-width: 25.8rem;
     width: var(--input-pane-width);
     flex-basis: var(--input-pane-width);

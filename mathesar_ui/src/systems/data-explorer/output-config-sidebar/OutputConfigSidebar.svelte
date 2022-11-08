@@ -9,7 +9,6 @@
   } from '@mathesar-component-library';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type QueryManager from '../QueryManager';
-  import TransformationsPane from './TransformationsPane.svelte';
 
   export let queryManager: QueryManager;
 
@@ -127,18 +126,6 @@
       {/if}
     </section>
   {/if}
-  <section>
-    <header>Transformations</header>
-    <div>
-      {#if inputColumnsFetchState?.state === 'processing'}
-        <Spinner />
-      {:else if inputColumnsFetchState?.state === 'success'}
-        <TransformationsPane {queryManager} />
-      {:else if inputColumnsFetchState?.state === 'failure'}
-        Failed to fetch column information
-      {/if}
-    </div>
-  </section>
 </aside>
 
 <style lang="scss">

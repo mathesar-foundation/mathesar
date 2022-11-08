@@ -12,11 +12,11 @@
     iconGrouping,
     iconDeleteMajor,
   } from '@mathesar/icons';
-  import type QueryManager from '../QueryManager';
+  import type QueryManager from '../../QueryManager';
   import FilterTransformation from './FilterTransformation.svelte';
-  import QueryFilterTransformationModel from '../QueryFilterTransformationModel';
+  import QueryFilterTransformationModel from '../../QueryFilterTransformationModel';
   import { calcAllowedColumnsPerTransformation } from './transformationUtils';
-  import QuerySummarizationTransformationModel from '../QuerySummarizationTransformationModel';
+  import QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
   import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
 
   export let queryManager: QueryManager;

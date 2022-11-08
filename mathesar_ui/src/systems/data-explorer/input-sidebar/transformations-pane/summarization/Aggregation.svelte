@@ -9,8 +9,8 @@
     getValueFromEvent,
   } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import type { QuerySummarizationAggregationEntry } from '../../QuerySummarizationTransformationModel';
-  import type { ProcessedQueryResultColumn } from '../../utils';
+  import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
+  import type { ProcessedQueryResultColumn } from '../../../utils';
 
   const dispatch = createEventDispatcher();
 
