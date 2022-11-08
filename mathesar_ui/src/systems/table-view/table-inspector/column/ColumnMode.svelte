@@ -6,7 +6,6 @@
   import ColumnActions from './ColumnActions.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ processedColumns, selection } = $tabularData);
