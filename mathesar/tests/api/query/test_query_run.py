@@ -77,7 +77,7 @@ def test_queries_run_minimal(create_patents_table, client):
     assert response.json() == expect_response_json
 
 
-def test_queries_run_deleted_table(create_patents_table, client):
+def test_queries_run_deleted_column(create_patents_table, client):
     base_table = create_patents_table(table_name='patent_query_run_minimal_table')
     to_be_deleted_column_id = base_table.get_column_by_name('Center').id
     initial_columns = [
