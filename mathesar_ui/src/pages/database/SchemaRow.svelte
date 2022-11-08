@@ -60,11 +60,9 @@
     <SchemaConstituentCounts {schema} />
 
     {#if isDefault}
-      <Alert appearance="info">
-        <slot slot="content">
-          Every PostgreSQL database includes the "public" schema. This protected
-          schema can be read by anybody who accesses the database.
-        </slot>
+      <Alert>
+        Every PostgreSQL database includes the "public" schema. This protected
+        schema can be read by anybody who accesses the database.
       </Alert>
     {/if}
   </div>
