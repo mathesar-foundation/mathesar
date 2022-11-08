@@ -10,7 +10,6 @@
    */
   import { tick } from 'svelte';
   import {
-    Alert,
     LabeledInput,
     type ModalController,
   } from '@mathesar-component-library';
@@ -22,7 +21,6 @@
   import { toast } from '@mathesar/stores/toast';
   import TextArea from '@mathesar/component-library/text-area/TextArea.svelte';
 
-  export let helpText = '';
   export let saveButtonLabel = 'Save';
   export let controller: ModalController;
   export let getNameValidationErrors: (name: string) => string[];
@@ -75,11 +73,8 @@
   <slot slot="title" name="title" {initialName} />
 
   <div class="form-container">
-    {#if helpText}
-      <Alert appearance="info">
-        <slot slot="content">{helpText}</slot>
-      </Alert>
-    {/if}
+    <slot name="helpText" />
+
     <div class="input-container">
       <LabeledInput label="Name" layout="stacked">
         <TextInput
