@@ -165,8 +165,12 @@
       </div>
     {:else}
       <InputSidebar {queryManager} />
-      <ResultPane queryRunner={queryManager} />
-      <OutputConfigSidebar {queryManager} />
+      {#if $query.initial_columns.length > 0}
+        <ResultPane queryRunner={queryManager} />
+        <OutputConfigSidebar {queryManager} />
+      {:else}
+        <div class="help-text">Get started by adding columns from the left</div>
+      {/if}
     {/if}
   </div>
 </div>

@@ -38,7 +38,8 @@
   </header>
   {#if !initial_columns.length}
     <div class="empty-state">
-      Please add a column from the column selection pane to get started.
+      This exploration does not contain any columns. Please edit it to add
+      columns.
     </div>
   {:else}
     <Results {queryRunner} />
