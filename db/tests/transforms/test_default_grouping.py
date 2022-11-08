@@ -16,6 +16,7 @@ def some_fixture(engine_with_academics):
     metadata = get_empty_metadata()
     acad_oid = get_oid_from_table('academics', schema, engine)
     acad_id_attnum = get_attnum(acad_oid, 'id', engine, metadata=metadata)
+    acad_name_attnum = get_attnum(acad_oid, 'name', engine, metadata=metadata)
     acad_insitution_attnum = get_attnum(acad_oid, 'institution', engine, metadata=metadata)
     uni_oid = get_oid_from_table('universities', schema, engine)
     uni_name_attnum = get_attnum(uni_oid, 'name', engine, metadata=metadata)
@@ -24,16 +25,23 @@ def some_fixture(engine_with_academics):
     arti_title_attnum = get_attnum(arti_oid, 'title', engine, metadata=metadata)
     arti_prim_author_attnum = get_attnum(arti_oid, 'primary_author', engine, metadata=metadata)
     initial_columns = [
+        # Serves as user-selected, unique-constrained column
         InitialColumn(
             acad_oid,
             acad_id_attnum,
-            alias='id',
+            alias='acad_id',
+        ),
+        # Serves as initial column on same table as user-selected column
+        InitialColumn(
+            acad_oid,
+            acad_name_attnum,
+            alias='acad_name',
         ),
         # Serves as a "single result" initial column
         InitialColumn(
             uni_oid,
             uni_name_attnum,
-            alias='institution_name',
+            alias='uni_name',
             jp_path=[
                 [
                     (acad_oid, acad_insitution_attnum),
@@ -45,7 +53,7 @@ def some_fixture(engine_with_academics):
         InitialColumn(
             arti_oid,
             arti_title_attnum,
-            alias='article_title',
+            alias='arti_title',
             jp_path=[
                 [
                     (acad_oid, acad_id_attnum),
@@ -79,6 +87,52 @@ def test_x(engine_with_academics):
     expected_agg_on_columns = set()
     assert group_agg_transform.group_by_columns == expected_group_by_columns
     assert group_agg_transform.agg_on_columns == expected_group_by_columns
+
+
+# A more complete implementation
+def __hypothetical_finish_specifying_group_agg_transform(db_query, ix_of_group_agg_transform):
+    group_agg_transform = db_query.transformations[ix_of_group_agg_transform]
+    assert type(group_agg_transform) is SummarizeTransform
+    # Each transformation in a query has different input aliases
+    input_aliases = db_query.get_input_aliases_for_transformation(ix_of_group_agg_transform)
+    input_aliases_not_in_group_agg = _get_input_aliases_not_in_group_agg(input_aliases, group_agg_transform)
+    if not input_aliases_not_in_group_agg:
+        # If all input aliases for this transform are mentioned in the group-agg transform spec, we
+        # consider it fully specified.
+        return group_agg_transform
+    # A group-agg transform has a base_grouping_column, or a user-selected input alias around
+    # which our suggestions will be based.
+    user_selected_alias = group_agg_transform.base_grouping_column
+    # When we'll have finished specifying this group-agg transform, each input alias not already
+    # mentioned in it, will be added either to its "group by set" or its "aggregate on set"
+    aliases_to_be_added_to_group_by = set()
+    aliases_to_be_added_to_agg_on = set()
+    # Most of logic in the rest of method is around whether or not we can add a given input alias
+    # to the "group by set"
+    can_we_add_to_group_by = (
+        _is_unique_constrained(db_query, user_selected_alias)
+        and _is_not_generated_via_aggregation(user_selected_alias)
+    )
+    if can_we_add_to_group_by:
+        oids_of_joinable_tables_with_single_results = \
+            _get_oids_of_joinable_tables_with_single_results(db_query, engine, metadata)
+        oid_of_user_selected_alias = _get_oid_of_alias(db_query, user_selected_alias)
+        for input_alias in input_aliases_not_in_group_agg:
+            # Any input alias that cannot be grouped by, will be aggregated on
+            if _should_group_by(
+                _get_oid_of_alias(input_alias),
+                oid_of_user_selected_alias,
+                oids_of_joinable_tables_with_single_results,
+            ):
+                alias_set_to_add_to = aliases_to_be_added_to_group_by
+            else:
+                alias_set_to_add_to = aliases_to_be_added_to_agg_on
+            alias_set_to_add_to.add(initial_column.alias)
+    else:
+        aliases_to_be_added_to_agg_on = input_aliases_not_in_group_agg
+    group_agg_transform = group_agg_transform.add_aliases_to_agg_on(aliases_to_be_added_to_agg_on)
+    group_agg_transform = group_agg_transform.add_aliases_to_group_by(aliases_to_be_added_to_group_by)
+    return group_agg_transform
 
 
 # TODO make a copy of group_agg_transform, instead of mutating it
@@ -119,8 +173,8 @@ def finish_specifying_group_agg_transform(db_query, group_agg_transform, engine,
             for initial_column
             in initial_columns_not_in_group_agg
         )
-    group_agg_transform = _add_aliases_to_agg_on(group_agg_transform, aliases_to_be_added_to_agg_on)
-    group_agg_transform = _add_aliases_to_group_by(group_agg_transform, aliases_to_be_added_to_group_by)
+    group_agg_transform = group_agg_transform.add_aliases_to_agg_on(aliases_to_be_added_to_agg_on)
+    group_agg_transform = group_agg_transform.add_aliases_to_group_by(aliases_to_be_added_to_group_by)
     return group_agg_transform
 
 
@@ -192,7 +246,7 @@ def _get_oids_of_joinable_tables_with_single_results(db_query, engine, metadata)
 
 
 # TODO
-def _is_unique_constrained(initial_column):
+def _is_unique_constrained(db_query, alias):
     return True
 
 
