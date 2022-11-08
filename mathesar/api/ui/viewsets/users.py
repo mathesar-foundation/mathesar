@@ -38,6 +38,7 @@ class SchemaRoleViewSet(viewsets.ModelViewSet):
     queryset = SchemaRole.objects.all().order_by('id')
     serializer_class = SchemaRoleSerializer
     pagination_class = DefaultLimitOffsetPagination
+    access_policy = DatabaseRoleAccessPolicy
 
     def update(self, request, pk=None):
         raise MethodNotAllowed(request.method)
