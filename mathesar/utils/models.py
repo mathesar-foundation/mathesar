@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 from db.tables.operations.alter import alter_table, SUPPORTED_TABLE_ALTER_ARGS
 from db.schemas.operations.alter import alter_schema, SUPPORTED_SCHEMA_ALTER_ARGS
+from db.columns.exceptions import InvalidTypeError
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
@@ -35,6 +36,8 @@ def update_sa_table(table, validated_data):
         alter_table(table.name, table.oid, table.schema.name, table.schema._sa_engine, data)
         reset_reflection()
     # TODO: Catch more specific exceptions
+    except InvalidTypeError as e:
+        raise e
     except Exception as e:
         raise base_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
 
