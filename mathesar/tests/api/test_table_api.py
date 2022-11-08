@@ -1506,10 +1506,10 @@ def test_table_move_columns_after_extracting(create_patents_table, client):
     assert extracted_column.display_options == column_with_display_options.display_options
 
 
-def test_table_ui_dependency(client, create_patents_table):
-    base_table = create_patents_table(table_name="Dependent Table")
+def test_table_ui_dependency(client, create_patents_table, get_uid):
+    base_table = create_patents_table(table_name=get_uid())
     query_data = {
-        "name": "Query",
+        "name": get_uid(),
         "base_table": base_table,
         "initial_columns": [
             {
@@ -1523,12 +1523,12 @@ def test_table_ui_dependency(client, create_patents_table):
             },
         ],
     }
-    UIQuery.objects.create(**query_data)
+    query = UIQuery.objects.create(**query_data)
     response = client.get(f'/api/db/v0/tables/{base_table.id}/ui_dependents/')
     response_data = response.json()
     expected_response = {
         'queries': [
-            base_table.id
+            query.id
         ]
     }
     assert response_data == expected_response
