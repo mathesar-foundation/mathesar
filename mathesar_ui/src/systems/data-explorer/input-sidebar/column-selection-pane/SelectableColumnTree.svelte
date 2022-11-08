@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ColumnWithLink } from '../utils';
+  import type { ColumnWithLink } from '../../utils';
   import SelectableColumn from './SelectableColumn.svelte';
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
 

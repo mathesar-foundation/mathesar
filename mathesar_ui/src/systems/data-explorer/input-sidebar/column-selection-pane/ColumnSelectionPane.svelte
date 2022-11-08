@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Spinner } from '@mathesar-component-library';
   import SelectableColumnTree from './SelectableColumnTree.svelte';
-  import type QueryManager from '../QueryManager';
+  import type QueryManager from '../../QueryManager';
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
 
   export let queryManager: QueryManager;

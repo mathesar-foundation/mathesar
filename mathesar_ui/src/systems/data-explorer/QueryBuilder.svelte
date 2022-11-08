@@ -18,8 +18,7 @@
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
   import type QueryManager from './QueryManager';
-  import type { ColumnWithLink } from './utils';
-  import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
+  import InputSidebar from './input-sidebar/InputSidebar.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
 
@@ -39,21 +38,6 @@
       q.withBaseTable(tableEntry ? tableEntry.id : undefined),
     );
     queryManager.clearSelectedColumn();
-  }
-
-  async function addColumn(column: ColumnWithLink) {
-    const baseAlias = `${column.tableName}_${column.name}`;
-    const allAliases = new Set($query.initial_columns.map((c) => c.alias));
-    const alias = getAvailableName(baseAlias, allAliases);
-    await queryManager.update((q) =>
-      q.withColumn({
-        alias,
-        id: column.id,
-        jp_path: column.jpPath,
-        display_name: alias,
-      }),
-    );
-    queryManager.selectColumn(alias);
   }
 
   function handleNameChange(e: Event) {
@@ -180,15 +164,7 @@
         Get started by selecting a table and adding columns
       </div>
     {:else}
-      <div class="input-sidebar">
-        <ColumnSelectionPane
-          {queryManager}
-          on:add={(e) => addColumn(e.detail)}
-        />
-      </div>
-      <!-- Do not use inputColumnManager in ResultPane because
-        we'd also use ResultPane for query page where input column
-        details would not be available-->
+      <InputSidebar {queryManager} />
       <ResultPane queryRunner={queryManager} />
       <OutputConfigSidebar {queryManager} />
     {/if}
@@ -276,18 +252,6 @@
         margin-right: auto;
         font-size: var(--text-size-x-large);
         color: var(--slate-400);
-      }
-
-      .input-sidebar {
-        --input-pane-width: 25.8rem;
-        width: var(--input-pane-width);
-        flex-basis: var(--input-pane-width);
-        border-right: 1px solid var(--slate-300);
-        background-color: var(--sand-100);
-        flex-shrink: 0;
-        flex-grow: 0;
-        display: flex;
-        flex-direction: column;
       }
     }
   }
