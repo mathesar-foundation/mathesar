@@ -35,7 +35,7 @@
     />
   </div>
   <Dropdown {disabled} triggerClass="column-type" triggerAppearance="plain">
-    <NameWithIcon slot="trigger" icon={processedColumn.abstractType.icon}>
+    <NameWithIcon slot="trigger" icon={processedColumn.abstractType.getIcon()}>
       {processedColumn.abstractType.name}
     </NameWithIcon>
     <div slot="content" class="type-options-content" let:close>
