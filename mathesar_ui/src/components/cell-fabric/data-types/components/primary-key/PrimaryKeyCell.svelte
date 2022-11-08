@@ -37,16 +37,15 @@
       case 'ArrowRight':
       case 'ArrowDown':
       case 'ArrowUp':
-          dispatch('movementKeyDown', {
-            originalEvent: e,
-            key: e.key,
-          });
+        dispatch('movementKeyDown', {
+          originalEvent: e,
+          key: e.key,
+        });
         break;
       default:
         break;
     }
   }
-
 </script>
 
 <CellWrapper
