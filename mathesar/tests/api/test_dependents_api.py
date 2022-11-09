@@ -1,7 +1,10 @@
 def _get_object_dependent_ids(dependents, object_id, type):
     return [
         int(d['obj']['id'])
-        for d in dependents if int(d['parent_obj']['id']) == object_id and d['parent_obj']['type'] == type
+        for d in dependents
+        if int(d['parent_obj']['id']) == object_id
+        and d['parent_obj']['type'] == type
+        and 'id' in d['obj']
     ]
 
 
@@ -16,7 +19,7 @@ def test_dependents_response_attrs(library_ma_tables, client):
     response_data = response.json()
 
     dependent_expected_attrs = ['obj', 'parent_obj']
-    assert len(response_data) == 3
+    assert len(response_data) == 4
     assert all(
         [
             all(attr in dependent for attr in dependent_expected_attrs)
