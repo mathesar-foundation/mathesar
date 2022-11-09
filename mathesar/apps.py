@@ -11,6 +11,7 @@ def _prepare_database_model(**kwargs):
     dbs_in_settings.remove('default')
     for db_name in dbs_in_settings:
         Database.current_objects.get_or_create(name=db_name)
+    # TODO fix test DB loading to make this unnecessary
     if not settings.TEST:
         sync_databases_status()
 

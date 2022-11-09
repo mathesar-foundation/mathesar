@@ -53,7 +53,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mathesar.middleware.CursorClosedHandlerMiddleware",
-    "mathesar.middleware.LiveDemoModeMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -90,9 +89,6 @@ DATABASES = {
 }
 DATABASES[decouple_config('DJANGO_DATABASE_KEY')] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
 
-LIVE_DEMO = decouple_config('LIVE_DEMO', default=False, cast=bool)
-TEST = decouple_config('TEST', default=False, cast=bool)
-
 for db_key, db_dict in DATABASES.items():
     # Engine can be '.postgresql' or '.postgresql_psycopg2'
     if not db_dict['ENGINE'].startswith('django.db.backends.postgresql'):
@@ -104,6 +100,7 @@ for db_key, db_dict in DATABASES.items():
 
 # pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
+TEST = decouple_config('TEST', default=False, cast=bool)
 if TEST:
     for db_key, _ in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim)):
         DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
