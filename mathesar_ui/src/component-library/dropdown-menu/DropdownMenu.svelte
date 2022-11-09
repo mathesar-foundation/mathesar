@@ -11,6 +11,7 @@
   export let label: string;
   export let icon: IconProps | undefined = undefined;
   export let closeOnInnerClick = true;
+  export let menuStyle = '';
 </script>
 
 <Dropdown {closeOnInnerClick} ariaLabel={label} {...$$restProps}>
@@ -23,7 +24,7 @@
       <span class="label">{label}</span>
     {/if}
   </span>
-  <Menu slot="content" --min-width="100%">
+  <Menu slot="content" style="--min-width: 100%;{menuStyle}">
     <slot />
   </Menu>
 </Dropdown>

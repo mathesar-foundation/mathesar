@@ -38,6 +38,7 @@
           closeOnInnerClick={true}
           label=""
           icon={iconShowMore}
+          menuStyle="--spacing-y:0.8em;"
         >
           <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}
             >Edit Schema</ButtonMenuItem
