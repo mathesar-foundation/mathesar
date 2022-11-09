@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import status
@@ -79,17 +78,21 @@ def get_common_data(request, database, schema=None):
 
 
 def get_current_database(request, db_name):
-    # if there's a DB name passed in, try to retrieve the database, or return a 404 error.
+    """Get database from passed name, with fall back behavior."""
     if db_name is not None:
-        return get_object_or_404(Database, name=db_name)
-    elif settings.LIVE_DEMO:
-        return Database.objects.get(name=request.GET.get('database', 'mathesar_tables'))
+        current_database = get_object_or_404(Database, name=db_name)
     else:
+        request_database_name = request.GET.get('database')
         try:
-            # Try to get the first database available
-            return Database.objects.order_by('id').first()
+            if request_database_name is not None:
+                # Try to get the database named specified in the request
+                current_database = Database.objects.get(name=request_database_name)
+            else:
+                # Try to get the first database available
+                current_database = Database.objects.order_by('id').first()
         except Database.DoesNotExist:
-            return None
+            current_database = None
+    return current_database
 
 
 def get_current_schema(request, schema_id, database):
