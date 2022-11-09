@@ -303,6 +303,15 @@ export default class SheetSelection<
     }
   }
 
+  selectAndActivateFirstCellIfExists(): void {
+    const firstRow = this.getRows()[0];
+    const firstColumn = this.getColumns()[0];
+    if (firstRow && firstColumn) {
+      this.selectMultipleCells([[firstRow, firstColumn]]);
+      this.activateCell(firstRow, firstColumn);
+    }
+  }
+
   getIncludedCells(selectionBounds: SelectionBounds): Cell<Row, Column>[] {
     const { startRowIndex, endRowIndex, startColumnIndex, endColumnIndex } =
       selectionBounds;
@@ -428,6 +437,14 @@ export default class SheetSelection<
       rowIndex: row.rowIndex,
       columnId: column.id,
     });
+  }
+
+  focusCell(row: Pick<Row, 'rowIndex'>, column: Pick<Column, 'id'>): void {
+    const cellsInTheColumn = document.querySelectorAll(
+      `[data-column-identifier="${column.id}"]`,
+    );
+    const targetCell = cellsInTheColumn.item(row.rowIndex);
+    (targetCell?.querySelector('.cell-wrapper') as HTMLElement)?.focus();
   }
 
   private getAdjacentCell(
