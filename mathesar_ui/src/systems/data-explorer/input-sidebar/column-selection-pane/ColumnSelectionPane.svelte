@@ -29,8 +29,6 @@
 <style lang="scss">
   div {
     position: relative;
-    padding: 0.75rem;
-    flex-grow: 1;
-    overflow: auto;
+    padding: 0 var(--size-large);
   }
 </style>

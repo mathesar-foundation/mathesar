@@ -28,8 +28,8 @@
 </script>
 
 <aside class="input-sidebar">
-  <div>Build your Exploration</div>
-  <div class="input-pane">
+  <header>Build your Exploration</header>
+  <section class="input-pane">
     <TabContainer
       tabs={[
         { id: 'column-selection', label: 'Select Columns' },
@@ -43,18 +43,31 @@
         <Spinner />
       {:else if inputColumnsFetchState?.state === 'success'}
         {#if activeTab.id === 'column-selection'}
+          {#if $query.initial_columns.length === 0}
+            <div class="help-text">
+              Select the columns that will be used for the exploration. Columns
+              are limited to those from the base table and it's linked tables.
+            </div>
+          {/if}
           <ColumnSelectionPane
             {queryManager}
             on:add={(e) => addColumn(e.detail)}
           />
         {:else}
+          {#if $query.transformationModels.length === 0}
+            <div class="help-text">
+              Transformations can be used to summarize data, filter data, and
+              more. Note that transformations are applied in the order they are
+              listed.
+            </div>
+          {/if}
           <TransformationsPane {queryManager} />
         {/if}
       {:else if inputColumnsFetchState?.state === 'failure'}
         Failed to fetch column information
       {/if}
     </TabContainer>
-  </div>
+  </section>
 </aside>
 
 <style lang="scss">
@@ -70,10 +83,21 @@
     flex-direction: column;
     overflow: hidden;
 
+    header {
+      background-color: var(--white);
+      padding: var(--size-xx-small) var(--size-large);
+      border-bottom: 1px solid var(--slate-200);
+    }
+
     .input-pane {
       flex-grow: 1;
       overflow: hidden;
       position: relative;
+
+      .help-text {
+        padding: var(--size-large);
+        font-size: var(--text-size-small);
+      }
     }
   }
 </style>

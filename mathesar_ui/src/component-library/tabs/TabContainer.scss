@@ -34,6 +34,7 @@
         overflow: hidden;
         color: inherit;
         text-align: center;
+        font-weight: var(--tab-header-font-weight, 590);
       }
 
       &:hover {
