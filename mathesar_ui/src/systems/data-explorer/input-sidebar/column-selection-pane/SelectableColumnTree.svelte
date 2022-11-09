@@ -4,6 +4,7 @@
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
 
   export let columnsWithLinks: Map<ColumnWithLink['id'], ColumnWithLink>;
+  export let showColumnsWithoutLinks = true;
 </script>
 
 <div class="selectable-column-tree">
@@ -16,7 +17,7 @@
       >
         <svelte:self columnsWithLinks={column.linksTo.columns} on:add />
       </TableGroupCollapsible>
-    {:else}
+    {:else if showColumnsWithoutLinks}
       <SelectableColumn {column} on:add />
     {/if}
   {/each}

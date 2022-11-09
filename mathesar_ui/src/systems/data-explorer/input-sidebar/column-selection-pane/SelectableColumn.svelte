@@ -10,11 +10,14 @@
 </script>
 
 <div class="selectable-column">
-  <Button appearance="plain" on:click={() => dispatch('add', column)}>
+  <Button appearance="secondary" on:click={() => dispatch('add', column)}>
     <ColumnName
       column={{ ...column, type_options: null, display_options: null }}
     />
-    <span class="add">Add +</span>
+    <span class="add">
+      <span class="text">Add</span>
+      <span>+</span>
+    </span>
   </Button>
 </div>
 
@@ -26,8 +29,6 @@
     :global(button) {
       flex-grow: 1;
       text-align: left;
-      border: 1px solid #efefef;
-      border-radius: 0.15rem;
       overflow: hidden;
     }
     :global(button .name-with-icon) {
@@ -40,13 +41,13 @@
     }
 
     &:not(:hover) {
-      :global(button .add) {
+      :global(button .add .text) {
         display: none;
       }
     }
 
     + :global(.selectable-column) {
-      margin-top: -1px;
+      margin-top: var(--size-ultra-small);
     }
   }
 </style>

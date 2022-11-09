@@ -43,12 +43,10 @@
         <Spinner />
       {:else if inputColumnsFetchState?.state === 'success'}
         {#if activeTab.id === 'column-selection'}
-          {#if $query.initial_columns.length === 0}
-            <div class="help-text">
-              Select the columns that will be used for the exploration. Columns
-              are limited to those from the base table and it's linked tables.
-            </div>
-          {/if}
+          <div class="help-text">
+            Select the columns that will be used for the exploration. Columns
+            are limited to those from the base table and it's linked tables.
+          </div>
           <ColumnSelectionPane
             {queryManager}
             on:add={(e) => addColumn(e.detail)}
