@@ -24,7 +24,7 @@ def generate_attribute_accessor(getattr):
     return tmp_class()
 
 
-# Generates an alias via `generate_attribute_accessor`.
+# Let's you generate an alias via `generate_attribute_accessor`.
 #
 # Example uses:
 #
@@ -252,7 +252,7 @@ def initial_columns(academics_ids):
         ],
     ]
 )
-def test_only_transform(
+def test_sole_transform(
     engine_with_academics,
         metadata,
         academics_ids,
@@ -261,7 +261,7 @@ def test_only_transform(
         expected_summarize_transform,
 ):
     """
-    Case where summarization is the only transformation.
+    Case where summarization is the sole transformation.
     """
     engine, _ = engine_with_academics
     ids = academics_ids
