@@ -42,6 +42,7 @@
   } from './linkTableUtils';
   import RelationshipDiagram from './RelationshipDiagram.svelte';
   import TableName from './TableName.svelte';
+    import { forEach, map } from 'iter-tools';
 
   const dispatch = createEventDispatcher();
   const tabularData = getTabularDataStoreFromContext();
@@ -245,6 +246,41 @@
     getRadioLabel: (value: boolean) => (value ? 'Yes' : 'No'),
   };
 
+  $: handleTableNameError = (tableName: string) => {
+    const sameTableNameExist  = [...$tables.data.values()].map((t) => t.name).findIndex(item =>{
+      return item === tableName;
+    })
+    if(sameTableNameExist >= 0) {
+      return ["Table names must be unique!"];
+    }
+    if(tableName.length === 0) {
+      return ["The Field cannot be empty!"]
+    }
+    return [];
+  }
+
+  $: handleColumnErrors = (columnName: string, whichTable: string) => {
+    if(whichTable === "this") {
+      const sameNameExist = $columns.findIndex((item: any) => {
+        return item.name === columnName
+      })
+
+      if(sameNameExist >= 0) return ["Column name must be unique!"]
+    } 
+
+    if(whichTable === "that" && $thatTableColumns !== undefined){
+      const sameNameExist = $thatTableColumns.findIndex((item: any) => {
+        return item.name === columnName
+      })
+
+      if(sameNameExist >= 0) return ["Column name must be unique!"];
+    }
+
+    if(columnName.length === 0) return ["The Field cannot be empty!"];
+     
+    return []
+  }
+
   $: areFieldsFilled = () => {
     // check if table is chosen
     if(thatTable === undefined) return false;
@@ -368,7 +404,7 @@
             </div>
 
             {#if relationshipType === 'many-to-many'}
-              <FormField>
+              <FormField errors={handleTableNameError(mappingTableName)}>
                 <LabeledInput
                   label="We will create a new mapping table named:"
                   layout="stacked"
@@ -376,7 +412,8 @@
                   <TextInput bind:value={mappingTableName} />
                 </LabeledInput>
               </FormField>
-              <FormField>
+              {#if mappingTableName.length > 0}
+              <FormField errors={handleColumnErrors(mappingToThisColumnName, "this")}>
                 <LabeledInput layout="stacked">
                   <div slot="label">
                     Each
@@ -388,7 +425,7 @@
                   <TextInput bind:value={mappingToThisColumnName} />
                 </LabeledInput>
               </FormField>
-              <FormField>
+              <FormField errors={handleColumnErrors(mappingToThatColumnName, "that")}>
                 <LabeledInput layout="stacked">
                   <div slot="label">
                     Each
@@ -400,9 +437,10 @@
                   <TextInput bind:value={mappingToThatColumnName} />
                 </LabeledInput>
               </FormField>
+              {/if}
             {:else if relationshipType === 'one-to-many'}
-              <FormField>
-                <LabeledInput>
+              <FormField errors={handleColumnErrors(thatNewColumnName, "that")}>
+                <LabeledInput layout="stacked">
                   <div slot="label">
                     The
                     <TableName name={thatTable?.name} which="that" />
@@ -419,8 +457,8 @@
                 record.
               </FormField>
             {:else if relationshipType === 'many-to-one'}
-              <FormField>
-                <LabeledInput>
+              <FormField errors={handleColumnErrors(thisNewColumnName, "this")}>
+                <LabeledInput layout="stacked">
                   <div slot="label">
                     The
                     <TableName name={thisTable?.name} which="this" />
@@ -437,8 +475,8 @@
                 record.
               </FormField>
             {:else if relationshipType === 'one-to-one'}
-              <FormField>
-                <LabeledInput>
+              <FormField errors={handleColumnErrors(thisNewColumnName, "this")}>
+                <LabeledInput layout="stacked">
                   <div slot="label">
                     The
                     <TableName name={thisTable?.name} which="this" />
