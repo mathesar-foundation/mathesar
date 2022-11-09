@@ -244,6 +244,46 @@
     options: [true, false],
     getRadioLabel: (value: boolean) => (value ? 'Yes' : 'No'),
   };
+
+  $: areFieldsFilled = () => {
+    // check if table is chosen
+    if(thatTable === undefined) return false;
+    // check if checkboxes are filled
+    if(thisHasManyOfThat === undefined) return false;
+    if(!isSelfReferential && thatHasManyOfThis === undefined) return false;
+
+    // check if currently shown fields are empty
+    if(!isSelfReferential && thisHasManyOfThat && thatHasManyOfThis) {
+      if (  (mappingTableName.length === 0) 
+        ||  (mappingToThisColumnName.length === 0) 
+        ||  (mappingToThatColumnName.length === 0)) return false;
+    }
+
+    if(!isSelfReferential && thisHasManyOfThat && !thatHasManyOfThis){
+      if (thatNewColumnName.length === 0) return false;
+    }
+
+    if(!isSelfReferential && !thisHasManyOfThat && thatHasManyOfThis){
+      if (thisNewColumnName.length === 0) return false;
+    }
+
+    if(!isSelfReferential && !thisHasManyOfThat && !thatHasManyOfThis) {
+      if (thisNewColumnName.length === 0) return false;
+    }
+
+    if(isSelfReferential && !thisHasManyOfThat){
+      if (thisNewColumnName.length === 0) return false;
+    }
+
+    if(isSelfReferential && thisHasManyOfThat) {
+      if (  (mappingTableName.length === 0)
+        ||  (mappingToThisColumnName.length === 0)
+        ||  (mappingToThatColumnName.length === 0)) return false;
+    }
+    
+    // return true if all currently shown field are filled
+    return true;
+  }
 </script>
 
 <ControlledModal {controller} on:open={init} size="large">
@@ -434,7 +474,7 @@
     onProceed={handleSave}
     onCancel={() => controller.close()}
     proceedButton={{ label: 'Create Link', icon: iconTableLink }}
-    {canProceed}
+    canProceed={areFieldsFilled()}
   />
 </ControlledModal>
 
