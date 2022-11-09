@@ -52,20 +52,18 @@
     flex-grow: 1;
     overflow: hidden;
     flex-shrink: 0;
-    margin: 10px;
+    margin: var(--size-large);
     display: flex;
     flex-direction: column;
-    border: 1px solid #e5e5e5;
-    border-radius: 4px;
 
     header {
-      padding: 8px 10px;
-      border-bottom: 1px solid #e5e5e5;
       display: flex;
       align-items: center;
+      margin-bottom: var(--size-large);
 
       .title {
-        font-weight: 600;
+        font-size: var(--text-size-large);
+        font-weight: 590;
       }
       .info {
         margin-left: 8px;
@@ -79,6 +77,12 @@
 
     .empty-state {
       padding: 1rem;
+    }
+
+    :global([data-identifier='query-run-result']) {
+      border: 1px solid var(--slate-200);
+      border-radius: var(--border-radius-m);
+      background: var(--sand-100);
     }
   }
 </style>
