@@ -14,7 +14,6 @@
     {#if column.linksTo}
       <TableGroupCollapsible
         tableName={column.linksTo.name}
-        direction="in"
         {column}
         {linkCollapsibleOpenState}
       >

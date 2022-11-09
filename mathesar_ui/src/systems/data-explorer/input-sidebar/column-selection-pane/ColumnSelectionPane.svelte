@@ -60,7 +60,6 @@
               <TableGroupCollapsible
                 tableName={table.name}
                 column={table.referencedViaColumn}
-                direction="out"
                 {linkCollapsibleOpenState}
               >
                 <SelectableColumnTree

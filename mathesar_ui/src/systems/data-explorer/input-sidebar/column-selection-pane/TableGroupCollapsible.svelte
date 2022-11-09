@@ -5,14 +5,13 @@
     Button,
     iconExpandDown,
   } from '@mathesar-component-library';
-  import { iconInwardLink, iconOutwardLink } from '@mathesar/icons';
+  import { iconTable } from '@mathesar/icons';
   import type { ColumnWithLink } from '../../utils';
 
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
   export let column: Pick<ColumnWithLink, 'id' | 'name'>;
   export let tableName: string;
-  export let direction: 'in' | 'out';
 </script>
 
 <div class="table-group">
@@ -31,13 +30,12 @@
           size="0.7rem"
           rotate={isOpen ? undefined : 270}
         />
-        <Icon
-          {...direction === 'in' ? iconInwardLink : iconOutwardLink}
-          size="0.6rem"
-        />
-        {tableName}
+        <Icon {...iconTable} size="0.9rem" />
+        <span>{tableName}</span>
       </span>
-      <span class="fk-column">via {column.name}</span>
+      <span class="fk-column">
+        via {column.name}
+      </span>
     </Button>
     <div class="column-list" slot="content">
       <slot />
@@ -66,6 +64,14 @@
       white-space: nowrap;
       text-overflow: ellipsis;
       margin-right: auto;
+    }
+
+    .table-name {
+      > span {
+        display: inline-block;
+        vertical-align: middle;
+        font-weight: 590;
+      }
     }
     .fk-column {
       font-size: var(--text-size-small);
