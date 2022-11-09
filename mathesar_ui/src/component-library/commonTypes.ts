@@ -3,7 +3,8 @@ export type Appearance =
   | 'primary'
   | 'secondary'
   | 'plain'
-  | 'ghost';
+  | 'ghost'
+  | 'plain-primary';
 
 export type Size = 'small' | 'medium' | 'large';
 

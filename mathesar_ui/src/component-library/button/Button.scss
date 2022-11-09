@@ -66,8 +66,12 @@ button.btn {
     }
   }
 
-  &.btn-plain {
+  &.btn-plain,
+  &.btn-plain-primary {
     background: transparent;
+  }
+
+  &.btn-plain-primary {
     color: var(--brand-500);
   }
 
@@ -76,14 +80,16 @@ button.btn {
   }
 
   &.btn-plain,
-  &.btn-ghost {
+  &.btn-ghost,
+  &.btn-plain-primary {
     border-color: transparent;
     border-radius: 0px;
     box-shadow: none !important;
   }
 
   &.btn-default,
-  &.btn-plain {
+  &.btn-plain,
+  &.btn-plain-primary {
     &:not(:disabled) {
       &:hover {
         background: var(--slate-100);
