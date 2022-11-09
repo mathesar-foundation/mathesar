@@ -6,46 +6,81 @@
 
   export let queryManager: QueryManager;
 
-  $: ({ inputColumns } = queryManager);
+  $: ({ inputColumns, query } = queryManager);
   $: ({ baseTableColumns, tablesThatReferenceBaseTable } = $inputColumns);
+  $: hasInitialColumns = $query.initial_columns.length > 0;
+  $: hasLinksFromBaseTable = [...baseTableColumns].some(
+    ([, entry]) => entry.linksTo !== undefined,
+  );
+  $: hasLinksToBaseTable = tablesThatReferenceBaseTable.size > 0;
 </script>
 
-<div>
+<div data-identifier="column-selection-list">
   <section>
     <header>From Base table</header>
-    {#each [...baseTableColumns] as [columnId, column] (columnId)}
-      <SelectableColumn {column} on:add />
-    {/each}
+    <div class="content">
+      {#each [...baseTableColumns] as [columnId, column] (columnId)}
+        <SelectableColumn {column} on:add />
+      {/each}
+    </div>
   </section>
-  <section>
-    <header>Linked from Base table</header>
-    <SelectableColumnTree
-      showColumnsWithoutLinks={false}
-      columnsWithLinks={baseTableColumns}
-      on:add
-    />
-  </section>
-  {#if tablesThatReferenceBaseTable.size > 0}
+  {#if !hasInitialColumns && (hasLinksFromBaseTable || hasLinksToBaseTable)}
     <section>
-      <header>Linked to Base table</header>
-      <div data-identifier="referenced-by-tables">
-        {#each [...tablesThatReferenceBaseTable] as [tableId, table] (tableId)}
-          <TableGroupCollapsible
-            tableName={table.name}
-            column={table.referencedViaColumn}
-            direction="out"
-          >
-            <SelectableColumnTree columnsWithLinks={table.columns} on:add />
-          </TableGroupCollapsible>
-        {/each}
+      <header>From linked tables</header>
+      <div class="content">
+        <div class="help-text">
+          At least one column from the base table is required to add columns
+          from linked tables.
+        </div>
       </div>
     </section>
+  {:else}
+    {#if hasLinksFromBaseTable}
+      <section>
+        <header>Linked from Base table</header>
+        <div class="content">
+          <SelectableColumnTree
+            showColumnsWithoutLinks={false}
+            columnsWithLinks={baseTableColumns}
+            on:add
+          />
+        </div>
+      </section>
+    {/if}
+    {#if hasLinksToBaseTable}
+      <section>
+        <header>Linked to Base table</header>
+        <div class="content" data-identifier="referenced-by-tables">
+          {#if hasInitialColumns}
+            {#each [...tablesThatReferenceBaseTable] as [tableId, table] (tableId)}
+              <TableGroupCollapsible
+                tableName={table.name}
+                column={table.referencedViaColumn}
+                direction="out"
+              >
+                <SelectableColumnTree columnsWithLinks={table.columns} on:add />
+              </TableGroupCollapsible>
+            {/each}
+          {/if}
+        </div>
+      </section>
+    {/if}
   {/if}
 </div>
 
 <style lang="scss">
-  div {
+  [data-identifier='column-selection-list'] {
     position: relative;
-    padding: 0 var(--size-large);
+
+    section {
+      header {
+        padding: var(--size-xx-small);
+        background: var(--sand-200);
+        font-weight: 590;
+      }
+      .content {
+        padding: var(--size-large);
+      }
+    }
   }
 </style>

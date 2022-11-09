@@ -10,7 +10,7 @@
 </script>
 
 <div class="selectable-column">
-  <Button appearance="secondary" on:click={() => dispatch('add', column)}>
+  <Button on:click={() => dispatch('add', column)}>
     <ColumnName
       column={{ ...column, type_options: null, display_options: null }}
     />
@@ -48,6 +48,10 @@
 
     + :global(.selectable-column) {
       margin-top: var(--size-ultra-small);
+    }
+
+    + :global(.table-group) {
+      margin-top: var(--size-small);
     }
   }
 </style>

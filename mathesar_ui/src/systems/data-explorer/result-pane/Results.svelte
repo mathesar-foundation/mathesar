@@ -173,7 +173,6 @@
       flex-shrink: 0;
       border-top: 1px solid #dfdfdf;
       padding: 0.2rem 0.6rem;
-      background: #fafafa;
       display: flex;
       align-items: center;
       margin-top: auto;

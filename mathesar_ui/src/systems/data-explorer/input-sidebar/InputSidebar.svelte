@@ -85,6 +85,7 @@
       background-color: var(--white);
       padding: var(--size-xx-small) var(--size-large);
       border-bottom: 1px solid var(--slate-200);
+      font-weight: 590;
     }
 
     .input-pane {
