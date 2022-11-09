@@ -383,7 +383,7 @@ export default class SheetSelection<
     return false;
   }
 
-  selectColumns(columns: [Column]): void {
+  selectColumns(columns: Column[]): void {
     const selectedRows = this.getSelectedUniqueRowsId(
       new ImmutableSet(this.selectedCells.getValues()),
     );
