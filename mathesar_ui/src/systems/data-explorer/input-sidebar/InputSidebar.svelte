@@ -7,6 +7,8 @@
   import type { ColumnWithLink } from '../utils';
 
   export let queryManager: QueryManager;
+  export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
+    {};
 
   $: ({ query, state } = queryManager);
   $: ({ inputColumnsFetchState } = $state);
@@ -49,6 +51,7 @@
           </div>
           <ColumnSelectionPane
             {queryManager}
+            {linkCollapsibleOpenState}
             on:add={(e) => addColumn(e.detail)}
           />
         {:else}

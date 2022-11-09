@@ -6,14 +6,17 @@
     iconExpandDown,
   } from '@mathesar-component-library';
   import { iconInwardLink, iconOutwardLink } from '@mathesar/icons';
+  import type { ColumnWithLink } from '../../utils';
 
-  export let column: { name: string; type: string };
+  export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
+    {};
+  export let column: Pick<ColumnWithLink, 'id' | 'name'>;
   export let tableName: string;
   export let direction: 'in' | 'out';
 </script>
 
 <div class="table-group">
-  <Collapsible>
+  <Collapsible bind:isOpen={linkCollapsibleOpenState[column.id]}>
     <Button
       slot="trigger"
       appearance="plain"

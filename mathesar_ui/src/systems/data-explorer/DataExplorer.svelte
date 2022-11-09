@@ -21,10 +21,13 @@
   import InputSidebar from './input-sidebar/InputSidebar.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
+  import type { ColumnWithLink } from './utils';
 
   const saveModalController = modal.spawnModalController();
 
   export let queryManager: QueryManager;
+  export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
+    {};
 
   $: ({ query, state } = queryManager);
 
@@ -38,6 +41,7 @@
       q.withBaseTable(tableEntry ? tableEntry.id : undefined),
     );
     queryManager.clearSelectedColumn();
+    linkCollapsibleOpenState = {};
   }
 
   function handleNameChange(e: Event) {
@@ -164,7 +168,7 @@
         Get started by selecting a table and adding columns
       </div>
     {:else}
-      <InputSidebar {queryManager} />
+      <InputSidebar {queryManager} {linkCollapsibleOpenState} />
       {#if $query.initial_columns.length > 0}
         <ResultPane queryRunner={queryManager} />
         <OutputConfigSidebar {queryManager} />

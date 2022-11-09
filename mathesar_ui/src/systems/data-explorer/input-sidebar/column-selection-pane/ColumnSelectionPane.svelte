@@ -3,8 +3,11 @@
   import SelectableColumn from './SelectableColumn.svelte';
   import type QueryManager from '../../QueryManager';
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
+  import type { ColumnWithLink } from '../../utils';
 
   export let queryManager: QueryManager;
+  export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
+    {};
 
   $: ({ inputColumns, query } = queryManager);
   $: ({ baseTableColumns, tablesThatReferenceBaseTable } = $inputColumns);
@@ -42,6 +45,7 @@
           <SelectableColumnTree
             showColumnsWithoutLinks={false}
             columnsWithLinks={baseTableColumns}
+            {linkCollapsibleOpenState}
             on:add
           />
         </div>
@@ -57,8 +61,13 @@
                 tableName={table.name}
                 column={table.referencedViaColumn}
                 direction="out"
+                {linkCollapsibleOpenState}
               >
-                <SelectableColumnTree columnsWithLinks={table.columns} on:add />
+                <SelectableColumnTree
+                  {linkCollapsibleOpenState}
+                  columnsWithLinks={table.columns}
+                  on:add
+                />
               </TableGroupCollapsible>
             {/each}
           {/if}
@@ -80,6 +89,10 @@
       }
       .content {
         padding: var(--size-large);
+
+        .help-text {
+          font-size: var(--text-size-small);
+        }
       }
     }
   }

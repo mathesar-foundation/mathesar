@@ -3,6 +3,8 @@
   import SelectableColumn from './SelectableColumn.svelte';
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
 
+  export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
+    {};
   export let columnsWithLinks: Map<ColumnWithLink['id'], ColumnWithLink>;
   export let showColumnsWithoutLinks = true;
 </script>
@@ -14,8 +16,13 @@
         tableName={column.linksTo.name}
         direction="in"
         {column}
+        {linkCollapsibleOpenState}
       >
-        <svelte:self columnsWithLinks={column.linksTo.columns} on:add />
+        <svelte:self
+          {linkCollapsibleOpenState}
+          columnsWithLinks={column.linksTo.columns}
+          on:add
+        />
       </TableGroupCollapsible>
     {:else if showColumnsWithoutLinks}
       <SelectableColumn {column} on:add />
