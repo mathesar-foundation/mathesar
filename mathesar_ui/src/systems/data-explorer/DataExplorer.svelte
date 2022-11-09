@@ -255,7 +255,7 @@
         margin-top: 10rem;
         margin-left: auto;
         margin-right: auto;
-        font-size: var(--text-size-x-large);
+        font-size: var(--text-size-xx-large);
         color: var(--slate-400);
       }
     }

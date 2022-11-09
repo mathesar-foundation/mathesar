@@ -54,12 +54,12 @@
     --color-link: var(--color-blue-dark);
     --color-text: #171717;
     --color-text-muted: #6b7280;
-    --text-size-x-small: 0.5715rem; // 8px
-    --text-size-xx-small: 0.7143rem; // 10px
-    --text-size-small: 0.8572rem; // 12px
-    --text-size-base: 1rem; // 14px
-    --text-size-large: 1.1429rem; // 16px
-    --text-size-x-large: 1.4286rem; // 20px
+    --text-size-xx-small: var(--size-xx-small); // 8px
+    --text-size-x-small: var(--size-x-small); // 10px
+    --text-size-small: var(--size-small); // 12px
+    --text-size-base: var(--size-base); // 14px
+    --text-size-large: var(--size-large); // 16px
+    --text-size-xx-large: var(--size-xx-large); // 20px
 
     --modal-z-index: 50;
     --modal-record-selector-z-index: 50;

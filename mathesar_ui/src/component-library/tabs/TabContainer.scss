@@ -10,11 +10,10 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    border-bottom: 1px solid #dfdfdf;
+    border-bottom: 1px solid var(--slate-300);
 
     > li.tab {
       align-items: stretch;
-      background: 0 0;
       cursor: pointer;
       display: inline-flex;
       outline: none;
@@ -39,7 +38,7 @@
 
       &:hover {
         background: var(--slate-100);
-        border-bottom-color: var(--slate-100);
+        border-bottom-color: var(--slate-300);
       }
 
       & + li.tab {

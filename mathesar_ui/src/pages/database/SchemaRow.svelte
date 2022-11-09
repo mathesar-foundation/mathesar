@@ -107,7 +107,7 @@
     align-items: center;
   }
   .name {
-    font-size: var(--text-size-x-large);
+    font-size: var(--text-size-xx-large);
   }
 
   .lock {
