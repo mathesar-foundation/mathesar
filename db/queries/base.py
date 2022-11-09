@@ -191,6 +191,6 @@ class InitialColumn:
     @property
     def is_base_column(self):
         """
-        A base column is a column on a query's base table.
+        A base column is an initial column on a query's base table.
         """
         return self.jp_path is None
