@@ -93,13 +93,6 @@ DATABASES[decouple_config('DJANGO_DATABASE_KEY')] = decouple_config('DJANGO_DATA
 LIVE_DEMO = decouple_config('LIVE_DEMO', default=False, cast=bool)
 TEST = decouple_config('TEST', default=False, cast=bool)
 
-# TODO replace with lazy generation
-if LIVE_DEMO and not TEST:
-    for i in range(10):
-        suffix = f'_ld{i}'
-        DATABASES[f'mathesar_tables{suffix}'] = {k: v for k, v in DATABASES['mathesar_tables'].items()}
-        DATABASES[f'mathesar_tables{suffix}'].update({'NAME': f'mathesar{suffix}'})
-
 for db_key, db_dict in DATABASES.items():
     # Engine can be '.postgresql' or '.postgresql_psycopg2'
     if not db_dict['ENGINE'].startswith('django.db.backends.postgresql'):
