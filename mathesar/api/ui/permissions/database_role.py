@@ -8,8 +8,11 @@ from mathesar.models.users import DatabaseRole, Role
 class DatabaseRoleAccessPolicy(AccessPolicy):
     statements = [
         # Listing and retrieving a database role is allowed for everyone.
-        # We cannot restrict access for creating a Database Role object here because database for which the role is created can be known only by inspecting the request body
-        # So Creating a database role API access permission is tied to the database object(sent in the body) validation done by the serializer when creating the database role.
+        # We cannot restrict access for creating a `DatabaseRole` object here,
+        # because the database for which the role is created can be known only by inspecting the request body.
+        # So creating a database role API access permission is tied to
+        # the validation done on the database object (sent in the body) by the serializer
+        # when creating the database role.
         {
             'action': ['list', 'retrieve', 'create'],
             'principal': '*',
