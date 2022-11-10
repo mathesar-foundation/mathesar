@@ -59,6 +59,13 @@
     if (!$isOpen) {
       return;
     }
+    if (_columns.length === 0) {
+      // If the user clears the chosen columns, we don't want to update the
+      // selected cells because it would mean that no columns are selected. When
+      // no columns are selected, the column pane of the table inspector closes,
+      // unmounting this component.
+      return;
+    }
     selection.intersectSelectedRowsWithGivenColumns(_columns);
   }
   $: handleColumnsChange($columns);
