@@ -190,7 +190,7 @@ def test_database_role_list_user_with_view_permission(client_bob, user_alice, us
     assert response_data['count'] == 2
 
 
-def test_database_role_list_superuser(client, user_bob):
+def test_database_role_list_manager(client, user_bob):
     role = 'manager'
     database = Database.objects.all()[0]
     DatabaseRole.objects.create(user=user_bob, database=database, role=role)
