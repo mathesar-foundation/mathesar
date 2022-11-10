@@ -31,7 +31,6 @@ def install_on_db_with_key(database_key, skip_confirm):
             root_database=DATABASES["default"]["NAME"],
             port=DATABASES["default"]["PORT"],
         )
-        print(f"Created DB is {DATABASES['mathesar_tables']['NAME']}")
     else:
         # if we're installing anywhere else, we require the DB to exist in
         # advance.
