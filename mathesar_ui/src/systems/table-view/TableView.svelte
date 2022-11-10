@@ -5,6 +5,7 @@
     getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
+    type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import Body from './Body.svelte';
@@ -17,7 +18,8 @@
   export let usesVirtualList = false;
   export let allowsDdlOperations = false;
 
-  $: ({ processedColumns, display, isLoading } = $tabularData);
+  $: ({ processedColumns, display, isLoading, selection } = $tabularData);
+  $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
   $: hasNewColumnButton = allowsDdlOperations;
@@ -44,11 +46,34 @@
   ]);
   $: showTableInspector =
     $isTableInspectorVisible && !$isLoading && supportsTableInspector;
+
+  function selectAndActivateFirstCellOnTableLoad(
+    _isLoading: boolean,
+    _selection: TabularDataSelection,
+  ) {
+    if (!_isLoading) {
+      _selection.selectAndActivateFirstCellIfExists();
+    }
+  }
+
+  function checkAndReinstateFocusOnActiveCell(e: Event) {
+    const target = e.target as HTMLElement;
+    if (!target.closest('[data-sheet-element="cell"')) {
+      if ($activeCell) {
+        selection.focusCell(
+          { rowIndex: $activeCell.rowIndex },
+          { id: Number($activeCell.columnId) },
+        );
+      }
+    }
+  }
+
+  $: void selectAndActivateFirstCellOnTableLoad($isLoading, selection);
 </script>
 
 <div class="table-view">
   <div class="table-inspector-view">
-    <div class="sheet-area">
+    <div class="sheet-area" on:click={checkAndReinstateFocusOnActiveCell}>
       {#if $processedColumns.size}
         <Sheet
           columns={sheetColumns}
