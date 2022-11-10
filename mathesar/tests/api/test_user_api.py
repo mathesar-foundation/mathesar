@@ -448,6 +448,19 @@ def test_schema_role_create_no_roles(create_schema, client_bob, user_alice, get_
     assert response.status_code == 400
 
 
+def test_automatic_public_schema_manager_role(client_bob, user_bob, user_alice, get_uid):
+    public_schema_oid = 2200
+    database_role = 'viewer'
+    database = Database.objects.all()[0]
+    public_schema = Schema.objects.get(database=database, oid=public_schema_oid)
+    data = {'user': user_alice.id, 'role': 'manager', 'schema': public_schema.id}
+    response = client_bob.post('/api/ui/v0/schema_roles/', data=data)
+    assert response.status_code == 400
+    DatabaseRole.objects.create(user=user_bob, database=database, role=database_role)
+    response = client_bob.post('/api/ui/v0/schema_roles/', data=data)
+    assert response.status_code == 201
+
+
 def test_schema_role_create_without_permissible_role(create_schema, client_bob, user_bob, user_alice, get_uid):
     schema = create_schema(get_uid())
     SchemaRole.objects.create(user=user_bob, schema=schema, role='editor')
