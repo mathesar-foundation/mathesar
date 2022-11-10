@@ -48,7 +48,7 @@ class SchemaRoleAccessPolicy(AccessPolicy):
         ).exists()
         is_db_manager = DatabaseRole.objects.filter(
             user=request.user,
-            schema=schema_role.schema,
+            database=schema_role.schema.database,
             role=Role.MANAGER.value
         ).exists()
         return is_db_manager or is_schema_manager
