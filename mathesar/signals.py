@@ -2,9 +2,10 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from mathesar.models.base import (
-    Column, Table, _compute_preview_template,
+    Column, Schema, Table, _compute_preview_template,
     _create_table_settings,
 )
+from mathesar.models.users import DatabaseRole, Role, SchemaRole
 from mathesar.state.django import reflect_new_table_constraints
 
 
@@ -27,3 +28,11 @@ def create_table_settings(**kwargs):
 def compute_preview_column_settings(**kwargs):
     instance = kwargs['instance']
     _compute_preview_template(instance.table)
+
+
+@receiver(post_save, sender=DatabaseRole)
+def give_public_schema_manager_access(**kwargs):
+    if kwargs['created']:
+        instance = kwargs['instance']
+        public_schema = Schema.current_objects.get(oid=2200)
+        SchemaRole.objects.create(schema=public_schema, user=instance.user, role=Role.MANAGER.value)
