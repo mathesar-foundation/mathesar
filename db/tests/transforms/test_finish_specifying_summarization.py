@@ -9,6 +9,7 @@ from db.transforms.base import Summarize, SelectSubsetOfColumns, Limit
 from db.columns.operations.select import get_column_attnum_from_name
 from db.transforms.operations.finish_specifying import finish_specifying_summarize_transform
 
+
 def generate_attribute_accessor(getattr):
     """
     Gives you an object instance whose `__getattr__` returns the result of calling the
@@ -19,8 +20,11 @@ def generate_attribute_accessor(getattr):
 
     generate_attribute_accessor(get_oid).academics  # returns the oid of 'academics'
     """
+    def discard_self(_, attr_name):
+        return getattr(attr_name)
+
     class tmp_class:
-        __getattr__ = lambda _, attr_name: getattr(attr_name)
+        __getattr__ = discard_self
     return tmp_class()
 
 
@@ -38,15 +42,18 @@ gen_alias = generate_attribute_accessor(
     )
 )
 
+
 # default output alias suffixes
 group_output_alias_suffix = Summarize.default_group_output_alias_suffix
 agg_output_alias_suffix = Summarize.default_agg_output_alias_suffix
+
 
 def _gen_grouping_expr(alias):
     return dict(
         input_alias=alias,
         output_alias=alias + group_output_alias_suffix,
     )
+
 
 def _gen_agg_expr(alias):
     return dict(
@@ -55,9 +62,11 @@ def _gen_agg_expr(alias):
         function="aggregate_to_array",
     )
 
+
 @pytest.fixture
 def metadata():
     return get_empty_metadata()
+
 
 @pytest.fixture
 def academics_ids(engine_with_academics, metadata):
@@ -80,17 +89,19 @@ def academics_ids(engine_with_academics, metadata):
     ```
     """
     engine, schema = engine_with_academics
+
     @functools.cache
     def get_oid(table_name):
         return get_oid_from_table(table_name, schema, engine)
+
     @functools.cache
     def get_attnum(table_name, column_name):
         table_oid = get_oid(table_name)
         return get_column_attnum_from_name(table_oid, column_name, engine, metadata=metadata)
     attnum_getter = generate_attribute_accessor(
         lambda table_name: generate_attribute_accessor(
-                lambda column_name: get_attnum(table_name, column_name)
-            )
+            lambda column_name: get_attnum(table_name, column_name)
+        )
     )
     oid_getter = generate_attribute_accessor(get_oid)
     return types.SimpleNamespace(
@@ -141,6 +152,7 @@ def initial_columns(academics_ids):
         ),
     ]
 
+
 # a summarization transform that has the bare minimum partial specification.
 empty_summarize = Summarize(
     dict(
@@ -149,6 +161,7 @@ empty_summarize = Summarize(
         aggregation_expressions=[]
     )
 )
+
 
 # the summarization transform that's the result of fully specifying `empty_summarize`.
 full_summarize = Summarize(
@@ -164,6 +177,7 @@ full_summarize = Summarize(
         ]
     )
 )
+
 
 # the summarization transform that's the result of fully specifying `empty_summarize`,
 # when we can't provide good defaults (i.e. we've put everything into aggregation).
@@ -181,9 +195,16 @@ full_summarize_no_defaults = Summarize(
     )
 )
 
+
 @pytest.mark.parametrize(
     'input_summarize_transform, expected_summarize_transform, transforms_before, transforms_after',
     [
+        [
+            empty_summarize,
+            full_summarize,
+            [],
+            [],
+        ],
         [
             empty_summarize,
             full_summarize,
@@ -231,12 +252,6 @@ full_summarize_no_defaults = Summarize(
             ],
         ],
         [
-            empty_summarize,
-            full_summarize,
-            [],
-            [],
-        ],
-        [
             # partly empty summarization
             Summarize(
                 dict(
@@ -263,7 +278,8 @@ full_summarize_no_defaults = Summarize(
                     aggregation_expressions=[]
                 )
             ),
-            # like full_summarize, but `gen_alias.academics.name` grouping is after `gen_alias.universities.name`
+            # like full_summarize, but `gen_alias.academics.name` grouping expr is
+            # after `gen_alias.universities.name`
             Summarize(
                 dict(
                     base_grouping_column=gen_alias.academics.id,
