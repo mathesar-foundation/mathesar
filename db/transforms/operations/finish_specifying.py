@@ -26,16 +26,20 @@ def finish_specifying_summarize_transform(db_query, ix_of_summarize_transform, e
     user_selected_alias = summarize_transform.base_grouping_column
     user_selected_initial_column = _get_initial_column_by_alias(db_query.initial_columns, user_selected_alias)
     # When we'll have finished specifying this group-agg transform, each input alias not already
-    # mentioned in it, will be added either to its "group by set" or its "aggregate on set"
+    # mentioned in it, will be added either to its "group by set" or its "aggregate on set".
     aliases_to_be_added_to_group_by = []
     aliases_to_be_added_to_agg_on = []
-    # Most of logic in the rest of method is around whether or not we can add a given input alias
-    # to the "group by set"
-    can_we_add_to_group_by = (
+    # We'll always want user-selected alias (base_grouping_column) in the "group by set";
+    if user_selected_initial_column in initial_columns_not_in_summarize:
+        aliases_to_be_added_to_group_by.append(user_selected_alias)
+        initial_columns_not_in_summarize.remove(user_selected_initial_column)
+    # Most of logic in the rest of method is around whether or not we can add some of the other
+    # input aliases to the "group by set"; otherwise we'll put them in "aggregate on set".
+    can_we_add_other_aliases_to_group_by = (
         _is_first_alias_generating_transform(db_query, ix_of_summarize_transform)
         and _is_initial_column_unique_constrained(user_selected_initial_column, engine, metadata)
     )
-    if can_we_add_to_group_by:
+    if can_we_add_other_aliases_to_group_by:
         oids_of_joinable_tables_with_single_results = _get_oids_of_joinable_tables_with_single_results(db_query, engine, metadata)
         oid_of_user_selected_initial_column = _get_oid_of_initial_column(user_selected_initial_column)
         for initial_column in initial_columns_not_in_summarize:

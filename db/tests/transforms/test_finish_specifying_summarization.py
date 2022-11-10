@@ -5,7 +5,7 @@ import functools
 from db.tables.operations.select import get_oid_from_table
 from db.queries.base import DBQuery, InitialColumn
 from db.metadata import get_empty_metadata
-from db.transforms.base import Summarize
+from db.transforms.base import Summarize, SelectSubsetOfColumns, Limit
 from db.columns.operations.select import get_column_attnum_from_name
 from db.transforms.operations.finish_specifying import finish_specifying_summarize_transform
 
@@ -128,85 +128,149 @@ def initial_columns(academics_ids):
         ),
     ]
 
+# a summarization transform that has the bare minimum partial specification.
+empty_summarize = Summarize(
+    dict(
+        base_grouping_column=gen_alias.academics.id,
+        grouping_expressions=[],
+        aggregation_expressions=[]
+    )
+)
+
+# the summarization transform that's the result of fully specifying `empty_summarize`.
+full_summarize = Summarize(
+    dict(
+        base_grouping_column=gen_alias.academics.id,
+        grouping_expressions=[
+            dict(
+                input_alias=gen_alias.academics.id,
+                output_alias=gen_alias.academics.id + group_output_alias_suffix,
+            ),
+            dict(
+                input_alias=gen_alias.academics.name,
+                output_alias=gen_alias.academics.name + group_output_alias_suffix,
+            ),
+            dict(
+                input_alias=gen_alias.universities.name,
+                output_alias=gen_alias.universities.name + group_output_alias_suffix,
+            ),
+        ],
+        aggregation_expressions=[
+            dict(
+                input_alias=gen_alias.articles.title,
+                output_alias=gen_alias.articles.title + agg_output_alias_suffix,
+                function="aggregate_to_array",
+            ),
+        ]
+    )
+)
+
+# the summarization transform that's the result of fully specifying `empty_summarize`,
+# when we can't provide good defaults (i.e. we've put everything into aggregation).
+full_summarize_no_defaults = Summarize(
+    dict(
+        base_grouping_column=gen_alias.academics.id,
+        grouping_expressions=[
+            dict(
+                input_alias=gen_alias.academics.id,
+                output_alias=gen_alias.academics.id + group_output_alias_suffix,
+            ),
+        ],
+        aggregation_expressions=[
+            dict(
+                input_alias=gen_alias.academics.name,
+                output_alias=gen_alias.academics.name + agg_output_alias_suffix,
+                function="aggregate_to_array",
+            ),
+            dict(
+                input_alias=gen_alias.universities.name,
+                output_alias=gen_alias.universities.name + agg_output_alias_suffix,
+                function="aggregate_to_array",
+            ),
+            dict(
+                input_alias=gen_alias.articles.title,
+                output_alias=gen_alias.articles.title + agg_output_alias_suffix,
+                function="aggregate_to_array",
+            ),
+        ]
+    )
+)
+
 @pytest.mark.parametrize(
-    'input_summarize_transform, expected_summarize_transform',
+    'input_summarize_transform, expected_summarize_transform, transforms_before, transforms_after',
     [
         [
-            Summarize(
-                dict(
-                    base_grouping_column=gen_alias.academics.id,
-                    grouping_expressions=[],
-                    aggregation_expressions=[]
-                )
-            ),
-            Summarize(
-                dict(
-                    base_grouping_column=gen_alias.academics.id,
-                    grouping_expressions=[
-                        dict(
-                            input_alias=gen_alias.academics.id,
-                            output_alias=gen_alias.academics.id + group_output_alias_suffix,
-                        ),
-                        dict(
-                            input_alias=gen_alias.academics.name,
-                            output_alias=gen_alias.academics.name + group_output_alias_suffix,
-                        ),
-                        dict(
-                            input_alias=gen_alias.universities.name,
-                            output_alias=gen_alias.universities.name + group_output_alias_suffix,
-                        ),
-                    ],
-                    aggregation_expressions=[
-                        dict(
-                            input_alias=gen_alias.articles.title,
-                            output_alias=gen_alias.articles.title + agg_output_alias_suffix,
-                            function="aggregate_to_array",
-                        ),
-                    ]
-                )
-            ),
+            empty_summarize,
+            full_summarize,
+            [
+                # should not affect summarization
+                Limit(10),
+            ],
+            [],
         ],
         [
-            Summarize(
-                dict(
-                    base_grouping_column=gen_alias.academics.id,
-                    grouping_expressions=[
-                        dict(
-                            input_alias=gen_alias.academics.id,
-                            output_alias=gen_alias.academics.id + group_output_alias_suffix,
-                        ),
-                    ],
-                    aggregation_expressions=[]
-                )
-            ),
-            Summarize(
-                dict(
-                    base_grouping_column=gen_alias.academics.id,
-                    grouping_expressions=[
-                        dict(
-                            input_alias=gen_alias.academics.id,
-                            output_alias=gen_alias.academics.id + group_output_alias_suffix,
-                        ),
-                        dict(
-                            input_alias=gen_alias.academics.name,
-                            output_alias=gen_alias.academics.name + group_output_alias_suffix,
-                        ),
-                        dict(
-                            input_alias=gen_alias.universities.name,
-                            output_alias=gen_alias.universities.name + group_output_alias_suffix,
-                        ),
-                    ],
-                    aggregation_expressions=[
-                        dict(
-                            input_alias=gen_alias.articles.title,
-                            output_alias=gen_alias.articles.title + agg_output_alias_suffix,
-                            function="aggregate_to_array",
-                        ),
-                    ]
-                )
-            ),
+            empty_summarize,
+            full_summarize,
+            [],
+            [
+                # should not affect summarization
+                Limit(10),
+            ],
         ],
         [
+            empty_summarize,
+            full_summarize_no_defaults,
+            [
+                # should prevent summarization from providing good defaults
+                SelectSubsetOfColumns(
+                    [
+                        gen_alias.academics.name,
+                        gen_alias.universities.name,
+                    ]
+                ),
+            ],
+            [],
+        ],
+        [
+            empty_summarize,
+            full_summarize_no_defaults,
+            [],
+            [
+                # should not affect summarization
+                SelectSubsetOfColumns(
+                    [
+                        gen_alias.academics.name,
+                        gen_alias.universities.name,
+                    ]
+                ),
+            ],
+        ],
+        [
+            empty_summarize,
+            full_summarize,
+            [],
+            [],
+        ],
+        [
+            # less than empty summarization
+            Summarize(
+                dict(
+                    base_grouping_column=gen_alias.academics.id,
+                    grouping_expressions=[
+                        dict(
+                            input_alias=gen_alias.academics.id,
+                            output_alias=gen_alias.academics.id + group_output_alias_suffix,
+                        ),
+                    ],
+                    aggregation_expressions=[]
+                )
+            ),
+            full_summarize,
+            [],
+            [],
+        ],
+        [
+            # less than empty summarization
             Summarize(
                 dict(
                     base_grouping_column=gen_alias.academics.id,
@@ -223,42 +287,21 @@ def initial_columns(academics_ids):
                     aggregation_expressions=[]
                 )
             ),
-            Summarize(
-                dict(
-                    base_grouping_column=gen_alias.academics.id,
-                    grouping_expressions=[
-                        dict(
-                            input_alias=gen_alias.academics.id,
-                            output_alias=gen_alias.academics.id + group_output_alias_suffix,
-                        ),
-                        dict(
-                            input_alias=gen_alias.universities.name,
-                            output_alias=gen_alias.universities.name + group_output_alias_suffix,
-                        ),
-                        dict(
-                            input_alias=gen_alias.academics.name,
-                            output_alias=gen_alias.academics.name + group_output_alias_suffix,
-                        ),
-                    ],
-                    aggregation_expressions=[
-                        dict(
-                            input_alias=gen_alias.articles.title,
-                            output_alias=gen_alias.articles.title + agg_output_alias_suffix,
-                            function="aggregate_to_array",
-                        ),
-                    ]
-                )
-            ),
+            full_summarize,
+            [],
+            [],
         ],
     ]
 )
-def test_sole_transform(
+def test_some_transforms(
     engine_with_academics,
-        metadata,
-        academics_ids,
-        initial_columns,
-        input_summarize_transform,
-        expected_summarize_transform,
+    metadata,
+    academics_ids,
+    initial_columns,
+    input_summarize_transform,
+    expected_summarize_transform,
+    transforms_before,
+    transforms_after,
 ):
     """
     Case where summarization is the sole transformation.
@@ -266,8 +309,11 @@ def test_sole_transform(
     engine, _ = engine_with_academics
     ids = academics_ids
 
-    transforms = [input_summarize_transform]
-    ix_of_summarize_transform = 0
+    transforms, ix_of_summarize_transform = _assemble_transforms(
+        transforms_before,
+        input_summarize_transform,
+        transforms_after,
+    )
     base_table_oid = ids.oid.academics
     db_query = DBQuery(
         base_table_oid=base_table_oid,
@@ -278,4 +324,17 @@ def test_sole_transform(
 
     complete_summarize_transform = \
         finish_specifying_summarize_transform(db_query, ix_of_summarize_transform, engine, metadata)
-    assert complete_summarize_transform == expected_summarize_transform
+    # We're comparing `__dict__`s, because then pytest can provide nice diffs.
+    assert complete_summarize_transform.__dict__ == expected_summarize_transform.__dict__
+
+
+def _assemble_transforms(transforms_before, transform, transforms_after):
+    """
+    When defining a test case we want to define what transforms come before the transform we're
+    testing, what its index in the transform sequence is, and what transforms come after it.
+    """
+    transforms = [*transforms_before]
+    transforms.append(transform)
+    ix_of_transform = len(transforms) - 1
+    transforms.extend(transforms_after)
+    return transforms, ix_of_transform
