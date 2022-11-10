@@ -26,10 +26,6 @@
   })();
   /** When only one column is selected */
   $: column = selectedColumns.length === 1 ? selectedColumns[0] : undefined;
-
-  function updateColumnSelection(change: CustomEvent) {
-    selection.intersectSelectedRowsWithGivenColumns(change.detail);
-  }
 </script>
 
 <div class="column-mode-container">
@@ -71,7 +67,6 @@
         <ColumnActions
           columns={selectedColumns}
           columnsDataStore={$tabularData.columnsDataStore}
-          on:change={updateColumnSelection}
         />
       </div>
     </Collapsible>

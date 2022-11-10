@@ -8,7 +8,10 @@
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    getTabularDataStoreFromContext,
+    type ProcessedColumn,
+  } from '@mathesar/stores/table-data';
   import {
     getTableFromStoreOrApi,
     moveColumns,
@@ -30,10 +33,10 @@
   let tableName = '';
   let newFkColumnName = '';
 
-  $: ({ processedColumns, constraintsDataStore } = $tabularData);
+  $: ({ processedColumns, constraintsDataStore, selection } = $tabularData);
   $: ({ constraints } = $constraintsDataStore);
   $: availableColumns = [...$processedColumns.values()];
-  $: ({ targetType, columns } = controller);
+  $: ({ targetType, columns, isOpen } = controller);
   $: canProceed = true;
   $: proceedButtonLabel =
     $targetType === 'existingTable' ? 'Move Columns' : 'Create Table';
@@ -51,6 +54,14 @@
   function handleTableNameUpdate() {
     newFkColumnName = tableName;
   }
+
+  function handleColumnsChange(_columns: ProcessedColumn[]) {
+    if (!$isOpen) {
+      return;
+    }
+    selection.intersectSelectedRowsWithGivenColumns(_columns);
+  }
+  $: handleColumnsChange($columns);
 
   async function handleSave() {
     const followUps: Promise<unknown>[] = [];
@@ -133,11 +144,7 @@
             the linked table.
           </span>
         </span>
-        <SelectProcessedColumns
-          {availableColumns}
-          bind:columns={$columns}
-          on:change
-        />
+        <SelectProcessedColumns {availableColumns} bind:columns={$columns} />
       </LabeledInput>
     </FormField>
   </Form>

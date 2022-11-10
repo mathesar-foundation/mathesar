@@ -15,9 +15,4 @@
   }
 </script>
 
-<MultiSelect
-  options={availableColumns}
-  bind:values={columns}
-  {getLabel}
-  on:change
-/>
+<MultiSelect options={availableColumns} bind:values={columns} {getLabel} />

@@ -70,7 +70,7 @@
   </Button>
 </div>
 
-<ExtractColumnsModal controller={extractColumns} on:change />
+<ExtractColumnsModal controller={extractColumns} />
 
 <style>
   .actions-container {
