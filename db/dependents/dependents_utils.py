@@ -1,5 +1,5 @@
+from sqlalchemy import MetaData, any_, column, exists, func, literal, select, text, true, union, and_, collate
 import warnings
-from sqlalchemy import MetaData, any_, column, exists, func, literal, select, text, true, union, and_
 from sqlalchemy.dialects.postgresql import array
 
 from db.utils import get_pg_catalog_table
@@ -81,6 +81,31 @@ def _get_rule_dependents(pg_identify_object, dependency_pairs):
     return dependency_pairs.where(pg_identify_object.c.type == 'rule')
 
 
+def _get_trigger_dependents(pg_depend, pg_identify_object, pg_trigger):
+    return (
+        select(
+            pg_depend,
+            # for some reason, tgname column is in C collation which collides with other columns collations
+            collate(pg_trigger.c.tgname, 'default').label('objname'),
+            pg_identify_object.c.type.label('objtype')
+        )
+        .select_from(pg_depend)
+        .join(pg_identify_object, true())
+        .join(pg_trigger, pg_trigger.c.oid == pg_depend.c.objid)
+        .where(pg_depend.c.deptype == any_(array(PG_DEPENDENT_TYPES)))
+        .where(pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID)
+        .where(pg_identify_object.c.type == 'trigger')
+        .group_by(
+            pg_depend,
+            pg_trigger.c.tgname,
+            pg_identify_object.c.type)
+    )
+
+
+def _get_sequence_dependents(pg_identify_object, dependency_pairs):
+    return dependency_pairs.where(pg_identify_object.c.type == 'sequence')
+
+
 def _get_view_dependents(pg_identify_object, pg_rewrite_table, rule_dependents):
     pg_identify_object = _get_pg_identify_object_lateral_stmt(
         text(f'{PG_CLASS_CATALOGUE_NAME}::regclass::oid'), pg_rewrite_table.c.ev_class, DEFAULT_NON_COLUMN_OBJSUBID)
@@ -107,6 +132,27 @@ def _get_view_dependents(pg_identify_object, pg_rewrite_table, rule_dependents):
 
 def _get_table_dependents(pg_identify_object, base):
     return base.where(pg_identify_object.c.type == 'table')
+
+
+def _get_function_dependents(pg_depend, pg_identify_object, pg_proc):
+    return (
+        select(
+            pg_depend,
+            # the same as with pg_trigger table
+            collate(pg_proc.c.proname, 'default').label('objname'),
+            pg_identify_object.c.type.label('objtype')
+        )
+        .select_from(pg_depend)
+        .join(pg_identify_object, true())
+        .join(pg_proc, pg_proc.c.oid == pg_depend.c.objid)
+        .where(pg_depend.c.deptype == any_(array(PG_DEPENDENT_TYPES)))
+        .where(pg_depend.c.objid >= USER_DEFINED_OBJECTS_MIN_OID)
+        .where(pg_identify_object.c.type == 'function')
+        .group_by(
+            pg_depend,
+            pg_proc.c.proname,
+            pg_identify_object.c.type)
+    )
 
 
 # stmt for getting a full list of dependents and identifying them
@@ -138,6 +184,14 @@ def _get_pg_rewrite(engine, metadata):
     return get_pg_catalog_table("pg_rewrite", engine, metadata=metadata)
 
 
+def _get_pg_trigger(engine, metadata):
+    return get_pg_catalog_table('pg_trigger', engine, metadata=metadata)
+
+
+def _get_pg_proc(engine, metadata):
+    return get_pg_catalog_table('pg_proc', engine, metadata=metadata)
+
+
 def _get_pg_identify_object_lateral_stmt(classid, objid, objsubid):
     return (
         select(
@@ -159,6 +213,8 @@ def _get_typed_dependency_pairs_stmt(engine, exclude_types):
     pg_identify_object = _get_pg_identify_object_lateral_stmt(
         pg_depend.c.classid, pg_depend.c.objid, pg_depend.c.objsubid)
     pg_rewrite = _get_pg_rewrite(engine, metadata)
+    pg_trigger = _get_pg_trigger(engine, metadata)
+    pg_proc = _get_pg_proc(engine, metadata)
 
     type_dependents = {}
     # each statement filters the base statement extracting dependents of a specific type
@@ -179,6 +235,16 @@ def _get_typed_dependency_pairs_stmt(engine, exclude_types):
 
     index_dependents = _get_index_dependents(pg_identify_object, dependency_pairs).cte('index_dependents')
     type_dependents['index'] = index_dependents
+
+    trigger_dependents = _get_trigger_dependents(pg_depend, pg_identify_object, pg_trigger).cte('trigger_dependents')
+    type_dependents['trigger'] = [trigger_dependents]
+
+    sequence_dependents = _get_sequence_dependents(pg_identify_object, dependency_pairs).cte('sequence_dependents')
+    type_dependents['sequence'] = [sequence_dependents]
+
+    # only schemas' function dependents
+    function_dependents = _get_function_dependents(pg_depend, pg_identify_object, pg_proc).cte('function_dependents')
+    type_dependents['function'] = [function_dependents]
 
     dependent_selects = [
         select(dependent)

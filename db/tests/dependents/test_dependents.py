@@ -28,7 +28,7 @@ def test_correct_dependents_amount_and_level(engine, library_tables_oids):
 
     publishers_dependents = _get_object_dependents(publishers_dependents_graph, library_tables_oids['Publishers'])
 
-    assert len(publishers_dependents) == 2
+    assert len(publishers_dependents) == 3
     assert all(
         [
             r['level'] == 1
@@ -75,7 +75,12 @@ def test_constrains_as_dependents(engine, library_tables_oids, library_db_tables
         'Checkouts_Item id_fkey', library_tables_oids['Checkouts'], engine
     )
 
-    assert sorted(items_dependents_oids) == sorted(items_constraint_oids + [checkouts_items_fk_oid])
+    assert all(
+        [
+            oid in items_dependents_oids
+            for oid in items_constraint_oids + [checkouts_items_fk_oid]
+        ]
+    )
 
 
 # if a table contains a foreign key referencing itself, it shouldn't be treated as a dependent
@@ -177,7 +182,7 @@ def test_views_as_dependents(engine_with_schema, library_db_tables, library_tabl
     assert publications_view_dependent['name'] == view_name
 
 
-def test_indexex_as_dependents(engine, library_db_tables, library_tables_oids):
+def test_indexes_as_dependents(engine, library_db_tables, library_tables_oids):
     index_name = 'index'
     index = Index(index_name, library_db_tables['Publishers'].c.id)
     index.create(engine)
@@ -207,3 +212,12 @@ def test_filter(engine, library_tables_oids, exclude_types):
             type not in dependents_types for type in exclude_types
         ]
     )
+
+
+def test_sequences_as_dependents(engine, library_tables_oids):
+    publishers_oid = library_tables_oids['Publishers']
+    publishers_sequence_name = '"Publishers_id_seq"'
+    publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, [])
+    publishers_sequence_dependent = _get_object_dependents_by_name(publishers_dependents_graph, publishers_oid, publishers_sequence_name)[0]
+
+    assert publishers_sequence_dependent['name'] == publishers_sequence_name

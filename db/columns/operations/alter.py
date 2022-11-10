@@ -1,8 +1,8 @@
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import DefaultClause, text, DDL, select
-from sqlalchemy.exc import DataError, InternalError
-from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue
+from sqlalchemy.exc import DataError, InternalError, ProgrammingError
+from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue, StringDataRightTruncation, RaiseException, SyntaxError
 
 from db.columns.defaults import NAME, NULLABLE
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
@@ -103,12 +103,22 @@ def retype_column(
     except DataError as e:
         if type(e.orig) == InvalidParameterValue:
             raise InvalidTypeOptionError
-        if type(e.orig) == InvalidTextRepresentation:
-            raise InvalidTypeError
+        elif type(e.orig) == InvalidTextRepresentation:
+            raise InvalidTypeError(column_name, new_type)
+        elif type(e.orig) == StringDataRightTruncation:
+            raise e.orig
         else:
-            raise e
+            raise e.orig
     except InternalError as e:
-        raise e.orig
+        if type(e.orig) == RaiseException:
+            raise InvalidTypeError(column_name, new_type)
+        else:
+            raise e.orig
+    except ProgrammingError as e:
+        if type(e.orig) == SyntaxError:
+            raise InvalidTypeOptionError
+        else:
+            raise e.orig
 
 
 def alter_column_type(
