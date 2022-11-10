@@ -28,7 +28,7 @@
   $: column = selectedColumns.length === 1 ? selectedColumns[0] : undefined;
 
   function updateColumnSelection(change: CustomEvent) {
-    selection.selectColumns(change.detail);
+    selection.intersectSelectedRowsWithGivenColumns(change.detail);
   }
 </script>
 

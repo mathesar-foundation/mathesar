@@ -383,7 +383,12 @@ export default class SheetSelection<
     return false;
   }
 
-  selectColumns(columns: Column[]): void {
+  /**
+   * Modifies the selected cells, forming a new selection by maintaining the
+   * currently selected rows but altering the selected columns to match the
+   * supplied columns.
+   */
+  intersectSelectedRowsWithGivenColumns(columns: Column[]): void {
     const selectedRows = this.getSelectedUniqueRowsId(
       new ImmutableSet(this.selectedCells.getValues()),
     );
