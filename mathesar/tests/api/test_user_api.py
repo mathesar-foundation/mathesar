@@ -425,7 +425,7 @@ def test_database_role_create_non_superuser(client_bob, user_bob):
     assert response.json()[0]['code'] == 2151
 
 
-def test_schema_role_create(client, user_bob):
+def test_schema_role_create_by_superuser(client, user_bob):
     role = 'editor'
     schema = Schema.objects.all()[0]
     data = {'user': user_bob.id, 'role': role, 'schema': schema.id}
