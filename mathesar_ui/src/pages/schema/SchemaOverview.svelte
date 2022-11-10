@@ -53,10 +53,8 @@
 </div>
 
 <style lang="scss">
-  :root {
-    --container-gap: 2rem;
-  }
   .container {
+    --container-gap: 2rem;
     display: flex;
     flex-direction: column;
 
