@@ -107,7 +107,9 @@
         />
       {/if}
 
-      <div class="title">Exploring from</div>
+      <div class="title">
+        {isSaved ? 'Based on' : 'Exploring from'}
+      </div>
       <div class="base-table-holder" class:table-selected={currentTable}>
         {#if currentTable}
           <TableName table={currentTable} />
@@ -215,7 +217,7 @@
         .base-table-holder {
           flex-grow: 0;
           flex-shrink: 0;
-          margin-left: 1rem;
+          margin-left: 0.7rem;
 
           &.table-selected {
             font-weight: 590;
