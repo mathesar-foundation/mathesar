@@ -33,8 +33,13 @@
   const addEditModal = modal.spawnModalController();
 
   type TabsKey = 'overview' | 'tables' | 'explorations';
-  type TabItem = { label: string; id: TabsKey };
-  const tabs: TabItem[] = [
+  type TabItem = { label: string; id: TabsKey; count?: number };
+
+  let activeTab: TabItem;
+  $: tablesMap = $tablesStore.data;
+  $: explorationsMap = $queries.data;
+
+  $: tabs = [
     {
       label: 'Overview',
       id: 'overview',
@@ -42,15 +47,14 @@
     {
       label: 'Tables',
       id: 'tables',
+      count: tablesMap.size,
     },
     {
       label: 'Explorations',
       id: 'explorations',
+      count: explorationsMap.size,
     },
   ];
-  let activeTab: TabItem;
-  $: tablesMap = $tablesStore.data;
-  $: explorationsMap = $queries.data;
 
   function handleEditSchema() {
     addEditModal.open();
@@ -83,6 +87,14 @@
   </AppSecondaryHeader>
 
   <TabContainer bind:activeTab {tabs}>
+    <slot slot="tab" let:tab>
+      <div class="tab-header-container">
+        <span>{tab.label}</span>
+        {#if tab.count !== undefined}
+          <span class="count">{tab.count}</span>
+        {/if}
+      </div>
+    </slot>
     <slot>
       {#if activeTab?.id === 'overview'}
         <div class="tab-container">
@@ -111,5 +123,20 @@
 <style lang="scss">
   .tab-container {
     padding-top: 1rem;
+  }
+
+  .tab-header-container {
+    display: flex;
+    align-items: center;
+
+    > :global(* + *) {
+      margin-left: 0.25rem;
+    }
+
+    .count {
+      border-radius: var(--border-radius-l);
+      background: var(--slate-100);
+      padding: 0.071rem 0.14rem;
+    }
   }
 </style>
