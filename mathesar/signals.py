@@ -31,8 +31,8 @@ def compute_preview_column_settings(**kwargs):
 
 
 @receiver(post_save, sender=DatabaseRole)
-def give_public_schema_manager_access(**kwargs):
+def give_manager_access_to_public_schema(**kwargs):
     if kwargs['created']:
         instance = kwargs['instance']
-        public_schema = Schema.current_objects.get(oid=2200)
+        public_schema = Schema.current_objects.get(oid=2200, database=instance.database)
         SchemaRole.objects.create(schema=public_schema, user=instance.user, role=Role.MANAGER.value)

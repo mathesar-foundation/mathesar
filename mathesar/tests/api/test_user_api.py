@@ -209,7 +209,7 @@ def test_database_role_list_superuser(client, user_bob):
 
 
 def test_schema_role_list(client, user_bob):
-    role = 'manager'
+    role = 'viewer'
     schema = Schema.objects.all()[0]
     SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
 
@@ -224,6 +224,55 @@ def test_schema_role_list(client, user_bob):
     assert role_data['user'] == user_bob.id
     assert role_data['role'] == role
     assert role_data['schema'] == schema.id
+
+
+def test_schema_role_list_database_viewer(client, user_bob):
+    role = 'viewer'
+    schema = Schema.objects.all()[0]
+    DatabaseRole.objects.create(user=user_bob, database=schema.database, role=role)
+
+    response = client.get('/api/ui/v0/schema_roles/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+
+
+def test_schema_role_list_schema_viewer(create_schema, client_bob, user_bob, user_alice, get_uid):
+    different_schema = create_schema(get_uid())
+    SchemaRole.objects.create(user=user_bob, schema=different_schema, role='viewer')
+    SchemaRole.objects.create(user=user_alice, schema=different_schema, role='editor')
+    response = client_bob.get('/api/ui/v0/schema_roles/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 2
+
+
+def test_schema_role_list_no_roles(create_schema, client_bob, user_alice, get_uid):
+    schema = Schema.objects.all()[0]
+    different_schema = create_schema(get_uid())
+    DatabaseRole.objects.create(user=user_alice, database=schema.database, role='viewer')
+    SchemaRole.objects.create(user=user_alice, schema=different_schema, role='manager')
+    response = client_bob.get('/api/ui/v0/schema_roles/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 0
+
+
+def test_schema_role_list_with_roles_on_multiple_database(FUN_create_dj_db, create_schema, client_bob, user_alice, get_uid):
+    FUN_create_dj_db(get_uid())
+    FUN_create_dj_db(get_uid())
+    schema = Schema.objects.all()[0]
+    different_schema = create_schema(get_uid())
+    DatabaseRole.objects.create(user=user_alice, database=schema.database, role='viewer')
+    SchemaRole.objects.create(user=user_alice, schema=different_schema, role='manager')
+    response = client_bob.get('/api/ui/v0/schema_roles/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 0
 
 
 def test_database_role_detail(client, user_bob):
