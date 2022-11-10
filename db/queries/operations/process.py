@@ -1,13 +1,13 @@
-from db.transforms.base import UnprocessedTransform
+from db.transforms.base import PossiblyPartialTransform
 
 
 def get_processed_transformations(db_query):
     """
     Processes db_query's transformations and returns them. Resulting sequence is the db_query's
-    transform sequence, but each unprocessed transform is replaced with a transform that's the
+    transform sequence, but each possibly partial transform is replaced with a transform that's the
     result of processing it.
 
-    See UnprocessedTransform for more information.
+    See PossiblyPartialTransform for more information.
     """
     return tuple(
         _get_processed_transformation(db_query, ix, db_transformation)
@@ -17,8 +17,8 @@ def get_processed_transformations(db_query):
 
 
 def _get_processed_transformation(db_query, ix, db_transformation):
-    if isinstance(db_transformation, UnprocessedTransform):
+    if isinstance(db_transformation, PossiblyPartialTransform):
         db_transformation = db_transformation.get_processed(
-            db_query, index_in_transformation_pipeline=ix
+            db_query, ix_in_transform_pipeline=ix
         )
     return db_transformation

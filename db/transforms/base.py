@@ -49,21 +49,16 @@ class Transform(ABC):
         return dict()
 
 
-class UnprocessedTransform(Transform):
+class PossiblyPartialTransform(Transform):
     """
-    An unprocessed transform is a way to allow transformations that are not fully specified and
-    need to be processed into a regular transform before they can be applied to a relation.
+    A transform that may be partially specified. It is expected that, before we apply it to a
+    relation, we'll pass it through our processing routines, which will always produce a fully
+    specified transform. It's a way to allow transformations that are not fully specified and
+    need to be processed (have their spec rewritten) before they can be applied to a relation.
     """
-
-    def apply_to_relation(self, _):
-        message = (
-            "Programming error; "
-            "this is an unprocessed transform: it should never be applied."
-        )
-        raise Exception(message)
 
     @abstractmethod
-    def get_processed(self, db_query, index_in_transformation_pipeline):
+    def get_processed(self, db_query, ix_in_transform_pipeline):
         """
         Processes this transform into a new transform, possibly of a different type, and returns
         the new transform. Parametrized by the db_query that has this transform in its transform

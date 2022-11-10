@@ -5,12 +5,11 @@ from mathesar.state.cached_property import cached_property
 from db.queries.base import DBQuery, InitialColumn
 from db.queries.operations.process import get_processed_transformations
 from db.transforms.operations.deserialize import deserialize_transformation
+from db.transforms.operations.serialize import serialize_transformation
 
 from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
 from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValueType, DictHasBadKeys
-from db.transforms.operations.deserialize import deserialize_transformation
-from db.transforms.operations.serialize import serialize_transformation
 from mathesar.state import get_cached_metadata
 
 
@@ -248,9 +247,9 @@ class UIQuery(BaseModel, Relation):
         """
         The transformations attribute is normally specified via a HTTP request. Now we're
         introducing the concept of processed transformations, where we look at the
-        transformations and we find special transformations that need processing (unprocessed
-        transformations), if any, and replace them with transformations resulting from processing
-        them. The frontend then reflects our updated transformations.
+        transformations and we find transformations that may be partially specified, if any, and
+        replace them with transformations resulting from processing them. The frontend then
+        reflects our updated transformations.
 
         We're keeping this functionality somewhat separate from the default/simpler transformation
         pipeline. Meaning that it is not enabled by default and has to be triggered on demand (by
@@ -263,11 +262,7 @@ class UIQuery(BaseModel, Relation):
         certain transformations might alter the transformation pipeline, which would then need
         reflecting by frontend; that might be a breaking change.
 
-        It is also not clear if we'll want to keep transformation processing in the long term. Our
-        motivation for doing processed queries at this time is to circumvent frontend technical
-        debt.
-
-        Also note, currently we only need transformation processing when using the `query/run`
+        Note, currently we only need transformation processing when using the `query/run`
         endpoint, which means that we don't need to update any persisted queries, which means that
         we don't need to trigger reflection.
         """
@@ -283,6 +278,15 @@ class UIQuery(BaseModel, Relation):
 
     @property
     def _processed_db_transformations(self):
+        """
+        Note, different from _db_transformations, because this can effectively rewrite
+        transformation specs. And we might not want to do that every time db_transformations are
+        accessed, due to possible performance costs.
+
+        If it weren't for performance costs, we might consider replacing _db_transformations with
+        this: the effect would be that a persisted query could have different summarizations in
+        django database than what is being evaluated in Postgres.
+        """
         return get_processed_transformations(self.db_query)
 
     @property
