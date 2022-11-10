@@ -50,6 +50,7 @@
     border: 1px solid var(--slate-300);
     border-radius: var(--border-radius-l);
     max-width: 22rem;
+    overflow: hidden;
 
     > :global(* + *) {
       margin-top: 1rem;
@@ -73,8 +74,8 @@
   .actions {
     display: flex;
     flex-direction: row;
-    // font-weight: bolder;
-    border-top: 1px solid var(--sand-100);
+    background-color: var(--sand-100);
+    border-top: 1px solid var(--sand-200);
 
     :global(.action) {
       flex: 1;
@@ -82,7 +83,7 @@
       justify-content: center;
 
       &:first-child {
-        border-right: 1px solid var(--sand-100);
+        border-right: 1px solid var(--sand-200);
         border-bottom-left-radius: var(--border-radius-l);
       }
       &:last-child {
