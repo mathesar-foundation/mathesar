@@ -28,13 +28,18 @@ export class AccompanyingElements implements Readable<Set<HTMLElement>> {
     this.parent = parent;
   }
 
-  add(el: HTMLElement): void {
+  /**
+   * @returns a function to remove the element, which should be called to avoid
+   * memory leaks
+   */
+  add(el: HTMLElement): () => void {
     this.elements.update((elements) => {
       const s = new Set(elements);
       s.add(el);
       return s;
     });
     this.parent?.add(el);
+    return () => this.delete(el);
   }
 
   delete(el: HTMLElement): void {

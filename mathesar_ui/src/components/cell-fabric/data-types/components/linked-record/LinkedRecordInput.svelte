@@ -64,11 +64,15 @@
    * to tell the dropdown not to close when the user clicks within the Record
    * Selector UI, so we set the modal element to "accompany" the dropdown.
    */
-  function setRecordSelectorToAccompanyDropdown() {
-    const modal = document.querySelector<HTMLElement>('.modal-record-selector');
-    if (dropdownAccompanyingElements && modal) {
-      dropdownAccompanyingElements.add(modal);
+  function setRecordSelectorToAccompanyDropdown(): () => void {
+    if (!dropdownAccompanyingElements) {
+      return () => {};
     }
+    const modal = document.querySelector<HTMLElement>('.modal-record-selector');
+    if (!modal) {
+      return () => {};
+    }
+    return dropdownAccompanyingElements.add(modal);
   }
 
   async function launchRecordSelector() {
@@ -76,8 +80,9 @@
     isAcquiringInput = true;
     const recordSelectorPromise = recordSelector.acquireUserInput({ tableId });
     await tick();
-    setRecordSelectorToAccompanyDropdown();
+    const cleanupDropdown = setRecordSelectorToAccompanyDropdown();
     const result = await recordSelectorPromise;
+    cleanupDropdown();
     isAcquiringInput = false;
     if (result === undefined) {
       dispatch('recordSelectorCancel');
