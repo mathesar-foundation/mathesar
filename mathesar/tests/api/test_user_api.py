@@ -162,6 +162,21 @@ def test_database_role_list_user_without_view_permission(client_bob, user_alice)
     assert response_data['count'] == 0
 
 
+def test_db_role_list_with_roles_on_multiple_database(FUN_create_dj_db, client_bob, user_bob, get_uid):
+    FUN_create_dj_db(get_uid())
+    FUN_create_dj_db(get_uid())
+    FUN_create_dj_db(get_uid())
+    databases = Database.objects.all()
+    database_with_viewer_access = databases[0]
+    DatabaseRole.objects.create(user=user_bob, database=database_with_viewer_access, role='viewer')
+    database_with_manager_access = databases[1]
+    DatabaseRole.objects.create(user=user_bob, database=database_with_manager_access, role='manager')
+
+    response = client_bob.get('/api/ui/v0/database_roles/')
+
+    assert response.status_code == 200
+
+
 def test_database_role_list_user_with_view_permission(client_bob, user_alice, user_bob):
     role = 'manager'
     database = Database.objects.all()[0]
@@ -323,6 +338,24 @@ def test_database_role_create_by_manager(client_bob, user_bob, user_alice):
     assert response_data['user'] == user_alice.id
     assert response_data['role'] == role
     assert response_data['database'] == database.id
+
+
+def test_db_role_create_with_roles_on_multiple_database(FUN_create_dj_db, client_bob, user_bob, user_alice, get_uid):
+    FUN_create_dj_db(get_uid())
+    FUN_create_dj_db(get_uid())
+    FUN_create_dj_db(get_uid())
+    databases = Database.objects.all()
+    database_with_viewer_access = databases[0]
+    DatabaseRole.objects.create(user=user_bob, database=database_with_viewer_access, role='viewer')
+    database_with_manager_access = databases[1]
+    DatabaseRole.objects.create(user=user_bob, database=database_with_manager_access, role='manager')
+
+    role = 'viewer'
+    data = {'user': user_alice.id, 'role': role, 'database': database_with_viewer_access.id}
+
+    response = client_bob.post('/api/ui/v0/database_roles/', data)
+
+    assert response.status_code == 400
 
 
 def test_database_role_create_non_superuser(client_bob, user_bob):
