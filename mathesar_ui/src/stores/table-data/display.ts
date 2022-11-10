@@ -1,126 +1,12 @@
-import { writable, get, derived } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
 import { WritableMap } from '@mathesar-component-library';
-import type { Column } from '@mathesar/api/tables/columns';
 import type { Meta } from './meta';
 import type { ColumnsDataStore } from './columns';
-import {
-  type Row,
-  type RecordsData,
-  type RecordRow,
-  filterRecordRows,
-} from './records';
-
-// TODO: Select active cell using primary key instead of index
-// Checkout scenarios with pk consisting multiple columns
-export interface ActiveCell {
-  rowIndex: number;
-  columnId: number;
-}
+import { type Row, type RecordsData, filterRecordRows } from './records';
 
 // @deprecated
 export const DEFAULT_COLUMN_WIDTH = 160;
-
-enum Direction {
-  Up = 'up',
-  Down = 'down',
-  Left = 'left',
-  Right = 'right',
-}
-
-function getDirection(event: KeyboardEvent): Direction | undefined {
-  const { key } = event;
-  const shift = event.shiftKey;
-  switch (true) {
-    case shift && key === 'Tab':
-      return Direction.Left;
-    case shift:
-      return undefined;
-    case key === 'ArrowUp':
-      return Direction.Up;
-    case key === 'ArrowDown':
-      return Direction.Down;
-    case key === 'ArrowLeft':
-      return Direction.Left;
-    case key === 'ArrowRight':
-    case key === 'Tab':
-      return Direction.Right;
-    default:
-      return undefined;
-  }
-}
-
-function getHorizontalDelta(direction: Direction): number {
-  switch (direction) {
-    case Direction.Left:
-      return -1;
-    case Direction.Right:
-      return 1;
-    default:
-      return 0;
-  }
-}
-
-function getVerticalDelta(direction: Direction): number {
-  switch (direction) {
-    case Direction.Up:
-      return -1;
-    case Direction.Down:
-      return 1;
-    default:
-      return 0;
-  }
-}
-
-export function isCellActive(
-  activeCell: ActiveCell,
-  row: RecordRow,
-  column: Column,
-): boolean {
-  return (
-    activeCell &&
-    activeCell?.columnId === column.id &&
-    activeCell.rowIndex === row.rowIndex
-  );
-}
-
-// TODO: Create a common utility action to handle active element based scroll
-export function scrollBasedOnActiveCell(): void {
-  const activeCell: HTMLElement | null =
-    document.querySelector('.cell.is-active');
-  const activeRow = activeCell?.parentElement;
-  const container = document.querySelector('.virtual-list.outerElement');
-  if (!container || !activeRow) {
-    return;
-  }
-  // Vertical scroll
-  if (
-    activeRow.offsetTop + activeRow.clientHeight + 40 >
-    container.scrollTop + container.clientHeight
-  ) {
-    const offsetValue: number =
-      container.getBoundingClientRect().bottom -
-      activeRow.getBoundingClientRect().bottom -
-      40;
-    container.scrollTop -= offsetValue;
-  } else if (activeRow.offsetTop - 30 < container.scrollTop) {
-    container.scrollTop = activeRow.offsetTop - 30;
-  }
-
-  // Horizontal scroll
-  if (
-    activeCell.offsetLeft + activeRow.clientWidth + 30 >
-    container.scrollLeft + container.clientWidth
-  ) {
-    const offsetValue: number =
-      container.getBoundingClientRect().right -
-      activeCell.getBoundingClientRect().right -
-      30;
-    container.scrollLeft -= offsetValue;
-  } else if (activeCell.offsetLeft - 30 < container.scrollLeft) {
-    container.scrollLeft = activeCell.offsetLeft - 30;
-  }
-}
 
 export interface ColumnPlacement {
   /** CSS value in px */
@@ -152,8 +38,6 @@ export class Display {
   scrollOffset: Writable<number>;
 
   horizontalScrollOffset: Writable<number>;
-
-  activeCell: Writable<ActiveCell | undefined>;
 
   isTableInspectorVisible: Writable<boolean>;
 
@@ -189,7 +73,6 @@ export class Display {
     this.recordsData = recordsData;
     this.horizontalScrollOffset = writable(0);
     this.scrollOffset = writable(0);
-    this.activeCell = writable<ActiveCell | undefined>(undefined);
     this.isTableInspectorVisible = writable(true);
 
     this.customizedColumnWidths = new WritableMap();
@@ -245,88 +128,5 @@ export class Display {
         return allRecords;
       },
     );
-  }
-
-  resetActiveCell(): void {
-    this.activeCell.set(undefined);
-  }
-
-  selectCell(row: RecordRow, column: Column): void {
-    this.activeCell.set({
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      rowIndex: row.rowIndex,
-      columnId: column.id,
-    });
-  }
-
-  private getAdjacentCell(
-    activeCell: ActiveCell,
-    direction: Direction,
-  ): ActiveCell | undefined {
-    const rowIndex = (() => {
-      const delta = getVerticalDelta(direction);
-      if (delta === 0) {
-        return activeCell.rowIndex;
-      }
-      const totalCount = get(this.recordsData.totalCount) ?? 0;
-      const savedRecords = get(this.recordsData.savedRecords);
-      const newRecords = get(this.recordsData.newRecords);
-      const pagination = get(this.meta.pagination);
-      const { offset } = pagination;
-      const pageSize = pagination.size;
-      const minRowIndex = 0;
-      /**
-       * We are not subtracting 1 from the below maxRowIndex calculation
-       * inorder to account for the add-new-record placeholder row
-       */
-      const maxRowIndex =
-        Math.min(pageSize, totalCount - offset, savedRecords.length) +
-        newRecords.length;
-      const newRowIndex = activeCell.rowIndex + delta;
-      if (newRowIndex < minRowIndex || newRowIndex > maxRowIndex) {
-        return undefined;
-      }
-      return newRowIndex;
-    })();
-    if (rowIndex === undefined) {
-      return undefined;
-    }
-
-    const columnId = (() => {
-      const delta = getHorizontalDelta(direction);
-      if (delta === 0) {
-        return activeCell.columnId;
-      }
-      const columns = get(this.columnsDataStore.columns);
-      const index = columns.findIndex((c) => c.id === activeCell.columnId);
-      const target = columns[index + delta] as Column | undefined;
-      return target?.id;
-    })();
-    if (columnId === undefined) {
-      return undefined;
-    }
-
-    return { rowIndex, columnId };
-  }
-
-  handleKeyEventsOnActiveCell(key: KeyboardEvent): 'moved' | undefined {
-    const direction = getDirection(key);
-    if (!direction) {
-      return undefined;
-    }
-    let moved = false;
-    this.activeCell.update((activeCell) => {
-      if (!activeCell) {
-        return undefined;
-      }
-      const adjacentCell = this.getAdjacentCell(activeCell, direction);
-      if (adjacentCell) {
-        moved = true;
-        return adjacentCell;
-      }
-      return activeCell;
-    });
-
-    return moved ? 'moved' : undefined;
   }
 }

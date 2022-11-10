@@ -15,6 +15,7 @@ export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
 export { default as CheckboxGroup } from './checkbox-group/CheckboxGroup.svelte';
+export { default as Chip } from './chip/Chip.svelte';
 export { default as Collapsible } from './collapsible/Collapsible.svelte';
 export { default as ContextMenu } from './context-menu/ContextMenu.svelte';
 export { default as Debounce } from './debounce/Debounce.svelte';

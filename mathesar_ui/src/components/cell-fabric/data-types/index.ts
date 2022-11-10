@@ -7,6 +7,7 @@ import duration from './duration';
 import date from './date';
 import time from './time';
 import datetime from './datetime';
+import array from './array';
 import type { CellDataType, CellComponentFactory } from './typeDefinitions';
 
 const dataTypeComponentFactories: Record<CellDataType, CellComponentFactory> = {
@@ -19,6 +20,7 @@ const dataTypeComponentFactories: Record<CellDataType, CellComponentFactory> = {
   date,
   time,
   datetime,
+  array,
 };
 
 export default dataTypeComponentFactories;
