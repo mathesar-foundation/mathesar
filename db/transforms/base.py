@@ -38,6 +38,18 @@ class Transform(ABC):
             and self.__dict__ == other.__dict__
         )
 
+    @property
+    def map_of_output_alias_to_input_alias(self):
+        """
+        Expected to return a mapping of output aliases to input aliases.
+
+        Useful when looking for parent aliases of a given alias.
+
+        Notice that the reverse mapping (from input aliases to output aliases) would be
+        significantly different, because a single input alias can map to multiple output aliases.
+        """
+        return dict()
+
 
 class Filter(Transform):
     type = "filter"
@@ -170,9 +182,21 @@ class Summarize(Transform):
     """
     type = "summarize"
 
-    # Largely for testing; when generating specs, we want predictable output aliases.
+    # When generating specs, largely in testing, we want predictable output aliases.
     default_group_output_alias_suffix = "_grouped"
     default_agg_output_alias_suffix = "_agged"
+
+    @property
+    def map_of_output_alias_to_input_alias(self):
+        m = dict()
+        grouping_expressions = self.spec['grouping_expressions']
+        aggregation_expressions = self.spec['aggregation_expressions']
+        all_expressions = grouping_expressions + aggregation_expressions
+        for expression in all_expressions:
+            expr_output_alias = expression.get('output_alias', None)
+            expr_input_alias = expression.get('input_alias', None)
+            m[expr_output_alias] = expr_input_alias
+        return m
 
     def apply_to_relation(self, relation):
 
