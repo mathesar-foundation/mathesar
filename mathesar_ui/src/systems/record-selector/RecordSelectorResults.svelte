@@ -1,10 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-
-  // TODO: Remove route dependency in systems
-  import RowCellBackgrounds from '@mathesar/systems/table-view/row/RowCellBackgrounds.svelte';
-
   import type { Column } from '@mathesar/api/tables/columns';
+  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import KeyboardKey from '@mathesar/components/KeyboardKey.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';

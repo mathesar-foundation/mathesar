@@ -139,7 +139,7 @@ export interface PostgresMoneyColumn extends Column {
 
 export type MoneyColumn = MathesarMoneyColumn | PostgresMoneyColumn;
 
-// TODO: Remove specification DB types here
+// TODO: Remove specification of DB types here
 export interface NumberColumn extends Column {
   type:
     | 'BIGINT'
@@ -154,4 +154,8 @@ export interface NumberColumn extends Column {
     | 'SMALLSERIAL';
   type_options: Partial<NumberTypeOptions> | null;
   display_options: Partial<NumberDisplayOptions> | null;
+}
+
+export interface ArrayTypeOptions extends Record<string, unknown> {
+  item_type: string;
 }

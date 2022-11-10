@@ -92,49 +92,49 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     id: 'json_array_length_equals',
     name: 'number of elements is',
     uiTypeParameterMap: {
-      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+      [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Number],
     },
   },
   {
     id: 'json_array_length_greater_than',
     name: 'number of elements >',
     uiTypeParameterMap: {
-      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+      [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Number],
     },
   },
   {
     id: 'json_array_length_greater_or_equal',
     name: 'number of elements >=',
     uiTypeParameterMap: {
-      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+      [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Number],
     },
   },
   {
     id: 'json_array_length_less_than',
     name: 'number of elements <',
     uiTypeParameterMap: {
-      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+      [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Number],
     },
   },
   {
     id: 'json_array_length_less_or_equal',
     name: 'number of elements <=',
     uiTypeParameterMap: {
-      [abstractTypeCategory.Array]: [abstractTypeCategory.Number],
+      [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Number],
     },
   },
   {
     id: 'json_array_not_empty',
     name: 'array is not empty',
     uiTypeParameterMap: {
-      [abstractTypeCategory.Array]: [],
+      [abstractTypeCategory.JsonArray]: [],
     },
   },
   {
     id: 'json_array_contains',
     name: 'array contains',
     uiTypeParameterMap: {
-      [abstractTypeCategory.Array]: [abstractTypeCategory.Text],
+      [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Text],
     },
   },
   {

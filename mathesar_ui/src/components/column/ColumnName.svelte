@@ -13,7 +13,7 @@
   export let column: DisplayColumn;
   export let isLoading = false;
 
-  function getColumnIconProps(_column: DisplayColumn): IconProps {
+  function getColumnIconProps(_column: DisplayColumn): IconProps | IconProps[] {
     if (_column.constraintsType?.includes('primary')) {
       return iconConstraint;
     }
@@ -25,7 +25,10 @@
     return getAbstractTypeForDbType(
       _column.type,
       get(currentDbAbstractTypes)?.data,
-    ).icon;
+    ).getIcon({
+      dbType: _column.type,
+      typeOptions: _column.type_options,
+    });
   }
 
   $: icon = getColumnIconProps(column);
