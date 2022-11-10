@@ -1,5 +1,6 @@
 from django.db import transaction
 
+from db.schemas.utils import get_schema_oid_from_name
 from mathesar.models.base import Database, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
 
@@ -261,7 +262,13 @@ def test_schema_role_list_no_roles(create_schema, client_bob, user_alice, get_ui
     assert response_data['count'] == 0
 
 
-def test_schema_role_list_with_roles_on_multiple_database(FUN_create_dj_db, create_schema, client_bob, user_alice, get_uid):
+def test_schema_role_list_with_roles_on_multiple_database(
+        FUN_create_dj_db,
+        create_schema,
+        client_bob,
+        user_alice,
+        get_uid
+):
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
     schema = Schema.objects.all()[0]
@@ -433,6 +440,106 @@ def test_schema_role_create(client, user_bob):
     assert response_data['schema'] == schema.id
 
 
+def test_schema_role_create_no_roles(create_schema, client_bob, user_alice, get_uid):
+    role = 'manager'
+    schema = create_schema(get_uid())
+    data = {'user': user_alice.id, 'role': role, 'schema': schema.id}
+    response = client_bob.post('/api/ui/v0/schema_roles/', data=data)
+    assert response.status_code == 400
+
+
+def test_schema_role_create_without_permissible_role(create_schema, client_bob, user_bob, user_alice, get_uid):
+    schema = create_schema(get_uid())
+    SchemaRole.objects.create(user=user_bob, schema=schema, role='editor')
+    role = 'editor'
+    data = {'user': user_alice.id, 'role': role, 'schema': schema.id}
+    response = client_bob.post('/api/ui/v0/schema_roles/', data=data)
+    assert response.status_code == 400
+
+
+def test_schema_role_create_by_schema_manager(create_schema, client_bob, user_bob, user_alice, get_uid):
+    role = 'manager'
+    schema = create_schema(get_uid())
+    SchemaRole.objects.create(user=user_bob, schema=schema, role='manager')
+    data = {'user': user_alice.id, 'role': role, 'schema': schema.id}
+    response = client_bob.post('/api/ui/v0/schema_roles/', data=data)
+    assert response.status_code == 201
+    response_data = response.json()
+    assert response_data['user'] == user_alice.id
+    assert response_data['role'] == role
+    assert response_data['schema'] == schema.id
+
+
+def test_schema_role_create_by_db_manager(create_schema, client_bob, user_bob, user_alice, get_uid):
+    role = 'manager'
+    schema = create_schema(get_uid())
+    DatabaseRole.objects.create(user=user_bob, database=schema.database, role='manager')
+    data = {'user': user_alice.id, 'role': role, 'schema': schema.id}
+    response = client_bob.post('/api/ui/v0/schema_roles/', data=data)
+    assert response.status_code == 201
+    response_data = response.json()
+    assert response_data['user'] == user_alice.id
+    assert response_data['role'] == role
+    assert response_data['schema'] == schema.id
+
+
+def test_schema_role_create_with_multiple_database(
+        FUN_create_dj_db,
+        MOD_engine_cache,
+        create_db_schema,
+        client_bob,
+        user_bob,
+        user_alice,
+        get_uid
+):
+    schema_params = [
+        ("schema_1", "database_1"), ("schema_2", "database_2"),
+        ("schema_3", "database_3"), ("schema_1", "database_3")
+    ]
+
+    dbs_to_create = set(param[1] for param in schema_params)
+
+    for db_name in dbs_to_create:
+        FUN_create_dj_db(db_name)
+
+    for schema_name, db_name in schema_params:
+        engine = MOD_engine_cache(db_name)
+        create_db_schema(schema_name, engine)
+
+    schemas = {
+        schema_param: Schema.objects.get(
+            oid=get_schema_oid_from_name(
+                schema_param[0],
+                MOD_engine_cache(schema_param[1])
+            ),
+        )
+        for schema_param in schema_params
+    }
+    db1_schema_with_manager_role = schemas[schema_params[0]]
+    db2_schema_with_no_schema_role_but_db_manager = schemas[schema_params[1]]
+    DatabaseRole.objects.create(
+        user=user_bob,
+        database=db2_schema_with_no_schema_role_but_db_manager.database,
+        role='manager'
+    )
+    db3_schema_with_no_role = schemas[schema_params[2]]
+    db3_schema_with_editor_role = schemas[schema_params[2]]
+    SchemaRole.objects.create(user=user_bob, schema=db1_schema_with_manager_role, role='manager')
+    SchemaRole.objects.create(user=user_bob, schema=db3_schema_with_editor_role, role='editor')
+    data = {'user': user_alice.id, 'role': 'manager', 'schema': db1_schema_with_manager_role.id}
+    response = client_bob.post('/api/ui/v0/schema_roles/', data=data)
+    assert response.status_code == 201
+    data = {'user': user_alice.id, 'role': 'manager', 'schema': db3_schema_with_no_role.id}
+    response = client_bob.post('/api/ui/v0/schema_roles/', data=data)
+    assert response.status_code == 400
+    data = {'user': user_alice.id, 'role': 'manager', 'schema': db3_schema_with_editor_role.id}
+    response = client_bob.post('/api/ui/v0/schema_roles/', data=data)
+    assert response.status_code == 400
+    data = {'user': user_alice.id, 'role': 'manager', 'schema': db2_schema_with_no_schema_role_but_db_manager.id}
+    response = client_bob.post('/api/ui/v0/schema_roles/', data=data)
+    assert response.status_code == 201
+
+
 def test_database_role_create_with_incorrect_role(client, user_bob):
     role = 'nonsense'
     database = Database.objects.all()[0]
@@ -522,12 +629,41 @@ def test_database_role_destroy_by_user_without_role(client_bob, user_alice):
     assert response.status_code == 404
 
 
-def test_schema_role_destroy(client, user_bob):
+def test_schema_role_destroy_by_superuser(client, user_bob):
     role = 'viewer'
     schema = Schema.objects.all()[0]
     schema_role = SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
 
     response = client.delete(f'/api/ui/v0/schema_roles/{schema_role.id}/')
+    assert response.status_code == 204
+
+
+def test_schema_role_destroy_by_manager(client_bob, user_bob):
+    role = 'manager'
+    schema = Schema.objects.all()[0]
+    schema_role = SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
+
+    response = client_bob.delete(f'/api/ui/v0/schema_roles/{schema_role.id}/')
+    assert response.status_code == 204
+
+
+def test_schema_role_destroy_by_non_manager(client_bob, user_bob):
+    role = 'viewer'
+    schema = Schema.objects.all()[0]
+    schema_role = SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
+
+    response = client_bob.delete(f'/api/ui/v0/schema_roles/{schema_role.id}/')
+    assert response.status_code == 403
+
+
+def test_schema_role_destroy_by_db_manager(client_bob, user_bob, user_alice):
+    schema = Schema.objects.all()[0]
+    database = schema.database
+    DatabaseRole.objects.create(user=user_bob, database=database, role='manager')
+
+    schema_role = SchemaRole.objects.create(user=user_alice, schema=schema, role='viewer')
+
+    response = client_bob.delete(f'/api/ui/v0/schema_roles/{schema_role.id}/')
     assert response.status_code == 204
 
 
