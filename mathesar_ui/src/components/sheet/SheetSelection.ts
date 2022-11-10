@@ -383,6 +383,26 @@ export default class SheetSelection<
     return false;
   }
 
+  /**
+   * Modifies the selected cells, forming a new selection by maintaining the
+   * currently selected rows but altering the selected columns to match the
+   * supplied columns.
+   */
+  intersectSelectedRowsWithGivenColumns(columns: Column[]): void {
+    const selectedRows = this.getSelectedUniqueRowsId(
+      new ImmutableSet(this.selectedCells.getValues()),
+    );
+    const cells: Cell<Row, Column>[] = [];
+    columns.forEach((column) => {
+      selectedRows.forEach((rowIndex) => {
+        const row = this.getRows()[rowIndex];
+        cells.push([row, column]);
+      });
+    });
+
+    this.selectMultipleCells(cells);
+  }
+
   toggleColumnSelection(column: Column): void {
     if (this.clearColumnSelection(column)) {
       return;
@@ -522,6 +542,15 @@ export default class SheetSelection<
       ...columnsSelectedWhenTheTableIsEmpty,
     ]);
     return Array.from(setOfUniqueColumnIds);
+  }
+
+  getSelectedUniqueRowsId(
+    selectedCells: ImmutableSet<string>,
+  ): Row['rowIndex'][] {
+    const setOfUniqueRowIndex = new Set([
+      ...[...selectedCells].map(getSelectedRowIndex),
+    ]);
+    return Array.from(setOfUniqueRowIndex);
   }
 
   destroy(): void {
