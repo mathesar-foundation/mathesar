@@ -23,6 +23,7 @@ services:
       - DISPLAY=${DISPLAY}
       - XAUTHORITY=/.Xauthority
       - DJANGO_SUPERUSER_PASSWORD=password
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings}
     command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./run.sh
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
