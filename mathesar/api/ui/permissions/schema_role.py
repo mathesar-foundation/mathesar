@@ -6,7 +6,6 @@ from mathesar.models.users import DatabaseRole, Role, SchemaRole
 
 
 class SchemaRoleAccessPolicy(AccessPolicy):
-
     # Anyone can view schema role as long as they have atleast a view access to that schema or its database
     # Create Access is restricted to superusers or managers of the schema or the database it belongs to.
     statements = [
@@ -31,8 +30,13 @@ class SchemaRoleAccessPolicy(AccessPolicy):
             databases_with_view_access = Database.objects.filter(
                 Q(databaserole__role__in=allowed_roles) & Q(databaserole__user=request.user)
             )
-            schema_with_view_access = Schema.objects.filter(Q(databaserole__role__in=allowed_roles) & Q(databaserole__user=request.user))
-            qs = qs.filter(Q(schema__in=schema_with_view_access) | Q(schema__database__in=databases_with_view_access))
+            schema_with_view_access = Schema.objects.filter(
+                Q(schemarole__role__in=allowed_roles) & Q(schemarole__user=request.user)
+            )
+            qs = qs.filter(
+                Q(schema__in=schema_with_view_access)
+                | Q(schema__database__in=databases_with_view_access)
+            )
         return qs
 
     def is_schema_manager(self, request, view, action):
