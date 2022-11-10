@@ -42,6 +42,19 @@ gen_alias = generate_attribute_accessor(
 group_output_alias_suffix = Summarize.default_group_output_alias_suffix
 agg_output_alias_suffix = Summarize.default_agg_output_alias_suffix
 
+def _gen_grouping_expr(alias):
+    return dict(
+        input_alias=alias,
+        output_alias=alias + group_output_alias_suffix,
+    )
+
+def _gen_agg_expr(alias):
+    return dict(
+        input_alias=alias,
+        output_alias=alias + agg_output_alias_suffix,
+        function="aggregate_to_array",
+    )
+
 @pytest.fixture
 def metadata():
     return get_empty_metadata()
@@ -142,25 +155,12 @@ full_summarize = Summarize(
     dict(
         base_grouping_column=gen_alias.academics.id,
         grouping_expressions=[
-            dict(
-                input_alias=gen_alias.academics.id,
-                output_alias=gen_alias.academics.id + group_output_alias_suffix,
-            ),
-            dict(
-                input_alias=gen_alias.academics.name,
-                output_alias=gen_alias.academics.name + group_output_alias_suffix,
-            ),
-            dict(
-                input_alias=gen_alias.universities.name,
-                output_alias=gen_alias.universities.name + group_output_alias_suffix,
-            ),
+            _gen_grouping_expr(gen_alias.academics.id),
+            _gen_grouping_expr(gen_alias.academics.name),
+            _gen_grouping_expr(gen_alias.universities.name),
         ],
         aggregation_expressions=[
-            dict(
-                input_alias=gen_alias.articles.title,
-                output_alias=gen_alias.articles.title + agg_output_alias_suffix,
-                function="aggregate_to_array",
-            ),
+            _gen_agg_expr(gen_alias.articles.title),
         ]
     )
 )
@@ -171,27 +171,12 @@ full_summarize_no_defaults = Summarize(
     dict(
         base_grouping_column=gen_alias.academics.id,
         grouping_expressions=[
-            dict(
-                input_alias=gen_alias.academics.id,
-                output_alias=gen_alias.academics.id + group_output_alias_suffix,
-            ),
+            _gen_grouping_expr(gen_alias.academics.id),
         ],
         aggregation_expressions=[
-            dict(
-                input_alias=gen_alias.academics.name,
-                output_alias=gen_alias.academics.name + agg_output_alias_suffix,
-                function="aggregate_to_array",
-            ),
-            dict(
-                input_alias=gen_alias.universities.name,
-                output_alias=gen_alias.universities.name + agg_output_alias_suffix,
-                function="aggregate_to_array",
-            ),
-            dict(
-                input_alias=gen_alias.articles.title,
-                output_alias=gen_alias.articles.title + agg_output_alias_suffix,
-                function="aggregate_to_array",
-            ),
+            _gen_agg_expr(gen_alias.academics.name),
+            _gen_agg_expr(gen_alias.universities.name),
+            _gen_agg_expr(gen_alias.articles.title),
         ]
     )
 )
@@ -233,7 +218,7 @@ full_summarize_no_defaults = Summarize(
         ],
         [
             empty_summarize,
-            full_summarize_no_defaults,
+            full_summarize,
             [],
             [
                 # should not affect summarization
@@ -252,15 +237,12 @@ full_summarize_no_defaults = Summarize(
             [],
         ],
         [
-            # less than empty summarization
+            # partly empty summarization
             Summarize(
                 dict(
                     base_grouping_column=gen_alias.academics.id,
                     grouping_expressions=[
-                        dict(
-                            input_alias=gen_alias.academics.id,
-                            output_alias=gen_alias.academics.id + group_output_alias_suffix,
-                        ),
+                        _gen_grouping_expr(gen_alias.academics.id),
                     ],
                     aggregation_expressions=[]
                 )
@@ -270,24 +252,31 @@ full_summarize_no_defaults = Summarize(
             [],
         ],
         [
-            # less than empty summarization
+            # partly summarization
             Summarize(
                 dict(
                     base_grouping_column=gen_alias.academics.id,
                     grouping_expressions=[
-                        dict(
-                            input_alias=gen_alias.academics.id,
-                            output_alias=gen_alias.academics.id + group_output_alias_suffix,
-                        ),
-                        dict(
-                            input_alias=gen_alias.universities.name,
-                            output_alias=gen_alias.universities.name + group_output_alias_suffix,
-                        ),
+                        _gen_grouping_expr(gen_alias.academics.id),
+                        _gen_grouping_expr(gen_alias.universities.name),
                     ],
                     aggregation_expressions=[]
                 )
             ),
-            full_summarize,
+            # like full_summarize, but `gen_alias.academics.name` grouping is after `gen_alias.universities.name`
+            Summarize(
+                dict(
+                    base_grouping_column=gen_alias.academics.id,
+                    grouping_expressions=[
+                        _gen_grouping_expr(gen_alias.academics.id),
+                        _gen_grouping_expr(gen_alias.universities.name),
+                        _gen_grouping_expr(gen_alias.academics.name),
+                    ],
+                    aggregation_expressions=[
+                        _gen_agg_expr(gen_alias.articles.title),
+                    ]
+                )
+            ),
             [],
             [],
         ],
