@@ -7,9 +7,9 @@
   import OverviewHeader from './OverviewHeader.svelte';
   import TablesList from './TablesList.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
-  import CreateEmptyTableButton from './CreateEmptyTableButton.svelte';
   import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
+  import CreateNewTableButton from './CreateNewTableButton.svelte';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
@@ -22,9 +22,7 @@
   <div class="vertical-container tables">
     <OverviewHeader title="Tables">
       <slot slot="action">
-        <CreateEmptyTableButton {database} {schema}>
-          New Table
-        </CreateEmptyTableButton>
+        <CreateNewTableButton {database} {schema} />
       </slot>
     </OverviewHeader>
     {#if tablesMap.size}

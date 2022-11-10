@@ -6,7 +6,7 @@
   export let href: string;
 </script>
 
-<a {href} class="menu-item">
+<a {href} class="menu-item menu-item-link">
   <div class="spacer cell" />
   <div class="control cell" />
   <div class="icon cell">
