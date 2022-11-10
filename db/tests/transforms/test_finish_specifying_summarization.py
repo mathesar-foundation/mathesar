@@ -152,6 +152,7 @@ def initial_columns(academics_ids):
         ),
     ]
 
+
 # a summarization transform that has the bare minimum partial specification.
 empty_summarize = Summarize(
     dict(
