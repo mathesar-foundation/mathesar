@@ -5,10 +5,12 @@
   import type { QueryInstance } from '@mathesar/api/queries';
   import ExplorationsList from './ExplorationsList.svelte';
   import EntityLayout from './EntityLayout.svelte';
+  import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
   export let explorationsMap: Map<number, QueryInstance>;
+  export let hasTablesToExplore: boolean;
 
   let explorationsSearchQuery = '';
 
@@ -56,6 +58,14 @@
     {/if}
   </slot>
   <slot slot="content">
-    <ExplorationsList explorations={filteredExplorations} {database} {schema} />
+    {#if !explorationsMap.size && hasTablesToExplore}
+      <CreateNewExplorationTutorial {database} {schema} />
+    {:else}
+      <ExplorationsList
+        explorations={filteredExplorations}
+        {database}
+        {schema}
+      />
+    {/if}
   </slot>
 </EntityLayout>

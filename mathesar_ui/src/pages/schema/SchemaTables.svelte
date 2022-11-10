@@ -4,6 +4,7 @@
   import TablesList from './TablesList.svelte';
   import EntityLayout from './EntityLayout.svelte';
   import CreateEmptyTableButton from './CreateEmptyTableButton.svelte';
+  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
 
   export let tablesMap: Map<number, TableEntry>;
 
@@ -53,6 +54,10 @@
     {/if}
   </slot>
   <slot slot="content">
-    <TablesList tables={filteredTables} {database} {schema} />
+    {#if tablesMap.size}
+      <TablesList tables={filteredTables} {database} {schema} />
+    {:else}
+      <CreateNewTableTutorial {database} {schema} />
+    {/if}
   </slot>
 </EntityLayout>

@@ -94,7 +94,12 @@
         </div>
       {:else}
         <div class="tab-container">
-          <SchemaExplorations {explorationsMap} {database} {schema} />
+          <SchemaExplorations
+            hasTablesToExplore={!!tablesMap.size}
+            {explorationsMap}
+            {database}
+            {schema}
+          />
         </div>
       {/if}
     </slot>
