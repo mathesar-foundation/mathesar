@@ -1,125 +1,96 @@
 <script lang="ts">
-  import { router } from 'tinro';
+  import { onMount, tick } from 'svelte';
 
+  import { ImmutableSet } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/tables/columns';
-  import type { Response as ApiRecordsResponse } from '@mathesar/api/tables/records';
-  import { ImmutableSet, portal, Spinner } from '@mathesar-component-library';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
+    constraintIsFk,
     setTabularDataStoreInContext,
     TabularData,
-    constraintIsFk,
+    type RecordRow,
   } from '@mathesar/stores/table-data';
-  import { postAPI, States } from '@mathesar/utils/api';
-  import { tables } from '@mathesar/stores/tables';
   import {
     buildInputData,
-    buildRecordSummariesForSheet,
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import Arrow from './Arrow.svelte';
-  import CellArranger from './CellArranger.svelte';
-  import CellWrapper from './CellWrapper.svelte';
-  import ColumnResizer from './ColumnResizer.svelte';
-  import QuarterCircle from './QuarterCircle.svelte';
+  import { tables } from '@mathesar/stores/tables';
+  import { States } from '@mathesar/utils/api';
+  import overflowObserver, {
+    makeOverflowDetails,
+  } from '@mathesar/utils/overflowObserver';
+  import Cell from './RecordSelectorCellWrapper.svelte';
   import type {
     RecordSelectorController,
     RecordSelectorResult,
   } from './RecordSelectorController';
-  import { setNewRecordSelectorControllerInContext } from './RecordSelectorController';
-  import RecordSelectorInput from './RecordSelectorInput.svelte';
-  import RecordSelectorResults from './RecordSelectorResults.svelte';
-  import { getPkValueInRecord } from './recordSelectorUtils';
-  import RecordSelectorWindow from './RecordSelectorWindow.svelte';
+  import { setRecordSelectorControllerInContext } from './RecordSelectorController';
+  import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
+  import RecordSelectorInputCell from './RecordSelectorInputCell.svelte';
+  import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
+  import {
+    getColumnIdToFocusInitially,
+    getPkValueInRecord,
+  } from './recordSelectorUtils';
+  import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
-  export let windowPositionerElement: HTMLElement;
+  export let nestedController: RecordSelectorController;
+  export let submitResult: (result: RecordSelectorResult) => void;
+  export let isHoveringCreate = false;
 
-  const nestedController = setNewRecordSelectorControllerInContext({
-    nestingLevel: controller.nestingLevel + 1,
-  });
   const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
   let columnWithFocus: Column | undefined = undefined;
-  let isSubmittingNewRecord = false;
+  /** It will be undefined if we're loading data, for example. */
+  let selectionIndex: number | undefined = undefined;
 
-  $: ({ columnWithNestedSelectorOpen, isOpen, rowType } = controller);
+  $: setRecordSelectorControllerInContext(nestedController);
+  $: ({ columnWithNestedSelectorOpen, purpose } = controller);
   $: tabularDataStore.set(tabularData);
   $: ({
     constraintsDataStore,
-    display,
     meta,
-    isLoading,
     columnsDataStore,
     id: tableId,
     recordsData,
+    processedColumns,
   } = tabularData);
-  $: ({ recordSummaries } = recordsData);
-  $: ({ constraints, state: constraintsState } = $constraintsDataStore);
+  $: table = $tables.data.get(tableId);
+  $: ({ recordSummaries, state: recordsDataState } = recordsData);
+  $: recordsDataIsLoading = $recordsDataState === States.Loading;
+  $: ({ constraints } = $constraintsDataStore);
   $: nestedSelectorIsOpen = nestedController.isOpen;
-  $: rowWidthStore = display.rowWidth;
-  $: rowWidth = $rowWidthStore;
-  $: ({ columns, fetchStatus } = columnsDataStore);
+  $: ({ columns } = columnsDataStore);
+  $: ({ searchFuzzy } = meta);
   $: fkColumnIds = new ImmutableSet(
     constraints
       .filter(constraintIsFk)
       .filter((c) => c.columns.length === 1)
       .map((c) => c.columns[0]),
   );
+  $: recordsStore = recordsData.savedRecords;
+  $: records = $recordsStore;
+  $: resultCount = records.length;
   $: fkColumnWithFocus = (() => {
     if (columnWithFocus === undefined) {
       return undefined;
     }
     return fkColumnIds.has(columnWithFocus.id) ? columnWithFocus : undefined;
   })();
-  $: isInitialized =
-    $fetchStatus?.state === 'success' && constraintsState === States.Done;
 
-  $: if ($isOpen) {
-    meta.searchFuzzy.update((s) => s.drained());
-  }
-
-  function submitResult(result: RecordSelectorResult) {
-    if ($rowType === 'button') {
-      controller.submit(result);
-    } else if ($rowType === 'hyperlink') {
-      const { recordId } = result;
-      const recordPageUrl = $storeToGetRecordPageUrl({ tableId, recordId });
-      if (recordPageUrl) {
-        router.goto(recordPageUrl);
-        controller.cancel();
-      }
+  function handleRecordsLoadingStateChange(isLoading: boolean) {
+    if (isLoading) {
+      selectionIndex = undefined;
+    } else {
+      selectionIndex = 0;
     }
   }
+  $: handleRecordsLoadingStateChange(recordsDataIsLoading);
 
-  async function handleSubmitNewRecord(v: Iterable<[number, unknown]>) {
-    const url = `/api/db/v0/tables/${tableId}/records/`;
-    const body = Object.fromEntries(v);
-    try {
-      isSubmittingNewRecord = true;
-      const response = await postAPI<ApiRecordsResponse>(url, body);
-      const record = response.results[0];
-      const recordId = getPkValueInRecord(record, $columns);
-      const previewData = response.preview_data ?? [];
-      const tableEntry = $tables.data.get(tableId);
-      const template = tableEntry?.settings?.preview_settings?.template;
-      if (!template) {
-        throw new Error('No record summary template found in API response.');
-      }
-      const recordSummary = renderTransitiveRecordSummary({
-        inputData: buildInputData(record),
-        template,
-        transitiveData: buildRecordSummariesForSheet(previewData),
-      });
-      submitResult({ recordId, recordSummary });
-    } catch (err) {
-      // TODO set errors in tabularData to appear within cells
-    } finally {
-      isSubmittingNewRecord = false;
-    }
-  }
+  $: effectiveSelectionIndex = isHoveringCreate ? undefined : selectionIndex;
 
   function handleInputFocus(column: Column) {
     nestedController.cancel();
@@ -129,226 +100,308 @@
   function handleInputBlur() {
     columnWithFocus = undefined;
   }
+
+  function moveSelectionByOffset(offset: number) {
+    if (selectionIndex === undefined) {
+      return;
+    }
+    const newSelectionIndex = selectionIndex + offset;
+    selectionIndex = Math.min(Math.max(newSelectionIndex, 0), resultCount - 1);
+  }
+
+  function getPkValue(row: RecordRow): string | number | undefined {
+    const { record } = row;
+    if (!record || Object.keys(record).length === 0) {
+      return undefined;
+    }
+    return getPkValueInRecord(record, $columns);
+  }
+
+  function getRowHref(row: RecordRow): string | undefined {
+    if ($purpose === 'dataEntry') {
+      return undefined;
+    }
+    const recordId = getPkValue(row);
+    if (!recordId) {
+      return undefined;
+    }
+    return $storeToGetRecordPageUrl({ tableId, recordId });
+  }
+
+  function submitIndex(index: number) {
+    const row = records[index] as RecordRow | undefined;
+    if (!row) {
+      // e.g. if there are no results and the user pressed Enter to submit
+      return;
+    }
+    const { record } = row;
+    const recordId = getPkValue(row);
+    if (!record || recordId === undefined) {
+      return;
+    }
+    const tableEntry = $tables.data.get(tableId);
+    const template = tableEntry?.settings?.preview_settings?.template ?? '';
+    const recordSummary = renderTransitiveRecordSummary({
+      template,
+      inputData: buildInputData(record),
+      transitiveData: $recordSummaries,
+    });
+    submitResult({ recordId, recordSummary });
+  }
+
+  function submitSelection() {
+    if (effectiveSelectionIndex === undefined) {
+      return;
+    }
+    submitIndex(effectiveSelectionIndex);
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if ($nestedSelectorIsOpen) {
+      return;
+    }
+    let handled = true;
+    switch (e.key) {
+      case 'ArrowUp':
+        moveSelectionByOffset(-1);
+        break;
+      case 'ArrowDown':
+        moveSelectionByOffset(1);
+        break;
+      case 'Enter':
+        // When we have a FK search cell selected, we use `Enter` to open the
+        // nested selector. That event is handled by LinkedRecordInput, so we
+        // don't need to handle it here -- we just need to make sure to _not_
+        // handle other events here in that case. We still let the user submit
+        // the selected record by using Shift+Enter.
+        if (!fkColumnWithFocus || e.shiftKey) {
+          submitSelection();
+        } else {
+          handled = false;
+        }
+        break;
+      default:
+        handled = false;
+    }
+
+    if (handled) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown, { capture: true });
+    return () => {
+      window.removeEventListener('keydown', handleKeydown, { capture: true });
+    };
+  });
+
+  onMount(async () => {
+    const columnId = getColumnIdToFocusInitially({ table, columns: $columns });
+    if (columnId === undefined) {
+      return;
+    }
+    await tick();
+    const selector = `.record-selector-input.column-${columnId}`;
+    const input = document.querySelector<HTMLElement>(selector);
+    if (input) {
+      input.focus();
+    }
+  });
+
+  const overflowDetails = makeOverflowDetails();
+  const {
+    hasOverflowTop,
+    hasOverflowRight,
+    hasOverflowBottom,
+    hasOverflowLeft,
+  } = overflowDetails;
 </script>
 
 <div
-  class="record-selector-table"
-  class:has-open-nested-selector={$nestedSelectorIsOpen}
+  class="inset-shadow-positioner"
+  class:has-overflow-top={$hasOverflowTop}
+  class:has-overflow-right={$hasOverflowRight}
+  class:has-overflow-bottom={$hasOverflowBottom}
+  class:has-overflow-left={$hasOverflowLeft}
 >
-  {#if $isLoading || isSubmittingNewRecord}
-    <div
-      class="loading-spinner"
-      class:prevent-user-entry={isSubmittingNewRecord}
-    >
-      <Spinner size="2em" />
-    </div>
-  {/if}
-
-  {#if isInitialized}
-    <div class="row header" style="width: {rowWidth}px">
-      <CellArranger {display} let:style let:processedColumn>
-        <CellWrapper header {style}>
-          <ProcessedColumnName {processedColumn} />
-          <ColumnResizer columnId={processedColumn.column.id} />
-        </CellWrapper>
-      </CellArranger>
-      <div class="overlay" />
-    </div>
-
-    <div class="row inputs">
-      <CellArranger {display} let:style let:processedColumn let:column>
-        {@const columnId = processedColumn.id}
-        {#if column === $columnWithNestedSelectorOpen}
-          <div class="active-fk-cell-indicator" {style}>
-            <div class="border" />
-            <div class="knockout">
-              <div class="smoother left"><QuarterCircle /></div>
-              <div class="smoother right"><QuarterCircle /></div>
-            </div>
-            <div class="arrow"><Arrow /></div>
-          </div>
-        {:else if column === columnWithFocus}
-          <div class="highlight" {style} />
-        {/if}
-        <CellWrapper
-          style="{style}{column === columnWithFocus ? 'z-index: 101;' : ''}"
-        >
-          <RecordSelectorInput
-            class="record-selector-input column-{columnId}"
-            containerClass="record-selector-input-container"
-            componentAndProps={processedColumn.inputComponentAndProps}
-            searchFuzzy={meta.searchFuzzy}
-            {columnId}
-            recordSummaryStore={recordSummaries}
-            on:focus={() => handleInputFocus(column)}
-            on:blur={() => handleInputBlur()}
-            on:recordSelectorOpen={() => {
-              $columnWithNestedSelectorOpen = column;
-            }}
-            on:recordSelectorSubmit={() => {
-              $columnWithNestedSelectorOpen = undefined;
-            }}
-            on:recordSelectorCancel={() => {
-              $columnWithNestedSelectorOpen = undefined;
-            }}
+  <div class="scroll-container" use:overflowObserver={overflowDetails}>
+    <div class="table">
+      <div class="thead">
+        <div class="tr header">
+          {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+            <Cell rowType="columnHeaderRow" columnType="dataColumn">
+              <ProcessedColumnName {processedColumn} />
+            </Cell>
+          {/each}
+          <Cell
+            rowType="columnHeaderRow"
+            columnType="rowHeaderColumn"
+            {overflowDetails}
           />
-        </CellWrapper>
-      </CellArranger>
-      <div class="overlay" />
-    </div>
-
-    <div class="divider">
-      <CellArranger {display} let:style>
-        <CellWrapper {style} divider />
-      </CellArranger>
-    </div>
-
-    {#if $nestedSelectorIsOpen}
-      <div class="nested-record-selector" use:portal={windowPositionerElement}>
-        <RecordSelectorWindow
-          {windowPositionerElement}
-          controller={nestedController}
-        />
+        </div>
+        <div class="tr inputs">
+          {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+            {@const column = processedColumn.column}
+            <RecordSelectorInputCell
+              hasFocus={column === columnWithFocus}
+              hasNestedSelectorOpen={column === $columnWithNestedSelectorOpen}
+              {overflowDetails}
+              {processedColumn}
+              {searchFuzzy}
+              recordSummaryStore={recordSummaries}
+              on:focus={() => handleInputFocus(column)}
+              on:blur={() => handleInputBlur()}
+              on:recordSelectorOpen={() => {
+                $columnWithNestedSelectorOpen = column;
+              }}
+              on:recordSelectorSubmit={() => {
+                $columnWithNestedSelectorOpen = undefined;
+              }}
+              on:recordSelectorCancel={() => {
+                $columnWithNestedSelectorOpen = undefined;
+              }}
+            />
+          {/each}
+          <Cell
+            rowType="searchInputRow"
+            columnType="rowHeaderColumn"
+            {overflowDetails}
+          />
+        </div>
+        <div class="tr divider">
+          {#each [...$processedColumns] as [columnId, _] (columnId)}
+            <Cell
+              rowType="dividerRow"
+              columnType="dataColumn"
+              {overflowDetails}
+            />
+          {/each}
+          <Cell
+            rowType="dividerRow"
+            columnType="rowHeaderColumn"
+            {overflowDetails}
+          />
+        </div>
       </div>
-    {:else}
-      <RecordSelectorResults
-        {tableId}
-        {fkColumnWithFocus}
-        rowType={$rowType}
-        {submitResult}
-        submitNewRecord={handleSubmitNewRecord}
-        on:linkClick={() => controller.cancel()}
-      />
-    {/if}
-  {/if}
+      <div class="tbody">
+        {#each records as row, index}
+          <!--
+          We have duplicate click handlers on the row (for usability) and the
+          submit button (for a11y). We can't use a button for the row element
+          because the cell contains divs and divs don't go inside buttons.
+        -->
+          <RecordSelectorDataRow
+            href={getRowHref(row)}
+            on:click={() => submitIndex(index)}
+            {index}
+            selectionIndex={effectiveSelectionIndex}
+            setSelectionIndex={(i) => {
+              selectionIndex = i;
+            }}
+          >
+            {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+              <RecordSelectorDataCell
+                {row}
+                {processedColumn}
+                {recordSummaries}
+                {searchFuzzy}
+              />
+            {/each}
+            <Cell
+              rowType="dataRow"
+              columnType="rowHeaderColumn"
+              {overflowDetails}
+            >
+              <RecordSelectorSubmitButton
+                purpose={$purpose}
+                on:click={() => submitIndex(index)}
+                isSelected={effectiveSelectionIndex === index}
+              />
+            </Cell>
+          </RecordSelectorDataRow>
+        {/each}
+      </div>
+    </div>
+  </div>
+  <div class="inset-shadow" />
 </div>
 
 <style>
-  .record-selector-table {
-    position: relative;
-    min-height: 6rem;
+  .inset-shadow-positioner {
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
-    --divider-height: 0.7rem;
-    --divider-color: #e7e7e7;
-    --color-highlight: #428af4;
+    overflow: hidden;
+    position: relative;
+    --overflow-shadow-size: 0.75rem;
+    --overflow-shadow-color: rgba(0, 0, 0, 0.4);
+    --clip-path-size: calc(-1 * var(--overflow-shadow-size));
+    --overflow-shadow: 0 0 var(--overflow-shadow-size)
+      var(--overflow-shadow-color);
+    --focus-highlight-width: 0.2rem;
   }
-  .loading-spinner {
+  .scroll-container {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow: auto;
+    position: relative;
+  }
+  .table {
+    display: table;
+    flex: 0 1 auto;
+    overflow: auto;
+    position: relative;
+    border-spacing: 0;
+    margin-left: var(--focus-highlight-width);
+    --border-width: 1px;
+    --border-color: #e7e7e7;
+    --row-height: 2.25rem;
+  }
+  .thead {
+    display: table-header-group;
+  }
+  .thead .tr:first-child {
+    /**
+     * This, along with the somewhat complex border CSS on `.cell-wrapper` is a
+     * hacky way of getting collapsing borders.
+     *
+     * We can't use semantic table elements with `border-collapse: collapse;`
+     * because those elements don't let us make the entire row into a hyperlink.
+     *
+     * We also can't set a border on `.table` because the border ends up
+     * scrolling when we don't want it to scroll.
+     */
+    --border-top-width: var(--border-width);
+  }
+  .tbody {
+    display: table-row-group;
+  }
+  .tr {
+    display: table-row;
+  }
+
+  .inset-shadow {
     position: absolute;
     top: 0;
     left: 0;
     height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #aaa;
-    z-index: 100;
+    width: calc(100% - var(--body-padding));
     pointer-events: none;
+    z-index: var(--z-index__record_selector__shadow-inset);
   }
-  .loading-spinner.prevent-user-entry {
-    pointer-events: all;
-    background: rgba(255, 255, 255, 0.5);
+  .has-overflow-bottom .inset-shadow {
+    box-shadow: 0 -1rem var(--overflow-shadow-size) -1rem
+      var(--overflow-shadow-color) inset;
   }
-  .header,
-  .inputs,
-  .divider {
-    flex: 0 0 auto;
+  .has-overflow-left .inset-shadow {
+    box-shadow: 1rem 0 var(--overflow-shadow-size) -1rem var(
+        --overflow-shadow-color
+      ) inset;
   }
-  .row {
-    position: relative;
-    height: 30px;
-  }
-  .divider {
-    position: relative;
-    height: var(--divider-height);
-    box-sizing: content-box;
-  }
-  .inputs :global(.record-selector-input-container) {
-    height: 100%;
-    width: 100%;
-  }
-  .inputs :global(.record-selector-input) {
-    height: 100%;
-    width: 100%;
-    border: none;
-  }
-  .inputs :global(.record-selector-input:focus) {
-    outline: none;
-    border: none;
-    box-shadow: none;
-  }
-  .highlight {
-    position: absolute;
-    height: 100%;
-    z-index: 100;
-    border-radius: 2px;
-    box-shadow: 0 0 0 2px var(--color-highlight);
-    pointer-events: none;
-  }
-  .active-fk-cell-indicator {
-    --border-width: 3px;
-    position: absolute;
-    height: 100%;
-    z-index: 102;
-    pointer-events: none;
-  }
-  .active-fk-cell-indicator .border {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    top: calc(-1 * var(--border-width));
-    left: calc(-1 * var(--border-width));
-    box-sizing: content-box;
-    border: dashed var(--border-width) var(--color-highlight);
-    z-index: 2;
-  }
-  .active-fk-cell-indicator .knockout {
-    position: absolute;
-    height: var(--divider-height);
-    width: calc(100% + 2 * (var(--divider-height) + var(--border-width)));
-    bottom: calc(-1 * var(--divider-height));
-    left: calc(-1 * var(--border-width) + -1 * var(--divider-height));
-    background: white;
-    z-index: 1;
-  }
-  .active-fk-cell-indicator .smoother {
-    position: absolute;
-    color: var(--divider-color);
-    height: var(--divider-height);
-    width: var(--divider-height);
-  }
-  .active-fk-cell-indicator .smoother.right {
-    right: 0;
-    /* 1px forces some overlap to prevent sub-pixel gaps */
-    transform: translate(1px) scaleX(-1);
-  }
-  .active-fk-cell-indicator :global(svg) {
-    display: block;
-    height: 100%;
-    width: 100%;
-  }
-  .active-fk-cell-indicator .arrow {
-    color: var(--color-highlight);
-    position: absolute;
-    --size: 1.2rem;
-    width: var(--size);
-    bottom: -1.5rem;
-    left: calc(50% - var(--size) / 2);
-    z-index: 3;
-    transform: scaleY(-1);
-  }
-  .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.5);
-    z-index: 100;
-    pointer-events: none;
-  }
-  .record-selector-table:not(.has-open-nested-selector) .overlay {
-    display: none;
+  .has-overflow-left.has-overflow-bottom .inset-shadow {
+    box-shadow: 1rem -1rem var(--overflow-shadow-size) -1rem
+      var(--overflow-shadow-color) inset;
   }
 </style>

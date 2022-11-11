@@ -11,6 +11,7 @@ export interface CellTypeProps<Value> {
   isActive: boolean;
   isSelectedInRange: boolean;
   disabled: boolean;
+  searchValue?: unknown;
 }
 
 // Primary key
