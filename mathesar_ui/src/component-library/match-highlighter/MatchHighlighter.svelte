@@ -1,20 +1,13 @@
 <script lang="ts">
   import { splitMatchParts } from './matchHighlighterUtils';
-  import Match from './Match.svelte';
+  import type Match from './Match.svelte';
+  import PrecomputedMatchHighlighter from './PrecomputedMatchHighlighter.svelte';
 
   export let text: string;
   export let substring = '';
-  export let matchComponent = Match;
+  export let matchComponent: typeof Match | undefined = undefined;
 
   $: matchParts = splitMatchParts(text, substring);
 </script>
 
-<span class="match-highlighter">
-  {#each matchParts as part}
-    {#if part.isMatch}
-      <svelte:component this={matchComponent}>{part.text}</svelte:component>
-    {:else}
-      {part.text}
-    {/if}
-  {/each}
-</span>
+<PrecomputedMatchHighlighter {matchParts} {matchComponent} />

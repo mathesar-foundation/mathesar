@@ -20,14 +20,9 @@ during Sheet component creation.
     value: unknown;
     hasError?: boolean;
     componentAndProps: ComponentAndProps;
-
-    /**
-     * From `LinkedRecordInput`. Perhaps there's a better way to specify this
-     * property here.
-     */
-    containerClass?: string;
     recordSummary?: string;
     setRecordSummary?: (recordId: string, recordSummary: string) => void;
+    allowsHyperlinks?: boolean;
   }
 
   export let value: unknown;

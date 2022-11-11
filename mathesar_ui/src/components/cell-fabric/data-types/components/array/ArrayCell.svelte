@@ -48,9 +48,11 @@
 >
   <CellValue {value}>
     {#if isDefinedNonNullable(value)}
-      {#each value as entry}
-        <Chip display="inline" background="var(--slate-200)">{entry}</Chip>
-      {/each}
+      <div>
+        {#each value as entry}
+          <Chip display="inline" background="var(--slate-200)">{entry}</Chip>
+        {/each}
+      </div>
     {/if}
   </CellValue>
 </CellWrapper>
