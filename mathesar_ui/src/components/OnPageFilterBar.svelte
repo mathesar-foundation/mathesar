@@ -62,7 +62,10 @@
 
   .search-results-info {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+
+    > :global(* + *) {
+      margin-left: 2rem;
+    }
   }
 </style>
