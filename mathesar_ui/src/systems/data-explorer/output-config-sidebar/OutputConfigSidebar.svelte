@@ -152,6 +152,8 @@
     flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden;
+    position: relative;
+    isolation: isolate;
 
     > section {
       > header {
@@ -161,7 +163,7 @@
         border-bottom: 1px solid var(--color-gray-medium);
         position: sticky;
         top: 0;
-        z-index: 10;
+        z-index: 1;
       }
       > :global(div) {
         padding: 1rem 1rem 1.25rem;

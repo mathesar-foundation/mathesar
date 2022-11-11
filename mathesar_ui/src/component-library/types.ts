@@ -18,3 +18,4 @@ export * from './text-area/TextAreaTypes';
 export * from './select/SelectTypes';
 export * from './number-input/NumberInputTypes';
 export * from './date-time-picker/DateTimePickerTypes';
+export * from './match-highlighter/matchHighlighterTypes';

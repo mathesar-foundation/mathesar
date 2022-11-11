@@ -6,6 +6,7 @@
     align-items: center;
     display: flex;
     position: relative;
+    isolation: isolate;
     flex-direction: row;
     margin: 0;
     padding: 0;
@@ -93,5 +94,6 @@
     border-top: none;
     border-radius: 0px 0px 2px 2px;
     position: relative;
+    isolation: isolate;
   }
 }

@@ -3,6 +3,7 @@
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
+  isolation: isolate;
 
   .input-group-text {
     display: flex;
@@ -24,7 +25,7 @@
   .input-element,
   button {
     &:focus {
-      z-index: 10;
+      z-index: 1;
     }
   }
 

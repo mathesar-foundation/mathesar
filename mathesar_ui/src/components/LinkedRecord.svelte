@@ -17,6 +17,8 @@
   function handleDeleteButtonClick() {
     dispatch('delete');
   }
+
+  $: label = recordSummary ?? String(recordId);
 </script>
 
 <span
@@ -30,17 +32,19 @@
       class="record-summary record-page-link"
       title="Go to record"
       href={recordPageHref}
+      tabindex="-1"
       on:mouseenter={() => {
         isHoveringRecordPageLink = true;
       }}
       on:mouseleave={() => {
         isHoveringRecordPageLink = false;
       }}
+      on:click={(e) => e.stopPropagation()}
     >
-      {recordSummary ?? String(recordId)}
+      {label}
     </a>
   {:else}
-    <span class="record-summary">{recordSummary}</span>
+    <span class="record-summary">{label}</span>
   {/if}
   {#if hasDeleteButton}
     <!--
@@ -52,8 +56,9 @@
     -->
     <span
       class="delete-button"
-      on:click={handleDeleteButtonClick}
+      on:click|stopPropagation={handleDeleteButtonClick}
       role="button"
+      tabindex="-1"
       aria-label="Clear value"
       title="Clear value"
       on:mouseenter={() => {
@@ -75,6 +80,7 @@
     display: grid;
     grid-template: auto / 1fr auto;
     position: relative;
+    isolation: isolate;
   }
   .background {
     position: absolute;
