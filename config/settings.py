@@ -193,7 +193,13 @@ FRIENDLY_ERRORS = {
             'invalid_choice': 2083,
             'not_a_list': 2123,
             'empty': 2093
-        }
+        },
+        'PermittedPkRelatedField': {
+            'required': 2007,
+            'null': 2027,
+            'does_not_exist': 2151,
+            'incorrect_type': 2161
+        },
     },
     'EXCEPTION_DICT': {
         'Http404': 4005

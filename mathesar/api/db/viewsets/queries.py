@@ -110,12 +110,19 @@ class QueryViewSet(
         columns = query.output_columns_simple
         column_metadata = query.all_columns_description_map
         output_serializer = BaseQuerySerializer(query)
+
+        def _get_param_val(val):
+            try:
+                ret_val = json.loads(val)
+            except json.JSONDecodeError:
+                ret_val = val
+            return ret_val
         return Response(
             {
                 "query": output_serializer.data,
                 "records": paginated_records.data,
                 "output_columns": columns,
                 "column_metadata": column_metadata,
-                "parameters": {k: json.loads(request.GET[k]) for k in request.GET},
+                "parameters": {k: _get_param_val(request.GET[k]) for k in request.GET},
             }
         )

@@ -11,7 +11,7 @@ class DummyPartialTransform(PossiblyPartialTransform):
         pass
 
     def get_processed(self, db_query, ix_in_transform_pipeline):
-        return Limit(self.spec)
+        return Limit(1)
 
 
 @pytest.fixture
@@ -41,7 +41,7 @@ def test_transform_processing(
     ]
     input_dummy_transform_json = {
         'type': DummyPartialTransform.type,
-        'spec': 1,
+        'spec': {},
     }
     expected_limit_transform = {
         'type': 'limit',
