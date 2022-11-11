@@ -3,7 +3,9 @@ from db.transforms.base import Summarize, SelectSubsetOfColumns
 from db.columns.operations.select import get_column_from_oid_and_attnum
 
 
-def finish_specifying_summarize_transform(db_query, ix_of_summarize_transform, engine, metadata):
+def finish_specifying_summarize_transform(
+    db_query, ix_of_summarize_transform, engine, metadata
+):
     """
     Adds missing input aliases to the summarize transform.
 
@@ -19,19 +21,43 @@ def finish_specifying_summarize_transform(db_query, ix_of_summarize_transform, e
     """
     summarize_transform = db_query.transformations[ix_of_summarize_transform]
     assert type(summarize_transform) is Summarize
-    initial_columns_not_in_summarize = _get_initial_columns_not_in_summarize(db_query, summarize_transform)
-    if not initial_columns_not_in_summarize:
-        # If all input aliases for this transform are mentioned in the group-agg transform spec, we
-        # consider it fully specified.
-        return summarize_transform
-    # A group-agg transform has a base_grouping_column (i.e. a user-selected input alias) around
-    # which our suggestions will be based.
-    base_grouping_alias = summarize_transform.base_grouping_column
-    base_grouping_initial_column = _get_initial_column_by_alias(db_query.initial_columns, base_grouping_alias)
-    # When we'll have finished specifying this group-agg transform, each input alias not already
-    # mentioned in it, will be added either to its "group-by set" or its "aggregate-on set".
+    aliases_to_be_added_to_group_by, aliases_to_be_added_to_agg_on = \
+        _split_missing_input_aliases_into_group_and_agg_lists(
+            db_query, ix_of_summarize_transform, engine, metadata
+        )
+    there_is_something_to_add = \
+        aliases_to_be_added_to_group_by or aliases_to_be_added_to_group_by
+    if there_is_something_to_add:
+        summarize_transform = \
+            summarize_transform.add_aliases_to_agg_on(
+                aliases_to_be_added_to_agg_on
+            )
+        summarize_transform = \
+            summarize_transform.add_aliases_to_group_by(
+                aliases_to_be_added_to_group_by
+            )
+    return summarize_transform
+
+
+def _split_missing_input_aliases_into_group_and_agg_lists(
+    db_query, ix_of_summarize_transform, engine, metadata,
+):
     aliases_to_be_added_to_group_by = []
     aliases_to_be_added_to_agg_on = []
+    summarize_transform = db_query.transformations[ix_of_summarize_transform]
+    initial_columns_not_in_summarize = \
+        _get_initial_columns_not_in_summarize(db_query, summarize_transform)
+    if not initial_columns_not_in_summarize:
+        # If all input aliases for summarize transform are in the transform's group-by or
+        # aggregate-on sets, there's nothing to do.
+        return aliases_to_be_added_to_group_by, aliases_to_be_added_to_agg_on
+    # A summarize transform has a base_grouping_column (i.e. a user-selected input alias) around
+    # which our suggestions will be based.
+    base_grouping_alias = summarize_transform.base_grouping_column
+    base_grouping_initial_column = \
+        _get_initial_column_by_alias(
+            db_query.initial_columns, base_grouping_alias
+        )
     # We'll always want user-selected alias (base_grouping_column) in the "group-by set";
     if base_grouping_initial_column in initial_columns_not_in_summarize:
         aliases_to_be_added_to_group_by.append(base_grouping_alias)
@@ -39,12 +65,20 @@ def finish_specifying_summarize_transform(db_query, ix_of_summarize_transform, e
     # Most of logic in the rest of method is around whether or not we can add some of the other
     # input aliases to the "group-by set"; otherwise we'll put them in "aggregate-on set".
     can_we_add_other_aliases_to_group_by = (
-        _is_first_alias_generating_transform(db_query, ix_of_summarize_transform)
-        and _is_initial_column_unique_constrained(base_grouping_initial_column, engine, metadata)
+        _is_first_alias_generating_transform(
+            db_query, ix_of_summarize_transform
+        )
+        and _is_initial_column_unique_constrained(
+            base_grouping_initial_column, engine, metadata
+        )
     )
     if can_we_add_other_aliases_to_group_by:
-        oids_of_joinable_tables_with_single_results = _get_oids_of_joinable_tables_with_single_results(db_query, engine, metadata)
-        oid_of_base_grouping_initial_column = _get_oid_of_initial_column(base_grouping_initial_column)
+        oids_of_joinable_tables_with_single_results = \
+            _get_oids_of_joinable_tables_with_single_results(
+                db_query, engine, metadata
+            )
+        oid_of_base_grouping_initial_column = \
+            _get_oid_of_initial_column(base_grouping_initial_column)
         for initial_column in initial_columns_not_in_summarize:
             if _should_group_by(
                 _get_oid_of_initial_column(initial_column),
@@ -61,9 +95,7 @@ def finish_specifying_summarize_transform(db_query, ix_of_summarize_transform, e
             for initial_column
             in initial_columns_not_in_summarize
         )
-    summarize_transform = summarize_transform.add_aliases_to_agg_on(aliases_to_be_added_to_agg_on)
-    summarize_transform = summarize_transform.add_aliases_to_group_by(aliases_to_be_added_to_group_by)
-    return summarize_transform
+    return aliases_to_be_added_to_group_by, aliases_to_be_added_to_agg_on
 
 
 def _is_first_alias_generating_transform(db_query, ix_of_summarize_transform):
@@ -77,7 +109,8 @@ def _is_first_alias_generating_transform(db_query, ix_of_summarize_transform):
     prior_transforms = db_query.transformations[:ix_of_summarize_transform]
     for prior_transform in prior_transforms:
         alias_generating_transforms = {Summarize, SelectSubsetOfColumns}
-        is_alias_generating = type(prior_transform) in alias_generating_transforms
+        is_alias_generating = \
+            type(prior_transform) in alias_generating_transforms
         if is_alias_generating:
             return False
     return True
@@ -111,14 +144,20 @@ def _should_group_by(
     For the sake of efficiency, we're not checking here that base_grouping_group_by_col is unique
     constrained: it is presumed that that is the case.
     """
-    is_on_table_of_base_grouping_column = oid_of_initial_column == oid_of_base_grouping_group_by_col
-    is_single_result = oid_of_initial_column in oids_of_joinable_tables_with_single_results
-    should_group_by = is_on_table_of_base_grouping_column or is_single_result
+    is_on_table_of_base_grouping_column = \
+        oid_of_initial_column == oid_of_base_grouping_group_by_col
+    is_single_result = \
+        oid_of_initial_column in oids_of_joinable_tables_with_single_results
+    should_group_by = \
+        is_on_table_of_base_grouping_column or is_single_result
     return should_group_by
 
 
-def _get_oids_of_joinable_tables_with_single_results(db_query, engine, metadata):
-    joinable_tables = get_joinable_tables(engine, metadata, db_query.base_table_oid)
+def _get_oids_of_joinable_tables_with_single_results(
+    db_query, engine, metadata,
+):
+    joinable_tables = \
+        get_joinable_tables(engine, metadata, db_query.base_table_oid)
     return set(
         _get_oid_of_joinable_table(joinable_table)
         for joinable_table
