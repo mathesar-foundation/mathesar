@@ -348,6 +348,7 @@ def test_db_role_create_with_roles_on_multiple_database(FUN_create_dj_db, client
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
+    cache.clear()
     reset_reflection()
     databases = Database.objects.all()
     database_with_viewer_access = databases[0]
