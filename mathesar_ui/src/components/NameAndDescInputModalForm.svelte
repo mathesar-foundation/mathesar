@@ -28,6 +28,19 @@
   export let getInitialDescription: () => string = () => '';
   export let save: (name: string, description: string) => Promise<void>;
 
+  /**
+   * NOTE: This is NOT a feature
+   *
+   * Ideally this component should not have this prop
+   * since the name of the component itself suggests
+   * that its used to edit both name and description
+   *
+   * But still adding this prop to support only editing
+   * table name. Since editing table description is planned
+   * but will come in future.
+   */
+  export let hideDescription: boolean = false;
+
   let isSubmitting = false;
   let inputElement: HTMLInputElement;
   let initialName = '';
@@ -96,16 +109,18 @@
       </LabeledInput>
     </div>
 
-    <div class="input-container">
-      <LabeledInput label="Description" layout="stacked">
-        <TextArea
-          bind:value={description}
-          aria-label="description"
-          disabled={isSubmitting}
-          placeholder="Description"
-        />
-      </LabeledInput>
-    </div>
+    {#if !hideDescription}
+      <div class="input-container">
+        <LabeledInput label="Description" layout="stacked">
+          <TextArea
+            bind:value={description}
+            aria-label="description"
+            disabled={isSubmitting}
+            placeholder="Description"
+          />
+        </LabeledInput>
+      </div>
+    {/if}
   </div>
   <CancelOrProceedButtonPair
     proceedButton={{ label: saveButtonLabel }}
