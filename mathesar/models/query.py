@@ -4,11 +4,11 @@ from django.utils.functional import cached_property
 
 from db.queries.base import DBQuery, InitialColumn
 from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
+from db.transforms.operations.deserialize import deserialize_transformation
 
 from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
 from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValueType, DictHasBadKeys
-from db.transforms.operations.deserialize import deserialize_transformation
 from mathesar.state import get_cached_metadata
 
 
@@ -195,13 +195,44 @@ class UIQuery(BaseModel, Relation):
         )
 
     def _describe_query_column(self, sa_col):
-        return {
-            'alias': sa_col.name,
-            'display_name': self._get_display_name_for_sa_col(sa_col),
-            'type': sa_col.db_type.id,
-            'type_options': sa_col.type_options,
-            'display_options': self._get_display_options_for_sa_col(sa_col),
-        }
+        """
+        Note, has some conditional fields depending on whether the column is an initial column or
+        is generated mid-query (created via a summarization).
+        """
+        alias = sa_col.name
+        initial_db_column = self._get_db_initial_column_by_alias(alias)
+        is_initial_column = initial_db_column is not None
+        output = dict(
+            alias=alias,
+            display_name=self._get_display_name_for_alias(alias),
+            type=sa_col.db_type.id,
+            type_options=sa_col.type_options,
+            display_options=self._get_display_options_for_alias(alias),
+            is_initial_column=is_initial_column,
+        )
+        optionals = dict(
+            input_column_name=None,
+            input_table_name=None,
+            input_alias=None,
+        )
+        output = output | optionals
+        if is_initial_column:
+            initial_dj_column = _get_dj_column_for_initial_db_column(initial_db_column)
+            output = output | dict(
+                input_column_name=initial_dj_column.name,
+                input_table_name=initial_dj_column.table.name,
+            )
+        else:
+            input_alias = self.db_query.get_input_alias_for_output_alias(alias)
+            output = output | dict(
+                input_alias=input_alias
+            )
+        return output
+
+    def _get_db_initial_column_by_alias(self, alias):
+        for db_initial_column in self._db_initial_columns:
+            if db_initial_column.alias == alias:
+                return db_initial_column
 
     @property
     def all_columns_description_map(self):
@@ -221,6 +252,7 @@ class UIQuery(BaseModel, Relation):
             metadata=get_cached_metadata()
         )
 
+    # TODO reused; consider using cached_property
     @property
     def _db_initial_columns(self):
         return tuple(
@@ -238,12 +270,12 @@ class UIQuery(BaseModel, Relation):
                 in self.transformations
             )
 
-    def _get_display_name_for_sa_col(self, sa_col):
-        return self._alias_to_display_name.get(sa_col.name)
+    def _get_display_name_for_alias(self, alias):
+        return self._alias_to_display_name.get(alias)
 
-    def _get_display_options_for_sa_col(self, sa_col):
+    def _get_display_options_for_alias(self, alias):
         if self.display_options is not None:
-            return self.display_options.get(sa_col.name)
+            return self.display_options.get(alias)
 
     @cached_property
     def _alias_to_display_name(self):
@@ -265,6 +297,12 @@ class UIQuery(BaseModel, Relation):
     @property
     def _sa_engine(self):
         return self.base_table._sa_engine
+
+
+def _get_dj_column_for_initial_db_column(initial_column):
+    oid = initial_column.reloid
+    attnum = initial_column.attnum
+    return Column.objects.get(table__oid=oid, attnum=attnum)
 
 
 def _get_column_pair_from_id(col_id):

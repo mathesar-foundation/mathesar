@@ -29,6 +29,23 @@
   function handleValueMouseDown() {
     dispatch('activate');
   }
+
+  function handleKeyDown(e: KeyboardEvent) {
+    switch (e.key) {
+      case 'Tab':
+      case 'ArrowLeft':
+      case 'ArrowRight':
+      case 'ArrowDown':
+      case 'ArrowUp':
+        dispatch('movementKeyDown', {
+          originalEvent: e,
+          key: e.key,
+        });
+        break;
+      default:
+        break;
+    }
+  }
 </script>
 
 <CellWrapper
@@ -37,6 +54,7 @@
   {disabled}
   on:activate
   on:mouseenter
+  on:keydown={handleKeyDown}
   hasPadding={false}
 >
   <div class="primary-key-cell">

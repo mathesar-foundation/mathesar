@@ -303,6 +303,15 @@ export default class SheetSelection<
     }
   }
 
+  selectAndActivateFirstCellIfExists(): void {
+    const firstRow = this.getRows()[0];
+    const firstColumn = this.getColumns()[0];
+    if (firstRow && firstColumn) {
+      this.selectMultipleCells([[firstRow, firstColumn]]);
+      this.activateCell(firstRow, firstColumn);
+    }
+  }
+
   getIncludedCells(selectionBounds: SelectionBounds): Cell<Row, Column>[] {
     const { startRowIndex, endRowIndex, startColumnIndex, endColumnIndex } =
       selectionBounds;
@@ -374,6 +383,26 @@ export default class SheetSelection<
     return false;
   }
 
+  /**
+   * Modifies the selected cells, forming a new selection by maintaining the
+   * currently selected rows but altering the selected columns to match the
+   * supplied columns.
+   */
+  intersectSelectedRowsWithGivenColumns(columns: Column[]): void {
+    const selectedRows = this.getSelectedUniqueRowsId(
+      new ImmutableSet(this.selectedCells.getValues()),
+    );
+    const cells: Cell<Row, Column>[] = [];
+    columns.forEach((column) => {
+      selectedRows.forEach((rowIndex) => {
+        const row = this.getRows()[rowIndex];
+        cells.push([row, column]);
+      });
+    });
+
+    this.selectMultipleCells(cells);
+  }
+
   toggleColumnSelection(column: Column): void {
     if (this.clearColumnSelection(column)) {
       return;
@@ -428,6 +457,14 @@ export default class SheetSelection<
       rowIndex: row.rowIndex,
       columnId: column.id,
     });
+  }
+
+  focusCell(row: Pick<Row, 'rowIndex'>, column: Pick<Column, 'id'>): void {
+    const cellsInTheColumn = document.querySelectorAll(
+      `[data-column-identifier="${column.id}"]`,
+    );
+    const targetCell = cellsInTheColumn.item(row.rowIndex);
+    (targetCell?.querySelector('.cell-wrapper') as HTMLElement)?.focus();
   }
 
   private getAdjacentCell(
@@ -505,6 +542,15 @@ export default class SheetSelection<
       ...columnsSelectedWhenTheTableIsEmpty,
     ]);
     return Array.from(setOfUniqueColumnIds);
+  }
+
+  getSelectedUniqueRowsId(
+    selectedCells: ImmutableSet<string>,
+  ): Row['rowIndex'][] {
+    const setOfUniqueRowIndex = new Set([
+      ...[...selectedCells].map(getSelectedRowIndex),
+    ]);
+    return Array.from(setOfUniqueRowIndex);
   }
 
   destroy(): void {
