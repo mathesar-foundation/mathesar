@@ -21,7 +21,7 @@ function execute {
 }
 
 # instantiate .env file
-cp ${ENV_EXAMPLE} ${ENV_ORIG}
+cp -n ${ENV_EXAMPLE} ${ENV_ORIG}
 
 # runs docker compose as daemon process
 execute docker-compose up -d

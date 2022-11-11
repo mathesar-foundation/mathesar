@@ -1,4 +1,5 @@
 from django.core.cache import cache
+import pytest
 from sqlalchemy import text
 
 from db.schemas.utils import get_mathesar_schemas, get_schema_oid_from_name
@@ -49,6 +50,7 @@ def test_schema_list(client, patent_schema, MOD_engine_cache):
     )
 
 
+@pytest.mark.skip("Faulty DB handling assumptions; invalid")
 def test_schema_list_filter(client, create_db_schema, FUN_create_dj_db, MOD_engine_cache):
     schema_params = [("schema_1", "database_1"), ("schema_2", "database_2"),
                      ("schema_3", "database_3"), ("schema_1", "database_3")]
@@ -210,6 +212,7 @@ def test_schema_sort_by_id(create_schema, client, MOD_engine_cache):
             comparison_tuple[1].database.name)
 
 
+@pytest.mark.skip("Faulty DB handling assumptions; invalid")
 def test_schema_create(client, FUN_create_dj_db, MOD_engine_cache):
     db_name = "some_db1"
     FUN_create_dj_db(db_name)
@@ -238,6 +241,7 @@ def test_schema_create(client, FUN_create_dj_db, MOD_engine_cache):
     )
 
 
+@pytest.mark.skip("Faulty DB handling assumptions; invalid")
 def test_schema_create_description(client, FUN_create_dj_db, MOD_engine_cache):
     db_name = "some_db2"
     FUN_create_dj_db(db_name)
@@ -402,6 +406,7 @@ def test_schema_get_with_reflect_change(client, engine, create_db_schema):
     assert orig_id == modified_id
 
 
+@pytest.mark.skip("Faulty DB handling assumptions; invalid")
 def test_schema_create_duplicate(client, FUN_create_dj_db):
     db_name = "tmp_db1"
     FUN_create_dj_db(db_name)
