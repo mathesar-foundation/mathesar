@@ -50,7 +50,7 @@ export function constructDataExplorerUrlToSummarizeFromGroup(
 export function constructQueryModelFromHash(
   hash: string,
 ): UnsavedQueryInstance {
-  let queryInstance: Mutable<UnsavedQueryInstance> = {};
+  const queryInstance: Mutable<UnsavedQueryInstance> = {};
   const terseSummarization = JSON.parse(
     Url64.decode(hash),
   ) as Partial<TerseSummarization>;

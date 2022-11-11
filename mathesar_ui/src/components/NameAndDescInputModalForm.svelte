@@ -39,7 +39,7 @@
    * table name. Since editing table description is planned
    * but will come in future.
    */
-  export let hideDescription: boolean = false;
+  export let hideDescription = false;
 
   let isSubmitting = false;
   let inputElement: HTMLInputElement;

@@ -26,7 +26,7 @@
 </script>
 
 <DropdownMenu
-  showArrow={false}
+  showArrow={true}
   triggerAppearance="plain"
   closeOnInnerClick={true}
   label="New Table"
