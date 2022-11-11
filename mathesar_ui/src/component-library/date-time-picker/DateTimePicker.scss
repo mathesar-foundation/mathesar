@@ -47,6 +47,7 @@
   display: -ms-flexbox;
   display: flex;
   position: relative;
+  isolation: isolate;
 }
 .flatpickr-months .flatpickr-month {
   background: transparent;

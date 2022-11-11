@@ -1,8 +1,12 @@
 <script lang="ts">
-  import { TextInput } from '@mathesar-component-library';
+  import {
+    PrecomputedMatchHighlighter,
+    TextInput,
+  } from '@mathesar-component-library';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { CellTypeProps } from '../typeDefinitions';
+  import UriCellContent from './UriCellContent.svelte';
 
   type $$Props = CellTypeProps<string>;
 
@@ -10,6 +14,7 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
+  export let searchValue: $$Props['searchValue'] = undefined;
 </script>
 
 <SteppedInputCell
@@ -17,6 +22,7 @@
   {isActive}
   {isSelectedInRange}
   {disabled}
+  {searchValue}
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown
@@ -24,13 +30,15 @@
   on:mouseenter
   on:update
 >
-  <span slot="content">
+  <span slot="content" let:matchParts>
     <CellValue {value}>
-      {#if isActive}
-        <a href={value ?? ''} target="_blank" class="link">{value}</a>
-      {:else}
-        <span class="content">{value}</span>
-      {/if}
+      <UriCellContent {value} {isActive}>
+        {#if matchParts}
+          <PrecomputedMatchHighlighter {matchParts} />
+        {:else}
+          {value}
+        {/if}
+      </UriCellContent>
     </CellValue>
   </span>
   <TextInput
@@ -41,15 +49,3 @@
     on:keydown={handleInputKeydown}
   />
 </SteppedInputCell>
-
-<style>
-  .content {
-    text-decoration: underline;
-  }
-  .link {
-    color: #3867ad;
-  }
-  .link:visited {
-    color: #6138ad;
-  }
-</style>

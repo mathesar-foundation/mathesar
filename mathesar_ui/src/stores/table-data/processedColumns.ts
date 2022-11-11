@@ -56,12 +56,21 @@ export function processColumn({
   columnIndex,
   constraints,
   abstractTypeMap,
+  hasEnhancedPrimaryKeyCell,
 }: {
   tableId: TableEntry['id'];
   column: Column;
   columnIndex: number;
   constraints: Constraint[];
   abstractTypeMap: AbstractTypesMap;
+  /**
+   * - When true, the primary key cells will be rendered via the PrimaryKeyCell
+   *   component, which provides additional functionality (e.g. hyperlink to
+   *   record) over the data-type-based cell.
+   * - When false, the primary key cells will be rendered via the
+   *   data-type-based cell.
+   */
+  hasEnhancedPrimaryKeyCell?: boolean;
 }): ProcessedColumn {
   const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
   const relevantConstraints = constraints.filter((c) =>
@@ -74,6 +83,7 @@ export function processColumn({
     (c) => c.columns.length !== 1,
   );
   const linkFk = findFkConstraintsForColumn(exclusiveConstraints, column.id)[0];
+  const isPk = (hasEnhancedPrimaryKeyCell ?? true) && column.primary_key;
   return {
     id: column.id,
     column,
@@ -86,7 +96,7 @@ export function processColumn({
       cellInfo: abstractType.cellInfo,
       column,
       fkTargetTableId: linkFk ? linkFk.referent_table : undefined,
-      pkTargetTableId: column.primary_key ? tableId : undefined,
+      pkTargetTableId: isPk ? tableId : undefined,
     }),
     inputComponentAndProps: getDbTypeBasedInputCap(
       column,

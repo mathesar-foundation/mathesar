@@ -91,6 +91,19 @@
   .sheet {
     display: flex;
     flex-direction: column;
+    isolation: isolate;
+    --z-index__sheet__active-cell: 1;
+    --z-index__sheet__column-resizer: 2;
+    --z-index__sheet__top-left-cell: 3;
+    --z-index__sheet__horizontal-scrollbar: 4;
+    --z-index__sheet__vertical-scrollbar: 5;
+
+    --virtual-list-horizontal-scrollbar-z-index: var(
+      --z-index__sheet__horizontal-scrollbar
+    );
+    --virtual-list-vertical-scrollbar-z-index: var(
+      --z-index__sheet__vertical-scrollbar
+    );
 
     &.uses-virtual-list {
       overflow: hidden;
@@ -114,7 +127,7 @@
 
     :global([data-sheet-element='cell'][data-cell-static='true']) {
       position: sticky;
-      z-index: 5;
+      z-index: var(--z-index__sheet__top-left-cell);
     }
 
     :global([data-sheet-element='cell'][data-cell-control='true']) {

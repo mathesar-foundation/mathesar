@@ -67,6 +67,8 @@
 
   function onValueChange(newValue: string) {
     value = formatter.parse(newValue).value;
+    dispatch('artificialInput', value);
+    dispatch('artificialChange', value);
   }
 </script>
 
@@ -80,6 +82,8 @@
   on:focus
   on:blur={checkAndBlur}
   on:keydown
+  on:artificialInput
+  on:artificialChange
 />
 
 <AttachableDropdown

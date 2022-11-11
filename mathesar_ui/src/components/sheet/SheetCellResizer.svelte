@@ -72,14 +72,13 @@
     height: 100%;
     top: 0;
     right: calc(-1 * var(--width) / 2);
-    z-index: 100;
+    z-index: var(--z-index__sheet__column-resizer);
     cursor: e-resize;
     display: flex;
     justify-content: center;
   }
   .indicator {
     position: relative;
-    z-index: 100;
     height: 100%;
     width: 0.3rem;
     background: #39a0f5;
