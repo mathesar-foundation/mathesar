@@ -1,9 +1,7 @@
-from django.core.cache import cache
 from django.db import transaction
 
 from mathesar.models.base import Database, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
-from mathesar.state import reset_reflection
 
 
 def test_user_list(client):
@@ -168,8 +166,6 @@ def test_db_role_list_with_roles_on_multiple_database(FUN_create_dj_db, client_b
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
-    cache.clear()
-    reset_reflection()
     databases = Database.objects.all()
     database_with_viewer_access = databases[0]
     DatabaseRole.objects.create(user=user_bob, database=database_with_viewer_access, role='viewer')
@@ -348,8 +344,6 @@ def test_db_role_create_with_roles_on_multiple_database(FUN_create_dj_db, client
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
-    cache.clear()
-    reset_reflection()
     databases = Database.objects.all()
     database_with_viewer_access = databases[0]
     DatabaseRole.objects.create(user=user_bob, database=database_with_viewer_access, role='viewer')
