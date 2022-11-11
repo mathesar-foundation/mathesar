@@ -10,7 +10,7 @@ class DummyPartialTransform(PossiblyPartialTransform):
     def apply_to_relation(self, _):
         pass
 
-    def get_processed(self, db_query, ix_in_transform_pipeline): # noqa: F841
+    def get_processed(self, db_query, ix_in_transform_pipeline):  # noqa: F841
         return Limit(1)
 
 
@@ -24,7 +24,7 @@ def monkeypatch_known_transforms(monkeypatch):
 
 
 def test_transform_processing(
-    create_patents_table, client, monkeypatch_known_transforms, # noqa: F841
+    create_patents_table, client, monkeypatch_known_transforms,  # noqa: F841
 ):
     base_table = create_patents_table(table_name='patent_query_run_minimal_table')
     initial_columns = [

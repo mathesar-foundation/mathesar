@@ -58,7 +58,7 @@ class PossiblyPartialTransform(Transform):
     """
 
     @abstractmethod
-    def get_processed(self, db_query, ix_in_transform_pipeline): # noqa: F841
+    def get_processed(self, db_query, ix_in_transform_pipeline):  # noqa: F841
         """
         Processes this transform into a new transform, possibly of a different type, and returns
         the new transform. Parametrized by the db_query that has this transform in its transform
