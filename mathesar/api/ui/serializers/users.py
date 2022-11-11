@@ -1,8 +1,10 @@
-from rest_access_policy import FieldAccessMixin
+from rest_access_policy import FieldAccessMixin, PermittedPkRelatedField
 from rest_framework import serializers
 
+from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.ui.permissions.users import UserAccessPolicy
+from mathesar.models.base import Database
 from mathesar.models.users import User, DatabaseRole, SchemaRole
 
 
@@ -55,6 +57,13 @@ class DatabaseRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
     class Meta:
         model = DatabaseRole
         fields = ['id', 'user', 'database', 'role']
+
+    # Restrict the list of databases to which the user has access to create a database role
+    # Refer https://rsinger86.github.io/drf-access-policy/policy_reuse/ for the usage of `PermittedPkRelatedField`
+    database = PermittedPkRelatedField(
+        access_policy=DatabaseAccessPolicy,
+        queryset=Database.current_objects.all()
+    )
 
 
 class SchemaRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
