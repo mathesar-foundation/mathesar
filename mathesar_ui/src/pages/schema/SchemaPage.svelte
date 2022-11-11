@@ -87,34 +87,30 @@
   </AppSecondaryHeader>
 
   <TabContainer bind:activeTab {tabs}>
-    <slot slot="tab" let:tab>
-      <div class="tab-header-container">
-        <span>{tab.label}</span>
-        {#if tab.count !== undefined}
-          <span class="count">{tab.count}</span>
-        {/if}
-      </div>
-    </slot>
-    <slot>
-      {#if activeTab?.id === 'overview'}
-        <div class="tab-container">
-          <SchemaOverview {tablesMap} {explorationsMap} {database} {schema} />
-        </div>
-      {:else if activeTab?.id === 'tables'}
-        <div class="tab-container">
-          <SchemaTables {tablesMap} {database} {schema} />
-        </div>
-      {:else}
-        <div class="tab-container">
-          <SchemaExplorations
-            hasTablesToExplore={!!tablesMap.size}
-            {explorationsMap}
-            {database}
-            {schema}
-          />
-        </div>
+    <div slot="tab" let:tab class="tab-header-container">
+      <span>{tab.label}</span>
+      {#if tab.count !== undefined}
+        <span class="count">{tab.count}</span>
       {/if}
-    </slot>
+    </div>
+    {#if activeTab?.id === 'overview'}
+      <div class="tab-container">
+        <SchemaOverview {tablesMap} {explorationsMap} {database} {schema} />
+      </div>
+    {:else if activeTab?.id === 'tables'}
+      <div class="tab-container">
+        <SchemaTables {tablesMap} {database} {schema} />
+      </div>
+    {:else}
+      <div class="tab-container">
+        <SchemaExplorations
+          hasTablesToExplore={!!tablesMap.size}
+          {explorationsMap}
+          {database}
+          {schema}
+        />
+      </div>
+    {/if}
   </TabContainer>
 </LayoutWithHeader2>
 
