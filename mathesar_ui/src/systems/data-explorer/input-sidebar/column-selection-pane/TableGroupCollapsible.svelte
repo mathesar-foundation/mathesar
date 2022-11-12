@@ -16,27 +16,27 @@
 
 <div class="table-group">
   <Collapsible bind:isOpen={linkCollapsibleOpenState[column.id]}>
-    <Button
-      slot="trigger"
-      appearance="plain"
-      class="column-name"
-      let:toggle
-      let:isOpen
-      on:click={toggle}
-    >
-      <span class="table-name">
-        <Icon
-          {...iconExpandDown}
-          size="0.7rem"
-          rotate={isOpen ? undefined : 270}
-        />
-        <Icon {...iconTable} size="0.9rem" />
-        <span>{tableName}</span>
-      </span>
-      <span class="fk-column">
-        via {column.name}
-      </span>
-    </Button>
+    <!--
+      A fragment is used here because sveltecheck does not seem to
+      recognize toggle as a defined variable when directly using the
+      Button as the slot element.
+    -->
+    <svelte:fragment slot="trigger" let:toggle let:isOpen>
+      <Button appearance="plain" class="column-name" on:click={toggle}>
+        <span class="table-name">
+          <Icon
+            {...iconExpandDown}
+            size="0.7rem"
+            rotate={isOpen ? undefined : 270}
+          />
+          <Icon {...iconTable} size="0.9rem" />
+          <span>{tableName}</span>
+        </span>
+        <span class="fk-column">
+          via {column.name}
+        </span>
+      </Button>
+    </svelte:fragment>
     <div class="column-list" slot="content">
       <slot />
       <div class="line-down" />
