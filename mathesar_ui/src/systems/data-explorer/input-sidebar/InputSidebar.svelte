@@ -77,7 +77,6 @@
     width: var(--input-pane-width);
     flex-basis: var(--input-pane-width);
     border-right: 1px solid var(--slate-300);
-    background-color: var(--sand-100);
     flex-shrink: 0;
     flex-grow: 0;
     display: flex;
@@ -85,7 +84,6 @@
     overflow: hidden;
 
     header {
-      background-color: var(--white);
       padding: var(--size-xx-small) var(--size-large);
       border-bottom: 1px solid var(--slate-200);
       font-weight: 590;
@@ -95,6 +93,7 @@
       flex-grow: 1;
       overflow: hidden;
       position: relative;
+      background-color: var(--sand-100);
 
       .help-text {
         padding: var(--size-large);

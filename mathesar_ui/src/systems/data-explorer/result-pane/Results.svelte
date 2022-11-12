@@ -151,6 +151,7 @@
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
+    --status-bar-height: 3rem;
 
     .empty-state {
       padding: 1rem;
@@ -165,18 +166,19 @@
     }
 
     :global(.sheet) {
-      bottom: 2.7rem;
+      bottom: var(--status-bar-height);
     }
 
     [data-identifier='status-bar'] {
       flex-grow: 0;
       flex-shrink: 0;
-      border-top: 1px solid #dfdfdf;
+      border-top: 1px solid var(--slate-300);
+      background-color: var(--slate-100);
       padding: 0.2rem 0.6rem;
       display: flex;
       align-items: center;
       margin-top: auto;
-      height: 2.7rem;
+      height: var(--status-bar-height);
 
       :global(.pagination-group) {
         margin-left: auto;

@@ -253,7 +253,6 @@
       left: 0;
       right: 0;
       overflow-x: auto;
-      background-color: var(--slate-100);
       overflow: hidden;
 
       .help-text {
