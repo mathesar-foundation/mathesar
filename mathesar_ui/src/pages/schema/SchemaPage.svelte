@@ -31,8 +31,13 @@
   const addEditModal = modal.spawnModalController();
 
   type TabsKey = 'overview' | 'tables' | 'explorations';
-  type TabItem = { label: string; id: TabsKey };
-  const tabs: TabItem[] = [
+  type TabItem = { label: string; id: TabsKey; count?: number };
+
+  let activeTab: TabItem;
+  $: tablesMap = $tablesStore.data;
+  $: explorationsMap = $queries.data;
+
+  $: tabs = [
     {
       label: 'Overview',
       id: 'overview',
@@ -40,15 +45,14 @@
     {
       label: 'Tables',
       id: 'tables',
+      count: tablesMap.size,
     },
     {
       label: 'Explorations',
       id: 'explorations',
+      count: explorationsMap.size,
     },
   ];
-  let activeTab: TabItem;
-  $: tablesMap = $tablesStore.data;
-  $: explorationsMap = $queries.data;
 
   function handleEditSchema() {
     addEditModal.open();
@@ -81,21 +85,30 @@
   </AppSecondaryHeader>
 
   <TabContainer bind:activeTab {tabs}>
-    <slot>
-      {#if activeTab?.id === 'overview'}
-        <div class="tab-container">
-          <SchemaOverview {tablesMap} {explorationsMap} {database} {schema} />
-        </div>
-      {:else if activeTab?.id === 'tables'}
-        <div class="tab-container">
-          <SchemaTables {tablesMap} {database} {schema} />
-        </div>
-      {:else}
-        <div class="tab-container">
-          <SchemaExplorations {explorationsMap} {database} {schema} />
-        </div>
+    <div slot="tab" let:tab class="tab-header-container">
+      <span>{tab.label}</span>
+      {#if tab.count !== undefined}
+        <span class="count">{tab.count}</span>
       {/if}
-    </slot>
+    </div>
+    {#if activeTab?.id === 'overview'}
+      <div class="tab-container">
+        <SchemaOverview {tablesMap} {explorationsMap} {database} {schema} />
+      </div>
+    {:else if activeTab?.id === 'tables'}
+      <div class="tab-container">
+        <SchemaTables {tablesMap} {database} {schema} />
+      </div>
+    {:else}
+      <div class="tab-container">
+        <SchemaExplorations
+          hasTablesToExplore={!!tablesMap.size}
+          {explorationsMap}
+          {database}
+          {schema}
+        />
+      </div>
+    {/if}
   </TabContainer>
 </LayoutWithHeader2>
 
@@ -104,5 +117,20 @@
 <style lang="scss">
   .tab-container {
     padding-top: 2rem;
+  }
+
+  .tab-header-container {
+    display: flex;
+    align-items: center;
+
+    > :global(* + *) {
+      margin-left: 0.25rem;
+    }
+
+    .count {
+      border-radius: var(--border-radius-l);
+      background: var(--slate-100);
+      padding: 0.071rem 0.14rem;
+    }
   }
 </style>

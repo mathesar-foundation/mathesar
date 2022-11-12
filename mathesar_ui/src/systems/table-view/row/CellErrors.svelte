@@ -74,6 +74,6 @@
     border-radius: 0.4em;
     max-width: 20em;
     padding: 0.5em;
-    z-index: 20;
+    z-index: var(--cell-errors-z-index);
   }
 </style>

@@ -1,61 +1,68 @@
 import pytest
 from django.core.cache import cache
+from sqlalchemy import text
 
+from db.metadata import get_empty_metadata
+from mathesar.database.base import create_mathesar_engine
 from mathesar.state.django import reflect_db_objects
 from mathesar.models.base import Table, Schema, Database
-from db.metadata import get_empty_metadata
 
 
-@pytest.fixture(scope="module")
-def database_api_db(MOD_create_dj_db, get_uid):
-    db_name = "test_database_api_db_" + get_uid()
-    MOD_create_dj_db(db_name)
-    return db_name
+def _recreate_db(db_name):
+    root_engine = create_mathesar_engine('default')
+    with root_engine.connect() as conn:
+        conn.execution_options(isolation_level="AUTOCOMMIT")
+        conn.execute(text(f"DROP DATABASE IF EXISTS {db_name} WITH (FORCE);"))
+        conn.execute(text(f"CREATE DATABASE {db_name};"))
 
 
-def test_database_reflection_new(database_api_db):
-    reflect_db_objects(metadata=get_empty_metadata())
-    assert Database.objects.filter(name=database_api_db).exists()
+def _remove_db(db_name):
+    root_engine = create_mathesar_engine('default')
+    with root_engine.connect() as conn:
+        conn.execution_options(isolation_level="AUTOCOMMIT")
+        conn.execute(text(f"DROP DATABASE IF EXISTS {db_name} WITH (FORCE);"))
 
 
-def test_database_reflection_delete(database_api_db, FUN_dj_databases):
-    reflect_db_objects(metadata=get_empty_metadata())
-    db = Database.objects.get(name=database_api_db)
-    assert db.deleted is False
-
-    del FUN_dj_databases[database_api_db]
-    cache.clear()
-    reflect_db_objects(metadata=get_empty_metadata())
-    db.refresh_from_db()
-    assert db.deleted is True
+@pytest.fixture
+def test_db_name(worker_id):
+    default_test_db_name = "mathesar_db_api_test"
+    return f"{default_test_db_name}_{worker_id}"
 
 
-def test_database_reflection_delete_schema(database_api_db, FUN_dj_databases):
-    reflect_db_objects(metadata=get_empty_metadata())
-    db = Database.objects.get(name=database_api_db)
+@pytest.fixture
+def db_dj_model(test_db_name):
+    _recreate_db(test_db_name)
+    db = Database.objects.get_or_create(name=test_db_name)[0]
+    reflect_db_objects(get_empty_metadata())
+    yield db
+    _remove_db(test_db_name)
+    db.delete()
 
-    Schema.objects.create(oid=1, database=db)
+
+def test_database_reflection_delete(db_dj_model):
+    assert db_dj_model.deleted is False  # check DB is not marked deleted inappropriately
+    _remove_db(db_dj_model.name)
+    reflect_db_objects(get_empty_metadata())
+    fresh_db_model = Database.objects.get(name=db_dj_model.name)
+    assert fresh_db_model.deleted is True  # check DB is marked deleted appropriately
+
+
+def test_database_reflection_delete_schema(db_dj_model):
+    Schema.objects.create(oid=1, database=db_dj_model)
     # We expect the test schema + 'public'
-    assert Schema.objects.filter(database=db).count() == 2
-
-    del FUN_dj_databases[database_api_db]
-    cache.clear()
-    reflect_db_objects(metadata=get_empty_metadata())
-    assert Schema.objects.filter(database=db).count() == 0
+    assert Schema.objects.filter(database=db_dj_model).count() == 2
+    _remove_db(db_dj_model.name)
+    reflect_db_objects(get_empty_metadata())
+    assert Schema.objects.filter(database=db_dj_model).count() == 0
 
 
-def test_database_reflection_delete_table(database_api_db, FUN_dj_databases):
-    reflect_db_objects(metadata=get_empty_metadata())
-    db = Database.objects.get(name=database_api_db)
-
-    schema = Schema.objects.create(oid=1, database=db)
+def test_database_reflection_delete_table(db_dj_model):
+    schema = Schema.objects.create(oid=1, database=db_dj_model)
     Table.objects.create(oid=2, schema=schema)
-    assert Table.objects.filter(schema__database=db).count() == 1
-
-    del FUN_dj_databases[database_api_db]
-    cache.clear()
-    reflect_db_objects(metadata=get_empty_metadata())
-    assert Table.objects.filter(schema__database=db).count() == 0
+    assert Table.objects.filter(schema__database=db_dj_model).count() == 1
+    _remove_db(db_dj_model.name)
+    reflect_db_objects(get_empty_metadata())
+    assert Table.objects.filter(schema__database=db_dj_model).count() == 0
 
 
 def check_database(database, response_database):
@@ -67,103 +74,29 @@ def check_database(database, response_database):
     assert response_database['supported_types_url'].endswith('/types/')
 
 
-def test_database_list(client, test_db_name, database_api_db):
+def test_database_list(client, db_dj_model):
     response = client.get('/api/db/v0/databases/')
     response_data = response.json()
-
-    expected_databases = {
-        test_db_name: Database.objects.get(name=test_db_name),
-        database_api_db: Database.objects.get(name=database_api_db),
-    }
-
-    assert response.status_code == 200
-    assert response_data['count'] == 2
-    assert len(response_data['results']) == 2
-    for response_database in response_data['results']:
-        expected_database = expected_databases[response_database['name']]
-        check_database(expected_database, response_database)
-
-
-def test_database_list_deleted(client, test_db_name, database_api_db, FUN_dj_databases):
-    reflect_db_objects(metadata=get_empty_metadata())
-    del FUN_dj_databases[database_api_db]
-
-    cache.clear()
-    response = client.get('/api/db/v0/databases/')
-    response_data = response.json()
-
-    expected_databases = {
-        test_db_name: Database.objects.get(name=test_db_name),
-        database_api_db: Database.objects.get(name=database_api_db),
-    }
-
-    assert response.status_code == 200
-    assert response_data['count'] == 2
-    assert len(response_data['results']) == 2
-    for response_database in response_data['results']:
-        expected_database = expected_databases[response_database['name']]
-        check_database(expected_database, response_database)
-
-
-@pytest.mark.parametrize('deleted', [True, False])
-def test_database_list_filter_deleted(client, deleted, test_db_name, database_api_db, FUN_dj_databases):
-    reflect_db_objects(metadata=get_empty_metadata())
-    del FUN_dj_databases[database_api_db]
-
-    cache.clear()
-    response = client.get(f'/api/db/v0/databases/?deleted={deleted}')
-    response_data = response.json()
-
-    expected_databases = {
-        False: Database.current_objects.get(name=test_db_name),
-        True: Database.current_objects.get(name=database_api_db),
-    }
-
     assert response.status_code == 200
     assert response_data['count'] == 1
     assert len(response_data['results']) == 1
-
-    expected_database = expected_databases[deleted]
-    response_database = response_data['results'][0]
-    check_database(expected_database, response_database)
+    check_database(db_dj_model, response_data['results'][0])
 
 
-@pytest.mark.parametrize('sort_field', ['id', 'name'])
-def test_database_list_sorted_by(client, test_db_name, database_api_db, FUN_create_dj_db, sort_field, get_uid):
-    """
-    Notice that we must pull in databases that are already setup in this scope.
-    """
-    reflect_db_objects(metadata=get_empty_metadata())
-
-    # I appended a lowercase letter in front of the random string, because I suspected that Python
-    # and Postgres might be sorting multi-case string sets differently.
-    test_db_name_2 = 'a' + get_uid()
-
-    FUN_create_dj_db(test_db_name_2)
-
+def test_database_list_deleted(client, db_dj_model):
+    _remove_db(db_dj_model.name)
     cache.clear()
-
-    expected_databases = [
-        Database.objects.get(name=test_db_name),
-        Database.objects.get(name=test_db_name_2),
-        Database.objects.get(name=database_api_db),
-    ]
-    expected_databases = sorted(expected_databases, key=lambda db: getattr(db, sort_field))
-
-    response = client.get(f'/api/db/v0/databases/?sort_by={sort_field}')
+    response = client.get('/api/db/v0/databases/')
     response_data = response.json()
-    response_databases = response_data['results']
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == 1
+    check_database(db_dj_model, response_data['results'][0])
 
-    comparison_tuples = zip(expected_databases, response_databases)
-    for comparison_tuple in comparison_tuples:
-        check_database(comparison_tuple[0], comparison_tuple[1])
 
-
-def test_database_detail(client):
-    expected_database = Database.objects.all().first()
-
-    response = client.get(f'/api/db/v0/databases/{expected_database.id}/')
+def test_database_detail(client, db_dj_model):
+    response = client.get(f'/api/db/v0/databases/{db_dj_model.id}/')
     response_database = response.json()
 
     assert response.status_code == 200
-    check_database(expected_database, response_database)
+    check_database(db_dj_model, response_database)

@@ -1,4 +1,4 @@
-button.btn {
+.btn {
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
@@ -38,7 +38,8 @@ button.btn {
     color: var(--white);
 
     &:not(:disabled) {
-      &:hover {
+      &:hover,
+      &.hover {
         background: var(--brand-600);
         border-color: var(--brand-600);
       }
@@ -55,7 +56,8 @@ button.btn {
     border-color: var(--slate-200);
 
     &:not(:disabled) {
-      &:hover {
+      &:hover,
+      &.hover {
         background: var(--slate-200);
         border-color: var(--slate-300);
       }
@@ -91,12 +93,14 @@ button.btn {
   &.btn-plain,
   &.btn-plain-primary {
     &:not(:disabled) {
-      &:hover {
+      &:hover,
+      &.hover {
         background: var(--slate-100);
       }
 
       &:active,
-      &:focus {
+      &:focus,
+      &.focus {
         box-shadow: 0 0 0 2px var(--slate-100) !important;
       }
 

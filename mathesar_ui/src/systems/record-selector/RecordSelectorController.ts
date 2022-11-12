@@ -3,7 +3,7 @@ import { writable } from 'svelte/store';
 
 import type { Column } from '@mathesar/api/tables/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { RecordSelectorRowType } from './recordSelectorTypes';
+import type { RecordSelectorPurpose } from './recordSelectorUtils';
 
 interface RecordSelectorControllerProps {
   onOpen?: () => void;
@@ -26,7 +26,7 @@ export class RecordSelectorController {
   /** 0 = root level */
   nestingLevel: number;
 
-  rowType = writable<RecordSelectorRowType>('button');
+  purpose = writable<RecordSelectorPurpose>('dataEntry');
 
   isOpen = writable(false);
 
@@ -62,7 +62,7 @@ export class RecordSelectorController {
     tableId: DBObjectEntry['id'];
   }): Promise<RecordSelectorResult | undefined> {
     this.tableId.set(tableId);
-    this.rowType.set('button');
+    this.purpose.set('dataEntry');
     this.open();
     return new Promise((resolve) => {
       this.submit = (v) => {
@@ -78,7 +78,7 @@ export class RecordSelectorController {
 
   navigateToRecordPage({ tableId }: { tableId: DBObjectEntry['id'] }): void {
     this.tableId.set(tableId);
-    this.rowType.set('hyperlink');
+    this.purpose.set('navigation');
     this.open();
     this.cancel = () => {
       this.close();
@@ -88,12 +88,10 @@ export class RecordSelectorController {
 
 const contextKey = {};
 
-export function setNewRecordSelectorControllerInContext(
-  props: RecordSelectorControllerProps,
-): RecordSelectorController {
-  const recordSelectorController = new RecordSelectorController(props);
-  setContext(contextKey, recordSelectorController);
-  return recordSelectorController;
+export function setRecordSelectorControllerInContext(
+  c: RecordSelectorController,
+): void {
+  setContext(contextKey, c);
 }
 
 export function getRecordSelectorFromContext(): RecordSelectorController {

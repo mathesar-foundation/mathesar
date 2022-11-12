@@ -63,6 +63,7 @@ function getProps(
     locale: (format && localeMap.get(format)) ?? undefined,
     useGrouping: getUseGrouping(displayOptions?.use_grouping ?? 'false'),
     allowFloat: getAllowFloat(column, config?.floatAllowanceStrategy),
+    allowNegative: true,
     minimumFractionDigits: displayOptions?.minimum_fraction_digits ?? undefined,
     maximumFractionDigits: displayOptions?.maximum_fraction_digits ?? undefined,
   };

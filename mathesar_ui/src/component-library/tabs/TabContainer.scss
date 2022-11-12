@@ -6,6 +6,7 @@
     align-items: center;
     display: flex;
     position: relative;
+    isolation: isolate;
     flex-direction: row;
     margin: 0;
     padding: 0;
@@ -94,6 +95,7 @@
     min-height: 0;
     min-width: 0;
     position: relative;
+    isolation: isolate;
   }
 
   &.fill-container-height {

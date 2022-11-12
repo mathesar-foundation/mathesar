@@ -1,11 +1,11 @@
-from rest_framework.mixins import CreateModelMixin, ListModelMixin
+from rest_framework.mixins import CreateModelMixin
 from rest_framework.viewsets import GenericViewSet
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.links import LinksMappingSerializer
 from mathesar.state import reset_reflection
 
 
-class LinkViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+class LinkViewSet(CreateModelMixin, GenericViewSet):
     serializer_class = LinksMappingSerializer
     pagination_class = DefaultLimitOffsetPagination
 

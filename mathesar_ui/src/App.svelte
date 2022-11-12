@@ -1,18 +1,22 @@
 <script lang="ts">
   import { ToastPresenter, Confirmation } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
-  import { setNewRecordSelectorControllerInContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import {
+    RecordSelectorController,
+    setRecordSelectorControllerInContext,
+  } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { confirmationController } from '@mathesar/stores/confirmation';
   import { modal } from './stores/modal';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import RootRoute from './routes/RootRoute.svelte';
 
   const recordSelectorModal = modal.spawnModalController();
-  const recordSelectorController = setNewRecordSelectorControllerInContext({
+  const recordSelectorController = new RecordSelectorController({
     onOpen: () => recordSelectorModal.open(),
     onClose: () => recordSelectorModal.close(),
     nestingLevel: 0,
   });
+  setRecordSelectorControllerInContext(recordSelectorController);
 </script>
 
 <ToastPresenter entries={toast.entries} />
@@ -112,6 +116,11 @@
     --table-title-header-height: 4.6428rem;
 
     color: var(--slate-800);
+
+    --modal-z-index: 1;
+    --dropdown-z-index: 1;
+    --cell-errors-z-index: 1;
+    --toast-z-index: 2;
   }
 
   h1 {
@@ -133,6 +142,7 @@
     font-size: inherit;
     font-weight: inherit;
     text-align: inherit;
+    text-decoration: inherit;
     margin: 0;
     padding: 0;
   }

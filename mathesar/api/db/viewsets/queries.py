@@ -5,6 +5,7 @@ from rest_framework import viewsets
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from mathesar.api.dj_filters import UIQueryFilter
 
 from mathesar.api.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.api.serializers.queries import BaseQuerySerializer, QuerySerializer
@@ -23,6 +24,7 @@ class QueryViewSet(
     serializer_class = QuerySerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = UIQueryFilter
 
     def get_queryset(self):
         queryset = UIQuery.objects.all()
@@ -107,12 +109,19 @@ class QueryViewSet(
         columns = query.output_columns_simple
         column_metadata = query.all_columns_description_map
         output_serializer = BaseQuerySerializer(query)
+
+        def _get_param_val(val):
+            try:
+                ret_val = json.loads(val)
+            except json.JSONDecodeError:
+                ret_val = val
+            return ret_val
         return Response(
             {
                 "query": output_serializer.data,
                 "records": paginated_records.data,
                 "output_columns": columns,
                 "column_metadata": column_metadata,
-                "parameters": {k: json.loads(request.GET[k]) for k in request.GET},
+                "parameters": {k: _get_param_val(request.GET[k]) for k in request.GET},
             }
         )
