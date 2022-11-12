@@ -39,6 +39,8 @@
   .prefix-wrapper {
     --icon-width: 2.142rem;
     position: relative;
+    display: block;
+
     .input-prefix-icon-container {
       position: absolute;
       top: 0;

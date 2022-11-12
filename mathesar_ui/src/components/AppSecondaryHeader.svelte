@@ -4,14 +4,20 @@
 
   export let pageTitleAndMetaProps: ComponentProps<PageTitleAndMeta>;
   export let maxWidth = true;
+  export let theme: 'dark' | 'light' = 'dark';
   // export let showTutorial: boolean = false;
 </script>
 
-<div class="container">
+<div
+  class="container"
+  class:theme-dark={theme === 'dark'}
+  class:theme-light={theme === 'light'}
+>
   <div class="content" class:max-width={maxWidth}>
     <div class="page-title-and-meta-container">
       <PageTitleAndMeta {...pageTitleAndMetaProps}>
         <slot slot="action" name="action" />
+        <slot slot="bottom" name="bottom" />
       </PageTitleAndMeta>
     </div>
     <!-- {#if showTutorial}
@@ -24,8 +30,14 @@
 
 <style>
   .container {
+    padding: var(--page-padding);
+  }
+  .theme-dark {
     background-color: var(--slate-400);
-    padding: 2rem;
+    color: var(--white);
+  }
+  .theme-light {
+    background-color: var(--sand-200);
   }
   .content.max-width {
     max-width: var(--max-layout-width, 54rem);
