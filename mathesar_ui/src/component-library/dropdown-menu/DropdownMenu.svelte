@@ -15,15 +15,16 @@
 </script>
 
 <Dropdown {closeOnInnerClick} ariaLabel={label} {...$$restProps}>
-  <span class="dropdown-menu-trigger" slot="trigger">
-    <!-- TODO: Figure out a way to make exactly one out of label and icon mandatory in props using TS -->
-    {#if icon}
-      <Icon {...icon} />
-    {/if}
-    {#if label}
-      <span class="label">{label}</span>
-    {/if}
-  </span>
+  <slot name="trigger" slot="trigger">
+    <span class="dropdown-menu-trigger">
+      {#if icon}
+        <Icon {...icon} />
+      {/if}
+      {#if label}
+        <span class="label">{label}</span>
+      {/if}
+    </span>
+  </slot>
   <Menu slot="content" style="--min-width: 100%;{menuStyle}">
     <slot />
   </Menu>
