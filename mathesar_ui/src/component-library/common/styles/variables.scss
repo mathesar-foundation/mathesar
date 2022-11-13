@@ -7,15 +7,13 @@
   --danger-background-color: #fde9e9;
   --dander-border-color: #f2aaaa;
 
-  // Input specific
-  --input-disabled-background: #efefef;
-
   // Idea here is to use the same token naming
   // between the Figma designs and the codebase
   // which then makes it easier and faster to create
   // element from design into code.
   --red-500: #eb5441;
-  --red-600: #c63826;
+  --red-600: #dd4734;
+  --red-800: #c63826;
 
   --slate-100: #eff1f1;
   --slate-200: #d5d8dc;
@@ -44,6 +42,7 @@
   // Brand Color
   --brand-500: var(--red-500);
   --brand-600: var(--red-600);
+  --brand-800: var(--red-800);
   --brand-box-shadow: var(--red-box-shadow);
 
   --size-super-ultra-small: 0.2858rem; // 4px

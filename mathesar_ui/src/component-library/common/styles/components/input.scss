@@ -14,17 +14,17 @@
   text-align: var(--input-element-text-align, 'left');
 
   &:focus {
-    border-color: var(--brand-500);
+    border-color: var(--slate-300);
     outline: 0;
-    box-shadow: 0 0 0 2px var(--brand-box-shadow);
+    box-shadow: 0 0 0 2px var(--slate-100);
   }
 
   &:disabled {
-    background: var(--input-disabled-background);
+    background: var(--slate-100);
   }
 
   &.has-error {
-    background: var(--danger-background-color);
+    background: var(--red-500);
   }
 
   &.text-area {
