@@ -16,27 +16,37 @@
   </main>
 </div>
 
-<style>
+<style lang="scss">
   .app-layout {
     display: grid;
     grid-template: auto auto / 1fr;
+
+    .app-layout-header {
+      position: sticky;
+    }
+    .app-layout-content {
+      position: relative;
+
+      &.restrict-width {
+        max-width: var(--max-layout-width, 54rem);
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+      }
+    }
+
+    &.fit-viewport {
+      grid-template: auto 1fr / 1fr;
+      height: 100vh;
+      overflow: hidden;
+
+      .app-layout-content {
+        overflow: hidden;
+      }
+    }
   }
-  .app-layout.fit-viewport {
-    grid-template: auto 1fr / 1fr;
-    height: 100vh;
-  }
-  .app-layout-header {
-    position: sticky;
-  }
-  .app-layout-content {
-    position: relative;
-  }
-  .app-layout-content.restrict-width {
-    max-width: var(--max-layout-width, 54rem);
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
-  }
+
+  // TODO: Remove default styling properties on layout components
   .app-layout:not(.fit-viewport) .app-layout-content {
     padding: var(--page-padding);
   }

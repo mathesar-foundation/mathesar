@@ -187,11 +187,9 @@
 
 <style lang="scss">
   .data-explorer {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    display: grid;
+    grid-template: auto 1fr / 1fr;
+    height: 100%;
 
     .header {
       display: flex;
@@ -241,13 +239,8 @@
     }
     .content-pane {
       display: flex;
-      position: absolute;
-      top: var(--table-title-header-height);
-      bottom: 0;
-      left: 0;
-      right: 0;
-      overflow-x: auto;
       overflow: hidden;
+      overflow-x: auto;
       --input-pane-width: 25.8rem;
       --exploration-inspector-width: 22.9rem;
 

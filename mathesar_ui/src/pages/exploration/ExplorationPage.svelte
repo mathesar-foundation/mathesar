@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
   import {
     ExplorationResult,
     QueryModel,
@@ -34,7 +34,7 @@
   <title>{query.name} | {schema.name} | Mathesar</title>
 </svelte:head>
 
-<LayoutWithHeader fitViewport>
+<LayoutWithHeader2 fitViewport restrictWidth={false}>
   {#if queryRunner}
     <div class="exploration-page">
       <Header bind:isInspectorOpen {query} {database} {schema} />
@@ -46,7 +46,7 @@
       </div>
     </div>
   {/if}
-</LayoutWithHeader>
+</LayoutWithHeader2>
 
 <style lang="scss">
   .exploration-page {
@@ -57,6 +57,8 @@
     .content {
       display: flex;
       --exploration-inspector-width: 22.9rem;
+      overflow: hidden;
+      overflow-x: auto;
     }
   }
 </style>
