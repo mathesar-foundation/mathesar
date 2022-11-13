@@ -42,7 +42,6 @@
   } from './linkTableUtils';
   import RelationshipDiagram from './RelationshipDiagram.svelte';
   import TableName from './TableName.svelte';
-    import { forEach, map } from 'iter-tools';
 
   const dispatch = createEventDispatcher();
   const tabularData = getTabularDataStoreFromContext();
