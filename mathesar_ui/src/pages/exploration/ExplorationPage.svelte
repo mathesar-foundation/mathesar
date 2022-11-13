@@ -5,17 +5,19 @@
     ExplorationResult,
     QueryModel,
     QueryRunner,
+    ExplorationInspector,
   } from '@mathesar/systems/data-explorer';
   import type { QueryInstance } from '@mathesar/api/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-  import ActionsPane from './ActionsPane.svelte';
+  import Header from './Header.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
   export let query: QueryInstance;
 
   let queryRunner: QueryRunner | undefined;
+  let isInspectorOpen = true;
 
   function createQueryRunner(
     _query: QueryInstance,
@@ -35,8 +37,13 @@
 <LayoutWithHeader fitViewport>
   {#if queryRunner}
     <div class="exploration-page">
-      <ActionsPane {query} {queryRunner} {database} {schema} />
-      <ExplorationResult {queryRunner} />
+      <Header bind:isInspectorOpen {query} {database} {schema} />
+      <div class="content">
+        <ExplorationResult {queryRunner} />
+        {#if isInspectorOpen}
+          <ExplorationInspector {queryRunner} />
+        {/if}
+      </div>
     </div>
   {/if}
 </LayoutWithHeader>
@@ -46,5 +53,10 @@
     display: grid;
     grid-template: auto 1fr / 1fr;
     height: 100%;
+
+    .content {
+      display: flex;
+      --exploration-inspector-width: 25.8rem;
+    }
   }
 </style>

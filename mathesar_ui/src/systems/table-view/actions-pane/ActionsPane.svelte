@@ -16,7 +16,7 @@
     iconGrouping,
     iconRefresh,
     iconSorting,
-    iconTableInspector,
+    iconInspector,
   } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/utils/api';
@@ -162,7 +162,7 @@
   </div>
 
   <Button size="medium" disabled={$isLoading} on:click={toggleTableInspector}>
-    <Icon {...iconTableInspector} />
+    <Icon {...iconInspector} />
   </Button>
 </div>
 

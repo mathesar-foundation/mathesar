@@ -47,7 +47,7 @@
     }
 
     + :global(.selectable-column) {
-      margin-top: var(--size-ultra-small);
+      margin-top: var(--size-super-ultra-small);
     }
 
     + :global(.table-group) {

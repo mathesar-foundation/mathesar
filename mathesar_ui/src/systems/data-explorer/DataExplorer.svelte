@@ -14,13 +14,13 @@
   import type { TableEntry } from '@mathesar/api/tables';
   import { queries } from '@mathesar/stores/queries';
   import { getAvailableName } from '@mathesar/utils/db';
-  import { iconRedo, iconUndo } from '@mathesar/icons';
+  import { iconRedo, iconUndo, iconInspector } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
   import type QueryManager from './QueryManager';
   import InputSidebar from './input-sidebar/InputSidebar.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
-  import OutputConfigSidebar from './output-config-sidebar/OutputConfigSidebar.svelte';
+  import ExplorationInspector from './exploration-inspector/ExplorationInspector.svelte';
   import type { ColumnWithLink } from './utils';
 
   const saveModalController = modal.spawnModalController();
@@ -35,6 +35,9 @@
     ? $tablesDataStore.data.get($query.base_table)
     : undefined;
   $: isSaved = $query.isSaved();
+  $: hasNoColumns = $query.initial_columns.length === 0;
+
+  let isInspectorOpen = true;
 
   function updateBaseTable(tableEntry: TableEntry | undefined) {
     void queryManager.update((q) =>
@@ -161,6 +164,16 @@
             <span>Redo</span>
           </Button>
         </InputGroup>
+        <Button
+          appearance="secondary"
+          disabled={hasNoColumns}
+          on:click={() => {
+            isInspectorOpen = !isInspectorOpen;
+          }}
+        >
+          <Icon {...iconInspector} />
+          <span>Inspector</span>
+        </Button>
       {/if}
     </div>
   </div>
@@ -171,11 +184,13 @@
       </div>
     {:else}
       <InputSidebar {queryManager} {linkCollapsibleOpenState} />
-      {#if $query.initial_columns.length > 0}
-        <ResultPane queryRunner={queryManager} />
-        <OutputConfigSidebar {queryManager} />
-      {:else}
+      {#if hasNoColumns}
         <div class="help-text">Get started by adding columns from the left</div>
+      {:else}
+        <ResultPane queryRunner={queryManager} />
+        {#if isInspectorOpen}
+          <ExplorationInspector queryRunner={queryManager} />
+        {/if}
       {/if}
     {/if}
   </div>
@@ -254,6 +269,8 @@
       right: 0;
       overflow-x: auto;
       overflow: hidden;
+      --input-pane-width: 25.8rem;
+      --exploration-inspector-width: 25.8rem;
 
       .help-text {
         display: inline-block;
