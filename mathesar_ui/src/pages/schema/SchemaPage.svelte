@@ -84,7 +84,7 @@
     </slot>
   </AppSecondaryHeader>
 
-  <TabContainer bind:activeTab {tabs}>
+  <TabContainer bind:activeTab {tabs} uniformTabWidth={false}>
     <div slot="tab" let:tab class="tab-header-container">
       <span>{tab.label}</span>
       {#if tab.count !== undefined}

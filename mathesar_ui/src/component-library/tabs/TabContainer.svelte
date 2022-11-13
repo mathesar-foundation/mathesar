@@ -23,6 +23,7 @@
   export let preventDefault = false;
   export let fillTabWidth = false;
   export let fillContainerHeight = false;
+  export let uniformTabWidth = true;
 
   function selectActiveTab(e: Event, tab: Tab) {
     activeTab = tab;
@@ -82,6 +83,8 @@
         {componentId}
         {tab}
         {allowRemoval}
+        {uniformTabWidth}
+        totalTabs={tabs.length}
         isActive={tab[idKey] === activeTab[idKey]}
         on:focus={focusTab}
         on:blur={blurTab}
