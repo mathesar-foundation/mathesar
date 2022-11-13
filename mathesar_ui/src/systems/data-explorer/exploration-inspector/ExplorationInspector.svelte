@@ -1,6 +1,9 @@
 <script lang="ts">
   import { TabContainer } from '@mathesar-component-library';
   import type QueryRunner from '../QueryRunner';
+  import ExplorationTab from './ExplorationTab.svelte';
+  import ColumnTab from './ColumnTab.svelte';
+  import CellTab from './CellTab.svelte';
 
   export let queryRunner: QueryRunner;
   $: ({ query } = queryRunner);
@@ -19,7 +22,13 @@
 
 <aside class="exploration-inspector">
   <TabContainer {tabs} fillTabWidth fillContainerHeight let:activeTab>
-    <div />
+    {#if activeTab.id === 'inspect-exploration'}
+      <ExplorationTab />
+    {:else if activeTab.id === 'inspect-column'}
+      <ColumnTab />
+    {:else}
+      <CellTab />
+    {/if}
   </TabContainer>
 </aside>
 
@@ -34,5 +43,20 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+
+    :global(.collapsible > button.btn) {
+      background-color: var(--sand-200);
+
+      &:hover {
+        background-color: var(--sand-300);
+      }
+
+      &:active {
+        background-color: var(--sand-400);
+      }
+    }
+    :global(.collapsible > button.btn .collapsible-header-title) {
+      font-weight: 590;
+    }
   }
 </style>

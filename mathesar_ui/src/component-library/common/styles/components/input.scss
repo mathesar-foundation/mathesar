@@ -26,4 +26,8 @@
   &.has-error {
     background: var(--danger-background-color);
   }
+
+  &.text-area {
+    resize: vertical;
+  }
 }

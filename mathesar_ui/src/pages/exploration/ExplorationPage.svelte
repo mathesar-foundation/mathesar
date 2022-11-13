@@ -56,7 +56,7 @@
 
     .content {
       display: flex;
-      --exploration-inspector-width: 25.8rem;
+      --exploration-inspector-width: 22.9rem;
     }
   }
 </style>

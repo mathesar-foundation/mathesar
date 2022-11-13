@@ -270,7 +270,7 @@
       overflow-x: auto;
       overflow: hidden;
       --input-pane-width: 25.8rem;
-      --exploration-inspector-width: 25.8rem;
+      --exploration-inspector-width: 22.9rem;
 
       .help-text {
         display: inline-block;
