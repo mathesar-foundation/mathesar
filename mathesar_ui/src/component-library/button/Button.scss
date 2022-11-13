@@ -68,6 +68,25 @@
     }
   }
 
+  &.btn-outline-primary {
+    background: var(--white);
+    border-color: var(--brand-500);
+    color: var(--brand-500);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        background: var(--slate-100);
+        border-color: var(--brand-600);
+      }
+
+      &:active {
+        background: var(--slate-200);
+        border-color: var(--brand-800);
+      }
+    }
+  }
+
   &.btn-plain,
   &.btn-plain-primary {
     background: transparent;

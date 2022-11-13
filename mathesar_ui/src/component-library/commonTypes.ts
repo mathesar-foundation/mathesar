@@ -4,7 +4,8 @@ export type Appearance =
   | 'secondary'
   | 'plain'
   | 'ghost'
-  | 'plain-primary';
+  | 'plain-primary'
+  | 'outline-primary';
 
 export type Size = 'small' | 'medium' | 'large';
 
