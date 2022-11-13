@@ -117,18 +117,19 @@
     on:mouseenter
     on:click={() => checkAndToggle(api)}
     on:keydown={(e) => handleKeyDown(e, api, isOpen)}
-  > <div class="cell">
-    <div class="value" class:active={isActive}>
-      <CellValue {value}>
-        {getLabel(value ?? undefined)}
-      </CellValue>
-    </div>
-
-    {#if isActive}
-      <div class="icon">
-        <Icon {...iconExpandDown} />
+  >
+    <div class="cell">
+      <div class="value" class:active={isActive}>
+        <CellValue {value}>
+          {getLabel(value ?? undefined)}
+        </CellValue>
       </div>
-    {/if}
+
+      {#if isActive}
+        <div class="icon">
+          <Icon {...iconExpandDown} />
+        </div>
+      {/if}
     </div>
   </CellWrapper>
 
