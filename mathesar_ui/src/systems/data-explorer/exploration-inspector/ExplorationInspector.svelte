@@ -1,12 +1,13 @@
 <script lang="ts">
   import { TabContainer } from '@mathesar-component-library';
   import type QueryRunner from '../QueryRunner';
+  import type QueryManager from '../QueryManager';
   import ExplorationTab from './ExplorationTab.svelte';
   import ColumnTab from './ColumnTab.svelte';
   import CellTab from './CellTab.svelte';
 
-  export let queryRunner: QueryRunner;
-  $: ({ query } = queryRunner);
+  export let queryHandler: QueryRunner | QueryManager;
+  $: ({ query } = queryHandler);
   $: isSaved = $query.isSaved();
 
   const generalTabs = [
@@ -23,7 +24,11 @@
 <aside class="exploration-inspector">
   <TabContainer {tabs} fillTabWidth fillContainerHeight let:activeTab>
     {#if activeTab.id === 'inspect-exploration'}
-      <ExplorationTab />
+      <ExplorationTab
+        {queryHandler}
+        name={$query.name}
+        description={$query.description}
+      />
     {:else if activeTab.id === 'inspect-column'}
       <ColumnTab />
     {:else}

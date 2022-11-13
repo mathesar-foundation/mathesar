@@ -41,7 +41,7 @@
       <div class="content">
         <ExplorationResult {queryRunner} />
         {#if isInspectorOpen}
-          <ExplorationInspector {queryRunner} />
+          <ExplorationInspector queryHandler={queryRunner} />
         {/if}
       </div>
     </div>

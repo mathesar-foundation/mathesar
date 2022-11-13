@@ -51,6 +51,7 @@ export type QueryInstanceTransformation =
 export interface QueryInstance {
   readonly id: number;
   readonly name: string;
+  readonly description?: string;
   readonly base_table: number;
   readonly initial_columns?: QueryInstanceInitialColumn[];
   readonly transformations?: QueryInstanceTransformation[];

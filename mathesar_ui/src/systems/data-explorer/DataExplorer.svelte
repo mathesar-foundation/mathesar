@@ -5,7 +5,6 @@
     Button,
     SpinnerButton,
   } from '@mathesar-component-library';
-  import EditableTitle from '@mathesar/components/EditableTitle.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
@@ -13,7 +12,6 @@
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import type { TableEntry } from '@mathesar/api/tables';
   import { queries } from '@mathesar/stores/queries';
-  import { getAvailableName } from '@mathesar/utils/db';
   import { iconRedo, iconUndo, iconInspector } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
@@ -45,17 +43,6 @@
     );
     queryManager.clearSelectedColumn();
     linkCollapsibleOpenState = {};
-  }
-
-  function handleNameChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-    if (target.value.trim() === '') {
-      target.value = getAvailableName(
-        'New_Exploration',
-        new Set([...$queries.data.values()].map((q) => q.name)),
-      );
-    }
-    void queryManager.update((q) => q.withName(target.value));
   }
 
   function getNameValidationErrors(name: string) {
@@ -102,14 +89,6 @@
 <div class="data-explorer">
   <div class="header">
     <div class="title-wrapper">
-      {#if isSaved}
-        <EditableTitle
-          value={$query.name}
-          size={1.266}
-          on:change={handleNameChange}
-        />
-      {/if}
-
       <div class="title">
         {isSaved ? 'Based on' : 'Exploring from'}
       </div>
@@ -189,7 +168,7 @@
       {:else}
         <ResultPane queryRunner={queryManager} />
         {#if isInspectorOpen}
-          <ExplorationInspector queryRunner={queryManager} />
+          <ExplorationInspector queryHandler={queryManager} />
         {/if}
       {/if}
     {/if}

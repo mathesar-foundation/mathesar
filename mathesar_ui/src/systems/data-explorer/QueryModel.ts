@@ -38,6 +38,8 @@ export default class QueryModel {
 
   name: UnsavedQueryInstance['name'];
 
+  description: UnsavedQueryInstance['description'];
+
   initial_columns: QueryInstanceInitialColumn[];
 
   transformationModels: QueryTransformationModel[];
@@ -46,6 +48,7 @@ export default class QueryModel {
     this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
+    this.description = model?.description;
     this.initial_columns = model?.initial_columns ?? [];
     if (model && 'transformationModels' in model) {
       this.transformationModels = [...model.transformationModels];
@@ -84,7 +87,7 @@ export default class QueryModel {
     };
   }
 
-  withName(name: string): QueryModelUpdateDiff {
+  withName(name?: string): QueryModelUpdateDiff {
     const model = new QueryModel({
       ...this,
       name,
@@ -94,6 +97,20 @@ export default class QueryModel {
       type: 'name',
       diff: {
         name,
+      },
+    };
+  }
+
+  withDescription(description?: string): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      description,
+    });
+    return {
+      model,
+      type: 'name',
+      diff: {
+        description,
       },
     };
   }
@@ -197,6 +214,7 @@ export default class QueryModel {
     return {
       id: this.id,
       name: this.name,
+      description: this.description,
       base_table: this.base_table,
       initial_columns: this.initial_columns,
       transformations: this.transformationModels?.map((entry) =>
