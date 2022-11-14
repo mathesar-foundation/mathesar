@@ -31,7 +31,7 @@
         on:delete
       />
     {:else if activeTab.id === 'inspect-column'}
-      <ColumnTab />
+      <ColumnTab {queryHandler} />
     {:else}
       <CellTab />
     {/if}
@@ -50,6 +50,9 @@
     flex-direction: column;
     overflow: hidden;
 
+    :global(.section-content) {
+      padding: var(--size-large);
+    }
     :global(.collapsible > button.btn) {
       background-color: var(--sand-200);
 
@@ -63,6 +66,9 @@
     }
     :global(.collapsible > button.btn .collapsible-header-title) {
       font-weight: 590;
+    }
+    :global(.collapsible .section-content.actions .delete-button) {
+      width: 100%;
     }
   }
 </style>

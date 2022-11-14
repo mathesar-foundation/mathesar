@@ -95,7 +95,7 @@
 
 <Collapsible isOpen triggerAppearance="plain">
   <span slot="header">Properties</span>
-  <div slot="content" class="content">
+  <div slot="content" class="section-content">
     <Form>
       <FormField>
         <LabeledInput label="Name" layout="stacked">
@@ -134,7 +134,7 @@
 
 <Collapsible isOpen triggerAppearance="plain">
   <span slot="header">Actions</span>
-  <div slot="content" class="content actions">
+  <div slot="content" class="section-content actions">
     <Button
       class="delete-button"
       appearance="outline-primary"
@@ -147,20 +147,12 @@
 </Collapsible>
 
 <style lang="scss">
-  .content {
-    padding: var(--size-large);
-
+  .section-content {
     :global(.form) {
       --form-field-spacing: var(--size-large);
 
       :global(label .label) {
         font-weight: 590;
-      }
-    }
-
-    &.actions {
-      :global(.delete-button) {
-        width: 100%;
       }
     }
   }
