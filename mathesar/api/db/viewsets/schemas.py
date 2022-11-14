@@ -24,10 +24,10 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
     def create(self, request):
         serializer = SchemaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        database_name = serializer.validated_data['database'].name
         schema = create_schema_and_object(
             serializer.validated_data['name'],
-            serializer.validated_data['database'],
+            database_name,
             comment=serializer.validated_data.get('description')
         )
         serializer = SchemaSerializer(schema)
