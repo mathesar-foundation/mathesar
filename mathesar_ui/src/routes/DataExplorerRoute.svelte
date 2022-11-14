@@ -4,7 +4,7 @@
   import {
     QueryManager,
     QueryModel,
-    constructQueryModelFromTerseSummarizationHash,
+    constructQueryModelFromHash,
   } from '@mathesar/systems/data-explorer';
   import { getQuery } from '@mathesar/stores/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
@@ -70,8 +70,7 @@
     const { hash } = $router;
     if (hash) {
       try {
-        const newQueryModel =
-          constructQueryModelFromTerseSummarizationHash(hash);
+        const newQueryModel = constructQueryModelFromHash(hash);
         router.location.hash.clear();
         createQueryManager(newQueryModel);
         return;

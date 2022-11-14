@@ -15,18 +15,11 @@
   $: ({ columnWithNestedSelectorOpen } = recordSelectorController);
   $: nestedSelectorIsOpen = !!$columnWithNestedSelectorOpen;
   $: ({ isOpen, isOnTop } = modalController);
-  $: closeOnEsc = $isOnTop && !nestedSelectorIsOpen;
   $: closeOnOverlay = $isOnTop && !nestedSelectorIsOpen;
 
   function close() {
     $isOpen = false;
     recordSelectorController.cancel();
-  }
-
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && isOpen && closeOnEsc) {
-      close();
-    }
   }
 
   function handleOverlayClick() {
@@ -42,8 +35,6 @@
 
   $: void dispatchOpenOrClose($isOpen);
 </script>
-
-<svelte:window on:keydown={handleKeydown} />
 
 {#if $isOpen}
   <div use:portal class="modal-record-selector">
@@ -80,20 +71,18 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: var(--modal-record-selector-z-index, auto);
+    z-index: var(--modal-z-index, auto);
     isolation: isolate;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    --inset: 1rem;
-    --nested-selector-overlap: 1rem;
     /**
      * The space between the top of the bottom-most nested selector and the top
      * of the viewport when the viewport is short enough to cause the upper
      * record selector windows to overflow off the top of the viewport.
      */
-    --nested-selector-extra-top-inset: 0.75rem;
+    --nested-selector-extra-top-inset: 2rem;
   }
   .overlay {
     background-color: rgba(0, 0, 0, 0.2);
@@ -108,7 +97,6 @@
     width: 100%;
     flex: 1 0 max-content;
     z-index: 2;
-    padding: var(--inset);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -125,18 +113,12 @@
       justify-content: center;
     }
     .root-record-selector {
-      max-height: calc(
-        100vh - var(--nested-selector-extra-top-inset) - 2 * var(--inset)
-      );
+      max-height: calc(100vh - var(--nested-selector-extra-top-inset));
     }
     :global(.nested-record-selector) {
-      margin-top: calc(
-        -1 * var(--nested-selector-overlap) + -1 * var(--nested-selector-extra-top-inset)
-      );
+      margin-top: calc(-1 * var(--nested-selector-extra-top-inset));
       padding-top: var(--nested-selector-extra-top-inset);
-      max-height: calc(
-        100vh - var(--nested-selector-extra-top-inset) - 2 * var(--inset)
-      );
+      max-height: calc(100vh - var(--nested-selector-extra-top-inset));
     }
   }
 </style>

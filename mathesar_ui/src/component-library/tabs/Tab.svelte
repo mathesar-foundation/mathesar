@@ -6,22 +6,13 @@
 
   export let componentId: number;
   export let tab: Tab;
-  export let totalTabs: number;
   export let isActive = false;
   export let allowRemoval = false;
-  export let getTabURL: (tab: Tab) => string | undefined;
 </script>
 
-<li
-  role="presentation"
-  class="tab"
-  class:active={isActive}
-  tabindex="-1"
-  style={isActive ? undefined : `width: ${Math.floor(100 / totalTabs)}%;`}
->
-  <a
+<li role="presentation" class="tab" class:active={isActive} tabindex="-1">
+  <div
     role="tab"
-    href={getTabURL(tab)}
     tabindex="0"
     aria-selected={isActive}
     aria-disabled={!!tab.disabled}
@@ -34,7 +25,7 @@
     on:click
   >
     <slot />
-  </a>
+  </div>
 
   {#if allowRemoval}
     <button

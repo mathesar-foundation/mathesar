@@ -1,6 +1,7 @@
 import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import type { TerseGrouping } from '@mathesar/stores/table-data';
+import type { Mutable } from '@mathesar/typeUtils';
 import Url64 from '@mathesar/utils/Url64';
 
 export interface TerseSummarization {
@@ -10,6 +11,18 @@ export interface TerseSummarization {
     name: string;
   }[];
   terseGrouping: TerseGrouping;
+}
+
+export function createDataExplorerUrlToExploreATable(
+  databaseName: string,
+  schemaId: number,
+  tableId: number,
+) {
+  const dataExplorerRouteUrl = getDataExplorerPageUrl(databaseName, schemaId);
+  const tableInformationHash = Url64.encode(
+    JSON.stringify({ baseTableId: tableId }),
+  );
+  return `${dataExplorerRouteUrl}#${tableInformationHash}`;
 }
 
 export function constructDataExplorerUrlToSummarizeFromGroup(
@@ -34,56 +47,68 @@ export function constructDataExplorerUrlToSummarizeFromGroup(
   return undefined;
 }
 
-export function constructQueryModelFromTerseSummarizationHash(
+export function constructQueryModelFromHash(
   hash: string,
 ): UnsavedQueryInstance {
+  const queryInstance: Mutable<UnsavedQueryInstance> = {};
   const terseSummarization = JSON.parse(
     Url64.decode(hash),
-  ) as TerseSummarization;
-  const groupedColumnId = terseSummarization.terseGrouping[0][0];
-  const groupedColumn = terseSummarization.columns.find(
-    (column) => column.id === groupedColumnId,
-  );
-  if (!groupedColumn) {
-    return {};
-  }
-  const firstNonGroupColumn = terseSummarization.columns.find(
-    (entry) => entry.id !== groupedColumnId,
-  );
-  const aggregatedColumns = firstNonGroupColumn ? [firstNonGroupColumn] : [];
+  ) as Partial<TerseSummarization>;
 
-  return {
-    base_table: terseSummarization.baseTableId,
-    initial_columns: terseSummarization.columns.map((column) => ({
-      alias: column.name,
-      id: column.id,
-      display_name: column.name,
-    })),
-    transformations: [
-      {
-        type: 'summarize',
-        spec: {
-          grouping_expressions: [
-            {
-              input_alias: groupedColumn.name,
-              output_alias: groupedColumn.name,
-              preproc: terseSummarization.terseGrouping[0][1],
-            },
-          ],
-          aggregation_expressions: aggregatedColumns.map((entry) => ({
-            input_alias: entry.name,
-            output_alias: `${entry.name} (aggregated)`,
-            function: 'count',
-          })),
+  if (terseSummarization.baseTableId) {
+    queryInstance.base_table = terseSummarization.baseTableId;
+  }
+
+  if (terseSummarization.terseGrouping && terseSummarization.columns) {
+    const groupedColumnId = terseSummarization.terseGrouping[0][0];
+    const groupedColumn = terseSummarization.columns.find(
+      (column) => column.id === groupedColumnId,
+    );
+
+    if (groupedColumn) {
+      const firstNonGroupColumn = terseSummarization.columns.find(
+        (entry) => entry.id !== groupedColumnId,
+      );
+      const aggregatedColumns = firstNonGroupColumn
+        ? [firstNonGroupColumn]
+        : [];
+
+      queryInstance.initial_columns = terseSummarization.columns.map(
+        (column) => ({
+          alias: column.name,
+          id: column.id,
+          display_name: column.name,
+        }),
+      );
+
+      queryInstance.transformations = [
+        {
+          type: 'summarize',
+          spec: {
+            grouping_expressions: [
+              {
+                input_alias: groupedColumn.name,
+                output_alias: groupedColumn.name,
+                preproc: terseSummarization.terseGrouping[0][1],
+              },
+            ],
+            aggregation_expressions: aggregatedColumns.map((entry) => ({
+              input_alias: entry.name,
+              output_alias: `${entry.name} (aggregated)`,
+              function: 'count',
+            })),
+          },
+          display_names: aggregatedColumns.reduce(
+            (displayNames, entry) => ({
+              ...displayNames,
+              [`${entry.name} (aggregated)`]: `Count(${entry.name})`,
+            }),
+            {} as Record<string, string>,
+          ),
         },
-        display_names: aggregatedColumns.reduce(
-          (displayNames, entry) => ({
-            ...displayNames,
-            [`${entry.name} (aggregated)`]: `Count(${entry.name})`,
-          }),
-          {} as Record<string, string>,
-        ),
-      },
-    ],
-  };
+      ];
+    }
+  }
+
+  return queryInstance;
 }
