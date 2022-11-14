@@ -81,21 +81,7 @@ export function isCellActive(
 }
 
 // TODO: Create a common utility action to handle active element based scroll
-export function scrollBasedOnActiveCell(): void {
-  const activeCell: HTMLElement | null = document.querySelector(
-    '[data-sheet-element="cell"].is-active',
-  );
-  scrollToElement(activeCell);
-}
-
-export function scrollBasedOnSelection(): void {
-  const selectedCell: HTMLElement | null = document.querySelector(
-    '[data-sheet-element="cell"].is-selected',
-  );
-  scrollToElement(selectedCell);
-}
-
-function scrollToElement(htmlElement: HTMLElement | null ): void {
+function scrollToElement(htmlElement: HTMLElement | null): void {
   const activeRow = htmlElement?.parentElement;
   const container = document.querySelector('[data-sheet-body-element="list"]');
   if (!container || !activeRow) {
@@ -128,6 +114,20 @@ function scrollToElement(htmlElement: HTMLElement | null ): void {
   } else if (htmlElement.offsetLeft - 30 < container.scrollLeft) {
     container.scrollLeft = htmlElement.offsetLeft - 30;
   }
+}
+
+export function scrollBasedOnActiveCell(): void {
+  const activeCell: HTMLElement | null = document.querySelector(
+    '[data-sheet-element="cell"].is-active',
+  );
+  scrollToElement(activeCell);
+}
+
+export function scrollBasedOnSelection(): void {
+  const selectedCell: HTMLElement | null = document.querySelector(
+    '[data-sheet-element="cell"].is-selected',
+  );
+  scrollToElement(selectedCell);
 }
 
 type SelectionBounds = {

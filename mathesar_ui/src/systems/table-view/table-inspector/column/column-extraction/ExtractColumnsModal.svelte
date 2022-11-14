@@ -10,9 +10,7 @@
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
-  import {
-    scrollBasedOnSelection
-  } from '@mathesar/components/sheet';
+  import { scrollBasedOnSelection } from '@mathesar/components/sheet';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
@@ -78,13 +76,18 @@
   $: handleColumnsChange($columns);
 
   async function handleSave() {
-    type followUpsTypes = [Promise<TableEntry>, Promise<[
-        ProcessedColumn[] | undefined,
-        TableRecordsData | undefined,
-        ConstraintsData | undefined,
-    ]>];
+    type FollowUpsTypes = [
+      Promise<TableEntry>,
+      Promise<
+        [
+          ProcessedColumn[] | undefined,
+          TableRecordsData | undefined,
+          ConstraintsData | undefined,
+        ]
+      >,
+    ];
     const followUps = [];
-    
+
     try {
       if ($targetType === 'existingTable') {
         const targetTableId = linkedTable?.table.id;
@@ -105,17 +108,17 @@
         followUps.push(getTableFromStoreOrApi(response.extracted_table));
       }
       followUps.push($tabularData.refresh());
-      const results = await Promise.all(followUps as followUpsTypes);
-      const returned_columns = results[1][0];
-      if(returned_columns) {
+      const results = await Promise.all(followUps as FollowUpsTypes);
+      const returnedColumns = results[1][0];
+      if (returnedColumns) {
         // Selecting the last column for now. Would need to be modified
         // when we position the new column where the old columns were.
-        const last_column = returned_columns[returned_columns.length-1];
-        selection.toggleColumnSelection(last_column);
+        const lastColumn = returnedColumns[returnedColumns.length - 1];
+        selection.toggleColumnSelection(lastColumn);
         await tick();
         scrollBasedOnSelection();
       }
-      toast.success("Successfully extracted columns");
+      toast.success('Successfully extracted columns');
       controller.close();
     } catch (e) {
       toast.error(getErrorMessage(e));
