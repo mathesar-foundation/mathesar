@@ -1,13 +1,18 @@
+from rest_access_policy import PermittedSlugRelatedField
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
 
+from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models.base import Database, Schema
 
 
 class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
     name = serializers.CharField()
-    database = SlugRelatedField(slug_field='name', queryset=Database.current_objects.all())
+    database = PermittedSlugRelatedField(
+        access_policy=DatabaseAccessPolicy,
+        slug_field='name',
+        queryset=Database.current_objects.all()
+    )
     description = serializers.CharField(
         required=False, allow_blank=True, default=None, allow_null=True
     )

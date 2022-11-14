@@ -22,7 +22,7 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
         return Schema.objects.all().order_by('-created_at')
 
     def create(self, request):
-        serializer = SchemaSerializer(data=request.data)
+        serializer = SchemaSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         database_name = serializer.validated_data['database'].name
         schema = create_schema_and_object(
