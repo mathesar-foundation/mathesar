@@ -100,7 +100,8 @@ for db_key, db_dict in DATABASES.items():
 
 # pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
-if decouple_config('TEST', default=False, cast=bool):
+TEST = decouple_config('TEST', default=False, cast=bool)
+if TEST:
     for db_key, _ in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim)):
         DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
 
