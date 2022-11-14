@@ -29,7 +29,7 @@ def post_query_with_description(_post_query, create_patents_table, get_uid):
     base_table = create_patents_table(table_name=get_uid())
     request_data = {
         "name": get_uid(),
-        "description":"A generic description",
+        "description": "A generic description",
         "base_table": base_table.id,
         "initial_columns": [
             {
