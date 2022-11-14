@@ -85,7 +85,18 @@ export function scrollBasedOnActiveCell(): void {
   const activeCell: HTMLElement | null = document.querySelector(
     '[data-sheet-element="cell"].is-active',
   );
-  const activeRow = activeCell?.parentElement;
+  scrollToElement(activeCell);
+}
+
+export function scrollBasedOnSelection(): void {
+  const selectedCell: HTMLElement | null = document.querySelector(
+    '[data-sheet-element="cell"].is-selected',
+  );
+  scrollToElement(selectedCell);
+}
+
+function scrollToElement(htmlElement: HTMLElement | null ): void {
+  const activeRow = htmlElement?.parentElement;
   const container = document.querySelector('[data-sheet-body-element="list"]');
   if (!container || !activeRow) {
     return;
@@ -106,16 +117,16 @@ export function scrollBasedOnActiveCell(): void {
 
   // Horizontal scroll
   if (
-    activeCell.offsetLeft + activeRow.clientWidth + 30 >
+    htmlElement.offsetLeft + activeRow.clientWidth + 30 >
     container.scrollLeft + container.clientWidth
   ) {
     const offsetValue: number =
       container.getBoundingClientRect().right -
-      activeCell.getBoundingClientRect().right -
+      htmlElement.getBoundingClientRect().right -
       30;
     container.scrollLeft -= offsetValue;
-  } else if (activeCell.offsetLeft - 30 < container.scrollLeft) {
-    container.scrollLeft = activeCell.offsetLeft - 30;
+  } else if (htmlElement.offsetLeft - 30 < container.scrollLeft) {
+    container.scrollLeft = htmlElement.offsetLeft - 30;
   }
 }
 
@@ -399,7 +410,6 @@ export default class SheetSelection<
         cells.push([row, column]);
       });
     });
-
     this.selectMultipleCells(cells);
   }
 

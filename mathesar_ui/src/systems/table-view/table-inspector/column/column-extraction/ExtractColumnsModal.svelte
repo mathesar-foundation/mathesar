@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { tick } from 'svelte';
+  import type { TableEntry } from '@mathesar/api/tables';
   import {
     CancelOrProceedButtonPair,
     ControlledModal,
@@ -9,8 +11,13 @@
   import FormField from '@mathesar/components/FormField.svelte';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
   import {
+    scrollBasedOnSelection
+  } from '@mathesar/components/sheet';
+  import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
+    type ConstraintsData,
+    type TableRecordsData,
   } from '@mathesar/stores/table-data';
   import {
     getTableFromStoreOrApi,
@@ -71,7 +78,13 @@
   $: handleColumnsChange($columns);
 
   async function handleSave() {
-    const followUps: Promise<unknown>[] = [];
+    type followUpsTypes = [Promise<TableEntry>, Promise<[
+        ProcessedColumn[] | undefined,
+        TableRecordsData | undefined,
+        ConstraintsData | undefined,
+    ]>];
+    const followUps = [];
+    
     try {
       if ($targetType === 'existingTable') {
         const targetTableId = linkedTable?.table.id;
@@ -92,7 +105,17 @@
         followUps.push(getTableFromStoreOrApi(response.extracted_table));
       }
       followUps.push($tabularData.refresh());
-      await Promise.all(followUps);
+      const results = await Promise.all(followUps as followUpsTypes);
+      const returned_columns = results[1][0];
+      if(returned_columns) {
+        // Selecting the last column for now. Would need to be modified
+        // when we position the new column where the old columns were.
+        const last_column = returned_columns[returned_columns.length-1];
+        selection.toggleColumnSelection(last_column);
+        await tick();
+        scrollBasedOnSelection();
+      }
+      toast.success("Successfully extracted columns");
       controller.close();
     } catch (e) {
       toast.error(getErrorMessage(e));
