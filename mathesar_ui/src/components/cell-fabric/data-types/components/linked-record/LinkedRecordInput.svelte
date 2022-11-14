@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, getContext, tick } from 'svelte';
 
   // TODO remove dependency cycle
   // eslint-disable-next-line import/no-cycle
@@ -11,6 +11,7 @@
     getLabelIdFromInputId,
     Icon,
     iconExpandDown,
+    type AccompanyingElements,
   } from '@mathesar-component-library';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
@@ -18,12 +19,15 @@
 
   type $$Props = LinkedRecordCellProps & {
     class?: string;
-    containerClass?: string;
     id?: string;
+    allowsHyperlinks?: boolean;
   };
 
   const labelController = getLabelControllerFromContainingLabel();
   const recordSelector = getRecordSelectorFromContext();
+  const dropdownAccompanyingElements = getContext<
+    AccompanyingElements | undefined
+  >('dropdownAccompanyingElements');
   const dispatch = createEventDispatcher();
 
   export let id = getGloballyUniqueId();
@@ -33,16 +37,17 @@
   export let tableId: $$Props['tableId'];
   let classes: $$Props['class'] = '';
   export { classes as class };
-  export let containerClass = '';
+  export let allowsHyperlinks = true;
 
   let isAcquiringInput = false;
-  let element: HTMLSpanElement;
+  let element: HTMLSpanElement | undefined;
 
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
-  $: recordPageHref = hasValue
-    ? $storeToGetRecordPageUrl({ tableId, recordId: value })
-    : undefined;
+  $: recordPageHref =
+    hasValue && allowsHyperlinks
+      ? $storeToGetRecordPageUrl({ tableId, recordId: value })
+      : undefined;
 
   function clear() {
     value = undefined;
@@ -51,23 +56,45 @@
     // If the value is cleared via a button, the focus may shift to that button.
     // We'd like to shift it back to the input element to that the user can
     // press `Enter` to launch the record selector.
-    element.focus();
+    element?.focus();
+  }
+
+  /**
+   * If this LinkedRecordInput in placed inside an AttachableDropdown, we want
+   * to tell the dropdown not to close when the user clicks within the Record
+   * Selector UI, so we set the modal element to "accompany" the dropdown.
+   */
+  function setRecordSelectorToAccompanyDropdown(): () => void {
+    if (!dropdownAccompanyingElements) {
+      return () => {};
+    }
+    const modal = document.querySelector<HTMLElement>('.modal-record-selector');
+    if (!modal) {
+      return () => {};
+    }
+    return dropdownAccompanyingElements.add(modal);
   }
 
   async function launchRecordSelector() {
     dispatch('recordSelectorOpen');
     isAcquiringInput = true;
-    const result = await recordSelector.acquireUserInput({ tableId });
+    const recordSelectorPromise = recordSelector.acquireUserInput({ tableId });
+    await tick();
+    const cleanupDropdown = setRecordSelectorToAccompanyDropdown();
+    const result = await recordSelectorPromise;
+    cleanupDropdown();
     isAcquiringInput = false;
     if (result === undefined) {
       dispatch('recordSelectorCancel');
-      return;
+    } else {
+      value = result.recordId;
+      setRecordSummary(String(result.recordId), result.recordSummary);
+      dispatch('recordSelectorSubmit');
+      dispatch('artificialChange', value);
+      dispatch('artificialInput', value);
     }
-    value = result.recordId;
-    setRecordSummary(String(result.recordId), result.recordSummary);
-    dispatch('recordSelectorSubmit');
-    dispatch('artificialChange', value);
-    dispatch('artificialInput', value);
+    await tick();
+    element?.focus();
   }
 
   function handleKeydown(e: KeyboardEvent) {
@@ -93,7 +120,7 @@
 
 <span
   {id}
-  class="linked-record-input {containerClass}"
+  class="input-element linked-record-input {classes}"
   class:has-value={hasValue}
   class:is-acquiring-input={isAcquiringInput}
   tabindex={isAcquiringInput ? undefined : 0}
@@ -106,7 +133,7 @@
   role="listbox"
   aria-labelledby={getLabelIdFromInputId(id)}
 >
-  <span class="content {classes}">
+  <span class="content">
     {#if hasValue}
       <LinkedRecord
         recordId={value}
@@ -114,7 +141,6 @@
         hasDeleteButton
         on:delete={clear}
         {recordPageHref}
-        on:click={(e) => e.stopPropagation()}
       />
     {/if}
   </span>
@@ -128,6 +154,7 @@
     class="dropdown-button"
     on:click={launchRecordSelector}
     role="button"
+    tabindex="-1"
     aria-label="Pick a record"
     title="Pick a record"
   >
@@ -142,10 +169,12 @@
     display: grid;
     grid-template: auto / 1fr auto;
     position: relative;
+    isolation: isolate;
     border: 1px solid #dfdfdf;
     border-radius: 0.25rem;
     background: #fff;
     min-height: 2.25em;
+    padding: 0;
     --padding: 0.5rem;
     cursor: default;
   }
@@ -160,6 +189,7 @@
     position: relative;
     display: block;
     padding: var(--padding);
+    padding-right: 0;
     z-index: 2;
   }
   .dropdown-button {

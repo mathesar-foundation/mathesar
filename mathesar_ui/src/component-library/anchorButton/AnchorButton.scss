@@ -1,0 +1,8 @@
+.anchor-button {
+  color: var(--brand-500);
+  text-decoration: none;
+
+  &:hover {
+    background: var(--slate-100);
+  }
+}

@@ -1,9 +1,39 @@
+import type { TableEntry } from '@mathesar/api/tables';
 import type { Column } from '@mathesar/api/tables/columns';
 import type { Result as ApiRecord } from '@mathesar/api/tables/records';
-import type {
-  RecordSelectorSelection,
-  SelectionDetails,
-} from './recordSelectorTypes';
+
+/**
+ * - 'dataEntry' - each row is a button that submits the recordId via a Promise.
+ * - 'navigation' - each row is a hyperlink to a Record Page.
+ */
+export type RecordSelectorPurpose = 'dataEntry' | 'navigation';
+
+/** What kind of row are we in? */
+export type CellLayoutRowType =
+  | 'columnHeaderRow'
+  | 'searchInputRow'
+  | 'dividerRow'
+  | 'dataRow';
+/** What kind of column are we in? */
+export type CellLayoutColumnType = 'dataColumn' | 'rowHeaderColumn';
+
+export type CellState = 'focused' | 'acquiringFkValue';
+
+export function getCellState({
+  hasNestedSelectorOpen,
+  hasFocus,
+}: {
+  hasNestedSelectorOpen: boolean;
+  hasFocus: boolean;
+}): CellState | undefined {
+  if (hasNestedSelectorOpen) {
+    return 'acquiringFkValue';
+  }
+  if (hasFocus) {
+    return 'focused';
+  }
+  return undefined;
+}
 
 export function getPkValueInRecord(
   record: ApiRecord,
@@ -20,74 +50,36 @@ export function getPkValueInRecord(
   return pkValue;
 }
 
-function getOffsetSelection(
-  selection: RecordSelectorSelection,
-  offset: number,
-): RecordSelectorSelection {
-  const { type } = selection;
-  if (selection.type === 'ghost') {
-    return offset > 0 ? { type: 'record', index: offset - 1 } : selection;
-  }
-  const effectiveIndex = (type === 'record' ? selection.index : -1) + offset;
-  return effectiveIndex < 0
-    ? { type: 'ghost' }
-    : { type: 'record', index: effectiveIndex };
-}
-
-/**
- * After variables within the results change, the user's selection might no
- * longer be valid. This function finds the nearest valid selection so that we
- * can update the selection with the result of this function when things change.
- */
-export function findNearestValidSelection(
-  d: SelectionDetails,
-): RecordSelectorSelection {
-  if (d.selection.type === 'ghost') {
-    // Sometimes we end up in the ghost row purely by virtue of it being the
-    // only row, even if the user didn't select it. In this case we want to move
-    // back out of the ghost row if some results appear later.
-    const needToMoveOutOfGhostRow =
-      !d.hasGhostRow ||
-      (!d.userHasManuallySelectedGhostRow && d.resultCount > 0);
-    if (needToMoveOutOfGhostRow) {
-      // Note that if `resultCount` is 0 (table is empty) the selection will
-      // technically be invalid, but that's okay.
-      return { type: 'record', index: 0 };
+export function getColumnIdToFocusInitially({
+  table,
+  columns,
+}: {
+  table: TableEntry | undefined;
+  columns: Column[];
+}): number | undefined {
+  function getFromRecordSummaryTemplate() {
+    if (!table) {
+      return undefined;
     }
-    // We have a valid ghost row selection that we should keep.
-    return d.selection;
+    const { template } = table.settings.preview_settings;
+    const match = template.match(/\{\d+\}/)?.[0] ?? undefined;
+    if (!match) {
+      return undefined;
+    }
+    const id = parseInt(match.slice(1, -1), 10);
+    if (Number.isNaN(id)) {
+      return undefined;
+    }
+    return id;
   }
 
-  // We have a record selection...
-
-  if (d.hasGhostRow && (d.resultCount === 0 || d.selection.index < 0)) {
-    // We should move to the ghost row.
-    return { type: 'ghost' };
-  }
-  // We should stay in the record selection.
-
-  if (d.selection.index >= d.resultCount) {
-    // We've overflowed off the bottom and need to move to the last row.
-    return { type: 'record', index: d.resultCount - 1 };
-  }
-  if (d.selection.index < 0) {
-    // We've underflowed and need to move to the first row.
-    return { type: 'record', index: 0 };
+  function getFromColumns() {
+    const column = columns.find((c) => !c.primary_key);
+    if (!column) {
+      return undefined;
+    }
+    return column.id;
   }
 
-  // We have a valid record selection.
-  return d.selection;
-}
-
-/**
- * Moves the selection, the re-adjusts it as necessary to remain valid.
- */
-export function getValidOffsetSelection(
-  d: SelectionDetails,
-  offset: number,
-): RecordSelectorSelection {
-  return findNearestValidSelection({
-    ...d,
-    selection: getOffsetSelection(d.selection, offset),
-  });
+  return getFromRecordSummaryTemplate() ?? getFromColumns();
 }
