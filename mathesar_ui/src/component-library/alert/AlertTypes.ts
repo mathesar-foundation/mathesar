@@ -1,1 +1,1 @@
-export type Appearance = 'info';
+export type Appearance = 'info' | 'error';

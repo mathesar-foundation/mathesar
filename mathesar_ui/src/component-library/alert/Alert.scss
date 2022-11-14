@@ -10,11 +10,10 @@
 
   &.alert-info {
     background-color: var(--sky-200);
-
-    .content {
-      font-size: 1rem;
-      color: var(--slate-800);
-      font-weight: 400;
-    }
+    color: var(--slate-800);
+  }
+  &.alert-error {
+    background-color: var(--danger-background-color);
+    color: var(--danger-color);
   }
 }

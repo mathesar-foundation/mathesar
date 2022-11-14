@@ -21,8 +21,8 @@
 
   export let cancelButton: Partial<ButtonDetails> = {};
   export let proceedButton: Partial<ButtonDetails> = {};
-  export let onCancel: () => void;
-  export let onProceed: () => Promise<void>;
+  export let onCancel: () => void = () => {};
+  export let onProceed: () => Promise<void> | void = () => {};
   export let canProceed = true;
   export let canCancel = true;
   export let isProcessing = false;
