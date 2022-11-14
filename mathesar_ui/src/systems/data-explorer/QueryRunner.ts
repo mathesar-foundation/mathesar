@@ -10,7 +10,7 @@ import Pagination from '@mathesar/utils/Pagination';
 import type {
   QueryResultRecord,
   QueryRunResponse,
-  QueryResultColumn,
+  QueryColumnMetaData,
 } from '@mathesar/api/queries';
 import { runQuery } from '@mathesar/stores/queries';
 import { SheetSelection } from '@mathesar/components/sheet';
@@ -201,7 +201,7 @@ export default class QueryRunner<
     await this.run();
   }
 
-  selectColumn(alias: QueryResultColumn['alias']): void {
+  selectColumn(alias: QueryColumnMetaData['alias']): void {
     const processedColumn = get(this.processedColumns).get(alias);
     if (processedColumn) {
       this.selection.toggleColumnSelection(processedColumn);

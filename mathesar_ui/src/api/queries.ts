@@ -68,38 +68,6 @@ export interface QueryGetResponse extends QueryInstance {
 export type QueriesList = PaginatedResponse<QueryInstance>;
 
 /**
- * endpoint: /api/db/v0/queries/<query_id>/records/
- */
-
-/**
- *  TODO: The API always returns empty array for table results,
- * however for queries it returns null. Remove the union once
- * the API is made consistent.
- *
- * Tracked in https://github.com/centerofci/mathesar/issues/1716
- */
-
-export type QueryResultRecord = Record<string, unknown>;
-
-export type QueryResultRecords =
-  | PaginatedResponse<QueryResultRecord>
-  | { count: 0; results: null };
-
-/**
- * endpoint: /api/db/v0/queries/<query_id>/columns/
- */
-
-export interface QueryResultColumn {
-  alias: string;
-  display_name: string | null;
-  type: Column['type'];
-  type_options: Column['type_options'];
-  display_options: Column['display_options'];
-}
-
-export type QueryResultColumns = QueryResultColumn[];
-
-/**
  * endpoint: /api/db/v0/queries/<query_id>/run/
  */
 
@@ -117,7 +85,54 @@ export interface QueryRunRequest {
   };
 }
 
-export type QueryColumnMetaData = QueryResultColumn;
+export interface QueryResultColumn {
+  alias: string;
+  display_name: string | null;
+  type: Column['type'];
+  type_options: Column['type_options'];
+  display_options: Column['display_options'];
+}
+
+export interface QueryInitialColumnSource {
+  is_initial_column: true;
+  input_column_name: string;
+  input_table_name: string;
+}
+
+export interface QueryGeneratedColumnSource {
+  is_initial_column: false;
+  input_alias: string;
+}
+
+export type QueryColumnSource =
+  | QueryInitialColumnSource
+  | QueryGeneratedColumnSource;
+
+export interface QueryInitialColumnMetaData
+  extends QueryResultColumn,
+    QueryInitialColumnSource {}
+
+export interface QueryVirtualColumnMetaData
+  extends QueryResultColumn,
+    QueryGeneratedColumnSource {}
+
+export type QueryColumnMetaData =
+  | QueryInitialColumnMetaData
+  | QueryVirtualColumnMetaData;
+
+/**
+ *  TODO: The API always returns empty array for table results,
+ * however for queries it returns null. Remove the union once
+ * the API is made consistent.
+ *
+ * Tracked in https://github.com/centerofci/mathesar/issues/1716
+ */
+
+export type QueryResultRecord = Record<string, unknown>;
+
+type QueryResultRecords =
+  | PaginatedResponse<QueryResultRecord>
+  | { count: 0; results: null };
 
 export interface QueryRunResponse {
   query: {
