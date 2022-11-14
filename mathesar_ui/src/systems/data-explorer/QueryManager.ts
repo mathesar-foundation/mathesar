@@ -21,8 +21,6 @@ import {
   getTablesThatReferenceBaseTable,
   getBaseTableColumnsWithLinks,
   getColumnInformationMap,
-  speculateColumnMetaData,
-  getProcessedOutputColumns,
 } from './utils';
 import type {
   ProcessedQueryResultColumnMap,
@@ -182,25 +180,9 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     }
   }
 
-  /**
-   * We are not creating a derived store so that we need to control
-   * the callback only for essential scenarios and not everytime
-   * query store changes.
-   */
-  speculateColumns() {
-    const speculatedMetaData = speculateColumnMetaData({
-      currentProcessedColumnsMetaData: get(this.columnsMetaData),
-      inputColumnInformationMap: get(this.inputColumns)
-        .inputColumnInformationMap,
-      queryModel: this.getQueryModel(),
-      abstractTypeMap: this.abstractTypeMap,
-    });
-    this.columnsMetaData.set(speculatedMetaData);
-    this.processedColumns.set(
-      getProcessedOutputColumns(
-        this.getQueryModel().getOutputColumnAliases(),
-        speculatedMetaData,
-      ),
+  private speculateColumns() {
+    super.speculateProcessedColumns(
+      get(this.inputColumns).inputColumnInformationMap,
     );
   }
 

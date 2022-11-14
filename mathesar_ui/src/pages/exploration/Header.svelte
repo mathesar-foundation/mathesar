@@ -64,6 +64,7 @@
 
       a {
         margin-right: var(--size-ultra-small);
+        text-decoration: none;
       }
     }
   }

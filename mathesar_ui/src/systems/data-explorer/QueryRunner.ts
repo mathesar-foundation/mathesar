@@ -16,11 +16,14 @@ import { runQuery } from '@mathesar/stores/queries';
 import { SheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type QueryModel from './QueryModel';
-import { processColumnMetaData, getProcessedOutputColumns } from './utils';
-import type {
-  ProcessedQueryOutputColumn,
-  ProcessedQueryResultColumnMap,
-  ProcessedQueryOutputColumnMap,
+import {
+  processColumnMetaData,
+  getProcessedOutputColumns,
+  speculateColumnMetaData,
+  type ProcessedQueryOutputColumn,
+  type ProcessedQueryResultColumnMap,
+  type ProcessedQueryOutputColumnMap,
+  type InputColumnsStoreSubstance,
 } from './utils';
 
 // TODO: Find a better way to implement type safety here
@@ -71,6 +74,7 @@ export default class QueryRunner<
     super();
     this.abstractTypeMap = abstractTypeMap;
     this.query = writable(query);
+    this.speculateProcessedColumns();
     void this.run();
     this.selection = new SheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
@@ -84,6 +88,31 @@ export default class QueryRunner<
         return Math.min(pageSize, totalCount - offset, rowLength) - 1;
       },
     });
+  }
+
+  /**
+   * We are not creating a derived store so that we need to control
+   * the callback only for essential scenarios and not everytime
+   * query store changes.
+   */
+  protected speculateProcessedColumns(
+    inputColumnInformationMap?: InputColumnsStoreSubstance['inputColumnInformationMap'],
+  ) {
+    const speculatedMetaData = speculateColumnMetaData({
+      currentProcessedColumnsMetaData: get(this.columnsMetaData),
+      inputColumnInformationMap:
+        inputColumnInformationMap ??
+        (new Map() as InputColumnsStoreSubstance['inputColumnInformationMap']),
+      queryModel: this.getQueryModel(),
+      abstractTypeMap: this.abstractTypeMap,
+    });
+    this.columnsMetaData.set(speculatedMetaData);
+    this.processedColumns.set(
+      getProcessedOutputColumns(
+        this.getQueryModel().getOutputColumnAliases(),
+        speculatedMetaData,
+      ),
+    );
   }
 
   async run(): Promise<QueryRunResponse | undefined> {
