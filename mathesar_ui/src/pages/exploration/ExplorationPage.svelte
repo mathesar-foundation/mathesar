@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { router } from 'tinro';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
   import {
@@ -10,6 +11,7 @@
   import type { QueryInstance } from '@mathesar/api/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+  import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import Header from './Header.svelte';
 
   export let database: Database;
@@ -28,6 +30,10 @@
   }
 
   $: createQueryRunner(query, $currentDbAbstractTypes.data);
+
+  function gotoSchemaPage() {
+    router.goto(getSchemaPageUrl(database.name, schema.id));
+  }
 </script>
 
 <svelte:head>
@@ -41,7 +47,10 @@
       <div class="content">
         <ExplorationResult {queryRunner} />
         {#if isInspectorOpen}
-          <ExplorationInspector queryHandler={queryRunner} />
+          <ExplorationInspector
+            queryHandler={queryRunner}
+            on:delete={gotoSchemaPage}
+          />
         {/if}
       </div>
     </div>

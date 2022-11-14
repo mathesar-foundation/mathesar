@@ -10,22 +10,7 @@
   export let database: Database;
   export let schema: SchemaEntry;
   export let query: QueryInstance;
-  // export let queryRunner: QueryRunner;
   export let isInspectorOpen = true;
-
-  // $: ({ runState } = queryRunner);
-  // $: isLoading = $runState?.state === 'processing';
-  // $: isError = $runState?.state === 'failure';
-
-  // function handleDeleteExploration() {
-  //   void confirmDelete({
-  //     identifierType: 'Exploration',
-  //     onProceed: async () => {
-  //       await deleteQuery(query.id);
-  //       router.goto(getSchemaPageUrl(database.name, schema.id));
-  //     },
-  //   });
-  // }
 </script>
 
 <div class="exploration-header">
@@ -50,31 +35,6 @@
       <span>Inspector</span>
     </Button>
   </div>
-  <!-- <Button disabled={isLoading} size="medium" on:click={handleDeleteExploration}>
-    <Icon {...iconDeleteMajor} />
-    <span>Delete</span>
-  </Button>
-  <div class="loading-info">
-    <Button
-      size="medium"
-      disabled={isLoading}
-      on:click={() => queryRunner.run()}
-    >
-      <Icon
-        {...isError && !isLoading ? iconError : iconRefresh}
-        spin={isLoading}
-      />
-      <span>
-        {#if isLoading}
-          Loading
-        {:else if isError}
-          Retry
-        {:else}
-          Refresh
-        {/if}
-      </span>
-    </Button>
-  </div> -->
 </div>
 
 <style lang="scss">

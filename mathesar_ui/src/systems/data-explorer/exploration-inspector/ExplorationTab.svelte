@@ -1,19 +1,26 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import {
     Collapsible,
     LabeledInput,
     TextInput,
     TextArea,
     CancelOrProceedButtonPair,
+    Button,
+    Icon,
   } from '@mathesar-component-library';
+  import { iconDeleteMajor } from '@mathesar/icons';
   import type { QueryInstance } from '@mathesar/api/queries';
-  import { queries, putQuery } from '@mathesar/stores/queries';
+  import { queries, putQuery, deleteQuery } from '@mathesar/stores/queries';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getAvailableName } from '@mathesar/utils/db';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import { toast } from '@mathesar/stores/toast';
   import type QueryRunner from '../QueryRunner';
   import QueryManager from '../QueryManager';
+
+  const dispatch = createEventDispatcher();
 
   export let queryHandler: QueryRunner | QueryManager;
   export let name: string | undefined;
@@ -71,6 +78,19 @@
       toast.error(message);
     }
   }
+
+  function handleDeleteExploration() {
+    if ($query.id !== undefined) {
+      const queryId = $query.id;
+      void confirmDelete({
+        identifierType: 'Exploration',
+        onProceed: async () => {
+          await deleteQuery(queryId);
+          dispatch('delete');
+        },
+      });
+    }
+  }
 </script>
 
 <Collapsible isOpen triggerAppearance="plain">
@@ -114,7 +134,16 @@
 
 <Collapsible isOpen triggerAppearance="plain">
   <span slot="header">Actions</span>
-  <div slot="content" class="content" />
+  <div slot="content" class="content actions">
+    <Button
+      class="delete-button"
+      appearance="outline-primary"
+      on:click={handleDeleteExploration}
+    >
+      <Icon {...iconDeleteMajor} />
+      <span>Delete Exploration</span>
+    </Button>
+  </div>
 </Collapsible>
 
 <style lang="scss">
@@ -126,6 +155,12 @@
 
       :global(label .label) {
         font-weight: 590;
+      }
+    }
+
+    &.actions {
+      :global(.delete-button) {
+        width: 100%;
       }
     }
   }

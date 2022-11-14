@@ -168,7 +168,7 @@
       {:else}
         <ResultPane queryRunner={queryManager} />
         {#if isInspectorOpen}
-          <ExplorationInspector queryHandler={queryManager} />
+          <ExplorationInspector queryHandler={queryManager} on:delete />
         {/if}
       {/if}
     {/if}

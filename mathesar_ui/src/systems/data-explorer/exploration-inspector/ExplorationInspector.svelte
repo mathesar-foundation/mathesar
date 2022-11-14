@@ -28,6 +28,7 @@
         {queryHandler}
         name={$query.name}
         description={$query.description}
+        on:delete
       />
     {:else if activeTab.id === 'inspect-column'}
       <ColumnTab />
