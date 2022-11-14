@@ -8,6 +8,8 @@ from mathesar.models.base import Database, Schema
 
 class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
     name = serializers.CharField()
+    # Restrict access to databases with create access
+    # Refer https://rsinger86.github.io/drf-access-policy/policy_reuse/
     database = PermittedSlugRelatedField(
         access_policy=DatabaseAccessPolicy,
         slug_field='name',
