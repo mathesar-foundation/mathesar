@@ -120,6 +120,12 @@ class UIQuery(BaseModel, Relation):
         unique=True,
     )
 
+    description = models.CharField(
+        max_length=280,
+        null=True,
+        blank=True
+    )
+
     base_table = models.ForeignKey(
         'Table', on_delete=models.CASCADE, related_name='queries'
     )
