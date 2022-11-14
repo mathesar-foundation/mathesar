@@ -410,6 +410,7 @@ export default class SheetSelection<
         cells.push([row, column]);
       });
     });
+
     this.selectMultipleCells(cells);
   }
 
