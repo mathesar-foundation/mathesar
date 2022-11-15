@@ -120,8 +120,7 @@ class UIQuery(BaseModel, Relation):
         unique=True,
     )
 
-    description = models.CharField(
-        max_length=280,
+    description = models.TextField(
         null=True,
         blank=True
     )
