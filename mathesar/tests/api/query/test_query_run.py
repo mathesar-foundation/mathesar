@@ -27,7 +27,7 @@ def test_queries_run_minimal(create_patents_table, client):
 
     expect_query = (
         {k: v for k, v in data.items() if k != 'parameters'}
-        | {'schema': base_table.schema.id, 'transformations': None}
+        | {'schema': base_table.schema.id, 'transformations': []}
     )
 
     expect_response_json = {

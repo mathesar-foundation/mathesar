@@ -26,6 +26,9 @@ class DBQuery:
             assert isinstance(initial_col, InitialColumn)
         self.initial_columns = initial_columns
         self.engine = engine
+        if transformations is None:
+            # Less states to consider if no transformations is just an empty sequence
+            transformations = tuple()
         self.transformations = transformations
         self.name = name
         self.metadata = metadata if metadata else get_empty_metadata()
