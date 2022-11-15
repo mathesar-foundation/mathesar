@@ -130,9 +130,9 @@ export default class QueryModel {
     };
   }
 
-  withoutColumn(columnAlias: string): QueryModelUpdateDiff {
+  withoutColumns(columnAliases: string[]): QueryModelUpdateDiff {
     const initialColumns = this.initial_columns.filter(
-      (entry) => entry.alias !== columnAlias,
+      (entry) => !columnAliases.includes(entry.alias),
     );
     const model = new QueryModel({
       ...this,
@@ -145,6 +145,10 @@ export default class QueryModel {
         initial_columns: initialColumns,
       },
     };
+  }
+
+  withoutColumn(columnAlias: string): QueryModelUpdateDiff {
+    return this.withoutColumns([columnAlias]);
   }
 
   withDisplayNameForColumn(
@@ -197,6 +201,20 @@ export default class QueryModel {
     return this.transformationModels.filter(
       (transform): transform is QuerySummarizationTransformationModel =>
         transform instanceof QuerySummarizationTransformationModel,
+    );
+  }
+
+  isColumnUsedInTransformations(columnAlias: string): boolean {
+    return this.transformationModels.some((transform) =>
+      transform.isColumnUsedInTransformation(columnAlias),
+    );
+  }
+
+  areColumnsUsedInTransformations(columnAliases: string[]): boolean {
+    return columnAliases.some((alias) =>
+      this.transformationModels.some((transform) =>
+        transform.isColumnUsedInTransformation(alias),
+      ),
     );
   }
 

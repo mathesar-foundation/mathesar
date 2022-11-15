@@ -2,21 +2,19 @@
   import { onDestroy } from 'svelte';
   import {
     Collapsible,
-    Button,
     LabeledInput,
     TextInput,
-    Icon,
   } from '@mathesar-component-library';
-  import { iconDeleteMajor } from '@mathesar/icons';
   import type QueryRunner from '../../QueryRunner';
   import QueryManager from '../../QueryManager';
   import ColumnSource from './ColumnSource.svelte';
+  import DeleteColumnAction from './DeleteColumnAction.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
 
   $: queryManager =
     queryHandler instanceof QueryManager ? queryHandler : undefined;
-  $: ({ selection, query, columnsMetaData, processedColumns } = queryHandler);
+  $: ({ selection, columnsMetaData, processedColumns } = queryHandler);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
   $: selectedColumns = (() => {
     const ids = selection.getSelectedUniqueColumnsId(
@@ -44,14 +42,6 @@
   onDestroy(() => {
     window.clearTimeout(timer);
   });
-
-  function deleteSelectedColumn() {
-    if (selectedColumn && queryManager) {
-      const { alias } = selectedColumn.column;
-      void queryManager.update((q) => q.withoutColumn(alias));
-      queryManager.clearSelectedColumn();
-    }
-  }
 
   function updateName(value: string) {
     window.clearTimeout(timer);
@@ -102,20 +92,8 @@
   </Collapsible>
 {/if}
 
-{#if selectedColumn && queryManager}
-  <Collapsible isOpen triggerAppearance="plain">
-    <span slot="header">Actions</span>
-    <div slot="content" class="section-content actions">
-      <Button
-        class="delete-button"
-        appearance="outline-primary"
-        on:click={deleteSelectedColumn}
-      >
-        <Icon {...iconDeleteMajor} />
-        <span>Delete column(s)</span>
-      </Button>
-    </div>
-  </Collapsible>
+{#if selectedColumns.length > 0 && queryManager}
+  <DeleteColumnAction {selectedColumns} {queryManager} />
 {/if}
 
 {#if !selectedColumn}
