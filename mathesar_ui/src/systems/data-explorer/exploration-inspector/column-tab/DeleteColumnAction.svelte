@@ -22,7 +22,7 @@
 
   function deleteSelectedColumn() {
     void queryManager.update((q) => q.withoutColumns(selectedColumnAliases));
-    queryManager.clearSelectedColumn();
+    queryManager.clearSelection();
   }
 </script>
 

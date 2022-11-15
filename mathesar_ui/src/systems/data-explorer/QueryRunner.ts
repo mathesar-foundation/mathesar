@@ -175,6 +175,7 @@ export default class QueryRunner<
   async setPagination(pagination: Pagination): Promise<void> {
     this.pagination.set(pagination);
     await this.run();
+    this.selection.activateFirstCellInSelectedColumn();
   }
 
   protected resetPagination(): void {
@@ -188,7 +189,7 @@ export default class QueryRunner<
   }
 
   protected resetResults(): void {
-    this.clearSelectedColumn();
+    this.clearSelection();
     this.runPromise?.cancel();
     this.resetPagination();
     this.rowsData.set({ totalCount: 0, rows: [] });
@@ -199,6 +200,7 @@ export default class QueryRunner<
   protected async resetPaginationAndRun(): Promise<void> {
     this.resetPagination();
     await this.run();
+    this.selection.activateFirstCellInSelectedColumn();
   }
 
   selectColumn(alias: QueryColumnMetaData['alias']): void {
@@ -207,10 +209,11 @@ export default class QueryRunner<
       this.selection.toggleColumnSelection(processedColumn);
     } else {
       this.selection.resetSelection();
+      this.selection.selectAndActivateFirstCellIfExists();
     }
   }
 
-  clearSelectedColumn(): void {
+  clearSelection(): void {
     this.selection.resetSelection();
   }
 

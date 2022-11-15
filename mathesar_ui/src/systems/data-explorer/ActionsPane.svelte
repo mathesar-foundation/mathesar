@@ -36,7 +36,7 @@
     void queryManager.update((q) =>
       q.withBaseTable(tableEntry ? tableEntry.id : undefined),
     );
-    queryManager.clearSelectedColumn();
+    queryManager.clearSelection();
     linkCollapsibleOpenState = {};
   }
 
