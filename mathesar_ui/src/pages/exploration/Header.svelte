@@ -1,9 +1,8 @@
 <script lang="ts">
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { Button, Icon } from '@mathesar-component-library';
-  import QueryName from '@mathesar/components/QueryName.svelte';
-  import EntityType from '@mathesar/components/EntityType.svelte';
-  import { iconEdit, iconInspector } from '@mathesar/icons';
+  import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
+  import { iconEdit, iconExploration, iconInspector } from '@mathesar/icons';
   import type { QueryInstance } from '@mathesar/api/queries';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
 
@@ -13,12 +12,12 @@
   export let isInspectorOpen = true;
 </script>
 
-<div class="exploration-header">
-  <div class="title">
-    <EntityType>Exploration</EntityType>
-    <h1><QueryName {query} /></h1>
-  </div>
-  <div class="actions">
+<EntityPageHeader
+  icon={iconExploration}
+  name={query.name}
+  description={query.description}
+>
+  <svelte:fragment slot="actions-right">
     <a href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}>
       <Button appearance="primary">
         <Icon {...iconEdit} />
@@ -34,38 +33,12 @@
       <Icon {...iconInspector} />
       <span>Inspector</span>
     </Button>
-  </div>
-</div>
+  </svelte:fragment>
+</EntityPageHeader>
 
 <style lang="scss">
-  .exploration-header {
-    border-bottom: 1px solid var(--color-gray-dark);
-    background-color: var(--color-white);
-    position: relative;
-    display: flex;
-    align-items: center;
-    padding-right: 1rem;
-
-    .title {
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid var(--color-gray-medium);
-      padding: 1rem;
-      margin-right: 0.5rem;
-
-      h1 {
-        font-size: var(--text-size-xx-large);
-        font-weight: 500;
-        margin-bottom: 0;
-      }
-    }
-    .actions {
-      margin-left: auto;
-
-      a {
-        margin-right: var(--size-ultra-small);
-        text-decoration: none;
-      }
-    }
+  a {
+    margin-right: var(--size-ultra-small);
+    text-decoration: none;
   }
 </style>
