@@ -36,6 +36,9 @@ export interface TabularDataProps {
    * removed from view.
    */
   contextualFilters?: Map<number, number | string>;
+  hasEnhancedPrimaryKeyCell?: Parameters<
+    typeof processColumn
+  >[0]['hasEnhancedPrimaryKeyCell'];
 }
 
 export type TabularDataSelection = SheetSelection<RecordRow, ProcessedColumn>;
@@ -93,6 +96,7 @@ export class TabularData {
               columnIndex,
               constraints: constraintsData.constraints,
               abstractTypeMap: props.abstractTypesMap,
+              hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
             }),
           ]),
         ),

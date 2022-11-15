@@ -16,10 +16,10 @@
 }
 
 .ps__rail-x {
-  z-index: 20;
+  z-index: var(--virtual-list-horizontal-scrollbar-z-index, 20);
 }
 .ps__rail-y {
-  z-index: 30;
+  z-index: var(--virtual-list-vertical-scrollbar-z-index, 30);
   opacity: 0.6;
 }
 .ps__thumb-x {

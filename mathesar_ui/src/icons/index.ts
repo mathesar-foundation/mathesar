@@ -5,6 +5,7 @@ import {
   faBackspace,
   faCalendarDay,
   faCalendarWeek,
+  faCheck,
   faCheckSquare,
   faChevronRight,
   faClock,
@@ -16,7 +17,6 @@ import {
   faEnvelope,
   faExternalLinkAlt,
   faFileAlt,
-  faFileContract,
   faFilter,
   faGlobe,
   faHammer,
@@ -48,6 +48,7 @@ import {
   faUpload,
   faUser,
   faSave,
+  faCrosshairs,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
@@ -80,10 +81,13 @@ export const iconExpandRight: IconProps = { data: faChevronRight };
 export const iconImportData: IconProps = { data: faUpload };
 export const iconMoveColumnsToNewLinkedTable = { data: faLink };
 export const iconMoveColumnsToExistingLinkedTable = { data: faLink };
+/** Submit a selection with the record selector for data entry */
+export const iconPickRecord: IconProps = { data: faCheck };
 export const iconRedo: IconProps = { data: faRedo };
 export const iconRefresh: IconProps = { data: faSync };
 export const iconRename: IconProps = { data: faICursor };
 export const iconSave: IconProps = { data: faSave };
+/** Open the record selector */
 export const iconSelectRecord: IconProps = { data: faSearchPlus };
 export const iconSetToNull: IconProps = { data: faBackspace };
 export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
@@ -100,7 +104,7 @@ export const iconConstraintUnique: IconProps = { data: faSnowflake };
 export const iconDatabase: IconProps = { data: faDatabase };
 export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
-export const iconExploration: IconProps = { data: faFileContract };
+export const iconExploration: IconProps = { data: faCrosshairs };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faThList };
 export const iconInwardLink: IconProps = { data: faArrowRight };

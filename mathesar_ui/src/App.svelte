@@ -1,18 +1,22 @@
 <script lang="ts">
   import { ToastPresenter, Confirmation } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
-  import { setNewRecordSelectorControllerInContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import {
+    RecordSelectorController,
+    setRecordSelectorControllerInContext,
+  } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { confirmationController } from '@mathesar/stores/confirmation';
   import { modal } from './stores/modal';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import RootRoute from './routes/RootRoute.svelte';
 
   const recordSelectorModal = modal.spawnModalController();
-  const recordSelectorController = setNewRecordSelectorControllerInContext({
+  const recordSelectorController = new RecordSelectorController({
     onOpen: () => recordSelectorModal.open(),
     onClose: () => recordSelectorModal.close(),
     nestingLevel: 0,
   });
+  setRecordSelectorControllerInContext(recordSelectorController);
 </script>
 
 <ToastPresenter entries={toast.entries} />
@@ -62,40 +66,6 @@
     --text-size-x-large: 1.428rem;
     --display-size-large: 1.953rem;
 
-    /*********** RESTYLING ***********/
-    // Idea here is to use the same token naming
-    // between the Figma designs and the codebase
-    // which then makes it easier and faster to create
-    // element from design into code.
-    --red-500: #eb5441;
-    --red-600: #c63826;
-
-    --slate-100: #eff1f1;
-    --slate-200: #d5d8dc;
-    --slate-300: #aeb4bc;
-    --slate-400: #444c55;
-    --slate-800: #25292e;
-
-    --sky-200: #e8f1fd;
-
-    --yellow-100: #fdf7ed;
-
-    --white: white;
-
-    --red-box-shadow: #eb544133;
-
-    // Setting a new variable as brand color
-    // provides the ability to later change its
-    // value and support white-labelling
-
-    // Brand Color
-    --brand-500: var(--red-500);
-    --brand-600: var(--red-600);
-    --brand-box-shadow: var(--red-box-shadow);
-
-    --border-radius-s: 0.142rem; //2px
-    --border-radius-m: 0.285rem; //4px
-    --border-radius-l: 0.571rem; //8px
     --modal-z-index: 50;
     --modal-record-selector-z-index: 50;
   }
@@ -145,6 +115,11 @@
     --header-height: 4.285rem;
 
     color: var(--slate-400);
+
+    --modal-z-index: 1;
+    --dropdown-z-index: 1;
+    --cell-errors-z-index: 1;
+    --toast-z-index: 2;
   }
 
   h1 {
@@ -166,6 +141,7 @@
     font-size: inherit;
     font-weight: inherit;
     text-align: inherit;
+    text-decoration: inherit;
     margin: 0;
     padding: 0;
   }

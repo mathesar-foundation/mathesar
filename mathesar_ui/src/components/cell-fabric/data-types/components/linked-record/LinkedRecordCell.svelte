@@ -28,6 +28,9 @@
   $: hasValue = value !== undefined && value !== null;
 
   async function launchRecordSelector(event?: MouseEvent) {
+    if (disabled) {
+      return;
+    }
     event?.stopPropagation();
     const result = await recordSelector.acquireUserInput({ tableId });
     if (result === undefined) {
@@ -90,7 +93,7 @@
   on:dblclick={launchRecordSelector}
   hasPadding={false}
 >
-  <div class="linked-record-cell">
+  <div class="linked-record-cell" class:disabled>
     <div class="value">
       {#if hasValue}
         <LinkedRecord recordId={value} {recordSummary} />
@@ -100,32 +103,34 @@
         <Null />
       {/if}
     </div>
-    <button
-      class="dropdown-button passthrough"
-      on:click={launchRecordSelector}
-      {disabled}
-      label="Pick a record"
-      title="Pick a record"
-    >
-      <Icon {...iconExpandDown} />
-    </button>
+    {#if !disabled}
+      <button
+        class="dropdown-button passthrough"
+        on:click={launchRecordSelector}
+        label="Pick a record"
+        title="Pick a record"
+      >
+        <Icon {...iconExpandDown} />
+      </button>
+    {/if}
   </div>
 </CellWrapper>
 
 <style>
   .linked-record-cell {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    display: grid;
-    grid-template: auto / 1fr auto;
+    flex: 1 0 auto;
+    display: flex;
+    justify-content: space-between;
   }
   .value {
     padding-left: var(--cell-padding);
     align-self: center;
     overflow: hidden;
+    width: max-content;
+    max-width: 100%;
+  }
+  .disabled .value {
+    padding-right: var(--cell-padding);
   }
   .dropdown-button {
     cursor: pointer;
