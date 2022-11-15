@@ -233,7 +233,7 @@ class Summarize(Transform):
         )
         return _to_non_executable(executable)
 
-    def add_aliases_to_group_by(self, aliases):
+    def get_new_with_aliases_added_to_group_by(self, aliases):
         def get_col_spec_from_alias(alias):
             return dict(
                 input_alias=alias,
@@ -248,7 +248,7 @@ class Summarize(Transform):
             get_col_spec_from_alias=get_col_spec_from_alias,
         )
 
-    def add_aliases_to_agg_on(self, aliases):
+    def get_new_with_aliases_added_to_agg_on(self, aliases):
         def get_col_spec_from_alias(alias):
             return dict(
                 input_alias=alias,
@@ -298,7 +298,10 @@ def _add_aliases_to_summarization_expr_field(
     summarization, spec_field, aliases, get_col_spec_from_alias
 ):
     """
-    Immutably adds aliases to a summarization, generating necessary column specs.
+    Returns new summarization with aliases added to `spec_field`.
+
+    This function will apply `get_col_spec_from_alias` to each column alias in `aliases`,
+    and add the results to the chosen `spec_field` in a copy of `summarization`, returning the copy.
     """
     summarization = deepcopy(summarization)
     expressions_to_add = [
