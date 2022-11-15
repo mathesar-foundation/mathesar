@@ -118,17 +118,19 @@
     on:click={() => checkAndToggle(api)}
     on:keydown={(e) => handleKeyDown(e, api, isOpen)}
   >
-    <div class="value" class:active={isActive}>
-      <CellValue {value}>
-        {getLabel(value ?? undefined)}
-      </CellValue>
-    </div>
-
-    {#if isActive}
-      <div class="icon">
-        <Icon {...iconExpandDown} />
+    <div class="cell">
+      <div class="value" class:active={isActive}>
+        <CellValue {value}>
+          {getLabel(value ?? undefined)}
+        </CellValue>
       </div>
-    {/if}
+
+      {#if isActive}
+        <div class="icon">
+          <Icon {...iconExpandDown} />
+        </div>
+      {/if}
+    </div>
   </CellWrapper>
 
   <AttachableDropdown
@@ -148,7 +150,9 @@
     border: 1px solid #ccc;
     max-width: 250px;
   }
-
+  .cell {
+    display: flex;
+  }
   .value {
     flex: 1 1 auto;
     overflow: hidden;
