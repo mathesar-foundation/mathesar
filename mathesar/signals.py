@@ -36,4 +36,5 @@ def give_manager_access_to_public_schema(**kwargs):
     if kwargs['created']:
         instance = kwargs['instance']
         public_schema = Schema.objects.get(oid=PUBLIC_SCHEMA_OID, database=instance.database)
-        SchemaRole.objects.create(schema=public_schema, user=instance.user, role=Role.MANAGER.value)
+        # Permissions are similar to Postgres 15 https://www.enterprisedb.com/blog/new-public-schema-permissions-postgresql-15
+        SchemaRole.objects.create(schema=public_schema, user=instance.user, role=Role.VIEWER.value)
