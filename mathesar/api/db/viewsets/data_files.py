@@ -1,7 +1,9 @@
+from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
+from mathesar.api.dj_filters import DataFileFilter
 import mathesar.api.exceptions.data_import_exceptions.exceptions
 import mathesar.api.exceptions.database_exceptions.exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
@@ -17,6 +19,8 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     queryset = DataFile.objects.all().order_by('-created_at')
     serializer_class = DataFileSerializer
     pagination_class = DefaultLimitOffsetPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = DataFileFilter
 
     def partial_update(self, request, pk=None):
         serializer = DataFileSerializer(

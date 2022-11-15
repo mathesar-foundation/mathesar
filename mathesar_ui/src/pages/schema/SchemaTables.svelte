@@ -3,7 +3,8 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import TablesList from './TablesList.svelte';
   import EntityLayout from './EntityLayout.svelte';
-  import CreateEmptyTableButton from './CreateEmptyTableButton.svelte';
+  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
+  import CreateNewTableButton from './CreateNewTableButton.svelte';
 
   export let tablesMap: Map<number, TableEntry>;
 
@@ -34,9 +35,7 @@
   on:clear={clearQuery}
 >
   <slot slot="action">
-    <CreateEmptyTableButton {database} {schema}>
-      New Table
-    </CreateEmptyTableButton>
+    <CreateNewTableButton {database} {schema} />
   </slot>
   <slot slot="resultInfo">
     {#if filteredTables.length}
@@ -53,6 +52,10 @@
     {/if}
   </slot>
   <slot slot="content">
-    <TablesList tables={filteredTables} {database} {schema} />
+    {#if tablesMap.size}
+      <TablesList tables={filteredTables} {database} {schema} />
+    {:else}
+      <CreateNewTableTutorial {database} {schema} />
+    {/if}
   </slot>
 </EntityLayout>

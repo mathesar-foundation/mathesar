@@ -1,13 +1,16 @@
 <script lang="ts">
   import { Icon, iconLoading } from '@mathesar/component-library';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import type { RecordsData, Selection } from '@mathesar/stores/table-data';
+  import type {
+    RecordsData,
+    TabularDataSelection,
+  } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import ActionItem from '../ActionItem.svelte';
 
   export let selectedRowIndices: number[];
   export let recordsData: RecordsData;
-  export let selection: Selection;
+  export let selection: TabularDataSelection;
 
   let isDeleting = false;
 

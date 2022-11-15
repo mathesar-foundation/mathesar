@@ -7,7 +7,9 @@
   import OverviewHeader from './OverviewHeader.svelte';
   import TablesList from './TablesList.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
-  import CreateEmptyTableButton from './CreateEmptyTableButton.svelte';
+  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
+  import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
+  import CreateNewTableButton from './CreateNewTableButton.svelte';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
@@ -20,43 +22,49 @@
   <div class="vertical-container tables">
     <OverviewHeader title="Tables">
       <slot slot="action">
-        <CreateEmptyTableButton {database} {schema}>
-          New Table
-        </CreateEmptyTableButton>
+        <CreateNewTableButton {database} {schema} />
       </slot>
     </OverviewHeader>
-    <TablesList tables={[...tablesMap.values()]} {database} {schema} />
+    {#if tablesMap.size}
+      <TablesList tables={[...tablesMap.values()]} {database} {schema} />
+    {:else}
+      <CreateNewTableTutorial {database} {schema} />
+    {/if}
   </div>
   <div class="vertical-container explorations">
     <div class="vertical-container">
       <OverviewHeader title="Saved Explorations" />
-      <ExplorationsList
-        bordered={false}
-        explorations={[...explorationsMap.values()]}
-        {database}
-        {schema}
-      />
+      {#if tablesMap.size && !explorationsMap.size}
+        <CreateNewExplorationTutorial {database} {schema} />
+      {:else}
+        <ExplorationsList
+          bordered={false}
+          explorations={[...explorationsMap.values()]}
+          {database}
+          {schema}
+        />
+      {/if}
     </div>
 
-    <div class="vertical-container">
-      <OverviewHeader title="Explore your Data" />
-      <span>
-        Explorations let you query your data to uncover trends and insights.
-      </span>
-      <div>
-        <AnchorButton href={getDataExplorerPageUrl(database.name, schema.id)}>
-          Open Data Explorer
-        </AnchorButton>
+    {#if tablesMap.size && explorationsMap.size}
+      <div class="vertical-container">
+        <OverviewHeader title="Explore your Data" />
+        <span>
+          Explorations let you query your data to uncover trends and insights.
+        </span>
+        <div>
+          <AnchorButton href={getDataExplorerPageUrl(database.name, schema.id)}>
+            Open Data Explorer
+          </AnchorButton>
+        </div>
       </div>
-    </div>
+    {/if}
   </div>
 </div>
 
 <style lang="scss">
-  :root {
-    --container-gap: 2rem;
-  }
   .container {
+    --container-gap: 2rem;
     display: flex;
     flex-direction: column;
 

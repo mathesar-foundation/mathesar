@@ -44,13 +44,14 @@
   />
 </div>
 
-<style lang="scss">
+<style>
   .rename-column-property-container {
     display: flex;
     flex-direction: column;
-
-    > :global(* + *) {
-      margin-top: 0.5rem;
-    }
+    gap: 0.5rem;
+  }
+  .label {
+    font-size: var(--text-size-small);
+    margin-left: 0.5rem;
   }
 </style>

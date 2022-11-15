@@ -8,6 +8,9 @@
   export let database: Database;
   export let schema: SchemaEntry;
 
+  let classes = '';
+  export { classes as class };
+
   let isCreatingNewTable = false;
 
   async function handleCreateEmptyTable() {
@@ -22,6 +25,7 @@
   on:click={handleCreateEmptyTable}
   disabled={isCreatingNewTable}
   appearance="plain"
+  class={classes}
 >
   {#if isCreatingNewTable}
     <Spinner />

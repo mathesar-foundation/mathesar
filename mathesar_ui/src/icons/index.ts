@@ -5,6 +5,7 @@ import {
   faBackspace,
   faCalendarDay,
   faCalendarWeek,
+  faCheck,
   faCheckSquare,
   faChevronRight,
   faClock,
@@ -50,8 +51,8 @@ import {
   faCrosshairs,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
-
 import type { IconProps } from '@mathesar-component-library/types';
+import { arrayIcon } from './customIcons';
 
 /**
  * @file
@@ -80,10 +81,13 @@ export const iconExpandRight: IconProps = { data: faChevronRight };
 export const iconImportData: IconProps = { data: faUpload };
 export const iconMoveColumnsToNewLinkedTable = { data: faLink };
 export const iconMoveColumnsToExistingLinkedTable = { data: faLink };
+/** Submit a selection with the record selector for data entry */
+export const iconPickRecord: IconProps = { data: faCheck };
 export const iconRedo: IconProps = { data: faRedo };
 export const iconRefresh: IconProps = { data: faSync };
 export const iconRename: IconProps = { data: faICursor };
 export const iconSave: IconProps = { data: faSave };
+/** Open the record selector */
 export const iconSelectRecord: IconProps = { data: faSearchPlus };
 export const iconSetToNull: IconProps = { data: faBackspace };
 export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
@@ -135,3 +139,4 @@ export const iconUiTypeText: IconProps = { data: faAlignLeft };
 export const iconUiTypeTime: IconProps = { data: faClock };
 export const iconUiTypeUnknown: IconProps = { data: faQuestion };
 export const iconUiTypeUri: IconProps = { data: faGlobe };
+export const iconUiTypeArray: IconProps = { data: arrayIcon };

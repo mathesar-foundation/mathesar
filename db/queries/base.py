@@ -16,6 +16,10 @@ class DBQuery:
             engine,
             transformations=None,
             name=None,
+            # The same metadata will be used by all the methods within DBQuery
+            # So make sure to change the metadata in case the DBQuery methods are called
+            # after a mutation to the database object that could make the existing metadata invalid.
+            metadata=None
     ):
         self.base_table_oid = base_table_oid
         for initial_col in initial_columns:
@@ -24,6 +28,7 @@ class DBQuery:
         self.engine = engine
         self.transformations = transformations
         self.name = name
+        self.metadata = metadata if metadata else get_empty_metadata()
 
     # mirrors a method in db.records.operations.select
     def get_records(self, **kwargs):
@@ -41,6 +46,7 @@ class DBQuery:
             table=self.transformed_relation, engine=self.engine, **kwargs,
         )
 
+    # NOTE if too expensive, can be rewritten to parse DBQuery spec, instead of leveraging sqlalchemy
     @property
     def all_sa_columns_map(self):
         """
@@ -97,8 +103,7 @@ class DBQuery:
 
     @property
     def initial_relation(self):
-        # TODO reuse metadata
-        metadata = get_empty_metadata()
+        metadata = self.metadata
         base_table = reflect_table_from_oid(
             self.base_table_oid, self.engine, metadata=metadata
         )
@@ -111,7 +116,7 @@ class DBQuery:
             We use the function-scoped metadata so all involved tables are aware
             of each other.
             """
-            return reflect_table_from_oid(oid, self.engine, metadata=metadata)
+            return reflect_table_from_oid(oid, self.engine, metadata=metadata, keep_existing=True)
 
         def _get_column_name(oid, attnum):
             return get_column_name_from_attnum(oid, attnum, self.engine, metadata=metadata)
@@ -141,6 +146,19 @@ class DBQuery:
             [_process_initial_column(col) for col in self.initial_columns]
         ).select_from(from_clause)
         return stmt.cte()
+
+    def get_input_alias_for_output_alias(self, output_alias):
+        return self.map_of_output_alias_to_input_alias.get(output_alias)
+
+    # TODO consider caching; not urgent, since redundant calls don't trigger IO, it seems
+    @property
+    def map_of_output_alias_to_input_alias(self):
+        m = dict()
+        transforms = self.transformations
+        if transforms:
+            for transform in transforms:
+                m = m | transform.map_of_output_alias_to_input_alias
+        return m
 
 
 def _guarantee_jp_path_tuples(jp_path):
@@ -172,4 +190,7 @@ class InitialColumn:
 
     @property
     def is_base_column(self):
+        """
+        A base column is an initial column on a query's base table.
+        """
         return self.jp_path is None

@@ -19,7 +19,7 @@
 
   export let usesVirtualList = false;
 
-  $: ({ id, display, columnsDataStore } = $tabularData);
+  $: ({ id, display, columnsDataStore, selection } = $tabularData);
   $: ({ displayableRecords } = display);
   $: ({ pkColumn } = columnsDataStore);
 
@@ -45,39 +45,9 @@
     const record = allRecords?.[index];
     return record ? getItemSizeFromRow(record) : rowHeightPx;
   }
-
-  function checkAndResetActiveCell(e: Event) {
-    const target = e.target as HTMLElement;
-    const targetMissing = !document.body.contains(target);
-    let clearActiveCell = false;
-
-    if (targetMissing) {
-      const focusedElementNotWithinEditableCell =
-        !document.activeElement ||
-        (!document.activeElement.closest('.editable-cell') &&
-          !document.activeElement.closest('.retain-active-cell'));
-      clearActiveCell = focusedElementNotWithinEditableCell;
-    } else {
-      const targetNotWithinEditableCell =
-        !target.closest('.editable-cell') &&
-        !target.closest('.retain-active-cell');
-      const targetNotWithinTableInspector = !target.closest(
-        '.table-inspector-container',
-      );
-      clearActiveCell =
-        targetNotWithinEditableCell && targetNotWithinTableInspector;
-    }
-
-    if (clearActiveCell) {
-      display.resetActiveCell();
-    }
-  }
 </script>
 
-<svelte:window
-  on:keydown={checkAndResetActiveCell}
-  on:mousedown={checkAndResetActiveCell}
-/>
+<svelte:window />
 
 {#key id}
   {#if usesVirtualList}

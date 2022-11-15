@@ -1,18 +1,22 @@
 <script lang="ts">
   import { ToastPresenter, Confirmation } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
-  import { setNewRecordSelectorControllerInContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import {
+    RecordSelectorController,
+    setRecordSelectorControllerInContext,
+  } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { confirmationController } from '@mathesar/stores/confirmation';
   import { modal } from './stores/modal';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import RootRoute from './routes/RootRoute.svelte';
 
   const recordSelectorModal = modal.spawnModalController();
-  const recordSelectorController = setNewRecordSelectorControllerInContext({
+  const recordSelectorController = new RecordSelectorController({
     onOpen: () => recordSelectorModal.open(),
     onClose: () => recordSelectorModal.close(),
     nestingLevel: 0,
   });
+  setRecordSelectorControllerInContext(recordSelectorController);
 </script>
 
 <ToastPresenter entries={toast.entries} />
@@ -96,6 +100,7 @@
     --color-fk: #dfd0b3;
     --color-error: #f47171;
     --cell-text-color-processing: #888;
+    --color-array-element: #c1e8e8;
 
     --cell-border-horizontal: 1px solid #e7e7e7;
     --cell-border-vertical: 1px solid #efefef;
@@ -110,6 +115,11 @@
     --header-height: 4.285rem;
 
     color: var(--slate-400);
+
+    --modal-z-index: 1;
+    --dropdown-z-index: 1;
+    --cell-errors-z-index: 1;
+    --toast-z-index: 2;
   }
 
   h1 {
@@ -131,6 +141,7 @@
     font-size: inherit;
     font-weight: inherit;
     text-align: inherit;
+    text-decoration: inherit;
     margin: 0;
     padding: 0;
   }

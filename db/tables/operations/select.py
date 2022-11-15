@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Table, select, join, inspect, and_, cast, func, Integer, literal, or_
+    Table, select, join, inspect, and_, cast, func, Integer, literal, or_,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -14,17 +14,31 @@ TARGET = 'target'
 MULTIPLE_RESULTS = 'multiple_results'
 
 
-def reflect_table(name, schema, engine, metadata, connection_to_use=None):
+def reflect_table(name, schema, engine, metadata, connection_to_use=None, keep_existing=False):
+    extend_existing = not keep_existing
     autoload_with = engine if connection_to_use is None else connection_to_use
-    return Table(name, metadata, schema=schema, autoload_with=autoload_with, extend_existing=True)
+    return Table(
+        name,
+        metadata,
+        schema=schema,
+        autoload_with=autoload_with,
+        extend_existing=extend_existing,
+        keep_existing=keep_existing
+    )
 
 
-def reflect_table_from_oid(oid, engine, metadata, connection_to_use=None):
-    tables = reflect_tables_from_oids([oid], engine, metadata=metadata, connection_to_use=connection_to_use)
+def reflect_table_from_oid(oid, engine, metadata, connection_to_use=None, keep_existing=False):
+    tables = reflect_tables_from_oids(
+        [oid],
+        engine,
+        metadata=metadata,
+        connection_to_use=connection_to_use,
+        keep_existing=keep_existing
+    )
     return tables.get(oid, None)
 
 
-def reflect_tables_from_oids(oids, engine, metadata, connection_to_use=None):
+def reflect_tables_from_oids(oids, engine, metadata, connection_to_use=None, keep_existing=False):
     oids_to_schema_and_table_names = (
         get_map_of_table_oid_to_schema_name_and_table_name(
             oids,
@@ -41,6 +55,7 @@ def reflect_tables_from_oids(oids, engine, metadata, connection_to_use=None):
             engine,
             metadata=metadata,
             connection_to_use=connection_to_use,
+            keep_existing=keep_existing
         )
     return table_oids_to_sa_tables
 

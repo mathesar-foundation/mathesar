@@ -1,5 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+
+  import {
+    getValueComparisonOutcome,
+    splitMatchParts,
+  } from '@mathesar-component-library';
   import type { CellValueFormatter } from '@mathesar/components/cell-fabric/utils';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import CellWrapper from './CellWrapper.svelte';
@@ -17,9 +22,28 @@
   export let multiLineTruncate = false;
   export let formatValue: CellValueFormatter<Value> | undefined = undefined;
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
+  export let searchValue: unknown | undefined = undefined;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
+
+  $: matchParts = (() => {
+    if (typeof value !== 'string' || typeof searchValue !== 'string') {
+      return undefined;
+    }
+    return splitMatchParts(value, searchValue);
+  })();
+  $: valueComparisonOutcome = (() => {
+    if (matchParts) {
+      return getValueComparisonOutcome(matchParts);
+    }
+    const hasSearchValue =
+      searchValue !== null && searchValue !== undefined && searchValue !== '';
+    if (hasSearchValue) {
+      return searchValue === value ? 'exactMatch' : 'noMatch';
+    }
+    return undefined;
+  })();
 
   function setModeToEdit() {
     if (!disabled) {
@@ -92,6 +116,12 @@
     dispatchUpdate();
     resetEditMode();
   }
+
+  function handleMouseDown() {
+    if (!isActive) {
+      dispatch('activate');
+    }
+  }
 </script>
 
 <CellWrapper
@@ -101,11 +131,12 @@
   bind:element={cellRef}
   on:dblclick={setModeToEdit}
   on:keydown={handleKeyDown}
-  on:mousedown={() => dispatch('activate')}
+  on:mousedown={handleMouseDown}
   on:mouseenter
   mode={isEditMode ? 'edit' : 'default'}
   {multiLineTruncate}
   {horizontalAlignment}
+  {valueComparisonOutcome}
 >
   {#if isEditMode}
     <slot {handleInputBlur} {handleInputKeydown} />
@@ -115,8 +146,8 @@
       class:nowrap={!isActive}
       class:truncate={isActive && multiLineTruncate}
     >
-      <slot name="content" {value} {formatValue}>
-        <CellValue {value} {formatValue} />
+      <slot name="content" {value} {formatValue} {matchParts}>
+        <CellValue {value} {formatValue} {matchParts} />
       </slot>
     </div>
   {/if}

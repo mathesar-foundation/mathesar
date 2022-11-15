@@ -11,6 +11,7 @@ export interface CellTypeProps<Value> {
   isActive: boolean;
   isSelectedInRange: boolean;
   disabled: boolean;
+  searchValue?: unknown;
 }
 
 // Primary key
@@ -118,6 +119,12 @@ export interface DateTimeCellExternalProps {
 export interface DateTimeCellProps
   extends CellTypeProps<string>,
     DateTimeCellExternalProps {}
+
+// Array
+
+export type ArrayCellExternalProps = Record<string, never>;
+
+export type ArrayCellProps = CellTypeProps<unknown[]>;
 
 // Common
 

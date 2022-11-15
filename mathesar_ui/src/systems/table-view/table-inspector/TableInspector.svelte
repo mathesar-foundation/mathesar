@@ -69,6 +69,7 @@
       right: 0;
       bottom: 0;
     }
+    isolation: isolate;
   }
 
   /* .tabs-container {

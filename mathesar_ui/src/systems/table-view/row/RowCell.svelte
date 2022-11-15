@@ -7,17 +7,18 @@
     WritableMap,
   } from '@mathesar-component-library';
   import {
-    isCellActive,
-    scrollBasedOnActiveCell,
     rowHasNewRecord,
     type RecordRow,
-    type Display,
     type RecordsData,
     type CellKey,
     type ProcessedColumn,
-    isCellSelected,
-    Selection,
+    type TabularDataSelection,
   } from '@mathesar/stores/table-data';
+  import {
+    isCellActive,
+    scrollBasedOnActiveCell,
+    isCellSelected,
+  } from '@mathesar/components/sheet';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
@@ -25,16 +26,13 @@
   import { SheetCell } from '@mathesar/components/sheet';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import CellErrors from './CellErrors.svelte';
-  import CellBackground from './CellBackground.svelte';
-  import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let recordsData: RecordsData;
-  export let display: Display;
-  export let selection: Selection;
+  export let selection: TabularDataSelection;
   export let row: RecordRow;
-  export let rowIsSelected = false;
-  export let rowIsProcessing = false;
   export let rowHasErrors = false;
   export let key: CellKey;
   export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
@@ -46,9 +44,8 @@
   $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
   $: columnId = column.id;
-  $: ({ activeCell } = display);
-  $: isActive = $activeCell && isCellActive($activeCell, row, column);
-  $: ({ selectedCells } = selection);
+  $: ({ activeCell, selectedCells } = selection);
+  $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
 
   /**
    * The name indicates that this boolean is only true when more than one cell
@@ -67,7 +64,8 @@
    * [1]: https://github.com/centerofci/mathesar/issues/1534
    */
   $: isSelectedInRange =
-    isCellSelected($selectedCells, row, column) && $selectedCells.size > 1;
+    isCellSelected($selectedCells, row, processedColumn) &&
+    $selectedCells.size > 1;
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -93,7 +91,7 @@
     event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
   ) {
     const { originalEvent } = event.detail;
-    const type = display.handleKeyEventsOnActiveCell(originalEvent);
+    const type = selection.handleKeyEventsOnActiveCell(originalEvent);
     if (type) {
       originalEvent.stopPropagation();
       originalEvent.preventDefault();
@@ -137,11 +135,7 @@
       white background better communicates that the user can edit the active
       cell.
     -->
-      <RowCellBackgrounds
-        isSelected={rowIsSelected}
-        isProcessing={rowIsProcessing}
-        hasErrors={rowHasErrors}
-      />
+      <RowCellBackgrounds hasErrors={rowHasErrors} />
     {/if}
 
     <CellFabric
@@ -162,16 +156,16 @@
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}
       on:activate={() => {
-        display.selectCell(row, column);
+        selection.activateCell(row, processedColumn);
         // Activate event initaites the selection process
-        selection.onStartSelection(row, column);
+        selection.onStartSelection(row, processedColumn);
       }}
       on:update={valueUpdated}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
       on:mouseenter={() => {
         // This enables the click + drag to
         // select multiple cells
-        selection.onMouseEnterWhileSelection(row, column);
+        selection.onMouseEnterWhileSelection(row, processedColumn);
       }}
     />
     <ContextMenu>
@@ -200,7 +194,7 @@
     background: var(--cell-bg-color-base);
 
     &.is-active {
-      z-index: 5;
+      z-index: var(--z-index__sheet__active-cell);
       border-color: transparent;
       min-height: 100%;
       height: auto !important;

@@ -15,6 +15,7 @@ export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
 export { default as CheckboxGroup } from './checkbox-group/CheckboxGroup.svelte';
+export { default as Chip } from './chip/Chip.svelte';
 export { default as Collapsible } from './collapsible/Collapsible.svelte';
 export { default as ContextMenu } from './context-menu/ContextMenu.svelte';
 export { default as Debounce } from './debounce/Debounce.svelte';
@@ -22,7 +23,6 @@ export { default as Help } from './help/Help.svelte';
 export { default as Icon } from './icon/Icon.svelte';
 export { InputGroup, InputGroupText } from './input-group';
 export { default as LabeledInput } from './labeled-input/LabeledInput.svelte';
-export { default as MatchHighlighter } from './match-highlighter/MatchHighlighter.svelte';
 export {
   NumberInput,
   StringifiedNumberInput,
@@ -43,7 +43,6 @@ export { default as TextInput } from './text-input/TextInput.svelte';
 export { default as TextInputWithPrefix } from './text-input/TextInputWithPrefix.svelte';
 
 // Compound Components (Ordered)
-export { AttachableDropdown, Dropdown } from './dropdown';
 export { DatePicker, InlineDateTimePicker } from './date-time-picker';
 export { default as DropdownMenu } from './dropdown-menu/DropdownMenu.svelte';
 export { default as DataTypeBasedInput } from './data-type-based-input/DataTypeBasedInput.svelte';
@@ -60,6 +59,8 @@ export { default as Window } from './window/Window.svelte';
 // Systems
 export * from './label';
 export * from './confirmation';
+export * from './dropdown';
+export * from './match-highlighter';
 export * from './menu';
 export * from './modal';
 export * from './toast';

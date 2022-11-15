@@ -7,9 +7,7 @@
 
 <div class="container">
   <OnPageFilterBar placeholder={searchPlaceholder} bind:searchQuery on:clear>
-    <slot slot="action">
-      <slot name="action" />
-    </slot>
+    <slot name="action" slot="action" />
     <slot slot="resultInfo" name="resultInfo" />
   </OnPageFilterBar>
   <slot name="content" />

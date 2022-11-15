@@ -11,12 +11,7 @@
   export let database: Database;
   export let schema: SchemaEntry;
 
-  function getBaseTableNameForExploration() {
-    const table = [...$tablesStore.data.values()].find(
-      (_table) => _table.id === exploration.base_table,
-    );
-    return table?.name || '';
-  }
+  $: baseTable = $tablesStore.data.get(exploration.base_table);
 </script>
 
 <a
@@ -28,12 +23,14 @@
       <Icon {...iconExploration} />
       <span>{exploration.name}</span>
     </div>
-    <div class="horizontal-container">
-      <span class="meta">Based on</span>
+    {#if baseTable}
       <div class="horizontal-container">
-        <TableName table={{ name: getBaseTableNameForExploration() }} />
+        <span class="meta">Based on</span>
+        <div class="horizontal-container">
+          <TableName table={baseTable} />
+        </div>
       </div>
-    </div>
+    {/if}
   </div>
 </a>
 
