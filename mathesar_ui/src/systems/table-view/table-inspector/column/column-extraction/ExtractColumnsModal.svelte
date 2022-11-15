@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import { get } from 'svelte/store';
+
   import {
     CancelOrProceedButtonPair,
     ControlledModal,
@@ -14,8 +15,6 @@
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
-    type ConstraintsData,
-    type TableRecordsData,
   } from '@mathesar/stores/table-data';
   import {
     getTableFromStoreOrApi,
@@ -76,18 +75,7 @@
   $: handleColumnsChange($columns);
 
   async function handleSave() {
-    type FollowUpsTypes = [
-      Promise<TableEntry>,
-      Promise<
-        [
-          ProcessedColumn[] | undefined,
-          TableRecordsData | undefined,
-          ConstraintsData | undefined,
-        ]
-      >,
-    ];
-    const followUps = [];
-
+    const followUps: Promise<unknown>[] = [];
     try {
       if ($targetType === 'existingTable') {
         const targetTableId = linkedTable?.table.id;
@@ -108,17 +96,23 @@
         followUps.push(getTableFromStoreOrApi(response.extracted_table));
       }
       followUps.push($tabularData.refresh());
-      const results = await Promise.all(followUps as FollowUpsTypes);
-      const returnedColumns = results[1][0];
-      if (returnedColumns) {
-        // Selecting the last column for now. Would need to be modified
-        // when we position the new column where the old columns were.
-        const lastColumn = returnedColumns[returnedColumns.length - 1];
-        selection.toggleColumnSelection(lastColumn);
+      await Promise.all(followUps);
+      if ($targetType === 'newTable') {
+        // We ase using `get(processedColumns)` instead of `$processedColumns`
+        // because the store gets updated when the above promises settle, and
+        // for some reason Svelte doesn't seem to dispatch that update to the
+        // store when we're using the dollar syntax here. There may be a cleaner
+        // approach.
+        const allColumns = [...get(processedColumns).values()];
+        // Here we assume that the new column will be positioned at the end. We
+        // will need to modify this logic when we position the new column where
+        // the old columns were.
+        const newFkColumn = allColumns.slice(-1)[0];
+        selection.toggleColumnSelection(newFkColumn);
         await tick();
         scrollBasedOnSelection();
       }
-      toast.success('Successfully extracted columns');
+      toast.success('Successfully extracted columns.');
       controller.close();
     } catch (e) {
       toast.error(getErrorMessage(e));
