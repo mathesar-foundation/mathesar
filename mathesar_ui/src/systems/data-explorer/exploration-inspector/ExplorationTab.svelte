@@ -67,8 +67,9 @@
 
   async function handleSave() {
     try {
-      // TODO: Add description once backend accepts description
-      const updatedQuery = $query.withName(name).model;
+      const updatedQuery = $query
+        .withName(name)
+        .model.withDescription(description).model;
       // TODO: Write better utility methods to identify saved instances
       await putQuery(updatedQuery.toJSON() as QueryInstance);
       query.set(updatedQuery);

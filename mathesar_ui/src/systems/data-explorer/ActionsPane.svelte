@@ -62,10 +62,11 @@
     }
   }
 
-  // TODO: Handle description
-  async function create(name: string) {
+  async function create(name: string, description: string) {
     try {
-      await queryManager.update((q) => q.withName(name));
+      await queryManager.update((q) =>
+        q.withName(name).model.withDescription(description),
+      );
       await save();
     } catch (err) {
       toast.fromError(err);
@@ -157,7 +158,7 @@
   save={create}
   {getNameValidationErrors}
   getInitialName={() => $query.name ?? ''}
-  getInitialDescription={() => ''}
+  getInitialDescription={() => $query.description ?? ''}
 >
   <span slot="title"> Save Exploration </span>
 </NameAndDescInputModalForm>

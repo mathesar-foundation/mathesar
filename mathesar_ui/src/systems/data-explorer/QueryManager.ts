@@ -283,11 +283,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
    * @throws Error if unable to save
    */
   async save(): Promise<QueryModel> {
-    const queryJSON = {
-      ...this.getQueryModel().toJSON(),
-      // TODO: Remove this once backend support for description is added
-      description: undefined,
-    };
+    const queryJSON = this.getQueryModel().toJSON();
     this.state.update((_state) => ({
       ..._state,
       saveState: { state: 'processing' },
