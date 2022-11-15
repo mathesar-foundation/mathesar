@@ -8,8 +8,9 @@
     Icon,
   } from '@mathesar-component-library';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import type QueryRunner from '../QueryRunner';
-  import QueryManager from '../QueryManager';
+  import type QueryRunner from '../../QueryRunner';
+  import QueryManager from '../../QueryManager';
+  import ColumnSource from './ColumnSource.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
 
@@ -34,11 +35,8 @@
   $: hasMultipleSelectedColumns = selectedColumns.length > 1;
   $: selectedColumn =
     selectedColumns.length > 0 ? selectedColumns[0] : undefined;
-  $: initialColumn = selectedColumn
-    ? $query.getColumn(selectedColumn.column.alias)
-    : undefined;
-  $: columnInformation = initialColumn
-    ? $columnsMetaData.get(initialColumn.alias)
+  $: columnInformation = selectedColumn
+    ? $columnsMetaData.get(selectedColumn.column.alias)
     : undefined;
 
   let timer: number;
@@ -98,17 +96,7 @@
         />
       </LabeledInput>
       {#if columnInformation}
-        <div data-identifier="column-source">
-          <span>Source Column</span>
-          <div>
-            <div class="column-info">
-              <div>Table:</div>
-              <!-- <div>{columnInformation.tableName}</div>
-                <div>Column:</div>
-                <div>{columnInformation.name}</div> -->
-            </div>
-          </div>
-        </div>
+        <ColumnSource {columnInformation} columnsMetaData={$columnsMetaData} />
       {/if}
     </div>
   </Collapsible>

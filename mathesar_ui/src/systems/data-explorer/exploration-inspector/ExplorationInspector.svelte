@@ -3,7 +3,7 @@
   import type QueryRunner from '../QueryRunner';
   import type QueryManager from '../QueryManager';
   import ExplorationTab from './ExplorationTab.svelte';
-  import ColumnTab from './ColumnTab.svelte';
+  import ColumnTab from './column-tab/ColumnTab.svelte';
   import CellTab from './CellTab.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
@@ -49,9 +49,21 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    --spacing-y: 0.4em;
 
     :global(.section-content) {
       padding: var(--size-large);
+    }
+    :global(.section-content .form) {
+      --form-field-spacing: var(--size-large);
+    }
+    :global(.section-content h1) {
+      font-size: var(--text-size-base);
+      font-weight: 590;
+      margin: 0;
+    }
+    :global(.section-content .labeled-input .label) {
+      font-weight: 590;
     }
     :global(.collapsible > button.btn) {
       background-color: var(--sand-200);

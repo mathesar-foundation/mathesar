@@ -145,15 +145,3 @@
     </Button>
   </div>
 </Collapsible>
-
-<style lang="scss">
-  .section-content {
-    :global(.form) {
-      --form-field-spacing: var(--size-large);
-
-      :global(label .label) {
-        font-weight: 590;
-      }
-    }
-  }
-</style>
