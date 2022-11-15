@@ -118,17 +118,6 @@
     isSelfReferential,
   );
 
-  /**
-   * `canProceed` has to be placed after `handleChangeThatTable` since
-   * svelte executes reactive calls in specified order at each tick
-   * and we the variables used here like `thisHasManyOfThat` and
-   * `thatHasManyOfThis` are manipulated within `handleChangeThatTable`.
-   */
-  $: canProceed =
-    thatTable &&
-    thisHasManyOfThat !== undefined &&
-    (isSelfReferential || thatHasManyOfThis !== undefined);
-
   function setColumnNames(
     _relationshipType: RelationshipType | undefined,
     _namesOfColumnsInThatTable: Set<string>,
