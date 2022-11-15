@@ -237,9 +237,7 @@
   $: handleTableNameError = (tableName: string) => {
     const sameTableNameExist = [...$tables.data.values()]
       .map((t) => t.name)
-      .findIndex((item) => {
-        return item === tableName;
-      });
+      .findIndex((item) => item === tableName);
     if (sameTableNameExist >= 0) {
       return ['Table names must be unique.'];
     }
@@ -251,17 +249,17 @@
 
   $: handleColumnErrors = (columnName: string, whichTable: string) => {
     if (whichTable === 'this') {
-      const sameNameExist = $columns.findIndex((item: any) => {
-        return item.name === columnName;
-      });
+      const sameNameExist = $columns.findIndex(
+        (item) => item.name === columnName,
+      );
 
       if (sameNameExist >= 0) return ['Column name must be unique.'];
     }
 
     if (whichTable === 'that' && $thatTableColumns !== undefined) {
-      const sameNameExist = $thatTableColumns.findIndex((item: any) => {
-        return item.name === columnName;
-      });
+      const sameNameExist = $thatTableColumns.findIndex(
+        (item) => item.name === columnName,
+      );
 
       if (sameNameExist >= 0) return ['Column name must be unique.'];
     }
@@ -284,8 +282,9 @@
         mappingTableName.length === 0 ||
         mappingToThisColumnName.length === 0 ||
         mappingToThatColumnName.length === 0
-      )
+      ) {
         return false;
+      }
     }
 
     if (!isSelfReferential && thisHasManyOfThat && !thatHasManyOfThis) {
@@ -309,8 +308,9 @@
         mappingTableName.length === 0 ||
         mappingToThisColumnName.length === 0 ||
         mappingToThatColumnName.length === 0
-      )
+      ) {
         return false;
+      }
     }
 
     // return true if all currently shown field are filled
