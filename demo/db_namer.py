@@ -48,7 +48,14 @@ ADJECTIVES = [
 MODULUS = len(ADJECTIVES)
 
 
-def get_name(session_id, chunk=16, join_val='_', adjectives=None, modulus=None):
+def get_name(
+        session_id,
+        chunk=8,
+        max_words=3,
+        join_val='_',
+        adjectives=None,
+        modulus=None
+):
     """
     Deterministically generate a name of the form adj1_adj2_adj3_mathesar.
 
@@ -62,12 +69,14 @@ def get_name(session_id, chunk=16, join_val='_', adjectives=None, modulus=None):
     index in the given `adjectives` list, and join them with a terminal
     string 'mathesar' using the given `join_val`.
     """
+    session_id = session_id or 'DEFAULT'
     adjectives = adjectives or ADJECTIVES
     modulus = modulus or MODULUS
     session_hex = bytes(session_id, 'utf-8').hex()
+    upper_limit = min(len(session_hex), chunk * max_words)
     indices = (
         int(session_hex[i:i + chunk], 16) % modulus
-        for i in range(0, len(session_hex), chunk)
+        for i in range(0, upper_limit, chunk)
     )
 
     def get_word():
