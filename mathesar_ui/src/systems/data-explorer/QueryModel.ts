@@ -244,4 +244,11 @@ export default class QueryModel {
   isSaved(): boolean {
     return !!this.id;
   }
+
+  hasSummarizationTransform(): boolean {
+    return this.transformationModels.some(
+      (transform): transform is QuerySummarizationTransformationModel =>
+        transform instanceof QuerySummarizationTransformationModel,
+    );
+  }
 }

@@ -42,7 +42,9 @@
       let:activeTab
     >
       {#if inputColumnsFetchState?.state === 'processing'}
-        <Spinner />
+        <div class="loading-state">
+          <Spinner />
+        </div>
       {:else if inputColumnsFetchState?.state === 'success'}
         {#if activeTab.id === 'column-selection'}
           <div class="help-text">
@@ -55,13 +57,11 @@
             on:add={(e) => addColumn(e.detail)}
           />
         {:else}
-          {#if $query.transformationModels.length === 0}
-            <div class="help-text">
-              Transformations can be used to summarize data, filter data, and
-              more. Note that transformations are applied in the order they are
-              listed.
-            </div>
-          {/if}
+          <div class="help-text">
+            Transformations can be used to summarize data, filter data, and
+            more. Note that transformations are applied in the order they are
+            listed.
+          </div>
           <TransformationsPane {queryManager} />
         {/if}
       {:else if inputColumnsFetchState?.state === 'failure'}
@@ -93,6 +93,10 @@
       overflow: hidden;
       position: relative;
       background-color: var(--sand-100);
+
+      .loading-state {
+        padding: var(--size-large);
+      }
 
       .help-text {
         padding: var(--size-large);
