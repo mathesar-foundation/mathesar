@@ -19,10 +19,8 @@
   export let activeTab: Tab = tabs[0];
   export let idKey = 'id';
   export let labelKey = 'label';
-  export let linkKey = 'href';
   export let allowRemoval = false;
   export let preventDefault = false;
-  export let getLink: (arg0: unknown) => string;
 
   function selectActiveTab(e: Event, tab: Tab) {
     activeTab = tab;
@@ -69,11 +67,6 @@
       (tab as HTMLElement)?.focus?.();
     }
   }
-
-  function getTabURL(tab: Tab): string {
-    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-    return getLink ? getLink(tab) : (tab[linkKey] as string) ?? undefined;
-  }
 </script>
 
 <div class="tab-container" role="navigation">
@@ -83,8 +76,6 @@
         {componentId}
         {tab}
         {allowRemoval}
-        totalTabs={tabs.length}
-        {getTabURL}
         isActive={tab[idKey] === activeTab[idKey]}
         on:focus={focusTab}
         on:blur={blurTab}

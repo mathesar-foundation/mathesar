@@ -6,4 +6,6 @@
   export let table: Pick<TableEntry, 'name'>;
 </script>
 
-<NameWithIcon icon={iconTable}>{table.name}</NameWithIcon>
+<NameWithIcon icon={iconTable}>
+  <span title={table.name}>{table.name}</span>
+</NameWithIcon>

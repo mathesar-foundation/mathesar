@@ -17,7 +17,6 @@ import {
   faEnvelope,
   faExternalLinkAlt,
   faFileAlt,
-  faFileContract,
   faFilter,
   faGlobe,
   faHammer,
@@ -49,6 +48,7 @@ import {
   faUpload,
   faUser,
   faSave,
+  faCrosshairs,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
@@ -104,7 +104,7 @@ export const iconConstraintUnique: IconProps = { data: faSnowflake };
 export const iconDatabase: IconProps = { data: faDatabase };
 export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
-export const iconExploration: IconProps = { data: faFileContract };
+export const iconExploration: IconProps = { data: faCrosshairs };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faThList };
 export const iconInwardLink: IconProps = { data: faArrowRight };
