@@ -12,6 +12,11 @@ services:
       - "5432:5432"
     volumes:
       - ./.volumes:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   service:
     build:
       context: .
@@ -24,7 +29,7 @@ services:
       - XAUTHORITY=/.Xauthority
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings}
-    command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./run.sh
+    command: ./run.sh
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/.Xauthority
@@ -35,7 +40,8 @@ services:
       - "3000:3000"
       - "6006:6006"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   ui_node_modules:
