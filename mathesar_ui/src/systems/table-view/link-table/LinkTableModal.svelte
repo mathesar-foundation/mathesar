@@ -246,79 +246,87 @@
   };
 
   $: handleTableNameError = (tableName: string) => {
-    const sameTableNameExist  = [...$tables.data.values()].map((t) => t.name).findIndex(item =>{
-      return item === tableName;
-    })
-    if(sameTableNameExist >= 0) {
-      return ["Table names must be unique!"];
+    const sameTableNameExist = [...$tables.data.values()]
+      .map((t) => t.name)
+      .findIndex((item) => {
+        return item === tableName;
+      });
+    if (sameTableNameExist >= 0) {
+      return ['Table names must be unique!'];
     }
-    if(tableName.length === 0) {
-      return ["The Field cannot be empty!"]
+    if (tableName.length === 0) {
+      return ['The Field cannot be empty!'];
     }
     return [];
-  }
+  };
 
   $: handleColumnErrors = (columnName: string, whichTable: string) => {
-    if(whichTable === "this") {
+    if (whichTable === 'this') {
       const sameNameExist = $columns.findIndex((item: any) => {
-        return item.name === columnName
-      })
+        return item.name === columnName;
+      });
 
-      if(sameNameExist >= 0) return ["Column name must be unique!"]
-    } 
-
-    if(whichTable === "that" && $thatTableColumns !== undefined){
-      const sameNameExist = $thatTableColumns.findIndex((item: any) => {
-        return item.name === columnName
-      })
-
-      if(sameNameExist >= 0) return ["Column name must be unique!"];
+      if (sameNameExist >= 0) return ['Column name must be unique!'];
     }
 
-    if(columnName.length === 0) return ["The Field cannot be empty!"];
-     
-    return []
-  }
+    if (whichTable === 'that' && $thatTableColumns !== undefined) {
+      const sameNameExist = $thatTableColumns.findIndex((item: any) => {
+        return item.name === columnName;
+      });
+
+      if (sameNameExist >= 0) return ['Column name must be unique!'];
+    }
+
+    if (columnName.length === 0) return ['The Field cannot be empty!'];
+
+    return [];
+  };
 
   $: areFieldsFilled = () => {
     // check if table is chosen
-    if(thatTable === undefined) return false;
+    if (thatTable === undefined) return false;
     // check if checkboxes are filled
-    if(thisHasManyOfThat === undefined) return false;
-    if(!isSelfReferential && thatHasManyOfThis === undefined) return false;
+    if (thisHasManyOfThat === undefined) return false;
+    if (!isSelfReferential && thatHasManyOfThis === undefined) return false;
 
     // check if currently shown fields are empty
-    if(!isSelfReferential && thisHasManyOfThat && thatHasManyOfThis) {
-      if (  (mappingTableName.length === 0) 
-        ||  (mappingToThisColumnName.length === 0) 
-        ||  (mappingToThatColumnName.length === 0)) return false;
+    if (!isSelfReferential && thisHasManyOfThat && thatHasManyOfThis) {
+      if (
+        mappingTableName.length === 0 ||
+        mappingToThisColumnName.length === 0 ||
+        mappingToThatColumnName.length === 0
+      )
+        return false;
     }
 
-    if(!isSelfReferential && thisHasManyOfThat && !thatHasManyOfThis){
+    if (!isSelfReferential && thisHasManyOfThat && !thatHasManyOfThis) {
       if (thatNewColumnName.length === 0) return false;
     }
 
-    if(!isSelfReferential && !thisHasManyOfThat && thatHasManyOfThis){
+    if (!isSelfReferential && !thisHasManyOfThat && thatHasManyOfThis) {
       if (thisNewColumnName.length === 0) return false;
     }
 
-    if(!isSelfReferential && !thisHasManyOfThat && !thatHasManyOfThis) {
+    if (!isSelfReferential && !thisHasManyOfThat && !thatHasManyOfThis) {
       if (thisNewColumnName.length === 0) return false;
     }
 
-    if(isSelfReferential && !thisHasManyOfThat){
+    if (isSelfReferential && !thisHasManyOfThat) {
       if (thisNewColumnName.length === 0) return false;
     }
 
-    if(isSelfReferential && thisHasManyOfThat) {
-      if (  (mappingTableName.length === 0)
-        ||  (mappingToThisColumnName.length === 0)
-        ||  (mappingToThatColumnName.length === 0)) return false;
+    if (isSelfReferential && thisHasManyOfThat) {
+      if (
+        mappingTableName.length === 0 ||
+        mappingToThisColumnName.length === 0 ||
+        mappingToThatColumnName.length === 0
+      )
+        return false;
     }
-    
+
     // return true if all currently shown field are filled
     return true;
-  }
+  };
 </script>
 
 <ControlledModal {controller} on:open={init} size="large">
@@ -412,33 +420,37 @@
                 </LabeledInput>
               </FormField>
               {#if mappingTableName.length > 0}
-              <FormField errors={handleColumnErrors(mappingToThisColumnName, "this")}>
-                <LabeledInput layout="stacked">
-                  <div slot="label">
-                    Each
-                    <TableName name={mappingTableName} which="mapping" />
-                    record will reference one
-                    <TableName name={thisTable?.name} which="this" />
-                    record using a column named:
-                  </div>
-                  <TextInput bind:value={mappingToThisColumnName} />
-                </LabeledInput>
-              </FormField>
-              <FormField errors={handleColumnErrors(mappingToThatColumnName, "that")}>
-                <LabeledInput layout="stacked">
-                  <div slot="label">
-                    Each
-                    <TableName name={mappingTableName} which="mapping" />
-                    record will reference one
-                    <TableName name={thatTable?.name} which="that" />
-                    record using a column named:
-                  </div>
-                  <TextInput bind:value={mappingToThatColumnName} />
-                </LabeledInput>
-              </FormField>
+                <FormField
+                  errors={handleColumnErrors(mappingToThisColumnName, 'this')}
+                >
+                  <LabeledInput layout="stacked">
+                    <div slot="label">
+                      Each
+                      <TableName name={mappingTableName} which="mapping" />
+                      record will reference one
+                      <TableName name={thisTable?.name} which="this" />
+                      record using a column named:
+                    </div>
+                    <TextInput bind:value={mappingToThisColumnName} />
+                  </LabeledInput>
+                </FormField>
+                <FormField
+                  errors={handleColumnErrors(mappingToThatColumnName, 'that')}
+                >
+                  <LabeledInput layout="stacked">
+                    <div slot="label">
+                      Each
+                      <TableName name={mappingTableName} which="mapping" />
+                      record will reference one
+                      <TableName name={thatTable?.name} which="that" />
+                      record using a column named:
+                    </div>
+                    <TextInput bind:value={mappingToThatColumnName} />
+                  </LabeledInput>
+                </FormField>
               {/if}
             {:else if relationshipType === 'one-to-many'}
-              <FormField errors={handleColumnErrors(thatNewColumnName, "that")}>
+              <FormField errors={handleColumnErrors(thatNewColumnName, 'that')}>
                 <LabeledInput layout="stacked">
                   <div slot="label">
                     The
@@ -456,7 +468,7 @@
                 record.
               </FormField>
             {:else if relationshipType === 'many-to-one'}
-              <FormField errors={handleColumnErrors(thisNewColumnName, "this")}>
+              <FormField errors={handleColumnErrors(thisNewColumnName, 'this')}>
                 <LabeledInput layout="stacked">
                   <div slot="label">
                     The
@@ -474,7 +486,7 @@
                 record.
               </FormField>
             {:else if relationshipType === 'one-to-one'}
-              <FormField errors={handleColumnErrors(thisNewColumnName, "this")}>
+              <FormField errors={handleColumnErrors(thisNewColumnName, 'this')}>
                 <LabeledInput layout="stacked">
                   <div slot="label">
                     The
