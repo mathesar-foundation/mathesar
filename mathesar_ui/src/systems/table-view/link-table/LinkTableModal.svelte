@@ -252,10 +252,10 @@
         return item === tableName;
       });
     if (sameTableNameExist >= 0) {
-      return ['Table names must be unique!'];
+      return ['Table names must be unique.'];
     }
     if (tableName.length === 0) {
-      return ['The Field cannot be empty!'];
+      return ['The Field cannot be empty.'];
     }
     return [];
   };
@@ -266,7 +266,7 @@
         return item.name === columnName;
       });
 
-      if (sameNameExist >= 0) return ['Column name must be unique!'];
+      if (sameNameExist >= 0) return ['Column name must be unique.'];
     }
 
     if (whichTable === 'that' && $thatTableColumns !== undefined) {
@@ -274,10 +274,10 @@
         return item.name === columnName;
       });
 
-      if (sameNameExist >= 0) return ['Column name must be unique!'];
+      if (sameNameExist >= 0) return ['Column name must be unique.'];
     }
 
-    if (columnName.length === 0) return ['The Field cannot be empty!'];
+    if (columnName.length === 0) return ['The Field cannot be empty.'];
 
     return [];
   };
