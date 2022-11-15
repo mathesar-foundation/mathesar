@@ -1,161 +1,45 @@
 <script lang="ts">
-  import {
-    Icon,
-    InputGroup,
-    Button,
-    SpinnerButton,
-  } from '@mathesar-component-library';
-  import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
-  import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
-  import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
-  import TableName from '@mathesar/components/TableName.svelte';
-  import { tables as tablesDataStore } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/tables';
-  import { queries } from '@mathesar/stores/queries';
-  import { iconRedo, iconUndo, iconInspector } from '@mathesar/icons';
-  import { modal } from '@mathesar/stores/modal';
-  import { toast } from '@mathesar/stores/toast';
+  import { iconExploration } from '@mathesar/icons';
+  import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import type QueryManager from './QueryManager';
   import InputSidebar from './input-sidebar/InputSidebar.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import ExplorationInspector from './exploration-inspector/ExplorationInspector.svelte';
   import type { ColumnWithLink } from './utils';
-
-  const saveModalController = modal.spawnModalController();
+  import ActionsPane from './ActionsPane.svelte';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
 
-  $: ({ query, state } = queryManager);
-
-  $: currentTable = $query.base_table
-    ? $tablesDataStore.data.get($query.base_table)
-    : undefined;
-  $: isSaved = $query.isSaved();
+  $: ({ query } = queryManager);
   $: hasNoColumns = $query.initial_columns.length === 0;
 
   let isInspectorOpen = true;
-
-  function updateBaseTable(tableEntry: TableEntry | undefined) {
-    void queryManager.update((q) =>
-      q.withBaseTable(tableEntry ? tableEntry.id : undefined),
-    );
-    queryManager.clearSelectedColumn();
-    linkCollapsibleOpenState = {};
-  }
-
-  function getNameValidationErrors(name: string) {
-    const trimmedName = name.trim();
-    if (!trimmedName) {
-      return ['Name cannot be empty.'];
-    }
-    const isDuplicate = Array.from($queries.data ?? []).some(
-      ([, s]) => s.name.toLowerCase().trim() === trimmedName,
-    );
-    if (isDuplicate) {
-      return ['An exploration with that name already exists.'];
-    }
-    return [];
-  }
-
-  async function save() {
-    try {
-      await queryManager.save();
-    } catch (err) {
-      toast.fromError(err);
-    }
-  }
-
-  // TODO: Handle description
-  async function create(name: string) {
-    try {
-      await queryManager.update((q) => q.withName(name));
-      await save();
-    } catch (err) {
-      toast.fromError(err);
-    }
-  }
-
-  async function saveExistingOrCreateNew() {
-    if ($query.isSaved()) {
-      await save();
-    } else {
-      saveModalController.open();
-    }
-  }
 </script>
 
 <div class="data-explorer">
-  <div class="header">
-    <div class="title-wrapper">
-      <div class="title">
-        {isSaved ? 'Based on' : 'Exploring from'}
-      </div>
-      <div class="base-table-holder" class:table-selected={currentTable}>
-        {#if currentTable}
-          <TableName table={currentTable} />
-        {:else}
-          <SelectTableWithinCurrentSchema
-            autoSelect="none"
-            table={currentTable}
-            on:change={(e) => updateBaseTable(e.detail)}
-          />
-        {/if}
-      </div>
+  {#if $query.isSaved()}
+    <EntityPageHeader
+      icon={iconExploration}
+      name={$query.name ?? ''}
+      description={$query.description}
+    >
+      <ActionsPane
+        {queryManager}
+        bind:linkCollapsibleOpenState
+        bind:isInspectorOpen
+      />
+    </EntityPageHeader>
+  {:else}
+    <div class="header">
+      <ActionsPane
+        {queryManager}
+        bind:linkCollapsibleOpenState
+        bind:isInspectorOpen
+      />
     </div>
-
-    {#if !isSaved && currentTable}
-      <Button
-        appearance="secondary"
-        on:click={() => updateBaseTable(undefined)}
-      >
-        Start Over
-      </Button>
-    {/if}
-
-    <div class="actions">
-      {#if $query.isSaved()}
-        <SaveStatusIndicator status={$state.saveState?.state} />
-      {/if}
-      {#if currentTable}
-        <!-- TODO: Change disabled condition to is_valid(query) -->
-        <SpinnerButton
-          label="Save"
-          disabled={!$query.base_table}
-          onClick={saveExistingOrCreateNew}
-        />
-        <InputGroup>
-          <Button
-            appearance="secondary"
-            disabled={!$state.isUndoPossible}
-            on:click={() => queryManager.undo()}
-          >
-            <Icon {...iconUndo} />
-            <span>Undo</span>
-          </Button>
-          <Button
-            appearance="secondary"
-            disabled={!$state.isRedoPossible}
-            on:click={() => queryManager.redo()}
-          >
-            <Icon {...iconRedo} />
-            <span>Redo</span>
-          </Button>
-        </InputGroup>
-        <Button
-          appearance="secondary"
-          disabled={hasNoColumns}
-          on:click={() => {
-            isInspectorOpen = !isInspectorOpen;
-          }}
-        >
-          <Icon {...iconInspector} />
-          <span>Inspector</span>
-        </Button>
-      {/if}
-    </div>
-  </div>
+  {/if}
   <div class="content-pane">
     {#if !$query.base_table}
       <div class="help-text">
@@ -175,16 +59,6 @@
   </div>
 </div>
 
-<NameAndDescInputModalForm
-  controller={saveModalController}
-  save={create}
-  {getNameValidationErrors}
-  getInitialName={() => $query.name ?? ''}
-  getInitialDescription={() => ''}
->
-  <span slot="title"> Save Exploration </span>
-</NameAndDescInputModalForm>
-
 <style lang="scss">
   .data-explorer {
     display: grid;
@@ -192,51 +66,11 @@
     height: 100%;
 
     .header {
-      display: flex;
-      align-items: center;
-      height: var(--table-title-header-height);
       border-bottom: 1px solid var(--slate-300);
       position: relative;
-      overflow: hidden;
-
-      .title-wrapper {
-        display: flex;
-        align-items: center;
-        overflow: hidden;
-        padding: 1rem;
-        font-size: var(--text-size-large);
-
-        .base-table-holder {
-          flex-grow: 0;
-          flex-shrink: 0;
-          margin-left: 0.7rem;
-
-          &.table-selected {
-            font-weight: 590;
-          }
-
-          > :global(.select) {
-            min-width: 12rem;
-            font-size: var(--text-size-base);
-          }
-        }
-      }
-
-      .actions {
-        flex-shrink: 0;
-        padding: 0.5rem;
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        :global(button) {
-          flex-shrink: 0;
-        }
-        :global(button .fa-icon) {
-          padding-right: 0.25rem;
-        }
-      }
+      padding: 0 var(--size-large);
     }
+
     .content-pane {
       display: flex;
       overflow: hidden;

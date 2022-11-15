@@ -2,7 +2,7 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { Button, Icon } from '@mathesar-component-library';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
-  import { iconEdit, iconExploration, iconInspector } from '@mathesar/icons';
+  import { iconExploration, iconInspector } from '@mathesar/icons';
   import type { QueryInstance } from '@mathesar/api/queries';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
 
@@ -20,7 +20,6 @@
   <svelte:fragment slot="actions-right">
     <a href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}>
       <Button appearance="primary">
-        <Icon {...iconEdit} />
         <span>Edit in Data Explorer</span>
       </Button>
     </a>
@@ -38,7 +37,7 @@
 
 <style lang="scss">
   a {
-    margin-right: var(--size-ultra-small);
+    margin-right: var(--size-small);
     text-decoration: none;
   }
 </style>

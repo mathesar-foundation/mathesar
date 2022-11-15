@@ -20,7 +20,7 @@
       {/if}
     </div>
   </div>
-  <div class="actions">
+  <div class="actions" class:has-right-actions={$$slots['actions-right']}>
     {#if $$slots.default}
       <div class="actions-left">
         <slot />
@@ -47,7 +47,8 @@
       border-right: 1px solid var(--slate-200);
       padding: var(--size-small) var(--size-large);
       align-items: center;
-      width: 20rem;
+      min-width: 20rem;
+      max-width: 30rem;
       flex-grow: 0;
       flex-shrink: 0;
 
@@ -59,6 +60,7 @@
       .title {
         display: flex;
         flex-direction: column;
+        overflow: hidden;
 
         h1 {
           font-size: var(--text-size-large);
@@ -67,6 +69,12 @@
         }
         span {
           color: var(--slate-400);
+        }
+        h1,
+        span {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       }
     }
@@ -77,8 +85,19 @@
       align-items: center;
       flex-grow: 1;
 
+      .actions-left {
+        display: flex;
+      }
+
+      &:not(.has-right-actions) {
+        .actions-left {
+          flex-grow: 1;
+        }
+      }
+
       .actions-right {
         margin-left: auto;
+        display: flex;
       }
     }
   }
