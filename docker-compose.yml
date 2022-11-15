@@ -18,6 +18,9 @@ services:
       timeout: 5s
       retries: 5
   service:
+    depends_on:
+      db:
+        condition: service_healthy
     build:
       context: .
       dockerfile: ${DOCKERFILE}
@@ -39,9 +42,5 @@ services:
       - "8000:8000"
       - "3000:3000"
       - "6006:6006"
-    depends_on:
-      db:
-        condition: service_healthy
-
 volumes:
   ui_node_modules:
