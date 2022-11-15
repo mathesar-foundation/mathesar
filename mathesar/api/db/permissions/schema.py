@@ -13,9 +13,9 @@ class SchemaAccessPolicy(AccessPolicy):
 
             if request.method.lower() == 'get':
                 allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
-            permissible_databaserole_filter = (
+            permissible_database_role_filter = (
                 Q(database__databaserole__role__in=allowed_roles) & Q(database__databaserole__user=request.user)
             )
-            permissible_schemaroles_filter = (Q(schemarole__role__in=allowed_roles) & Q(schemarole__user=request.user))
-            qs = qs.filter(permissible_databaserole_filter | permissible_schemaroles_filter)
+            permissible_schema_roles_filter = (Q(schemarole__role__in=allowed_roles) & Q(schemarole__user=request.user))
+            qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
         return qs
