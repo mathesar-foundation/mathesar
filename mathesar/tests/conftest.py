@@ -87,7 +87,8 @@ def create_dj_db(request):
     def _create_and_add(db_name):
         create_db(db_name)
         add_db_to_dj_settings(db_name)
-        return db_name
+        database_model = Database.current_objects.create(name=db_name)
+        return database_model
     yield _create_and_add
 
 

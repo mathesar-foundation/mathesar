@@ -48,6 +48,10 @@
     cursor: pointer;
     color: var(--slate-800);
 
+    &.menu-item-link {
+      text-decoration: none;
+    }
+
     &.danger {
       color: var(--red-500);
     }

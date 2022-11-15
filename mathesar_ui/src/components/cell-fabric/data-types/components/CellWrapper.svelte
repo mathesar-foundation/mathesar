@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { tick } from 'svelte';
   import type { HorizontalAlignment } from './typeDefinitions';
@@ -10,6 +11,8 @@
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
   export let hasPadding = true;
+  export let valueComparisonOutcome: ValueComparisonOutcome | undefined =
+    undefined;
 
   /**
    * This only affects the alignment of the displayed value while in
@@ -40,6 +43,9 @@
   class:truncate={multiLineTruncate}
   class:h-align-right={horizontalAlignment === 'right'}
   class:has-padding={hasPadding}
+  class:exact-match={valueComparisonOutcome === 'exactMatch'}
+  class:substring-match={valueComparisonOutcome === 'substringMatch'}
+  class:no-match={valueComparisonOutcome === 'noMatch'}
   bind:this={element}
   on:click
   on:dblclick
@@ -49,10 +55,17 @@
   tabindex={-1}
   {...$$restProps}
 >
-  <CellBackground
-    color="rgba(14, 101, 235, 0.1)"
-    when={isSelectedInRange && mode !== 'edit'}
-  />
+  {#if mode !== 'edit'}
+    <CellBackground color="rgba(14, 101, 235, 0.1)" when={isSelectedInRange} />
+    <CellBackground
+      color="var(--match-color)"
+      when={valueComparisonOutcome === 'exactMatch'}
+    />
+    <CellBackground
+      color="var(--match-color-light)"
+      when={valueComparisonOutcome === 'substringMatch'}
+    />
+  {/if}
   <slot />
 </div>
 
@@ -62,6 +75,11 @@
     overflow: hidden;
     position: relative;
     min-height: var(--cell-height);
+    display: flex;
+    flex-direction: column;
+    --match-color: rgba(36, 192, 54, 0.4);
+    --match-color-light: rgba(36, 192, 54, 0.1);
+    --match-background-color: var(--match-color);
 
     &.has-padding {
       padding: var(--cell-padding);
@@ -96,5 +114,11 @@
         min-height: 5em;
       }
     }
+  }
+  .exact-match {
+    --match-background-color: transparent;
+  }
+  .no-match {
+    text-decoration: line-through;
   }
 </style>
