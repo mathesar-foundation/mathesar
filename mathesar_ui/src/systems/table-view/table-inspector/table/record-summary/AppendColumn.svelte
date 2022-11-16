@@ -13,7 +13,7 @@
   }
 </script>
 
-<DropdownMenu label="Insert Column" icon={iconAddNew}>
+<DropdownMenu label="Append Column" icon={iconAddNew}>
   {#each columns as column}
     <ButtonMenuItem
       label={column.name}

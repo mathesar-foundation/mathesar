@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-
+  import { Alert, RadioGroup } from '@mathesar-component-library';
   import {
-    Alert,
-    CancelOrProceedButtonPair,
-    FormattedInput,
-    RadioGroup,
-  } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/tables/columns';
+    makeForm,
+    requiredField,
+    optionalField,
+    FormSubmit,
+  } from '@mathesar/components/form';
+  import Field from '@mathesar/components/form/Field.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import {
@@ -16,50 +15,38 @@
   } from '@mathesar/stores/table-data';
   import { renderRecordSummaryForRow } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { currentTable } from '@mathesar/stores/tables';
-  import InsertColumn from './InsertColumn.svelte';
+  import TemplateInput from './TemplateInput.svelte';
   import {
     columnIsConformant,
     getColumnsInTemplate,
+    hasColumnReferences,
   } from './recordSummaryTemplateUtils';
-  import TemplateInputFormatter from './TemplateInputFormatter';
 
-  type TemplateType = 'Default' | 'Custom';
-  const templateTypes: TemplateType[] = ['Default', 'Custom'];
   const tabularData = getTabularDataStoreFromContext();
-
-  let templateType: TemplateType = 'Default';
-  let template = '';
 
   $: ({ recordsData, columnsDataStore } = $tabularData);
   $: ({ columns } = columnsDataStore);
   $: ({ savedRecords } = recordsData);
   $: firstRow = $savedRecords[0] as RecordRow | undefined;
   $: table = $currentTable;
-  $: formatter = new TemplateInputFormatter($columns);
-  $: columnsInTemplate =
-    templateType === 'Default'
-      ? []
-      : getColumnsInTemplate({ columns: $columns, template });
+  $: initialCustomized = table?.settings.preview_settings.customized ?? false;
+  $: initialTemplate = table?.settings.preview_settings.template ?? '';
+  $: customized = requiredField(initialCustomized);
+  $: template = optionalField(initialTemplate, [hasColumnReferences($columns)]);
+  $: form = makeForm({ customized, template });
+  $: columnsInTemplate = $customized
+    ? getColumnsInTemplate({ columns: $columns, template: $template })
+    : [];
   $: nonconformantColumns = columnsInTemplate.filter(
     (column) => !columnIsConformant(column),
   );
-
-  function init() {
-    template = table ? table.settings.preview_settings.template : '';
-  }
-  onMount(init);
-  $: table, init();
   $: previewRecordSummary = (() => {
     if (!table || !firstRow) {
       return undefined;
     }
     const { record } = firstRow;
-    return renderRecordSummaryForRow({ template, record });
+    return renderRecordSummaryForRow({ template: $template, record });
   })();
-
-  function insertColumn(column: Column) {
-    template = `${template}{${column.id}}`;
-  }
 
   async function save() {
     // TODO
@@ -73,11 +60,18 @@
 {/if}
 
 <div>Template</div>
-<RadioGroup options={templateTypes} isInline bind:value={templateType} />
+<RadioGroup
+  options={[false, true]}
+  getRadioLabel={(v) => (v ? 'Custom' : 'Default')}
+  isInline
+  bind:value={$customized}
+/>
 
-{#if templateType === 'Custom'}
-  <InsertColumn columns={$columns} onSelect={insertColumn} />
-  <FormattedInput {formatter} bind:value={template} />
+{#if $customized}
+  <Field
+    field={template}
+    input={{ component: TemplateInput, props: { columns: $columns } }}
+  />
 {/if}
 
 {#if nonconformantColumns.length}
@@ -99,10 +93,12 @@
   </Alert>
 {/if}
 
-<CancelOrProceedButtonPair
+<FormSubmit
+  {form}
   onProceed={save}
-  onCancel={init}
+  onCancel={form.reset}
   proceedButton={{ label: 'Save' }}
+  initiallyHidden
 />
 
 <style>
