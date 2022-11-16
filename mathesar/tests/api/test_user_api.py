@@ -227,11 +227,11 @@ def test_schema_role_list(client, user_bob):
     assert role_data['schema'] == schema.id
 
 
-def test_schema_role_list_database_viewer(client, user_bob):
+def test_schema_role_list_database_viewer(client, user_bob, user_alice):
     role = 'viewer'
     schema = Schema.objects.all()[0]
     DatabaseRole.objects.create(user=user_bob, database=schema.database, role=role)
-
+    SchemaRole.objects.create(user=user_alice, schema=schema, role='editor')
     response = client.get('/api/ui/v0/schema_roles/')
     response_data = response.json()
 
