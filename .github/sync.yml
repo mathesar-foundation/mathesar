@@ -48,6 +48,16 @@ centerofci/mathesar-scripts:
   - .github/workflows/update-project-on-issue-label.yml
   - .github/workflows/update-project-on-pr-edit.yml
   - .github/workflows/update-project-on-pr-label.yml
+centerofci/mathesar-website:
+  - .github/actions/project_update/
+  - .github/workflows/add-to-project.yml
+  - .github/workflows/toc.yml
+  - .github/workflows/stale.yml
+  - .github/workflows/update-project-on-issue-close.yml
+  - .github/workflows/update-project-on-issue-edit.yml
+  - .github/workflows/update-project-on-issue-label.yml
+  - .github/workflows/update-project-on-pr-edit.yml
+  - .github/workflows/update-project-on-pr-label.yml
 centerofci/mathesar-wiki:
   - .github/actions/project_update/
   - .github/workflows/add-to-project.yml

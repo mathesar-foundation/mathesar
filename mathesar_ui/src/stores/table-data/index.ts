@@ -28,6 +28,7 @@ export {
   type PlaceholderRow,
   type RecordGroup,
   type RecordGrouping,
+  type TableRecordsData,
 } from './records';
 export {
   getCellKey,
