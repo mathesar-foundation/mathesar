@@ -1,7 +1,7 @@
-from db.transforms.base import PossiblyPartialTransform
+from db.transforms.base import Summarize
 
 
-def get_processed_transformations(db_query):
+def get_transforms_with_summarizes_speced(db_query):
     """
     Processes db_query's transformations and returns them. Resulting sequence is the db_query's
     transform sequence, but each possibly partial transform is replaced with a transform that's the
@@ -9,16 +9,16 @@ def get_processed_transformations(db_query):
 
     See PossiblyPartialTransform for more information.
     """
+    def _map(db_query, ix, db_transformation):
+        if isinstance(db_transformation, Summarize):
+            # TODO call finish_specifying_summarize_transform, once the other PR is merged in
+            return db_transformation
+        return db_transformation
     return tuple(
-        _get_processed_transformation(db_query, ix, db_transformation)
+        _map(db_query, ix, db_transformation)
+        #_get_processed_transformation(db_query, ix, db_transformation)
         for ix, db_transformation
         in enumerate(db_query.transformations)
     )
 
 
-def _get_processed_transformation(db_query, ix, db_transformation):
-    if isinstance(db_transformation, PossiblyPartialTransform):
-        db_transformation = db_transformation.get_processed(
-            db_query, ix_in_transform_pipeline=ix
-        )
-    return db_transformation

@@ -49,28 +49,6 @@ class Transform(ABC):
         return dict()
 
 
-class PossiblyPartialTransform(Transform):
-    """
-    A transform that may be partially specified. It is expected that, before we apply it to a
-    relation, we'll pass it through our processing routines, which will always produce a fully
-    specified transform. It's a way to allow transformations that are not fully specified and
-    need to be processed (have their spec rewritten) before they can be applied to a relation.
-    """
-
-    @abstractmethod
-    def get_processed(self, db_query, ix_in_transform_pipeline):  # noqa: F841
-        """
-        Processes this transform into a new transform, possibly of a different type, and returns
-        the new transform. Parametrized by the db_query that has this transform in its transform
-        pipeline and the index of this transform in that pipeline.
-
-        The index parameter is necessary, because a transform might require different
-        processing depending on its position in the pipeline, and we can't distinguish between
-        identical transforms in different pipeline positions via equality checks.
-        """
-        pass
-
-
 class Filter(Transform):
     type = "filter"
 

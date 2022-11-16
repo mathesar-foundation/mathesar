@@ -3,7 +3,7 @@ from django.db import models
 from mathesar.state.cached_property import cached_property
 
 from db.queries.base import DBQuery, InitialColumn
-from db.queries.operations.process import get_processed_transformations
+from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.transforms.operations.deserialize import deserialize_transformation
 from db.transforms.operations.serialize import serialize_transformation
 
@@ -262,10 +262,10 @@ class UIQuery(BaseModel, Relation):
 
         Whereas before the transformations attribute was a one-way flow from the client,
         now it's something that the backend may redefine. This a significant complication of the
-        data flow. For example, if you replace transformations on a UIQuery and save it, we must
-        trigger a reflection, which can have a performance impact. Also, frontend must expect that
-        certain transformations might alter the transformation pipeline, which would then need
-        reflecting by frontend; that might be a breaking change.
+        data flow. For example, if you replace transformations on a saved UIQuery and save it
+        again, we must trigger a reflection, which can have a performance impact. Also, frontend
+        must expect that certain transformations might alter the transformation pipeline, which
+        would then need reflecting by frontend; that might be a breaking change.
 
         Note, currently we only need transformation processing when using the `query/run`
         endpoint, which means that we don't need to update any persisted queries, which means that
@@ -284,15 +284,18 @@ class UIQuery(BaseModel, Relation):
     @property
     def _processed_db_transformations(self):
         """
-        Note, different from _db_transformations, because this can effectively rewrite
-        transformation specs. And we might not want to do that every time db_transformations are
-        accessed, due to possible performance costs.
+        Currently, the only transformation processing we're doing is finishing (when partial) the
+        specification of Summarize transforms.
+
+        Note, different from _db_transformations, because this can effectively rewrite the
+        transformations pipeline. And we might not want to do that every time db_transformations
+        is accessed, due to possible performance costs.
 
         If it weren't for performance costs, we might consider replacing _db_transformations with
         this: the effect would be that a persisted query could have different summarizations in
         django database than what is being evaluated in Postgres.
         """
-        return get_processed_transformations(self.db_query)
+        return get_transforms_with_summarizes_speced(self.db_query)
 
     @property
     def db_query(self):
