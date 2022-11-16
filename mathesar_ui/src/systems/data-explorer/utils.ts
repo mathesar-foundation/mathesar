@@ -2,7 +2,10 @@ import { ImmutableMap } from '@mathesar-component-library';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import type {
   QueryResultColumn,
+  QueryColumnMetaData,
   QueryRunResponse,
+  QueryInitialColumnSource,
+  QueryGeneratedColumnSource,
 } from '@mathesar/api/queries';
 import {
   getAbstractTypeForDbType,
@@ -27,23 +30,19 @@ import type {
 import type { Column } from '@mathesar/api/tables/columns';
 import type QueryModel from './QueryModel';
 
-export type ColumnOperationalState =
-  | {
-      state: 'processing';
-      processType?: 'creation' | 'deletion' | 'modification';
-    }
-  | { state: 'success' }
-  | { state: 'failure'; errors: string[] };
+type ProcessedQueryResultColumnSource =
+  | (Pick<QueryInitialColumnSource, 'is_initial_column'> &
+      Partial<QueryInitialColumnSource>)
+  | QueryGeneratedColumnSource;
 
 export interface ProcessedQueryResultColumn extends CellColumnFabric {
-  id: QueryResultColumn['alias'];
+  id: QueryColumnMetaData['alias'];
   column: QueryResultColumn;
   abstractType: AbstractType;
   inputComponentAndProps: ComponentAndProps;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
-  // Make this mandatory later
-  operationalState?: ColumnOperationalState;
+  source: ProcessedQueryResultColumnSource;
 }
 
 export interface ProcessedQueryOutputColumn extends ProcessedQueryResultColumn {
@@ -266,10 +265,10 @@ export function getTablesThatReferenceBaseTable(
   return references;
 }
 
-/** ======== */
-
 function processColumn(
-  columnInfo: Pick<QueryResultColumn, 'alias'> & Partial<QueryResultColumn>,
+  columnInfo: Pick<QueryColumnMetaData, 'alias'> &
+    ProcessedQueryResultColumnSource &
+    Partial<QueryColumnMetaData>,
   abstractTypeMap: AbstractTypesMap,
 ): ProcessedQueryResultColumn {
   const column = {
@@ -281,6 +280,16 @@ function processColumn(
   };
 
   const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
+  const source: ProcessedQueryResultColumnSource = columnInfo.is_initial_column
+    ? {
+        is_initial_column: true,
+        input_column_name: columnInfo.input_column_name,
+        input_table_name: columnInfo.input_table_name,
+      }
+    : {
+        is_initial_column: false,
+        input_alias: columnInfo.input_alias,
+      };
   return {
     id: column.alias,
     column,
@@ -298,6 +307,7 @@ function processColumn(
     preprocFunctions: getPreprocFunctionsForAbstractType(
       abstractType.identifier,
     ),
+    source,
   };
 }
 
@@ -346,13 +356,19 @@ export function speculateColumnMetaData({
     summarizationTransformsWithoutMetaData.length > 0;
   if (initialColumnsRequiringChange.length > 0) {
     initialColumnsRequiringChange.forEach((initialColumn) => {
+      const inputColumnInformation = inputColumnInformationMap.get(
+        initialColumn.id,
+      );
       updatedColumnsMetaData = updatedColumnsMetaData.with(
         initialColumn.alias,
         processColumn(
           {
             alias: initialColumn.alias,
             display_name: initialColumn.display_name,
-            type: inputColumnInformationMap.get(initialColumn.id)?.type,
+            type: inputColumnInformation?.type,
+            is_initial_column: true,
+            input_column_name: inputColumnInformation?.name,
+            input_table_name: inputColumnInformation?.tableName,
           },
           abstractTypeMap,
         ),
@@ -382,6 +398,8 @@ export function speculateColumnMetaData({
                       }
                     : null,
                 display_options: null,
+                is_initial_column: false,
+                input_alias: aggregation.inputAlias,
               },
               abstractTypeMap,
             ),
@@ -404,7 +422,7 @@ export function getProcessedOutputColumns(
       alias,
       {
         ...(processedColumnMetaData.get(alias) ??
-          processColumn({ alias }, new Map())),
+          processColumn({ alias, is_initial_column: true }, new Map())),
         columnIndex: index,
       },
     ]),

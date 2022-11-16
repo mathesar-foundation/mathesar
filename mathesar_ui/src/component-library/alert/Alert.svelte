@@ -1,14 +1,15 @@
 <script lang="ts">
-  import { iconInfo } from '../common/icons';
+  import { iconInfo, iconWarning } from '../common/icons';
   import Icon from '../icon/Icon.svelte';
   import type { IconProps } from '../icon/IconTypes';
-  import type { Appearance } from './AlertTypes';
+  import type { AlertAppearance } from './AlertTypes';
 
-  const appearanceIconMap: Record<Appearance, IconProps> = {
+  const appearanceIconMap: Record<AlertAppearance, IconProps> = {
     info: iconInfo,
+    warning: iconWarning,
   };
 
-  export let appearance: Appearance = 'info';
+  export let appearance: AlertAppearance = 'info';
   export let icon: IconProps = appearanceIconMap[appearance];
 
   $: classes = ['alert-container', `alert-${appearance}`].join(' ');

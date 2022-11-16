@@ -5,6 +5,7 @@
     DropdownMenu,
     ButtonMenuItem,
     ImmutableMap,
+    Collapsible,
   } from '@mathesar-component-library';
   import {
     iconAddNew,
@@ -12,11 +13,11 @@
     iconGrouping,
     iconDeleteMajor,
   } from '@mathesar/icons';
-  import type QueryManager from '../QueryManager';
+  import type QueryManager from '../../QueryManager';
   import FilterTransformation from './FilterTransformation.svelte';
-  import QueryFilterTransformationModel from '../QueryFilterTransformationModel';
+  import QueryFilterTransformationModel from '../../QueryFilterTransformationModel';
   import { calcAllowedColumnsPerTransformation } from './transformationUtils';
-  import QuerySummarizationTransformationModel from '../QuerySummarizationTransformationModel';
+  import QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
   import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
 
   export let queryManager: QueryManager;
@@ -99,78 +100,86 @@
   }
 </script>
 
-{#if transformationModels && allowedColumnsPerTransformation.length === transformationModels.length}
-  {#each transformationModels as transformationModel, index (transformationModel)}
-    <section class="transformation">
-      <header>
-        <span class="number">
-          {index + 1}
-        </span>
-        <span class="title">
-          {#if transformationModel instanceof QueryFilterTransformationModel}
-            Filter
-          {:else}
-            Summarization
+<div class="transformations">
+  {#if transformationModels && allowedColumnsPerTransformation.length === transformationModels.length}
+    {#each transformationModels as transformationModel, index (transformationModel)}
+      <Collapsible isOpen triggerAppearance="plain">
+        <span slot="header" class="header">
+          <span class="number">
+            {index + 1}
+          </span>
+          <span class="title">
+            {#if transformationModel instanceof QueryFilterTransformationModel}
+              Filter
+            {:else}
+              Summarization
+            {/if}
+          </span>
+          {#if index === transformationModels.length - 1}
+            <Button
+              appearance="plain"
+              class="padding-zero"
+              on:click={() => removeTransformation(index)}
+            >
+              <Icon {...iconDeleteMajor} size="0.8rem" />
+            </Button>
           {/if}
         </span>
-        {#if transformationModel instanceof QueryFilterTransformationModel || index === transformationModels.length - 1}
-          <Button
-            appearance="plain"
-            class="padding-zero"
-            on:click={() => removeTransformation(index)}
-          >
-            <Icon {...iconDeleteMajor} size="0.8rem" />
-          </Button>
-        {/if}
-      </header>
-      <div class="content">
-        {#if transformationModel instanceof QueryFilterTransformationModel}
-          <FilterTransformation
-            columns={allowedColumnsPerTransformation[index]}
-            model={transformationModel}
-            limitEditing={allowedColumnsPerTransformation[index].size === 0}
-            totalTransformations={transformationModels.length}
-            on:update={() => updateTransformations()}
-          />
-        {:else if transformationModel instanceof QuerySummarizationTransformationModel}
-          <SummarizationTransformation
-            columns={allowedColumnsPerTransformation[index]}
-            model={transformationModel}
-            limitEditing={allowedColumnsPerTransformation[index].size === 0 ||
-              index < transformationModels.length - 1}
-            on:update={() => updateTransformations()}
-          />
-        {/if}
-      </div>
-    </section>
-  {/each}
-{/if}
+        <div slot="content" class="content">
+          {#if transformationModel instanceof QueryFilterTransformationModel}
+            <FilterTransformation
+              columns={allowedColumnsPerTransformation[index]}
+              model={transformationModel}
+              limitEditing={allowedColumnsPerTransformation[index].size === 0}
+              totalTransformations={transformationModels.length}
+              on:update={() => updateTransformations()}
+            />
+          {:else if transformationModel instanceof QuerySummarizationTransformationModel}
+            <SummarizationTransformation
+              columns={allowedColumnsPerTransformation[index]}
+              model={transformationModel}
+              limitEditing={allowedColumnsPerTransformation[index].size === 0 ||
+                index < transformationModels.length - 1}
+              on:update={() => updateTransformations()}
+            />
+          {/if}
+        </div>
+      </Collapsible>
+    {/each}
+  {/if}
 
-<DropdownMenu
-  label="Add transformation step"
-  icon={iconAddNew}
-  disabled={$processedColumns.size === 0}
->
-  <ButtonMenuItem icon={iconFiltering} on:click={addFilter}>
-    Filter
-  </ButtonMenuItem>
-  <ButtonMenuItem icon={iconGrouping} on:click={addSummarization}>
-    Summarize
-  </ButtonMenuItem>
-</DropdownMenu>
+  <div class="add-transform-control">
+    <DropdownMenu
+      label="Add transformation step"
+      icon={iconAddNew}
+      disabled={$processedColumns.size === 0}
+      triggerAppearance="secondary"
+    >
+      <ButtonMenuItem icon={iconFiltering} on:click={addFilter}>
+        Filter
+      </ButtonMenuItem>
+      <ButtonMenuItem
+        icon={iconGrouping}
+        disabled={$query.hasSummarizationTransform()}
+        on:click={addSummarization}
+      >
+        Summarize
+      </ButtonMenuItem>
+    </DropdownMenu>
+  </div>
+</div>
 
 <style lang="scss">
-  .transformation {
-    border: 1px solid var(--color-gray-medium);
-    padding: 0.5rem;
-    border-radius: 4px;
-    background: var(--color-gray-lighter);
-    margin-bottom: 1rem;
+  .transformations {
+    margin-bottom: var(--size-large);
 
-    header {
+    :global(.collapsible .collapsible-header) {
+      padding: var(--size-ultra-small) var(--size-large);
+    }
+
+    .header {
       display: flex;
       align-items: center;
-      margin-bottom: 0.6rem;
       gap: 0.3rem;
 
       .number {
@@ -185,6 +194,19 @@
       .title {
         flex-grow: 1;
         font-weight: 500;
+      }
+    }
+
+    .content {
+      padding: var(--size-small) var(--size-large) var(--size-large)
+        var(--size-super-ultra-large);
+    }
+
+    .add-transform-control {
+      padding: var(--size-small) var(--size-large);
+
+      :global(.dropdown.trigger) {
+        width: 100%;
       }
     }
   }
