@@ -124,6 +124,7 @@
     class:is-active={isActive}
     class:is-processing={isProcessing}
     class:is-pk={column.primary_key}
+    class:is-selected={isSelectedInRange}
     {...htmlAttributes}
     {style}
   >
