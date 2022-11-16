@@ -45,7 +45,7 @@ def reflect_db_objects(metadata):
                 Prefetch('schema', queryset=schemas)
             )
             reflect_columns_from_tables(tables, metadata=metadata)
-            reflect_constraints_from_database(database.name)
+            reflect_constraints_from_database(database)
         else:
             models.Schema.current_objects.filter(database=database).delete()
 
@@ -166,7 +166,7 @@ def _delete_stale_columns(attnum_tuples, tables):
 
 # TODO pass in a cached engine instead of creating a new one
 def reflect_constraints_from_database(database):
-    engine = create_mathesar_engine(database)
+    engine = create_mathesar_engine(database.name)
     db_constraints = get_constraints_with_oids(engine)
     map_of_table_oid_to_constraint_oids = defaultdict(list)
     for db_constraint in db_constraints:
@@ -188,7 +188,9 @@ def reflect_constraints_from_database(database):
     for constraint in models.Constraint.current_objects.all():
         if constraint.oid not in [db_constraint['oid'] for db_constraint in db_constraints]:
             stale_constraint_ids.append(constraint.id)
-    models.Constraint.current_objects.filter(id__in=stale_constraint_ids).delete()
+    models.Constraint.current_objects.filter(
+        table__schema__database=database, id__in=stale_constraint_ids
+    ).delete()
     engine.dispose()
 
 
