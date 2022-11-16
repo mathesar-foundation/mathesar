@@ -115,8 +115,17 @@ def get_table_description(oid, engine):
 
 
 def get_joinable_tables(
-        engine, metadata, base_table_oid=None, max_depth=3, limit=None, offset=None
+    engine, metadata, base_table_oid=None, max_depth=3, limit=None, offset=None
 ):
+    """
+    Output is a collection of `sqlalchemy.engine.Row`[0]. `Row` "seeks to act as much like a
+    Python named tuple as possible". Look ups can be done via integer indexes, string indexes or
+    attributes (e.g. `joinable_table[TARGET]. Inspect code to know what the exact keys are, but
+    their order and semantics is: `(base table oid, target table oid, join parameter path,
+    foreign key path, depth, multiple results boolean flag).
+
+    [0] https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Row
+    """
     FK_OID = 'fk_oid'
     LEFT_REL = 'left_rel'
     RIGHT_REL = 'right_rel'
