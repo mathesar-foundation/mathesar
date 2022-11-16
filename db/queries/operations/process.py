@@ -24,5 +24,3 @@ def get_transforms_with_summarizes_speced(db_query, engine, metadata):
         for ix, db_transformation
         in enumerate(db_query.transformations)
     )
-
-
