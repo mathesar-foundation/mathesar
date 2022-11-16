@@ -29,7 +29,7 @@ export function getColumnsInTemplate({
 export function hasColumnReferences(columns: Column[]): ValidationFn<string> {
   return validIf(
     (template) => getColumnsInTemplate({ template, columns }).length > 0,
-    'The template must reference at least one column, otherwise it will be ' +
-      'the same for all records.',
+    'The template must reference at least one column, otherwise the record ' +
+      'summary will be the same for all records.',
   );
 }

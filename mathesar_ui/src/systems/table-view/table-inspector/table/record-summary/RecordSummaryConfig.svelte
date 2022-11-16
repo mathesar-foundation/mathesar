@@ -79,7 +79,7 @@
     <div class="nonconformant-columns">
       <p>
         Because some column names contain curly braces, the following numerical
-        values are used in place of column names:
+        values are used in place of column names within the above template:
       </p>
       <ul>
         {#each nonconformantColumns as column}
