@@ -37,7 +37,7 @@ def get_project_data():
         """
         {
           organization(login: "$github_org") {
-            projectNext(number: $project_num) {
+            projectV2(number: $project_num) {
               id
               fields(first: 20) {
                 nodes {
@@ -53,7 +53,7 @@ def get_project_data():
     )
     query = query_template.substitute(github_org=GITHUB_ORG, project_num=MATHESAR_PROJECT_NUMBER)
     result = run_graphql(query)
-    return result['data']['organization']['projectNext']
+    return result['data']['organization']['projectV2']
 
 
 def add_item_to_project(content_id, project_data):
@@ -62,7 +62,7 @@ def add_item_to_project(content_id, project_data):
         """
           mutation {
             addProjectV2Item(input: {projectId: "$project_id" contentId: "$content_id"}) {
-              projectNextItem {
+              projectV2Item {
                 id
               }
             }
@@ -75,7 +75,7 @@ def add_item_to_project(content_id, project_data):
     )
     result = run_graphql(query)
     try:
-        return result['data']['addProjectV2Item']['projectNextItem']['id']
+        return result['data']['addProjectV2Item']['projectV2Item']['id']
     except KeyError as e:
         print(f'\tAdd item error:\n\t\t{result}')
         raise e
@@ -107,7 +107,7 @@ def update_field_for_item(item_id, field, value, project_data):
                 value: "$value"
               }
             ) {
-              projectNextItem {
+              projectV2Item {
                 id
               }
             }
