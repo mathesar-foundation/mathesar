@@ -81,11 +81,8 @@ export function isCellActive(
 }
 
 // TODO: Create a common utility action to handle active element based scroll
-export function scrollBasedOnActiveCell(): void {
-  const activeCell: HTMLElement | null = document.querySelector(
-    '[data-sheet-element="cell"].is-active',
-  );
-  const activeRow = activeCell?.parentElement;
+function scrollToElement(htmlElement: HTMLElement | null): void {
+  const activeRow = htmlElement?.parentElement;
   const container = document.querySelector('[data-sheet-body-element="list"]');
   if (!container || !activeRow) {
     return;
@@ -106,17 +103,31 @@ export function scrollBasedOnActiveCell(): void {
 
   // Horizontal scroll
   if (
-    activeCell.offsetLeft + activeRow.clientWidth + 30 >
+    htmlElement.offsetLeft + activeRow.clientWidth + 30 >
     container.scrollLeft + container.clientWidth
   ) {
     const offsetValue: number =
       container.getBoundingClientRect().right -
-      activeCell.getBoundingClientRect().right -
+      htmlElement.getBoundingClientRect().right -
       30;
     container.scrollLeft -= offsetValue;
-  } else if (activeCell.offsetLeft - 30 < container.scrollLeft) {
-    container.scrollLeft = activeCell.offsetLeft - 30;
+  } else if (htmlElement.offsetLeft - 30 < container.scrollLeft) {
+    container.scrollLeft = htmlElement.offsetLeft - 30;
   }
+}
+
+export function scrollBasedOnActiveCell(): void {
+  const activeCell: HTMLElement | null = document.querySelector(
+    '[data-sheet-element="cell"].is-active',
+  );
+  scrollToElement(activeCell);
+}
+
+export function scrollBasedOnSelection(): void {
+  const selectedCell: HTMLElement | null = document.querySelector(
+    '[data-sheet-element="cell"].is-selected',
+  );
+  scrollToElement(selectedCell);
 }
 
 type SelectionBounds = {
@@ -372,17 +383,6 @@ export default class SheetSelection<
     );
   }
 
-  clearColumnSelection(column: Column): boolean {
-    const isCompleteColumnSelected = this.isCompleteColumnSelected(column);
-
-    if (isCompleteColumnSelected) {
-      this.resetSelection();
-      return true;
-    }
-
-    return false;
-  }
-
   /**
    * Modifies the selected cells, forming a new selection by maintaining the
    * currently selected rows but altering the selected columns to match the
@@ -404,7 +404,11 @@ export default class SheetSelection<
   }
 
   toggleColumnSelection(column: Column): void {
-    if (this.clearColumnSelection(column)) {
+    const isCompleteColumnSelected = this.isCompleteColumnSelected(column);
+    this.activateCellByIndexAndId(0, column.id);
+
+    if (isCompleteColumnSelected) {
+      this.resetSelection();
       return;
     }
 
@@ -456,6 +460,16 @@ export default class SheetSelection<
     this.activeCell.set({
       rowIndex: row.rowIndex,
       columnId: column.id,
+    });
+  }
+
+  activateCellByIndexAndId(
+    rowIndex: Row['rowIndex'],
+    columnId: Column['id'],
+  ): void {
+    this.activeCell.set({
+      rowIndex,
+      columnId,
     });
   }
 
@@ -524,6 +538,13 @@ export default class SheetSelection<
     });
 
     return moved ? 'moved' : undefined;
+  }
+
+  activateFirstCellInSelectedColumn() {
+    const activeCell = get(this.activeCell);
+    if (activeCell) {
+      this.activateCellByIndexAndId(0, activeCell.columnId);
+    }
   }
 
   /**

@@ -11,12 +11,10 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    border-bottom: 1px solid #dfdfdf;
-    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--slate-300);
 
     > li.tab {
       align-items: stretch;
-      background: 0 0;
       cursor: pointer;
       display: inline-flex;
       outline: none;
@@ -26,22 +24,24 @@
       overflow: hidden;
       transition: width 0.2s cubic-bezier(0.39, 0.575, 0.565, 1);
       border-radius: 2px 2px 0px 0px;
-      border-bottom: 4px solid transparent;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
 
       > div {
         padding: 0.5rem 1rem;
         white-space: nowrap;
         text-decoration: none;
         text-overflow: ellipsis;
-        display: flex;
-        align-items: center;
         overflow: hidden;
         color: inherit;
+        text-align: center;
+        font-weight: var(--tab-header-font-weight, 590);
+        width: 100%;
       }
 
       &:hover {
         background: var(--slate-100);
-        border-bottom-color: var(--slate-100);
+        border-bottom-color: var(--slate-300);
       }
 
       & + li.tab {
@@ -76,6 +76,16 @@
         }
       }
     }
+
+    &.fill-tab-width {
+      > li.tab {
+        flex-grow: 1;
+
+        > div {
+          width: 100%;
+        }
+      }
+    }
   }
 
   > ul.tabs:before {
@@ -87,5 +97,14 @@
     min-width: 0;
     position: relative;
     isolation: isolate;
+  }
+
+  &.fill-container-height {
+    height: 100%;
+    overflow: hidden;
+
+    .tab-content-holder {
+      overflow: auto;
+    }
   }
 }
