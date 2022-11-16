@@ -57,7 +57,7 @@
     font-weight: 500;
     display: block;
     color: var(--white);
-    font-size: var(--text-size-x-large);
+    font-size: var(--text-size-xx-large);
     margin: 0 var(--spacing);
   }
 </style>

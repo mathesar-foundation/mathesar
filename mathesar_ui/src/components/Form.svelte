@@ -2,10 +2,12 @@
   <slot />
 </div>
 
-<style>
-  .form :global(.form-field + .form-field) {
+<style lang="scss">
+  .form {
     --form-field-spacing: 1.1em;
-    margin-top: var(--form-field-spacing);
-    padding-top: var(--form-field-spacing);
+
+    :global(.form-field + .form-field) {
+      padding-top: var(--form-field-spacing);
+    }
   }
 </style>
