@@ -1,10 +1,10 @@
 <script>
   import { Collapsible } from '@mathesar-component-library';
-  import TableConstraints from '@mathesar/systems/table-view/constraints/TableConstraints.svelte';
   import RenameTable from './RenameTable.svelte';
-  // import ConstraintHelp from '../../constraints/__help__/ConstraintHelp.svelte';
   import TableActions from './TableActions.svelte';
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
+  import AdvancedActions from './AdvancedActions.svelte';
+  import TableLinks from './links/TableLinks.svelte';
 </script>
 
 <div class="table-mode-container">
@@ -20,6 +20,13 @@
   </Collapsible>
 
   <Collapsible isOpen>
+    <CollapsibleHeader slot="header" title="Links" isDBLevelConfiguration />
+    <div slot="content" class="content-container">
+      <TableLinks />
+    </div>
+  </Collapsible>
+
+  <Collapsible isOpen>
     <CollapsibleHeader slot="header" title="Actions" />
     <div slot="content" class="content-container">
       <TableActions />
@@ -29,7 +36,7 @@
   <Collapsible>
     <CollapsibleHeader slot="header" title="Advanced" />
     <div slot="content" class="content-container">
-      <TableConstraints />
+      <AdvancedActions />
     </div>
   </Collapsible>
 </div>
