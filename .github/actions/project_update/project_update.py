@@ -61,7 +61,7 @@ def add_item_to_project(content_id, project_data):
     query_template = Template(
         """
           mutation {
-            addProjectNextItem(input: {projectId: "$project_id" contentId: "$content_id"}) {
+            addProjectV2Item(input: {projectId: "$project_id" contentId: "$content_id"}) {
               projectNextItem {
                 id
               }
@@ -75,7 +75,7 @@ def add_item_to_project(content_id, project_data):
     )
     result = run_graphql(query)
     try:
-        return result['data']['addProjectNextItem']['projectNextItem']['id']
+        return result['data']['addProjectV2Item']['projectNextItem']['id']
     except KeyError as e:
         print(f'\tAdd item error:\n\t\t{result}')
         raise e
@@ -99,7 +99,7 @@ def update_field_for_item(item_id, field, value, project_data):
     query_template = Template(
         """
           mutation {
-            updateProjectNextItemField(
+            updateProjectV2ItemField(
               input: {
                 projectId: "$project_id"
                 itemId: "$item_id"
