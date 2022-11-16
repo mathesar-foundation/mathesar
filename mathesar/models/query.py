@@ -295,7 +295,11 @@ class UIQuery(BaseModel, Relation):
         this: the effect would be that a persisted query could have different summarizations in
         django database than what is being evaluated in Postgres.
         """
-        return get_transforms_with_summarizes_speced(self.db_query)
+        return get_transforms_with_summarizes_speced(
+            db_query=self.db_query,
+            engine=self._sa_engine,
+            metadata=get_cached_metadata(),
+        )
 
     @property
     def db_query(self):
