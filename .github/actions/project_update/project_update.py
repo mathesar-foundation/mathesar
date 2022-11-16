@@ -41,9 +41,28 @@ def get_project_data():
               id
               fields(first: 20) {
                 nodes {
-                  id
-                  name
-                  settings
+                  ... on ProjectV2Field {
+                    id
+                    name
+                  }
+                  ... on ProjectV2IterationField {
+                    id
+                    name
+                    configuration {
+                      iterations {
+                        startDate
+                        id
+                      }
+                    }
+                  }
+                  ... on ProjectV2SingleSelectField {
+                    id
+                    name
+                    options {
+                      id
+                      name
+                    }
+                  }
                 }
               }
             }
