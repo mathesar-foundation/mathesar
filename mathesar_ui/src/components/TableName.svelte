@@ -4,8 +4,9 @@
   import NameWithIcon from './NameWithIcon.svelte';
 
   export let table: Pick<TableEntry, 'name'>;
+  export let isLoading = false;
 </script>
 
-<NameWithIcon icon={iconTable}>
+<NameWithIcon icon={iconTable} {isLoading}>
   <span title={table.name}>{table.name}</span>
 </NameWithIcon>

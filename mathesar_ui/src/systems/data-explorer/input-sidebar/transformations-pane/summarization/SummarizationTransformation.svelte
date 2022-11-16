@@ -1,11 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
-  import type QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
+  import type QuerySummarizationTransformationModel from '../../../QuerySummarizationTransformationModel';
   import type {
     ProcessedQueryResultColumn,
     ProcessedQueryResultColumnMap,
-  } from '../../utils';
+  } from '../../../utils';
   import Aggregation from './Aggregation.svelte';
 
   const dispatch = createEventDispatcher();

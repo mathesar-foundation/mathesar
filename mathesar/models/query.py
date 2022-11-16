@@ -121,6 +121,11 @@ class UIQuery(BaseModel, Relation):
         unique=True,
     )
 
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
     base_table = models.ForeignKey(
         'Table', on_delete=models.CASCADE, related_name='queries'
     )

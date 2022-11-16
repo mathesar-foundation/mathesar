@@ -25,6 +25,28 @@ def post_minimal_query(_post_query, create_patents_table, get_uid):
 
 
 @pytest.fixture
+def post_query_with_description(_post_query, create_patents_table, get_uid):
+    base_table = create_patents_table(table_name=get_uid())
+    request_data = {
+        "name": get_uid(),
+        "description": "A generic description",
+        "base_table": base_table.id,
+        "initial_columns": [
+            {
+                "id": 1,
+                "jp_path": [[1, 3], [4, 5]],
+                "alias": "alias_x",
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    return _post_query(request_data)
+
+
+@pytest.fixture
 def _post_query(client):
     def _f(request_data):
         response = client.post('/api/db/v0/queries/', data=request_data)
@@ -299,3 +321,21 @@ def _deep_equality_assert(
             )
     else:
         assert expected == actual
+
+
+def test_create_with_description(post_query_with_description):
+    request_data, response = post_query_with_description
+    response_json = response.json()
+    assert response_json['description'] == "A generic description"
+
+
+def test_update_description(post_query_with_description, client):
+    post_data, response = post_query_with_description
+    response_json = response.json()
+    query_id = response_json['id']
+    patch_data = {
+        "description": "A new description"
+    }
+    response = client.patch(f'/api/db/v0/queries/{query_id}/', data=patch_data)
+    response_json = response.json()
+    assert response_json['description'] == "A new description"

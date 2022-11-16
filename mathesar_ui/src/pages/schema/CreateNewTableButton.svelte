@@ -27,7 +27,7 @@
 
 <DropdownMenu
   showArrow={true}
-  triggerAppearance="plain"
+  triggerAppearance="plain-primary"
   closeOnInnerClick={true}
   label="New Table"
 >
