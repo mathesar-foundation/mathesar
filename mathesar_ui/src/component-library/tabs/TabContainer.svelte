@@ -21,6 +21,9 @@
   export let labelKey = 'label';
   export let allowRemoval = false;
   export let preventDefault = false;
+  export let fillTabWidth = false;
+  export let fillContainerHeight = false;
+  export let uniformTabWidth = true;
 
   function selectActiveTab(e: Event, tab: Tab) {
     activeTab = tab;
@@ -69,13 +72,19 @@
   }
 </script>
 
-<div class="tab-container" role="navigation">
-  <ul role="tablist" class="tabs">
+<div
+  class="tab-container"
+  role="navigation"
+  class:fill-container-height={fillContainerHeight}
+>
+  <ul role="tablist" class="tabs" class:fill-tab-width={fillTabWidth}>
     {#each tabs as tab, index (tab[idKey] || tab)}
       <TabComponent
         {componentId}
         {tab}
         {allowRemoval}
+        {uniformTabWidth}
+        totalTabs={tabs.length}
         isActive={tab[idKey] === activeTab[idKey]}
         on:focus={focusTab}
         on:blur={blurTab}
@@ -99,7 +108,7 @@
       tabindex="0"
     >
       {#if activeTab}
-        <slot />
+        <slot {activeTab} />
       {/if}
     </div>
   </div>

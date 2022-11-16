@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { IconProps } from './IconTypes';
+  import IconPath from './IconPath.svelte';
 
   // NOTE:
   // The type definition for the props here are duplicated in `Icon.d.ts` too.
@@ -69,9 +70,9 @@
 >
   {#if Array.isArray(path)}
     {#each path as entry (entry)}
-      <path d={entry} />
+      <IconPath path={entry} />
     {/each}
   {:else}
-    <path d={path} />
+    <IconPath {path} />
   {/if}
 </svg>
