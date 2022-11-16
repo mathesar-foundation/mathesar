@@ -3,6 +3,7 @@
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type {
+    ColumnsDataStore,
     RecordsData,
     TabularDataSelection,
   } from '@mathesar/stores/table-data';
@@ -12,6 +13,7 @@
   export let selectedRowIndices: number[];
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
+  export let columnsDataStore: ColumnsDataStore;
 
   let isDeleting = false;
 
@@ -32,9 +34,10 @@
   }
 
   $: ({ savedRecords } = recordsData);
+  $: ({ columns } = columnsDataStore);
 
-  function getRecordId(selectedRowIndex: number) {
-    return $savedRecords[selectedRowIndex].rowIndex;
+  function getRecord(selectedRowIndex: number) {
+    return $savedRecords[selectedRowIndex].record;
   }
 </script>
 
@@ -42,7 +45,10 @@
   {#if selectedRowIndices.length === 1}
     <ActionItem
       href={$storeToGetRecordPageUrl({
-        recordId: getRecordId(selectedRowIndices[0]),
+        recordId: recordsData.getPkValueInRecord(
+          getRecord(selectedRowIndices[0]),
+          $columns,
+        ),
       })}
     >
       <Icon {...iconRecord} />

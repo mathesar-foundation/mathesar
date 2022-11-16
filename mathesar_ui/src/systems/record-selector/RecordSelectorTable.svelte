@@ -29,10 +29,7 @@
   import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
   import RecordSelectorInputCell from './RecordSelectorInputCell.svelte';
   import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
-  import {
-    getColumnIdToFocusInitially,
-    getPkValueInRecord,
-  } from './recordSelectorUtils';
+  import { getColumnIdToFocusInitially } from './recordSelectorUtils';
   import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
 
   export let controller: RecordSelectorController;
@@ -114,7 +111,7 @@
     if (!record || Object.keys(record).length === 0) {
       return undefined;
     }
-    return getPkValueInRecord(record, $columns);
+    return recordsData.getPkValueInRecord(record, $columns);
   }
 
   function getRowHref(row: RecordRow): string | undefined {

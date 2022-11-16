@@ -28,6 +28,7 @@
           selectedRowIndices={uniquelySelectedRowIndices}
           {recordsData}
           {selection}
+          columnsDataStore={$tabularData.columnsDataStore}
         />
       </div>
     </Collapsible>

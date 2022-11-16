@@ -10,12 +10,12 @@
   $: suffixIcon = (function () {
     if (suffixIcon) {
       return suffixIcon;
-    } else if (href) {
-      return iconExternalLink;
-    } else {
-      return undefined;
     }
-  })();
+    if (href) {
+      return iconExternalLink;
+    }
+    return undefined;
+  }());
   $: element = href === undefined ? 'button' : 'a';
 </script>
 

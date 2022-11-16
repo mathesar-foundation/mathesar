@@ -20,7 +20,6 @@
     RecordSelectorResult,
   } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
-  import { getPkValueInRecord } from './recordSelectorUtils';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -69,7 +68,7 @@
       isSubmittingNewRecord = true;
       const response = await postAPI<ApiRecordsResponse>(url, body);
       const record = response.results[0];
-      const recordId = getPkValueInRecord(record, $columns);
+      const recordId = recordsData.getPkValueInRecord(record, $columns);
       const previewData = response.preview_data ?? [];
       const tableEntry = $tables.data.get(tableId);
       const template = tableEntry?.settings?.preview_settings?.template;

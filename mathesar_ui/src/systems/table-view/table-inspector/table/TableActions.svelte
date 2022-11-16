@@ -8,8 +8,8 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDatabase } from '@mathesar/stores/databases';
-  import ActionItem from '../ActionItem.svelte';
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
+  import ActionItem from '../ActionItem.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 

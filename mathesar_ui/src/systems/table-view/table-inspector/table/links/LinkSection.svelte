@@ -5,14 +5,14 @@
     iconLinksInThisTable,
   } from '@mathesar/icons';
   import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
-  import type { TableLink, TableLinkType } from './utils';
   import { modal } from '@mathesar/stores/modal';
   import LinkTableModal from '@mathesar/systems/table-view/link-table/LinkTableModal.svelte';
+  import type { TableLink, TableLinkType } from './utils';
   import LinkItem from './LinkItem.svelte';
 
   export let links: TableLink[];
   export let type: TableLinkType;
-  export let showCreateLinkButton: boolean = false;
+  export let showCreateLinkButton = false;
 
   const linkTableModal = modal.spawnModalController();
 
@@ -25,7 +25,7 @@
       default:
         throw new MissingExhaustiveConditionError(type);
     }
-  })();
+  }());
 
   $: title = (function () {
     switch (type) {
@@ -36,7 +36,7 @@
       default:
         throw new MissingExhaustiveConditionError(type);
     }
-  })();
+  }());
 </script>
 
 <div class="link-section-container">

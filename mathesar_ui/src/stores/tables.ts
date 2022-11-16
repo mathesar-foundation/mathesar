@@ -32,8 +32,8 @@ import type {
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import { CancellablePromise } from '@mathesar-component-library';
 
-import { currentSchemaId } from './schemas';
 import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
+import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
 
