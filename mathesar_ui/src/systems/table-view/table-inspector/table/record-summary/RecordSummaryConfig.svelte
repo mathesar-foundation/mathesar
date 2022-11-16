@@ -99,6 +99,7 @@
   onCancel={form.reset}
   proceedButton={{ label: 'Save' }}
   initiallyHidden
+  size="small"
 />
 
 <style>
