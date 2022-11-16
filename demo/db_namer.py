@@ -1,63 +1,34 @@
 """Utility function for generating database names from session ID cookies."""
-
-ADJECTIVES = [
-    'amusing', 'ancient', 'antique', 'asian', 'austere', 'average', 'awesome',
-    'beloved', 'best', 'better', 'big', 'bigger', 'biggest', 'bizarre', 'black',
-    'bland', 'boring', 'breezy', 'bright', 'broken', 'busiest', 'busy',
-    'central', 'certain', 'changed', 'cheap', 'cheaper', 'cheery', 'chilly',
-    'classic', 'clean', 'cleaner', 'clear', 'clearer', 'closer', 'closest',
-    'closing', 'cloudy', 'coastal', 'cold', 'coldest', 'comfy', 'common',
-    'complex', 'cool', 'coolest', 'cosy', 'cozy', 'crowded', 'current', 'damp',
-    'dark', 'darker', 'darkest', 'desired', 'dim', 'dingy', 'dirty', 'double',
-    'drab', 'driest', 'dry', 'dual', 'dull', 'duller', 'dullest', 'dusty',
-    'early', 'elegant', 'empty', 'exotic', 'famous', 'fancy', 'filmed',
-    'filthy', 'fine', 'foggy', 'foreign', 'formal', 'frosty', 'frozen', 'full',
-    'funny', 'fuzzy', 'gaudy', 'ghastly', 'ghostly', 'glassy', 'glazed',
-    'gloomy', 'glossy', 'godlike', 'good', 'grand', 'gray', 'great', 'green',
-    'greener', 'grey', 'grisly', 'handy', 'happy', 'harsh', 'healthy', 'heavy',
-    'hideous', 'hiding', 'high', 'holiest', 'home', 'hostile', 'hot', 'huge',
-    'humid', 'idyllic', 'illegal', 'immense', 'indoor', 'initial', 'joint',
-    'joyful', 'key', 'known', 'large', 'largest', 'lesser', 'light', 'limited',
-    'little', 'lively', 'living', 'local', 'lofty', 'logical', 'lone', 'long',
-    'lost', 'lousy', 'lovely', 'low', 'lower', 'lucky', 'luxury', 'magical',
-    'main', 'major', 'marine', 'massive', 'maximum', 'mean', 'messy', 'middle',
-    'mighty', 'minor', 'missing', 'misty', 'mixed', 'modern', 'moist', 'mouldy',
-    'moving', 'muddy', 'mundane', 'murky', 'musty', 'muted', 'mystic', 'mythic',
-    'naff', 'named', 'narrow', 'native', 'natural', 'nearby', 'neat', 'new',
-    'nice', 'noisy', 'normal', 'notable', 'odd', 'odorous', 'old', 'only',
-    'open', 'orderly', 'organic', 'outdoor', 'outside', 'paid', 'painful',
-    'painted', 'perfect', 'petty', 'pitiful', 'placid', 'plain', 'planted',
-    'poor', 'popular', 'precise', 'present', 'pretty', 'pricey', 'primal',
-    'prior', 'private', 'proven', 'public', 'pure', 'queer', 'quiet', 'rainy',
-    'rare', 'real', 'rebuilt', 'recent', 'red', 'refused', 'regular', 'related',
-    'remote', 'rented', 'restful', 'retail', 'rich', 'right', 'rigid', 'rocky',
-    'rural', 'sacred', 'sad', 'safe', 'scary', 'scenic', 'secret', 'secured',
-    'senior', 'serious', 'sexy', 'shiny', 'shoddy', 'silent', 'silly',
-    'similar', 'simple', 'single', 'sizable', 'slack', 'small', 'smelly',
-    'smoking', 'snowy', 'soft', 'solid', 'sombre', 'spare', 'spatial',
-    'special', 'stable', 'static', 'steady', 'strange', 'stupid', 'stylish',
-    'sunny', 'super', 'superb', 'teenage', 'tidier', 'tight', 'tiny', 'tough',
-    'tragic', 'uneven', 'unhappy', 'unknown', 'unsafe', 'unusual', 'urban',
-    'vague', 'varied', 'various', 'very', 'vibrant', 'virtual', 'visual',
-    'vital', 'vivid', 'vulgar', 'wacky', 'waiting', 'warm', 'wealthy',
-    'weeping', 'weird', 'wet', 'white', 'whole', 'wicked', 'wide', 'wild',
-    'windy', 'wooded', 'working', 'worldly', 'worst', 'worthy', 'wrong',
-    'young', 'yucky'
+WORDS = [
+    'wax', 'wry', 'jet', 'end', 'web', 'elf', 'jam', 'key', 'ant', 'fin', 'top',
+    'ray', 'tan', 'box', 'saw', 'tie', 'spy', 'day', 'gym', 'fox', 'van', 'ear',
+    'hub', 'age', 'hot', 'pin', 'red', 'map', 'run', 'den', 'bay', 'gas', 'nut',
+    'toy', 'art', 'net', 'pea', 'yam', 'pet', 'hat', 'ivy', 'egg', 'log', 'mum',
+    'rat', 'owl', 'hen', 'dry', 'bar', 'cub', 'dew', 'sun', 'lip', 'pig', 'tin',
+    'mud', 'ox', 'wok', 'ink', 'ton', 'big', 'way', 'tax', 'amp', 'act', 'ice',
+    'far', 'low', 'air', 'cut', 'oak', 'yak', 'eel', 'gem', 'few', 'ski', 'law',
+    'sea', 'hip', 'bag', 'bug', 'shy', 'dot', 'dye', 'eye', 'jaw', 'rib', 'mat',
+    'fir', 'bit', 'son', 'cat', 'six', 'fly', 'car', 'tub', 'emu', 'elk', 'tv',
+    'sly', 'tip', 'fan', 'fur', 'yew', 'jay', 'bus', 'zoo', 'sky', 'elm', 'cry',
+    'bee', 'tar', 'awe', 'bat', 'kip', 'cod', 'oil', 'foe', 'pot', 'ash', 'gum',
+    'odd', 'icy', 'koi', 'bun', 'era', 'leo', 'lan', 'soy', 'paw', 'can', 'pan',
+    'jar', 'pen', 'may', 'tea', 'ten', 'asp', 'dog', 'cap', 'bed', 'fog', 'bow',
+    'cup', 'pie', 'cow', 'fig', 'boa'
 ]
 
-MODULUS = len(ADJECTIVES)
+MODULUS = len(WORDS)
 
 
 def get_name(
         session_id,
-        chunk=8,
-        max_words=3,
+        chunk=2,
+        max_words=5,
         join_val='_',
-        adjectives=None,
-        modulus=None
+        word_list=None,
+        modulus=None,
 ):
     """
-    Deterministically generate a name of the form adj1_adj2_adj3_mathesar.
+    Deterministically generate a name of the form word1_word2_word3_....
 
     This is designed to work with Django sessionid cookie values, but
     would theoretically work with any string value.
@@ -69,19 +40,16 @@ def get_name(
     index in the given `adjectives` list, and join them with a terminal
     string 'mathesar' using the given `join_val`.
     """
-    session_id = session_id or 'DEFAULT'
-    adjectives = adjectives or ADJECTIVES
+    hex_chunk = 2 * chunk
+    bytes_length = chunk * max_words
+    session_id = session_id or ''
     modulus = modulus or MODULUS
+    word_list = word_list or WORDS
+    salt_gen = 'A'  # generates 'paw_paw_paw_...' after transformation
+    session_id += salt_gen * (bytes_length - len(session_id))
     session_hex = bytes(session_id, 'utf-8').hex()
-    upper_limit = min(len(session_hex), chunk * max_words)
     indices = (
-        int(session_hex[i:i + chunk], 16) % modulus
-        for i in range(0, upper_limit, chunk)
+        int(session_hex[i:i + hex_chunk], 16) % modulus
+        for i in range(0, 2 * bytes_length, hex_chunk)
     )
-
-    def get_word():
-        for i in indices:
-            yield adjectives[i]
-        yield 'mathesar'
-
-    return join_val.join(get_word())
+    return join_val.join(word_list[i] for i in indices)
