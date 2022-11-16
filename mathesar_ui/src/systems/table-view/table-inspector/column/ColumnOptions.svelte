@@ -79,29 +79,7 @@
   }
 </script>
 
-<div class="properties-container">
-  <!--
-    TODO Once we have a DropdownMenu component, make this option
-    disabled if the column is a primary key.
-  -->
-  <button class="passthrough" on:click={toggleAllowNull}>
-    {#if isRequestingToggleAllowNull}
-      <Icon class="opt" {...iconLoading} />
-    {:else}
-      <span class="opt"><Checkbox checked={!allowsNull} /></span>
-    {/if}
-    <span>
-      Disallow <span class="null">NULL</span> Values
-      <Help>
-        Enable this option to prevent null values in the column. Null values are
-        empty values that are not the same as zero or an empty string.
-      </Help>
-    </span>
-  </button>
-  <!--
-    TODO Once we have a DropdownMenu component, make this option
-    disabled if the column is a primary key.
-  -->
+<div class="column-options">
   <button class="passthrough" on:click={toggleAllowDuplicates}>
     {#if isRequestingToggleAllowDuplicates}
       <Icon class="opt" {...iconLoading} />
@@ -117,16 +95,30 @@
       </Help>
     </span>
   </button>
+  <button class="passthrough" on:click={toggleAllowNull}>
+    {#if isRequestingToggleAllowNull}
+      <Icon class="opt" {...iconLoading} />
+    {:else}
+      <span class="opt"><Checkbox checked={!allowsNull} /></span>
+    {/if}
+    <span>
+      Disallow <span class="null">NULL</span> Values
+      <Help>
+        Enable this option to prevent null values in the column. Null values are
+        empty values that are not the same as zero or an empty string.
+      </Help>
+    </span>
+  </button>
 </div>
 
 <style lang="scss">
-  .properties-container {
+  .column-options {
     padding: 1rem 0;
     display: flex;
     flex-direction: column;
 
     > :global(* + *) {
-      margin-top: 0.75rem;
+      margin-top: 0.5rem;
     }
 
     button {

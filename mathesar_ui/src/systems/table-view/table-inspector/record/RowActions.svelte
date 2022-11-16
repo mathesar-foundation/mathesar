@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Icon, iconLoading } from '@mathesar/component-library';
-  import { iconDeleteMajor } from '@mathesar/icons';
+  import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type {
     RecordsData,
     TabularDataSelection,
@@ -29,9 +30,25 @@
       }
     }
   }
+
+  $: ({ savedRecords } = recordsData);
+
+  function getRecordId(selectedRowIndex: number) {
+    return $savedRecords[selectedRowIndex].rowIndex;
+  }
 </script>
 
 <div class="actions-container">
+  {#if selectedRowIndices.length === 1}
+    <ActionItem
+      href={$storeToGetRecordPageUrl({
+        recordId: getRecordId(selectedRowIndices[0]),
+      })}
+    >
+      <Icon {...iconRecord} />
+      <span> Open Record </span>
+    </ActionItem>
+  {/if}
   <ActionItem danger on:click={handleDeleteRecords}>
     <Icon {...isDeleting ? iconLoading : iconDeleteMajor} />
     <span>

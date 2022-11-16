@@ -36,7 +36,7 @@
 </script>
 
 <div class="rename-column-property-container">
-  <span class="label">Name</span>
+  <span>Name</span>
   <EditableTextWithActions
     initialValue={column.column.name}
     onSubmit={handleColumnNameChange}

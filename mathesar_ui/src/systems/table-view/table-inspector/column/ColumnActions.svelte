@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon } from '@mathesar/component-library';
+  import { Icon, iconSettings } from '@mathesar/component-library';
   import {
     iconDeleteMajor,
     iconMoveColumnsToNewLinkedTable,
@@ -52,11 +52,17 @@
 </script>
 
 <div class="actions-container">
-  <ActionItem type="modal" on:click={handleMoveColumnsToNewLinkedTable}>
+  <ActionItem
+    suffixIcon={iconSettings}
+    on:click={handleMoveColumnsToNewLinkedTable}
+  >
     <Icon {...iconMoveColumnsToNewLinkedTable} />
     <span>New linked table from column{s}</span>
   </ActionItem>
-  <ActionItem type="modal" on:click={handleMoveColumnsToExistingLinkedTable}>
+  <ActionItem
+    suffixIcon={iconSettings}
+    on:click={handleMoveColumnsToExistingLinkedTable}
+  >
     <Icon {...iconMoveColumnsToExistingLinkedTable} />
     <span>Move column{s} to existing linked table</span>
   </ActionItem>
