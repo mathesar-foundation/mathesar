@@ -3,12 +3,9 @@
   import type { Column } from '@mathesar/api/tables/columns';
   import { iconAddNew } from '@mathesar/icons';
   import { getColumnIconProps } from '@mathesar/utils/columnUtils';
-  import { columnIsUsable } from './TemplateInputFormatter';
 
   export let columns: Column[];
   export let onSelect: (column: Column) => void;
-
-  $: usableColumns = columns.filter(columnIsUsable);
 
   function getIcon(column: Column) {
     const icon = getColumnIconProps(column);
@@ -17,7 +14,7 @@
 </script>
 
 <DropdownMenu label="Insert Column" icon={iconAddNew}>
-  {#each usableColumns as column}
+  {#each columns as column}
     <ButtonMenuItem
       label={column.name}
       icon={getIcon(column)}

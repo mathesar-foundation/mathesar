@@ -2,20 +2,16 @@ import type {
   InputFormatter,
   ParseResult,
 } from '@mathesar-component-library/types';
-import type { Column } from '@mathesar/api/tables/columns';
-
-type ColumnLike = Pick<Column, 'id' | 'name'>;
-
-export function columnIsUsable(column: ColumnLike): boolean {
-  // If a column contains a curly brace, we can't use it within the template.
-  return !column.name.match(/[{}]/);
-}
+import {
+  columnIsConformant,
+  type ColumnLike,
+} from './recordSummaryTemplateUtils';
 
 export default class TemplateInputFormatter implements InputFormatter<string> {
   private readonly columns: ColumnLike[];
 
   constructor(columns: ColumnLike[]) {
-    this.columns = columns.filter(columnIsUsable);
+    this.columns = columns.filter(columnIsConformant);
   }
 
   private getColumnName(columnId: number): string | undefined {
