@@ -81,7 +81,7 @@ def add_item_to_project(content_id, project_data):
         """
           mutation {
             addProjectV2ItemById(input: {projectId: "$project_id" contentId: "$content_id"}) {
-              projectV2Item {
+              item {
                 id
               }
             }
@@ -94,7 +94,7 @@ def add_item_to_project(content_id, project_data):
     )
     result = run_graphql(query)
     try:
-        return result['data']['addProjectV2ItemById']['projectV2Item']['id']
+        return result['data']['item']['projectV2Item']['id']
     except KeyError as e:
         print(f'\tAdd item error:\n\t\t{result}')
         raise e
