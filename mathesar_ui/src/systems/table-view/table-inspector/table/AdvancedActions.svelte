@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { Help, Icon, iconSettings } from '@mathesar/component-library';
-  import { iconConstraint } from '@mathesar/icons';
+  // import { Help, Icon, iconSettings } from '@mathesar/component-library';
+  // import { iconConstraint } from '@mathesar/icons';
   import TableConstraints from '../../constraints/TableConstraints.svelte';
-  import ActionItem from '../ActionItem.svelte';
+  // import ActionItem from '../ActionItem.svelte';
 </script>
 
 <div class="actions-container">
@@ -11,14 +11,14 @@
     rendering `TableConstraints` as it is for now
     to avoid loss of functionality
   -->
-  <ActionItem suffixIcon={iconSettings}>
+  <!-- <ActionItem suffixIcon={iconSettings}>
     <Icon {...iconConstraint} />
     <span>Constraints</span>
     <Help
       >Constraints are rules that apply to the data in a column to ensure that
       it is valid.</Help
     >
-  </ActionItem>
+  </ActionItem> -->
   <TableConstraints />
 </div>
 
