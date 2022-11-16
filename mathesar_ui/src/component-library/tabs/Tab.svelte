@@ -6,11 +6,19 @@
 
   export let componentId: number;
   export let tab: Tab;
+  export let totalTabs: number;
   export let isActive = false;
   export let allowRemoval = false;
+  export let uniformTabWidth = true;
 </script>
 
-<li role="presentation" class="tab" class:active={isActive} tabindex="-1">
+<li
+  role="presentation"
+  class="tab"
+  class:active={isActive}
+  tabindex="-1"
+  style={uniformTabWidth ? `width:${Math.floor(100 / totalTabs)}%;` : undefined}
+>
   <div
     role="tab"
     tabindex="0"

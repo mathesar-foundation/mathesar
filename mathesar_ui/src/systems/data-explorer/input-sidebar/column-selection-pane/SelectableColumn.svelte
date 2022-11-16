@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { Button } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import type { ColumnWithLink } from '../utils';
+  import type { ColumnWithLink } from '../../utils';
 
   const dispatch = createEventDispatcher();
 
@@ -10,11 +10,14 @@
 </script>
 
 <div class="selectable-column">
-  <Button appearance="plain" on:click={() => dispatch('add', column)}>
+  <Button on:click={() => dispatch('add', column)}>
     <ColumnName
       column={{ ...column, type_options: null, display_options: null }}
     />
-    <span class="add">Add +</span>
+    <span class="add">
+      <span class="text">Add</span>
+      <span>+</span>
+    </span>
   </Button>
 </div>
 
@@ -26,8 +29,6 @@
     :global(button) {
       flex-grow: 1;
       text-align: left;
-      border: 1px solid #efefef;
-      border-radius: 0.15rem;
       overflow: hidden;
     }
     :global(button .name-with-icon) {
@@ -40,13 +41,17 @@
     }
 
     &:not(:hover) {
-      :global(button .add) {
+      :global(button .add .text) {
         display: none;
       }
     }
 
     + :global(.selectable-column) {
-      margin-top: -1px;
+      margin-top: var(--size-super-ultra-small);
+    }
+
+    + :global(.table-group) {
+      margin-top: var(--size-small);
     }
   }
 </style>

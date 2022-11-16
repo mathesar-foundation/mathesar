@@ -1,8 +1,10 @@
 import type { QueryInstanceInitialColumn } from '@mathesar/api/queries';
-import type { ProcessedQueryResultColumnMap } from '../utils';
-import { getProcessedOutputColumns } from '../utils';
-import type { QueryTransformationModel } from '../QueryModel';
-import QuerySummarizationTransformationModel from '../QuerySummarizationTransformationModel';
+import {
+  getProcessedOutputColumns,
+  type ProcessedQueryResultColumnMap,
+} from '../../utils';
+import type { QueryTransformationModel } from '../../QueryModel';
+import QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
 
 export function calcAllowedColumnsPerTransformation(
   initialColumns: QueryInstanceInitialColumn[],

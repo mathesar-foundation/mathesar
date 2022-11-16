@@ -1,3 +1,4 @@
+from frozendict import frozendict
 from sqlalchemy import select
 
 from db.records.operations import select as records_select
@@ -167,6 +168,8 @@ class DBQuery:
 class InitialColumn:
     def __init__(
             self,
+            # TODO consider renaming to oid; reloid is not a term we use,
+            # even if it's what postgres uses; or use reloid more
             reloid,
             attnum,
             alias,
@@ -186,6 +189,16 @@ class InitialColumn:
         """
         return self.jp_path is None
 
+    def __eq__(self, other):
+        """Instances are equal when attributes are equal."""
+        if type(other) is type(self):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __hash__(self):
+        """Hashes are equal when attributes are equal."""
+        return hash(frozendict(self.__dict__))
+
 
 def _guarantee_jp_path_tuples(jp_path):
     """
@@ -201,4 +214,4 @@ def _guarantee_jp_path_tuples(jp_path):
             in jp_path
         )
     else:
-        return ()
+        return tuple()

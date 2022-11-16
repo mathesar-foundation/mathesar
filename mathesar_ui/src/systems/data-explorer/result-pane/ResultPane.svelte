@@ -1,48 +1,31 @@
 <script lang="ts">
-  import { Button, Spinner, Icon } from '@mathesar-component-library';
+  import { Button, Icon } from '@mathesar-component-library';
   import { iconRefresh } from '@mathesar/icons';
   import type QueryRunner from '../QueryRunner';
   import Results from './Results.svelte';
 
   export let queryRunner: QueryRunner;
 
-  $: ({ query, runState } = queryRunner);
-  $: ({ base_table, initial_columns } = $query);
+  $: ({ runState } = queryRunner);
 
-  $: columnRunState = $runState?.state;
-  $: recordRunState = $runState?.state;
+  $: isQueryRunInProcess = $runState?.state === 'processing';
 </script>
 
 <section data-identifier="result">
   <header>
     <span class="title">Result</span>
-    {#if base_table && initial_columns.length}
-      <span class="info">
-        {#if columnRunState === 'processing' || recordRunState === 'processing'}
-          Running query
-          <Spinner />
-        {:else if columnRunState === 'failure' || recordRunState === 'failure'}
-          Query failed to run
-          <Button
-            appearance="plain"
-            size="small"
-            class="padding-zero"
-            on:click={() => queryRunner.run()}
-          >
-            <Icon {...iconRefresh} size="0.6rem" />
-            <span>Retry</span>
-          </Button>
-        {/if}
-      </span>
-    {/if}
-  </header>
-  {#if !initial_columns.length}
-    <div class="empty-state">
-      Please add a column from the column selection pane to get started.
+    <div class="actions">
+      <Button
+        appearance="secondary"
+        disabled={isQueryRunInProcess}
+        on:click={() => queryRunner.run()}
+      >
+        <Icon {...iconRefresh} spin={isQueryRunInProcess} />
+        <span>Refresh</span>
+      </Button>
     </div>
-  {:else}
-    <Results {queryRunner} />
-  {/if}
+  </header>
+  <Results {queryRunner} />
 </section>
 
 <style lang="scss">
@@ -51,33 +34,22 @@
     flex-grow: 1;
     overflow: hidden;
     flex-shrink: 0;
-    margin: 10px;
     display: flex;
     flex-direction: column;
-    border: 1px solid #e5e5e5;
-    border-radius: 4px;
 
     header {
-      padding: 8px 10px;
-      border-bottom: 1px solid #e5e5e5;
       display: flex;
       align-items: center;
+      border-bottom: 1px solid var(--slate-200);
+      padding: var(--size-xx-small);
 
       .title {
-        font-weight: 600;
+        font-size: var(--text-size-large);
+        font-weight: 590;
       }
-      .info {
-        margin-left: 8px;
-        color: #71717a;
-        font-size: 0.875rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
+      .actions {
+        margin-left: auto;
       }
-    }
-
-    .empty-state {
-      padding: 1rem;
     }
   }
 </style>
