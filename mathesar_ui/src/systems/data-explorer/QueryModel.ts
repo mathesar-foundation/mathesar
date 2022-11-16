@@ -38,6 +38,8 @@ export default class QueryModel {
 
   name: UnsavedQueryInstance['name'];
 
+  description: UnsavedQueryInstance['description'];
+
   initial_columns: QueryInstanceInitialColumn[];
 
   transformationModels: QueryTransformationModel[];
@@ -46,6 +48,7 @@ export default class QueryModel {
     this.base_table = model?.base_table;
     this.id = model?.id;
     this.name = model?.name;
+    this.description = model?.description;
     this.initial_columns = model?.initial_columns ?? [];
     if (model && 'transformationModels' in model) {
       this.transformationModels = [...model.transformationModels];
@@ -84,7 +87,7 @@ export default class QueryModel {
     };
   }
 
-  withName(name: string): QueryModelUpdateDiff {
+  withName(name?: string): QueryModelUpdateDiff {
     const model = new QueryModel({
       ...this,
       name,
@@ -94,6 +97,20 @@ export default class QueryModel {
       type: 'name',
       diff: {
         name,
+      },
+    };
+  }
+
+  withDescription(description?: string): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      description,
+    });
+    return {
+      model,
+      type: 'name',
+      diff: {
+        description,
       },
     };
   }
@@ -113,9 +130,9 @@ export default class QueryModel {
     };
   }
 
-  withoutColumn(columnAlias: string): QueryModelUpdateDiff {
+  withoutColumns(columnAliases: string[]): QueryModelUpdateDiff {
     const initialColumns = this.initial_columns.filter(
-      (entry) => entry.alias !== columnAlias,
+      (entry) => !columnAliases.includes(entry.alias),
     );
     const model = new QueryModel({
       ...this,
@@ -128,6 +145,10 @@ export default class QueryModel {
         initial_columns: initialColumns,
       },
     };
+  }
+
+  withoutColumn(columnAlias: string): QueryModelUpdateDiff {
+    return this.withoutColumns([columnAlias]);
   }
 
   withDisplayNameForColumn(
@@ -183,6 +204,20 @@ export default class QueryModel {
     );
   }
 
+  isColumnUsedInTransformations(columnAlias: string): boolean {
+    return this.transformationModels.some((transform) =>
+      transform.isColumnUsedInTransformation(columnAlias),
+    );
+  }
+
+  areColumnsUsedInTransformations(columnAliases: string[]): boolean {
+    return columnAliases.some((alias) =>
+      this.transformationModels.some((transform) =>
+        transform.isColumnUsedInTransformation(alias),
+      ),
+    );
+  }
+
   getOutputColumnAliases(): string[] {
     const summarizationTransforms = this.getSummarizationTransforms();
     if (summarizationTransforms.length > 0) {
@@ -197,6 +232,7 @@ export default class QueryModel {
     return {
       id: this.id,
       name: this.name,
+      description: this.description,
       base_table: this.base_table,
       initial_columns: this.initial_columns,
       transformations: this.transformationModels?.map((entry) =>
@@ -207,5 +243,12 @@ export default class QueryModel {
 
   isSaved(): boolean {
     return !!this.id;
+  }
+
+  hasSummarizationTransform(): boolean {
+    return this.transformationModels.some(
+      (transform): transform is QuerySummarizationTransformationModel =>
+        transform instanceof QuerySummarizationTransformationModel,
+    );
   }
 }

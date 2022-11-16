@@ -92,4 +92,8 @@ export default class QuerySummarizationTransformationModel
       ),
     };
   }
+
+  isColumnUsedInTransformation(columnAlias: string): boolean {
+    return this.getOutputColumnAliases().includes(columnAlias);
+  }
 }
