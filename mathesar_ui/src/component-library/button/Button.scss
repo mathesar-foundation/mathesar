@@ -23,12 +23,11 @@
   /* Appearances */
   &.btn-default {
     background: var(--color-white);
-    border-color: var(--brand-500);
-    color: var(--brand-500);
+    border-color: var(--slate-200);
 
     &:not(:disabled) {
       &:focus {
-        border-color: var(--brand-500);
+        border-color: var(--slate-300);
       }
     }
   }
@@ -46,31 +45,54 @@
       }
 
       &:active {
-        background: var(--brand-600);
-        border-color: var(--brand-600);
+        background: var(--brand-800);
+        border-color: var(--brand-800);
       }
     }
   }
 
   &.btn-secondary {
     background: var(--slate-100);
-    border-color: var(--slate-100);
+    border-color: var(--slate-200);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        background: var(--slate-300);
+        background: var(--slate-200);
         border-color: var(--slate-300);
       }
 
       &:active {
-        background: var(--slate-100);
+        background: var(--slate-300);
       }
     }
   }
 
-  &.btn-plain {
+  &.btn-outline-primary {
+    background: var(--white);
+    border-color: var(--brand-500);
+    color: var(--brand-500);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        background: var(--slate-100);
+        border-color: var(--brand-600);
+      }
+
+      &:active {
+        background: var(--slate-200);
+        border-color: var(--brand-800);
+      }
+    }
+  }
+
+  &.btn-plain,
+  &.btn-plain-primary {
     background: transparent;
+  }
+
+  &.btn-plain-primary {
     color: var(--brand-500);
   }
 
@@ -79,35 +101,37 @@
   }
 
   &.btn-plain,
-  &.btn-ghost {
+  &.btn-ghost,
+  &.btn-plain-primary {
     border-color: transparent;
     border-radius: 0px;
     box-shadow: none !important;
   }
 
   &.btn-default,
-  &.btn-plain {
+  &.btn-plain,
+  &.btn-plain-primary {
     &:not(:disabled) {
       &:hover,
       &.hover {
-        background: #f3f4f5;
+        background: var(--slate-100);
       }
 
       &:active,
       &:focus,
       &.focus {
-        box-shadow: 0 0 0 2px #2087e633 !important;
+        box-shadow: 0 0 0 2px var(--slate-100) !important;
       }
 
       &:active {
-        background: #e7e7e7;
+        background: var(--slate-200);
       }
     }
   }
 
   /* Sizes */
   &.size-medium {
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.5rem;
     font-size: 1em;
   }
 

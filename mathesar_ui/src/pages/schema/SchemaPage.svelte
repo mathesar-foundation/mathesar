@@ -3,13 +3,11 @@
   import { queries } from '@mathesar/stores/queries';
   import { tables as tablesStore } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import Button from '@mathesar/component-library/button/Button.svelte';
   import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import { iconSchema, iconEdit } from '@mathesar/icons';
-  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { modal } from '@mathesar/stores/modal';
-  import TabContainer from '@mathesar/component-library/tabs/TabContainer.svelte';
+  import { Button, TabContainer, Icon } from '@mathesar-component-library';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
@@ -86,7 +84,7 @@
     </slot>
   </AppSecondaryHeader>
 
-  <TabContainer bind:activeTab {tabs}>
+  <TabContainer bind:activeTab {tabs} uniformTabWidth={false}>
     <div slot="tab" let:tab class="tab-header-container">
       <span>{tab.label}</span>
       {#if tab.count !== undefined}
@@ -118,7 +116,7 @@
 
 <style lang="scss">
   .tab-container {
-    padding-top: 1rem;
+    padding-top: 2rem;
   }
 
   .tab-header-container {
