@@ -45,7 +45,12 @@
 </script>
 
 <div class="cancel-or-proceed-button-pair">
-  <Button on:click={onCancel} disabled={isProcessing || !canCancel} {size}>
+  <Button
+    appearance="secondary"
+    on:click={onCancel}
+    disabled={isProcessing || !canCancel}
+    {size}
+  >
     {#if fullCancelButton.icon}<Icon {...fullCancelButton.icon} />{/if}
     <span>{fullCancelButton.label}</span>
   </Button>

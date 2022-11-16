@@ -10,17 +10,20 @@ import Pagination from '@mathesar/utils/Pagination';
 import type {
   QueryResultRecord,
   QueryRunResponse,
-  QueryResultColumn,
+  QueryColumnMetaData,
 } from '@mathesar/api/queries';
 import { runQuery } from '@mathesar/stores/queries';
 import { SheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type QueryModel from './QueryModel';
-import { processColumnMetaData, getProcessedOutputColumns } from './utils';
-import type {
-  ProcessedQueryOutputColumn,
-  ProcessedQueryResultColumnMap,
-  ProcessedQueryOutputColumnMap,
+import {
+  processColumnMetaData,
+  getProcessedOutputColumns,
+  speculateColumnMetaData,
+  type ProcessedQueryOutputColumn,
+  type ProcessedQueryResultColumnMap,
+  type ProcessedQueryOutputColumnMap,
+  type InputColumnsStoreSubstance,
 } from './utils';
 
 // TODO: Find a better way to implement type safety here
@@ -71,6 +74,7 @@ export default class QueryRunner<
     super();
     this.abstractTypeMap = abstractTypeMap;
     this.query = writable(query);
+    this.speculateProcessedColumns();
     void this.run();
     this.selection = new SheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
@@ -84,6 +88,31 @@ export default class QueryRunner<
         return Math.min(pageSize, totalCount - offset, rowLength) - 1;
       },
     });
+  }
+
+  /**
+   * We are not creating a derived store so that we need to control
+   * the callback only for essential scenarios and not everytime
+   * query store changes.
+   */
+  protected speculateProcessedColumns(
+    inputColumnInformationMap?: InputColumnsStoreSubstance['inputColumnInformationMap'],
+  ) {
+    const speculatedMetaData = speculateColumnMetaData({
+      currentProcessedColumnsMetaData: get(this.columnsMetaData),
+      inputColumnInformationMap:
+        inputColumnInformationMap ??
+        (new Map() as InputColumnsStoreSubstance['inputColumnInformationMap']),
+      queryModel: this.getQueryModel(),
+      abstractTypeMap: this.abstractTypeMap,
+    });
+    this.columnsMetaData.set(speculatedMetaData);
+    this.processedColumns.set(
+      getProcessedOutputColumns(
+        this.getQueryModel().getOutputColumnAliases(),
+        speculatedMetaData,
+      ),
+    );
   }
 
   async run(): Promise<QueryRunResponse | undefined> {
@@ -146,6 +175,7 @@ export default class QueryRunner<
   async setPagination(pagination: Pagination): Promise<void> {
     this.pagination.set(pagination);
     await this.run();
+    this.selection.activateFirstCellInSelectedColumn();
   }
 
   protected resetPagination(): void {
@@ -159,7 +189,7 @@ export default class QueryRunner<
   }
 
   protected resetResults(): void {
-    this.clearSelectedColumn();
+    this.clearSelection();
     this.runPromise?.cancel();
     this.resetPagination();
     this.rowsData.set({ totalCount: 0, rows: [] });
@@ -170,18 +200,20 @@ export default class QueryRunner<
   protected async resetPaginationAndRun(): Promise<void> {
     this.resetPagination();
     await this.run();
+    this.selection.activateFirstCellInSelectedColumn();
   }
 
-  selectColumn(alias: QueryResultColumn['alias']): void {
+  selectColumn(alias: QueryColumnMetaData['alias']): void {
     const processedColumn = get(this.processedColumns).get(alias);
     if (processedColumn) {
       this.selection.toggleColumnSelection(processedColumn);
     } else {
       this.selection.resetSelection();
+      this.selection.selectAndActivateFirstCellIfExists();
     }
   }
 
-  clearSelectedColumn(): void {
+  clearSelection(): void {
     this.selection.resetSelection();
   }
 
