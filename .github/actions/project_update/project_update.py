@@ -94,7 +94,7 @@ def add_item_to_project(content_id, project_data):
     )
     result = run_graphql(query)
     try:
-        return result['data']['item']['id']
+        return result['data']['addProjectV2ItemById']['item']['id']
     except KeyError as e:
         print(f'\tAdd item error:\n\t\t{result}')
         raise e
