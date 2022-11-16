@@ -1,12 +1,10 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from db.schemas.utils import PUBLIC_SCHEMA_OID
 from mathesar.models.base import (
-    Column, Schema, Table, _compute_preview_template,
+    Column, Table, _compute_preview_template,
     _create_table_settings,
 )
-from mathesar.models.users import DatabaseRole, Role, SchemaRole
 from mathesar.state.django import reflect_new_table_constraints
 
 
@@ -29,12 +27,3 @@ def create_table_settings(**kwargs):
 def compute_preview_column_settings(**kwargs):
     instance = kwargs['instance']
     _compute_preview_template(instance.table)
-
-
-@receiver(post_save, sender=DatabaseRole)
-def give_manager_access_to_public_schema(**kwargs):
-    if kwargs['created']:
-        instance = kwargs['instance']
-        public_schema = Schema.objects.get(oid=PUBLIC_SCHEMA_OID, database=instance.database)
-        # Permissions are similar to Postgres 15 https://www.enterprisedb.com/blog/new-public-schema-permissions-postgresql-15
-        SchemaRole.objects.create(schema=public_schema, user=instance.user, role=Role.VIEWER.value)
