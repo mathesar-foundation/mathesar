@@ -83,7 +83,8 @@
       </Collapsible>
     {/if}
 
-    {#if column}
+    <!-- Coming in the PR for chaging column data types -->
+    <!-- {#if column}
       <Collapsible isOpen>
         <CollapsibleHeader
           slot="header"
@@ -94,7 +95,7 @@
           <SetDefaultValue />
         </div>
       </Collapsible>
-    {/if}
+    {/if} -->
 
     <Collapsible isOpen>
       <CollapsibleHeader slot="header" title="Actions" />
