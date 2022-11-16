@@ -78,10 +78,6 @@ export type AbstractTypeConfigurationPartialMap = Partial<
   Record<AbstractTypeCategoryIdentifier, AbstractTypeConfiguration>
 >;
 
-export type AbstractTypeConfigurationFactory = (
-  map: AbstractTypeConfigurationPartialMap,
-) => AbstractTypeConfiguration;
-
 export interface AbstractType
   extends Omit<AbstractTypeResponse, 'db_types'>,
     AbstractTypeConfiguration {
@@ -89,6 +85,10 @@ export interface AbstractType
 }
 
 export type AbstractTypesMap = Map<AbstractType['identifier'], AbstractType>;
+
+export type AbstractTypeConfigurationFactory = (
+  map: AbstractTypesMap,
+) => AbstractTypeConfiguration;
 
 export interface AbstractTypesSubstance {
   state: States;

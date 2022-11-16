@@ -383,17 +383,6 @@ export default class SheetSelection<
     );
   }
 
-  clearColumnSelection(column: Column): boolean {
-    const isCompleteColumnSelected = this.isCompleteColumnSelected(column);
-
-    if (isCompleteColumnSelected) {
-      this.resetSelection();
-      return true;
-    }
-
-    return false;
-  }
-
   /**
    * Modifies the selected cells, forming a new selection by maintaining the
    * currently selected rows but altering the selected columns to match the
@@ -415,7 +404,11 @@ export default class SheetSelection<
   }
 
   toggleColumnSelection(column: Column): void {
-    if (this.clearColumnSelection(column)) {
+    const isCompleteColumnSelected = this.isCompleteColumnSelected(column);
+    this.activateCellByIndexAndId(0, column.id);
+
+    if (isCompleteColumnSelected) {
+      this.resetSelection();
       return;
     }
 
@@ -467,6 +460,16 @@ export default class SheetSelection<
     this.activeCell.set({
       rowIndex: row.rowIndex,
       columnId: column.id,
+    });
+  }
+
+  activateCellByIndexAndId(
+    rowIndex: Row['rowIndex'],
+    columnId: Column['id'],
+  ): void {
+    this.activeCell.set({
+      rowIndex,
+      columnId,
     });
   }
 
@@ -535,6 +538,13 @@ export default class SheetSelection<
     });
 
     return moved ? 'moved' : undefined;
+  }
+
+  activateFirstCellInSelectedColumn() {
+    const activeCell = get(this.activeCell);
+    if (activeCell) {
+      this.activateCellByIndexAndId(0, activeCell.columnId);
+    }
   }
 
   /**
