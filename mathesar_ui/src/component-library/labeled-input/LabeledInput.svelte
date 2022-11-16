@@ -2,7 +2,7 @@
   import Label from '@mathesar-component-library-dir/label/Label.svelte';
   import type { LabeledInputLayout } from './LabeledInputTypes';
 
-  export let label: string | undefined = undefined;
+  export let label: string | undefined = '';
   export let help: string | undefined = '';
   export let layout: LabeledInputLayout = 'inline';
 </script>
