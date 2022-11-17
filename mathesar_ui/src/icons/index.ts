@@ -39,7 +39,6 @@ import {
   faSortAmountDownAlt,
   faStopwatch,
   faSync,
-  faTable,
   faThList,
   faToolbox,
   faTrashAlt,
@@ -48,13 +47,12 @@ import {
   faUpload,
   faUser,
   faSave,
-  faCrosshairs,
   faTimes,
   faCircleArrowRight,
   faCircleArrowLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
-import { arrayIcon } from './customIcons';
+import { arrayIcon, tableIcon, explorationIcon } from './customIcons';
 
 /**
  * @file
@@ -106,7 +104,7 @@ export const iconConstraintUnique: IconProps = { data: faSnowflake };
 export const iconDatabase: IconProps = { data: faDatabase };
 export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
-export const iconExploration: IconProps = { data: faCrosshairs };
+export const iconExploration: IconProps = { data: explorationIcon };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faThList };
 export const iconInwardLink: IconProps = { data: faArrowRight };
@@ -116,8 +114,8 @@ export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconRecord: IconProps = { data: faFileAlt };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSorting: IconProps = { data: faSort };
-export const iconTable: IconProps = { data: faTable };
-export const iconTableInspector: IconProps = { data: faToolbox };
+export const iconTable: IconProps = { data: tableIcon };
+export const iconInspector: IconProps = { data: faToolbox };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUser: IconProps = { data: faUser };

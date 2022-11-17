@@ -42,4 +42,8 @@ export default class QueryFilterTransformationModel
       spec,
     };
   }
+
+  isColumnUsedInTransformation(columnAlias: string): boolean {
+    return this.columnIdentifier === columnAlias;
+  }
 }

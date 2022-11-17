@@ -13,4 +13,5 @@ export {
   getSelectedRowIndex,
   isCellActive,
   scrollBasedOnActiveCell,
+  scrollBasedOnSelection,
 } from './SheetSelection';

@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { tick } from 'svelte';
+  import { get } from 'svelte/store';
+
   import {
     CancelOrProceedButtonPair,
     ControlledModal,
@@ -8,6 +11,7 @@
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
+  import { scrollBasedOnSelection } from '@mathesar/components/sheet';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
@@ -93,6 +97,22 @@
       }
       followUps.push($tabularData.refresh());
       await Promise.all(followUps);
+      if ($targetType === 'newTable') {
+        // We ase using `get(processedColumns)` instead of `$processedColumns`
+        // because the store gets updated when the above promises settle, and
+        // for some reason Svelte doesn't seem to dispatch that update to the
+        // store when we're using the dollar syntax here. There may be a cleaner
+        // approach.
+        const allColumns = [...get(processedColumns).values()];
+        // Here we assume that the new column will be positioned at the end. We
+        // will need to modify this logic when we position the new column where
+        // the old columns were.
+        const newFkColumn = allColumns.slice(-1)[0];
+        selection.toggleColumnSelection(newFkColumn);
+        await tick();
+        scrollBasedOnSelection();
+      }
+      toast.success('Successfully extracted columns.');
       controller.close();
     } catch (e) {
       toast.error(getErrorMessage(e));
