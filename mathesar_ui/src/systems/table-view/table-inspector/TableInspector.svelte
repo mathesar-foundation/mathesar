@@ -47,7 +47,8 @@
     box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
       0px 3px 1px -2px rgba(0, 0, 0, 0.12), 0px 1px 5px 0px rgba(0, 0, 0, 0.2);
     position: relative;
-    background-color: var(--unknown-color-ask-ghislaine);
+    background-color: var(--sand-100);
+    isolation: isolate;
 
     // TODO: Make the tabs fixed and the inner content scrollable
     // TODO: Generalise the TabContainer component to account for below CSS
@@ -68,41 +69,9 @@
       left: 0;
       right: 0;
       bottom: 0;
+      top: 40px;
+      overflow-y: auto;
+      position: absolute;
     }
-    isolation: isolate;
   }
-
-  /* .tabs-container {
-    position: absolute;
-    overflow-y: auto;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: 20px;
-    padding: 0.5rem;
-  } */
-
-  /* .mode-tabs-container {
-    display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-    z-index: 1;
-    position: relative;
-    background: white;
-    padding: 0.5rem;
-  }
-
-  .mode-tab {
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    padding: 0.15rem 0.25rem;
-    flex: 1;
-    text-align: center;
-    cursor: pointer;
-  }
-
-  .mode-tab:hover,
-  .mode-tab.is-selected {
-    background-color: rgba(0, 0, 0, 0.12);
-  } */
 </style>
