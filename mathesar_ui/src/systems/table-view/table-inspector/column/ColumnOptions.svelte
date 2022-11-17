@@ -127,7 +127,7 @@
 
     .null {
       font-style: italic;
-      color: var(--unknown-color-ask-ghislaine-2);
+      color: var(--slate-500);
     }
   }
 </style>
