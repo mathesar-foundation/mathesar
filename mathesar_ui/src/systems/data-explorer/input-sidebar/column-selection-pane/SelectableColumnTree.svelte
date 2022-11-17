@@ -1,9 +1,12 @@
 <script lang="ts">
-  import type { ColumnWithLink } from '../utils';
+  import type { ColumnWithLink } from '../../utils';
   import SelectableColumn from './SelectableColumn.svelte';
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
 
+  export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
+    {};
   export let columnsWithLinks: Map<ColumnWithLink['id'], ColumnWithLink>;
+  export let showColumnsWithoutLinks = true;
 </script>
 
 <div class="selectable-column-tree">
@@ -11,12 +14,16 @@
     {#if column.linksTo}
       <TableGroupCollapsible
         tableName={column.linksTo.name}
-        direction="in"
         {column}
+        {linkCollapsibleOpenState}
       >
-        <svelte:self columnsWithLinks={column.linksTo.columns} on:add />
+        <svelte:self
+          {linkCollapsibleOpenState}
+          columnsWithLinks={column.linksTo.columns}
+          on:add
+        />
       </TableGroupCollapsible>
-    {:else}
+    {:else if showColumnsWithoutLinks}
       <SelectableColumn {column} on:add />
     {/if}
   {/each}

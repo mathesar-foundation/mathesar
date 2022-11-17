@@ -76,7 +76,7 @@
   </span>
   {#if showArrow}
     <span class="arrow">
-      <Icon {...iconExpandDown} />
+      <Icon {...iconExpandDown} size="0.75em" />
     </span>
   {/if}
 </Button>

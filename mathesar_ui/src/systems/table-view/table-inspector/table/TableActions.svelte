@@ -43,7 +43,7 @@
 </script>
 
 <div class="actions-container">
-  <Button appearance="ghost" on:click={() => linkTableModal.open()}>
+  <Button appearance="plain" on:click={() => linkTableModal.open()}>
     <Icon {...iconTableLink} />
     <span>Link Table</span>
   </Button>
@@ -53,7 +53,7 @@
   />
 
   {#if $currentDatabase && $currentSchemaId}
-    <Button appearance="ghost">
+    <Button appearance="plain">
       <Icon {...iconExploration} />
       <a
         class="btn-link"
@@ -63,7 +63,7 @@
     </Button>
   {/if}
 
-  <Button appearance="ghost" on:click={handleDeleteTable}>
+  <Button appearance="plain" on:click={handleDeleteTable}>
     <Icon {...iconDeleteMajor} />
     <span>Delete Table</span>
   </Button>

@@ -2,6 +2,8 @@ from sqlalchemy import inspect
 
 from db.schemas.operations.select import reflect_schema, get_mathesar_schemas_with_oids
 
+PUBLIC_SCHEMA_OID = 2200
+
 
 def get_schema_name_from_oid(oid, engine, metadata=None):
     schema_info = reflect_schema(engine, oid=oid, metadata=metadata)
