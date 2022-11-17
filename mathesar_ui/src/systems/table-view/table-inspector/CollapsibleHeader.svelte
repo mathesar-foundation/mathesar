@@ -7,6 +7,7 @@
 </script>
 
 <div class="container">
+  <span>{title}</span>
   {#if isDBLevelConfiguration}
     <Dropdown
       ariaLabel="Help"
@@ -25,12 +26,13 @@
       >
     </Dropdown>
   {/if}
-  <span>{title}</span>
 </div>
 
 <style lang="scss">
   .container {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
 
     > :global(* + *) {
       margin-left: 0.5rem;
