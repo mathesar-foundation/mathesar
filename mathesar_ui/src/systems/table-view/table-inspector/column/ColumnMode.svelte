@@ -54,11 +54,12 @@
             {column}
             columnsDataStore={$tabularData.columnsDataStore}
           />
-          <!-- <ColumnDisplayProperties {column} meta={$tabularData.meta} /> -->
-          <!-- TODO: Handle for FK too -->
           {#if column.column.primary_key}
             <ColumnTypeSpecifierTag {column} type="primaryKey" />
           {:else}
+            {#if !!column.linkFk}
+              <ColumnTypeSpecifierTag {column} type="foreignKey" />
+            {/if}
             <ColumnOptions
               {column}
               columnsDataStore={$tabularData.columnsDataStore}
