@@ -50,8 +50,6 @@
     background-color: var(--sand-100);
     isolation: isolate;
 
-    // TODO: Make the tabs fixed and the inner content scrollable
-    // TODO: Generalise the TabContainer component to account for below CSS
     :global(li.tab) {
       flex: 1;
     }

@@ -17,7 +17,6 @@
       triggerClass="help-trigger"
       contentClass="help-content"
     >
-      <!-- TODO: Confirm the icon position from Ghislaine -->
       <span slot="trigger" class="help-trigger-content">
         <Icon {...iconDatabase} />
       </span>
