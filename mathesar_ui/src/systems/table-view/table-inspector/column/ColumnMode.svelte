@@ -7,7 +7,6 @@
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
-  import SetDefaultValue from './SetDefaultValue.svelte';
   import ColumnTypeSpecifierTag from './ColumnTypeSpecifierTag.svelte';
 
   const tabularData = getTabularDataStoreFromContext();

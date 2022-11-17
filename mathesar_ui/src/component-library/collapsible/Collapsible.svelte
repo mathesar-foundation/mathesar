@@ -1,13 +1,8 @@
 <script lang="ts">
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { iconExpandDown } from '@mathesar-component-library-dir/common/icons';
-  import type { Appearance } from '@mathesar-component-library-dir/commonTypes';
 
   export let isOpen = false;
-
-  function toggle() {
-    isOpen = !isOpen;
-  }
 </script>
 
 <div class="collapsible">

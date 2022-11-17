@@ -25,7 +25,7 @@
       default:
         throw new MissingExhaustiveConditionError(type);
     }
-  }());
+  })();
 
   $: title = (function () {
     switch (type) {
@@ -36,7 +36,7 @@
       default:
         throw new MissingExhaustiveConditionError(type);
     }
-  }());
+  })();
 </script>
 
 <div class="link-section-container">
