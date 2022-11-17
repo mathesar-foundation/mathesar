@@ -5,7 +5,6 @@
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
-  import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
 
   export let type: 'primaryKey' | 'foreignKey';
   export let column: ProcessedColumn;

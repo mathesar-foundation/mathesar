@@ -15,7 +15,7 @@
       return iconExternalLink;
     }
     return undefined;
-  })();
+  }());
   $: element = href === undefined ? 'button' : 'a';
 </script>
 
