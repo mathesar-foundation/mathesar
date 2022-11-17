@@ -1,8 +1,11 @@
 <script lang="ts">
+  import { Button, Icon } from '@mathesar/component-library';
+  import { iconEdit } from '@mathesar/icons';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
+  import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import type { ColumnTypeOptionsSaveArgs } from '@mathesar/components/abstract-type-control/types';
   import { toast } from '@mathesar/stores/toast';
@@ -11,6 +14,21 @@
   $: ({ columnsDataStore } = $tabularData);
 
   export let column: ProcessedColumn;
+
+  let mode: 'read' | 'edit' = 'read';
+  function toggleMode(): undefined {
+    switch (mode) {
+      case 'read':
+        mode = 'edit';
+        break;
+      case 'edit':
+        mode = 'read';
+        break;
+      default:
+        throw new MissingExhaustiveConditionError(mode, 'ColumnType');
+    }
+    return undefined;
+  }
 
   async function save(columnInfo: ColumnTypeOptionsSaveArgs) {
     try {
@@ -27,10 +45,18 @@
   }
 </script>
 
-<AbstractTypeControl
-  column={{
-    ...column.column,
-    abstractType: column.abstractType,
-  }}
-  {save}
-/>
+{#if mode === 'read'}
+  <Button class="type-switch" appearance="plain" on:click={toggleMode}>
+    <span>{column.abstractType.name}</span>
+    <Icon size="0.7em" {...iconEdit} />
+  </Button>
+{:else}
+  <AbstractTypeControl
+    column={{
+      ...column.column,
+      abstractType: column.abstractType,
+    }}
+    {save}
+    on:close={toggleMode}
+  />
+{/if}
