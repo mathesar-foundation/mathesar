@@ -1,4 +1,5 @@
 import warnings
+import traceback
 
 from django.conf import settings
 from django.db import IntegrityError as DjangoIntegrityError
@@ -80,6 +81,7 @@ def mathesar_exception_handler(exc, context):
                 response_data['code'] = error_code
                 response_data['message'] = error_message
                 response_data['details'] = {'exception': force_str(exc)}
+                response_data['stacktrace'] = reformat_stacktrace(traceback.format_exc())
                 response.data = [response_data]
     return response
 
@@ -96,3 +98,8 @@ def is_pretty(data):
             ):
                 return False
         return True
+
+
+def reformat_stacktrace(stacktrace):
+    stacktrace_list = stacktrace.splitlines()[1:]
+    return [f'{i + 1}. {line.strip()}' for i, line in enumerate(stacktrace_list)]
