@@ -1,8 +1,12 @@
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from rest_framework import serializers
+
+from mathesar.api.db.permissions.schema import SchemaAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.api.exceptions.validation_exceptions.exceptions import PermissionDeniedAPIException
+from mathesar.models.base import Schema
 from mathesar.models.query import UIQuery
-from django.core.exceptions import ValidationError
 
 
 class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
@@ -18,6 +22,12 @@ class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer
             return base_table.schema.id
 
     def validate(self, attrs):
+        request = self.context['request']
+        base_table_schema_id = attrs['base_table'].schema_id
+        schema_queryset = Schema.objects.filter(id=base_table_schema_id)
+        has_schema_permission = SchemaAccessPolicy.scope_queryset(request, schema_queryset).exists()
+        if not has_schema_permission:
+            raise PermissionDeniedAPIException('Creating Query', 'Schema', base_table_schema_id)
         unexpected_fields = set(self.initial_data) - set(self.fields)
         if unexpected_fields:
             raise ValidationError(f"Unexpected field(s): {unexpected_fields}")
