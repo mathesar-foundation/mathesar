@@ -4,6 +4,7 @@ import logging
 from django.conf import settings
 
 from demo.install import load_library_dataset
+from demo.db_namer import get_name
 from db.install import create_mathesar_database
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Database
@@ -20,7 +21,7 @@ class LiveDemoModeMiddleware:
     def __call__(self, request):
         sessionid = request.COOKIES.get('sessionid', None)
         # every 4th character obfuscates sessionid (a bit)
-        db_name = 'mathesar_' + str(sessionid)[::4].lower()
+        db_name = get_name(str(sessionid))
         database, created = Database.current_objects.get_or_create(name=db_name)
         if created:
             create_mathesar_database(
