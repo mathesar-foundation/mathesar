@@ -134,3 +134,18 @@ class DictHasBadKeys(MathesarValidationException):
         if message is None:
             message = "Dictionary's keys are invalid or obligatory keys are missing."
         super().__init__(None, self.error_code, message, field, None)
+
+
+class PermissionDeniedAPIException(MathesarValidationException):
+    error_code = ErrorCodes.PermissionDenied.value
+
+    def __init__(
+            self,
+            action,
+            object_name,
+            object_id,
+            field=None,
+    ):
+        message = f"Permission Denied for {action} for {object_name} with ID: {object_id}"
+        details = {'object_name': object_name, 'object_id': object_id}
+        super().__init__(None, self.error_code, message, field, details)
