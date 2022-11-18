@@ -4,11 +4,7 @@ from db.transforms.operations.finish_specifying import finish_specifying_summari
 
 def get_transforms_with_summarizes_speced(db_query, engine, metadata):
     """
-    Processes db_query's transformations and returns them. Resulting sequence is the db_query's
-    transform sequence, but each possibly partial transform is replaced with a transform that's the
-    result of processing it.
-
-    See PossiblyPartialTransform for more information.
+    Processes db_query's transformations, each summarization spec is finished, if it is partial.
     """
     def _map(db_query, ix, db_transformation):
         if isinstance(db_transformation, Summarize):
