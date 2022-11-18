@@ -1,9 +1,11 @@
 from functools import wraps
 from django.db import models
-from django.utils.functional import cached_property
+from mathesar.state.cached_property import cached_property
 
 from db.queries.base import DBQuery, InitialColumn
+from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.transforms.operations.deserialize import deserialize_transformation
+from db.transforms.operations.serialize import serialize_transformation
 
 from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
@@ -181,7 +183,8 @@ class UIQuery(BaseModel, Relation):
 
     @property
     def initial_dj_columns(self):
-        return Column.objects.filter(pk__in=[col['id'] for col in self.initial_columns])
+        dj_column_ids = [col['id'] for col in self.initial_columns]
+        return Column.objects.filter(pk__in=dj_column_ids)
 
     @property
     def initial_columns_described(self):
@@ -244,6 +247,59 @@ class UIQuery(BaseModel, Relation):
             alias: self._describe_query_column(sa_col)
             for alias, sa_col in self.db_query.all_sa_columns_map.items()
         }
+
+    def replace_transformations_with_processed_transformations(self):
+        """
+        The transformations attribute is normally specified via a HTTP request. Now we're
+        introducing the concept of processed transformations, where we look at the
+        transformations and we find transformations that may be partially specified, if any, and
+        replace them with transformations resulting from processing them. The frontend then
+        reflects our updated transformations.
+
+        We're keeping this functionality somewhat separate from the default/simpler transformation
+        pipeline. Meaning that it is not enabled by default and has to be triggered on demand (by
+        calling this method). That is for multiple reasons.
+
+        Whereas before the transformations attribute was a one-way flow from the client,
+        now it's something that the backend may redefine. This a significant complication of the
+        data flow. For example, if you replace transformations on a saved UIQuery and save it
+        again, we must trigger a reflection, which can have a performance impact. Also, frontend
+        must expect that certain transformations might alter the transformation pipeline, which
+        would then need reflecting by frontend; that might be a breaking change.
+
+        Note, currently we only need transformation processing when using the `query/run`
+        endpoint, which means that we don't need to update any persisted queries, which means that
+        we don't need to trigger reflection.
+        """
+        self.transformations = self._processed_transformations
+
+    @property
+    def _processed_transformations(self):
+        return tuple(
+            serialize_transformation(db_transformation)
+            for db_transformation
+            in self._processed_db_transformations
+        )
+
+    @property
+    def _processed_db_transformations(self):
+        """
+        Currently, the only transformation processing we're doing is finishing (when partial) the
+        specification of Summarize transforms.
+
+        Note, different from _db_transformations, because this can effectively rewrite the
+        transformations pipeline. And we might not want to do that every time db_transformations
+        is accessed, due to possible performance costs.
+
+        If it weren't for performance costs, we might consider replacing _db_transformations with
+        this: the effect would be that a persisted query could have different summarizations in
+        django database than what is being evaluated in Postgres.
+        """
+        return get_transforms_with_summarizes_speced(
+            db_query=self.db_query,
+            engine=self._sa_engine,
+            metadata=get_cached_metadata(),
+        )
 
     @property
     def db_query(self):

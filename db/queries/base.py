@@ -27,6 +27,9 @@ class DBQuery:
             assert isinstance(initial_col, InitialColumn)
         self.initial_columns = initial_columns
         self.engine = engine
+        if transformations is None:
+            # Less states to consider if no transformations is just an empty sequence
+            transformations = tuple()
         self.transformations = transformations
         self.name = name
         self.metadata = metadata if metadata else get_empty_metadata()
@@ -162,13 +165,6 @@ class DBQuery:
         return m
 
 
-def _guarantee_jp_path_tuples(jp_path):
-    if jp_path is not None:
-        return tuple((tuple(edge[0]), tuple(edge[1])) for edge in jp_path)
-    else:
-        return ()
-
-
 class InitialColumn:
     def __init__(
             self,
@@ -184,18 +180,7 @@ class InitialColumn:
         self.reloid = reloid
         self.attnum = attnum
         self.alias = alias
-        if jp_path is not None:
-            self.jp_path = tuple(
-                # TODO explain the purpose of this transformation
-                tuple(
-                    [
-                        tuple(edge[0]),
-                        tuple(edge[1]),
-                    ]
-                ) for edge in jp_path
-            )
-        else:
-            self.jp_path = None
+        self.jp_path = _guarantee_jp_path_tuples(jp_path)
 
     @property
     def is_base_column(self):
@@ -213,3 +198,20 @@ class InitialColumn:
     def __hash__(self):
         """Hashes are equal when attributes are equal."""
         return hash(frozendict(self.__dict__))
+
+
+def _guarantee_jp_path_tuples(jp_path):
+    """
+    Makes sure that jp_path is made up of tuples or is an empty tuple.
+    """
+    if jp_path is not None:
+        return tuple(
+            (
+                tuple(edge[0]),
+                tuple(edge[1]),
+            )
+            for edge
+            in jp_path
+        )
+    else:
+        return tuple()
