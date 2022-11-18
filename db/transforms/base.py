@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from copy import deepcopy
+import itertools
 
 import sqlalchemy
 from sqlalchemy import select
@@ -156,6 +158,7 @@ class Group(Transform):
 class Summarize(Transform):
     """
     "spec": {
+        "base_grouping_column": "col1",
         "grouping_expressions": [
             {
                 "input_alias": "col1",
@@ -179,6 +182,10 @@ class Summarize(Transform):
     """
     type = "summarize"
 
+    # When generating specs, largely in testing, we want predictable output aliases.
+    default_group_output_alias_suffix = "_grouped"
+    default_agg_output_alias_suffix = "_agged"
+
     @property
     def map_of_output_alias_to_input_alias(self):
         m = dict()
@@ -196,8 +203,9 @@ class Summarize(Transform):
         def _get_grouping_column(col_spec):
             preproc = col_spec.get('preproc')
             out_alias = col_spec.get('output_alias')
+            in_alias = col_spec['input_alias']
 
-            expr = relation.columns[col_spec['input_alias']]
+            expr = relation.columns[in_alias]
 
             if preproc is not None:
                 expr = get_db_function_subclass_by_id(preproc).to_sa_expression(expr)
@@ -208,7 +216,7 @@ class Summarize(Transform):
 
         grouping_expressions = [
             _get_grouping_column(col_spec)
-            for col_spec in self.spec.get("grouping_expressions", [])
+            for col_spec in self._grouping_col_specs
         ]
         aggregation_expressions = [
             (
@@ -216,7 +224,7 @@ class Summarize(Transform):
                 .to_sa_expression(relation.columns[col_spec['input_alias']])
                 .label(col_spec['output_alias'])
             )
-            for col_spec in self.spec["aggregation_expressions"]
+            for col_spec in self._aggregation_col_specs
         ]
 
         executable = (
@@ -224,6 +232,91 @@ class Summarize(Transform):
             .group_by(*grouping_expressions)
         )
         return _to_non_executable(executable)
+
+    def get_new_with_aliases_added_to_group_by(self, aliases):
+        def get_col_spec_from_alias(alias):
+            return dict(
+                input_alias=alias,
+                output_alias=alias + default_suffix,
+            )
+        spec_field = 'grouping_expressions'
+        default_suffix = self.default_group_output_alias_suffix
+        return _add_aliases_to_summarization_expr_field(
+            summarization=self,
+            spec_field=spec_field,
+            aliases=aliases,
+            get_col_spec_from_alias=get_col_spec_from_alias,
+        )
+
+    def get_new_with_aliases_added_to_agg_on(self, aliases):
+        def get_col_spec_from_alias(alias):
+            return dict(
+                input_alias=alias,
+                output_alias=alias + default_suffix,
+                function=default_aggregation_fn
+            )
+        spec_field = 'aggregation_expressions'
+        default_suffix = self.default_agg_output_alias_suffix
+        default_aggregation_fn = 'aggregate_to_array'
+        return _add_aliases_to_summarization_expr_field(
+            summarization=self,
+            spec_field=spec_field,
+            aliases=aliases,
+            get_col_spec_from_alias=get_col_spec_from_alias,
+        )
+
+    @property
+    def base_grouping_column(self):
+        return self.spec['base_grouping_column']
+
+    @property
+    def grouping_input_aliases(self):
+        return [
+            col_spec['input_alias']
+            for col_spec
+            in self._grouping_col_specs
+        ]
+
+    @property
+    def aggregation_input_aliases(self):
+        return [
+            col_spec['input_alias']
+            for col_spec
+            in self._aggregation_col_specs
+        ]
+
+    @property
+    def _grouping_col_specs(self):
+        return self.spec.get("grouping_expressions", [])
+
+    @property
+    def _aggregation_col_specs(self):
+        return self.spec.get("aggregation_expressions", [])
+
+
+def _add_aliases_to_summarization_expr_field(
+    summarization, spec_field, aliases, get_col_spec_from_alias
+):
+    """
+    Returns new summarization with aliases added to `spec_field`.
+
+    This function will apply `get_col_spec_from_alias` to each column alias in `aliases`,
+    and add the results to the chosen `spec_field` in a copy of `summarization`, returning the copy.
+    """
+    summarization = deepcopy(summarization)
+    expressions_to_add = [
+        get_col_spec_from_alias(alias)
+        for alias
+        in aliases
+    ]
+    existing_expressions = summarization.spec[spec_field]
+    new_expressions = list(
+        itertools.chain(
+            existing_expressions, expressions_to_add
+        )
+    )
+    summarization.spec[spec_field] = new_expressions
+    return summarization
 
 
 class SelectSubsetOfColumns(Transform):

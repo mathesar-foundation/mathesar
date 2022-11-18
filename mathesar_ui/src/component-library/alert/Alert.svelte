@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { iconInfo, iconWarning } from '../common/icons';
+  import { iconError, iconInfo, iconWarning } from '../common/icons';
   import Icon from '../icon/Icon.svelte';
   import type { IconProps } from '../icon/IconTypes';
   import type { AlertAppearance } from './AlertTypes';
 
   const appearanceIconMap: Record<AlertAppearance, IconProps> = {
     info: iconInfo,
+    error: iconError,
     warning: iconWarning,
   };
 
@@ -15,9 +16,9 @@
   $: classes = ['alert-container', `alert-${appearance}`].join(' ');
 </script>
 
-<div class={classes}>
+<span class={classes}>
   <Icon {...icon} />
-  <div class="content">
+  <span class="content">
     <slot />
-  </div>
-</div>
+  </span>
+</span>
