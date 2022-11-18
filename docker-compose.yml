@@ -36,6 +36,5 @@ services:
       - "6006:6006"
     depends_on:
       - db
-
 volumes:
   ui_node_modules:
