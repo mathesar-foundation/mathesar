@@ -16,7 +16,7 @@
 
   const linkTableModal = modal.spawnModalController();
 
-  $: icon = (function () {
+  $: icon = (() => {
     switch (type) {
       case 'in_this_table':
         return iconLinksInThisTable;
@@ -25,9 +25,9 @@
       default:
         throw new MissingExhaustiveConditionError(type);
     }
-  }());
+  })();
 
-  $: title = (function () {
+  $: title = (() => {
     switch (type) {
       case 'in_this_table':
         return 'In this table';
@@ -36,7 +36,7 @@
       default:
         throw new MissingExhaustiveConditionError(type);
     }
-  }());
+  })();
 </script>
 
 <div class="link-section-container">

@@ -7,7 +7,7 @@
   export let suffixIcon: IconProps | undefined = undefined;
   export let href: string | undefined = undefined;
 
-  $: suffixIcon = (function () {
+  $: suffixIcon = (() => {
     if (suffixIcon) {
       return suffixIcon;
     }
@@ -15,7 +15,7 @@
       return iconExternalLink;
     }
     return undefined;
-  }());
+  })();
   $: element = href === undefined ? 'button' : 'a';
 </script>
 
