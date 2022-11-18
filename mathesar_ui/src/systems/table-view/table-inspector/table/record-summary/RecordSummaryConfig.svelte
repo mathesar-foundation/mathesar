@@ -1,10 +1,10 @@
 <script lang="ts">
   import { Alert, RadioGroup } from '@mathesar-component-library';
   import {
-    makeForm,
-    requiredField,
-    optionalField,
     FormSubmit,
+    makeForm,
+    optionalField,
+    requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -14,13 +14,18 @@
     type RecordRow,
   } from '@mathesar/stores/table-data';
   import { renderRecordSummaryForRow } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import { currentTable } from '@mathesar/stores/tables';
-  import TemplateInput from './TemplateInput.svelte';
+  import {
+    currentTable as table,
+    saveRecordSummaryTemplate,
+  } from '@mathesar/stores/tables';
+  import { toast } from '@mathesar/stores/toast';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import {
     columnIsConformant,
     getColumnsInTemplate,
     hasColumnReferences,
   } from './recordSummaryTemplateUtils';
+  import TemplateInput from './TemplateInput.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -28,20 +33,17 @@
   $: ({ columns } = columnsDataStore);
   $: ({ savedRecords } = recordsData);
   $: firstRow = $savedRecords[0] as RecordRow | undefined;
-  $: table = $currentTable;
-  $: initialCustomized = table?.settings.preview_settings.customized ?? false;
-  $: initialTemplate = table?.settings.preview_settings.template ?? '';
+  $: initialCustomized = $table?.settings.preview_settings.customized ?? false;
+  $: initialTemplate = $table?.settings.preview_settings.template ?? '';
   $: customized = requiredField(initialCustomized);
   $: template = optionalField(initialTemplate, [hasColumnReferences($columns)]);
   $: form = makeForm({ customized, template });
-  $: columnsInTemplate = $customized
-    ? getColumnsInTemplate({ columns: $columns, template: $template })
-    : [];
+  $: columnsInTemplate = getColumnsInTemplate($columns, $template);
   $: nonconformantColumns = columnsInTemplate.filter(
     (column) => !columnIsConformant(column),
   );
   $: previewRecordSummary = (() => {
-    if (!table || !firstRow) {
+    if (!$table || !firstRow) {
       return undefined;
     }
     const { record } = firstRow;
@@ -49,8 +51,14 @@
   })();
 
   async function save() {
-    // TODO
-    await Promise.resolve();
+    try {
+      if (!$table) {
+        throw new Error('Unable to find table.');
+      }
+      await saveRecordSummaryTemplate($table, $form.values);
+    } catch (e) {
+      toast.error(`Unable to save. ${getErrorMessage(e)}`);
+    }
   }
 </script>
 

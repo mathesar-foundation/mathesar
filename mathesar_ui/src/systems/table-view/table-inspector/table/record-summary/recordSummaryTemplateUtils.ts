@@ -14,13 +14,7 @@ export function columnIsConformant(column: ColumnLike): boolean {
   return !column.name.match(/[{}]/);
 }
 
-export function getColumnsInTemplate({
-  columns,
-  template,
-}: {
-  columns: Column[];
-  template: string;
-}) {
+export function getColumnsInTemplate(columns: Column[], template: string) {
   const matches = template.match(/\{\d+\}/g) ?? [];
   const columnIds = matches.map((m) => parseInt(m.slice(1, -1), 10));
   return columns.filter((c) => columnIds.includes(c.id));
@@ -28,7 +22,7 @@ export function getColumnsInTemplate({
 
 export function hasColumnReferences(columns: Column[]): ValidationFn<string> {
   return validIf(
-    (template) => getColumnsInTemplate({ template, columns }).length > 0,
+    (template) => getColumnsInTemplate(columns, template).length > 0,
     'The template must reference at least one column, otherwise the record ' +
       'summary will be the same for all records.',
   );

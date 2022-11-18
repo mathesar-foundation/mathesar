@@ -16,7 +16,10 @@
 import type { Readable, Unsubscriber, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
-import { CancellablePromise } from '@mathesar-component-library';
+import {
+  CancellablePromise,
+  type RecursivePartial,
+} from '@mathesar-component-library';
 import type { MinimalColumnDetails, TableEntry } from '@mathesar/api/tables';
 import type {
   SplitTableRequest,
@@ -424,4 +427,25 @@ export function getJoinableTablesResult(tableId: number) {
   return getAPI<JoinableTablesResult>(
     `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=1`,
   );
+}
+
+type TableSettings = TableEntry['settings'];
+
+export async function saveTableSettings(
+  table: Pick<TableEntry, 'id' | 'settings' | 'schema'>,
+  settings: RecursivePartial<TableSettings>,
+): Promise<void> {
+  const url = `/api/db/v0/tables/${table.id}/settings/${table.settings.id}/`;
+  await patchAPI<TableSettings>(url, settings);
+  await refetchTablesForSchema(table.schema);
+}
+
+export function saveRecordSummaryTemplate(
+  table: Pick<TableEntry, 'id' | 'settings' | 'schema'>,
+  previewSettings: TableSettings['preview_settings'],
+): Promise<void> {
+  const { customized } = previewSettings;
+  return saveTableSettings(table, {
+    preview_settings: customized ? previewSettings : { customized },
+  });
 }
