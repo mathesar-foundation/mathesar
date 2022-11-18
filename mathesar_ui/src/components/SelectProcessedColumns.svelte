@@ -5,7 +5,7 @@
   import ProcessedColumnName from './column/ProcessedColumnName.svelte';
 
   export let availableColumns: ProcessedColumn[];
-  export let columns: ProcessedColumn[] = [];
+  export let value: ProcessedColumn[] = [];
 
   function getLabel(processedColumn: ProcessedColumn): ComponentAndProps {
     return {
@@ -15,4 +15,4 @@
   }
 </script>
 
-<MultiSelect options={availableColumns} bind:values={columns} {getLabel} />
+<MultiSelect options={availableColumns} bind:values={value} {getLabel} />
