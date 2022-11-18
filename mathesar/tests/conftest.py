@@ -22,7 +22,7 @@ import mathesar.tests.conftest
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.models.base import Schema, Table, Database, DataFile
 from mathesar.models.base import Column as mathesar_model_column
-from mathesar.models.users import User
+from mathesar.models.users import DatabaseRole, SchemaRole, User
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
@@ -264,6 +264,7 @@ def create_schema(test_db_model, create_db_schema):
         schema_oid = get_schema_oid_from_name(schema_name, engine)
         schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
         return schema_model
+
     yield _create_schema
     # NOTE: Schema model is not cleaned up. Maybe invalidate cache?
 
@@ -318,7 +319,12 @@ def _get_datafile_for_path(path):
 def create_column():
     def _create_column(table, column_data):
         column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine, metadata=get_empty_metadata())
+        attnum = get_column_attnum_from_name(
+            table.oid,
+            [column.name],
+            table.schema._sa_engine,
+            metadata=get_empty_metadata()
+        )
         column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
         return column[0]
     return _create_column
@@ -333,7 +339,12 @@ def custom_types_schema_url(schema, live_server):
 def create_column_with_display_options():
     def _create_column(table, column_data):
         column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine, metadata=get_empty_metadata())
+        attnum = get_column_attnum_from_name(
+            table.oid,
+            [column.name],
+            table.schema._sa_engine,
+            metadata=get_empty_metadata()
+        )
         # passing table object caches sa_columns, missing out any new columns
         # So table.id is passed to get new instance of table.
         column = mathesar_model_column.current_objects.get_or_create(
@@ -342,6 +353,7 @@ def create_column_with_display_options():
             display_options=column_data.get('display_options', None)
         )
         return column[0]
+
     return _create_column
 
 
@@ -385,3 +397,58 @@ def client_bob(user_bob):
     client = APIClient()
     client.login(username='bob', password='password')
     return client
+
+
+@pytest.fixture
+def client_alice(user_alice):
+    client = APIClient()
+    client.login(username=user_alice.username, password='password')
+    return client
+
+
+@pytest.fixture
+def user_jerry():
+    user = User.objects.create(
+        username='jerry',
+        email='bob@example.com',
+        full_name='Bob Smith',
+        short_name='Bob'
+    )
+    user.set_password('password')
+    user.save()
+    yield user
+    user.delete()
+
+
+@pytest.fixture
+def user_turdy():
+    user = User.objects.create(
+        username='bob',
+        email='bob@example.com',
+        full_name='Bob Smith',
+        short_name='Bob'
+    )
+    user.set_password('password')
+    user.save()
+    yield user
+    user.delete()
+
+
+@pytest.fixture
+def db_manager_client(user_bob, schema):
+    role = 'manager'
+    client = APIClient()
+    client.login(username=user_bob.username, password='password')
+    database_role = DatabaseRole.objects.create(user=user_bob, database=schema.database, role=role)
+    yield client
+    database_role.delete()
+
+
+@pytest.fixture
+def schema_manager_client(user_alice, schema):
+    role = 'manager'
+    client = APIClient()
+    client.login(username=user_alice.username, password='password')
+    schema_role = SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
+    yield client
+    schema_role.delete()
