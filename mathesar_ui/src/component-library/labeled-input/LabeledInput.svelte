@@ -2,7 +2,8 @@
   import Label from '@mathesar-component-library-dir/label/Label.svelte';
   import type { LabeledInputLayout } from './LabeledInputTypes';
 
-  export let label: string | undefined = undefined;
+  export let label: string | undefined = '';
+  export let help: string | undefined = '';
   export let layout: LabeledInputLayout = 'inline';
 </script>
 
@@ -15,7 +16,12 @@
   <Label>
     <span class="label-content">
       <span class="label">
-        {#if $$slots.label}<slot name="label" />{:else}{label}{/if}
+        {label}
+        <slot name="label" />
+      </span>
+      <span class="help">
+        {help}
+        <slot name="help" />
       </span>
       <span class="input"><slot /></span>
     </span>
