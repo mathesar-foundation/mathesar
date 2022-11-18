@@ -10,7 +10,7 @@
   // TODO: Removing this default proceed icon
   // Change if needed in other designs
   export let icon: IconProps | undefined = undefined;
-  export let onClick: () => Promise<void>;
+  export let onClick: () => Promise<void> | void = () => {};
   export let disabled = false;
   export let isProcessing = false;
   export let size: Size | undefined = undefined;
