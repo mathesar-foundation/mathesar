@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import status
@@ -73,7 +74,8 @@ def get_common_data(request, database, schema=None):
         'databases': get_database_list(request),
         'tables': get_table_list(request, schema),
         'queries': get_queries_list(request, schema),
-        'abstract_types': get_ui_type_list(request, database)
+        'abstract_types': get_ui_type_list(request, database),
+        'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
     }
 
 
