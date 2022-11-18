@@ -31,6 +31,7 @@ import type {
 } from '@mathesar/api/tables';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import { CancellablePromise } from '@mathesar-component-library';
+import { invalidIf } from '@mathesar/components/form';
 
 import { currentSchemaId } from './schemas';
 
@@ -393,6 +394,14 @@ export const tables: Readable<DBTablesStoreData> = derived(
     };
   },
 );
+
+export const validateNewTableName = derived(tables, ($tables) => {
+  const names = new Set([...$tables.data.values()].map((t) => t.name));
+  return invalidIf(
+    (name: string) => names.has(name),
+    'A table with that name already exists.',
+  );
+});
 
 export function getTableName(id: DBObjectEntry['id']): string | undefined {
   return get(tables).data.get(id)?.name;

@@ -1,1 +1,1 @@
-export type AlertAppearance = 'info' | 'warning';
+export type AlertAppearance = 'info' | 'warning' | 'error';

@@ -15,3 +15,10 @@ export interface ComponentAndProps<T = unknown> {
   component: typeof SvelteComponent;
   props?: T;
 }
+
+// TODO change to the following, when we have time to fix the type errors:
+//
+// export type ComponentAndProps<T extends SvelteComponent> = {
+//   component: ComponentType<T>;
+//   props: ComponentProps<T>;
+// };

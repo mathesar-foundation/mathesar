@@ -5,7 +5,6 @@ pytest-django==4.2.0
 pytest-env==0.6.2
 pytest-cov==3.0.0
 pytest-xdist[psutil]==2.5.0
-Sphinx==3.5.3
 playwright==1.18.1
 pytest-playwright==0.2.3
 flake8-no-types==1.4.0

@@ -34,9 +34,15 @@ We actively encourage contribution! [Join our community](https://wiki.mathesar.o
 
 First, [ensure that you have Docker installed](https://docs.docker.com/get-docker/).
 
-Clone the repository and then run the following command for performing initial setup:
+
+Clone the repository and then copy the `.env.example` file to `.env` like so:
 ```
-make initial_setup
+cp .env.example .env
+```
+
+From the repository's root directory, run:
+```
+docker-compose up
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. 
