@@ -107,7 +107,7 @@ def get_field_data(field_name, project_data):
 
 
 def get_option_data(option_name, field_data):
-    settings = json.loads(field_data['options'])
+    settings = field_data['options']
     option_data = [option for option in options if option['name'] == option_name][0]
     return option_data
 
