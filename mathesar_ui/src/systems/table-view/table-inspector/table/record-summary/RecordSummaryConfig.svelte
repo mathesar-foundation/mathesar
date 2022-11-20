@@ -31,7 +31,7 @@
 
   $: ({ recordsData, columnsDataStore } = $tabularData);
   $: ({ columns } = columnsDataStore);
-  $: ({ savedRecords } = recordsData);
+  $: ({ savedRecords, recordSummaries } = recordsData);
   $: firstRow = $savedRecords[0] as RecordRow | undefined;
   $: initialCustomized = $table?.settings.preview_settings.customized ?? false;
   $: initialTemplate = $table?.settings.preview_settings.template ?? '';
@@ -47,7 +47,11 @@
       return undefined;
     }
     const { record } = firstRow;
-    return renderRecordSummaryForRow({ template: $template, record });
+    return renderRecordSummaryForRow({
+      template: $template,
+      record,
+      transitiveData: $recordSummaries,
+    });
   })();
 
   async function save() {

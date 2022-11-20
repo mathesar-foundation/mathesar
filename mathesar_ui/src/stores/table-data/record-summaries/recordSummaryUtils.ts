@@ -143,12 +143,14 @@ export function renderTransitiveRecordSummary({
 export function renderRecordSummaryForRow({
   template,
   record,
+  transitiveData,
 }: {
   template: string;
   record: Record<string | number, unknown>;
+  transitiveData: RecordSummariesForSheet;
 }) {
   const entries = Object.entries(record);
   const fields: [number, unknown][] = entries.map(([k, v]) => [Number(k), v]);
   const inputData = prepareFieldsAsRecordSummaryInputData(fields);
-  return renderRecordSummary(template, inputData);
+  return renderTransitiveRecordSummary({ template, inputData, transitiveData });
 }
