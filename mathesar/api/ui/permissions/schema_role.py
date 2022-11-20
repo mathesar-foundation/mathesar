@@ -28,10 +28,10 @@ class SchemaRoleAccessPolicy(AccessPolicy):
         if not request.user.is_superuser:
             allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
             databases_with_view_access = Database.objects.filter(
-                Q(databaserole__role__in=allowed_roles) & Q(databaserole__user=request.user)
+                Q(database_role__role__in=allowed_roles) & Q(database_role__user=request.user)
             )
             schema_with_view_access = Schema.objects.filter(
-                Q(schemarole__role__in=allowed_roles) & Q(schemarole__user=request.user)
+                Q(schema_role__role__in=allowed_roles) & Q(schema_role__user=request.user)
             )
             qs = qs.filter(
                 Q(schema__in=schema_with_view_access)
