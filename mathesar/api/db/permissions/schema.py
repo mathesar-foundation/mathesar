@@ -5,8 +5,9 @@ from mathesar.models.users import DatabaseRole, Role, SchemaRole
 
 
 class SchemaAccessPolicy(AccessPolicy):
-    # Anyone can view schema role as long as they have atleast a view access to that schema or its database
-    # Create Access is restricted to superusers or managers of the schema or the database it belongs to.
+    # Anyone can view schema as long as they have
+    # at least a Viewer access to that schema or the database the schema is part of
+    # Create Access is restricted to superusers or managers of the schema or the database the schema is part of.
     statements = [
         {
             'action': ['list', 'retrieve', 'create'],
