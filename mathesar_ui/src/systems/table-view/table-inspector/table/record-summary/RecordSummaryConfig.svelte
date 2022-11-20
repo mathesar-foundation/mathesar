@@ -76,6 +76,7 @@
     <RadioGroup
       options={[false, true]}
       getRadioLabel={(v) => (v ? 'Custom' : 'Default')}
+      ariaLabel="Template type"
       isInline
       bind:value={$customized}
     />
