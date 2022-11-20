@@ -54,4 +54,3 @@ class ErrorCodes(Enum):
     ConstraintColumnEmpty = 4412
     InvalidValueType = 4415
     DictHasBadKeys = 4416
-    PermissionDenied = 4418
