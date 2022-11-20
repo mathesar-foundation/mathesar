@@ -14,7 +14,7 @@ class SchemaAccessPolicy(AccessPolicy):
             'principal': '*',
             'effect': 'allow',
         },
-        # Only superuser or schema/database manager can delete the role
+        # Only superuser or schema/database manager can delete the schema
         {
             'action': ['destroy', 'update', 'partial_update'],
             'principal': ['*'],
