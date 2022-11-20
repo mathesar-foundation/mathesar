@@ -148,6 +148,15 @@ def check_create_table_response(
     check_table_response(response_table, table, expt_name)
 
 
+write_client_with_different_roles = [
+    ('db_manager_client', 201),
+    ('db_editor_client', 400),
+    ('schema_manager_client', 201),
+    ('schema_viewer_client', 400),
+    ('db_viewer_schema_manager_client', 201)
+]
+
+
 def test_table_list(create_patents_table, client):
     """
     Desired format:
@@ -691,8 +700,8 @@ def test_table_create_by_multiple_manager(client_bob, client_alice, user_bob, us
     assert response.status_code == 400
 
 
-@pytest.mark.parametrize('client_name, expected_status_code', [('db_manager_client', 201)])
-def test_table_partial_update_by_different_manager_roles(schema, request, client_name, expected_status_code):
+@pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)
+def test_table_create_by_different_manager_roles(schema, request, client_name, expected_status_code):
     table_name = 'test_table'
     body = {
         'name': table_name,
@@ -704,25 +713,6 @@ def test_table_partial_update_by_different_manager_roles(schema, request, client
 
 
 def test_table_partial_update_by_superuser(create_patents_table, client):
-    table_name = 'NASA Table Partial Update'
-    new_table_name = 'NASA Table Partial Update New'
-    table = create_patents_table(table_name)
-
-    expect_comment = 'a super new test comment'
-    body = {'name': new_table_name, 'description': expect_comment}
-    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
-
-    response_table = response.json()
-    assert response.status_code == 200
-    assert response_table
-    assert response_table['description'] == expect_comment
-    check_table_response(response_table, table, new_table_name)
-
-    table = Table.objects.get(oid=table.oid)
-    assert table.name == new_table_name
-
-
-def test_table_partial_update_by_manager(create_patents_table, client):
     table_name = 'NASA Table Partial Update'
     new_table_name = 'NASA Table Partial Update New'
     table = create_patents_table(table_name)

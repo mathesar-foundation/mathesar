@@ -410,9 +410,9 @@ def client_alice(user_alice):
 def user_jerry():
     user = User.objects.create(
         username='jerry',
-        email='bob@example.com',
-        full_name='Bob Smith',
-        short_name='Bob'
+        email='jerry@example.com',
+        full_name='JerrySmith',
+        short_name='Jerry'
     )
     user.set_password('password')
     user.save()
@@ -423,10 +423,24 @@ def user_jerry():
 @pytest.fixture
 def user_turdy():
     user = User.objects.create(
-        username='bob',
-        email='bob@example.com',
-        full_name='Bob Smith',
-        short_name='Bob'
+        username='turdy',
+        email='turdy@example.com',
+        full_name='Turdy',
+        short_name='Turdy'
+    )
+    user.set_password('password')
+    user.save()
+    yield user
+    user.delete()
+
+
+@pytest.fixture
+def user_tom():
+    user = User.objects.create(
+        username='tom',
+        email='tom@example.com',
+        full_name='Tom James',
+        short_name='Tom'
     )
     user.set_password('password')
     user.save()
@@ -445,10 +459,44 @@ def db_manager_client(user_bob, schema):
 
 
 @pytest.fixture
+def db_editor_client(user_turdy, schema):
+    role = 'viewer'
+    client = APIClient()
+    client.login(username=user_turdy.username, password='password')
+    database_role = DatabaseRole.objects.create(user=user_turdy, database=schema.database, role=role)
+    yield client
+    database_role.delete()
+
+
+@pytest.fixture
 def schema_manager_client(user_alice, schema):
     role = 'manager'
     client = APIClient()
     client.login(username=user_alice.username, password='password')
-    schema_role = SchemaRole.objects.create(user=user_bob, schema=schema, role=role)
+    schema_role = SchemaRole.objects.create(user=user_alice, schema=schema, role=role)
     yield client
+    schema_role.delete()
+
+
+@pytest.fixture
+def schema_viewer_client(user_jerry, schema):
+    role = 'viewer'
+    client = APIClient()
+    client.login(username=user_jerry.username, password='password')
+    schema_role = SchemaRole.objects.create(user=user_jerry, schema=schema, role=role)
+    yield client
+    schema_role.delete()
+
+
+@pytest.fixture
+def db_viewer_schema_manager_client(user_tom, schema):
+    schema_role = 'viewer'
+    db_role = 'manager'
+
+    client = APIClient()
+    client.login(username=user_tom.username, password='password')
+    database_role = DatabaseRole.objects.create(user=user_tom, database=schema.database, role=db_role)
+    schema_role = SchemaRole.objects.create(user=user_tom, schema=schema, role=schema_role)
+    yield client
+    database_role.delete()
     schema_role.delete()
