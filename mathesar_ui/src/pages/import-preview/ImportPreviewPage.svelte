@@ -46,6 +46,7 @@
   import { toast } from '@mathesar/stores/toast';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import PreviewColumn from './PreviewColumn.svelte';
+  import FaviconRecord from '@mathesar/static-assets/encodedFavicons_Record.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -307,7 +308,10 @@
   }
 </script>
 
-<svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
+<svelte:head>
+  <title>{makeSimplePageTitle('Import')}</title>
+  <FaviconRecord/>
+</svelte:head>
 
 <LayoutWithHeader>
   <div class="table-preview-confirmation">

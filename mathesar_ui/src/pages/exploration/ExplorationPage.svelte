@@ -13,6 +13,7 @@
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import Header from './Header.svelte';
+  import FaviconExplorer from '@mathesar/static-assets/encodedFavicons_DataExplorer.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -38,6 +39,7 @@
 
 <svelte:head>
   <title>{query.name} | {schema.name} | Mathesar</title>
+      <FaviconExplorer/>
 </svelte:head>
 
 <LayoutWithHeader2 fitViewport restrictWidth={false}>

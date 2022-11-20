@@ -8,6 +8,7 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import RecordPageContent from './RecordPageContent.svelte';
   import type RecordStore from './RecordStore';
+  import FaviconRecord from '@mathesar/static-assets/encodedFavicons_Record.svelte';
 
   export let record: RecordStore;
 
@@ -24,7 +25,10 @@
   $: title = recordStoreIsLoading ? '' : $summary;
 </script>
 
-<svelte:head><title>{makeSimplePageTitle(title)}</title></svelte:head>
+<svelte:head>
+  <title>{makeSimplePageTitle(title)}</title>
+  <FaviconRecord/>
+</svelte:head>
 
 <LayoutWithHeader>
   {#if isLoading}

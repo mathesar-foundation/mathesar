@@ -12,6 +12,7 @@
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
+  import FaviconSchema from '@mathesar/static-assets/encodedFavicons_Database.svelte'
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -59,7 +60,10 @@
   }
 </script>
 
-<svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
+<svelte:head>
+  <title>{makeSimplePageTitle(schema.name)}</title>
+    <FaviconSchema/>
+</svelte:head>
 
 <LayoutWithHeader2 --max-layout-width="64rem">
   <AppSecondaryHeader

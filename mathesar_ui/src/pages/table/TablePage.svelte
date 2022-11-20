@@ -13,6 +13,8 @@
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import FaviconTable from '@mathesar/static-assets/encodedFavicons_Table.svelte';
+
 
   const tabularDataStore = setTabularDataStoreInContext(
     // Sacrifice type safety here since the value is initialized reactively
@@ -41,7 +43,9 @@
   $: handleMetaSerializationChange($metaSerialization);
 </script>
 
-<svelte:head><title>{makeSimplePageTitle(table.name)}</title></svelte:head>
+<svelte:head><title>{makeSimplePageTitle(table.name)}</title>
+<FaviconTable/>
+</svelte:head>
 
 <LayoutWithHeader fitViewport>
   <div class="table-page">

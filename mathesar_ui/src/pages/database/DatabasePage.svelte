@@ -20,6 +20,7 @@
   import SchemaRow from './SchemaRow.svelte';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
+  import FaviconMathesar from '@mathesar/static-assets/encodedFavicons_Logo.svelte';
 
   const addEditModal = modal.spawnModalController();
 
@@ -78,7 +79,10 @@
   }
 </script>
 
-<svelte:head><title>{makeSimplePageTitle(database.name)}</title></svelte:head>
+<svelte:head>
+    <title>{makeSimplePageTitle(database.name)}</title>
+    <FaviconMathesar/>
+</svelte:head>
 
 <LayoutWithHeader2>
   <AppSecondaryHeader
