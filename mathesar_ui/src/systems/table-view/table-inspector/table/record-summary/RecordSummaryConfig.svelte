@@ -62,55 +62,76 @@
   }
 </script>
 
-{#if previewRecordSummary}
-  <div>Preview</div>
-  <LinkedRecord recordSummary={previewRecordSummary} />
-{/if}
-
-<div>Template</div>
-<RadioGroup
-  options={[false, true]}
-  getRadioLabel={(v) => (v ? 'Custom' : 'Default')}
-  isInline
-  bind:value={$customized}
-/>
-
-{#if $customized}
-  <Field
-    field={template}
-    input={{ component: TemplateInput, props: { columns: $columns } }}
-  />
-{/if}
-
-{#if nonconformantColumns.length}
-  <Alert>
-    <div class="nonconformant-columns">
-      <p>
-        Because some column names contain curly braces, the following numerical
-        values are used in place of column names within the above template:
-      </p>
-      <ul>
-        {#each nonconformantColumns as column}
-          <li>
-            <Identifier>{column.id}</Identifier>
-            references the column <Identifier>{column.name}</Identifier>.
-          </li>
-        {/each}
-      </ul>
+<div class="record-summary-config">
+  {#if previewRecordSummary}
+    <div class="heading">Preview</div>
+    <div class="content">
+      <div class="help">Shows how records will be displayed when linked.</div>
+      <LinkedRecord recordSummary={previewRecordSummary} />
     </div>
-  </Alert>
-{/if}
+  {/if}
 
-<FormSubmit
-  {form}
-  onProceed={save}
-  onCancel={form.reset}
-  proceedButton={{ label: 'Save' }}
-  initiallyHidden
-  size="small"
-/>
+  <div class="heading">Template</div>
+  <div class="content">
+    <RadioGroup
+      options={[false, true]}
+      getRadioLabel={(v) => (v ? 'Custom' : 'Default')}
+      isInline
+      bind:value={$customized}
+    />
+
+    {#if $customized}
+      <Field
+        field={template}
+        input={{ component: TemplateInput, props: { columns: $columns } }}
+      />
+    {/if}
+
+    {#if nonconformantColumns.length}
+      <Alert>
+        <div class="nonconformant-columns">
+          <p>
+            Because some column names contain curly braces, the following
+            numerical values are used in place of column names within the above
+            template:
+          </p>
+          <ul>
+            {#each nonconformantColumns as column}
+              <li>
+                <Identifier>{column.id}</Identifier>
+                references the column <Identifier>{column.name}</Identifier>.
+              </li>
+            {/each}
+          </ul>
+        </div>
+      </Alert>
+    {/if}
+
+    <FormSubmit
+      {form}
+      onProceed={save}
+      onCancel={form.reset}
+      proceedButton={{ label: 'Save' }}
+      initiallyHidden
+      size="small"
+    />
+  </div>
+</div>
 
 <style>
+  .heading {
+    margin-block: 0.75rem 0.5rem;
+  }
+  .content > :global(* + *) {
+    margin-top: 0.5rem;
+  }
+  .content {
+    margin-left: 0.5rem;
+  }
+  .help {
+    font-size: var(--text-size-small);
+    color: var(--color-text-muted);
+  }
   .nonconformant-columns > :global(:first-child) {
     margin-top: 0;
   }
