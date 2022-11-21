@@ -24,7 +24,7 @@
 <Button
   on:click={handleCreateEmptyTable}
   disabled={isCreatingNewTable}
-  appearance="plain"
+  appearance="plain-primary"
   class={classes}
 >
   {#if isCreatingNewTable}

@@ -31,7 +31,7 @@
 </script>
 
 <div class="actions-container">
-  <Button appearance="ghost" on:click={handleDeleteRecords}>
+  <Button appearance="plain" on:click={handleDeleteRecords}>
     <Icon {...isDeleting ? iconLoading : iconDeleteMajor} />
     <span>
       Delete {selectedRowIndices.length} record{selectedRowIndices.length > 1
