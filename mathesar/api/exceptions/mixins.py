@@ -104,6 +104,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         # Add missing `ListSerializer to existing relation list`
         parent_field_map['relation'].append('ListSerializer')
         parent_field_map['relation'].append('PermittedPkRelatedField')
+        parent_field_map['relation'].append('PermittedSlugRelatedField')
         return parent_field_map
 
     def get_field_kwargs(self, field, field_data):
