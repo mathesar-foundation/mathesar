@@ -1590,8 +1590,6 @@ def test_table_extract_columns_by_different_roles(create_patents_table, request,
     table_name = 'Patents'
     table = create_patents_table(table_name)
     column_name_id_map = table.get_column_name_id_bidirectional_map()
-    existing_columns = table.columns.all()
-    existing_columns = [existing_column.name for existing_column in existing_columns]
     column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
 
