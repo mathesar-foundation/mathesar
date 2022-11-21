@@ -94,6 +94,7 @@ class QueryViewSet(
         input_serializer = BaseQuerySerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         query = UIQuery(**input_serializer.validated_data)
+        query.replace_transformations_with_processed_transformations()
         record_serializer = RecordListParameterSerializer(data=request.GET)
         record_serializer.is_valid(raise_exception=True)
         output_serializer = BaseQuerySerializer(query)
