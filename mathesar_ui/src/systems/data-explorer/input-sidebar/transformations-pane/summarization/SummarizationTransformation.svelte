@@ -6,9 +6,11 @@
     LabeledInput,
   } from '@mathesar-component-library';
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type QuerySummarizationTransformationModel from '../../../QuerySummarizationTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../../../utils';
   import Aggregation from './Aggregation.svelte';
+  import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
 
   const dispatch = createEventDispatcher();
 
@@ -37,7 +39,43 @@
   }
 
   function onGroupChange(values: string[]) {
-    // Put everything not in groups, into aggregation
+    let newAggregations = aggregations;
+    const valueSet = new Set(values);
+    [...columns.values()].forEach((processedColumn) => {
+      const pcAlias = processedColumn.column.alias;
+      if (!valueSet.has(pcAlias) && model.columnIdentifier !== pcAlias) {
+        newAggregations = newAggregations.with(pcAlias, {
+          inputAlias: pcAlias,
+          outputAlias: `${pcAlias}_agged`,
+          function: 'aggregate_to_array',
+          displayName: `${pcAlias}_agged`,
+        });
+      }
+    });
+    aggregations = newAggregations;
+    groups = new ImmutableMap(
+      values.map((columnAlias) => [
+        columnAlias,
+        {
+          inputAlias: columnAlias,
+          outputAlias: `${columnAlias}_group`,
+        },
+      ]),
+    );
+    model.aggregations = aggregations;
+    model.groups = groups;
+    dispatch('update', model);
+  }
+
+  function removeAggregation(aggEntry: QuerySummarizationAggregationEntry) {
+    groups = groups.with(aggEntry.inputAlias, {
+      inputAlias: aggEntry.inputAlias,
+      outputAlias: `${aggEntry.inputAlias}_group`,
+    });
+    aggregations = aggregations.without(aggEntry.inputAlias);
+    model.groups = groups;
+    model.aggregations = aggregations;
+    dispatch('update', model);
   }
 </script>
 
@@ -61,7 +99,19 @@
             (entry) => entry.column.alias,
           )}
           on:change={(e) => onGroupChange(e.detail)}
-        />
+          autoClearInvalidValues={false}
+          let:option
+        >
+          {@const columnInfo = columns.get(option)?.column}
+          <ColumnName
+            column={{
+              name: columnInfo?.display_name ?? '',
+              type: columnInfo?.type ?? 'unknown',
+              type_options: null,
+              display_options: null,
+            }}
+          />
+        </MultiSelect>
       </LabeledInput>
     </section>
   {/if}
@@ -73,6 +123,7 @@
           processedColumn={columns.get(aggregation.inputAlias)}
           {aggregation}
           on:update
+          on:remove={() => removeAggregation(aggregation)}
         />
       {/each}
     </section>
