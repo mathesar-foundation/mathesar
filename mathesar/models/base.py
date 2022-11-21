@@ -872,20 +872,29 @@ def _create_table_settings(tables):
         TableSettings.current_objects.create(table=table, preview_settings=preview_column_settings)
 
 
-def _compute_preview_template(table):
+def _set_default_preview_template(table):
     if not table.settings.preview_settings.customized:
-        columns = Column.current_objects.filter(table=table).prefetch_related('table', 'table__schema', 'table__schema__database').order_by('attnum')
-        preview_column = None
-        primary_key_column = None
-        for column in columns:
-            if column.primary_key:
-                primary_key_column = column
-            else:
-                preview_column = column
-                break
-        if preview_column is None:
-            preview_column = primary_key_column
-        preview_template = f"{{{preview_column.id}}}"
+        preview_template = compute_default_preview_template(table)
         preview_settings = table.settings.preview_settings
         preview_settings.template = preview_template
         preview_settings.save()
+
+
+def compute_default_preview_template(table):
+    columns = Column.current_objects.filter(table=table).prefetch_related(
+        'table',
+        'table__schema',
+        'table__schema__database'
+    ).order_by('attnum')
+    preview_column = None
+    primary_key_column = None
+    for column in columns:
+        if column.primary_key:
+            primary_key_column = column
+        else:
+            preview_column = column
+            break
+    if preview_column is None:
+        preview_column = primary_key_column
+    preview_template = f"{{{preview_column.id}}}"
+    return preview_template
