@@ -177,9 +177,60 @@ export default class QueryModel {
     };
   }
 
-  withTransformationModels(
-    transformationModels?: QueryTransformationModel[],
+  private addTransform(
+    transformationModel: QueryTransformationModel,
   ): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      transformationModels: [...this.transformationModels, transformationModel],
+    });
+    return {
+      model,
+      type: 'transformations',
+      diff: {
+        transformations: model.toJSON().transformations,
+      },
+    };
+  }
+
+  addFilterTransform(
+    filterTransformationModel: QueryFilterTransformationModel,
+  ): QueryModelUpdateDiff {
+    return this.addTransform(filterTransformationModel);
+  }
+
+  addSummarizationTransform(
+    summarizationTransformationModel: QuerySummarizationTransformationModel,
+  ): QueryModelUpdateDiff {
+    if (this.hasSummarizationTransform()) {
+      // This should never happen
+      throw new Error(
+        'QueryModel currently allows only a single summarization transformation',
+      );
+    }
+    return this.addTransform(summarizationTransformationModel);
+  }
+
+  removeLastTransform(): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      transformationModels: this.transformationModels.slice(0, -1),
+    });
+    return {
+      model,
+      type: 'transformations',
+      diff: {
+        transformations: model.toJSON().transformations,
+      },
+    };
+  }
+
+  updateTransform(
+    index: number,
+    transform: QueryTransformationModel,
+  ): QueryModelUpdateDiff {
+    const transformationModels = [...this.transformationModels];
+    transformationModels[index] = transform;
     const model = new QueryModel({
       ...this,
       transformationModels,
@@ -200,7 +251,7 @@ export default class QueryModel {
   getSummarizationTransforms(): QuerySummarizationTransformationModel[] {
     return this.transformationModels.filter(
       (transform): transform is QuerySummarizationTransformationModel =>
-        transform instanceof QuerySummarizationTransformationModel,
+        transform.type === 'summarize',
     );
   }
 
@@ -235,9 +286,7 @@ export default class QueryModel {
       description: this.description,
       base_table: this.base_table,
       initial_columns: this.initial_columns,
-      transformations: this.transformationModels?.map((entry) =>
-        entry.toJSON(),
-      ),
+      transformations: this.transformationModels.map((entry) => entry.toJSON()),
     };
   }
 
@@ -248,7 +297,7 @@ export default class QueryModel {
   hasSummarizationTransform(): boolean {
     return this.transformationModels.some(
       (transform): transform is QuerySummarizationTransformationModel =>
-        transform instanceof QuerySummarizationTransformationModel,
+        transform.type === 'summarize',
     );
   }
 }

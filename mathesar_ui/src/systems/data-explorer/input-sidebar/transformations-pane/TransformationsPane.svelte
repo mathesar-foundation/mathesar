@@ -19,6 +19,7 @@
   import { calcAllowedColumnsPerTransformation } from './transformationUtils';
   import QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
   import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
+  import type { QueryTransformationModel } from '../../QueryModel';
 
   export let queryManager: QueryManager;
 
@@ -45,43 +46,28 @@
       conditionIdentifier: firstCondition.id,
       value: undefined,
     });
-    await queryManager.update((q) =>
-      q.withTransformationModels([...transformationModels, newFilter]),
-    );
+    await queryManager.update((q) => q.addFilterTransform(newFilter));
   }
 
   async function addSummarization() {
     const allColumns = [...$processedColumns.values()];
+    // TODO: Check and select first basetable column!
     const firstColumn = allColumns[0];
     if (!firstColumn) {
       return;
     }
     const newSummarization = new QuerySummarizationTransformationModel({
       columnIdentifier: firstColumn.column.alias,
-      aggregations: new ImmutableMap(
-        allColumns
-          .filter((column) => column.id !== firstColumn.column.alias)
-          .map((processedColumn) => [
-            processedColumn.column.alias,
-            {
-              inputAlias: processedColumn.column.alias,
-              outputAlias: `${processedColumn.column.alias}_1`,
-              function: 'aggregate_to_array',
-              displayName: `${processedColumn.column.display_name}_agg`,
-            },
-          ]),
-      ),
+      groups: new ImmutableMap(),
+      aggregations: new ImmutableMap(),
     });
     await queryManager.update((q) =>
-      q.withTransformationModels([...transformationModels, newSummarization]),
+      q.addSummarizationTransform(newSummarization),
     );
   }
 
-  async function removeTransformation(index: number) {
-    transformationModels.splice(index, 1);
-    await queryManager.update((q) =>
-      q.withTransformationModels(transformationModels),
-    );
+  async function removeLastTransformation() {
+    await queryManager.update((q) => q.removeLastTransform());
   }
 
   /**
@@ -93,9 +79,12 @@
    * 2. Check if transformations are different from what is present in query
    *    before updating.
    */
-  async function updateTransformations() {
+  async function updateTransformation(
+    index: number,
+    transformationModel: QueryTransformationModel,
+  ) {
     await queryManager.update((q) =>
-      q.withTransformationModels(transformationModels),
+      q.updateTransform(index, transformationModel),
     );
   }
 </script>
@@ -109,7 +98,7 @@
             {index + 1}
           </span>
           <span class="title">
-            {#if transformationModel instanceof QueryFilterTransformationModel}
+            {#if transformationModel.type === 'filter'}
               Filter
             {:else}
               Summarization
@@ -119,28 +108,28 @@
             <Button
               appearance="plain"
               class="padding-zero"
-              on:click={() => removeTransformation(index)}
+              on:click={() => removeLastTransformation()}
             >
               <Icon {...iconDeleteMajor} size="0.8rem" />
             </Button>
           {/if}
         </span>
         <div slot="content" class="content">
-          {#if transformationModel instanceof QueryFilterTransformationModel}
+          {#if transformationModel.type === 'filter'}
             <FilterTransformation
               columns={allowedColumnsPerTransformation[index]}
               model={transformationModel}
               limitEditing={allowedColumnsPerTransformation[index].size === 0}
               totalTransformations={transformationModels.length}
-              on:update={() => updateTransformations()}
+              on:update={() => updateTransformation(index, transformationModel)}
             />
-          {:else if transformationModel instanceof QuerySummarizationTransformationModel}
+          {:else if transformationModel.type === 'summarize'}
             <SummarizationTransformation
               columns={allowedColumnsPerTransformation[index]}
               model={transformationModel}
               limitEditing={allowedColumnsPerTransformation[index].size === 0 ||
                 index < transformationModels.length - 1}
-              on:update={() => updateTransformations()}
+              on:update={() => updateTransformation(index, transformationModel)}
             />
           {/if}
         </div>
