@@ -28,9 +28,9 @@ def generate_attribute_accessor(getattr):
     return tmp_class()
 
 
-# Let's you generate an alias via `generate_attribute_accessor`.
+# Syntax sugar; let's you generate an alias via `generate_attribute_accessor`.
 #
-# Example uses:
+# Example use:
 #
 # ```
 # gen_alias.universities.id  # returns "universities_id"
@@ -243,13 +243,26 @@ full_summarize_no_defaults = Summarize(
         ],
         [
             empty_summarize,
-            full_summarize_no_defaults,
+            # has less grouping expressions, due to prior SelectSubsetOfColumns transform
+            Summarize(
+                dict(
+                    base_grouping_column=gen_alias.academics.id,
+                    grouping_expressions=[
+                        _gen_grouping_expr(gen_alias.academics.id),
+                        _gen_grouping_expr(gen_alias.academics.name),
+                    ],
+                    aggregation_expressions=[
+                        _gen_agg_expr(gen_alias.articles.title),
+                    ]
+                )
+            ),
             [
-                # should prevent summarization from providing good defaults
+                # should not prevent summarization from providing good defaults
                 SelectSubsetOfColumns(
                     [
+                        gen_alias.academics.id,
                         gen_alias.academics.name,
-                        gen_alias.universities.name,
+                        gen_alias.articles.title,
                     ]
                 ),
             ],
@@ -270,7 +283,7 @@ full_summarize_no_defaults = Summarize(
             ],
         ],
         [
-            # partly empty summarization
+            # partial summarization
             Summarize(
                 dict(
                     base_grouping_column=gen_alias.academics.id,
@@ -285,7 +298,7 @@ full_summarize_no_defaults = Summarize(
             [],
         ],
         [
-            # partly summarization
+            # partial summarization
             Summarize(
                 dict(
                     base_grouping_column=gen_alias.academics.id,
