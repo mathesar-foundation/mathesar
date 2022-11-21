@@ -377,6 +377,28 @@ export function speculateColumnMetaData({
   }
   if (summarizationTransformsWithoutMetaData.length > 0) {
     summarizationTransformsWithoutMetaData.forEach((transform) => {
+      [...transform.groups.values()].forEach((group) => {
+        if (!updatedColumnsMetaData.has(group.outputAlias)) {
+          const inputColumn = updatedColumnsMetaData.get(
+            group.inputAlias,
+          )?.column;
+          updatedColumnsMetaData = updatedColumnsMetaData.with(
+            group.outputAlias,
+            processColumn(
+              {
+                alias: group.outputAlias,
+                display_name: null,
+                type: inputColumn?.type ?? 'unknown',
+                type_options: inputColumn?.type_options ?? null,
+                display_options: inputColumn?.display_options ?? null,
+                is_initial_column: false,
+                input_alias: group.inputAlias,
+              },
+              abstractTypeMap,
+            ),
+          );
+        }
+      });
       [...transform.aggregations.values()].forEach((aggregation) => {
         if (!updatedColumnsMetaData.has(aggregation.outputAlias)) {
           updatedColumnsMetaData = updatedColumnsMetaData.with(
