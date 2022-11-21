@@ -449,7 +449,7 @@ def user_tom():
 
 
 @pytest.fixture
-def db_manager_client(user_bob):
+def db_manager_client_factory(user_bob):
     def _db_manager_client(schema):
         role = 'manager'
         client = APIClient()
@@ -460,7 +460,7 @@ def db_manager_client(user_bob):
 
 
 @pytest.fixture
-def db_editor_client(user_turdy):
+def db_editor_client_factory(user_turdy):
     def _db_editor_client(schema):
         role = 'viewer'
         client = APIClient()
@@ -471,7 +471,7 @@ def db_editor_client(user_turdy):
 
 
 @pytest.fixture
-def schema_manager_client(user_alice):
+def schema_manager_client_factory(user_alice):
     def _schema_manager_client(schema):
         role = 'manager'
         client = APIClient()
@@ -482,7 +482,7 @@ def schema_manager_client(user_alice):
 
 
 @pytest.fixture
-def schema_viewer_client(user_jerry):
+def schema_viewer_client_factory(user_jerry):
     def _schema_viewer_client(schema):
         role = 'viewer'
         client = APIClient()
@@ -493,7 +493,7 @@ def schema_viewer_client(user_jerry):
 
 
 @pytest.fixture
-def db_viewer_schema_manager_client(user_tom):
+def db_viewer_schema_manager_client_factory(user_tom):
     def _db_viewer_schema_manager_client(schema):
         schema_role = 'viewer'
         db_role = 'manager'
@@ -504,3 +504,14 @@ def db_viewer_schema_manager_client(user_tom):
         SchemaRole.objects.create(user=user_tom, schema=schema, role=schema_role)
         return client
     return _db_viewer_schema_manager_client
+
+
+@pytest.fixture
+def superuser_client_factory(client):
+    """
+    A facade for the `client` fixture
+     for mimicking the same behaviour as other role based client factories
+    """
+    def _client(schema):
+        return client
+    return _client
