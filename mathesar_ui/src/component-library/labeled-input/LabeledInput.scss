@@ -16,6 +16,18 @@
     }
   }
 
+  .help {
+    // TODO figure out how we want to support help text with an inline layout.
+    // This CSS assumes the layout is stacked
+    display: block;
+    font-size: var(--text-size-small);
+    color: var(--color-text-muted);
+    margin-top: 0.5rem;
+    &:empty {
+      display: none;
+    }
+  }
+
   &.layout-stacked {
     .input {
       margin-top: var(--spacing-y);

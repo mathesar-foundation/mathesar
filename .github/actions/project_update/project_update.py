@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 from string import Template
 
@@ -107,8 +106,7 @@ def get_field_data(field_name, project_data):
 
 
 def get_option_data(option_name, field_data):
-    settings = json.loads(field_data['settings'])
-    options = settings['options']
+    options = field_data['options']
     option_data = [option for option in options if option['name'] == option_name][0]
     return option_data
 

@@ -5,6 +5,7 @@ from sqlalchemy import text
 from db.schemas.utils import get_mathesar_schemas, get_schema_oid_from_name
 from mathesar.models.base import Schema
 from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.models.users import DatabaseRole
 
 
 def check_schema_response(
@@ -105,7 +106,8 @@ def test_schema_list_filter(client, create_db_schema, FUN_create_dj_db, MOD_engi
             check_schema_response(
                 MOD_engine_cache,
                 response_schema, schema, schema.name,
-                schema.database.name, check_schema_objects=False)
+                schema.database.name, check_schema_objects=False
+            )
 
 
 def test_schema_detail(create_patents_table, client, test_db_name, MOD_engine_cache):
@@ -155,7 +157,8 @@ def test_schema_sort_by_name(create_schema, client, MOD_engine_cache):
     for comparison_tuple in comparison_tuples:
         check_schema_response(
             MOD_engine_cache, comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
-            comparison_tuple[1].database.name)
+            comparison_tuple[1].database.name
+        )
     sort_field = "name"
     response = client.get(f'/api/db/v0/schemas/?sort_by={sort_field}')
     response_data = response.json()
@@ -164,7 +167,8 @@ def test_schema_sort_by_name(create_schema, client, MOD_engine_cache):
     for comparison_tuple in comparison_tuples:
         check_schema_response(
             MOD_engine_cache, comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
-            comparison_tuple[1].database.name)
+            comparison_tuple[1].database.name
+        )
 
 
 def test_schema_sort_by_id(create_schema, client, MOD_engine_cache):
@@ -199,7 +203,8 @@ def test_schema_sort_by_id(create_schema, client, MOD_engine_cache):
         check_schema_response(
             MOD_engine_cache,
             comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
-            comparison_tuple[1].database.name)
+            comparison_tuple[1].database.name
+        )
 
     response = client.get('/api/db/v0/schemas/?sort_by=id')
     response_data = response.json()
@@ -209,11 +214,11 @@ def test_schema_sort_by_id(create_schema, client, MOD_engine_cache):
         check_schema_response(
             MOD_engine_cache,
             comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
-            comparison_tuple[1].database.name)
+            comparison_tuple[1].database.name
+        )
 
 
-@pytest.mark.skip("Faulty DB handling assumptions; invalid")
-def test_schema_create(client, FUN_create_dj_db, MOD_engine_cache):
+def test_schema_create_by_superuser(client, FUN_create_dj_db, MOD_engine_cache):
     db_name = "some_db1"
     FUN_create_dj_db(db_name)
 
@@ -239,6 +244,71 @@ def test_schema_create(client, FUN_create_dj_db, MOD_engine_cache):
         db_name,
         check_schema_objects=0
     )
+
+
+def test_schema_create_by_schema_manager(client_bob, user_bob, FUN_create_dj_db, MOD_engine_cache):
+    db_name = "some_db1"
+    role = "manager"
+    database = FUN_create_dj_db(db_name)
+    schema_count_before = Schema.objects.count()
+
+    schema_name = 'Test Schema'
+    data = {
+        'name': schema_name,
+        'database': db_name
+    }
+    response = client_bob.post('/api/db/v0/schemas/', data=data)
+    assert response.status_code == 400
+
+    DatabaseRole.objects.create(database=database, user=user_bob, role=role)
+    response = client_bob.post('/api/db/v0/schemas/', data=data)
+    assert response.status_code == 201
+    response_schema = response.json()
+    schema_count_after = Schema.objects.count()
+    assert schema_count_after == schema_count_before + 1
+    schema = Schema.objects.get(id=response_schema['id'])
+    check_schema_response(
+        MOD_engine_cache,
+        response_schema,
+        schema,
+        schema_name,
+        db_name,
+        check_schema_objects=True
+    )
+
+
+def test_schema_create_by_schema_editor(client_bob, user_bob, FUN_create_dj_db):
+    db_name = "some_db1"
+    role = "editor"
+    database = FUN_create_dj_db(db_name)
+    DatabaseRole.objects.create(database=database, user=user_bob, role=role)
+
+    schema_name = 'Test Schema'
+    data = {
+        'name': schema_name,
+        'database': db_name
+    }
+    response = client_bob.post('/api/db/v0/schemas/', data=data)
+    assert response.status_code == 400
+
+
+def test_schema_create(client_bob, user_bob, FUN_create_dj_db, get_uid):
+    database_with_viewer_access = FUN_create_dj_db(get_uid())
+    database_with_manager_access = FUN_create_dj_db(get_uid())
+    FUN_create_dj_db(get_uid())
+    DatabaseRole.objects.create(user=user_bob, database=database_with_viewer_access, role='viewer')
+    DatabaseRole.objects.create(user=user_bob, database=database_with_manager_access, role='manager')
+
+    schema_name = 'Test Schema'
+    data = {
+        'name': schema_name,
+        'database': database_with_viewer_access.name
+    }
+    response = client_bob.post('/api/db/v0/schemas/', data=data)
+    assert response.status_code == 400
+    data['database'] = database_with_manager_access.name
+    response = client_bob.post('/api/db/v0/schemas/', data=data)
+    assert response.status_code == 201
 
 
 @pytest.mark.skip("Faulty DB handling assumptions; invalid")
@@ -294,7 +364,7 @@ def test_schema_partial_update(create_schema, client, test_db_name, MOD_engine_c
 
     response_schema = response.json()
     assert response.status_code == 200
-    check_schema_response(MOD_engine_cache, response_schema, schema, new_schema_name, test_db_name,)
+    check_schema_response(MOD_engine_cache, response_schema, schema, new_schema_name, test_db_name)
 
     schema = Schema.objects.get(oid=schema.oid)
     assert schema.name == new_schema_name

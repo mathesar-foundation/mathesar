@@ -398,6 +398,15 @@ class Table(DatabaseObject, Relation):
             exclude
         )
 
+    def get_ui_dependents(self):
+        """
+        Returns all service layer dependents. For now only Data Explorer Query is considered
+        """
+
+        return {
+            'queries': self.queries.all().values_list('id', flat=True)
+        }
+
     def add_column(self, column_data):
         result = create_column(
             self.schema._sa_engine,
