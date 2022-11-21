@@ -8,18 +8,29 @@ export interface QuerySummarizationAggregationEntry {
   displayName: string;
 }
 
+export interface QuerySummarizationGroupingEntry {
+  inputAlias: string;
+  outputAlias: string;
+  preprocFunction?: string;
+}
+
 export interface QuerySummarizationTransformationEntry {
   columnIdentifier: string;
   preprocFunctionIdentifier?: string;
+  groups: ImmutableMap<string, QuerySummarizationGroupingEntry>;
   aggregations: ImmutableMap<string, QuerySummarizationAggregationEntry>;
 }
 
 export default class QuerySummarizationTransformationModel
   implements QuerySummarizationTransformationEntry
 {
+  type = 'summarize' as const;
+
   columnIdentifier;
 
   preprocFunctionIdentifier;
+
+  groups;
 
   aggregations;
 
@@ -32,13 +43,16 @@ export default class QuerySummarizationTransformationModel
       this.columnIdentifier = transformation.columnIdentifier;
       this.preprocFunctionIdentifier = transformation.preprocFunctionIdentifier;
       this.aggregations = transformation.aggregations;
+      this.groups = transformation.groups;
     } else {
-      const groupingExpression = transformation.spec.grouping_expressions[0];
+      const baseGroupingColumn = transformation.spec.base_grouping_column;
       const aggregationExpressions =
-        transformation.spec.aggregation_expressions;
-      const displayNames = transformation.display_names;
-      this.columnIdentifier = groupingExpression.input_alias;
-      this.preprocFunctionIdentifier = groupingExpression.preproc;
+        transformation.spec.aggregation_expressions ?? [];
+      const groupingExpressions =
+        transformation.spec.grouping_expressions ?? [];
+      const displayNames = transformation.display_names ?? {};
+      this.columnIdentifier = baseGroupingColumn;
+      // this.preprocFunctionIdentifier = groupingExpression.preproc;
       this.aggregations = new ImmutableMap(
         aggregationExpressions.map((entry) => [
           entry.input_alias,
@@ -50,27 +64,37 @@ export default class QuerySummarizationTransformationModel
           },
         ]),
       );
+      this.groups = new ImmutableMap(
+        groupingExpressions.map((entry) => [
+          entry.input_alias,
+          {
+            inputAlias: entry.input_alias,
+            outputAlias: entry.output_alias,
+            preprocFunction: entry.preproc,
+          },
+        ]),
+      );
     }
   }
 
   getOutputColumnAliases(): string[] {
     return [
-      this.columnIdentifier,
+      `${this.columnIdentifier}_grouped`,
       ...[...this.aggregations.values()].map((entry) => entry.outputAlias),
     ];
   }
 
   toJSON(): QueryInstanceSummarizationTransformation {
     const aggregationEntries = [...this.aggregations.entries()];
+    const groupingEntries = [...this.groups.entries()];
 
     const spec: QueryInstanceSummarizationTransformation['spec'] = {
-      grouping_expressions: [
-        {
-          input_alias: this.columnIdentifier,
-          output_alias: this.columnIdentifier,
-          preproc: this.preprocFunctionIdentifier,
-        },
-      ],
+      base_grouping_column: this.columnIdentifier,
+      grouping_expressions: groupingEntries.map(([inputAlias, groupObj]) => ({
+        input_alias: inputAlias,
+        output_alias: groupObj.outputAlias,
+        preproc: groupObj.preprocFunction,
+      })),
       aggregation_expressions: aggregationEntries.map(
         ([inputAlias, aggObj]) => ({
           input_alias: inputAlias,
