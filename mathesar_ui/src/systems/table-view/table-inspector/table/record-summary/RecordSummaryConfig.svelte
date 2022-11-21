@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Alert, RadioGroup } from '@mathesar-component-library';
+  import type { TableEntry } from '@mathesar/api/tables';
   import {
     FormSubmit,
     makeForm,
@@ -9,15 +10,9 @@
   import Field from '@mathesar/components/form/Field.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
-  import {
-    getTabularDataStoreFromContext,
-    type RecordRow,
-  } from '@mathesar/stores/table-data';
+  import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
   import { renderRecordSummaryForRow } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import {
-    currentTable as table,
-    saveRecordSummaryTemplate,
-  } from '@mathesar/stores/tables';
+  import { saveRecordSummaryTemplate } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import {
@@ -27,14 +22,15 @@
   } from './recordSummaryTemplateUtils';
   import TemplateInput from './TemplateInput.svelte';
 
-  const tabularData = getTabularDataStoreFromContext();
+  export let table: TableEntry;
+  export let tabularData: TabularData;
 
-  $: ({ recordsData, columnsDataStore } = $tabularData);
+  $: ({ recordsData, columnsDataStore } = tabularData);
   $: ({ columns } = columnsDataStore);
   $: ({ savedRecords, recordSummaries } = recordsData);
   $: firstRow = $savedRecords[0] as RecordRow | undefined;
-  $: initialCustomized = $table?.settings.preview_settings.customized ?? false;
-  $: initialTemplate = $table?.settings.preview_settings.template ?? '';
+  $: initialCustomized = table?.settings.preview_settings.customized ?? false;
+  $: initialTemplate = table?.settings.preview_settings.template ?? '';
   $: customized = requiredField(initialCustomized);
   $: template = optionalField(initialTemplate, [hasColumnReferences($columns)]);
   $: form = makeForm({ customized, template });
@@ -43,7 +39,7 @@
     (column) => !columnIsConformant(column),
   );
   $: previewRecordSummary = (() => {
-    if (!$table || !firstRow) {
+    if (!table || !firstRow) {
       return undefined;
     }
     const { record } = firstRow;
@@ -56,10 +52,10 @@
 
   async function save() {
     try {
-      if (!$table) {
+      if (!table) {
         throw new Error('Unable to find table.');
       }
-      await saveRecordSummaryTemplate($table, $form.values);
+      await saveRecordSummaryTemplate(table, $form.values);
     } catch (e) {
       toast.error(`Unable to save. ${getErrorMessage(e)}`);
     }

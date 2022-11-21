@@ -1,11 +1,15 @@
 <script>
   import { Collapsible } from '@mathesar-component-library';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { currentTable } from '@mathesar/stores/tables';
   import RenameTable from './RenameTable.svelte';
   import TableActions from './TableActions.svelte';
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import AdvancedActions from './AdvancedActions.svelte';
   import TableLinks from './links/TableLinks.svelte';
   import RecordSummaryConfig from './record-summary/RecordSummaryConfig.svelte';
+
+  const tabularData = getTabularDataStoreFromContext();
 </script>
 
 <div class="table-mode-container">
@@ -21,13 +25,6 @@
   </Collapsible>
 
   <Collapsible isOpen>
-    <CollapsibleHeader slot="header" title="Record Summary" />
-    <div slot="content" class="content-container">
-      <RecordSummaryConfig />
-    </div>
-  </Collapsible>
-
-  <Collapsible isOpen>
     <CollapsibleHeader slot="header" title="Links" isDBLevelConfiguration />
     <div slot="content" class="content-container">
       <TableLinks />
@@ -38,6 +35,13 @@
     <CollapsibleHeader slot="header" title="Actions" />
     <div slot="content" class="content-container">
       <TableActions />
+    </div>
+  </Collapsible>
+
+  <Collapsible>
+    <CollapsibleHeader slot="header" title="Record Summary" />
+    <div slot="content" class="content-container">
+      <RecordSummaryConfig table={$currentTable} tabularData={$tabularData} />
     </div>
   </Collapsible>
 
