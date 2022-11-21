@@ -4,7 +4,6 @@
     Select,
     TextInput,
     LabeledInput,
-    Checkbox,
     Debounce,
     getValueFromEvent,
   } from '@mathesar-component-library';
@@ -14,8 +13,8 @@
 
   const dispatch = createEventDispatcher();
 
-  export let processedColumn: ProcessedQueryResultColumn;
-  export let aggregation: QuerySummarizationAggregationEntry | undefined;
+  export let processedColumn: ProcessedQueryResultColumn | undefined;
+  export let aggregation: QuerySummarizationAggregationEntry;
 
   function getAggregationTypeLabel(aggType?: string) {
     switch (aggType) {
@@ -27,61 +26,48 @@
         return '';
     }
   }
-
-  function includeExcludeAggregation(isAggregated: boolean) {
-    if (isAggregated) {
-      dispatch('include');
-    } else {
-      dispatch('exclude');
-    }
-  }
 </script>
 
 <div class="aggregation">
   <header>
-    <LabeledInput layout="inline-input-first">
-      <Checkbox
-        checked={!!aggregation}
-        on:change={(e) => includeExcludeAggregation(e.detail)}
-      />
+    {#if processedColumn}
       <ColumnName
-        slot="label"
         column={{
           ...processedColumn.column,
           name:
             processedColumn.column.display_name ?? processedColumn.column.alias,
         }}
       />
-    </LabeledInput>
+    {:else}
+      {aggregation.inputAlias}
+    {/if}
   </header>
-  {#if aggregation}
-    <div class="content">
-      <LabeledInput label="as" layout="stacked">
-        <Select
-          options={['aggregate_to_array', 'count']}
-          bind:value={aggregation.function}
-          getLabel={getAggregationTypeLabel}
-          on:change={() => dispatch('update')}
-        />
-      </LabeledInput>
+  <div class="content">
+    <LabeledInput label="as" layout="stacked">
+      <Select
+        options={['aggregate_to_array', 'count']}
+        bind:value={aggregation.function}
+        getLabel={getAggregationTypeLabel}
+        on:change={() => dispatch('update')}
+      />
+    </LabeledInput>
 
-      <LabeledInput label="with display name" layout="stacked">
-        <Debounce
-          bind:value={aggregation.displayName}
-          let:handleNewValue
-          on:artificialInput={() => dispatch('update')}
-        >
-          <TextInput
-            value={aggregation.displayName}
-            on:input={(e) =>
-              handleNewValue({ value: getValueFromEvent(e), debounce: true })}
-            on:change={(e) =>
-              handleNewValue({ value: getValueFromEvent(e), debounce: false })}
-          />
-        </Debounce>
-      </LabeledInput>
-    </div>
-  {/if}
+    <LabeledInput label="with display name" layout="stacked">
+      <Debounce
+        bind:value={aggregation.displayName}
+        let:handleNewValue
+        on:artificialInput={() => dispatch('update')}
+      >
+        <TextInput
+          value={aggregation.displayName}
+          on:input={(e) =>
+            handleNewValue({ value: getValueFromEvent(e), debounce: true })}
+          on:change={(e) =>
+            handleNewValue({ value: getValueFromEvent(e), debounce: false })}
+        />
+      </Debounce>
+    </LabeledInput>
+  </div>
 </div>
 
 <style lang="scss">
