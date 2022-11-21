@@ -200,6 +200,10 @@ FRIENDLY_ERRORS = {
             'does_not_exist': 2151,
             'incorrect_type': 2161
         },
+        'PermittedSlugRelatedField': {
+            'required': 2007, 'invalid': 2002, 'null': 2027,
+            'does_not_exist': 2151, 'incorrect_type': 2161
+        },
     },
     'EXCEPTION_DICT': {
         'Http404': 4005
