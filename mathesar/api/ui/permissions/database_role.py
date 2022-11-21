@@ -33,7 +33,7 @@ class DatabaseRoleAccessPolicy(AccessPolicy):
             # TODO Consider moving to more reusable place
             allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
             databases_with_view_access = Database.objects.filter(
-                Q(databaserole__role__in=allowed_roles) & Q(databaserole__user=request.user)
+                Q(database_role__role__in=allowed_roles) & Q(database_role__user=request.user)
             )
             qs = qs.filter(database__in=databases_with_view_access)
         return qs
