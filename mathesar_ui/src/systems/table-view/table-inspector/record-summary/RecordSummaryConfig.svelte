@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Alert, RadioGroup } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/tables';
+  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import {
     FormSubmit,
     makeForm,
@@ -25,12 +26,12 @@
   export let table: TableEntry;
   export let tabularData: TabularData;
 
-  $: ({ recordsData, columnsDataStore } = tabularData);
+  $: ({ recordsData, columnsDataStore, isLoading } = tabularData);
   $: ({ columns } = columnsDataStore);
   $: ({ savedRecords, recordSummaries } = recordsData);
   $: firstRow = $savedRecords[0] as RecordRow | undefined;
-  $: initialCustomized = table?.settings.preview_settings.customized ?? false;
-  $: initialTemplate = table?.settings.preview_settings.template ?? '';
+  $: initialCustomized = table.settings.preview_settings.customized ?? false;
+  $: initialTemplate = table.settings.preview_settings.template ?? '';
   $: customized = requiredField(initialCustomized);
   $: template = optionalField(initialTemplate, [hasColumnReferences($columns)]);
   $: form = makeForm({ customized, template });
@@ -39,7 +40,7 @@
     (column) => !columnIsConformant(column),
   );
   $: previewRecordSummary = (() => {
-    if (!table || !firstRow) {
+    if (!firstRow) {
       return undefined;
     }
     const { record } = firstRow;
@@ -52,9 +53,6 @@
 
   async function save() {
     try {
-      if (!table) {
-        throw new Error('Unable to find table.');
-      }
       await saveRecordSummaryTemplate(table, $form.values);
     } catch (e) {
       toast.error(`Unable to save. ${getErrorMessage(e)}`);
@@ -63,60 +61,68 @@
 </script>
 
 <div class="record-summary-config">
-  {#if previewRecordSummary}
-    <div class="heading">Preview</div>
+  {#if $isLoading}
+    <Spinner />
+  {:else}
+    {#if previewRecordSummary}
+      <div class="heading">Preview</div>
+      <div class="content">
+        <div class="help">
+          Shows how links to
+          <Identifier>{table.name}</Identifier>
+          records will appear.
+        </div>
+        <LinkedRecord recordSummary={previewRecordSummary} />
+      </div>
+    {/if}
+
+    <div class="heading">Template</div>
     <div class="content">
-      <div class="help">Shows how records will be displayed when linked.</div>
-      <LinkedRecord recordSummary={previewRecordSummary} />
+      <RadioGroup
+        options={[false, true]}
+        getRadioLabel={(v) => (v ? 'Custom' : 'Default')}
+        ariaLabel="Template type"
+        isInline
+        bind:value={$customized}
+      />
+
+      {#if $customized}
+        <Field
+          field={template}
+          input={{ component: TemplateInput, props: { columns: $columns } }}
+        />
+      {/if}
+
+      {#if nonconformantColumns.length}
+        <Alert>
+          <div class="nonconformant-columns">
+            <p>
+              Because some column names contain curly braces, the following
+              numerical values are used in place of column names within the
+              above template:
+            </p>
+            <ul>
+              {#each nonconformantColumns as column}
+                <li>
+                  <Identifier>{column.id}</Identifier>
+                  references the column <Identifier>{column.name}</Identifier>.
+                </li>
+              {/each}
+            </ul>
+          </div>
+        </Alert>
+      {/if}
+
+      <FormSubmit
+        {form}
+        onProceed={save}
+        onCancel={form.reset}
+        proceedButton={{ label: 'Save' }}
+        initiallyHidden
+        size="small"
+      />
     </div>
   {/if}
-
-  <div class="heading">Template</div>
-  <div class="content">
-    <RadioGroup
-      options={[false, true]}
-      getRadioLabel={(v) => (v ? 'Custom' : 'Default')}
-      ariaLabel="Template type"
-      isInline
-      bind:value={$customized}
-    />
-
-    {#if $customized}
-      <Field
-        field={template}
-        input={{ component: TemplateInput, props: { columns: $columns } }}
-      />
-    {/if}
-
-    {#if nonconformantColumns.length}
-      <Alert>
-        <div class="nonconformant-columns">
-          <p>
-            Because some column names contain curly braces, the following
-            numerical values are used in place of column names within the above
-            template:
-          </p>
-          <ul>
-            {#each nonconformantColumns as column}
-              <li>
-                <Identifier>{column.id}</Identifier>
-                references the column <Identifier>{column.name}</Identifier>.
-              </li>
-            {/each}
-          </ul>
-        </div>
-      </Alert>
-    {/if}
-
-    <FormSubmit
-      {form}
-      onProceed={save}
-      onCancel={form.reset}
-      proceedButton={{ label: 'Save' }}
-      initiallyHidden
-      size="small"
-    />
-  </div>
 </div>
 
 <style>
