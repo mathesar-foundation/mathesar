@@ -309,7 +309,7 @@ def _add_aliases_to_summarization_expr_field(
         for alias
         in aliases
     ]
-    existing_expressions = summarization.spec[spec_field]
+    existing_expressions = summarization.spec.get(spec_field, [])
     new_expressions = list(
         itertools.chain(
             existing_expressions, expressions_to_add
