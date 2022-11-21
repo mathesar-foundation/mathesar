@@ -98,10 +98,12 @@
   let:isOpen
 >
   <span
-    class="multi-select-trigger {triggerClass}"
+    class="input-element multi-select-trigger {triggerClass}"
     bind:this={trigger}
-    on:click={() => api.toggle()}
+    on:click={api.toggle}
     aria-label={ariaLabel}
+    tabindex="0"
+    on:keydown={api.handleKeyDown}
   >
     <span class="selected-values">
       {#each values as value}
