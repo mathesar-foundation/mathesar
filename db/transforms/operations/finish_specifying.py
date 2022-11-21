@@ -182,7 +182,10 @@ def _is_initial_column_unique_constrained(initial_column, engine, metadata):
 
 
 def _is_sa_column_unique_constrained(sa_column):
-    return sa_column.primary_key or sa_column.unique
+    return bool(
+        sa_column.primary_key
+        or sa_column.unique
+    )
 
 
 def _get_oid_of_initial_column(initial_column):
