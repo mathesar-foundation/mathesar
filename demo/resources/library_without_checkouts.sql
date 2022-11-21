@@ -2,9 +2,9 @@
 
 CREATE TABLE "Authors" (
     id integer NOT NULL,
-    "Author First Name" text,
-    "Author Last Name" text,
-    "Author Website" mathesar_types.uri
+    "First Name" text,
+    "Last Name" text,
+    "Website" mathesar_types.uri
 );
 
 CREATE SEQUENCE "Authors_id_seq"
@@ -100,7 +100,7 @@ CREATE TABLE "Publications" (
     "Title" text,
     "Author" integer NOT NULL,
     "Publisher" integer NOT NULL,
-    "Publication Year" integer,
+    "Year" integer,
     "ISBN" text
 );
 
@@ -122,7 +122,7 @@ ALTER TABLE ONLY "Publications"
 
 CREATE TABLE "Publishers" (
     id integer NOT NULL,
-    "Publisher" text
+    "Name" text
 );
 
 CREATE SEQUENCE "Publishers_id_seq"
@@ -139,7 +139,7 @@ ALTER TABLE ONLY "Publishers"
   ALTER COLUMN id SET DEFAULT nextval('"Publishers_id_seq"'::regclass);
 
 
-INSERT INTO "Authors" (id, "Author First Name", "Author Last Name", "Author Website") VALUES
+INSERT INTO "Authors" (id, "First Name", "Last Name", "Website") VALUES
 (14, 'Zachary', 'Medina', null),
 (6, 'Jennifer', 'Newman', null),
 (9, 'Melissa', 'Harris', 'http://harris.info'),
@@ -311,7 +311,7 @@ INSERT INTO "Patrons" (id, "First Name", "Last Name", "Email") VALUES
 ;
 
 
-INSERT INTO "Publications" (id, "Title", "ISBN", "Publication Year", "Author",  "Publisher") VALUES
+INSERT INTO "Publications" (id, "Title", "ISBN", "Year", "Author",  "Publisher") VALUES
 (12, 'Economic Real Return Street', '1-76660-210-X', 1965, 14, 1),
 (9, 'Claim Student Use Long Blood', '0-10-580468-1', 1906, 13, 1),
 (37, 'Music Since Market Family', '0-693-69318-5', 1933, 1, 1),
@@ -380,7 +380,7 @@ INSERT INTO "Publications" (id, "Title", "ISBN", "Publication Year", "Author",  
 ;
 
 
-INSERT INTO "Publishers" (id, "Publisher") VALUES
+INSERT INTO "Publishers" (id, "Name") VALUES
 (3, 'Wright LLC'),
 (1, 'Rocha PLC'),
 (2, 'Stokes, Campos and Rich')
