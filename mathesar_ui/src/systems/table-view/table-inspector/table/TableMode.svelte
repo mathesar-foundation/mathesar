@@ -2,12 +2,12 @@
   import { Collapsible } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
+  import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
   import RenameTable from './RenameTable.svelte';
   import TableActions from './TableActions.svelte';
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import AdvancedActions from './AdvancedActions.svelte';
   import TableLinks from './links/TableLinks.svelte';
-  import RecordSummaryConfig from './record-summary/RecordSummaryConfig.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 </script>
