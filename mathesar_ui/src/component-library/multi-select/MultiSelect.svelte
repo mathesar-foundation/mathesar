@@ -66,6 +66,8 @@
     selectedOption: Option | undefined,
   ) => boolean = (a, b) => a === b;
 
+  export let autoClearInvalidValues = true;
+
   let trigger: HTMLElement;
 
   function setValues(newValues: Option[]) {
@@ -78,11 +80,26 @@
   }
 
   function handleOptionsChange(newOptions: Option[]) {
-    setValues(
-      values.filter((v) => newOptions.some((o) => valuesAreEqual(o, v))),
-    );
+    if (autoClearInvalidValues) {
+      setValues(
+        values.filter((v) => newOptions.some((o) => valuesAreEqual(o, v))),
+      );
+    }
   }
   $: handleOptionsChange(options);
+
+  /**
+   * This type cast is essential since `ListBoxOptions` does not
+   * get a direct prop with it's genertic type `Option`. The slot prop
+   * `option` is identified as `unknown` instead.
+   *
+   * Related issues:
+   * https://github.com/sveltejs/language-tools/issues/442
+   * https://github.com/sveltejs/language-tools/issues/1344
+   */
+  function getOptionWithTypeCast(option: unknown): Option {
+    return option as Option;
+  }
 </script>
 
 <BaseInput {...$$restProps} {id} {disabled} />
@@ -109,7 +126,11 @@
       {#each values as value}
         <span class="selected-value">
           <span class="label">
-            <StringOrComponent arg={getLabel(value)} />
+            {#if $$slots.default}
+              <slot option={value} label={getLabel(value)} />
+            {:else}
+              <StringOrComponent arg={getLabel(value)} />
+            {/if}
           </span>
           <span
             class="remove-button icon-button"
@@ -134,6 +155,12 @@
     {trigger}
     on:close={() => api.close()}
   >
-    <ListBoxOptions id="{id}-select-options" />
+    {#if $$slots.default}
+      <ListBoxOptions id="{id}-select-options" let:option let:label>
+        <slot option={getOptionWithTypeCast(option)} {label} />
+      </ListBoxOptions>
+    {:else}
+      <ListBoxOptions id="{id}-select-options" />
+    {/if}
   </AttachableDropdown>
 </ListBox>
