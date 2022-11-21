@@ -1,5 +1,6 @@
 import json
 
+import pytest
 from sqlalchemy import Column as SAColumn, ForeignKey, Integer, MetaData, Table as SATable, select
 
 from db.columns.operations.select import get_column_attnum_from_name
@@ -44,6 +45,15 @@ def _verify_unique_constraint(constraint_data, columns, name):
     assert constraint_data['name'] == name
     assert constraint_data['type'] == 'unique'
     assert 'id' in constraint_data and type(constraint_data['id']) == int
+
+
+write_client_with_different_roles = [
+    ('db_manager_client', 201),
+    ('db_editor_client', 404),
+    ('schema_manager_client', 201),
+    ('schema_viewer_client', 404),
+    ('db_viewer_schema_manager_client', 201)
+]
 
 
 def test_default_constraint_list(create_patents_table, client):
@@ -203,6 +213,24 @@ def test_create_single_column_unique_constraint(create_patents_table, client):
     )
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), [constraint_column_id], 'NASA Constraint List 5_Case Number_key')
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)
+def test_create_unique_constraint_by_different_roles(create_patents_table, client, request, client_name, expected_status_code):
+    table_name = 'NASA Constraint List 5'
+    table = create_patents_table(table_name)
+    constraint_column_id = table.get_columns_by_name(['Case Number'])[0].id
+    data = {
+        'type': 'unique',
+        'columns': [constraint_column_id]
+    }
+    client = request.getfixturevalue(client_name)(table.schema)
+    response = client.post(
+        f'/api/db/v0/tables/{table.id}/constraints/',
+        data=json.dumps(data),
+        content_type='application/json'
+    )
+    assert response.status_code == expected_status_code
 
 
 def test_create_unique_constraint_with_name_specified(create_patents_table, client):

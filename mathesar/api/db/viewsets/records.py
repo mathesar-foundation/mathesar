@@ -41,7 +41,7 @@ class RecordViewSet(viewsets.ViewSet):
 
         serializer = RecordListParameterSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(table_pk, request)
 
         filter_unprocessed = serializer.validated_data['filter']
         order_by = serializer.validated_data['order_by']
@@ -105,7 +105,7 @@ class RecordViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(table_pk, request)
         # TODO refactor to use serializer for more DRY response logic
         paginator = TableLimitOffsetPagination()
         record_filters = {
@@ -132,7 +132,7 @@ class RecordViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def create(self, request, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(table_pk, request)
         serializer = RecordSerializer(data=request.data, context=self.get_serializer_context(table))
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -165,7 +165,7 @@ class RecordViewSet(viewsets.ViewSet):
         return response
 
     def partial_update(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(table_pk, request)
         serializer = RecordSerializer(
             {'id': pk},
             data=request.data,
@@ -198,7 +198,7 @@ class RecordViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(table_pk, request)
         if table.get_record(pk) is None:
             raise generic_api_exceptions.NotFoundAPIException(
                 NotFound,
