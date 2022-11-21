@@ -85,13 +85,8 @@ export function constructQueryModelFromHash(
         {
           type: 'summarize',
           spec: {
-            grouping_expressions: [
-              {
-                input_alias: groupedColumn.name,
-                output_alias: groupedColumn.name,
-                preproc: terseSummarization.terseGrouping[0][1],
-              },
-            ],
+            base_grouping_column: groupedColumn.name,
+            grouping_expressions: [],
             aggregation_expressions: aggregatedColumns.map((entry) => ({
               input_alias: entry.name,
               output_alias: `${entry.name} (aggregated)`,
