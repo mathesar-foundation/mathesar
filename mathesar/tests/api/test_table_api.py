@@ -156,6 +156,14 @@ write_client_with_different_roles = [
     ('db_viewer_schema_manager_client', 201)
 ]
 
+update_client_with_different_roles = [
+    ('db_manager_client', 200),
+    ('db_editor_client', 403),
+    ('schema_manager_client', 200),
+    ('schema_viewer_client', 403),
+    ('db_viewer_schema_manager_client', 200)
+]
+
 
 def test_table_list(create_patents_table, client):
     """
@@ -695,7 +703,7 @@ def test_table_create_by_different_manager_roles(schema, request, client_name, e
         'name': table_name,
         'schema': schema.id,
     }
-    client = request.getfixturevalue(client_name)
+    client = request.getfixturevalue(client_name)(schema)
     response = client.post('/api/db/v0/tables/', body)
     assert response.status_code == expected_status_code
 
@@ -742,6 +750,18 @@ def test_table_partial_update_schema(create_patents_table, client):
     assert response.status_code == 400
     assert response_error['message'] == 'Updating schema for tables is not supported.'
     assert response_error['code'] == ErrorCodes.UnsupportedAlter.value
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', update_client_with_different_roles)
+def test_table_partial_update_by_different_roles(create_patents_table, request, client_name, expected_status_code):
+    table_name = 'NASA Table Partial Update'
+    new_table_name = 'NASA Table Partial Update New'
+    table = create_patents_table(table_name)
+    client = request.getfixturevalue(client_name)(table.schema)
+    expect_comment = 'a super new test comment'
+    body = {'name': new_table_name, 'description': expect_comment}
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    assert response.status_code == expected_status_code
 
 
 def test_table_delete(create_patents_table, client):
@@ -1554,3 +1574,32 @@ def test_table_move_columns_after_extracting(create_patents_table, client):
     extracted_column = Column.objects.get(id=extracted_column_id)
     assert extracted_column.id == extracted_column_id
     assert extracted_column.display_options == column_with_display_options.display_options
+
+
+split_table_client_with_different_roles = [
+    ('db_manager_client', 201),
+    ('db_editor_client', 403),
+    ('schema_manager_client', 201),
+    ('schema_viewer_client', 403),
+    ('db_viewer_schema_manager_client', 201)
+]
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', split_table_client_with_different_roles)
+def test_table_extract_columns_by_different_roles(create_patents_table, request, client_name, expected_status_code):
+    table_name = 'Patents'
+    table = create_patents_table(table_name)
+    column_name_id_map = table.get_column_name_id_bidirectional_map()
+    existing_columns = table.columns.all()
+    existing_columns = [existing_column.name for existing_column in existing_columns]
+    column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
+    column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
+
+    extract_table_name = "Patent Info"
+    split_data = {
+        'extract_columns': column_ids_to_extract,
+        'extracted_table_name': extract_table_name,
+    }
+    client = request.getfixturevalue(client_name)(table.schema)
+    current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
+    assert current_table_response.status_code == expected_status_code

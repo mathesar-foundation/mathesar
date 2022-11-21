@@ -1,5 +1,6 @@
 from django_filters import rest_framework as filters
 from psycopg2.errors import CheckViolation, InvalidTextRepresentation
+from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
@@ -8,6 +9,7 @@ from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError
 
 from db.types.exceptions import UnsupportedTypeException
 from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError, ColumnMappingsNotFound
+from mathesar.api.db.permissions.table import TableAccessPolicy
 from mathesar.api.serializers.dependents import DependentFilterSerializer, DependentSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
@@ -29,11 +31,12 @@ from mathesar.utils.tables import get_table_column_types
 from mathesar.utils.joins import get_processed_joinable_tables
 
 
-class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewsets.GenericViewSet):
+class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewsets.GenericViewSet):
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = TableFilter
+    access_policy = TableAccessPolicy
 
     def get_queryset(self):
         # Better to use prefetch_related for schema and database,
