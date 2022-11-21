@@ -163,6 +163,18 @@ empty_summarize = Summarize(
 )
 
 
+# a partial summarization transform whose base grouping column is in the grouping_expressions list
+empty_summarize_base_col_in_grouping = Summarize(
+    dict(
+        base_grouping_column=gen_alias.academics.id,
+        grouping_expressions=[
+            _gen_grouping_expr(gen_alias.academics.id),
+        ],
+        aggregation_expressions=[]
+    )
+)
+
+
 # the summarization transform that's the result of fully specifying `empty_summarize`.
 full_summarize = Summarize(
     dict(
@@ -199,6 +211,12 @@ full_summarize_no_defaults = Summarize(
 @pytest.mark.parametrize(
     'input_summarize_transform, expected_summarize_transform, transforms_before, transforms_after',
     [
+        [
+            empty_summarize_base_col_in_grouping,
+            full_summarize,
+            [],
+            [],
+        ],
         [
             empty_summarize,
             full_summarize,
