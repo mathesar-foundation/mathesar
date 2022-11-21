@@ -24,6 +24,7 @@ fully_speced_summarize = \
         )
     )
 
+
 @pytest.mark.parametrize(
     'input_summarize, expected_summarize', [
         [
