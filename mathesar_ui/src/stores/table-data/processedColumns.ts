@@ -103,7 +103,7 @@ export function processColumn({
       linkFk ? linkFk.referent_table : undefined,
       abstractType.cellInfo,
     ),
-    allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
+    allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier, linkFk),
     preprocFunctions: getPreprocFunctionsForAbstractType(
       abstractType.identifier,
     ),

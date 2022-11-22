@@ -1,3 +1,4 @@
+import type { FkConstraint } from '@mathesar/api/tables/constraints';
 import { abstractTypeCategory } from '../constants';
 import type {
   AbstractTypeCategoryIdentifier,
@@ -218,13 +219,14 @@ export const filterDefinitionMap = getFilterDefinitionMap();
 
 export function getFiltersForAbstractType(
   categoryIdentifier: AbstractTypeCategoryIdentifier,
+  isFK: FkConstraint
 ): Map<AbstractTypeFilterDefinition['id'], AbstractTypeFilterDefinition> {
   const allowedFiltersMap: Map<
     AbstractTypeFilterDefinition['id'],
     AbstractTypeFilterDefinition
   > = new Map();
 
-  filterDefinitionMap.get(categoryIdentifier)?.forEach((filter) => {
+  filterDefinitionMap.get((isFK !== undefined ? "boolean"  : categoryIdentifier))?.forEach((filter) => {
     allowedFiltersMap.set(filter.id, filter);
   });
 
