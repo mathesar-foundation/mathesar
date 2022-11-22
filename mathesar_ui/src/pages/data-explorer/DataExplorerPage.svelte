@@ -22,6 +22,6 @@
   <title>{makeSimplePageTitle($query.name ?? 'Data Explorer')}</title>
 </svelte:head>
 
-<LayoutWithHeader2 fitViewport restrictWidth={false}>
+<LayoutWithHeader2 fitViewport>
   <DataExplorer {queryManager} on:delete={gotoSchemaPage} />
 </LayoutWithHeader2>

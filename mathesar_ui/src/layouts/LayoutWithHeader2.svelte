@@ -1,12 +1,22 @@
 <!-- TODO: Rename it when the older LayoutWithHeader is deleted -->
 <script lang="ts">
   import AppHeader from '@mathesar/components/AppHeader.svelte';
+  import LiveDemoBanner from '@mathesar/components/LiveDemoBanner.svelte';
 
   export let fitViewport = false;
-  export let restrictWidth = true;
+  export let restrictWidth = false;
+  export let cssVariables: Record<string, string> | undefined = undefined;
+
+  $: style = cssVariables
+    ? Object.entries(cssVariables)
+        .filter((val) => val[0].indexOf('--') === 0)
+        .map((entry) => `${entry[0]}: ${entry[1]}`)
+        .join(';')
+    : undefined;
 </script>
 
-<div class="app-layout" class:fit-viewport={fitViewport}>
+<div class="app-layout" class:fit-viewport={fitViewport} {style}>
+  <LiveDemoBanner />
   <div class="app-layout-header">
     <AppHeader />
   </div>
@@ -18,14 +28,20 @@
 
 <style lang="scss">
   .app-layout {
-    display: grid;
-    grid-template: auto auto / 1fr;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 
     .app-layout-header {
       position: sticky;
+      top: 0;
+      z-index: var(--app-header-z-index, 2);
+      flex-grow: 0;
+      flex-shrink: 0;
     }
     .app-layout-content {
       position: relative;
+      flex-grow: 1;
 
       &.restrict-width {
         max-width: var(--max-layout-width, 54rem);
@@ -35,9 +51,10 @@
       }
     }
 
+    &:not(.fit-viewport) {
+      overflow: auto;
+    }
     &.fit-viewport {
-      grid-template: auto 1fr / 1fr;
-      height: 100vh;
       overflow: hidden;
 
       .app-layout-content {

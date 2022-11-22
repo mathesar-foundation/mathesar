@@ -80,7 +80,7 @@
 
 <svelte:head><title>{makeSimplePageTitle(database.name)}</title></svelte:head>
 
-<LayoutWithHeader2>
+<LayoutWithHeader2 restrictWidth={true}>
   <AppSecondaryHeader
     slot="secondary-header"
     pageTitleAndMetaProps={{

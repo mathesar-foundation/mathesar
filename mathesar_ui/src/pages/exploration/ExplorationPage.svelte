@@ -40,7 +40,7 @@
   <title>{query.name} | {schema.name} | Mathesar</title>
 </svelte:head>
 
-<LayoutWithHeader2 fitViewport restrictWidth={false}>
+<LayoutWithHeader2 fitViewport>
   {#if queryRunner}
     <div class="exploration-page">
       <Header bind:isInspectorOpen {query} {database} {schema} />

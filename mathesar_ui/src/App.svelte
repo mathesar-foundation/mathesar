@@ -121,6 +121,10 @@
     --dropdown-z-index: 1;
     --cell-errors-z-index: 1;
     --toast-z-index: 2;
+    --app-header-z-index: 2;
+
+    overflow: hidden;
+    height: 100vh;
   }
 
   h1 {
