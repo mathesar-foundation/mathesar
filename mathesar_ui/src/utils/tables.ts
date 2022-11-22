@@ -1,6 +1,8 @@
 import type { TableEntry } from '@mathesar/api/tables';
 
-export function isTableImportConfirmationRequired(table: TableEntry): boolean {
+export function isTableImportConfirmationRequired(
+  table: Partial<Pick<TableEntry, 'import_verified' | 'data_files'>>,
+): boolean {
   /**
    * table.import_verified can be null when tables have been
    * manually added to the db/already present in db in which
