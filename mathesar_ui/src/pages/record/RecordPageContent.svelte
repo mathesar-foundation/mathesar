@@ -30,13 +30,9 @@
 <h1><Icon {...iconRecord} />{$summary}</h1>
 
 <section class="fields-section">
-  <div class="fields">
-    {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-      <div class="field">
-        <DirectField {processedColumn} {record} />
-      </div>
-    {/each}
-  </div>
+  {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+    <DirectField {processedColumn} {record} />
+  {/each}
 </section>
 
 <div class="widgets">
@@ -50,15 +46,7 @@
 <style>
   .fields-section {
     margin: 3rem 0;
-  }
-  .fields {
-    display: flex;
-    flex-wrap: wrap;
-    --spacing: 1rem;
-    margin: calc(-1 * var(--spacing));
-  }
-  .field {
-    margin: var(--spacing);
-    flex: 1 1 25rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
   }
 </style>
