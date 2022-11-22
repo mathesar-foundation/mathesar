@@ -19,7 +19,7 @@
 
 <FilterEntryComponent
   allowDelete={false}
-  columns={[...columns.values()]}
+  {columns}
   getColumnLabel={(column) => columns.get(column.id)?.column.display_name ?? ''}
   disableColumnChange={limitEditing}
   layout="vertical"
