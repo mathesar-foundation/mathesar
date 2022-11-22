@@ -119,7 +119,7 @@ def reflect_columns_from_tables(tables, metadata):
     _delete_stale_columns(attnum_tuples, tables)
     # Manually trigger preview templates computation signal
     for table in tables:
-        models._compute_preview_template(table)
+        models._set_default_preview_template(table)
 
     _invalidate_columns_with_incorrect_display_options(tables)
 
