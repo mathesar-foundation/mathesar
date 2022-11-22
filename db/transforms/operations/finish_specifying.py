@@ -1,6 +1,6 @@
 from db.tables.operations import select as tables_select
 from db.tables.operations.select import get_joinable_tables
-from db.transforms.base import Summarize, SelectSubsetOfColumns
+from db.transforms.base import Summarize
 from db.columns.operations.select import get_column_from_oid_and_attnum
 
 
@@ -46,7 +46,7 @@ def _split_missing_input_aliases_into_group_and_agg_lists(
     aliases_to_be_added_to_agg_on = []
     summarize_transform = db_query.transformations[ix_of_summarize_transform]
     missing_input_aliases = \
-        _get_missing_input_aliases(db_query, summarize_transform)
+        _get_missing_input_aliases(db_query, ix_of_summarize_transform)
     if not missing_input_aliases:
         # If all input aliases for summarize transform are in the transform's group-by or
         # aggregate-on lists, there's nothing to do.
@@ -55,13 +55,14 @@ def _split_missing_input_aliases_into_group_and_agg_lists(
     # which our suggestions will be based.
     base_grouping_alias = summarize_transform.base_grouping_column
     base_grouping_initial_column = \
-        _get_initial_column_by_alias(
-            db_query, base_grouping_alias
+        db_query.get_initial_column_by_input_alias(
+            ix_of_summarize_transform, base_grouping_alias,
         )
-    # We'll always want base_grouping_column in the "group-by list";
-    if base_grouping_alias in missing_input_aliases:
-        aliases_to_be_added_to_group_by.append(base_grouping_alias)
-        missing_input_aliases.remove(base_grouping_alias)
+    _make_sure_base_grouping_column_will_be_in_group_by_list(
+        base_grouping_alias,
+        missing_input_aliases,
+        aliases_to_be_added_to_group_by,
+    )
     # Most of logic in the rest of method is around whether or not we can add some of the other
     # missing input aliases to the "group-by list"; otherwise we'll put them in "aggregate-on list".
     can_add_other_aliases_to_group_by = (
@@ -78,63 +79,56 @@ def _split_missing_input_aliases_into_group_and_agg_lists(
         oid_of_base_grouping_initial_column = \
             _get_oid_of_initial_column(base_grouping_initial_column)
         for input_alias in missing_input_aliases:
-            initial_column = _get_initial_column_by_alias(db_query, input_alias)
-            if _should_group_by(
-                _get_oid_of_initial_column(initial_column),
-                oid_of_base_grouping_initial_column,
-                oids_of_joinable_tables_with_single_results,
-            ):
+            initial_column = \
+                db_query.get_initial_column_by_input_alias(
+                    ix_of_summarize_transform, input_alias
+                )
+            if (
+                    initial_column is not None
+                    and _should_group_by(
+                        _get_oid_of_initial_column(initial_column),
+                        oid_of_base_grouping_initial_column,
+                        oids_of_joinable_tables_with_single_results,
+                    )
+                ):
                 alias_list_to_add_to = aliases_to_be_added_to_group_by
             else:
                 alias_list_to_add_to = aliases_to_be_added_to_agg_on
-            alias_list_to_add_to.append(initial_column.alias)
+            alias_list_to_add_to.append(input_alias)
     else:
         aliases_to_be_added_to_agg_on = list(missing_input_aliases)
     return aliases_to_be_added_to_group_by, aliases_to_be_added_to_agg_on
 
 
-def _get_initial_column_by_alias(db_query, alias):
-    # IDEA i can make guesses about how each transform changes input alias list
-    # most don't; that can be portrayed in a mapping, if it carries over, then input_alias -> input_alias,
-    # if it changes, input_alias -> output_alias, if it gets removed input_alias -> None
-    # TODO
-    for initial_column in initial_columns:
-        if initial_column.alias == alias:
-            return initial_column
+def _make_sure_base_grouping_column_will_be_in_group_by_list(
+    base_grouping_alias,
+    missing_input_aliases,
+    aliases_to_be_added_to_group_by,
+):
+    """
+    We'll always want base_grouping_column in the "group-by list";
+    """
+    if base_grouping_alias in missing_input_aliases:
+        aliases_to_be_added_to_group_by.append(base_grouping_alias)
+        missing_input_aliases.remove(base_grouping_alias)
 
 
 def _get_missing_input_aliases(db_query, ix_of_summarize_transform):
     """
-    # TODO explain missing
+    Missing input aliases are those that are not mentioned in a summarize transform's spec. It's
+    the input aliases that we'll be automatically adding into the said spec, so that it can be
+    considered fully specified.
     """
     summarize_transform = db_query.transformations[ix_of_summarize_transform]
     group_by_aliases = summarize_transform.grouping_input_aliases
     agg_on_aliases = summarize_transform.aggregation_input_aliases
     aliases_in_summarize = group_by_aliases + agg_on_aliases
-    input_aliases = _get_input_aliases(db_query, ix_of_summarize_transform)
+    input_aliases = db_query.get_input_aliases(ix_of_summarize_transform)
     return [
         input_alias
         for input_alias
         in input_aliases
         if input_alias not in aliases_in_summarize
-    ]
-
-
-def _get_input_aliases(db_query, ix_of_summarize_transform):
-    # TODO
-    pass
-
-
-def _get_initial_columns_not_in_summarize(db_query, summarize_transform):
-    initial_columns = db_query.initial_columns
-    group_by_aliases = summarize_transform.grouping_input_aliases
-    agg_on_aliases = summarize_transform.aggregation_input_aliases
-    aliases_in_summarize = group_by_aliases + agg_on_aliases
-    return [
-        initial_column
-        for initial_column in
-        initial_columns
-        if initial_column.alias not in aliases_in_summarize
     ]
 
 
@@ -189,6 +183,9 @@ def _is_sa_column_unique_constrained(sa_column):
 
 
 def _get_oid_of_initial_column(initial_column):
+    """
+    Using this just because reloid is an obscure term (in our codebase).
+    """
     return initial_column.reloid
 
 

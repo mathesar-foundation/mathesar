@@ -10,6 +10,13 @@ from db.functions.operations.deserialize import get_db_function_subclass_by_id
 from db.records.operations import group, relevance, sort as rec_sort
 
 
+from typing import NamedTuple, Optional
+
+class UniqueConstraintMapping(NamedTuple):
+    input_alias: Optional[str]
+    output_alias: str
+
+
 class Transform(ABC):
     type = None
     spec = None
@@ -49,6 +56,28 @@ class Transform(ABC):
         significantly different, because a single input alias can map to multiple output aliases.
         """
         return dict()
+
+    def get_output_aliases(self, input_aliases):
+        uc_mappings = self.get_unique_constraint_mappings(input_aliases)
+        return [
+            uc_mapping.output_alias
+            for uc_mapping
+            in uc_mappings
+        ]
+
+    def get_unique_constraint_mappings(self, input_aliases):
+        """
+        By default, each input alias maps to an identically named output alias, and its unique
+        constraint, if any, is carried over.
+        """
+        return [
+            UniqueConstraintMapping(
+                input_alias,
+                input_alias,
+            )
+            for input_alias
+            in input_aliases
+        ]
 
 
 class Filter(Transform):
@@ -233,6 +262,27 @@ class Summarize(Transform):
         )
         return _to_non_executable(executable)
 
+    def get_unique_constraint_mappings(self, _):
+        mappings = []
+        # these col specs carry uniqueness over
+        for col_spec in self._grouping_col_specs:
+            input_alias = col_spec['input_alias']
+            output_alias = col_spec['output_alias']
+            mapping = UniqueConstraintMapping(
+                input_alias,
+                output_alias,
+            )
+            mappings.append(mapping)
+        # these col specs *don't* carry uniqueness over
+        for col_spec in self._aggregation_col_specs:
+            output_alias = col_spec['output_alias']
+            mapping = UniqueConstraintMapping(
+                None,
+                output_alias,
+            )
+            mappings.append(mapping)
+        return mappings
+
     def get_new_with_aliases_added_to_group_by(self, aliases):
         def get_col_spec_from_alias(alias):
             return dict(
@@ -323,7 +373,7 @@ class SelectSubsetOfColumns(Transform):
     type = "select"
 
     def apply_to_relation(self, relation):
-        columns_to_select = self.spec
+        columns_to_select = self._columns_to_select
         if columns_to_select:
             processed_columns_to_select = [
                 _make_sure_column_expression(column)
@@ -334,6 +384,21 @@ class SelectSubsetOfColumns(Transform):
             return _to_non_executable(executable)
         else:
             return relation
+
+    def get_unique_constraint_mappings(self, _):
+        columns_to_select = self._columns_to_select
+        return [
+            UniqueConstraintMapping(
+                column_to_select,
+                column_to_select,
+            )
+            for column_to_select
+            in columns_to_select
+        ]
+
+    @property
+    def _columns_to_select(self):
+        return self.spec
 
 
 def _make_sure_column_expression(input):
