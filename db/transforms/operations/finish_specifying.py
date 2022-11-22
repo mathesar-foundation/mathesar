@@ -84,13 +84,13 @@ def _split_missing_input_aliases_into_group_and_agg_lists(
                     ix_of_summarize_transform, input_alias
                 )
             if (
-                    initial_column is not None
-                    and _should_group_by(
-                        _get_oid_of_initial_column(initial_column),
-                        oid_of_base_grouping_initial_column,
-                        oids_of_joinable_tables_with_single_results,
-                    )
-                ):
+                initial_column is not None
+                and _should_group_by(
+                    _get_oid_of_initial_column(initial_column),
+                    oid_of_base_grouping_initial_column,
+                    oids_of_joinable_tables_with_single_results,
+                )
+            ):
                 alias_list_to_add_to = aliases_to_be_added_to_group_by
             else:
                 alias_list_to_add_to = aliases_to_be_added_to_agg_on
