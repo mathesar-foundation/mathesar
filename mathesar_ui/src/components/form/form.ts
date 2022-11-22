@@ -1,19 +1,19 @@
 import { derived, get, type Readable } from 'svelte/store';
 
 import { unite } from '@mathesar-component-library';
-import { comboErrorsKey, type Field, type ValuedField } from './field';
+import { comboErrorsKey, type FieldStore, type ValuedField } from './field';
 import { isValid as outcomeIsValid, type ComboValidator } from './validators';
 
-type GenericFieldsObj = Record<string, Field>;
+type GenericFieldsObj = Record<string, FieldStore>;
 type Values<FieldsObj extends GenericFieldsObj> = {
-  [K in keyof FieldsObj]: FieldsObj[K] extends Field<infer T> ? T : never;
+  [K in keyof FieldsObj]: FieldsObj[K] extends FieldStore<infer T> ? T : never;
 };
 
 function runComboValidators(
   valuedFields: ValuedField[],
   comboValidators: ComboValidator[],
 ): void {
-  const fieldErrorMap = new Map<Field, string[]>();
+  const fieldErrorMap = new Map<FieldStore, string[]>();
   comboValidators.forEach((validator) => {
     const { outcome, fields } = validator(valuedFields);
     fields.forEach((field) => {

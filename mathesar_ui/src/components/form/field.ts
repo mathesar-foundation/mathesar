@@ -51,7 +51,7 @@ export interface RequiredField<T> extends BaseField<T> {
 export interface OptionalField<T> extends BaseField<T> {
   isRequired: false;
 }
-export type Field<T = unknown> = RequiredField<T> | OptionalField<T>;
+export type FieldStore<T = unknown> = RequiredField<T> | OptionalField<T>;
 
 export interface BaseFieldProps<T> {
   initialValue: T;
@@ -67,8 +67,8 @@ export type FieldProps<T> = RequiredFieldProps<T> | OptionalFieldProps<T>;
 
 export function field<T>(props: RequiredFieldProps<T>): RequiredField<T>;
 export function field<T>(props: OptionalFieldProps<T>): OptionalField<T>;
-export function field<T>(props: FieldProps<T>): Field<T>;
-export function field<T>(props: FieldProps<T>): Field<T> {
+export function field<T>(props: FieldProps<T>): FieldStore<T>;
+export function field<T>(props: FieldProps<T>): FieldStore<T> {
   const allValidators = [
     ...(props.validators ?? []),
     ...(props.isRequired ? [required()] : []),
@@ -120,10 +120,10 @@ export function requiredField<T>(
   return field({ initialValue, validators, isRequired: true });
 }
 
-export type FieldValue<F> = F extends Field<infer Value> ? Value : never;
+export type FieldValue<F> = F extends FieldStore<infer Value> ? Value : never;
 
 export interface ValuedField<T = unknown> {
   name: string;
-  field: Field<T>;
+  field: FieldStore<T>;
   value: T;
 }
