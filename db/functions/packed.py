@@ -70,6 +70,124 @@ class GreaterOrEqual(DBFunctionPacked):
         ])
 
 
+class ArrayLengthEquals(DBFunctionPacked):
+    id = 'array_length_equals'
+    name = 'Number of elements is'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return base.Equal([
+            base.ArrayLength([param0]),
+            param1
+        ])
+
+
+class ArrayLengthGreaterThan(DBFunctionPacked):
+    id = 'array_length_greater_than'
+    name = 'Number of elements is greater than'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return base.Greater([
+            base.ArrayLength([param0]),
+            param1
+        ])
+
+
+class ArrayLengthLessThan(DBFunctionPacked):
+    id = 'array_length_lesser_than'
+    name = 'Number of elements is lesser than'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return base.Lesser([
+            base.ArrayLength([param0]),
+            param1
+        ])
+
+
+class ArrayLengthGreaterorEqual(DBFunctionPacked):
+    id = 'array_length_greater_than_or_equal'
+    name = 'Number of elements is greater than or equal to'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return GreaterOrEqual([
+            base.ArrayLength([param0]),
+            param1
+        ])
+
+
+class ArrayLengthLessorEqual(DBFunctionPacked):
+    id = 'array_length_lesser_than_or_equal'
+    name = 'Number of elements is lesser than or equal to'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.array),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return LesserOrEqual([
+            base.ArrayLength([param0]),
+            param1
+        ])
+
+
+class ArrayNotEmpty(DBFunctionPacked):
+    id = 'array_not_empty'
+    name = 'Is not empty'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(1),
+        hints.parameter(0, hints.array),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        return base.Greater([
+            base.ArrayLength([param0]),
+            0,
+        ])
+
+
 class JsonLengthEquals(DBFunctionPacked):
     id = 'json_array_length_equals'
     name = 'Number of elements is'

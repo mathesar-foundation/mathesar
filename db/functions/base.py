@@ -410,6 +410,21 @@ class ArrayContains(DBFunction):
         )
 
 
+class ArrayLength(DBFunction):
+    id = 'array_length'
+    name = 'length'
+    hints = tuple([
+        hints.returns(hints.comparable),
+        hints.parameter_count(1),
+        hints.parameter(0, hints.array),
+        hints.mathesar_filter
+    ])
+
+    @staticmethod
+    def to_sa_expression(value):
+        return sa_call_sql_function('array_length', value, return_type=PostgresType.INTEGER)
+
+
 class Alias(DBFunction):
     id = 'alias'
     name = 'alias'
