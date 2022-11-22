@@ -2,9 +2,10 @@ from rest_access_policy import FieldAccessMixin, PermittedPkRelatedField
 from rest_framework import serializers
 
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
+from mathesar.api.db.permissions.schema import SchemaAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.ui.permissions.users import UserAccessPolicy
-from mathesar.models.base import Database
+from mathesar.models.base import Database, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
 
 
@@ -70,3 +71,8 @@ class SchemaRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSerialize
     class Meta:
         model = SchemaRole
         fields = ['id', 'user', 'schema', 'role']
+
+    schema = PermittedPkRelatedField(
+        access_policy=SchemaAccessPolicy,
+        queryset=Schema.current_objects.all()
+    )

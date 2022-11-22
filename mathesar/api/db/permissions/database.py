@@ -12,5 +12,5 @@ class DatabaseAccessPolicy(AccessPolicy):
             allowed_roles = (Role.MANAGER.value,)
             if request.method.lower() == 'get':
                 allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
-            qs = qs.filter(Q(databaserole__role__in=allowed_roles) & Q(databaserole__user=request.user))
+            qs = qs.filter(Q(database_role__role__in=allowed_roles) & Q(database_role__user=request.user))
         return qs
