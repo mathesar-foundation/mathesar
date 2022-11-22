@@ -3,7 +3,7 @@
 
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     setTabularDataStoreInContext,
@@ -43,12 +43,12 @@
 
 <svelte:head><title>{makeSimplePageTitle(table.name)}</title></svelte:head>
 
-<LayoutWithHeader fitViewport>
+<LayoutWithHeader2 fitViewport>
   <div class="table-page">
     <ActionsPane {database} {schema} {table} />
     <TableView usesVirtualList allowsDdlOperations />
   </div>
-</LayoutWithHeader>
+</LayoutWithHeader2>
 
 <style>
   .table-page {
