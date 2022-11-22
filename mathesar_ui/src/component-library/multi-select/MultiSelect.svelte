@@ -110,12 +110,14 @@
   on:change
   {labelKey}
   {getLabel}
+  {disabled}
   checkEquality={valuesAreEqual}
   let:api
   let:isOpen
 >
   <span
     class="input-element multi-select-trigger {triggerClass}"
+    class:disabled
     bind:this={trigger}
     on:click={api.toggle}
     aria-label={ariaLabel}

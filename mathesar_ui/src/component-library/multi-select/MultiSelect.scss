@@ -9,6 +9,10 @@
   padding: var(--spacing);
   min-height: 2.37em;
 
+  &.disabled {
+    pointer-events: none;
+  }
+
   .selected-values {
     display: flex;
     flex-wrap: wrap;
