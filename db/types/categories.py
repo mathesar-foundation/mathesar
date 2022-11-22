@@ -82,6 +82,10 @@ COMPARABLE_TYPES = frozenset({
     *TIME_RELATED_TYPES,
 })
 
+ARRAY = frozenset({
+    PostgresType._ARRAY
+})
+
 JSON_TYPES = frozenset({
     PostgresType.JSON,
     PostgresType.JSONB,
