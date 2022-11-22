@@ -27,7 +27,19 @@ def check_schema_response(
         assert schema_name in get_mathesar_schemas(engine)
 
 
-def test_schema_list(client, patent_schema, MOD_engine_cache):
+list_clients_with_results_count = [
+    ('client', 2),
+    ('db_manager_client', 2),
+    ('db_editor_client', 2),
+    ('schema_manager_client', 1),
+    ('schema_viewer_client', 1),
+    ('db_viewer_schema_manager_client', 1)
+]
+
+
+@pytest.mark.parametrize('client_name, expected_schema_count', list_clients_with_results_count)
+def test_schema_list(request, patent_schema, MOD_engine_cache, client_name, expected_schema_count):
+    client = request.getfixturevalue(client_name)
     response = client.get('/api/db/v0/schemas/')
     assert response.status_code == 200
 
@@ -35,7 +47,7 @@ def test_schema_list(client, patent_schema, MOD_engine_cache):
 
     assert response_data['count'] == 2
     results = response_data['results']
-    assert len(results) == 2
+    assert len(results) == expected_schema_count
 
     response_schema = None
     for some_schema in response_data['results']:

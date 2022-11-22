@@ -5,16 +5,16 @@ from mathesar.models.users import DatabaseRole, Role, SchemaRole
 
 
 class SchemaAccessPolicy(AccessPolicy):
-    # Anyone can view schema as long as they have
+    # Anyone can view a Schema as long as they have
     # at least a Viewer access to that schema or the database the schema is part of
-    # Create Access is restricted to superusers or managers of the schema or the database the schema is part of.
+    # Create access is restricted to superusers or managers of the schema or the database the schema is part of.
     statements = [
         {
             'action': ['list', 'retrieve', 'create'],
             'principal': '*',
             'effect': 'allow',
         },
-        # Only superuser or schema/database manager can delete the schema
+        # Only superuser or schema/database manager can modify or delete the schema
         {
             'action': ['destroy', 'update', 'partial_update'],
             'principal': ['*'],
