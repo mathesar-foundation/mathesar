@@ -35,8 +35,7 @@
       position: sticky;
       top: 0;
       z-index: var(--app-header-z-index, 2);
-      flex-grow: 0;
-      flex-shrink: 0;
+      flex: 0 0;
     }
     .app-layout-content {
       position: relative;
