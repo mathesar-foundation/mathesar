@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Spinner } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/tables';
-  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
@@ -26,10 +26,10 @@
 
 <svelte:head><title>{makeSimplePageTitle(title)}</title></svelte:head>
 
-<LayoutWithHeader2>
+<LayoutWithHeader>
   {#if isLoading}
     <Spinner />
   {:else}
     <RecordPageContent {tableStructure} {record} />
   {/if}
-</LayoutWithHeader2>
+</LayoutWithHeader>

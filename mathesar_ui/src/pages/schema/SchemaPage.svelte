@@ -3,7 +3,7 @@
   import { queries } from '@mathesar/stores/queries';
   import { tables as tablesStore } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import { iconSchema, iconEdit } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
@@ -61,7 +61,7 @@
 
 <svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
 
-<LayoutWithHeader2
+<LayoutWithHeader
   restrictWidth={true}
   cssVariables={{ '--max-layout-width': '64rem' }}
 >
@@ -113,7 +113,7 @@
       </div>
     {/if}
   </TabContainer>
-</LayoutWithHeader2>
+</LayoutWithHeader>
 
 <AddEditSchemaModal controller={addEditModal} {database} {schema} />
 

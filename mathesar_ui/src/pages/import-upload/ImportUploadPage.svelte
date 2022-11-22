@@ -1,7 +1,7 @@
 <script lang="ts">
   import { router } from 'tinro';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
-  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { RadioGroup, Spinner } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/utils/api';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
@@ -58,7 +58,7 @@
 
 <svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
 
-<LayoutWithHeader2>
+<LayoutWithHeader>
   <div class="import-file-view">
     <h2>Create a table by importing your data</h2>
 
@@ -113,7 +113,7 @@
       </div>
     </div>
   </div>
-</LayoutWithHeader2>
+</LayoutWithHeader>
 
 <style lang="scss">
   .import-file-view {

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
 </script>
 
-<LayoutWithHeader2>
+<LayoutWithHeader>
   <h1>Error</h1>
   <slot />
-</LayoutWithHeader2>
+</LayoutWithHeader>

@@ -6,7 +6,7 @@
     getTablePageUrl,
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
-  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import {
     Sheet,
     SheetHeader,
@@ -309,7 +309,7 @@
 
 <svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
 
-<LayoutWithHeader2>
+<LayoutWithHeader>
   <div class="table-preview-confirmation">
     <h2>Confirm your data</h2>
 
@@ -426,7 +426,7 @@
       </div>
     {/if}
   </div>
-</LayoutWithHeader2>
+</LayoutWithHeader>
 
 <style lang="scss">
   .table-preview-confirmation {
