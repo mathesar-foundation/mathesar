@@ -9,6 +9,7 @@
 
   export let processedColumn: ProcessedQueryResultColumn | undefined;
   export let aggregation: QuerySummarizationAggregationEntry;
+  export let limitEditing = false;
 
   function getAggregationTypeLabel(aggType?: string) {
     switch (aggType) {
@@ -39,10 +40,15 @@
   <Select
     options={['aggregate_to_array', 'count']}
     bind:value={aggregation.function}
+    disabled={limitEditing}
     getLabel={getAggregationTypeLabel}
     on:change={() => dispatch('update')}
   />
-  <Button appearance="plain" on:click={() => dispatch('remove')}>
+  <Button
+    disabled={limitEditing}
+    appearance="plain"
+    on:click={() => dispatch('remove')}
+  >
     <Icon {...iconClose} size="0.8rem" />
   </Button>
 </div>
@@ -52,7 +58,6 @@
     margin: 0.8rem 0 0 0.3rem;
     display: grid;
     grid-template-columns: 7fr 1fr 3fr 0.5fr;
-    grid-column-gap: 1fr;
 
     span {
       padding: 0.3rem;

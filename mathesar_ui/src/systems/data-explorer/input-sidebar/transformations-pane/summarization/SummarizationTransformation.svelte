@@ -100,6 +100,7 @@
           )}
           on:change={(e) => onGroupChange(e.detail)}
           autoClearInvalidValues={false}
+          disabled={limitEditing}
           let:option
         >
           {@const columnInfo = columns.get(option)?.column}
@@ -107,7 +108,7 @@
             column={{
               name: columnInfo?.display_name ?? '',
               type: columnInfo?.type ?? 'unknown',
-              type_options: null,
+              type_options: columnInfo?.type_options ?? null,
               display_options: null,
             }}
           />
@@ -122,6 +123,7 @@
         <Aggregation
           processedColumn={columns.get(aggregation.inputAlias)}
           {aggregation}
+          {limitEditing}
           on:update
           on:remove={() => removeAggregation(aggregation)}
         />
