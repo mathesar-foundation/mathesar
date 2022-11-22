@@ -2,10 +2,16 @@ import type { TableEntry } from '@mathesar/api/tables';
 import type { FkConstraint } from '@mathesar/api/tables/constraints';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 import {
+  type ValidationOutcome,
+  invalid,
+  valid,
+} from '@mathesar/components/form';
+import {
   constraintIsFk,
   type Constraint,
   type ProcessedColumn,
 } from '@mathesar/stores/table-data';
+
 import type { LinkedTable } from './columnExtractionTypes';
 
 function getLinkedTable({
@@ -46,4 +52,18 @@ export function getLinkedTables({
         : undefined,
     )
     .filter(isDefinedNonNullable);
+}
+
+export function validateTableIsNotLinkedViaSelectedColumn(
+  linkedTable: LinkedTable,
+  columns: ProcessedColumn[],
+): ValidationOutcome {
+  const offendingColumn = columns.find((selectedColumn) =>
+    linkedTable.columns.some((c) => c.id === selectedColumn.id),
+  );
+  const msg = (c: string, t: string) =>
+    `Cannot move linking column "${c}" to its linked table "${t}".`;
+  return offendingColumn
+    ? invalid(msg(offendingColumn.column.name, linkedTable.table.name))
+    : valid();
 }
