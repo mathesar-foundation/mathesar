@@ -52,7 +52,6 @@ export default class QuerySummarizationTransformationModel
         transformation.spec.grouping_expressions ?? [];
       const displayNames = transformation.display_names ?? {};
       this.columnIdentifier = baseGroupingColumn;
-      // this.preprocFunctionIdentifier = groupingExpression.preproc;
       this.aggregations = new ImmutableMap(
         aggregationExpressions.map((entry) => [
           entry.input_alias,
@@ -64,7 +63,7 @@ export default class QuerySummarizationTransformationModel
           },
         ]),
       );
-      this.groups = new ImmutableMap(
+      let groups = new ImmutableMap(
         groupingExpressions.map((entry) => [
           entry.input_alias,
           {
@@ -74,12 +73,24 @@ export default class QuerySummarizationTransformationModel
           },
         ]),
       );
+      const baseColumnWithinGroupingExp = groups.get(baseGroupingColumn);
+      if (baseColumnWithinGroupingExp) {
+        this.preprocFunctionIdentifier =
+          baseColumnWithinGroupingExp.preprocFunction;
+        groups = groups.without(baseGroupingColumn);
+      }
+      this.groups = groups;
     }
+  }
+
+  private getBaseColumnOutputAlias(): string {
+    return `${this.columnIdentifier}_grouped`;
   }
 
   getOutputColumnAliases(): string[] {
     return [
-      `${this.columnIdentifier}_grouped`,
+      this.getBaseColumnOutputAlias(),
+      ...[...this.groups.values()].map((entry) => entry.outputAlias),
       ...[...this.aggregations.values()].map((entry) => entry.outputAlias),
     ];
   }
@@ -90,11 +101,18 @@ export default class QuerySummarizationTransformationModel
 
     const spec: QueryInstanceSummarizationTransformation['spec'] = {
       base_grouping_column: this.columnIdentifier,
-      grouping_expressions: groupingEntries.map(([inputAlias, groupObj]) => ({
-        input_alias: inputAlias,
-        output_alias: groupObj.outputAlias,
-        preproc: groupObj.preprocFunction,
-      })),
+      grouping_expressions: [
+        {
+          input_alias: this.columnIdentifier,
+          output_alias: this.getBaseColumnOutputAlias(),
+          preproc: this.preprocFunctionIdentifier,
+        },
+        ...groupingEntries.map(([inputAlias, groupObj]) => ({
+          input_alias: inputAlias,
+          output_alias: groupObj.outputAlias,
+          preproc: groupObj.preprocFunction,
+        })),
+      ],
       aggregation_expressions: aggregationEntries.map(
         ([inputAlias, aggObj]) => ({
           input_alias: inputAlias,

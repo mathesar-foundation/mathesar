@@ -227,10 +227,14 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
         thatTransform &&
         thatTransform.type === 'summarize'
       ) {
-        if (thatTransform.groups.has(thatTransform.columnIdentifier)) {
+        const thatTransformGroupWhichIsTheSameAsBaseColumn =
+          thatTransform.groups.get(thatTransform.columnIdentifier);
+        if (thatTransformGroupWhichIsTheSameAsBaseColumn) {
           thatTransform.groups = thatTransform.groups.without(
             thatTransform.columnIdentifier,
           );
+          thatTransform.preprocFunctionIdentifier =
+            thatTransformGroupWhichIsTheSameAsBaseColumn.preprocFunction;
         }
         if (
           thatTransform.aggregations.size !== thisTransform.aggregations.size ||
