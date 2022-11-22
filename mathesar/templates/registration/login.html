@@ -2,6 +2,14 @@
 
 {% block title %}Login{% endblock %}
 
+{% block styles %}
+  <style type="text/css">
+    body {
+      padding: 2rem;
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
   <h2>Log in to Mathesar</h2>
   <form method="post">
@@ -9,4 +17,10 @@
     {{ form.as_p }}
     <button type="submit">Log In</button>
   </form>
+  {% if live_demo_mode %}
+    <p>
+      Mathesar is in live demo mode. Each session has its own copy of demo data.
+      Data will be deleted regularly.
+    </p>
+  {% endif %}
 {% endblock %}
