@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from mathesar.api.dj_filters import UIQueryFilter
 
+from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess, DeletedColumnAccessAPIException
 from mathesar.api.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.api.serializers.queries import BaseQuerySerializer, QuerySerializer
 from mathesar.api.serializers.records import RecordListParameterSerializer
@@ -93,22 +94,26 @@ class QueryViewSet(
         input_serializer = BaseQuerySerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         query = UIQuery(**input_serializer.validated_data)
+        query.replace_transformations_with_processed_transformations()
         record_serializer = RecordListParameterSerializer(data=request.GET)
         record_serializer.is_valid(raise_exception=True)
-        records = paginator.paginate_queryset(
-            queryset=self.get_queryset(),
-            request=request,
-            table=query,
-            filters=record_serializer.validated_data['filter'],
-            order_by=record_serializer.validated_data['order_by'],
-            grouping=record_serializer.validated_data['grouping'],
-            search=record_serializer.validated_data['search_fuzzy'],
-            duplicate_only=record_serializer.validated_data['duplicate_only'],
-        )
-        paginated_records = paginator.get_paginated_response(records)
+        output_serializer = BaseQuerySerializer(query)
+        try:
+            records = paginator.paginate_queryset(
+                queryset=self.get_queryset(),
+                request=request,
+                table=query,
+                filters=record_serializer.validated_data['filter'],
+                order_by=record_serializer.validated_data['order_by'],
+                grouping=record_serializer.validated_data['grouping'],
+                search=record_serializer.validated_data['search_fuzzy'],
+                duplicate_only=record_serializer.validated_data['duplicate_only'],
+            )
+            paginated_records = paginator.get_paginated_response(records)
+        except DeletedColumnAccess as e:
+            raise DeletedColumnAccessAPIException(e, query=output_serializer.data)
         columns = query.output_columns_simple
         column_metadata = query.all_columns_description_map
-        output_serializer = BaseQuerySerializer(query)
 
         def _get_param_val(val):
             try:

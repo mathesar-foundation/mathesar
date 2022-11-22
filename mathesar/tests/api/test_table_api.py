@@ -8,6 +8,7 @@ from db.columns.operations.select import get_column_attnum_from_name, get_column
 from db.types.base import PostgresType, MathesarCustomType
 from db.metadata import get_empty_metadata
 from mathesar.models.users import DatabaseRole, SchemaRole
+from mathesar.models.query import UIQuery
 
 from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
@@ -1554,3 +1555,31 @@ def test_table_move_columns_after_extracting(create_patents_table, client):
     extracted_column = Column.objects.get(id=extracted_column_id)
     assert extracted_column.id == extracted_column_id
     assert extracted_column.display_options == column_with_display_options.display_options
+
+
+def test_table_ui_dependency(client, create_patents_table, get_uid):
+    base_table = create_patents_table(table_name=get_uid())
+    query_data = {
+        "name": get_uid(),
+        "base_table": base_table,
+        "initial_columns": [
+            {
+                "id": 1,
+                "jp_path": [[1, 3], [4, 5]],
+                "alias": "alias_x",
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    query = UIQuery.objects.create(**query_data)
+    response = client.get(f'/api/db/v0/tables/{base_table.id}/ui_dependents/')
+    response_data = response.json()
+    expected_response = {
+        'queries': [
+            query.id
+        ]
+    }
+    assert response_data == expected_response

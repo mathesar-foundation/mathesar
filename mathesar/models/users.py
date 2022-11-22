@@ -31,6 +31,7 @@ class DatabaseRole(BaseModel):
         constraints = [
             models.UniqueConstraint(fields=['user', 'database'], name='unique_database_role')
         ]
+        default_related_name = 'database_role'
 
 
 class SchemaRole(BaseModel):
@@ -42,3 +43,4 @@ class SchemaRole(BaseModel):
         constraints = [
             models.UniqueConstraint(fields=['user', 'schema'], name='unique_schema_role')
         ]
+        default_related_name = 'schema_role'
