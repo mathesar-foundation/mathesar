@@ -94,11 +94,12 @@ class QueryViewSet(
         input_serializer = BaseQuerySerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         query = UIQuery(**input_serializer.validated_data)
-        output_serializer = BaseQuerySerializer(query)
         try:
+            # TODO Consider treating the transformation as immutable
             query.replace_transformations_with_processed_transformations()
             record_serializer = RecordListParameterSerializer(data=request.GET)
             record_serializer.is_valid(raise_exception=True)
+            output_serializer = BaseQuerySerializer(query)
             records = paginator.paginate_queryset(
                 queryset=self.get_queryset(),
                 request=request,
@@ -111,6 +112,7 @@ class QueryViewSet(
             )
             paginated_records = paginator.get_paginated_response(records)
         except DeletedColumnAccess as e:
+            output_serializer = BaseQuerySerializer(query)
             raise DeletedColumnAccessAPIException(e, query=output_serializer.data)
         columns = query.output_columns_simple
         column_metadata = query.all_columns_description_map
