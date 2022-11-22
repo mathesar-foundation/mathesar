@@ -2,43 +2,28 @@
   import {
     ButtonMenuItem,
     DropdownMenu,
-    getValueFromArtificialEvent,
-    getValueFromEvent,
     iconExpandDown,
     Label,
     LabelController,
   } from '@mathesar/component-library';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
+  import type { FieldStore } from '@mathesar/components/form';
   import Null from '@mathesar/components/Null.svelte';
   import { iconSetToNull } from '@mathesar/icons';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
-  import { toast } from '@mathesar/stores/toast';
-  import { getErrorMessage } from '@mathesar/utils/errors';
   import type RecordStore from './RecordStore';
 
   const labelController = new LabelController();
 
-  export let processedColumn: ProcessedColumn;
   export let record: RecordStore;
+  export let processedColumn: ProcessedColumn;
+  export let field: FieldStore;
 
-  let isUpdating = false;
-
+  $: ({ recordSummaries } = record);
   $: ({ column } = processedColumn);
-  $: ({ fields, recordSummaries } = record);
-  $: value = $fields.get(column.id);
-  $: disabled = column.primary_key || isUpdating;
-
-  async function updateField(v: unknown) {
-    isUpdating = true;
-    try {
-      await record.updateField(column.id, v);
-    } catch (e) {
-      toast.error(getErrorMessage(e));
-    } finally {
-      isUpdating = false;
-    }
-  }
+  $: value = $field;
+  $: disabled = column.primary_key;
 </script>
 
 <div class="direct-field">
@@ -65,12 +50,10 @@
 
   <div class="input cell">
     <DynamicInput
-      {value}
+      bind:value={$field}
       {disabled}
       componentAndProps={processedColumn.inputComponentAndProps}
       {labelController}
-      on:change={(e) => updateField(getValueFromEvent(e))}
-      on:artificialChange={(e) => updateField(getValueFromArtificialEvent(e))}
       recordSummary={$recordSummaries
         .get(String(column.id))
         ?.get(String(value))}

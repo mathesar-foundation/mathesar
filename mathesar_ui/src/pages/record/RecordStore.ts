@@ -16,7 +16,7 @@ export default class RecordStore {
   fetchRequest = writable<RequestStatus | undefined>(undefined);
 
   /** Keys are column ids */
-  fields = new WritableMap<number, unknown>();
+  fieldValues = new WritableMap<number, unknown>();
 
   recordSummaries = new RecordSummaryStore();
 
@@ -34,7 +34,7 @@ export default class RecordStore {
     this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordId}/`;
     const { template } = this.table.settings.preview_settings;
     this.summary = derived(
-      [this.fields, this.recordSummaries],
+      [this.fieldValues, this.recordSummaries],
       ([fields, fkSummaryData]) =>
         renderTransitiveRecordSummary({
           template,
@@ -47,7 +47,7 @@ export default class RecordStore {
 
   private updateSelfWithApiResponseData(response: ApiResponse): void {
     const result = response.results[0];
-    this.fields.reconstruct(
+    this.fieldValues.reconstruct(
       Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
     );
     if (response.preview_data) {
@@ -70,8 +70,7 @@ export default class RecordStore {
     }
   }
 
-  async updateField(columnId: number, value: unknown): Promise<void> {
-    const body = { [columnId]: value };
-    this.updateSelfWithApiResponseData(await patchAPI(this.url, body));
+  async patch(payload: Record<string, unknown>) {
+    this.updateSelfWithApiResponseData(await patchAPI(this.url, payload));
   }
 }
