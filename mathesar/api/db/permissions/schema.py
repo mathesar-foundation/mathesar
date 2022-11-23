@@ -24,18 +24,35 @@ class SchemaAccessPolicy(AccessPolicy):
     ]
 
     @classmethod
-    def scope_queryset(cls, request, qs):
+    def _scope_queryset(cls, request, qs, allowed_roles):
         if not request.user.is_superuser:
-            allowed_roles = (Role.MANAGER.value,)
-
-            if request.method.lower() == 'get':
-                allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
             permissible_database_role_filter = (
                 Q(database__database_role__role__in=allowed_roles) & Q(database__database_role__user=request.user)
             )
-            permissible_schema_roles_filter = (Q(schema_role__role__in=allowed_roles) & Q(schema_role__user=request.user))
+            permissible_schema_roles_filter = (
+                Q(schema_role__role__in=allowed_roles) & Q(schema_role__user=request.user)
+            )
             qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
         return qs
+
+    @classmethod
+    def scope_queryset(cls, request, qs):
+        """
+        Used for scoping the queryset of Serializer RelatedField which reference a Schema
+        """
+        allowed_roles = (Role.MANAGER.value,)
+
+        if request.method.lower() == 'get':
+            allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
+        return SchemaAccessPolicy._scope_queryset(request, qs, allowed_roles)
+
+    @classmethod
+    def scope_viewset_queryset(cls, request, qs):
+        """
+        Used for scoping queryset
+        """
+        allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
+        return SchemaAccessPolicy._scope_queryset(request, qs, allowed_roles)
 
     def is_schema_manager(self, request, view, action):
         schema = view.get_object()

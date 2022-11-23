@@ -1,4 +1,5 @@
 from django_filters import rest_framework as filters
+from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -13,7 +14,7 @@ from mathesar.models.base import Schema
 from mathesar.utils.schemas import create_schema_and_object
 
 
-class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class SchemaViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -22,7 +23,7 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
     def get_queryset(self):
         qs = Schema.objects.all().order_by('-created_at')
-        return self.access_policy.scope_queryset(self.request, qs)
+        return self.access_policy.scope_viewset_queryset(self.request, qs)
 
     def create(self, request):
         serializer = SchemaSerializer(data=request.data, context={'request': request})

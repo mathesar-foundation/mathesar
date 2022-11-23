@@ -259,11 +259,10 @@ def test_schema_create_by_superuser(client, FUN_create_dj_db, MOD_engine_cache):
     )
 
 
-def test_schema_create_by_db_manager(client_bob, user_bob, FUN_create_dj_db, MOD_engine_cache):
-    db_name = "some_db1"
+def test_schema_create_by_db_manager(client_bob, user_bob, FUN_create_dj_db, get_uid):
+    db_name = get_uid()
     role = "manager"
     database = FUN_create_dj_db(db_name)
-    schema_count_before = Schema.objects.count()
 
     schema_name = 'Test Schema'
     data = {
@@ -276,22 +275,10 @@ def test_schema_create_by_db_manager(client_bob, user_bob, FUN_create_dj_db, MOD
     DatabaseRole.objects.create(database=database, user=user_bob, role=role)
     response = client_bob.post('/api/db/v0/schemas/', data=data)
     assert response.status_code == 201
-    response_schema = response.json()
-    schema_count_after = Schema.objects.count()
-    assert schema_count_after == schema_count_before + 1
-    schema = Schema.objects.get(id=response_schema['id'])
-    check_schema_response(
-        MOD_engine_cache,
-        response_schema,
-        schema,
-        schema_name,
-        db_name,
-        check_schema_objects=True
-    )
 
 
-def test_schema_create_by_db_editor(client_bob, user_bob, FUN_create_dj_db):
-    db_name = "some_db1"
+def test_schema_create_by_db_editor(client_bob, user_bob, FUN_create_dj_db, get_uid):
+    db_name = get_uid()
     role = "editor"
     database = FUN_create_dj_db(db_name)
     DatabaseRole.objects.create(database=database, user=user_bob, role=role)
@@ -386,9 +373,9 @@ def test_schema_partial_update(create_schema, client, test_db_name, MOD_engine_c
 update_clients_with_status_code = [
     ('superuser_client_factory', 200),
     ('db_manager_client_factory', 200),
-    ('db_editor_client_factory', 404),
+    ('db_editor_client_factory', 403),
     ('schema_manager_client_factory', 200),
-    ('schema_viewer_client_factory', 404),
+    ('schema_viewer_client_factory', 403),
     ('db_viewer_schema_manager_client_factory', 200)
 ]
 
@@ -418,9 +405,9 @@ def test_schema_delete(create_schema, client):
 delete_clients_with_status_code = [
     ('superuser_client_factory', 204),
     ('db_manager_client_factory', 204),
-    ('db_editor_client_factory', 404),
+    ('db_editor_client_factory', 403),
     ('schema_manager_client_factory', 204),
-    ('schema_viewer_client_factory', 404),
+    ('schema_viewer_client_factory', 403),
     ('db_viewer_schema_manager_client_factory', 204)
 ]
 
