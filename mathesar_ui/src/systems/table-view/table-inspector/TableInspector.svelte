@@ -29,7 +29,7 @@
 </script>
 
 <div class="table-inspector-container">
-  <TabContainer bind:activeTab {tabs}>
+  <TabContainer bind:activeTab {tabs} fillContainerHeight fillTabWidth>
     <slot>
       {#if activeTab}
         <div class="tabs-container">
@@ -49,27 +49,5 @@
     position: relative;
     background-color: var(--sand-100);
     isolation: isolate;
-
-    :global(li.tab) {
-      flex: 1;
-    }
-
-    :global(.tabs) {
-      margin-bottom: 0;
-    }
-
-    :global(li.tab > div) {
-      text-align: center;
-      margin: auto;
-    }
-
-    :global(.tabs-container) {
-      left: 0;
-      right: 0;
-      bottom: 0;
-      top: 40px;
-      overflow-y: auto;
-      position: absolute;
-    }
   }
 </style>
