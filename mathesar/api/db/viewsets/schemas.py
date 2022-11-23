@@ -21,7 +21,8 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
     access_policy = SchemaAccessPolicy
 
     def get_queryset(self):
-        return Schema.objects.all().order_by('-created_at')
+        qs = Schema.objects.all().order_by('-created_at')
+        return self.access_policy.scope_queryset(self.request, qs)
 
     def create(self, request):
         serializer = SchemaSerializer(data=request.data, context={'request': request})

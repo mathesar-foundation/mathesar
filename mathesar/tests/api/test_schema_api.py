@@ -28,24 +28,25 @@ def check_schema_response(
 
 
 list_clients_with_results_count = [
-    ('client', 2),
-    ('db_manager_client', 2),
-    ('db_editor_client', 2),
-    ('schema_manager_client', 1),
-    ('schema_viewer_client', 1),
-    ('db_viewer_schema_manager_client', 1)
+    ('superuser_client_factory', 3),
+    ('db_manager_client_factory', 3),
+    ('db_editor_client_factory', 3),
+    ('schema_manager_client_factory', 1),
+    ('schema_viewer_client_factory', 1),
+    ('db_viewer_schema_manager_client_factory', 3)
 ]
 
 
 @pytest.mark.parametrize('client_name, expected_schema_count', list_clients_with_results_count)
-def test_schema_list(request, patent_schema, MOD_engine_cache, client_name, expected_schema_count):
-    client = request.getfixturevalue(client_name)
+def test_schema_list(request, patent_schema, create_schema, MOD_engine_cache, client_name, expected_schema_count):
+    create_schema("Private Schema")
+    client = request.getfixturevalue(client_name)(patent_schema)
     response = client.get('/api/db/v0/schemas/')
     assert response.status_code == 200
 
     response_data = response.json()
 
-    assert response_data['count'] == 2
+    assert response_data['count'] == expected_schema_count
     results = response_data['results']
     assert len(results) == expected_schema_count
 
