@@ -43,7 +43,7 @@
       </span>
     {/if}
     {#if column}
-      <Collapsible isOpen>
+      <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
           title="Properties"
@@ -71,7 +71,7 @@
     {/if}
 
     {#if column}
-      <Collapsible isOpen>
+      <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
           title="Data Type"
@@ -97,7 +97,7 @@
       </Collapsible>
     {/if} -->
 
-    <Collapsible isOpen>
+    <Collapsible isOpen triggerAppearance="plain">
       <CollapsibleHeader slot="header" title="Actions" />
       <div slot="content" class="content-container">
         <ColumnActions

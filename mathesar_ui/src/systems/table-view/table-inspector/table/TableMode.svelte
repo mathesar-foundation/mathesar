@@ -8,7 +8,7 @@
 </script>
 
 <div class="table-mode-container">
-  <Collapsible isOpen>
+  <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader
       slot="header"
       title="Properties"
@@ -19,21 +19,21 @@
     </div>
   </Collapsible>
 
-  <Collapsible isOpen>
+  <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader slot="header" title="Links" isDbLevelConfiguration />
     <div slot="content" class="content-container">
       <TableLinks />
     </div>
   </Collapsible>
 
-  <Collapsible isOpen>
+  <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader slot="header" title="Actions" />
     <div slot="content" class="content-container">
       <TableActions />
     </div>
   </Collapsible>
 
-  <Collapsible>
+  <Collapsible triggerAppearance="plain">
     <CollapsibleHeader slot="header" title="Advanced" />
     <div slot="content" class="content-container">
       <AdvancedActions />
