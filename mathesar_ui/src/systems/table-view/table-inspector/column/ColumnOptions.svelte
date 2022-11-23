@@ -4,6 +4,7 @@
     Checkbox,
     iconLoading,
     Help,
+    LabeledInput,
   } from '@mathesar-component-library';
   import type {
     ColumnsDataStore,
@@ -80,35 +81,44 @@
 </script>
 
 <div class="column-options">
-  <button class="passthrough" on:click={toggleAllowDuplicates}>
-    {#if isRequestingToggleAllowDuplicates}
-      <Icon class="opt" {...iconLoading} />
-    {:else}
-      <span class="opt"><Checkbox checked={!allowsDuplicates} /></span>
-    {/if}
-    <span>
+  <LabeledInput layout="inline-input-first">
+    <span slot="label">
       Restrict to Unique
       <Help>
         Enable this option to make sure that the column only contains unique
-        values. <br /><br /> Useful for columns that contain identifiers, such as
-        a person's ID number or emails.
+        values. Useful for columns that contain identifiers, such as a person's
+        ID number or emails.
       </Help>
     </span>
-  </button>
-  <button class="passthrough" on:click={toggleAllowNull}>
-    {#if isRequestingToggleAllowNull}
+    {#if isRequestingToggleAllowDuplicates}
       <Icon class="opt" {...iconLoading} />
     {:else}
-      <span class="opt"><Checkbox checked={!allowsNull} /></span>
+      <Checkbox
+        disabled={isRequestingToggleAllowDuplicates}
+        checked={!allowsDuplicates}
+        on:change={toggleAllowDuplicates}
+      />
     {/if}
-    <span>
+  </LabeledInput>
+
+  <LabeledInput layout="inline-input-first">
+    <span slot="label">
       Disallow <span class="null">NULL</span> Values
       <Help>
         Enable this option to prevent null values in the column. Null values are
         empty values that are not the same as zero or an empty string.
       </Help>
     </span>
-  </button>
+    {#if isRequestingToggleAllowNull}
+      <Icon class="opt" {...iconLoading} />
+    {:else}
+      <Checkbox
+        disabled={isRequestingToggleAllowNull}
+        checked={!allowsNull}
+        on:change={toggleAllowNull}
+      />
+    {/if}
+  </LabeledInput>
 </div>
 
 <style lang="scss">
@@ -119,10 +129,6 @@
 
     > :global(* + *) {
       margin-top: 0.5rem;
-    }
-
-    button {
-      cursor: pointer;
     }
 
     .null {
