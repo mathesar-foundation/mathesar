@@ -28,9 +28,9 @@ def generate_attribute_accessor(getattr):
     return tmp_class()
 
 
-# Syntax sugar; let's you generate an alias via `generate_attribute_accessor`.
+# Let's you generate an alias via `generate_attribute_accessor`.
 #
-# Example use:
+# Example uses:
 #
 # ```
 # gen_alias.universities.id  # returns "universities_id"
@@ -243,26 +243,13 @@ full_summarize_no_defaults = Summarize(
         ],
         [
             empty_summarize,
-            # has less grouping expressions, due to prior SelectSubsetOfColumns transform
-            Summarize(
-                dict(
-                    base_grouping_column=gen_alias.academics.id,
-                    grouping_expressions=[
-                        _gen_grouping_expr(gen_alias.academics.id),
-                        _gen_grouping_expr(gen_alias.academics.name),
-                    ],
-                    aggregation_expressions=[
-                        _gen_agg_expr(gen_alias.articles.title),
-                    ]
-                )
-            ),
+            full_summarize_no_defaults,
             [
-                # should not prevent summarization from providing good defaults
+                # should prevent summarization from providing good defaults
                 SelectSubsetOfColumns(
                     [
-                        gen_alias.academics.id,
                         gen_alias.academics.name,
-                        gen_alias.articles.title,
+                        gen_alias.universities.name,
                     ]
                 ),
             ],
@@ -325,6 +312,49 @@ full_summarize_no_defaults = Summarize(
                 )
             ),
             [],
+            [],
+        ],
+        [
+            # partial summarization
+            # like full_summarize, but `gen_alias.academics.name` grouping expr is
+            # after `gen_alias.universities.name`
+            Summarize(
+                dict(
+                    base_grouping_column=gen_alias.academics.id + group_output_alias_suffix,
+                    grouping_expressions=[],
+                    aggregation_expressions=[]
+                )
+            ),
+            Summarize(
+                dict(
+                    base_grouping_column=gen_alias.academics.id + group_output_alias_suffix,
+                    grouping_expressions=[
+                        _gen_grouping_expr(gen_alias.academics.id + group_output_alias_suffix),
+                        _gen_grouping_expr(gen_alias.academics.name + group_output_alias_suffix),
+                    ],
+                    aggregation_expressions=[
+                        _gen_agg_expr(gen_alias.universities.name + agg_output_alias_suffix),
+                        _gen_agg_expr(gen_alias.articles.title + agg_output_alias_suffix),
+                    ]
+                )
+            ),
+            [
+                # a full summarization that groups on 2/3 of columns that would be grouped on by
+                # default.
+                Summarize(
+                    dict(
+                        base_grouping_column=gen_alias.academics.id,
+                        grouping_expressions=[
+                            _gen_grouping_expr(gen_alias.academics.id),
+                            _gen_grouping_expr(gen_alias.academics.name),
+                        ],
+                        aggregation_expressions=[
+                            _gen_agg_expr(gen_alias.universities.name),
+                            _gen_agg_expr(gen_alias.articles.title),
+                        ]
+                    )
+                ),
+            ],
             [],
         ],
     ]
