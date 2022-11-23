@@ -259,7 +259,7 @@ def test_schema_create_by_superuser(client, FUN_create_dj_db, MOD_engine_cache):
     )
 
 
-def test_schema_create_by_schema_manager(client_bob, user_bob, FUN_create_dj_db, MOD_engine_cache):
+def test_schema_create_by_db_manager(client_bob, user_bob, FUN_create_dj_db, MOD_engine_cache):
     db_name = "some_db1"
     role = "manager"
     database = FUN_create_dj_db(db_name)
@@ -290,7 +290,7 @@ def test_schema_create_by_schema_manager(client_bob, user_bob, FUN_create_dj_db,
     )
 
 
-def test_schema_create_by_schema_editor(client_bob, user_bob, FUN_create_dj_db):
+def test_schema_create_by_db_editor(client_bob, user_bob, FUN_create_dj_db):
     db_name = "some_db1"
     role = "editor"
     database = FUN_create_dj_db(db_name)
@@ -305,7 +305,7 @@ def test_schema_create_by_schema_editor(client_bob, user_bob, FUN_create_dj_db):
     assert response.status_code == 400
 
 
-def test_schema_create(client_bob, user_bob, FUN_create_dj_db, get_uid):
+def test_schema_create_multiple_existing_roles(client_bob, user_bob, FUN_create_dj_db, get_uid):
     database_with_viewer_access = FUN_create_dj_db(get_uid())
     database_with_manager_access = FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
@@ -383,24 +383,24 @@ def test_schema_partial_update(create_schema, client, test_db_name, MOD_engine_c
     assert schema.name == new_schema_name
 
 
-def test_schema_patch_same_name(create_schema, client, test_db_name, MOD_engine_cache):
+update_clients_with_status_code = [
+    ('superuser_client_factory', 200),
+    ('db_manager_client_factory', 200),
+    ('db_editor_client_factory', 404),
+    ('schema_manager_client_factory', 200),
+    ('schema_viewer_client_factory', 404),
+    ('db_viewer_schema_manager_client_factory', 200)
+]
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', update_clients_with_status_code)
+def test_schema_patch_same_name(create_schema, request, client_name, expected_status_code):
     schema_name = 'Patents Schema Same Name'
     schema = create_schema(schema_name)
-
+    client = request.getfixturevalue(client_name)(schema)
     body = {'name': schema_name}
     response = client.patch(f'/api/db/v0/schemas/{schema.id}/', body)
-
-    response_schema = response.json()
-    assert response.status_code == 200
-    check_schema_response(
-        MOD_engine_cache,
-        response_schema,
-        schema,
-        schema_name,
-        test_db_name
-    )
-    schema = Schema.objects.get(oid=schema.oid)
-    assert schema.name == schema_name
+    assert response.status_code == expected_status_code
 
 
 def test_schema_delete(create_schema, client):
@@ -413,6 +413,25 @@ def test_schema_delete(create_schema, client):
     # Ensure the Django model was deleted
     existing_oids = {schema.oid for schema in Schema.objects.all()}
     assert schema.oid not in existing_oids
+
+
+delete_clients_with_status_code = [
+    ('superuser_client_factory', 204),
+    ('db_manager_client_factory', 204),
+    ('db_editor_client_factory', 404),
+    ('schema_manager_client_factory', 204),
+    ('schema_viewer_client_factory', 404),
+    ('db_viewer_schema_manager_client_factory', 204)
+]
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', delete_clients_with_status_code)
+def test_schema_delete_by_different_roles(create_schema, request, client_name, expected_status_code):
+    schema_name = 'NASA Schema Delete'
+    schema = create_schema(schema_name)
+    client = request.getfixturevalue(client_name)(schema)
+    response = client.delete(f'/api/db/v0/schemas/{schema.id}/')
+    assert response.status_code == expected_status_code
 
 
 def test_schema_dependents(client, create_schema):
