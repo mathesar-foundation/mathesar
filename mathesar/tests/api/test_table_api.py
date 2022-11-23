@@ -8,6 +8,7 @@ from db.columns.operations.select import get_column_attnum_from_name, get_column
 from db.types.base import PostgresType, MathesarCustomType
 from db.metadata import get_empty_metadata
 from mathesar.models.users import DatabaseRole, SchemaRole
+from mathesar.models.query import UIQuery
 
 from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
@@ -667,7 +668,7 @@ def test_table_create_with_same_name(client, schema):
     assert response_error[0]['message'] == f'Relation {table_name} already exists in schema {schema.id}'
 
 
-def test_table_create_by_multiple_manager(client_bob, client_alice, user_bob, user_alice, schema):
+def test_table_create_multiple_users_different_roles(client_bob, client_alice, user_bob, user_alice, schema):
     table_name = 'test_table'
     body = {
         'name': table_name,
@@ -697,7 +698,7 @@ def test_table_create_by_multiple_manager(client_bob, client_alice, user_bob, us
 
 
 @pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)
-def test_table_create_by_different_manager_roles(schema, request, client_name, expected_status_code):
+def test_table_create(schema, request, client_name, expected_status_code):
     table_name = 'test_table'
     body = {
         'name': table_name,
@@ -1601,3 +1602,31 @@ def test_table_extract_columns_by_different_roles(create_patents_table, request,
     client = request.getfixturevalue(client_name)(table.schema)
     current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
     assert current_table_response.status_code == expected_status_code
+
+
+def test_table_ui_dependency(client, create_patents_table, get_uid):
+    base_table = create_patents_table(table_name=get_uid())
+    query_data = {
+        "name": get_uid(),
+        "base_table": base_table,
+        "initial_columns": [
+            {
+                "id": 1,
+                "jp_path": [[1, 3], [4, 5]],
+                "alias": "alias_x",
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    query = UIQuery.objects.create(**query_data)
+    response = client.get(f'/api/db/v0/tables/{base_table.id}/ui_dependents/')
+    response_data = response.json()
+    expected_response = {
+        'queries': [
+            query.id
+        ]
+    }
+    assert response_data == expected_response

@@ -74,6 +74,12 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
         return Response(serializer.data)
 
     @action(methods=['get'], detail=True)
+    def ui_dependents(self, request, pk=None):
+        table = self.get_object()
+        ui_dependents = table.get_ui_dependents()
+        return Response(ui_dependents)
+
+    @action(methods=['get'], detail=True)
     def joinable_tables(self, request, pk=None):
         table = self.get_object()
         limit = request.query_params.get('limit')

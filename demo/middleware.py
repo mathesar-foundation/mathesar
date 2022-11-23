@@ -3,7 +3,7 @@ import logging
 
 from django.conf import settings
 
-from demo.install import load_library_dataset
+from demo.install import load_datasets, customize_settings
 from demo.db_namer import get_name
 from db.install import create_mathesar_database
 from mathesar.database.base import create_mathesar_engine
@@ -33,8 +33,9 @@ class LiveDemoModeMiddleware:
                 port=settings.DATABASES["default"]["PORT"],
             )
             engine = create_mathesar_engine(db_name)
-            load_library_dataset(engine)
+            load_datasets(engine)
             reset_reflection()
+            customize_settings(engine)
 
         logger.debug(f"Using database {db_name} for sessionid {sessionid}")
         params = request.GET.copy()
