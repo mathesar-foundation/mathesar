@@ -13,6 +13,7 @@ from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.utils import follows_json_number_spec
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.models import base as models_base
+from mathesar.models.base import compute_default_preview_template
 from mathesar.models.query import DBQuery
 from mathesar.utils.preview import compute_path_prefix, compute_path_str
 
@@ -791,6 +792,77 @@ def test_self_referential_column_preview(self_referential_table, engine, client)
         name_column_alias: 'Child1', parent_column_alias: '1'
     }
     assert preview_data == expected_preview_data
+
+
+def test_table_settings_set_customized_field_automatically(publication_tables, client):
+    author_table, publisher_table, publication_table, checkouts_table = publication_tables
+    author_template_columns = author_table.get_columns_by_name(["first_name", "last_name", "id"])
+    author_table_settings_id = author_table.settings.id
+    response = client.get(
+        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
+    )
+    default_preview = response.json()
+    assert default_preview['preview_settings']['customized'] is False
+    assert default_preview['preview_settings']['template'] == compute_default_preview_template(author_table)
+    author_preview_template = f'Full Name: {{{ author_template_columns[0].id }}} {{{author_template_columns[1].id}}}'
+    data = {
+        "preview_settings": {
+            'template': author_preview_template,
+        }
+    }
+    client.patch(
+        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
+        data=data,
+    )
+    response = client.get(
+        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
+    )
+    customised_preview = response.json()
+    assert customised_preview['preview_settings']['customized'] is True
+    assert customised_preview['preview_settings']['template'] == author_preview_template
+
+
+def test_foreign_key_record_api_reset_column_preview_to_default(publication_tables, client):
+    author_table, publisher_table, publication_table, checkouts_table = publication_tables
+    author_template_columns = author_table.get_columns_by_name(["first_name", "last_name", "id"])
+    author_table_settings_id = author_table.settings.id
+    response = client.get(
+        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
+    )
+    default_preview = response.json()
+    assert default_preview['preview_settings']['customized'] is False
+    default_preview_template = compute_default_preview_template(author_table)
+    assert default_preview['preview_settings']['template'] == default_preview_template
+    author_preview_template = f'Full Name: {{{ author_template_columns[0].id }}} {{{author_template_columns[1].id}}}'
+    data = {
+        "preview_settings": {
+            'template': author_preview_template,
+        }
+    }
+    client.patch(
+        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
+        data=data,
+    )
+    response = client.get(
+        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
+    )
+    customised_preview = response.json()
+    assert customised_preview['preview_settings']['template'] == author_preview_template
+    data = {
+        "preview_settings": {
+            'customized': False,
+        }
+    }
+    client.patch(
+        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
+        data=data,
+    )
+    response = client.get(
+        f"/api/db/v0/tables/{author_table.id}/settings/{author_table_settings_id}/",
+    )
+    reset_preview = response.json()
+    assert reset_preview['preview_settings']['template'] == default_preview_template
+    assert reset_preview['preview_settings']['customized'] is False
 
 
 def test_foreign_key_record_api_all_column_previews(publication_tables, client):
