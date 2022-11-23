@@ -13,7 +13,10 @@
     RecordsData,
     TabularDataSelection,
   } from '@mathesar/stores/table-data';
-  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
+  import {
+    getPkValueInRecord,
+    type RecordRow,
+  } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
 
   export let selectedRowIndices: number[];
@@ -39,20 +42,32 @@
     }
   }
 
-  function getRecord(selectedRowIndex: number) {
-    return $savedRecords[selectedRowIndex].record;
-  }
-
-  $: ({ savedRecords } = recordsData);
   $: ({ columns } = columnsDataStore);
-  $: recordPageLink =
-    $storeToGetRecordPageUrl({
-      recordId: getPkValueInRecord(getRecord(selectedRowIndices[0]), $columns),
-    }) || '';
+  $: recordPageLink = (() => {
+    const selectedRowIndex = selectedRowIndices[0];
+    const recordRow = recordsData.getRecordRows()[selectedRowIndex];
+
+    if (!recordRow) {
+      return '';
+    }
+
+    let recordId: string | number;
+    try {
+      recordId = getPkValueInRecord(recordRow.record, $columns);
+    } catch (e) {
+      return '';
+    }
+
+    return (
+      $storeToGetRecordPageUrl({
+        recordId,
+      }) || ''
+    );
+  })();
 </script>
 
 <div class="actions-container">
-  {#if selectedRowIndices.length === 1}
+  {#if selectedRowIndices.length === 1 && recordPageLink}
     <AnchorButton href={recordPageLink}>
       <div class="action-item">
         <div>
