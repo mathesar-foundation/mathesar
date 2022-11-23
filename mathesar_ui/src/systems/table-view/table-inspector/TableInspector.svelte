@@ -42,12 +42,23 @@
 
 <style lang="scss">
   .table-inspector-container {
-    --collapsible-header-background-color: var(--sand-200);
     width: var(--table-inspector-width, 400px);
     box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
       0px 3px 1px -2px rgba(0, 0, 0, 0.12), 0px 1px 5px 0px rgba(0, 0, 0, 0.2);
     position: relative;
     background-color: var(--sand-100);
     isolation: isolate;
+
+    :global(.collapsible > button.btn) {
+      background-color: var(--sand-200);
+
+      &:hover {
+        background-color: var(--sand-300);
+      }
+
+      &:active {
+        background-color: var(--sand-400);
+      }
+    }
   }
 </style>
