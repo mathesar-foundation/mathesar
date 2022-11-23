@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { Icon, iconLoading } from '@mathesar/component-library';
+  import {
+    AnchorButton,
+    Button,
+    Icon,
+    iconExternalLink,
+    iconLoading,
+  } from '@mathesar/component-library';
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type {
@@ -9,7 +15,6 @@
   } from '@mathesar/stores/table-data';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
-  import ActionItem from '../ActionItem.svelte';
 
   export let selectedRowIndices: number[];
   export let recordsData: RecordsData;
@@ -34,36 +39,38 @@
     }
   }
 
-  $: ({ savedRecords } = recordsData);
-  $: ({ columns } = columnsDataStore);
-
   function getRecord(selectedRowIndex: number) {
     return $savedRecords[selectedRowIndex].record;
   }
+
+  $: ({ savedRecords } = recordsData);
+  $: ({ columns } = columnsDataStore);
+  $: recordPageLink =
+    $storeToGetRecordPageUrl({
+      recordId: getPkValueInRecord(getRecord(selectedRowIndices[0]), $columns),
+    }) || '';
 </script>
 
 <div class="actions-container">
   {#if selectedRowIndices.length === 1}
-    <ActionItem
-      href={$storeToGetRecordPageUrl({
-        recordId: getPkValueInRecord(
-          getRecord(selectedRowIndices[0]),
-          $columns,
-        ),
-      })}
-    >
-      <Icon {...iconRecord} />
-      <span> Open Record </span>
-    </ActionItem>
+    <AnchorButton href={recordPageLink}>
+      <div class="action-item">
+        <div>
+          <Icon {...iconRecord} />
+          <span> Open Record </span>
+        </div>
+        <Icon {...iconExternalLink} />
+      </div>
+    </AnchorButton>
   {/if}
-  <ActionItem danger on:click={handleDeleteRecords}>
+  <Button appearance="outline-primary" on:click={handleDeleteRecords}>
     <Icon {...isDeleting ? iconLoading : iconDeleteMajor} />
     <span>
       Delete {selectedRowIndices.length} record{selectedRowIndices.length > 1
         ? 's'
         : ''}
     </span>
-  </ActionItem>
+  </Button>
 </div>
 
 <style lang="scss">
@@ -74,5 +81,12 @@
     > :global(* + *) {
       margin-top: 0.5rem;
     }
+  }
+
+  .action-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 </style>

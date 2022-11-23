@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon, iconSettings } from '@mathesar/component-library';
+  import { Button, Icon, iconSettings } from '@mathesar/component-library';
   import {
     iconDeleteMajor,
     iconMoveColumnsToNewLinkedTable,
@@ -11,7 +11,6 @@
     ColumnsDataStore,
     ProcessedColumn,
   } from '@mathesar/stores/table-data';
-  import ActionItem from '../ActionItem.svelte';
   import ExtractColumnsModal from './column-extraction/ExtractColumnsModal.svelte';
   import { ExtractColumnsModalController } from './column-extraction/ExtractColumnsModalController';
 
@@ -52,25 +51,32 @@
 </script>
 
 <div class="actions-container">
-  <ActionItem
-    suffixIcon={iconSettings}
-    on:click={handleMoveColumnsToNewLinkedTable}
-  >
-    <Icon {...iconMoveColumnsToNewLinkedTable} />
-    <span>New linked table from column{s}</span>
-  </ActionItem>
-  <ActionItem
-    suffixIcon={iconSettings}
-    on:click={handleMoveColumnsToExistingLinkedTable}
-  >
-    <Icon {...iconMoveColumnsToExistingLinkedTable} />
-    <span>Move column{s} to existing linked table</span>
-  </ActionItem>
+  <Button on:click={handleMoveColumnsToNewLinkedTable}>
+    <div class="action-item">
+      <div>
+        <Icon {...iconMoveColumnsToNewLinkedTable} />
+        <span>New linked table from column{s}</span>
+      </div>
+      <Icon {...iconSettings} />
+    </div>
+  </Button>
+  <Button on:click={handleMoveColumnsToExistingLinkedTable}>
+    <div class="action-item">
+      <div>
+        <Icon {...iconMoveColumnsToExistingLinkedTable} />
+        <span>Move column{s} to existing linked table</span>
+      </div>
+      <Icon {...iconSettings} />
+    </div>
+  </Button>
   {#if column}
-    <ActionItem danger on:click={() => column && handleDeleteColumn(column)}>
+    <Button
+      appearance="outline-primary"
+      on:click={() => column && handleDeleteColumn(column)}
+    >
       <Icon {...iconDeleteMajor} />
       <span>Delete Column</span>
-    </ActionItem>
+    </Button>
   {/if}
 </div>
 
@@ -84,5 +90,12 @@
     > :global(* + *) {
       margin-top: 0.5rem;
     }
+  }
+
+  .action-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 </style>
