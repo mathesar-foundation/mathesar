@@ -31,6 +31,7 @@
   import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
   import { getColumnIdToFocusInitially } from './recordSelectorUtils';
   import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
+  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -111,7 +112,7 @@
     if (!record || Object.keys(record).length === 0) {
       return undefined;
     }
-    return recordsData.getPkValueInRecord(record, $columns);
+    return getPkValueInRecord(record, $columns);
   }
 
   function getRowHref(row: RecordRow): string | undefined {

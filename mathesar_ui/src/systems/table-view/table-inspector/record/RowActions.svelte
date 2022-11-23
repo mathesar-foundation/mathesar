@@ -7,6 +7,7 @@
     RecordsData,
     TabularDataSelection,
   } from '@mathesar/stores/table-data';
+  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
   import ActionItem from '../ActionItem.svelte';
 
@@ -45,7 +46,7 @@
   {#if selectedRowIndices.length === 1}
     <ActionItem
       href={$storeToGetRecordPageUrl({
-        recordId: recordsData.getPkValueInRecord(
+        recordId: getPkValueInRecord(
           getRecord(selectedRowIndices[0]),
           $columns,
         ),
