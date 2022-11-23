@@ -7,7 +7,8 @@ from mathesar.models.users import DatabaseRole, Role, SchemaRole
 class SchemaAccessPolicy(AccessPolicy):
     # Anyone can view a Schema as long as they have
     # at least a Viewer access to that schema or the database the schema is part of
-    # Create access is restricted to superusers or managers of the schema or the database the schema is part of.
+    # Create access is restricted to superusers or managers of the database the schema is part of.
+    # This restriction is taken care of the serializer used for creating the Schema
     statements = [
         {
             'action': ['list', 'retrieve', 'create'],
@@ -49,7 +50,10 @@ class SchemaAccessPolicy(AccessPolicy):
     @classmethod
     def scope_viewset_queryset(cls, request, qs):
         """
-        Used for scoping queryset
+        Used for scoping queryset of the SchemaViewSet.
+        It is used for listing all the schema the user has Viewer access.
+         Restrictions are then applied based on the request method using the Policy statements.
+         This helps us to throw correct error status code instead of a 404 error code
         """
         allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
         return SchemaAccessPolicy._scope_queryset(request, qs, allowed_roles)

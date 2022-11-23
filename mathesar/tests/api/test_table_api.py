@@ -660,7 +660,7 @@ def test_table_create_with_same_name(client, schema):
     assert response_error[0]['message'] == f'Relation {table_name} already exists in schema {schema.id}'
 
 
-def test_table_create_by_multiple_manager(client_bob, client_alice, user_bob, user_alice, schema):
+def test_table_create_multiple_users_different_roles(client_bob, client_alice, user_bob, user_alice, schema):
     table_name = 'test_table'
     body = {
         'name': table_name,
@@ -690,7 +690,7 @@ def test_table_create_by_multiple_manager(client_bob, client_alice, user_bob, us
 
 
 @pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)
-def test_table_create_by_different_manager_roles(schema, request, client_name, expected_status_code):
+def test_table_create(schema, request, client_name, expected_status_code):
     table_name = 'test_table'
     body = {
         'name': table_name,
