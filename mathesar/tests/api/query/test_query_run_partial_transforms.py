@@ -11,12 +11,10 @@ def test_partial_summarize_transform(
         {
             'id': base_table.get_column_by_name('Center').id,
             'alias': col1_alias,
-            'display_name': 'Column 1',
         },
         {
             'id': base_table.get_column_by_name('Case Number').id,
             'alias': 'col2',
-            'display_name': 'Column 2',
         },
     ]
     input_summarize_transform_json = \
@@ -60,6 +58,7 @@ def test_partial_summarize_transform(
     data = {
         'base_table': base_table.id,
         'initial_columns': initial_columns,
+        'display_names': None,
         'parameters': {
             'order_by': [
                 {'field': 'col1_grouped', 'direction': 'asc'},
@@ -80,7 +79,7 @@ def test_partial_summarize_transform(
         'column_metadata': {
             'col1': {
                 'alias': 'col1',
-                'display_name': 'Column 1',
+                'display_name': None,
                 'display_options': None,
                 'input_alias': None,
                 'input_column_name': 'Center',
@@ -102,7 +101,7 @@ def test_partial_summarize_transform(
             },
             'col2': {
                 'alias': 'col2',
-                'display_name': 'Column 2',
+                'display_name': None,
                 'display_options': None,
                 'input_alias': None,
                 'input_column_name': 'Case Number',

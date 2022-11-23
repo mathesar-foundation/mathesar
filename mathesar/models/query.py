@@ -46,7 +46,6 @@ def _get_validator_for_initial_columns(field_name):
                 )
                 raise DictHasBadKeys(message, field=field_name)
             optional_keys = {
-                "display_name",
                 "jp_path",
             }
             valid_keys = {
@@ -150,12 +149,21 @@ class UIQuery(BaseModel, Relation):
         ],
     )
 
-    # dict of column ids/aliases to display options
+    # dict of aliases to display options
     display_options = models.JSONField(
         null=True,
         blank=True,
         validators=[
             _get_validator_for_dict(field_name="display_options"),
+        ],
+    )
+
+    # dict of aliases to display names
+    display_names = models.JSONField(
+        null=True,
+        blank=True,
+        validators=[
+            _get_validator_for_dict(field_name="display_names"),
         ],
     )
 
@@ -191,15 +199,15 @@ class UIQuery(BaseModel, Relation):
     def initial_columns_described(self):
         return tuple(
             {
-                'alias': col['alias'],
-                'display_name': col.get('display_name')
-            }
-            | {
+                'alias': initial_col['alias'],
+                'display_name': self._get_display_name_for_alias(
+                    initial_col['alias']
+                ),
                 'type': dj_col.db_type.id,
                 'type_options': dj_col._sa_column.type_options,
                 'display_options': dj_col.display_options
             }
-            for col, dj_col in zip(self.initial_columns, self.initial_dj_columns)
+            for initial_col, dj_col in zip(self.initial_columns, self.initial_dj_columns)
         )
 
     def _describe_query_column(self, sa_col):
@@ -340,20 +348,35 @@ class UIQuery(BaseModel, Relation):
 
     @cached_property
     def _alias_to_display_name(self):
-        display_name_map = {
-            initial_column['alias']: initial_column.get('display_name')
-            for initial_column
-            in self.initial_columns
-        }
+        """
+        Currently, sources alias-to-display-name mappings from `initial_columns`,
+        `transformations`, and `display_names`. `display_names` is a recent addition: the other
+        sources are to be phased out; choosing to do it this way, so that we break fewer saved
+        queries.
+        """
+        alias_to_display_name = {}
+        # TODO stop sourcing display names from initial_columns (by removing below code block)
+        alias_to_display_name.update(
+            {
+                initial_column['alias']: initial_column.get('display_name')
+                for initial_column
+                in self.initial_columns
+            }
+        )
+        # TODO stop sourcing display names from transformations (by removing below code block)
         if self.transformations is not None:
-            display_name_map.update(
+            alias_to_display_name.update(
                 {
                     k: v
                     for transformation in self.transformations
-                    for k, v in transformation.get('display_names', {}).items()
+                    for k, v
+                    in transformation.get('display_names', {}).items()
                 }
             )
-        return display_name_map
+        # TODO make `display_names` the only source of display names (only keep below code block)
+        if self.display_names is not None:
+            alias_to_display_name.update(self.display_names)
+        return alias_to_display_name
 
     @property
     def _sa_engine(self):
