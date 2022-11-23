@@ -45,11 +45,11 @@
       </span>
     {/if}
     {#if column}
-      <Collapsible isOpen>
+      <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
           title="Properties"
-          isDBLevelConfiguration
+          isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
           <RenameColumn
@@ -73,11 +73,11 @@
     {/if}
 
     {#if column}
-      <Collapsible isOpen>
+      <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
           title="Data Type"
-          isDBLevelConfiguration
+          isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
           <ColumnType {column} />
@@ -106,7 +106,7 @@
           ? undefined
           : $tables.data.get(referentTableId)}
       {#if referentTable !== undefined}
-        <Collapsible>
+        <Collapsible triggerAppearance="plain">
           <CollapsibleHeader slot="header" title="Record Summary" />
           <div slot="content" class="content-container">
             <FkRecordSummaryConfig table={referentTable} />
@@ -115,7 +115,7 @@
       {/if}
     {/if}
 
-    <Collapsible isOpen>
+    <Collapsible isOpen triggerAppearance="plain">
       <CollapsibleHeader slot="header" title="Actions" />
       <div slot="content" class="content-container">
         <ColumnActions

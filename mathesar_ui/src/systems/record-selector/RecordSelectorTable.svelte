@@ -20,6 +20,7 @@
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';
+  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import Cell from './RecordSelectorCellWrapper.svelte';
   import type {
     RecordSelectorController,
@@ -111,7 +112,7 @@
     if (!record || Object.keys(record).length === 0) {
       return undefined;
     }
-    return recordsData.getPkValueInRecord(record, $columns);
+    return getPkValueInRecord(record, $columns);
   }
 
   function getRowHref(row: RecordRow): string | undefined {

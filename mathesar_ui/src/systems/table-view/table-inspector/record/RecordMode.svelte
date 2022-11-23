@@ -21,7 +21,7 @@
         {uniquelySelectedRowIndices.length} records selected
       </span>
     {/if}
-    <Collapsible isOpen>
+    <Collapsible isOpen triggerAppearance="plain">
       <CollapsibleHeader slot="header" title="Actions" />
       <div slot="content" class="content-container">
         <RowActions

@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { Icon } from '@mathesar/component-library';
   import Button from '@mathesar/component-library/button/Button.svelte';
+  import { iconAddNew } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import LinkTableModal from '@mathesar/systems/table-view/link-table/LinkTableModal.svelte';
   import LinkSection from './LinkSection.svelte';
@@ -13,30 +15,18 @@
 
 <div class="links-section">
   {#if linksInThisTable.length}
-    <LinkSection
-      type="in_this_table"
-      links={linksInThisTable}
-      showCreateLinkButton
-    />
+    <LinkSection type="in_this_table" links={linksInThisTable} />
   {/if}
   {#if linksFromOtherTables.length}
-    <LinkSection
-      type="from_other_tables"
-      links={linksFromOtherTables}
-      showCreateLinkButton={!linksInThisTable.length}
-    />
+    <LinkSection type="from_other_tables" links={linksFromOtherTables} />
   {/if}
-  {#if !linksInThisTable.length && !linksFromOtherTables.length}
-    <div>
-      <!-- TODO: Update designs once its updated on Figma -->
-      <Button
-        on:click={() => linkTableModal.open()}
-        appearance="plain"
-        class="padding-zero">Create Link</Button
-      >
-      <LinkTableModal controller={linkTableModal} />
-    </div>
-  {/if}
+  <div>
+    <Button on:click={() => linkTableModal.open()} appearance="secondary">
+      <Icon {...iconAddNew} />
+      <span>Create Link</span>
+    </Button>
+    <LinkTableModal controller={linkTableModal} />
+  </div>
 </div>
 
 <style lang="scss">

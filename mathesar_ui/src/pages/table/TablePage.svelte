@@ -3,7 +3,6 @@
 
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     setTabularDataStoreInContext,
@@ -13,6 +12,7 @@
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
 
   const tabularDataStore = setTabularDataStoreInContext(
     // Sacrifice type safety here since the value is initialized reactively
@@ -43,12 +43,12 @@
 
 <svelte:head><title>{makeSimplePageTitle(table.name)}</title></svelte:head>
 
-<LayoutWithHeader fitViewport>
+<LayoutWithHeader2 fitViewport restrictWidth={false}>
   <div class="table-page">
     <ActionsPane {database} {schema} {table} />
     <TableView usesVirtualList allowsDdlOperations />
   </div>
-</LayoutWithHeader>
+</LayoutWithHeader2>
 
 <style>
   .table-page {

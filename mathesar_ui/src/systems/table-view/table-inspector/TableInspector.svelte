@@ -29,7 +29,7 @@
 </script>
 
 <div class="table-inspector-container">
-  <TabContainer bind:activeTab {tabs}>
+  <TabContainer bind:activeTab {tabs} fillContainerHeight fillTabWidth>
     <slot>
       {#if activeTab}
         <div class="tabs-container">
@@ -42,7 +42,6 @@
 
 <style lang="scss">
   .table-inspector-container {
-    --collapsible-header-background-color: var(--sand-200);
     width: var(--table-inspector-width, 400px);
     box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
       0px 3px 1px -2px rgba(0, 0, 0, 0.12), 0px 1px 5px 0px rgba(0, 0, 0, 0.2);
@@ -50,26 +49,16 @@
     background-color: var(--sand-100);
     isolation: isolate;
 
-    :global(li.tab) {
-      flex: 1;
-    }
+    :global(.collapsible > button.btn) {
+      background-color: var(--sand-200);
 
-    :global(.tabs) {
-      margin-bottom: 0;
-    }
+      &:hover {
+        background-color: var(--sand-300);
+      }
 
-    :global(li.tab > div) {
-      text-align: center;
-      margin: auto;
-    }
-
-    :global(.tabs-container) {
-      left: 0;
-      right: 0;
-      bottom: 0;
-      top: 40px;
-      overflow-y: auto;
-      position: absolute;
+      &:active {
+        background-color: var(--sand-400);
+      }
     }
   }
 </style>
