@@ -510,7 +510,7 @@ def db_viewer_schema_manager_client_factory(user_tom):
 def superuser_client_factory(client):
     """
     A facade for the `client` fixture
-     for mimicking the same behaviour as other role based client factories
+     to the same behaviour as other role based client factories
     """
     def _client(schema):
         return client
