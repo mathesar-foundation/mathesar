@@ -20,6 +20,7 @@
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';
+  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import Cell from './RecordSelectorCellWrapper.svelte';
   import type {
     RecordSelectorController,
@@ -31,7 +32,6 @@
   import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
   import { getColumnIdToFocusInitially } from './recordSelectorUtils';
   import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
-  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;

@@ -13,10 +13,7 @@
     RecordsData,
     TabularDataSelection,
   } from '@mathesar/stores/table-data';
-  import {
-    getPkValueInRecord,
-    type RecordRow,
-  } from '@mathesar/stores/table-data/records';
+  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
 
   export let selectedRowIndices: number[];

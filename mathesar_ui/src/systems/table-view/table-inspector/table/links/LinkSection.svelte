@@ -5,7 +5,6 @@
     iconLinksInThisTable,
   } from '@mathesar/icons';
   import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
-  import { modal } from '@mathesar/stores/modal';
   import type { TableLink, TableLinkType } from './utils';
   import LinkItem from './LinkItem.svelte';
 
