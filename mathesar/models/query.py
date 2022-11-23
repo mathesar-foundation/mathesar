@@ -348,32 +348,7 @@ class UIQuery(BaseModel, Relation):
 
     @cached_property
     def _alias_to_display_name(self):
-        """
-        Currently, sources alias-to-display-name mappings from `initial_columns`,
-        `transformations`, and `display_names`. `display_names` is a recent addition: the other
-        sources are to be phased out; choosing to do it this way, so that we break fewer saved
-        queries.
-        """
         alias_to_display_name = {}
-        # TODO stop sourcing display names from initial_columns (by removing below code block)
-        alias_to_display_name.update(
-            {
-                initial_column['alias']: initial_column.get('display_name')
-                for initial_column
-                in self.initial_columns
-            }
-        )
-        # TODO stop sourcing display names from transformations (by removing below code block)
-        if self.transformations is not None:
-            alias_to_display_name.update(
-                {
-                    k: v
-                    for transformation in self.transformations
-                    for k, v
-                    in transformation.get('display_names', {}).items()
-                }
-            )
-        # TODO make `display_names` the only source of display names (only keep below code block)
         if self.display_names is not None:
             alias_to_display_name.update(self.display_names)
         return alias_to_display_name
