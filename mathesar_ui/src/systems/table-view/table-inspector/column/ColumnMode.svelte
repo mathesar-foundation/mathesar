@@ -47,7 +47,7 @@
         <CollapsibleHeader
           slot="header"
           title="Properties"
-          isDBLevelConfiguration
+          isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
           <RenameColumn
@@ -75,7 +75,7 @@
         <CollapsibleHeader
           slot="header"
           title="Data Type"
-          isDBLevelConfiguration
+          isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
           <ColumnType {column} />

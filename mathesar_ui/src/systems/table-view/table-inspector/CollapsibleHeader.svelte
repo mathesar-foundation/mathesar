@@ -3,12 +3,12 @@
   import { iconDatabase } from '@mathesar/icons';
 
   export let title: string;
-  export let isDBLevelConfiguration = false;
+  export let isDbLevelConfiguration = false;
 </script>
 
 <div class="container">
   <span>{title}</span>
-  {#if isDBLevelConfiguration}
+  {#if isDbLevelConfiguration}
     <Dropdown
       ariaLabel="Help"
       placement="auto"

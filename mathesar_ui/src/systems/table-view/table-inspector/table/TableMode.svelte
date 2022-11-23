@@ -12,7 +12,7 @@
     <CollapsibleHeader
       slot="header"
       title="Properties"
-      isDBLevelConfiguration
+      isDbLevelConfiguration
     />
     <div slot="content" class="content-container">
       <RenameTable />
@@ -20,7 +20,7 @@
   </Collapsible>
 
   <Collapsible isOpen>
-    <CollapsibleHeader slot="header" title="Links" isDBLevelConfiguration />
+    <CollapsibleHeader slot="header" title="Links" isDbLevelConfiguration />
     <div slot="content" class="content-container">
       <TableLinks />
     </div>
