@@ -9,7 +9,8 @@
     optionalField,
   } from '@mathesar/components/form';
   import Identifier from '@mathesar/components/Identifier.svelte';
-  import { iconRecord, iconSave } from '@mathesar/icons';
+  import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
+  import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
   import { getAPI } from '@mathesar/utils/api';
@@ -43,10 +44,13 @@
   }
 </script>
 
-<div><EntityType><Identifier>{table.name}</Identifier> Record</EntityType></div>
-<h1><Icon {...iconRecord} />{$summary}</h1>
-
-<section class="fields-section">
+<InsetPageLayout>
+  <div slot="header">
+    <div>
+      <EntityType><Identifier>{table.name}</Identifier> Record</EntityType>
+    </div>
+    <h1><Icon {...iconRecord} />{$summary}</h1>
+  </div>
   <div class="fields">
     {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
       <DirectField {record} {processedColumn} {field} />
@@ -56,12 +60,13 @@
     <FormSubmit
       {form}
       proceedButton={{ label: 'Save', icon: iconSave }}
+      cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
       onProceed={save}
       initiallyHidden
       onCancel={() => form.reset()}
     />
   </div>
-</section>
+</InsetPageLayout>
 
 <div class="widgets">
   {#await getJoinableTablesResult(table.id)}
@@ -72,9 +77,6 @@
 </div>
 
 <style>
-  .fields-section {
-    margin: 3rem 0;
-  }
   .fields {
     display: grid;
     grid-template-columns: auto 1fr;

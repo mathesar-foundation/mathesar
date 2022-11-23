@@ -26,7 +26,7 @@
 
 <svelte:head><title>{makeSimplePageTitle(title)}</title></svelte:head>
 
-<LayoutWithHeader>
+<LayoutWithHeader cssVariables={{ '--page-padding': '0' }}>
   {#if isLoading}
     <Spinner />
   {:else}
