@@ -20,9 +20,9 @@
       <span slot="trigger" class="help-trigger-content">
         <Icon {...iconDatabase} />
       </span>
-      <slot slot="content"
-        >This section affects the configuration of the database.</slot
-      >
+      <slot slot="content">
+        This section affects the configuration of the database.
+      </slot>
     </Dropdown>
   {/if}
 </div>

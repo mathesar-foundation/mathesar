@@ -45,9 +45,9 @@
   {#if $currentDatabase && $currentSchemaId}
     <ActionItem href={explorationPageUrl}>
       <Icon {...iconExploration} /> <span>Explore Data</span>
-      <Help
-        >Open this table in Data Explorer to query and analyze your data.</Help
-      >
+      <Help>
+        Open this table in Data Explorer to query and analyze your data.
+      </Help>
     </ActionItem>
   {/if}
 
