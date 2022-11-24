@@ -406,7 +406,6 @@ class RemoveColumns(Transform):
         columns_to_select = self.get_columns_to_select(input_aliases)
         select_transform = SelectSubsetOfColumns(columns_to_select)
         relation = select_transform.apply_to_relation(relation)
-        breakpoint()
         return relation
 
     def get_unique_constraint_mappings(self, input_aliases):
