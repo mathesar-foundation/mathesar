@@ -14,6 +14,7 @@ interface CommonData {
   current_db: string;
   current_schema: number | null;
   abstract_types: AbstractTypeResponse[];
+  live_demo_mode: boolean;
 }
 
 function getData<T>(selector: string, retainData = false): T | undefined {
