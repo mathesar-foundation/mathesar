@@ -149,20 +149,30 @@ def check_create_table_response(
     check_table_response(response_table, table, expt_name)
 
 
-write_client_with_different_roles = [
-    ('db_manager_client', 201),
-    ('db_editor_client', 400),
-    ('schema_manager_client', 201),
-    ('schema_viewer_client', 400),
-    ('db_viewer_schema_manager_client', 201)
+list_clients_with_results_count = [
+    ('superuser_client_factory', 3),
+    ('db_manager_client_factory', 3),
+    ('db_editor_client_factory', 3),
+    ('schema_manager_client_factory', 2),
+    ('schema_viewer_client_factory', 2),
+    ('db_viewer_schema_manager_client_factory', 3)
 ]
 
-update_client_with_different_roles = [
-    ('db_manager_client', 200),
-    ('db_editor_client', 403),
-    ('schema_manager_client', 200),
-    ('schema_viewer_client', 403),
-    ('db_viewer_schema_manager_client', 200)
+write_clients_with_status_code = [
+    ('superuser_client_factory', 201),
+    ('db_manager_client_factory', 201),
+    ('db_editor_client_factory', 400),
+    ('schema_manager_client_factory', 201),
+    ('schema_viewer_client_factory', 400),
+    ('db_viewer_schema_manager_client_factory', 201)
+]
+
+update_client_with_status_code = [
+    ('db_manager_client_factory', 200),
+    ('db_editor_client_factory', 403),
+    ('schema_manager_client_factory', 200),
+    ('schema_viewer_client_factory', 403),
+    ('db_viewer_schema_manager_client_factory', 200)
 ]
 
 
@@ -208,6 +218,24 @@ def test_table_list(create_patents_table, client):
     assert response_data['count'] >= 1
     assert len(response_data['results']) >= 1
     check_table_response(response_table, table, table_name)
+
+
+@pytest.mark.parametrize('client_name,expected_table_count', list_clients_with_results_count)
+def test_table_list_based_on_permissions(
+        create_patents_table, patent_schema,
+        create_table,
+        request,
+        client_name,
+        expected_table_count
+):
+    create_patents_table('Private Table', schema_name='Private Schema')
+    create_patents_table("Patent Table 1")
+    create_patents_table("Patent Table 2")
+    client = request.getfixturevalue(client_name)(patent_schema)
+
+    response = client.get('/api/db/v0/tables/')
+    response_data = response.json()
+    assert response_data['count'] == expected_table_count
 
 
 def test_table_list_filter_name(create_patents_table, client):
@@ -697,7 +725,7 @@ def test_table_create_multiple_users_different_roles(client_bob, client_alice, u
     assert response.status_code == 400
 
 
-@pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)
+@pytest.mark.parametrize('client_name, expected_status_code', write_clients_with_status_code)
 def test_table_create(schema, request, client_name, expected_status_code):
     table_name = 'test_table'
     body = {
@@ -753,7 +781,7 @@ def test_table_partial_update_schema(create_patents_table, client):
     assert response_error['code'] == ErrorCodes.UnsupportedAlter.value
 
 
-@pytest.mark.parametrize('client_name, expected_status_code', update_client_with_different_roles)
+@pytest.mark.parametrize('client_name, expected_status_code', update_client_with_status_code)
 def test_table_partial_update_by_different_roles(create_patents_table, request, client_name, expected_status_code):
     table_name = 'NASA Table Partial Update'
     new_table_name = 'NASA Table Partial Update New'
@@ -777,6 +805,34 @@ def test_table_delete(create_patents_table, client):
     new_table_count = len(Table.objects.all())
     assert table_count - 1 == new_table_count
     assert Table.objects.filter(id=table.id).exists() is False
+
+
+delete_clients_with_status_codes = [
+    ('superuser_client_factory', 204, 204),
+    ('db_manager_client_factory', 204, 204),
+    ('db_editor_client_factory', 403, 403),
+    ('schema_manager_client_factory', 204, 404),
+    ('schema_viewer_client_factory', 403, 404),
+    ('db_viewer_schema_manager_client_factory', 204, 404)
+]
+
+
+@pytest.mark.parametrize('client_name, expected_status_code, different_schema_expected_status_code', delete_clients_with_status_codes)
+def test_table_delete_by_different_roles(
+        create_patents_table,
+        request,
+        client_name,
+        expected_status_code,
+        different_schema_expected_status_code,
+):
+    different_schema_table = create_patents_table('Private Table', schema_name='Private Schema')
+    table_name = 'NASA Table Delete'
+    table = create_patents_table(table_name)
+    client = request.getfixturevalue(client_name)(table.schema)
+    response = client.delete(f'/api/db/v0/tables/{table.id}/')
+    assert response.status_code == expected_status_code
+    response = client.delete(f'/api/db/v0/tables/{different_schema_table.id}/')
+    assert response.status_code == different_schema_expected_status_code
 
 
 def test_table_dependencies(client, create_patents_table):

@@ -43,7 +43,7 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
         # because select_related would lead to duplicate object instances and could result in multiple engines instances
         # We prefetch `columns` using Django prefetch_related to get list of column objects and
         # then prefetch column properties like `column name` using prefetch library.
-        return self.access_policy.scope_queryset(Table.objects.prefetch_related('schema', 'schema__database', 'columns').prefetch('_sa_table', 'columns').order_by('-created_at'))
+        return self.access_policy.scope_viewset_queryset(self.request, Table.objects.prefetch_related('schema', 'schema__database', 'columns').prefetch('_sa_table', 'columns').order_by('-created_at'))
 
     def partial_update(self, request, pk=None):
         table = self.get_object()
