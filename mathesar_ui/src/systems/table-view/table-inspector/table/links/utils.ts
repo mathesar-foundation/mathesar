@@ -14,15 +14,19 @@ function generateTableLinkFromJoinableTable(
   linkedTable: JoinableTable,
   joinableTablesResult: JoinableTablesResult,
 ): TableLink {
+  const isLinkReversed = linkedTable.fk_path[0][1];
+  const columnId = isLinkReversed
+    ? linkedTable.jp_path[0][1]
+    : linkedTable.jp_path[0][0];
+  console.log({ columnId });
   return {
     table: {
       id: linkedTable.target,
       name: joinableTablesResult.tables[linkedTable.target].name,
     },
     column: {
-      id: linkedTable.jp_path[0].slice(-1)[0],
-      name: joinableTablesResult.columns[linkedTable.jp_path[0].slice(-1)[0]]
-        .name,
+      id: columnId,
+      name: joinableTablesResult.columns[columnId].name,
     },
   };
 }
@@ -34,7 +38,7 @@ export function getTableLinks(
   switch (type) {
     case 'in_this_table': {
       const linkedTables = joinableTablesResult.joinable_tables.filter(
-        (table) => !table.multiple_results,
+        (table) => !table.fk_path[0][1],
       );
       const links: TableLink[] = linkedTables.map((table) =>
         generateTableLinkFromJoinableTable(table, joinableTablesResult),
@@ -43,7 +47,7 @@ export function getTableLinks(
     }
     case 'from_other_tables': {
       const linkedTables = joinableTablesResult.joinable_tables.filter(
-        (table) => table.multiple_results,
+        (table) => table.fk_path[0][1],
       );
       const links: TableLink[] = linkedTables.map((table) =>
         generateTableLinkFromJoinableTable(table, joinableTablesResult),
