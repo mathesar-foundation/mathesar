@@ -243,31 +243,26 @@ full_summarize_no_defaults = Summarize(
         ],
         [
             empty_summarize,
-            full_summarize_no_defaults,
+            Summarize(
+                dict(
+                    base_grouping_column=gen_alias.academics.id,
+                    grouping_expressions=[
+                        _gen_grouping_expr(gen_alias.academics.id),
+                        _gen_grouping_expr(gen_alias.academics.name),
+                    ],
+                    aggregation_expressions=[]
+                )
+            ),
             [
                 # should prevent summarization from providing good defaults
                 SelectSubsetOfColumns(
                     [
+                        gen_alias.academics.id,
                         gen_alias.academics.name,
-                        gen_alias.universities.name,
                     ]
                 ),
             ],
             [],
-        ],
-        [
-            empty_summarize,
-            full_summarize,
-            [],
-            [
-                # should not affect summarization
-                SelectSubsetOfColumns(
-                    [
-                        gen_alias.academics.name,
-                        gen_alias.universities.name,
-                    ]
-                ),
-            ],
         ],
         [
             # partial summarization
