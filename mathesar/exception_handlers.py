@@ -39,6 +39,8 @@ def standardize_error_response(data):
                 data[index]['code'] = ErrorCodes.UnknownError.value
         if 'detail' not in error:
             data[index]['detail'] = error.pop('details', {})
+    # Adds a Stack-trace of the error for better debugging
+    data['stacktrace'] = reformat_stacktrace(traceback.format_exc())
     return data
 
 
@@ -81,7 +83,9 @@ def mathesar_exception_handler(exc, context):
                 response_data['code'] = error_code
                 response_data['message'] = error_message
                 response_data['details'] = {'exception': force_str(exc)}
-                response_data['stacktrace'] = reformat_stacktrace(traceback.format_exc())
+                # Stacktrace should only be returned if MATHESAR_MODE is set to DEVELOPMENT
+                if settings.MATHESAR_MODE == 'DEVELOPMENT':
+                    response_data['stacktrace'] = reformat_stacktrace(traceback.format_exc())
                 response.data = [response_data]
     return response
 
