@@ -18,7 +18,6 @@ function generateTableLinkFromJoinableTable(
   const columnId = isLinkReversed
     ? linkedTable.jp_path[0][1]
     : linkedTable.jp_path[0][0];
-  console.log({ columnId });
   return {
     table: {
       id: linkedTable.target,
