@@ -10,7 +10,15 @@ class TableAccessPolicy(AccessPolicy):
     # Create Access is restricted to superusers or managers of the schema or the database the table is part of.
     statements = [
         {
-            'action': ['list', 'retrieve', 'create', 'type_suggestions'],
+            'action': [
+                'list',
+                'retrieve',
+                'create',
+                'type_suggestions',
+                'dependents',
+                'ui_dependents',
+                'joinable_tables',
+            ],
             'principal': '*',
             'effect': 'allow',
         },
@@ -36,7 +44,8 @@ class TableAccessPolicy(AccessPolicy):
     def _scope_queryset(cls, request, qs, allowed_roles):
         if not request.user.is_superuser:
             permissible_database_role_filter = (
-                Q(schema__database__database_role__role__in=allowed_roles) & Q(schema__database__database_role__user=request.user)
+                Q(schema__database__database_role__role__in=allowed_roles)
+                & Q(schema__database__database_role__user=request.user)
             )
             permissible_schema_roles_filter = (
                 Q(schema__schema_role__role__in=allowed_roles) & Q(schema__schema_role__user=request.user)

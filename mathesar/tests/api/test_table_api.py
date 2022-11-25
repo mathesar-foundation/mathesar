@@ -813,7 +813,7 @@ delete_clients_with_status_codes = [
     ('db_editor_client_factory', 403, 403),
     ('schema_manager_client_factory', 204, 404),
     ('schema_viewer_client_factory', 403, 404),
-    ('db_viewer_schema_manager_client_factory', 204, 404)
+    ('db_viewer_schema_manager_client_factory', 204, 403)
 ]
 
 
@@ -1634,11 +1634,12 @@ def test_table_move_columns_after_extracting(create_patents_table, client):
 
 
 split_table_client_with_different_roles = [
-    ('db_manager_client', 201),
-    ('db_editor_client', 403),
-    ('schema_manager_client', 201),
-    ('schema_viewer_client', 403),
-    ('db_viewer_schema_manager_client', 201)
+    ('superuser_client_factory', 201),
+    ('db_manager_client_factory', 201),
+    ('db_editor_client_factory', 403),
+    ('schema_manager_client_factory', 201),
+    ('schema_viewer_client_factory', 403),
+    ('db_viewer_schema_manager_client_factory', 201)
 ]
 
 
