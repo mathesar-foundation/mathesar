@@ -21,6 +21,7 @@ import {
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import type { TableEntry } from '@mathesar/api/tables';
+import { retrieveFilters } from '@mathesar/components/filter-entry/utils';
 import { findFkConstraintsForColumn } from './constraintsUtils';
 
 export interface ProcessedColumn extends CellColumnFabric {
@@ -103,7 +104,7 @@ export function processColumn({
       linkFk ? linkFk.referent_table : undefined,
       abstractType.cellInfo,
     ),
-    allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier, linkFk),
+    allowedFiltersMap: retrieveFilters(abstractType.identifier, linkFk),
     preprocFunctions: getPreprocFunctionsForAbstractType(
       abstractType.identifier,
     ),
