@@ -495,8 +495,8 @@ def schema_viewer_client_factory(user_jerry):
 @pytest.fixture
 def db_viewer_schema_manager_client_factory(user_tom):
     def _db_viewer_schema_manager_client(schema):
-        schema_role = 'viewer'
-        db_role = 'manager'
+        schema_role = 'manager'
+        db_role = 'viewer'
 
         client = APIClient()
         client.login(username=user_tom.username, password='password')
