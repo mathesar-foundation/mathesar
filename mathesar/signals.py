@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from mathesar.models.base import (
-    Column, Table, _compute_preview_template,
+    Column, Table, _set_default_preview_template,
     _create_table_settings,
 )
 from mathesar.state.django import reflect_new_table_constraints
@@ -26,4 +26,4 @@ def create_table_settings(**kwargs):
 @receiver(post_save, sender=Column)
 def compute_preview_column_settings(**kwargs):
     instance = kwargs['instance']
-    _compute_preview_template(instance.table)
+    _set_default_preview_template(instance.table)

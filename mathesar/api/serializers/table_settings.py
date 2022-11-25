@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 
-from mathesar.models.base import PreviewColumnSettings, TableSettings
+from mathesar.models.base import PreviewColumnSettings, TableSettings, compute_default_preview_template
 
 
 class PreviewColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
@@ -10,7 +10,7 @@ class PreviewColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerial
         model = PreviewColumnSettings
         fields = ['customized', 'template']
 
-    customized = serializers.BooleanField(default=True, read_only=True)
+    customized = serializers.BooleanField(default=True)
     template = serializers.CharField()
 
 
@@ -25,7 +25,12 @@ class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.Hyperlinked
         preview_settings_data = validated_data.pop('preview_settings', None)
         if preview_settings_data is not None:
             instance.preview_settings.delete()
-            preview_settings = PreviewColumnSettings.objects.create(customized=True, **preview_settings_data)
+            # The preview is customised when the client modifies the default template
+            if preview_settings_data.get('template', None):
+                preview_settings_data['customized'] = True
+            if preview_settings_data['customized'] is False:
+                preview_settings_data['template'] = compute_default_preview_template(instance.table)
+            preview_settings = PreviewColumnSettings.objects.create(**preview_settings_data)
             instance.preview_settings = preview_settings
             instance.save()
         return instance

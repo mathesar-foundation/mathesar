@@ -4,6 +4,7 @@ from mathesar.state.cached_property import cached_property
 
 from db.queries.base import DBQuery, InitialColumn
 from db.queries.operations.process import get_transforms_with_summarizes_speced
+from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
 from db.transforms.operations.deserialize import deserialize_transformation
 from db.transforms.operations.serialize import serialize_transformation
 
@@ -366,7 +367,10 @@ def _get_dj_column_for_initial_db_column(initial_column):
 
 
 def _get_column_pair_from_id(col_id):
-    col = Column.objects.get(id=col_id)
+    try:
+        col = Column.objects.get(id=col_id)
+    except Column.DoesNotExist:
+        raise DeletedColumnAccess(col_id)
     return col.table.oid, col.attnum
 
 

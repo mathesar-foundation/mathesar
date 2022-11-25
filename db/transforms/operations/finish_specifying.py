@@ -26,16 +26,15 @@ def finish_specifying_summarize_transform(
         _split_missing_input_aliases_into_group_and_agg_lists(
             db_query, ix_of_summarize_transform, engine, metadata
         )
-    there_is_something_to_add = \
-        aliases_to_be_added_to_group_by or aliases_to_be_added_to_group_by
-    if there_is_something_to_add:
-        summarize_transform = \
-            summarize_transform.get_new_with_aliases_added_to_agg_on(
-                aliases_to_be_added_to_agg_on
-            )
+    if aliases_to_be_added_to_group_by:
         summarize_transform = \
             summarize_transform.get_new_with_aliases_added_to_group_by(
                 aliases_to_be_added_to_group_by
+            )
+    if aliases_to_be_added_to_agg_on:
+        summarize_transform = \
+            summarize_transform.get_new_with_aliases_added_to_agg_on(
+                aliases_to_be_added_to_agg_on
             )
     return summarize_transform
 
@@ -180,7 +179,10 @@ def _is_initial_column_unique_constrained(initial_column, engine, metadata):
 
 
 def _is_sa_column_unique_constrained(sa_column):
-    return sa_column.primary_key or sa_column.unique
+    return bool(
+        sa_column.primary_key
+        or sa_column.unique
+    )
 
 
 def _get_oid_of_initial_column(initial_column):

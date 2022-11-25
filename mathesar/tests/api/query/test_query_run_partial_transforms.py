@@ -1,16 +1,79 @@
+import pytest
+
 from db.transforms.base import Summarize, Limit
 from db.transforms.operations.serialize import serialize_transformation
 
 
+fully_speced_summarize = \
+    Summarize(
+        dict(
+            aggregation_expressions=[
+                dict(
+                    function='aggregate_to_array',
+                    input_alias='col2',
+                    output_alias='col2_agged'
+                )
+            ],
+            base_grouping_column='col1',
+            grouping_expressions=[
+                dict(
+                    input_alias='col1',
+                    output_alias='col1_grouped',
+                )
+            ]
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    'input_summarize, expected_summarize', [
+        [
+            Summarize(
+                dict(
+                    base_grouping_column='col1',
+                    aggregation_expressions=[
+                        dict(
+                            function='aggregate_to_array',
+                            input_alias='col2',
+                            output_alias='col2_agged'
+                        )
+                    ],
+                ),
+            ),
+            fully_speced_summarize,
+        ],
+        [
+            Summarize(
+                dict(
+                    base_grouping_column='col1',
+                    grouping_expressions=[
+                        dict(
+                            input_alias='col1',
+                            output_alias='col1_grouped',
+                        )
+                    ]
+                )
+            ),
+            fully_speced_summarize,
+        ],
+        [
+            Summarize(
+                dict(
+                    base_grouping_column='col1',
+                )
+            ),
+            fully_speced_summarize,
+        ],
+    ]
+)
 def test_partial_summarize_transform(
-    create_patents_table, client,
+    create_patents_table, client, input_summarize, expected_summarize,
 ):
     base_table = create_patents_table(table_name='patent_query_run_minimal_table')
-    col1_alias = 'col1'
     initial_columns = [
         {
             'id': base_table.get_column_by_name('Center').id,
-            'alias': col1_alias,
+            'alias': 'col1',
             'display_name': 'Column 1',
         },
         {
@@ -20,34 +83,9 @@ def test_partial_summarize_transform(
         },
     ]
     input_summarize_transform_json = \
-        serialize_transformation(
-            Summarize(
-                dict(
-                    base_grouping_column=col1_alias,
-                )
-            )
-        )
+        serialize_transformation(input_summarize)
     expected_summarize_transform_json = \
-        serialize_transformation(
-            Summarize(
-                {
-                    'aggregation_expressions': [
-                        {
-                            'function': 'aggregate_to_array',
-                            'input_alias': 'col2',
-                            'output_alias': 'col2_agged'
-                        }
-                    ],
-                    'base_grouping_column': 'col1',
-                    'grouping_expressions': [
-                        {
-                            'input_alias': 'col1',
-                            'output_alias': 'col1_grouped'
-                        }
-                    ]
-                }
-            )
-        )
+        serialize_transformation(expected_summarize)
     limit_transform_json = serialize_transformation(Limit(5))
     input_transformations = [
         limit_transform_json,
