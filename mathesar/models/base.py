@@ -284,7 +284,7 @@ _sa_table_prefetcher = Prefetcher(
 
 class Table(DatabaseObject, Relation):
     # These are fields whose source of truth is in the model
-    MODEL_FIELDS = ['import_verified']
+    MODEL_FIELDS = ['import_verified', 'display_options']
     current_objects = models.Manager()
     objects = DatabaseObjectManager(
         # TODO Move the Prefetcher into a separate class and replace lambdas with proper function
@@ -296,6 +296,7 @@ class Table(DatabaseObject, Relation):
     import_verified = models.BooleanField(blank=True, null=True)
     import_target = models.ForeignKey('Table', blank=True, null=True, on_delete=models.SET_NULL)
     is_temp = models.BooleanField(blank=True, null=True)
+    display_options = JSONField(null=True, default=None)
 
     class Meta:
         constraints = [

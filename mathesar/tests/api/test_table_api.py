@@ -895,6 +895,29 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
     assert len(new_created) == 0
 
 
+def test_table_get_column_order(create_patents_table, client):
+    table_name = 'GET column order'
+    table = create_patents_table(table_name)
+    column_order = [1, 2, 3]
+    display_options = {"column_order": column_order}
+    table.display_options = display_options
+    table.save()
+    response = client.get(f'/api/db/v0/tables/{table.id}/')
+
+    assert response.status_code == 200
+    assert response.json()['display_options'] == display_options
+
+
+def test_table_get_column_order_null_default(create_patents_table, client):
+    table_name = 'GET column order null default'
+    table = create_patents_table(table_name)
+
+    response = client.get(f'/api/db/v0/tables/{table.id}/')
+
+    assert response.status_code == 200
+    assert response.json()['display_options'] is None
+
+
 def _get_patents_column_data(table):
     column_data = [{
         'name': 'id',
@@ -1020,6 +1043,22 @@ def test_table_patch_columns_one_type_change(create_patents_table, client):
 
     assert response.status_code == 200
     _check_columns(response_json['columns'], column_data)
+
+
+def test_table_patch_column_order(create_patents_table, client):
+    table_name = 'PATCH column order'
+    table = create_patents_table(table_name)
+
+    column_order = [1, 2, 3]
+    display_options = {"column_order": column_order}
+    body = {
+        'display_options': display_options
+    }
+    # Need to specify format here because otherwise the body gets sent
+    # as a multi-part form, which can't handle nested keys.
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    assert response.status_code == 200
+    assert response.json()['display_options'] == display_options
 
 
 def _get_data_types_column_data(table):
