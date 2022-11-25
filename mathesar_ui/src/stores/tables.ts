@@ -418,8 +418,8 @@ export const currentTable = derived(
       : $tables.data.get($currentTableId),
 );
 
-export function getJoinableTablesResult(tableId: number) {
+export function getJoinableTablesResult(tableId: number, maxDepth: number = 1) {
   return getAPI<JoinableTablesResult>(
-    `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=1`,
+    `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=${maxDepth}`,
   );
 }
