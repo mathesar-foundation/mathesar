@@ -10,13 +10,30 @@ class TableAccessPolicy(AccessPolicy):
     # Create Access is restricted to superusers or managers of the schema or the database the table is part of.
     statements = [
         {
-            'action': ['list', 'retrieve', 'create', 'type_suggestions'],
+            'action': [
+                'list',
+                'retrieve',
+                'create',
+                'type_suggestions',
+                'dependents',
+                'ui_dependents',
+                'joinable_tables',
+            ],
             'principal': '*',
             'effect': 'allow',
         },
         # Only superuser or schema/database manager can delete the role
         {
-            'action': ['destroy', 'update', 'partial_update', 'split_table', 'move_columns', 'previews', 'existing_import', 'map_imported_columns'],
+            'action': [
+                'destroy',
+                'update',
+                'partial_update',
+                'split_table',
+                'move_columns',
+                'previews',
+                'existing_import',
+                'map_imported_columns'
+            ],
             'principal': ['*'],
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_table_manager)']
@@ -24,19 +41,39 @@ class TableAccessPolicy(AccessPolicy):
     ]
 
     @classmethod
-    def scope_queryset(cls, request, qs):
+    def _scope_queryset(cls, request, qs, allowed_roles):
         if not request.user.is_superuser:
-            allowed_roles = (Role.MANAGER.value,)
-
-            if request.method.lower() == 'get':
-                allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
             permissible_database_role_filter = (
-                Q(table__schema__database__databaserole__role__in=allowed_roles) & Q(table__schema__database__databaserole__user=request.user)
+                Q(schema__database__database_role__role__in=allowed_roles)
+                & Q(schema__database__database_role__user=request.user)
             )
-            permissible_schema_roles_filter = (Q(table__schema__schemarole__role__in=allowed_roles) & Q(table__schema__schemarole__user=request.user))
+            permissible_schema_roles_filter = (
+                Q(schema__schema_role__role__in=allowed_roles) & Q(schema__schema_role__user=request.user)
+            )
             qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
-
         return qs
+
+    @classmethod
+    def scope_queryset(cls, request, qs):
+        """
+        Used for scoping the queryset of Serializer RelatedField which reference a Table
+        """
+        allowed_roles = (Role.MANAGER.value,)
+
+        if request.method.lower() == 'get':
+            allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
+        return TableAccessPolicy._scope_queryset(request, qs, allowed_roles)
+
+    @classmethod
+    def scope_viewset_queryset(cls, request, qs):
+        """
+        Used for scoping queryset of the SchemaViewSet.
+        It is used for listing all the schema the user has Viewer access.
+         Restrictions are then applied based on the request method using the Policy statements.
+         This helps us to throw correct error status code instead of a 404 error code
+        """
+        allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
+        return TableAccessPolicy._scope_queryset(request, qs, allowed_roles)
 
     def is_table_manager(self, request, view, action):
         # Table access control is based on Schema and Database Roles as of now
