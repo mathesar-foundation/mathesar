@@ -1,7 +1,7 @@
 <script lang="ts">
   import { router } from 'tinro';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import {
     ExplorationResult,
     QueryModel,
@@ -42,7 +42,7 @@
       <FaviconExplorer/>
 </svelte:head>
 
-<LayoutWithHeader2 fitViewport restrictWidth={false}>
+<LayoutWithHeader fitViewport>
   {#if queryRunner}
     <div class="exploration-page">
       <Header bind:isInspectorOpen {query} {database} {schema} />
@@ -57,7 +57,7 @@
       </div>
     </div>
   {/if}
-</LayoutWithHeader2>
+</LayoutWithHeader>
 
 <style lang="scss">
   .exploration-page {

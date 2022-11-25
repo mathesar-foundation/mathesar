@@ -3,6 +3,7 @@ from rest_framework import viewsets
 from rest_framework.exceptions import MethodNotAllowed
 
 from mathesar.api.ui.permissions.database_role import DatabaseRoleAccessPolicy
+from mathesar.api.ui.permissions.schema_role import SchemaRoleAccessPolicy
 from mathesar.api.ui.serializers.users import UserSerializer, DatabaseRoleSerializer, SchemaRoleSerializer
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.ui.permissions.users import UserAccessPolicy
@@ -34,10 +35,16 @@ class DatabaseRoleViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         raise MethodNotAllowed(request.method)
 
 
-class SchemaRoleViewSet(viewsets.ModelViewSet):
+class SchemaRoleViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = SchemaRole.objects.all().order_by('id')
     serializer_class = SchemaRoleSerializer
     pagination_class = DefaultLimitOffsetPagination
+    access_policy = SchemaRoleAccessPolicy
+
+    def get_queryset(self):
+        return self.access_policy.scope_queryset(
+            self.request, super().get_queryset()
+        )
 
     def update(self, request, pk=None):
         raise MethodNotAllowed(request.method)
