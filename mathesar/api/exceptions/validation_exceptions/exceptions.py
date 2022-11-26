@@ -134,3 +134,16 @@ class DictHasBadKeys(MathesarValidationException):
         if message is None:
             message = "Dictionary's keys are invalid or obligatory keys are missing."
         super().__init__(None, self.error_code, message, field, None)
+
+
+class InvalidReferentTableName(MathesarValidationException):
+    error_code = ErrorCodes.InvalidReferentTableName.value
+
+    def __init__(
+            self,
+            referent_table_name,
+            message=None,
+            field=None,
+    ):
+        message = f'Referent table name "{referent_table_name}" is invalid.'
+        super().__init__(None, self.error_code, message, field, None)

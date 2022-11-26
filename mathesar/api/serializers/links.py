@@ -3,7 +3,7 @@ from rest_framework import serializers
 from db.links.operations.create import create_foreign_key_link, create_many_to_many_link
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
-    InvalidLinkChoiceAPIException,
+    InvalidLinkChoiceAPIException, InvalidReferentTableName
 )
 from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
@@ -81,6 +81,13 @@ class LinksMappingSerializer(
         "many-to-many": ManyToManySerializer
     }
     link_type = serializers.CharField(required=True)
+
+    def run_validation(self, data):
+        if referent_table :=  data.get('referent_table', None):
+            referent_table_name = Table.current_objects.get(id=referent_table).name
+            if referent_table_name.find('(') and referent_table_name.find(')') != -1:
+                raise InvalidReferentTableName(referent_table_name)
+        return super(LinksMappingSerializer, self).run_validation(data)
 
     def get_mapping_field(self, data):
         link_type = data.get('link_type', None)
