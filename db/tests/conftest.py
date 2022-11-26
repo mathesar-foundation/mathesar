@@ -126,6 +126,11 @@ def uris_table_name():
 
 
 @pytest.fixture(scope='session')
+def array_table_name():
+    return "array_test"
+
+
+@pytest.fixture(scope='session')
 def json_table_name():
     return "json_sort"
 
@@ -216,10 +221,10 @@ def magnitude_table_obj(engine_with_magnitude, magnitude_table_name):
 
 
 @pytest.fixture
-def array_table_obj(engine_with_array, json_table_name):
+def array_table_obj(engine_with_array, array_table_name):
     engine, schema = engine_with_array
     metadata = MetaData(bind=engine)
-    table = Table(json_table_name, metadata, schema=schema, autoload_with=engine)
+    table = Table(array_table_name, metadata, schema=schema, autoload_with=engine)
     return table, engine
 
 

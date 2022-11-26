@@ -415,14 +415,15 @@ class ArrayLength(DBFunction):
     name = 'length'
     hints = tuple([
         hints.returns(hints.comparable),
-        hints.parameter_count(1),
+        hints.parameter_count(2),
         hints.parameter(0, hints.array),
+        hints.parameter(1, hints.numeric),
         hints.mathesar_filter
     ])
 
     @staticmethod
-    def to_sa_expression(value):
-        return sa_call_sql_function('array_length', value, return_type=PostgresType.INTEGER)
+    def to_sa_expression(value, dimension):
+        return sa_call_sql_function('array_length', value, dimension, return_type=PostgresType.INTEGER)
 
 
 class Alias(DBFunction):
