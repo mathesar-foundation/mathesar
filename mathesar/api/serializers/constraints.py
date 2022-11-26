@@ -148,8 +148,8 @@ class ConstraintSerializer(
         return serializer.create(validated_data)
 
     def run_validation(self, data):
-        if referent_table :=  data.get('referent_table', None):
-            referent_table_name = Table.current_objects.get(id = referent_table).name
+        if referent_table := data.get('referent_table', None):
+            referent_table_name = Table.current_objects.get(id=referent_table).name
             if referent_table_name.find('(') != -1 and referent_table_name.find(')') != -1:
                 raise InvalidReferentTableName(referent_table_name)
         constraint_type = data.get('type', None)
