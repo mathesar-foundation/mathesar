@@ -33,7 +33,7 @@ def test_filter_functions_on_int_array(array_table_obj, main_db_function, litera
             Noop([literal_param]),
         ])
     else:
-        #The db_func dependent on array_length(array, dimension) requires 2 paramters
+        # The db_func dependent on array_length(array, dimension) requires 2 paramters
         db_function = main_db_function([
             ColumnName([array_column_name]),
             Noop([dimension]),
@@ -54,7 +54,7 @@ def test_filter_functions_on_int_array(array_table_obj, main_db_function, litera
     (ArrayLengthLessOrEqual, 5, 10),
     (ArrayLengthGreaterOrEqual, 5, 2),
     (ArrayContains, {'Tesla'}, 1),
-    (ArrayContains, {'Ford','BMW'}, 3),
+    (ArrayContains, {'Ford', 'BMW'}, 3),
     (ArrayNotEmpty, {}, 11),
 ])
 def test_filter_functions_on_text_array(array_table_obj, main_db_function, literal_param, expected_count):
@@ -68,7 +68,7 @@ def test_filter_functions_on_text_array(array_table_obj, main_db_function, liter
             Noop([literal_param]),
         ])
     else:
-        #The db_func dependent on array_length(array, dimension) requires 2 paramters
+        # The db_func dependent on array_length(array, dimension) requires 2 paramters
         db_function = main_db_function([
             ColumnName([array_column_name]),
             Noop([dimension]),
