@@ -48,6 +48,7 @@ import {
   faUser,
   faSave,
   faTimes,
+  faCircleExclamation,
   faCircleArrowRight,
   faCircleArrowLeft,
 } from '@fortawesome/free-solid-svg-icons';
@@ -125,6 +126,7 @@ export const iconLinksFromOtherTables: IconProps = { data: faCircleArrowLeft };
 // STATUSES
 
 export const iconNotEditable: IconProps = { data: faLock };
+export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
 
 // UI TYPES
 
