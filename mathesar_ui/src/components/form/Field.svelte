@@ -6,7 +6,7 @@
     TextInput,
     type LabeledInput,
   } from '@mathesar-component-library';
-  import type { FieldStore as FieldStore } from './field';
+  import type { FieldStore } from './field';
   import FieldWrapper from './FieldWrapper.svelte';
 
   type Layout = ComponentProps<LabeledInput>['layout'];
