@@ -33,6 +33,7 @@ import type { PaginatedResponse } from '@mathesar/utils/api';
 import { CancellablePromise } from '@mathesar-component-library';
 import { invalidIf } from '@mathesar/components/form';
 
+import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
 import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
@@ -416,3 +417,9 @@ export const currentTable = derived(
       ? undefined
       : $tables.data.get($currentTableId),
 );
+
+export function getJoinableTablesResult(tableId: number, maxDepth = 1) {
+  return getAPI<JoinableTablesResult>(
+    `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=${maxDepth}`,
+  );
+}

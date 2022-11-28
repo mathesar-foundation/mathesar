@@ -5,6 +5,8 @@
     display: flex;
     width: 100%;
     text-align: left;
+    cursor: pointer;
+    font-weight: inherit;
 
     .collapsible-header-title {
       flex-grow: 1;

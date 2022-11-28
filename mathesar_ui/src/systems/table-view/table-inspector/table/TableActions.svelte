@@ -1,27 +1,22 @@
 <script lang="ts">
   import { router } from 'tinro';
-
-  import { Button, Icon } from '@mathesar-component-library';
   import {
-    iconDeleteMajor,
-    iconExploration,
-    iconTableLink,
-  } from '@mathesar/icons';
+    AnchorButton,
+    Button,
+    Help,
+    Icon,
+    iconExternalLink,
+  } from '@mathesar-component-library';
+  import { iconDeleteMajor, iconExploration } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
-  import {
-    getDataExplorerPageUrl,
-    getSchemaPageUrl,
-  } from '@mathesar/routes/urls';
+  import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDatabase } from '@mathesar/stores/databases';
-  import { modal } from '@mathesar/stores/modal';
-  import LinkTableModal from '../../link-table/LinkTableModal.svelte';
+  import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
 
   const tabularData = getTabularDataStoreFromContext();
-  const linkTableModal = modal.spawnModalController();
-  const tableConstraintsModal = modal.spawnModalController();
 
   function handleDeleteTable() {
     void confirmDelete({
@@ -40,42 +35,52 @@
       },
     });
   }
+
+  $: explorationPageUrl =
+    $currentDatabase && $currentSchemaId
+      ? createDataExplorerUrlToExploreATable(
+          $currentDatabase?.name,
+          $currentSchemaId,
+          $tabularData.id,
+        )
+      : '';
 </script>
 
 <div class="actions-container">
-  <Button appearance="plain" on:click={() => linkTableModal.open()}>
-    <Icon {...iconTableLink} />
-    <span>Link Table</span>
-  </Button>
-  <LinkTableModal
-    controller={linkTableModal}
-    on:goToConstraints={() => tableConstraintsModal.open()}
-  />
-
   {#if $currentDatabase && $currentSchemaId}
-    <Button appearance="plain">
-      <Icon {...iconExploration} />
-      <a
-        class="btn-link"
-        href={getDataExplorerPageUrl($currentDatabase.name, $currentSchemaId)}
-        >Explore Data</a
-      >
-    </Button>
+    <AnchorButton href={explorationPageUrl}>
+      <div class="action-item">
+        <div>
+          <Icon {...iconExploration} /> <span>Explore Data</span>
+          <Help>
+            Open this table in Data Explorer to query and analyze your data.
+          </Help>
+        </div>
+        <Icon {...iconExternalLink} />
+      </div>
+    </AnchorButton>
   {/if}
 
-  <Button appearance="plain" on:click={handleDeleteTable}>
+  <Button appearance="outline-primary" on:click={handleDeleteTable}>
     <Icon {...iconDeleteMajor} />
     <span>Delete Table</span>
   </Button>
 </div>
 
-<style>
+<style lang="scss">
   .actions-container {
     display: flex;
     flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 0.5rem;
+    }
   }
-  .btn-link {
-    color: inherit;
-    text-decoration: none;
+
+  .action-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 </style>
