@@ -31,9 +31,9 @@ class ConstraintAccessPolicy(AccessPolicy):
             if request.method.lower() == 'get':
                 allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
             permissible_database_role_filter = (
-                Q(table__schema__database__databaserole__role__in=allowed_roles) & Q(table__schema__database__databaserole__user=request.user)
+                Q(table__schema__database__database_role__role__in=allowed_roles) & Q(table__schema__database__database_role__user=request.user)
             )
-            permissible_schema_roles_filter = (Q(table__schema__schemarole__role__in=allowed_roles) & Q(table__schema__schemarole__user=request.user))
+            permissible_schema_roles_filter = (Q(table__schema__schema_role__role__in=allowed_roles) & Q(table__schema__schema_role__user=request.user))
             qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
 
         return qs
