@@ -13,6 +13,7 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
+  export let isProcessing: $$Props['isProcessing'];
 
   let cellRef: HTMLElement;
   let isFirstActivated = false;
@@ -77,7 +78,7 @@
     <Checkbox
       bind:checked={value}
       allowIndeterminate={true}
-      {disabled}
+      disabled = {isProcessing}
       on:change={dispatchUpdate}
     />
   {/if}

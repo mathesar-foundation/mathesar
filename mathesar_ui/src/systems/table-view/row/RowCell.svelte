@@ -143,6 +143,7 @@
       {isActive}
       {isSelectedInRange}
       {value}
+      {isProcessing}
       recordSummary={$recordSummaries
         .get(String(column.id))
         ?.get(String(value))}

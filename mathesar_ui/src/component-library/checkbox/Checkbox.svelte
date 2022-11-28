@@ -1,8 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-
 
   const dispatch = createEventDispatcher<{ change: boolean }>();
 
@@ -25,30 +23,15 @@
    */
   export let allowIndeterminate = false;
   export let value: string | number | string[] | undefined = undefined;
-  export let disabled = false;
+  export let disabled = true;
   export let id: string | undefined = undefined;
 
-  const tabularData = getTabularDataStoreFromContext();
-  $: ({
-    meta,
-  } = $tabularData);
-  $: ({
-    sheetState,
-  } = meta);
-
   $: indeterminate = allowIndeterminate && checked === null;
-  $: if($sheetState !== 'processing'){
-    disabled=false
-  }
 
-  function onChange(){
+  function onChange() {
     checked = !checked;
     dispatch('change', checked);
-    if ($sheetState == 'processing'){
-      disabled = true
-    }
   }
-  
 </script>
 
 <BaseInput {...$$restProps} bind:id {disabled} />
@@ -60,7 +43,7 @@
   {id}
   checked={checked ?? undefined}
   {indeterminate}
-  disabled = {disabled}
+  {disabled}
   {value}
   on:change={onChange}
   on:click
