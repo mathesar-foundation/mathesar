@@ -48,6 +48,8 @@ import {
   faUser,
   faSave,
   faTimes,
+  faCircleArrowRight,
+  faCircleArrowLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import { arrayIcon, tableIcon, explorationIcon } from './customIcons';
@@ -117,6 +119,8 @@ export const iconInspector: IconProps = { data: faToolbox };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUser: IconProps = { data: faUser };
+export const iconLinksInThisTable: IconProps = { data: faCircleArrowRight };
+export const iconLinksFromOtherTables: IconProps = { data: faCircleArrowLeft };
 
 // STATUSES
 
