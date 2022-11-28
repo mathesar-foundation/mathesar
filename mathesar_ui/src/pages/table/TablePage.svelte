@@ -12,7 +12,7 @@
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
 
   const tabularDataStore = setTabularDataStoreInContext(
     // Sacrifice type safety here since the value is initialized reactively
@@ -43,12 +43,12 @@
 
 <svelte:head><title>{makeSimplePageTitle(table.name)}</title></svelte:head>
 
-<LayoutWithHeader2 fitViewport restrictWidth={false}>
+<LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
     <ActionsPane {database} {schema} {table} />
     <TableView usesVirtualList allowsDdlOperations />
   </div>
-</LayoutWithHeader2>
+</LayoutWithHeader>
 
 <style>
   .table-page {

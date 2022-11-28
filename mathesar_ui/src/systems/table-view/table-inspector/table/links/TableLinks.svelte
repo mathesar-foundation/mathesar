@@ -8,6 +8,7 @@
   const tabularData = getTabularDataStoreFromContext();
 
   $: tableId = $tabularData.id;
+  $: columns = $tabularData.processedColumns;
 </script>
 
 <div>
@@ -15,10 +16,15 @@
     <Spinner />
   {:then joinableTablesResult}
     <LinksSectionContainer
-      linksInThisTable={getTableLinks('in_this_table', joinableTablesResult)}
+      linksInThisTable={getTableLinks(
+        'in_this_table',
+        joinableTablesResult,
+        $columns,
+      )}
       linksFromOtherTables={getTableLinks(
         'from_other_tables',
         joinableTablesResult,
+        $columns,
       )}
     />
   {/await}

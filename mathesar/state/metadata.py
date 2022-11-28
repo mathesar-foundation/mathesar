@@ -1,11 +1,12 @@
 from db.metadata import get_empty_metadata
+from django_request_cache import cache_for_request
 
 
+@cache_for_request
 def get_cached_metadata():
     """
     Cached to minimize reflection queries to Postgres.
     """
-    global _metadata_cache
     return _metadata_cache
 
 
