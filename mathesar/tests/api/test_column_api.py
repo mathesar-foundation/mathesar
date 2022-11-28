@@ -629,6 +629,35 @@ def test_column_destroy(column_test_table, create_patents_table, client):
     assert new_data["count"] == num_columns - 1
 
 
+delete_client_with_different_roles = [
+    ('superuser_client_factory', 204, 204),
+    ('db_manager_client_factory', 204, 204),
+    ('db_editor_client_factory', 404, 404),
+    ('schema_manager_client_factory', 204, 404),
+    ('schema_viewer_client_factory', 404, 404),
+    ('db_viewer_schema_manager_client_factory', 204, 404)
+]
+
+
+@pytest.mark.parametrize('client_name, expected_status_code, different_schema_expected_status_code', delete_client_with_different_roles)
+def test_column_destroy_based_on_permissions(create_patents_table, request, client_name, expected_status_code, different_schema_expected_status_code):
+    table_name = 'NASA Column Table'
+    table = create_patents_table(table_name)
+    client = request.getfixturevalue(client_name)(table.schema)
+    different_schema_table = create_patents_table(table_name, schema_name="Different Schema")
+    col_one_name = table.sa_columns[1].name
+    column = table.get_columns_by_name([col_one_name])[0]
+    response = client.delete(
+        f"/api/db/v0/tables/{table.id}/columns/{column.id}/"
+    )
+    assert response.status_code == expected_status_code
+    column = different_schema_table.get_columns_by_name([col_one_name])[0]
+    response = client.delete(
+        f"/api/db/v0/tables/{different_schema_table.id}/columns/{column.id}/"
+    )
+    assert response.status_code == different_schema_expected_status_code
+
+
 def test_column_destroy_when_missing(column_test_table, client):
     response = client.delete(
         f"/api/db/v0/tables/{column_test_table.id}/columns/99999/"
