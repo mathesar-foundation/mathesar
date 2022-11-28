@@ -23,7 +23,7 @@
    */
   export let allowIndeterminate = false;
   export let value: string | number | string[] | undefined = undefined;
-  export let disabled = true;
+  export let disabled = false;
   export let id: string | undefined = undefined;
 
   $: indeterminate = allowIndeterminate && checked === null;
