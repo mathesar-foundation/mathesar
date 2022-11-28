@@ -44,9 +44,6 @@
 <style>
   .table-mode-container {
     padding-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
   }
 
   .content-container {
