@@ -1,16 +1,26 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Mathesar login</title>
-  </head>
-  <body>
-    <h2>Log in to Mathesar</h2>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit">Log In</button>
-    </form>
-  </body>
-</html>
+{% extends 'mathesar/base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block styles %}
+  <style type="text/css">
+    body {
+      padding: 2rem;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <h2>Log in to Mathesar</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Log In</button>
+  </form>
+  {% if live_demo_mode %}
+    <p>
+      Mathesar is in live demo mode. Each session has its own copy of demo data.
+      Data will be deleted regularly.
+    </p>
+  {% endif %}
+{% endblock %}
