@@ -49,12 +49,12 @@
   .file-upload-trigger {
     display: block;
     background: transparent;
-    border: 1px dashed #5193f0;
+    border: 1px dashed var(--slate-300);
     border-radius: 3px;
     color: inherit;
     font-family: inherit;
     padding: 0px;
-    min-height: 180px;
+    min-height: 16.6rem;
     flex-grow: 1;
 
     .message {
@@ -66,28 +66,31 @@
       flex-direction: column;
       text-align: center;
 
-      > svg {
-        color: #5193f0;
+      .icon-holder {
+        font-size: var(--size-super-ultra-large);
       }
 
       .text {
-        margin-top: 25px;
+        margin-top: var(--size-xx-small);
 
         .title {
           font-weight: 500;
-          margin-bottom: 10px;
+          font-size: var(--size-large);
+        }
+        .desc {
+          color: var(--slate-500);
         }
       }
     }
 
     &:focus,
     &:hover {
-      background: #f5f9ff;
+      background: var(--slate-100);
     }
 
     &:active,
     &.in {
-      background: #ebf3ff;
+      background: var(--slate-200);
     }
   }
 

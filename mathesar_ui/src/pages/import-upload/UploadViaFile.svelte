@@ -61,5 +61,7 @@
     fileProgress={fileUploadProgress}
     on:add={(e) => uploadNewFile(e.detail)}
   />
-  <div class="help-content">You can import tabular (CSV, TSV) data.</div>
+  <div class="help-content">
+    The file must be in tabular format (CSV, TSV etc.)
+  </div>
 </div>

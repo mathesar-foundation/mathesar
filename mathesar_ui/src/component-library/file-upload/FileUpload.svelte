@@ -83,7 +83,7 @@
     <div class="files">
       {#each fileUploads as upload (upload.fileId)}
         <div class="file">
-          <Icon {...iconFile} size="3.5em" />
+          <Icon {...iconFile} />
           <div class="file-info">
             <div class="name">{upload.file.name}</div>
             <Progress
@@ -131,10 +131,12 @@
     >
       <slot>
         <div class="message">
-          <Icon size="60px" {...iconUploadFile} />
+          <div class="icon-holder">
+            <Icon {...iconUploadFile} />
+          </div>
           <div class="text">
             <div class="title">Drag a file here</div>
-            <div>or click to browse a file from your computer</div>
+            <div class="desc">or click to browse a file from your computer</div>
           </div>
         </div>
       </slot>

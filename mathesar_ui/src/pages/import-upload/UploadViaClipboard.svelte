@@ -1,6 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { SpinnerButton, TextArea } from '@mathesar/component-library';
+  import {
+    SpinnerButton,
+    TextArea,
+    LabeledInput,
+  } from '@mathesar-component-library';
   import { postAPI } from '@mathesar/utils/api';
   import type { UploadEvents } from './uploadUtils';
 
@@ -22,9 +26,12 @@
   }
 </script>
 
-<div class="help-content">Paste your data below:</div>
-
-<TextArea bind:value={clipboardContent} rows={10} disabled={isLoading} />
+<LabeledInput label="Paste the data you want to import" layout="stacked">
+  <TextArea bind:value={clipboardContent} rows={10} disabled={isLoading} />
+</LabeledInput>
+<div class="help-content">
+  The data must be in tabular format (CSV, TSV etc.)
+</div>
 
 <div class="buttons">
   <SpinnerButton

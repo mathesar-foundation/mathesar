@@ -1,6 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { SpinnerButton, TextInput } from '@mathesar/component-library';
+  import {
+    SpinnerButton,
+    TextInput,
+    LabeledInput,
+  } from '@mathesar-component-library';
   import { postAPI } from '@mathesar/utils/api';
   import type { UploadEvents } from './uploadUtils';
 
@@ -22,9 +26,16 @@
   }
 </script>
 
-<div class="help-content">Enter a URL pointing to data to download:</div>
+<LabeledInput
+  label="Enter the URL of the file you want to import"
+  layout="stacked"
+>
+  <TextInput bind:value={url} aria-label="URL" disabled={isLoading} />
+</LabeledInput>
 
-<TextInput bind:value={url} aria-label="URL" disabled={isLoading} />
+<div class="help-content">
+  The data must be in tabular format (CSV, TSV etc.)
+</div>
 
 <div class="buttons">
   <SpinnerButton

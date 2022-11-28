@@ -58,10 +58,15 @@
 
 <svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
 
-<LayoutWithHeader>
+<LayoutWithHeader
+  restrictWidth
+  cssVariables={{
+    '--max-layout-width': '67.357rem',
+    '--layout-background-color': 'var(--sand-200)',
+  }}
+>
+  <h2>Create a table by importing your data</h2>
   <div class="import-file-view">
-    <h2>Create a table by importing your data</h2>
-
     <div class="upload-method-input">
       <RadioGroup
         bind:value={uploadMethod}
@@ -88,80 +93,81 @@
       />
     </div>
 
-    <div class="help-content bounded">
-      Large data sets can sometimes take several minutes to process.
-      <strong>
-        Please do not leave this page or close the browser tab while import is
-        in progress.
-      </strong>
+    {#if isLoading}
+      <div class="help-content bounded">
+        Large data sets can sometimes take several minutes to process.
+        <strong>
+          Please do not leave this page or close the browser tab while import is
+          in progress.
+        </strong>
 
-      <div>
-        {#each statusInfo as info (info)}
-          {#if info.status?.state}
-            <div>
-              {info.label}:
-              {#if info.status?.state === 'processing'}
-                <Spinner />
-              {:else if info.status?.state === 'success'}
-                Success
-              {:else if info.status?.state === 'failure'}
-                {info.status?.errors.join(', ')}
-              {/if}
-            </div>
-          {/if}
-        {/each}
+        <div>
+          {#each statusInfo as info (info)}
+            {#if info.status?.state}
+              <div>
+                {info.label}:
+                {#if info.status?.state === 'processing'}
+                  <Spinner />
+                {:else if info.status?.state === 'success'}
+                  Success
+                {:else if info.status?.state === 'failure'}
+                  {info.status?.errors.join(', ')}
+                {/if}
+              </div>
+            {/if}
+          {/each}
+        </div>
       </div>
-    </div>
+    {/if}
   </div>
 </LayoutWithHeader>
 
 <style lang="scss">
+  h2 {
+    font-weight: 400;
+    font-size: var(--size-super-ultra-large);
+  }
+
   .import-file-view {
-    /**
-     * Temporary style. This is in place
-     * until we have a dedicated layout
-     * for it.
-     */
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+    padding: 2.2857rem;
+    border: 1px solid var(--slate-300);
+    border-radius: var(--border-radius-m);
+    background-color: var(--white);
+    margin-bottom: 2rem;
 
-  .upload-method-input {
-    :global(.option) {
+    .upload-method-input {
+      :global(.option) {
+        padding: 0.8rem 0;
+        margin-right: 0.5rem;
+      }
+    }
+
+    .upload-section {
+      margin-top: var(--size-large);
+
+      :global(.file-upload-section) {
+        padding-top: var(--size-ultra-small);
+      }
+
+      :global(.help-content) {
+        margin: 0.4rem 0;
+        line-height: 1.5;
+        color: var(--slate-500);
+      }
+
+      :global(.buttons) {
+        margin-top: 0.9rem;
+        text-align: right;
+      }
+    }
+
+    .help-content.bounded {
       border: 1px solid var(--color-gray-light);
+      background: var(--color-gray-lighter);
+      padding: 0.6rem 1rem;
+      line-height: 1.6;
+      margin-top: 2rem;
       border-radius: 0.2rem;
-      padding: 0.5rem 0.7rem;
-      font-weight: 500;
     }
-  }
-
-  .upload-section {
-    border-top: 1px solid var(--color-gray-lighter);
-    padding-top: 0.9rem;
-    margin: 0.9rem 0;
-
-    :global(.file-upload-section) {
-      margin-top: 1.1rem;
-    }
-
-    :global(.help-content) {
-      margin: 0.4rem 0;
-      line-height: 1.5;
-    }
-
-    :global(.buttons) {
-      margin-top: 0.9rem;
-      text-align: right;
-    }
-  }
-
-  .help-content.bounded {
-    border: 1px solid var(--color-gray-light);
-    background: var(--color-gray-lighter);
-    padding: 0.6rem 1rem;
-    line-height: 1.6;
-    margin-top: 2rem;
-    border-radius: 0.2rem;
   }
 </style>
