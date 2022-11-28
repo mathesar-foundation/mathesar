@@ -95,6 +95,39 @@ def test_column_list(column_test_table, client):
     check_columns_response(response_data['results'], expect_results)
 
 
+list_client_with_different_roles = [
+    ('superuser_client_factory', 8, 8),
+    ('db_manager_client_factory', 8, 8),
+    ('db_editor_client_factory', 8, 8),
+    ('schema_manager_client_factory', 8, 0),
+    ('schema_viewer_client_factory', 8, 0),
+    ('db_viewer_schema_manager_client_factory', 8, 8)
+]
+
+write_client_with_different_roles = [
+    ('superuser_client_factory', 201),
+    ('db_manager_client_factory', 201),
+    ('db_editor_client_factory', 404),
+    ('schema_manager_client_factory', 201),
+    ('schema_viewer_client_factory', 404),
+    ('db_viewer_schema_manager_client_factory', 201)
+]
+
+
+@pytest.mark.parametrize('client_name,expected_count,different_schema_expected_count', list_client_with_different_roles)
+def test_column_list_based_on_permissions(create_patents_table, request, client_name, expected_count, different_schema_expected_count):
+    table_name = 'NASA Column List 1'
+    table = create_patents_table(table_name)
+    different_schema_table = create_patents_table(table_name, schema_name="Different Schema")
+    client = request.getfixturevalue(client_name)(table.schema)
+    response = client.get(f"/api/db/v0/tables/{table.id}/columns/")
+    response_data = response.json()
+    assert response_data['count'] == expected_count
+    response = client.get(f"/api/db/v0/tables/{different_schema_table.id}/columns/")
+    response_data = response.json()
+    assert response_data['count'] == different_schema_expected_count
+
+
 def test_column_create(column_test_table, client):
     name = "anewcolumn"
     db_type = PostgresType.NUMERIC
@@ -118,6 +151,27 @@ def test_column_create(column_test_table, client):
     assert actual_new_col["name"] == name
     assert actual_new_col["type"] == db_type.id
     assert actual_new_col["default"] is None
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)
+def test_column_create_by_different_roles(create_patents_table, request, client_name, expected_status_code):
+    table_name = 'NASA Constraint List 1'
+    table = create_patents_table(table_name)
+    name = "anewcolumn"
+    db_type = PostgresType.NUMERIC
+    data = {
+        "name": name,
+        "type": db_type.id,
+        "display_options": {"show_as_percentage": True},
+        "nullable": True
+    }
+    client = request.getfixturevalue(client_name)(table.schema)
+
+    response = client.post(
+        f"/api/db/v0/tables/{table.id}/columns/",
+        data=data,
+    )
+    assert response.status_code == expected_status_code
 
 
 create_default_test_list = [
