@@ -118,10 +118,7 @@
     <Collapsible isOpen triggerAppearance="plain">
       <CollapsibleHeader slot="header" title="Actions" />
       <div slot="content" class="content-container">
-        <ColumnActions
-          columns={selectedColumns}
-          columnsDataStore={$tabularData.columnsDataStore}
-        />
+        <ColumnActions columns={selectedColumns} />
       </div>
     </Collapsible>
   {/if}
