@@ -7,7 +7,7 @@
     getTabularDataStoreFromContext,
     type FilterEntry,
   } from '@mathesar/stores/table-data';
-  import type { FilterCombination } from '@mathesar/api/tables/records';
+  import type { FilterCombination } from '@mathesar/api/types/tables/records';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
 
   const dispatch = createEventDispatcher<{

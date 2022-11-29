@@ -4,7 +4,7 @@ import {
   ImmutableSet,
   WritableMap,
 } from '@mathesar-component-library';
-import type { Column } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import type { RequestStatus } from '@mathesar/utils/api';
 import { getMostImportantRequestStatusState } from '@mathesar/utils/api';
 import type { RowStatus } from './meta';

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
+  import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
   import TableWidget from './TableWidget.svelte';
 
   export let recordId: number;

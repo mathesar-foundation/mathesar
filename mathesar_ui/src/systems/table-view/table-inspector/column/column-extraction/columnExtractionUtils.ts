@@ -1,5 +1,5 @@
-import type { TableEntry } from '@mathesar/api/tables';
-import type { FkConstraint } from '@mathesar/api/tables/constraints';
+import type { TableEntry } from '@mathesar/api/types/tables';
+import type { FkConstraint } from '@mathesar/api/types/tables/constraints';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 import {
   type ValidationOutcome,

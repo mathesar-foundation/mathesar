@@ -1,4 +1,4 @@
-import type { GetRequestParams } from '@mathesar/api/tables/records';
+import type { GetRequestParams } from '@mathesar/api/types/tables/records';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 
 export interface GroupEntry {

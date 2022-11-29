@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import type { SelectProps } from '@mathesar-component-library/types';
   import SelectTable from './SelectTable.svelte';

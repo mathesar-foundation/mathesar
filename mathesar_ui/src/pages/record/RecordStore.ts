@@ -1,7 +1,7 @@
 import { derived, writable, type Readable } from 'svelte/store';
 
-import type { TableEntry } from '@mathesar/api/tables';
-import type { Response as ApiResponse } from '@mathesar/api/tables/records';
+import type { TableEntry } from '@mathesar/api/types/tables';
+import type { Response as ApiResponse } from '@mathesar/api/types/tables/records';
 import { WritableMap } from '@mathesar/component-library';
 import {
   renderTransitiveRecordSummary,

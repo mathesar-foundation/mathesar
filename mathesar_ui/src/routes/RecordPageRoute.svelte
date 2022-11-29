@@ -3,7 +3,7 @@
   import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconRecord } from '@mathesar/icons';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import RecordStore from '@mathesar/pages/record/RecordStore';
   import { getRecordPageUrl } from './urls';
 

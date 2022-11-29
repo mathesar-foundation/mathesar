@@ -1,7 +1,7 @@
 import type {
   QueryInstanceInitialColumn,
   QueryInstanceTransformation,
-} from '@mathesar/api/queries';
+} from '@mathesar/api/types/queries';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';

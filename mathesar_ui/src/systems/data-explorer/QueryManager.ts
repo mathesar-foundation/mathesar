@@ -7,9 +7,9 @@ import {
 import { getAPI } from '@mathesar/utils/api';
 import type { RequestStatus } from '@mathesar/utils/api';
 import CacheManager from '@mathesar/utils/CacheManager';
-import type { QueryInstance } from '@mathesar/api/queries';
-import type { TableEntry } from '@mathesar/api/tables';
-import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
+import type { QueryInstance } from '@mathesar/api/types/queries';
+import type { TableEntry } from '@mathesar/api/types/tables';
+import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';

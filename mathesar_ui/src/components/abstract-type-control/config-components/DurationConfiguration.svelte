@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
   import { LabeledInput, Select } from '@mathesar-component-library';
-  import type { DurationUnit } from '@mathesar/api/tables/columns';
+  import type { DurationUnit } from '@mathesar/api/types/tables/columns';
   import type { DurationConfig } from '@mathesar/utils/duration/types';
   import type { FormValues } from '@mathesar-component-library/types';
   import { DurationSpecification } from '@mathesar/utils/duration';

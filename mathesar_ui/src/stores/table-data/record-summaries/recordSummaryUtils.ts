@@ -2,7 +2,7 @@ import { ImmutableMap } from '@mathesar-component-library';
 import type {
   ApiDataForRecordSummariesInFkColumn,
   ApiRecordSummaryInputData,
-} from '@mathesar/api/tables/records';
+} from '@mathesar/api/types/tables/records';
 
 /** A generalized type that can be used for Map or ImmutableMap or others. */
 interface LookerUpper<Key, Value> {

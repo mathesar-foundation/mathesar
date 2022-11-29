@@ -17,8 +17,8 @@
     OneToOne,
     OneToMany,
     ManyToMany,
-  } from '@mathesar/api/links';
-  import type { TableEntry } from '@mathesar/api/tables';
+  } from '@mathesar/api/types/links';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';

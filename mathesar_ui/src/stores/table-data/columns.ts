@@ -5,7 +5,7 @@ import {
   EventHandler,
   WritableSet,
 } from '@mathesar-component-library';
-import type { Column } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import type { PaginatedResponse, RequestStatus } from '@mathesar/utils/api';
 import { deleteAPI, getAPI, patchAPI, postAPI } from '@mathesar/utils/api';
 import { getErrorMessage } from '@mathesar/utils/errors';

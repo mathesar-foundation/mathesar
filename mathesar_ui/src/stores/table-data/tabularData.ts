@@ -9,7 +9,7 @@ import {
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/utils/api';
-import type { Column } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import { SheetSelection } from '@mathesar/components/sheet';
 import { Meta } from './meta';
 import { ColumnsDataStore } from './columns';

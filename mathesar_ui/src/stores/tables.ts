@@ -20,11 +20,14 @@ import {
   CancellablePromise,
   type RecursivePartial,
 } from '@mathesar-component-library';
-import type { MinimalColumnDetails, TableEntry } from '@mathesar/api/tables';
+import type {
+  MinimalColumnDetails,
+  TableEntry,
+} from '@mathesar/api/types/tables';
 import type {
   SplitTableRequest,
   SplitTableResponse,
-} from '@mathesar/api/tables/split_table';
+} from '@mathesar/api/types/tables/split_table';
 import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
 import { invalidIf } from '@mathesar/components/form';
 import type { PaginatedResponse } from '@mathesar/utils/api';
@@ -37,7 +40,7 @@ import {
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
-import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
+import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
 import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();

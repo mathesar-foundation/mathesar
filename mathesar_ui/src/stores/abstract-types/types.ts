@@ -6,7 +6,7 @@ import type {
 } from '@mathesar-component-library/types';
 import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
 import type { DbType } from '@mathesar/AppTypes';
-import type { Column } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import type { States } from '@mathesar/utils/api';
 import type { abstractTypeCategory } from './constants';
 

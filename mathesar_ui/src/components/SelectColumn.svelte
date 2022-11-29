@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Select } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { Column } from '@mathesar/api/types/tables/columns';
 
   export let columns: Column[];
   export let column: Column | undefined;

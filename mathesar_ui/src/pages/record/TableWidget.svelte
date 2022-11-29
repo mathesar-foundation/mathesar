@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/tables';
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { Column } from '@mathesar/api/types/tables/columns';
   import { Icon } from '@mathesar/component-library';
   import { iconMultipleRecords } from '@mathesar/icons';
   import {

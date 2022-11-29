@@ -2,7 +2,7 @@
   import { onMount, tick } from 'svelte';
 
   import { ImmutableSet } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { Column } from '@mathesar/api/types/tables/columns';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {

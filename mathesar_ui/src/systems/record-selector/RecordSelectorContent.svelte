@@ -2,7 +2,7 @@
   import { router } from 'tinro';
 
   import { Button, Icon, Spinner } from '@mathesar-component-library';
-  import type { Response as ApiRecordsResponse } from '@mathesar/api/tables/records';
+  import type { Response as ApiRecordsResponse } from '@mathesar/api/types/tables/records';
   import { iconAddNew } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { TabularData } from '@mathesar/stores/table-data';

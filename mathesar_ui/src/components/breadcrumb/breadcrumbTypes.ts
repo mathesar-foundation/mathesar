@@ -1,4 +1,4 @@
-import type { TableEntry } from '@mathesar/api/tables';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import type { IconProps } from '@mathesar/component-library/types';
 

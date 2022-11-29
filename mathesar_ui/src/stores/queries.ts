@@ -34,7 +34,7 @@ import type {
   QueryGetResponse,
   QueryRunRequest,
   QueryRunResponse,
-} from '@mathesar/api/queries';
+} from '@mathesar/api/types/queries';
 import { CancellablePromise } from '@mathesar-component-library';
 
 import { currentSchemaId } from './schemas';

@@ -5,7 +5,7 @@
     Icon,
     iconError,
   } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import EntityType from '@mathesar/components/EntityType.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';

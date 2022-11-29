@@ -4,7 +4,7 @@ import { derived } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/utils/api';
-import type { Column } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import { ColumnsDataStore } from './columns';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';

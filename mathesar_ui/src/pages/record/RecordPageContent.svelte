@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/tables';
-  import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
   import { Spinner } from '@mathesar/component-library';
   import {
     FormSubmitWithCatch,
@@ -14,7 +14,7 @@
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
-  import { getAPI} from '@mathesar/utils/api';
+  import { getAPI } from '@mathesar/utils/api';
   import DirectField from './DirectField.svelte';
   import type RecordStore from './RecordStore';
   import Widgets from './Widgets.svelte';

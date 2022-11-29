@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Spinner } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { TableStructure } from '@mathesar/stores/table-data';
