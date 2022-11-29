@@ -34,6 +34,9 @@
   // The aria-label for the icon. Typically describes the icon.
   export let label: string | undefined = undefined;
 
+  // Tooltip
+  export let title: string | undefined = undefined;
+
   function concatClasses(
     _classes?: string,
     _flip?: IconProps['flip'],
@@ -68,6 +71,9 @@
   role={label ? 'img' : 'presentation'}
   {...$$restProps}
 >
+  {#if title}
+    <title>{title}</title>
+  {/if}
   {#if Array.isArray(path)}
     {#each path as entry (entry)}
       <IconPath path={entry} />
