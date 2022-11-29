@@ -14,7 +14,7 @@ class SchemaAccessPolicy(AccessPolicy):
         # Restrictions for the create method is done by the Serializers when creating the schema,
         # As the permissions depend on the database object.
         {
-            'action': ['list', 'retrieve', 'create'],
+            'action': ['list', 'retrieve', 'create', 'dependents'],
             'principal': '*',
             'effect': 'allow',
         },
