@@ -53,6 +53,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mathesar.middleware.CursorClosedHandlerMiddleware",
+    'django_userforeignkey.middleware.UserForeignKeyMiddleware',
+    'django_request_cache.middleware.RequestCacheMiddleware',
 ]
 
 ROOT_URLCONF = "config.urls"

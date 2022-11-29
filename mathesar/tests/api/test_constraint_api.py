@@ -242,7 +242,7 @@ def test_create_single_column_unique_constraint(create_patents_table, client):
 
 
 @pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)
-def test_create_unique_constraint_by_different_roles(create_patents_table, client, request, client_name, expected_status_code):
+def test_create_unique_constraint_by_different_roles(create_patents_table, request, client_name, expected_status_code):
     table_name = 'NASA Constraint List 5'
     table = create_patents_table(table_name)
     constraint_column_id = table.get_columns_by_name(['Case Number'])[0].id
