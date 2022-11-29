@@ -14,7 +14,7 @@
 </script>
 
 <DropdownMenu label="Append Column" icon={iconAddNew}>
-  {#each columns as column}
+  {#each columns as column (column.id)}
     <ButtonMenuItem
       label={column.name}
       icon={getIcon(column)}
