@@ -1,6 +1,7 @@
-import { derived, get, type Readable } from 'svelte/store';
+import { derived, get, writable, type Readable } from 'svelte/store';
 
 import { unite } from '@mathesar-component-library';
+import type { RequestStatus } from '@mathesar/utils/api';
 import { comboErrorsKey, type FieldStore, type ValuedField } from './field';
 import { isValid as outcomeIsValid, type ComboValidator } from './validators';
 
@@ -31,11 +32,11 @@ function runComboValidators(
 }
 
 export function makeForm<FieldsObj extends GenericFieldsObj>(
-  fieldsObj: FieldsObj,
+  fields: FieldsObj,
   comboValidators: ComboValidator[] = [],
 ) {
   const valuedFields: Readable<ValuedField[]> = unite(
-    Object.entries(fieldsObj).map(([name, field]) =>
+    Object.entries(fields).map(([name, field]) =>
       derived(field, (value) => ({ name, field, value })),
     ),
   );
@@ -47,17 +48,21 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
   });
 
   function reset() {
-    Object.values(fieldsObj).forEach((field) => {
+    Object.values(fields).forEach((field) => {
       field.reset();
     });
   }
 
+  const requestStatus = writable<RequestStatus | undefined>(undefined);
+
+  const serverErrors = writable<string[]>([]);
+
   const isValid = derived(
-    unite(Object.values(fieldsObj).map((f) => f.isValid)),
+    unite(Object.values(fields).map((f) => f.isValid)),
     (a) => a.every((i) => i),
   );
   const isDirty = derived(
-    unite(Object.values(fieldsObj).map((f) => f.isDirty)),
+    unite(Object.values(fields).map((f) => f.isDirty)),
     (a) => a.some((i) => i),
   );
 
@@ -70,7 +75,7 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
     }),
   );
 
-  return { ...store, reset };
+  return { ...store, fields, reset, serverErrors, requestStatus };
 }
 
 export type Form<FieldsObj extends GenericFieldsObj = GenericFieldsObj> =

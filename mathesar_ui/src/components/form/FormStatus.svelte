@@ -9,19 +9,21 @@
   } from '@mathesar-component-library';
   import { iconUnsavedChanges } from '@mathesar/icons';
   import type { RequestStatus } from '@mathesar/utils/api';
+  import type { Form } from './form';
 
-  export let hasChanges = false;
-  let incomingRequestStatus: RequestStatus | undefined = undefined;
-  export { incomingRequestStatus as requestStatus };
+  export let form: Form;
 
   let requestStatus: RequestStatus | undefined;
   let timeout: number | undefined;
+
+  $: hasChanges = $form.isDirty;
+  $: formRequestStatus = form.requestStatus;
 
   function clearRequestStatus() {
     requestStatus = undefined;
   }
 
-  function handleNewIncomingRequestStatus(s: RequestStatus | undefined) {
+  function handleNewFormRequestStatus(s: RequestStatus | undefined) {
     window.clearTimeout(timeout);
     timeout = undefined;
     requestStatus = s;
@@ -29,7 +31,7 @@
       timeout = window.setTimeout(clearRequestStatus, 5000);
     }
   }
-  $: handleNewIncomingRequestStatus(incomingRequestStatus);
+  $: handleNewFormRequestStatus($formRequestStatus);
 
   function handleNewHasChanges(_hasChanges: boolean) {
     // If user gets server errors and then clears the form, we clear errors.
