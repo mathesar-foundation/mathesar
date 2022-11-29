@@ -13,6 +13,7 @@
   contentClass="help-content"
 >
   <span slot="trigger" class="help-trigger-content">
+    <!-- TODO: Instead of the solid one, use a regular icon -->
     <Icon {...iconHelp} />
   </span>
   <slot slot="content" />
