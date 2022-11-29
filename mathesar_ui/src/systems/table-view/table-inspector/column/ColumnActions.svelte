@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Icon } from '@mathesar/component-library';
+  import { Button, Icon, iconSettings } from '@mathesar/component-library';
   import {
     iconDeleteMajor,
     iconMoveColumnsToNewLinkedTable,
@@ -51,30 +51,51 @@
 </script>
 
 <div class="actions-container">
+  <Button on:click={handleMoveColumnsToNewLinkedTable}>
+    <div class="action-item">
+      <div>
+        <Icon {...iconMoveColumnsToNewLinkedTable} />
+        <span>New linked table from column{s}</span>
+      </div>
+      <Icon {...iconSettings} />
+    </div>
+  </Button>
+  <Button on:click={handleMoveColumnsToExistingLinkedTable}>
+    <div class="action-item">
+      <div>
+        <Icon {...iconMoveColumnsToExistingLinkedTable} />
+        <span>Move column{s} to existing linked table</span>
+      </div>
+      <Icon {...iconSettings} />
+    </div>
+  </Button>
   {#if column}
     <Button
-      appearance="plain"
+      appearance="outline-primary"
       on:click={() => column && handleDeleteColumn(column)}
     >
       <Icon {...iconDeleteMajor} />
       <span>Delete Column</span>
     </Button>
   {/if}
-  <Button appearance="plain" on:click={handleMoveColumnsToNewLinkedTable}>
-    <Icon {...iconMoveColumnsToNewLinkedTable} />
-    <span>New linked table from column{s}</span>
-  </Button>
-  <Button appearance="plain" on:click={handleMoveColumnsToExistingLinkedTable}>
-    <Icon {...iconMoveColumnsToExistingLinkedTable} />
-    <span>Move column{s} to existing linked table</span>
-  </Button>
 </div>
 
 <ExtractColumnsModal controller={extractColumns} />
 
-<style>
+<style lang="scss">
   .actions-container {
     display: flex;
     flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 0.5rem;
+    }
+  }
+
+  .action-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 </style>

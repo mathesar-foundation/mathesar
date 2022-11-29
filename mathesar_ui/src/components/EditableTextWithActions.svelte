@@ -49,9 +49,7 @@
 
 <div class="editable-text">
   {#if !isEditable}
-    <span class="non-editable-value" role="button" on:click={makeEditable}
-      >{initialValue}</span
-    >
+    <TextInput on:focus={makeEditable} value={initialValue} />
   {:else}
     <div class="input-container">
       <TextInput disabled={isSubmitting} autofocus bind:value />
@@ -82,18 +80,14 @@
   .input-container {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+
+    > :global(* + *) {
+      margin-top: 0.5rem;
+    }
   }
 
   .error {
     color: var(--color-error);
     font-size: var(--text-size-x-small);
-  }
-
-  .non-editable-value {
-    padding: 0.43rem 0.57rem;
-  }
-  .non-editable-value:hover {
-    box-shadow: 0 0 0 2px #2087e633;
   }
 </style>
