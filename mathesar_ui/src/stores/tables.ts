@@ -13,26 +13,31 @@
  *   sorting.
  */
 
-import { derived, writable, get } from 'svelte/store';
-import type { Readable, Writable, Unsubscriber } from 'svelte/store';
+import type { Readable, Unsubscriber, Writable } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
+
 import {
+  CancellablePromise,
+  type RecursivePartial,
+} from '@mathesar-component-library';
+import type { MinimalColumnDetails, TableEntry } from '@mathesar/api/tables';
+import type {
+  SplitTableRequest,
+  SplitTableResponse,
+} from '@mathesar/api/tables/split_table';
+import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
+import { invalidIf } from '@mathesar/components/form';
+import type { PaginatedResponse } from '@mathesar/utils/api';
+import {
+  deleteAPI,
   getAPI,
+  patchAPI,
   postAPI,
   States,
-  deleteAPI,
-  patchAPI,
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
-import type {
-  SplitTableResponse,
-  TableEntry,
-  MinimalColumnDetails,
-} from '@mathesar/api/tables';
-import type { PaginatedResponse } from '@mathesar/utils/api';
-import { CancellablePromise } from '@mathesar-component-library';
-import { invalidIf } from '@mathesar/components/form';
 
+import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
 import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
@@ -298,10 +303,11 @@ export function splitTable(
   idsOfColumnsToExtract: number[],
   extractedTableName: string,
 ): CancellablePromise<SplitTableResponse> {
-  return postAPI(`/api/db/v0/tables/${id}/split_table/`, {
+  const body: SplitTableRequest = {
     extract_columns: idsOfColumnsToExtract,
     extracted_table_name: extractedTableName,
-  });
+  };
+  return postAPI(`/api/db/v0/tables/${id}/split_table/`, body);
 }
 
 export function moveColumns(
@@ -416,3 +422,30 @@ export const currentTable = derived(
       ? undefined
       : $tables.data.get($currentTableId),
 );
+
+export function getJoinableTablesResult(tableId: number, maxDepth = 1) {
+  return getAPI<JoinableTablesResult>(
+    `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=${maxDepth}`,
+  );
+}
+
+type TableSettings = TableEntry['settings'];
+
+export async function saveTableSettings(
+  table: Pick<TableEntry, 'id' | 'settings' | 'schema'>,
+  settings: RecursivePartial<TableSettings>,
+): Promise<void> {
+  const url = `/api/db/v0/tables/${table.id}/settings/${table.settings.id}/`;
+  await patchAPI<TableSettings>(url, settings);
+  await refetchTablesForSchema(table.schema);
+}
+
+export function saveRecordSummaryTemplate(
+  table: Pick<TableEntry, 'id' | 'settings' | 'schema'>,
+  previewSettings: TableSettings['preview_settings'],
+): Promise<void> {
+  const { customized } = previewSettings;
+  return saveTableSettings(table, {
+    preview_settings: customized ? previewSettings : { customized },
+  });
+}
