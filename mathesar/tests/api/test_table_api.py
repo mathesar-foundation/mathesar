@@ -150,11 +150,11 @@ def check_create_table_response(
 
 
 write_client_with_different_roles = [
-    ('db_manager_client', 201),
-    ('db_editor_client', 400),
-    ('schema_manager_client', 201),
-    ('schema_viewer_client', 400),
-    ('db_viewer_schema_manager_client', 201)
+    ('db_manager_client_factory', 201),
+    ('db_editor_client_factory', 400),
+    ('schema_manager_client_factory', 201),
+    ('schema_viewer_client_factory', 400),
+    ('db_viewer_schema_manager_client_factory', 201)
 ]
 
 
@@ -690,13 +690,13 @@ def test_table_create_multiple_users_different_roles(client_bob, client_alice, u
 
 
 @pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)
-def test_table_create(schema, request, client_name, expected_status_code):
+def test_table_create_based_on_permissions(schema, request, client_name, expected_status_code):
     table_name = 'test_table'
     body = {
         'name': table_name,
         'schema': schema.id,
     }
-    client = request.getfixturevalue(client_name)
+    client = request.getfixturevalue(client_name)(schema)
     response = client.post('/api/db/v0/tables/', body)
     assert response.status_code == expected_status_code
 
