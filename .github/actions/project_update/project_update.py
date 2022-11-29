@@ -111,17 +111,19 @@ def get_option_data(option_name, field_data):
     return option_data
 
 
-def update_field_for_item(item_id, field, value, project_data):
+def update_field_value_for_single_select_item(item_id, field, value, project_data):
     print(f'Updating {item_id} with field ID: {field}, field value: {value}...')
     query_template = Template(
         """
           mutation {
-            updateProjectV2ItemField(
+            updateProjectV2ItemFieldValue(
               input: {
                 projectId: "$project_id"
                 itemId: "$item_id"
                 fieldId: "$field_id"
-                value: "$value"
+                value: {
+                  singleSelectOptionId: "$value"
+                }
               }
             ) {
               projectV2Item {
@@ -132,11 +134,42 @@ def update_field_for_item(item_id, field, value, project_data):
         """
     )
     field_data = get_field_data(field, project_data)
-    if field == 'Timestamp':
-        value_to_save = value
-    else:
-        option_data = get_option_data(value, field_data)
-        value_to_save = option_data['id']
+    option_data = get_option_data(value, field_data)
+    value_to_save = option_data['id']
+    query = query_template.substitute(
+        project_id=project_data['id'],
+        item_id=item_id,
+        field_id=field_data['id'],
+        value=value_to_save
+    )
+    result = run_graphql(query)
+    return result
+
+
+def update_field_value_for_text_item(item_id, field, value, project_data):
+    print(f'Updating {item_id} with field ID: {field}, field value: {value}...')
+    query_template = Template(
+        """
+          mutation {
+            updateProjectV2ItemFieldValue(
+              input: {
+                projectId: "$project_id"
+                itemId: "$item_id"
+                fieldId: "$field_id"
+                value: {
+                  text: "$value"
+                }
+              }
+            ) {
+              projectV2Item {
+                id
+              }
+            }
+          }
+        """
+    )
+    field_data = get_field_data(field, project_data)
+    value_to_save = value
     query = query_template.substitute(
         project_id=project_data['id'],
         item_id=item_id,
@@ -163,12 +196,12 @@ if __name__ == '__main__':
     project_data = get_project_data()
     item_id = add_item_to_project(content_id, project_data)
     if args.status:
-        update_field_for_item(item_id, 'Status', args.status, project_data)
+        update_field_value_for_single_select_item(item_id, 'Status', args.status, project_data)
     if args.priority:
-        update_field_for_item(item_id, 'Priority', args.priority, project_data)
+        update_field_value_for_single_select_item(item_id, 'Priority', args.priority, project_data)
     if args.work:
-        update_field_for_item(item_id, 'Work', args.work, project_data)
+        update_field_value_for_single_select_item(item_id, 'Work', args.work, project_data)
     if args.timestamp:
         timestamp = parser.parse(args.timestamp)
         timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')
-        update_field_for_item(item_id, 'Timestamp', timestamp_str, project_data)
+        update_field_value_for_text_item(item_id, 'Timestamp', timestamp_str, project_data)
