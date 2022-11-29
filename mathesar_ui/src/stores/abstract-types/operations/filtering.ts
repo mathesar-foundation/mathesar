@@ -53,9 +53,24 @@ function constructParamMapForAllTypes(
   >;
 }
 
+const equalityFiltersResponse: AbstractTypeFilterDefinitionResponse[] = [
+  {
+    id: 'equal',
+    name: 'equals',
+    aliases: constructAliasMapForTypes(allDateTimeTypes, 'is same as'),
+    uiTypeParameterMap: constructParamMapForAllTypes((category) => [category]),
+  },
+  {
+    id: 'empty',
+    name: 'is empty',
+    uiTypeParameterMap: constructParamMapForAllTypes(() => []),
+  },
+];
+
 // This is the API response expected from the server
 // Might be better if we can have this with the types endpoint
 const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
+  ...equalityFiltersResponse,
   {
     id: 'contains_case_insensitive',
     name: 'contains',
@@ -178,20 +193,11 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     aliases: constructAliasMapForTypes(allDateTimeTypes, 'is after or same as'),
     uiTypeParameterMap: numericallyOperableTypesParams,
   },
-  {
-    id: 'equal',
-    name: 'is equal to',
-    aliases: constructAliasMapForTypes(allDateTimeTypes, 'is same as'),
-    uiTypeParameterMap: constructParamMapForAllTypes((category) => [category]),
-  },
-  {
-    id: 'empty',
-    name: 'is empty',
-    uiTypeParameterMap: constructParamMapForAllTypes(() => []),
-  },
 ];
 
-function getFilterDefinitionMap(): AbstractTypeFilterDefinitionMap {
+function getFilterDefinitionMap(
+  filterDefinitionResponse: AbstractTypeFilterDefinitionResponse[],
+): AbstractTypeFilterDefinitionMap {
   const categories =
     Object.values<AbstractTypeCategoryIdentifier>(abstractTypeCategory);
   const filterDefinitionMap: AbstractTypeFilterDefinitionMap = new Map();
@@ -201,7 +207,7 @@ function getFilterDefinitionMap(): AbstractTypeFilterDefinitionMap {
     }
     const filterDefinitions = filterDefinitionMap.get(category);
 
-    filterResponse.forEach((filter) => {
+    filterDefinitionResponse.forEach((filter) => {
       if (filter.uiTypeParameterMap[category]) {
         filterDefinitions?.push({
           id: filter.id,
@@ -214,36 +220,37 @@ function getFilterDefinitionMap(): AbstractTypeFilterDefinitionMap {
   return filterDefinitionMap;
 }
 
-export const filterDefinitionMap = getFilterDefinitionMap();
+export const equalityFiltersDefinitionMap = getFilterDefinitionMap(
+  equalityFiltersResponse,
+);
+export const filterDefinitionMap = getFilterDefinitionMap(filterResponse);
 
-function getFiltersForEquality(
-    allowedFiltersMap: Map<
-      AbstractTypeFilterDefinition['id'],
-      AbstractTypeFilterDefinition
-    >,
-  ): Map<AbstractTypeFilterDefinition['id'], AbstractTypeFilterDefinition> {
-    filterDefinitionMap.get('boolean')?.forEach((filter) => {
-      allowedFiltersMap.set(filter.id, filter);
-    });
-    return allowedFiltersMap;
-}
-
-export function getFiltersForAbstractType(
+export function getEqualityFiltersForAbstractType(
   categoryIdentifier: AbstractTypeCategoryIdentifier,
-  isFk: boolean,
 ): Map<AbstractTypeFilterDefinition['id'], AbstractTypeFilterDefinition> {
   const allowedFiltersMap: Map<
     AbstractTypeFilterDefinition['id'],
     AbstractTypeFilterDefinition
   > = new Map();
 
-  if (isFk === false) {
-    filterDefinitionMap.get(categoryIdentifier)?.forEach((filter) => {
-      allowedFiltersMap.set(filter.id, filter);
-    });
-  } else {
-    getFiltersForEquality(allowedFiltersMap);
-  }
+  equalityFiltersDefinitionMap.get(categoryIdentifier)?.forEach((filter) => {
+    allowedFiltersMap.set(filter.id, filter);
+  });
+
+  return allowedFiltersMap;
+}
+
+export function getFiltersForAbstractType(
+  categoryIdentifier: AbstractTypeCategoryIdentifier,
+): Map<AbstractTypeFilterDefinition['id'], AbstractTypeFilterDefinition> {
+  const allowedFiltersMap: Map<
+    AbstractTypeFilterDefinition['id'],
+    AbstractTypeFilterDefinition
+  > = new Map();
+
+  filterDefinitionMap.get(categoryIdentifier)?.forEach((filter) => {
+    allowedFiltersMap.set(filter.id, filter);
+  });
 
   return allowedFiltersMap;
 }

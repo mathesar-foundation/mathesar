@@ -1,5 +1,8 @@
 import type { FkConstraint } from '@mathesar/api/tables/constraints';
-import { getFiltersForAbstractType } from '@mathesar/stores/abstract-types';
+import {
+  getEqualityFiltersForAbstractType,
+  getFiltersForAbstractType,
+} from '@mathesar/stores/abstract-types';
 import type {
   AbstractTypeCategoryIdentifier,
   AbstractTypeFilterDefinition,
@@ -17,15 +20,10 @@ export function validateFilterEntry(
 
 export function retrieveFilters(
   categoryIdentifier: AbstractTypeCategoryIdentifier,
-  linkFK: FkConstraint,
+  linkFK?: FkConstraint,
 ): Map<AbstractTypeFilterDefinition['id'], AbstractTypeFilterDefinition> {
-  let allowedFiltersMap: Map<
-    AbstractTypeFilterDefinition['id'],
-    AbstractTypeFilterDefinition
-  > = new Map();
   const isFK: boolean = linkFK !== undefined;
-
-  allowedFiltersMap = getFiltersForAbstractType(categoryIdentifier, isFK);
-
-  return allowedFiltersMap;
+  return isFK
+    ? getEqualityFiltersForAbstractType(categoryIdentifier)
+    : getFiltersForAbstractType(categoryIdentifier);
 }
