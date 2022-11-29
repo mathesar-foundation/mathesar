@@ -64,6 +64,35 @@ def test_create_empty_table_settings(client, schema, empty_nasa_table, schema_na
     assert results[0]['preview_settings']['customized'] is False
 
 
+update_clients_with_status_codes = [
+    ('superuser_client_factory', 200),
+    ('db_manager_client_factory', 200),
+    ('db_editor_client_factory', 404),
+    ('schema_manager_client_factory', 200),
+    ('schema_viewer_client_factory', 404),
+    ('db_viewer_schema_manager_client_factory', 200)
+]
+
+
+@pytest.mark.parametrize('client_name,expected_status_code', update_clients_with_status_codes)
+def test_update_table_settings_permission(create_patents_table, request, client_name, expected_status_code):
+    table_name = 'NASA Table'
+    table = create_patents_table(table_name)
+    settings_id = table.settings.id
+    client = request.getfixturevalue(client_name)(table.schema)
+    columns = models_base.Column.objects.filter(table=table).values_list('id', flat=True)
+    preview_template = ','.join(f'{{{ column }}}' for column in columns)
+    data = {
+        "preview_settings": {
+            'template': preview_template,
+        }
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{table.id}/settings/{settings_id}/", data
+    )
+    assert response.status_code == expected_status_code
+
+
 def test_update_table_settings(client, column_test_table):
     columns = models_base.Column.objects.filter(table=column_test_table).values_list('id', flat=True)
     preview_template = ','.join(f'{{{ column }}}' for column in columns)
