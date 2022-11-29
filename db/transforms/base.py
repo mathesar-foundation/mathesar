@@ -390,12 +390,14 @@ def _add_aliases_to_summarization_expr_field(
     return summarization
 
 
-class RemoveColumns(Transform):
+class HideColumns(Transform):
     """
+    Selects every column in the transform, except for the columns specified in the spec.
+
     We're implementing this transform in terms of selecting columns (since Postgres doesn't really
     support "selecting everything except").
     """
-    type = "remove"
+    type = "hide"
 
     def apply_to_relation(self, relation):
         input_aliases = [
@@ -424,11 +426,11 @@ class RemoveColumns(Transform):
             column
             for column
             in input_aliases
-            if column not in self._columns_to_remove
+            if column not in self._columns_to_hide
         ]
 
     @property
-    def _columns_to_remove(self):
+    def _columns_to_hide(self):
         return self.spec
 
 
