@@ -1,47 +1,64 @@
 <script>
   import { Collapsible } from '@mathesar-component-library';
-  import TableConstraints from '@mathesar/systems/table-view/constraints/TableConstraints.svelte';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { currentTable } from '@mathesar/stores/tables';
+  import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
   import RenameTable from './RenameTable.svelte';
-  import ConstraintHelp from '../../constraints/__help__/ConstraintHelp.svelte';
   import TableActions from './TableActions.svelte';
+  import CollapsibleHeader from '../CollapsibleHeader.svelte';
+  import AdvancedActions from './AdvancedActions.svelte';
+  import TableLinks from './links/TableLinks.svelte';
+
+  const tabularData = getTabularDataStoreFromContext();
 </script>
 
 <div class="table-mode-container">
-  <Collapsible isOpen>
-    <span slot="header">Table Properties</span>
-    <div slot="content" class="property-container">
+  <Collapsible isOpen triggerAppearance="plain">
+    <CollapsibleHeader
+      slot="header"
+      title="Properties"
+      isDbLevelConfiguration
+    />
+    <div slot="content" class="content-container">
       <RenameTable />
     </div>
   </Collapsible>
 
-  <Collapsible isOpen>
-    <span slot="header">Constraints <ConstraintHelp /></span>
-    <div slot="content" class="property-container">
-      <TableConstraints />
+  <Collapsible isOpen triggerAppearance="plain">
+    <CollapsibleHeader slot="header" title="Links" isDbLevelConfiguration />
+    <div slot="content" class="content-container">
+      <TableLinks />
     </div>
   </Collapsible>
 
-  <Collapsible isOpen>
-    <span slot="header">Actions</span>
-    <div slot="content" class="actions-container">
+  <Collapsible isOpen triggerAppearance="plain">
+    <CollapsibleHeader slot="header" title="Actions" />
+    <div slot="content" class="content-container">
       <TableActions />
+    </div>
+  </Collapsible>
+
+  <Collapsible triggerAppearance="plain">
+    <CollapsibleHeader slot="header" title="Record Summary" />
+    <div slot="content" class="content-container">
+      <RecordSummaryConfig table={$currentTable} tabularData={$tabularData} />
+    </div>
+  </Collapsible>
+
+  <Collapsible triggerAppearance="plain">
+    <CollapsibleHeader slot="header" title="Advanced" />
+    <div slot="content" class="content-container">
+      <AdvancedActions />
     </div>
   </Collapsible>
 </div>
 
 <style>
   .table-mode-container {
-    padding: 1rem 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    padding-bottom: 1rem;
   }
 
-  .property-container {
+  .content-container {
     padding: 1rem;
-  }
-
-  .actions-container {
-    padding: 1rem 0;
   }
 </style>
