@@ -75,7 +75,7 @@ from db.records.operations.select import get_records
                 transforms_base.SelectSubsetOfColumns(
                     spec=["id", "Grade"],
                 ),
-                transforms_base.RemoveColumns(
+                transforms_base.HideColumns(
                     spec=["Grade"],
                 ),
             ],
