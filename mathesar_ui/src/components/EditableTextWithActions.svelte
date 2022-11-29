@@ -8,12 +8,16 @@
     CancelOrProceedButtonPair,
     TextInput,
   } from '@mathesar-component-library';
+  import type { ComponentAndProps } from '@mathesar/component-library/types';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
 
-  export let initialValue = '';
+  export let initialValue: any = '';
   export let onSubmit: (value: string) => Promise<void>;
   export let getValidationErrors: (value: string) => string[] = () => [];
+  export let inputComponentAndProps: ComponentAndProps = {
+    component: TextInput,
+  };
 
   let isEditable = false;
   let value = '';
@@ -52,7 +56,13 @@
     <TextInput on:focus={makeEditable} value={initialValue} />
   {:else}
     <div class="input-container">
-      <TextInput disabled={isSubmitting} autofocus bind:value />
+      <svelte:component
+        this={inputComponentAndProps.component}
+        {...inputComponentAndProps.props || {}}
+        autofocus
+        bind:value
+        disabled={isSubmitting}
+      />
       {#if validationErrors.length}
         {#each validationErrors as error}
           <span class="error">{error}</span>

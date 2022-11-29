@@ -10,22 +10,21 @@
     ColumnWithAbstractType,
     ColumnTypeOptionsSaveArgs,
   } from './utils';
-  import AbstractTypeOptions from './AbstractTypeOptions.svelte';
+  import AbstractTypeDBOptions from './AbstractTypeDBOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
 
   const dispatch = createEventDispatcher();
 
   export let column: ColumnWithAbstractType;
-  export let save: (options: ColumnTypeOptionsSaveArgs) => Promise<unknown>;
+  export let save: (
+    options: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
+  ) => Promise<unknown>;
 
   let selectedAbstractType: ColumnWithAbstractType['abstractType'] =
     column.abstractType;
   let selectedDbType: ColumnWithAbstractType['type'] = column.type;
   let typeOptions: ColumnWithAbstractType['type_options'] = {
     ...(column.type_options ?? {}),
-  };
-  let displayOptions: ColumnWithAbstractType['display_options'] = {
-    ...(column.display_options ?? {}),
   };
   let typeChangeState: RequestStatus;
 
@@ -40,7 +39,6 @@
     selectedAbstractType = _column.abstractType;
     selectedDbType = _column.type;
     typeOptions = { ...(_column.type_options ?? {}) };
-    displayOptions = { ...(_column.display_options ?? {}) };
   }
   $: resetAbstractType(column);
 
@@ -52,7 +50,6 @@
     selectedDbType = type;
     selectedAbstractType = abstractType;
     typeOptions = {};
-    displayOptions = {};
   }
 
   function cancel() {
@@ -67,7 +64,6 @@
       await save({
         type: selectedDbType,
         type_options: { ...typeOptions },
-        display_options: { ...displayOptions },
       });
     } catch (err) {
       const errorMessage =
@@ -92,11 +88,10 @@
 
   {#if selectedAbstractType && selectedDbType}
     {#key selectedAbstractType}
-      <AbstractTypeOptions
+      <AbstractTypeDBOptions
         {selectedAbstractType}
         bind:selectedDbType
         bind:typeOptions
-        bind:displayOptions
         {column}
       />
     {/key}
@@ -115,11 +110,7 @@
 </div>
 
 <style lang="scss">
-  .column-type-menu {
-    padding: 0.75rem;
-
-    .footer {
-      margin-top: 1rem;
-    }
+  .footer {
+    margin-top: 1rem;
   }
 </style>

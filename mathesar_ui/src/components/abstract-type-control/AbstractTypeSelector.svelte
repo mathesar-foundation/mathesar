@@ -53,7 +53,7 @@
   }
 </script>
 
-<LabeledInput label="Column Data Type" layout={'stacked'}>
+<LabeledInput label="Data Type" layout={'stacked'}>
   <Select
     options={allowedTypeConversions}
     value={selectedAbstractType}
