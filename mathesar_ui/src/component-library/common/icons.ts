@@ -16,6 +16,9 @@ import {
   faAngleRight,
   faCaretRight,
   faLightbulb,
+  faGears,
+  faArrowUpRightFromSquare,
+  faExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
@@ -50,10 +53,13 @@ export const iconUploadFile: IconProps = { data: faFileUpload };
 // (These names should all be nouns)
 
 export const iconFile: IconProps = { data: faFile };
-export const iconInfo: IconProps = { data: faLightbulb };
+export const iconSettings: IconProps = { data: faGears };
+export const iconExternalLink: IconProps = { data: faArrowUpRightFromSquare };
 
 // STATUSES
 
+export const iconInfo: IconProps = { data: faLightbulb };
+export const iconWarning: IconProps = { data: faExclamation };
 export const iconError: IconProps = { data: faExclamationTriangle };
 export const iconLoading: IconProps = { data: faSpinner, spin: true };
 export const iconSuccess: IconProps = { data: faCheck };

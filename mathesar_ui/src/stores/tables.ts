@@ -31,7 +31,9 @@ import type {
 } from '@mathesar/api/tables';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import { CancellablePromise } from '@mathesar-component-library';
+import { invalidIf } from '@mathesar/components/form';
 
+import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
 import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
@@ -394,6 +396,14 @@ export const tables: Readable<DBTablesStoreData> = derived(
   },
 );
 
+export const validateNewTableName = derived(tables, ($tables) => {
+  const names = new Set([...$tables.data.values()].map((t) => t.name));
+  return invalidIf(
+    (name: string) => names.has(name),
+    'A table with that name already exists.',
+  );
+});
+
 export function getTableName(id: DBObjectEntry['id']): string | undefined {
   return get(tables).data.get(id)?.name;
 }
@@ -407,3 +417,9 @@ export const currentTable = derived(
       ? undefined
       : $tables.data.get($currentTableId),
 );
+
+export function getJoinableTablesResult(tableId: number, maxDepth = 1) {
+  return getAPI<JoinableTablesResult>(
+    `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=${maxDepth}`,
+  );
+}

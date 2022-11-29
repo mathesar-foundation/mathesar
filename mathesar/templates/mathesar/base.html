@@ -1,5 +1,3 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -22,60 +20,17 @@
         padding: 0;
         font-size: 14px;
         line-height: 1.2;
-        color: #1e1e1e;
       }
       * {
         box-sizing: border-box;
         outline: 0;
       }
     </style>
-    {% if not development_mode %} {% for css_file in manifest_data.module_css %}
-    <link rel="stylesheet" href="{% static css_file %}" />
-    {% endfor %} {% endif %} {% block styles %} {% endblock %}
+    {% block styles %} {% endblock %}
   </head>
   <body>
-    {% block scripts %} {% endblock %} {% if development_mode %}
-    <script type="module" src="{{ client_dev_url }}/@vite/client"></script>
-    <script type="module" src="{{ client_dev_url }}/src/main.ts"></script>
-    {% else %}
-    <!-- For legacy browsers that do not support modules -->
-    <script nomodule>
-      !(function () {
-        var e = document,
-          t = e.createElement("script");
-        if (!("noModule" in t) && "onbeforeload" in t) {
-          var n = !1;
-          e.addEventListener(
-            "beforeload",
-            function (e) {
-              if (e.target === t) n = !0;
-              else if (!e.target.hasAttribute("nomodule") || !n) return;
-              e.preventDefault();
-            },
-            !0
-          ),
-            (t.type = "module"),
-            (t.src = "."),
-            e.head.appendChild(t),
-            t.remove();
-        }
-      })();
-    </script>
+    {% block scripts %} {% endblock %}
 
-    <script type="module" src="{% static manifest_data.module_js %}"></script>
-    <script
-      nomodule
-      src="{% static manifest_data.legacy_polyfill_js %}"
-    ></script>
-    <script
-      nomodule
-      id="vite-legacy-entry"
-      data-src="{% static manifest_data.legacy_js %}"
-    >
-      System.import(
-        document.getElementById("vite-legacy-entry").getAttribute("data-src")
-      );
-    </script>
-    {% endif %}
+    {% block content %} {% endblock %}
   </body>
 </html>

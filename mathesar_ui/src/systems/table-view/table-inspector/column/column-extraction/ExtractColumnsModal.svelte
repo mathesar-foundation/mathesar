@@ -1,27 +1,35 @@
 <script lang="ts">
-  import {
-    CancelOrProceedButtonPair,
-    ControlledModal,
-    LabeledInput,
-    TextInput,
-  } from '@mathesar-component-library';
-  import Form from '@mathesar/components/Form.svelte';
-  import FormField from '@mathesar/components/FormField.svelte';
+  import { tick } from 'svelte';
+  import { get } from 'svelte/store';
+
+  import { ControlledModal } from '@mathesar-component-library';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
+  import { scrollBasedOnSelection } from '@mathesar/components/sheet';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import {
+    requiredField,
+    makeForm,
+    Field,
+    FormSubmit,
+    comboValidator,
+  } from '@mathesar/components/form';
+  import {
     getTableFromStoreOrApi,
     moveColumns,
     splitTable,
     tables as tablesDataStore,
+    validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import type { LinkedTable } from './columnExtractionTypes';
-  import { getLinkedTables } from './columnExtractionUtils';
+  import {
+    getLinkedTables,
+    validateTableIsNotLinkedViaSelectedColumn,
+  } from './columnExtractionUtils';
   import type { ExtractColumnsModalController } from './ExtractColumnsModalController';
   import SelectLinkedTable from './SelectLinkedTable.svelte';
 
@@ -29,15 +37,21 @@
 
   export let controller: ExtractColumnsModalController;
 
-  let linkedTable: LinkedTable | undefined = undefined;
-  let tableName = '';
-  let newFkColumnName = '';
-
   $: ({ processedColumns, constraintsDataStore, selection } = $tabularData);
   $: ({ constraints } = $constraintsDataStore);
   $: availableColumns = [...$processedColumns.values()];
   $: ({ targetType, columns, isOpen } = controller);
-  $: canProceed = true;
+  $: linkedTable = requiredField<LinkedTable | undefined>(undefined);
+  $: tableName = requiredField('', [$validateNewTableName]);
+  $: newFkColumnName = requiredField(''); // TODO: add unique validation
+  $: form =
+    $targetType === 'newTable'
+      ? makeForm({ columns, tableName }) // TODO: add newFkColumnName
+      : makeForm({ columns, linkedTable }, [
+          comboValidator([linkedTable, columns], (args) =>
+            validateTableIsNotLinkedViaSelectedColumn(...args),
+          ),
+        ]);
   $: proceedButtonLabel =
     $targetType === 'existingTable' ? 'Move Columns' : 'Create Table';
   $: linkedTables = getLinkedTables({
@@ -46,14 +60,10 @@
     tables: $tablesDataStore.data,
   });
 
-  function init() {
-    tableName = '';
-    newFkColumnName = '';
+  function handleTableNameUpdate(_tableName: string) {
+    $newFkColumnName = _tableName;
   }
-
-  function handleTableNameUpdate() {
-    newFkColumnName = tableName;
-  }
+  $: handleTableNameUpdate($tableName);
 
   function handleColumnsChange(_columns: ProcessedColumn[]) {
     if (!$isOpen) {
@@ -74,7 +84,7 @@
     const followUps: Promise<unknown>[] = [];
     try {
       if ($targetType === 'existingTable') {
-        const targetTableId = linkedTable?.table.id;
+        const targetTableId = $linkedTable?.table.id;
         if (!targetTableId) {
           throw new Error('No target table selected');
         }
@@ -87,12 +97,28 @@
         const response = await splitTable(
           $tabularData.id,
           $columns.map((c) => c.id),
-          tableName,
+          $tableName,
         );
         followUps.push(getTableFromStoreOrApi(response.extracted_table));
       }
       followUps.push($tabularData.refresh());
       await Promise.all(followUps);
+      if ($targetType === 'newTable') {
+        // We ase using `get(processedColumns)` instead of `$processedColumns`
+        // because the store gets updated when the above promises settle, and
+        // for some reason Svelte doesn't seem to dispatch that update to the
+        // store when we're using the dollar syntax here. There may be a cleaner
+        // approach.
+        const allColumns = [...get(processedColumns).values()];
+        // Here we assume that the new column will be positioned at the end. We
+        // will need to modify this logic when we position the new column where
+        // the old columns were.
+        const newFkColumn = allColumns.slice(-1)[0];
+        selection.toggleColumnSelection(newFkColumn);
+        await tick();
+        scrollBasedOnSelection();
+      }
+      toast.success('Successfully extracted columns.');
       controller.close();
     } catch (e) {
       toast.error(getErrorMessage(e));
@@ -100,7 +126,7 @@
   }
 </script>
 
-<ControlledModal {controller} on:open={init}>
+<ControlledModal {controller} on:close{form.reset}>
   <span slot="title">
     {#if $targetType === 'existingTable'}
       Move Columns to Linked Table
@@ -109,73 +135,43 @@
     {/if}
   </span>
 
-  <Form>
-    {#if $targetType === 'newTable'}
-      <FormField>
-        <LabeledInput layout="stacked">
-          <span slot="label">Name of New Table</span>
-          <TextInput bind:value={tableName} on:input={handleTableNameUpdate} />
-        </LabeledInput>
-      </FormField>
-
-      <!--
+  {#if $targetType === 'newTable'}
+    <Field field={tableName} label="Name of New Table" layout="stacked" />
+    <!--
         TODO Uncomment and implement when
         https://github.com/centerofci/mathesar/issues/1434 is done
       -->
-      <!-- <FormField>
-        <LabeledInput layout="stacked">
-          <span slot="label">Name of New Linking Column In This Table</span>
-          <TextInput bind:value={newFkColumnName} />
-        </LabeledInput>
-      </FormField> -->
-    {/if}
+    <!-- <Field
+        field={newFkColumnName}
+        label="Name of New Linking Column In This Table"
+        layout="stacked"
+      /> -->
+  {:else}
+    <Field
+      field={linkedTable}
+      input={{ component: SelectLinkedTable, props: { linkedTables } }}
+      label="Linked Table"
+      layout="stacked"
+    />
+  {/if}
 
-    {#if $targetType === 'existingTable'}
-      <FormField>
-        <LabeledInput layout="stacked">
-          <span slot="label" class="label">
-            <span class="title">Linked Table</span>
-            <span class="help" />
-          </span>
-          <SelectLinkedTable {linkedTables} bind:value={linkedTable} />
-        </LabeledInput>
-      </FormField>
-    {/if}
+  <Field
+    field={columns}
+    input={{ component: SelectProcessedColumns, props: { availableColumns } }}
+    label="Columns to Move"
+    layout="stacked"
+  >
+    <span slot="help">
+      These columns will be removed from the current table and moved to the
+      linked table.
+    </span>
+  </Field>
 
-    <FormField>
-      <LabeledInput layout="stacked">
-        <span slot="label" class="label">
-          <span class="title">Columns to Move</span>
-          <span class="help">
-            These columns will be removed from the current table and moved to
-            the linked table.
-          </span>
-        </span>
-        <SelectProcessedColumns {availableColumns} bind:columns={$columns} />
-      </LabeledInput>
-    </FormField>
-  </Form>
-
-  <CancelOrProceedButtonPair
+  <FormSubmit
+    {form}
     slot="footer"
+    proceedButton={{ label: proceedButtonLabel }}
     onProceed={handleSave}
     onCancel={() => controller.close()}
-    proceedButton={{ label: proceedButtonLabel }}
-    {canProceed}
   />
 </ControlledModal>
-
-<style>
-  .label {
-    display: block;
-  }
-  .title {
-    display: block;
-  }
-  .help {
-    display: block;
-    font-size: var(--text-size-small);
-    color: var(--color-text-muted);
-    margin-top: 0.5rem;
-  }
-</style>

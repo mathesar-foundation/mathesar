@@ -8,13 +8,21 @@
     margin-left: 0.5rem;
   }
 
+  .content {
+    font-size: 1rem;
+    color: var(--slate-800);
+    font-weight: 400;
+    line-height: var(--size-x-large);
+  }
+
   &.alert-info {
     background-color: var(--sky-200);
-
-    .content {
-      font-size: 1rem;
-      color: var(--slate-800);
-      font-weight: 400;
-    }
+  }
+  &.alert-warning {
+    background-color: var(--yellow-100);
+  }
+  &.alert-error {
+    background-color: var(--danger-background-color);
+    color: var(--danger-color);
   }
 }

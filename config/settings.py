@@ -53,6 +53,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mathesar.middleware.CursorClosedHandlerMiddleware",
+    'django_userforeignkey.middleware.UserForeignKeyMiddleware',
+    'django_request_cache.middleware.RequestCacheMiddleware',
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -199,6 +201,10 @@ FRIENDLY_ERRORS = {
             'null': 2027,
             'does_not_exist': 2151,
             'incorrect_type': 2161
+        },
+        'PermittedSlugRelatedField': {
+            'required': 2007, 'invalid': 2002, 'null': 2027,
+            'does_not_exist': 2151, 'incorrect_type': 2161
         },
     },
     'EXCEPTION_DICT': {

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { IconProps } from './IconTypes';
+  import IconPath from './IconPath.svelte';
 
   // NOTE:
   // The type definition for the props here are duplicated in `Icon.d.ts` too.
@@ -32,6 +33,9 @@
 
   // The aria-label for the icon. Typically describes the icon.
   export let label: string | undefined = undefined;
+
+  // Tooltip
+  export let title: string | undefined = undefined;
 
   function concatClasses(
     _classes?: string,
@@ -67,11 +71,14 @@
   role={label ? 'img' : 'presentation'}
   {...$$restProps}
 >
+  {#if title}
+    <title>{title}</title>
+  {/if}
   {#if Array.isArray(path)}
     {#each path as entry (entry)}
-      <path d={entry} />
+      <IconPath path={entry} />
     {/each}
   {:else}
-    <path d={path} />
+    <IconPath {path} />
   {/if}
 </svg>
