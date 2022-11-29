@@ -16,7 +16,7 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { tables } from '@mathesar/stores/tables';
-  import { States } from '@mathesar/utils/api';
+  import { States } from '@mathesar/api/utils/requestUtils';
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';

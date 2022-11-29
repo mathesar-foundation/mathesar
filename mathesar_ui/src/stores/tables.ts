@@ -30,14 +30,14 @@ import type {
 } from '@mathesar/api/types/tables/split_table';
 import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
 import { invalidIf } from '@mathesar/components/form';
-import type { PaginatedResponse } from '@mathesar/utils/api';
+import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
 import {
   deleteAPI,
   getAPI,
   patchAPI,
   postAPI,
   States,
-} from '@mathesar/utils/api';
+} from '@mathesar/api/utils/requestUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';

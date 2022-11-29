@@ -12,7 +12,7 @@
     iconSorting,
   } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { States } from '@mathesar/utils/api';
+  import { States } from '@mathesar/api/utils/requestUtils';
   import Filter from './record-operations/Filter.svelte';
   import Group from './record-operations/Group.svelte';
   import Sort from './record-operations/Sort.svelte';

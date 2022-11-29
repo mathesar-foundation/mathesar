@@ -24,8 +24,16 @@
 
 import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-import { deleteAPI, getAPI, postAPI, putAPI } from '@mathesar/utils/api';
-import type { RequestStatus, PaginatedResponse } from '@mathesar/utils/api';
+import {
+  deleteAPI,
+  getAPI,
+  postAPI,
+  putAPI,
+} from '@mathesar/api/utils/requestUtils';
+import type {
+  RequestStatus,
+  PaginatedResponse,
+} from '@mathesar/api/utils/requestUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { SchemaEntry } from '@mathesar/AppTypes';

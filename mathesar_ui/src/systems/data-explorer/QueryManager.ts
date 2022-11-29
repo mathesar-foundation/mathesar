@@ -4,8 +4,8 @@ import {
   isDefinedNonNullable,
   CancellablePromise,
 } from '@mathesar-component-library';
-import { getAPI } from '@mathesar/utils/api';
-import type { RequestStatus } from '@mathesar/utils/api';
+import { getAPI } from '@mathesar/api/utils/requestUtils';
+import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { QueryInstance } from '@mathesar/api/types/queries';
 import type { TableEntry } from '@mathesar/api/types/tables';

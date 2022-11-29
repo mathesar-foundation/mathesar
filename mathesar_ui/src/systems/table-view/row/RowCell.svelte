@@ -21,8 +21,8 @@
   } from '@mathesar/components/sheet';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
-  import type { RequestStatus } from '@mathesar/utils/api';
-  import { States } from '@mathesar/utils/api';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import { States } from '@mathesar/api/utils/requestUtils';
   import { SheetCell } from '@mathesar/components/sheet';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';

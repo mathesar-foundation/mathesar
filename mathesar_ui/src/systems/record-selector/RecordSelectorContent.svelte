@@ -13,7 +13,7 @@
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { tables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { postAPI, States } from '@mathesar/utils/api';
+  import { postAPI, States } from '@mathesar/api/utils/requestUtils';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import type {

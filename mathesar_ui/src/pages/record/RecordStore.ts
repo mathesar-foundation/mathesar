@@ -8,7 +8,11 @@ import {
   prepareFieldsAsRecordSummaryInputData,
   buildRecordSummariesForSheet,
 } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-import { getAPI, patchAPI, type RequestStatus } from '@mathesar/utils/api';
+import {
+  getAPI,
+  patchAPI,
+  type RequestStatus,
+} from '@mathesar/api/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 

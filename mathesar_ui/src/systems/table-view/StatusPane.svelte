@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getPaginationPageCount } from '@mathesar-component-library';
-  import { States } from '@mathesar/utils/api';
+  import { States } from '@mathesar/api/utils/requestUtils';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
 

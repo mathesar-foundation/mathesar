@@ -11,8 +11,8 @@
   import { tables } from '@mathesar/stores/tables';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import type { PaginatedResponse } from '@mathesar/utils/api';
-  import { getAPI } from '@mathesar/utils/api';
+  import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
+  import { getAPI } from '@mathesar/api/utils/requestUtils';
   import {
     iconAddNew,
     iconDeleteMajor,

@@ -14,7 +14,7 @@
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
-  import { getAPI } from '@mathesar/utils/api';
+  import { getAPI } from '@mathesar/api/utils/requestUtils';
   import DirectField from './DirectField.svelte';
   import type RecordStore from './RecordStore';
   import Widgets from './Widgets.svelte';

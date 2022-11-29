@@ -1,7 +1,7 @@
 import { derived, get, writable, type Readable } from 'svelte/store';
 
 import { unite } from '@mathesar-component-library';
-import type { RequestStatus } from '@mathesar/utils/api';
+import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { comboErrorsKey, type FieldStore, type ValuedField } from './field';
 import { isValid as outcomeIsValid, type ComboValidator } from './validators';
 

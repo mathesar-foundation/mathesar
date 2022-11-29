@@ -8,7 +8,7 @@
     Spinner,
   } from '@mathesar-component-library';
   import { iconUnsavedChanges } from '@mathesar/icons';
-  import type { RequestStatus } from '@mathesar/utils/api';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type { Form } from './form';
 
   export let form: Form;

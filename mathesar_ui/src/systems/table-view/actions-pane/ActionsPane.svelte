@@ -19,7 +19,7 @@
     iconInspector,
   } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { States } from '@mathesar/utils/api';
+  import { States } from '@mathesar/api/utils/requestUtils';
   import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/data-explorer';
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';

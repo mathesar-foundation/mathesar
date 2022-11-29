@@ -1,6 +1,6 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type { RequestStatus } from '@mathesar/utils/api';
+import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import {
   ImmutableMap,
   CancellablePromise,

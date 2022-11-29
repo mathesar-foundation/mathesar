@@ -1,5 +1,5 @@
 import { ImmutableMap } from '@mathesar/component-library';
-import type { RequestStatus } from '@mathesar/utils/api';
+import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import type { RowStatus } from '../meta';
 import type { CellKey, RowKey } from '../utils';
 import { ROW_HAS_CELL_ERROR_MSG, getRowStatus } from '../utils';

@@ -1,5 +1,10 @@
 import { writable, get as getStoreValue, derived } from 'svelte/store';
-import { deleteAPI, getAPI, postAPI, States } from '@mathesar/utils/api';
+import {
+  deleteAPI,
+  getAPI,
+  postAPI,
+  States,
+} from '@mathesar/api/utils/requestUtils';
 import type {
   Writable,
   Updater,
@@ -7,7 +12,7 @@ import type {
   Unsubscriber,
   Readable,
 } from 'svelte/store';
-import type { PaginatedResponse } from '@mathesar/utils/api';
+import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { Constraint as ApiConstraint } from '@mathesar/api/types/tables/constraints';

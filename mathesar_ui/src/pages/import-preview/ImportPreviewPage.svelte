@@ -25,8 +25,11 @@
   } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import { getAPI, patchAPI } from '@mathesar/utils/api';
-  import type { RequestStatus, PaginatedResponse } from '@mathesar/utils/api';
+  import { getAPI, patchAPI } from '@mathesar/api/utils/requestUtils';
+  import type {
+    RequestStatus,
+    PaginatedResponse,
+  } from '@mathesar/api/utils/requestUtils';
   import {
     getTableFromStoreOrApi,
     getTypeSuggestionsForTable,

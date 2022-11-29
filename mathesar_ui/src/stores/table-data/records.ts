@@ -12,7 +12,7 @@ import {
   deleteAPI,
   patchAPI,
   postAPI,
-} from '@mathesar/utils/api';
+} from '@mathesar/api/utils/requestUtils';
 import {
   isDefinedNonNullable,
   type CancellablePromise,
