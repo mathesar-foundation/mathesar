@@ -15,12 +15,12 @@
   import { toast } from '@mathesar/stores/toast';
   import { postAPI, States } from '@mathesar/utils/api';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import type {
     RecordSelectorController,
     RecordSelectorResult,
   } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
-  import { getPkValueInRecord } from './recordSelectorUtils';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
