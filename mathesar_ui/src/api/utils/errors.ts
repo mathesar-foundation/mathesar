@@ -14,7 +14,7 @@ interface ApiErrorData {
   message: string;
   code?: string | number;
   field?: string;
-  details?: unknown;
+  detail?: unknown;
 }
 
 function getApiErrorCode(data: unknown): string | number | undefined {
@@ -32,7 +32,7 @@ function getApiErrorData(data: unknown): ApiErrorData {
     message: getErrorMessage(data),
     code: getApiErrorCode(data),
     field: hasStringProperty(data, 'field') ? data.field : undefined,
-    details: hasProperty(data, 'details') ? data.details : undefined,
+    detail: hasProperty(data, 'detail') ? data.detail : undefined,
   };
 }
 
@@ -41,14 +41,14 @@ export class ApiError extends Error {
 
   field?: string;
 
-  details?: unknown;
+  detail?: unknown;
 
   constructor(anything: unknown) {
     const data = getApiErrorData(anything);
     super(data.message);
     this.code = data.code;
     this.field = data.field;
-    this.details = data.details;
+    this.detail = data.detail;
   }
 }
 
