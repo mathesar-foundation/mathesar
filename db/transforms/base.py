@@ -11,7 +11,7 @@ from db.functions.operations.deserialize import get_db_function_subclass_by_id
 from db.records.operations import group, relevance, sort as rec_sort
 
 
-class UniqueConstraintMapping(NamedTuple):
+class UniqueConstraintMapping:
     """
     A unique constraint mapping describes how a transform in a query maps a given input alias to an
     output alias, in the context of unique constraints.
@@ -33,8 +33,10 @@ class UniqueConstraintMapping(NamedTuple):
         - whether a given initial-column-linked alias is unique-constrained when that initial column
         is unique-constrained.
     """
-    input_alias: Optional[str]  # noqa: NT001
-    output_alias: str  # noqa: NT001
+
+    def __init__(self, input_alias, output_alias):
+        self.input_alias = input_alias
+        self.output_alias = output_alias
 
 
 class Transform(ABC):
