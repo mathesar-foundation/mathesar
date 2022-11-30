@@ -417,7 +417,7 @@ class ArrayLength(DBFunction):
         hints.returns(hints.comparable),
         hints.parameter_count(2),
         hints.parameter(0, hints.array),
-        hints.parameter(1, hints.numeric),
+        hints.parameter(1, hints.integer),
         hints.mathesar_filter
     ])
 

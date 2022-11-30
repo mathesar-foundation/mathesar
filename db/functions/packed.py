@@ -77,8 +77,8 @@ class ArrayLengthEquals(DBFunctionPacked):
         hints.returns(hints.boolean),
         hints.parameter_count(3),
         hints.parameter(0, hints.array),
-        hints.parameter(1, hints.numeric),
-        hints.parameter(2, hints.numeric),
+        hints.parameter(1, hints.integer),
+        hints.parameter(2, hints.integer),
         hints.mathesar_filter,
     ])
 
@@ -99,8 +99,8 @@ class ArrayLengthGreaterThan(DBFunctionPacked):
         hints.returns(hints.boolean),
         hints.parameter_count(3),
         hints.parameter(0, hints.array),
-        hints.parameter(1, hints.numeric),
-        hints.parameter(2, hints.numeric),
+        hints.parameter(1, hints.integer),
+        hints.parameter(2, hints.integer),
         hints.mathesar_filter
     ])
 
@@ -121,8 +121,8 @@ class ArrayLengthLessThan(DBFunctionPacked):
         hints.returns(hints.boolean),
         hints.parameter_count(3),
         hints.parameter(0, hints.array),
-        hints.parameter(1, hints.numeric),
-        hints.parameter(2, hints.numeric),
+        hints.parameter(1, hints.integer),
+        hints.parameter(2, hints.integer),
         hints.mathesar_filter
     ])
 
@@ -143,8 +143,8 @@ class ArrayLengthGreaterOrEqual(DBFunctionPacked):
         hints.returns(hints.boolean),
         hints.parameter_count(3),
         hints.parameter(0, hints.array),
-        hints.parameter(1, hints.numeric),
-        hints.parameter(2, hints.numeric),
+        hints.parameter(1, hints.integer),
+        hints.parameter(2, hints.integer),
         hints.mathesar_filter
     ])
 
@@ -165,8 +165,8 @@ class ArrayLengthLessOrEqual(DBFunctionPacked):
         hints.returns(hints.boolean),
         hints.parameter_count(3),
         hints.parameter(0, hints.array),
-        hints.parameter(1, hints.numeric),
-        hints.parameter(2, hints.numeric),
+        hints.parameter(1, hints.integer),
+        hints.parameter(2, hints.integer),
         hints.mathesar_filter
     ])
 
@@ -187,7 +187,7 @@ class ArrayNotEmpty(DBFunctionPacked):
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.parameter(0, hints.array),
-        hints.parameter(1, hints.numeric),
+        hints.parameter(1, hints.integer),
         hints.mathesar_filter,
     ])
 
