@@ -1100,8 +1100,8 @@ delete_clients_with_status_codes = [
     ('superuser_client_factory', 204, 204),
     ('db_manager_client_factory', 204, 204),
     ('db_editor_client_factory', 204, 204),
-    ('schema_manager_client_factory', 204, 404),
-    ('schema_viewer_client_factory', 403, 404),
+    ('schema_manager_client_factory', 204, 403),
+    ('schema_viewer_client_factory', 403, 403),
     ('db_viewer_schema_manager_client_factory', 204, 403)
 ]
 
