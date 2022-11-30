@@ -1,5 +1,71 @@
+import pytest
+
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.base import Column
+
+run_client_with_status_code = [
+    ('db_manager_client_factory', 200, 200),
+    ('db_editor_client_factory', 200, 200),
+    ('schema_manager_client_factory', 200, 400),
+    ('schema_viewer_client_factory', 200, 400),
+    ('db_viewer_schema_manager_client_factory', 200, 200)
+]
+
+
+@pytest.mark.parametrize(
+    'client_name, expected_status_code, different_schema_expected_status_code',
+    run_client_with_status_code
+)
+def test_queries_run_minimal_based_on_permissions(
+        create_patents_table,
+        request,
+        client_name,
+        expected_status_code,
+        different_schema_expected_status_code
+):
+    base_table = create_patents_table(table_name='Patent Table')
+    different_schema_base_table = create_patents_table(table_name='Patent Table', schema_name="Private Schema")
+    initial_columns = [
+        {
+            'id': base_table.get_column_by_name('Center').id,
+            'alias': 'col1',
+            'display_name': 'Column 1',
+        },
+        {
+            'id': base_table.get_column_by_name('Case Number').id,
+            'alias': 'col2',
+            'display_name': 'Column 2',
+        },
+    ]
+    data = {
+        'base_table': base_table.id,
+        'initial_columns': initial_columns,
+        'parameters': {
+            'order_by': [
+                {'field': 'col1', 'direction': 'asc'},
+                {'field': 'col2', 'direction': 'desc'}
+            ],
+            'limit': 2,
+            'offset': 3
+        }
+    }
+    client = request.getfixturevalue(client_name)(base_table.schema)
+    response = client.post('/api/db/v0/queries/run/', data, format='json')
+    assert response.status_code == expected_status_code
+    data = {
+        'base_table': different_schema_base_table.id,
+        'initial_columns': initial_columns,
+        'parameters': {
+            'order_by': [
+                {'field': 'col1', 'direction': 'asc'},
+                {'field': 'col2', 'direction': 'desc'}
+            ],
+            'limit': 2,
+            'offset': 3
+        }
+    }
+    response = client.post('/api/db/v0/queries/run/', data, format='json')
+    assert response.status_code == different_schema_expected_status_code
 
 
 def test_queries_run_minimal(create_patents_table, client):

@@ -1,13 +1,20 @@
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from rest_access_policy import PermittedPkRelatedField
 from rest_framework import serializers
 
+from mathesar.api.db.permissions.query_table import QueryTableAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.models.base import Table
 from mathesar.models.query import UIQuery
 
 
 class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     schema = serializers.SerializerMethodField('get_schema')
+    base_table = PermittedPkRelatedField(
+        access_policy=QueryTableAccessPolicy,
+        queryset=Table.current_objects.all()
+    )
 
     class Meta:
         model = UIQuery
