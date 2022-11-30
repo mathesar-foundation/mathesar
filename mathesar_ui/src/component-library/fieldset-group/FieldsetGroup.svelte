@@ -9,6 +9,7 @@
   export let isInline = false;
   export let options: Option[] = [];
   export let label: string | undefined = undefined;
+  export let ariaLabel: string | undefined = undefined;
 
   export let labelKey = 'label';
   export let getLabel: LabelGetter<Option> = (o: Option) =>
@@ -17,7 +18,13 @@
   export let getDisabled: (value: Option | undefined) => boolean = () => false;
 </script>
 
-<fieldset class="fieldset-group" class:inline={isInline} on:change>
+<fieldset
+  class="fieldset-group"
+  class:inline={isInline}
+  class:has-label={!!label}
+  aria-label={ariaLabel}
+  on:change
+>
   {#if $$slots.label || label}
     <legend>
       {#if $$slots.label}<slot name="label" />{/if}

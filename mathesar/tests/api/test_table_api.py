@@ -7,6 +7,7 @@ from sqlalchemy import text
 from db.columns.operations.select import get_column_attnum_from_name, get_column_attnum_from_names_as_map
 from db.types.base import PostgresType, MathesarCustomType
 from db.metadata import get_empty_metadata
+from mathesar.models.users import DatabaseRole, SchemaRole
 from mathesar.models.query import UIQuery
 
 from mathesar.state import reset_reflection
@@ -146,6 +147,15 @@ def check_create_table_response(
     assert data_file.table_imported_to.id == table.id
     assert table.import_target == import_target_table
     check_table_response(response_table, table, expt_name)
+
+
+write_client_with_different_roles = [
+    ('db_manager_client_factory', 201),
+    ('db_editor_client_factory', 400),
+    ('schema_manager_client_factory', 201),
+    ('schema_viewer_client_factory', 400),
+    ('db_viewer_schema_manager_client_factory', 201)
+]
 
 
 def test_table_list(create_patents_table, client):
@@ -650,7 +660,48 @@ def test_table_create_with_same_name(client, schema):
     assert response_error[0]['message'] == f'Relation {table_name} already exists in schema {schema.id}'
 
 
-def test_table_partial_update(create_patents_table, client):
+def test_table_create_multiple_users_different_roles(client_bob, client_alice, user_bob, user_alice, schema):
+    table_name = 'test_table'
+    body = {
+        'name': table_name,
+        'schema': schema.id,
+    }
+
+    response = client_bob.post('/api/db/v0/tables/', body)
+    assert response.status_code == 400
+    DatabaseRole.objects.create(database=schema.database, user=user_bob, role='manager')
+    response = client_bob.post('/api/db/v0/tables/', body)
+    assert response.status_code == 201
+
+    # Create different table by a different user
+    body['name'] = 'test_table_1'
+    response = client_alice.post('/api/db/v0/tables/', body)
+    assert response.status_code == 400
+    alice_schema_role = SchemaRole.objects.create(schema=schema, user=user_alice, role='viewer')
+    response = client_alice.post('/api/db/v0/tables/', body)
+    assert response.status_code == 400
+    alice_schema_role.delete()
+    alice_schema_role = SchemaRole.objects.create(schema=schema, user=user_alice, role='manager')
+    response = client_alice.post('/api/db/v0/tables/', body)
+    assert response.status_code == 201
+    alice_schema_role.delete()
+    response = client_alice.post('/api/db/v0/tables/', body)
+    assert response.status_code == 400
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)
+def test_table_create_based_on_permissions(schema, request, client_name, expected_status_code):
+    table_name = 'test_table'
+    body = {
+        'name': table_name,
+        'schema': schema.id,
+    }
+    client = request.getfixturevalue(client_name)(schema)
+    response = client.post('/api/db/v0/tables/', body)
+    assert response.status_code == expected_status_code
+
+
+def test_table_partial_update_by_superuser(create_patents_table, client):
     table_name = 'NASA Table Partial Update'
     new_table_name = 'NASA Table Partial Update New'
     table = create_patents_table(table_name)
