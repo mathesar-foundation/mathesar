@@ -17,7 +17,7 @@ class RecordAccessPolicy(AccessPolicy):
         },
         # Only superuser or schema/database manager can delete the role
         {
-            'action': ['destroy', 'update', 'partial_update'],
+            'action': ['destroy', 'update', 'partial_update', 'create'],
             'principal': '*',
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_table_editor)']
