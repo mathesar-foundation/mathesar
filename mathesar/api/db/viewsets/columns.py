@@ -42,7 +42,7 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return prefetched_queryset
 
     def create(self, request, table_pk=None):
-        table = get_table_or_404(table_pk, request)
+        table = get_table_or_404(table_pk)
         # We only support adding a single column through the API.
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
