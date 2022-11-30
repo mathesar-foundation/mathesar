@@ -1122,7 +1122,7 @@ def test_record_delete_based_on_permissions(
     client = request.getfixturevalue(client_name)(table.schema)
     response = client.delete(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
     assert response.status_code == expected_status_code
-    response = client.delete(f'/api/db/v0/tables/{different_schema_table.id}/')
+    response = client.delete(f'/api/db/v0/tables/{different_schema_table.id}/records/{record_id}/')
     assert response.status_code == different_schema_expected_status_code
 
 
