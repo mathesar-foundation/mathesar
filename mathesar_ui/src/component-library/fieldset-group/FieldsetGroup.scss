@@ -10,7 +10,10 @@
   .options {
     padding-left: 0;
     list-style-type: none;
-    margin: 1em 0 0 0;
+    margin: 0;
+  }
+  &.has-label .options {
+    margin-top: 1em;
   }
   &:not(.inline) .option {
     margin-top: var(--spacing-y);
