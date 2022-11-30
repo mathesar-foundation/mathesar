@@ -6,7 +6,7 @@ from mathesar.models.users import DatabaseRole, Role, SchemaRole
 
 class TableAccessPolicy(AccessPolicy):
     """
-    Anyone can view T as long as they have
+    Anyone can view Table as long as they have
     at least a Viewer access to the schema or its database
     Create Access is restricted to superusers or managers of the schema or the database the table is part of.
     Only superuser or schema/database manager can delete/modify/update the Table
