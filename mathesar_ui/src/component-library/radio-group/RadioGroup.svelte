@@ -9,6 +9,7 @@
   export let isInline = false;
   export let options: Option[] = [];
   export let label: string | undefined = undefined;
+  export let ariaLabel: string | undefined = undefined;
   export let radioLabelKey: string | undefined = undefined;
   export let getRadioLabel: LabelGetter<Option> | undefined = undefined;
 
@@ -32,6 +33,7 @@
   {isInline}
   {options}
   {label}
+  {ariaLabel}
   let:option
   let:disabled
   on:change

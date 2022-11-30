@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from typing import NamedTuple, Optional
 import itertools
 
 import sqlalchemy
@@ -11,7 +10,7 @@ from db.functions.operations.deserialize import get_db_function_subclass_by_id
 from db.records.operations import group, relevance, sort as rec_sort
 
 
-class UniqueConstraintMapping(NamedTuple):
+class UniqueConstraintMapping:
     """
     A unique constraint mapping describes how a transform in a query maps a given input alias to an
     output alias, in the context of unique constraints.
@@ -33,8 +32,10 @@ class UniqueConstraintMapping(NamedTuple):
         - whether a given initial-column-linked alias is unique-constrained when that initial column
         is unique-constrained.
     """
-    input_alias: Optional[str]  # noqa: NT001
-    output_alias: str  # noqa: NT001
+
+    def __init__(self, input_alias, output_alias):
+        self.input_alias = input_alias
+        self.output_alias = output_alias
 
 
 class Transform(ABC):
@@ -284,25 +285,26 @@ class Summarize(Transform):
         return _to_non_executable(executable)
 
     def get_unique_constraint_mappings(self, _):
-        mappings = []
-        # these col specs carry uniqueness over
-        for col_spec in self._grouping_col_specs:
-            input_alias = col_spec['input_alias']
-            output_alias = col_spec['output_alias']
-            mapping = UniqueConstraintMapping(
-                input_alias,
-                output_alias,
+        mappings_that_carry_uniqueness_over = [
+            UniqueConstraintMapping(
+                input_alias=col_spec['input_alias'],
+                output_alias=col_spec['output_alias'],
             )
-            mappings.append(mapping)
-        # these col specs *don't* carry uniqueness over
-        for col_spec in self._aggregation_col_specs:
-            output_alias = col_spec['output_alias']
-            mapping = UniqueConstraintMapping(
-                None,
-                output_alias,
+            for col_spec
+            in self._grouping_col_specs
+        ]
+        mappings_that_dont_carry_uniqueness_over = [
+            UniqueConstraintMapping(
+                input_alias=None,
+                output_alias=col_spec['output_alias'],
             )
-            mappings.append(mapping)
-        return mappings
+            for col_spec
+            in self._aggregation_col_specs
+        ]
+        return (
+            mappings_that_carry_uniqueness_over
+            + mappings_that_dont_carry_uniqueness_over
+        )
 
     def get_new_with_aliases_added_to_group_by(self, aliases):
         def get_col_spec_from_alias(alias):

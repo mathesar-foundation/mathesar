@@ -1,11 +1,15 @@
 <script lang="ts">
   import { Collapsible } from '@mathesar-component-library';
+  import { tables } from '@mathesar/stores/tables';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
   import RenameColumn from './RenameColumn.svelte';
-  import ColumnDisplayProperties from './ColumnDisplayProperties.svelte';
+  // import ColumnDisplayProperties from './ColumnDisplayProperties.svelte';
   import ColumnActions from './ColumnActions.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
+  import CollapsibleHeader from '../CollapsibleHeader.svelte';
+  import ColumnTypeSpecifierTag from './ColumnTypeSpecifierTag.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ processedColumns, selection } = $tabularData);
@@ -30,40 +34,90 @@
 
 <div class="column-mode-container">
   {#if selectedColumns.length === 0}
-    <span>
-      Select one or more cells to view columns properties and actions.
+    <span class="no-cell-selected">
+      Select one or more columns or cells to view the associated column
+      properties and actions.
     </span>
   {:else}
+    {#if selectedColumns.length > 1}
+      <span class="columns-selected-count">
+        {selectedColumns.length} columns selected
+      </span>
+    {/if}
     {#if column}
-      <Collapsible isOpen>
-        <span slot="header">Column Properties</span>
-        <div slot="content" class="property-container">
+      <Collapsible isOpen triggerAppearance="plain">
+        <CollapsibleHeader
+          slot="header"
+          title="Properties"
+          isDbLevelConfiguration
+        />
+        <div slot="content" class="content-container">
           <RenameColumn
             {column}
             columnsDataStore={$tabularData.columnsDataStore}
           />
-          <ColumnDisplayProperties {column} meta={$tabularData.meta} />
-          <ColumnOptions
-            {column}
-            columnsDataStore={$tabularData.columnsDataStore}
-            constraintsDataStore={$tabularData.constraintsDataStore}
-          />
+          {#if column.column.primary_key}
+            <ColumnTypeSpecifierTag {column} type="primaryKey" />
+          {:else}
+            {#if !!column.linkFk}
+              <ColumnTypeSpecifierTag {column} type="foreignKey" />
+            {/if}
+            <ColumnOptions
+              {column}
+              columnsDataStore={$tabularData.columnsDataStore}
+              constraintsDataStore={$tabularData.constraintsDataStore}
+            />
+          {/if}
         </div>
       </Collapsible>
     {/if}
 
     {#if column}
-      <Collapsible isOpen>
-        <span slot="header">Data Type</span>
-        <div slot="content" class="actions-container">
+      <Collapsible isOpen triggerAppearance="plain">
+        <CollapsibleHeader
+          slot="header"
+          title="Data Type"
+          isDbLevelConfiguration
+        />
+        <div slot="content" class="content-container">
           <ColumnType {column} />
         </div>
       </Collapsible>
     {/if}
 
-    <Collapsible isOpen>
-      <span slot="header">Actions</span>
-      <div slot="content" class="actions-container">
+    <!-- Coming in the PR for chaging column data types -->
+    <!-- {#if column}
+      <Collapsible isOpen>
+        <CollapsibleHeader
+          slot="header"
+          title="Default Value"
+          isDBLevelConfiguration
+        />
+        <div slot="content" class="content-container">
+          <SetDefaultValue />
+        </div>
+      </Collapsible>
+    {/if} -->
+
+    {#if column}
+      {@const referentTableId = column.linkFk?.referent_table}
+      {@const referentTable =
+        referentTableId === undefined
+          ? undefined
+          : $tables.data.get(referentTableId)}
+      {#if referentTable !== undefined}
+        <Collapsible triggerAppearance="plain">
+          <CollapsibleHeader slot="header" title="Linked Record Summary" />
+          <div slot="content" class="content-container">
+            <FkRecordSummaryConfig table={referentTable} />
+          </div>
+        </Collapsible>
+      {/if}
+    {/if}
+
+    <Collapsible isOpen triggerAppearance="plain">
+      <CollapsibleHeader slot="header" title="Actions" />
+      <div slot="content" class="content-container">
         <ColumnActions
           columns={selectedColumns}
           columnsDataStore={$tabularData.columnsDataStore}
@@ -73,19 +127,28 @@
   {/if}
 </div>
 
-<style>
+<style lang="scss">
   .column-mode-container {
-    padding: 1rem 0;
+    padding-bottom: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
   }
 
-  .property-container {
+  .no-cell-selected {
+    padding: 2rem;
+  }
+
+  .content-container {
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 0.5rem;
+    }
   }
 
-  .actions-container {
-    padding: 1rem 0;
+  .columns-selected-count {
+    padding: 1rem;
   }
 </style>
