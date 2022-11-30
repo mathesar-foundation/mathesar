@@ -107,9 +107,9 @@ list_client_with_different_roles = [
 write_client_with_different_roles = [
     ('superuser_client_factory', 201),
     ('db_manager_client_factory', 201),
-    ('db_editor_client_factory', 404),
+    ('db_editor_client_factory', 403),
     ('schema_manager_client_factory', 201),
-    ('schema_viewer_client_factory', 404),
+    ('schema_viewer_client_factory', 403),
     ('db_viewer_schema_manager_client_factory', 201)
 ]
 
@@ -632,10 +632,10 @@ def test_column_destroy(column_test_table, create_patents_table, client):
 delete_client_with_different_roles = [
     ('superuser_client_factory', 204, 204),
     ('db_manager_client_factory', 204, 204),
-    ('db_editor_client_factory', 404, 404),
-    ('schema_manager_client_factory', 204, 404),
-    ('schema_viewer_client_factory', 404, 404),
-    ('db_viewer_schema_manager_client_factory', 204, 404)
+    ('db_editor_client_factory', 403, 403),
+    ('schema_manager_client_factory', 204, 403),
+    ('schema_viewer_client_factory', 403, 403),
+    ('db_viewer_schema_manager_client_factory', 204, 403)
 ]
 
 
