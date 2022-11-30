@@ -392,6 +392,50 @@ def _add_aliases_to_summarization_expr_field(
     return summarization
 
 
+class HideColumns(Transform):
+    """
+    Selects every column in the transform, except for the columns specified in the spec.
+
+    We're implementing this transform in terms of selecting columns (since Postgres doesn't really
+    support "selecting everything except").
+    """
+    type = "hide"
+
+    def apply_to_relation(self, relation):
+        input_aliases = [
+            col.name
+            for col
+            in relation.c
+        ]
+        columns_to_select = self.get_columns_to_select(input_aliases)
+        select_transform = SelectSubsetOfColumns(columns_to_select)
+        relation = select_transform.apply_to_relation(relation)
+        return relation
+
+    def get_unique_constraint_mappings(self, input_aliases):
+        columns_to_select = self.get_columns_to_select(input_aliases)
+        return [
+            UniqueConstraintMapping(
+                column_to_select,
+                column_to_select,
+            )
+            for column_to_select
+            in columns_to_select
+        ]
+
+    def get_columns_to_select(self, input_aliases):
+        return [
+            column
+            for column
+            in input_aliases
+            if column not in self._columns_to_hide
+        ]
+
+    @property
+    def _columns_to_hide(self):
+        return self.spec
+
+
 class SelectSubsetOfColumns(Transform):
     type = "select"
 
