@@ -462,7 +462,7 @@ def db_manager_client_factory(user_bob):
 @pytest.fixture
 def db_editor_client_factory(user_turdy):
     def _db_editor_client(schema):
-        role = 'viewer'
+        role = 'editor'
         client = APIClient()
         client.login(username=user_turdy.username, password='password')
         DatabaseRole.objects.create(user=user_turdy, database=schema.database, role=role)
