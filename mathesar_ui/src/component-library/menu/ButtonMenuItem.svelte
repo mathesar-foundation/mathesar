@@ -5,6 +5,7 @@
 
   const dispatch = createEventDispatcher();
 
+  export let label: string | undefined = undefined;
   export let icon: IconProps | undefined = undefined;
   export let disabled = false;
   /** Visually indicates that the action is destructive */
@@ -34,6 +35,12 @@
     user can still click anywhere. I'm not sure this is perfectly sound. Open
     to better solutions.
   -->
-  <button class="label cell passthrough-button"><slot /></button>
+  <button class="label cell passthrough-button">
+    {#if label}
+      {label}
+    {:else}
+      <slot />
+    {/if}
+  </button>
   <div class="spacer cell" />
 </div>

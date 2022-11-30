@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Collapsible } from '@mathesar-component-library';
+  import { tables } from '@mathesar/stores/tables';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
   import RenameColumn from './RenameColumn.svelte';
   // import ColumnDisplayProperties from './ColumnDisplayProperties.svelte';
   import ColumnActions from './ColumnActions.svelte';
@@ -96,6 +98,22 @@
         </div>
       </Collapsible>
     {/if} -->
+
+    {#if column}
+      {@const referentTableId = column.linkFk?.referent_table}
+      {@const referentTable =
+        referentTableId === undefined
+          ? undefined
+          : $tables.data.get(referentTableId)}
+      {#if referentTable !== undefined}
+        <Collapsible triggerAppearance="plain">
+          <CollapsibleHeader slot="header" title="Linked Record Summary" />
+          <div slot="content" class="content-container">
+            <FkRecordSummaryConfig table={referentTable} />
+          </div>
+        </Collapsible>
+      {/if}
+    {/if}
 
     <Collapsible isOpen triggerAppearance="plain">
       <CollapsibleHeader slot="header" title="Actions" />

@@ -11,12 +11,10 @@ def test_convert_to_db_query(create_patents_table, get_uid):
         {
             'id': col1_dj.id,
             'alias': 'col1',
-            'display_name': 'Column 1',
         },
         {
             'id': col2_dj.id,
             'alias': 'col2',
-            'display_name': 'Column 2',
         },
     ]
     oid = base_table_dj.oid
