@@ -31,17 +31,17 @@
     </div>
   </Collapsible>
 
-  <Collapsible isOpen triggerAppearance="plain">
-    <CollapsibleHeader slot="header" title="Actions" />
-    <div slot="content" class="content-container">
-      <TableActions />
-    </div>
-  </Collapsible>
-
   <Collapsible triggerAppearance="plain">
     <CollapsibleHeader slot="header" title="Record Summary" />
     <div slot="content" class="content-container">
       <RecordSummaryConfig table={$currentTable} tabularData={$tabularData} />
+    </div>
+  </Collapsible>
+
+  <Collapsible isOpen triggerAppearance="plain">
+    <CollapsibleHeader slot="header" title="Actions" />
+    <div slot="content" class="content-container">
+      <TableActions />
     </div>
   </Collapsible>
 
