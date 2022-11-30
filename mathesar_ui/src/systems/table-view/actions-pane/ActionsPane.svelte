@@ -7,9 +7,7 @@
   } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import EntityType from '@mathesar/components/EntityType.svelte';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
-  import TableName from '@mathesar/components/TableName.svelte';
   import {
     iconAddNew,
     iconFiltering,
@@ -24,10 +22,11 @@
   import Filter from './record-operations/Filter.svelte';
   import Sort from './record-operations/Sort.svelte';
   import Group from './record-operations/Group.svelte';
+  import TableNameAndDescription from '@mathesar/components/TableNameAndDescription.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
-  export let table: Pick<TableEntry, 'name'>;
+  export let table: Pick<TableEntry, 'name' | 'description'>;
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -72,8 +71,7 @@
 
 <div class="actions-pane">
   <div class="heading">
-    <EntityType>Table</EntityType>
-    <h1><TableName {table} /></h1>
+    <TableNameAndDescription {table} />
   </div>
 
   <Dropdown showArrow={false} contentClass="filter-dropdown-content">
@@ -166,7 +164,7 @@
   </Button>
 </div>
 
-<style>
+<style lang="scss">
   .actions-pane {
     border-bottom: 1px solid var(--color-gray-dark);
     background-color: var(--color-white);
@@ -177,16 +175,14 @@
     padding-right: 1rem;
   }
   .heading {
-    display: flex;
-    flex-direction: column;
+    /**
+    * restricting the max-width 
+    * so that long descriptions does not take all the available space
+    */
+    max-width: 20%;
     border-right: 1px solid var(--color-gray-medium);
     padding: 1rem;
-    margin-right: 0.5rem;
-  }
-  .heading h1 {
-    font-size: var(--text-size-xx-large);
-    font-weight: 500;
-    margin-bottom: 0;
+    font-size: var(--text-size-large);
   }
   .divider {
     width: 1px;
