@@ -48,7 +48,6 @@
           inputAlias: pcAlias,
           outputAlias: `${pcAlias}_agged`,
           function: 'aggregate_to_array',
-          displayName: `${pcAlias}_agged`,
         });
       }
     });

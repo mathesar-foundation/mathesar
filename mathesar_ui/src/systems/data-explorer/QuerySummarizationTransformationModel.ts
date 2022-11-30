@@ -5,7 +5,6 @@ export interface QuerySummarizationAggregationEntry {
   inputAlias: string;
   outputAlias: string;
   function: 'aggregate_to_array' | 'count';
-  displayName: string;
 }
 
 export interface QuerySummarizationGroupingEntry {
@@ -37,7 +36,7 @@ export default class QuerySummarizationTransformationModel
   constructor(
     transformation:
       | QueryInstanceSummarizationTransformation
-      | Omit<QuerySummarizationTransformationEntry, 'displayNames'>,
+      | QuerySummarizationTransformationEntry,
   ) {
     if ('columnIdentifier' in transformation) {
       this.columnIdentifier = transformation.columnIdentifier;
@@ -50,7 +49,6 @@ export default class QuerySummarizationTransformationModel
         transformation.spec.aggregation_expressions ?? [];
       const groupingExpressions =
         transformation.spec.grouping_expressions ?? [];
-      const displayNames = transformation.display_names ?? {};
       this.columnIdentifier = baseGroupingColumn;
       this.aggregations = new ImmutableMap(
         aggregationExpressions.map((entry) => [
@@ -59,7 +57,6 @@ export default class QuerySummarizationTransformationModel
             inputAlias: entry.input_alias,
             outputAlias: entry.output_alias,
             function: entry.function,
-            displayName: displayNames[entry.output_alias] ?? entry.output_alias,
           },
         ]),
       );
@@ -125,13 +122,6 @@ export default class QuerySummarizationTransformationModel
     return {
       type: 'summarize',
       spec,
-      display_names: aggregationEntries.reduce(
-        (displayNames, aggregation) => ({
-          ...displayNames,
-          [aggregation[1].outputAlias]: aggregation[1].displayName,
-        }),
-        {} as Record<string, string>,
-      ),
     };
   }
 

@@ -1,6 +1,8 @@
 import type {
   QueryInstanceInitialColumn,
   QueryInstanceTransformation,
+  QueryInstance,
+  QueryRunRequest,
 } from '@mathesar/api/queries';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
@@ -44,6 +46,8 @@ export default class QueryModel {
 
   transformationModels: QueryTransformationModel[];
 
+  display_names: QueryInstance['display_names'];
+
   constructor(model?: UnsavedQueryInstance | QueryModel) {
     this.base_table = model?.base_table;
     this.id = model?.id;
@@ -56,6 +60,7 @@ export default class QueryModel {
       this.transformationModels =
         model?.transformations?.map(getTransformationModel) ?? [];
     }
+    this.display_names = model?.display_names ?? {};
   }
 
   withBaseTable(base_table?: number): QueryModelUpdateDiff {
@@ -120,6 +125,10 @@ export default class QueryModel {
     const model = new QueryModel({
       ...this,
       initial_columns: initialColumns,
+      display_names: {
+        ...this.display_names,
+        [column.alias]: column.alias,
+      },
     });
     return {
       model,
@@ -155,24 +164,19 @@ export default class QueryModel {
     columnAlias: string,
     displayName: string,
   ): QueryModelUpdateDiff {
-    const initialColumns = this.initial_columns.map((entry) => {
-      if (entry.alias === columnAlias) {
-        return {
-          ...entry,
-          display_name: displayName,
-        };
-      }
-      return entry;
-    });
+    const displayNames = {
+      ...this.display_names,
+      [columnAlias]: displayName,
+    };
     const model = new QueryModel({
       ...this,
-      initial_columns: initialColumns,
+      display_names: displayNames,
     });
     return {
       model,
       type: 'initialColumnName',
       diff: {
-        initial_columns: initialColumns,
+        display_names: displayNames,
       },
     };
   }
@@ -279,6 +283,20 @@ export default class QueryModel {
     return this.initial_columns.map((entry) => entry.alias);
   }
 
+  toRunRequestJson(): Omit<QueryRunRequest, 'parameters'> {
+    if (this.base_table === undefined) {
+      throw new Error(
+        'Cannot formulate run request since base_table is undefined',
+      );
+    }
+    return {
+      base_table: this.base_table,
+      initial_columns: this.initial_columns,
+      transformations: this.transformationModels.map((entry) => entry.toJSON()),
+      display_names: this.display_names,
+    };
+  }
+
   toJSON(): UnsavedQueryInstance {
     return {
       id: this.id,
@@ -287,6 +305,7 @@ export default class QueryModel {
       base_table: this.base_table,
       initial_columns: this.initial_columns,
       transformations: this.transformationModels.map((entry) => entry.toJSON()),
+      display_names: this.display_names,
     };
   }
 

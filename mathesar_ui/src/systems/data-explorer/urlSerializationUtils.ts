@@ -93,13 +93,6 @@ export function constructQueryModelFromHash(
               function: 'count',
             })),
           },
-          display_names: aggregatedColumns.reduce(
-            (displayNames, entry) => ({
-              ...displayNames,
-              [`${entry.name} (aggregated)`]: `Count(${entry.name})`,
-            }),
-            {} as Record<string, string>,
-          ),
         },
       ];
     }

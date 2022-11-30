@@ -132,11 +132,7 @@ export default class QueryRunner<
       const paginationRequest = get(this.pagination).recordsRequestParams();
       this.runState.set({ state: 'processing' });
       this.runPromise = runQuery({
-        base_table: queryModel.base_table,
-        initial_columns: queryModel.initial_columns,
-        transformations: queryModel.transformationModels.map((transformation) =>
-          transformation.toJSON(),
-        ),
+        ...queryModel.toRunRequestJson(),
         parameters: {
           ...paginationRequest,
         },

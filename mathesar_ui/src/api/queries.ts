@@ -13,7 +13,6 @@ export interface QueryInstanceInitialColumn {
   alias: QueryColumnAlias;
   id: Column['id'];
   jp_path?: JpPath;
-  display_name: string;
 }
 
 // TODO: Extend this to support more complicated filters
@@ -44,7 +43,6 @@ export interface QueryInstanceSummarizationTransformation {
       function: 'aggregate_to_array' | 'count';
     }[];
   };
-  display_names?: Record<string, string>;
 }
 
 export type QueryInstanceTransformation =
@@ -58,6 +56,7 @@ export interface QueryInstance {
   readonly base_table: number;
   readonly initial_columns?: QueryInstanceInitialColumn[];
   readonly transformations?: QueryInstanceTransformation[];
+  readonly display_names: Record<string, string> | null;
 }
 
 export interface QueryGetResponse extends QueryInstance {
@@ -78,6 +77,7 @@ export interface QueryRunRequest {
   base_table: QueryInstance['base_table'];
   initial_columns: QueryInstanceInitialColumn[];
   transformations?: QueryInstanceTransformation[];
+  display_names: QueryInstance['display_names'];
   parameters: {
     order_by?: {
       field: QueryColumnAlias;
