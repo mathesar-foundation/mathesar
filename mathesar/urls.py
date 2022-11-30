@@ -4,6 +4,7 @@ from rest_framework_nested import routers
 from mathesar import views
 from mathesar.api.db import viewsets as db_viewsets
 from mathesar.api.ui import viewsets as ui_viewsets
+from mathesar.users.password_reset import ResetPasswordView
 
 db_router = routers.DefaultRouter()
 db_router.register(r'tables', db_viewsets.TableViewSet, basename='table')
@@ -30,8 +31,8 @@ urlpatterns = [
     path('api/db/v0/', include(db_table_router.urls)),
     path('api/ui/v0/', include(ui_router.urls)),
     path('api/ui/v0/reflect/', views.reflect_all, name='reflect_all'),
+    path('auth/password_reset', ResetPasswordView.as_view()),
     path('auth/', include('django.contrib.auth.urls')),
-
     path('', views.home, name='home'),
     path('<db_name>/', views.schemas, name='schemas'),
     re_path(
