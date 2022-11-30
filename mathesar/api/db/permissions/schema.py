@@ -5,20 +5,22 @@ from mathesar.models.users import DatabaseRole, Role, SchemaRole
 
 
 class SchemaAccessPolicy(AccessPolicy):
-    # Anyone can view a Schema as long as they have
-    # at least a Viewer access to that schema or the database the schema is part of
-    # Create access is restricted to superusers or managers of the database the schema is part of.
-    # This restriction is taken care of the serializer used for creating the Schema
+    """
+    Anyone can view a Schema as long as they have at least a Viewer access to that Schema.
+    Creating is restricted to superusers or managers of the Database
+    Destroying/Modifying is restricted to superusers or managers of the Schema
+    """
     statements = [
+        # Restrictions for the create method is done by the Serializers when creating the schema,
+        # As the permissions depend on the database object.
         {
-            'action': ['list', 'retrieve', 'create'],
+            'action': ['list', 'retrieve', 'create', 'dependents'],
             'principal': '*',
             'effect': 'allow',
         },
-        # Only superuser or schema/database manager can modify or delete the schema
         {
             'action': ['destroy', 'update', 'partial_update'],
-            'principal': ['*'],
+            'principal': '*',
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_schema_manager)']
         },
@@ -51,9 +53,9 @@ class SchemaAccessPolicy(AccessPolicy):
     def scope_viewset_queryset(cls, request, qs):
         """
         Used for scoping queryset of the SchemaViewSet.
-        It is used for listing all the schema the user has Viewer access.
-         Restrictions are then applied based on the request method using the Policy statements.
-         This helps us to throw correct error status code instead of a 404 error code
+        Filters out all the schema the user has Viewer access,
+        Restrictions are then applied based on the request method using the Policy statements.
+        This helps us to throw correct error status code instead of a 404 error code
         """
         allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
         return SchemaAccessPolicy._scope_queryset(request, qs, allowed_roles)

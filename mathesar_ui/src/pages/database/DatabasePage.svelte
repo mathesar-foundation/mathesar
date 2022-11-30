@@ -11,7 +11,7 @@
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import { schemas as schemasStore } from '@mathesar/stores/schemas';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import LayoutWithHeader2 from '@mathesar/layouts/LayoutWithHeader2.svelte';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import { iconDatabase, iconAddNew } from '@mathesar/icons';
   import { deleteSchema as deleteSchemaAPI } from '@mathesar/stores/schemas';
@@ -80,7 +80,7 @@
 
 <svelte:head><title>{makeSimplePageTitle(database.name)}</title></svelte:head>
 
-<LayoutWithHeader2>
+<LayoutWithHeader restrictWidth={true}>
   <AppSecondaryHeader
     slot="secondary-header"
     pageTitleAndMetaProps={{
@@ -138,7 +138,7 @@
       {/each}
     </ul>
   </div>
-</LayoutWithHeader2>
+</LayoutWithHeader>
 
 <AddEditSchemaModal
   controller={addEditModal}
