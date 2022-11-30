@@ -78,7 +78,7 @@
     <Checkbox
       bind:checked={value}
       allowIndeterminate={true}
-      disabled = {isProcessing}
+      disabled={isProcessing}
       on:change={dispatchUpdate}
     />
   {/if}
