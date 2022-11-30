@@ -1,21 +1,15 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import {
-    Select,
-    TextInput,
-    LabeledInput,
-    Checkbox,
-    Debounce,
-    getValueFromEvent,
-  } from '@mathesar-component-library';
+  import { Select, Icon, Button, iconClose } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
   import type { ProcessedQueryResultColumn } from '../../../utils';
 
   const dispatch = createEventDispatcher();
 
-  export let processedColumn: ProcessedQueryResultColumn;
-  export let aggregation: QuerySummarizationAggregationEntry | undefined;
+  export let processedColumn: ProcessedQueryResultColumn | undefined;
+  export let aggregation: QuerySummarizationAggregationEntry;
+  export let limitEditing = false;
 
   function getAggregationTypeLabel(aggType?: string) {
     switch (aggType) {
@@ -27,73 +21,47 @@
         return '';
     }
   }
-
-  function includeExcludeAggregation(isAggregated: boolean) {
-    if (isAggregated) {
-      dispatch('include');
-    } else {
-      dispatch('exclude');
-    }
-  }
 </script>
 
 <div class="aggregation">
-  <header>
-    <LabeledInput layout="inline-input-first">
-      <Checkbox
-        checked={!!aggregation}
-        on:change={(e) => includeExcludeAggregation(e.detail)}
-      />
-      <ColumnName
-        slot="label"
-        column={{
-          ...processedColumn.column,
-          name:
-            processedColumn.column.display_name ?? processedColumn.column.alias,
-        }}
-      />
-    </LabeledInput>
-  </header>
-  {#if aggregation}
-    <div class="content">
-      <LabeledInput label="as" layout="stacked">
-        <Select
-          options={['aggregate_to_array', 'count']}
-          bind:value={aggregation.function}
-          getLabel={getAggregationTypeLabel}
-          on:change={() => dispatch('update')}
-        />
-      </LabeledInput>
-
-      <LabeledInput label="with display name" layout="stacked">
-        <Debounce
-          bind:value={aggregation.displayName}
-          let:handleNewValue
-          on:artificialInput={() => dispatch('update')}
-        >
-          <TextInput
-            value={aggregation.displayName}
-            on:input={(e) =>
-              handleNewValue({ value: getValueFromEvent(e), debounce: true })}
-            on:change={(e) =>
-              handleNewValue({ value: getValueFromEvent(e), debounce: false })}
-          />
-        </Debounce>
-      </LabeledInput>
-    </div>
+  {#if processedColumn}
+    <ColumnName
+      column={{
+        ...processedColumn.column,
+        name:
+          processedColumn.column.display_name ?? processedColumn.column.alias,
+      }}
+      truncateName={false}
+    />
+  {:else}
+    <div>{aggregation.inputAlias}</div>
   {/if}
+  <span>as</span>
+  <Select
+    options={['aggregate_to_array', 'count']}
+    bind:value={aggregation.function}
+    disabled={limitEditing}
+    getLabel={getAggregationTypeLabel}
+    on:change={() => dispatch('update')}
+  />
+  <Button
+    disabled={limitEditing}
+    appearance="plain"
+    on:click={() => dispatch('remove')}
+  >
+    <Icon {...iconClose} size="0.8rem" />
+  </Button>
 </div>
 
 <style lang="scss">
   .aggregation {
     margin: 0.8rem 0 0 0.3rem;
+    display: grid;
+    grid-template-columns: 7fr 1fr 3fr 0.5fr;
 
-    .content {
-      margin: 0.5rem 0 0.4rem 1rem;
-
-      :global(.labeled-input + .labeled-input) {
-        margin-top: 0.5rem;
-      }
+    span {
+      padding: 0.3rem;
+      text-align: center;
     }
   }
 </style>
