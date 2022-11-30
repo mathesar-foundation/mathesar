@@ -1,6 +1,8 @@
 import type {
   QueryInstanceInitialColumn,
   QueryInstanceTransformation,
+  QueryInstance,
+  QueryRunRequest,
 } from '@mathesar/api/types/queries';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
@@ -44,6 +46,8 @@ export default class QueryModel {
 
   transformationModels: QueryTransformationModel[];
 
+  display_names: QueryInstance['display_names'];
+
   constructor(model?: UnsavedQueryInstance | QueryModel) {
     this.base_table = model?.base_table;
     this.id = model?.id;
@@ -56,6 +60,7 @@ export default class QueryModel {
       this.transformationModels =
         model?.transformations?.map(getTransformationModel) ?? [];
     }
+    this.display_names = model?.display_names ?? {};
   }
 
   withBaseTable(base_table?: number): QueryModelUpdateDiff {
@@ -120,6 +125,10 @@ export default class QueryModel {
     const model = new QueryModel({
       ...this,
       initial_columns: initialColumns,
+      display_names: {
+        ...this.display_names,
+        [column.alias]: column.alias,
+      },
     });
     return {
       model,
@@ -155,31 +164,77 @@ export default class QueryModel {
     columnAlias: string,
     displayName: string,
   ): QueryModelUpdateDiff {
-    const initialColumns = this.initial_columns.map((entry) => {
-      if (entry.alias === columnAlias) {
-        return {
-          ...entry,
-          display_name: displayName,
-        };
-      }
-      return entry;
-    });
+    const displayNames = {
+      ...this.display_names,
+      [columnAlias]: displayName,
+    };
     const model = new QueryModel({
       ...this,
-      initial_columns: initialColumns,
+      display_names: displayNames,
     });
     return {
       model,
       type: 'initialColumnName',
       diff: {
-        initial_columns: initialColumns,
+        display_names: displayNames,
       },
     };
   }
 
-  withTransformationModels(
-    transformationModels?: QueryTransformationModel[],
+  private addTransform(
+    transformationModel: QueryTransformationModel,
   ): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      transformationModels: [...this.transformationModels, transformationModel],
+    });
+    return {
+      model,
+      type: 'transformations',
+      diff: {
+        transformations: model.toJSON().transformations,
+      },
+    };
+  }
+
+  addFilterTransform(
+    filterTransformationModel: QueryFilterTransformationModel,
+  ): QueryModelUpdateDiff {
+    return this.addTransform(filterTransformationModel);
+  }
+
+  addSummarizationTransform(
+    summarizationTransformationModel: QuerySummarizationTransformationModel,
+  ): QueryModelUpdateDiff {
+    if (this.hasSummarizationTransform()) {
+      // This should never happen
+      throw new Error(
+        'QueryModel currently allows only a single summarization transformation',
+      );
+    }
+    return this.addTransform(summarizationTransformationModel);
+  }
+
+  removeLastTransform(): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      transformationModels: this.transformationModels.slice(0, -1),
+    });
+    return {
+      model,
+      type: 'transformations',
+      diff: {
+        transformations: model.toJSON().transformations,
+      },
+    };
+  }
+
+  updateTransform(
+    index: number,
+    transform: QueryTransformationModel,
+  ): QueryModelUpdateDiff {
+    const transformationModels = [...this.transformationModels];
+    transformationModels[index] = transform;
     const model = new QueryModel({
       ...this,
       transformationModels,
@@ -200,7 +255,7 @@ export default class QueryModel {
   getSummarizationTransforms(): QuerySummarizationTransformationModel[] {
     return this.transformationModels.filter(
       (transform): transform is QuerySummarizationTransformationModel =>
-        transform instanceof QuerySummarizationTransformationModel,
+        transform.type === 'summarize',
     );
   }
 
@@ -228,6 +283,20 @@ export default class QueryModel {
     return this.initial_columns.map((entry) => entry.alias);
   }
 
+  toRunRequestJson(): Omit<QueryRunRequest, 'parameters'> {
+    if (this.base_table === undefined) {
+      throw new Error(
+        'Cannot formulate run request since base_table is undefined',
+      );
+    }
+    return {
+      base_table: this.base_table,
+      initial_columns: this.initial_columns,
+      transformations: this.transformationModels.map((entry) => entry.toJSON()),
+      display_names: this.display_names,
+    };
+  }
+
   toJSON(): UnsavedQueryInstance {
     return {
       id: this.id,
@@ -235,9 +304,8 @@ export default class QueryModel {
       description: this.description,
       base_table: this.base_table,
       initial_columns: this.initial_columns,
-      transformations: this.transformationModels?.map((entry) =>
-        entry.toJSON(),
-      ),
+      transformations: this.transformationModels.map((entry) => entry.toJSON()),
+      display_names: this.display_names,
     };
   }
 
@@ -248,7 +316,7 @@ export default class QueryModel {
   hasSummarizationTransform(): boolean {
     return this.transformationModels.some(
       (transform): transform is QuerySummarizationTransformationModel =>
-        transform instanceof QuerySummarizationTransformationModel,
+        transform.type === 'summarize',
     );
   }
 }

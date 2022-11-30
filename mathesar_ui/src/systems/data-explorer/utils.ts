@@ -336,11 +336,8 @@ export function speculateColumnMetaData({
 }): ProcessedQueryResultColumnMap {
   const initialColumns = queryModel.initial_columns;
   const summarizationTransforms = queryModel.getSummarizationTransforms();
-  const initialColumnsRequiringChange = initialColumns.filter(
-    (column) =>
-      !currentProcessedColumnsMetaData.has(column.alias) ||
-      currentProcessedColumnsMetaData.get(column.alias)?.column.display_name !==
-        column.display_name,
+  const initialColumnsWithoutMetaData = initialColumns.filter(
+    (column) => !currentProcessedColumnsMetaData.has(column.alias),
   );
   const summarizationTransformsWithoutMetaData = summarizationTransforms.filter(
     (transformation) =>
@@ -350,12 +347,21 @@ export function speculateColumnMetaData({
           (outputAlias) => !currentProcessedColumnsMetaData.has(outputAlias),
         ),
   );
+  // Only change display names for columns present in meta data
+  const displayNamesRequiringChange = Object.entries(
+    queryModel.display_names ?? {},
+  ).filter(
+    ([alias, displayName]) =>
+      currentProcessedColumnsMetaData.has(alias) &&
+      currentProcessedColumnsMetaData.get(alias)?.column.display_name !==
+        displayName,
+  );
   let updatedColumnsMetaData = currentProcessedColumnsMetaData;
-  const isUpdateRequired =
-    initialColumnsRequiringChange.length > 0 ||
+  let isUpdateRequired =
+    initialColumnsWithoutMetaData.length > 0 ||
     summarizationTransformsWithoutMetaData.length > 0;
-  if (initialColumnsRequiringChange.length > 0) {
-    initialColumnsRequiringChange.forEach((initialColumn) => {
+  if (initialColumnsWithoutMetaData.length > 0) {
+    initialColumnsWithoutMetaData.forEach((initialColumn) => {
       const inputColumnInformation = inputColumnInformationMap.get(
         initialColumn.id,
       );
@@ -364,7 +370,6 @@ export function speculateColumnMetaData({
         processColumn(
           {
             alias: initialColumn.alias,
-            display_name: initialColumn.display_name,
             type: inputColumnInformation?.type,
             is_initial_column: true,
             input_column_name: inputColumnInformation?.name,
@@ -377,6 +382,28 @@ export function speculateColumnMetaData({
   }
   if (summarizationTransformsWithoutMetaData.length > 0) {
     summarizationTransformsWithoutMetaData.forEach((transform) => {
+      [...transform.groups.values()].forEach((group) => {
+        if (!updatedColumnsMetaData.has(group.outputAlias)) {
+          const inputColumn = updatedColumnsMetaData.get(
+            group.inputAlias,
+          )?.column;
+          updatedColumnsMetaData = updatedColumnsMetaData.with(
+            group.outputAlias,
+            processColumn(
+              {
+                alias: group.outputAlias,
+                display_name: null,
+                type: inputColumn?.type ?? 'unknown',
+                type_options: inputColumn?.type_options ?? null,
+                display_options: inputColumn?.display_options ?? null,
+                is_initial_column: false,
+                input_alias: group.inputAlias,
+              },
+              abstractTypeMap,
+            ),
+          );
+        }
+      });
       [...transform.aggregations.values()].forEach((aggregation) => {
         if (!updatedColumnsMetaData.has(aggregation.outputAlias)) {
           updatedColumnsMetaData = updatedColumnsMetaData.with(
@@ -384,7 +411,6 @@ export function speculateColumnMetaData({
             processColumn(
               {
                 alias: aggregation.outputAlias,
-                display_name: aggregation.displayName,
                 type:
                   aggregation.function === 'aggregate_to_array'
                     ? '_array'
@@ -406,6 +432,21 @@ export function speculateColumnMetaData({
           );
         }
       });
+    });
+  }
+  if (displayNamesRequiringChange.length > 0) {
+    displayNamesRequiringChange.forEach(([alias, displayName]) => {
+      const columnMetaData = updatedColumnsMetaData.get(alias);
+      if (columnMetaData) {
+        updatedColumnsMetaData = updatedColumnsMetaData.with(alias, {
+          ...columnMetaData,
+          column: {
+            ...columnMetaData.column,
+            display_name: displayName,
+          },
+        });
+        isUpdateRequired = true;
+      }
     });
   }
   return isUpdateRequired

@@ -7,14 +7,17 @@ import {
 import { getAPI } from '@mathesar/api/utils/requestUtils';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import CacheManager from '@mathesar/utils/CacheManager';
-import type { QueryInstance } from '@mathesar/api/types/queries';
+import type {
+  QueryInstance,
+  QueryRunResponse,
+} from '@mathesar/api/types/queries';
 import type { TableEntry } from '@mathesar/api/types/tables';
 import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { validateFilterEntry } from '@mathesar/components/filter-entry';
-import type QueryModel from './QueryModel';
+import QueryModel from './QueryModel';
 import type { QueryModelUpdateDiff } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
 import {
@@ -26,7 +29,6 @@ import type {
   ProcessedQueryResultColumnMap,
   InputColumnsStoreSubstance,
 } from './utils';
-import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QueryRunner from './QueryRunner';
 
 function validateQuery(
@@ -38,7 +40,7 @@ function validateQuery(
     return false;
   }
   return queryModel.transformationModels.every((transformation) => {
-    if (transformation instanceof QueryFilterTransformationModel) {
+    if (transformation.type === 'filter') {
       const column = columnMap.get(transformation.columnIdentifier);
       const condition = column?.allowedFiltersMap.get(
         transformation.conditionIdentifier,
@@ -87,6 +89,10 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
 
   private querySavePromise: CancellablePromise<QueryInstance> | undefined;
 
+  // Listeners
+
+  private runUnsubscriber;
+
   constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
     super(query, abstractTypeMap);
     this.undoRedoManager = new QueryUndoRedoManager();
@@ -95,6 +101,9 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       const isQueryValid = validateQuery(query, get(this.processedColumns));
       this.undoRedoManager.pushState(query, isQueryValid);
       return query;
+    });
+    this.runUnsubscriber = this.on('run', (response: QueryRunResponse) => {
+      this.checkAndUpdateSummarization(new QueryModel(response.query));
     });
   }
 
@@ -135,7 +144,6 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
         inputColumnsFetchState: { state: 'processing' },
       }));
 
-      // TODO: Refactor our stores to mimic our db
       this.baseTableFetchPromise = getTable(baseTableId);
       this.joinableColumnsfetchPromise = getAPI<JoinableTablesResult>(
         `/api/db/v0/tables/${baseTableId}/joinable_tables/`,
@@ -209,6 +217,43 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       isUndoPossible: this.undoRedoManager.isUndoPossible(),
       isRedoPossible: this.undoRedoManager.isRedoPossible(),
     }));
+  }
+
+  private checkAndUpdateSummarization(queryModel: QueryModel) {
+    const thisQueryModel = this.getQueryModel();
+    let newQueryModel = thisQueryModel;
+    let isChangeNeeded = false;
+    thisQueryModel.transformationModels.forEach((thisTransform, index) => {
+      const thatTransform = queryModel.transformationModels[index];
+      if (
+        thisTransform.type === 'summarize' &&
+        thatTransform &&
+        thatTransform.type === 'summarize'
+      ) {
+        const thatTransformGroupWhichIsTheSameAsBaseColumn =
+          thatTransform.groups.get(thatTransform.columnIdentifier);
+        if (thatTransformGroupWhichIsTheSameAsBaseColumn) {
+          thatTransform.groups = thatTransform.groups.without(
+            thatTransform.columnIdentifier,
+          );
+          thatTransform.preprocFunctionIdentifier =
+            thatTransformGroupWhichIsTheSameAsBaseColumn.preprocFunction;
+        }
+        if (
+          thatTransform.aggregations.size !== thisTransform.aggregations.size ||
+          thatTransform.groups.size !== thisTransform.groups.size
+        ) {
+          isChangeNeeded = true;
+          newQueryModel = newQueryModel.updateTransform(
+            index,
+            thatTransform,
+          ).model;
+        }
+      }
+    });
+    if (isChangeNeeded) {
+      this.query.set(newQueryModel);
+    }
   }
 
   async update(
@@ -323,6 +368,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
 
   destroy(): void {
     super.destroy();
+    this.runUnsubscriber();
     this.baseTableFetchPromise?.cancel();
     this.joinableColumnsfetchPromise?.cancel();
     this.querySavePromise?.cancel();

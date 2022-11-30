@@ -24,7 +24,8 @@
   }
 
   &.has-error {
-    background: var(--danger-background-color);
+    border-color: var(--red-500);
+    background: var(--red-100);
   }
 
   &.text-area {
