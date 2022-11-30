@@ -229,7 +229,7 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         # Reload the table to avoid cached properties
-        existing_table = get_table_or_404(target_table.id, request)
+        existing_table = get_table_or_404(target_table.id)
         serializer = TableSerializer(
             existing_table, context={'request': request}
         )
