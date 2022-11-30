@@ -41,3 +41,14 @@ export function requiredNonNullable<T>(
   }
   return defaultValue;
 }
+
+/**
+ * From https://stackoverflow.com/a/51365037/895563
+ */
+export type RecursivePartial<T> = {
+  [P in keyof T]?: T[P] extends (infer U)[]
+    ? RecursivePartial<U>[]
+    : T[P] extends number | string | symbol | undefined
+    ? T[P]
+    : RecursivePartial<T[P]>;
+};

@@ -21,6 +21,6 @@ class TableSettingsViewSet(AccessViewSetMixin, ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['table'] = get_table_or_404(self.kwargs['table_pk'], self.request)
+        context['table'] = get_table_or_404(self.kwargs['table_pk'])
 
         return context

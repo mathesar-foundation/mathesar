@@ -32,7 +32,7 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
         if self.limit is None:
             self.limit = self.default_limit
         self.offset = self.get_offset(request)
-        table = get_table_or_404(pk=table_id, request=request)
+        table = get_table_or_404(pk=table_id)
         self.count = len(table.sa_columns)
         self.request = request
         return list(table.sa_columns)[self.offset:self.offset + self.limit]

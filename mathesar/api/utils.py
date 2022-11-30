@@ -3,7 +3,6 @@ import mathesar.api.exceptions.generic_exceptions.base_exceptions as generic_api
 import re
 
 from db.records.operations import group
-from mathesar.api.db.permissions.table import TableAccessPolicy
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.base import Table
 from mathesar.utils.preview import column_alias_from_preview_template
@@ -12,7 +11,7 @@ DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
 
 
-def get_table_or_404(pk, request):
+def get_table_or_404(pk):
     """
     Get table for which the user has correct permission if it exists,
      otherwise throws a DRF NotFound error.
@@ -23,9 +22,7 @@ def get_table_or_404(pk, request):
         table: return the table based on a specific id
     """
     try:
-
-        permissible_tables_queryset = TableAccessPolicy.scope_queryset(request, Table.objects.all())
-        table = permissible_tables_queryset.get(id=pk)
+        table = Table.objects.get(id=pk)
     except Table.DoesNotExist:
         raise generic_api_exceptions.NotFoundAPIException(
             NotFound,

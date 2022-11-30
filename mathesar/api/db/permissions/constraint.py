@@ -1,6 +1,7 @@
 from django.db.models import Q
 from rest_access_policy import AccessPolicy
 
+from mathesar.api.utils import get_table_or_404
 from mathesar.models.users import DatabaseRole, Role, SchemaRole
 
 
@@ -10,13 +11,13 @@ class ConstraintAccessPolicy(AccessPolicy):
     # Create Access is restricted to superusers or managers of the schema or the database the constraint is part of.
     statements = [
         {
-            'action': ['list', 'retrieve', 'create'],
+            'action': ['list', 'retrieve'],
             'principal': '*',
             'effect': 'allow',
         },
         # Only superuser or schema/database manager can delete the role
         {
-            'action': ['destroy', 'update', 'partial_update'],
+            'action': ['create', 'destroy', 'update', 'partial_update'],
             'principal': ['*'],
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_table_manager)']
@@ -26,10 +27,7 @@ class ConstraintAccessPolicy(AccessPolicy):
     @classmethod
     def scope_queryset(cls, request, qs):
         if not request.user.is_superuser:
-            allowed_roles = (Role.MANAGER.value,)
-
-            if request.method.lower() == 'get':
-                allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
+            allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
             permissible_database_role_filter = (
                 Q(table__schema__database__database_role__role__in=allowed_roles) & Q(table__schema__database__database_role__user=request.user)
             )
@@ -41,16 +39,15 @@ class ConstraintAccessPolicy(AccessPolicy):
     def is_table_manager(self, request, view, action):
         # Constraint access control is based on Schema and Database Roles as of now
         # TODO Include Table Role based access when Table Roles are introduced
-        constraint = view.get_object()
-
+        table = get_table_or_404(view.kwargs['table_pk'])
         is_schema_manager = SchemaRole.objects.filter(
             user=request.user,
-            schema=constraint.table.schema,
+            schema=table.schema,
             role=Role.MANAGER.value
         ).exists()
         is_db_manager = DatabaseRole.objects.filter(
             user=request.user,
-            database=constraint.table.schema.database,
+            database=table.schema.database,
             role=Role.MANAGER.value
         ).exists()
         return is_db_manager or is_schema_manager
