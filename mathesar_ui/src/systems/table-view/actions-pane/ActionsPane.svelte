@@ -74,74 +74,81 @@
     <TableNameAndDescription {table} />
   </div>
 
-  <Dropdown showArrow={false} contentClass="filter-dropdown-content">
-    <svelte:fragment slot="trigger">
-      <Icon {...iconFiltering} size="0.8em" />
-      <span>
-        Filters
-        {#if $filtering.entries.length > 0}
-          ({$filtering.entries.length})
-        {/if}
-      </span>
-    </svelte:fragment>
-    <svelte:fragment slot="content">
-      <Filter filtering={meta.filtering} />
-    </svelte:fragment>
-  </Dropdown>
+  <div class="actions">
+    <div class="quick-access">
+      <Dropdown
+        showArrow={false}
+        triggerAppearance="secondary"
+        contentClass="filter-dropdown-content"
+      >
+        <svelte:fragment slot="trigger">
+          <Icon {...iconFiltering} size="0.8em" />
+          <span>
+            Filters
+            {#if $filtering.entries.length > 0}
+              ({$filtering.entries.length})
+            {/if}
+          </span>
+        </svelte:fragment>
+        <svelte:fragment slot="content">
+          <Filter filtering={meta.filtering} />
+        </svelte:fragment>
+      </Dropdown>
 
-  <Dropdown showArrow={false}>
-    <svelte:fragment slot="trigger">
-      <Icon {...iconSorting} />
-      <span>
-        Sort
-        {#if $sorting.size > 0}
-          ({$sorting.size})
-        {/if}
-      </span>
-    </svelte:fragment>
-    <svelte:fragment slot="content">
-      <Sort columns={$columns} sorting={meta.sorting} />
-    </svelte:fragment>
-  </Dropdown>
+      <Dropdown showArrow={false} triggerAppearance="secondary">
+        <svelte:fragment slot="trigger">
+          <Icon {...iconSorting} />
+          <span>
+            Sort
+            {#if $sorting.size > 0}
+              ({$sorting.size})
+            {/if}
+          </span>
+        </svelte:fragment>
+        <svelte:fragment slot="content">
+          <Sort columns={$columns} sorting={meta.sorting} />
+        </svelte:fragment>
+      </Dropdown>
 
-  <Dropdown showArrow={false}>
-    <svelte:fragment slot="trigger">
-      <Icon {...iconGrouping} />
-      <span>
-        Group
-        {#if $grouping.entries.length > 0}
-          ({$grouping.entries.length})
-        {/if}
-      </span>
-    </svelte:fragment>
-    <svelte:fragment slot="content">
-      <Group grouping={meta.grouping} />
-    </svelte:fragment>
-  </Dropdown>
+      <Dropdown showArrow={false} triggerAppearance="secondary">
+        <svelte:fragment slot="trigger">
+          <Icon {...iconGrouping} />
+          <span>
+            Group
+            {#if $grouping.entries.length > 0}
+              ({$grouping.entries.length})
+            {/if}
+          </span>
+        </svelte:fragment>
+        <svelte:fragment slot="content">
+          <Group grouping={meta.grouping} />
+        </svelte:fragment>
+      </Dropdown>
+    </div>
 
-  <!-- Restricting Data Explorer redirection to single column
+    <!-- Restricting Data Explorer redirection to single column
       grouping for the time being -->
-  {#if summarizationUrl && $grouping.entries.length === 1}
+    <!-- {#if summarizationUrl && $grouping.entries.length === 1}
     <a href={summarizationUrl}>Summarize</a>
-  {/if}
+  {/if} -->
 
-  <div class="divider" />
+    <!-- <div class="divider" /> -->
 
-  <Button
+    <!-- <Button
     disabled={$isLoading}
     size="medium"
     on:click={() => recordsData.addEmptyRecord()}
   >
     <Icon {...iconAddNew} />
     <span>New Record</span>
-  </Button>
+  </Button> -->
 
-  {#if $sheetState}
+    <!-- {#if $sheetState}
     <div class="divider" />
     <SaveStatusIndicator status={$sheetState} />
-  {/if}
+  {/if} -->
 
-  <div class="loading-info">
+    <!-- <div class="loading-info">
     <Button size="medium" disabled={$isLoading} on:click={refresh}>
       <Icon
         {...isError && !isLoading ? iconError : iconRefresh}
@@ -157,22 +164,27 @@
         {/if}
       </span>
     </Button>
-  </div>
+  </div> -->
 
-  <Button size="medium" disabled={$isLoading} on:click={toggleTableInspector}>
-    <Icon {...iconInspector} />
-  </Button>
+    <Button
+      appearance="secondary"
+      size="medium"
+      disabled={$isLoading}
+      on:click={toggleTableInspector}
+    >
+      <Icon {...iconInspector} />
+      <span>Inspector</span>
+    </Button>
+  </div>
 </div>
 
 <style lang="scss">
   .actions-pane {
-    border-bottom: 1px solid var(--color-gray-dark);
+    border-bottom: 1px solid var(--slate-300);
     background-color: var(--color-white);
     position: relative;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding-right: 1rem;
   }
   .heading {
     /**
@@ -180,19 +192,25 @@
     * so that long descriptions does not take all the available space
     */
     max-width: 20%;
-    border-right: 1px solid var(--color-gray-medium);
+    border-right: 1px solid var(--slate-300);
     padding: 1rem;
     font-size: var(--text-size-large);
   }
-  .divider {
-    width: 1px;
-    display: inline-block;
-    background: #dfdfdf;
-    height: 2rem;
-    margin: 0px 5px;
+  .actions {
+    flex: 1;
+    display: flex;
+    padding: 1rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
-  .loading-info {
-    margin-left: auto;
+  .quick-access {
+    display: flex;
+    flex-direction: row;
+
+    > :global(* + *) {
+      margin-left: 0.5rem;
+    }
   }
   .actions-pane :global(.filter-dropdown-content.dropdown.content) {
     overflow-x: hidden;
