@@ -16,9 +16,11 @@
   $: classes = ['alert-container', `alert-${appearance}`].join(' ');
 </script>
 
-<span class={classes}>
-  <Icon {...icon} />
-  <span class="content">
-    <slot />
+<div class={classes}>
+  <span class="icon">
+    <Icon {...icon} />
   </span>
-</span>
+  <div class="content">
+    <slot />
+  </div>
+</div>

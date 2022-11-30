@@ -1,9 +1,10 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
-  import FormSubmit from './FormSubmit.svelte';
-  import type { Form } from './form';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import Errors from './Errors.svelte';
+  import type { Form } from './form';
+  import FormSubmit from './FormSubmit.svelte';
 
   interface $$Props extends ComponentProps<FormSubmit> {
     getErrorMessages?: (e: unknown) => string[];
@@ -15,14 +16,17 @@
     getErrorMessage(e),
   ];
 
+  $: ({ requestStatus } = form);
+  $: errors = $requestStatus?.state === 'failure' ? $requestStatus.errors : [];
+
   async function proceed() {
     try {
+      form.clearServerErrors();
       form.requestStatus.set({ state: 'processing' });
       await onProceed();
       form.requestStatus.set({ state: 'success' });
     } catch (e) {
-      const errors = getErrorMessages(e);
-      form.requestStatus.set({ state: 'failure', errors });
+      form.requestStatus.set({ state: 'failure', errors: getErrorMessages(e) });
     }
   }
 </script>
@@ -33,3 +37,5 @@
   onCancel={() => form.reset()}
   {...$$restProps}
 />
+
+<Errors {errors} --alert-margin="1rem 0 0 1rem" />

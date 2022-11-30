@@ -9,6 +9,7 @@
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import type { FieldStore } from '@mathesar/components/form';
+  import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import { iconSetToNull } from '@mathesar/icons';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
@@ -23,6 +24,7 @@
   $: ({ recordSummaries } = record);
   $: ({ column } = processedColumn);
   $: value = $field;
+  $: ({ showsError } = field);
   $: disabled = column.primary_key;
 </script>
 
@@ -63,13 +65,16 @@
           recordId,
           recordSummary,
         })}
+      hasError={$showsError}
     />
+    <FieldErrors {field} />
   </div>
 </div>
 
 <style>
   .direct-field {
     display: contents;
+    --alert-margin: 0.5rem 0 0 0;
   }
   .direct-field:not(:last-child) .cell {
     padding-bottom: 1rem;

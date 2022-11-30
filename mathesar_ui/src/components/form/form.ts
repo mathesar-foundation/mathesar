@@ -47,35 +47,46 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
     ) as Values<FieldsObj>;
   });
 
-  function reset() {
-    Object.values(fields).forEach((field) => {
-      field.reset();
-    });
-  }
-
   const requestStatus = writable<RequestStatus | undefined>(undefined);
-
-  const serverErrors = writable<string[]>([]);
 
   const isValid = derived(
     unite(Object.values(fields).map((f) => f.isValid)),
     (a) => a.every((i) => i),
   );
-  const isDirty = derived(
-    unite(Object.values(fields).map((f) => f.isDirty)),
+  const canSubmit = derived(
+    unite(Object.values(fields).map((f) => f.canSubmit)),
+    (a) => a.every((i) => i),
+  );
+  const hasChanges = derived(
+    unite(Object.values(fields).map((f) => f.hasChanges)),
     (a) => a.some((i) => i),
   );
 
+  function clearServerErrors() {
+    requestStatus.update((v) => (v?.state === 'failure' ? undefined : v));
+    Object.values(fields).forEach((field) => {
+      field.serverErrors.set([]);
+    });
+  }
+
+  function reset() {
+    clearServerErrors();
+    Object.values(fields).forEach((field) => {
+      field.reset();
+    });
+  }
+
   const store = derived(
-    [values, isValid, isDirty],
-    ([$values, $isValid, $isDirty]) => ({
+    [values, isValid, canSubmit, hasChanges],
+    ([$values, $isValid, $canSubmit, $hasChanges]) => ({
       values: $values,
       isValid: $isValid,
-      isDirty: $isDirty,
+      canSubmit: $canSubmit,
+      hasChanges: $hasChanges,
     }),
   );
 
-  return { ...store, fields, reset, serverErrors, requestStatus };
+  return { ...store, fields, reset, clearServerErrors, requestStatus };
 }
 
 export type Form<FieldsObj extends GenericFieldsObj = GenericFieldsObj> =

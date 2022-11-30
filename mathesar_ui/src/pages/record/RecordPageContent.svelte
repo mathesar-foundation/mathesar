@@ -1,7 +1,9 @@
 <script lang="ts">
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
-  import { Spinner } from '@mathesar/component-library';
+  import { getDetailedRecordsErrors } from '@mathesar/api/utils/recordUtils';
+  import { getAPI } from '@mathesar/api/utils/requestUtils';
+  import { Spinner } from '@mathesar-component-library';
   import {
     FormSubmitWithCatch,
     makeForm,
@@ -14,7 +16,6 @@
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
-  import { getAPI } from '@mathesar/api/utils/requestUtils';
   import DirectField from './DirectField.svelte';
   import type RecordStore from './RecordStore';
   import Widgets from './Widgets.svelte';
@@ -58,6 +59,13 @@
       proceedButton={{ label: 'Save', icon: iconSave }}
       cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
       onProceed={() => record.patch($form.values)}
+      getErrorMessages={(e) => {
+        const { columnErrors, recordErrors } = getDetailedRecordsErrors(e);
+        for (const [columnId, errors] of columnErrors) {
+          formFields[columnId]?.serverErrors.set(errors);
+        }
+        return recordErrors;
+      }}
       initiallyHidden
     />
   </div>

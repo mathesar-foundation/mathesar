@@ -13,9 +13,13 @@
   export let initiallyHidden = false;
   export let onCancel = () => form.reset();
 
-  $: ({ isDirty, isValid } = $form);
+  $: ({ hasChanges, canSubmit } = $form);
 </script>
 
-{#if !initiallyHidden || isDirty}
-  <CancelOrProceedButtonPair canProceed={isValid} {onCancel} {...$$restProps} />
+{#if !initiallyHidden || hasChanges}
+  <CancelOrProceedButtonPair
+    canProceed={canSubmit}
+    {onCancel}
+    {...$$restProps}
+  />
 {/if}

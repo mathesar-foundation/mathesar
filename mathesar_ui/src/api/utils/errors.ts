@@ -46,6 +46,7 @@ export class ApiError extends Error {
   constructor(anything: unknown) {
     const data = getApiErrorData(anything);
     super(data.message);
+    this.name = 'ApiError';
     this.code = data.code;
     this.field = data.field;
     this.detail = data.detail;
@@ -59,7 +60,7 @@ export class ApiMultiError extends Error {
     const inputArray = Array.isArray(anything) ? anything : [anything];
     const errors = inputArray.map((d) => new ApiError(d));
     super(errors.map((e) => e.message).join(' '));
-    this.name = 'ApiErrorSet';
+    this.name = 'ApiMultiError';
     this.errors = errors;
   }
 }
