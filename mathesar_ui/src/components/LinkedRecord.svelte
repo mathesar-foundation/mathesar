@@ -6,7 +6,7 @@
 
   const dispatch = createEventDispatcher();
 
-  export let recordId: unknown;
+  export let recordId: unknown | undefined = undefined;
   export let recordSummary: string | undefined = undefined;
   export let hasDeleteButton = false;
   export let recordPageHref: string | undefined = undefined;
@@ -14,11 +14,19 @@
   let isHoveringDelete = false;
   let isHoveringRecordPageLink = false;
 
+  $: label = (() => {
+    if (recordSummary) {
+      return recordSummary;
+    }
+    if (recordId !== undefined) {
+      return String(recordId);
+    }
+    return '(Unknown)';
+  })();
+
   function handleDeleteButtonClick() {
     dispatch('delete');
   }
-
-  $: label = recordSummary ?? String(recordId);
 </script>
 
 <span
