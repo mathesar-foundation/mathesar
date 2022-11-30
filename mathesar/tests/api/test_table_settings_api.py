@@ -67,7 +67,7 @@ def test_create_empty_table_settings(client, schema, empty_nasa_table, schema_na
 update_clients_with_status_codes = [
     ('superuser_client_factory', 200),
     ('db_manager_client_factory', 200),
-    ('db_editor_client_factory', 403),
+    ('db_editor_client_factory', 200),
     ('schema_manager_client_factory', 200),
     ('schema_viewer_client_factory', 403),
     ('db_viewer_schema_manager_client_factory', 200)
