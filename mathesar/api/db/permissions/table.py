@@ -5,11 +5,17 @@ from mathesar.models.users import DatabaseRole, Role, SchemaRole
 
 
 class TableAccessPolicy(AccessPolicy):
-    # Anyone can view table role as long as they have
-    # at least a Viewer access to the schema or its database
-    # Create Access is restricted to superusers or managers of the schema or the database the table is part of.
+    """
+    Anyone can view Table as long as they have
+    at least a Viewer access to the schema or its database
+    Create Access is restricted to superusers or managers of the schema or the database the table is part of.
+    Only superuser or schema/database manager can delete/modify/update the Table
+    """
+
     statements = [
         {
+            # Restrictions for the create method is done by the Serializers when creating the schema,
+            # As the permissions depend on the database object.
             'action': [
                 'list',
                 'retrieve',
@@ -22,7 +28,7 @@ class TableAccessPolicy(AccessPolicy):
             'principal': '*',
             'effect': 'allow',
         },
-        # Only superuser or schema/database manager can delete the role
+
         {
             'action': [
                 'destroy',
@@ -34,7 +40,7 @@ class TableAccessPolicy(AccessPolicy):
                 'existing_import',
                 'map_imported_columns'
             ],
-            'principal': ['*'],
+            'principal': '*',
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_table_manager)']
         },
@@ -67,10 +73,10 @@ class TableAccessPolicy(AccessPolicy):
     @classmethod
     def scope_viewset_queryset(cls, request, qs):
         """
-        Used for scoping queryset of the SchemaViewSet.
-        It is used for listing all the schema the user has Viewer access.
-         Restrictions are then applied based on the request method using the Policy statements.
-         This helps us to throw correct error status code instead of a 404 error code
+        Used for scoping queryset of the TableViewSet.
+        It is used for listing all the table the user has Viewer access.
+        Restrictions are then applied based on the request method using the Policy statements.
+        This helps us to throw correct error status code instead of a 404 error code
         """
         allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
         return TableAccessPolicy._scope_queryset(request, qs, allowed_roles)
