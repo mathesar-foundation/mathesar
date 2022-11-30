@@ -18,6 +18,10 @@ class QueryAccessPolicy(AccessPolicy):
                 'run',
                 'update',
                 'partial_update',
+                'columns',
+                'results',
+                'records',
+
             ],
             'principal': '*',
             'effect': 'allow',
