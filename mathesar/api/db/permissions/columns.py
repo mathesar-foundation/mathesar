@@ -14,7 +14,7 @@ class ColumnAccessPolicy(AccessPolicy):
 
     statements = [
         {
-            'action': ['list', 'retrieve'],
+            'action': ['list', 'retrieve', 'dependents'],
             'principal': '*',
             'effect': 'allow',
         },
