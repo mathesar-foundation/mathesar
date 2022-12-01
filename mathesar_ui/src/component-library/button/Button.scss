@@ -165,6 +165,10 @@
     width: 100%;
   }
 
+  &.danger {
+    color: var(--red-500);
+  }
+
   /* State */
   &:disabled {
     opacity: 0.5;

@@ -9,6 +9,7 @@
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
+  import { Badge } from '@mathesar-component-library';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
   export let row: GroupHeaderRow;
@@ -46,17 +47,24 @@
         preprocName={preprocNames[index]}
       />
     {/each}
-    <span class="tag count">
-      <span class="name">Count</span>
-      <span class="value">{group.count}</span>
-    </span>
+    <div class="count-container">
+      <Badge>
+        {group.count}
+      </Badge>
+    </div>
   </div>
 </SheetPositionableCell>
 
-<style>
+<style lang="scss">
   .group-header {
     padding: 0.5rem 0.4rem;
-    align-items: end;
     gap: 1rem;
+    background-color: var(--sand-200);
+
+    .count-container {
+      --badge-text-color: var(--slate-800);
+      --badge-background-color: var(--slate-100);
+      height: 100%;
+    }
   }
 </style>

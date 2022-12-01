@@ -5,7 +5,7 @@
 </script>
 
 <SheetPositionableCell
-  index={1}
+  index={0}
   columnSpan={columnCount}
   let:htmlAttributes
   let:style
@@ -21,11 +21,10 @@
 
 <style lang="scss">
   .new-record-message {
-    background: var(--color-green-medium);
+    background: var(--sky-200);
     display: flex;
     align-items: center;
     font-size: var(--text-size-small);
-    color: var(--color-white);
     padding: 0 0.5rem;
   }
 </style>

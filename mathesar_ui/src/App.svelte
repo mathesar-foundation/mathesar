@@ -92,7 +92,7 @@
     --cell-bg-color-error: #fef1f1;
     --cell-bg-color-header: #f9f9f9;
     --cell-bg-color-processing: #fefef1;
-    --cell-bg-color-disabled: #f3f3f3;
+    --cell-bg-color-disabled: var(--sand-100);
     --cell-bg-color-row-hover: #f6f7f7;
     --cell-bg-color-row-selected: #e4f2ff;
 
