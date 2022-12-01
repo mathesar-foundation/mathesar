@@ -106,7 +106,7 @@
     />
   {/if}
   {#if allowDelete}
-    <Button on:click={() => dispatch('removeGroup')}>
+    <Button appearance="secondary" on:click={() => dispatch('removeGroup')}>
       <Icon size="0.8rem" {...iconDeleteMajor} />
     </Button>
   {/if}
