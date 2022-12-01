@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    Badge,
     Button,
     Dropdown,
     Icon,
@@ -19,10 +20,11 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/utils/api';
   import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/data-explorer';
-  import Filter from './record-operations/Filter.svelte';
-  import Sort from './record-operations/Sort.svelte';
+  import Filter from './record-operations/filter/Filter.svelte';
+  import Sort from './record-operations/sort/Sort.svelte';
   import Group from './record-operations/Group.svelte';
   import TableNameAndDescription from '@mathesar/components/TableNameAndDescription.svelte';
+  import SummarizationLink from './SummarizationLink.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -86,7 +88,9 @@
           <span>
             Filters
             {#if $filtering.entries.length > 0}
-              ({$filtering.entries.length})
+              <Badge>
+                {$filtering.entries.length}
+              </Badge>
             {/if}
           </span>
         </svelte:fragment>
@@ -101,7 +105,9 @@
           <span>
             Sort
             {#if $sorting.size > 0}
-              ({$sorting.size})
+              <Badge>
+                {$sorting.size}
+              </Badge>
             {/if}
           </span>
         </svelte:fragment>
@@ -116,7 +122,9 @@
           <span>
             Group
             {#if $grouping.entries.length > 0}
-              ({$grouping.entries.length})
+              <Badge>
+                {$grouping.entries.length}
+              </Badge>
             {/if}
           </span>
         </svelte:fragment>
@@ -125,12 +133,6 @@
         </svelte:fragment>
       </Dropdown>
     </div>
-
-    <!-- Restricting Data Explorer redirection to single column
-      grouping for the time being -->
-    <!-- {#if summarizationUrl && $grouping.entries.length === 1}
-    <a href={summarizationUrl}>Summarize</a>
-  {/if} -->
 
     <!-- <div class="divider" /> -->
 
@@ -166,15 +168,22 @@
     </Button>
   </div> -->
 
-    <Button
-      appearance="secondary"
-      size="medium"
-      disabled={$isLoading}
-      on:click={toggleTableInspector}
-    >
-      <Icon {...iconInspector} />
-      <span>Inspector</span>
-    </Button>
+    <div class="aux-actions">
+      <!-- Restricting Data Explorer redirection to single column
+      grouping for the time being -->
+      {#if summarizationUrl && $grouping.entries.length === 1}
+        <SummarizationLink {summarizationUrl} />
+      {/if}
+      <Button
+        appearance="secondary"
+        size="medium"
+        disabled={$isLoading}
+        on:click={toggleTableInspector}
+      >
+        <Icon {...iconInspector} />
+        <span>Inspector</span>
+      </Button>
+    </div>
   </div>
 </div>
 
@@ -192,13 +201,14 @@
     * so that long descriptions does not take all the available space
     */
     max-width: 20%;
-    border-right: 1px solid var(--slate-300);
     padding: 1rem;
     font-size: var(--text-size-large);
   }
   .actions {
     flex: 1;
+    border-left: 1px solid var(--slate-300);
     display: flex;
+    padding: 1rem;
     padding: 1rem;
     flex-direction: row;
     align-items: center;
@@ -210,6 +220,16 @@
 
     > :global(* + *) {
       margin-left: 0.5rem;
+    }
+  }
+
+  .aux-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    > :global(* + *) {
+      margin-left: 1rem;
     }
   }
   .actions-pane :global(.filter-dropdown-content.dropdown.content) {
