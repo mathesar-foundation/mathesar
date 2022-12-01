@@ -15,16 +15,10 @@
   async function save(
     columnInfo: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
   ) {
-    try {
-      await columnsDataStore.patch(column.id, {
-        type: columnInfo.type,
-        type_options: columnInfo.type_options,
-      });
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Unable to change column type.';
-      toast.error(message);
-    }
+    await columnsDataStore.patch(column.id, {
+      type: columnInfo.type,
+      type_options: columnInfo.type_options,
+    });
   }
 </script>
 

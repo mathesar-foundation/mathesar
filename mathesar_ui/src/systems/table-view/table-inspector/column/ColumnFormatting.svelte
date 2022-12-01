@@ -13,6 +13,8 @@
 
   export let column: ProcessedColumn;
 
+  let actionButtonsVisible = false;
+
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);
 
@@ -35,6 +37,7 @@
       await columnsDataStore.patch(column.id, {
         display_options: displayOptions,
       });
+      actionButtonsVisible = false;
     } catch (err) {
       const message =
         err instanceof Error
@@ -47,14 +50,19 @@
   function cancel() {
     typeChangeState = { state: 'success' };
     displayOptions = {};
+    actionButtonsVisible = false;
   }
 
   $: isSaveDisabled =
     typeChangeState?.state === 'processing' || !$validationResult;
+
+  function showActionButtons() {
+    actionButtonsVisible = true;
+  }
 </script>
 
 {#if displayOptionsConfig && displayForm}
-  <div>
+  <div on:focus={showActionButtons} on:mousedown={showActionButtons}>
     <AbstractTypeDisplayOptions
       bind:displayOptions
       {displayOptionsConfig}

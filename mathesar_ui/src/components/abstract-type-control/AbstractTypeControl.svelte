@@ -27,6 +27,7 @@
     ...(column.type_options ?? {}),
   };
   let typeChangeState: RequestStatus;
+  let actionButtonsVisible = false;
 
   const validationContext = createValidationContext();
   $: ({ validationResult } = validationContext);
@@ -55,6 +56,7 @@
   function cancel() {
     resetAbstractType(column);
     typeChangeState = { state: 'success' };
+    actionButtonsVisible = false;
     dispatch('cancel');
   }
 
@@ -65,6 +67,8 @@
         type: selectedDbType,
         type_options: { ...typeOptions },
       });
+      console.log('save successful');
+      actionButtonsVisible = false;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Unable to change column type';
@@ -76,9 +80,17 @@
     !selectedAbstractType ||
     typeChangeState?.state === 'processing' ||
     !$validationResult;
+
+  function showActionButtons() {
+    actionButtonsVisible = true;
+  }
 </script>
 
-<div class="column-type-menu">
+<div
+  class="column-type-menu"
+  on:focus={showActionButtons}
+  on:mousedown={showActionButtons}
+>
   <AbstractTypeSelector
     {selectedAbstractType}
     {column}
@@ -97,16 +109,18 @@
     {/key}
   {/if}
 
-  <div class="footer">
-    <CancelOrProceedButtonPair
-      onProceed={onSave}
-      onCancel={cancel}
-      isProcessing={typeChangeState?.state === 'processing'}
-      canProceed={!isSaveDisabled}
-      proceedButton={{ label: 'Save' }}
-      size="small"
-    />
-  </div>
+  {#if actionButtonsVisible}
+    <div class="footer">
+      <CancelOrProceedButtonPair
+        onProceed={onSave}
+        onCancel={cancel}
+        isProcessing={typeChangeState?.state === 'processing'}
+        canProceed={!isSaveDisabled}
+        proceedButton={{ label: 'Save' }}
+        size="small"
+      />
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">

@@ -91,7 +91,7 @@
         <CollapsibleHeader
           slot="header"
           title="Default Value"
-          isDBLevelConfiguration
+          isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
           <SetDefaultValue {column} />
