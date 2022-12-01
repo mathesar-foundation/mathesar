@@ -1,9 +1,5 @@
 <script lang="ts">
-  import {
-    DropdownMenu,
-    ButtonMenuItem,
-    Button,
-  } from '@mathesar-component-library';
+  import { DropdownMenu, ButtonMenuItem } from '@mathesar-component-library';
   import type { Writable } from 'svelte/store';
   import {
     getTabularDataStoreFromContext,

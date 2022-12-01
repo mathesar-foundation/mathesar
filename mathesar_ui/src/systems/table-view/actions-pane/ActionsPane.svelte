@@ -11,10 +11,10 @@
   } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/data-explorer';
+  import TableNameAndDescription from '@mathesar/components/TableNameAndDescription.svelte';
   import Filter from './record-operations/filter/Filter.svelte';
   import Sort from './record-operations/sort/Sort.svelte';
   import Group from './record-operations/Group.svelte';
-  import TableNameAndDescription from '@mathesar/components/TableNameAndDescription.svelte';
   import SummarizationLink from './SummarizationLink.svelte';
 
   export let database: Database;

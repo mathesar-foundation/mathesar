@@ -8,9 +8,9 @@
   } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/api/tables/records';
   import { validateFilterEntry } from '@mathesar/components/filter-entry';
+  import { iconAddNew } from '@mathesar/icons';
   import FilterEntries from './FilterEntries.svelte';
   import { deepCloneFiltering } from '../utils';
-  import { iconAddNew } from '@mathesar/icons';
 
   const tabularData = getTabularDataStoreFromContext();
 

@@ -15,17 +15,15 @@
   export let columns: Column[];
   export let disabled: boolean;
 
-  $: sortColumn = columns.find((column) => column.id === sortColumnId)!;
+  $: sortColumn = columns.find((column) => column.id === sortColumnId);
   $: columnOptions = (() => {
     if (sortColumn) {
       if (disabled) {
         return [sortColumn];
-      } else {
-        return [...availableColumns, sortColumn];
       }
-    } else {
-      return [];
+      return [...availableColumns, sortColumn];
     }
+    return [];
   })();
 
   function removeSorter() {
@@ -34,7 +32,7 @@
 
   function update() {
     dispatch('update', {
-      columnId: sortColumn.id,
+      columnId: sortColumn?.id,
       direction: sortDirection,
     });
   }
