@@ -9,7 +9,7 @@
   import type { FilterCombination } from '@mathesar/api/tables/records';
   import { validateFilterEntry } from '@mathesar/components/filter-entry';
   import FilterEntries from './FilterEntries.svelte';
-  import { deepCloneFiltering } from './utils';
+  import { deepCloneFiltering } from '../utils';
   import { iconAddNew } from '@mathesar/icons';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -91,14 +91,14 @@
         on:updateCombination={(e) => setCombination(e.detail)}
       />
     {:else}
-      <span>No filters have been added</span>
+      <span class="muted">No filters have been added</span>
     {/if}
   </div>
   {#if $processedColumns.size}
     <div class="footer">
       <Button appearance="secondary" on:click={addFilter}>
         <Icon {...iconAddNew} />
-        <span>Add new filter</span>
+        <span>Add New Filter</span>
       </Button>
     </div>
   {/if}
@@ -116,6 +116,10 @@
 
     .header {
       font-weight: bolder;
+    }
+
+    .muted {
+      color: var(--slate-400);
     }
   }
 </style>
