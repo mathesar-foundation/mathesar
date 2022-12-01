@@ -5,7 +5,6 @@
   } from '@mathesar/stores/table-data';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import type { ColumnTypeOptionsSaveArgs } from '@mathesar/components/abstract-type-control/types';
-  import { toast } from '@mathesar/stores/toast';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);

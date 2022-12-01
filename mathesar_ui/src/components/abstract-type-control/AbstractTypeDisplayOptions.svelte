@@ -8,8 +8,8 @@
     FormValues,
   } from '@mathesar-component-library/types';
   import type { AbstractTypeDisplayConfig } from '@mathesar/stores/abstract-types/types';
-  import type { ColumnWithAbstractType } from './utils';
   import type { Readable } from 'svelte/store';
+  import type { ColumnWithAbstractType } from './utils';
 
   export let displayOptions: ColumnWithAbstractType['display_options'];
   export let displayOptionsConfig: AbstractTypeDisplayConfig;

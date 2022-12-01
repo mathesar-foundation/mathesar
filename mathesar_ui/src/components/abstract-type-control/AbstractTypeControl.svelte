@@ -67,7 +67,6 @@
         type: selectedDbType,
         type_options: { ...typeOptions },
       });
-      console.log('save successful');
       actionButtonsVisible = false;
     } catch (err) {
       const errorMessage =
