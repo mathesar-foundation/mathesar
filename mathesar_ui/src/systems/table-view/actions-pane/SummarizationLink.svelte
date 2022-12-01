@@ -29,7 +29,7 @@
 
     border-left: 4px solid var(--brand-500);
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    background-color: var(--brand-100);
+    background-color: var(--yellow-100);
   }
 
   .call-to-action {
