@@ -1,0 +1,8 @@
+.badge {
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-m);
+  background-color: var(--badge-background-color, var(--brand-500));
+  color: var(--badge-text-color, var(--white));
+  padding: 1px 4px;
+  display: inline-block;
+}
