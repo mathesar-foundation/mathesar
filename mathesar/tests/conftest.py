@@ -22,7 +22,7 @@ import mathesar.tests.conftest
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.models.base import Schema, Table, Database, DataFile
 from mathesar.models.base import Column as mathesar_model_column
-from mathesar.models.users import User
+from mathesar.models.users import DatabaseRole, SchemaRole, User
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
@@ -264,6 +264,7 @@ def create_schema(test_db_model, create_db_schema):
         schema_oid = get_schema_oid_from_name(schema_name, engine)
         schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
         return schema_model
+
     yield _create_schema
     # NOTE: Schema model is not cleaned up. Maybe invalidate cache?
 
@@ -318,7 +319,12 @@ def _get_datafile_for_path(path):
 def create_column():
     def _create_column(table, column_data):
         column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine, metadata=get_empty_metadata())
+        attnum = get_column_attnum_from_name(
+            table.oid,
+            [column.name],
+            table.schema._sa_engine,
+            metadata=get_empty_metadata()
+        )
         column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
         return column[0]
     return _create_column
@@ -333,7 +339,12 @@ def custom_types_schema_url(schema, live_server):
 def create_column_with_display_options():
     def _create_column(table, column_data):
         column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine, metadata=get_empty_metadata())
+        attnum = get_column_attnum_from_name(
+            table.oid,
+            [column.name],
+            table.schema._sa_engine,
+            metadata=get_empty_metadata()
+        )
         # passing table object caches sa_columns, missing out any new columns
         # So table.id is passed to get new instance of table.
         column = mathesar_model_column.current_objects.get_or_create(
@@ -342,6 +353,7 @@ def create_column_with_display_options():
             display_options=column_data.get('display_options', None)
         )
         return column[0]
+
     return _create_column
 
 
@@ -385,3 +397,121 @@ def client_bob(user_bob):
     client = APIClient()
     client.login(username='bob', password='password')
     return client
+
+
+@pytest.fixture
+def client_alice(user_alice):
+    client = APIClient()
+    client.login(username=user_alice.username, password='password')
+    return client
+
+
+@pytest.fixture
+def user_jerry():
+    user = User.objects.create(
+        username='jerry',
+        email='jerry@example.com',
+        full_name='JerrySmith',
+        short_name='Jerry'
+    )
+    user.set_password('password')
+    user.save()
+    yield user
+    user.delete()
+
+
+@pytest.fixture
+def user_turdy():
+    user = User.objects.create(
+        username='turdy',
+        email='turdy@example.com',
+        full_name='Turdy',
+        short_name='Turdy'
+    )
+    user.set_password('password')
+    user.save()
+    yield user
+    user.delete()
+
+
+@pytest.fixture
+def user_tom():
+    user = User.objects.create(
+        username='tom',
+        email='tom@example.com',
+        full_name='Tom James',
+        short_name='Tom'
+    )
+    user.set_password('password')
+    user.save()
+    yield user
+    user.delete()
+
+
+@pytest.fixture
+def db_manager_client_factory(user_bob):
+    def _db_manager_client(schema):
+        role = 'manager'
+        client = APIClient()
+        client.login(username=user_bob.username, password='password')
+        DatabaseRole.objects.create(user=user_bob, database=schema.database, role=role)
+        return client
+    return _db_manager_client
+
+
+@pytest.fixture
+def db_editor_client_factory(user_turdy):
+    def _db_editor_client(schema):
+        role = 'editor'
+        client = APIClient()
+        client.login(username=user_turdy.username, password='password')
+        DatabaseRole.objects.create(user=user_turdy, database=schema.database, role=role)
+        return client
+    return _db_editor_client
+
+
+@pytest.fixture
+def schema_manager_client_factory(user_alice):
+    def _schema_manager_client(schema):
+        role = 'manager'
+        client = APIClient()
+        client.login(username=user_alice.username, password='password')
+        SchemaRole.objects.create(user=user_alice, schema=schema, role=role)
+        return client
+    return _schema_manager_client
+
+
+@pytest.fixture
+def schema_viewer_client_factory(user_jerry):
+    def _schema_viewer_client(schema):
+        role = 'viewer'
+        client = APIClient()
+        client.login(username=user_jerry.username, password='password')
+        SchemaRole.objects.create(user=user_jerry, schema=schema, role=role)
+        return client
+    return _schema_viewer_client
+
+
+@pytest.fixture
+def db_viewer_schema_manager_client_factory(user_tom):
+    def _db_viewer_schema_manager_client(schema):
+        schema_role = 'manager'
+        db_role = 'viewer'
+
+        client = APIClient()
+        client.login(username=user_tom.username, password='password')
+        DatabaseRole.objects.create(user=user_tom, database=schema.database, role=db_role)
+        SchemaRole.objects.create(user=user_tom, schema=schema, role=schema_role)
+        return client
+    return _db_viewer_schema_manager_client
+
+
+@pytest.fixture
+def superuser_client_factory(client):
+    """
+    A facade for the `client` fixture
+     to the same behaviour as other role based client factories
+    """
+    def _client(schema):
+        return client
+    return _client

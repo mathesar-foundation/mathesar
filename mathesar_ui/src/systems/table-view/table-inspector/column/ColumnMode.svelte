@@ -116,7 +116,7 @@
           : $tables.data.get(referentTableId)}
       {#if referentTable !== undefined}
         <Collapsible triggerAppearance="plain">
-          <CollapsibleHeader slot="header" title="Record Summary" />
+          <CollapsibleHeader slot="header" title="Linked Record Summary" />
           <div slot="content" class="content-container">
             <FkRecordSummaryConfig table={referentTable} />
           </div>
