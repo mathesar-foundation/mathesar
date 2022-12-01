@@ -1,7 +1,7 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
   import type { Writable } from 'svelte/store';
-  import { Button } from '@mathesar-component-library';
+  import { Button, Icon } from '@mathesar-component-library';
   import {
     getTabularDataStoreFromContext,
     type Filtering,
@@ -10,6 +10,7 @@
   import { validateFilterEntry } from '@mathesar/components/filter-entry';
   import FilterEntries from './FilterEntries.svelte';
   import { deepCloneFiltering } from './utils';
+  import { iconAddNew } from '@mathesar/icons';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -79,52 +80,42 @@
 </script>
 
 <div class="filters" class:filtered={filterCount}>
-  <div class="header">
-    {#if filterCount}
-      Filter records
-    {:else}
-      No filters have been added
-    {/if}
-  </div>
+  <div class="header">Filter records</div>
   <div class="content">
-    <FilterEntries
-      bind:entries={$internalFiltering.entries}
-      bind:filterCombination={$internalFiltering.combination}
-      on:remove={(e) => removeFilter(e.detail)}
-      on:update={updateFilter}
-      on:updateCombination={(e) => setCombination(e.detail)}
-    />
-
-    {#if $processedColumns.size}
-      <div class="footer">
-        <Button on:click={addFilter}>Add new filter</Button>
-      </div>
+    {#if filterCount}
+      <FilterEntries
+        bind:entries={$internalFiltering.entries}
+        bind:filterCombination={$internalFiltering.combination}
+        on:remove={(e) => removeFilter(e.detail)}
+        on:update={updateFilter}
+        on:updateCombination={(e) => setCombination(e.detail)}
+      />
+    {:else}
+      <span>No filters have been added</span>
     {/if}
   </div>
+  {#if $processedColumns.size}
+    <div class="footer">
+      <Button appearance="secondary" on:click={addFilter}>
+        <Icon {...iconAddNew} />
+        <span>Add new filter</span>
+      </Button>
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
   .filters {
-    padding: 12px;
-    min-width: 310px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
 
-    &.filtered {
-      min-width: 620px;
-    }
-    &:not(.filtered) {
-      .header {
-        color: #606066;
-      }
+    > :global(* + *) {
+      margin-top: 1rem;
     }
 
-    .content {
-      margin-top: 12px;
-
-      .footer {
-        display: flex;
-        align-items: center;
-        margin-top: 18px;
-      }
+    .header {
+      font-weight: bolder;
     }
   }
 </style>

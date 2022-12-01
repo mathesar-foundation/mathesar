@@ -225,6 +225,7 @@
       <Button
         size="small"
         class="filter-remove"
+        appearance="secondary"
         on:click={() => dispatch('removeFilter')}
       >
         <Icon {...iconDeleteMajor} />
