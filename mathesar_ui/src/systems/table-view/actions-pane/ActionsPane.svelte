@@ -1,24 +1,15 @@
 <script lang="ts">
-  import {
-    Badge,
-    Button,
-    Dropdown,
-    Icon,
-    iconError,
-  } from '@mathesar-component-library';
+  import { Badge, Button, Dropdown, Icon } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
   import {
-    iconAddNew,
     iconFiltering,
     iconGrouping,
-    iconRefresh,
     iconSorting,
     iconInspector,
   } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { States } from '@mathesar/utils/api';
   import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/data-explorer';
   import Filter from './record-operations/filter/Filter.svelte';
   import Sort from './record-operations/sort/Sort.svelte';
@@ -32,25 +23,11 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({
-    id,
-    columnsDataStore,
-    recordsData,
-    meta,
-    constraintsDataStore,
-    isLoading,
-    display,
-  } = $tabularData);
+  $: ({ id, columnsDataStore, recordsData, meta, isLoading, display } =
+    $tabularData);
   $: ({ columns } = columnsDataStore);
-  $: columnsFetchStatus = columnsDataStore.fetchStatus;
   $: ({ filtering, sorting, grouping, sheetState } = meta);
   $: ({ isTableInspectorVisible } = display);
-  $: recordState = recordsData.state;
-
-  $: isError =
-    $columnsFetchStatus?.state === 'failure' ||
-    $recordState === States.Error ||
-    $constraintsDataStore.state === States.Error;
 
   $: summarizationUrl = constructDataExplorerUrlToSummarizeFromGroup(
     database.name,
@@ -61,10 +38,6 @@
       terseGrouping: $grouping.terse(),
     },
   );
-
-  function refresh() {
-    void $tabularData.refresh();
-  }
 
   function toggleTableInspector() {
     isTableInspectorVisible.set(!$isTableInspectorVisible);
@@ -134,39 +107,9 @@
       </Dropdown>
     </div>
 
-    <!-- <div class="divider" /> -->
-
-    <!-- <Button
-    disabled={$isLoading}
-    size="medium"
-    on:click={() => recordsData.addEmptyRecord()}
-  >
-    <Icon {...iconAddNew} />
-    <span>New Record</span>
-  </Button> -->
-
-    <!-- {#if $sheetState}
-    <div class="divider" />
-    <SaveStatusIndicator status={$sheetState} />
-  {/if} -->
-
-    <!-- <div class="loading-info">
-    <Button size="medium" disabled={$isLoading} on:click={refresh}>
-      <Icon
-        {...isError && !isLoading ? iconError : iconRefresh}
-        spin={$isLoading}
-      />
-      <span>
-        {#if $isLoading}
-          Loading
-        {:else if isError}
-          Retry
-        {:else}
-          Refresh
-        {/if}
-      </span>
-    </Button>
-  </div> -->
+    {#if $sheetState}
+      <SaveStatusIndicator status={$sheetState} />
+    {/if}
 
     <div class="aux-actions">
       <!-- Restricting Data Explorer redirection to single column
