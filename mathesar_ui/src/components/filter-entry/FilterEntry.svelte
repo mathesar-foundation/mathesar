@@ -14,10 +14,12 @@
   } from '@mathesar-component-library/types';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import type { ReadableMapLike } from '@mathesar/typeUtils';
   import type { FilterEntryColumnLike } from './types';
   import { validateFilterEntry } from './utils';
 
@@ -26,7 +28,7 @@
 
   const dispatch = createEventDispatcher();
 
-  export let columns: ColumnLikeType[];
+  export let columns: ReadableMapLike<ColumnLikeType['id'], ColumnLikeType>;
   export let getColumnLabel: (column: ColumnLikeType) => string;
 
   export let columnIdentifier: ColumnLikeType['id'] | undefined;
@@ -41,14 +43,14 @@
 
   /**
    * Eslint recognizes an unnecessary type assertion that typecheck fails to
-   * do in the svelte template below. *:/ Whaat? Needs more digging down*
+   * do in the svelte template below. *:/ Needs more digging down*
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  $: columnIdentifiers = columns.map(
+  $: columnIdentifiers = [...columns.values()].map(
     (_column) => _column.id,
   ) as ColumnLikeType['id'][];
   $: selectedColumn = columnIdentifier
-    ? columns.find((column) => column.id === columnIdentifier)
+    ? columns.get(columnIdentifier)
     : undefined;
   $: selectedColumnFiltersMap =
     selectedColumn?.allowedFiltersMap ??
@@ -78,9 +80,11 @@
   });
 
   function getColumnName(_columnId?: ColumnLikeType['id']) {
-    const column = columns.find((columnEntry) => columnEntry.id === _columnId);
-    if (column) {
-      return getColumnLabel(column);
+    if (_columnId) {
+      const column = columns.get(_columnId);
+      if (column) {
+        return getColumnLabel(column);
+      }
     }
     return '';
   }
@@ -190,7 +194,18 @@
       on:change={onColumnChange}
       triggerClass="filter-column-id"
       disabled={disableColumnChange}
-    />
+      let:option
+    >
+      {@const columnInfo = columns.get(option)}
+      <ColumnName
+        column={{
+          name: getColumnName(option),
+          type: columnInfo?.column.type ?? 'unknown',
+          type_options: columnInfo?.column.type_options ?? null,
+          display_options: columnInfo?.column.display_options ?? null,
+        }}
+      />
+    </Select>
     {#key columnIdentifier}
       <Select
         options={conditionIds}
