@@ -1,3 +1,4 @@
+import bz2
 import os
 
 from sqlalchemy import text
@@ -9,11 +10,14 @@ RESOURCES = os.path.join(FILE_DIR, "resources")
 LIBRARY_ONE = os.path.join(RESOURCES, "library_without_checkouts.sql")
 LIBRARY_TWO = os.path.join(RESOURCES, "library_add_checkouts.sql")
 LIBRARY_MANAGEMENT = 'Library Management'
+MOVIE_COLLECTION = 'Movie Collection'
+MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
 
 
 def load_datasets(engine):
     """Load some SQL files with demo data to DB targeted by `engine`."""
     _load_library_dataset(engine)
+    _load_movies_dataset(engine)
 
 
 def _load_library_dataset(engine):
@@ -33,6 +37,17 @@ def _load_library_dataset(engine):
         conn.execute(set_search_path)
         conn.execute(text(f1.read()))
         conn.execute(text(f2.read()))
+
+
+def _load_movies_dataset(engine):
+    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{MOVIE_COLLECTION}" CASCADE;""")
+    create_schema_query = text(f"""CREATE SCHEMA "{MOVIE_COLLECTION}";""")
+    set_search_path = text(f"""SET search_path="{MOVIE_COLLECTION}";""")
+    with engine.begin() as conn, bz2.open(MOVIES_SQL_BZ2, 'rt') as f:
+        conn.execute(drop_schema_query)
+        conn.execute(create_schema_query)
+        conn.execute(set_search_path)
+        conn.execute(text(f.read()))
 
 
 def customize_settings(engine):
