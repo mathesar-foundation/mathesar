@@ -1,12 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import {
+    ImmutableMap,
+    MultiSelect,
+    LabeledInput,
+  } from '@mathesar-component-library';
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type QuerySummarizationTransformationModel from '../../../QuerySummarizationTransformationModel';
-  import type {
-    ProcessedQueryResultColumn,
-    ProcessedQueryResultColumnMap,
-  } from '../../../utils';
+  import type { ProcessedQueryResultColumnMap } from '../../../utils';
   import Aggregation from './Aggregation.svelte';
+  import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
 
   const dispatch = createEventDispatcher();
 
@@ -14,8 +18,7 @@
   export let model: QuerySummarizationTransformationModel;
 
   export let limitEditing = false;
-  let { aggregations } = model;
-  $: aggregations = model.aggregations;
+  $: ({ aggregations, groups } = model);
 
   function updateGrouping(updateEventDetail: {
     preprocFunctionIdentifier?: string;
@@ -24,39 +27,52 @@
     const { columnIdentifier, preprocFunctionIdentifier } = updateEventDetail;
 
     if (columnIdentifier !== model.columnIdentifier) {
-      // recalculate agg columns
-      aggregations = model.aggregations
-        .without(columnIdentifier)
-        .with(model.columnIdentifier, {
-          inputAlias: model.columnIdentifier,
-          outputAlias: `${model.columnIdentifier}_agg`,
-          function: 'aggregate_to_array',
-          displayName: `${model.columnIdentifier}_agg`,
-        });
+      // guess everything again
+      groups = new ImmutableMap();
+      aggregations = new ImmutableMap();
       model.aggregations = aggregations;
+      model.groups = groups;
     }
     model.columnIdentifier = columnIdentifier;
     model.preprocFunctionIdentifier = preprocFunctionIdentifier;
     dispatch('update', model);
   }
 
-  function includeColumnForAggregation(
-    processedColumn: ProcessedQueryResultColumn,
-  ) {
-    aggregations = model.aggregations.with(processedColumn.id, {
-      inputAlias: processedColumn.id,
-      outputAlias: `${processedColumn.id}_agg`,
-      function: 'aggregate_to_array',
-      displayName: `${processedColumn.id}_agg`,
+  function onGroupChange(values: string[]) {
+    let newAggregations = aggregations;
+    const valueSet = new Set(values);
+    [...columns.values()].forEach((processedColumn) => {
+      const pcAlias = processedColumn.column.alias;
+      if (!valueSet.has(pcAlias) && model.columnIdentifier !== pcAlias) {
+        newAggregations = newAggregations.with(pcAlias, {
+          inputAlias: pcAlias,
+          outputAlias: `${pcAlias}_agged`,
+          function: 'aggregate_to_array',
+        });
+      }
     });
+    aggregations = newAggregations;
+    groups = new ImmutableMap(
+      values.map((columnAlias) => [
+        columnAlias,
+        {
+          inputAlias: columnAlias,
+          outputAlias: `${columnAlias}_group`,
+        },
+      ]),
+    );
     model.aggregations = aggregations;
+    model.groups = groups;
     dispatch('update', model);
   }
 
-  function excludeColumnFromAggregation(
-    processedColumn: ProcessedQueryResultColumn,
-  ) {
-    aggregations = model.aggregations.without(processedColumn.id);
+  function removeAggregation(aggEntry: QuerySummarizationAggregationEntry) {
+    groups = groups.with(aggEntry.inputAlias, {
+      inputAlias: aggEntry.inputAlias,
+      outputAlias: `${aggEntry.inputAlias}_group`,
+    });
+    aggregations = aggregations.without(aggEntry.inputAlias);
+    model.groups = groups;
     model.aggregations = aggregations;
     dispatch('update', model);
   }
@@ -73,25 +89,51 @@
     preprocFunctionIdentifier={model.preprocFunctionIdentifier}
     on:update={(e) => updateGrouping(e.detail)}
   />
-  <div class="aggregations">
-    <header>Aggregate</header>
-    {#each [...columns
-        .without(model.columnIdentifier)
-        .values()] as processedColumn (processedColumn.id)}
-      <Aggregation
-        {processedColumn}
-        aggregation={aggregations.get(processedColumn.id)}
-        on:include={() => includeColumnForAggregation(processedColumn)}
-        on:exclude={() => excludeColumnFromAggregation(processedColumn)}
-        on:update
-      />
-    {/each}
-  </div>
+  {#if groups.size > 0}
+    <section>
+      <LabeledInput label="Not Aggregated" layout="stacked">
+        <MultiSelect
+          values={[...groups.values()].map((entry) => entry.inputAlias)}
+          options={[...columns.without(model.columnIdentifier).values()].map(
+            (entry) => entry.column.alias,
+          )}
+          on:change={(e) => onGroupChange(e.detail)}
+          autoClearInvalidValues={false}
+          disabled={limitEditing}
+          let:option
+        >
+          {@const columnInfo = columns.get(option)?.column}
+          <ColumnName
+            column={{
+              name: columnInfo?.display_name ?? '',
+              type: columnInfo?.type ?? 'unknown',
+              type_options: columnInfo?.type_options ?? null,
+              display_options: null,
+            }}
+          />
+        </MultiSelect>
+      </LabeledInput>
+    </section>
+  {/if}
+  {#if aggregations.size > 0}
+    <section>
+      <header>Aggregate</header>
+      {#each [...aggregations.values()] as aggregation (aggregation.inputAlias)}
+        <Aggregation
+          processedColumn={columns.get(aggregation.inputAlias)}
+          {aggregation}
+          {limitEditing}
+          on:update
+          on:remove={() => removeAggregation(aggregation)}
+        />
+      {/each}
+    </section>
+  {/if}
 </div>
 
 <style lang="scss">
   .summarization {
-    .aggregations {
+    section {
       margin-top: 0.6rem;
     }
   }
