@@ -150,4 +150,13 @@
     margin: 0;
     padding: 0;
   }
+
+  .postgres-keyword {
+    font-size: 80%;
+    padding: 0.02em 0.3em;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: bold;
+  }
 </style>
