@@ -341,12 +341,13 @@ class UIQuery(BaseModel, Relation):
 
     def _get_display_options_for_alias(self, alias):
         display_options = None
-        if self.display_options is not None:
+        if self.display_options:
             display_options = self.display_options.get(alias)
         if display_options is None:
             # notice that this isn't meant to support non-initial-column aliases
-            dj_col = self._map_of_initial_col_alias_to_dj_column[alias]
-            display_options = dj_col.display_options
+            dj_col = self._map_of_initial_col_alias_to_dj_column.get(alias)
+            if dj_col:
+                display_options = dj_col.display_options
         return display_options
 
     @property
