@@ -24,7 +24,8 @@
   }
 
   &.has-error {
-    background: var(--red-500);
+    border-color: var(--red-500);
+    background: var(--red-100);
   }
 
   &.text-area {

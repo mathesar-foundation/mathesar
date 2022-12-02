@@ -8,16 +8,18 @@ from mathesar.models.query import UIQuery
 def joining_patents_query(academics_ma_tables):
     academics_table = academics_ma_tables['academics']
     institutions_table = academics_ma_tables['universities']
+    display_names = {
+        'name': 'name',
+        'institution_name': 'institution name',
+    }
     initial_columns = [
         {
             'id': academics_table.get_column_by_name('name').id,
             'alias': 'name',
-            'display_name': 'name',
         },
         {
             'id': institutions_table.get_column_by_name('name').id,
             'alias': 'institution_name',
-            'display_name': 'institution name',
             'jp_path': [[
                 academics_table.get_column_by_name('institution').id,
                 institutions_table.get_column_by_name('id').id,
@@ -32,6 +34,7 @@ def joining_patents_query(academics_ma_tables):
         base_table=academics_table,
         initial_columns=initial_columns,
         display_options=display_options,
+        display_names=display_names,
     )
     return ui_query
 
