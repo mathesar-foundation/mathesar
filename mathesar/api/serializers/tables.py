@@ -10,6 +10,7 @@ from db.columns.exceptions import InvalidTypeError
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
     MultipleDataFileAPIException, UnknownDatabaseTypeIdentifier,
+    InvalidTableName,
 )
 from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException, InvalidTypeCastAPIException
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
@@ -170,6 +171,9 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
 
     def validate(self, data):
         if self.partial:
+            if table_name := data.get('name', None):
+                if table_name.find('(') and table_name.find(')') != -1:
+                    raise InvalidTableName(table_name)
             columns = data.get('columns', None)
             if columns is not None:
                 for col in columns:
