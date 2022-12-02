@@ -4,7 +4,6 @@ import {
   type ProcessedQueryResultColumnMap,
 } from '../../utils';
 import type { QueryTransformationModel } from '../../QueryModel';
-import QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
 
 export function calcAllowedColumnsPerTransformation(
   initialColumns: QueryInstanceInitialColumn[],
@@ -19,7 +18,7 @@ export function calcAllowedColumnsPerTransformation(
   allowedTransformations.push(latestColumnList);
   for (let index = 1; index < transformationModels.length; index += 1) {
     const transformation = transformationModels[index - 1];
-    if (transformation instanceof QuerySummarizationTransformationModel) {
+    if (transformation.type === 'summarize') {
       latestColumnList = getProcessedOutputColumns(
         transformation.getOutputColumnAliases(),
         columnsMetaData,

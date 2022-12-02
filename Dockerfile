@@ -10,6 +10,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
 
 # Install node
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get update
 RUN apt install -y sudo nodejs && rm -rf /var/lib/apt/lists/*
 
 # Change work directory

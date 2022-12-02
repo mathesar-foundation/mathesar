@@ -22,7 +22,6 @@
         alias,
         id: column.id,
         jp_path: column.jpPath,
-        display_name: alias,
       }),
     );
     queryManager.selectColumn(alias);
