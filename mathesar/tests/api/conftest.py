@@ -56,7 +56,7 @@ def create_base_table(create_table):
             table_name=table_name,
             schema_name=schema_name,
             csv_filepath='mathesar/tests/data/base_table.csv'
-            )
+        )
     return _create_table
 
 
@@ -67,7 +67,7 @@ def create_referent_table(create_table):
             table_name=table_name,
             schema_name=schema_name,
             csv_filepath='mathesar/tests/data/reference_table.csv'
-            )
+        )
     return _create_table
 
 
