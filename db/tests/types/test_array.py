@@ -9,13 +9,14 @@ from db.functions.operations.apply import apply_db_function_as_filter
 
 
 @pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
+    (ArrayLengthEquals, 0, 1),
     (ArrayLengthEquals, 3, 9),
     (ArrayLengthEquals, 5, 1),
     (ArrayLengthEquals, 2, 1),
     (ArrayLengthGreaterThan, 3, 1),
     (ArrayLengthGreaterOrEqual, 3, 10),
-    (ArrayLengthLessThan, 4, 10),
-    (ArrayLengthLessOrEqual, 5, 11),
+    (ArrayLengthLessThan, 4, 11),
+    (ArrayLengthLessOrEqual, 5, 12),
     (ArrayLengthGreaterOrEqual, 5, 1),
     (ArrayContains, {1, 2, 3}, 1),
     (ArrayContains, {1}, 8),
@@ -45,13 +46,14 @@ def test_filter_functions_on_int_array(array_table_obj, main_db_function, litera
 
 
 @pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
+    (ArrayLengthEquals, 0, 1),
     (ArrayLengthEquals, 3, 8),
     (ArrayLengthEquals, 5, 1),
     (ArrayLengthEquals, 6, 1),
     (ArrayLengthGreaterThan, 3, 3),
     (ArrayLengthGreaterOrEqual, 3, 11),
-    (ArrayLengthLessThan, 4, 8),
-    (ArrayLengthLessOrEqual, 5, 10),
+    (ArrayLengthLessThan, 4, 9),
+    (ArrayLengthLessOrEqual, 5, 11),
     (ArrayLengthGreaterOrEqual, 5, 2),
     (ArrayContains, {'Tesla'}, 1),
     (ArrayContains, {'Ford', 'BMW'}, 3),

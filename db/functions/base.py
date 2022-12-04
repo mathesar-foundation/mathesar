@@ -377,6 +377,22 @@ class Count(DBFunction):
         return sa_call_sql_function('count', column_expr, return_type=PostgresType.INTEGER)
 
 
+class Coalesce(DBFunction):
+    id = 'coalesce'
+    name = 'coalesce'
+    hints = tuple([
+        hints.returns(hints.comparable),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.array),
+        hints.parameter(1, hints.integer),
+        hints.mathesar_filter
+    ])
+
+    @staticmethod
+    def to_sa_expression(value, default):
+        return sa_call_sql_function('coalesce', value, default, return_type=PostgresType.INTEGER)
+
+
 class ArrayAgg(DBFunction):
     id = 'aggregate_to_array'
     name = 'aggregate to array'

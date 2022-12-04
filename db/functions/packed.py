@@ -87,7 +87,7 @@ class ArrayLengthEquals(DBFunctionPacked):
         param1 = self.parameters[1]
         param2 = self.parameters[2]
         return base.Equal([
-            base.ArrayLength([param0, param1]),
+            base.Coalesce([base.ArrayLength([param0, param1]), 0]),
             param2
         ])
 
@@ -109,7 +109,7 @@ class ArrayLengthGreaterThan(DBFunctionPacked):
         param1 = self.parameters[1]
         param2 = self.parameters[2]
         return base.Greater([
-            base.ArrayLength([param0, param1]),
+            base.Coalesce([base.ArrayLength([param0, param1]), 0]),
             param2
         ])
 
@@ -131,7 +131,7 @@ class ArrayLengthLessThan(DBFunctionPacked):
         param1 = self.parameters[1]
         param2 = self.parameters[2]
         return base.Lesser([
-            base.ArrayLength([param0, param1]),
+            base.Coalesce([base.ArrayLength([param0, param1]), 0]),
             param2
         ])
 
@@ -153,7 +153,7 @@ class ArrayLengthGreaterOrEqual(DBFunctionPacked):
         param1 = self.parameters[1]
         param2 = self.parameters[2]
         return GreaterOrEqual([
-            base.ArrayLength([param0, param1]),
+            base.Coalesce([base.ArrayLength([param0, param1]), 0]),
             param2
         ])
 
@@ -175,7 +175,7 @@ class ArrayLengthLessOrEqual(DBFunctionPacked):
         param1 = self.parameters[1]
         param2 = self.parameters[2]
         return LesserOrEqual([
-            base.ArrayLength([param0, param1]),
+            base.Coalesce([base.ArrayLength([param0, param1]), 0]),
             param2
         ])
 
@@ -195,7 +195,7 @@ class ArrayNotEmpty(DBFunctionPacked):
         param0 = self.parameters[0]
         param1 = self.parameters[1]
         return base.Greater([
-            base.ArrayLength([param0, param1]),
+            base.Coalesce([base.ArrayLength([param0, param1]), 0]),
             0,
         ])
 
