@@ -40,6 +40,7 @@ def test_create_non_empty_table_settings(client, schema, create_patents_table, s
     expected_preview_template = f'{{{first_non_primary_column.id}}}'
     column_order = [1, 2, 3]
     table.settings.column_order = [1, 2, 3]
+    table.settings.save()
     response = client.get(
         f"/api/db/v0/tables/{table.id}/settings/"
     )
