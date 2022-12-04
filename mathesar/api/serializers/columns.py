@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty, SerializerMethodField
 from rest_framework.settings import api_settings
@@ -8,6 +8,10 @@ from mathesar.api.serializers.shared_serializers import (
     DisplayOptionsMappingSerializer,
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
 )
+from mathesar.api.exceptions.database_exceptions import (
+    exceptions as database_api_exceptions,
+)
+from db.columns.exceptions import InvalidTypeError
 from mathesar.models.base import Column
 from db.types.operations.convert import get_db_type_enum_from_id
 
@@ -147,8 +151,14 @@ class ColumnSerializer(SimpleColumnSerializer):
     def validate(self, data):
         data = super().validate(data)
         # Reevaluate column display options based on the new column type.
-        if TYPE_KEY in data and DISPLAY_OPTIONS_KEY not in data:
-            if self.instance:
+        if TYPE_KEY in data and self.instance:
+            target_types = self.get_valid_target_types(self.instance)
+            if data[TYPE_KEY] not in target_types:
+                raise database_api_exceptions.InvalidTypeCastAPIException(
+                    InvalidTypeError,
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            if DISPLAY_OPTIONS_KEY not in data:
                 db_type = getattr(self.instance, 'db_type', None)
                 # Invalidate display_options if type has been changed
                 if db_type is not None:
