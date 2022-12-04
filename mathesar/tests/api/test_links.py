@@ -7,6 +7,7 @@ from db.tables.operations.select import get_oid_from_table
 from db.tables.utils import get_primary_key_column
 
 from mathesar.models.base import Constraint, Table
+from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
 @pytest.fixture
@@ -28,6 +29,26 @@ def column_test_table(patent_schema):
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     return table
+
+
+def test_create_link_on_invalid_table_name(create_base_table, create_referent_table, client):
+    reference_table = create_base_table('Base_table')
+    # Having round brackets in the referent_table name is invalid.
+    referent_table = create_referent_table('Referent_table(alpha)')
+    data = {
+        "link_type": "one-to-one",
+        "reference_column_name": "col_1",
+        "reference_table": reference_table.id,
+        "referent_table": referent_table.id,
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    response_data = response.json()[0]
+    assert response.status_code == 400
+    assert response_data['code'] == ErrorCodes.InvalidReferentTableName.value
+    assert response_data['message'] == 'Referent table name "Referent_table(alpha)" is invalid.'
 
 
 def test_one_to_one_link_create(column_test_table, client, create_patents_table):
