@@ -3,6 +3,7 @@
 from django.db import migrations, models
 import mathesar.models.query
 
+
 class Migration(migrations.Migration):
 
     dependencies = [

@@ -89,4 +89,3 @@ def test_update_table_settings(client, column_test_table):
     assert response_data['preview_settings']['template'] == preview_template
     assert response_data['preview_settings']['customized'] is True
     assert response_data['column_order'] == column_order
-

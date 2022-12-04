@@ -57,7 +57,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
             'import_verified', 'columns', 'records_url', 'constraints_url',
             'columns_url', 'joinable_tables_url', 'type_suggestions_url',
             'previews_url', 'data_files', 'has_dependents', 'dependents_url',
-            'settings', 'description'
+            'settings', 'description',
         ]
 
     def get_records_url(self, obj):

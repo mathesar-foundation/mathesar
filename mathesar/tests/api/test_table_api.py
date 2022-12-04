@@ -1022,6 +1022,7 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
     ]
     assert len(new_created) == 0
 
+
 def _get_patents_column_data(table):
     column_data = [{
         'name': 'id',
@@ -1147,6 +1148,7 @@ def test_table_patch_columns_one_type_change(create_patents_table, client):
 
     assert response.status_code == 200
     _check_columns(response_json['columns'], column_data)
+
 
 def _get_data_types_column_data(table):
     column_data = [{

@@ -27,6 +27,7 @@ def _get_validator_for_list_of_dicts(field_name):
                 raise InvalidValueType(message, field=field_name)
     return _validator
 
+
 def _get_validator_for_list_of_ints(field_name):
     # NOTE `wraps` decorations needed to interop with Django's migrations
     @wraps(_get_validator_for_list_of_ints)
@@ -39,6 +40,7 @@ def _get_validator_for_list_of_ints(field_name):
                 message = f"{value} should contain only ints."
                 raise InvalidValueType(message, field=field_name)
     return _validator
+
 
 def _get_validator_for_initial_columns(field_name):
     # NOTE `wraps` decorations needed to interop with Django's migrations
