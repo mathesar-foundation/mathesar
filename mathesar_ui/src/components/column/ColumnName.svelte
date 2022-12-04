@@ -5,8 +5,11 @@
 
   export let column: DisplayColumn;
   export let isLoading = false;
+  export let truncateName = true;
 
   $: icon = getColumnIconProps(column);
 </script>
 
-<NameWithIcon on:click {icon} {isLoading}>{column.name}</NameWithIcon>
+<NameWithIcon on:click {icon} {isLoading} {truncateName}>
+  {column.name}
+</NameWithIcon>
