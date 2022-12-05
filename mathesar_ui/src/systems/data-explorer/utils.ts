@@ -93,7 +93,7 @@ export interface ReferencedByTable extends LinkedTable {
 
 export interface InputColumnsStoreSubstance {
   baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
-  tablesThatReferenceBaseTable: Map<ReferencedByTable['id'], ReferencedByTable>;
+  tablesThatReferenceBaseTable: ReferencedByTable[];
   inputColumnInformationMap: Map<InputColumn['id'], InputColumn>;
 }
 
@@ -124,10 +124,6 @@ export function getLinkFromColumn(
   );
   if (validLinks.length === 0) {
     return undefined;
-  }
-  if (validLinks.length > 1) {
-    // This scenario should never occur
-    throw new Error(`Multiple links present for the same column: ${columnId}`);
   }
   const link = validLinks[0];
   const toTableInfo = result.tables[link.target];
@@ -215,11 +211,11 @@ export function getBaseTableColumnsWithLinks(
 export function getTablesThatReferenceBaseTable(
   result: JoinableTablesResult,
   baseTable: TableEntry,
-): Map<ReferencedByTable['id'], ReferencedByTable> {
+): ReferencedByTable[] {
   const referenceLinks = result.joinable_tables.filter(
     (entry) => entry.depth === 1 && entry.fk_path[0][1] === true,
   );
-  const references: Map<ReferencedByTable['id'], ReferencedByTable> = new Map();
+  const references: ReferencedByTable[] = [];
 
   referenceLinks.forEach((reference) => {
     const tableId = reference.target;
@@ -250,7 +246,7 @@ export function getTablesThatReferenceBaseTable(
           ];
         });
 
-    references.set(tableId, {
+    references.push({
       id: tableId,
       name: table.name,
       referencedViaColumn: {
