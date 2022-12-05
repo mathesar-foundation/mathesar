@@ -8,7 +8,7 @@ from mathesar.models.users import DatabaseRole, Role, SchemaRole
 class ColumnAccessPolicy(AccessPolicy):
     """
     Anyone can view a Column as long as they have
-    at least a Viewer access to the Schema
+    at least a Viewer access to the Schema or the database
     Only superuser or schema/database manager can delete/modify/create a Column
     """
 
@@ -31,9 +31,13 @@ class ColumnAccessPolicy(AccessPolicy):
         if not request.user.is_superuser:
             allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
             permissible_database_role_filter = (
-                Q(table__schema__database__database_role__role__in=allowed_roles) & Q(table__schema__database__database_role__user=request.user)
+                Q(table__schema__database__database_role__role__in=allowed_roles)
+                & Q(table__schema__database__database_role__user=request.user)
             )
-            permissible_schema_roles_filter = (Q(table__schema__schema_role__role__in=allowed_roles) & Q(table__schema__schema_role__user=request.user))
+            permissible_schema_roles_filter = (
+                Q(table__schema__schema_role__role__in=allowed_roles)
+                & Q(table__schema__schema_role__user=request.user)
+            )
             qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
 
         return qs
