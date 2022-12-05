@@ -1,4 +1,4 @@
-type Callback<Arg> = (value: Arg) => Promise<void>;
+type Callback<Arg> = (value: Arg) => Promise<void> | void;
 type CallbackSet<Arg = unknown> = Set<Callback<Arg>>;
 
 export default class EventHandler<Events extends Record<string, unknown>> {

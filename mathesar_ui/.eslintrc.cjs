@@ -73,6 +73,8 @@ module.exports = {
         'no-constant-condition': 'off',
         '@typescript-eslint/restrict-template-expressions': 'off',
         '@typescript-eslint/no-unsafe-argument': 'off',
+        'no-sequences': 'off',
+        '@typescript-eslint/no-unused-expressions': 'off',
       },
     },
     {

@@ -1,53 +1,89 @@
+import pytest
+
 from db.transforms.base import Summarize, Limit
 from db.transforms.operations.serialize import serialize_transformation
 
 
+fully_speced_summarize = \
+    Summarize(
+        dict(
+            aggregation_expressions=[
+                dict(
+                    function='aggregate_to_array',
+                    input_alias='col2',
+                    output_alias='col2_agged'
+                )
+            ],
+            base_grouping_column='col1',
+            grouping_expressions=[
+                dict(
+                    input_alias='col1',
+                    output_alias='col1_grouped',
+                )
+            ]
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    'input_summarize, expected_summarize', [
+        [
+            Summarize(
+                dict(
+                    base_grouping_column='col1',
+                    aggregation_expressions=[
+                        dict(
+                            function='aggregate_to_array',
+                            input_alias='col2',
+                            output_alias='col2_agged'
+                        )
+                    ],
+                ),
+            ),
+            fully_speced_summarize,
+        ],
+        [
+            Summarize(
+                dict(
+                    base_grouping_column='col1',
+                    grouping_expressions=[
+                        dict(
+                            input_alias='col1',
+                            output_alias='col1_grouped',
+                        )
+                    ]
+                )
+            ),
+            fully_speced_summarize,
+        ],
+        [
+            Summarize(
+                dict(
+                    base_grouping_column='col1',
+                )
+            ),
+            fully_speced_summarize,
+        ],
+    ]
+)
 def test_partial_summarize_transform(
-    create_patents_table, client,
+    create_patents_table, client, input_summarize, expected_summarize,
 ):
     base_table = create_patents_table(table_name='patent_query_run_minimal_table')
-    col1_alias = 'col1'
     initial_columns = [
         {
             'id': base_table.get_column_by_name('Center').id,
-            'alias': col1_alias,
-            'display_name': 'Column 1',
+            'alias': 'col1',
         },
         {
             'id': base_table.get_column_by_name('Case Number').id,
             'alias': 'col2',
-            'display_name': 'Column 2',
         },
     ]
     input_summarize_transform_json = \
-        serialize_transformation(
-            Summarize(
-                dict(
-                    base_grouping_column=col1_alias,
-                )
-            )
-        )
+        serialize_transformation(input_summarize)
     expected_summarize_transform_json = \
-        serialize_transformation(
-            Summarize(
-                {
-                    'aggregation_expressions': [
-                        {
-                            'function': 'aggregate_to_array',
-                            'input_alias': 'col2',
-                            'output_alias': 'col2_agged'
-                        }
-                    ],
-                    'base_grouping_column': 'col1',
-                    'grouping_expressions': [
-                        {
-                            'input_alias': 'col1',
-                            'output_alias': 'col1_grouped'
-                        }
-                    ]
-                }
-            )
-        )
+        serialize_transformation(expected_summarize)
     limit_transform_json = serialize_transformation(Limit(5))
     input_transformations = [
         limit_transform_json,
@@ -60,6 +96,7 @@ def test_partial_summarize_transform(
     data = {
         'base_table': base_table.id,
         'initial_columns': initial_columns,
+        'display_names': None,
         'parameters': {
             'order_by': [
                 {'field': 'col1_grouped', 'direction': 'asc'},
@@ -80,7 +117,7 @@ def test_partial_summarize_transform(
         'column_metadata': {
             'col1': {
                 'alias': 'col1',
-                'display_name': 'Column 1',
+                'display_name': None,
                 'display_options': None,
                 'input_alias': None,
                 'input_column_name': 'Center',
@@ -102,7 +139,7 @@ def test_partial_summarize_transform(
             },
             'col2': {
                 'alias': 'col2',
-                'display_name': 'Column 2',
+                'display_name': None,
                 'display_options': None,
                 'input_alias': None,
                 'input_column_name': 'Case Number',
