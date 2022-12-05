@@ -82,6 +82,10 @@ COMPARABLE_TYPES = frozenset({
     *TIME_RELATED_TYPES,
 })
 
+ARRAY = frozenset({
+    PostgresType._ARRAY
+})
+
 JSON_TYPES = frozenset({
     PostgresType.JSON,
     PostgresType.JSONB,
@@ -89,6 +93,7 @@ JSON_TYPES = frozenset({
     MathesarCustomType.MATHESAR_JSON_ARRAY
 })
 
+# TODO is JSON_ARRAY useful being separate from ARRAY?
 JSON_ARRAY = frozenset({
     MathesarCustomType.MATHESAR_JSON_ARRAY,
 })
