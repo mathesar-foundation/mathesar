@@ -25,7 +25,7 @@
 
 {#each entries as entry, index (entry)}
   <FilterEntryComponent
-    columns={[...$processedColumns.values()]}
+    columns={$processedColumns}
     getColumnLabel={(column) =>
       $processedColumns.get(column.id)?.column.name ?? ''}
     bind:columnIdentifier={entry.columnId}
