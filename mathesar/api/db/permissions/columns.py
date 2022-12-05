@@ -8,7 +8,7 @@ from mathesar.models.users import DatabaseRole, Role, SchemaRole
 class ColumnAccessPolicy(AccessPolicy):
     """
     Anyone can view a Column as long as they have
-    at least a Viewer access to the Schema
+    at least a Viewer access to the Schema or the database
     Only superuser or schema/database manager can delete/modify/create a Column
     """
 
