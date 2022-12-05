@@ -48,6 +48,7 @@ def _build_db_types_hinted():
     _add_to_db_type_hintsets(categories.DATETIME_TYPES, (hints.date, hints.time,))
     _add_to_db_type_hintsets(categories.DURATION_TYPES, (hints.duration,))
     _add_to_db_type_hintsets(categories.COMPARABLE_TYPES, (hints.comparable,))
+    _add_to_db_type_hintsets(categories.INTEGER_TYPES, (hints.integer,))
 
     # TODO do we want JSON_ARRAY and ARRAY distinct here?
     _add_to_db_type_hintsets(categories.JSON_ARRAY, (hints.json_array,))
