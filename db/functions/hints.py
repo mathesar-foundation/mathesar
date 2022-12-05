@@ -101,6 +101,9 @@ column = _make_hint("column")
 array = _make_hint("array")
 
 
+numeric = _make_hint("numeric")
+
+
 string_like = _make_hint("string_like")
 
 
