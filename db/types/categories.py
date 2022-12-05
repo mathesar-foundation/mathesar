@@ -93,6 +93,7 @@ JSON_TYPES = frozenset({
     MathesarCustomType.MATHESAR_JSON_ARRAY
 })
 
+# TODO is JSON_ARRAY useful being separate from ARRAY?
 JSON_ARRAY = frozenset({
     MathesarCustomType.MATHESAR_JSON_ARRAY,
 })
