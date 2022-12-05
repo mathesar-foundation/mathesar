@@ -5,9 +5,11 @@ from mathesar.models.users import DatabaseRole, Role, SchemaRole
 
 
 class RecordAccessPolicy(AccessPolicy):
-    # Anyone can view a Record as long as they have
-    # at least a Viewer access to the schema or its database
-    # Create Access is restricted to superusers or managers of the schema or the database the constraint is part of.
+    """
+    Anyone can view a Column as long as they are a superuser or have
+    at least a Viewer access to the Schema or the database
+    Only superuser or schema/database Manager/Editor can delete/modify/create a Record
+    """
     statements = [
         {
             'action': ['list', 'retrieve'],
