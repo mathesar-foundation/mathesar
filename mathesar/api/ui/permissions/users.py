@@ -11,7 +11,7 @@ class UserAccessPolicy(AccessPolicy):
         },
         # Only superusers can create users
         {
-            'action': ['create'],
+            'action': ['create', 'password_reset'],
             'principal': ['*'],
             'effect': 'allow',
             'condition': 'is_superuser'

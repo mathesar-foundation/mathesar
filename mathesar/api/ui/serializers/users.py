@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from rest_access_policy import FieldAccessMixin, PermittedPkRelatedField
 from rest_framework import serializers
 
@@ -52,6 +53,11 @@ class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.Mo
         user.set_password(password)
         user.save()
         return user
+
+
+class PasswordResetSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    username = serializers.SlugRelatedField(queryset=get_user_model().objects.all(), slug_field='username')
+    password = serializers.CharField()
 
 
 class DatabaseRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
