@@ -153,7 +153,7 @@ class ColumnSerializer(SimpleColumnSerializer):
         # Reevaluate column display options based on the new column type.
         if TYPE_KEY in data and self.instance:
             target_types = self.get_valid_target_types(self.instance)
-            if data[TYPE_KEY] not in target_types:
+            if data[TYPE_KEY].lower() not in target_types:
                 raise database_api_exceptions.InvalidTypeCastAPIException(
                     InvalidTypeError,
                     status_code=status.HTTP_400_BAD_REQUEST
@@ -164,8 +164,6 @@ class ColumnSerializer(SimpleColumnSerializer):
                 if db_type is not None:
                     if str(db_type.id) != data[TYPE_KEY]:
                         data[DISPLAY_OPTIONS_KEY] = None
-            else:
-                data[DISPLAY_OPTIONS_KEY] = None
         if not self.partial:
             from_scratch_required_fields = [TYPE_KEY]
             from_scratch_specific_fields = [TYPE_KEY, 'nullable', 'primary_key']
