@@ -1,8 +1,9 @@
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from rest_framework import serializers
+
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models.query import UIQuery
-from django.core.exceptions import ValidationError
 
 
 class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
@@ -10,7 +11,7 @@ class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer
 
     class Meta:
         model = UIQuery
-        fields = ['schema', 'initial_columns', 'transformations', 'base_table']
+        fields = ['schema', 'initial_columns', 'transformations', 'base_table', 'display_names']
 
     def get_schema(self, uiquery):
         base_table = uiquery.base_table

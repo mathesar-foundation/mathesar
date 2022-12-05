@@ -17,9 +17,9 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
         with:
-          key: mathesar-docker-cache-{hash}
+          key: mathesar-docker-cache-new-{hash}
           restore-keys: |
-            mathesar-docker-cache-
+            mathesar-docker-cache-new
 
       - name: Copy env file
         run: cp .env.example .env
