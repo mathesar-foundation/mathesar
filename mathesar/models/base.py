@@ -1,4 +1,4 @@
-from functools import reduce
+from functools import reduce, wraps
 
 from bidict import bidict
 
@@ -53,10 +53,23 @@ from mathesar.database.types import UIType, get_ui_type_from_db_type
 from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
 from mathesar.state.cached_property import cached_property
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
+from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValueType, DictHasBadKeys
 
 
 NAME_CACHE_INTERVAL = 60 * 5
 
+def _get_validator_for_list_of_ints(field_name):
+    # NOTE `wraps` decorations needed to interop with Django's migrations
+    @wraps(_get_validator_for_list_of_ints)
+    def _validator(value):
+        if not isinstance(value, list):
+            message = f"{value} should be a list."
+            raise InvalidValueType(message, field=field_name)
+        for subvalue in value:
+            if not isinstance(subvalue, int):
+                message = f"{value} should contain only ints."
+                raise InvalidValueType(message, field=field_name)
+    return _validator
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -863,7 +876,9 @@ class PreviewColumnSettings(BaseModel):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = JSONField(null=True, default=None)
+    column_order = JSONField(null=True, default=None, validators=[
+            _get_validator_for_list_of_ints(field_name="column_order"),
+        ],)
 
 
 def _create_table_settings(tables):

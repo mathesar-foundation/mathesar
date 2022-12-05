@@ -89,3 +89,18 @@ def test_update_table_settings(client, column_test_table):
     assert response_data['preview_settings']['template'] == preview_template
     assert response_data['preview_settings']['customized'] is True
     assert response_data['column_order'] == column_order
+
+
+def test_update_table_settings_string_in_column_order(client, column_test_table):
+    column_order = ["4", "5", "6"]
+    data = {
+        "column_order": column_order
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{column_test_table.id}/settings/{column_test_table.settings.id}/",
+        data=data,
+    )
+    assert response.status_code == 200
+    response_data = response.json()
+    assert response_data == None
+    assert response_data['column_order'] == column_order
