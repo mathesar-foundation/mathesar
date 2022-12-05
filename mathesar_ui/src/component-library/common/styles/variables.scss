@@ -11,6 +11,7 @@
   // between the Figma designs and the codebase
   // which then makes it easier and faster to create
   // element from design into code.
+  --red-100: #fdeeed;
   --red-500: #eb5441;
   --red-600: #dd4734;
   --red-800: #c63826;
@@ -62,4 +63,5 @@
   --border-radius-s: 0.142rem; //2px
   --border-radius-m: 0.285rem; //4px
   --border-radius-l: 0.571rem; //8px
+  --border-radius-xl: 1.142rem; //16px
 }

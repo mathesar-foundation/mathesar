@@ -1,4 +1,5 @@
 from django.urls import reverse
+from rest_access_policy import PermittedPkRelatedField
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from sqlalchemy.exc import ProgrammingError
@@ -6,6 +7,8 @@ from sqlalchemy.exc import ProgrammingError
 from db.types.operations.convert import get_db_type_enum_from_id
 from db.tables.operations.create import DuplicateTable
 from db.columns.exceptions import InvalidTypeError
+from mathesar.api.db.permissions.schema import SchemaAccessPolicy
+from mathesar.api.db.permissions.table import TableAccessPolicy
 
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
@@ -19,7 +22,7 @@ from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_a
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
 from mathesar.api.serializers.table_settings import TableSettingsSerializer
-from mathesar.models.base import Column, Table, DataFile
+from mathesar.models.base import Column, Schema, Table, DataFile
 from mathesar.utils.tables import gen_table_name, create_table_from_datafile, create_empty_table
 
 
@@ -42,6 +45,10 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     )
     description = serializers.CharField(
         required=False, allow_blank=True, default=None, allow_null=True
+    )
+    schema = PermittedPkRelatedField(
+        access_policy=SchemaAccessPolicy,
+        queryset=Schema.current_objects.all()
     )
 
     class Meta:
@@ -205,7 +212,7 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 
 class MoveTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     move_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
-    target_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+    target_table = PermittedPkRelatedField(access_policy=TableAccessPolicy, queryset=Table.current_objects.all())
 
 
 class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
@@ -227,6 +234,6 @@ class MappingSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 
 
 class TableImportSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    import_target = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all(), required=True)
+    import_target = PermittedPkRelatedField(access_policy=TableAccessPolicy, queryset=Table.current_objects.all(), required=True)
     data_files = serializers.PrimaryKeyRelatedField(required=True, many=True, queryset=DataFile.objects.all())
     mappings = MappingSerializer(required=True, allow_null=True, many=True)
