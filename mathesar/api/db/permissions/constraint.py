@@ -9,7 +9,7 @@ class ConstraintAccessPolicy(AccessPolicy):
     """
     Anyone can view Constraint as long as they have
     at least a Viewer access to the schema or its database
-    Only superuser or schema/database manager can create/delete/modify/update the Constraint
+    Only superuser or schema/database manager can create/delete/update the Constraint
     """
     statements = [
         {
