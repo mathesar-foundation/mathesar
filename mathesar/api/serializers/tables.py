@@ -8,6 +8,7 @@ from db.types.operations.convert import get_db_type_enum_from_id
 from db.tables.operations.create import DuplicateTable
 from db.columns.exceptions import InvalidTypeError
 from mathesar.api.db.permissions.schema import SchemaAccessPolicy
+from mathesar.api.db.permissions.table import TableAccessPolicy
 
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
@@ -207,7 +208,7 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 
 class MoveTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     move_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
-    target_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+    target_table = PermittedPkRelatedField(access_policy=TableAccessPolicy, queryset=Table.current_objects.all())
 
 
 class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
@@ -229,6 +230,6 @@ class MappingSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 
 
 class TableImportSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    import_target = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all(), required=True)
+    import_target = PermittedPkRelatedField(access_policy=TableAccessPolicy, queryset=Table.current_objects.all(), required=True)
     data_files = serializers.PrimaryKeyRelatedField(required=True, many=True, queryset=DataFile.objects.all())
     mappings = MappingSerializer(required=True, allow_null=True, many=True)

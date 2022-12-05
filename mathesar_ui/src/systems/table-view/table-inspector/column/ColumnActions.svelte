@@ -7,22 +7,24 @@
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
-  import type {
-    ColumnsDataStore,
-    ProcessedColumn,
+  import {
+    getTabularDataStoreFromContext,
+    type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import ExtractColumnsModal from './column-extraction/ExtractColumnsModal.svelte';
   import { ExtractColumnsModalController } from './column-extraction/ExtractColumnsModalController';
 
-  export let columnsDataStore: ColumnsDataStore;
-  export let columns: ProcessedColumn[];
-
+  const tabularData = getTabularDataStoreFromContext();
   const extractColumns = new ExtractColumnsModalController(
     modal.getPropsForNewModal(),
   );
 
+  export let columns: ProcessedColumn[];
+
+  $: ({ processedColumns, columnsDataStore } = $tabularData);
   $: column = columns.length === 1 ? columns[0] : undefined;
   $: s = columns.length > 1 ? 's' : '';
+  $: canMoveToLinkedTable = [...$processedColumns].some(([, c]) => c.linkFk);
 
   function handleDeleteColumn(c: ProcessedColumn) {
     void confirmDelete({
@@ -60,15 +62,17 @@
       <Icon {...iconSettings} />
     </div>
   </Button>
-  <Button on:click={handleMoveColumnsToExistingLinkedTable}>
-    <div class="action-item">
-      <div>
-        <Icon {...iconMoveColumnsToExistingLinkedTable} />
-        <span>Move column{s} to existing linked table</span>
+  {#if canMoveToLinkedTable}
+    <Button on:click={handleMoveColumnsToExistingLinkedTable}>
+      <div class="action-item">
+        <div>
+          <Icon {...iconMoveColumnsToExistingLinkedTable} />
+          <span>Move column{s} to existing linked table</span>
+        </div>
+        <Icon {...iconSettings} />
       </div>
-      <Icon {...iconSettings} />
-    </div>
-  </Button>
+    </Button>
+  {/if}
   {#if column}
     <Button
       appearance="outline-primary"
