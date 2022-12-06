@@ -1,4 +1,4 @@
-import type { SortDirection } from "@mathesar/stores/table-data";
+import type { SortDirection } from '@mathesar/stores/table-data';
 
 export type SortEntryEvents = {
   remove: number;
