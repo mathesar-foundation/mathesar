@@ -1,7 +1,13 @@
 <script lang="ts">
-  import { AttachableDropdown, TextInput } from '@mathesar/component-library';
+  import {
+    AttachableDropdown,
+    Button,
+    Icon,
+    iconSearch,
+  } from '@mathesar/component-library';
+  import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
+  import { iconExpandRight } from '@mathesar/icons';
   import BreadcrumbSelectorRow from './BreadcrumbSelectorRow.svelte';
-  import BreadcrumbSeparatorIcon from './BreadcrumbSeparatorIcon.svelte';
   import type { BreadcrumbSelectorData } from './breadcrumbTypes';
   import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
 
@@ -25,17 +31,20 @@
 </script>
 
 <div class="entity-switcher" class:is-open={isOpen}>
-  <button
-    class="trigger passthrough-button"
-    bind:this={triggerElement}
+  <Button
     on:click={() => {
       isOpen = !isOpen;
     }}
     aria-label={triggerLabel}
     title={triggerLabel}
+    appearance="ghost"
+    bind:element={triggerElement}
+    class="padding-zero"
   >
-    <BreadcrumbSeparatorIcon />
-  </button>
+    <div class="trigger">
+      <Icon {...iconExpandRight} />
+    </div>
+  </Button>
 
   <AttachableDropdown
     bind:isOpen
@@ -44,14 +53,28 @@
   >
     <div class="entity-switcher-content">
       <div class="search">
-        <TextInput bind:value={filterString} bind:element={textInputEl} />
+        <TextInputWithPrefix
+          prefixIcon={iconSearch}
+          bind:value={filterString}
+          bind:element={textInputEl}
+        />
       </div>
       <div class="results">
         {#each [...processedData] as [categoryName, entries] (categoryName)}
           <!-- data coming down from parent can have categories with 0 items: we
         don't want to render that. -->
           {#if entries.length > 0}
-            <div class="section-name">{categoryName}</div>
+            <div class="section-name">
+              {#if filterString?.length === 0}
+                {categoryName}
+              {:else}
+                {`${entries.length} match${
+                  entries.length > 1 ? 's' : ''
+                } for '${filterString}' ${
+                  processedData.size > 1 ? `in ${categoryName}` : ''
+                }`}
+              {/if}
+            </div>
             <ul class="items">
               {#each entries as entry (entry.href)}
                 <BreadcrumbSelectorRow
@@ -64,13 +87,19 @@
               {/each}
             </ul>
           {/if}
+        {:else}
+          {#if filterString.length > 0}
+            <div class="section-name">
+              No matches for '{filterString}'
+            </div>
+          {/if}
         {/each}
       </div>
     </div>
   </AttachableDropdown>
 </div>
 
-<style>
+<style lang="scss">
   :global(.breadcrumb-selector-dropdown) {
     display: flex;
   }
@@ -85,45 +114,26 @@
     overflow-y: auto;
   }
   .section-name {
-    font-size: var(--text-size-x-small);
     margin: 0.25rem 0;
-
-    color: var(--color-text-muted);
-    text-transform: uppercase;
   }
   .items {
     list-style: none;
-    padding: 0;
+    padding-left: 0.5rem;
     margin: 0;
-  }
-  /* TODO: reduce code duplication with this CSS used elsewhere. */
-  .passthrough-button {
-    background: inherit;
-    border-radius: inherit;
-    border: inherit;
-    color: inherit;
-    cursor: inherit;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    text-align: inherit;
-    margin: 0;
-    padding: 0;
   }
   .entity-switcher .trigger {
-    --background-color: var(--color-gray-lighter);
-    --border-color: var(--color-gray-dark);
-    display: block;
-    cursor: pointer;
-  }
-  .entity-switcher .trigger :global(svg) {
-    height: 1.8rem;
-    display: block;
-  }
-  .entity-switcher .trigger:hover,
-  .entity-switcher.is-open .trigger {
-    --background-color: var(--color-contrast);
-    --icon-color: white;
-    --border-color: var(--color-contrast);
+    border: 1px solid var(--slate-500);
+    color: var(--slate-400);
+    border-radius: var(--border-radius-m);
+    display: flex;
+    align-items: center;
+    padding: 0.25rem;
+
+    &:hover,
+    &:active {
+      background-color: var(--slate-100);
+      color: var(--slate-500);
+      border-color: var(--slate-300);
+    }
   }
 </style>

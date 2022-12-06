@@ -109,6 +109,7 @@
   }
   .name {
     font-size: var(--text-size-xx-large);
+    --icon-color: var(--brand-500);
   }
 
   .lock {
