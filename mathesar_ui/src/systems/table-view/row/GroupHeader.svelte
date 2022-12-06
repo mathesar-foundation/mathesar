@@ -37,20 +37,22 @@
   let:style
 >
   <div {...htmlAttributes} {style} class="group-header">
-    <CellBackground color="var(--cell-bg-color-header)" />
-    {#each columnIds as columnId, index (columnId)}
-      <GroupHeaderCellValue
-        {processedColumnsMap}
-        cellValue={row.groupValues ? row.groupValues[columnId] : undefined}
-        {recordSummariesForSheet}
-        {columnId}
-        preprocName={preprocNames[index]}
-      />
-    {/each}
-    <div class="count-container">
-      <Badge>
-        {group.count}
-      </Badge>
+    <CellBackground color="var(--sand-200)" />
+    <div class="groups-data">
+      {#each columnIds as columnId, index (columnId)}
+        <GroupHeaderCellValue
+          {processedColumnsMap}
+          cellValue={row.groupValues ? row.groupValues[columnId] : undefined}
+          {recordSummariesForSheet}
+          {columnId}
+          preprocName={preprocNames[index]}
+        />
+      {/each}
+      <div class="count-container">
+        <Badge>
+          {group.count}
+        </Badge>
+      </div>
     </div>
   </div>
 </SheetPositionableCell>
@@ -58,10 +60,15 @@
 <style lang="scss">
   .group-header {
     padding: 0.5rem 0.4rem;
-    gap: 1rem;
-    background-color: var(--sand-200);
+
+    .groups-data {
+      align-items: start;
+      display: flex;
+      gap: 1rem;
+    }
 
     .count-container {
+      --badge-font-size: var(--text-size-small);
       --badge-text-color: var(--slate-800);
       --badge-background-color: var(--slate-100);
       height: 100%;
