@@ -65,7 +65,7 @@
           showArrow={false}
           triggerAppearance="plain"
           closeOnInnerClick={true}
-          label=""
+          ariaLabel="{column.name} Field Options"
           icon={iconExpandDown}
         >
           <ButtonMenuItem
