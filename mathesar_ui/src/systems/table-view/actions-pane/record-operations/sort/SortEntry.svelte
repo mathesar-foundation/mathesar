@@ -6,8 +6,9 @@
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { SortDirection } from '@mathesar/stores/table-data';
   import { createEventDispatcher } from 'svelte';
+  import type { SortEntryEvents } from '../types';
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<SortEntryEvents>();
 
   export let availableColumns: Column[];
   export let sortColumnId: number;

@@ -4,7 +4,8 @@
   import { SortDirection, type Sorting } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/tables/columns';
   import { iconAddNew } from '@mathesar/icons';
-  import SortEntries from './SortEntries.svelte';
+  import SortEntries from './SortEntry.svelte';
+  import type { SortEntryEvents } from '../types';
 
   export let sorting: Writable<Sorting>;
   export let columns: Column[];
@@ -18,23 +19,28 @@
     sorting.update((s) => s.with(newSortColumn.id, newSortDirection));
   }
 
-  function removeSortColumn(columnId: number) {
+  function removeSortColumn(
+    columnId: CustomEvent<SortEntryEvents['remove']>['detail'],
+  ) {
     sorting.update((s) => s.without(columnId));
   }
 
   function updateSorter(
-    sorter: { columnId: number; direction: SortDirection },
+    sorter: CustomEvent<SortEntryEvents['update']>['detail'],
     oldColumnId: number,
   ) {
-    /**
-     * This check will esure that the order of the
-     * sorters are not changed when the user
-     * changes the SortDirection of the top sorters
-     */
-    if (oldColumnId !== sorter.columnId) {
-      sorting.update((s) => s.without(oldColumnId));
+    const { columnId, direction } = sorter;
+    if (typeof columnId === 'number') {
+      /**
+       * This check will esure that the order of the
+       * sorters are not changed when the user
+       * changes the SortDirection of the top sorters
+       */
+      if (oldColumnId !== columnId) {
+        sorting.update((s) => s.without(oldColumnId));
+      }
+      sorting.update((s) => s.with(columnId, direction));
     }
-    sorting.update((s) => s.with(sorter.columnId, sorter.direction));
   }
 </script>
 
