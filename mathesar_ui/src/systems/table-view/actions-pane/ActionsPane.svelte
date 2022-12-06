@@ -122,6 +122,7 @@
         size="medium"
         disabled={$isLoading}
         on:click={toggleTableInspector}
+        active={$isTableInspectorVisible}
       >
         <Icon {...iconInspector} />
         <span>Inspector</span>

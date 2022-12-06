@@ -16,6 +16,7 @@
   }
 
   &:active,
+  &.active,
   &:focus {
     outline: 0;
   }
@@ -44,7 +45,8 @@
         border-color: var(--brand-600);
       }
 
-      &:active {
+      &:active,
+      &.active {
         background: var(--brand-800);
         border-color: var(--brand-800);
       }
@@ -62,8 +64,10 @@
         border-color: var(--slate-300);
       }
 
-      &:active {
-        background: var(--slate-300);
+      &:active, 
+      &.active {
+        background: var(--slate-500);
+        color: var(--white);
       }
     }
   }
@@ -80,7 +84,8 @@
         border-color: var(--brand-600);
       }
 
-      &:active {
+      &:active,
+      &.active {
         background: var(--slate-200);
         border-color: var(--brand-800);
       }
@@ -118,12 +123,14 @@
       }
 
       &:active,
+      &.active,
       &:focus,
       &.focus {
         box-shadow: 0 0 0 2px var(--slate-100) !important;
       }
 
-      &:active {
+      &:active,
+      &.active {
         background: var(--slate-200);
       }
     }
