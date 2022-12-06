@@ -24,7 +24,7 @@ export interface TableEntry {
   id: number;
   name: string;
   schema: number;
-  import_verified: boolean;
+  import_verified: boolean | null;
   data_files?: number[];
   columns: MinimalColumnDetails[];
   settings: TableSettings;
