@@ -28,6 +28,7 @@ export interface TableEntry {
   data_files?: number[];
   columns: MinimalColumnDetails[];
   settings: TableSettings;
+  description: string | null;
 }
 
 /**

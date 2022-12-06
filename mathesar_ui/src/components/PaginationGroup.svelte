@@ -44,7 +44,7 @@
       on:change={handlePageChange}
     />
     <Select
-      triggerAppearance="plain"
+      triggerAppearance="secondary"
       options={pageSizeOpts}
       value={pageSize}
       on:change={setPageSize}
