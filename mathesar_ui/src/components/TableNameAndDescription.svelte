@@ -20,7 +20,6 @@
 <style lang="scss">
   .name-and-description {
     .name {
-      font-weight: bolder;
       display: -webkit-box;
       -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
