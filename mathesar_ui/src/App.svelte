@@ -96,7 +96,7 @@
     --cell-bg-color-row-hover: #f6f7f7;
     --cell-bg-color-row-selected: #e4f2ff;
 
-    --color-fk: #dfd0b3;
+    --color-fk: var(--yellow-300);
     --color-error: #f47171;
     --cell-text-color-processing: #888;
     --color-array-element: #c1e8e8;
