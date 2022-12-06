@@ -7,7 +7,6 @@
   export let isLoading = false;
   /** When true, the icon will be rendered within a box */
   export let iconHasBox = false;
-  export let truncateName = true;
 
   $: icons = Array.isArray(icon) ? icon : [icon];
 </script>
@@ -25,23 +24,22 @@
       {/each}
     {/if}
   </span>
-  <span class="name" class:truncate={truncateName}><slot /></span>
+  <span class="name"><slot /></span>
 </span>
 
 <style lang="scss">
   .name-with-icon {
-    display: inline-flex;
-    align-items: center;
     text-decoration: inherit;
     overflow: hidden;
     max-width: 100%;
-    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .icon {
     flex: 0 0 auto;
     display: inline-flex;
-    margin-right: 0.4em;
     /**
      * This component gets used in headings and other places where the text is
      * larger. But having the icon scale linearly with the text produces an icon
@@ -53,7 +51,9 @@
     color: var(--icon-color, currentcolor);
     opacity: var(--icon-opacity, 0.75);
     align-items: center;
-    vertical-align: middle;
+    vertical-align: top;
+    position: relative;
+    top: 0.1em;
 
     > :global(svg) {
       display: block;
@@ -69,18 +69,12 @@
     border-radius: 0.25em;
     padding: 0.2em;
     background: var(--icon-color, currentcolor);
+    top: 0;
   }
   .name-with-icon.boxed .icon > :global(svg) {
     color: var(--white);
   }
   .name {
-    display: block;
     color: var(--name-color, var(--slate-800));
-
-    &.truncate {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
   }
 </style>
