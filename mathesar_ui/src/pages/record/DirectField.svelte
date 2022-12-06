@@ -6,6 +6,7 @@
     Label,
     LabelController,
   } from '@mathesar/component-library';
+  import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import type { FieldStore } from '@mathesar/components/form';
@@ -15,6 +16,26 @@
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import type RecordStore from './RecordStore';
 
+  /**
+   * This is used to determine whether to display a `NULL` overlay indicator.
+   * For text data types the indicator is important because otherwise the user
+   * has no way to distinguish an empty string from a `NULL` value. But for some
+   * data types (e.g. Date), we can't show the indicator because the input
+   * component already shows placeholder text to guide the user towards the
+   * required formatting.
+   *
+   * TODO: Refactor this logic. Invert control. Each data type should define a
+   * common param to indicate how a NULL value should be displayed over its
+   * input component. Then we should grab onto that param within this component.
+   * The pattern we're currently using is brittle because if we add new data
+   * types we shouldn't need to update this code here.
+   */
+  const cellDataTypesThatUsePlaceholderText = new Set<CellDataType>([
+    'date',
+    'datetime',
+    'duration',
+    'time',
+  ]);
   const labelController = new LabelController();
 
   export let record: RecordStore;
@@ -22,10 +43,13 @@
   export let field: FieldStore;
 
   $: ({ recordSummaries } = record);
-  $: ({ column } = processedColumn);
+  $: ({ column, abstractType } = processedColumn);
   $: value = $field;
   $: ({ showsError } = field);
   $: disabled = column.primary_key;
+  $: shouldDisplayNullOverlay = !cellDataTypesThatUsePlaceholderText.has(
+    abstractType.cellInfo.type,
+  );
 </script>
 
 <div class="direct-field">
@@ -44,13 +68,20 @@
           label=""
           icon={iconExpandDown}
         >
-          <ButtonMenuItem icon={iconSetToNull}>Set to <Null /></ButtonMenuItem>
+          <ButtonMenuItem icon={iconSetToNull} on:click={() => field.set(null)}>
+            Set to <Null />
+          </ButtonMenuItem>
         </DropdownMenu>
       </div>
     </div>
   </div>
 
   <div class="input cell">
+    {#if $field === null && shouldDisplayNullOverlay}
+      <div class="null">
+        <Null />
+      </div>
+    {/if}
     <DynamicInput
       bind:value={$field}
       {disabled}
@@ -93,5 +124,20 @@
   }
   .options {
     margin: 0 0.2rem;
+  }
+  .input {
+    position: relative;
+    isolation: isolate;
+  }
+  .input > :global(*) {
+    position: relative;
+    z-index: 1;
+  }
+  .null {
+    position: absolute;
+    z-index: 2;
+    top: 0.5rem;
+    left: 0.8rem;
+    pointer-events: none;
   }
 </style>
