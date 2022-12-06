@@ -16,7 +16,6 @@ class PreviewColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerial
 
 class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
     preview_settings = PreviewColumnSerializer()
-    column_order = serializers.ListField(required=False)
 
     class Meta:
         model = TableSettings

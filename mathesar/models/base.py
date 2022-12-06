@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
+from django.contrib.postgres.fields import ArrayField
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -58,18 +59,6 @@ from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValu
 
 NAME_CACHE_INTERVAL = 60 * 5
 
-def _get_validator_for_list_of_ints(field_name):
-    # NOTE `wraps` decorations needed to interop with Django's migrations
-    @wraps(_get_validator_for_list_of_ints)
-    def _validator(value):
-        if not isinstance(value, list):
-            message = f"{value} should be a list."
-            raise InvalidValueType(message, field=field_name)
-        for subvalue in value:
-            if not isinstance(subvalue, int):
-                message = f"{value} should contain only ints."
-                raise InvalidValueType(message, field=field_name)
-    return _validator
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -876,9 +865,7 @@ class PreviewColumnSettings(BaseModel):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = JSONField(null=True, default=None, validators=[
-            _get_validator_for_list_of_ints(field_name="column_order"),
-        ],)
+    column_order = ArrayField(models.IntegerField(), null=True, default=None)
 
 
 def _create_table_settings(tables):

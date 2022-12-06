@@ -93,6 +93,7 @@ def test_update_table_settings(client, column_test_table):
 
 def test_update_table_settings_string_in_column_order(client, column_test_table):
     column_order = ["4", "5", "6"]
+    column_order_as_ints = [4, 5, 6]
     data = {
         "column_order": column_order
     }
@@ -102,5 +103,4 @@ def test_update_table_settings_string_in_column_order(client, column_test_table)
     )
     assert response.status_code == 200
     response_data = response.json()
-    assert response_data == None
-    assert response_data['column_order'] == column_order
+    assert response_data['column_order'] == column_order_as_ints
