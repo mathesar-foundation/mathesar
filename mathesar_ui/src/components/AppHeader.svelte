@@ -2,15 +2,39 @@
   import {
     DropdownMenu,
     Icon,
+    iconLoading,
     LinkMenuItem,
   } from '@mathesar-component-library';
   import { currentDatabase } from '@mathesar/stores/databases';
-  import { iconUser } from '@mathesar/icons';
-  import { getDatabasePageUrl } from '@mathesar/routes/urls';
+  import { iconAddNew, iconExploration, iconUser } from '@mathesar/icons';
+  import {
+    getDatabasePageUrl,
+    getDataExplorerPageUrl,
+    getImportPageUrl,
+    getTablePageUrl,
+  } from '@mathesar/routes/urls';
   import DatabaseName from '@mathesar/components/DatabaseName.svelte';
   import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import CreateEmptyTableButton from '@mathesar/pages/schema/CreateEmptyTableButton.svelte';
+  import { createTable } from '@mathesar/stores/tables';
+  import { router } from 'tinro';
+  import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
 
   $: database = $currentDatabase;
+  $: schema = $currentSchemaId;
+
+  let isCreatingNewEmptyTable = false;
+
+  async function handleCreateEmptyTable() {
+    if (!schema || !database) {
+      return;
+    }
+    isCreatingNewEmptyTable = true;
+    const tableInfo = await createTable(schema, {});
+    isCreatingNewEmptyTable = false;
+    router.goto(getTablePageUrl(database.name, schema, tableInfo.id), false);
+  }
 </script>
 
 <header class="app-header">
@@ -19,14 +43,31 @@
   </div>
 
   <div class="right">
-    <DropdownMenu
-      triggerAppearance="ghost"
-      size="small"
-      closeOnInnerClick={true}
-      label="Shortcuts"
-    >
-      <!-- TODO: Show shortcuts -->
-    </DropdownMenu>
+    {#if schema && database}
+      <DropdownMenu
+        triggerAppearance="ghost"
+        size="small"
+        closeOnInnerClick={true}
+        label="Shortcuts"
+        icon={isCreatingNewEmptyTable ? iconLoading : undefined}
+      >
+        <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}
+          >New Table from Scratch</ButtonMenuItem
+        >
+        <LinkMenuItem
+          icon={iconAddNew}
+          href={getImportPageUrl(database?.name, schema)}
+        >
+          New Table from Data Import
+        </LinkMenuItem>
+        <LinkMenuItem
+          icon={iconExploration}
+          href={getDataExplorerPageUrl(database?.name, schema)}
+        >
+          Open Data Explorer
+        </LinkMenuItem>
+      </DropdownMenu>
+    {/if}
     <DropdownMenu
       triggerAppearance="ghost"
       size="small"
