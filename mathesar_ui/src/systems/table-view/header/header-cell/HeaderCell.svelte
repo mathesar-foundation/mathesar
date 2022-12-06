@@ -14,6 +14,7 @@
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import {
     iconFiltering,
+    iconGrouping,
     iconSortAscending,
     iconSortDescending,
   } from '@mathesar/icons';
@@ -23,12 +24,15 @@
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ meta } = $tabularData);
-  $: ({ filtering, sorting } = meta);
+  $: ({ filtering, sorting, grouping } = meta);
 
   $: hasFilter = $filtering.entries.some(
     (entry) => entry.columnId === processedColumn.id,
   );
   $: sorter = $sorting.get(processedColumn.id);
+  $: grouped = $grouping.entries.some(
+    (entry) => entry.columnId === processedColumn.id,
+  );
 </script>
 
 <div class="header-cell-root">
@@ -37,7 +41,7 @@
     <span>
       <ProcessedColumnName {processedColumn} />
     </span>
-    {#if sorter || hasFilter}
+    {#if sorter || hasFilter || grouped}
       <div class="indicator-icons">
         {#if sorter}
           <Icon
@@ -48,6 +52,9 @@
         {/if}
         {#if hasFilter}
           <Icon {...iconFiltering} />
+        {/if}
+        {#if grouped}
+          <Icon {...iconGrouping} />
         {/if}
       </div>
     {/if}
