@@ -14,12 +14,11 @@
     getTablePageUrl,
   } from '@mathesar/routes/urls';
   import DatabaseName from '@mathesar/components/DatabaseName.svelte';
-  import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
   import { currentSchemaId } from '@mathesar/stores/schemas';
-  import CreateEmptyTableButton from '@mathesar/pages/schema/CreateEmptyTableButton.svelte';
   import { createTable } from '@mathesar/stores/tables';
   import { router } from 'tinro';
   import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
+  import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
 
   $: database = $currentDatabase;
   $: schema = $currentSchemaId;

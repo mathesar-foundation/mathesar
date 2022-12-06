@@ -8,6 +8,7 @@
     getSchemaPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
+  import { iconRecord } from '@mathesar/icons';
   import BreadcrumbLink from './BreadcrumbLink.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
   import EntitySelector from './EntitySelector.svelte';
@@ -15,7 +16,6 @@
   import LogoAndNameWithLink from './LogoAndNameWithLink.svelte';
   import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
   import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
-  import { iconRecord } from '@mathesar/icons';
 
   export let item: BreadcrumbItem;
 </script>
