@@ -86,7 +86,7 @@
     height: 100%;
     display: grid;
     grid-template: auto 1fr / auto;
-    overflow: auto;
+    overflow-y: auto;
   }
   .header {
     display: grid;

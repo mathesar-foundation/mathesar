@@ -11,6 +11,7 @@ export { default as portal } from './common/actions/portal';
 export { default as Alert } from './alert/Alert.svelte';
 export { default as AnchorButton } from './anchorButton/AnchorButton.svelte';
 export { default as Badge } from './badge/Badge.svelte';
+export { default as BadgeCount } from './badge-count/BadgeCount.svelte';
 export { default as Tutorial } from './tutorial/Tutorial.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
