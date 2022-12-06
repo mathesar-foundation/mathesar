@@ -27,10 +27,22 @@ export interface BreadcrumbItemSimple {
   icon?: IconProps;
 }
 
+export interface BreadcrumbItemRecord {
+  type: 'record';
+  database: Database;
+  schema: SchemaEntry;
+  table: TableEntry;
+  record: {
+    id: number;
+    summary: string;
+  };
+}
+
 export type BreadcrumbItem =
   | BreadcrumbItemDatabase
   | BreadcrumbItemSchema
   | BreadcrumbItemTable
+  | BreadcrumbItemRecord
   | BreadcrumbItemSimple;
 
 export interface BaseBreadcrumbSelectorEntry {

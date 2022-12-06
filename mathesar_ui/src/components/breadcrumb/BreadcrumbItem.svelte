@@ -4,6 +4,7 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import {
     getDatabasePageUrl,
+    getRecordPageUrl,
     getSchemaPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
@@ -14,6 +15,7 @@
   import LogoAndNameWithLink from './LogoAndNameWithLink.svelte';
   import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
   import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
+  import { iconRecord } from '@mathesar/icons';
 
   export let item: BreadcrumbItem;
 </script>
@@ -34,6 +36,17 @@
       <TableName table={item.table} />
     </BreadcrumbLink>
     <BreadcrumbRecordSelector table={item.table} />
+  {:else if item.type === 'record'}
+    <BreadcrumbLink
+      href={getRecordPageUrl(
+        item.database.name,
+        item.schema.id,
+        item.table.id,
+        item.record.id,
+      )}
+    >
+      <NameWithIcon icon={iconRecord}>{item.record.summary}</NameWithIcon>
+    </BreadcrumbLink>
   {:else if item.type === 'simple'}
     <BreadcrumbPageSeparator />
     <BreadcrumbLink href={item.href}>
