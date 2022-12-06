@@ -4,30 +4,75 @@
   using table inspector
  -->
 <script lang="ts">
-  import { Button } from '@mathesar-component-library';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import { Button, Icon } from '@mathesar-component-library';
+  import {
+    getTabularDataStoreFromContext,
+    SortDirection,
+    type ProcessedColumn,
+  } from '@mathesar/stores/table-data';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import {
+    iconFiltering,
+    iconSortAscending,
+    iconSortDescending,
+  } from '@mathesar/icons';
 
   export let processedColumn: ProcessedColumn;
   export let isSelected = false;
+
+  const tabularData = getTabularDataStoreFromContext();
+  $: ({ meta } = $tabularData);
+  $: ({ filtering, sorting } = meta);
+
+  $: hasFilter = $filtering.entries.some(
+    (entry) => entry.columnId === processedColumn.id,
+  );
+  $: sorter = $sorting.get(processedColumn.id);
 </script>
 
-<div>
+<div class="header-cell-root">
   <CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
   <Button appearance="ghost" on:click>
-    <ProcessedColumnName {processedColumn} />
+    <span>
+      <ProcessedColumnName {processedColumn} />
+    </span>
+    {#if sorter || hasFilter}
+      <div class="indicator-icons">
+        {#if sorter}
+          <Icon
+            {...sorter === SortDirection.A
+              ? iconSortAscending
+              : iconSortDescending}
+          />
+        {/if}
+        {#if hasFilter}
+          <Icon {...iconFiltering} />
+        {/if}
+      </div>
+    {/if}
   </Button>
 </div>
 
 <style lang="scss">
-  div {
+  .header-cell-root {
     width: 100%;
 
     :global(button.btn) {
       width: 100%;
       padding: 0.26rem 0.5rem;
       font-size: inherit;
+      justify-content: space-between;
+    }
+
+    .indicator-icons {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      > :global(* + *) {
+        margin-left: 0.25rem;
+      }
     }
   }
 </style>
