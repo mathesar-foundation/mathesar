@@ -96,6 +96,7 @@
     --z-index__sheet__column-resizer: 2;
     --z-index__sheet__top-left-cell: 3;
     --z-index__sheet__horizontal-scrollbar: 4;
+    --z-index-new-record-message: 4;
     --z-index__sheet__vertical-scrollbar: 5;
 
     --virtual-list-horizontal-scrollbar-z-index: var(
