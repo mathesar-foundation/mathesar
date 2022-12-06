@@ -31,8 +31,8 @@
 </script>
 
 <SheetPositionableCell
-  index={1}
-  columnSpan={processedColumnsMap.size}
+  index={0}
+  columnSpan={processedColumnsMap.size + 1}
   let:htmlAttributes
   let:style
 >
@@ -59,7 +59,8 @@
 
 <style lang="scss">
   .group-header {
-    padding: 0.5rem 0.4rem;
+    padding: 0.5rem 1.5rem;
+    z-index: var(--z-index-group-header);
 
     .groups-data {
       align-items: start;
