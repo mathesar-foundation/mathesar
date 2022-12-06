@@ -43,10 +43,12 @@
 </script>
 
 <InsetPageLayout>
-  <div slot="header">
-    <h1><NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon></h1>
-    <div>Record in <TableName {table} /></div>
-    <FormStatus {form} />
+  <div slot="header" class="header">
+    <h1 class="title">
+      <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
+    </h1>
+    <div class="table-name">Record in <TableName {table} /></div>
+    <div class="form-status"><FormStatus {form} /></div>
   </div>
   <div class="fields">
     {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
@@ -80,6 +82,27 @@
 </div>
 
 <style>
+  .header {
+    display: grid;
+    grid-template: auto auto / auto 1fr;
+    gap: 0.25rem 1.5rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .title {
+    grid-row: 1;
+    grid-column: 1;
+    margin: 0;
+  }
+  .table-name {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  .form-status {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+  }
+
   .fields {
     display: grid;
     grid-template-columns: auto 1fr;
