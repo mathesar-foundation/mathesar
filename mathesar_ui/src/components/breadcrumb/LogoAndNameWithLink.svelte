@@ -20,6 +20,6 @@
     display: block;
     color: var(--white);
     font-size: var(--text-size-xx-large);
-    margin: 0 var(--spacing);
+    margin-left: 0.5rem;
   }
 </style>

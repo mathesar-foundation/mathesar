@@ -85,7 +85,6 @@
           </div>
         </LinkMenuItem>
       {/if}
-      <!-- TODO: Create an issue for saving and showing username in FE -->
     </DropdownMenu>
   </div>
 </header>
