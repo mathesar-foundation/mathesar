@@ -1,6 +1,6 @@
 from db.tables.operations import select as tables_select
 from db.tables.operations.select import get_joinable_tables
-from db.transforms.base import Summarize, SelectSubsetOfColumns
+from db.transforms.base import Summarize
 from db.columns.operations.select import get_column_from_oid_and_attnum
 
 
@@ -11,13 +11,13 @@ def finish_specifying_summarize_transform(
     Adds missing input aliases to the summarize transform.
 
     Will find input aliases that are not mentioned in the summarize_transform and will add each
-    of them to its group-by set and/or aggregate-on set.
+    of them to its group-by list and/or aggregate-on list.
 
     If the user selected input alias (summarize's base grouping column) is not unique-constrained,
-    will put the unmentioned input aliases in the aggregation set.
+    will put the unmentioned input aliases in the aggregation list.
 
     If the user selected input alias (summarize's base grouping column) is unique-constrained,
-    then it might put at least some input aliases in the grouping set, depending on what
+    then it might put at least some input aliases in the grouping list, depending on what
     _should_group_by returns.
     """
     summarize_transform = db_query.transformations[ix_of_summarize_transform]
@@ -45,29 +45,28 @@ def _split_missing_input_aliases_into_group_and_agg_lists(
     aliases_to_be_added_to_group_by = []
     aliases_to_be_added_to_agg_on = []
     summarize_transform = db_query.transformations[ix_of_summarize_transform]
-    initial_columns_not_in_summarize = \
-        _get_initial_columns_not_in_summarize(db_query, summarize_transform)
-    if not initial_columns_not_in_summarize:
+    missing_input_aliases = \
+        _get_missing_input_aliases(db_query, ix_of_summarize_transform)
+    if not missing_input_aliases:
         # If all input aliases for summarize transform are in the transform's group-by or
-        # aggregate-on sets, there's nothing to do.
+        # aggregate-on lists, there's nothing to do.
         return aliases_to_be_added_to_group_by, aliases_to_be_added_to_agg_on
     # A summarize transform has a base_grouping_column (which is an alias) around
     # which our suggestions will be based.
     base_grouping_alias = summarize_transform.base_grouping_column
     base_grouping_initial_column = \
-        _get_initial_column_by_alias(
-            db_query.initial_columns, base_grouping_alias
+        db_query.get_initial_column_by_input_alias(
+            ix_of_summarize_transform, base_grouping_alias,
         )
-    # We'll always want user-selected alias (base_grouping_column) in the "group-by set";
-    if base_grouping_initial_column in initial_columns_not_in_summarize:
-        aliases_to_be_added_to_group_by.append(base_grouping_alias)
-        initial_columns_not_in_summarize.remove(base_grouping_initial_column)
+    _make_sure_base_grouping_column_will_be_in_group_by_list(
+        base_grouping_alias,
+        missing_input_aliases,
+        aliases_to_be_added_to_group_by,
+    )
     # Most of logic in the rest of method is around whether or not we can add some of the other
-    # input aliases to the "group-by set"; otherwise we'll put them in "aggregate-on set".
+    # missing input aliases to the "group-by list"; otherwise we'll put them in "aggregate-on list".
     can_add_other_aliases_to_group_by = (
-        _is_first_alias_generating_transform(
-            db_query, ix_of_summarize_transform
-        )
+        base_grouping_initial_column is not None
         and _is_initial_column_unique_constrained(
             base_grouping_initial_column, engine, metadata
         )
@@ -79,60 +78,58 @@ def _split_missing_input_aliases_into_group_and_agg_lists(
             )
         oid_of_base_grouping_initial_column = \
             _get_oid_of_initial_column(base_grouping_initial_column)
-        for initial_column in initial_columns_not_in_summarize:
-            if _should_group_by(
-                _get_oid_of_initial_column(initial_column),
-                oid_of_base_grouping_initial_column,
-                oids_of_joinable_tables_with_single_results,
+        for input_alias in missing_input_aliases:
+            initial_column = \
+                db_query.get_initial_column_by_input_alias(
+                    ix_of_summarize_transform, input_alias
+                )
+            if (
+                initial_column is not None
+                and _should_group_by(
+                    _get_oid_of_initial_column(initial_column),
+                    oid_of_base_grouping_initial_column,
+                    oids_of_joinable_tables_with_single_results,
+                )
             ):
-                alias_set_to_add_to = aliases_to_be_added_to_group_by
+                alias_list_to_add_to = aliases_to_be_added_to_group_by
             else:
-                alias_set_to_add_to = aliases_to_be_added_to_agg_on
-            alias_set_to_add_to.append(initial_column.alias)
+                alias_list_to_add_to = aliases_to_be_added_to_agg_on
+            alias_list_to_add_to.append(input_alias)
     else:
-        aliases_to_be_added_to_agg_on = list(
-            initial_column.alias
-            for initial_column
-            in initial_columns_not_in_summarize
-        )
+        aliases_to_be_added_to_agg_on = list(missing_input_aliases)
     return aliases_to_be_added_to_group_by, aliases_to_be_added_to_agg_on
 
 
-def _is_first_alias_generating_transform(db_query, ix_of_summarize_transform):
+def _make_sure_base_grouping_column_will_be_in_group_by_list(
+    base_grouping_alias,
+    missing_input_aliases,
+    aliases_to_be_added_to_group_by,
+):
     """
-    Checks if the transform is the first alias-generating transform. An alias-generating transform
-    means that it itroduces new aliases (columns) to the transform pipeline. We want to know when
-    a given alias-generating transform is the first in the pipeline, because then we can consider
-    its input aliases to be fully described by initial columns, which can be a useful
-    simplification.
+    We'll always want base_grouping_column in the "group-by list";
     """
-    prior_transforms = db_query.transformations[:ix_of_summarize_transform]
-    for prior_transform in prior_transforms:
-        alias_generating_transforms = {Summarize, SelectSubsetOfColumns}
-        is_alias_generating = \
-            type(prior_transform) in alias_generating_transforms
-        if is_alias_generating:
-            return False
-    return True
+    if base_grouping_alias in missing_input_aliases:
+        aliases_to_be_added_to_group_by.append(base_grouping_alias)
+        missing_input_aliases.remove(base_grouping_alias)
 
 
-def _get_initial_columns_not_in_summarize(db_query, summarize_transform):
-    initial_columns = db_query.initial_columns
+def _get_missing_input_aliases(db_query, ix_of_summarize_transform):
+    """
+    Missing input aliases are those that are not mentioned in a summarize transform's spec. It's
+    the input aliases that we'll be automatically adding into the said spec, so that it can be
+    considered fully specified.
+    """
+    summarize_transform = db_query.transformations[ix_of_summarize_transform]
     group_by_aliases = summarize_transform.grouping_input_aliases
     agg_on_aliases = summarize_transform.aggregation_input_aliases
     aliases_in_summarize = group_by_aliases + agg_on_aliases
+    input_aliases = db_query.get_input_aliases(ix_of_summarize_transform)
     return [
-        initial_column
-        for initial_column in
-        initial_columns
-        if initial_column.alias not in aliases_in_summarize
+        input_alias
+        for input_alias
+        in input_aliases
+        if input_alias not in aliases_in_summarize
     ]
-
-
-def _get_initial_column_by_alias(initial_columns, alias):
-    for initial_column in initial_columns:
-        if initial_column.alias == alias:
-            return initial_column
 
 
 def _should_group_by(
@@ -186,6 +183,9 @@ def _is_sa_column_unique_constrained(sa_column):
 
 
 def _get_oid_of_initial_column(initial_column):
+    """
+    Using this just because reloid is an obscure term (in our codebase).
+    """
     return initial_column.reloid
 
 

@@ -19,6 +19,7 @@ TIMES_SQL = os.path.join(RESOURCES, "times_create.sql")
 BOOLEANS_SQL = os.path.join(RESOURCES, "booleans_create.sql")
 FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 MAGNITUDE_SQL = os.path.join(RESOURCES, "magnitude_testing_create.sql")
+ARRAY_SQL = os.path.join(RESOURCES, "array_create.sql")
 JSON_SQL = os.path.join(RESOURCES, "json_sort.sql")
 BOOKS_FROM_SQL = os.path.join(RESOURCES, "books_import_from.sql")
 BOOKS_TARGET_SQL = os.path.join(RESOURCES, "books_import_target.sql")
@@ -46,6 +47,15 @@ def engine_with_uris(engine_with_schema):
 def engine_with_times(engine_with_schema):
     engine, schema = engine_with_schema
     with engine.begin() as conn, open(TIMES_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+
+
+@pytest.fixture
+def engine_with_array(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(ARRAY_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
     yield engine, schema
@@ -113,6 +123,11 @@ def roster_table_name():
 @pytest.fixture(scope='session')
 def uris_table_name():
     return "uris"
+
+
+@pytest.fixture(scope='session')
+def array_table_name():
+    return "array_test"
 
 
 @pytest.fixture(scope='session')
@@ -202,6 +217,14 @@ def magnitude_table_obj(engine_with_magnitude, magnitude_table_name):
     engine, schema = engine_with_magnitude
     metadata = MetaData(bind=engine)
     table = Table(magnitude_table_name, metadata, schema=schema, autoload_with=engine)
+    return table, engine
+
+
+@pytest.fixture
+def array_table_obj(engine_with_array, array_table_name):
+    engine, schema = engine_with_array
+    metadata = MetaData(bind=engine)
+    table = Table(array_table_name, metadata, schema=schema, autoload_with=engine)
     return table, engine
 
 

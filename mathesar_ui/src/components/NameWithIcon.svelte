@@ -7,6 +7,7 @@
   export let isLoading = false;
   /** When true, the icon will be rendered within a box */
   export let iconHasBox = false;
+  export let truncateName = true;
 
   $: icons = Array.isArray(icon) ? icon : [icon];
 </script>
@@ -24,7 +25,7 @@
       {/each}
     {/if}
   </span>
-  <span class="name"><slot /></span>
+  <span class="name" class:truncate={truncateName}><slot /></span>
 </span>
 
 <style lang="scss">
@@ -74,9 +75,12 @@
   }
   .name {
     display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     color: var(--name-color, var(--slate-800));
+
+    &.truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 </style>
