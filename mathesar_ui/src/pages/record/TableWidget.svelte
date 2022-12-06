@@ -1,17 +1,16 @@
 <script lang="ts">
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import { Icon } from '@mathesar/component-library';
-  import { iconMultipleRecords } from '@mathesar/icons';
+  import TableName from '@mathesar/components/TableName.svelte';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
+    Meta,
     setTabularDataStoreInContext,
     TabularData,
-    Meta,
   } from '@mathesar/stores/table-data';
-  import TableView from '@mathesar/systems/table-view/TableView.svelte';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import Pagination from '@mathesar/utils/Pagination';
   import MiniActionsPane from '@mathesar/systems/table-view/actions-pane/MiniActionsPane.svelte';
+  import TableView from '@mathesar/systems/table-view/TableView.svelte';
+  import Pagination from '@mathesar/utils/Pagination';
 
   const tabularDataStore = setTabularDataStoreInContext(
     // Sacrifice type safety here since the value is initialized reactively
@@ -39,8 +38,9 @@
 <div class="table-widget">
   <div class="top">
     <div class="left">
-      <Icon {...iconMultipleRecords} size="1.4rem" />
-      <h3 class="heading">{table.name}</h3>
+      <h3 class="passthrough">
+        <strong><TableName {table} /></strong>
+      </h3>
     </div>
     <div class="right">
       <MiniActionsPane />
@@ -71,9 +71,6 @@
     grid-auto-flow: column;
     gap: 0.5rem;
     align-items: center;
-  }
-  .heading {
-    margin: 0;
   }
   .right {
     flex: 1 0 auto;

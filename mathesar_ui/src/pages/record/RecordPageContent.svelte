@@ -42,46 +42,52 @@
   }
 </script>
 
-<InsetPageLayout>
-  <div slot="header" class="header">
-    <h1 class="title">
-      <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
-    </h1>
-    <div class="table-name">Record in <TableName {table} /></div>
-    <div class="form-status"><FormStatus {form} /></div>
-  </div>
-  <div class="fields">
-    {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
-      <DirectField {record} {processedColumn} {field} />
-    {/each}
-  </div>
-  <div class="submit">
-    <FormSubmitWithCatch
-      {form}
-      proceedButton={{ label: 'Save', icon: iconSave }}
-      cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
-      onProceed={() => record.patch($form.values)}
-      getErrorMessages={(e) => {
-        const { columnErrors, recordErrors } = getDetailedRecordsErrors(e);
-        for (const [columnId, errors] of columnErrors) {
-          formFields[columnId]?.serverErrors.set(errors);
-        }
-        return recordErrors;
-      }}
-      initiallyHidden
-    />
-  </div>
-</InsetPageLayout>
+<div class="record-page-content">
+  <InsetPageLayout>
+    <div slot="header" class="header">
+      <h1 class="title">
+        <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
+      </h1>
+      <div class="table-name">Record in <TableName {table} /></div>
+      <div class="form-status"><FormStatus {form} /></div>
+    </div>
+    <div class="fields">
+      {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
+        <DirectField {record} {processedColumn} {field} />
+      {/each}
+    </div>
+    <div class="submit">
+      <FormSubmitWithCatch
+        {form}
+        proceedButton={{ label: 'Save', icon: iconSave }}
+        cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
+        onProceed={() => record.patch($form.values)}
+        getErrorMessages={(e) => {
+          const { columnErrors, recordErrors } = getDetailedRecordsErrors(e);
+          for (const [columnId, errors] of columnErrors) {
+            formFields[columnId]?.serverErrors.set(errors);
+          }
+          return recordErrors;
+        }}
+        initiallyHidden
+      />
+    </div>
+  </InsetPageLayout>
 
-<div class="widgets">
   {#await getJoinableTablesResult(table.id)}
     <Spinner />
   {:then joinableTablesResult}
-    <Widgets {joinableTablesResult} {recordId} />
+    <Widgets {joinableTablesResult} {recordId} recordSummary={$summary} />
   {/await}
 </div>
 
 <style>
+  .record-page-content {
+    height: 100%;
+    display: grid;
+    grid-template: auto 1fr / auto;
+    overflow: auto;
+  }
   .header {
     display: grid;
     grid-template: auto auto / auto 1fr;

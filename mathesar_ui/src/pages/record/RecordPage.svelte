@@ -26,7 +26,7 @@
 
 <svelte:head><title>{makeSimplePageTitle(title)}</title></svelte:head>
 
-<LayoutWithHeader cssVariables={{ '--page-padding': '0' }}>
+<LayoutWithHeader cssVariables={{ '--page-padding': '0' }} fitViewport>
   {#if isLoading}
     <Spinner />
   {:else}
