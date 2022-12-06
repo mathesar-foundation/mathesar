@@ -133,6 +133,7 @@
 
 <style lang="scss">
   .actions-pane {
+    --badge-font-size: var(--text-size-small);
     border-bottom: 1px solid var(--slate-300);
     background-color: var(--color-white);
     position: relative;
