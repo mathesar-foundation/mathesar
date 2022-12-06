@@ -68,7 +68,11 @@
           label=""
           icon={iconExpandDown}
         >
-          <ButtonMenuItem icon={iconSetToNull} on:click={() => field.set(null)}>
+          <ButtonMenuItem
+            icon={iconSetToNull}
+            on:click={() => field.set(null)}
+            disabled={column.primary_key}
+          >
             Set to <Null />
           </ButtonMenuItem>
         </DropdownMenu>
