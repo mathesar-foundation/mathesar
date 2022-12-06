@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { Icon } from '@mathesar-component-library';
+  import {
+    DropdownMenu,
+    Icon,
+    LinkMenuItem,
+  } from '@mathesar-component-library';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { iconUser } from '@mathesar/icons';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
@@ -15,20 +19,38 @@
   </div>
 
   <div class="right">
-    <div class="database-switcher">
+    <DropdownMenu
+      triggerAppearance="ghost"
+      size="small"
+      closeOnInnerClick={true}
+      label="Shortcuts"
+    >
+      <!-- TODO: Show shortcuts -->
+    </DropdownMenu>
+    <DropdownMenu
+      triggerAppearance="ghost"
+      size="small"
+      closeOnInnerClick={true}
+      label=""
+      icon={iconUser}
+    >
+      <div class="user-switcher" slot="trigger">
+        <Icon {...iconUser} />
+      </div>
       {#if database}
-        <a href={getDatabasePageUrl(database.name)}>
-          <DatabaseName {database} />
-        </a>
+        <LinkMenuItem href={getDatabasePageUrl(database.name)}>
+          <div class="database-name">
+            <span class="database-title">Database</span>
+            <DatabaseName {database} />
+          </div>
+        </LinkMenuItem>
       {/if}
-    </div>
-    <div class="user-switcher">
-      <Icon {...iconUser} />
-    </div>
+      <!-- TODO: Create an issue for saving and showing username in FE -->
+    </DropdownMenu>
   </div>
 </header>
 
-<style>
+<style lang="scss">
   .app-header {
     display: flex;
     justify-content: space-between;
@@ -45,22 +67,25 @@
   .right {
     display: flex;
     align-items: center;
+    color: var(--white);
+    font-size: var(--text-size-large);
   }
 
   .user-switcher {
+    background-color: var(--slate-200);
+    color: var(--slate-800);
+    border-radius: var(--border-radius-m);
+    padding: 0.5rem;
     display: flex;
     align-items: center;
-    background: var(--color-gray-medium);
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    margin-left: 1rem;
   }
 
-  .database-switcher a {
-    color: var(--white);
-    text-decoration: none;
-  }
-  .database-switcher a:hover {
-    text-decoration: underline;
+  .database-name {
+    display: flex;
+    flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 0.5rem;
+    }
   }
 </style>
