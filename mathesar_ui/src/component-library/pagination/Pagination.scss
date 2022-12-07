@@ -9,8 +9,7 @@ ul.pagination {
   li {
     margin: 0 0.25rem;
 
-    a,
-    button {
+    a {
       padding: 0.25rem;
 
       min-width: 1.5rem;
@@ -29,24 +28,9 @@ ul.pagination {
       }
     }
 
-    button:focus {
-      outline: #39a0f5 solid 1px;
-    }
-
-    .page {
-      border: 1px solid #efefef;
-      border-radius: 0.25rem;
-      text-decoration: none;
-      color: inherit;
-      background: #fff;
-    }
-
     button {
-      border: none;
-      background: inherit;
-
       .ellipsis {
-        color: #afafaf;
+        color: var(--slate-300);
       }
 
       &:hover {
@@ -63,8 +47,8 @@ ul.pagination {
 
     &.active {
       .page {
-        color: #39a0f5;
-        border-color: #489ee4;
+        color: var(--brand-500);
+        border-color: var(--brand-500);
       }
     }
   }

@@ -73,7 +73,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class PasswordResetSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    password = serializers.CharField()
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
 
 
 class DatabaseRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):

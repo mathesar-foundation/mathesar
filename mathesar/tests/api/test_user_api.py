@@ -40,7 +40,7 @@ def test_same_user_detail_as_non_superuser(client_bob, user_bob):
     assert response_data['schema_roles'] == []
 
 
-def test_user_log(client, user_bob):
+def test_user_password_reset(client, user_bob):
     new_password = 'new_password'
     data = {
         'password': new_password
@@ -49,6 +49,15 @@ def test_user_log(client, user_bob):
     assert response.status_code == 200
     user_bob.refresh_from_db()
     assert user_bob.check_password(new_password) is True
+
+
+def test_user_password_reset_non_superuser(client_bob, user_bob):
+    new_password = 'new_password'
+    data = {
+        'password': new_password
+    }
+    response = client_bob.post(f'/api/ui/v0/users/{user_bob.id}/password_reset/', data=data)
+    assert response.status_code == 403
 
 
 def test_user_password_change(client_bob, user_bob):
