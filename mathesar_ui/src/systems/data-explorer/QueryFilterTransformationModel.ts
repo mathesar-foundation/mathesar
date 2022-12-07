@@ -9,6 +9,8 @@ export interface QueryFilterTransformationEntry {
 export default class QueryFilterTransformationModel
   implements QueryFilterTransformationEntry
 {
+  type = 'filter' as const;
+
   columnIdentifier;
 
   conditionIdentifier;

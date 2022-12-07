@@ -10,6 +10,10 @@ def create_overdue_books_query(library_ma_tables, get_uid, client):
     request_data = {
         "name": get_uid(),
         "base_table": checkouts.id,
+        "display_names": {
+            "email": "Patron Email",
+            "Title List": "Titles"
+        },
         "initial_columns": [
             {
                 "id": checkouts.get_column_by_name("id").id,
@@ -23,7 +27,6 @@ def create_overdue_books_query(library_ma_tables, get_uid, client):
             }, {
                 "id": patrons.get_column_by_name("Email").id,
                 "alias": "email",
-                "display_name": "Patron Email",
                 "jp_path": [
                     [
                         checkouts.get_column_by_name("Patron").id,
@@ -72,9 +75,6 @@ def create_overdue_books_query(library_ma_tables, get_uid, client):
                     ]
                 },
                 "type": "summarize",
-                "display_names": {
-                    "Title List": "Titles"
-                }
             }
         ],
 
@@ -167,6 +167,10 @@ def create_monthly_checkouts_query(run_overdue_books_scenario, get_uid, client):
             {"id": columns["id"]["id"], "alias": "id"},
             {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
         ],
+        "display_names": {
+            "Checkout Month": "Month",
+            "Count": "Number of Checkouts",
+        },
         "transformations": [
             {
                 "spec": {
@@ -186,10 +190,6 @@ def create_monthly_checkouts_query(run_overdue_books_scenario, get_uid, client):
                     ]
                 },
                 "type": "summarize",
-                "display_names": {
-                    "Checkout Month": "Month",
-                    "Count": "Number of Checkouts"
-                }
             }
         ]
     }
