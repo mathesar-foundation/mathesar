@@ -99,11 +99,13 @@
     gap: 0.25rem 1.5rem;
     align-items: center;
     margin-bottom: 1.5rem;
+    overflow: hidden;
   }
   .title {
     grid-row: 1;
     grid-column: 1;
     margin: 0;
+    overflow: hidden;
   }
   .table-name {
     grid-row: 2;
