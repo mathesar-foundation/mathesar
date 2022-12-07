@@ -16,6 +16,9 @@
    */
   export let size: Size = 'medium';
 
+  export let danger = false;
+  export let active = false;
+
   // Additional classes
   let classes = '';
   export { classes as class };
@@ -32,6 +35,8 @@
   bind:this={element}
   type="button"
   class={allClasses}
+  class:danger
+  class:active
   {...$$restProps}
   on:click
   on:keydown

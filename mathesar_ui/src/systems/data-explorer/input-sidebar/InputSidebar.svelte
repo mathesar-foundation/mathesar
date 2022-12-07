@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TabContainer, Spinner } from '@mathesar-component-library';
+  import { TabContainer, Spinner, Alert } from '@mathesar-component-library';
   import { getAvailableName } from '@mathesar/utils/db';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import TransformationsPane from './transformations-pane/TransformationsPane.svelte';
@@ -64,7 +64,11 @@
           <TransformationsPane {queryManager} />
         {/if}
       {:else if inputColumnsFetchState?.state === 'failure'}
-        Failed to fetch column information
+        <Alert appearance="error">
+          Failed to fetch column information: {inputColumnsFetchState?.errors.join(
+            ';',
+          )}
+        </Alert>
       {/if}
     </TabContainer>
   </section>
