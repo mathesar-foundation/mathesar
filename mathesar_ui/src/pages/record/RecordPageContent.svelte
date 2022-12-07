@@ -48,7 +48,9 @@
       <h1 class="title">
         <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
       </h1>
-      <div class="table-name">Record in <TableName {table} /></div>
+      <div class="table-name">
+        Record in <TableName {table} truncate={false} />
+      </div>
       <div class="form-status"><FormStatus {form} /></div>
     </div>
     <div class="fields">
