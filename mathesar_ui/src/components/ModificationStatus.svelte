@@ -75,6 +75,7 @@
     display: inline-flex;
     align-items: center;
     color: var(--slate-400);
+    white-space: nowrap;
   }
   .icon > :global(*) {
     display: block;
