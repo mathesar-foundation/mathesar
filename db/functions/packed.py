@@ -30,9 +30,9 @@ class DBFunctionPacked(base.DBFunction):
         pass
 
 
-class NotEmpty(DBFunctionPacked):
-    id = 'not_empty'
-    name = 'Is not empty'
+class NotNull(DBFunctionPacked):
+    id = 'not_null'
+    name = 'Is not null'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(1),
@@ -43,7 +43,7 @@ class NotEmpty(DBFunctionPacked):
     def unpack(self):
         param0 = self.parameters[0]
         return base.Not([
-            base.Empty([param0]),
+            base.Null([param0]),
         ])
 
 
