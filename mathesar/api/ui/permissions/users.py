@@ -5,7 +5,7 @@ class UserAccessPolicy(AccessPolicy):
     statements = [
         # Anyone can read all users
         {
-            'action': ['list', 'retrieve'],
+            'action': ['list', 'retrieve', 'password_change'],
             'principal': '*',
             'effect': 'allow'
         },

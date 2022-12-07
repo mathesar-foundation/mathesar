@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from mathesar.api.ui.permissions.database_role import DatabaseRoleAccessPolicy
 from mathesar.api.ui.permissions.schema_role import SchemaRoleAccessPolicy
 from mathesar.api.ui.serializers.users import (
-    PasswordResetSerializer, UserSerializer, DatabaseRoleSerializer,
+    ChangePasswordSerializer, PasswordResetSerializer, UserSerializer, DatabaseRoleSerializer,
     SchemaRoleSerializer,
 )
 from mathesar.api.pagination import DefaultLimitOffsetPagination
@@ -31,6 +31,17 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         password = serializer.validated_data["password"]
         user.set_password(password)
         user.save()
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=['post'], detail=False)
+    def password_change(self, request):
+        serializer = ChangePasswordSerializer(
+            instance=request.user,
+            data=request.data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(status=status.HTTP_200_OK)
 
 
