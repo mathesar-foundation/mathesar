@@ -247,13 +247,13 @@ class MathesarColumn(Column):
         col_type = getattr(self, "type", None)
         if col_type is not None:
             full_type_options = {
-            "length": hasattr(self.type, "length"),
-            "precision": hasattr(self.type, "precision"),
-            "scale": hasattr(self.type, "scale"),
-            "fields": hasattr(self.type, "fields"),
-            "item_type": hasattr(self.type, "item_type"),
-            "dimensions": hasattr(self.type, "dimensions")
-        }
+                "length": hasattr(self.type, "length"),
+                "precision": hasattr(self.type, "precision"),
+                "scale": hasattr(self.type, "scale"),
+                "fields": hasattr(self.type, "fields"),
+                "item_type": hasattr(self.type, "item_type"),
+                "dimensions": hasattr(self.type, "dimensions")
+            }
         _type_options = [k for k, v in full_type_options.items() if v is True]
         return _type_options if _type_options else None
 
