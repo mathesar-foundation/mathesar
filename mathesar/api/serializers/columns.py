@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty, SerializerMethodField
 from rest_framework.settings import api_settings
@@ -7,6 +7,10 @@ from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.shared_serializers import (
     DisplayOptionsMappingSerializer,
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
+)
+from db.columns.exceptions import InvalidTypeOptionError
+from mathesar.api.exceptions.database_exceptions import (
+    exceptions as database_api_exceptions
 )
 from mathesar.models.base import Column
 from db.types.operations.convert import get_db_type_enum_from_id
@@ -35,6 +39,12 @@ class TypeOptionSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     def validate(self, attrs):
         if attrs.get('scale', None) is not None and attrs.get('precision', None) is None:
             attrs['precision'] = 1000
+        elif attrs.get('scale', None) is None and attrs.get('precision', None) is not None:
+            raise database_api_exceptions.InvalidTypeOptionAPIException(
+                InvalidTypeOptionError,
+                message='Cannot set precision without a scale.',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         return super().validate(attrs)
 
     def run_validation(self, data=empty):
