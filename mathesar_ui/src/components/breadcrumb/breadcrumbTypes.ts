@@ -1,6 +1,9 @@
 import type { TableEntry } from '@mathesar/api/tables';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-import type { IconProps } from '@mathesar/component-library/types';
+import type {
+  ComponentAndProps,
+  IconProps,
+} from '@mathesar/component-library/types';
 
 export interface BreadcrumbItemDatabase {
   type: 'database';
@@ -23,7 +26,7 @@ export interface BreadcrumbItemTable {
 export interface BreadcrumbItemSimple {
   type: 'simple';
   href: string;
-  label: string;
+  label: string | ComponentAndProps;
   icon?: IconProps;
 }
 
