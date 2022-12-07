@@ -10,6 +10,7 @@ def test_available_filters_structure(engine_with_schema):
         'greater',
         'lesser',
         'empty',
+        'not_empty',
         'equal',
         'greater_or_equal',
         'contains_case_insensitive',

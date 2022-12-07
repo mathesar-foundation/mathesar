@@ -30,6 +30,23 @@ class DBFunctionPacked(base.DBFunction):
         pass
 
 
+class NotEmpty(DBFunctionPacked):
+    id = 'not_empty'
+    name = 'Is not empty'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(1),
+        hints.parameter(0, hints.any),
+        hints.mathesar_filter,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        return base.Not([
+            base.Empty([param0]),
+        ])
+
+
 class LesserOrEqual(DBFunctionPacked):
     id = 'lesser_or_equal'
     name = 'is lesser or equal to'
