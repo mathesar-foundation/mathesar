@@ -5,9 +5,8 @@
 </script>
 
 <a {href} class="home-link">
-  <!-- TODO: Use the logo with white outline from Figma -->
   <Logo />
-  <span class="mathesar">Mathesar</span>
+  <div class="mathesar">Mathesar</div>
 </a>
 
 <style>
@@ -15,10 +14,13 @@
     display: flex;
     align-items: center;
     text-decoration: none;
+    color: var(--white);
+  }
+  .home-link > :global(svg) {
+    font-size: 2rem;
+    display: block;
   }
   .mathesar {
-    display: block;
-    color: var(--white);
     font-size: var(--text-size-xx-large);
     margin-left: 0.5rem;
   }
