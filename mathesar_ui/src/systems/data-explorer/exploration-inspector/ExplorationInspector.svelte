@@ -33,13 +33,13 @@
     {:else if activeTab.id === 'inspect-column'}
       <ColumnTab {queryHandler} />
     {:else}
-      <CellTab />
+      <CellTab {queryHandler} />
     {/if}
   </TabContainer>
 </aside>
 
 <style lang="scss">
-  aside.exploration-inspector {
+  .exploration-inspector {
     width: var(--exploration-inspector-width);
     flex-basis: var(--exploration-inspector-width);
     border-left: 1px solid var(--slate-300);

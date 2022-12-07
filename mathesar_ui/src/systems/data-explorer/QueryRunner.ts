@@ -213,6 +213,10 @@ export default class QueryRunner<
     this.selection.resetSelection();
   }
 
+  getRows(): QueryRow[] {
+    return get(this.rowsData).rows;
+  }
+
   getQueryModel(): QueryModel {
     return get(this.query);
   }
