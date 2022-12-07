@@ -1,9 +1,9 @@
 <script lang="ts">
+  import { Spinner } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
   import { getDetailedRecordsErrors } from '@mathesar/api/utils/recordUtils';
   import { getAPI } from '@mathesar/api/utils/requestUtils';
-  import { Spinner } from '@mathesar-component-library';
   import {
     FormSubmitWithCatch,
     makeForm,
@@ -11,6 +11,7 @@
   } from '@mathesar/components/form';
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import RecordSummary from '@mathesar/components/RecordSummary.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
@@ -46,7 +47,9 @@
   <InsetPageLayout>
     <div slot="header" class="header">
       <h1 class="title">
-        <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
+        <NameWithIcon icon={iconRecord}>
+          <RecordSummary recordSummary={$summary} />
+        </NameWithIcon>
       </h1>
       <div class="table-name">
         Record in <TableName {table} truncate={false} />

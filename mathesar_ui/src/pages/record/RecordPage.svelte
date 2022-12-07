@@ -2,10 +2,11 @@
   import { Spinner } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { TableStructure } from '@mathesar/stores/table-data';
+  import { displayRecordSummaryAsPlainText } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { currentTable } from '@mathesar/stores/tables';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import RecordPageContent from './RecordPageContent.svelte';
   import type RecordStore from './RecordStore';
 
@@ -21,7 +22,9 @@
   $: ({ summary } = record);
   $: recordStoreIsLoading = $recordStoreFetchRequest?.state === 'processing';
   $: isLoading = $tableStructureIsLoading || recordStoreIsLoading;
-  $: title = recordStoreIsLoading ? '' : $summary;
+  $: title = recordStoreIsLoading
+    ? ''
+    : displayRecordSummaryAsPlainText($summary);
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(title)}</title></svelte:head>
