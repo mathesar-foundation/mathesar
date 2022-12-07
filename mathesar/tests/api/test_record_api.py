@@ -166,10 +166,10 @@ def test_filter_with_added_columns(create_patents_table, client):
             lambda new_column_id, value: {"equal": [{"column_id": [new_column_id]}, {"literal": [value]}]},
             False, 2),
         (
-            lambda new_column_id, _: {"empty": [{"column_id": [new_column_id]}]},
+            lambda new_column_id, _: {"null": [{"column_id": [new_column_id]}]},
             None, 1394),
         (
-            lambda new_column_id, _: {"not": [{"empty": [{"column_id": [new_column_id]}]}]},
+            lambda new_column_id, _: {"not": [{"null": [{"column_id": [new_column_id]}]}]},
             None, 49),
     ]
 
@@ -1086,7 +1086,7 @@ def test_record_list_filter_exceptions(create_patents_table, client):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
-    filter_list = json.dumps({"empty": [{"column_name": [columns_name_id_map['Center']]}]})
+    filter_list = json.dumps({"null": [{"column_name": [columns_name_id_map['Center']]}]})
     with patch.object(DBQuery, "get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?filters={filter_list}'

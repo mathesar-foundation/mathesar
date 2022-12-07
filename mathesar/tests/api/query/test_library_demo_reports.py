@@ -59,7 +59,7 @@ def create_overdue_books_query(library_ma_tables, get_uid, client):
             },
             {
                 "spec": {
-                    "empty": [{"column_name": ["Check In Time"]}]
+                    "null": [{"column_name": ["Check In Time"]}]
                 },
                 "type": "filter"
             },
