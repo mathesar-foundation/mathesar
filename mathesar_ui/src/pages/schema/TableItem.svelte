@@ -69,13 +69,13 @@
       label=""
       icon={iconShowMore}
     >
-      <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}
-        >Edit Table</ButtonMenuItem
-      >
+      <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
+        Edit Table
+      </ButtonMenuItem>
       <MenuDivider />
-      <LinkMenuItem href={explorationPageUrl} icon={iconExploration}
-        >Explore Table</LinkMenuItem
-      >
+      <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
+        Explore Table
+      </LinkMenuItem>
       <MenuDivider />
       <ButtonMenuItem
         on:click={handleDeleteTable}
@@ -130,6 +130,7 @@
   .name-and-description {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 
     .name {
       font-size: var(--text-size-large);

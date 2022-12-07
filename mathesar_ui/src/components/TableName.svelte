@@ -7,6 +7,4 @@
   export let isLoading = false;
 </script>
 
-<NameWithIcon icon={iconTable} {isLoading}>
-  <span title={table.name}>{table.name}</span>
-</NameWithIcon>
+<NameWithIcon icon={iconTable} {isLoading}>{table.name}</NameWithIcon>

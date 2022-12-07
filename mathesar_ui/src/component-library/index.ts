@@ -43,6 +43,7 @@ export { default as TextArea } from './text-area/TextArea.svelte';
 export { default as TextAvatar } from './text-avatar/TextAvatar.svelte';
 export { default as TextInput } from './text-input/TextInput.svelte';
 export { default as TextInputWithPrefix } from './text-input/TextInputWithPrefix.svelte';
+export { default as Truncate } from './truncate/Truncate.svelte';
 
 // Compound Components (Ordered)
 export { DatePicker, InlineDateTimePicker } from './date-time-picker';
