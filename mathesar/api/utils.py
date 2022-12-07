@@ -13,9 +13,11 @@ METADATA_KEY = 'metadata'
 
 def get_table_or_404(pk):
     """
-    Get table if it exists, otherwise throws a DRF NotFound error.
+    Get table for which the user has correct permission if it exists,
+     otherwise throws a DRF NotFound error.
     Args:
         pk: id of table
+        request: Viewset request, required for filtering based on permissions
     Returns:
         table: return the table based on a specific id
     """
