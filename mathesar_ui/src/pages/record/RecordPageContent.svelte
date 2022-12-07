@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Spinner } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
   import { getDetailedRecordsErrors } from '@mathesar/api/utils/recordUtils';
@@ -18,6 +17,7 @@
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
   import DirectField from './DirectField.svelte';
+  import RecordPageLoadingSpinner from './RecordPageLoadingSpinner.svelte';
   import type RecordStore from './RecordStore';
   import Widgets from './Widgets.svelte';
 
@@ -81,7 +81,7 @@
   </InsetPageLayout>
 
   {#await getJoinableTablesResult(table.id)}
-    <Spinner />
+    <RecordPageLoadingSpinner />
   {:then joinableTablesResult}
     <Widgets {joinableTablesResult} {recordId} recordSummary={$summary} />
   {/await}
