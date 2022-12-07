@@ -15,7 +15,7 @@
   $: hasLinksFromBaseTable = [...baseTableColumns].some(
     ([, entry]) => entry.linksTo !== undefined,
   );
-  $: hasLinksToBaseTable = tablesThatReferenceBaseTable.size > 0;
+  $: hasLinksToBaseTable = tablesThatReferenceBaseTable.length > 0;
 </script>
 
 <div data-identifier="column-selection-list">
@@ -56,7 +56,8 @@
         <header>Linked to Base table</header>
         <div class="content" data-identifier="referenced-by-tables">
           {#if hasInitialColumns}
-            {#each [...tablesThatReferenceBaseTable] as [tableId, table] (tableId)}
+            <!--table.id is not unique here. Same table can be present multiple times-->
+            {#each tablesThatReferenceBaseTable as table (table)}
               <TableGroupCollapsible
                 tableName={table.name}
                 column={table.referencedViaColumn}
