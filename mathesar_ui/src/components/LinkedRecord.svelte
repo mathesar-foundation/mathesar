@@ -3,6 +3,7 @@
 
   import { Icon } from '@mathesar-component-library';
   import { iconDeleteMinor } from '@mathesar/icons';
+  import RecordSummary from './RecordSummary.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -49,10 +50,12 @@
       }}
       on:click={(e) => e.stopPropagation()}
     >
-      {label}
+      <RecordSummary recordSummary={label} />
     </a>
   {:else}
-    <span class="record-summary">{label}</span>
+    <span class="record-summary">
+      <RecordSummary recordSummary={label} />
+    </span>
   {/if}
   {#if hasDeleteButton}
     <!--

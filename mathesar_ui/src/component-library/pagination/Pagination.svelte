@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tick, createEventDispatcher } from 'svelte';
-  import { Icon } from '@mathesar-component-library';
+  import { Button, Icon } from '@mathesar-component-library';
   import {
     iconChooseItemPrevious,
     iconShowMore,
@@ -52,7 +52,8 @@
   <ul class="pagination">
     {#if pageCount > 1}
       <li>
-        <button
+        <Button
+          appearance="plain"
           tabindex="0"
           role="link"
           aria-label="Previous"
@@ -60,7 +61,7 @@
           disabled={currentPage === 1}
         >
           <Icon {...iconChooseItemPrevious} tabindex="-1" />
-        </button>
+        </Button>
       </li>
     {/if}
 
@@ -78,28 +79,32 @@
             1
           </a>
         {:else}
-          <button
+          <Button
             tabindex="0"
+            appearance="secondary"
             role="link"
             aria-label="Goto Page 1"
             class="page"
             on:click={(e) => setPage(e, 1)}
           >
             1
-          </button>
+          </Button>
         {/if}
       </li>
       {#if pageInfo.start > 2}
         <li>
-          <button
+          <Button
             tabindex="0"
             role="link"
+            appearance="plain"
             aria-label="Goto Page {pageInfo.prevPageWindow}"
             on:click={(e) => setPage(e, pageInfo.prevPageWindow)}
           >
-            <Icon class="ellipsis" {...iconShowMore} />
-            <Icon class="arrow" {...iconChooseItemManyPrior} />
-          </button>
+            <span>
+              <Icon class="ellipsis" {...iconShowMore} />
+              <Icon class="arrow" {...iconChooseItemManyPrior} />
+            </span>
+          </Button>
         </li>
       {/if}
     {/if}
@@ -122,8 +127,9 @@
             {_page}
           </a>
         {:else}
-          <button
+          <Button
             tabindex="0"
+            appearance="secondary"
             role="link"
             aria-label={currentPage === _page
               ? `Current Page, Page ${currentPage}`
@@ -134,7 +140,7 @@
             aria-selected={currentPage === _page}
           >
             {_page}
-          </button>
+          </Button>
         {/if}
       </li>
     {/each}
@@ -142,15 +148,18 @@
     {#if pageInfo.end < pageCount}
       {#if pageInfo.end < pageCount - 1}
         <li>
-          <button
+          <Button
             tabindex="0"
+            appearance="plain"
             role="link"
             aria-label="Goto Page {pageInfo.nextPageWindow}"
             on:click={(e) => setPage(e, pageInfo.nextPageWindow)}
           >
-            <Icon class="ellipsis" {...iconShowMore} />
-            <Icon class="arrow" {...iconChooseItemManyAhead} />
-          </button>
+            <span>
+              <Icon class="ellipsis" {...iconShowMore} />
+              <Icon class="arrow" {...iconChooseItemManyAhead} />
+            </span>
+          </Button>
         </li>
       {/if}
       <li>
@@ -166,30 +175,32 @@
             {pageCount}
           </a>
         {:else}
-          <button
+          <Button
             tabindex="0"
+            appearance="secondary"
             class="page"
             role="link"
             aria-label="Goto Page {pageCount}"
             on:click={(e) => setPage(e, pageCount)}
           >
             {pageCount}
-          </button>
+          </Button>
         {/if}
       </li>
     {/if}
 
     {#if pageCount > 1}
       <li>
-        <button
+        <Button
           tabindex="0"
+          appearance="plain"
           role="link"
           aria-label="Next"
           on:click={(e) => setPage(e, currentPage + 1)}
           disabled={currentPage === pageCount}
         >
           <Icon {...iconChooseItemNext} />
-        </button>
+        </Button>
       </li>
     {/if}
   </ul>

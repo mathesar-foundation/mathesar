@@ -39,7 +39,7 @@
   closeOnInnerClick={false}
   contentClass="content"
   bind:isOpen={isDropdownOpen}
-  triggerAppearance="plain"
+  triggerAppearance="secondary"
   showArrow={false}
   ariaLabel="New Column"
 >
