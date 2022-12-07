@@ -125,6 +125,11 @@
     display: flex;
     align-items: center;
     justify-content: end;
+    max-width: 15rem;
+    overflow: hidden;
+  }
+  .label {
+    overflow: hidden;
   }
   .options {
     margin: 0 0.2rem;
