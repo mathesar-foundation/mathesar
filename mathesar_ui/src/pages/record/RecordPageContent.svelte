@@ -52,7 +52,8 @@
         </NameWithIcon>
       </h1>
       <div class="table-name">
-        Record in <TableName {table} truncate={false} />
+        Record in
+        <strong><TableName {table} truncate={false} /></strong>
       </div>
       <div class="form-status"><FormStatus {form} /></div>
     </div>
