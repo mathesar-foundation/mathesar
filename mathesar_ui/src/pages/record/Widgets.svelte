@@ -43,7 +43,7 @@
       Related Records
       <Help>
         Each of the following records links to
-        <NameWithIcon icon={iconRecord}>
+        <NameWithIcon icon={iconRecord} truncate={false}>
           <strong>{recordSummary}</strong>
         </NameWithIcon>
         via a linking column in its corresponding table. (For convenience, that linking
