@@ -34,7 +34,8 @@
           columnNameMap.get(joinableTable.jp_path[0].slice(-1)[0]) ??
           '(unknown column)',
       },
-    }));
+    }))
+    .sort((a, b) => a.table.name.localeCompare(b.table.name));
 </script>
 
 {#if tableWidgetInputs.length}
