@@ -23,6 +23,7 @@
 <style>
   .errors {
     font-size: var(--text-size-small);
+    --alert-margin: var(--errors-margin);
   }
   .list {
     margin: 0;

@@ -31,11 +31,19 @@
   }
 </script>
 
-<FormSubmit
-  {form}
-  onProceed={proceed}
-  onCancel={() => form.reset()}
-  {...$$restProps}
-/>
+<div class="form-submit-with-catch">
+  <FormSubmit
+    {form}
+    onProceed={proceed}
+    onCancel={() => form.reset()}
+    {...$$restProps}
+  />
 
-<Errors {errors} --alert-margin="1rem 0 0 1rem" />
+  <Errors {errors} />
+</div>
+
+<style>
+  .form-submit-with-catch {
+    --errors-margin: 1rem 0 0 1rem;
+  }
+</style>

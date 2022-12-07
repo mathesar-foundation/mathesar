@@ -109,7 +109,7 @@
 <style>
   .direct-field {
     display: contents;
-    --alert-margin: 0.5rem 0 0 0;
+    --errors-margin: 0.5rem 0 0 0;
   }
   .direct-field:not(:last-child) .cell {
     padding-bottom: 1rem;

@@ -116,9 +116,6 @@
     grid-template-columns: auto 1fr;
   }
   .submit {
-    margin-top: 2rem;
-  }
-  .submit:empty {
-    display: none;
+    --form-submit-margin: 2rem 0 0 0;
   }
 </style>

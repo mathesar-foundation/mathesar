@@ -17,9 +17,17 @@
 </script>
 
 {#if !initiallyHidden || hasChanges}
-  <CancelOrProceedButtonPair
-    canProceed={canSubmit}
-    {onCancel}
-    {...$$restProps}
-  />
+  <div class="form-submit">
+    <CancelOrProceedButtonPair
+      canProceed={canSubmit}
+      {onCancel}
+      {...$$restProps}
+    />
+  </div>
 {/if}
+
+<style>
+  .form-submit {
+    margin: var(--form-submit-margin);
+  }
+</style>
