@@ -37,14 +37,22 @@ class TypeOptionSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     fields = serializers.CharField(required=False)
 
     def validate(self, attrs):
-        if attrs.get('scale', None) is not None and attrs.get('precision', None) is None:
+        column = getattr(self.parent, 'instance', None)
+        scale = attrs.get('scale', None)
+        precision = attrs.get('precision', None)
+        if scale is not None and precision is None:
             attrs['precision'] = 1000
-        elif attrs.get('scale', None) is None and attrs.get('precision', None) is not None:
-            raise database_api_exceptions.InvalidTypeOptionAPIException(
-                InvalidTypeOptionError,
-                message='Cannot set precision without a scale.',
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
+        elif column is not None and scale is None and precision is not None:
+            valid_type_options = column.valid_type_options
+            if all(
+                type_options in valid_type_options
+                for type_options in ['scale', 'precision']
+            ):
+                raise database_api_exceptions.InvalidTypeOptionAPIException(
+                    InvalidTypeOptionError,
+                    message='Cannot set precision without a scale.',
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
         return super().validate(attrs)
 
     def run_validation(self, data=empty):
