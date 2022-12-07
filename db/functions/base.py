@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 import warnings
 
 from sqlalchemy import column, not_, and_, or_, func, literal, cast
-from sqlalchemy.dialects.postgresql import array_agg, TEXT
+from sqlalchemy.dialects.postgresql import array_agg, TEXT, array
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat
 
@@ -388,6 +388,57 @@ class ArrayAgg(DBFunction):
     def to_sa_expression(column_expr):
         _maybe_downcast(column_expr)
         return array_agg(column_expr)
+
+
+class ArrayContains(DBFunction):
+    id = 'array_contains'
+    name = 'contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.array),
+        hints.parameter(1, hints.array),
+    ])
+
+    @staticmethod
+    def to_sa_expression(value1, value2):
+        return sa_call_sql_function(
+            'arraycontains',
+            value1,
+            array(value2),
+            return_type=PostgresType.BOOLEAN
+        )
+
+
+class ArrayLength(DBFunction):
+    id = 'array_length'
+    name = 'length'
+    hints = tuple([
+        hints.returns(hints.comparable),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.array),
+        hints.parameter(1, hints.any),
+        hints.mathesar_filter
+    ])
+
+    @staticmethod
+    def to_sa_expression(value, dimension):
+        array_length = sa_call_sql_function(
+            'array_length',
+            value,
+            dimension,
+            return_type=PostgresType.INTEGER,
+        )
+        # The SQL function `array_length` returns NULL, when the array is empty. We want
+        # output to default to 0 (zero) in that case.
+        default_when_empty = 0
+        with_default = sa_call_sql_function(
+            'coalesce',
+            array_length,
+            default_when_empty,
+            return_type=PostgresType.INTEGER,
+        )
+        return with_default
 
 
 class Alias(DBFunction):
