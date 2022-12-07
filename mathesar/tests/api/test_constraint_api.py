@@ -321,7 +321,7 @@ def test_create_foreign_key_constraint_on_invalid_table_name(create_base_table, 
     response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
     response_data = response.json()[0]
     assert response.status_code == 400
-    assert response_data['code'] == ErrorCodes.InvalidReferentTableName.value
+    assert response_data['code'] == ErrorCodes.InvalidTableName.value
     assert response_data['message'] == 'Referent table name "Referent_table(alpha)" is invalid.'
 
 

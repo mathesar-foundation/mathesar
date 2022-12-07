@@ -7,7 +7,7 @@ import mathesar.api.exceptions.database_exceptions.exceptions as database_api_ex
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ConstraintColumnEmptyAPIException, UnsupportedConstraintAPIException,
-    InvalidReferentTableName
+    InvalidTableName
 )
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from mathesar.api.serializers.shared_serializers import (
@@ -151,7 +151,7 @@ class ConstraintSerializer(
         if referent_table := data.get('referent_table', None):
             referent_table_name = Table.current_objects.get(id=referent_table).name
             if referent_table_name.find('(') != -1 and referent_table_name.find(')') != -1:
-                raise InvalidReferentTableName(referent_table_name)
+                raise InvalidTableName(referent_table_name)
         constraint_type = data.get('type', None)
         if constraint_type not in self.serializers_mapping.keys():
             raise UnsupportedConstraintAPIException(constraint_type=constraint_type)

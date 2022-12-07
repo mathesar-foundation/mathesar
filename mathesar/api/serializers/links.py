@@ -5,7 +5,7 @@ from db.links.operations.create import create_foreign_key_link, create_many_to_m
 from mathesar.api.db.permissions.table import TableAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
-    InvalidLinkChoiceAPIException, InvalidReferentTableName
+    InvalidLinkChoiceAPIException, InvalidTableName
 )
 from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,

@@ -81,7 +81,7 @@ def test_create_link_on_invalid_table_name(create_base_table, create_referent_ta
     )
     response_data = response.json()[0]
     assert response.status_code == 400
-    assert response_data['code'] == ErrorCodes.InvalidReferentTableName.value
+    assert response_data['code'] == ErrorCodes.InvalidTableName.value
     assert response_data['message'] == 'Referent table name "Referent_table(alpha)" is invalid.'
 
 
