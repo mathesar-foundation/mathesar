@@ -42,7 +42,7 @@
     gap: 0.2rem;
 
     .name {
-      font-size: var(--text-size-x-small);
+      font-size: var(--text-size-small);
       color: var(--color-text-muted);
       display: flex;
       align-items: center;
@@ -56,7 +56,7 @@
       }
     }
     .value {
-      font-weight: 500;
+      font-size: var(--text-size-large);
     }
   }
 </style>
