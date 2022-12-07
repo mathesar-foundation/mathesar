@@ -1,7 +1,9 @@
+from django.contrib.auth import get_user_model
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from mathesar.api.ui.permissions.database_role import DatabaseRoleAccessPolicy
@@ -21,11 +23,11 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     pagination_class = DefaultLimitOffsetPagination
     access_policy = UserAccessPolicy
 
-    @action(methods=['post'], detail=False)
-    def password_reset(self, request):
+    @action(methods=['post'], detail=True)
+    def password_reset(self, request, pk=None):
         serializer = PasswordResetSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["username"]
+        user = get_object_or_404(get_user_model(), pk=pk)
         password = serializer.validated_data["password"]
         user.set_password(password)
         user.save()
