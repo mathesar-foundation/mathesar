@@ -1,8 +1,6 @@
 <script lang="ts">
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { getExplorationPageUrl } from '@mathesar/routes/urls';
-  import { iconExploration } from '@mathesar/icons';
   import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
   import { queries } from '@mathesar/stores/queries';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
@@ -17,10 +15,10 @@
 {#if query}
   <AppendBreadcrumb
     item={{
-      type: 'simple',
-      href: getExplorationPageUrl(database.name, schema.id, queryId),
-      label: query?.name ?? 'Exploration',
-      icon: iconExploration,
+      type: 'exploration',
+      database,
+      schema,
+      query,
     }}
   />
 

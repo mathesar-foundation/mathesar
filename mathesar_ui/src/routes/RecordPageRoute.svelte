@@ -1,12 +1,9 @@
 <script lang="ts">
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import RecordSummary from '@mathesar/components/RecordSummary.svelte';
-  import { iconRecord } from '@mathesar/icons';
-  import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
   import RecordStore from '@mathesar/pages/record/RecordStore';
-  import { getRecordPageUrl } from './urls';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -20,10 +17,14 @@
 {#if $fetchRequest?.state === 'success'}
   <AppendBreadcrumb
     item={{
-      type: 'simple',
-      href: getRecordPageUrl(database.name, schema.id, table.id, recordId),
-      label: { component: RecordSummary, props: { recordSummary: $summary } },
-      icon: iconRecord,
+      type: 'record',
+      database,
+      schema,
+      table,
+      record: {
+        id: recordId,
+        summary: $summary,
+      },
     }}
   />
 {/if}
