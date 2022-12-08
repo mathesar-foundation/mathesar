@@ -41,9 +41,9 @@
     bind:element={triggerElement}
     class="padding-zero"
   >
-    <div class="trigger">
+    <span class="trigger">
       <Icon {...iconExpandRight} />
-    </div>
+    </span>
   </Button>
 
   <AttachableDropdown

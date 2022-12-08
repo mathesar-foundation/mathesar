@@ -13,10 +13,10 @@
 </script>
 
 <Button on:click={handleClick} appearance="ghost" class="padding-zero">
-  <div class="trigger">
+  <span class="trigger">
     <Icon {...iconSearch} />
     <Icon {...iconExpandRight} class="expand-right-icon" />
-  </div>
+  </span>
 </Button>
 
 <style lang="scss">
