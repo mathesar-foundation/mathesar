@@ -41,7 +41,7 @@ class TypeOptionSerializer(MathesarErrorMessageMixin, serializers.Serializer):
         db_type = self.context.get('db_type', None)
         scale = attrs.get('scale', None)
         precision = attrs.get('precision', None)
-        if(
+        if (
             db_type == PostgresType.NUMERIC
             and (scale is None and precision is not None)
             or (scale is not None and precision is None)

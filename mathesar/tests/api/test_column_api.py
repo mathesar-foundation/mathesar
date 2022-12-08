@@ -180,7 +180,6 @@ def test_column_create_invalid_default(column_test_table, client):
     "db_type,type_options,expected_type_options",
     [
         (PostgresType.NUMERIC, {"precision": 5, "scale": 3}, {"precision": 5, "scale": 3}),
-        (PostgresType.NUMERIC, {"scale": 3}, {"precision": 1000, "scale": 3}),
         (PostgresType.CHARACTER_VARYING, {"length": 5}, {"length": 5}),
         (PostgresType.CHARACTER, {"length": 5}, {"length": 5}),
         (PostgresType.INTERVAL, {"precision": 5}, {"precision": 5}),
@@ -211,6 +210,8 @@ def test_column_create_retrieve_options(column_test_table, client, db_type, type
 
 invalid_type_options = [
     {"precision": 5, "scale": 8},
+    {"precision": 1000},
+    {"scale": 5},
     {"precision": "asd"},
     {"nonoption": 34},
     {"length": "two"},
@@ -434,7 +435,7 @@ def test_column_update_name_type_nullable_default(column_test_table, client):
 
 def test_column_update_type_options(column_test_table, client):
     db_type = PostgresType.NUMERIC
-    type_options = {"scale": 1}
+    type_options = {'precision': 1000, "scale": 1}
     expected_type_options = {'precision': 1000, 'scale': 1}
     data = {"type": db_type.id, "type_options": type_options}
     column = column_test_table.get_columns_by_name(['mycolumn3'])[0]
