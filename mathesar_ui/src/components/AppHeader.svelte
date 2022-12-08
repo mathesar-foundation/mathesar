@@ -4,6 +4,7 @@
     Icon,
     iconLoading,
     LinkMenuItem,
+    MenuHeading,
   } from '@mathesar-component-library';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { iconAddNew, iconExploration, iconUser } from '@mathesar/icons';
@@ -78,11 +79,9 @@
         <Icon {...iconUser} />
       </div>
       {#if database}
+        <MenuHeading>Database</MenuHeading>
         <LinkMenuItem href={getDatabasePageUrl(database.name)}>
-          <div class="database-name">
-            <span class="database-title">Database</span>
-            <DatabaseName {database} />
-          </div>
+          <DatabaseName {database} />
         </LinkMenuItem>
       {/if}
     </DropdownMenu>
@@ -117,14 +116,5 @@
     padding: 0.5rem;
     display: flex;
     align-items: center;
-  }
-
-  .database-name {
-    display: flex;
-    flex-direction: column;
-
-    > :global(* + *) {
-      margin-top: 0.5rem;
-    }
   }
 </style>
