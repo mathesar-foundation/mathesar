@@ -45,7 +45,7 @@
           <Spinner />
         </div>
       {:else if inputColumnsFetchState?.state === 'success'}
-        {#if activeTab.id === 'column-selection'}
+        {#if activeTab?.id === 'column-selection'}
           <div class="help-text">
             Select the columns that will be used for the exploration. Columns
             are limited to those from the base table and it's linked tables.
@@ -55,7 +55,7 @@
             {linkCollapsibleOpenState}
             on:add={(e) => addColumn(e.detail)}
           />
-        {:else}
+        {:else if activeTab?.id === 'transform-results'}
           <div class="help-text">
             Transformations can be used to summarize data, filter data, and
             more. Note that transformations are applied in the order they are

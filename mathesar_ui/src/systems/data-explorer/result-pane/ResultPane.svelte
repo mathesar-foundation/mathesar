@@ -1,28 +1,16 @@
 <script lang="ts">
-  import { Button, Icon } from '@mathesar-component-library';
-  import { iconRefresh } from '@mathesar/icons';
   import type QueryRunner from '../QueryRunner';
   import Results from './Results.svelte';
+  import QueryRefreshButton from './QueryRefreshButton.svelte';
 
   export let queryRunner: QueryRunner;
-
-  $: ({ runState } = queryRunner);
-
-  $: isQueryRunInProcess = $runState?.state === 'processing';
 </script>
 
 <section data-identifier="result">
   <header>
     <span class="title">Result</span>
     <div class="actions">
-      <Button
-        appearance="secondary"
-        disabled={isQueryRunInProcess}
-        on:click={() => queryRunner.run()}
-      >
-        <Icon {...iconRefresh} spin={isQueryRunInProcess} />
-        <span>Refresh</span>
-      </Button>
+      <QueryRefreshButton {queryRunner} />
     </div>
   </header>
   <Results {queryRunner} />
