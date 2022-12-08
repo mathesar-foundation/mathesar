@@ -12,9 +12,8 @@
 
   .menu-heading {
     grid-column: 1 / -1;
-    color: #444;
-    font-size: 80%;
-    padding: 0.2em 0;
+    color: var(--slate-500);
+    padding: 0.2em 0.5em;
   }
 
   .menu-divider {
