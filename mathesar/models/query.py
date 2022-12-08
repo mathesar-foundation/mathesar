@@ -1,13 +1,14 @@
 from functools import wraps
 from django.db import models
-from mathesar.state.cached_property import cached_property
+from frozendict import frozendict
 
 from db.queries.base import DBQuery, InitialColumn
 from db.queries.operations.process import get_transforms_with_summarizes_speced
-from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
 from db.transforms.operations.deserialize import deserialize_transformation
 from db.transforms.operations.serialize import serialize_transformation
 
+from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
+from mathesar.state.cached_property import cached_property
 from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
 from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValueType, DictHasBadKeys
@@ -46,7 +47,6 @@ def _get_validator_for_initial_columns(field_name):
                 )
                 raise DictHasBadKeys(message, field=field_name)
             optional_keys = {
-                "display_name",
                 "jp_path",
             }
             valid_keys = {
@@ -150,12 +150,21 @@ class UIQuery(BaseModel, Relation):
         ],
     )
 
-    # dict of column ids/aliases to display options
+    # dict of aliases to display options
     display_options = models.JSONField(
         null=True,
         blank=True,
         validators=[
             _get_validator_for_dict(field_name="display_options"),
+        ],
+    )
+
+    # dict of aliases to display names
+    display_names = models.JSONField(
+        null=True,
+        blank=True,
+        validators=[
+            _get_validator_for_dict(field_name="display_names"),
         ],
     )
 
@@ -183,23 +192,19 @@ class UIQuery(BaseModel, Relation):
         return tuple(sa_col.name for sa_col in self.db_query.sa_output_columns)
 
     @property
-    def initial_dj_columns(self):
-        dj_column_ids = [col['id'] for col in self.initial_columns]
-        return Column.objects.filter(pk__in=dj_column_ids)
-
-    @property
     def initial_columns_described(self):
         return tuple(
             {
-                'alias': col['alias'],
-                'display_name': col.get('display_name')
-            }
-            | {
+                'alias': initial_col_alias,
+                'display_name': self._get_display_name_for_alias(
+                    initial_col_alias
+                ),
                 'type': dj_col.db_type.id,
                 'type_options': dj_col._sa_column.type_options,
                 'display_options': dj_col.display_options
             }
-            for col, dj_col in zip(self.initial_columns, self.initial_dj_columns)
+            for initial_col_alias, dj_col
+            in self._map_of_initial_col_alias_to_dj_column.items()
         )
 
     def _describe_query_column(self, sa_col):
@@ -335,25 +340,38 @@ class UIQuery(BaseModel, Relation):
         return self._alias_to_display_name.get(alias)
 
     def _get_display_options_for_alias(self, alias):
-        if self.display_options is not None:
-            return self.display_options.get(alias)
+        display_options = None
+        if self.display_options:
+            display_options = self.display_options.get(alias)
+        if display_options is None:
+            # notice that this isn't meant to support non-initial-column aliases
+            dj_col = self._map_of_initial_col_alias_to_dj_column.get(alias)
+            if dj_col:
+                display_options = dj_col.display_options
+        return display_options
+
+    @property
+    def _map_of_initial_col_alias_to_dj_column(self):
+        dj_column_ids = [col['id'] for col in self.initial_columns]
+        dj_columns = Column.objects.filter(pk__in=dj_column_ids)
+        initial_col_aliases = [
+            initial_col['alias']
+            for initial_col
+            in self.initial_columns
+        ]
+        return frozendict(
+            zip(
+                initial_col_aliases,
+                dj_columns,
+            )
+        )
 
     @cached_property
     def _alias_to_display_name(self):
-        display_name_map = {
-            initial_column['alias']: initial_column.get('display_name')
-            for initial_column
-            in self.initial_columns
-        }
-        if self.transformations is not None:
-            display_name_map.update(
-                {
-                    k: v
-                    for transformation in self.transformations
-                    for k, v in transformation.get('display_names', {}).items()
-                }
-            )
-        return display_name_map
+        alias_to_display_name = {}
+        if self.display_names is not None:
+            alias_to_display_name.update(self.display_names)
+        return alias_to_display_name
 
     @property
     def _sa_engine(self):

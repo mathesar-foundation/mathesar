@@ -18,7 +18,7 @@ class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer
 
     class Meta:
         model = UIQuery
-        fields = ['schema', 'initial_columns', 'transformations', 'base_table']
+        fields = ['schema', 'initial_columns', 'transformations', 'base_table', 'display_names']
 
     def get_schema(self, uiquery):
         base_table = uiquery.base_table

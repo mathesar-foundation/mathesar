@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { StringOrComponent } from '@mathesar-component-library';
   import Logo from '@mathesar/components/Logo.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
@@ -19,9 +20,9 @@
 
 <div class="container">
   {#if item.type === 'database'}
-    <a href={getDatabasePageUrl(item.database.name)} class="logo-link"
-      ><Logo /></a
-    >
+    <a href={getDatabasePageUrl(item.database.name)} class="logo-link">
+      <Logo />
+    </a>
     <SchemaSelector database={item.database} />
   {:else if item.type === 'schema'}
     <BreadcrumbLink href={getSchemaPageUrl(item.database.name, item.schema.id)}>
@@ -38,9 +39,11 @@
   {:else if item.type === 'simple'}
     <BreadcrumbLink href={item.href}>
       {#if item.icon}
-        <NameWithIcon icon={item.icon}>{item.label}</NameWithIcon>
+        <NameWithIcon icon={item.icon}>
+          <StringOrComponent arg={item.label} />
+        </NameWithIcon>
       {:else}
-        {item.label}
+        <StringOrComponent arg={item.label} />
       {/if}
     </BreadcrumbLink>
   {/if}

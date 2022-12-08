@@ -70,21 +70,24 @@ def test_queries_run_minimal_based_on_permissions(
 
 def test_queries_run_minimal(create_patents_table, client):
     base_table = create_patents_table(table_name='patent_query_run_minimal_table')
+    display_names = {
+        'col1': 'Column 1',
+        'col2': 'Column 2',
+    }
     initial_columns = [
         {
             'id': base_table.get_column_by_name('Center').id,
             'alias': 'col1',
-            'display_name': 'Column 1',
         },
         {
             'id': base_table.get_column_by_name('Case Number').id,
             'alias': 'col2',
-            'display_name': 'Column 2',
         },
     ]
     data = {
         'base_table': base_table.id,
         'initial_columns': initial_columns,
+        'display_names': display_names,
         'parameters': {
             'order_by': [
                 {'field': 'col1', 'direction': 'asc'},
@@ -158,12 +161,10 @@ def test_queries_run_deleted_column(create_patents_table, client):
         {
             'id': to_be_deleted_column_id,
             'alias': 'col1',
-            'display_name': 'Column 1',
         },
         {
             'id': base_table.get_column_by_name('Case Number').id,
             'alias': 'col2',
-            'display_name': 'Column 2',
         },
     ]
     data = {

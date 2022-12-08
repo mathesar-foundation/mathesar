@@ -7,7 +7,9 @@
     Select,
   } from '@mathesar-component-library';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import type { ReadableMapLike, GroupEntryColumnLike } from './types';
+  import type { ReadableMapLike } from '@mathesar/typeUtils';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import type { GroupEntryColumnLike } from './types';
 
   type T = $$Generic;
   type ColumnLikeType = T & GroupEntryColumnLike;
@@ -94,7 +96,18 @@
     getLabel={(columnId) =>
       columnId ? getColumnLabel(columns.get(columnId)) : ''}
     on:change={onColumnChange}
-  />
+    let:option
+  >
+    {@const columnInfo = columns.get(option)}
+    <ColumnName
+      column={{
+        name: getColumnLabel(columnInfo),
+        type: columnInfo?.column.type ?? 'unknown',
+        type_options: columnInfo?.column.type_options ?? null,
+        display_options: columnInfo?.column.display_options ?? null,
+      }}
+    />
+  </Select>
   {#if preprocFunctions.length > 1}
     <Select
       options={preprocFunctions}
@@ -106,7 +119,7 @@
     />
   {/if}
   {#if allowDelete}
-    <Button on:click={() => dispatch('removeGroup')}>
+    <Button appearance="secondary" on:click={() => dispatch('removeGroup')}>
       <Icon size="0.8rem" {...iconDeleteMajor} />
     </Button>
   {/if}

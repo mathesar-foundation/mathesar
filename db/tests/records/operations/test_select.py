@@ -1,13 +1,9 @@
-import pytest
-
 from decimal import Decimal
 from collections import Counter
 
 from sqlalchemy import Column, VARCHAR
 
 from db.records.operations.select import get_records, get_column_cast_records
-from db.transforms.operations.apply import apply_transformations
-from db.transforms import base as transforms_base
 from db.tables.operations.create import create_mathesar_table
 from db.types.base import PostgresType
 
@@ -108,75 +104,3 @@ def test_get_records_duplicate_only(roster_table_obj):
     all_counter = {k: v for k, v in all_counter.items() if v > 1}
     got_counter = Counter(tuple(r[c] for c in duplicate_only) for r in dupe_record_list)
     assert all_counter == got_counter
-
-
-# TODO might want to move this to transforms test namespace
-@pytest.mark.parametrize(
-    "transformations,expected_records",
-    [
-        [
-            [
-                transforms_base.Filter(
-                    spec=dict(
-                        contains=[
-                            dict(column_name=["Student Name"]),
-                            dict(literal=["son"]),
-                        ]
-                    ),
-                ),
-                transforms_base.Order(
-                    spec=[{"field": "Teacher Email", "direction": "asc"}],
-                ),
-                transforms_base.Limit(
-                    spec=5,
-                ),
-                transforms_base.SelectSubsetOfColumns(
-                    spec=["id"],
-                ),
-            ],
-            [
-                (978,),
-                (194,),
-                (99,),
-                (155,),
-                (192,),
-            ]
-        ],
-        [
-            [
-                transforms_base.Limit(
-                    spec=50,
-                ),
-                transforms_base.Filter(
-                    spec=dict(
-                        contains=[
-                            dict(column_name=["Student Name"]),
-                            dict(literal=["son"]),
-                        ]
-                    ),
-                ),
-                transforms_base.Order(
-                    spec=[{"field": "Teacher Email", "direction": "asc"}],
-                ),
-                transforms_base.Limit(
-                    spec=5,
-                ),
-                transforms_base.SelectSubsetOfColumns(
-                    spec=["id"],
-                ),
-            ],
-            [
-                (31,),
-                (16,),
-                (18,),
-                (24,),
-                (33,),
-            ]
-        ],
-    ]
-)
-def test_transformations(roster_table_obj, transformations, expected_records):
-    roster, engine = roster_table_obj
-    relation = apply_transformations(roster, transformations)
-    records = get_records(relation, engine)
-    assert records == expected_records
