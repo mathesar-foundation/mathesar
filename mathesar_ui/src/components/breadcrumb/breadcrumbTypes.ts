@@ -1,3 +1,4 @@
+import type { QueryInstance } from '@mathesar/api/queries';
 import type { TableEntry } from '@mathesar/api/tables';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import type {
@@ -41,10 +42,18 @@ export interface BreadcrumbItemRecord {
   };
 }
 
+export interface BreadcrumbItemExploration {
+  type: 'exploration';
+  database: Database;
+  schema: SchemaEntry;
+  query: Pick<QueryInstance, 'id' | 'name'>;
+}
+
 export type BreadcrumbItem =
   | BreadcrumbItemDatabase
   | BreadcrumbItemSchema
   | BreadcrumbItemTable
+  | BreadcrumbItemExploration
   | BreadcrumbItemRecord
   | BreadcrumbItemSimple;
 

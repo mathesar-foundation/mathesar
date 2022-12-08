@@ -4,11 +4,13 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import {
     getDatabasePageUrl,
+    getExplorationPageUrl,
     getRecordPageUrl,
     getSchemaPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
-  import { iconRecord } from '@mathesar/icons';
+  import { StringOrComponent } from '@mathesar/component-library';
+  import { iconExploration, iconRecord } from '@mathesar/icons';
   import BreadcrumbLink from './BreadcrumbLink.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
   import EntitySelector from './EntitySelector.svelte';
@@ -16,7 +18,6 @@
   import LogoAndNameWithLink from './LogoAndNameWithLink.svelte';
   import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
   import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
-  import { StringOrComponent } from '@mathesar/component-library';
   import RecordSummary from '../RecordSummary.svelte';
 
   export let item: BreadcrumbItem;
@@ -50,6 +51,17 @@
       <NameWithIcon icon={iconRecord}>
         <RecordSummary recordSummary={item.record.summary} />
       </NameWithIcon>
+    </BreadcrumbLink>
+  {:else if item.type === 'exploration'}
+    <EntitySelector database={item.database} schema={item.schema} />
+    <BreadcrumbLink
+      href={getExplorationPageUrl(
+        item.database.name,
+        item.schema.id,
+        item.query.id,
+      )}
+    >
+      <NameWithIcon icon={iconExploration}>{item.query.name}</NameWithIcon>
     </BreadcrumbLink>
   {:else if item.type === 'simple'}
     <BreadcrumbPageSeparator />
