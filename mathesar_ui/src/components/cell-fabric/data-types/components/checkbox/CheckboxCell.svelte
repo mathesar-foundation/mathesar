@@ -14,6 +14,7 @@
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let isProcessing: $$Props['isProcessing'];
+  export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   let cellRef: HTMLElement;
   let isFirstActivated = false;
@@ -67,6 +68,7 @@
   {isActive}
   {isSelectedInRange}
   {disabled}
+  {isIndependentOfSheet}
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
   on:click={checkAndToggle}

@@ -18,10 +18,11 @@
   description={query.description}
 >
   <svelte:fragment slot="actions-right">
-    <a href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}>
-      <Button appearance="primary">
-        <span>Edit in Data Explorer</span>
-      </Button>
+    <a
+      class="btn btn-primary"
+      href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}
+    >
+      <span>Edit in Data Explorer</span>
     </a>
     <Button
       appearance="secondary"

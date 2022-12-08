@@ -16,6 +16,7 @@ import { runQuery } from '@mathesar/stores/queries';
 import { SheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type QueryModel from './QueryModel';
+import QueryInspector from './QueryInspector';
 import {
   processColumnMetaData,
   getProcessedOutputColumns,
@@ -68,6 +69,8 @@ export default class QueryRunner<
 
   selection: QuerySheetSelection;
 
+  inspector: QueryInspector;
+
   private runPromise: CancellablePromise<QueryRunResponse> | undefined;
 
   constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
@@ -88,6 +91,7 @@ export default class QueryRunner<
         return Math.min(pageSize, totalCount - offset, rowLength) - 1;
       },
     });
+    this.inspector = new QueryInspector(this.query);
   }
 
   /**
@@ -201,16 +205,29 @@ export default class QueryRunner<
 
   selectColumn(alias: QueryColumnMetaData['alias']): void {
     const processedColumn = get(this.processedColumns).get(alias);
-    if (processedColumn) {
-      this.selection.toggleColumnSelection(processedColumn);
-    } else {
+    if (!processedColumn) {
       this.selection.resetSelection();
       this.selection.selectAndActivateFirstCellIfExists();
+      this.inspector.selectCellTab();
+      return;
     }
+
+    const isSelected = this.selection.toggleColumnSelection(processedColumn);
+    if (isSelected) {
+      this.inspector.selectColumnTab();
+      return;
+    }
+
+    this.selection.activateFirstCellInSelectedColumn();
+    this.inspector.selectCellTab();
   }
 
   clearSelection(): void {
     this.selection.resetSelection();
+  }
+
+  getRows(): QueryRow[] {
+    return get(this.rowsData).rows;
   }
 
   getQueryModel(): QueryModel {

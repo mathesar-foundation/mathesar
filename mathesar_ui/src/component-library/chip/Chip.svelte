@@ -8,7 +8,7 @@
     const l = textShade === 'dark' ? 85 : 40;
     return `hsl(${h}, ${s}%, ${l}%)`;
   })();
-  export let display: 'block' | 'inline' = 'block';
+  export let display: 'block' | 'inline' | 'inline-block' = 'block';
 
   let classes = '';
   export { classes as class };
