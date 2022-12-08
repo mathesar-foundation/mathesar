@@ -13,9 +13,9 @@
   } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/utils/api';
-  import Filter from './record-operations/Filter.svelte';
+  import Filter from './record-operations/filter/Filter.svelte';
   import Group from './record-operations/Group.svelte';
-  import Sort from './record-operations/Sort.svelte';
+  import Sort from './record-operations/sort/Sort.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 

@@ -1,5 +1,6 @@
 import { ImmutableMap } from '@mathesar-component-library';
 import {
+  nullPlaceholder,
   prepareFieldsAsRecordSummaryInputData,
   renderTransitiveRecordSummary,
   type RecordSummariesForSheet,
@@ -53,7 +54,7 @@ describe('Record Summary', () => {
     [ '{ 11}'          , '{ 11}' ],
     [ '{11 }'          , '{11 }' ],
     [ '{99}'           , '{99}' ], // column id 99 doesn't exist
-    [ '{13}'           , '(null)' ],
+    [ '{13}'           , nullPlaceholder ],
     [ '{14}'           , 'Apple-Banana' ],
     [ '{11} {14}'      , 'one Apple-Banana' ],
     [ '{15}'           , '1501' ],
