@@ -67,11 +67,13 @@
         type: selectedDbType,
         type_options: { ...typeOptions },
       });
+      typeChangeState = { state: 'success' };
       actionButtonsVisible = false;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Unable to change column type';
       toast.error(errorMessage);
+      typeChangeState = { state: 'failure', errors: [errorMessage] };
     }
   }
 
