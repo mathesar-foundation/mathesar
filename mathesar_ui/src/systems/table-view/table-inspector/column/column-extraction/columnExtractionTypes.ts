@@ -1,5 +1,5 @@
-import type { TableEntry } from '@mathesar/api/tables';
-import type { FkConstraint } from '@mathesar/api/tables/constraints';
+import type { TableEntry } from '@mathesar/api/types/tables';
+import type { FkConstraint } from '@mathesar/api/types/tables/constraints';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
 export type ColumnExtractionTargetType = 'newTable' | 'existingTable';

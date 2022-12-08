@@ -2,7 +2,7 @@ import type {
   NumberDisplayOptions,
   NumberFormat,
   Column,
-} from '@mathesar/api/tables/columns';
+} from '@mathesar/api/types/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/AppTypes';
 import { iconUiTypeNumber } from '@mathesar/icons';

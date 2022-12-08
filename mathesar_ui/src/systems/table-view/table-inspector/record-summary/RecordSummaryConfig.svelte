@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Alert, RadioGroup } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import {
     FormSubmit,

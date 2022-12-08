@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { Spinner } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
@@ -8,6 +7,7 @@
   import { displayRecordSummaryAsPlainText } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { currentTable } from '@mathesar/stores/tables';
   import RecordPageContent from './RecordPageContent.svelte';
+  import RecordPageLoadingSpinner from './RecordPageLoadingSpinner.svelte';
   import type RecordStore from './RecordStore';
 
   export let record: RecordStore;
@@ -29,9 +29,9 @@
 
 <svelte:head><title>{makeSimplePageTitle(title)}</title></svelte:head>
 
-<LayoutWithHeader>
+<LayoutWithHeader cssVariables={{ '--page-padding': '0' }} fitViewport>
   {#if isLoading}
-    <Spinner />
+    <RecordPageLoadingSpinner />
   {:else}
     <RecordPageContent {tableStructure} {record} />
   {/if}

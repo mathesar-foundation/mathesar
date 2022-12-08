@@ -1,4 +1,4 @@
-import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
+import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
 

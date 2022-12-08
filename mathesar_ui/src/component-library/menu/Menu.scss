@@ -12,9 +12,8 @@
 
   .menu-heading {
     grid-column: 1 / -1;
-    color: #444;
-    font-size: 80%;
-    padding: 0.2em 0;
+    color: var(--slate-500);
+    padding: 0.2em 0.5em;
   }
 
   .menu-divider {
@@ -62,28 +61,28 @@
       color: var(--slate-300);
       cursor: not-allowed;
     }
-    .control {
+    > .control {
       grid-column: control;
     }
-    .icon {
+    > .icon {
       grid-column: icon;
     }
-    .label {
+    > .label {
       grid-column: label;
     }
-    .cell:not(:empty) {
+    > .cell:not(:empty) {
       padding: var(--spacing-y, var(--spacing-y-default))
         var(--spacing-x, var(--spacing-x-default));
     }
-    .control,
-    .icon {
+    > .control,
+    > .icon {
       display: flex;
       align-items: center;
     }
-    .cell.control {
+    > .cell.control {
       --checkbox-margin-bottom: 0;
     }
-    .passthrough-button {
+    > .passthrough-button {
       background: inherit;
       border-radius: inherit;
       border: inherit;
