@@ -31,6 +31,40 @@ def column_test_table(patent_schema):
     return table
 
 
+write_clients_with_status_code = [
+    ('superuser_client_factory', 201),
+    ('db_manager_client_factory', 201),
+    ('db_editor_client_factory', 400),
+    ('schema_manager_client_factory', 201),
+    ('schema_viewer_client_factory', 400),
+    ('db_viewer_schema_manager_client_factory', 201)
+]
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', write_clients_with_status_code)
+def test_one_to_one_link_create_permissions(
+        column_test_table,
+        request,
+        create_patents_table,
+        client_name,
+        expected_status_code
+):
+    table_2 = create_patents_table('Table 2')
+    client = request.getfixturevalue(client_name)(table_2.schema)
+
+    data = {
+        "link_type": "one-to-one",
+        "reference_column_name": "col_1",
+        "reference_table": table_2.id,
+        "referent_table": column_test_table.id,
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    assert response.status_code == expected_status_code
+
+
 def test_create_link_on_invalid_table_name(create_base_table, create_referent_table, client):
     reference_table = create_base_table('Base_table')
     # Having round brackets in the referent_table name is invalid.
@@ -84,6 +118,31 @@ def test_one_to_one_link_create(column_test_table, client, create_patents_table)
     assert fk_constraint_columns == table_2.get_columns_by_name(['col_1'])
     referent_primary_key_column_name = get_primary_key_column(column_test_table._sa_table).name
     assert referent_columns == column_test_table.get_columns_by_name([referent_primary_key_column_name])
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', write_clients_with_status_code)
+def test_one_to_many_link_create_permissions(
+        column_test_table,
+        request,
+        create_patents_table,
+        client_name,
+        expected_status_code
+):
+
+    table_2 = create_patents_table('Table 2')
+    client = request.getfixturevalue(client_name)(table_2.schema)
+
+    data = {
+        "link_type": "one-to-many",
+        "reference_column_name": "col_1",
+        "reference_table": table_2.id,
+        "referent_table": column_test_table.id,
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    assert response.status_code == expected_status_code
 
 
 def test_one_to_many_link_create(column_test_table, client, create_patents_table):
@@ -178,3 +237,28 @@ def test_many_to_many_link_create(column_test_table, client, create_patents_tabl
         data=data,
     )
     assert response.status_code == 201
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', write_clients_with_status_code)
+def test_many_to_many_link_create_permissions(
+        column_test_table,
+        request,
+        create_patents_table,
+        client_name,
+        expected_status_code
+):
+    table_2 = create_patents_table('Table 2')
+    client = request.getfixturevalue(client_name)(table_2.schema)
+    data = {
+        "link_type": "many-to-many",
+        "mapping_table_name": "map_table",
+        "referents": [
+            {'referent_table': column_test_table.id, 'column_name': "link_1"},
+            {'referent_table': table_2.id, 'column_name': "link_2"}
+        ],
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    assert response.status_code == expected_status_code

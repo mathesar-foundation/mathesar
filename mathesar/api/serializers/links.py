@@ -1,6 +1,8 @@
+from rest_access_policy import PermittedPkRelatedField
 from rest_framework import serializers
 
 from db.links.operations.create import create_foreign_key_link, create_many_to_many_link
+from mathesar.api.db.permissions.table import TableAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     InvalidLinkChoiceAPIException, InvalidReferentTableName
@@ -14,8 +16,8 @@ from mathesar.models.base import Table
 
 class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     reference_column_name = serializers.CharField()
-    reference_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
-    referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+    reference_table = PermittedPkRelatedField(access_policy=TableAccessPolicy, queryset=Table.current_objects.all())
+    referent_table = PermittedPkRelatedField(access_policy=TableAccessPolicy, queryset=Table.current_objects.all())
     # TODO Fix hacky link_type detection by reflecting it correctly
     link_type = serializers.CharField(default="one-to-one")
 
@@ -44,7 +46,7 @@ class OneToManySerializer(OneToOneSerializer):
 
 class MapColumnSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     column_name = serializers.CharField()
-    referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+    referent_table = PermittedPkRelatedField(access_policy=TableAccessPolicy, queryset=Table.current_objects.all())
 
 
 class ManyToManySerializer(MathesarErrorMessageMixin, serializers.Serializer):

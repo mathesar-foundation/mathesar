@@ -5,8 +5,9 @@
 </script>
 
 <SheetPositionableCell
-  index={1}
-  columnSpan={columnCount}
+  index={0}
+  columnSpan={// Adding once since the index is starting from 0
+  columnCount + 1}
   let:htmlAttributes
   let:style
 >
@@ -21,11 +22,11 @@
 
 <style lang="scss">
   .new-record-message {
-    background: var(--color-green-medium);
+    z-index: var(--z-index-new-record-message, auto);
+    background: var(--sky-200);
     display: flex;
     align-items: center;
     font-size: var(--text-size-small);
-    color: var(--color-white);
     padding: 0 0.5rem;
   }
 </style>

@@ -1,68 +1,27 @@
 <script lang="ts">
-  import {
-    Button,
-    Dropdown,
-    Icon,
-    iconError,
-  } from '@mathesar-component-library';
-  import {
-    iconFiltering,
-    iconGrouping,
-    iconRefresh,
-    iconSorting,
-  } from '@mathesar/icons';
+  import type { Dropdown } from '@mathesar/component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { States } from '@mathesar/utils/api';
-  import Filter from './record-operations/Filter.svelte';
-  import Group from './record-operations/Group.svelte';
-  import Sort from './record-operations/Sort.svelte';
+  import type { ComponentProps } from 'svelte';
+  import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
+  import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
+  import SortDropdown from './record-operations/sort/SortDropdown.svelte';
+
+  const dropdownProps: Partial<ComponentProps<Dropdown>> = {
+    placement: 'bottom-end',
+    size: 'small',
+  };
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore, isLoading } =
-    $tabularData);
+  $: ({ columnsDataStore, meta } = $tabularData);
+  $: ({ filtering, sorting, grouping } = meta);
   $: ({ columns } = columnsDataStore);
-  $: columnsFetchStatus = columnsDataStore.fetchStatus;
-  $: recordState = recordsData.state;
-
-  $: isError =
-    $columnsFetchStatus?.state === 'failure' ||
-    $recordState === States.Error ||
-    $constraintsDataStore.state === States.Error;
-
-  function refresh() {
-    void $tabularData.refresh();
-  }
 </script>
 
 <div class="mini-actions-pane">
-  <Dropdown showArrow={false} ariaLabel="Filtering">
-    <Icon slot="trigger" {...iconFiltering} />
-    <Filter slot="content" filtering={meta.filtering} />
-  </Dropdown>
-
-  <Dropdown showArrow={false} ariaLabel="Sorting">
-    <Icon slot="trigger" {...iconSorting} />
-    <Sort slot="content" columns={$columns} sorting={meta.sorting} />
-  </Dropdown>
-
-  <Dropdown showArrow={false} ariaLabel="Grouping">
-    <Icon slot="trigger" {...iconGrouping} />
-    <Group slot="content" grouping={meta.grouping} />
-  </Dropdown>
-
-  <Button
-    size="medium"
-    disabled={$isLoading}
-    on:click={refresh}
-    aria-label="Refresh"
-    title="Refresh"
-  >
-    <Icon
-      {...isError && !isLoading ? iconError : iconRefresh}
-      spin={$isLoading}
-    />
-  </Button>
+  <FilterDropdown {filtering} {...dropdownProps} />
+  <SortDropdown {sorting} columns={$columns} {...dropdownProps} />
+  <GroupDropdown {grouping} {...dropdownProps} />
 </div>
 
 <style>

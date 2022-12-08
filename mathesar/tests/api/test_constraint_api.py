@@ -1,11 +1,12 @@
 import json
 
+import pytest
 from sqlalchemy import Column as SAColumn, ForeignKey, Integer, MetaData, Table as SATable, select
 
 from db.columns.operations.select import get_column_attnum_from_name
 from db.constraints.base import UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
-from mathesar.models.base import Table, Column
+from mathesar.models.base import Constraint, Table, Column
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from db.metadata import get_empty_metadata
 
@@ -46,6 +47,36 @@ def _verify_unique_constraint(constraint_data, columns, name):
     assert 'id' in constraint_data and type(constraint_data['id']) == int
 
 
+write_client_with_different_roles = [
+    ('superuser_client_factory', 201),
+    ('db_manager_client_factory', 201),
+    ('db_editor_client_factory', 403),
+    ('schema_manager_client_factory', 201),
+    ('schema_viewer_client_factory', 403),
+    ('db_viewer_schema_manager_client_factory', 201)
+]
+
+
+list_client_with_different_roles = [
+    ('superuser_client_factory', 2, 2),
+    ('db_manager_client_factory', 2, 2),
+    ('db_editor_client_factory', 2, 2),
+    ('schema_manager_client_factory', 2, 0),
+    ('schema_viewer_client_factory', 2, 0),
+    ('db_viewer_schema_manager_client_factory', 2, 2)
+]
+
+
+delete_client_with_different_roles = [
+    ('superuser_client_factory', 204, 204),
+    ('db_manager_client_factory', 204, 204),
+    ('db_editor_client_factory', 403, 403),
+    ('schema_manager_client_factory', 204, 403),
+    ('schema_viewer_client_factory', 403, 403),
+    ('db_viewer_schema_manager_client_factory', 204, 403)
+]
+
+
 def test_default_constraint_list(create_patents_table, client):
     table_name = 'NASA Constraint List 0'
     table = create_patents_table(table_name)
@@ -63,18 +94,30 @@ def test_default_constraint_list(create_patents_table, client):
     assert constraint_data['type'] == 'primary'
 
 
-def test_multiple_constraint_list(create_patents_table, client):
+@pytest.mark.parametrize('client_name,expected_constraint_count,different_schema_expected_constraint_count', list_client_with_different_roles)
+def test_constraint_list_based_on_permissions(
+        create_patents_table,
+        request,
+        client_name,
+        expected_constraint_count,
+        different_schema_expected_constraint_count
+):
     table_name = 'NASA Constraint List 1'
     table = create_patents_table(table_name)
     constraint_column = table.get_columns_by_name(['Case Number'])[0]
     table.add_constraint(UniqueConstraint(None, table.oid, [constraint_column.attnum]))
+    different_schema_table = create_patents_table(table_name, schema_name="Different Schema")
+    constraint_column = different_schema_table.get_columns_by_name(['Case Number'])[0]
+    different_schema_table.add_constraint(
+        UniqueConstraint(None, different_schema_table.oid, [constraint_column.attnum])
+    )
+    client = request.getfixturevalue(client_name)(table.schema)
     response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
-
-    _verify_primary_and_unique_constraints(response)
-    for constraint_data in response_data['results']:
-        if constraint_data['type'] == 'unique':
-            _verify_unique_constraint(constraint_data, [constraint_column.id], 'NASA Constraint List 1_Case Number_key')
+    assert response_data['count'] == expected_constraint_count
+    response = client.get(f'/api/db/v0/tables/{different_schema_table.id}/constraints/')
+    response_data = response.json()
+    assert response_data['count'] == different_schema_expected_constraint_count
 
 
 def test_existing_foreign_key_constraint_list(patent_schema, client):
@@ -203,6 +246,24 @@ def test_create_single_column_unique_constraint(create_patents_table, client):
     )
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), [constraint_column_id], 'NASA Constraint List 5_Case Number_key')
+
+
+@pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)
+def test_create_unique_constraint_by_different_roles(create_patents_table, request, client_name, expected_status_code):
+    table_name = 'NASA Constraint List 5'
+    table = create_patents_table(table_name)
+    constraint_column_id = table.get_columns_by_name(['Case Number'])[0].id
+    data = {
+        'type': 'unique',
+        'columns': [constraint_column_id]
+    }
+    client = request.getfixturevalue(client_name)(table.schema)
+    response = client.post(
+        f'/api/db/v0/tables/{table.id}/constraints/',
+        data=json.dumps(data),
+        content_type='application/json'
+    )
+    assert response.status_code == expected_status_code
 
 
 def test_create_unique_constraint_with_name_specified(create_patents_table, client):
@@ -388,6 +449,15 @@ def test_drop_constraint(create_patents_table, client):
     assert new_list_response.json()['count'] == 1
 
 
+def _first_unique_constraint(table):
+    constraints = Constraint.objects.filter(table=table)
+    for constraint_data in constraints:
+        if constraint_data.type == 'unique':
+            constraint_id = constraint_data. id
+            break
+    return constraint_id
+
+
 def test_create_unique_constraint_with_duplicate_name(create_patents_table, client):
     table_name = 'NASA Constraint List 8'
     table = create_patents_table(table_name)
@@ -438,6 +508,26 @@ def test_drop_nonexistent_constraint(create_patents_table, client):
     response_data = response.json()[0]
     assert response_data['message'] == "Not found."
     assert response_data['code'] == ErrorCodes.NotFound.value
+
+
+@pytest.mark.parametrize('client_name, expected_status_code, different_schema_expected_status_code', delete_client_with_different_roles)
+def test_drop_constraint_based_on_permission(create_patents_table, request, client_name, expected_status_code, different_schema_expected_status_code):
+    table_name = 'NASA Constraint List 1'
+    table = create_patents_table(table_name)
+    constraint_column = table.get_columns_by_name(['Case Number'])[0]
+    table.add_constraint(UniqueConstraint(None, table.oid, [constraint_column.attnum]))
+    different_schema_table = create_patents_table(table_name, schema_name="Different Schema")
+    constraint_column = different_schema_table.get_columns_by_name(['Case Number'])[0]
+    different_schema_table.add_constraint(
+        UniqueConstraint(None, different_schema_table.oid, [constraint_column.attnum])
+    )
+    client = request.getfixturevalue(client_name)(table.schema)
+    constraint_id = _first_unique_constraint(table)
+    response = client.delete(f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/')
+    assert response.status_code == expected_status_code
+    different_schema_table_constraint_id = _first_unique_constraint(different_schema_table)
+    response = client.delete(f'/api/db/v0/tables/{different_schema_table.id}/constraints/{different_schema_table_constraint_id}/')
+    assert response.status_code == different_schema_expected_status_code
 
 
 def test_drop_nonexistent_table(client):

@@ -1,4 +1,4 @@
-import type { DateDisplayOptions } from '@mathesar/api/tables/columns';
+import type { DateDisplayOptions } from '@mathesar/api/types/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import {
   DateTimeFormatter,

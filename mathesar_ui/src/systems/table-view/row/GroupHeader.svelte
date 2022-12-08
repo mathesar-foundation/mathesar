@@ -8,6 +8,7 @@
   } from '@mathesar/stores/table-data';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import { Badge } from '@mathesar-component-library';
   import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
@@ -30,33 +31,48 @@
 </script>
 
 <SheetPositionableCell
-  index={1}
-  columnSpan={processedColumnsMap.size}
+  index={0}
+  columnSpan={processedColumnsMap.size + 1}
   let:htmlAttributes
   let:style
 >
   <div {...htmlAttributes} {style} class="group-header">
-    <CellBackground color="var(--cell-bg-color-header)" />
-    {#each columnIds as columnId, index (columnId)}
-      <GroupHeaderCellValue
-        {processedColumnsMap}
-        cellValue={row.groupValues ? row.groupValues[columnId] : undefined}
-        {recordSummariesForSheet}
-        {columnId}
-        preprocName={preprocNames[index]}
-      />
-    {/each}
-    <span class="tag count">
-      <span class="name">Count</span>
-      <span class="value">{group.count}</span>
-    </span>
+    <CellBackground color="var(--sand-200)" />
+    <div class="groups-data">
+      {#each columnIds as columnId, index (columnId)}
+        <GroupHeaderCellValue
+          {processedColumnsMap}
+          cellValue={row.groupValues ? row.groupValues[columnId] : undefined}
+          {recordSummariesForSheet}
+          {columnId}
+          preprocName={preprocNames[index]}
+        />
+      {/each}
+      <div class="count-container">
+        <Badge>
+          {group.count}
+        </Badge>
+      </div>
+    </div>
   </div>
 </SheetPositionableCell>
 
-<style>
+<style lang="scss">
   .group-header {
-    padding: 0.5rem 0.4rem;
-    align-items: end;
-    gap: 1rem;
+    padding: 0.5rem 1.5rem;
+    z-index: var(--z-index-group-header);
+
+    .groups-data {
+      align-items: start;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .count-container {
+      --badge-font-size: var(--text-size-small);
+      --badge-text-color: var(--slate-800);
+      --badge-background-color: var(--slate-100);
+      height: 100%;
+    }
   }
 </style>

@@ -7,7 +7,8 @@
 @import 'common/styles/main.scss';
 
 @import 'alert/Alert.scss';
-@import './anchorButton/AnchorButton.scss';
+@import 'anchorButton/AnchorButton.scss';
+@import 'badge/Badge.scss';
 @import 'tutorial/Tutorial.scss';
 @import 'button/Button.scss';
 @import 'cancel-or-proceed-button-pair/CancelOrProceedButtonPair.scss';
@@ -37,6 +38,7 @@
 @import 'select/Select.scss';
 @import 'tabs/TabContainer.scss';
 @import 'tree/Tree.scss';
+@import 'truncate/Truncate.scss';
 
 @import 'form-builder/FormBuilder.scss';
 @import 'modal/IndependentModal.scss';

@@ -1,6 +1,6 @@
-import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { Column } from '@mathesar/api/tables/columns';
-import type { JpPath } from '@mathesar/api/tables/joinable_tables';
+import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
+import type { Column } from '@mathesar/api/types/tables/columns';
+import type { JpPath } from '@mathesar/api/types/tables/joinable_tables';
 import type { SchemaEntry } from '@mathesar/AppTypes';
 
 export type QueryColumnAlias = string;
