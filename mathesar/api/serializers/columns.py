@@ -152,8 +152,9 @@ class ColumnSerializer(SimpleColumnSerializer):
         data = super().validate(data)
         # Reevaluate column display options based on the new column type.
         if TYPE_KEY in data and self.instance:
-            target_types = self.get_valid_target_types(self.instance)
-            if data[TYPE_KEY].lower() not in target_types:
+            db_type = get_db_type_enum_from_id(data[TYPE_KEY].lower())
+            target_types = self.instance.valid_target_types
+            if db_type not in target_types:
                 raise database_api_exceptions.InvalidTypeCastAPIException(
                     InvalidTypeError,
                     status_code=status.HTTP_400_BAD_REQUEST
