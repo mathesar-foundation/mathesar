@@ -50,11 +50,24 @@
 >
   <CellValue {value}>
     {#if isDefinedNonNullable(value)}
+      {#if isIndependentOfSheet}
+        <div class="count">{value.length} value(s)</div>
+      {/if}
       <div>
         {#each value as entry}
-          <Chip display="inline" background="var(--slate-200)">{entry}</Chip>
+          <Chip
+            display={isIndependentOfSheet ? 'inline-block' : 'inline'}
+            background="var(--slate-200)">{entry}</Chip
+          >
         {/each}
       </div>
     {/if}
   </CellValue>
 </CellWrapper>
+
+<style lang="scss">
+  .count {
+    font-weight: 500;
+    margin-bottom: 0.8rem;
+  }
+</style>
