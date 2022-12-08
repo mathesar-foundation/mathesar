@@ -33,7 +33,7 @@
     padding: var(--page-padding);
   }
   .theme-dark {
-    background-color: var(--slate-400);
+    background-color: var(--slate-500);
     color: var(--white);
   }
   .theme-light {
