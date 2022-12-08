@@ -10,9 +10,9 @@ export interface BaseField<T> extends Writable<T> {
    * True when the value has been changed from the initial value. Values are
    * compared by equality.
    */
-  isDirty: Readable<boolean>;
+  hasChanges: Readable<boolean>;
   /**
-   * Errors from validators directly on this field
+   * Client-side errors from validators directly on this field.
    */
   fieldErrors: Readable<string[]>;
   /**
@@ -23,9 +23,13 @@ export interface BaseField<T> extends Writable<T> {
    */
   [comboErrorsKey]: Writable<string[]>;
   /**
-   * Only includes the errors generated from combo validators
+   * Only includes the client-side errors generated from combo validators.
    */
   comboErrors: Readable<string[]>;
+  /**
+   * Errors from the server after submitting the form.
+   */
+  serverErrors: Writable<string[]>;
   /**
    * Includes:
    *
@@ -37,6 +41,10 @@ export interface BaseField<T> extends Writable<T> {
    * True when there are no errors.
    */
   isValid: Readable<boolean>;
+  /**
+   * The form can be submitted with server errors, but not with client errors.
+   */
+  canSubmit: Readable<boolean>;
   /**
    * True when there are errors and the value has been changed. This can be used
    * to set CSS classes and such.
@@ -51,7 +59,7 @@ export interface RequiredField<T> extends BaseField<T> {
 export interface OptionalField<T> extends BaseField<T> {
   isRequired: false;
 }
-export type Field<T = unknown> = RequiredField<T> | OptionalField<T>;
+export type FieldStore<T = unknown> = RequiredField<T> | OptionalField<T>;
 
 export interface BaseFieldProps<T> {
   initialValue: T;
@@ -67,29 +75,37 @@ export type FieldProps<T> = RequiredFieldProps<T> | OptionalFieldProps<T>;
 
 export function field<T>(props: RequiredFieldProps<T>): RequiredField<T>;
 export function field<T>(props: OptionalFieldProps<T>): OptionalField<T>;
-export function field<T>(props: FieldProps<T>): Field<T>;
-export function field<T>(props: FieldProps<T>): Field<T> {
+export function field<T>(props: FieldProps<T>): FieldStore<T>;
+export function field<T>(props: FieldProps<T>): FieldStore<T> {
   const allValidators = [
     ...(props.validators ?? []),
     ...(props.isRequired ? [required()] : []),
   ];
   const value = writable(props.initialValue);
-  const isDirty = derived(value, (v) => v !== props.initialValue);
+  const hasChanges = derived(value, (v) => v !== props.initialValue);
   const fieldErrors = derived(value, (v) => getErrors(v, allValidators));
   const writableComboErrors = writable<string[]>([]);
   const comboErrors = derived(writableComboErrors, (e) => e);
-  const errors = derived([fieldErrors, comboErrors], ([a, b]) => [...a, ...b]);
+  const serverErrors = writable<string[]>([]);
+  const errorStores = [fieldErrors, comboErrors, serverErrors];
+  const errors = derived(errorStores, (a) => a.flat());
   const isValid = derived(errors, (e) => e.length === 0);
-  const showsError = derived([isDirty, isValid], ([d, v]) => d && !v);
+  const canSubmit = derived(
+    [fieldErrors, comboErrors],
+    (a) => a.flat().length === 0,
+  );
+  const showsError = derived([hasChanges, isValid], ([d, v]) => d && !v);
   return {
     isRequired: props.isRequired,
     initialValue: props.initialValue,
-    isDirty,
+    hasChanges,
     fieldErrors,
     [comboErrorsKey]: writableComboErrors,
     comboErrors,
+    serverErrors,
     errors,
     isValid,
+    canSubmit,
     showsError,
     subscribe(run: (v: T) => void, invalidate?: (v?: T) => void) {
       return value.subscribe(run, invalidate);
@@ -120,10 +136,10 @@ export function requiredField<T>(
   return field({ initialValue, validators, isRequired: true });
 }
 
-export type FieldValue<F> = F extends Field<infer Value> ? Value : never;
+export type FieldValue<F> = F extends FieldStore<infer Value> ? Value : never;
 
 export interface ValuedField<T = unknown> {
   name: string;
-  field: Field<T>;
+  field: FieldStore<T>;
   value: T;
 }

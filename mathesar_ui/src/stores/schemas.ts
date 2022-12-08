@@ -8,8 +8,8 @@ import {
   patchAPI,
   postAPI,
   States,
-} from '@mathesar/utils/api';
-import type { PaginatedResponse } from '@mathesar/utils/api';
+} from '@mathesar/api/utils/requestUtils';
+import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
 
 import type { Database, SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';

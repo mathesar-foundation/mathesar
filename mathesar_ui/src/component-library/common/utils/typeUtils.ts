@@ -4,6 +4,10 @@ export function isDefinedObject(
   return typeof object === 'object' && object !== null;
 }
 
+export function isNumber(v: unknown): v is number {
+  return typeof v === 'number';
+}
+
 export function hasProperty<PropertyName extends string>(
   object: unknown,
   property: PropertyName,

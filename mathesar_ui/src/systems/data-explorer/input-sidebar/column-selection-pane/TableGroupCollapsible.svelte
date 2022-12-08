@@ -4,8 +4,9 @@
     Icon,
     Button,
     iconExpandDown,
+    Truncate,
   } from '@mathesar-component-library';
-  import { iconTable } from '@mathesar/icons';
+  import TableName from '@mathesar/components/TableName.svelte';
   import type { ColumnWithLink } from '../../utils';
 
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
@@ -29,11 +30,14 @@
             size="0.7rem"
             rotate={isOpen ? undefined : 270}
           />
-          <Icon {...iconTable} size="0.9rem" />
-          <span>{tableName}</span>
+          <span>
+            <TableName table={{ name: tableName }} />
+          </span>
         </span>
         <span class="fk-column">
-          via {column.name}
+          <Truncate>
+            via {column.name}
+          </Truncate>
         </span>
       </Button>
     </svelte:fragment>
@@ -54,36 +58,28 @@
       flex-direction: column;
       padding: 0;
       width: 100%;
-    }
-
-    .table-name,
-    .fk-column {
-      display: block;
-      max-width: 100%;
+      align-items: flex-start;
       overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      margin-right: auto;
     }
 
     .table-name {
+      display: flex;
+      max-width: 100%;
+      overflow: hidden;
+      align-items: center;
+
       > span {
         display: inline-block;
-        vertical-align: middle;
         font-weight: 590;
+        margin-left: 0.3rem;
+        overflow: hidden;
       }
     }
     .fk-column {
       font-size: var(--text-size-small);
-    }
-
-    :global(.collapsible .collapsible-header) {
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #dfdfdf;
-      border-radius: 2px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
+      display: block;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     .column-list {

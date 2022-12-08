@@ -4,7 +4,7 @@
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
   } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { Column } from '@mathesar/api/types/tables/columns';
   import {
     SheetHeader,
     SheetCell,

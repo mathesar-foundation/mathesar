@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+
 import { CancellablePromise } from '@mathesar-component-library';
 import { ApiMultiError } from './errors';
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { Column } from '@mathesar/api/types/tables/columns';
   import { FormattedInput } from '@mathesar/component-library';
   import TemplateInputFormatter from './TemplateInputFormatter';
   import AppendColumn from './AppendColumn.svelte';

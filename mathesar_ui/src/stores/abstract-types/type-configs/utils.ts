@@ -1,5 +1,8 @@
 import { dayjs } from '@mathesar-component-library';
-import type { DateFormat, TimeFormat } from '@mathesar/api/tables/columns';
+import type {
+  DateFormat,
+  TimeFormat,
+} from '@mathesar/api/types/tables/columns';
 import { DateTimeSpecification } from '@mathesar/utils/date-time';
 
 export function getDateFormatOptions(): Record<DateFormat, { label: string }> {

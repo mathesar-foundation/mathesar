@@ -1,20 +1,15 @@
 <script lang="ts">
-  import { Badge, Button, Dropdown, Icon } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import { Button, Icon } from '@mathesar-component-library';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
-  import {
-    iconFiltering,
-    iconGrouping,
-    iconSorting,
-    iconInspector,
-  } from '@mathesar/icons';
+  import TableNameAndDescription from '@mathesar/components/TableNameAndDescription.svelte';
+  import { iconInspector } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/data-explorer';
-  import TableNameAndDescription from '@mathesar/components/TableNameAndDescription.svelte';
-  import Filter from './record-operations/filter/Filter.svelte';
-  import Sort from './record-operations/sort/Sort.svelte';
-  import Group from './record-operations/Group.svelte';
+  import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
+  import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
+  import SortDropdown from './record-operations/sort/SortDropdown.svelte';
   import SummarizationLink from './SummarizationLink.svelte';
 
   export let database: Database;
@@ -23,12 +18,10 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ id, columnsDataStore, recordsData, meta, isLoading, display } =
-    $tabularData);
+  $: ({ id, columnsDataStore, meta, isLoading, display } = $tabularData);
   $: ({ columns } = columnsDataStore);
   $: ({ filtering, sorting, grouping, sheetState } = meta);
   $: ({ isTableInspectorVisible } = display);
-
   $: summarizationUrl = constructDataExplorerUrlToSummarizeFromGroup(
     database.name,
     schema.id,
@@ -51,60 +44,9 @@
 
   <div class="actions">
     <div class="quick-access">
-      <Dropdown
-        showArrow={false}
-        triggerAppearance="secondary"
-        contentClass="filter-dropdown-content"
-      >
-        <svelte:fragment slot="trigger">
-          <Icon {...iconFiltering} size="0.8em" />
-          <span>
-            Filters
-            {#if $filtering.entries.length > 0}
-              <Badge>
-                {$filtering.entries.length}
-              </Badge>
-            {/if}
-          </span>
-        </svelte:fragment>
-        <svelte:fragment slot="content">
-          <Filter filtering={meta.filtering} />
-        </svelte:fragment>
-      </Dropdown>
-
-      <Dropdown showArrow={false} triggerAppearance="secondary">
-        <svelte:fragment slot="trigger">
-          <Icon {...iconSorting} />
-          <span>
-            Sort
-            {#if $sorting.size > 0}
-              <Badge>
-                {$sorting.size}
-              </Badge>
-            {/if}
-          </span>
-        </svelte:fragment>
-        <svelte:fragment slot="content">
-          <Sort columns={$columns} sorting={meta.sorting} />
-        </svelte:fragment>
-      </Dropdown>
-
-      <Dropdown showArrow={false} triggerAppearance="secondary">
-        <svelte:fragment slot="trigger">
-          <Icon {...iconGrouping} />
-          <span>
-            Group
-            {#if $grouping.entries.length > 0}
-              <Badge>
-                {$grouping.entries.length}
-              </Badge>
-            {/if}
-          </span>
-        </svelte:fragment>
-        <svelte:fragment slot="content">
-          <Group grouping={meta.grouping} />
-        </svelte:fragment>
-      </Dropdown>
+      <FilterDropdown {filtering} />
+      <SortDropdown {sorting} columns={$columns} />
+      <GroupDropdown {grouping} />
     </div>
 
     {#if $sheetState}
@@ -176,9 +118,5 @@
     > :global(* + *) {
       margin-left: 1rem;
     }
-  }
-  .actions-pane :global(.filter-dropdown-content.dropdown.content) {
-    overflow-x: hidden;
-    max-height: 320px;
   }
 </style>

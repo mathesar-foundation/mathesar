@@ -1,10 +1,10 @@
 import { writable, derived } from 'svelte/store';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { getAPI, States } from '@mathesar/utils/api';
+import { getAPI, States } from '@mathesar/api/utils/requestUtils';
 
 import type { Writable, Readable } from 'svelte/store';
 import type { Database } from '@mathesar/AppTypes';
-import type { PaginatedResponse } from '@mathesar/utils/api';
+import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
 import type { CancellablePromise } from '@mathesar-component-library';
 
 const commonData = preloadCommonData();

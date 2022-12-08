@@ -6,7 +6,7 @@
     Checkbox,
     iconLoading,
   } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { Column } from '@mathesar/api/types/tables/columns';
   import { toast } from '@mathesar/stores/toast';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import {
