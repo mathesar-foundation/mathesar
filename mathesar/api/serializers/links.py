@@ -24,6 +24,13 @@ class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     def is_link_unique(self):
         return True
 
+    def run_validation(self, data):
+        if referent_table := data.get('referent_table', None):
+            referent_table_name = Table.current_objects.get(id=referent_table).name
+            if referent_table_name.find('(') and referent_table_name.find(')') != -1:
+                raise InvalidTableName(referent_table_name)
+        return super(OneToOneSerializer, self).run_validation(data)
+
     def create(self, validated_data):
         reference_table = validated_data['reference_table']
         create_foreign_key_link(
@@ -43,6 +50,13 @@ class OneToManySerializer(OneToOneSerializer):
     def is_link_unique(self):
         return False
 
+    def run_validation(self, data):
+        if referent_table := data.get('referent_table', None):
+            referent_table_name = Table.current_objects.get(id=referent_table).name
+            if referent_table_name.find('(') and referent_table_name.find(')') != -1:
+                raise InvalidTableName(referent_table_name)
+        return super(OneToManySerializer, self).run_validation(data)
+
 
 class MapColumnSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     column_name = serializers.CharField()
@@ -53,6 +67,13 @@ class ManyToManySerializer(MathesarErrorMessageMixin, serializers.Serializer):
     referents = MapColumnSerializer(many=True)
     mapping_table_name = serializers.CharField()
     link_type = serializers.CharField(default="many-to-many")
+
+    def run_validation(self, data):
+        if referent_table := data.get('referent_table', None):
+            referent_table_name = Table.current_objects.get(id=referent_table).name
+            if referent_table_name.find('(') and referent_table_name.find(')') != -1:
+                raise InvalidTableName(referent_table_name)
+        return super(ManyToManySerializer, self).run_validation(data)
 
     def create(self, validated_data):
         referents = validated_data['referents']
@@ -84,12 +105,6 @@ class LinksMappingSerializer(
     }
     link_type = serializers.CharField(required=True)
 
-    def run_validation(self, data):
-        if referent_table := data.get('referent_table', None):
-            referent_table_name = Table.current_objects.get(id=referent_table).name
-            if referent_table_name.find('(') and referent_table_name.find(')') != -1:
-                raise InvalidReferentTableName(referent_table_name)
-        return super(LinksMappingSerializer, self).run_validation(data)
 
     def get_mapping_field(self, data):
         link_type = data.get('link_type', None)
