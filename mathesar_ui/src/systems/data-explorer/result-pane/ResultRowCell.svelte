@@ -10,11 +10,13 @@
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type { QueryRow, QuerySheetSelection } from '../QueryRunner';
   import type { ProcessedQueryOutputColumn } from '../utils';
+  import type QueryInspector from '../QueryInspector';
 
   export let processedQueryColumn: ProcessedQueryOutputColumn;
   export let row: QueryRow | undefined;
   export let recordRunState: RequestStatus['state'] | undefined;
   export let selection: QuerySheetSelection;
+  export let inspector: QueryInspector;
 
   $: ({ activeCell, selectedCells } = selection);
   $: isActive =
@@ -82,6 +84,7 @@
             selection.activateCell(row, processedQueryColumn);
             // Activate event initaites the selection process
             selection.onStartSelection(row, processedQueryColumn);
+            inspector.selectCellTab();
           }
         }}
         on:mouseenter={() => {

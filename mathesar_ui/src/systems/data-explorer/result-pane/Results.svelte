@@ -21,8 +21,15 @@
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
 
-  $: ({ query, processedColumns, rowsData, pagination, runState, selection } =
-    queryRunner);
+  $: ({
+    query,
+    processedColumns,
+    rowsData,
+    pagination,
+    runState,
+    selection,
+    inspector,
+  } = queryRunner);
   $: ({ initial_columns } = $query);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
@@ -128,6 +135,7 @@
                     row={rows[item.index]}
                     {recordRunState}
                     {selection}
+                    {inspector}
                   />
                 {/each}
               </div>
