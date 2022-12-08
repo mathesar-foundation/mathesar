@@ -16,6 +16,8 @@
   import LogoAndNameWithLink from './LogoAndNameWithLink.svelte';
   import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
   import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
+  import { StringOrComponent } from '@mathesar/component-library';
+  import RecordSummary from '../RecordSummary.svelte';
 
   export let item: BreadcrumbItem;
 </script>
@@ -45,15 +47,19 @@
         item.record.id,
       )}
     >
-      <NameWithIcon icon={iconRecord}>{item.record.summary}</NameWithIcon>
+      <NameWithIcon icon={iconRecord}>
+        <RecordSummary recordSummary={item.record.summary} />
+      </NameWithIcon>
     </BreadcrumbLink>
   {:else if item.type === 'simple'}
     <BreadcrumbPageSeparator />
     <BreadcrumbLink href={item.href}>
       {#if item.icon}
-        <NameWithIcon icon={item.icon}>{item.label}</NameWithIcon>
+        <NameWithIcon icon={item.icon}>
+          <StringOrComponent arg={item.label} />
+        </NameWithIcon>
       {:else}
-        {item.label}
+        <StringOrComponent arg={item.label} />
       {/if}
     </BreadcrumbLink>
   {/if}

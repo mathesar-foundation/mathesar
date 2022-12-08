@@ -4,6 +4,7 @@
   import { Icon, Spinner } from '@mathesar/component-library';
   import EntityType from '@mathesar/components/EntityType.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
+  import RecordSummary from '@mathesar/components/RecordSummary.svelte';
   import { iconRecord } from '@mathesar/icons';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
@@ -27,7 +28,10 @@
 </script>
 
 <div><EntityType><Identifier>{table.name}</Identifier> Record</EntityType></div>
-<h1><Icon {...iconRecord} />{$summary}</h1>
+<h1>
+  <Icon {...iconRecord} />
+  <RecordSummary recordSummary={$summary} />
+</h1>
 
 <section class="fields-section">
   <div class="fields">

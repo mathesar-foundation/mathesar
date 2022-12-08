@@ -1,8 +1,8 @@
 <script lang="ts">
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import type { TableEntry } from '@mathesar/api/tables';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import RecordStore from '@mathesar/pages/record/RecordStore';
 
   export let database: Database;
