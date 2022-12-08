@@ -46,6 +46,7 @@ import {
   faUser,
   faSave,
   faTimes,
+  faCircleExclamation,
   faCircleArrowRight,
   faCircleArrowLeft,
   faListUl,
@@ -127,6 +128,7 @@ export const iconForwardSeparator: IconProps = { data: faSlash };
 // STATUSES
 
 export const iconNotEditable: IconProps = { data: faLock };
+export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
 
 // UI TYPES
 

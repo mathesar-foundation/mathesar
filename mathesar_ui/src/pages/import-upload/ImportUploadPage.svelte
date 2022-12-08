@@ -3,7 +3,7 @@
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { RadioGroup, Spinner } from '@mathesar-component-library';
-  import type { RequestStatus } from '@mathesar/utils/api';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { createTable } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';

@@ -9,7 +9,7 @@
   import { getQuery } from '@mathesar/stores/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { CancellablePromise } from '@mathesar/component-library';
-  import type { QueryInstance } from '@mathesar/api/queries';
+  import type { QueryInstance } from '@mathesar/api/types/queries';
   import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';

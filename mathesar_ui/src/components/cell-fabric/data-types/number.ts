@@ -2,7 +2,7 @@ import type {
   NumberColumn,
   NumberDisplayOptions,
   NumberFormat,
-} from '@mathesar/api/tables/columns';
+} from '@mathesar/api/types/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import NumberCell from './components/number/NumberCell.svelte';
 import NumberCellInput from './components/number/NumberCellInput.svelte';

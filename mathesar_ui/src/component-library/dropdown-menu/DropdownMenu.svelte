@@ -8,13 +8,14 @@
   // for the inherited props from the Dropdown component
   // interface $$RestProps extends ComponentProps<Dropdown> {};
 
-  export let label: string;
+  export let label = '';
+  export let ariaLabel: string | undefined = undefined;
   export let icon: IconProps | undefined = undefined;
   export let closeOnInnerClick = true;
   export let menuStyle = '';
 </script>
 
-<Dropdown {closeOnInnerClick} ariaLabel={label} {...$$restProps}>
+<Dropdown {closeOnInnerClick} ariaLabel={ariaLabel ?? label} {...$$restProps}>
   <slot name="trigger" slot="trigger">
     <span class="dropdown-menu-trigger">
       {#if icon}

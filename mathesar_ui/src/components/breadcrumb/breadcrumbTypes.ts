@@ -1,5 +1,5 @@
-import type { QueryInstance } from '@mathesar/api/queries';
-import type { TableEntry } from '@mathesar/api/tables';
+import type { QueryInstance } from '@mathesar/api/types/queries';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import type {
   ComponentAndProps,

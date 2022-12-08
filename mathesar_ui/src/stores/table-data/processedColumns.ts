@@ -1,9 +1,9 @@
 import type { Readable } from 'svelte/store';
-import type { Column } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import type {
   Constraint,
   FkConstraint,
-} from '@mathesar/api/tables/constraints';
+} from '@mathesar/api/types/tables/constraints';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import type {
   AbstractType,
@@ -20,7 +20,7 @@ import {
   getDbTypeBasedInputCap,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
-import type { TableEntry } from '@mathesar/api/tables';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import { retrieveFilters } from '@mathesar/components/filter-entry/utils';
 import { findFkConstraintsForColumn } from './constraintsUtils';
 

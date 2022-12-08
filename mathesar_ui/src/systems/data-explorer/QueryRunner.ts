@@ -1,6 +1,6 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type { RequestStatus } from '@mathesar/utils/api';
+import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import {
   ImmutableMap,
   CancellablePromise,
@@ -11,7 +11,7 @@ import type {
   QueryResultRecord,
   QueryRunResponse,
   QueryColumnMetaData,
-} from '@mathesar/api/queries';
+} from '@mathesar/api/types/queries';
 import { runQuery } from '@mathesar/stores/queries';
 import { SheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';

@@ -3,7 +3,7 @@
   import { Button, Icon } from '@mathesar-component-library';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import { iconExploration, iconInspector } from '@mathesar/icons';
-  import type { QueryInstance } from '@mathesar/api/queries';
+  import type { QueryInstance } from '@mathesar/api/types/queries';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
 
   export let database: Database;

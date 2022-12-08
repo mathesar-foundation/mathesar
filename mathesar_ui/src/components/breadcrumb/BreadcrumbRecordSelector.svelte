@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, iconSearch, Icon } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import { iconExpandRight } from '@mathesar/icons';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
 

@@ -1,4 +1,4 @@
-import type { TextTypeOptions } from '@mathesar/api/tables/columns';
+import type { TextTypeOptions } from '@mathesar/api/types/tables/columns';
 import type {
   ComponentAndProps,
   TextInputProps,
