@@ -63,6 +63,55 @@ def test_record_list(create_patents_table, client):
         assert str(column_id) in record_data
 
 
+list_client_with_different_roles = [
+    ('superuser_client_factory', 200, 200),
+    ('db_manager_client_factory', 200, 200),
+    ('db_editor_client_factory', 200, 200),
+    ('schema_manager_client_factory', 200, 403),
+    ('schema_viewer_client_factory', 200, 403),
+    ('db_viewer_schema_manager_client_factory', 200, 200)
+]
+
+write_clients_with_status_code = [
+    ('superuser_client_factory', 201),
+    ('db_manager_client_factory', 201),
+    ('db_editor_client_factory', 400),
+    ('schema_manager_client_factory', 201),
+    ('schema_viewer_client_factory', 400),
+    ('db_viewer_schema_manager_client_factory', 201)
+]
+
+update_client_with_status_code = [
+    ('db_manager_client_factory', 200),
+    ('db_editor_client_factory', 200),
+    ('schema_manager_client_factory', 200),
+    ('schema_viewer_client_factory', 403),
+    ('db_viewer_schema_manager_client_factory', 200)
+]
+
+
+@pytest.mark.parametrize(
+    'client_name,expected_status_code,different_schema_expected_status_code',
+    list_client_with_different_roles
+)
+def test_record_list_based_on_permission(
+        create_patents_table,
+        request,
+        client_name,
+        expected_status_code,
+        different_schema_expected_status_code
+):
+
+    table_name = 'NASA Record List'
+    table = create_patents_table(table_name)
+    different_schema_table = create_patents_table(table_name, schema_name="Different Schema")
+    client = request.getfixturevalue(client_name)(table.schema)
+    response = client.get(f'/api/db/v0/tables/{table.id}/records/')
+    assert response.status_code == expected_status_code
+    response = client.get(f'/api/db/v0/tables/{different_schema_table.id}/records/')
+    assert response.status_code == different_schema_expected_status_code
+
+
 serialization_test_list = [
     ("TIME WITH TIME ZONE", "12:30:10.0+01:00"),
     ("TIMESTAMP WITHOUT TIME ZONE", "2000-05-23T12:30:10.0 AD"),
@@ -1001,6 +1050,23 @@ def test_record_create(create_patents_table, client):
             assert data[column_name] == record_data[column_id_str]
 
 
+@pytest.mark.parametrize('client_name, expected_status_code', update_client_with_status_code)
+def test_record_partial_update_based_on_permission(create_patents_table, request, client_name, expected_status_code):
+    table_name = 'NASA Record Patch'
+    table = create_patents_table(table_name)
+    records = table.get_records()
+    record_id = records[0]['id']
+    client = request.getfixturevalue(client_name)(table.schema)
+    client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    data = {
+        columns_name_id_map['Center']: 'NASA Example Space Center',
+        columns_name_id_map['Status']: 'Example',
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/{record_id}/', data=data)
+    assert response.status_code == expected_status_code
+
+
 def test_record_partial_update(create_patents_table, client):
     table_name = 'NASA Record Patch'
     table = create_patents_table(table_name)
@@ -1028,6 +1094,36 @@ def test_record_partial_update(create_patents_table, client):
         elif column_name == 'Status':
             assert original_data[column_id_str] != record_data[column_id_str]
             assert record_data[column_id_str] == 'Example'
+
+
+delete_clients_with_status_codes = [
+    ('superuser_client_factory', 204, 204),
+    ('db_manager_client_factory', 204, 204),
+    ('db_editor_client_factory', 204, 204),
+    ('schema_manager_client_factory', 204, 403),
+    ('schema_viewer_client_factory', 403, 403),
+    ('db_viewer_schema_manager_client_factory', 204, 403)
+]
+
+
+@pytest.mark.parametrize('client_name, expected_status_code,different_schema_expected_status_code', delete_clients_with_status_codes)
+def test_record_delete_based_on_permissions(
+        create_patents_table,
+        request,
+        client_name,
+        expected_status_code,
+        different_schema_expected_status_code
+):
+    table_name = 'NASA Record Delete'
+    table = create_patents_table(table_name)
+    different_schema_table = create_patents_table('Private Table', schema_name='Private Schema')
+    records = table.get_records()
+    record_id = records[0]['id']
+    client = request.getfixturevalue(client_name)(table.schema)
+    response = client.delete(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
+    assert response.status_code == expected_status_code
+    response = client.delete(f'/api/db/v0/tables/{different_schema_table.id}/records/{record_id}/')
+    assert response.status_code == different_schema_expected_status_code
 
 
 def test_record_delete(create_patents_table, client):
