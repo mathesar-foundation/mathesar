@@ -7,7 +7,12 @@
     MenuHeading,
   } from '@mathesar-component-library';
   import { currentDatabase } from '@mathesar/stores/databases';
-  import { iconAddNew, iconExploration, iconUser } from '@mathesar/icons';
+  import {
+    iconAddNew,
+    iconExploration,
+    iconShortcuts,
+    iconUser,
+  } from '@mathesar/icons';
   import {
     getDatabasePageUrl,
     getDataExplorerPageUrl,
@@ -48,12 +53,15 @@
         triggerAppearance="ghost"
         size="small"
         closeOnInnerClick={true}
-        label="Shortcuts"
         icon={isCreatingNewEmptyTable ? iconLoading : undefined}
       >
-        <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}
-          >New Table from Scratch</ButtonMenuItem
-        >
+        <span slot="trigger" class="shortcuts">
+          <span class="icon"><Icon {...iconShortcuts} /></span>
+          <span class="text">Shortcuts</span>
+        </span>
+        <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
+          New Table from Scratch
+        </ButtonMenuItem>
         <LinkMenuItem
           icon={iconAddNew}
           href={getImportPageUrl(database?.name, schema)}
@@ -95,20 +103,26 @@
     padding: 0.25rem 1rem;
     height: var(--header-height, 60px);
     background-color: var(--slate-800);
+    overflow: hidden;
+    color: var(--white);
   }
 
   .left {
     display: flex;
     align-items: center;
+    overflow: hidden;
   }
 
   .right {
     display: flex;
     align-items: center;
-    color: var(--white);
     font-size: var(--text-size-large);
   }
 
+  .shortcuts .text {
+    display: none;
+  }
+  .shortcuts .icon,
   .user-switcher {
     background-color: var(--slate-200);
     color: var(--slate-800);
@@ -116,5 +130,14 @@
     padding: 0.5rem;
     display: flex;
     align-items: center;
+  }
+
+  @media (min-width: 45rem) {
+    .shortcuts .text {
+      display: unset;
+    }
+    .shortcuts .icon {
+      display: none;
+    }
   }
 </style>

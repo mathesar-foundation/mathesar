@@ -2,22 +2,24 @@
   export let href: string;
 </script>
 
-<span class="breadcrumb-item">
+<span class="breadcrumb-link">
   <a {href}><slot /></a>
 </span>
 
 <style>
-  .breadcrumb-item {
+  .breadcrumb-link {
     display: block;
+    overflow: hidden;
   }
-  .breadcrumb-item a {
+  .breadcrumb-link a {
     display: block;
+    overflow: hidden;
     text-decoration: none;
-    color: var(--color-gray-darker);
+    color: inherit;
     font-weight: 500;
     font-size: var(--text-size-base);
   }
-  .breadcrumb-item a:hover {
+  .breadcrumb-link a:hover {
     text-decoration: underline;
     border-color: #555;
   }
