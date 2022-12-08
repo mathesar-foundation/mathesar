@@ -18,6 +18,7 @@ class MathesarSetPasswordForm(SetPasswordForm):
 
 
 class MathesarPasswordResetConfirmView(PasswordResetConfirmView):
+    # Override default form as we need custom save behaviour
     form_class = MathesarSetPasswordForm
     template_name = 'users/password_reset_confirmation.html'
     title = _('Change Default Password')
@@ -27,6 +28,8 @@ class MathesarPasswordResetConfirmView(PasswordResetConfirmView):
     def dispatch(self, *args, **kwargs):
         self.user = self.request.user
         self.validlink = True
+        # Avoid calling the PasswordResetConfirmView `dispatch` method
+        # as it contains behaviours not suited for our user flow
         return super(PasswordResetConfirmView, self).dispatch(*args, **kwargs)
 
     def form_valid(self, form):
