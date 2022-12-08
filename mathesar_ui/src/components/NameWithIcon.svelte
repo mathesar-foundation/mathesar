@@ -50,6 +50,6 @@
     color: var(--white);
   }
   .name {
-    color: var(--name-color, var(--slate-800));
+    color: var(--name-color, currentcolor);
   }
 </style>
