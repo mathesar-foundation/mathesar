@@ -102,7 +102,7 @@
     background: var(--cell-bg-color-base);
 
     &.is-active {
-      z-index: 5;
+      z-index: var(--z-index__sheet__active-cell);
       border-color: transparent;
       min-height: 100%;
       height: auto;

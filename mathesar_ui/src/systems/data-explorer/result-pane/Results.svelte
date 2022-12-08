@@ -9,6 +9,7 @@
     isColumnSelected,
   } from '@mathesar/components/sheet';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
@@ -103,6 +104,7 @@
                   let:style
                 >
                   <div {...htmlAttributes} {style}>
+                    <CellBackground color="var(--cell-bg-color-header)" />
                     {$pagination.offset + item.index + 1}
                   </div>
                 </SheetCell>
