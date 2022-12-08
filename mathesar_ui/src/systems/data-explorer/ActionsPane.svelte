@@ -6,7 +6,7 @@
     SpinnerButton,
   } from '@mathesar-component-library';
   import { iconRedo, iconUndo, iconInspector } from '@mathesar/icons';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import TableName from '@mathesar/components/TableName.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';

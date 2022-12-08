@@ -1,4 +1,4 @@
-import type { JoinableTablesResult } from '@mathesar/api/tables/joinable_tables';
+import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
 
 export const ItemsTableId = 75;
 export const CheckoutsPkColumnId = 216;

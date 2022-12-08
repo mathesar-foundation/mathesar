@@ -7,12 +7,12 @@
   } from '@mathesar-component-library';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import type { Constraint } from '@mathesar/api/tables/constraints';
+  import type { Constraint } from '@mathesar/api/types/tables/constraints';
   import { tables } from '@mathesar/stores/tables';
   import Identifier from '@mathesar/components/Identifier.svelte';
-  import type { Column } from '@mathesar/api/tables/columns';
-  import type { PaginatedResponse } from '@mathesar/utils/api';
-  import { getAPI } from '@mathesar/utils/api';
+  import type { Column } from '@mathesar/api/types/tables/columns';
+  import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
+  import { getAPI } from '@mathesar/api/utils/requestUtils';
   import {
     iconAddNew,
     iconDeleteMajor,

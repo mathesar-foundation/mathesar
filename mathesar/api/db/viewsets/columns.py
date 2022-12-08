@@ -1,11 +1,13 @@
 import warnings
 from psycopg2.errors import DuplicateColumn, NotNullViolation, StringDataRightTruncation
+from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError, IntegrityError
 
+from mathesar.api.db.permissions.columns import ColumnAccessPolicy
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions,
     base_exceptions as database_base_api_exceptions,
@@ -25,12 +27,15 @@ from mathesar.models.base import Column
 from mathesar.state import get_cached_metadata
 
 
-class ColumnViewSet(viewsets.ModelViewSet):
+class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     serializer_class = ColumnSerializer
     pagination_class = DefaultLimitOffsetPagination
+    access_policy = ColumnAccessPolicy
 
     def get_queryset(self):
-        queryset = Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
+        queryset = self.access_policy.scope_queryset(
+            self.request, Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
+        )
         # Prefetching instead of using select_related because select_related uses joins,
         # and we need a reuse of individual Django object instead of its data
         prefetched_queryset = queryset.prefetch_related('table').prefetch('name')

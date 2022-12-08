@@ -6,7 +6,7 @@ import {
   ImmutableSet,
   WritableMap,
 } from '@mathesar-component-library';
-import type { RequestStatus } from '@mathesar/utils/api';
+import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import type { TersePagination } from '@mathesar/utils/Pagination';
 import Pagination from '@mathesar/utils/Pagination';
 import Url64 from '@mathesar/utils/Url64';

@@ -1,4 +1,4 @@
-import type { BooleanDisplayOptions } from '@mathesar/api/tables/columns';
+import type { BooleanDisplayOptions } from '@mathesar/api/types/tables/columns';
 import type {
   ComponentAndProps,
   SelectProps,

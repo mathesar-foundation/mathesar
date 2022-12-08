@@ -33,6 +33,7 @@
     position: relative;
     display: flex;
     overflow: hidden;
+    border-radius: var(--border-radius-m);
   }
   .breadcrumb-selector-row.active {
     background-color: hsla(0, 0%, 0%, 0.1);
@@ -40,13 +41,9 @@
   .breadcrumb-selector-row a {
     flex: 1 1 auto;
     display: block;
-    padding: 0.25rem;
-    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
     color: inherit;
     text-decoration: none;
-  }
-  .breadcrumb-selector-row a:hover {
-    text-decoration: underline;
   }
 
   .hover-indicator {
