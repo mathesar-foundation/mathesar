@@ -12,6 +12,7 @@ from db.columns.exceptions import InvalidTypeOptionError
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
+from db.types.base import PostgresType
 from mathesar.models.base import Column
 from db.types.operations.convert import get_db_type_enum_from_id
 
@@ -37,22 +38,19 @@ class TypeOptionSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     fields = serializers.CharField(required=False)
 
     def validate(self, attrs):
-        column = getattr(self.parent, 'instance', None)
+        db_type = self.context.get('db_type', None)
         scale = attrs.get('scale', None)
         precision = attrs.get('precision', None)
-        if scale is not None and precision is None:
-            attrs['precision'] = 1000
-        elif column is not None and scale is None and precision is not None:
-            valid_type_options = column.valid_type_options
-            if all(
-                type_options in valid_type_options
-                for type_options in ['scale', 'precision']
-            ):
-                raise database_api_exceptions.InvalidTypeOptionAPIException(
-                    InvalidTypeOptionError,
-                    message='Cannot set precision without a scale.',
-                    status_code=status.HTTP_400_BAD_REQUEST
-                )
+        if(
+            db_type == PostgresType.NUMERIC
+            and (scale is None and precision is not None)
+            or (scale is not None and precision is None)
+        ):
+            raise database_api_exceptions.InvalidTypeOptionAPIException(
+                InvalidTypeOptionError,
+                message='Both scale and precision fields are required.',
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
         return super().validate(attrs)
 
     def run_validation(self, data=empty):
