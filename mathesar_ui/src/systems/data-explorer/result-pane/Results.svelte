@@ -14,8 +14,10 @@
   import type QueryRunner from '../QueryRunner';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
+  import QueryRefreshButton from './QueryRefreshButton.svelte';
 
   export let queryRunner: QueryRunner;
+  export let isExplorationPage = false;
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
 
@@ -37,6 +39,17 @@
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
+  $: refreshButtonState = (() => {
+    let buttonState: 'loading' | 'error' | undefined = undefined;
+    const queryRunState = $runState?.state;
+    if (queryRunState === 'processing') {
+      buttonState = 'loading';
+    }
+    if (queryRunState === 'failure') {
+      buttonState = 'error';
+    }
+    return buttonState;
+  })();
 
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
@@ -134,13 +147,18 @@
       {:else if recordRunState === 'success'}
         No results found
       {/if}
-      <PaginationGroup
-        pagination={$pagination}
-        {totalCount}
-        on:change={(e) => {
-          void queryRunner.setPagination(e.detail);
-        }}
-      />
+      <div class="pagination-controls">
+        <PaginationGroup
+          pagination={$pagination}
+          {totalCount}
+          on:change={(e) => {
+            void queryRunner.setPagination(e.detail);
+          }}
+        />
+        {#if isExplorationPage}
+          <QueryRefreshButton {queryRunner} />
+        {/if}
+      </div>
     </div>
   {/if}
 </div>
@@ -182,8 +200,14 @@
       margin-top: auto;
       height: var(--status-bar-height);
 
-      :global(.pagination-group) {
+      .pagination-controls {
         margin-left: auto;
+        display: flex;
+        align-items: center;
+
+        :global(.refresh-button) {
+          margin-left: var(--size-xx-small);
+        }
       }
     }
 
