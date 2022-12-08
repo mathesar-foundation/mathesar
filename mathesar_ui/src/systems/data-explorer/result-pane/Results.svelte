@@ -9,17 +9,27 @@
     isColumnSelected,
   } from '@mathesar/components/sheet';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
+  import QueryRefreshButton from './QueryRefreshButton.svelte';
 
   export let queryRunner: QueryRunner;
+  export let isExplorationPage = false;
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
 
-  $: ({ query, processedColumns, rowsData, pagination, runState, selection } =
-    queryRunner);
+  $: ({
+    query,
+    processedColumns,
+    rowsData,
+    pagination,
+    runState,
+    selection,
+    inspector,
+  } = queryRunner);
   $: ({ initial_columns } = $query);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
@@ -36,6 +46,17 @@
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
+  $: refreshButtonState = (() => {
+    let buttonState: 'loading' | 'error' | undefined = undefined;
+    const queryRunState = $runState?.state;
+    if (queryRunState === 'processing') {
+      buttonState = 'loading';
+    }
+    if (queryRunState === 'failure') {
+      buttonState = 'error';
+    }
+    return buttonState;
+  })();
 
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
@@ -103,6 +124,7 @@
                   let:style
                 >
                   <div {...htmlAttributes} {style}>
+                    <CellBackground color="var(--cell-bg-color-header)" />
                     {$pagination.offset + item.index + 1}
                   </div>
                 </SheetCell>
@@ -113,6 +135,7 @@
                     row={rows[item.index]}
                     {recordRunState}
                     {selection}
+                    {inspector}
                   />
                 {/each}
               </div>
@@ -132,13 +155,18 @@
       {:else if recordRunState === 'success'}
         No results found
       {/if}
-      <PaginationGroup
-        pagination={$pagination}
-        {totalCount}
-        on:change={(e) => {
-          void queryRunner.setPagination(e.detail);
-        }}
-      />
+      <div class="pagination-controls">
+        <PaginationGroup
+          pagination={$pagination}
+          {totalCount}
+          on:change={(e) => {
+            void queryRunner.setPagination(e.detail);
+          }}
+        />
+        {#if isExplorationPage}
+          <QueryRefreshButton {queryRunner} />
+        {/if}
+      </div>
     </div>
   {/if}
 </div>
@@ -180,8 +208,14 @@
       margin-top: auto;
       height: var(--status-bar-height);
 
-      :global(.pagination-group) {
+      .pagination-controls {
         margin-left: auto;
+        display: flex;
+        align-items: center;
+
+        :global(.refresh-button) {
+          margin-left: var(--size-xx-small);
+        }
       }
     }
 

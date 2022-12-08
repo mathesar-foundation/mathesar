@@ -201,7 +201,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     if (get(this.state).inputColumnsFetchState?.state !== 'success') {
       await this.calculateInputColumnTree();
     }
-    const isQueryValid = validateQuery(queryModel, get(this.processedColumns));
+    const isQueryValid = validateQuery(queryModel, get(this.columnsMetaData));
     const clientValidationState: RequestStatus = isQueryValid
       ? { state: 'success' }
       : {

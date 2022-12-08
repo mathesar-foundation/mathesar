@@ -3,12 +3,12 @@
     getPaginationPageCount,
     Button,
     Icon,
-    iconError,
   } from '@mathesar-component-library';
   import { States } from '@mathesar/api/utils/requestUtils';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
-  import { iconAddNew, iconRefresh } from '@mathesar/icons';
+  import RefreshButton from '@mathesar/components/RefreshButton.svelte';
+  import { iconAddNew } from '@mathesar/icons';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -28,6 +28,16 @@
     recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
   $: hasNewRecordButton = context === 'page';
+  $: refreshButtonState = (() => {
+    let buttonState: 'loading' | 'error' | undefined = undefined;
+    if ($isLoading) {
+      buttonState = 'loading';
+    }
+    if (isError) {
+      buttonState = 'error';
+    }
+    return buttonState;
+  })();
 
   function refresh() {
     void $tabularData.refresh();
@@ -76,26 +86,7 @@
       pageSizeOptions={context === 'widget' ? [] : undefined}
       hiddenWhenPossible={context === 'widget'}
     />
-    <Button
-      appearance="secondary"
-      size="medium"
-      disabled={$isLoading}
-      on:click={refresh}
-    >
-      <Icon
-        {...isError && !isLoading ? iconError : iconRefresh}
-        spin={$isLoading}
-      />
-      <span>
-        {#if $isLoading}
-          Loading
-        {:else if isError}
-          Retry
-        {:else}
-          Refresh
-        {/if}
-      </span>
-    </Button>
+    <RefreshButton on:click={refresh} state={refreshButtonState} />
   </div>
 </div>
 
