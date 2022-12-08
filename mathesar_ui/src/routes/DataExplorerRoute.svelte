@@ -116,14 +116,36 @@
 </script>
 
 {#if $query?.id}
-  <AppendBreadcrumb
-    item={{
-      type: 'simple',
-      href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
-      label: $query?.name ? `Edit: ${$query?.name}` : 'Data Explorer',
-      icon: iconExploration,
-    }}
-  />
+  {#if $query.name}
+    <AppendBreadcrumb
+      item={{
+        type: 'exploration',
+        database,
+        schema,
+        query: {
+          id: $query.id,
+          name: $query.name,
+        },
+      }}
+    />
+    <AppendBreadcrumb
+      item={{
+        type: 'simple',
+        href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
+        label: 'Edit',
+        icon: iconExploration,
+      }}
+    />
+  {:else}
+    <AppendBreadcrumb
+      item={{
+        type: 'simple',
+        href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
+        label: 'Data Explorer',
+        icon: iconExploration,
+      }}
+    />
+  {/if}
 {:else}
   <AppendBreadcrumb
     item={{
