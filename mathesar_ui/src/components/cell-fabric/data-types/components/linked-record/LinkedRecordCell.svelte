@@ -22,6 +22,7 @@
   export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
+  export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   let wasActiveBeforeClick = false;
 
@@ -85,6 +86,7 @@
   {isActive}
   {isSelectedInRange}
   {disabled}
+  {isIndependentOfSheet}
   on:activate
   on:mouseenter
   on:keydown={handleWrapperKeyDown}

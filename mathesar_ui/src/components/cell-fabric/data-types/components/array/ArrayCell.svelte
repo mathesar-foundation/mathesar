@@ -13,6 +13,7 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
+  export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
@@ -42,6 +43,7 @@
   {isActive}
   {isSelectedInRange}
   {disabled}
+  {isIndependentOfSheet}
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
   on:mousedown={handleMouseDown}

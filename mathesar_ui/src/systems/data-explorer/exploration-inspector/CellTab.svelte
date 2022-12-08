@@ -1,11 +1,12 @@
 <script lang="ts">
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import type QueryRunner from '../QueryRunner';
 
   export let queryHandler: QueryRunner;
-  $: ({ selection } = queryHandler);
+  $: ({ selection, processedColumns } = queryHandler);
   $: ({ activeCell } = selection);
 
-  $: selectedCell = (() => {
+  $: selectedCellValue = (() => {
     const cell = $activeCell;
     if (cell) {
       const rows = queryHandler.getRows();
@@ -15,14 +16,34 @@
     }
     return undefined;
   })();
+  $: processedQueryColumn = (() => {
+    const cell = $activeCell;
+    if (cell) {
+      const processedColumn = $processedColumns.get(String(cell.columnId));
+      if (processedColumn) {
+        return processedColumn;
+      }
+    }
+    return undefined;
+  })();
 </script>
 
-<div class="section-content" class:has-content={selectedCell}>
-  {#if selectedCell}
+<div
+  class="section-content"
+  class:has-content={selectedCellValue !== undefined}
+>
+  {#if selectedCellValue !== undefined}
     <section class="cell-content">
       <header>Content</header>
       <div class="content">
-        {selectedCell}
+        {#if processedQueryColumn}
+          <CellFabric
+            isIndependentOfSheet={true}
+            disabled={true}
+            columnFabric={processedQueryColumn}
+            value={selectedCellValue}
+          />
+        {/if}
       </div>
     </section>
   {:else}
