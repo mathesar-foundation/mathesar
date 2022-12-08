@@ -14,7 +14,7 @@ class User(AbstractUser):
     last_name = None
     full_name = models.CharField(max_length=255, blank=True, null=True)
     short_name = models.CharField(max_length=255, blank=True, null=True)
-    password_change_needed = models.BooleanField(default=True)
+    password_change_needed = models.BooleanField(default=False)
 
 
 class Role(models.TextChoices):
