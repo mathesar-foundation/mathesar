@@ -8,7 +8,7 @@
     QueryRunner,
     ExplorationInspector,
   } from '@mathesar/systems/data-explorer';
-  import type { QueryInstance } from '@mathesar/api/queries';
+  import type { QueryInstance } from '@mathesar/api/types/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';

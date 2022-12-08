@@ -12,7 +12,7 @@ import {
   deleteAPI,
   patchAPI,
   postAPI,
-} from '@mathesar/utils/api';
+} from '@mathesar/api/utils/requestUtils';
 import {
   isDefinedNonNullable,
   type CancellablePromise,
@@ -26,8 +26,8 @@ import type {
   Grouping as ApiGrouping,
   GroupingMode,
   GetRequestParams as ApiGetRequestParams,
-} from '@mathesar/api/tables/records';
-import type { Column } from '@mathesar/api/tables/columns';
+} from '@mathesar/api/types/tables/records';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
 import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';

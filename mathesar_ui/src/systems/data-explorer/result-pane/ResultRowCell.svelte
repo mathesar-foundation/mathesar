@@ -7,7 +7,7 @@
     isCellSelected,
   } from '@mathesar/components/sheet';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import type { RequestStatus } from '@mathesar/utils/api';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type { QueryRow, QuerySheetSelection } from '../QueryRunner';
   import type { ProcessedQueryOutputColumn } from '../utils';
 

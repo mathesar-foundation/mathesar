@@ -1,4 +1,4 @@
-import type { QueryInstanceFilterTransformation } from '@mathesar/api/queries';
+import type { QueryInstanceFilterTransformation } from '@mathesar/api/types/queries';
 
 export interface QueryFilterTransformationEntry {
   columnIdentifier: string;

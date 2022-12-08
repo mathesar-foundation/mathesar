@@ -6,7 +6,7 @@
     getTabularDataStoreFromContext,
     type Filtering,
   } from '@mathesar/stores/table-data';
-  import type { FilterCombination } from '@mathesar/api/tables/records';
+  import type { FilterCombination } from '@mathesar/api/types/tables/records';
   import { validateFilterEntry } from '@mathesar/components/filter-entry';
   import { iconAddNew } from '@mathesar/icons';
   import FilterEntries from './FilterEntries.svelte';

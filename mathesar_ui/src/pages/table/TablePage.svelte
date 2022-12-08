@@ -1,7 +1,7 @@
 <script lang="ts">
   import { router } from 'tinro';
 
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
@@ -46,7 +46,7 @@
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
     <ActionsPane {database} {schema} {table} />
-    <TableView usesVirtualList allowsDdlOperations />
+    <TableView />
   </div>
 </LayoutWithHeader>
 
