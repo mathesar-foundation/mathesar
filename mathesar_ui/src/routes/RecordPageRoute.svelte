@@ -1,9 +1,10 @@
 <script lang="ts">
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { iconRecord } from '@mathesar/icons';
   import type { TableEntry } from '@mathesar/api/tables';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import RecordSummary from '@mathesar/components/RecordSummary.svelte';
+  import { iconRecord } from '@mathesar/icons';
+  import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
   import RecordStore from '@mathesar/pages/record/RecordStore';
   import { getRecordPageUrl } from './urls';
 
@@ -21,7 +22,7 @@
     item={{
       type: 'simple',
       href: getRecordPageUrl(database.name, schema.id, table.id, recordId),
-      label: $summary,
+      label: { component: RecordSummary, props: { recordSummary: $summary } },
       icon: iconRecord,
     }}
   />

@@ -20,6 +20,7 @@
   --slate-200: #d5d8dc;
   --slate-300: #aeb4bc;
   --slate-400: #4b535d;
+  --slate-500: #4b535d;
   --slate-800: #25292e;
 
   --sand-100: #f9f8f6;
@@ -32,6 +33,7 @@
 
   --yellow-100: #fdf7ed;
   --yellow-200: #ffedaf;
+  --yellow-300: #f8ceb0;
 
   --white: white;
 
@@ -42,6 +44,7 @@
   // value and support white-labelling
 
   // Brand Color
+  --brand-100: var(--red-100);
   --brand-500: var(--red-500);
   --brand-600: var(--red-600);
   --brand-800: var(--red-800);

@@ -44,13 +44,7 @@
 </script>
 
 <div class="groups" class:grouped={$grouping.entries.length > 0}>
-  <header>
-    {#if $grouping.entries.length > 0}
-      Group records by
-    {:else}
-      No grouping condition has been added
-    {/if}
-  </header>
+  <header>Group records by</header>
   <div class="content">
     {#each $grouping.entries as groupEntry, index (index)}
       <GroupEntryComponent
@@ -64,12 +58,15 @@
         disableColumnChange={$grouping.entries.length > 1 &&
           index < $grouping.entries.length - 1}
       />
+    {:else}
+      <span class="muted">No grouping condition has been added</span>
     {/each}
   </div>
   <footer>
     <DropdownMenu
-      label="Select column to group by"
+      label="Add New Grouping"
       disabled={availableColumns.length === 0}
+      triggerAppearance="secondary"
     >
       {#each availableColumns as column (column.id)}
         <ButtonMenuItem on:click={() => addGroupColumn(column)}>
@@ -83,12 +80,10 @@
 <style lang="scss">
   .groups {
     min-width: 25rem;
-    padding: 0.8rem;
+    padding: 1rem;
 
-    &:not(.grouped) {
-      header {
-        color: var(--color-text-muted);
-      }
+    header {
+      font-weight: bolder;
     }
     .content {
       margin-top: 0.8rem;
@@ -104,6 +99,10 @@
 
     footer {
       margin-top: 1rem;
+    }
+
+    .muted {
+      color: var(--slate-400);
     }
   }
 </style>

@@ -72,7 +72,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
 
   inputColumns: Writable<InputColumnsStoreSubstance> = writable({
     baseTableColumns: new Map(),
-    tablesThatReferenceBaseTable: new Map(),
+    tablesThatReferenceBaseTable: [],
     inputColumnInformationMap: new Map(),
   });
 
@@ -109,7 +109,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     if (!baseTableId) {
       this.inputColumns.set({
         baseTableColumns: new Map(),
-        tablesThatReferenceBaseTable: new Map(),
+        tablesThatReferenceBaseTable: [],
         inputColumnInformationMap: new Map(),
       });
       this.state.update((state) => ({
