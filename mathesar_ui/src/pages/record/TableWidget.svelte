@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Truncate } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Column } from '@mathesar/api/types/tables/columns';
   import TableName from '@mathesar/components/TableName.svelte';
@@ -38,7 +37,7 @@
 
 <div class="table-widget">
   <div class="top">
-    <Truncate><strong><TableName {table} /></strong></Truncate>
+    <strong><TableName {table} /></strong>
     <MiniActionsPane />
   </div>
 
