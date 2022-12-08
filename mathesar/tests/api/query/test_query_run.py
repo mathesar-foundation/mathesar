@@ -29,12 +29,10 @@ def test_queries_run_minimal_based_on_permissions(
         {
             'id': base_table.get_column_by_name('Center').id,
             'alias': 'col1',
-            'display_name': 'Column 1',
         },
         {
             'id': base_table.get_column_by_name('Case Number').id,
             'alias': 'col2',
-            'display_name': 'Column 2',
         },
     ]
     data = {
