@@ -30,6 +30,8 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         user = get_object_or_404(get_user_model(), pk=pk)
         password = serializer.validated_data["password"]
         user.set_password(password)
+        # Make sure we redirect user to change password set by the admin on login
+        user.password_change_needed = True
         user.save()
         return Response(status=status.HTTP_200_OK)
 
