@@ -4,6 +4,7 @@
 }
 .truncate:not(.multiline) {
   display: block;
+  max-width: 100%;
   /**
    * Why not just use `-webkit-box` for single line cases too? Because it
    * doesn't perform as well when truncating very short strings. For example,
