@@ -17,7 +17,6 @@
 
 <style>
   .schema-name {
-    --icon-color: var(--brand-500);
     --icon-opacity: 1;
   }
   .schema-name.is-locked {
