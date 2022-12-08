@@ -1,4 +1,4 @@
-import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/queries';
+import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/types/queries';
 import { ImmutableMap } from '@mathesar-component-library';
 
 export interface QuerySummarizationAggregationEntry {

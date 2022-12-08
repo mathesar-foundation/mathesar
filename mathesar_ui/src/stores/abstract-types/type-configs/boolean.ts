@@ -2,7 +2,7 @@ import type { FormValues } from '@mathesar-component-library/types';
 import type {
   BooleanDisplayOptions,
   Column,
-} from '@mathesar/api/tables/columns';
+} from '@mathesar/api/types/tables/columns';
 import { iconUiTypeBoolean } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,

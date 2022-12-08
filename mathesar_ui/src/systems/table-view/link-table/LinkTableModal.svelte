@@ -17,8 +17,8 @@
     OneToOne,
     OneToMany,
     ManyToMany,
-  } from '@mathesar/api/links';
-  import type { TableEntry } from '@mathesar/api/tables';
+  } from '@mathesar/api/types/links';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -30,7 +30,7 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
-  import { postAPI } from '@mathesar/utils/api';
+  import { postAPI } from '@mathesar/api/utils/requestUtils';
   import { getAvailableName } from '@mathesar/utils/db';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { iconTechnicalExplanation, iconTableLink } from '@mathesar/icons';
