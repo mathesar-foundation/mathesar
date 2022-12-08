@@ -47,8 +47,7 @@
         <NameWithIcon icon={iconRecord} truncate={false}>
           <strong>{recordSummary}</strong>
         </NameWithIcon>
-        via a linking column in its corresponding table. (For convenience, that linking
-        column is hidden from view here.)
+        from another table.
       </Help>
       <hr />
     </h2>
