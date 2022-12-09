@@ -22,7 +22,7 @@ class SchemaViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin,
     access_policy = SchemaAccessPolicy
 
     def get_queryset(self):
-        qs = Schema.objects.all().order_by('name')
+        qs = Schema.objects.all().order_by('-created_at')
         return self.access_policy.scope_viewset_queryset(self.request, qs)
 
     def create(self, request):
