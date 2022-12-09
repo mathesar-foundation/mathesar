@@ -65,7 +65,35 @@ def test_one_to_one_link_create_permissions(
     assert response.status_code == expected_status_code
 
 
-def test_create_link_on_invalid_table_name(create_base_table, create_referent_table, client):
+def test_one_to_many_link_on_invalid_table_name(
+        create_base_table,
+        create_referent_table,
+        client
+    ):
+    reference_table = create_base_table('Base_table')
+    # Having round brackets in the referent_table name is invalid.
+    referent_table = create_referent_table('Referent_table(alpha)')
+    data = {
+        "link_type": "one-to-many",
+        "reference_column_name": "col_1",
+        "reference_table": reference_table.id,
+        "referent_table": referent_table.id,
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    response_data = response.json()[0]
+    assert response.status_code == 400
+    assert response_data['code'] == ErrorCodes.InvalidTableName.value
+    assert response_data['message'] == 'Table name "Referent_table(alpha)" is invalid.'
+
+
+def test_one_to_one_link_on_invalid_table_name(
+        create_base_table,
+        create_referent_table,
+        client
+    ):
     reference_table = create_base_table('Base_table')
     # Having round brackets in the referent_table name is invalid.
     referent_table = create_referent_table('Referent_table(alpha)')
@@ -82,7 +110,7 @@ def test_create_link_on_invalid_table_name(create_base_table, create_referent_ta
     response_data = response.json()[0]
     assert response.status_code == 400
     assert response_data['code'] == ErrorCodes.InvalidTableName.value
-    assert response_data['message'] == 'Referent table name "Referent_table(alpha)" is invalid.'
+    assert response_data['message'] == 'Table name "Referent_table(alpha)" is invalid.'
 
 
 def test_one_to_one_link_create(column_test_table, client, create_patents_table):

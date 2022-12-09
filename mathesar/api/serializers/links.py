@@ -24,12 +24,13 @@ class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     def is_link_unique(self):
         return True
 
-    def run_validation(self, data):
-        if referent_table := data.get('referent_table', None):
-            referent_table_name = Table.current_objects.get(id=referent_table).name
+    def validate(self, attrs):
+        if referent_table := attrs.get('referent_table', None):
+            referent_table_name = referent_table.name
+            print(referent_table_name)
             if referent_table_name.find('(') and referent_table_name.find(')') != -1:
                 raise InvalidTableName(referent_table_name)
-        return super(OneToOneSerializer, self).run_validation(data)
+        return super(OneToOneSerializer, self).validate(attrs)
 
     def create(self, validated_data):
         reference_table = validated_data['reference_table']
@@ -49,13 +50,6 @@ class OneToManySerializer(OneToOneSerializer):
 
     def is_link_unique(self):
         return False
-
-    def run_validation(self, data):
-        if referent_table := data.get('referent_table', None):
-            referent_table_name = Table.current_objects.get(id=referent_table).name
-            if referent_table_name.find('(') and referent_table_name.find(')') != -1:
-                raise InvalidTableName(referent_table_name)
-        return super(OneToManySerializer, self).run_validation(data)
 
 
 class MapColumnSerializer(MathesarErrorMessageMixin, serializers.Serializer):
