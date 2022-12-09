@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
   import {
     getTablePageUrl,
@@ -137,6 +137,7 @@
   .name-and-description {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 
     .name {
       font-size: var(--text-size-large);

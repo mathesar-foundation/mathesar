@@ -6,7 +6,7 @@ import type {
   QueryRunResponse,
   QueryInitialColumnSource,
   QueryGeneratedColumnSource,
-} from '@mathesar/api/queries';
+} from '@mathesar/api/types/queries';
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,
@@ -22,12 +22,12 @@ import {
   getDbTypeBasedInputCap,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
-import type { TableEntry } from '@mathesar/api/tables';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type {
   JpPath,
   JoinableTablesResult,
-} from '@mathesar/api/tables/joinable_tables';
-import type { Column } from '@mathesar/api/tables/columns';
+} from '@mathesar/api/types/tables/joinable_tables';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import type QueryModel from './QueryModel';
 
 type ProcessedQueryResultColumnSource =
@@ -93,7 +93,7 @@ export interface ReferencedByTable extends LinkedTable {
 
 export interface InputColumnsStoreSubstance {
   baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
-  tablesThatReferenceBaseTable: Map<ReferencedByTable['id'], ReferencedByTable>;
+  tablesThatReferenceBaseTable: ReferencedByTable[];
   inputColumnInformationMap: Map<InputColumn['id'], InputColumn>;
 }
 
@@ -115,21 +115,23 @@ export function getLinkFromColumn(
   result: JoinableTablesResult,
   columnId: Column['id'],
   depth: number,
+  parentPath = '',
 ): LinkedTable | undefined {
-  const validLinks = result.joinable_tables.filter(
+  const allLinksFromColumn = result.joinable_tables.filter(
     (entry) =>
       entry.depth === depth &&
       entry.fk_path[depth - 1][1] === false &&
-      entry.jp_path[depth - 1][0] === columnId,
+      entry.jp_path[depth - 1][0] === columnId &&
+      entry.jp_path.join(',').indexOf(parentPath) === 0,
   );
-  if (validLinks.length === 0) {
+  if (allLinksFromColumn.length === 0) {
     return undefined;
   }
-  if (validLinks.length > 1) {
+  if (allLinksFromColumn.length > 1) {
     // This scenario should never occur
     throw new Error(`Multiple links present for the same column: ${columnId}`);
   }
-  const link = validLinks[0];
+  const link = allLinksFromColumn[0];
   const toTableInfo = result.tables[link.target];
   const toTable = {
     id: link.target,
@@ -150,7 +152,12 @@ export function getLinkFromColumn(
           name: columnInLinkedTable.name,
           tableName: toTableInfo.name,
           type: columnInLinkedTable.type,
-          linksTo: getLinkFromColumn(result, columnIdInLinkedTable, depth + 1),
+          linksTo: getLinkFromColumn(
+            result,
+            columnIdInLinkedTable,
+            depth + 1,
+            link.jp_path.join(','),
+          ),
           jpPath: link.jp_path,
         },
       ];
@@ -164,7 +171,7 @@ export function getLinkFromColumn(
 
 export function getColumnInformationMap(
   result: JoinableTablesResult,
-  baseTable: TableEntry,
+  baseTable: Pick<TableEntry, 'id' | 'name' | 'columns'>,
 ): InputColumnsStoreSubstance['inputColumnInformationMap'] {
   const map: InputColumnsStoreSubstance['inputColumnInformationMap'] =
     new Map();
@@ -196,7 +203,7 @@ export function getColumnInformationMap(
 
 export function getBaseTableColumnsWithLinks(
   result: JoinableTablesResult,
-  baseTable: TableEntry,
+  baseTable: Pick<TableEntry, 'id' | 'name' | 'columns'>,
 ): Map<ColumnWithLink['id'], ColumnWithLink> {
   const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
     baseTable.columns.map((column) => [
@@ -214,12 +221,12 @@ export function getBaseTableColumnsWithLinks(
 
 export function getTablesThatReferenceBaseTable(
   result: JoinableTablesResult,
-  baseTable: TableEntry,
-): Map<ReferencedByTable['id'], ReferencedByTable> {
+  baseTable: Pick<TableEntry, 'id' | 'name' | 'columns'>,
+): ReferencedByTable[] {
   const referenceLinks = result.joinable_tables.filter(
     (entry) => entry.depth === 1 && entry.fk_path[0][1] === true,
   );
-  const references: Map<ReferencedByTable['id'], ReferencedByTable> = new Map();
+  const references: ReferencedByTable[] = [];
 
   referenceLinks.forEach((reference) => {
     const tableId = reference.target;
@@ -244,13 +251,18 @@ export function getTablesThatReferenceBaseTable(
               name: columnInTable.name,
               type: columnInTable.type,
               tableName: table.name,
-              linksTo: getLinkFromColumn(result, columnIdInTable, 2),
+              linksTo: getLinkFromColumn(
+                result,
+                columnIdInTable,
+                2,
+                reference.jp_path.join(','),
+              ),
               jpPath: reference.jp_path,
             },
           ];
         });
 
-    references.set(tableId, {
+    references.push({
       id: tableId,
       name: table.name,
       referencedViaColumn: {

@@ -1,4 +1,4 @@
-import type { PaginatedResponse } from '@mathesar/utils/api';
+import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
 import type { Column } from './tables/columns';
 
 export type MinimalColumnDetails = Pick<
@@ -24,10 +24,11 @@ export interface TableEntry {
   id: number;
   name: string;
   schema: number;
-  import_verified: boolean;
+  import_verified: boolean | null;
   data_files?: number[];
   columns: MinimalColumnDetails[];
   settings: TableSettings;
+  description: string | null;
 }
 
 /**

@@ -10,6 +10,8 @@ export { default as portal } from './common/actions/portal';
 // Simple Components
 export { default as Alert } from './alert/Alert.svelte';
 export { default as AnchorButton } from './anchorButton/AnchorButton.svelte';
+export { default as Badge } from './badge/Badge.svelte';
+export { default as BadgeCount } from './badge-count/BadgeCount.svelte';
 export { default as Tutorial } from './tutorial/Tutorial.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
@@ -41,6 +43,7 @@ export { default as TextArea } from './text-area/TextArea.svelte';
 export { default as TextAvatar } from './text-avatar/TextAvatar.svelte';
 export { default as TextInput } from './text-input/TextInput.svelte';
 export { default as TextInputWithPrefix } from './text-input/TextInputWithPrefix.svelte';
+export { default as Truncate } from './truncate/Truncate.svelte';
 
 // Compound Components (Ordered)
 export { DatePicker, InlineDateTimePicker } from './date-time-picker';

@@ -102,7 +102,7 @@
       <div class="tab-container">
         <SchemaTables {tablesMap} {database} {schema} />
       </div>
-    {:else}
+    {:else if activeTab?.id === 'explorations'}
       <div class="tab-container">
         <SchemaExplorations
           hasTablesToExplore={!!tablesMap.size}

@@ -2,7 +2,7 @@
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import type { ResultValue } from '@mathesar/api/tables/records';
+  import type { ResultValue } from '@mathesar/api/types/tables/records';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
@@ -42,7 +42,7 @@
     gap: 0.2rem;
 
     .name {
-      font-size: var(--text-size-x-small);
+      font-size: var(--text-size-small);
       color: var(--color-text-muted);
       display: flex;
       align-items: center;
@@ -56,7 +56,7 @@
       }
     }
     .value {
-      font-weight: 500;
+      font-size: var(--text-size-large);
     }
   }
 </style>

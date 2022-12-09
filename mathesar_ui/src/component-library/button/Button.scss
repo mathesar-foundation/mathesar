@@ -10,12 +10,14 @@
   box-shadow: #000 0 0 0 0, #000 0 0 0 0, rgba(0, 0, 0, 0.05) 0 1px 2px 0;
   font-weight: inherit;
   position: relative;
+  padding: 0.5em 0.5em;
 
   > * + * {
-    margin-left: 0.25rem;
+    margin-left: 0.25em;
   }
 
   &:active,
+  &.active,
   &:focus {
     outline: 0;
   }
@@ -44,7 +46,8 @@
         border-color: var(--brand-600);
       }
 
-      &:active {
+      &:active,
+      &.active {
         background: var(--brand-800);
         border-color: var(--brand-800);
       }
@@ -62,8 +65,10 @@
         border-color: var(--slate-300);
       }
 
-      &:active {
-        background: var(--slate-300);
+      &:active,
+      &.active {
+        background: var(--slate-500);
+        color: var(--white);
       }
     }
   }
@@ -80,7 +85,8 @@
         border-color: var(--brand-600);
       }
 
-      &:active {
+      &:active,
+      &.active {
         background: var(--slate-200);
         border-color: var(--brand-800);
       }
@@ -118,12 +124,14 @@
       }
 
       &:active,
+      &.active,
       &:focus,
       &.focus {
         box-shadow: 0 0 0 2px var(--slate-100) !important;
       }
 
-      &:active {
+      &:active,
+      &.active {
         background: var(--slate-200);
       }
     }
@@ -131,17 +139,14 @@
 
   /* Sizes */
   &.size-medium {
-    padding: 0.5rem 0.5rem;
     font-size: 1em;
   }
 
   &.size-small {
-    padding: 0.25rem 0.5rem;
     font-size: 0.889em;
   }
 
   &.size-large {
-    padding: 8px 14px;
     font-size: 1.2em;
   }
 
@@ -149,20 +154,12 @@
     padding: 0px;
   }
 
-  &.padding-small {
-    padding: 4px 10px;
-  }
-
-  &.padding-medium {
-    padding: 0.5rem 0.75rem;
-  }
-
-  &.padding-large {
-    padding: 8px 14px;
-  }
-
   &.full-width {
     width: 100%;
+  }
+
+  &.danger {
+    color: var(--red-500);
   }
 
   /* State */

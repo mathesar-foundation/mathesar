@@ -10,9 +10,12 @@
 
   export let pagination: Pagination;
   export let totalCount: number;
-  export let pageSizeOpts = [100, 200, 500];
+  export let pageSizeOptions = [100, 200, 500];
+  export let hiddenWhenPossible = false;
 
   $: ({ size: pageSize, page } = pagination);
+  $: possibleToHide = pageSize >= totalCount;
+  $: hidden = possibleToHide && hiddenWhenPossible;
 
   function handlePageChange(event: {
     detail: {
@@ -35,7 +38,7 @@
   }
 </script>
 
-{#if totalCount}
+{#if totalCount && !hidden}
   <div class="pagination-group">
     <PaginationComponent
       total={totalCount}
@@ -43,12 +46,14 @@
       currentPage={page}
       on:change={handlePageChange}
     />
-    <Select
-      triggerAppearance="plain"
-      options={pageSizeOpts}
-      value={pageSize}
-      on:change={setPageSize}
-    />
+    {#if pageSizeOptions.length}
+      <Select
+        triggerAppearance="secondary"
+        options={pageSizeOptions}
+        value={pageSize}
+        on:change={setPageSize}
+      />
+    {/if}
   </div>
 {/if}
 

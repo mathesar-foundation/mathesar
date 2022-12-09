@@ -92,11 +92,11 @@
     --cell-bg-color-error: #fef1f1;
     --cell-bg-color-header: #f9f9f9;
     --cell-bg-color-processing: #fefef1;
-    --cell-bg-color-disabled: #f3f3f3;
+    --cell-bg-color-disabled: var(--sand-100);
     --cell-bg-color-row-hover: #f6f7f7;
     --cell-bg-color-row-selected: #e4f2ff;
 
-    --color-fk: #dfd0b3;
+    --color-fk: var(--yellow-300);
     --color-error: #f47171;
     --cell-text-color-processing: #888;
     --color-array-element: #c1e8e8;
@@ -132,6 +132,10 @@
     font-size: 1.6rem;
   }
 
+  .block {
+    display: block;
+  }
+
   /**
    * Used to turn elements like `<button>` and `<a>` into plain elements that
    * don't have any browser styling but still have functionality.
@@ -149,5 +153,14 @@
     text-decoration: inherit;
     margin: 0;
     padding: 0;
+  }
+
+  .postgres-keyword {
+    font-size: 80%;
+    padding: 0.02em 0.3em;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: bold;
   }
 </style>

@@ -5,8 +5,8 @@
     FileUpload,
     FileUploadAddDetail,
   } from '@mathesar-component-library/types';
-  import { uploadFile } from '@mathesar/utils/api';
-  import type { UploadCompletionOpts } from '@mathesar/utils/api';
+  import { uploadFile } from '@mathesar/api/utils/requestUtils';
+  import type { UploadCompletionOpts } from '@mathesar/api/utils/requestUtils';
   import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();

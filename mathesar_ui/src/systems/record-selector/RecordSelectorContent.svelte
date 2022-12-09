@@ -2,7 +2,7 @@
   import { router } from 'tinro';
 
   import { Button, Icon, Spinner } from '@mathesar-component-library';
-  import type { Response as ApiRecordsResponse } from '@mathesar/api/tables/records';
+  import type { Response as ApiRecordsResponse } from '@mathesar/api/types/tables/records';
   import { iconAddNew } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { TabularData } from '@mathesar/stores/table-data';
@@ -13,7 +13,7 @@
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { tables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { postAPI, States } from '@mathesar/utils/api';
+  import { postAPI, States } from '@mathesar/api/utils/requestUtils';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import type {

@@ -8,7 +8,7 @@
     InputGroup,
     InputGroupText,
   } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { Column } from '@mathesar/api/types/tables/columns';
   import { iconAddNew } from '@mathesar/icons';
 
   const dispatch = createEventDispatcher();
@@ -39,7 +39,7 @@
   closeOnInnerClick={false}
   contentClass="content"
   bind:isOpen={isDropdownOpen}
-  triggerAppearance="plain"
+  triggerAppearance="secondary"
   showArrow={false}
   ariaLabel="New Column"
 >

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import WhiteLogo from '@mathesar/components/WhiteLogo.svelte';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import BreadcrumbItem from './BreadcrumbItem.svelte';
   import {
     breadcrumbItemIsDatabase,
     getBreadcrumbItemsFromContext,
   } from './breadcrumbUtils';
+  import LogoAndNameWithLink from './LogoAndNameWithLink.svelte';
 
   const items = getBreadcrumbItemsFromContext();
 
@@ -23,41 +23,32 @@
     }
     return getDatabasePageUrl(database.name);
   })();
+  /**
+   * When we have lots of items, tell each one that they can simplify
+   * themselves on narrow viewports.
+   */
+  $: hasResponsiveAbridgement = $items.length > 2;
 </script>
 
 <div class="breadcrumb">
   {#if isMinimal}
-    <a href={minimalHref} class="home-link">
-      <WhiteLogo />
-      <span class="mathesar">Mathesar</span>
-    </a>
+    <LogoAndNameWithLink href={minimalHref} />
   {:else}
     {#each $items as item}
-      <BreadcrumbItem {item} />
+      <BreadcrumbItem {item} {hasResponsiveAbridgement} />
     {/each}
   {/if}
 </div>
 
-<style>
+<style lang="scss">
   .breadcrumb {
+    --breadcrumb-spacing: 0.75rem;
     display: flex;
+    overflow: hidden;
     align-items: center;
-    --spacing: 0.5rem;
-    margin: calc(-1 * var(--spacing));
-  }
-  .breadcrumb > :global(*) {
-    margin: var(--spacing);
-  }
-  .home-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-  }
-  .mathesar {
-    font-weight: 500;
-    display: block;
-    color: var(--white);
-    font-size: var(--text-size-xx-large);
-    margin: 0 var(--spacing);
+
+    > :global(* + *) {
+      margin-left: var(--breadcrumb-spacing);
+    }
   }
 </style>

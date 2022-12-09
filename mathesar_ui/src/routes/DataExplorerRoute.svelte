@@ -9,7 +9,7 @@
   import { getQuery } from '@mathesar/stores/queries';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { CancellablePromise } from '@mathesar/component-library';
-  import type { QueryInstance } from '@mathesar/api/queries';
+  import type { QueryInstance } from '@mathesar/api/types/queries';
   import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
@@ -116,14 +116,36 @@
 </script>
 
 {#if $query?.id}
-  <AppendBreadcrumb
-    item={{
-      type: 'simple',
-      href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
-      label: $query?.name ? `Edit: ${$query?.name}` : 'Data Explorer',
-      icon: iconExploration,
-    }}
-  />
+  {#if $query.name}
+    <AppendBreadcrumb
+      item={{
+        type: 'exploration',
+        database,
+        schema,
+        query: {
+          id: $query.id,
+          name: $query.name,
+        },
+      }}
+    />
+    <AppendBreadcrumb
+      item={{
+        type: 'simple',
+        href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
+        label: 'Edit',
+        icon: iconExploration,
+      }}
+    />
+  {:else}
+    <AppendBreadcrumb
+      item={{
+        type: 'simple',
+        href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
+        label: 'Data Explorer',
+        icon: iconExploration,
+      }}
+    />
+  {/if}
 {:else}
   <AppendBreadcrumb
     item={{
