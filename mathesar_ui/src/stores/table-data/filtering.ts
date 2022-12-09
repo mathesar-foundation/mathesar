@@ -3,7 +3,7 @@ import type {
   GetRequestParams,
   FilterCondition,
   FilterConditionParams,
-} from '@mathesar/api/tables/records';
+} from '@mathesar/api/types/tables/records';
 
 export interface FilterEntry {
   readonly columnId: number;

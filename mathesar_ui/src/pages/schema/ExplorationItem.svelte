@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { QueryInstance } from '@mathesar/api/queries';
+  import type { QueryInstance } from '@mathesar/api/types/queries';
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration } from '@mathesar/icons';

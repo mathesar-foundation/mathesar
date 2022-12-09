@@ -23,6 +23,7 @@
   export let formatValue: CellValueFormatter<Value> | undefined = undefined;
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
   export let searchValue: unknown | undefined = undefined;
+  export let isIndependentOfSheet = false;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
@@ -137,14 +138,15 @@
   {multiLineTruncate}
   {horizontalAlignment}
   {valueComparisonOutcome}
+  {isIndependentOfSheet}
 >
   {#if isEditMode}
     <slot {handleInputBlur} {handleInputKeydown} />
   {:else}
     <div
       class="content"
-      class:nowrap={!isActive}
-      class:truncate={isActive && multiLineTruncate}
+      class:nowrap={!isActive && !isIndependentOfSheet}
+      class:truncate={isActive && multiLineTruncate && !isIndependentOfSheet}
     >
       <slot name="content" {value} {formatValue} {matchParts}>
         <CellValue {value} {formatValue} {matchParts} />

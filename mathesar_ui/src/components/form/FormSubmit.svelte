@@ -11,10 +11,23 @@
 
   export let form: Form;
   export let initiallyHidden = false;
+  export let onCancel = () => form.reset();
 
-  $: ({ isDirty, isValid } = $form);
+  $: ({ hasChanges, canSubmit } = $form);
 </script>
 
-{#if !initiallyHidden || isDirty}
-  <CancelOrProceedButtonPair canProceed={isValid} {...$$restProps} />
+{#if !initiallyHidden || hasChanges}
+  <div class="form-submit">
+    <CancelOrProceedButtonPair
+      canProceed={canSubmit}
+      {onCancel}
+      {...$$restProps}
+    />
+  </div>
 {/if}
+
+<style>
+  .form-submit {
+    margin: var(--form-submit-margin);
+  }
+</style>

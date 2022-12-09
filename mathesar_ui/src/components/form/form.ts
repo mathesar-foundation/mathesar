@@ -1,19 +1,20 @@
-import { derived, get, type Readable } from 'svelte/store';
+import { derived, get, writable, type Readable } from 'svelte/store';
 
 import { unite } from '@mathesar-component-library';
-import { comboErrorsKey, type Field, type ValuedField } from './field';
+import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+import { comboErrorsKey, type FieldStore, type ValuedField } from './field';
 import { isValid as outcomeIsValid, type ComboValidator } from './validators';
 
-type GenericFieldsObj = Record<string, Field>;
+type GenericFieldsObj = Record<string, FieldStore>;
 type Values<FieldsObj extends GenericFieldsObj> = {
-  [K in keyof FieldsObj]: FieldsObj[K] extends Field<infer T> ? T : never;
+  [K in keyof FieldsObj]: FieldsObj[K] extends FieldStore<infer T> ? T : never;
 };
 
 function runComboValidators(
   valuedFields: ValuedField[],
   comboValidators: ComboValidator[],
 ): void {
-  const fieldErrorMap = new Map<Field, string[]>();
+  const fieldErrorMap = new Map<FieldStore, string[]>();
   comboValidators.forEach((validator) => {
     const { outcome, fields } = validator(valuedFields);
     fields.forEach((field) => {
@@ -31,11 +32,11 @@ function runComboValidators(
 }
 
 export function makeForm<FieldsObj extends GenericFieldsObj>(
-  fieldsObj: FieldsObj,
+  fields: FieldsObj,
   comboValidators: ComboValidator[] = [],
 ) {
   const valuedFields: Readable<ValuedField[]> = unite(
-    Object.entries(fieldsObj).map(([name, field]) =>
+    Object.entries(fields).map(([name, field]) =>
       derived(field, (value) => ({ name, field, value })),
     ),
   );
@@ -46,31 +47,46 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
     ) as Values<FieldsObj>;
   });
 
+  const requestStatus = writable<RequestStatus | undefined>(undefined);
+
+  const isValid = derived(
+    unite(Object.values(fields).map((f) => f.isValid)),
+    (a) => a.every((i) => i),
+  );
+  const canSubmit = derived(
+    unite(Object.values(fields).map((f) => f.canSubmit)),
+    (a) => a.every((i) => i),
+  );
+  const hasChanges = derived(
+    unite(Object.values(fields).map((f) => f.hasChanges)),
+    (a) => a.some((i) => i),
+  );
+
+  function clearServerErrors() {
+    requestStatus.update((v) => (v?.state === 'failure' ? undefined : v));
+    Object.values(fields).forEach((field) => {
+      field.serverErrors.set([]);
+    });
+  }
+
   function reset() {
-    Object.values(fieldsObj).forEach((field) => {
+    clearServerErrors();
+    Object.values(fields).forEach((field) => {
       field.reset();
     });
   }
 
-  const isValid = derived(
-    unite(Object.values(fieldsObj).map((f) => f.isValid)),
-    (a) => a.every((i) => i),
-  );
-  const isDirty = derived(
-    unite(Object.values(fieldsObj).map((f) => f.isDirty)),
-    (a) => a.some((i) => i),
-  );
-
   const store = derived(
-    [values, isValid, isDirty],
-    ([$values, $isValid, $isDirty]) => ({
+    [values, isValid, canSubmit, hasChanges],
+    ([$values, $isValid, $canSubmit, $hasChanges]) => ({
       values: $values,
       isValid: $isValid,
-      isDirty: $isDirty,
+      canSubmit: $canSubmit,
+      hasChanges: $hasChanges,
     }),
   );
 
-  return { ...store, reset };
+  return { ...store, fields, reset, clearServerErrors, requestStatus };
 }
 
 export type Form<FieldsObj extends GenericFieldsObj = GenericFieldsObj> =

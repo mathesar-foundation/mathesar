@@ -1,4 +1,4 @@
-import type { FkConstraint } from '@mathesar/api/tables/constraints';
+import type { FkConstraint } from '@mathesar/api/types/tables/constraints';
 import {
   getEqualityFiltersForAbstractType,
   getFiltersForAbstractType,

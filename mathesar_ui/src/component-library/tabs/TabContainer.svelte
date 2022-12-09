@@ -16,7 +16,7 @@
   const componentId = getId();
 
   export let tabs: Tab[] = [];
-  export let activeTab: Tab = tabs[0];
+  export let activeTab: Tab | undefined = tabs[0];
   export let idKey = 'id';
   export let labelKey = 'label';
   export let allowRemoval = false;
@@ -35,7 +35,7 @@
 
   function removeTab(e: { detail: Event }, index: number) {
     const removedTab = tabs.splice(index, 1);
-    if (activeTab[idKey] === removedTab[0]?.[idKey]) {
+    if (activeTab?.[idKey] === removedTab[0]?.[idKey]) {
       if (tabs[index]) {
         activeTab = tabs[index];
       } else if (tabs[index - 1]) {
@@ -85,7 +85,7 @@
         {allowRemoval}
         {uniformTabWidth}
         totalTabs={tabs.length}
-        isActive={tab[idKey] === activeTab[idKey]}
+        isActive={tab[idKey] === activeTab?.[idKey]}
         on:focus={focusTab}
         on:blur={blurTab}
         on:click={checkAndPreventDefault}

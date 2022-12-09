@@ -46,10 +46,13 @@ import {
   faUser,
   faSave,
   faTimes,
+  faCircleExclamation,
   faCircleArrowRight,
   faCircleArrowLeft,
   faListUl,
   faInfo,
+  faSlash,
+  faStar,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import { arrayIcon, tableIcon, explorationIcon } from './customIcons';
@@ -113,6 +116,7 @@ export const iconMultipleRecords: IconProps = { data: faCopy };
 export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconRecord: IconProps = { data: faFileAlt };
 export const iconSchema: IconProps = { data: faProjectDiagram };
+export const iconShortcuts: IconProps = { data: faStar };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: tableIcon };
 export const iconInspector: IconProps = { data: faInfo };
@@ -121,10 +125,12 @@ export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUser: IconProps = { data: faUser };
 export const iconLinksInThisTable: IconProps = { data: faCircleArrowRight };
 export const iconLinksFromOtherTables: IconProps = { data: faCircleArrowLeft };
+export const iconForwardSeparator: IconProps = { data: faSlash };
 
 // STATUSES
 
 export const iconNotEditable: IconProps = { data: faLock };
+export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
 
 // UI TYPES
 

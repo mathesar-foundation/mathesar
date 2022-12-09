@@ -3,7 +3,7 @@ import type {
   TimeDisplayOptions,
   TimeFormat,
   Column,
-} from '@mathesar/api/tables/columns';
+} from '@mathesar/api/types/tables/columns';
 import { iconUiTypeTime } from '@mathesar/icons';
 import type {
   AbstractTypeDbConfig,

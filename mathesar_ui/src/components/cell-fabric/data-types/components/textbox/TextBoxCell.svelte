@@ -10,6 +10,7 @@
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
+  export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   // Db options
   export let length: $$Props['length'] = undefined;
@@ -21,6 +22,7 @@
   {isSelectedInRange}
   {disabled}
   {searchValue}
+  {isIndependentOfSheet}
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown

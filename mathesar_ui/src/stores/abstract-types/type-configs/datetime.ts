@@ -4,7 +4,7 @@ import type {
   TimeFormat,
   DateFormat,
   Column,
-} from '@mathesar/api/tables/columns';
+} from '@mathesar/api/types/tables/columns';
 import { iconUiTypeDateTime } from '@mathesar/icons';
 import type {
   AbstractTypeDbConfig,
