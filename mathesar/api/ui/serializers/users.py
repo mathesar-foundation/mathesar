@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import validate_password
 from rest_access_policy import FieldAccessMixin, PermittedPkRelatedField
 from rest_framework import serializers
 
@@ -52,6 +53,10 @@ class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.Mo
         user.set_password(password)
         user.save()
         return user
+
+
+class PasswordResetSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
 
 
 class DatabaseRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):

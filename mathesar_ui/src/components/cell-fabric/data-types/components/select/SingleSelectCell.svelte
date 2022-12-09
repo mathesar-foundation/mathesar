@@ -27,6 +27,7 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: DefinedProps['value'] = undefined;
   export let disabled: DefinedProps['disabled'];
+  export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   export let options: DefinedProps['options'] = [];
   export let getLabel: DefinedProps['getLabel'] = (option?: Option) =>
@@ -100,6 +101,7 @@
 <ListBox
   {options}
   {getLabel}
+  {disabled}
   selectionType="single"
   value={isDefinedNonNullable(value) ? [value] : []}
   on:change={(e) => setValueFromListBox(e.detail)}
@@ -113,6 +115,7 @@
     {isActive}
     {isSelectedInRange}
     {disabled}
+    {isIndependentOfSheet}
     on:mousedown={handleMouseDown}
     on:mouseenter
     on:click={() => checkAndToggle(api)}

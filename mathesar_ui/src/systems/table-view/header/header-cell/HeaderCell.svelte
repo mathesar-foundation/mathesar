@@ -38,9 +38,7 @@
 <div class="header-cell-root">
   <CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
   <Button appearance="ghost" on:click>
-    <span>
-      <ProcessedColumnName {processedColumn} />
-    </span>
+    <ProcessedColumnName {processedColumn} />
     {#if sorter || hasFilter || grouped}
       <div class="indicator-icons">
         {#if sorter}

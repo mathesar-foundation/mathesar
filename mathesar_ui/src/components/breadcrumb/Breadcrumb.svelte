@@ -23,6 +23,11 @@
     }
     return getDatabasePageUrl(database.name);
   })();
+  /**
+   * When we have lots of items, tell each one that they can simplify
+   * themselves on narrow viewports.
+   */
+  $: hasResponsiveAbridgement = $items.length > 2;
 </script>
 
 <div class="breadcrumb">
@@ -30,7 +35,7 @@
     <LogoAndNameWithLink href={minimalHref} />
   {:else}
     {#each $items as item}
-      <BreadcrumbItem {item} />
+      <BreadcrumbItem {item} {hasResponsiveAbridgement} />
     {/each}
   {/if}
 </div>
@@ -39,6 +44,7 @@
   .breadcrumb {
     --breadcrumb-spacing: 0.75rem;
     display: flex;
+    overflow: hidden;
     align-items: center;
 
     > :global(* + *) {

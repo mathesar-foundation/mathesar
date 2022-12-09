@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { Column } from '@mathesar/api/types/tables/columns';
   import { iconAddNew } from '@mathesar/icons';
   import { getColumnIconProps } from '@mathesar/utils/columnUtils';
 

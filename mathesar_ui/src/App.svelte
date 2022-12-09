@@ -132,6 +132,10 @@
     font-size: 1.6rem;
   }
 
+  .block {
+    display: block;
+  }
+
   /**
    * Used to turn elements like `<button>` and `<a>` into plain elements that
    * don't have any browser styling but still have functionality.

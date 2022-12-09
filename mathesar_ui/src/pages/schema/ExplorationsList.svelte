@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { QueryInstance } from '@mathesar/api/queries';
+  import type { QueryInstance } from '@mathesar/api/types/queries';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconExploration } from '@mathesar/icons';
   import ExplorationItem from './ExplorationItem.svelte';

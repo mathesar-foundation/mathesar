@@ -3,7 +3,7 @@ import type {
   QueryInstanceTransformation,
   QueryInstance,
   QueryRunRequest,
-} from '@mathesar/api/queries';
+} from '@mathesar/api/types/queries';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
