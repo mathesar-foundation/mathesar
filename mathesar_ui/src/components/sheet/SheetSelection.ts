@@ -403,13 +403,13 @@ export default class SheetSelection<
     this.selectMultipleCells(cells);
   }
 
-  toggleColumnSelection(column: Column): void {
+  toggleColumnSelection(column: Column): boolean {
     const isCompleteColumnSelected = this.isCompleteColumnSelected(column);
     this.activateCellByIndexAndId(0, column.id);
 
     if (isCompleteColumnSelected) {
       this.resetSelection();
-      return;
+      return false;
     }
 
     const rows = this.getRows();
@@ -417,7 +417,7 @@ export default class SheetSelection<
     if (rows.length === 0) {
       this.resetSelection();
       this.columnsSelectedWhenTheTableIsEmpty.add(column.id);
-      return;
+      return true;
     }
 
     const cells: Cell<Row, Column>[] = [];
@@ -430,6 +430,7 @@ export default class SheetSelection<
     // disjointed cells
     this.resetSelection();
     this.selectMultipleCells(cells);
+    return true;
   }
 
   toggleRowSelection(row: Row): void {

@@ -20,6 +20,7 @@
   export let maximumFractionDigits: $$Props['maximumFractionDigits'];
   export let locale: $$Props['locale'];
   export let allowFloat: $$Props['allowFloat'];
+  export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   $: formatterOptions = {
     locale,
@@ -62,6 +63,7 @@
   {isActive}
   {isSelectedInRange}
   {disabled}
+  {isIndependentOfSheet}
   {formatValue}
   horizontalAlignment="right"
   let:handleInputBlur

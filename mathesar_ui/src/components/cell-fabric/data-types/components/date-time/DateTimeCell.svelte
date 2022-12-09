@@ -10,6 +10,7 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
+  export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   export let type: $$Props['type'];
   export let formattingString: $$Props['formattingString'];
@@ -32,6 +33,7 @@
   {isActive}
   {isSelectedInRange}
   {disabled}
+  {isIndependentOfSheet}
   let:handleInputBlur
   let:handleInputKeydown
   {formatValue}

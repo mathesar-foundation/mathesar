@@ -7,39 +7,35 @@
   import CellTab from './CellTab.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
-  $: ({ query } = queryHandler);
-  $: isSaved = $query.isSaved();
 
-  const generalTabs = [
-    { id: 'inspect-column', label: 'Column' },
-    { id: 'inspect-cell', label: 'Cell' },
-  ];
-  const tabsWhenQueryIsSaved = [
-    { id: 'inspect-exploration', label: 'Exploration' },
-    ...generalTabs,
-  ];
-  $: tabs = isSaved ? tabsWhenQueryIsSaved : generalTabs;
+  $: ({ inspector, query } = queryHandler);
+  $: ({ tabs, activeTab } = inspector);
 </script>
 
 <aside class="exploration-inspector">
-  <TabContainer {tabs} fillTabWidth fillContainerHeight let:activeTab>
-    {#if activeTab.id === 'inspect-exploration'}
+  <TabContainer
+    tabs={$tabs}
+    bind:activeTab={$activeTab}
+    fillTabWidth
+    fillContainerHeight
+  >
+    {#if $activeTab?.id === 'inspect-exploration'}
       <ExplorationTab
         {queryHandler}
         name={$query.name}
         description={$query.description}
         on:delete
       />
-    {:else if activeTab.id === 'inspect-column'}
+    {:else if $activeTab?.id === 'inspect-column'}
       <ColumnTab {queryHandler} />
-    {:else}
-      <CellTab />
+    {:else if $activeTab?.id === 'inspect-cell'}
+      <CellTab {queryHandler} />
     {/if}
   </TabContainer>
 </aside>
 
 <style lang="scss">
-  aside.exploration-inspector {
+  .exploration-inspector {
     width: var(--exploration-inspector-width);
     flex-basis: var(--exploration-inspector-width);
     border-left: 1px solid var(--slate-300);

@@ -45,7 +45,7 @@
     <div class="exploration-page">
       <Header bind:isInspectorOpen {query} {database} {schema} />
       <div class="content">
-        <ExplorationResult {queryRunner} />
+        <ExplorationResult {queryRunner} isExplorationPage />
         {#if isInspectorOpen}
           <ExplorationInspector
             queryHandler={queryRunner}
