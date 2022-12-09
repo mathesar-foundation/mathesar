@@ -1,10 +1,13 @@
 import json
 from django_filters import rest_framework as filters
+from rest_access_policy import AccessViewSetMixin
 
 from rest_framework import viewsets
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
+
+from mathesar.api.db.permissions.query import QueryAccessPolicy
 from mathesar.api.dj_filters import UIQueryFilter
 
 from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess, DeletedColumnAccessAPIException
@@ -15,6 +18,7 @@ from mathesar.models.query import UIQuery
 
 
 class QueryViewSet(
+        AccessViewSetMixin,
         CreateModelMixin,
         UpdateModelMixin,
         RetrieveModelMixin,
@@ -26,9 +30,10 @@ class QueryViewSet(
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = UIQueryFilter
+    access_policy = QueryAccessPolicy
 
     def get_queryset(self):
-        queryset = UIQuery.objects.all()
+        queryset = self.access_policy.scope_queryset(self.request, UIQuery.objects.all())
         schema_id = self.request.query_params.get('schema')
         if schema_id:
             queryset = queryset.filter(base_table__schema=schema_id)
@@ -91,7 +96,7 @@ class QueryViewSet(
         params = request.data.pop("parameters", {})
         request.GET |= {k: [json.dumps(v)] for k, v in params.items()}
         paginator = TableLimitOffsetPagination()
-        input_serializer = BaseQuerySerializer(data=request.data)
+        input_serializer = BaseQuerySerializer(data=request.data, context={'request': request})
         input_serializer.is_valid(raise_exception=True)
         query = UIQuery(**input_serializer.validated_data)
         try:

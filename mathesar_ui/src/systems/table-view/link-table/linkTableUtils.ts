@@ -1,4 +1,4 @@
-import type { LinkType } from '@mathesar/api/links';
+import type { LinkType } from '@mathesar/api/types/links';
 import { getAvailableName } from '@mathesar/utils/db';
 
 /**

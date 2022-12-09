@@ -22,6 +22,7 @@
   export let locale: $$Props['locale'];
   export let allowFloat: $$Props['allowFloat'];
   export let horizontalAlignment: HorizontalAlignment = 'right';
+  export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   $: formatterOptions = {
     locale,
@@ -53,6 +54,7 @@
   {isActive}
   {isSelectedInRange}
   {disabled}
+  {isIndependentOfSheet}
   {formatValue}
   {horizontalAlignment}
   let:handleInputBlur

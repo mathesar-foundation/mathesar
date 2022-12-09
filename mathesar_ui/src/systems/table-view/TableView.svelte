@@ -15,9 +15,11 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  export let usesVirtualList = false;
-  export let allowsDdlOperations = false;
+  export let context: 'page' | 'widget' = 'page';
 
+  $: usesVirtualList = context === 'page';
+  $: allowsDdlOperations = context === 'page';
+  $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection } = $tabularData);
   $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
@@ -80,6 +82,7 @@
           getColumnIdentifier={(entry) => entry.column.id}
           {usesVirtualList}
           {columnWidths}
+          hasBorder={sheetHasBorder}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
         >
@@ -92,7 +95,7 @@
       <TableInspector />
     {/if}
   </div>
-  <StatusPane />
+  <StatusPane {context} />
 </div>
 
 <style>

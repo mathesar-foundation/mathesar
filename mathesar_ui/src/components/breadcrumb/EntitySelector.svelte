@@ -4,7 +4,7 @@
     currentTableId,
     tables as tablesStore,
   } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import {
     getTablePageUrl,
     getExplorationPageUrl,
@@ -12,7 +12,7 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import { queries as queriesStore } from '@mathesar/stores/queries';
-  import type { QueryInstance } from '@mathesar/api/queries';
+  import type { QueryInstance } from '@mathesar/api/types/queries';
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type {
     BreadcrumbSelectorEntry,

@@ -5,9 +5,17 @@ import {
   EventHandler,
   WritableSet,
 } from '@mathesar-component-library';
-import type { Column } from '@mathesar/api/tables/columns';
-import type { PaginatedResponse, RequestStatus } from '@mathesar/utils/api';
-import { deleteAPI, getAPI, patchAPI, postAPI } from '@mathesar/utils/api';
+import type { Column } from '@mathesar/api/types/tables/columns';
+import type {
+  PaginatedResponse,
+  RequestStatus,
+} from '@mathesar/api/utils/requestUtils';
+import {
+  deleteAPI,
+  getAPI,
+  patchAPI,
+  postAPI,
+} from '@mathesar/api/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 
 function api(url: string) {

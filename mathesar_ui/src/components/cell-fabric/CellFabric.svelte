@@ -20,6 +20,7 @@
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
   export let searchValue: unknown | undefined = undefined;
   export let isProcessing = false;
+  export let isIndependentOfSheet = false;
 
   $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
@@ -30,6 +31,7 @@
   class="cell-fabric"
   data-column-identifier={columnFabric.id}
   class:show-as-skeleton={showAsSkeleton}
+  class:is-independent={isIndependentOfSheet}
 >
   <svelte:component
     this={component}
@@ -37,6 +39,7 @@
     {isActive}
     {isSelectedInRange}
     {disabled}
+    {isIndependentOfSheet}
     {horizontalAlignment}
     {recordSummary}
     {setRecordSummary}
@@ -56,15 +59,21 @@
 
 <style lang="scss">
   .cell-fabric {
-    --cell-height: 29px;
     position: relative;
     display: flex;
     flex: 1 1 auto;
-    min-height: var(--cell-height);
     align-items: center;
     width: 100%;
-    --cell-padding: 0.5rem;
     isolation: isolate;
+
+    &:not(.is-independent) {
+      --cell-height: 29px;
+      --cell-padding: 0.5rem;
+      min-height: var(--cell-height);
+    }
+    &.is-independent {
+      --cell-padding: 0rem;
+    }
   }
   .loader {
     top: 0;
