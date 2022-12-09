@@ -43,8 +43,7 @@ class TypeOptionSerializer(MathesarErrorMessageMixin, serializers.Serializer):
         precision = attrs.get('precision', None)
         if (
             db_type == PostgresType.NUMERIC
-            and (scale is None and precision is not None)
-            or (scale is not None and precision is None)
+            and (scale is None) != (precision is None)
         ):
             raise database_api_exceptions.InvalidTypeOptionAPIException(
                 InvalidTypeOptionError,
