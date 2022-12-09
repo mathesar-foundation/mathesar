@@ -14,13 +14,11 @@ def test_function_list_well_formed(client, test_db_model):
         assert hints is None or isinstance(hints, list)
 
 
-def test_filter_list_permissions(FUN_create_dj_db, get_uid, client_bob, client_alice, user_bob, user_alice):
+def test_function_list_permissions(FUN_create_dj_db, get_uid, client_bob, client_alice, user_bob, user_alice):
     database = FUN_create_dj_db(get_uid())
     DatabaseRole.objects.create(user=user_bob, database=database, role='viewer')
     response = client_bob.get(f'/api/db/v0/databases/{database.id}/functions/')
-    response_data = response.json()
     assert response.status_code == 200
-    assert len(response_data) == len(database.supported_ui_types)
 
     response = client_alice.get(f'/api/db/v0/databases/{database.id}/functions/')
     assert response.status_code == 404
