@@ -1,6 +1,8 @@
 import time
 import warnings
 
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from sqlalchemy.exc import InterfaceError
 
 
@@ -18,3 +20,16 @@ class CursorClosedHandlerMiddleware:
             time.sleep(1)
             response = self.get_response(request)
             return response
+
+
+class PasswordChangeNeededMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        redirect_to_password_change = request.user.is_authenticated and request.user.password_change_needed
+
+        if redirect_to_password_change and request.path != reverse('password_reset_confirm'):
+            return HttpResponseRedirect(reverse('password_reset_confirm'))
+        response = self.get_response(request)
+        return response
