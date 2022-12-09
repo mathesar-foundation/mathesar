@@ -62,9 +62,9 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def validate_old_password(self, value):
         user = self.context['request'].user
-        if user.check_password(value) is False:
-            raise IncorrectOldPassword(field='old_password')
-        return value
+        if user.check_password(value) is True:
+            return value
+        raise IncorrectOldPassword(field='old_password')
 
     def update(self, instance, validated_data):
         instance.set_password(validated_data['password'])
