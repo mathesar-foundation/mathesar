@@ -49,7 +49,7 @@ class ErrorCodes(Enum):
     InvalidDateError = 4413
     InvalidDateFormatError = 4414
     InvalidLinkChoice = 4409
-    InvalidTableName = 4419
+    InvalidTableName = 4420
     IncompatibleFractionDigitValues = 4410
     UnsupportedConstraint = 4411
     ConstraintColumnEmpty = 4412
