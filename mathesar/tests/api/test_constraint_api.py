@@ -303,7 +303,11 @@ def test_create_single_column_foreign_key_constraint(two_foreign_key_tables, cli
     )
 
 
-def test_create_foreign_key_constraint_on_invalid_table_name(create_base_table, create_referent_table, client):
+def test_foreign_key_constraint_on_invalid_table_name(
+    create_base_table,
+    create_referent_table,
+    client
+):
     referrer_table = create_base_table(table_name="Base_table")
     # Having round brackets in the referent_table name is invalid.
     referent_table = create_referent_table(table_name="Referent_table(alpha)")
@@ -322,7 +326,8 @@ def test_create_foreign_key_constraint_on_invalid_table_name(create_base_table, 
     response_data = response.json()[0]
     assert response.status_code == 400
     assert response_data['code'] == ErrorCodes.InvalidTableName.value
-    assert response_data['message'] == 'Referent table name "Referent_table(alpha)" is invalid.'
+    assert response_data['message'] == 'Table name "Referent_table(alpha)" is invalid.'
+    assert response_data['field'] == 'referent_table'
 
 
 def test_create_single_column_foreign_key_constraint_with_options(

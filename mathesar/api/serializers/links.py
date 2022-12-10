@@ -114,7 +114,6 @@ class LinksMappingSerializer(
     }
     link_type = serializers.CharField(required=True)
 
-
     def get_mapping_field(self, data):
         link_type = data.get('link_type', None)
         if link_type is None:
