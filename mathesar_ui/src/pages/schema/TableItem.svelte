@@ -7,7 +7,6 @@
   } from '@mathesar/routes/urls';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import {
-    Button,
     DropdownMenu,
     ButtonMenuItem,
     MenuDivider,
@@ -65,50 +64,54 @@
   );
 </script>
 
-<div class="{tablecardIsHovered ? 'container linkIsHovered' : 'container'}">
-  <a on:mouseenter={handleLinkHover} on:mouseleave={handleLinkUnHover} class = "table-card-link" aria-label = {table.name} href={getGoToTableLink()}>
-  <div class="table-item-header">
-    <div class="name-and-description">
-      <div class="name"><TableName {table} /></div>
-    </div>
-    <DropdownMenu
-      showArrow={false}
-      triggerAppearance="plain"
-      closeOnInnerClick={true}
-      label=""
-      icon={iconShowMore}
-    >
-      <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
-        Edit Table
-      </ButtonMenuItem>
-      <MenuDivider />
-      <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
-        Explore Table
-      </LinkMenuItem>
-      <MenuDivider />
-      <ButtonMenuItem
-        on:click={handleDeleteTable}
-        danger
-        icon={iconDeleteMajor}
+<div class={tablecardIsHovered ? 'container linkIsHovered' : 'container'}>
+  <a
+    on:mouseenter={handleLinkHover}
+    on:mouseleave={handleLinkUnHover}
+    class="table-card-link"
+    aria-label={table.name}
+    href={getGoToTableLink()}
+  >
+    <div class="table-item-header">
+      <div class="name-and-description">
+        <div class="name"><TableName {table} /></div>
+      </div>
+      <DropdownMenu
+        showArrow={false}
+        triggerAppearance="plain"
+        closeOnInnerClick={true}
+        label=""
+        icon={iconShowMore}
       >
-        Delete Table
-      </ButtonMenuItem>
-    </DropdownMenu>
-    <EditTable modalController={editTableModalController} {table} />
-  </div>
-  <div class="actions">
-    <p class="action passthrough action-link">
-      Go to Table
-    </p>
-    <a
-      on:click={() =>
-        recordSelector.navigateToRecordPage({ tableId: table.id })}
-      class="action"
-    >
-      Find Record
-      </a>
-  </div>
- </a>
+        <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
+          Edit Table
+        </ButtonMenuItem>
+        <MenuDivider />
+        <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
+          Explore Table
+        </LinkMenuItem>
+        <MenuDivider />
+        <ButtonMenuItem
+          on:click={handleDeleteTable}
+          danger
+          icon={iconDeleteMajor}
+        >
+          Delete Table
+        </ButtonMenuItem>
+      </DropdownMenu>
+      <EditTable modalController={editTableModalController} {table} />
+    </div>
+    <div class="actions">
+      <p class="action passthrough action-link">Go to Table</p>
+      <p
+        on:click={() =>
+          recordSelector.navigateToRecordPage({ tableId: table.id })}
+        class="action passthrough action-link"
+      >
+        Find Record
+      </p>
+    </div>
+  </a>
 </div>
 
 <style lang="scss">
@@ -124,17 +127,16 @@
       margin-top: 1rem;
     }
   }
-  .container.linkIsHovered{
+  .container.linkIsHovered {
     background-color: var(--slate-100);
-    cursor: pointer; 
+    cursor: pointer;
   }
 
-  .table-card-link{
+  .table-card-link {
     position: absolute;
     text-decoration: none;
     color: black;
   }
-
 
   .table-item-header {
     display: flex;
