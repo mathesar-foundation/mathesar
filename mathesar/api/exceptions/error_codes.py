@@ -56,3 +56,4 @@ class ErrorCodes(Enum):
     InvalidValueType = 4415
     DictHasBadKeys = 4416
     DeletedColumnAccess = 4418
+    IncorrectOldPassword = 4419

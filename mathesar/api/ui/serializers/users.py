@@ -5,6 +5,7 @@ from rest_framework import serializers
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.db.permissions.schema import SchemaAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.api.exceptions.validation_exceptions.exceptions import IncorrectOldPassword
 from mathesar.api.ui.permissions.users import UserAccessPolicy
 from mathesar.models.base import Database, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
@@ -50,9 +51,26 @@ class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.Mo
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = User(**validated_data)
+        user.password_change_needed = True
         user.set_password(password)
         user.save()
         return user
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    old_password = serializers.CharField(write_only=True, required=True)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if user.check_password(value) is True:
+            return value
+        raise IncorrectOldPassword(field='old_password')
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
 
 
 class PasswordResetSerializer(MathesarErrorMessageMixin, serializers.Serializer):
