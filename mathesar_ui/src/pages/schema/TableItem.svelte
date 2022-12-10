@@ -30,6 +30,8 @@
   export let database: Database;
   export let schema: SchemaEntry;
 
+  let tablecardIsHovered = false;
+
   function getGoToTableLink() {
     return isTableImportConfirmationRequired(table)
       ? getImportPreviewPageUrl(database.name, schema.id, table.id)
@@ -49,6 +51,12 @@
   function handleEditTable() {
     editTableModalController.open();
   }
+  function handleLinkHover() {
+    tablecardIsHovered = true;
+  }
+  function handleLinkUnHover() {
+    tablecardIsHovered = false;
+  }
 
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
     database.name,
@@ -57,7 +65,8 @@
   );
 </script>
 
-<div class="container">
+<div class="{tablecardIsHovered ? 'container linkIsHovered' : 'container'}">
+  <a on:mouseenter={handleLinkHover} on:mouseleave={handleLinkUnHover} class = "table-card-link" aria-label = {table.name} href={getGoToTableLink()}>
   <div class="table-item-header">
     <div class="name-and-description">
       <div class="name"><TableName {table} /></div>
@@ -88,18 +97,18 @@
     <EditTable modalController={editTableModalController} {table} />
   </div>
   <div class="actions">
-    <a class="action passthrough action-link" href={getGoToTableLink()}>
+    <p class="action passthrough action-link">
       Go to Table
-    </a>
-    <Button
+    </p>
+    <a
       on:click={() =>
         recordSelector.navigateToRecordPage({ tableId: table.id })}
-      appearance="ghost"
       class="action"
     >
       Find Record
-    </Button>
+      </a>
   </div>
+ </a>
 </div>
 
 <style lang="scss">
@@ -115,6 +124,17 @@
       margin-top: 1rem;
     }
   }
+  .container.linkIsHovered{
+    background-color: var(--slate-100);
+    cursor: pointer; 
+  }
+
+  .table-card-link{
+    position: absolute;
+    text-decoration: none;
+    color: black;
+  }
+
 
   .table-item-header {
     display: flex;
@@ -151,7 +171,7 @@
       flex: 1;
       padding: 0.75rem;
       justify-content: center;
-
+      position: relative;
       &:first-child {
         border-right: 1px solid var(--sand-200);
         border-bottom-left-radius: var(--border-radius-l);
