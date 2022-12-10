@@ -150,8 +150,14 @@ class ConstraintSerializer(
     def run_validation(self, data):
         if referent_table := data.get('referent_table', None):
             referent_table_name = Table.current_objects.get(id=referent_table).name
-            if referent_table_name.find('(') != -1 and referent_table_name.find(')') != -1:
-                raise InvalidTableName(referent_table_name)
+            if any(
+                invalid_char in referent_table_name
+                for invalid_char in ('(', ')')
+            ):
+                raise InvalidTableName(
+                    referent_table_name,
+                    field='referent_table'
+                )
         constraint_type = data.get('type', None)
         if constraint_type not in self.serializers_mapping.keys():
             raise UnsupportedConstraintAPIException(constraint_type=constraint_type)

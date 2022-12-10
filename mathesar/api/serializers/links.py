@@ -27,9 +27,14 @@ class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     def validate(self, attrs):
         if referent_table := attrs.get('referent_table', None):
             referent_table_name = referent_table.name
-            print(referent_table_name)
-            if referent_table_name.find('(') and referent_table_name.find(')') != -1:
-                raise InvalidTableName(referent_table_name)
+            if any(
+                invalid_char in referent_table_name
+                for invalid_char in ('(', ')')
+            ):
+                raise InvalidTableName(
+                    referent_table_name,
+                    field='referent_table'
+                )
         return super(OneToOneSerializer, self).validate(attrs)
 
     def create(self, validated_data):
@@ -62,12 +67,22 @@ class ManyToManySerializer(MathesarErrorMessageMixin, serializers.Serializer):
     mapping_table_name = serializers.CharField()
     link_type = serializers.CharField(default="many-to-many")
 
-    def run_validation(self, data):
-        if referent_table := data.get('referent_table', None):
-            referent_table_name = Table.current_objects.get(id=referent_table).name
-            if referent_table_name.find('(') and referent_table_name.find(')') != -1:
-                raise InvalidTableName(referent_table_name)
-        return super(ManyToManySerializer, self).run_validation(data)
+    def validate(self, attrs):
+        if referents := attrs.get('referents', None):
+            referent_tables = (
+                referent_table.get('referent_table').name
+                for referent_table in referents
+            )
+            for referent_table_name in referent_tables:
+                if any(
+                    invalid_char in referent_table_name
+                    for invalid_char in ('(', ')')
+                ):
+                    raise InvalidTableName(
+                        referent_table_name,
+                        field='referents'
+                    )
+        return super(ManyToManySerializer, self).validate(attrs)
 
     def create(self, validated_data):
         referents = validated_data['referents']
