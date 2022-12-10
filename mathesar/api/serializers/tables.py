@@ -179,7 +179,10 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     def validate(self, data):
         if self.partial:
             if table_name := data.get('name', None):
-                if table_name.find('(') and table_name.find(')') != -1:
+                if any(
+                    invalid_char in table_name
+                    for invalid_char in ('(', ')')
+                ):
                     raise InvalidTableName(table_name)
             columns = data.get('columns', None)
             if columns is not None:
