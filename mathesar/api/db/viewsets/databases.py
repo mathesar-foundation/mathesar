@@ -1,9 +1,11 @@
 from django_filters import rest_framework as filters
+from rest_access_policy import AccessViewSetMixin
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
+from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.models.base import Database
 from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
@@ -17,14 +19,18 @@ from db.types.base import get_available_known_db_types
 from mathesar.api.serializers.db_types import DBTypeSerializer
 
 
-class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DatabaseFilter
+    access_policy = DatabaseAccessPolicy
 
     def get_queryset(self):
-        return Database.objects.all().order_by('-created_at')
+        return self.access_policy.scope_queryset(
+            self.request,
+            Database.objects.all().order_by('-created_at')
+        )
 
     @action(methods=['get'], detail=True)
     def functions(self, request, pk=None):
