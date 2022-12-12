@@ -4,14 +4,14 @@ from rest_access_policy import AccessPolicy
 from mathesar.models.users import Role
 
 
-class DatabaseAccessPolicy(AccessPolicy):
+class UIDatabaseAccessPolicy(AccessPolicy):
     """
     Anyone can view Database objects and
-    Database properties like types and functions if they have a Viewer access
+    Database properties like types and filters if they have a Viewer access
     """
     statements = [
         {
-            'action': ['list', 'retrieve', 'types', 'functions'],
+            'action': ['list', 'retrieve', 'types', 'functions', 'filters'],
             'principal': '*',
             'effect': 'allow',
         }
