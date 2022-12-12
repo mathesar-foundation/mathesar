@@ -134,3 +134,15 @@ class DictHasBadKeys(MathesarValidationException):
         if message is None:
             message = "Dictionary's keys are invalid or obligatory keys are missing."
         super().__init__(None, self.error_code, message, field, None)
+
+
+class IncorrectOldPassword(MathesarValidationException):
+    error_code = ErrorCodes.IncorrectOldPassword.value
+
+    def __init__(
+            self,
+
+            field=None,
+    ):
+        message = "Old password is not correct"
+        super().__init__(None, self.error_code, message, field, None)
