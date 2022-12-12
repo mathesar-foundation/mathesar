@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { FileUpload as FileUploadComponent } from '@mathesar/component-library';
+  import { FileUpload as FileUploadComponent } from '@mathesar-component-library';
   import type {
     FileUpload,
     FileUploadAddDetail,
@@ -61,7 +61,9 @@
     fileProgress={fileUploadProgress}
     on:add={(e) => uploadNewFile(e.detail)}
   />
-  <div class="help-content">
-    The file must be in tabular format (CSV, TSV etc.)
-  </div>
+  {#if !uploadProgress}
+    <div class="help-content">
+      The file must be in tabular format (CSV, TSV etc.)
+    </div>
+  {/if}
 </div>

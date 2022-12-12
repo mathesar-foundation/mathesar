@@ -83,9 +83,11 @@
     <div class="files">
       {#each fileUploads as upload (upload.fileId)}
         <div class="file">
-          <Icon {...iconFile} />
           <div class="file-info">
-            <div class="name">{upload.file.name}</div>
+            <div class="file-name">
+              <Icon {...iconFile} />
+              <span>{upload.file.name}</span>
+            </div>
             <Progress
               percentage={Math.round(fileProgress?.[upload.fileId] ?? 0)}
             />

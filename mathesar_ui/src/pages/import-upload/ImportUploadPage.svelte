@@ -7,6 +7,7 @@
     RadioGroup,
     Spinner,
     iconUploadFile,
+    Alert,
   } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
@@ -81,21 +82,32 @@
 >
   <h2>Create a table by importing your data</h2>
   <div class="import-file-view">
-    <div class="upload-method-input">
-      <RadioGroup
-        bind:value={uploadMethod}
-        options={uploadMethods}
-        isInline
-        label="How would you like to import your data?"
-        getRadioLabel={(opt) => ({
-          component: NameWithIcon,
-          props: {
-            name: opt.label,
-            icon: opt.icon,
-          },
-        })}
-      />
-    </div>
+    {#if isLoading}
+      <div class="uploading-info">
+        <span>Uploading Data</span>
+        <Alert appearance="warning">
+          Large data sets can sometimes take several minutes to process. Please
+          do not leave this page or close the browser tab while import is in
+          progress.
+        </Alert>
+      </div>
+    {:else}
+      <div class="upload-method-input">
+        <RadioGroup
+          bind:value={uploadMethod}
+          options={uploadMethods}
+          isInline
+          label="How would you like to import your data?"
+          getRadioLabel={(opt) => ({
+            component: NameWithIcon,
+            props: {
+              name: opt.label,
+              icon: opt.icon,
+            },
+          })}
+        />
+      </div>
+    {/if}
 
     <div class="upload-section">
       <svelte:component
@@ -116,12 +128,6 @@
 
     {#if isLoading}
       <div class="help-content bounded">
-        Large data sets can sometimes take several minutes to process.
-        <strong>
-          Please do not leave this page or close the browser tab while import is
-          in progress.
-        </strong>
-
         <div>
           {#each statusInfo as info (info)}
             {#if info.status?.state}
@@ -167,6 +173,16 @@
       :global(.option) {
         padding: 0.8rem 0;
         margin-right: 0.5rem;
+      }
+    }
+    .uploading-info {
+      span {
+        display: block;
+        font-size: var(--text-size-large);
+        margin-bottom: var(--size-large);
+      }
+      :global(.alert-container) {
+        font-size: var(--text-size-small);
       }
     }
 
