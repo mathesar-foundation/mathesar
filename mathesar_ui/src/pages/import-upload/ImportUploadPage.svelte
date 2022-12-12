@@ -8,6 +8,7 @@
     iconUploadFile,
     Alert,
   } from '@mathesar-component-library';
+  import StatusIndicator from '@mathesar/components/StatusIndicator.svelte';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconUrl, iconPaste } from '@mathesar/icons';
@@ -133,17 +134,25 @@
           uploadStatus = undefined;
           tableCreationProgress = undefined;
         }}
+        hideAllActions={tableCreationProgress?.state === 'processing'}
       >
-        <svelte:fragment slot="errors">
-          {#if errorMessage}
-            <div class="errors">
-              <Alert appearance="error">
-                <h>Failed to import data</h>
-                <span>{errorMessage}</span>
-              </Alert>
-            </div>
-          {/if}
-        </svelte:fragment>
+        {#if tableCreationProgress?.state === 'processing'}
+          <div class="preview-status">
+            <StatusIndicator
+              state="processing"
+              messages={{ processing: 'Preparing Preview' }}
+            />
+          </div>
+        {/if}
+
+        {#if errorMessage}
+          <div class="errors">
+            <Alert appearance="error">
+              <span class="title">Failed to import data</span>
+              <span>{errorMessage}</span>
+            </Alert>
+          </div>
+        {/if}
       </svelte:component>
     </div>
   </div>
@@ -209,8 +218,19 @@
       }
     }
 
-    .errors {
+    .errors,
+    .preview-status {
       margin-top: var(--size-large);
+    }
+    .errors {
+      :global(.alert-container) {
+        max-width: 100%;
+      }
+      .title {
+        display: block;
+        margin-bottom: var(--size-ultra-small);
+        font-size: var(--size-large);
+      }
     }
   }
 </style>

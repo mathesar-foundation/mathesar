@@ -12,6 +12,7 @@
   const dispatch = createEventDispatcher<UploadEvents>();
   export let isLoading: boolean;
   export let showCancelButton: boolean;
+  export let hideAllActions = false;
 
   let url: string;
 
@@ -39,18 +40,20 @@
   The data must be in tabular format (CSV, TSV etc.)
 </div>
 
-<slot name="errors" />
+<slot />
 
-<div class="buttons">
-  {#if showCancelButton}
-    <Button appearance="secondary" on:click={() => dispatch('cancel')}>
-      Cancel
-    </Button>
-  {/if}
-  <SpinnerButton
-    onClick={importFromURL}
-    label="Continue"
-    disabled={!url || isLoading}
-    class="continue-action"
-  />
-</div>
+{#if !hideAllActions}
+  <div class="buttons">
+    {#if showCancelButton}
+      <Button appearance="secondary" on:click={() => dispatch('cancel')}>
+        Cancel
+      </Button>
+    {/if}
+    <SpinnerButton
+      onClick={importFromURL}
+      label="Continue"
+      disabled={!url || isLoading}
+      class="continue-action"
+    />
+  </div>
+{/if}

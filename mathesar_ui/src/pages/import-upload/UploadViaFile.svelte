@@ -16,6 +16,7 @@
 
   export let isLoading: boolean;
   export let showCancelButton: boolean;
+  export let hideAllActions = false;
 
   let uploads: FileUpload[] | undefined;
   let uploadProgress: UploadCompletionOpts | undefined;
@@ -75,9 +76,9 @@
   {/if}
 </div>
 
-<slot name="errors" />
+<slot />
 
-{#if showCancelButton}
+{#if !hideAllActions && showCancelButton}
   <div class="buttons">
     <Button appearance="secondary" on:click={() => dispatch('cancel')}>
       Cancel
