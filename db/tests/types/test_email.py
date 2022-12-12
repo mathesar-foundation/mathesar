@@ -103,6 +103,20 @@ def test_create_email_type_domain_checks_broken_emails(engine_with_schema):
             )
         assert type(e.orig) == CheckViolation
 
+def test_create_email_type_domain_returns_correct_error_broken_emails(engine_with_schema):  
+    engine, _ = engine_with_schema
+    address_incorrect = "notanemailaddress"  
+    with pytest.raises(IntegrityError) as e:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    f"SELECT '{address_incorrect}'::{email.DB_TYPE};"
+                )
+            )
+        assert type(e.orig) == CheckViolation
+        assert address_incorrect + "is not a valid email address" in str(e.value)
+
+
 
 @pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
     (EmailDomainContains, "mail", 588),
