@@ -1,10 +1,16 @@
 <script lang="ts">
   import { router } from 'tinro';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import { RadioGroup, Spinner } from '@mathesar-component-library';
+  import {
+    RadioGroup,
+    Spinner,
+    iconUploadFile,
+  } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { iconUrl, iconPaste } from '@mathesar/icons';
   import { createTable } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import UploadViaFile from './UploadViaFile.svelte';
@@ -15,9 +21,17 @@
   export let schema: SchemaEntry;
 
   const uploadMethods = [
-    { label: 'Upload a file', component: UploadViaFile },
-    { label: 'Provide a URL to the file', component: UploadViaUrl },
-    { label: 'Copy and Paste Text', component: UploadViaClipboard },
+    { label: 'Upload a file', component: UploadViaFile, icon: iconUploadFile },
+    {
+      label: 'Provide a URL to the file',
+      component: UploadViaUrl,
+      icon: iconUrl,
+    },
+    {
+      label: 'Copy and Paste Text',
+      component: UploadViaClipboard,
+      icon: iconPaste,
+    },
   ];
   let uploadMethod = uploadMethods[0];
 
@@ -73,6 +87,13 @@
         options={uploadMethods}
         isInline
         label="How would you like to import your data?"
+        getRadioLabel={(opt) => ({
+          component: NameWithIcon,
+          props: {
+            name: opt.label,
+            icon: opt.icon,
+          },
+        })}
       />
     </div>
 
@@ -124,7 +145,7 @@
 
 <style lang="scss">
   h2 {
-    font-weight: 400;
+    font-weight: 500;
     font-size: var(--size-super-ultra-large);
   }
 
@@ -136,6 +157,13 @@
     margin-bottom: 2rem;
 
     .upload-method-input {
+      font-size: var(--text-size-large);
+      --spacing-x: 0.5em;
+
+      :global(legend) {
+        font-weight: 500;
+      }
+
       :global(.option) {
         padding: 0.8rem 0;
         margin-right: 0.5rem;
