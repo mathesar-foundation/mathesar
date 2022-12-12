@@ -88,14 +88,14 @@
   <div class="actions">
     {#if isTableImportConfirmationNeeded}
       <a
-        class="action passthrough action-link"
+        class="btn btn-plain size-medium action action-link"
         href={getImportPreviewPageUrl(database.name, schema.id, table.id)}
       >
         Confirm Imported Data
       </a>
     {:else}
       <a
-        class="action passthrough action-link"
+        class="btn btn-plain size-medium action action-link"
         href={getTablePageUrl(database.name, schema.id, table.id)}
       >
         Go to Table
@@ -103,7 +103,7 @@
       <Button
         on:click={() =>
           recordSelector.navigateToRecordPage({ tableId: table.id })}
-        appearance="ghost"
+        appearance="plain"
         class="action"
       >
         Find Record
