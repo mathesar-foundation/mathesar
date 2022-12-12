@@ -5,6 +5,7 @@
   border-radius: var(--border-radius-m);
   max-width: max-content;
   margin: var(--alert-margin);
+  border: 1px solid;
 
   > svg {
     // This helps to vertically align the icon with the first line of text.
@@ -22,14 +23,17 @@
 
   &.alert-info {
     background-color: var(--sky-200);
+    border-color: var(--sky-500);
   }
   &.alert-warning {
     background-color: var(--yellow-100);
+    border-color: var(--yellow-200);
   }
   &.alert-error {
-    background-color: var(--danger-background-color);
+    background-color: var(--red-100);
+    border-color: var(--red-500);
     .icon {
-      color: var(--danger-color);
+      color: var(--red-500);
     }
   }
 }
