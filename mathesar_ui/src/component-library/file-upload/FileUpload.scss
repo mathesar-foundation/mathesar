@@ -34,16 +34,15 @@
         }
 
         > .progress {
-          height: 10px;
-          border-radius: 4px;
-          margin-top: 7px;
-          margin-bottom: 5px;
+          height: var(--size-xx-small);
+          border-radius: var(--size-super-ultra-small);
+          margin: var(--size-xx-small) 0;
         }
 
         > .upload-info {
-          font-size: 0.8em;
           display: flex;
           justify-content: space-between;
+          color: var(--slate-500);
         }
       }
     }
@@ -90,18 +89,19 @@
 
     &:focus,
     &:hover {
-      background: var(--slate-100);
+      background: var(--slate-50-tentative);
     }
 
     &:active,
     &.in {
-      background: var(--slate-200);
+      background: var(--slate-100);
     }
   }
 
-  &.inprogress {
+  &.disabled {
     .file-upload-trigger {
-      margin-left: 8px;
+      pointer-events: none;
+      cursor: not-allowed;
     }
   }
 }

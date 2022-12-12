@@ -23,6 +23,7 @@
     undefined;
   export let multiple = false;
   export let fileUploads: FileUpload[] | undefined = undefined;
+  export let disabled = false;
 
   let fileId = 0;
   let state = 'idle';
@@ -57,19 +58,21 @@
   }
 
   function onFileDrop(event: DragEvent) {
-    const fileList = event.dataTransfer?.files;
-    if (!fileList) {
-      return;
-    }
-    if (multiple) {
-      processFiles(event, fileList);
-    } else {
-      processFiles(event, [fileList[0]]);
+    if (!disabled) {
+      const fileList = event.dataTransfer?.files;
+      if (!fileList) {
+        return;
+      }
+      if (multiple) {
+        processFiles(event, fileList);
+      } else {
+        processFiles(event, [fileList[0]]);
+      }
     }
   }
 
   function checkAndOpen(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
+    if (!disabled && event.key === 'Enter') {
       (event.target as HTMLElement).click();
     }
   }
@@ -77,6 +80,7 @@
 
 <div
   class="file-upload"
+  class:disabled
   class:inprogress={fileUploads && fileUploads.length > 0}
 >
   {#if fileUploads && fileUploads.length > 0}
