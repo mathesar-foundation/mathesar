@@ -251,7 +251,7 @@ def uris_table_obj(engine_with_uris, uris_table_name):
             engine,
             conn,
             uri_type,
-            metadata = metadata
+            metadata=metadata,
         )
     yield table, engine
 

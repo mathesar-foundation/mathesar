@@ -1,10 +1,8 @@
 import pytest
 
-from sqlalchemy.dialects.postgresql import array_agg
-from sqlalchemy import column, cast, select, TEXT
+from sqlalchemy import select
 
 from db.functions.base import ArrayAgg
-from db.functions.operations.apply import db_function_to_sa_expression
 from db.tables.operations.select import reflect_table
 from db.transforms.base import Summarize
 
@@ -24,7 +22,7 @@ def up_to_date_uris_table_obj(uris_table_obj):
 
 def test_custom_type_aggregation(up_to_date_uris_table_obj):
     """
-    Our custom types can break during array_agg (ArrayAgg) with output looking something like: 
+    Our custom types can break during array_agg (ArrayAgg) with output looking something like:
 
     `['{', 'h', 't', 't', 'p', ':', '/', '/', 's', 'o', ...]`
 
