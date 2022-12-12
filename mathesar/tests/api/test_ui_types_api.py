@@ -2,6 +2,7 @@ from mathesar.api.display_options import DISPLAY_OPTIONS_BY_UI_TYPE
 from mathesar.models.base import Database
 from mathesar.database.types import get_ui_type_from_id, UIType
 from db.types.base import PostgresType, MathesarCustomType
+from mathesar.models.users import DatabaseRole
 
 
 def test_type_list(client, test_db_name):
@@ -18,6 +19,18 @@ def test_type_list(client, test_db_name):
         assert ui_type is not None
         expected_display_options = DISPLAY_OPTIONS_BY_UI_TYPE.get(ui_type)
         assert found_display_options == expected_display_options
+
+
+def test_type_list_permissions(FUN_create_dj_db, get_uid, client_bob, client_alice, user_bob, user_alice):
+    database = FUN_create_dj_db(get_uid())
+    DatabaseRole.objects.create(user=user_bob, database=database, role='viewer')
+    response = client_bob.get(f'/api/ui/v0/databases/{database.id}/types/')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert len(response_data) == len(database.supported_ui_types)
+
+    response = client_alice.get(f'/api/ui/v0/databases/{database.id}/types/')
+    assert response.status_code == 404
 
 
 def test_database_types_installed(client, test_db_name):
