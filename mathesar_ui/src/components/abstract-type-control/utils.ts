@@ -6,7 +6,7 @@ import type {
   AbstractTypeDbConfig,
   AbstractTypeDisplayConfig,
 } from '@mathesar/stores/abstract-types/types';
-import type { Column } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import { readable } from 'svelte/store';
 import DurationConfiguration from './config-components/DurationConfiguration.svelte';
 

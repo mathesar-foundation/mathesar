@@ -4,7 +4,7 @@
  * endpoint: /api/db/v0/tables/<table_id>/joinable_tables/
  */
 
-import type { TableEntry } from '@mathesar/api/tables';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type { Column } from './columns';
 
 type ForeignKeyId = number;

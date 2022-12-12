@@ -1,7 +1,7 @@
 import type { FormValues } from '@mathesar-component-library/types';
 
 import type { DbType } from '@mathesar/AppTypes';
-import type { Column } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import { iconUiTypeText } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,

@@ -13,6 +13,7 @@ export interface CellTypeProps<Value> {
   disabled: boolean;
   searchValue?: unknown;
   isProcessing: boolean;
+  isIndependentOfSheet: boolean;
 }
 
 // Primary key

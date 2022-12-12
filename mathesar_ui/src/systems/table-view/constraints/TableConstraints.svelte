@@ -10,7 +10,7 @@
     type Constraint,
     type ConstraintsDataStore,
   } from '@mathesar/stores/table-data';
-  import { States } from '@mathesar/utils/api';
+  import { States } from '@mathesar/api/utils/requestUtils';
   import { modal } from '@mathesar/stores/modal';
   import {
     iconAddNew,

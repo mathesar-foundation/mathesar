@@ -1,5 +1,5 @@
 import { get } from 'svelte/store';
-import type { Field, FieldValue, ValuedField } from './field';
+import type { FieldStore, FieldValue, ValuedField } from './field';
 
 export type Valid = { type: 'valid' };
 export type Invalid = { type: 'invalid'; errorMsg: string };
@@ -94,14 +94,14 @@ export function max(
 
 interface ComboValidationOutcome {
   outcome: ValidationOutcome;
-  fields: Field[];
+  fields: FieldStore[];
 }
 
 export type ComboValidator = (
   valuedFields: ValuedField[],
 ) => ComboValidationOutcome;
 
-type FieldsTuple = [Field<unknown>, ...Array<Field<unknown>>];
+type FieldsTuple = [FieldStore<unknown>, ...Array<FieldStore<unknown>>];
 type ValuesTuple<Fields extends FieldsTuple> = {
   [K in keyof Fields]: FilledFieldValue<Fields[K]>;
 };

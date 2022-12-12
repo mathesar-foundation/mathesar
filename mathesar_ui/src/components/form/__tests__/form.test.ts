@@ -27,7 +27,7 @@ test('ReadableForm', async () => {
     age: undefined,
     beverage: undefined,
   });
-  expect(get(form).isDirty).toBe(false);
+  expect(get(form).hasChanges).toBe(false);
   expect(get(form).isValid).toBe(false);
 
   // Fill in some values that have the following problems:
@@ -44,14 +44,14 @@ test('ReadableForm', async () => {
   expect(get(name.errors)).toEqual([nameTakenMsg]);
   expect(get(age.errors)).toEqual([tooYoung]);
   expect(get(beverage.errors)).toEqual([]);
-  expect(get(form).isDirty).toBe(true);
+  expect(get(form).hasChanges).toBe(true);
 
   // Fix the form validation problems
   age.set(20);
   expect(get(age.errors)).toEqual([]);
   name.set('Lisa');
   expect(get(name.errors)).toEqual([]);
-  expect(get(form).isDirty).toBe(true);
+  expect(get(form).hasChanges).toBe(true);
   expect(get(form).isValid).toBe(true);
 
   // Change one field to a value that causes a combo validator to fail
