@@ -4,12 +4,14 @@
     SpinnerButton,
     TextInput,
     LabeledInput,
+    Button,
   } from '@mathesar/component-library';
   import { postAPI } from '@mathesar/api/utils/requestUtils';
   import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();
   export let isLoading: boolean;
+  export let showCancelButton: boolean;
 
   let url: string;
 
@@ -37,10 +39,18 @@
   The data must be in tabular format (CSV, TSV etc.)
 </div>
 
+<slot name="errors" />
+
 <div class="buttons">
+  {#if showCancelButton}
+    <Button appearance="secondary" on:click={() => dispatch('cancel')}>
+      Cancel
+    </Button>
+  {/if}
   <SpinnerButton
     onClick={importFromURL}
     label="Continue"
     disabled={!url || isLoading}
+    class="continue-action"
   />
 </div>

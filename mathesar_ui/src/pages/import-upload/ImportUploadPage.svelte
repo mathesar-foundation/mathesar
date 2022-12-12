@@ -5,7 +5,6 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import {
     RadioGroup,
-    Spinner,
     iconUploadFile,
     Alert,
   } from '@mathesar-component-library';
@@ -36,17 +35,24 @@
   ];
   let uploadMethod = uploadMethods[0];
 
-  let uploadStatus: RequestStatus;
-  let tableCreationProgress: RequestStatus;
+  let uploadStatus: RequestStatus | undefined;
+  let tableCreationProgress: RequestStatus | undefined;
 
   $: isLoading =
     uploadStatus?.state === 'processing' ||
     tableCreationProgress?.state === 'processing';
-
-  $: statusInfo = [
-    { label: 'Uploading data', status: uploadStatus },
-    { label: 'Preparing preview', status: tableCreationProgress },
-  ];
+  $: isError =
+    uploadStatus?.state === 'failure' ||
+    tableCreationProgress?.state === 'failure';
+  $: errorMessage = (() => {
+    if (uploadStatus?.state === 'failure') {
+      return uploadStatus.errors.join(',');
+    }
+    if (tableCreationProgress?.state === 'failure') {
+      return tableCreationProgress.errors.join(',');
+    }
+    return undefined;
+  })();
 
   async function createPreviewTable(uploadInfo: { dataFileId: number }) {
     uploadStatus = { state: 'success' };
@@ -58,14 +64,13 @@
       });
       router.goto(getImportPreviewPageUrl(database.name, schema.id, table.id));
     } catch (err) {
-      const errorMessage =
+      const message =
         err instanceof Error
           ? err.message
           : 'Unable to create a table from the uploaded data';
-      // Throw toast here?
       tableCreationProgress = {
         state: 'failure',
-        errors: [errorMessage],
+        errors: [message],
       };
     }
   }
@@ -82,7 +87,7 @@
 >
   <h2>Create a table by importing your data</h2>
   <div class="import-file-view">
-    {#if isLoading}
+    {#if isLoading || isError}
       <div class="uploading-info">
         <span>Uploading Data</span>
         <Alert appearance="warning">
@@ -123,29 +128,24 @@
             errors: [e.detail ?? 'Upload failed'],
           };
         }}
-      />
+        showCancelButton={isError}
+        on:cancel={() => {
+          uploadStatus = undefined;
+          tableCreationProgress = undefined;
+        }}
+      >
+        <svelte:fragment slot="errors">
+          {#if errorMessage}
+            <div class="errors">
+              <Alert appearance="error">
+                <h>Failed to import data</h>
+                <span>{errorMessage}</span>
+              </Alert>
+            </div>
+          {/if}
+        </svelte:fragment>
+      </svelte:component>
     </div>
-
-    {#if isLoading}
-      <div class="help-content bounded">
-        <div>
-          {#each statusInfo as info (info)}
-            {#if info.status?.state}
-              <div>
-                {info.label}:
-                {#if info.status?.state === 'processing'}
-                  <Spinner />
-                {:else if info.status?.state === 'success'}
-                  Success
-                {:else if info.status?.state === 'failure'}
-                  {info.status?.errors.join(', ')}
-                {/if}
-              </div>
-            {/if}
-          {/each}
-        </div>
-      </div>
-    {/if}
   </div>
 </LayoutWithHeader>
 
@@ -201,17 +201,16 @@
 
       :global(.buttons) {
         margin-top: 0.9rem;
-        text-align: right;
+        display: flex;
+        align-items: center;
+      }
+      :global(.buttons .continue-action) {
+        margin-left: auto;
       }
     }
 
-    .help-content.bounded {
-      border: 1px solid var(--color-gray-light);
-      background: var(--color-gray-lighter);
-      padding: 0.6rem 1rem;
-      line-height: 1.6;
-      margin-top: 2rem;
-      border-radius: 0.2rem;
+    .errors {
+      margin-top: var(--size-large);
     }
   }
 </style>

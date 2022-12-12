@@ -1,6 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { FileUpload as FileUploadComponent } from '@mathesar-component-library';
+  import {
+    FileUpload as FileUploadComponent,
+    Button,
+  } from '@mathesar-component-library';
   import type {
     FileUpload,
     FileUploadAddDetail,
@@ -10,6 +13,9 @@
   import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();
+
+  export let isLoading: boolean;
+  export let showCancelButton: boolean;
 
   let uploads: FileUpload[] | undefined;
   let uploadProgress: UploadCompletionOpts | undefined;
@@ -59,6 +65,7 @@
   <FileUploadComponent
     bind:fileUploads={uploads}
     fileProgress={fileUploadProgress}
+    disabled={isLoading}
     on:add={(e) => uploadNewFile(e.detail)}
   />
   {#if !uploadProgress}
@@ -67,3 +74,13 @@
     </div>
   {/if}
 </div>
+
+<slot name="errors" />
+
+{#if showCancelButton}
+  <div class="buttons">
+    <Button appearance="secondary" on:click={() => dispatch('cancel')}>
+      Cancel
+    </Button>
+  </div>
+{/if}
