@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { SpinnerButton, TextArea } from '@mathesar/component-library';
-  import { postAPI } from '@mathesar/utils/api';
+  import { postAPI } from '@mathesar/api/utils/requestUtils';
   import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();

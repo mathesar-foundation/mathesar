@@ -3,7 +3,7 @@ import type {
   ComponentAndProps,
   FormattedInputProps,
 } from '@mathesar-component-library/types';
-import type { DurationDisplayOptions } from '@mathesar/api/tables/columns';
+import type { DurationDisplayOptions } from '@mathesar/api/types/tables/columns';
 import {
   DurationFormatter,
   DurationSpecification,

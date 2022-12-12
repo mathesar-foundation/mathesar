@@ -15,6 +15,7 @@
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
+  export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 </script>
 
 <SteppedInputCell
@@ -23,6 +24,7 @@
   {isSelectedInRange}
   {disabled}
   {searchValue}
+  {isIndependentOfSheet}
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown

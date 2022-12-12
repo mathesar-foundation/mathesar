@@ -2,7 +2,7 @@
   import type { Writable } from 'svelte/store';
   import { Icon, Button } from '@mathesar-component-library';
   import { SortDirection, type Sorting } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { Column } from '@mathesar/api/types/tables/columns';
   import { iconAddNew } from '@mathesar/icons';
   import SortEntries from './SortEntry.svelte';
   import type { SortEntryEvents } from '../types';

@@ -59,13 +59,15 @@
   <div data-identifier="aggregation-source">
     <h1>Aggregated from</h1>
     <div class="column-info">
-      <ColumnName
-        isLoading={!aggregationColumn.name}
-        column={{
-          ...aggregationColumn,
-          name: aggregationColumn.name ?? '',
-        }}
-      />
+      <span class="tag">
+        <ColumnName
+          isLoading={!aggregationColumn.name}
+          column={{
+            ...aggregationColumn,
+            name: aggregationColumn.name ?? '',
+          }}
+        />
+      </span>
     </div>
   </div>
 {/if}
@@ -74,18 +76,22 @@
   <div data-identifier="column-source">
     <h1>Source Column</h1>
     <div class="column-info">
-      <ColumnName
-        isLoading={!source.column.name}
-        column={{
-          ...source.column,
-          name: source.column.name ?? '',
-        }}
-      />
-      <span>from</span>
-      <TableName
-        isLoading={!source.table.name}
-        table={{ name: source.table.name ?? '' }}
-      />
+      <span class="tag">
+        <ColumnName
+          isLoading={!source.column.name}
+          column={{
+            ...source.column,
+            name: source.column.name ?? '',
+          }}
+        />
+      </span>
+      <span class="from">from</span>
+      <span class="tag">
+        <TableName
+          isLoading={!source.table.name}
+          table={{ name: source.table.name ?? '' }}
+        />
+      </span>
     </div>
   </div>
 {/if}
@@ -97,19 +103,20 @@
 
     .column-info {
       margin-top: var(--spacing-y);
+      max-width: 100%;
 
-      :global(.name-with-icon) {
+      .tag {
         padding: var(--size-extreme-small) var(--size-ultra-small);
         background: var(--slate-200);
         border-radius: var(--size-large);
         font-weight: 510;
+        overflow: hidden;
+        max-width: 100%;
       }
 
       span {
-        margin: 0 var(--size-super-ultra-small);
-      }
-
-      > :global(span) {
+        display: inline-block;
+        vertical-align: middle;
         margin-bottom: var(--size-super-ultra-small);
       }
     }
