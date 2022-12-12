@@ -21,4 +21,7 @@ class HasUnderlyingType:
     underlying_type = None
 
     def downcast_to_underlying_type(self, column_expr):
+        #TODO remove
+        print("HasUnderlyingType.downcast_to_underlying_type")
+        print((column_expr.type, self.underlying_type))
         return cast(column_expr, self.underlying_type)

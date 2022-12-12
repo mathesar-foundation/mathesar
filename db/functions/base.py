@@ -601,6 +601,11 @@ def _maybe_downcast(column_expr):
     See documentation in `HasUnderlyingType`.
     """
     column_expr_type = column_expr.type
+    #TODO remove
+    print("_maybe_downcast")
+    print(column_expr_type)
     if isinstance(column_expr_type, HasUnderlyingType):
+        #TODO remove
+        print("HasUnderlyingType")
         column_expr = column_expr_type.downcast_to_underlying_type(column_expr)
     return column_expr
