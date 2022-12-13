@@ -3,7 +3,7 @@ import type { AbstractTypeConfigurationFactory } from '../../types';
 
 const jsonObjectFactory: AbstractTypeConfigurationFactory = () => ({
   getIcon: () => iconUiTypeJsonObject,
-  defaultDbType: 'mathesar_json_object',
+  defaultDbType: 'mathesar_types.mathesar_json_object',
   cellInfo: {
     type: 'string',
   },
