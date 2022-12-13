@@ -1069,6 +1069,7 @@ def test_table_patch_invalid_table_name(create_patents_table, client):
     assert response.status_code == 400
     assert response_data['code'] == ErrorCodes.InvalidTableName.value
     assert response_data['message'] == f'Table name "{invalid_table_name}" is invalid.'
+    assert response_data['field'] == 'name'
 
 
 def test_table_patch_same_table_name(create_patents_table, client):

@@ -183,7 +183,10 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
                     invalid_char in table_name
                     for invalid_char in ('(', ')')
                 ):
-                    raise InvalidTableName(table_name)
+                    raise InvalidTableName(
+                        table_name,
+                        field='name'
+                    )
             columns = data.get('columns', None)
             if columns is not None:
                 for col in columns:
