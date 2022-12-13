@@ -48,6 +48,10 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
                     table=table,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
+            elif "CheckViolation" in str(type(e.orig)):
+                raise database_api_exceptions.InvalidTypeCastAPIException(
+                    e,
+                )
             else:
                 raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         return record
