@@ -378,6 +378,15 @@ class UIQuery(BaseModel, Relation):
     def _sa_engine(self):
         return self.base_table._sa_engine
 
+    def add_defaults_to_display_names(self):
+        """
+        We have some logic for producing default display names. This method fetches those default
+        display names and merges them with previously-stored display names. Previously-stored
+        display names take precedence.
+        """
+        current_display_names = self.display_names or dict()
+        self.display_names = self._default_display_names | current_display_names
+
     @property
     def _default_display_names(self):
         def _get_default_display_name_for_agg_output_alias(
