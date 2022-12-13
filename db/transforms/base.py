@@ -275,7 +275,7 @@ class Summarize(Transform):
                 .to_sa_expression(relation.columns[col_spec['input_alias']])
                 .label(col_spec['output_alias'])
             )
-            for col_spec in self._aggregation_col_specs
+            for col_spec in self.aggregation_col_specs
         ]
 
         executable = (
@@ -299,7 +299,7 @@ class Summarize(Transform):
                 output_alias=col_spec['output_alias'],
             )
             for col_spec
-            in self._aggregation_col_specs
+            in self.aggregation_col_specs
         ]
         return (
             mappings_that_carry_uniqueness_over
@@ -347,7 +347,7 @@ class Summarize(Transform):
         return [
             col_spec['output_alias']
             for col_spec
-            in self._aggregation_col_specs
+            in self.aggregation_col_specs
         ]
 
     @property
@@ -371,7 +371,7 @@ class Summarize(Transform):
         return [
             col_spec['input_alias']
             for col_spec
-            in self._aggregation_col_specs
+            in self.aggregation_col_specs
         ]
 
     @property

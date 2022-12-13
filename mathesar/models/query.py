@@ -401,7 +401,8 @@ class UIQuery(BaseModel, Relation):
                 )
                 suffix_to_add = map_of_agg_function_to_suffix.get(agg_function)
                 if suffix_to_add:
-                    input_alias_display_name = self.display_names.get(input_alias)
+                    display_names = self.display_names or dict()
+                    input_alias_display_name = display_names.get(input_alias)
                     if input_alias_display_name:
                         return input_alias_display_name + suffix_to_add
 
@@ -412,7 +413,8 @@ class UIQuery(BaseModel, Relation):
             input_alias = \
                 summarize_transform\
                 .map_of_output_alias_to_input_alias[output_alias]
-            input_alias_display_name = self.display_names.get(input_alias)
+            display_names = self.display_names or dict()
+            input_alias_display_name = display_names.get(input_alias)
             if input_alias_display_name:
                 suffix_to_add = " group"
                 return input_alias_display_name + suffix_to_add
