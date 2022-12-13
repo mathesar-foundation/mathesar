@@ -19,6 +19,7 @@
 
   export let column: ColumnWithAbstractType;
   export let selectedAbstractType: AbstractType;
+  export let disabled = false;
 
   $: allowedTypeConversions = getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
     column.type,
@@ -62,6 +63,7 @@
     on:change={(e) => selectAbstractType(e.detail)}
     let:option
     let:label
+    {disabled}
   >
     <NameWithIcon icon={option.getIcon()}>
       {label}

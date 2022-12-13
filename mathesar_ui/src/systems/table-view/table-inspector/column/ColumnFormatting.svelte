@@ -62,9 +62,11 @@
   function showActionButtons() {
     actionButtonsVisible = true;
   }
+
+  $: isFkOrPk = column.column.primary_key || !!column.linkFk;
 </script>
 
-{#if displayOptionsConfig && displayForm}
+{#if displayOptionsConfig && displayForm && !isFkOrPk}
   <div on:focus={showActionButtons} on:mousedown={showActionButtons}>
     <AbstractTypeDisplayOptions
       bind:displayOptions
@@ -73,16 +75,18 @@
       {displayFormValues}
     />
 
-    <div class="footer">
-      <CancelOrProceedButtonPair
-        onProceed={save}
-        onCancel={cancel}
-        isProcessing={typeChangeState?.state === 'processing'}
-        canProceed={!isSaveDisabled}
-        proceedButton={{ label: 'Save' }}
-        size="small"
-      />
-    </div>
+    {#if actionButtonsVisible}
+      <div class="footer">
+        <CancelOrProceedButtonPair
+          onProceed={save}
+          onCancel={cancel}
+          isProcessing={typeChangeState?.state === 'processing'}
+          canProceed={!isSaveDisabled}
+          proceedButton={{ label: 'Save' }}
+          size="small"
+        />
+      </div>
+    {/if}
   </div>
 {:else}
   <span>No formatting option for the column data type</span>

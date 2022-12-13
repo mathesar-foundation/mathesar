@@ -5,6 +5,8 @@
   } from '@mathesar/stores/table-data';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import type { ColumnTypeOptionsSaveArgs } from '@mathesar/components/abstract-type-control/types';
+  import AbstractTypeSelector from '@mathesar/components/abstract-type-control/AbstractTypeSelector.svelte';
+  import { Alert } from '@mathesar/component-library';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);
@@ -21,12 +23,38 @@
       default: null,
     });
   }
-</script>
-
-<AbstractTypeControl
-  column={{
+  $: disallowDataTypeChange = column.column.primary_key || !!column.linkFk;
+  $: columnWithAbstractType = {
     ...column.column,
     abstractType: column.abstractType,
-  }}
-  {save}
-/>
+  };
+</script>
+
+{#if disallowDataTypeChange}
+  <AbstractTypeSelector
+    selectedAbstractType={column.abstractType}
+    column={columnWithAbstractType}
+    disabled={true}
+  />
+  <Alert appearance="info">
+    {#if column.column.primary_key}
+      <span class="info-alert">
+        The data type of the primary key column is restricted and cannot be
+        changed.
+      </span>
+    {:else if !!column.linkFk}
+      <span class="info-alert">
+        The data type of the foreign key column is restricted to the data type
+        of the primary key column and cannot be changed.
+      </span>
+    {/if}
+  </Alert>
+{:else}
+  <AbstractTypeControl column={columnWithAbstractType} {save} />
+{/if}
+
+<style lang="scss">
+  .info-alert {
+    font-size: var(--text-size-small);
+  }
+</style>

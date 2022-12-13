@@ -91,6 +91,7 @@
   {column}
   on:change={(e) => selectTypeAndAbstractType(e.detail)}
   on:reset={() => resetAbstractType(column)}
+  disabled={typeChangeState.state === 'processing'}
 />
 
 {#if selectedAbstractType && selectedDbType}
@@ -107,10 +108,10 @@
 {#if actionButtonsVisible}
   <div class="footer">
     <Alert appearance="warning">
-      <span class="warning-message"
-        >Data loss can result from changing the data type of a column. This
-        action cannot be undone.</span
-      >
+      <span class="warning-alert">
+        Data loss can result from changing the data type of a column. This
+        action cannot be undone.
+      </span>
     </Alert>
     <CancelOrProceedButtonPair
       onProceed={onSave}
@@ -134,7 +135,7 @@
       margin-top: 0.5rem;
     }
 
-    .warning-message {
+    .warning-alert {
       font-size: var(--text-size-small);
     }
   }
