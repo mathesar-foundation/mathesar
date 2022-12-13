@@ -47,11 +47,6 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         type_options = request.data.get('type_options', None)
-        if type_options is not None:
-            scale = type_options.get('scale', None)
-            precision = type_options.get('precision', None)
-            if scale is not None and precision is None:
-                request.data['type_options']['precision'] = 1000
         if 'source_column' in serializer.validated_data:
             column = table.duplicate_column(
                 serializer.validated_data['source_column'],
