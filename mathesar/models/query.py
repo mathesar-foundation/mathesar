@@ -409,13 +409,13 @@ class UIQuery(BaseModel, Relation):
             summarize_transform,
             output_alias,
         ):
-                input_alias = \
-                    summarize_transform\
-                    .map_of_output_alias_to_input_alias[output_alias]
-                input_alias_display_name = self.display_names.get(input_alias)
-                if input_alias_display_name:
-                    suffix_to_add = " group"
-                    return input_alias_display_name + suffix_to_add
+            input_alias = \
+                summarize_transform\
+                .map_of_output_alias_to_input_alias[output_alias]
+            input_alias_display_name = self.display_names.get(input_alias)
+            if input_alias_display_name:
+                suffix_to_add = " group"
+                return input_alias_display_name + suffix_to_add
         summarize_transforms = [
             db_transform
             for db_transform
