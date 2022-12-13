@@ -17,6 +17,8 @@
     await columnsDataStore.patch(column.id, {
       type: columnInfo.type,
       type_options: columnInfo.type_options,
+      display_options: null,
+      default: null,
     });
   }
 </script>
