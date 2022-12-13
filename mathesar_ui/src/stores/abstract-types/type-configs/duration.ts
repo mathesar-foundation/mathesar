@@ -2,7 +2,7 @@ import type { FormValues } from '@mathesar-component-library/types';
 import type {
   DurationDisplayOptions,
   Column,
-} from '@mathesar/api/tables/columns';
+} from '@mathesar/api/types/tables/columns';
 import { iconUiTypeDuration } from '@mathesar/icons';
 import { DurationSpecification } from '@mathesar/utils/duration';
 import type {

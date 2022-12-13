@@ -1,7 +1,7 @@
 import { getContext, setContext } from 'svelte';
 import { writable } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { RecordSelectorPurpose } from './recordSelectorUtils';
 

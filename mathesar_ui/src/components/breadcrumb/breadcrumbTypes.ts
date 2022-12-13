@@ -1,4 +1,5 @@
-import type { TableEntry } from '@mathesar/api/tables';
+import type { QueryInstance } from '@mathesar/api/types/queries';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import type {
   ComponentAndProps,
@@ -30,10 +31,30 @@ export interface BreadcrumbItemSimple {
   icon?: IconProps;
 }
 
+export interface BreadcrumbItemRecord {
+  type: 'record';
+  database: Database;
+  schema: SchemaEntry;
+  table: TableEntry;
+  record: {
+    id: number;
+    summary: string;
+  };
+}
+
+export interface BreadcrumbItemExploration {
+  type: 'exploration';
+  database: Database;
+  schema: SchemaEntry;
+  query: Pick<QueryInstance, 'id' | 'name'>;
+}
+
 export type BreadcrumbItem =
   | BreadcrumbItemDatabase
   | BreadcrumbItemSchema
   | BreadcrumbItemTable
+  | BreadcrumbItemExploration
+  | BreadcrumbItemRecord
   | BreadcrumbItemSimple;
 
 export interface BaseBreadcrumbSelectorEntry {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, Icon, InputGroup } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/tables/columns';
+  import type { Column } from '@mathesar/api/types/tables/columns';
   import SelectColumn from '@mathesar/components/SelectColumn.svelte';
   import SelectSortDirection from '@mathesar/components/SelectSortDirection.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';

@@ -1,4 +1,4 @@
-import type { TableEntry } from '@mathesar/api/tables';
+import type { TableEntry } from '@mathesar/api/types/tables';
 
 export function isTableImportConfirmationRequired(table: TableEntry): boolean {
   /**

@@ -31,7 +31,6 @@
         name:
           processedColumn.column.display_name ?? processedColumn.column.alias,
       }}
-      truncateName={false}
     />
   {:else}
     <div>{aggregation.inputAlias}</div>
@@ -58,6 +57,7 @@
     margin: 0.8rem 0 0 0.3rem;
     display: grid;
     grid-template-columns: 7fr 1fr 3fr 0.5fr;
+    align-items: center;
 
     span {
       padding: 0.3rem;

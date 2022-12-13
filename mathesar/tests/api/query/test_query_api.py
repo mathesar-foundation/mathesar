@@ -1,5 +1,7 @@
 import pytest
 
+from mathesar.models.query import UIQuery
+
 
 @pytest.fixture
 def post_minimal_query(_post_query, create_patents_table, get_uid):
@@ -52,6 +54,7 @@ def _post_query(client):
         response = client.post('/api/db/v0/queries/', data=request_data)
         assert response.status_code == 201
         return request_data, response
+
     return _f
 
 
@@ -80,6 +83,71 @@ def test_create(post_minimal_query):
     request_data, response = post_minimal_query
     response_json = response.json()
     _deep_equality_assert(expected=request_data, actual=response_json)
+
+
+write_clients_with_status_code = [
+    ('superuser_client_factory', 201, 201),
+    ('db_manager_client_factory', 201, 201),
+    ('db_editor_client_factory', 201, 201),
+    ('schema_manager_client_factory', 201, 400),
+    ('schema_viewer_client_factory', 201, 400),
+    ('db_viewer_schema_manager_client_factory', 201, 201)
+]
+
+
+@pytest.mark.parametrize(
+    'client_name, expected_status_code, different_schema_expected_status_code',
+    write_clients_with_status_code
+)
+def test_create_based_on_permission(
+        create_patents_table,
+        request,
+        get_uid,
+        client_name,
+        expected_status_code,
+        different_schema_expected_status_code
+):
+    base_table = create_patents_table(table_name=get_uid())
+    different_schema_base_table = create_patents_table(table_name=get_uid(), schema_name='Private Schema')
+    request_data = {
+        "name": get_uid(),
+        "base_table": base_table.id,
+        # TODO use actual columns
+        "initial_columns": [
+            {
+                "id": 1,
+                # Mock Django IDs; their correctness is not checked
+                "jp_path": [[1, 3], [4, 5]],
+                "alias": "alias_x",
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    client = request.getfixturevalue(client_name)(base_table.schema)
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == expected_status_code
+    request_data = {
+        "name": get_uid(),
+        "base_table": different_schema_base_table.id,
+        # TODO use actual columns
+        "initial_columns": [
+            {
+                "id": 1,
+                # Mock Django IDs; their correctness is not checked
+                "jp_path": [[1, 3], [4, 5]],
+                "alias": "alias_x",
+            },
+            {
+                "id": 2,
+                "alias": "alias_y",
+            },
+        ],
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == different_schema_expected_status_code
 
 
 def test_query_with_bad_base_table(get_uid, client):
@@ -237,6 +305,80 @@ def test_update(post_minimal_query, client):
     expected.update(post_data)
     expected.update(patch_data)
     _deep_equality_assert(expected=expected, actual=response_json)
+
+
+update_client_with_status_code = [
+    ('db_manager_client_factory', 200, 200),
+    ('db_editor_client_factory', 200, 200),
+    ('schema_manager_client_factory', 200, 404),
+    ('schema_viewer_client_factory', 200, 404),
+    ('db_viewer_schema_manager_client_factory', 200, 200)
+]
+
+
+@pytest.mark.parametrize(
+    'client_name, expected_status_code, different_schema_expected_status_code',
+    update_client_with_status_code
+)
+def test_update_based_on_permission(
+        create_patents_table,
+        request,
+        get_uid,
+        client_name,
+        expected_status_code,
+        different_schema_expected_status_code
+):
+    base_table = create_patents_table(table_name=get_uid())
+    different_schema_base_table = create_patents_table(table_name=get_uid(), schema_name='Private Schema')
+    ui_query = UIQuery.objects.create(
+        name="Query1",
+        base_table=base_table,
+        initial_columns=[
+            {
+                "id": 3,
+                # Mock Django IDs; their correctness is not checked
+                "jp_path": [[1, 3]],
+                "alias": "alias_x",
+            }
+        ]
+    )
+    different_schema_ui_query = UIQuery.objects.create(
+        name="Query2",
+        base_table=different_schema_base_table,
+        initial_columns=[
+            {
+                "id": 3,
+                # Mock Django IDs; their correctness is not checked
+                "jp_path": [[1, 3]],
+                "alias": "alias_x",
+            }
+        ]
+    )
+    client = request.getfixturevalue(client_name)(base_table.schema)
+    patch_data = {
+        "initial_columns": [
+            {
+                "id": 3,
+                # Mock Django IDs; their correctness is not checked
+                "jp_path": [[1, 3]],
+                "alias": "alias_x",
+            }
+        ]
+    }
+    response = client.patch(f'/api/db/v0/queries/{ui_query.id}/', data=patch_data)
+    assert response.status_code == expected_status_code
+    patch_data = {
+        "initial_columns": [
+            {
+                "id": 3,
+                # Mock Django IDs; their correctness is not checked
+                "jp_path": [[1, 3]],
+                "alias": "alias_x",
+            }
+        ]
+    }
+    response = client.patch(f'/api/db/v0/queries/{different_schema_ui_query.id}/', data=patch_data)
+    assert response.status_code == different_schema_expected_status_code
 
 
 def test_list(post_minimal_query, client):

@@ -5,7 +5,7 @@
     CancelOrProceedButtonPair,
   } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
-  import type { RequestStatus } from '@mathesar/utils/api';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type {
     ColumnWithAbstractType,
     ColumnTypeOptionsSaveArgs,

@@ -1,17 +1,16 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/tables';
-  import type { Column } from '@mathesar/api/tables/columns';
-  import { Icon } from '@mathesar/component-library';
-  import { iconMultipleRecords } from '@mathesar/icons';
+  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { Column } from '@mathesar/api/types/tables/columns';
+  import TableName from '@mathesar/components/TableName.svelte';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
+    Meta,
     setTabularDataStoreInContext,
     TabularData,
-    Meta,
   } from '@mathesar/stores/table-data';
-  import TableView from '@mathesar/systems/table-view/TableView.svelte';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import Pagination from '@mathesar/utils/Pagination';
   import MiniActionsPane from '@mathesar/systems/table-view/actions-pane/MiniActionsPane.svelte';
+  import TableView from '@mathesar/systems/table-view/TableView.svelte';
+  import Pagination from '@mathesar/utils/Pagination';
 
   const tabularDataStore = setTabularDataStoreInContext(
     // Sacrifice type safety here since the value is initialized reactively
@@ -38,46 +37,26 @@
 
 <div class="table-widget">
   <div class="top">
-    <div class="left">
-      <Icon {...iconMultipleRecords} size="1.4rem" />
-      <h3 class="heading">{table.name}</h3>
-    </div>
-    <div class="right">
-      <MiniActionsPane />
-    </div>
+    <strong><TableName {table} /></strong>
+    <MiniActionsPane />
   </div>
 
   <div class="results">
-    <TableView />
+    <TableView context="widget" />
   </div>
 </div>
 
 <style>
   .top {
-    --spacing-x: 1rem;
-    --spacing-y: 0.3rem;
-    display: flex;
+    display: grid;
+    grid-template: auto / 1fr auto;
+    gap: 0.5rem;
     justify-content: space-between;
     align-items: center;
-    margin: calc(-1 * var(--spacing-y)) calc(-1 * var(--spacing-x));
-    padding-bottom: 1rem;
-    flex-wrap: wrap;
+    padding-bottom: 0.5rem;
+    overflow: hidden;
   }
   .top > :global(*) {
-    margin: var(--spacing-y) var(--spacing-x);
-  }
-  .left {
-    display: grid;
-    grid-auto-flow: column;
-    gap: 0.5rem;
-    align-items: center;
-  }
-  .heading {
-    margin: 0;
-  }
-  .right {
-    flex: 1 0 auto;
-    display: flex;
-    justify-content: flex-end;
+    overflow: hidden;
   }
 </style>

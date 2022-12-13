@@ -3,7 +3,7 @@ import type {
   SortDirection as ApiSortDirection,
   SortingEntry as ApiSortingEntry,
   GetRequestParams,
-} from '@mathesar/api/tables/records';
+} from '@mathesar/api/types/tables/records';
 import type { Grouping } from './grouping';
 
 export enum SortDirection {
