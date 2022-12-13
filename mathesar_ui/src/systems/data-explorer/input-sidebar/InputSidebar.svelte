@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TabContainer, Spinner } from '@mathesar-component-library';
+  import { TabContainer, Spinner, Alert } from '@mathesar-component-library';
   import { getAvailableName } from '@mathesar/utils/db';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import TransformationsPane from './transformations-pane/TransformationsPane.svelte';
@@ -45,7 +45,7 @@
           <Spinner />
         </div>
       {:else if inputColumnsFetchState?.state === 'success'}
-        {#if activeTab.id === 'column-selection'}
+        {#if activeTab?.id === 'column-selection'}
           <div class="help-text">
             Select the columns that will be used for the exploration. Columns
             are limited to those from the base table and it's linked tables.
@@ -55,7 +55,7 @@
             {linkCollapsibleOpenState}
             on:add={(e) => addColumn(e.detail)}
           />
-        {:else}
+        {:else if activeTab?.id === 'transform-results'}
           <div class="help-text">
             Transformations can be used to summarize data, filter data, and
             more. Note that transformations are applied in the order they are
@@ -64,7 +64,11 @@
           <TransformationsPane {queryManager} />
         {/if}
       {:else if inputColumnsFetchState?.state === 'failure'}
-        Failed to fetch column information
+        <Alert appearance="error">
+          Failed to fetch column information: {inputColumnsFetchState?.errors.join(
+            ';',
+          )}
+        </Alert>
       {/if}
     </TabContainer>
   </section>

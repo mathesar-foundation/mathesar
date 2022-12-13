@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/tables/columns';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 // The types here are frontend types and are

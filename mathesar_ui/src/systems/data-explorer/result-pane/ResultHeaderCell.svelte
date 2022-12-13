@@ -9,7 +9,7 @@
   export let processedQueryColumn: ProcessedQueryOutputColumn;
   export let isSelected: boolean;
 
-  $: ({ runState, selection } = queryRunner);
+  $: ({ runState } = queryRunner);
 
   $: columnRunState = $runState?.state;
 </script>

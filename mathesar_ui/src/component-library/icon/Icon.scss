@@ -1,6 +1,7 @@
 .fa-icon {
   display: inline-block;
-  vertical-align: middle;
+  /** Makes icons look good when rendered inline, alongside text. */
+  vertical-align: -10%;
   fill: currentColor;
   flex-shrink: 0;
 }

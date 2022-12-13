@@ -17,6 +17,7 @@
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
+  export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   $: href = $storeToGetRecordPageUrl({ tableId, recordId: value });
 
@@ -52,6 +53,7 @@
   {isActive}
   {isSelectedInRange}
   {disabled}
+  {isIndependentOfSheet}
   on:activate
   on:mouseenter
   on:keydown={handleKeyDown}

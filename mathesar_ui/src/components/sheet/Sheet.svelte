@@ -13,6 +13,7 @@
   export let columns: SheetColumnType[];
   export let usesVirtualList = false;
   export let restrictWidthToRowWidth = false;
+  export let hasBorder = false;
 
   export let getColumnIdentifier: (
     c: SheetColumnType,
@@ -81,7 +82,13 @@
   $: style = restrictWidthToRowWidth ? `width:${rowWidth + 2}px;` : undefined;
 </script>
 
-<div class="sheet" class:uses-virtual-list={usesVirtualList} {style} on:click>
+<div
+  class="sheet"
+  class:has-border={hasBorder}
+  class:uses-virtual-list={usesVirtualList}
+  {style}
+  on:click
+>
   {#if columns.length}
     <slot />
   {/if}
@@ -96,6 +103,8 @@
     --z-index__sheet__column-resizer: 2;
     --z-index__sheet__top-left-cell: 3;
     --z-index__sheet__horizontal-scrollbar: 4;
+    --z-index-new-record-message: 4;
+    --z-index-group-header: 4;
     --z-index__sheet__vertical-scrollbar: 5;
 
     --virtual-list-horizontal-scrollbar-z-index: var(
@@ -104,6 +113,10 @@
     --virtual-list-vertical-scrollbar-z-index: var(
       --z-index__sheet__vertical-scrollbar
     );
+
+    &.has-border {
+      border: 1px solid var(--color-gray-medium);
+    }
 
     &.uses-virtual-list {
       overflow: hidden;

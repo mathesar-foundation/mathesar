@@ -11,9 +11,11 @@
 
 <div class="selectable-column">
   <Button on:click={() => dispatch('add', column)}>
-    <ColumnName
-      column={{ ...column, type_options: null, display_options: null }}
-    />
+    <div class="name">
+      <ColumnName
+        column={{ ...column, type_options: null, display_options: null }}
+      />
+    </div>
     <span class="add">
       <span class="text">Add</span>
       <span>+</span>
@@ -31,17 +33,17 @@
       text-align: left;
       overflow: hidden;
     }
-    :global(button .name-with-icon) {
+    .name {
       flex-grow: 1;
-      text-overflow: ellipsis;
       white-space: nowrap;
+      overflow: hidden;
     }
-    :global(button .add) {
+    .add {
       flex-shrink: 0;
     }
 
     &:not(:hover) {
-      :global(button .add .text) {
+      .add .text {
         display: none;
       }
     }

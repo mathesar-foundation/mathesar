@@ -5,14 +5,14 @@ class UserAccessPolicy(AccessPolicy):
     statements = [
         # Anyone can read all users
         {
-            'action': ['list', 'retrieve'],
+            'action': ['list', 'retrieve', 'password_change'],
             'principal': '*',
             'effect': 'allow'
         },
         # Only superusers can create users
         {
-            'action': ['create'],
-            'principal': ['*'],
+            'action': ['create', 'password_reset'],
+            'principal': '*',
             'effect': 'allow',
             'condition': 'is_superuser'
         },

@@ -13,6 +13,7 @@
   export let hasPadding = true;
   export let valueComparisonOutcome: ValueComparisonOutcome | undefined =
     undefined;
+  export let isIndependentOfSheet = false;
 
   /**
    * This only affects the alignment of the displayed value while in
@@ -40,9 +41,9 @@
   class:is-active={isActive}
   class:disabled
   class:is-edit-mode={mode === 'edit'}
-  class:truncate={multiLineTruncate}
-  class:h-align-right={horizontalAlignment === 'right'}
-  class:has-padding={hasPadding}
+  class:truncate={multiLineTruncate && !isIndependentOfSheet}
+  class:h-align-right={horizontalAlignment === 'right' && !isIndependentOfSheet}
+  class:has-padding={hasPadding && !isIndependentOfSheet}
   class:exact-match={valueComparisonOutcome === 'exactMatch'}
   class:substring-match={valueComparisonOutcome === 'substringMatch'}
   class:no-match={valueComparisonOutcome === 'noMatch'}

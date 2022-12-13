@@ -2,7 +2,8 @@ import { ImmutableMap } from '@mathesar-component-library';
 import type {
   ApiDataForRecordSummariesInFkColumn,
   ApiRecordSummaryInputData,
-} from '@mathesar/api/tables/records';
+} from '@mathesar/api/types/tables/records';
+import { escapeHtml } from '@mathesar/utils/stringUtils';
 
 /** A generalized type that can be used for Map or ImmutableMap or others. */
 interface LookerUpper<Key, Value> {
@@ -16,6 +17,27 @@ interface LookerUpper<Key, Value> {
  * - Tokens will only ever contain numbers, underscores, and lower case letters.
  */
 const tokenPattern = /\{[0-9_a-z]+\}/g;
+
+/**
+ * This is an arbitrary character within the Unicode Private Use Area. We don't
+ * render it directly. Rather, we use this to signify a `NULL` value that should
+ * be rendered as a stylized `NULL` when rendering the record summary.
+ */
+export const nullPlaceholder = '\uF000';
+const nullPlaceholderPattern = new RegExp(nullPlaceholder, 'g');
+
+function stringifyFieldValue(v: unknown): string {
+  if (v === undefined) {
+    return '';
+  }
+  if (v === null) {
+    return nullPlaceholder;
+  }
+  if (typeof v === 'string') {
+    return v;
+  }
+  return JSON.stringify(v);
+}
 
 export function renderRecordSummary(
   template: string,
@@ -36,7 +58,7 @@ type InputData = ImmutableMap<string, string>;
 
 export function buildInputData(apiData: ApiRecordSummaryInputData): InputData {
   const entries = Object.entries(apiData);
-  return new ImmutableMap(entries.map(([k, v]) => [k, String(v)]));
+  return new ImmutableMap(entries.map(([k, v]) => [k, stringifyFieldValue(v)]));
 }
 
 /** Keys are stringifed record ids */
@@ -83,19 +105,6 @@ export function mergeRecordSummariesForSheet(
   b: RecordSummariesForSheet,
 ): RecordSummariesForSheet {
   return a.withEntries(b, mergeRecordSummariesForColumn);
-}
-
-function stringifyFieldValue(v: unknown): string {
-  if (v === undefined) {
-    return '';
-  }
-  if (v === null) {
-    return '(null)';
-  }
-  if (typeof v === 'string') {
-    return v;
-  }
-  return JSON.stringify(v);
 }
 
 export function prepareFieldsAsRecordSummaryInputData(
@@ -153,4 +162,15 @@ export function renderRecordSummaryForRow({
   const fields: [number, unknown][] = entries.map(([k, v]) => [Number(k), v]);
   const inputData = prepareFieldsAsRecordSummaryInputData(fields);
   return renderTransitiveRecordSummary({ template, inputData, transitiveData });
+}
+
+const plainTextNull = 'NULL';
+const stylizedNull = '<span class="postgres-keyword">NULL</span>';
+
+export function displayRecordSummaryAsPlainText(str: string): string {
+  return str.replace(nullPlaceholderPattern, plainTextNull);
+}
+
+export function displayRecordSummaryAsHtml(str: string): string {
+  return escapeHtml(str).replace(nullPlaceholderPattern, stylizedNull);
 }

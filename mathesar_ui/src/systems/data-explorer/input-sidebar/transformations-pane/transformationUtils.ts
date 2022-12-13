@@ -1,4 +1,4 @@
-import type { QueryInstanceInitialColumn } from '@mathesar/api/queries';
+import type { QueryInstanceInitialColumn } from '@mathesar/api/types/queries';
 import {
   getProcessedOutputColumns,
   type ProcessedQueryResultColumnMap,

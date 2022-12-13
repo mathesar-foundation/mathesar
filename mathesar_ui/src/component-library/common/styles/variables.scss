@@ -11,6 +11,8 @@
   // between the Figma designs and the codebase
   // which then makes it easier and faster to create
   // element from design into code.
+  --green-100: #e5fde6;
+
   --red-100: #fdeeed;
   --red-500: #eb5441;
   --red-600: #dd4734;
@@ -19,7 +21,8 @@
   --slate-100: #eff1f1;
   --slate-200: #d5d8dc;
   --slate-300: #aeb4bc;
-  --slate-400: #4b535d;
+  --slate-400: #959da7;
+  --slate-500: #4b535d;
   --slate-800: #25292e;
 
   --sand-100: #f9f8f6;
@@ -32,6 +35,7 @@
 
   --yellow-100: #fdf7ed;
   --yellow-200: #ffedaf;
+  --yellow-300: #f8ceb0;
 
   --white: white;
 
@@ -42,6 +46,7 @@
   // value and support white-labelling
 
   // Brand Color
+  --brand-100: var(--red-100);
   --brand-500: var(--red-500);
   --brand-600: var(--red-600);
   --brand-800: var(--red-800);

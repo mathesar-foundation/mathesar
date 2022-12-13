@@ -1,16 +1,21 @@
 .alert-container {
   display: flex;
   flex-direction: row;
-  padding: 0.7rem;
+  padding: 0.7em;
   border-radius: var(--border-radius-m);
+  max-width: max-content;
+  margin: var(--alert-margin);
+
+  > svg {
+    // This helps to vertically align the icon with the first line of text.
+    margin-top: 0.15em;
+  }
 
   > * + * {
-    margin-left: 0.5rem;
+    margin-left: 0.5em;
   }
 
   .content {
-    font-size: 1rem;
-    color: var(--slate-800);
     font-weight: 400;
     line-height: var(--size-x-large);
   }
@@ -23,6 +28,8 @@
   }
   &.alert-error {
     background-color: var(--danger-background-color);
-    color: var(--danger-color);
+    .icon {
+      color: var(--danger-color);
+    }
   }
 }

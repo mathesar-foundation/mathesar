@@ -1,51 +1,98 @@
 <script lang="ts">
-  import { getPaginationPageCount } from '@mathesar-component-library';
-  import { States } from '@mathesar/utils/api';
+  import {
+    getPaginationPageCount,
+    Button,
+    Icon,
+  } from '@mathesar-component-library';
+  import { States } from '@mathesar/api/utils/requestUtils';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
+  import RefreshButton from '@mathesar/components/RefreshButton.svelte';
+  import { iconAddNew } from '@mathesar/icons';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ recordsData, meta } = $tabularData);
-  $: ({
-    // selectedRows,
-    pagination,
-  } = meta);
+  export let context: 'page' | 'widget' = 'page';
+
+  $: ({ recordsData, meta, isLoading, columnsDataStore, constraintsDataStore } =
+    $tabularData);
+  $: ({ pagination } = meta);
   $: ({ size: pageSize, leftBound, rightBound } = $pagination);
   $: ({ totalCount, state, newRecords } = recordsData);
   $: recordState = $state;
-
+  $: columnsFetchStatus = columnsDataStore.fetchStatus;
   $: pageCount = getPaginationPageCount($totalCount ?? 0, pageSize);
   $: max = Math.min($totalCount ?? 0, rightBound);
+  $: isError =
+    $columnsFetchStatus?.state === 'failure' ||
+    recordState === States.Error ||
+    $constraintsDataStore.state === States.Error;
+  $: hasNewRecordButton = context === 'page';
+  $: refreshButtonState = (() => {
+    let buttonState: 'loading' | 'error' | undefined = undefined;
+    if ($isLoading) {
+      buttonState = 'loading';
+    }
+    if (isError) {
+      buttonState = 'error';
+    }
+    return buttonState;
+  })();
+
+  function refresh() {
+    void $tabularData.refresh();
+  }
 </script>
 
-<div class="status-pane">
-  <div class="record-count">
-    <!-- TODO: Check with team if we need this now? -->
-    <!-- {#if $selectedRows?.size > 0}
-      {$selectedRows.size} record{$selectedRows.size > 1 ? 's' : ''} selected of
-      {$totalCount}
-    {:else if pageCount > 0 && $totalCount} -->
-    {#if pageCount > 0 && $totalCount}
-      Showing {leftBound} to {max}
-      {#if $newRecords.length > 0}
-        (+ {$newRecords.length} new record{$newRecords.length > 1 ? 's' : ''})
-      {/if}
-      of {$totalCount} records
-    {:else if recordState !== States.Loading}
-      No records found
+<div
+  class="status-pane"
+  class:context-widget={context === 'widget'}
+  class:context-page={context === 'page'}
+>
+  <div class="status-pane-items-section">
+    {#if hasNewRecordButton}
+      <Button
+        disabled={$isLoading}
+        size="medium"
+        appearance="primary"
+        on:click={() => recordsData.addEmptyRecord()}
+      >
+        <Icon {...iconAddNew} />
+        <span>New Record</span>
+      </Button>
     {/if}
+    <div class="record-count">
+      <!-- TODO: Check with team if we need this now? -->
+      <!-- {#if $selectedRows?.size > 0}
+        {$selectedRows.size} record{$selectedRows.size > 1 ? 's' : ''} selected of
+        {$totalCount}
+      {:else if pageCount > 0 && $totalCount} -->
+      {#if pageCount > 0 && $totalCount}
+        Showing {leftBound} to {max}
+        {#if $newRecords.length > 0}
+          (+ {$newRecords.length} new record{$newRecords.length > 1 ? 's' : ''})
+        {/if}
+        of {$totalCount} records
+      {:else if recordState !== States.Loading}
+        No records found
+      {/if}
+    </div>
   </div>
 
-  <PaginationGroup
-    bind:pagination={$pagination}
-    totalCount={$totalCount ?? 0}
-  />
+  <div class="status-pane-items-section">
+    <PaginationGroup
+      bind:pagination={$pagination}
+      totalCount={$totalCount ?? 0}
+      pageSizeOptions={context === 'widget' ? [] : undefined}
+      hiddenWhenPossible={context === 'widget'}
+    />
+    <RefreshButton on:click={refresh} state={refreshButtonState} />
+  </div>
 </div>
 
-<style>
+<style lang="scss">
   .status-pane {
-    padding: 0.25rem 1.5rem;
+    padding: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -53,9 +100,23 @@
     position: relative;
     flex-shrink: 0;
     flex-basis: 32px;
+
+    &.context-page {
+      background-color: var(--slate-100);
+    }
+
+    &.context-widget {
+      font-size: 80%;
+    }
   }
 
-  .record-count {
-    font-size: var(--text-size-small);
+  .status-pane-items-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    > :global(* + *) {
+      margin-left: 1rem;
+    }
   }
 </style>
