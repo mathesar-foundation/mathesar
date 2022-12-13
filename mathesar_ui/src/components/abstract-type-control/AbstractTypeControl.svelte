@@ -10,7 +10,7 @@
   import {
     type ColumnWithAbstractType,
     type ColumnTypeOptionsSaveArgs,
-    hasTypeOptionsChanges,
+    hasTypeOptionsChanged,
   } from './utils';
   import AbstractTypeDBOptions from './AbstractTypeDBOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
@@ -31,7 +31,8 @@
   $: actionButtonsVisible =
     selectedAbstractType !== column.abstractType ||
     selectedDbType !== column.type ||
-    hasTypeOptionsChanges(column.type_options ?? {}, typeOptions ?? {});
+    hasTypeOptionsChanged(column.type_options ?? {}, typeOptions ?? {});
+
   let typeChangeState: RequestStatus;
 
   const validationContext = createValidationContext();
@@ -91,7 +92,7 @@
   {column}
   on:change={(e) => selectTypeAndAbstractType(e.detail)}
   on:reset={() => resetAbstractType(column)}
-  disabled={typeChangeState.state === 'processing'}
+  disabled={typeChangeState?.state === 'processing'}
 />
 
 {#if selectedAbstractType && selectedDbType}

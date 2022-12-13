@@ -51,12 +51,12 @@
     typeChangeState = { state: 'success' };
   }
 
-  function setRecordSummary(recordId: string, recordSummary: string) {
+  function setRecordSummary(recordId: string, _recordSummary: string) {
     if (recordSummaries) {
       recordSummaries.addBespokeRecordSummary({
         columnId: String(column.id),
         recordId,
-        recordSummary,
+        recordSummary: _recordSummary,
       });
     }
   }
