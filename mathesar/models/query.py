@@ -254,6 +254,67 @@ class UIQuery(BaseModel, Relation):
             for alias, sa_col in self.db_query.all_sa_columns_map.items()
         }
 
+    @property
+    def _default_display_names(self):
+        def _get_map_of_output_alias_to_input_alias(
+            summarize_transform,
+            output_aliases
+        ):
+            return {
+                summarize_transform.map_of_output_alias_to_input_alias[
+                    output_alias
+                ]: output_alias
+                for output_alias in output_aliases
+            }
+        def _create_default_display_names(
+            map_of_output_alias_to_input_alias,
+            suffix_to_add,
+        ):
+            new_display_names = dict()
+            for output_alias, input_alias \
+            in map_of_output_alias_to_input_alias.items():
+                input_alias_display_name = self.display_names.get(input_alias)
+                if input_alias_display_name:
+                    new_display_names[output_alias] = \
+                        input_alias_display_name + suffix_to_add
+            return new_display_names
+        from db.transforms.base import Summarize
+        summarize_transforms = [
+            db_transform
+            for db_transform
+            in self.db_query.transformations
+            if isinstance(db_transform, Summarize)
+        ]
+        map_of_grouping_output_alias_to_input_alias = dict()
+        map_of_aggregation_output_alias_to_input_alias = dict()
+        for summarize_transform in summarize_transforms:
+            grouping_output_aliases = summarize_transform.grouping_output_aliases
+            aggregation_output_aliases = summarize_transform.aggregation_output_aliases
+            map_of_grouping_output_alias_to_input_alias = \
+                map_of_grouping_output_alias_to_input_alias | \
+                _get_map_of_output_alias_to_input_alias(summarize_transform, grouping_output_aliases)
+            map_of_aggregation_output_alias_to_input_alias = \
+                map_of_aggregation_output_alias_to_input_alias | \
+                _get_map_of_output_alias_to_input_alias(summarize_transform, aggregation_output_aliases)
+        default_display_names = dict()
+        for map_of_output_alias_to_input_alias, suffix_to_add \
+        in [
+            (
+                map_of_grouping_output_alias_to_input_alias,
+                " group"
+            ),
+            (
+                map_of_aggregation_output_alias_to_input_alias,
+                " list"
+            ),
+        ]:
+            default_display_names = \
+                default_display_names | \
+                    _create_default_display_names(
+                        map_of_output_alias_to_input_alias, suffix_to_add
+                    )
+        return default_display_names
+
     def replace_transformations_with_processed_transformations(self):
         """
         The transformations attribute is normally specified via a HTTP request. Now we're

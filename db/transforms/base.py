@@ -343,6 +343,22 @@ class Summarize(Transform):
         return self.spec['base_grouping_column']
 
     @property
+    def aggregation_output_aliases(self):
+        return [
+            col_spec['output_alias']
+            for col_spec
+            in self._aggregation_col_specs
+        ]
+
+    @property
+    def grouping_output_aliases(self):
+        return [
+            col_spec['output_alias']
+            for col_spec
+            in self._grouping_col_specs
+        ]
+
+    @property
     def grouping_input_aliases(self):
         return [
             col_spec['input_alias']
