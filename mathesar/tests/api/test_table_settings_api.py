@@ -38,6 +38,9 @@ def test_create_non_empty_table_settings(client, schema, create_patents_table, s
     table = create_patents_table('Table 2', schema_name=schema_name)
     first_non_primary_column = table.columns.order_by('attnum')[1]
     expected_preview_template = f'{{{first_non_primary_column.id}}}'
+    column_order = [1, 2, 3]
+    table.settings.column_order = [1, 2, 3]
+    table.settings.save()
     response = client.get(
         f"/api/db/v0/tables/{table.id}/settings/"
     )
@@ -47,6 +50,7 @@ def test_create_non_empty_table_settings(client, schema, create_patents_table, s
     assert response_data['count'] == 1
     assert results[0]['preview_settings']['template'] == expected_preview_template
     assert results[0]['preview_settings']['customized'] is False
+    assert results[0]['column_order'] == column_order
 
 
 def test_create_empty_table_settings(client, schema, empty_nasa_table, schema_name):
@@ -62,6 +66,7 @@ def test_create_empty_table_settings(client, schema, empty_nasa_table, schema_na
     assert response_data['count'] == 1
     assert results[0]['preview_settings']['template'] == expected_preview_template
     assert results[0]['preview_settings']['customized'] is False
+    assert results[0]['column_order'] is None
 
 
 update_clients_with_status_codes = [
@@ -97,10 +102,12 @@ def test_update_table_settings(client, column_test_table):
     columns = models_base.Column.objects.filter(table=column_test_table).values_list('id', flat=True)
     preview_template = ','.join(f'{{{ column }}}' for column in columns)
     settings_id = column_test_table.settings.id
+    column_order = [4, 5, 6]
     data = {
         "preview_settings": {
             'template': preview_template,
-        }
+        },
+        "column_order": column_order
     }
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/settings/{settings_id}/",
@@ -110,3 +117,19 @@ def test_update_table_settings(client, column_test_table):
     response_data = response.json()
     assert response_data['preview_settings']['template'] == preview_template
     assert response_data['preview_settings']['customized'] is True
+    assert response_data['column_order'] == column_order
+
+
+def test_update_table_settings_string_in_column_order(client, column_test_table):
+    column_order = ["4", "5", "6"]
+    column_order_as_ints = [4, 5, 6]
+    data = {
+        "column_order": column_order
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{column_test_table.id}/settings/{column_test_table.settings.id}/",
+        data=data,
+    )
+    assert response.status_code == 200
+    response_data = response.json()
+    assert response_data['column_order'] == column_order_as_ints
