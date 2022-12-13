@@ -6,9 +6,10 @@
   } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import type {
-    ColumnWithAbstractType,
-    ColumnTypeOptionsSaveArgs,
+  import {
+    type ColumnWithAbstractType,
+    type ColumnTypeOptionsSaveArgs,
+    hasTypeOptionsChanges,
   } from './utils';
   import AbstractTypeDBOptions from './AbstractTypeDBOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
@@ -26,8 +27,11 @@
   let typeOptions: ColumnWithAbstractType['type_options'] = {
     ...(column.type_options ?? {}),
   };
+  $: actionButtonsVisible =
+    selectedAbstractType !== column.abstractType ||
+    selectedDbType !== column.type ||
+    hasTypeOptionsChanges(column.type_options ?? {}, typeOptions ?? {});
   let typeChangeState: RequestStatus;
-  let actionButtonsVisible = false;
 
   const validationContext = createValidationContext();
   $: ({ validationResult } = validationContext);
@@ -56,7 +60,6 @@
   function cancel() {
     resetAbstractType(column);
     typeChangeState = { state: 'success' };
-    actionButtonsVisible = false;
     dispatch('cancel');
   }
 
@@ -68,7 +71,6 @@
         type_options: { ...typeOptions },
       });
       typeChangeState = { state: 'success' };
-      actionButtonsVisible = false;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Unable to change column type';
@@ -81,48 +83,38 @@
     !selectedAbstractType ||
     typeChangeState?.state === 'processing' ||
     !$validationResult;
-
-  function showActionButtons() {
-    actionButtonsVisible = true;
-  }
 </script>
 
-<div
-  class="column-type-menu"
-  on:focus={showActionButtons}
-  on:mousedown={showActionButtons}
->
-  <AbstractTypeSelector
-    {selectedAbstractType}
-    {column}
-    on:change={(e) => selectTypeAndAbstractType(e.detail)}
-    on:reset={() => resetAbstractType(column)}
-  />
+<AbstractTypeSelector
+  {selectedAbstractType}
+  {column}
+  on:change={(e) => selectTypeAndAbstractType(e.detail)}
+  on:reset={() => resetAbstractType(column)}
+/>
 
-  {#if selectedAbstractType && selectedDbType}
-    {#key selectedAbstractType}
-      <AbstractTypeDBOptions
-        {selectedAbstractType}
-        bind:selectedDbType
-        bind:typeOptions
-        {column}
-      />
-    {/key}
-  {/if}
+{#if selectedAbstractType && selectedDbType}
+  {#key selectedAbstractType}
+    <AbstractTypeDBOptions
+      {selectedAbstractType}
+      bind:selectedDbType
+      bind:typeOptions
+      {column}
+    />
+  {/key}
+{/if}
 
-  {#if actionButtonsVisible}
-    <div class="footer">
-      <CancelOrProceedButtonPair
-        onProceed={onSave}
-        onCancel={cancel}
-        isProcessing={typeChangeState?.state === 'processing'}
-        canProceed={!isSaveDisabled}
-        proceedButton={{ label: 'Save' }}
-        size="small"
-      />
-    </div>
-  {/if}
-</div>
+{#if actionButtonsVisible}
+  <div class="footer">
+    <CancelOrProceedButtonPair
+      onProceed={onSave}
+      onCancel={cancel}
+      isProcessing={typeChangeState?.state === 'processing'}
+      canProceed={!isSaveDisabled}
+      proceedButton={{ label: 'Save' }}
+      size="small"
+    />
+  </div>
+{/if}
 
 <style lang="scss">
   .footer {
