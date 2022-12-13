@@ -87,7 +87,7 @@
     {/if}
 
     {#if column && !column.column.default?.is_dynamic}
-      <Collapsible isOpen>
+      <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
           title="Default Value"
@@ -100,7 +100,7 @@
     {/if}
 
     {#if column}
-      <Collapsible>
+      <Collapsible triggerAppearance="plain">
         <CollapsibleHeader slot="header" title="Formatting" />
         <div slot="content" class="content-container">
           <ColumnFormatting {column} />
