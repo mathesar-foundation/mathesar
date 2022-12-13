@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import { createValidationContext } from '@mathesar/component-library';
   import CancelOrProceedButtonPair from '@mathesar/component-library/cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
   import AbstractTypeDisplayOptions from '@mathesar/components/abstract-type-control/AbstractTypeDisplayOptions.svelte';
@@ -9,7 +10,6 @@
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
-  import type { RequestStatus } from '@mathesar/utils/api';
 
   export let column: ProcessedColumn;
 
@@ -33,17 +33,20 @@
     }));
 
   async function save() {
+    typeChangeState = { state: 'processing' };
     try {
       await columnsDataStore.patch(column.id, {
         display_options: displayOptions,
       });
       actionButtonsVisible = false;
+      typeChangeState = { state: 'success' };
     } catch (err) {
       const message =
         err instanceof Error
           ? err.message
           : 'Unable to change column display options.';
       toast.error(message);
+      typeChangeState = { state: 'failure', errors: [message] };
     }
   }
 
