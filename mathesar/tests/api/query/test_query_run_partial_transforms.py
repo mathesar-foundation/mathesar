@@ -111,6 +111,12 @@ def test_partial_summarize_transform(
         | {
             'schema': base_table.schema.id,
             'transformations': output_transformations,
+            'display_names': {
+                'col1': 'Center',
+                'col1_grouped': 'Center group',
+                'col2': 'Case Number',
+                'col2_agged': 'Case Number list',
+            },
         }
     )
     expect_response_json = {
