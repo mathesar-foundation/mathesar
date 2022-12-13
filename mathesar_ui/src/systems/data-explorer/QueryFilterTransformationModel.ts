@@ -11,6 +11,8 @@ export default class QueryFilterTransformationModel
 {
   type = 'filter' as const;
 
+  name = 'Filter' as const;
+
   columnIdentifier;
 
   conditionIdentifier;

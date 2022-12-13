@@ -4,9 +4,11 @@ import type {
   QueryInstance,
   QueryRunRequest,
 } from '@mathesar/api/types/queries';
+import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
+import QueryHideTransformationModel from './QueryHideTransformationModel';
 
 export interface QueryModelUpdateDiff {
   model: QueryModel;
@@ -22,15 +24,22 @@ export interface QueryModelUpdateDiff {
 
 export type QueryTransformationModel =
   | QueryFilterTransformationModel
-  | QuerySummarizationTransformationModel;
+  | QuerySummarizationTransformationModel
+  | QueryHideTransformationModel;
 
 function getTransformationModel(
   transformation: QueryInstanceTransformation,
 ): QueryTransformationModel {
-  if (transformation.type === 'filter') {
-    return new QueryFilterTransformationModel(transformation);
+  switch (transformation.type) {
+    case 'filter':
+      return new QueryFilterTransformationModel(transformation);
+    case 'summarize':
+      return new QuerySummarizationTransformationModel(transformation);
+    case 'hide':
+      return new QueryHideTransformationModel(transformation);
+    default:
+      throw new MissingExhaustiveConditionError(transformation);
   }
-  return new QuerySummarizationTransformationModel(transformation);
 }
 
 export default class QueryModel {
@@ -215,6 +224,12 @@ export default class QueryModel {
     return this.addTransform(summarizationTransformationModel);
   }
 
+  addHideTransform(
+    hideTransformModel: QueryHideTransformationModel,
+  ): QueryModelUpdateDiff {
+    return this.addTransform(hideTransformModel);
+  }
+
   removeLastTransform(): QueryModelUpdateDiff {
     const model = new QueryModel({
       ...this,
@@ -260,16 +275,16 @@ export default class QueryModel {
   }
 
   isColumnUsedInTransformations(columnAlias: string): boolean {
-    return this.transformationModels.some((transform) =>
-      transform.isColumnUsedInTransformation(columnAlias),
+    return this.transformationModels.some(
+      (transform) =>
+        'isColumnUsedInTransformation' in transform &&
+        transform.isColumnUsedInTransformation(columnAlias),
     );
   }
 
   areColumnsUsedInTransformations(columnAliases: string[]): boolean {
     return columnAliases.some((alias) =>
-      this.transformationModels.some((transform) =>
-        transform.isColumnUsedInTransformation(alias),
-      ),
+      this.isColumnUsedInTransformations(alias),
     );
   }
 

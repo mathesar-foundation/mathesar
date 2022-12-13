@@ -25,6 +25,8 @@ export default class QuerySummarizationTransformationModel
 {
   type = 'summarize' as const;
 
+  name = 'Summarization' as const;
+
   columnIdentifier;
 
   preprocFunctionIdentifier;
