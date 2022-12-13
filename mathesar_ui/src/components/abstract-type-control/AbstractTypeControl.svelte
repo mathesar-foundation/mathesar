@@ -3,6 +3,7 @@
   import {
     createValidationContext,
     CancelOrProceedButtonPair,
+    Alert,
   } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
@@ -105,6 +106,12 @@
 
 {#if actionButtonsVisible}
   <div class="footer">
+    <Alert appearance="warning">
+      <span class="warning-message"
+        >Data loss can result from changing the data type of a column. This
+        action cannot be undone.</span
+      >
+    </Alert>
     <CancelOrProceedButtonPair
       onProceed={onSave}
       onCancel={cancel}
@@ -119,5 +126,16 @@
 <style lang="scss">
   .footer {
     margin-top: 1rem;
+
+    display: flex;
+    flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 0.5rem;
+    }
+
+    .warning-message {
+      font-size: var(--text-size-small);
+    }
   }
 </style>
