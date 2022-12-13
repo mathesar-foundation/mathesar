@@ -3,18 +3,19 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty, SerializerMethodField
 from rest_framework.settings import api_settings
 
+from db.columns.exceptions import InvalidTypeError
+from db.columns.exceptions import InvalidTypeOptionError
+from db.types.base import PostgresType
+from db.types.operations.convert import get_db_type_enum_from_id
+from mathesar.api.exceptions.database_exceptions import (
+    exceptions as database_api_exceptions
+)
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.shared_serializers import (
     DisplayOptionsMappingSerializer,
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
 )
-from db.columns.exceptions import InvalidTypeOptionError
-from mathesar.api.exceptions.database_exceptions import (
-    exceptions as database_api_exceptions
-)
-from db.types.base import PostgresType
 from mathesar.models.base import Column
-from db.types.operations.convert import get_db_type_enum_from_id
 
 
 class InputValueField(serializers.CharField):
@@ -162,15 +163,20 @@ class ColumnSerializer(SimpleColumnSerializer):
     def validate(self, data):
         data = super().validate(data)
         # Reevaluate column display options based on the new column type.
-        if TYPE_KEY in data and DISPLAY_OPTIONS_KEY not in data:
-            if self.instance:
+        if TYPE_KEY in data and self.instance:
+            db_type = get_db_type_enum_from_id(data[TYPE_KEY].lower())
+            target_types = self.instance.valid_target_types
+            if db_type not in target_types:
+                raise database_api_exceptions.InvalidTypeCastAPIException(
+                    InvalidTypeError,
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            if DISPLAY_OPTIONS_KEY not in data:
                 db_type = getattr(self.instance, 'db_type', None)
                 # Invalidate display_options if type has been changed
                 if db_type is not None:
                     if str(db_type.id) != data[TYPE_KEY]:
                         data[DISPLAY_OPTIONS_KEY] = None
-            else:
-                data[DISPLAY_OPTIONS_KEY] = None
         if not self.partial:
             from_scratch_required_fields = [TYPE_KEY]
             from_scratch_specific_fields = [TYPE_KEY, 'nullable', 'primary_key']
