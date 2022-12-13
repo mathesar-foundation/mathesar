@@ -6,6 +6,7 @@ from db.queries.base import DBQuery, InitialColumn
 from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.transforms.operations.deserialize import deserialize_transformation
 from db.transforms.operations.serialize import serialize_transformation
+from db.transforms.base import Summarize
 
 from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
 from mathesar.state.cached_property import cached_property
@@ -254,67 +255,6 @@ class UIQuery(BaseModel, Relation):
             for alias, sa_col in self.db_query.all_sa_columns_map.items()
         }
 
-    @property
-    def _default_display_names(self):
-        def _get_map_of_output_alias_to_input_alias(
-            summarize_transform,
-            output_aliases
-        ):
-            return {
-                summarize_transform.map_of_output_alias_to_input_alias[
-                    output_alias
-                ]: output_alias
-                for output_alias in output_aliases
-            }
-        def _create_default_display_names(
-            map_of_output_alias_to_input_alias,
-            suffix_to_add,
-        ):
-            new_display_names = dict()
-            for output_alias, input_alias \
-            in map_of_output_alias_to_input_alias.items():
-                input_alias_display_name = self.display_names.get(input_alias)
-                if input_alias_display_name:
-                    new_display_names[output_alias] = \
-                        input_alias_display_name + suffix_to_add
-            return new_display_names
-        from db.transforms.base import Summarize
-        summarize_transforms = [
-            db_transform
-            for db_transform
-            in self.db_query.transformations
-            if isinstance(db_transform, Summarize)
-        ]
-        map_of_grouping_output_alias_to_input_alias = dict()
-        map_of_aggregation_output_alias_to_input_alias = dict()
-        for summarize_transform in summarize_transforms:
-            grouping_output_aliases = summarize_transform.grouping_output_aliases
-            aggregation_output_aliases = summarize_transform.aggregation_output_aliases
-            map_of_grouping_output_alias_to_input_alias = \
-                map_of_grouping_output_alias_to_input_alias | \
-                _get_map_of_output_alias_to_input_alias(summarize_transform, grouping_output_aliases)
-            map_of_aggregation_output_alias_to_input_alias = \
-                map_of_aggregation_output_alias_to_input_alias | \
-                _get_map_of_output_alias_to_input_alias(summarize_transform, aggregation_output_aliases)
-        default_display_names = dict()
-        for map_of_output_alias_to_input_alias, suffix_to_add \
-        in [
-            (
-                map_of_grouping_output_alias_to_input_alias,
-                " group"
-            ),
-            (
-                map_of_aggregation_output_alias_to_input_alias,
-                " list"
-            ),
-        ]:
-            default_display_names = \
-                default_display_names | \
-                    _create_default_display_names(
-                        map_of_output_alias_to_input_alias, suffix_to_add
-                    )
-        return default_display_names
-
     def replace_transformations_with_processed_transformations(self):
         """
         The transformations attribute is normally specified via a HTTP request. Now we're
@@ -437,6 +377,65 @@ class UIQuery(BaseModel, Relation):
     @property
     def _sa_engine(self):
         return self.base_table._sa_engine
+
+    @property
+    def _default_display_names(self):
+        def _get_default_display_name_for_agg_output_alias(
+            output_alias,
+            input_alias,
+            agg_function
+        ):
+            if output_alias and input_alias and agg_function:
+                map_of_agg_function_to_suffix = dict(
+                    aggregate_to_array=" list",
+                    count=" count",
+                )
+                suffix_to_add = map_of_agg_function_to_suffix.get(agg_function)
+                if suffix_to_add:
+                    input_alias_display_name = self.display_names.get(input_alias)
+                    if input_alias_display_name:
+                        return input_alias_display_name + suffix_to_add
+
+        def _get_default_display_name_for_group_output_alias(
+            summarize_transform,
+            output_alias,
+        ):
+                input_alias = \
+                    summarize_transform\
+                    .map_of_output_alias_to_input_alias[output_alias]
+                input_alias_display_name = self.display_names.get(input_alias)
+                if input_alias_display_name:
+                    suffix_to_add = " group"
+                    return input_alias_display_name + suffix_to_add
+        summarize_transforms = [
+            db_transform
+            for db_transform
+            in self.db_query.transformations
+            if isinstance(db_transform, Summarize)
+        ]
+        default_display_names = dict()
+        for summarize_transform in summarize_transforms:
+            # Find default display names for grouping output aliases
+            for output_alias in summarize_transform.grouping_output_aliases:
+                default_display_name = \
+                    _get_default_display_name_for_group_output_alias(
+                        summarize_transform,
+                        output_alias,
+                    )
+                if default_display_name:
+                    default_display_names[output_alias] = default_display_name
+            # Find default display names for aggregation output aliases
+            for agg_col_spec in summarize_transform.aggregation_col_specs:
+                input_alias = agg_col_spec.get("input_alias")
+                output_alias = agg_col_spec.get("output_alias")
+                agg_function = agg_col_spec.get("function")
+                default_display_name = \
+                    _get_default_display_name_for_agg_output_alias(
+                        output_alias, input_alias, agg_function
+                    )
+                if default_display_name:
+                    default_display_names[output_alias] = default_display_name
+        return default_display_names
 
 
 def _get_dj_column_for_initial_db_column(initial_column):

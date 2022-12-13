@@ -379,7 +379,7 @@ class Summarize(Transform):
         return self.spec.get("grouping_expressions", [])
 
     @property
-    def _aggregation_col_specs(self):
+    def aggregation_col_specs(self):
         return self.spec.get("aggregation_expressions", [])
 
 
