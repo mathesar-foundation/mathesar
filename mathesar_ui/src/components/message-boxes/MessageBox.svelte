@@ -23,9 +23,9 @@
     position: relative;
     border-radius: var(--border-radius-m);
     max-width: max-content;
-    margin: var(--margin);
-    background: var(--background);
-    border: var(--border);
+    margin: var(--MessageBox__margin);
+    background: var(--MessageBox__background);
+    border: var(--MessageBox__border);
   }
   .message-box.has-icon {
     padding-left: 2.25em;
@@ -34,6 +34,6 @@
     position: absolute;
     left: 0.8em;
     top: 0.7em;
-    color: var(--icon-color, currentcolor);
+    color: var(--MessageBox__icon-color, currentcolor);
   }
 </style>

@@ -45,6 +45,6 @@
 
 <style>
   .errors {
-    --margin: 1rem 0 0 1rem;
+    --MessageBox__margin: 1rem 0 0 1rem;
   }
 </style>

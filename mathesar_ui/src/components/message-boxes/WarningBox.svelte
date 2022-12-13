@@ -9,6 +9,6 @@
 
 <style>
   .warning-box {
-    --background: var(--yellow-100);
+    --MessageBox__background: var(--yellow-100);
   }
 </style>

@@ -9,7 +9,7 @@
 
 <style>
   .outcome-box {
-    --background: var(--purple-100);
-    --border: solid 1px var(--purple-300);
+    --MessageBox__background: var(--purple-100);
+    --MessageBox__border: solid 1px var(--purple-300);
   }
 </style>

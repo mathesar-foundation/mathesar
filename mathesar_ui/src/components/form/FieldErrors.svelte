@@ -16,6 +16,6 @@
 
 <style>
   .field-errors.has-margin {
-    --margin: 0.5rem 0 0 0.5rem;
+    --MessageBox__margin: 0.5rem 0 0 0.5rem;
   }
 </style>

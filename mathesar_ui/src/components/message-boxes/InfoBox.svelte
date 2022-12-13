@@ -9,7 +9,7 @@
 
 <style>
   .info-box {
-    --background: var(--sky-200);
-    --border: solid 1px var(--sky-300);
+    --MessageBox__background: var(--sky-200);
+    --MessageBox__border: solid 1px var(--sky-300);
   }
 </style>

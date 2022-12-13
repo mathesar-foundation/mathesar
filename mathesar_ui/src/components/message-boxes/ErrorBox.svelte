@@ -9,8 +9,8 @@
 
 <style>
   .error-box {
-    --background: var(--danger-background-color);
-    --icon-color: var(--danger-color);
+    --MessageBox__background: var(--danger-background-color);
+    --MessageBox__icon-color: var(--danger-color);
     font-size: var(--text-size-small);
   }
 </style>
