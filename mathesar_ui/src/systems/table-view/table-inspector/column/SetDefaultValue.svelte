@@ -1,6 +1,7 @@
 <script lang="ts">
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import { CancelOrProceedButtonPair } from '@mathesar/component-library';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
-  import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
@@ -10,9 +11,23 @@
   export let column: ProcessedColumn;
 
   const tabularData = getTabularDataStoreFromContext();
-  $: ({ columnsDataStore } = $tabularData);
+  $: ({ columnsDataStore, recordsData } = $tabularData);
+  $: ({ recordSummaries } = recordsData);
 
-  async function save(value: unknown) {
+  $: value = column.column.default?.value;
+  $: actionButtonsVisible = value !== column.column.default?.value;
+  $: recordSummary = $recordSummaries
+    .get(String(column.id))
+    ?.get(String(value));
+
+  let typeChangeState: RequestStatus;
+
+  function resetValue() {
+    value = column.column.default?.value;
+  }
+
+  async function save() {
+    typeChangeState = { state: 'processing' };
     try {
       await columnsDataStore.patch(column.id, {
         default: {
@@ -20,29 +35,51 @@
           value,
         },
       });
+      typeChangeState = { state: 'success' };
     } catch (err) {
       const message =
         err instanceof Error
           ? err.message
           : 'Unable to change column display options.';
       toast.error(message);
+      typeChangeState = { state: 'failure', errors: [message] };
+    }
+  }
+
+  function handleCancel() {
+    resetValue();
+    typeChangeState = { state: 'success' };
+  }
+
+  function setRecordSummary(recordId: string, recordSummary: string) {
+    if (recordSummaries) {
+      recordSummaries.addBespokeRecordSummary({
+        columnId: String(column.id),
+        recordId,
+        recordSummary,
+      });
     }
   }
 </script>
 
 <div class="default-value-container">
   <span class="label">Value</span>
-  <EditableTextWithActions
-    initialValue={column.column.default?.value}
-    onSubmit={save}
-    getValidationErrors={() => []}
-    inputComponentAndProps={{
-      component: DynamicInput,
-      props: {
-        componentAndProps: column.inputComponentAndProps,
-      },
-    }}
+  <DynamicInput
+    componentAndProps={column.inputComponentAndProps}
+    bind:value
+    disabled={typeChangeState?.state === 'processing'}
+    {recordSummary}
+    {setRecordSummary}
   />
+  {#if actionButtonsVisible}
+    <CancelOrProceedButtonPair
+      onProceed={save}
+      onCancel={handleCancel}
+      isProcessing={typeChangeState?.state === 'processing'}
+      proceedButton={{ label: 'Save' }}
+      size="small"
+    />
+  {/if}
 </div>
 
 <style lang="scss">
