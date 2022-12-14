@@ -1056,6 +1056,22 @@ def _get_patents_column_data(table):
     return column_data
 
 
+def test_table_patch_invalid_table_name(create_patents_table, client):
+    table_name = 'NASA Table'
+    table = create_patents_table(table_name)
+    # Having round brackets in the table name is invalid.
+    invalid_table_name = 'NASA Table(alpha)'
+
+    body = {'name': invalid_table_name}
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+
+    response_data = response.json()[0]
+    assert response.status_code == 400
+    assert response_data['code'] == ErrorCodes.InvalidTableName.value
+    assert response_data['message'] == f'Table name "{invalid_table_name}" is invalid.'
+    assert response_data['field'] == 'name'
+
+
 def test_table_patch_same_table_name(create_patents_table, client):
     table_name = 'PATCH same name'
     table = create_patents_table(table_name)
