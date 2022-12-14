@@ -303,6 +303,33 @@ def test_create_single_column_foreign_key_constraint(two_foreign_key_tables, cli
     )
 
 
+def test_foreign_key_constraint_on_invalid_table_name(
+    create_base_table,
+    create_referent_table,
+    client
+):
+    referrer_table = create_base_table(table_name="Base_table")
+    # Having round brackets in the referent_table name is invalid.
+    referent_table = create_referent_table(table_name="Referent_table(alpha)")
+    referrer_column = referrer_table.get_columns_by_name(["Center"])[0]
+    referent_column = referent_table.get_columns_by_name(["Id"])[0]
+    referent_table.add_constraint(
+        UniqueConstraint(None, referent_table.oid, [referent_column.attnum])
+    )
+    data = {
+        'type': 'foreignkey',
+        'columns': [referrer_column.id],
+        'referent_columns': [referent_column.id],
+        'referent_table': referent_table.id
+    }
+    response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
+    response_data = response.json()[0]
+    assert response.status_code == 400
+    assert response_data['code'] == ErrorCodes.InvalidTableName.value
+    assert response_data['message'] == 'Table name "Referent_table(alpha)" is invalid.'
+    assert response_data['field'] == 'referent_table'
+
+
 def test_create_single_column_foreign_key_constraint_with_options(
     two_foreign_key_tables, client
 ):
