@@ -93,7 +93,7 @@
       {:else}
         <SelectTableWithinCurrentSchema
           autoSelect="none"
-          table={currentTable}
+          value={currentTable}
           on:change={(e) => updateBaseTable(e.detail)}
         />
       {/if}
