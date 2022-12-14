@@ -30,6 +30,7 @@ import type {
   InputColumnsStoreSubstance,
 } from './utils';
 import QueryRunner from './QueryRunner';
+import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 
 function validateQuery(
   queryModel: QueryModel,
@@ -79,6 +80,8 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     inputColumnInformationMap: new Map(),
   });
 
+  confirmationNeededForMultipleResults: Writable<boolean> = writable(true);
+
   // Promises
 
   private baseTableFetchPromise: CancellablePromise<TableEntry> | undefined;
@@ -103,7 +106,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       return query;
     });
     this.runUnsubscriber = this.on('run', (response: QueryRunResponse) => {
-      this.checkAndUpdateSummarization(new QueryModel(response.query));
+      this.checkAndUpdateSummarizationAfterRun(new QueryModel(response.query));
     });
   }
 
@@ -219,7 +222,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     }));
   }
 
-  private checkAndUpdateSummarization(queryModel: QueryModel) {
+  private checkAndUpdateSummarizationAfterRun(queryModel: QueryModel) {
     const thisQueryModel = this.getQueryModel();
     let newQueryModel = thisQueryModel;
     let isChangeNeeded = false;
@@ -274,6 +277,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
           this.resetResults();
           this.undoRedoManager.clear();
           this.setUndoRedoStates();
+          this.confirmationNeededForMultipleResults.set(true);
           await this.calculateInputColumnTree();
           break;
         case 'initialColumnName':
@@ -364,6 +368,25 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       }));
       throw err;
     }
+  }
+
+  getAutoSummarizationTransformModel():
+    | QuerySummarizationTransformationModel
+    | undefined {
+    const { baseTableColumns } = get(this.inputColumns);
+    const firstBaseTableInitialColumn =
+      this.getQueryModel().initial_columns.find((initialColumn) =>
+        baseTableColumns.has(initialColumn.id),
+      );
+    if (firstBaseTableInitialColumn) {
+      return new QuerySummarizationTransformationModel({
+        type: 'summarize',
+        spec: {
+          base_grouping_column: firstBaseTableInitialColumn.alias,
+        },
+      });
+    }
+    return undefined;
   }
 
   destroy(): void {
