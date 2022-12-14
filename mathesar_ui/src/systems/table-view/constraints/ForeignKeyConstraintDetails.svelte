@@ -72,7 +72,7 @@
     font-size: var(--text-size-small);
     background-color: var(--slate-200);
     border-radius: var(--border-radius-xl);
-    padding: 4px 6px;
+    padding: 0.285rem 0.428rem;
   }
 
   .target {
