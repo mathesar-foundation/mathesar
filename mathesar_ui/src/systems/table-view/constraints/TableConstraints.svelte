@@ -19,7 +19,7 @@
   } from '@mathesar/icons';
   import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
   import TableConstraint from './TableConstraint.svelte';
-  import NewFkConstraintModal from './NewFkConstraintModal.svelte';
+  import NewFkConstraintModal from './NewFkConstraint.svelte';
   import ConstraintTypeSection from './ConstraintTypeSection.svelte';
   import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
 
