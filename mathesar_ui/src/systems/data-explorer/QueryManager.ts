@@ -82,6 +82,8 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
 
   confirmationNeededForMultipleResults: Writable<boolean> = writable(true);
 
+  queryHasUnsavedChanges: Writable<boolean> = writable(false);
+
   // Promises
 
   private baseTableFetchPromise: CancellablePromise<TableEntry> | undefined;
@@ -202,6 +204,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     clientValidationState: RequestStatus;
   }> {
     this.query.set(queryModel);
+    this.queryHasUnsavedChanges.set(true);
     if (get(this.state).inputColumnsFetchState?.state !== 'success') {
       await this.calculateInputColumnTree();
     }
@@ -279,6 +282,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
           this.undoRedoManager.clear();
           this.setUndoRedoStates();
           this.confirmationNeededForMultipleResults.set(true);
+          this.queryHasUnsavedChanges.set(false);
           await this.calculateInputColumnTree();
           break;
         case 'initialColumnName':
@@ -354,6 +358,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
         ..._state,
         saveState: { state: 'success' },
       }));
+      this.queryHasUnsavedChanges.set(false);
       return this.getQueryModel();
     } catch (err) {
       const errors =

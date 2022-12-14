@@ -14,7 +14,7 @@
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import TableName from '@mathesar/components/TableName.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
-  import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
+  import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
@@ -30,7 +30,7 @@
     {};
   export let isInspectorOpen: boolean;
 
-  $: ({ query, state } = queryManager);
+  $: ({ query, state, queryHasUnsavedChanges } = queryManager);
   $: currentTable = $query.base_table
     ? $tablesDataStore.data.get($query.base_table)
     : undefined;
@@ -117,8 +117,11 @@
       </Button>
     {/if}
 
-    {#if $query.isSaved()}
-      <SaveStatusIndicator status={querySaveRequestStatus} />
+    {#if isSaved}
+      <ModificationStatus
+        requestStatus={$state.saveState}
+        hasChanges={$queryHasUnsavedChanges}
+      />
     {/if}
   </div>
 
@@ -133,7 +136,7 @@
             querySaveRequestStatus === 'processing'}
           onClick={saveExistingOrCreateNew}
         />
-        {#if $query.isSaved()}
+        {#if isSaved}
           <DropdownMenu
             triggerAppearance="primary"
             placement="bottom-end"
