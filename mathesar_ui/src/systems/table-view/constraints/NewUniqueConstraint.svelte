@@ -133,7 +133,6 @@
       </LabeledInput>
     </FormField>
 
-    <!-- TODO: Are we removing this? -->
     <FormField>
       <RadioGroup
         options={namingStrategies}

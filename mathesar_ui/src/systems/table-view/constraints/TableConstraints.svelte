@@ -63,8 +63,6 @@
         constraintType="unique"
         constraints={constraintsGroupedByType.get('unique') || []}
       />
-      <!-- TODO: Same for check/exclude too? -->
-      <!-- TODO: Create a ticket for null constraints -->
     </div>
   {/if}
 </div>

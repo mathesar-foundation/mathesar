@@ -19,8 +19,6 @@
     foreignkey: 'A foreign key constraint links records in two tables.',
     unique:
       'A unique constraint ensures that each record in a column is unique.',
-
-    // TODO: Add them later
     check: '',
     exclude: '',
   };
@@ -29,8 +27,6 @@
     primary: 'Primary Keys',
     foreignkey: 'Foreign Keys',
     unique: 'Unique',
-
-    // TODO: Add them later
     check: '',
     exclude: '',
   };
