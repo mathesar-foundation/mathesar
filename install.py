@@ -14,8 +14,25 @@ def main():
     for (opt, value) in opts:
         if (opt == "-s") or (opt == "--skip-confirm"):
             skip_confirm = True
+
     for database_key in [key for key in DATABASES if key != "default"]:
         install_on_db_with_key(database_key, skip_confirm)
+
+
+def superuser_exists():
+    pass
+
+
+def secret_key_exists():
+    pass
+
+
+def create_superuser():
+    pass
+
+
+def generate_secretkey():
+    pass
 
 
 def install_on_db_with_key(database_key, skip_confirm):
