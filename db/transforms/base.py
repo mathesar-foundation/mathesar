@@ -5,8 +5,8 @@ import itertools
 import sqlalchemy
 from sqlalchemy import select
 
-from db.functions.operations import apply
-from db.functions.operations.deserialize import get_db_function_subclass_by_id
+from db.functions.operations.apply import apply_db_function_by_id, apply_db_function_spec_as_filter
+from db.functions.packed import DistinctArrayAgg
 from db.records.operations import group, relevance, sort as rec_sort
 
 
@@ -110,7 +110,7 @@ class Filter(Transform):
         enforce_relation_type_expectations(relation)
         executable = _to_executable(relation)
         if filter is not None:
-            executable = apply.apply_db_function_spec_as_filter(executable, filter)
+            executable = apply_db_function_spec_as_filter(executable, filter)
         return _to_non_executable(executable)
 
 
@@ -226,7 +226,7 @@ class Summarize(Transform):
             {
                 "input_alias": "col3",
                 "output_alias": "col3_alias",  # required for aggregation cols
-                "function": "aggregate_to_array"  # required DBFunction id
+                "function": "distinct_aggregate_to_array"  # required DBFunction id
             }
         ]
     }
@@ -252,32 +252,40 @@ class Summarize(Transform):
     def apply_to_relation(self, relation):
 
         def _get_grouping_column(col_spec):
-            preproc = col_spec.get('preproc')
-            out_alias = col_spec.get('output_alias')
-            in_alias = col_spec['input_alias']
+            preproc_db_function_subclass_id = col_spec.get('preproc')
+            input_alias = col_spec['input_alias']
+            output_alias = col_spec['output_alias']
+            sa_expression = relation.columns[input_alias]
+            if preproc_db_function_subclass_id is not None:
+                sa_expression = apply_db_function_by_id(
+                    preproc_db_function_subclass_id,
+                    [sa_expression],
+                )
+            sa_expression = sa_expression.label(output_alias)
+            return sa_expression
 
-            expr = relation.columns[in_alias]
-
-            if preproc is not None:
-                expr = get_db_function_subclass_by_id(preproc).to_sa_expression(expr)
-            if out_alias is not None:
-                expr = expr.label(out_alias)
-
-            return expr
+        def _get_aggregation_column(relation, col_spec):
+            input_alias = col_spec['input_alias']
+            output_alias = col_spec['output_alias']
+            agg_db_function_subclass_id = col_spec['function']
+            column_to_aggregate = relation.columns[input_alias]
+            sa_expression = column_to_aggregate
+            sa_expression = apply_db_function_by_id(
+                agg_db_function_subclass_id,
+                [sa_expression],
+            )
+            return sa_expression.label(output_alias)
 
         grouping_expressions = [
             _get_grouping_column(col_spec)
-            for col_spec in self._grouping_col_specs
+            for col_spec
+            in self._grouping_col_specs
         ]
         aggregation_expressions = [
-            (
-                get_db_function_subclass_by_id(col_spec['function'])
-                .to_sa_expression(relation.columns[col_spec['input_alias']])
-                .label(col_spec['output_alias'])
-            )
-            for col_spec in self._aggregation_col_specs
+            _get_aggregation_column(relation, col_spec)
+            for col_spec
+            in self._aggregation_col_specs
         ]
-
         executable = (
             select(*grouping_expressions, *aggregation_expressions)
             .group_by(*grouping_expressions)
@@ -330,7 +338,7 @@ class Summarize(Transform):
             )
         spec_field = 'aggregation_expressions'
         default_suffix = self.default_agg_output_alias_suffix
-        default_aggregation_fn = 'aggregate_to_array'
+        default_aggregation_fn = DistinctArrayAgg.id
         return _add_aliases_to_summarization_expr_field(
             summarization=self,
             spec_field=spec_field,

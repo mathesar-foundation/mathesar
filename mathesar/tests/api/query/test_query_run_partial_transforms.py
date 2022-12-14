@@ -9,7 +9,7 @@ fully_speced_summarize = \
         dict(
             aggregation_expressions=[
                 dict(
-                    function='aggregate_to_array',
+                    function='distinct_aggregate_to_array',
                     input_alias='col2',
                     output_alias='col2_agged'
                 )
@@ -33,7 +33,7 @@ fully_speced_summarize = \
                     base_grouping_column='col1',
                     aggregation_expressions=[
                         dict(
-                            function='aggregate_to_array',
+                            function='distinct_aggregate_to_array',
                             input_alias='col2',
                             output_alias='col2_agged'
                         )

@@ -65,12 +65,15 @@ def create_overdue_books_query(library_ma_tables, get_uid, client):
             },
             {
                 "spec": {
-                    "grouping_expressions": [{"input_alias": "email"}],
+                    "grouping_expressions": [{
+                        "input_alias": "email",
+                        "output_alias": "email",
+                    }],
                     "aggregation_expressions": [
                         {
                             "input_alias": "Book Title",
                             "output_alias": "Title List",
-                            "function": "aggregate_to_array"
+                            "function": "distinct_aggregate_to_array"
                         }
                     ]
                 },

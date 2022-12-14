@@ -1,7 +1,17 @@
 from db.functions.base import DBFunction
 from db.functions.exceptions import ReferencedColumnsDontExist
 from db.functions.packed import DBFunctionPacked
-from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
+from db.functions.operations.deserialize import get_db_function_from_ma_function_spec, get_db_function_subclass_by_id
+
+
+def apply_db_function_by_id(db_function_subclass_id, parameters):
+    db_function_subclass = \
+        get_db_function_subclass_by_id(
+            db_function_subclass_id
+        )
+    db_function = db_function_subclass(parameters)
+    sa_expression = _db_function_to_sa_expression(db_function)
+    return sa_expression
 
 
 def apply_db_function_spec_as_filter(relation, ma_function_spec):
@@ -56,6 +66,9 @@ def _db_function_to_sa_expression(db_function_or_literal):
             for raw_parameter in raw_parameters
         ]
         db_function_subclass = type(db_function)
+        # TODO do we need to keep to_sa_expression as a static method?
+        # TODO maybe make it an instance method and then rewrite DBFunctionPacked.to_sa_expression
+        # to call to_sa_expression on result of self.unpack().
         return db_function_subclass.to_sa_expression(*sa_expression_parameters)
     else:
         literal = db_function_or_literal

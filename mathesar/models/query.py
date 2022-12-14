@@ -213,6 +213,7 @@ class UIQuery(BaseModel, Relation):
         is generated mid-query (created via a summarization).
         """
         alias = sa_col.name
+        assert not alias.startswith('%')
         initial_db_column = self._get_db_initial_column_by_alias(alias)
         is_initial_column = initial_db_column is not None
         output = dict(
