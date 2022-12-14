@@ -188,7 +188,9 @@ class Schema(DatabaseObject):
     # E.g: TableA from SchemaA depends on TableB from SchemaB
     # SchemaA won't return as a dependent for SchemaB, however
     # TableA will be a dependent of TableB which in turn depends on its schema
-    def get_dependents(self, exclude=[]):
+    def get_dependents(self, exclude=None):
+        if exclude is None:
+            exclude = []
         return get_dependents_graph(
             self.oid,
             self._sa_engine,
@@ -391,7 +393,9 @@ class Table(DatabaseObject, Relation):
     def description(self):
         return get_table_description(self.oid, self._sa_engine)
 
-    def get_dependents(self, exclude=[]):
+    def get_dependents(self, exclude=None):
+        if exclude is None:
+            exclude = []
         return get_dependents_graph(
             self.oid,
             self.schema._sa_engine,
@@ -459,7 +463,9 @@ class Table(DatabaseObject, Relation):
             engine=self.schema._sa_engine,
         )
 
-    def sa_num_records(self, filter=None, search=[]):
+    def sa_num_records(self, filter=None, search=None):
+        if search is None:
+            search = []
         return get_count(
             table=self._sa_table,
             engine=self.schema._sa_engine,
@@ -486,11 +492,15 @@ class Table(DatabaseObject, Relation):
         limit=None,
         offset=None,
         filter=None,
-        order_by=[],
+        order_by=None,
         group_by=None,
-        search=[],
+        search=None,
         duplicate_only=None,
     ):
+        if order_by is None:
+            order_by = []
+        if search is None:
+            search = []
         return db_get_records_with_default_order(
             table=self._sa_table,
             engine=self.schema._sa_engine,

@@ -438,13 +438,15 @@ def test_delete(post_minimal_query, client):
 def _deep_equality_assert(
     expected,
     actual,
-    key_path=[],  # for debugging
+        key_path=None,  # for debugging
 ):
     """
     Recursively walks dicts and lists, checking that values in `expected` are present in and equal
     to those in `actual`. Note that dicts in `actual` can have keys not in `expected`, but can't
     have list elements that are not in `expected`.
     """
+    if key_path is None:
+        key_path = []
     if isinstance(expected, dict):
         for key in expected:
             assert key in actual
