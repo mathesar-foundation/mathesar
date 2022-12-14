@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { isDefinedNonNullable } from '@mathesar-component-library';
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type {
     HorizontalAlignment,
@@ -16,16 +15,7 @@
   export let formatterOptions: $$Props['formatterOptions'];
   export let horizontalAlignment: HorizontalAlignment = 'right';
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
-  export let displayFormatter: $$Props['displayFormatter'];
-
-  function formatValue(
-    v: string | number | null | undefined,
-  ): string | null | undefined {
-    if (!isDefinedNonNullable(v)) {
-      return v;
-    }
-    return displayFormatter.format(String(v));
-  }
+  export let formatForDisplay: $$Props['formatForDisplay'];
 </script>
 
 <SteppedInputCell
@@ -34,7 +24,7 @@
   {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
-  {formatValue}
+  formatValue={formatForDisplay}
   {horizontalAlignment}
   let:handleInputBlur
   let:handleInputKeydown

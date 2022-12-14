@@ -1,5 +1,6 @@
 import type { Column } from '@mathesar/api/types/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
+import type { CellValueFormatter } from './components/typeDefinitions';
 
 // The types here are frontend types and are
 // different from db types.
@@ -21,7 +22,7 @@ export type CellColumnLike = Pick<
   'type' | 'type_options' | 'display_options'
 >;
 
-export interface CellComponentFactory {
+export interface CellComponentFactory<T = never> {
   get(
     column: CellColumnLike,
     config?: Record<string, unknown>,
@@ -33,5 +34,5 @@ export interface CellComponentFactory {
   getDisplayFormatter?(
     column: CellColumnLike,
     config?: Record<string, unknown>,
-  ): (value: unknown) => string | null;
+  ): CellValueFormatter<T>;
 }

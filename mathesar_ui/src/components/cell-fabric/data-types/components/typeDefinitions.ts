@@ -4,8 +4,11 @@ import type {
   SelectProps,
 } from '@mathesar-component-library/types';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { StringifiedNumberFormatter } from '@mathesar-component-library';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
+
+export type CellValueFormatter<T> = (
+  value: T | null | undefined,
+) => string | null | undefined;
 
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
@@ -64,7 +67,7 @@ export type TextAreaCellProps = TextBoxCellProps;
 
 export interface NumberCellExternalProps {
   formatterOptions: Partial<NumberFormatterOptions>;
-  displayFormatter: StringifiedNumberFormatter;
+  formatForDisplay: CellValueFormatter<string | number>;
 }
 
 export interface NumberCellProps

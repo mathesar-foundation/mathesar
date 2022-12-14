@@ -3,11 +3,17 @@ import type {
   NumberDisplayOptions,
   NumberFormat,
 } from '@mathesar/api/types/tables/columns';
-import { StringifiedNumberFormatter } from '@mathesar-component-library';
+import {
+  StringifiedNumberFormatter,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import NumberCell from './components/number/NumberCell.svelte';
 import NumberCellInput from './components/number/NumberCellInput.svelte';
-import type { NumberCellExternalProps } from './components/typeDefinitions';
+import type {
+  CellValueFormatter,
+  NumberCellExternalProps,
+} from './components/typeDefinitions';
 import type { CellComponentFactory } from './typeDefinitions';
 
 // prettier-ignore
@@ -54,10 +60,10 @@ export function getUseGrouping(
   }
 }
 
-function getInputProps(
+function getFormatterOptions(
   column: NumberColumn,
   config?: Config,
-): Omit<NumberCellExternalProps, 'displayFormatter'> {
+): NumberCellExternalProps['formatterOptions'] {
   const displayOptions = column.display_options;
   const format = displayOptions?.number_format ?? null;
   const locale = (format && localeMap.get(format)) ?? undefined;
@@ -67,13 +73,11 @@ function getInputProps(
   const minimumFractionDigits =
     displayOptions?.minimum_fraction_digits ?? undefined;
   return {
-    formatterOptions: {
-      locale,
-      allowFloat,
-      allowNegative,
-      useGrouping,
-      minimumFractionDigits,
-    },
+    locale,
+    allowFloat,
+    allowNegative,
+    useGrouping,
+    minimumFractionDigits,
   };
 }
 
@@ -81,24 +85,31 @@ function getProps(
   column: NumberColumn,
   config?: Config,
 ): NumberCellExternalProps {
-  const props = getInputProps(column, config);
+  const basicFormatterOptions = getFormatterOptions(column, config);
   const displayOptions = column.display_options;
   const maximumFractionDigits =
     displayOptions?.maximum_fraction_digits ?? undefined;
   const formatterOptions = {
-    ...props.formatterOptions,
+    ...basicFormatterOptions,
     // We only want to apply `maximumFractionDigits` during display. We don't
     // want it to take effect during input.
     maximumFractionDigits,
   };
+  const displayFormatter = new StringifiedNumberFormatter(formatterOptions);
   return {
-    ...props,
     formatterOptions,
-    displayFormatter: new StringifiedNumberFormatter(formatterOptions),
+    formatForDisplay: (
+      v: string | number | null | undefined,
+    ): string | null | undefined => {
+      if (!isDefinedNonNullable(v)) {
+        return v;
+      }
+      return displayFormatter.format(String(v));
+    },
   };
 }
 
-const numberType: CellComponentFactory = {
+const numberType: CellComponentFactory<string> = {
   get(
     column: NumberColumn,
     config?: Config,
@@ -112,19 +123,18 @@ const numberType: CellComponentFactory = {
   getInput(
     column: NumberColumn,
     config?: Config,
-  ): ComponentAndProps<Omit<NumberCellExternalProps, 'displayFormatter'>> {
+  ): ComponentAndProps<NumberCellExternalProps['formatterOptions']> {
     return {
       component: NumberCellInput,
-      props: getInputProps(column, config),
+      props: getFormatterOptions(column, config),
     };
   },
 
   getDisplayFormatter(
     column: NumberColumn,
     config?: Config,
-  ): (value: unknown) => string {
-    const formatter = getProps(column, config).displayFormatter;
-    return (value: unknown) => formatter.format(String(value));
+  ): CellValueFormatter<string> {
+    return getProps(column, config).formatForDisplay;
   },
 };
 

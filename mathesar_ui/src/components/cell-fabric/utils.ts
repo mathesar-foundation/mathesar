@@ -13,10 +13,6 @@ import LinkedRecordCell from './data-types/components/linked-record/LinkedRecord
 import PrimaryKeyCell from './data-types/components/primary-key/PrimaryKeyCell.svelte';
 import LinkedRecordInput from './data-types/components/linked-record/LinkedRecordInput.svelte';
 
-export type CellValueFormatter<T> = (
-  value: T | null | undefined,
-) => string | null | undefined;
-
 function getCellInfo(dbType: CellColumnLike['type']): CellInfo | undefined {
   const abstractTypeOfColumn = getAbstractTypeForDbType(
     dbType,
