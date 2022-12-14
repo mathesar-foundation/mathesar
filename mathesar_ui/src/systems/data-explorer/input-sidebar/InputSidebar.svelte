@@ -36,6 +36,11 @@
         body: `By default, Mathesar shows only one related record per row.
                We recommend adding a summarization step if you'd like to see
                related records as a list instead.`,
+        proceedButton: {
+          label: 'Yes, show related records as a list',
+          icon: undefined,
+        },
+        cancelButton: { label: 'Do not summarize', icon: undefined },
       });
       confirmationNeededForMultipleResults.set(false);
     }
