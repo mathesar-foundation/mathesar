@@ -8,9 +8,17 @@ import date from './date';
 import time from './time';
 import datetime from './datetime';
 import arrayFactory from './arrayFactory';
-import type { CellDataType, CellComponentFactory } from './typeDefinitions';
+import type {
+  SimpleCellDataTypes,
+  CompoundCellDataTypes,
+  CellDataType,
+  CellComponentFactory,
+} from './typeDefinitions';
 
-const simpleDataTypeComponentFactories = {
+const simpleDataTypeComponentFactories: Record<
+  SimpleCellDataTypes,
+  CellComponentFactory
+> = {
   string,
   boolean,
   number,
@@ -22,7 +30,10 @@ const simpleDataTypeComponentFactories = {
   datetime,
 };
 
-const compoundDataTypeComponentFactories = {
+const compoundDataTypeComponentFactories: Record<
+  CompoundCellDataTypes,
+  CellComponentFactory
+> = {
   array: arrayFactory(simpleDataTypeComponentFactories),
 };
 

@@ -136,9 +136,13 @@ export interface DateTimeCellProps
 
 // Array
 
-export type ArrayCellExternalProps = Record<string, never>;
+export interface ArrayCellExternalProps {
+  formatElementForDisplay: CellValueFormatter<never>;
+}
 
-export type ArrayCellProps = CellTypeProps<unknown[]>;
+export interface ArrayCellProps
+  extends CellTypeProps<never[]>,
+    ArrayCellExternalProps {}
 
 // Common
 
