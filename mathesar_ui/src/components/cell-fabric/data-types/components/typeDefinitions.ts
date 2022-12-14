@@ -109,10 +109,10 @@ export interface SingleSelectCellProps<Option>
 
 // FormattedInput
 
-export type FormattedInputCellExternalProps = Omit<
-  FormattedInputProps<string>,
-  'disabled' | 'value'
->;
+export interface FormattedInputCellExternalProps
+  extends Omit<FormattedInputProps<string>, 'disabled' | 'value'> {
+  formatForDisplay: CellValueFormatter<string>;
+}
 
 export interface FormattedInputCellProps
   extends CellTypeProps<string>,
