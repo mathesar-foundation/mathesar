@@ -30,4 +30,8 @@ export interface CellComponentFactory {
     column: CellColumnLike,
     config?: Record<string, unknown>,
   ): ComponentAndProps;
+  getDisplayFormatter?(
+    column: CellColumnLike,
+    config?: Record<string, unknown>,
+  ): (value: unknown) => string | null;
 }
