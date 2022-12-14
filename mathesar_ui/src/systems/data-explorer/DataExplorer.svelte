@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { Tutorial } from '@mathesar-component-library';
   import { iconExploration } from '@mathesar/icons';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
+  import { queries } from '@mathesar/stores/queries';
   import type QueryManager from './QueryManager';
   import InputSidebar from './input-sidebar/InputSidebar.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
@@ -42,12 +44,24 @@
       />
     </div>
   {/if}
-  <div class="content-pane">
-    {#if !$query.base_table}
+  {#if !$query.base_table}
+    <div class="initial-content">
+      {#if $queries.requestStatus.state === 'success' && $queries.data.size === 0}
+        <Tutorial>
+          <span slot="title"> Create and Share Explorations of Your Data </span>
+          <span slot="body">
+            Use Data Explorer to analyze and share your data. Explorations are
+            based on tables in your schema, to get started choose a table and
+            start adding columns and transformations.
+          </span>
+        </Tutorial>
+      {/if}
       <div class="help-text">
         Get started by selecting a table and adding columns
       </div>
-    {:else}
+    </div>
+  {:else}
+    <div class="content-pane">
       <InputSidebar {queryManager} {linkCollapsibleOpenState} />
       {#if hasNoColumns}
         <div class="help-text">Get started by adding columns from the left</div>
@@ -57,8 +71,8 @@
           <ExplorationInspector queryHandler={queryManager} on:delete />
         {/if}
       {/if}
-    {/if}
-  </div>
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -73,6 +87,33 @@
       padding: 0 var(--size-large);
     }
 
+    .help-text {
+      display: inline-block;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: var(--text-size-xx-large);
+      color: var(--slate-500);
+    }
+
+    .initial-content {
+      display: flex;
+      overflow: auto;
+      flex-direction: column;
+      align-items: center;
+
+      :global(.tutorial) {
+        margin-top: 4rem;
+        max-width: 70%;
+      }
+
+      .help-text {
+        margin: 10rem 0;
+      }
+      :global(.tutorial + .help-text) {
+        margin: 5rem 0;
+      }
+    }
+
     .content-pane {
       display: flex;
       overflow: hidden;
@@ -81,12 +122,7 @@
       --exploration-inspector-width: 22.9rem;
 
       .help-text {
-        display: inline-block;
         margin-top: 10rem;
-        margin-left: auto;
-        margin-right: auto;
-        font-size: var(--text-size-xx-large);
-        color: var(--slate-500);
       }
     }
   }
