@@ -136,6 +136,19 @@ class DictHasBadKeys(MathesarValidationException):
         super().__init__(None, self.error_code, message, field, None)
 
 
+class InvalidTableName(MathesarValidationException):
+    error_code = ErrorCodes.InvalidTableName.value
+
+    def __init__(
+            self,
+            table_name,
+            message=None,
+            field=None,
+    ):
+        message = f'Table name "{table_name}" is invalid.'
+        super().__init__(None, self.error_code, message, field, None)
+
+
 class IncorrectOldPassword(MathesarValidationException):
     error_code = ErrorCodes.IncorrectOldPassword.value
 
