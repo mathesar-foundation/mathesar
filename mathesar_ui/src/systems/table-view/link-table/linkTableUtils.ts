@@ -3,7 +3,7 @@ import { invalidIf } from '@mathesar/components/form';
 import { getAvailableName } from '@mathesar/utils/db';
 import { makeSingular } from '@mathesar/utils/languageUtils';
 
-export const linkTypes = ['oneToMany', 'manyToOne', 'manyToMany'] as const;
+export const linkTypes = ['manyToOne', 'oneToMany', 'manyToMany'] as const;
 
 export type LinkType = typeof linkTypes[number];
 
