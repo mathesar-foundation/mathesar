@@ -26,9 +26,11 @@ def apply_transformations_deprecated(
     columns_to_select=None,
     group_by=None,
     duplicate_only=None,
-    search=[],
+    search=None,
 ):
     # TODO rename the actual method parameter
+    if search is None:
+        search = []
     relation = table
 
     enforce_relation_type_expectations(relation)
