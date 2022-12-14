@@ -20,6 +20,8 @@
   import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
   import TableConstraint from './TableConstraint.svelte';
   import NewFkConstraintModal from './NewFkConstraintModal.svelte';
+  import ConstraintTypeSection from './ConstraintTypeSection.svelte';
+  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
 
   const tabularData = getTabularDataStoreFromContext();
   const newUniqueConstraintModal = modal.spawnModalController();
@@ -29,18 +31,26 @@
   $: state = $constraintsDataStore.state;
   $: errorMsg = $constraintsDataStore.error;
   $: constraints = $constraintsDataStore.constraints;
+
   $: constraintsGroupedByType = constraints.reduce(
     (groupedConstraints, constraint) => {
-      if (Array.isArray(groupedConstraints[constraint.type])) {
-        groupedConstraints[constraint.type].push(constraint);
+      const alreadyExistingConstraints = groupedConstraints.get(
+        constraint.type,
+      );
+      if (Array.isArray(alreadyExistingConstraints)) {
+        groupedConstraints.set(constraint.type, [
+          ...alreadyExistingConstraints,
+          constraint,
+        ]);
         return groupedConstraints;
       } else {
-        groupedConstraints[constraint.type] = [constraint];
+        groupedConstraints.set(constraint.type, [constraint]);
         return groupedConstraints;
       }
     },
-    {} as Record<Constraint['type'], Constraint[]>,
+    new Map<ConstraintType, Constraint[]>(),
   );
+
   $: isEmpty = constraints.length === 0;
   $: isLoading = state === States.Idle || state === States.Loading;
   // Only show the spinner during the _initial_ loading event. Hide it for
@@ -64,29 +74,20 @@
     <div>No constraints</div>
   {:else}
     <div class="constraints-list">
-      {#each Object.entries(constraintsGroupedByType) as [constraintType, constraints] (constraintType)}
-        {#each constraints as constraint (constraint.id)}
-          <TableConstraint {constraint} drop={() => remove(constraint)} />
-        {/each}
+      {#each [...constraintsGroupedByType] as [constraintType, constraints] (constraintType)}
+        <ConstraintTypeSection {constraintType} {constraints} />
       {/each}
     </div>
   {/if}
 </div>
 
-<!-- <DropdownMenu label="New Constraint" icon={iconAddNew}>
-  <ButtonMenuItem
-    on:click={() => newUniqueConstraintModal.open()}
-    icon={iconConstraintUnique}
-  >
-    Unique
-  </ButtonMenuItem>
-  <ButtonMenuItem
-    on:click={() => newFkConstraintModal.open()}
-    icon={iconTableLink}
-  >
-    Foreign Key
-  </ButtonMenuItem>
-</DropdownMenu> -->
+<style lang="scss">
+  .constraints-list {
+    display: flex;
+    flex-direction: column;
 
-<NewUniqueConstraintModal controller={newUniqueConstraintModal} />
-<NewFkConstraintModal controller={newFkConstraintModal} />
+    > :global(* + *) {
+      margin-top: 1rem;
+    }
+  }
+</style>
