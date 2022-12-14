@@ -84,7 +84,7 @@
         margin-left: auto;
         margin-right: auto;
         font-size: var(--text-size-xx-large);
-        color: var(--slate-400);
+        color: var(--slate-500);
       }
     }
   }
