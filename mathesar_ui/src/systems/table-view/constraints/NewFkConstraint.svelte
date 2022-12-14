@@ -22,8 +22,8 @@
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { getAvailableName } from '@mathesar/utils/db';
-  import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
   import { onMount } from 'svelte';
+  import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;
 

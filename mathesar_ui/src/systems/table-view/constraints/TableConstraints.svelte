@@ -3,11 +3,10 @@
   import {
     getTabularDataStoreFromContext,
     type Constraint,
-    type ConstraintsDataStore,
   } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/api/utils/requestUtils';
-  import ConstraintTypeSection from './ConstraintTypeSection.svelte';
   import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
+  import ConstraintTypeSection from './ConstraintTypeSection.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -27,10 +26,9 @@
           constraint,
         ]);
         return groupedConstraints;
-      } else {
-        groupedConstraints.set(constraint.type, [constraint]);
-        return groupedConstraints;
       }
+      groupedConstraints.set(constraint.type, [constraint]);
+      return groupedConstraints;
     },
     new Map<ConstraintType, Constraint[]>(),
   );
@@ -41,10 +39,6 @@
   // subsequent updates so that we can rely on the spinner used on the button
   // for the more specific update.
   $: shouldShowLoadingSpinner = isEmpty && isLoading;
-
-  function remove(constraint: Constraint) {
-    return (constraintsDataStore as ConstraintsDataStore).remove(constraint.id);
-  }
 </script>
 
 <div class="table-constraints">

@@ -21,9 +21,7 @@
       identifierType: 'Constraint',
       identifierName: constraint.name,
       body: ['Are you sure you want to proceed?'],
-      onProceed: () => {
-        return constraintsDataStore.remove(constraint.id);
-      },
+      onProceed: () => constraintsDataStore.remove(constraint.id),
     });
   }
 </script>

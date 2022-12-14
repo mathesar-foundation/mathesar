@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    CheckboxGroup,
     LabeledInput,
     MultiSelect,
     RadioGroup,
@@ -16,10 +15,8 @@
   import { toast } from '@mathesar/stores/toast';
   import Form from '@mathesar/components/Form.svelte';
   import { getAvailableName } from '@mathesar/utils/db';
-  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
-  import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
-  import UniqueConstraintColumnsHelp from './__help__/UniqueConstraintColumnsHelp.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;
 
