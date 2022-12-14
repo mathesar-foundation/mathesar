@@ -1,31 +1,15 @@
 <script lang="ts">
-  import {
-    Icon,
-    DropdownMenu,
-    ButtonMenuItem,
-    iconLoading,
-  } from '@mathesar-component-library';
+  import { Icon, iconLoading } from '@mathesar-component-library';
   import {
     getTabularDataStoreFromContext,
     type Constraint,
     type ConstraintsDataStore,
   } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/api/utils/requestUtils';
-  import { modal } from '@mathesar/stores/modal';
-  import {
-    iconAddNew,
-    iconTableLink,
-    iconConstraintUnique,
-  } from '@mathesar/icons';
-  import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
-  import TableConstraint from './TableConstraint.svelte';
-  import NewFkConstraintModal from './NewFkConstraint.svelte';
   import ConstraintTypeSection from './ConstraintTypeSection.svelte';
   import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
 
   const tabularData = getTabularDataStoreFromContext();
-  const newUniqueConstraintModal = modal.spawnModalController();
-  const newFkConstraintModal = modal.spawnModalController();
 
   $: constraintsDataStore = $tabularData.constraintsDataStore;
   $: state = $constraintsDataStore.state;
@@ -57,7 +41,6 @@
   // subsequent updates so that we can rely on the spinner used on the button
   // for the more specific update.
   $: shouldShowLoadingSpinner = isEmpty && isLoading;
-  $: countText = isEmpty ? '' : ` (${constraints.length as number})`;
 
   function remove(constraint: Constraint) {
     return (constraintsDataStore as ConstraintsDataStore).remove(constraint.id);
@@ -74,9 +57,20 @@
     <div>No constraints</div>
   {:else}
     <div class="constraints-list">
-      {#each [...constraintsGroupedByType] as [constraintType, constraints] (constraintType)}
-        <ConstraintTypeSection {constraintType} {constraints} />
-      {/each}
+      <ConstraintTypeSection
+        constraintType="primary"
+        constraints={constraintsGroupedByType.get('unique') || []}
+      />
+      <ConstraintTypeSection
+        constraintType="foreignkey"
+        constraints={constraintsGroupedByType.get('foreignkey') || []}
+      />
+      <ConstraintTypeSection
+        constraintType="unique"
+        constraints={constraintsGroupedByType.get('unique') || []}
+      />
+      <!-- TODO: Same for check/exclude too? -->
+      <!-- TODO: Create a ticket for null constraints -->
     </div>
   {/if}
 </div>

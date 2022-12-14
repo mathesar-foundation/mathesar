@@ -1,13 +1,12 @@
 <script lang="ts">
-  import type { ModalController } from '@mathesar-component-library';
   import {
     CheckboxGroup,
     LabeledInput,
+    MultiSelect,
     RadioGroup,
     TextInput,
   } from '@mathesar-component-library';
   import { CancelOrProceedButtonPair } from '@mathesar-component-library';
-  import { ControlledModal } from '@mathesar-component-library';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
@@ -18,11 +17,11 @@
   import Form from '@mathesar/components/Form.svelte';
   import { getAvailableName } from '@mathesar/utils/db';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
-  import UniqueConstraintsHelp from './__help__/UniqueConstraintsHelp.svelte';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
   import UniqueConstraintColumnsHelp from './__help__/UniqueConstraintColumnsHelp.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
 
-  export let controller: ModalController;
+  export let onClose: (() => void) | undefined = undefined;
 
   type NamingStrategy = 'auto' | 'manual';
   const namingStrategyLabelMap = new Map<NamingStrategy, string>([
@@ -109,32 +108,35 @@
       // the constraint name validation shows an error due to the name being a
       // duplicate at that point.
       init();
-      controller.close();
+      onClose?.();
     } catch (error) {
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       toast.error(`Unable to add constraint. ${error.message as string}`);
     }
   }
+
+  function handleCancel() {
+    onClose?.();
+  }
 </script>
 
-<ControlledModal {controller} on:open={init}>
-  <span slot="title">New Unique Constraint <UniqueConstraintsHelp /></span>
+<div class="add-new-unique-constraint">
+  <span>New Unique Constraint</span>
   <Form>
     <FormField>
-      <CheckboxGroup
-        options={columnsInTable}
-        bind:values={constraintColumns}
-        getCheckboxLabel={(processedColumn) => ({
-          component: ProcessedColumnName,
-          props: {
-            processedColumn,
-          },
-        })}
-      >
-        Columns <UniqueConstraintColumnsHelp />
-      </CheckboxGroup>
+      <LabeledInput label="Columns" layout="stacked">
+        <MultiSelect
+          bind:values={constraintColumns}
+          options={columnsInTable}
+          autoClearInvalidValues={false}
+          let:option
+        >
+          <ColumnName column={option.column} />
+        </MultiSelect>
+      </LabeledInput>
     </FormField>
 
+    <!-- TODO: Are we removing this? -->
     <FormField>
       <RadioGroup
         options={namingStrategies}
@@ -160,10 +162,21 @@
   </Form>
 
   <CancelOrProceedButtonPair
-    slot="footer"
     onProceed={handleSave}
-    onCancel={() => controller.close()}
+    onCancel={handleCancel}
     proceedButton={{ label: 'Add' }}
     {canProceed}
+    size="small"
   />
-</ControlledModal>
+</div>
+
+<style lang="scss">
+  .add-new-unique-constraint {
+    display: flex;
+    flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 1rem;
+    }
+  }
+</style>

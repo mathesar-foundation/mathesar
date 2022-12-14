@@ -3,7 +3,7 @@
   import { Button, Collapsible, Help } from '@mathesar/component-library';
   import type { Constraint } from '@mathesar/stores/table-data';
   import ConstraintCollapseHeader from './ConstraintCollapseHeader.svelte';
-  import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
+  import NewUniqueConstraint from './NewUniqueConstraint.svelte';
   import NewFkConstraint from './NewFkConstraint.svelte';
   import ConstraintDetails from './ConstraintDetails.svelte';
   import ForeignKeyConstraintDetails from './ForeignKeyConstraintDetails.svelte';
@@ -74,6 +74,8 @@
     <div class="add-constraint">
       {#if addConstraintType === 'foreignKey'}
         <NewFkConstraint onClose={resetAddConstraintType} />
+      {:else if addConstraintType === 'unique'}
+        <NewUniqueConstraint onClose={resetAddConstraintType} />
       {/if}
     </div>
   {/if}
@@ -90,6 +92,8 @@
         {/if}
       </div>
     </Collapsible>
+  {:else}
+    <span class="null">No {titleMap[constraintType]} Constraints</span>
   {/each}
 </div>
 
@@ -104,6 +108,10 @@
 
     :global(.collapsible-content) {
       padding-left: 1rem;
+    }
+
+    .null {
+      font-size: var(--text-size-small);
     }
   }
   .title {
