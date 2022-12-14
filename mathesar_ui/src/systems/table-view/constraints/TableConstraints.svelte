@@ -29,6 +29,18 @@
   $: state = $constraintsDataStore.state;
   $: errorMsg = $constraintsDataStore.error;
   $: constraints = $constraintsDataStore.constraints;
+  $: constraintsGroupedByType = constraints.reduce(
+    (groupedConstraints, constraint) => {
+      if (Array.isArray(groupedConstraints[constraint.type])) {
+        groupedConstraints[constraint.type].push(constraint);
+        return groupedConstraints;
+      } else {
+        groupedConstraints[constraint.type] = [constraint];
+        return groupedConstraints;
+      }
+    },
+    {} as Record<Constraint['type'], Constraint[]>,
+  );
   $: isEmpty = constraints.length === 0;
   $: isLoading = state === States.Idle || state === States.Loading;
   // Only show the spinner during the _initial_ loading event. Hide it for
@@ -52,14 +64,16 @@
     <div>No constraints</div>
   {:else}
     <div class="constraints-list">
-      {#each constraints as constraint (constraint.id)}
-        <TableConstraint {constraint} drop={() => remove(constraint)} />
+      {#each Object.entries(constraintsGroupedByType) as [constraintType, constraints] (constraintType)}
+        {#each constraints as constraint (constraint.id)}
+          <TableConstraint {constraint} drop={() => remove(constraint)} />
+        {/each}
       {/each}
     </div>
   {/if}
 </div>
 
-<DropdownMenu label="New Constraint" icon={iconAddNew}>
+<!-- <DropdownMenu label="New Constraint" icon={iconAddNew}>
   <ButtonMenuItem
     on:click={() => newUniqueConstraintModal.open()}
     icon={iconConstraintUnique}
@@ -72,7 +86,7 @@
   >
     Foreign Key
   </ButtonMenuItem>
-</DropdownMenu>
+</DropdownMenu> -->
 
 <NewUniqueConstraintModal controller={newUniqueConstraintModal} />
 <NewFkConstraintModal controller={newFkConstraintModal} />
