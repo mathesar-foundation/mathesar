@@ -284,7 +284,7 @@ class Summarize(Transform):
         aggregation_expressions = [
             _get_aggregation_column(relation, col_spec)
             for col_spec
-            in self._aggregation_col_specs
+            in self.aggregation_col_specs
         ]
         executable = (
             select(*grouping_expressions, *aggregation_expressions)
