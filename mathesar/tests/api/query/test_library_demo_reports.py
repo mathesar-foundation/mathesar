@@ -5,6 +5,7 @@ import pytest
 # option was defined, so that we can test if display option inheritance works as expected.
 display_option_origin = "display_option_origin"
 
+
 @pytest.fixture
 def create_overdue_books_query(library_ma_tables, get_uid, client):
     checkouts = library_ma_tables["Checkouts"]
@@ -166,6 +167,7 @@ def run_overdue_books_scenario(check_overdue_books_columns, client):
     for rec_pair in zip(actual_records, expect_records):
         assert rec_pair[0]['email'] == rec_pair[1]['email']
         assert sorted(rec_pair[0]['Title List']) == sorted(rec_pair[1]['Title List'])
+
 
 @pytest.fixture
 def create_monthly_checkouts_query(run_overdue_books_scenario, get_uid, client):
