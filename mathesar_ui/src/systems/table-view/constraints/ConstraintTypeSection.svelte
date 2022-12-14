@@ -6,6 +6,8 @@
   import ConstraintCollapseHeader from './ConstraintCollapseHeader.svelte';
   import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
   import NewFkConstraintModal from './NewFkConstraintModal.svelte';
+  import ConstraintDetails from './ConstraintDetails.svelte';
+  import ForeignKeyConstraintDetails from './ForeignKeyConstraintDetails.svelte';
 
   export let constraintType: ConstraintType;
   export let constraints: Constraint[];
@@ -61,6 +63,13 @@
       <span slot="header">
         <ConstraintCollapseHeader {constraint} />
       </span>
+      <div slot="content">
+        {#if constraintType === 'foreignkey'}
+          <ForeignKeyConstraintDetails {constraint} />
+        {:else}
+          <ConstraintDetails {constraint} />
+        {/if}
+      </div>
     </Collapsible>
   {/each}
 
@@ -75,6 +84,10 @@
 
     :global(.collapsible-header) {
       padding-left: 0;
+    }
+
+    :global(.collapsible-content) {
+      padding-left: 1rem;
     }
   }
   .title {
