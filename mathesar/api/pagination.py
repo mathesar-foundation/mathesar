@@ -61,11 +61,17 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         table,
         column_name_id_bidirectional_map=None,
         filters=None,
-        order_by=[],
-        grouping={},
-        search=[],
+        order_by=None,
+        grouping=None,
+        search=None,
         duplicate_only=None,
     ):
+        if order_by is None:
+            order_by = []
+        if grouping is None:
+            grouping = {}
+        if search is None:
+            search = []
         group_by = GroupBy(**grouping) if grouping else None
         self.limit = self.get_limit(request)
         if self.limit is None:
