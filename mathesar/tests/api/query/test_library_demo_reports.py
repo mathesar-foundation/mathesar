@@ -1,6 +1,10 @@
 import pytest
 
 
+# Otherwise meaningless display option key meant to designate on which alias a given display
+# option was defined, so that we can test if display option inheritance works as expected.
+display_option_origin = "display_option_origin"
+
 @pytest.fixture
 def create_overdue_books_query(library_ma_tables, get_uid, client):
     checkouts = library_ma_tables["Checkouts"]
@@ -13,6 +17,14 @@ def create_overdue_books_query(library_ma_tables, get_uid, client):
         "display_names": {
             "email": "Patron Email",
             "Title List": "Titles"
+        },
+        "display_options": {
+            "email": {
+                display_option_origin: "email",
+            },
+            "Book Title": {
+                display_option_origin: "Book Title",
+            },
         },
         "initial_columns": [
             {
@@ -93,22 +105,27 @@ def check_overdue_books_columns(create_overdue_books_query, client):
             'display_name': 'Titles',
             'type': '_array',
             'type_options': {'item_type': 'text'},
-            'display_options': None,
+            'display_options': {
+                display_option_origin: 'Book Title',
+            },
             'is_initial_column': False,
             'input_table_name': None,
             'input_column_name': None,
             'input_alias': 'Book Title',
-        }, {
+        },
+        {
             'alias': 'email',
             'display_name': 'Patron Email',
             'type': 'mathesar_types.email',
             'type_options': None,
-            'display_options': None,
+            'display_options': {
+                display_option_origin: 'email',
+            },
             'is_initial_column': True,
             'input_table_name': 'Patrons',
             'input_column_name': 'Email',
             'input_alias': None,
-        }
+        },
     ]
     actual_response_data = client.get(f'/api/db/v0/queries/{query_id}/columns/').json()
     assert sorted(actual_response_data, key=lambda x: x['alias']) == expect_response_data
@@ -150,7 +167,6 @@ def run_overdue_books_scenario(check_overdue_books_columns, client):
         assert rec_pair[0]['email'] == rec_pair[1]['email']
         assert sorted(rec_pair[0]['Title List']) == sorted(rec_pair[1]['Title List'])
 
-
 @pytest.fixture
 def create_monthly_checkouts_query(run_overdue_books_scenario, get_uid, client):
     _ = run_overdue_books_scenario
@@ -170,6 +186,14 @@ def create_monthly_checkouts_query(run_overdue_books_scenario, get_uid, client):
         "display_names": {
             "Checkout Month": "Month",
             "Count": "Number of Checkouts",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "id": {
+                display_option_origin: "id",
+            },
         },
         "transformations": [
             {
@@ -207,7 +231,9 @@ def check_monthly_checkouts_columns(create_monthly_checkouts_query, client):
             'display_name': 'Month',
             'type': 'text',
             'type_options': None,
-            'display_options': None,
+            'display_options': {
+                display_option_origin: "Checkout Time",
+            },
             'is_initial_column': False,
             'input_table_name': None,
             'input_column_name': None,
@@ -217,7 +243,9 @@ def check_monthly_checkouts_columns(create_monthly_checkouts_query, client):
             'display_name': 'Number of Checkouts',
             'type': 'integer',
             'type_options': None,
-            'display_options': None,
+            'display_options': {
+                display_option_origin: "id",
+            },
             'is_initial_column': False,
             'input_table_name': None,
             'input_column_name': None,
