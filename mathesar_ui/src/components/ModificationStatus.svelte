@@ -60,7 +60,7 @@
 {:else if requestStatus?.state === 'success'}
   <span
     class="modification-status-indicator success"
-    out:fade={{ duration: transitionDuration }}
+    out:fade|local={{ duration: transitionDuration }}
   >
     <span class="icon"><Icon {...iconSuccess} /></span>
     <span>All Changes Saved</span>
