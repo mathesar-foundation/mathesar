@@ -99,13 +99,14 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
   constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
     super(query, abstractTypeMap);
     this.undoRedoManager = new QueryUndoRedoManager();
-    const inputColumnTreePromise = this.calculateInputColumnTree();
-    void inputColumnTreePromise.then(() => {
-      const isQueryValid = validateQuery(query, get(this.processedColumns));
-      this.undoRedoManager.pushState(query, isQueryValid);
-      return query;
-    });
+    void this.calculateInputColumnTree();
+    let isFirstRun = true;
     this.runUnsubscriber = this.on('run', (response: QueryRunResponse) => {
+      if (isFirstRun) {
+        const isQueryValid = validateQuery(query, get(this.columnsMetaData));
+        this.undoRedoManager.pushState(query, isQueryValid);
+        isFirstRun = false;
+      }
       this.checkAndUpdateSummarizationAfterRun(new QueryModel(response.query));
     });
   }
