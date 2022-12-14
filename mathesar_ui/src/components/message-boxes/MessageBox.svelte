@@ -12,7 +12,7 @@
       <Icon {...icon} />
     </span>
   {/if}
-  <div class="content">
+  <div class="content trim-child-margins">
     <slot />
   </div>
 </div>
