@@ -4,6 +4,7 @@ from sqlalchemy import text
 
 from db.metadata import get_empty_metadata
 from mathesar.database.base import create_mathesar_engine
+from mathesar.models.users import DatabaseRole
 from mathesar.state.django import reflect_db_objects
 from mathesar.models.base import Table, Schema, Database
 
@@ -83,6 +84,29 @@ def test_database_list(client, db_dj_model):
     check_database(db_dj_model, response_data['results'][0])
 
 
+def test_database_list_permissions(FUN_create_dj_db, get_uid, client, client_bob, client_alice, user_bob, user_alice):
+    db1 = FUN_create_dj_db(get_uid())
+    DatabaseRole.objects.create(user=user_bob, database=db1, role='viewer')
+    DatabaseRole.objects.create(user=user_alice, database=db1, role='viewer')
+
+    db2 = FUN_create_dj_db(get_uid())
+    DatabaseRole.objects.create(user=user_bob, database=db2, role='manager')
+    DatabaseRole.objects.create(user=user_alice, database=db2, role='editor')
+
+    db3 = FUN_create_dj_db(get_uid())
+    DatabaseRole.objects.create(user=user_bob, database=db3, role='editor')
+
+    response = client_bob.get('/api/db/v0/databases/')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 3
+
+    response = client_alice.get('/api/db/v0/databases/')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 2
+
+
 def test_database_list_deleted(client, db_dj_model):
     _remove_db(db_dj_model.name)
     cache.clear()
@@ -100,3 +124,14 @@ def test_database_detail(client, db_dj_model):
 
     assert response.status_code == 200
     check_database(db_dj_model, response_database)
+
+
+def test_database_detail_permissions(FUN_create_dj_db, get_uid, client_bob, client_alice, user_bob, user_alice):
+    db1 = FUN_create_dj_db(get_uid())
+    DatabaseRole.objects.create(user=user_bob, database=db1, role='viewer')
+
+    response = client_bob.get(f'/api/db/v0/databases/{db1.id}/')
+    assert response.status_code == 200
+
+    response = client_alice.get(f'/api/db/v0/databases/{db1.id}/')
+    assert response.status_code == 404

@@ -136,9 +136,10 @@ def test_user_create(client):
     assert 'password' not in response_data
     assert response_data['short_name'] == data['short_name']
     assert response_data['full_name'] == data['full_name']
-
+    created_user = User.objects.get(id=response_data['id'])
+    assert created_user.password_change_needed is True
     # clean up
-    User.objects.get(id=response_data['id']).delete()
+    created_user.delete()
 
 
 def test_user_create_no_superuser(client_bob):

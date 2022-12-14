@@ -50,6 +50,28 @@ def self_referential_table(create_table, get_uid):
 
 
 @pytest.fixture
+def create_base_table(create_table):
+    def _create_table(table_name, schema_name='FK Test'):
+        return create_table(
+            table_name=table_name,
+            schema_name=schema_name,
+            csv_filepath='mathesar/tests/data/base_table.csv'
+        )
+    return _create_table
+
+
+@pytest.fixture
+def create_referent_table(create_table):
+    def _create_table(table_name, schema_name='FK Test'):
+        return create_table(
+            table_name=table_name,
+            schema_name=schema_name,
+            csv_filepath='mathesar/tests/data/reference_table.csv'
+        )
+    return _create_table
+
+
+@pytest.fixture
 def two_foreign_key_tables(_create_tables_from_files):
     return _create_tables_from_files(
         'mathesar/tests/data/base_table.csv',

@@ -14,12 +14,14 @@ from db.types.custom.money import MONEY_ARR_FUNC_NAME
 NUMERIC_ARR_FUNC_NAME = "get_numeric_array"
 
 
-def get_column_cast_expression(column, target_type, engine, type_options={}):
+def get_column_cast_expression(column, target_type, engine, type_options=None):
     """
     Given a Column, we get the correct SQL selectable for selecting the
     results of a Mathesar cast_to_<type> function on that column, where
     <type> is derived from the target_type.
     """
+    if type_options is None:
+        type_options = {}
     target_type_class = target_type.get_sa_class(engine)
     if target_type_class is None:
         raise UnsupportedTypeException(

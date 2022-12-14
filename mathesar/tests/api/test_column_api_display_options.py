@@ -303,7 +303,7 @@ def test_column_create_wrong_display_options(
 
 def test_column_update_display_options(column_test_table_with_service_layer_options, client):
     table, _ = column_test_table_with_service_layer_options
-    column_indexes = [2, 3, 4, 5]
+    column_indexes = [2, 3, 4]
     for column_index in column_indexes:
         colum_name = f"mycolumn{column_index}"
         column = table.get_columns_by_name([colum_name])[0]

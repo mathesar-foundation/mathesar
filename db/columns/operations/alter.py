@@ -69,8 +69,10 @@ def alter_column(engine, table_oid, column_attnum, column_data):
 
 
 def retype_column(
-    table_oid, column_attnum, engine, connection, new_type=None, type_options={},
+    table_oid, column_attnum, engine, connection, new_type=None, type_options=None,
 ):
+    if type_options is None:
+        type_options = {}
     table = reflect_table_from_oid(
         table_oid,
         engine,
@@ -122,8 +124,10 @@ def retype_column(
 
 
 def alter_column_type(
-    table_oid, column_name, engine, connection, target_type, type_options={}, metadata=None
+    table_oid, column_name, engine, connection, target_type, type_options=None, metadata=None
 ):
+    if type_options is None:
+        type_options = {}
     metadata = metadata if metadata else get_empty_metadata()
     type_options = type_options if type_options is not None else {}
     _preparer = engine.dialect.identifier_preparer
