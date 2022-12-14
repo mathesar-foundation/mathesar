@@ -29,6 +29,7 @@
         {queryManager}
         bind:linkCollapsibleOpenState
         bind:isInspectorOpen
+        on:close
       />
     </EntityPageHeader>
   {:else}
@@ -37,6 +38,7 @@
         {queryManager}
         bind:linkCollapsibleOpenState
         bind:isInspectorOpen
+        on:close
       />
     </div>
   {/if}

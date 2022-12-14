@@ -5,7 +5,10 @@
   import { DataExplorer } from '@mathesar/systems/data-explorer';
   import type { QueryManager } from '@mathesar/systems/data-explorer/types';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import { getSchemaPageUrl } from '@mathesar/routes/urls';
+  import {
+    getSchemaPageUrl,
+    getExplorationPageUrl,
+  } from '@mathesar/routes/urls';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -16,6 +19,12 @@
   function gotoSchemaPage() {
     router.goto(getSchemaPageUrl(database.name, schema.id));
   }
+
+  function gotoExplorationPage() {
+    if ($query.id) {
+      router.goto(getExplorationPageUrl(database.name, schema.id, $query.id));
+    }
+  }
 </script>
 
 <svelte:head>
@@ -23,5 +32,9 @@
 </svelte:head>
 
 <LayoutWithHeader fitViewport>
-  <DataExplorer {queryManager} on:delete={gotoSchemaPage} />
+  <DataExplorer
+    {queryManager}
+    on:close={gotoExplorationPage}
+    on:delete={gotoSchemaPage}
+  />
 </LayoutWithHeader>

@@ -1,9 +1,13 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import {
     Icon,
     InputGroup,
     Button,
     SpinnerButton,
+    DropdownMenu,
+    ButtonMenuItem,
+    iconExpandDown,
   } from '@mathesar-component-library';
   import { iconRedo, iconUndo, iconInspector } from '@mathesar/icons';
   import type { TableEntry } from '@mathesar/api/types/tables';
@@ -18,6 +22,7 @@
   import type QueryManager from './QueryManager';
   import type { ColumnWithLink } from './utils';
 
+  const dispatch = createEventDispatcher();
   const saveModalController = modal.spawnModalController();
 
   export let queryManager: QueryManager;
@@ -31,6 +36,7 @@
     : undefined;
   $: isSaved = $query.isSaved();
   $: hasNoColumns = $query.initial_columns.length === 0;
+  $: querySaveRequestStatus = $state.saveState?.state;
 
   function updateBaseTable(tableEntry: TableEntry | undefined) {
     void queryManager.update((q) =>
@@ -54,9 +60,12 @@
     return [];
   }
 
-  async function save() {
+  async function save(closeAfterSave = false) {
     try {
       await queryManager.save();
+      if (closeAfterSave) {
+        dispatch('close');
+      }
     } catch (err) {
       toast.fromError(err);
     }
@@ -109,18 +118,40 @@
     {/if}
 
     {#if $query.isSaved()}
-      <SaveStatusIndicator status={$state.saveState?.state} />
+      <SaveStatusIndicator status={querySaveRequestStatus} />
     {/if}
   </div>
 
   {#if currentTable}
     <div class="actions">
-      <!-- TODO: Change disabled condition to is_valid(query) -->
-      <SpinnerButton
-        label="Save"
-        disabled={!$query.base_table || hasNoColumns}
-        onClick={saveExistingOrCreateNew}
-      />
+      <InputGroup>
+        <!-- TODO: Change disabled condition to is_valid(query) -->
+        <SpinnerButton
+          label={querySaveRequestStatus === 'processing' ? 'Saving' : 'Save'}
+          disabled={!$query.base_table ||
+            hasNoColumns ||
+            querySaveRequestStatus === 'processing'}
+          onClick={saveExistingOrCreateNew}
+        />
+        {#if $query.isSaved()}
+          <DropdownMenu
+            triggerAppearance="primary"
+            placement="bottom-end"
+            closeOnInnerClick={true}
+            icon={{
+              ...iconExpandDown,
+              size: '0.8em',
+            }}
+            showArrow={false}
+          >
+            <ButtonMenuItem on:click={() => save()}>Save</ButtonMenuItem>
+            <ButtonMenuItem on:click={() => save(true)}>
+              Save and Close
+            </ButtonMenuItem>
+          </DropdownMenu>
+        {/if}
+      </InputGroup>
+
       <InputGroup>
         <Button
           appearance="secondary"
