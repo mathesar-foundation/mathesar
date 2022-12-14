@@ -7,10 +7,10 @@ import duration from './duration';
 import date from './date';
 import time from './time';
 import datetime from './datetime';
-import array from './array';
+import arrayFactory from './arrayFactory';
 import type { CellDataType, CellComponentFactory } from './typeDefinitions';
 
-const dataTypeComponentFactories: Record<CellDataType, CellComponentFactory> = {
+const simpleDataTypeComponentFactories = {
   string,
   boolean,
   number,
@@ -20,7 +20,15 @@ const dataTypeComponentFactories: Record<CellDataType, CellComponentFactory> = {
   date,
   time,
   datetime,
-  array,
+};
+
+const compoundDataTypeComponentFactories = {
+  array: arrayFactory(simpleDataTypeComponentFactories),
+};
+
+const dataTypeComponentFactories: Record<CellDataType, CellComponentFactory> = {
+  ...simpleDataTypeComponentFactories,
+  ...compoundDataTypeComponentFactories,
 };
 
 export default dataTypeComponentFactories;
