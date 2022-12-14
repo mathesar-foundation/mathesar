@@ -4,9 +4,16 @@
 
   export let icon: IconProps | undefined = undefined;
   export let style: string | undefined = undefined;
+  /** When true, the box will take the full width of its parent */
+  export let fullWidth = false;
 </script>
 
-<div class="message-box" class:has-icon={!!icon} {style}>
+<div
+  class="message-box"
+  class:has-icon={!!icon}
+  {style}
+  class:full-width={fullWidth}
+>
   {#if icon}
     <span class="icon">
       <Icon {...icon} />
@@ -22,10 +29,12 @@
     padding: 0.7em;
     position: relative;
     border-radius: var(--border-radius-m);
-    max-width: max-content;
     margin: var(--MessageBox__margin);
     background: var(--MessageBox__background);
     border: var(--MessageBox__border);
+  }
+  .message-box:not(.full-width) {
+    max-width: max-content;
   }
   .message-box.has-icon {
     padding-left: 2.25em;
