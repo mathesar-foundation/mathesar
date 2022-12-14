@@ -307,7 +307,7 @@ class Summarize(Transform):
                 output_alias=col_spec['output_alias'],
             )
             for col_spec
-            in self._aggregation_col_specs
+            in self.aggregation_col_specs
         ]
         return (
             mappings_that_carry_uniqueness_over
@@ -351,6 +351,22 @@ class Summarize(Transform):
         return self.spec['base_grouping_column']
 
     @property
+    def aggregation_output_aliases(self):
+        return [
+            col_spec['output_alias']
+            for col_spec
+            in self.aggregation_col_specs
+        ]
+
+    @property
+    def grouping_output_aliases(self):
+        return [
+            col_spec['output_alias']
+            for col_spec
+            in self._grouping_col_specs
+        ]
+
+    @property
     def grouping_input_aliases(self):
         return [
             col_spec['input_alias']
@@ -363,7 +379,7 @@ class Summarize(Transform):
         return [
             col_spec['input_alias']
             for col_spec
-            in self._aggregation_col_specs
+            in self.aggregation_col_specs
         ]
 
     @property
@@ -371,7 +387,7 @@ class Summarize(Transform):
         return self.spec.get("grouping_expressions", [])
 
     @property
-    def _aggregation_col_specs(self):
+    def aggregation_col_specs(self):
         return self.spec.get("aggregation_expressions", [])
 
 
