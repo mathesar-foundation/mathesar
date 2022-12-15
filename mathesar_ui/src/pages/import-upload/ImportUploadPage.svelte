@@ -3,12 +3,10 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import {
-    RadioGroup,
-    iconUploadFile,
-    Alert,
-  } from '@mathesar-component-library';
+  import { RadioGroup, iconUploadFile } from '@mathesar-component-library';
   import StatusIndicator from '@mathesar/components/StatusIndicator.svelte';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconUrl, iconPaste } from '@mathesar/icons';
@@ -91,11 +89,11 @@
     {#if isLoading || isError}
       <div class="uploading-info">
         <span>Uploading Data</span>
-        <Alert appearance="warning">
+        <WarningBox>
           Large data sets can sometimes take several minutes to process. Please
           do not leave this page or close the browser tab while import is in
           progress.
-        </Alert>
+        </WarningBox>
       </div>
     {:else}
       <div class="upload-method-input">
@@ -147,10 +145,10 @@
 
         {#if errorMessage}
           <div class="errors">
-            <Alert appearance="error">
+            <ErrorBox>
               <span class="title">Failed to import data</span>
               <span>{errorMessage}</span>
-            </Alert>
+            </ErrorBox>
           </div>
         {/if}
       </svelte:component>

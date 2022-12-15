@@ -1,41 +1,13 @@
-import { get } from 'svelte/store';
-import {
-  currentDbAbstractTypes,
-  getAbstractTypeForDbType,
-} from '@mathesar/stores/abstract-types';
 import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import type { TableEntry } from '@mathesar/api/types/tables';
+import { getCellInfo, getCellConfiguration } from './data-types/utils';
 import DataTypes from './data-types';
 import type { CellColumnLike } from './data-types/typeDefinitions';
 import type { LinkedRecordCellExternalProps } from './data-types/components/typeDefinitions';
 import LinkedRecordCell from './data-types/components/linked-record/LinkedRecordCell.svelte';
 import PrimaryKeyCell from './data-types/components/primary-key/PrimaryKeyCell.svelte';
 import LinkedRecordInput from './data-types/components/linked-record/LinkedRecordInput.svelte';
-
-export type CellValueFormatter<T> = (
-  value: T | null | undefined,
-) => string | null | undefined;
-
-function getCellInfo(dbType: CellColumnLike['type']): CellInfo | undefined {
-  const abstractTypeOfColumn = getAbstractTypeForDbType(
-    dbType,
-    get(currentDbAbstractTypes)?.data,
-  );
-  return abstractTypeOfColumn?.cellInfo;
-}
-
-function getCellConfiguration(
-  dbType: CellColumnLike['type'],
-  cellInfo?: CellInfo,
-): Record<string, unknown> {
-  const config = cellInfo?.config ?? {};
-  const conditionalConfig = cellInfo?.conditionalConfig?.[dbType] ?? {};
-  return {
-    ...config,
-    ...conditionalConfig,
-  };
-}
 
 export function getCellCap({
   cellInfo,

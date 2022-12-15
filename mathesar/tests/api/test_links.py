@@ -7,6 +7,7 @@ from db.tables.operations.select import get_oid_from_table
 from db.tables.utils import get_primary_key_column
 
 from mathesar.models.base import Constraint, Table
+from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
 @pytest.fixture
@@ -62,6 +63,56 @@ def test_one_to_one_link_create_permissions(
         data=data,
     )
     assert response.status_code == expected_status_code
+
+
+def test_one_to_many_link_on_invalid_table_name(
+        create_base_table,
+        create_referent_table,
+        client
+):
+    reference_table = create_base_table('Base_table')
+    # Having round brackets in the referent_table name is invalid.
+    referent_table = create_referent_table('Referent_table(alpha)')
+    data = {
+        "link_type": "one-to-many",
+        "reference_column_name": "col_1",
+        "reference_table": reference_table.id,
+        "referent_table": referent_table.id,
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    response_data = response.json()[0]
+    assert response.status_code == 400
+    assert response_data['code'] == ErrorCodes.InvalidTableName.value
+    assert response_data['message'] == 'Table name "Referent_table(alpha)" is invalid.'
+    assert response_data['field'] == 'referent_table'
+
+
+def test_one_to_one_link_on_invalid_table_name(
+        create_base_table,
+        create_referent_table,
+        client
+):
+    reference_table = create_base_table('Base_table')
+    # Having round brackets in the referent_table name is invalid.
+    referent_table = create_referent_table('Referent_table(alpha)')
+    data = {
+        "link_type": "one-to-one",
+        "reference_column_name": "col_1",
+        "reference_table": reference_table.id,
+        "referent_table": referent_table.id,
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    response_data = response.json()[0]
+    assert response.status_code == 400
+    assert response_data['code'] == ErrorCodes.InvalidTableName.value
+    assert response_data['message'] == 'Table name "Referent_table(alpha)" is invalid.'
+    assert response_data['field'] == 'referent_table'
 
 
 def test_one_to_one_link_create(column_test_table, client, create_patents_table):
@@ -216,6 +267,31 @@ def test_many_to_many_link_create(column_test_table, client, create_patents_tabl
         data=data,
     )
     assert response.status_code == 201
+
+
+def test_many_to_many_link_invalid_table_name(
+    column_test_table,
+    client,
+    create_patents_table
+):
+    table_2 = create_patents_table('Referent_table(alpha)')
+    data = {
+        "link_type": "many-to-many",
+        "mapping_table_name": "map_table",
+        "referents": [
+            {'referent_table': column_test_table.id, 'column_name': "link_1"},
+            {'referent_table': table_2.id, 'column_name': "link_2"}
+        ],
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    response_data = response.json()[0]
+    assert response.status_code == 400
+    assert response_data['code'] == ErrorCodes.InvalidTableName.value
+    assert response_data['message'] == 'Table name "Referent_table(alpha)" is invalid.'
+    assert response_data['field'] == 'referents'
 
 
 @pytest.mark.parametrize('client_name, expected_status_code', write_clients_with_status_code)

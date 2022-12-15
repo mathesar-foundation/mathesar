@@ -64,7 +64,7 @@
 {#if state === 'success'}
   <span
     class="modification-status-indicator"
-    out:fade={{ duration: transitionDuration }}
+    out:fade|local={{ duration: transitionDuration }}
   >
     <StatusIndicator
       {state}

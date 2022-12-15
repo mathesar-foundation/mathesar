@@ -11,6 +11,8 @@ export default class QueryFilterTransformationModel
 {
   type = 'filter' as const;
 
+  name = 'Filter' as const;
+
   columnIdentifier;
 
   conditionIdentifier;
@@ -32,7 +34,7 @@ export default class QueryFilterTransformationModel
     }
   }
 
-  toJSON(): QueryInstanceFilterTransformation {
+  toJson(): QueryInstanceFilterTransformation {
     const spec: QueryInstanceFilterTransformation['spec'] = {
       [this.conditionIdentifier]: [{ column_name: [this.columnIdentifier] }],
     };
