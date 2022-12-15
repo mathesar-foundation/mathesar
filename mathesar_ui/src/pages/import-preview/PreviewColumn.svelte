@@ -44,6 +44,7 @@
           ...processedColumn.column,
           abstractType: processedColumn.abstractType,
         }}
+        showWarnings={false}
         on:cancel={close}
         save={async (opts) => {
           await updateTypeRelatedOptions({
@@ -84,5 +85,6 @@
   .type-options-content {
     min-width: 18rem;
     max-width: 22rem;
+    padding: var(--size-small);
   }
 </style>
