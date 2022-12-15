@@ -6,7 +6,7 @@
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import type { ColumnTypeOptionsSaveArgs } from '@mathesar/components/abstract-type-control/types';
   import AbstractTypeSelector from '@mathesar/components/abstract-type-control/AbstractTypeSelector.svelte';
-  import { Alert } from '@mathesar/component-library';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);
@@ -36,7 +36,7 @@
     column={columnWithAbstractType}
     disabled={true}
   />
-  <Alert appearance="info">
+  <InfoBox>
     {#if column.column.primary_key}
       <span class="info-alert">
         The data type of the primary key column is restricted and cannot be
@@ -48,7 +48,7 @@
         of the primary key column and cannot be changed.
       </span>
     {/if}
-  </Alert>
+  </InfoBox>
 {:else}
   <AbstractTypeControl column={columnWithAbstractType} {save} />
 {/if}

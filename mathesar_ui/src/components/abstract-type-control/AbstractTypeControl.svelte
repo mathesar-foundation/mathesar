@@ -3,7 +3,6 @@
   import {
     createValidationContext,
     CancelOrProceedButtonPair,
-    Alert,
   } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
@@ -14,6 +13,7 @@
   } from './utils';
   import AbstractTypeDBOptions from './AbstractTypeDBOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
+  import WarningBox from '../message-boxes/WarningBox.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -108,12 +108,12 @@
 
 {#if actionButtonsVisible}
   <div class="footer">
-    <Alert appearance="warning">
+    <WarningBox>
       <span class="warning-alert">
         Data loss can result from changing the data type of a column. This
         action cannot be undone.
       </span>
-    </Alert>
+    </WarningBox>
     <CancelOrProceedButtonPair
       onProceed={onSave}
       onCancel={cancel}
