@@ -7,6 +7,7 @@
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import {
     Sheet,
     SheetHeader,
@@ -44,6 +45,8 @@
   } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { getCellCap } from '@mathesar/components/cell-fabric/utils';
   import { toast } from '@mathesar/stores/toast';
@@ -312,111 +315,145 @@
 
 <svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
 
-<LayoutWithHeader>
+<LayoutWithHeader
+  cssVariables={{
+    '--max-layout-width': '65.357rem',
+    '--layout-background-color': 'var(--sand-200)',
+    '--inset-page-padding': 'var(--size-super-ultra-large)',
+    '--inset-layout-padding': '0',
+  }}
+>
   <div class="table-preview-confirmation">
-    <h2>Confirm your data</h2>
+    <InsetPageLayout>
+      <h2 slot="header">Finish setting up your table</h2>
 
-    <div class="help-content">
-      To finish, review suggestions for the field types and column names. To
-      ensure your import is correct we have included a preview of your first few
-      rows.
-    </div>
+      {#if tableIsAlreadyConfirmed}
+        Table has already been confirmed. Click here to view the table.
+      {:else}
+        <div class="table-properties">
+          <LabeledInput layout="stacked">
+            <h4 slot="label">Table Name</h4>
+            <TextInput bind:value={tableName} />
+          </LabeledInput>
 
-    {#if tableIsAlreadyConfirmed}
-      Table has already been confirmed. Click here to view the table.
-    {:else}
-      <div class="table-properties-inputs">
-        <LabeledInput label="Enter table name:" layout="inline">
-          <TextInput bind:value={tableName} />
-        </LabeledInput>
-
-        <LabeledInput
-          label="Use first row as header"
-          layout="inline-input-first"
-        >
-          <Checkbox
-            bind:checked={useFirstRowAsHeader}
-            disabled={isLoading}
-            on:change={updateDataFileHeader}
-          />
-        </LabeledInput>
-      </div>
-
-      <div class="help-content preview-message">
-        {#if isLoading}
-          Please wait until we prepare a preview for you <Spinner />
-        {:else if previewRequestStatus?.state === 'failure'}
-          {previewRequestStatus.errors.join(',')}
-        {:else if headerUpdateRequestStatus?.state === 'failure'}
-          {headerUpdateRequestStatus.errors.join(',')}
-        {/if}
-      </div>
-
-      <div class="table-preview-content">
-        <Sheet
-          restrictWidthToRowWidth
-          columns={processedColumns}
-          getColumnIdentifier={(c) => c.id}
-        >
-          <SheetHeader inheritFontStyle>
-            {#each processedColumns as processedColumn (processedColumn.id)}
-              <SheetCell
-                columnIdentifierKey={processedColumn.id}
-                let:htmlAttributes
-                let:style
-              >
-                <div {...htmlAttributes} {style}>
-                  <PreviewColumn
-                    {isLoading}
-                    {processedColumn}
-                    {updateTypeRelatedOptions}
-                    bind:selected={columnProperties[processedColumn.id]
-                      .selected}
-                    bind:displayName={columnProperties[processedColumn.id]
-                      .displayName}
-                  />
-                  <SheetCellResizer
-                    columnIdentifierKey={processedColumn.id}
-                    minColumnWidth={120}
-                  />
-                </div>
-              </SheetCell>
-            {/each}
-          </SheetHeader>
-
-          {#each records as record (record)}
-            <SheetRow
-              style={{
-                position: 'relative',
-                height: 30,
-              }}
-              let:htmlAttributes
-              let:styleString
+          <div class="header-checkbox">
+            <LabeledInput
+              label="Use first row as header"
+              layout="inline-input-first"
             >
-              <div {...htmlAttributes} style={styleString}>
-                {#each processedColumns as processedColumn (processedColumn)}
-                  <SheetCell
-                    columnIdentifierKey={processedColumn.id}
-                    let:htmlAttributes
-                    let:style
-                  >
-                    <div {...htmlAttributes} {style}>
-                      <CellFabric
-                        columnFabric={processedColumn}
-                        value={record[processedColumn.column.name]}
-                        showAsSkeleton={showTableSkeleton}
-                        disabled={true}
-                      />
-                    </div>
-                  </SheetCell>
-                {/each}
-              </div>
-            </SheetRow>
-          {/each}
-        </Sheet>
-      </div>
+              <Checkbox
+                bind:checked={useFirstRowAsHeader}
+                disabled={isLoading}
+                on:change={updateDataFileHeader}
+              />
+            </LabeledInput>
+          </div>
 
-      <div class="footer">
+          <div class="help-content">
+            <h4>Column names and data types</h4>
+            <p>
+              Column names and data types are automatically detected, use the
+              controls below to review and update them if necessary.
+            </p>
+            {#if isLoading}
+              <InfoBox fullWidth>
+                <span>Please wait while we prepare a preview for you</span>
+                <Spinner />
+              </InfoBox>
+            {:else if previewRequestStatus?.state === 'failure'}
+              <ErrorBox fullWidth>
+                {previewRequestStatus.errors.join(',')}
+              </ErrorBox>
+            {:else if headerUpdateRequestStatus?.state === 'failure'}
+              <ErrorBox fullWidth>
+                {headerUpdateRequestStatus.errors.join(',')}
+              </ErrorBox>
+            {:else}
+              <InfoBox fullWidth>
+                Preview data is shown for the first few rows of your data only.
+              </InfoBox>
+            {/if}
+          </div>
+        </div>
+      {/if}
+    </InsetPageLayout>
+
+    {#if !tableIsAlreadyConfirmed}
+      {#if !(processedColumns.length === 0 && isLoading)}
+        <div class="table-preview-content">
+          <div class="preview">
+            <h4>Table Preview</h4>
+            <div class="content">
+              <div class="sheet-holder">
+                <Sheet
+                  restrictWidthToRowWidth
+                  columns={processedColumns}
+                  getColumnIdentifier={(c) => c.id}
+                >
+                  <SheetHeader inheritFontStyle>
+                    {#each processedColumns as processedColumn (processedColumn.id)}
+                      <SheetCell
+                        columnIdentifierKey={processedColumn.id}
+                        let:htmlAttributes
+                        let:style
+                      >
+                        <div {...htmlAttributes} {style}>
+                          <PreviewColumn
+                            {isLoading}
+                            {processedColumn}
+                            {updateTypeRelatedOptions}
+                            bind:selected={columnProperties[processedColumn.id]
+                              .selected}
+                            bind:displayName={columnProperties[
+                              processedColumn.id
+                            ].displayName}
+                          />
+                          <SheetCellResizer
+                            columnIdentifierKey={processedColumn.id}
+                            minColumnWidth={120}
+                          />
+                        </div>
+                      </SheetCell>
+                    {/each}
+                  </SheetHeader>
+
+                  {#each records as record (record)}
+                    <SheetRow
+                      style={{
+                        position: 'relative',
+                        height: 30,
+                      }}
+                      let:htmlAttributes
+                      let:styleString
+                    >
+                      <div {...htmlAttributes} style={styleString}>
+                        {#each processedColumns as processedColumn (processedColumn)}
+                          <SheetCell
+                            columnIdentifierKey={processedColumn.id}
+                            let:htmlAttributes
+                            let:style
+                          >
+                            <div {...htmlAttributes} {style}>
+                              <CellFabric
+                                columnFabric={processedColumn}
+                                value={record[processedColumn.column.name]}
+                                showAsSkeleton={showTableSkeleton}
+                                disabled={true}
+                              />
+                            </div>
+                          </SheetCell>
+                        {/each}
+                      </div>
+                    </SheetRow>
+                  {/each}
+                </Sheet>
+              </div>
+            </div>
+          </div>
+        </div>
+      {/if}
+
+      <div class="footer contain-width">
         {#if !isLoading}
           <CancelOrProceedButtonPair
             onCancel={handleCancel}
@@ -434,47 +471,82 @@
 <style lang="scss">
   .table-preview-confirmation {
     --sheet-header-height: 5.25rem;
-    margin-top: 1rem;
 
-    > *:not(.table-preview-content) {
-      max-width: 900px;
+    h2 {
+      font-weight: 500;
+      font-size: var(--size-super-ultra-large);
+    }
+
+    h4 {
+      font-weight: 600;
+      font-size: var(--size-large);
+      margin: 0;
+    }
+
+    > .contain-width {
+      max-width: var(--max-layout-width);
       margin-left: auto;
       margin-right: auto;
     }
 
-    .table-properties-inputs {
-      margin: 1rem auto;
+    .table-properties {
       > :global(.labeled-input) {
         margin-bottom: 1rem;
       }
-    }
 
-    .help-content {
-      line-height: 1.6;
+      .header-checkbox {
+        font-size: var(--text-size-large);
+      }
 
-      &.preview-message {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+      .help-content {
+        margin-top: 2rem;
+        line-height: 1.6;
+
+        p {
+          margin: var(--size-xx-small) 0;
+        }
       }
     }
 
     .table-preview-content {
-      margin-top: 1rem;
-      border-radius: 0.2rem;
+      overflow: hidden;
+      margin-top: var(--size-xx-large);
 
-      > :global(.sheet) {
-        margin-left: auto;
-        margin-right: auto;
-        border-top: 1px solid var(--color-gray-light);
-        border-left: 1px solid var(--color-gray-light);
-        // TODO: This should be min of (100%, 900px)
-        min-width: 900px;
+      .preview {
+        margin: 0 auto;
+        overflow: hidden;
+        width: fit-content;
+        max-width: 100%;
+        min-width: var(--max-layout-width);
+        background: var(--white);
+        border: solid 1px var(--slate-300);
+        border-radius: 0.3rem;
+
+        h4 {
+          padding: var(--size-small) var(--inset-page-padding);
+          border-bottom: 1px solid var(--slate-100);
+        }
+
+        .content {
+          padding: var(--inset-page-padding);
+        }
+
+        .sheet-holder {
+          background: var(--slate-50-tentative);
+          border: 1px solid var(--slate-200);
+          min-height: 20rem;
+          overflow: auto;
+        }
+
+        :global(.sheet [data-sheet-element='row'] [data-sheet-element='cell']) {
+          background: var(--white);
+        }
       }
     }
 
     .footer {
       margin: 1.6rem auto;
+      padding: 0 1rem;
     }
   }
 </style>

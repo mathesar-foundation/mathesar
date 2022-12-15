@@ -163,7 +163,7 @@
   }
 
   .import-file-view {
-    padding: 2.2857rem;
+    padding: var(--size-super-ultra-large);
     border: 1px solid var(--slate-300);
     border-radius: var(--border-radius-m);
     background-color: var(--white);
