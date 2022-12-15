@@ -47,14 +47,18 @@
   {#if !$query.base_table}
     <div class="initial-content">
       {#if $queries.requestStatus.state === 'success' && $queries.data.size === 0}
-        <Tutorial>
-          <span slot="title"> Create and Share Explorations of Your Data </span>
-          <span slot="body">
-            Use Data Explorer to analyze and share your data. Explorations are
-            based on tables in your schema, to get started choose a table and
-            start adding columns and transformations.
-          </span>
-        </Tutorial>
+        <div class="tutorial-holder">
+          <Tutorial>
+            <span slot="title">
+              Create and Share Explorations of Your Data
+            </span>
+            <span slot="body">
+              Use Data Explorer to analyze and share your data. Explorations are
+              based on tables in your schema, to get started choose a table and
+              start adding columns and transformations.
+            </span>
+          </Tutorial>
+        </div>
       {/if}
       <div class="help-text">
         Get started by selecting a table and adding columns
@@ -101,7 +105,7 @@
       flex-direction: column;
       align-items: center;
 
-      :global(.tutorial) {
+      .tutorial-holder {
         margin-top: 4rem;
         max-width: 70%;
       }
@@ -109,7 +113,7 @@
       .help-text {
         margin: 10rem 0;
       }
-      :global(.tutorial + .help-text) {
+      .tutorial-holder + .help-text {
         margin: 5rem 0;
       }
     }
