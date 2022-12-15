@@ -6,7 +6,11 @@
 </script>
 
 {#if labelController}
-  <Label controller={labelController} on:click --display="contents">
+  <Label
+    controller={labelController}
+    on:click
+    style="--Label__display:contents"
+  >
     <slot />
   </Label>
 {:else}

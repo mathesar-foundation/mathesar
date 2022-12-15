@@ -27,7 +27,11 @@
 </script>
 
 <div class="menu-item" on:click={handleClick} class:disabled>
-  <Label controller={labelController} on:click --display="contents">
+  <Label
+    controller={labelController}
+    on:click
+    style="--Label__display:contents;"
+  >
     <span class="spacer cell" />
     <span class="control cell">
       <Checkbox bind:checked {labelController} {disabled} />
