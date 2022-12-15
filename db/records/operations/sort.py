@@ -4,7 +4,9 @@ from db.columns import utils as col_utils
 from db.records.exceptions import BadSortFormat, SortFieldNotFound
 
 
-def get_default_order_by(relation, order_by=[]):
+def get_default_order_by(relation, order_by=None):
+    if order_by is None:
+        order_by = []
     # appending primary key sort guarantees determinism
     order_by = _append_primary_key_sort(relation, order_by)
     if not order_by:

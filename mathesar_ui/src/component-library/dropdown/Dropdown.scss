@@ -1,10 +1,5 @@
 button.dropdown.trigger {
-  padding: 0.5rem 2rem 0.5rem 0.75rem;
   position: relative;
-
-  &.no-arrow {
-    padding: 0.5rem 0.75rem;
-  }
 
   > .label {
     display: inline-flex;
@@ -17,16 +12,13 @@ button.dropdown.trigger {
     gap: 0.25rem;
     line-height: 1.2;
     min-height: 1.2em;
+    flex-grow: 1;
   }
 
   > .arrow {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
     display: flex;
     align-items: center;
-    padding-right: 0.75rem;
+    padding: 0 0.1rem;
   }
 }
 

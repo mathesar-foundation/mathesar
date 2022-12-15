@@ -21,9 +21,11 @@ def get_record(table, engine, id_value):
 def get_records_with_default_order(
         table,
         engine,
-        order_by=[],
+        order_by=None,
         **kwargs,
 ):
+    if order_by is None:
+        order_by = []
     order_by = get_default_order_by(table, order_by=order_by)
     return get_records(
         table=table,
@@ -41,10 +43,10 @@ def get_records(
     engine,
     limit=None,
     offset=None,
-    order_by=[],
+    order_by=None,
     filter=None,
     group_by=None,
-    search=[],
+    search=None,
     duplicate_only=None,
 ):
     """
@@ -67,6 +69,10 @@ def get_records(
         duplicate_only:  list of column names; only rows that have duplicates across those rows
                          will be returned
     """
+    if order_by is None:
+        order_by = []
+    if search is None:
+        search = []
     relation = apply_transformations_deprecated(
         table=table,
         limit=limit,
@@ -80,7 +86,9 @@ def get_records(
     return execute_pg_query(engine, relation)
 
 
-def get_count(table, engine, filter=None, search=[]):
+def get_count(table, engine, filter=None, search=None):
+    if search is None:
+        search = []
     col_name = "_count"
     columns_to_select = [
         count(1).label(col_name)

@@ -4,7 +4,11 @@ from db.constraints.utils import ConstraintType
 from mathesar.models.base import Column, Constraint, Table
 
 
-def _preview_info_by_column_id(fk_constraints, previous_path=[], exising_columns=[]):
+def _preview_info_by_column_id(fk_constraints, previous_path=None, exising_columns=None):
+    if previous_path is None:
+        previous_path = []
+    if exising_columns is None:
+        exising_columns = []
     preview_info = {}
     preview_columns = exising_columns
     for fk_constraint in fk_constraints:
@@ -65,7 +69,11 @@ def column_alias_from_preview_template(preview_template):
     return preview_data_column_ids
 
 
-def get_preview_info(referrer_table_pk, restrict_columns=None, path=[], existing_columns=[]):
+def get_preview_info(referrer_table_pk, restrict_columns=None, path=None, existing_columns=None):
+    if path is None:
+        path = []
+    if existing_columns is None:
+        existing_columns = []
     table_constraints = Constraint.objects.filter(table_id=referrer_table_pk).select_related('table__schema__database')
     fk_constraints = [
         table_constraint

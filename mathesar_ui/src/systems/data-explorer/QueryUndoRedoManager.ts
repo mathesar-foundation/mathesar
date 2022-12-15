@@ -9,7 +9,7 @@ export default class QueryUndoRedoManager {
     if (queryInfo) {
       const { query, isValid } = queryInfo;
       const json = JSON.parse(
-        JSON.stringify(query.toJSON()),
+        JSON.stringify(query.toJson()),
       ) as UnsavedQueryInstance;
       this.current = new QueryListEntry(json, isValid);
     }
@@ -20,7 +20,7 @@ export default class QueryUndoRedoManager {
       this.current.next.prev = undefined;
     }
     const json = JSON.parse(
-      JSON.stringify(query.toJSON()),
+      JSON.stringify(query.toJson()),
     ) as UnsavedQueryInstance;
     const newNode = new QueryListEntry(json, isValid);
     if (this.current && !this.current.isValid) {
