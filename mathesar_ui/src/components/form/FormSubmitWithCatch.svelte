@@ -38,12 +38,13 @@
     onCancel={() => form.reset()}
     {...$$restProps}
   />
-
-  <Errors {errors} />
+  <div class="errors">
+    <Errors {errors} />
+  </div>
 </div>
 
 <style>
-  .form-submit-with-catch {
-    --errors-margin: 1rem 0 0 1rem;
+  .errors {
+    --MessageBox__margin: 1rem 0 0 1rem;
   }
 </style>

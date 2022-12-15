@@ -13,6 +13,7 @@ from mathesar.api.db.permissions.table import TableAccessPolicy
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
     MultipleDataFileAPIException, UnknownDatabaseTypeIdentifier,
+    InvalidTableName,
 )
 from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException, InvalidTypeCastAPIException
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
@@ -177,6 +178,15 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
 
     def validate(self, data):
         if self.partial:
+            if table_name := data.get('name', None):
+                if any(
+                    invalid_char in table_name
+                    for invalid_char in ('(', ')')
+                ):
+                    raise InvalidTableName(
+                        table_name,
+                        field='name'
+                    )
             columns = data.get('columns', None)
             if columns is not None:
                 for col in columns:
