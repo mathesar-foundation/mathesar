@@ -1,17 +1,18 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+
   import {
     ButtonMenuItem,
     Icon,
     iconShowMore,
   } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { iconEdit, iconNotEditable, iconDeleteMajor } from '@mathesar/icons';
-  import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import SchemaName from '@mathesar/components/SchemaName.svelte';
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
-  import { createEventDispatcher } from 'svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
-  import Alert from '@mathesar/component-library/alert/Alert.svelte';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import SchemaName from '@mathesar/components/SchemaName.svelte';
+  import { iconDeleteMajor, iconEdit, iconNotEditable } from '@mathesar/icons';
+  import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
 
   const dispatch = createEventDispatcher();
@@ -61,10 +62,10 @@
     <SchemaConstituentCounts {schema} />
 
     {#if isDefault}
-      <Alert>
+      <InfoBox>
         Every PostgreSQL database includes the "public" schema. This protected
         schema can be read by anybody who accesses the database.
-      </Alert>
+      </InfoBox>
     {/if}
   </div>
 </a>
