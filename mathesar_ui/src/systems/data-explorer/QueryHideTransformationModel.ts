@@ -23,7 +23,7 @@ export default class QueryHideTransformationModel
     }
   }
 
-  toJSON(): QueryInstanceHideTransformation {
+  toJson(): QueryInstanceHideTransformation {
     return {
       type: this.type,
       spec: this.columnAliases,

@@ -94,7 +94,7 @@ export default class QuerySummarizationTransformationModel
     ];
   }
 
-  toJSON(): QueryInstanceSummarizationTransformation {
+  toJson(): QueryInstanceSummarizationTransformation {
     const aggregationEntries = [...this.aggregations.entries()];
     const groupingEntries = [...this.groups.entries()];
 

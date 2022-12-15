@@ -201,7 +201,7 @@ export default class QueryModel {
       model,
       type: 'transformations',
       diff: {
-        transformations: model.toJSON().transformations,
+        transformations: model.toJson().transformations,
       },
     };
   }
@@ -239,7 +239,7 @@ export default class QueryModel {
       model,
       type: 'transformations',
       diff: {
-        transformations: model.toJSON().transformations,
+        transformations: model.toJson().transformations,
       },
     };
   }
@@ -258,7 +258,7 @@ export default class QueryModel {
       model,
       type: 'transformations',
       diff: {
-        transformations: model.toJSON().transformations,
+        transformations: model.toJson().transformations,
       },
     };
   }
@@ -307,19 +307,19 @@ export default class QueryModel {
     return {
       base_table: this.base_table,
       initial_columns: this.initial_columns,
-      transformations: this.transformationModels.map((entry) => entry.toJSON()),
+      transformations: this.transformationModels.map((entry) => entry.toJson()),
       display_names: this.display_names,
     };
   }
 
-  toJSON(): UnsavedQueryInstance {
+  toJson(): UnsavedQueryInstance {
     return {
       id: this.id,
       name: this.name,
       description: this.description,
       base_table: this.base_table,
       initial_columns: this.initial_columns,
-      transformations: this.transformationModels.map((entry) => entry.toJSON()),
+      transformations: this.transformationModels.map((entry) => entry.toJson()),
       display_names: this.display_names,
     };
   }
