@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./.volumes:/var/lib/postgresql/data
+      - postgresql_data:/var/lib/postgresql/data
   service:
     build:
       context: .
@@ -38,3 +38,4 @@ services:
       - db
 volumes:
   ui_node_modules:
+  postgresql_data:
