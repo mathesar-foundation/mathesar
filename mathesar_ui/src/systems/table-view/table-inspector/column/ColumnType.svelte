@@ -50,7 +50,9 @@
     {/if}
   </InfoBox>
 {:else}
-  <AbstractTypeControl column={columnWithAbstractType} {save} />
+  {#key columnWithAbstractType}
+    <AbstractTypeControl column={columnWithAbstractType} {save} />
+  {/key}
 {/if}
 
 <style lang="scss">

@@ -103,7 +103,9 @@
       <Collapsible triggerAppearance="plain">
         <CollapsibleHeader slot="header" title="Formatting" />
         <div slot="content" class="content-container">
-          <ColumnFormatting {column} />
+          {#key column}
+            <ColumnFormatting {column} />
+          {/key}
         </div>
       </Collapsible>
     {/if}
