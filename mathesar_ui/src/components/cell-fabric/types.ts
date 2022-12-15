@@ -6,3 +6,5 @@ export interface CellColumnFabric {
   column: CellColumnLike;
   cellComponentAndProps: ComponentAndProps;
 }
+
+export type { CellValueFormatter } from './data-types/components/typeDefinitions';

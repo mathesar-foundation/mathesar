@@ -1,10 +1,14 @@
+import { isDefinedNonNullable } from '@mathesar-component-library';
 import type { TimeDisplayOptions } from '@mathesar/api/types/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import {
   DateTimeFormatter,
   DateTimeSpecification,
 } from '@mathesar/utils/date-time';
-import type { DateTimeCellExternalProps } from './components/typeDefinitions';
+import type {
+  DateTimeCellExternalProps,
+  CellValueFormatter,
+} from './components/typeDefinitions';
 import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
 import DateTimeCell from './components/date-time/DateTimeCell.svelte';
 import DateTimeInput from './components/date-time/DateTimeInput.svelte';
@@ -23,16 +27,25 @@ function getProps(
     type: supportTimeZone ? 'timeWithTZ' : 'time',
     timeFormat: format,
   });
+  const formatter = new DateTimeFormatter(specification);
   return {
     type: 'time',
     formattingString: specification.getFormattingString(),
-    formatter: new DateTimeFormatter(specification),
+    formatter,
     timeEnableSeconds: specification.hasSecondsInTime(),
     timeShow24Hr: specification.isTime24Hr(),
+    formatForDisplay: (
+      v: string | null | undefined,
+    ): string | null | undefined => {
+      if (!isDefinedNonNullable(v)) {
+        return v;
+      }
+      return formatter.parseAndFormat(v);
+    },
   };
 }
 
-const stringType: CellComponentFactory = {
+const timeType: CellComponentFactory = {
   get: (
     column: TimeLikeColumn,
     config?: { supportTimeZone?: boolean },
@@ -43,13 +56,21 @@ const stringType: CellComponentFactory = {
   getInput: (
     column: TimeLikeColumn,
     config?: { supportTimeZone?: boolean },
-  ): ComponentAndProps<DateTimeCellExternalProps> => ({
+  ): ComponentAndProps<
+    Omit<DateTimeCellExternalProps, 'formatForDisplay'>
+  > => ({
     component: DateTimeInput,
     props: {
       ...getProps(column, config?.supportTimeZone ?? false),
       allowRelativePresets: true,
     },
   }),
+  getDisplayFormatter(
+    column: TimeLikeColumn,
+    config?: { supportTimeZone?: boolean },
+  ): CellValueFormatter<string> {
+    return getProps(column, config?.supportTimeZone ?? false).formatForDisplay;
+  },
 };
 
-export default stringType;
+export default timeType;

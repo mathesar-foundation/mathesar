@@ -24,7 +24,7 @@ class MathesarColumn(Column):
             self,
             name,
             sa_type,
-            foreign_keys=set(),
+            foreign_keys=None,
             primary_key=False,
             nullable=True,
             autoincrement=False,
@@ -43,6 +43,8 @@ class MathesarColumn(Column):
         nullable -- Boolean giving whether the column is nullable.
         server_default -- String or DefaultClause giving the default value
         """
+        if foreign_keys is None:
+            foreign_keys = set()
         self.engine = engine
         super().__init__(
             *foreign_keys,
