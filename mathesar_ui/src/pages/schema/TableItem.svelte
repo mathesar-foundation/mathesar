@@ -57,6 +57,10 @@
     tablecardIsHovered = false;
   }
 
+  function handleGoToTextClick() {
+    window.location.pathname = getGoToTableLink();
+  }
+
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
     database.name,
     schema.id,
@@ -71,47 +75,51 @@
     class="table-card-link"
     aria-label={table.name}
     href={getGoToTableLink()}
-  >
-    <div class="table-item-header">
-      <div class="name-and-description">
-        <div class="name"><TableName {table} /></div>
-      </div>
-      <DropdownMenu
-        showArrow={false}
-        triggerAppearance="plain"
-        closeOnInnerClick={true}
-        label=""
-        icon={iconShowMore}
-      >
-        <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
-          Edit Table
-        </ButtonMenuItem>
-        <MenuDivider />
-        <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
-          Explore Table
-        </LinkMenuItem>
-        <MenuDivider />
-        <ButtonMenuItem
-          on:click={handleDeleteTable}
-          danger
-          icon={iconDeleteMajor}
-        >
-          Delete Table
-        </ButtonMenuItem>
-      </DropdownMenu>
-      <EditTable modalController={editTableModalController} {table} />
+  />
+  <div class="table-item-header">
+    <div class="name-and-description">
+      <div class="name"><TableName {table} /></div>
     </div>
-    <div class="actions">
-      <p class="action passthrough action-link">Go to Table</p>
-      <p
-        on:click={() =>
-          recordSelector.navigateToRecordPage({ tableId: table.id })}
-        class="action passthrough action-link"
+    <DropdownMenu
+      showArrow={false}
+      triggerAppearance="plain"
+      closeOnInnerClick={true}
+      label=""
+      icon={iconShowMore}
+    >
+      <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
+        Edit Table
+      </ButtonMenuItem>
+      <MenuDivider />
+      <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
+        Explore Table
+      </LinkMenuItem>
+      <MenuDivider />
+      <ButtonMenuItem
+        on:click={handleDeleteTable}
+        danger
+        icon={iconDeleteMajor}
       >
-        Find Record
-      </p>
-    </div>
-  </a>
+        Delete Table
+      </ButtonMenuItem>
+    </DropdownMenu>
+    <EditTable modalController={editTableModalController} {table} />
+  </div>
+  <div class="actions">
+    <p
+      on:click={() => handleGoToTextClick()}
+      class="action passthrough action-link"
+    >
+      Go to Table
+    </p>
+    <p
+      on:click={() =>
+        recordSelector.navigateToRecordPage({ tableId: table.id })}
+      class="action passthrough action-link"
+    >
+      Find Record
+    </p>
+  </div>
 </div>
 
 <style lang="scss">
@@ -122,7 +130,7 @@
     border-radius: var(--border-radius-l);
     max-width: 22rem;
     overflow: hidden;
-
+    position: relative;
     > :global(* + *) {
       margin-top: 1rem;
     }
@@ -136,6 +144,10 @@
     position: absolute;
     text-decoration: none;
     color: black;
+    left: 0rem;
+    right: 0rem;
+    top: 0rem;
+    bottom: 0rem;
   }
 
   .table-item-header {
@@ -168,7 +180,6 @@
     flex-direction: row;
     background-color: var(--sand-100);
     border-top: 1px solid var(--sand-200);
-
     :global(.action) {
       flex: 1;
       padding: 0.75rem;
@@ -177,9 +188,11 @@
       &:first-child {
         border-right: 1px solid var(--sand-200);
         border-bottom-left-radius: var(--border-radius-l);
+        z-index: 1;
       }
       &:last-child {
         border-bottom-right-radius: var(--border-radius-l);
+        z-index: 2;
       }
       &:hover {
         background-color: var(--slate-100);
