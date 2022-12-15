@@ -9,7 +9,8 @@ def test_available_filters_structure(engine_with_schema):
     some_filters_that_we_expect_to_be_there = [
         'greater',
         'lesser',
-        'empty',
+        'null',
+        'not_null',
         'equal',
         'greater_or_equal',
         'contains_case_insensitive',
