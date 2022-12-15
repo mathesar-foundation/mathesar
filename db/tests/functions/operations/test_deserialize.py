@@ -14,7 +14,7 @@ exceptions_test_list = [
         UnknownDBFunctionID
     ),
     (
-        {"empty": {"column_name": ["varchar"]}, },
+        {"null": {"column_name": ["varchar"]}, },
         BadDBFunctionFormat
     ),
 ]

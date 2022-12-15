@@ -9,6 +9,7 @@ import SingleSelectCell from './components/select/SingleSelectCell.svelte';
 import type {
   CheckBoxCellExternalProps,
   SingleSelectCellExternalProps,
+  CellValueFormatter,
 } from './components/typeDefinitions';
 import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
 
@@ -27,18 +28,23 @@ function getLabels(
   return [customLabels?.TRUE ?? 'true', customLabels?.FALSE ?? 'false'];
 }
 
+function getFormattedValue(
+  labels: [string, string],
+  value?: boolean | null,
+): string {
+  if (isDefinedNonNullable(value)) {
+    return value ? labels[0] : labels[1];
+  }
+  return '';
+}
+
 function getProps(
   column: BooleanLikeColumn,
 ): SingleSelectCellExternalProps<boolean | null> {
   const labels = getLabels(column.display_options);
   return {
     options: [null, true, false],
-    getLabel: (value?: boolean | null) => {
-      if (isDefinedNonNullable(value)) {
-        return value ? labels[0] : labels[1];
-      }
-      return '';
-    },
+    getLabel: (value?: boolean | null) => getFormattedValue(labels, value),
   };
 }
 
@@ -59,6 +65,11 @@ const booleanType: CellComponentFactory = {
     component: Select,
     props: getProps(column),
   }),
+  getDisplayFormatter(column: BooleanLikeColumn): CellValueFormatter<boolean> {
+    const labels = getLabels(column.display_options);
+    return (value: boolean | null | undefined) =>
+      getFormattedValue(labels, value);
+  },
 };
 
 export default booleanType;
