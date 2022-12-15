@@ -353,7 +353,8 @@
             <h4>Column names and data types</h4>
             <p>
               Column names and data types are automatically detected, use the
-              controls below to review and update them if necessary.
+              controls in the preview table to review and update them if
+              necessary.
             </p>
             {#if isLoading}
               <InfoBox fullWidth>
@@ -517,25 +518,28 @@
         overflow: hidden;
         width: fit-content;
         max-width: 100%;
-        min-width: var(--max-layout-width);
         background: var(--white);
         border: solid 1px var(--slate-300);
         border-radius: 0.3rem;
 
         h4 {
           padding: var(--size-small) var(--inset-page-padding);
-          border-bottom: 1px solid var(--slate-100);
+          border-bottom: 1px solid var(--slate-200);
         }
 
         .content {
           padding: var(--inset-page-padding);
+          background: var(--sand-100);
         }
 
         .sheet-holder {
-          background: var(--slate-50-tentative);
           border: 1px solid var(--slate-200);
           min-height: 20rem;
           overflow: auto;
+        }
+
+        :global(.sheet) {
+          min-width: 61.8rem;
         }
 
         :global(.sheet [data-sheet-element='row'] [data-sheet-element='cell']) {
