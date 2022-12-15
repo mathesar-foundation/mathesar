@@ -139,14 +139,14 @@ class InvalidTypeCastAPIException(MathesarAPIException):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
         super().__init__(exception, self.error_code, self.err_msg(exception), field, details, status_code)
-        # self.detail[0]["message"] = "this is bad"
 
     @staticmethod
     def err_msg(exception):
+        print(exception.params)
         if type(exception) is InvalidTypeError and exception.column_name and exception.new_type:
             return f'{exception.column_name} cannot be cast to {exception.new_type}.'
-        if type(exception) is IntegrityError and "email" in exception.__dict__["params"].keys():
-            return exception.__dict__["params"]["email"] + "is not a valid email address"
+        if type(exception) is IntegrityError and "email" in exception.params.keys():
+            return f'{exception.params["email"]} is not a valid email address.'
         return 'Invalid type cast requested.'
 
 
