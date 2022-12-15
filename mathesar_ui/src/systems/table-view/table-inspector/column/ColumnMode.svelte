@@ -4,12 +4,13 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
   import RenameColumn from './RenameColumn.svelte';
-  // import ColumnDisplayProperties from './ColumnDisplayProperties.svelte';
   import ColumnActions from './ColumnActions.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import ColumnTypeSpecifierTag from './ColumnTypeSpecifierTag.svelte';
+  import ColumnFormatting from './ColumnFormatting.svelte';
+  import SetDefaultValue from './SetDefaultValue.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ processedColumns, selection } = $tabularData);
@@ -85,19 +86,29 @@
       </Collapsible>
     {/if}
 
-    <!-- Coming in the PR for chaging column data types -->
-    <!-- {#if column}
-      <Collapsible isOpen>
+    {#if column && !column.column.default?.is_dynamic}
+      <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
           title="Default Value"
-          isDBLevelConfiguration
+          isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
-          <SetDefaultValue />
+          <SetDefaultValue {column} />
         </div>
       </Collapsible>
-    {/if} -->
+    {/if}
+
+    {#if column}
+      <Collapsible triggerAppearance="plain">
+        <CollapsibleHeader slot="header" title="Formatting" />
+        <div slot="content" class="content-container">
+          {#key column}
+            <ColumnFormatting {column} />
+          {/key}
+        </div>
+      </Collapsible>
+    {/if}
 
     {#if column}
       {@const referentTableId = column.linkFk?.referent_table}

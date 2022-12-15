@@ -1,62 +1,62 @@
 <script lang="ts">
-  import { Button, Icon } from '@mathesar/component-library';
-  import { iconEdit } from '@mathesar/icons';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
-  import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import type { ColumnTypeOptionsSaveArgs } from '@mathesar/components/abstract-type-control/types';
-  import { toast } from '@mathesar/stores/toast';
+  import AbstractTypeSelector from '@mathesar/components/abstract-type-control/AbstractTypeSelector.svelte';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);
 
   export let column: ProcessedColumn;
 
-  let mode: 'read' | 'edit' = 'read';
-  function toggleMode(): undefined {
-    switch (mode) {
-      case 'read':
-        mode = 'edit';
-        break;
-      case 'edit':
-        mode = 'read';
-        break;
-      default:
-        throw new MissingExhaustiveConditionError(mode, 'ColumnType');
-    }
-    return undefined;
+  async function save(
+    columnInfo: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
+  ) {
+    await columnsDataStore.patch(column.id, {
+      type: columnInfo.type,
+      type_options: columnInfo.type_options,
+      display_options: null,
+      default: null,
+    });
   }
-
-  async function save(columnInfo: ColumnTypeOptionsSaveArgs) {
-    try {
-      await columnsDataStore.patch(column.id, {
-        type: columnInfo.type,
-        type_options: columnInfo.type_options,
-        display_options: columnInfo.display_options,
-      });
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Unable to change column type.';
-      toast.error(message);
-    }
-  }
+  $: disallowDataTypeChange = column.column.primary_key || !!column.linkFk;
+  $: columnWithAbstractType = {
+    ...column.column,
+    abstractType: column.abstractType,
+  };
 </script>
 
-{#if mode === 'read'}
-  <Button class="type-switch" appearance="plain" on:click={toggleMode}>
-    <span>{column.abstractType.name}</span>
-    <Icon size="0.7em" {...iconEdit} />
-  </Button>
-{:else}
-  <AbstractTypeControl
-    column={{
-      ...column.column,
-      abstractType: column.abstractType,
-    }}
-    {save}
-    on:close={toggleMode}
+{#if disallowDataTypeChange}
+  <AbstractTypeSelector
+    selectedAbstractType={column.abstractType}
+    column={columnWithAbstractType}
+    disabled={true}
   />
+  <InfoBox>
+    {#if column.column.primary_key}
+      <span class="info-alert">
+        The data type of the primary key column is restricted and cannot be
+        changed.
+      </span>
+    {:else if !!column.linkFk}
+      <span class="info-alert">
+        The data type of the foreign key column is restricted to the data type
+        of the primary key column and cannot be changed.
+      </span>
+    {/if}
+  </InfoBox>
+{:else}
+  {#key columnWithAbstractType}
+    <AbstractTypeControl column={columnWithAbstractType} {save} />
+  {/key}
 {/if}
+
+<style lang="scss">
+  .info-alert {
+    font-size: var(--text-size-small);
+  }
+</style>

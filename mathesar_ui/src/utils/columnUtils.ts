@@ -7,6 +7,7 @@ import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
+import { uniqueWith, type ValidationFn } from '@mathesar/components/form';
 
 export function getColumnIconProps(
   _column: DisplayColumn,
@@ -26,4 +27,14 @@ export function getColumnIconProps(
     dbType: _column.type,
     typeOptions: _column.type_options,
   });
+}
+
+export function columnNameIsAvailable(
+  columns: { name: string }[],
+): ValidationFn<string> {
+  const msg = 'A column with that name already exists';
+  return uniqueWith(
+    columns.map((c) => c.name),
+    msg,
+  );
 }

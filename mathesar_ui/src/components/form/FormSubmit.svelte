@@ -10,6 +10,7 @@
   }
 
   export let form: Form;
+  export let canProceed = true;
   export let initiallyHidden = false;
   export let onCancel = () => form.reset();
 
@@ -19,7 +20,7 @@
 {#if !initiallyHidden || hasChanges}
   <div class="form-submit">
     <CancelOrProceedButtonPair
-      canProceed={canSubmit}
+      canProceed={canProceed && canSubmit}
       {onCancel}
       {...$$restProps}
     />
