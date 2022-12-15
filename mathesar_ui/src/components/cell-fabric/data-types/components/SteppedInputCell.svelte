@@ -5,10 +5,13 @@
     getValueComparisonOutcome,
     splitMatchParts,
   } from '@mathesar-component-library';
-  import type { CellValueFormatter } from '@mathesar/components/cell-fabric/utils';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import CellWrapper from './CellWrapper.svelte';
-  import type { CellTypeProps, HorizontalAlignment } from './typeDefinitions';
+  import type {
+    CellTypeProps,
+    HorizontalAlignment,
+    CellValueFormatter,
+  } from './typeDefinitions';
 
   const dispatch = createEventDispatcher();
 

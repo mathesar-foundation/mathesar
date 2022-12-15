@@ -1,6 +1,7 @@
 <script lang="ts">
   import { TabContainer, Spinner } from '@mathesar-component-library';
   import { getAvailableName } from '@mathesar/utils/db';
+  import { confirm } from '@mathesar/stores/confirmation';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import TransformationsPane from './transformations-pane/TransformationsPane.svelte';
@@ -11,36 +12,68 @@
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
 
-  $: ({ query, state } = queryManager);
+  $: ({ query, state, confirmationNeededForMultipleResults } = queryManager);
   $: ({ inputColumnsFetchState } = $state);
+
+  const tabs = [
+    { id: 'column-selection', label: 'Select Columns' },
+    { id: 'transform-results', label: 'Transform Results' },
+  ];
+  let activeTab = tabs[0];
 
   async function addColumn(column: ColumnWithLink) {
     const baseAlias = `${column.tableName}_${column.name}`;
     const allAliases = new Set($query.initial_columns.map((c) => c.alias));
     const alias = getAvailableName(baseAlias, allAliases);
-    await queryManager.update((q) =>
-      q.withColumn({
+    const queryHasNoSummarization = !$query.hasSummarizationTransform();
+    let addNewAutoSummarization = false;
+    if (
+      column.producesMultipleResults &&
+      $confirmationNeededForMultipleResults &&
+      queryHasNoSummarization
+    ) {
+      addNewAutoSummarization = await confirm({
+        title: "You're adding a column with multiple related records",
+        body: `By default, Mathesar shows only one related record per row.
+               We recommend adding a summarization step if you'd like to see
+               related records as a list instead.`,
+        proceedButton: {
+          label: 'Yes, show related records as a list',
+          icon: undefined,
+        },
+        cancelButton: { label: 'Do not summarize', icon: undefined },
+      });
+      confirmationNeededForMultipleResults.set(false);
+    }
+    await queryManager.update((q) => {
+      const newQuery = q.withColumn({
         alias,
         id: column.id,
         jp_path: column.jpPath,
-      }),
-    );
-    queryManager.selectColumn(alias);
+      });
+      if (addNewAutoSummarization) {
+        const autoSummarization =
+          queryManager.getAutoSummarizationTransformModel();
+        if (autoSummarization) {
+          return newQuery.model.addSummarizationTransform(autoSummarization);
+        }
+      }
+      return newQuery;
+    });
+    if (queryHasNoSummarization) {
+      queryManager.selectColumn(alias);
+    }
+    // Select transformations tab is auto summarization is added
+    if (addNewAutoSummarization) {
+      [, activeTab] = tabs;
+    }
   }
 </script>
 
 <aside class="input-sidebar">
   <header>Build your Exploration</header>
   <section class="input-pane">
-    <TabContainer
-      tabs={[
-        { id: 'column-selection', label: 'Select Columns' },
-        { id: 'transform-results', label: 'Transform Results' },
-      ]}
-      fillTabWidth
-      fillContainerHeight
-      let:activeTab
-    >
+    <TabContainer {tabs} fillTabWidth fillContainerHeight bind:activeTab>
       {#if inputColumnsFetchState?.state === 'processing'}
         <div class="loading-state">
           <Spinner />
