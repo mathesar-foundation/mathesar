@@ -46,12 +46,13 @@
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { getCellCap } from '@mathesar/components/cell-fabric/utils';
   import { toast } from '@mathesar/stores/toast';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import PreviewColumn from './PreviewColumn.svelte';
+  import ErrorInfo from './ErrorInfo.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -216,7 +217,11 @@
     } catch (err) {
       previewRequestStatus = {
         state: 'failure',
-        errors: [err instanceof Error ? err.message : 'Unable to load preview'],
+        errors: [
+          err instanceof Error
+            ? err.message
+            : 'An error occurred while loading the preview.',
+        ],
       };
     }
   }
@@ -269,11 +274,15 @@
       columns = newColumns;
       typeChangeRequestStatus = { state: 'success' };
     } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? `Data Type Change Failed: ${getErrorMessage(err.message)}`
+          : 'Data Type Change Failed';
       typeChangeRequestStatus = {
         state: 'failure',
-        errors: [err instanceof Error ? err.message : 'Unable to change type'],
+        errors: [errorMessage],
       };
-      throw err;
+      throw new Error(errorMessage);
     }
   }
 
@@ -362,13 +371,17 @@
                 <Spinner />
               </InfoBox>
             {:else if previewRequestStatus?.state === 'failure'}
-              <ErrorBox fullWidth>
-                {previewRequestStatus.errors.join(',')}
-              </ErrorBox>
+              <ErrorInfo
+                errors={previewRequestStatus.errors}
+                on:retry={() => onPreviewTableIdChange(previewTableId)}
+                on:delete={handleCancel}
+              />
             {:else if headerUpdateRequestStatus?.state === 'failure'}
-              <ErrorBox fullWidth>
-                {headerUpdateRequestStatus.errors.join(',')}
-              </ErrorBox>
+              <ErrorInfo
+                errors={headerUpdateRequestStatus.errors}
+                on:retry={updateDataFileHeader}
+                on:delete={handleCancel}
+              />
             {:else}
               <InfoBox fullWidth>
                 Preview data is shown for the first few rows of your data only.
@@ -380,7 +393,7 @@
     </InsetPageLayout>
 
     {#if !tableIsAlreadyConfirmed}
-      {#if !(processedColumns.length === 0 && isLoading)}
+      {#if processedColumns.length > 0}
         <div class="table-preview-content">
           <div class="preview">
             <h4>Table Preview</h4>
