@@ -53,7 +53,7 @@
     <div class="constraints-list">
       <ConstraintTypeSection
         constraintType="primary"
-        constraints={constraintsGroupedByType.get('unique') || []}
+        constraints={constraintsGroupedByType.get('primary') || []}
       />
       <ConstraintTypeSection
         constraintType="foreignkey"
