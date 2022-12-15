@@ -7,18 +7,15 @@
     ImmutableMap,
     Collapsible,
   } from '@mathesar-component-library';
-  import {
-    iconAddNew,
-    iconFiltering,
-    iconGrouping,
-    iconDeleteMajor,
-  } from '@mathesar/icons';
+  import { iconAddNew, iconDeleteMajor } from '@mathesar/icons';
   import type QueryManager from '../../QueryManager';
   import FilterTransformation from './FilterTransformation.svelte';
   import QueryFilterTransformationModel from '../../QueryFilterTransformationModel';
   import { calcAllowedColumnsPerTransformation } from './transformationUtils';
   import QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
   import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
+  import HideTransformation from './HideTransformation.svelte';
+  import QueryHideTransformationModel from '../../QueryHideTransformationModel';
   import type { QueryTransformationModel } from '../../QueryModel';
 
   export let queryManager: QueryManager;
@@ -66,6 +63,13 @@
     );
   }
 
+  async function addHideTransform() {
+    const newHide = new QueryHideTransformationModel({
+      columnAliases: [],
+    });
+    await queryManager.update((q) => q.addHideTransform(newHide));
+  }
+
   async function removeLastTransformation() {
     await queryManager.update((q) => q.removeLastTransform());
   }
@@ -98,11 +102,7 @@
             {index + 1}
           </span>
           <span class="title">
-            {#if transformationModel.type === 'filter'}
-              Filter
-            {:else}
-              Summarization
-            {/if}
+            {transformationModel.name}
           </span>
           {#if index === transformationModels.length - 1}
             <Button
@@ -115,11 +115,13 @@
           {/if}
         </span>
         <div slot="content" class="content">
+          {@const hasNoColumns =
+            allowedColumnsPerTransformation[index].size === 0}
           {#if transformationModel.type === 'filter'}
             <FilterTransformation
               columns={allowedColumnsPerTransformation[index]}
               model={transformationModel}
-              limitEditing={allowedColumnsPerTransformation[index].size === 0}
+              limitEditing={hasNoColumns}
               totalTransformations={transformationModels.length}
               on:update={() => updateTransformation(index, transformationModel)}
             />
@@ -127,8 +129,15 @@
             <SummarizationTransformation
               columns={allowedColumnsPerTransformation[index]}
               model={transformationModel}
-              limitEditing={allowedColumnsPerTransformation[index].size === 0 ||
+              limitEditing={hasNoColumns ||
                 index < transformationModels.length - 1}
+              on:update={() => updateTransformation(index, transformationModel)}
+            />
+          {:else if transformationModel.type === 'hide'}
+            <HideTransformation
+              columns={allowedColumnsPerTransformation[index]}
+              model={transformationModel}
+              limitEditing={hasNoColumns}
               on:update={() => updateTransformation(index, transformationModel)}
             />
           {/if}
@@ -144,16 +153,14 @@
       disabled={$processedColumns.size === 0}
       triggerAppearance="secondary"
     >
-      <ButtonMenuItem icon={iconFiltering} on:click={addFilter}>
-        Filter
-      </ButtonMenuItem>
+      <ButtonMenuItem on:click={addFilter}>Filter</ButtonMenuItem>
       <ButtonMenuItem
-        icon={iconGrouping}
         disabled={$query.hasSummarizationTransform()}
         on:click={addSummarization}
       >
         Summarize
       </ButtonMenuItem>
+      <ButtonMenuItem on:click={addHideTransform}>Hide Columns</ButtonMenuItem>
     </DropdownMenu>
   </div>
 </div>

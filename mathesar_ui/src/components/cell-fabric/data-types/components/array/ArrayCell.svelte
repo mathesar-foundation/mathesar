@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { isDefinedNonNullable, Chip } from '@mathesar-component-library';
   import CellValue from '@mathesar/components/CellValue.svelte';
+  import Null from '@mathesar/components/Null.svelte';
   import CellWrapper from '../CellWrapper.svelte';
   import type { ArrayCellProps } from '../typeDefinitions';
 
@@ -14,6 +15,7 @@
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
+  export let formatElementForDisplay: $$Props['formatElementForDisplay'];
 
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
@@ -57,8 +59,14 @@
         {#each value as entry}
           <Chip
             display={isIndependentOfSheet ? 'inline-block' : 'inline'}
-            background="var(--slate-200)">{entry}</Chip
+            background="var(--slate-200)"
           >
+            {#if entry === null}
+              <Null />
+            {:else}
+              {formatElementForDisplay(entry)}
+            {/if}
+          </Chip>
         {/each}
       </div>
     {/if}

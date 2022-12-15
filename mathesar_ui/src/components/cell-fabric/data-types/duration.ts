@@ -1,4 +1,7 @@
-import { FormattedInput } from '@mathesar-component-library';
+import {
+  FormattedInput,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
 import type {
   ComponentAndProps,
   FormattedInputProps,
@@ -9,7 +12,10 @@ import {
   DurationSpecification,
 } from '@mathesar/utils/duration';
 import FormattedInputCell from './components/formatted-input/FormattedInputCell.svelte';
-import type { FormattedInputCellExternalProps } from './components/typeDefinitions';
+import type {
+  FormattedInputCellExternalProps,
+  CellValueFormatter,
+} from './components/typeDefinitions';
 import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
 
 export interface DurationLikeColumn extends CellColumnLike {
@@ -25,6 +31,14 @@ function getProps(column: DurationLikeColumn): FormattedInputCellExternalProps {
   return {
     formatter,
     placeholder: durationSpecification.getFormattingString(),
+    formatForDisplay: (
+      v: string | null | undefined,
+    ): string | null | undefined => {
+      if (!isDefinedNonNullable(v)) {
+        return v;
+      }
+      return formatter.format(v);
+    },
   };
 }
 
@@ -41,6 +55,9 @@ const durationType: CellComponentFactory = {
     component: FormattedInput,
     props: getProps(column),
   }),
+  getDisplayFormatter(column: DurationLikeColumn): CellValueFormatter<string> {
+    return getProps(column).formatForDisplay;
+  },
 };
 
 export default durationType;
