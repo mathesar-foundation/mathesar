@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { isDefinedNonNullable } from '@mathesar-component-library';
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { DateTimeCellProps } from '../typeDefinitions';
   import DateTimeInput from './DateTimeInput.svelte';
@@ -17,15 +16,7 @@
   export let formatter: $$Props['formatter'];
   export let timeShow24Hr: $$Props['timeShow24Hr'] = true;
   export let timeEnableSeconds: $$Props['timeEnableSeconds'] = true;
-
-  function formatValue(
-    v: string | null | undefined,
-  ): string | null | undefined {
-    if (!isDefinedNonNullable(v)) {
-      return v;
-    }
-    return formatter.parseAndFormat(v);
-  }
+  export let formatForDisplay: $$Props['formatForDisplay'];
 </script>
 
 <SteppedInputCell
@@ -36,7 +27,7 @@
   {isIndependentOfSheet}
   let:handleInputBlur
   let:handleInputKeydown
-  {formatValue}
+  formatValue={formatForDisplay}
   on:movementKeyDown
   on:activate
   on:mouseenter

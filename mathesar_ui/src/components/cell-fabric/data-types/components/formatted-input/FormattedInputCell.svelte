@@ -1,8 +1,5 @@
 <script lang="ts">
-  import {
-    FormattedInput,
-    isDefinedNonNullable,
-  } from '@mathesar-component-library';
+  import { FormattedInput } from '@mathesar-component-library';
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { FormattedInputCellProps } from '../typeDefinitions';
 
@@ -13,17 +10,8 @@
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
-
   export let formatter: $$Props['formatter'];
-
-  function formatValue(
-    v: string | null | undefined,
-  ): string | null | undefined {
-    if (!isDefinedNonNullable(v)) {
-      return v;
-    }
-    return formatter.format(v);
-  }
+  export let formatForDisplay: $$Props['formatForDisplay'];
 </script>
 
 <SteppedInputCell
@@ -35,7 +23,7 @@
   horizontalAlignment="right"
   let:handleInputBlur
   let:handleInputKeydown
-  {formatValue}
+  formatValue={formatForDisplay}
   on:movementKeyDown
   on:activate
   on:mouseenter

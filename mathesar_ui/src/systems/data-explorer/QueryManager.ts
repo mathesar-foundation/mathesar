@@ -30,6 +30,7 @@ import type {
   InputColumnsStoreSubstance,
 } from './utils';
 import QueryRunner from './QueryRunner';
+import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 
 function validateQuery(
   queryModel: QueryModel,
@@ -79,6 +80,10 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     inputColumnInformationMap: new Map(),
   });
 
+  confirmationNeededForMultipleResults: Writable<boolean> = writable(true);
+
+  queryHasUnsavedChanges: Writable<boolean> = writable(false);
+
   // Promises
 
   private baseTableFetchPromise: CancellablePromise<TableEntry> | undefined;
@@ -96,14 +101,15 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
   constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
     super(query, abstractTypeMap);
     this.undoRedoManager = new QueryUndoRedoManager();
-    const inputColumnTreePromise = this.calculateInputColumnTree();
-    void inputColumnTreePromise.then(() => {
-      const isQueryValid = validateQuery(query, get(this.processedColumns));
-      this.undoRedoManager.pushState(query, isQueryValid);
-      return query;
-    });
+    void this.calculateInputColumnTree();
+    let isFirstRun = true;
     this.runUnsubscriber = this.on('run', (response: QueryRunResponse) => {
-      this.checkAndUpdateSummarization(new QueryModel(response.query));
+      if (isFirstRun) {
+        const isQueryValid = validateQuery(query, get(this.columnsMetaData));
+        this.undoRedoManager.pushState(query, isQueryValid);
+        isFirstRun = false;
+      }
+      this.checkAndUpdateSummarizationAfterRun(new QueryModel(response.query));
     });
   }
 
@@ -198,6 +204,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     clientValidationState: RequestStatus;
   }> {
     this.query.set(queryModel);
+    this.queryHasUnsavedChanges.set(true);
     if (get(this.state).inputColumnsFetchState?.state !== 'success') {
       await this.calculateInputColumnTree();
     }
@@ -219,7 +226,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     }));
   }
 
-  private checkAndUpdateSummarization(queryModel: QueryModel) {
+  private checkAndUpdateSummarizationAfterRun(queryModel: QueryModel) {
     const thisQueryModel = this.getQueryModel();
     let newQueryModel = thisQueryModel;
     let isChangeNeeded = false;
@@ -274,6 +281,8 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
           this.resetResults();
           this.undoRedoManager.clear();
           this.setUndoRedoStates();
+          this.confirmationNeededForMultipleResults.set(true);
+          this.queryHasUnsavedChanges.set(false);
           await this.calculateInputColumnTree();
           break;
         case 'initialColumnName':
@@ -328,7 +337,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
    * @throws Error if unable to save
    */
   async save(): Promise<QueryModel> {
-    const queryJSON = this.getQueryModel().toJSON();
+    const queryJSON = this.getQueryModel().toJson();
     this.state.update((_state) => ({
       ..._state,
       saveState: { state: 'processing' },
@@ -349,6 +358,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
         ..._state,
         saveState: { state: 'success' },
       }));
+      this.queryHasUnsavedChanges.set(false);
       return this.getQueryModel();
     } catch (err) {
       const errors =
@@ -364,6 +374,25 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       }));
       throw err;
     }
+  }
+
+  getAutoSummarizationTransformModel():
+    | QuerySummarizationTransformationModel
+    | undefined {
+    const { baseTableColumns } = get(this.inputColumns);
+    const firstBaseTableInitialColumn =
+      this.getQueryModel().initial_columns.find((initialColumn) =>
+        baseTableColumns.has(initialColumn.id),
+      );
+    if (firstBaseTableInitialColumn) {
+      return new QuerySummarizationTransformationModel({
+        type: 'summarize',
+        spec: {
+          base_grouping_column: firstBaseTableInitialColumn.alias,
+        },
+      });
+    }
+    return undefined;
   }
 
   destroy(): void {
