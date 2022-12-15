@@ -1,8 +1,4 @@
 <script lang="ts">
-  import {
-    StringifiedNumberFormatter,
-    isDefinedNonNullable,
-  } from '@mathesar-component-library';
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type {
     HorizontalAlignment,
@@ -16,37 +12,10 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
-  export let useGrouping: $$Props['useGrouping'];
-  export let minimumFractionDigits: $$Props['minimumFractionDigits'];
-  export let maximumFractionDigits: $$Props['maximumFractionDigits'];
-  export let locale: $$Props['locale'];
-  export let allowFloat: $$Props['allowFloat'];
+  export let formatterOptions: $$Props['formatterOptions'];
   export let horizontalAlignment: HorizontalAlignment = 'right';
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
-
-  $: formatterOptions = {
-    locale,
-    allowFloat,
-    allowNegative: true,
-    useGrouping,
-    minimumFractionDigits,
-  };
-  /** Used only for display -- not during input */
-  $: displayFormatter = new StringifiedNumberFormatter({
-    ...formatterOptions,
-    // We only want to apply `maximumFractionDigits` during display. We don't
-    // want it to take effect during input.
-    maximumFractionDigits,
-  });
-
-  function formatValue(
-    v: string | number | null | undefined,
-  ): string | null | undefined {
-    if (!isDefinedNonNullable(v)) {
-      return v;
-    }
-    return displayFormatter.format(String(v));
-  }
+  export let formatForDisplay: $$Props['formatForDisplay'];
 </script>
 
 <SteppedInputCell
@@ -55,7 +24,7 @@
   {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
-  {formatValue}
+  formatValue={formatForDisplay}
   {horizontalAlignment}
   let:handleInputBlur
   let:handleInputKeydown

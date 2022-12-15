@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Alert, RadioGroup } from '@mathesar-component-library';
+  import { RadioGroup } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import {
@@ -11,6 +11,7 @@
   import Field from '@mathesar/components/form/Field.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
   import { renderRecordSummaryForRow } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { saveRecordSummaryTemplate } from '@mathesar/stores/tables';
@@ -91,26 +92,27 @@
           field={template}
           input={{ component: TemplateInput, props: { columns: $columns } }}
         />
-      {/if}
 
-      {#if nonconformantColumns.length}
-        <Alert>
-          <div class="nonconformant-columns">
-            <p>
-              Because some column names contain curly braces, the following
-              numerical values are used in place of column names within the
-              above template:
-            </p>
-            <ul>
-              {#each nonconformantColumns as column}
-                <li>
-                  <Identifier>{column.id}</Identifier>
-                  references the column <Identifier>{column.name}</Identifier>.
-                </li>
-              {/each}
-            </ul>
-          </div>
-        </Alert>
+        {#if nonconformantColumns.length}
+          <InfoBox>
+            <div class="nonconformant-columns">
+              <p>
+                Because some column names contain curly braces, the following
+                numerical values are used in place of column names within the
+                above template:
+              </p>
+              <ul>
+                {#each nonconformantColumns as column}
+                  <li>
+                    <Identifier>{column.id}</Identifier>
+                    references the column
+                    <Identifier>{column.name}</Identifier>.
+                  </li>
+                {/each}
+              </ul>
+            </div>
+          </InfoBox>
+        {/if}
       {/if}
 
       <FormSubmit

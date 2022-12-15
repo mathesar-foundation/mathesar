@@ -8,7 +8,6 @@ export { default as popper } from './common/actions/popper';
 export { default as portal } from './common/actions/portal';
 
 // Simple Components
-export { default as Alert } from './alert/Alert.svelte';
 export { default as AnchorButton } from './anchorButton/AnchorButton.svelte';
 export { default as Badge } from './badge/Badge.svelte';
 export { default as BadgeCount } from './badge-count/BadgeCount.svelte';

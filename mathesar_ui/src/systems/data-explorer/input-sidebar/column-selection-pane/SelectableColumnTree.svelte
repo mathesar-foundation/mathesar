@@ -6,7 +6,6 @@
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
   export let columnsWithLinks: Map<ColumnWithLink['id'], ColumnWithLink>;
-  export let showColumnsWithoutLinks = true;
 </script>
 
 <div class="selectable-column-tree">
@@ -23,7 +22,7 @@
           on:add
         />
       </TableGroupCollapsible>
-    {:else if showColumnsWithoutLinks}
+    {:else}
       <SelectableColumn {column} on:add />
     {/if}
   {/each}
