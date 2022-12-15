@@ -46,7 +46,6 @@
   .field {
     display: block;
     --spacing: 1rem;
-    --alert-margin: 0.5rem 0 0 0.5rem;
   }
   :global(.field + .field) {
     margin-top: var(--spacing);

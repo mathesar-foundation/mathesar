@@ -6,6 +6,10 @@ import type {
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
 
+export type CellValueFormatter<T> = (
+  value: T | null | undefined,
+) => string | null | undefined;
+
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
   isActive: boolean;
@@ -61,7 +65,10 @@ export type TextAreaCellProps = TextBoxCellProps;
 
 // Number
 
-export type NumberCellExternalProps = Partial<NumberFormatterOptions>;
+export interface NumberCellExternalProps {
+  formatterOptions: Partial<NumberFormatterOptions>;
+  formatForDisplay: CellValueFormatter<string | number>;
+}
 
 export interface NumberCellProps
   extends CellTypeProps<string | number>,
@@ -69,10 +76,14 @@ export interface NumberCellProps
 
 // Money
 
-export interface MoneyCellExternalProps
-  extends Partial<NumberFormatterOptions> {
+interface MoneyFormatterOptions extends Partial<NumberFormatterOptions> {
   currencySymbol: string;
   currencySymbolLocation: 'after-minus' | 'end-with-space';
+}
+
+export interface MoneyCellExternalProps {
+  formatterOptions: MoneyFormatterOptions;
+  formatForDisplay: CellValueFormatter<string | number>;
 }
 
 export interface MoneyCellProps
@@ -98,10 +109,10 @@ export interface SingleSelectCellProps<Option>
 
 // FormattedInput
 
-export type FormattedInputCellExternalProps = Omit<
-  FormattedInputProps<string>,
-  'disabled' | 'value'
->;
+export interface FormattedInputCellExternalProps
+  extends Omit<FormattedInputProps<string>, 'disabled' | 'value'> {
+  formatForDisplay: CellValueFormatter<string>;
+}
 
 export interface FormattedInputCellProps
   extends CellTypeProps<string>,
@@ -116,6 +127,7 @@ export interface DateTimeCellExternalProps {
   timeShow24Hr?: boolean;
   timeEnableSeconds?: boolean;
   allowRelativePresets?: boolean;
+  formatForDisplay: CellValueFormatter<string>;
 }
 
 export interface DateTimeCellProps
@@ -124,9 +136,13 @@ export interface DateTimeCellProps
 
 // Array
 
-export type ArrayCellExternalProps = Record<string, never>;
+export interface ArrayCellExternalProps {
+  formatElementForDisplay: CellValueFormatter<never>;
+}
 
-export type ArrayCellProps = CellTypeProps<unknown[]>;
+export interface ArrayCellProps
+  extends CellTypeProps<never[]>,
+    ArrayCellExternalProps {}
 
 // Common
 

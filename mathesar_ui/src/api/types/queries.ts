@@ -45,9 +45,15 @@ export interface QueryInstanceSummarizationTransformation {
   };
 }
 
+export interface QueryInstanceHideTransformation {
+  type: 'hide';
+  spec: QueryColumnAlias[];
+}
+
 export type QueryInstanceTransformation =
   | QueryInstanceFilterTransformation
-  | QueryInstanceSummarizationTransformation;
+  | QueryInstanceSummarizationTransformation
+  | QueryInstanceHideTransformation;
 
 export interface QueryInstance {
   readonly id: number;
