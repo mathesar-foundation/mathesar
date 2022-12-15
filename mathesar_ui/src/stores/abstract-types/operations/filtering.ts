@@ -61,8 +61,13 @@ const equalityFiltersResponse: AbstractTypeFilterDefinitionResponse[] = [
     uiTypeParameterMap: constructParamMapForAllTypes((category) => [category]),
   },
   {
-    id: 'empty',
+    id: 'null',
     name: 'is empty',
+    uiTypeParameterMap: constructParamMapForAllTypes(() => []),
+  },
+  {
+    id: 'not_null',
+    name: 'is not empty',
     uiTypeParameterMap: constructParamMapForAllTypes(() => []),
   },
 ];

@@ -25,6 +25,8 @@ export default class QuerySummarizationTransformationModel
 {
   type = 'summarize' as const;
 
+  name = 'Summarization' as const;
+
   columnIdentifier;
 
   preprocFunctionIdentifier;
@@ -92,7 +94,7 @@ export default class QuerySummarizationTransformationModel
     ];
   }
 
-  toJSON(): QueryInstanceSummarizationTransformation {
+  toJson(): QueryInstanceSummarizationTransformation {
     const aggregationEntries = [...this.aggregations.entries()];
     const groupingEntries = [...this.groups.entries()];
 

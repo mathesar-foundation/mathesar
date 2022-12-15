@@ -1,3 +1,7 @@
+import {
+  StringifiedNumberFormatter,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
 import type {
   MoneyColumn,
   NumberFormat,
@@ -5,7 +9,10 @@ import type {
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import MoneyCell from './components/money/MoneyCell.svelte';
 import MoneyCellInput from './components/money/MoneyCellInput.svelte';
-import type { MoneyCellExternalProps } from './components/typeDefinitions';
+import type {
+  MoneyCellExternalProps,
+  CellValueFormatter,
+} from './components/typeDefinitions';
 import type { CellComponentFactory } from './typeDefinitions';
 import { getUseGrouping } from './number';
 
@@ -26,10 +33,12 @@ function moneyColumnIsInteger(column: MoneyColumn): boolean {
   return (column.type_options?.scale ?? Infinity) === 0;
 }
 
-function getProps(column: MoneyColumn): MoneyCellExternalProps {
+function getFormatterOptions(
+  column: MoneyColumn,
+): MoneyCellExternalProps['formatterOptions'] {
   const displayOptions = column.display_options;
   const format = displayOptions?.number_format ?? null;
-  const props: MoneyCellExternalProps = {
+  return {
     locale: (format && localeMap.get(format)) ?? undefined,
     useGrouping: getUseGrouping(displayOptions?.use_grouping ?? 'true'),
     allowFloat: !moneyColumnIsInteger(column),
@@ -40,7 +49,33 @@ function getProps(column: MoneyColumn): MoneyCellExternalProps {
       displayOptions?.currency_symbol_location ??
       FALLBACK_CURRENCY_SYMBOL_LOCATION,
   };
-  return props;
+}
+
+function getProps(column: MoneyColumn): MoneyCellExternalProps {
+  const formatterOptions = getFormatterOptions(column);
+  const displayFormatter = new StringifiedNumberFormatter(formatterOptions);
+  const insertCurrencySymbol = (() => {
+    switch (formatterOptions.currencySymbolLocation) {
+      case 'after-minus':
+        return (s: string) =>
+          s.replace(/^(-?)/, `$1${formatterOptions.currencySymbol}`);
+      case 'end-with-space':
+        return (s: string) => `${s} ${formatterOptions.currencySymbol}`;
+      default:
+        return (s: string) => s;
+    }
+  })();
+  return {
+    formatterOptions,
+    formatForDisplay: (
+      v: string | number | null | undefined,
+    ): string | null | undefined => {
+      if (!isDefinedNonNullable(v)) {
+        return v;
+      }
+      return insertCurrencySymbol(displayFormatter.format(String(v)));
+    },
+  };
 }
 
 const moneyType: CellComponentFactory = {
@@ -51,11 +86,20 @@ const moneyType: CellComponentFactory = {
     };
   },
 
-  getInput(column: MoneyColumn): ComponentAndProps<MoneyCellExternalProps> {
+  getInput(
+    column: MoneyColumn,
+  ): ComponentAndProps<MoneyCellExternalProps['formatterOptions']> {
     return {
       component: MoneyCellInput,
-      props: { ...getProps(column), maximumFractionDigits: undefined },
+      props: {
+        ...getFormatterOptions(column),
+        maximumFractionDigits: undefined,
+      },
     };
+  },
+
+  getDisplayFormatter(column: MoneyColumn): CellValueFormatter<string> {
+    return getProps(column).formatForDisplay;
   },
 };
 
