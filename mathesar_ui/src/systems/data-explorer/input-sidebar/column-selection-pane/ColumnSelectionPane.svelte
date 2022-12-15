@@ -12,9 +12,10 @@
   $: ({ inputColumns, query } = queryManager);
   $: ({ baseTableColumns, tablesThatReferenceBaseTable } = $inputColumns);
   $: hasInitialColumns = $query.initial_columns.length > 0;
-  $: hasLinksFromBaseTable = [...baseTableColumns].some(
-    ([, entry]) => entry.linksTo !== undefined,
+  $: baseTableColumnsWithLinks = new Map(
+    [...baseTableColumns].filter(([, entry]) => entry.linksTo !== undefined),
   );
+  $: hasLinksFromBaseTable = baseTableColumnsWithLinks.size > 0;
   $: hasLinksToBaseTable = tablesThatReferenceBaseTable.length > 0;
 </script>
 
@@ -43,8 +44,7 @@
         <header>Linked from Base table</header>
         <div class="content">
           <SelectableColumnTree
-            showColumnsWithoutLinks={false}
-            columnsWithLinks={baseTableColumns}
+            columnsWithLinks={baseTableColumnsWithLinks}
             {linkCollapsibleOpenState}
             on:add
           />

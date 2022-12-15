@@ -37,7 +37,9 @@ class DatabaseType(OrderByIds):
         is_type_in_database = self.id in type_ids_on_database
         return is_type_in_database
 
-    def get_sa_instance_compiled(self, engine, type_options={}):
+    def get_sa_instance_compiled(self, engine, type_options=None):
+        if type_options is None:
+            type_options = {}
         sa_class = self.get_sa_class(engine)
         if sa_class:
             dialect = engine.dialect
