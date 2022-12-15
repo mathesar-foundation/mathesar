@@ -5,7 +5,7 @@ from django.conf import settings
 
 from demo.install import load_datasets, customize_settings
 from demo.db_namer import get_name
-from db.install import create_mathesar_database
+from db.install import install_mathesar
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Database
 from mathesar.state import reset_reflection
@@ -24,13 +24,13 @@ class LiveDemoModeMiddleware:
         db_name = get_name(str(sessionid))
         database, created = Database.current_objects.get_or_create(name=db_name)
         if created:
-            create_mathesar_database(
+            install_mathesar(
                 db_name,
                 username=settings.DATABASES["default"]["USER"],
                 password=settings.DATABASES["default"]["PASSWORD"],
                 hostname=settings.DATABASES["default"]["HOST"],
-                root_database=settings.DATABASES["default"]["NAME"],
                 port=settings.DATABASES["default"]["PORT"],
+                skip_confirm=True
             )
             engine = create_mathesar_engine(db_name)
             load_datasets(engine)
