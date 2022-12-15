@@ -60,14 +60,20 @@
     return [];
   }
 
-  async function save(closeAfterSave = false) {
+  async function save() {
     try {
       await queryManager.save();
-      if (closeAfterSave) {
-        dispatch('close');
-      }
+      return { success: true };
     } catch (err) {
       toast.fromError(err);
+      return { success: false };
+    }
+  }
+
+  async function saveAndClose() {
+    const { success } = await save();
+    if (success) {
+      dispatch('close');
     }
   }
 
@@ -147,8 +153,8 @@
             }}
             showArrow={false}
           >
-            <ButtonMenuItem on:click={() => save()}>Save</ButtonMenuItem>
-            <ButtonMenuItem on:click={() => save(true)}>
+            <ButtonMenuItem on:click={save}>Save</ButtonMenuItem>
+            <ButtonMenuItem on:click={saveAndClose}>
               Save and Close
             </ButtonMenuItem>
           </DropdownMenu>
