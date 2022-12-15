@@ -170,9 +170,9 @@ class List(DBFunction):
         return list(items)
 
 
-class Empty(DBFunction):
-    id = 'empty'
-    name = 'is empty'
+class Null(DBFunction):
+    id = 'null'
+    name = 'is null'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(1),

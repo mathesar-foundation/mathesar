@@ -9,7 +9,7 @@ def get_db_function_from_ma_function_spec(spec):
 
     ```
     {"and": [
-        {"empty": [
+        {"null": [
             {"column_name": ["some_column"]},
         ]},
         {"equal": [
