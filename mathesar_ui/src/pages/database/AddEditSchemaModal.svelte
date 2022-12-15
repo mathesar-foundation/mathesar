@@ -1,6 +1,6 @@
 <!-- TODO: Shouldn't this be inside the schema page instead? -->
 <script lang="ts">
-  import { Alert, ModalController } from '@mathesar-component-library';
+  import type { ModalController } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import {
     schemas,
@@ -9,6 +9,7 @@
   } from '@mathesar/stores/schemas';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { toast } from '@mathesar/stores/toast';
 
   export let database: Database;
@@ -59,12 +60,12 @@
 >
   <svelte:fragment slot="helpText">
     {#if !schema}
-      <Alert>
+      <InfoBox>
         Name your schema to reflect its purpose. For example, your personal
         financial schema may be called "Personal Finances" and your movie
         collection "Movies." Add a description to your schema to remember what
         it's for.
-      </Alert>
+      </InfoBox>
     {/if}
   </svelte:fragment>
 
