@@ -6,17 +6,21 @@
   } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import type {
-    ColumnWithAbstractType,
-    ColumnTypeOptionsSaveArgs,
+  import {
+    type ColumnWithAbstractType,
+    type ColumnTypeOptionsSaveArgs,
+    hasTypeOptionsChanged,
   } from './utils';
-  import AbstractTypeOptions from './AbstractTypeOptions.svelte';
+  import AbstractTypeDBOptions from './AbstractTypeDBOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
+  import WarningBox from '../message-boxes/WarningBox.svelte';
 
   const dispatch = createEventDispatcher();
 
   export let column: ColumnWithAbstractType;
-  export let save: (options: ColumnTypeOptionsSaveArgs) => Promise<unknown>;
+  export let save: (
+    options: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
+  ) => Promise<unknown>;
 
   let selectedAbstractType: ColumnWithAbstractType['abstractType'] =
     column.abstractType;
@@ -24,9 +28,11 @@
   let typeOptions: ColumnWithAbstractType['type_options'] = {
     ...(column.type_options ?? {}),
   };
-  let displayOptions: ColumnWithAbstractType['display_options'] = {
-    ...(column.display_options ?? {}),
-  };
+  $: actionButtonsVisible =
+    selectedAbstractType !== column.abstractType ||
+    selectedDbType !== column.type ||
+    hasTypeOptionsChanged(column.type_options ?? {}, typeOptions ?? {});
+
   let typeChangeState: RequestStatus;
 
   const validationContext = createValidationContext();
@@ -40,7 +46,6 @@
     selectedAbstractType = _column.abstractType;
     selectedDbType = _column.type;
     typeOptions = { ...(_column.type_options ?? {}) };
-    displayOptions = { ...(_column.display_options ?? {}) };
   }
   $: resetAbstractType(column);
 
@@ -52,7 +57,6 @@
     selectedDbType = type;
     selectedAbstractType = abstractType;
     typeOptions = {};
-    displayOptions = {};
   }
 
   function cancel() {
@@ -67,12 +71,13 @@
       await save({
         type: selectedDbType,
         type_options: { ...typeOptions },
-        display_options: { ...displayOptions },
       });
+      typeChangeState = { state: 'success' };
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Unable to change column type';
       toast.error(errorMessage);
+      typeChangeState = { state: 'failure', errors: [errorMessage] };
     }
   }
 
@@ -82,27 +87,33 @@
     !$validationResult;
 </script>
 
-<div class="column-type-menu">
-  <AbstractTypeSelector
-    {selectedAbstractType}
-    {column}
-    on:change={(e) => selectTypeAndAbstractType(e.detail)}
-    on:reset={() => resetAbstractType(column)}
-  />
+<AbstractTypeSelector
+  {selectedAbstractType}
+  {column}
+  on:change={(e) => selectTypeAndAbstractType(e.detail)}
+  on:reset={() => resetAbstractType(column)}
+  disabled={typeChangeState?.state === 'processing'}
+/>
 
-  {#if selectedAbstractType && selectedDbType}
-    {#key selectedAbstractType}
-      <AbstractTypeOptions
-        {selectedAbstractType}
-        bind:selectedDbType
-        bind:typeOptions
-        bind:displayOptions
-        {column}
-      />
-    {/key}
-  {/if}
+{#if selectedAbstractType && selectedDbType}
+  {#key selectedAbstractType}
+    <AbstractTypeDBOptions
+      {selectedAbstractType}
+      bind:selectedDbType
+      bind:typeOptions
+      {column}
+    />
+  {/key}
+{/if}
 
+{#if actionButtonsVisible}
   <div class="footer">
+    <WarningBox>
+      <span class="warning-alert">
+        Data loss can result from changing the data type of a column. This
+        action cannot be undone.
+      </span>
+    </WarningBox>
     <CancelOrProceedButtonPair
       onProceed={onSave}
       onCancel={cancel}
@@ -112,14 +123,21 @@
       size="small"
     />
   </div>
-</div>
+{/if}
 
 <style lang="scss">
-  .column-type-menu {
-    padding: 0.75rem;
+  .footer {
+    margin-top: 1rem;
 
-    .footer {
-      margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 0.5rem;
+    }
+
+    .warning-alert {
+      font-size: var(--text-size-small);
     }
   }
 </style>

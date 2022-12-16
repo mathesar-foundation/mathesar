@@ -160,7 +160,7 @@
 
     <FormField>
       <LabeledInput label="Target Table" layout="stacked">
-        <SelectTable {tables} bind:table={targetTable} autoSelect="clear" />
+        <SelectTable {tables} bind:value={targetTable} autoSelect="clear" />
       </LabeledInput>
     </FormField>
 
