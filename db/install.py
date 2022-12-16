@@ -58,9 +58,7 @@ def create_mathesar_database(hostname, password, port, user_database, user_db_en
         with root_db_engine.connect() as conn:
             conn.execution_options(isolation_level="AUTOCOMMIT")
             conn.execute(text(f"CREATE DATABASE {user_database}"))
-        install.install_mathesar_on_database(user_db_engine)
         root_db_engine.dispose()
-        user_db_engine.dispose()
         print(f"Created DB is {user_database}.")
         return True
     else:
