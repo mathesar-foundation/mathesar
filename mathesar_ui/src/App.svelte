@@ -136,6 +136,13 @@
     display: block;
   }
 
+  .trim-child-margins > :first-child {
+    margin-top: 0;
+  }
+  .trim-child-margins > :last-child {
+    margin-bottom: 0;
+  }
+
   /**
    * Used to turn elements like `<button>` and `<a>` into plain elements that
    * don't have any browser styling but still have functionality.

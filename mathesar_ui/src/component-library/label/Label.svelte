@@ -6,6 +6,7 @@
   import { getLabelIdFromInputId } from './labelUtils';
 
   export let controller = new LabelController();
+  export let style: string | undefined = undefined;
 
   $: setLabelControllerInContext(controller);
   $: ({ inputId, disabled } = controller);
@@ -30,6 +31,7 @@
 -->
 <label
   for={$inputId}
+  {style}
   class="label-component"
   class:disabled={$disabled}
   id={getLabelIdFromInputId($inputId)}
@@ -37,9 +39,3 @@
 >
   <slot inputId={$inputId} />
 </label>
-
-<style>
-  .label-component {
-    display: var(--display, inline);
-  }
-</style>
