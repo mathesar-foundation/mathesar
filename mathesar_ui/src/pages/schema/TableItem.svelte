@@ -30,11 +30,7 @@
   export let database: Database;
   export let schema: SchemaEntry;
 
-  function getGoToTableLink() {
-    return isTableImportConfirmationRequired(table)
-      ? getImportPreviewPageUrl(database.name, schema.id, table.id)
-      : getTablePageUrl(database.name, schema.id, table.id);
-  }
+  $: isTableImportConfirmationNeeded = isTableImportConfirmationRequired(table);
 
   function handleDeleteTable() {
     void confirmDelete({
@@ -69,14 +65,16 @@
       label=""
       icon={iconShowMore}
     >
-      <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
-        Edit Table
-      </ButtonMenuItem>
-      <MenuDivider />
-      <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
-        Explore Table
-      </LinkMenuItem>
-      <MenuDivider />
+      {#if !isTableImportConfirmationNeeded}
+        <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
+          Edit Table
+        </ButtonMenuItem>
+        <MenuDivider />
+        <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
+          Explore Table
+        </LinkMenuItem>
+        <MenuDivider />
+      {/if}
       <ButtonMenuItem
         on:click={handleDeleteTable}
         danger
@@ -88,17 +86,29 @@
     <EditTable modalController={editTableModalController} {table} />
   </div>
   <div class="actions">
-    <a class="action passthrough action-link" href={getGoToTableLink()}>
-      Go to Table
-    </a>
-    <Button
-      on:click={() =>
-        recordSelector.navigateToRecordPage({ tableId: table.id })}
-      appearance="ghost"
-      class="action"
-    >
-      Find Record
-    </Button>
+    {#if isTableImportConfirmationNeeded}
+      <a
+        class="btn btn-plain size-medium action action-link"
+        href={getImportPreviewPageUrl(database.name, schema.id, table.id)}
+      >
+        Confirm Imported Data
+      </a>
+    {:else}
+      <a
+        class="btn btn-plain size-medium action action-link"
+        href={getTablePageUrl(database.name, schema.id, table.id)}
+      >
+        Go to Table
+      </a>
+      <Button
+        on:click={() =>
+          recordSelector.navigateToRecordPage({ tableId: table.id })}
+        appearance="plain"
+        class="action"
+      >
+        Find Record
+      </Button>
+    {/if}
   </div>
 </div>
 
@@ -110,10 +120,7 @@
     border-radius: var(--border-radius-l);
     max-width: 22rem;
     overflow: hidden;
-
-    > :global(* + *) {
-      margin-top: 1rem;
-    }
+    min-height: 7.5rem;
   }
 
   .table-item-header {
@@ -146,6 +153,7 @@
     flex-direction: row;
     background-color: var(--sand-100);
     border-top: 1px solid var(--sand-200);
+    margin-top: auto;
 
     :global(.action) {
       flex: 1;
