@@ -10,14 +10,17 @@
 
   let requestStatus: RequestStatus | undefined;
   let timeout: number | undefined;
+  let transitionDuration = 0;
 
   function clearRequestStatus() {
+    transitionDuration = 1000;
     requestStatus = undefined;
   }
 
   function handleNewIncomingRequestStatus(s: RequestStatus | undefined) {
     window.clearTimeout(timeout);
     timeout = undefined;
+    transitionDuration = 0;
     requestStatus = s;
     if (requestStatus?.state === 'success') {
       timeout = window.setTimeout(clearRequestStatus, 5000);
@@ -57,11 +60,9 @@
     }
     return undefined;
   })();
-
-  $: transitionDuration = hasChanges ? 0 : 1000;
 </script>
 
-{#if state === 'success'}
+{#if state}
   <span
     class="modification-status-indicator"
     out:fade|local={{ duration: transitionDuration }}
@@ -69,18 +70,10 @@
     <StatusIndicator
       {state}
       messages={{
-        success: 'All Changes Saved',
-      }}
-    />
-  </span>
-{:else if state}
-  <span class="modification-status-indicator">
-    <StatusIndicator
-      {state}
-      messages={{
         processing: 'Saving Changes',
         failure: 'Unable to save changes',
         warning: 'Unsaved Changes',
+        success: 'All Changes Saved',
       }}
     />
   </span>
