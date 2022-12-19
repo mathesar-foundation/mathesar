@@ -31,7 +31,7 @@ def _get_latest_release_tag_name_from_github():
     repo = 'mathesar'
     url = f'https://api.github.com/repos/{owner}/{repo}/releases/latest'
     headers = {
-        'Accept': 'japplication/vnd.github+json',
+        'Accept': 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
     }
     response = requests.get(url, headers)
