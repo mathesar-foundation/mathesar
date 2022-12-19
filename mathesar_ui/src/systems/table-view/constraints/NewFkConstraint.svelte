@@ -145,8 +145,8 @@
     </FormField>
 
     <FormField>
-      <LabeledInput label="Target table" layout="stacked">
-        <SelectTable {tables} bind:table={targetTable} autoSelect="clear" />
+      <LabeledInput label="Target Table" layout="stacked">
+        <SelectTable {tables} bind:value={targetTable} autoSelect="clear" />
       </LabeledInput>
     </FormField>
 

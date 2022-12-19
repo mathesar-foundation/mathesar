@@ -79,7 +79,7 @@
 
   setSheetContext({ stores, api });
 
-  $: style = restrictWidthToRowWidth ? `width:${rowWidth + 2}px;` : undefined;
+  $: style = restrictWidthToRowWidth ? `width:${rowWidth}px;` : undefined;
 </script>
 
 <div
