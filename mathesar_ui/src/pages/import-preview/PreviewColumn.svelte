@@ -44,6 +44,7 @@
           ...processedColumn.column,
           abstractType: processedColumn.abstractType,
         }}
+        showWarnings={false}
         on:cancel={close}
         save={async (opts) => {
           await updateTypeRelatedOptions({
@@ -71,7 +72,7 @@
       padding: 0.35rem 0.6rem;
       display: flex;
       align-items: center;
-      border-bottom: 1px solid var(--color-gray-light);
+      border-bottom: 1px solid var(--slate-200);
 
       :global(.checkbox) {
         flex-grow: 0;
@@ -84,5 +85,6 @@
   .type-options-content {
     min-width: 18rem;
     max-width: 22rem;
+    padding: var(--size-small);
   }
 </style>

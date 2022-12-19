@@ -6,7 +6,7 @@
 <style>
   .inset-page-layout {
     background: var(--sand-200);
-    padding: 1.5rem 1rem;
+    padding: var(--inset-layout-padding, 1.5rem 1rem);
   }
   .restrict-width {
     max-width: var(--max-layout-width, 54rem);
@@ -16,7 +16,7 @@
   }
   .page {
     background: var(--white);
-    padding: 1.5rem;
+    padding: var(--inset-page-padding, 1.5rem);
     border: solid 1px var(--slate-300);
     border-radius: 0.3rem;
   }
