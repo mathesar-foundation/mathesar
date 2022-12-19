@@ -334,14 +334,14 @@
 >
   <div class="table-preview-confirmation">
     <InsetPageLayout>
-      <h2 slot="header">Finish setting up your table</h2>
+      <h1 slot="header">Finish setting up your table</h1>
 
       {#if tableIsAlreadyConfirmed}
         Table has already been confirmed. Click here to view the table.
       {:else}
         <div class="table-properties">
           <LabeledInput layout="stacked">
-            <h4 slot="label">Table Name</h4>
+            <h2 slot="label">Table Name</h2>
             <TextInput bind:value={tableName} />
           </LabeledInput>
 
@@ -359,7 +359,7 @@
           </div>
 
           <div class="help-content">
-            <h4>Column names and data types</h4>
+            <h2>Column names and data types</h2>
             <p>
               Column names and data types are automatically detected, use the
               controls in the preview table to review and update them if
@@ -396,7 +396,7 @@
       {#if processedColumns.length > 0}
         <div class="table-preview-content">
           <div class="preview">
-            <h4>Table Preview</h4>
+            <h2>Table Preview</h2>
             <div class="content">
               <div class="sheet-holder">
                 <Sheet
@@ -486,12 +486,13 @@
   .table-preview-confirmation {
     --sheet-header-height: 5.25rem;
 
-    h2 {
+    h1 {
       font-weight: 500;
       font-size: var(--size-super-ultra-large);
+      margin: 0.83em 0;
     }
 
-    h4 {
+    h2 {
       font-weight: 600;
       font-size: var(--size-large);
       margin: 0;
@@ -535,7 +536,7 @@
         border: solid 1px var(--slate-300);
         border-radius: 0.3rem;
 
-        h4 {
+        h2 {
           padding: var(--size-small) var(--inset-page-padding);
           border-bottom: 1px solid var(--slate-200);
         }

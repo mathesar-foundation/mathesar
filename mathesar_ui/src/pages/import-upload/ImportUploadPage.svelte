@@ -84,7 +84,7 @@
     '--layout-background-color': 'var(--sand-200)',
   }}
 >
-  <h2>Create a table by importing your data</h2>
+  <h1>Create a table by importing your data</h1>
   <div class="import-file-view">
     {#if isLoading || isError}
       <div class="uploading-info">
@@ -157,9 +157,10 @@
 </LayoutWithHeader>
 
 <style lang="scss">
-  h2 {
+  h1 {
     font-weight: 500;
     font-size: var(--size-super-ultra-large);
+    margin: 0.83em 0;
   }
 
   .import-file-view {
