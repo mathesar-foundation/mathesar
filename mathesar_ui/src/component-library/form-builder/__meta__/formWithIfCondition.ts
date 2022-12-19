@@ -17,7 +17,7 @@ const formConfig: FormConfiguration = {
       {
         type: 'input',
         variable: 'restrictFieldSize',
-        label: 'Restrict Field Size',
+        label: 'Set a maximum length',
       },
       {
         type: 'if',

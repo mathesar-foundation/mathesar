@@ -53,6 +53,7 @@ import {
   faInfo,
   faSlash,
   faStar,
+  faPaste,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -102,6 +103,7 @@ export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
 export const iconSortDescending: IconProps = { data: faSortAmountDown };
 export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
+export const iconPaste: IconProps = { data: faPaste };
 
 // THINGS
 //
@@ -132,6 +134,7 @@ export const iconUser: IconProps = { data: faUser };
 export const iconLinksInThisTable: IconProps = { data: faCircleArrowRight };
 export const iconLinksFromOtherTables: IconProps = { data: faCircleArrowLeft };
 export const iconForwardSeparator: IconProps = { data: faSlash };
+export const iconUrl: IconProps = { data: faLink };
 
 // STATUSES
 

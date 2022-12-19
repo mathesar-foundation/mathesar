@@ -71,6 +71,7 @@ export interface InputColumn {
 export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
   type: Column['type'];
   linksTo?: LinkedTable;
+  producesMultipleResults: boolean;
 }
 
 export interface LinkedTable {
@@ -159,6 +160,7 @@ export function getLinkFromColumn(
             link.jp_path.join(','),
           ),
           jpPath: link.jp_path,
+          producesMultipleResults: link.multiple_results,
         },
       ];
     });
@@ -214,6 +216,7 @@ export function getBaseTableColumnsWithLinks(
         type: column.type,
         tableName: baseTable.name,
         linksTo: getLinkFromColumn(result, column.id, 1),
+        producesMultipleResults: false,
       },
     ]);
   return new Map(columnMapEntries.sort(compareColumnByLinks));
@@ -258,6 +261,7 @@ export function getTablesThatReferenceBaseTable(
                 reference.jp_path.join(','),
               ),
               jpPath: reference.jp_path,
+              producesMultipleResults: reference.multiple_results,
             },
           ];
         });

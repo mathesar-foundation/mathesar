@@ -62,7 +62,7 @@
 <svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
 
 <LayoutWithHeader
-  restrictWidth={true}
+  restrictWidth
   cssVariables={{ '--max-layout-width': '64rem' }}
 >
   <AppSecondaryHeader

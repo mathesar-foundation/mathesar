@@ -1,4 +1,5 @@
 .label-component {
+  display: var(--Label__display, inline);
   &:hover {
     cursor: pointer;
   }

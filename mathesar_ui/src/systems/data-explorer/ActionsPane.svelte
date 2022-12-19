@@ -1,16 +1,20 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import {
     Icon,
     InputGroup,
     Button,
     SpinnerButton,
+    DropdownMenu,
+    ButtonMenuItem,
+    iconExpandDown,
   } from '@mathesar-component-library';
   import { iconRedo, iconUndo, iconInspector } from '@mathesar/icons';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import TableName from '@mathesar/components/TableName.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
-  import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
+  import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
@@ -18,6 +22,7 @@
   import type QueryManager from './QueryManager';
   import type { ColumnWithLink } from './utils';
 
+  const dispatch = createEventDispatcher();
   const saveModalController = modal.spawnModalController();
 
   export let queryManager: QueryManager;
@@ -25,12 +30,13 @@
     {};
   export let isInspectorOpen: boolean;
 
-  $: ({ query, state } = queryManager);
+  $: ({ query, state, queryHasUnsavedChanges } = queryManager);
   $: currentTable = $query.base_table
     ? $tablesDataStore.data.get($query.base_table)
     : undefined;
   $: isSaved = $query.isSaved();
   $: hasNoColumns = $query.initial_columns.length === 0;
+  $: querySaveRequestStatus = $state.saveState?.state;
 
   function updateBaseTable(tableEntry: TableEntry | undefined) {
     void queryManager.update((q) =>
@@ -57,8 +63,17 @@
   async function save() {
     try {
       await queryManager.save();
+      return { success: true };
     } catch (err) {
       toast.fromError(err);
+      return { success: false };
+    }
+  }
+
+  async function saveAndClose() {
+    const { success } = await save();
+    if (success) {
+      dispatch('close');
     }
   }
 
@@ -93,7 +108,7 @@
       {:else}
         <SelectTableWithinCurrentSchema
           autoSelect="none"
-          table={currentTable}
+          value={currentTable}
           on:change={(e) => updateBaseTable(e.detail)}
         />
       {/if}
@@ -108,19 +123,44 @@
       </Button>
     {/if}
 
-    {#if $query.isSaved()}
-      <SaveStatusIndicator status={$state.saveState?.state} />
+    {#if isSaved}
+      <ModificationStatus
+        requestStatus={$state.saveState}
+        hasChanges={$queryHasUnsavedChanges}
+      />
     {/if}
   </div>
 
   {#if currentTable}
     <div class="actions">
-      <!-- TODO: Change disabled condition to is_valid(query) -->
-      <SpinnerButton
-        label="Save"
-        disabled={!$query.base_table || hasNoColumns}
-        onClick={saveExistingOrCreateNew}
-      />
+      <InputGroup>
+        <!-- TODO: Change disabled condition to is_valid(query) -->
+        <SpinnerButton
+          label={querySaveRequestStatus === 'processing' ? 'Saving' : 'Save'}
+          disabled={!$query.base_table ||
+            hasNoColumns ||
+            querySaveRequestStatus === 'processing'}
+          onClick={saveExistingOrCreateNew}
+        />
+        {#if isSaved}
+          <DropdownMenu
+            triggerAppearance="primary"
+            placement="bottom-end"
+            closeOnInnerClick={true}
+            icon={{
+              ...iconExpandDown,
+              size: '0.8em',
+            }}
+            showArrow={false}
+          >
+            <ButtonMenuItem on:click={save}>Save</ButtonMenuItem>
+            <ButtonMenuItem on:click={saveAndClose}>
+              Save and Close
+            </ButtonMenuItem>
+          </DropdownMenu>
+        {/if}
+      </InputGroup>
+
       <InputGroup>
         <Button
           appearance="secondary"

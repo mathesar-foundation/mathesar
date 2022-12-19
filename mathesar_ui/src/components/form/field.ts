@@ -1,6 +1,6 @@
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
-import { getErrors, required, type ValidationFn } from './validators';
+import { getErrors, type Filled, type ValidationFn } from './validators';
 
 export const comboErrorsKey = Symbol('comboErrors');
 
@@ -63,13 +63,14 @@ export type FieldStore<T = unknown> = RequiredField<T> | OptionalField<T>;
 
 export interface BaseFieldProps<T> {
   initialValue: T;
-  validators?: ValidationFn<T>[];
 }
 export interface RequiredFieldProps<T> extends BaseFieldProps<T> {
   isRequired: true;
+  validators?: ValidationFn<Filled<T>>[];
 }
 export interface OptionalFieldProps<T> extends BaseFieldProps<T> {
   isRequired: false;
+  validators?: ValidationFn<T>[];
 }
 export type FieldProps<T> = RequiredFieldProps<T> | OptionalFieldProps<T>;
 
@@ -77,13 +78,9 @@ export function field<T>(props: RequiredFieldProps<T>): RequiredField<T>;
 export function field<T>(props: OptionalFieldProps<T>): OptionalField<T>;
 export function field<T>(props: FieldProps<T>): FieldStore<T>;
 export function field<T>(props: FieldProps<T>): FieldStore<T> {
-  const allValidators = [
-    ...(props.validators ?? []),
-    ...(props.isRequired ? [required()] : []),
-  ];
   const value = writable(props.initialValue);
   const hasChanges = derived(value, (v) => v !== props.initialValue);
-  const fieldErrors = derived(value, (v) => getErrors(v, allValidators));
+  const fieldErrors = derived(value, (v) => getErrors({ ...props, value: v }));
   const writableComboErrors = writable<string[]>([]);
   const comboErrors = derived(writableComboErrors, (e) => e);
   const serverErrors = writable<string[]>([]);
@@ -131,7 +128,7 @@ export function optionalField<T>(
 
 export function requiredField<T>(
   initialValue: T,
-  validators: ValidationFn<T>[] = [],
+  validators: ValidationFn<Filled<T>>[] = [],
 ): RequiredField<T> {
   return field({ initialValue, validators, isRequired: true });
 }

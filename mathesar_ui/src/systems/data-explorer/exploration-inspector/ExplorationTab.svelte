@@ -71,7 +71,7 @@
         .withName(name)
         .model.withDescription(description).model;
       // TODO: Write better utility methods to identify saved instances
-      await putQuery(updatedQuery.toJSON() as QueryInstance);
+      await putQuery(updatedQuery.toJson() as QueryInstance);
       query.set(updatedQuery);
     } catch (err) {
       const message =

@@ -13,7 +13,14 @@
   <Button on:click={() => dispatch('add', column)}>
     <div class="name">
       <ColumnName
-        column={{ ...column, type_options: null, display_options: null }}
+        column={{
+          ...column,
+          type: column.producesMultipleResults ? '_array' : column.type,
+          type_options: column.producesMultipleResults
+            ? { item_type: column.type }
+            : null,
+          display_options: null,
+        }}
       />
     </div>
     <span class="add">

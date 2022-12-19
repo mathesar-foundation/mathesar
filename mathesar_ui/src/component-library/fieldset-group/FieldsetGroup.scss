@@ -1,8 +1,8 @@
 .fieldset-group {
   padding: 0;
   border: 0;
-  --spacing-y: 0.5em;
-  --spacing-x: 1em;
+  --spacing-y-default: 0.5em;
+  --spacing-x-default: 1em;
 
   legend {
     padding: 0;
@@ -16,14 +16,15 @@
     margin-top: 1em;
   }
   &:not(.inline) .option {
-    margin-top: var(--spacing-y);
-    margin-bottom: var(--spacing-y);
+    margin-top: var(--spacing-y, var(--spacing-y-default));
+    margin-bottom: var(--spacing-y, var(--spacing-y-default));
   }
 
   &.inline .options {
     display: flex;
-    .option + .option {
-      margin-left: var(--spacing-x);
+    flex-wrap: wrap;
+    .option:not(:last-child) {
+      margin-right: var(--spacing-x, var(--spacing-x-default));
     }
   }
 }

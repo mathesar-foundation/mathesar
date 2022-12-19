@@ -4,7 +4,7 @@
 </script>
 
 <div class="error-box">
-  <MessageBox icon={iconError}><slot /></MessageBox>
+  <MessageBox icon={iconError} {...$$restProps}><slot /></MessageBox>
 </div>
 
 <style>
