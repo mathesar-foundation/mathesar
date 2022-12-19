@@ -2,6 +2,7 @@
   import {
     LabeledInput,
     MultiSelect,
+    RadioGroup,
     TextInput,
   } from '@mathesar-component-library';
   import { CancelOrProceedButtonPair } from '@mathesar-component-library';
@@ -15,9 +16,16 @@
   import Form from '@mathesar/components/Form.svelte';
   import { getAvailableName } from '@mathesar/utils/db';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import { onMount } from 'svelte';
+  import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;
+
+  type NamingStrategy = 'auto' | 'manual';
+  const namingStrategyLabelMap = new Map<NamingStrategy, string>([
+    ['auto', 'Automatically'],
+    ['manual', 'Manually'],
+  ]);
+  const namingStrategies = [...namingStrategyLabelMap.keys()];
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -32,9 +40,13 @@
   }
 
   function getNameValidationErrors(
+    _namingStrategy: NamingStrategy,
     _constraintName: string | undefined,
     _existingConstraintNames: Set<string>,
   ) {
+    if (_namingStrategy === 'auto') {
+      return [];
+    }
     if (!_constraintName?.trim()) {
       return ['Name cannot be empty'];
     }
@@ -45,15 +57,13 @@
   }
 
   let constraintColumns: ProcessedColumn[] = [];
+  let namingStrategy: NamingStrategy = 'auto';
   let constraintName: string | undefined;
 
   function init() {
     constraintColumns = [];
-    constraintName = getSuggestedName(
-      tableName,
-      constraintColumns,
-      existingConstraintNames,
-    );
+    namingStrategy = 'auto';
+    constraintName = undefined;
   }
 
   $: constraintsDataStore = $tabularData.constraintsDataStore;
@@ -64,10 +74,24 @@
   $: ({ processedColumns } = $tabularData);
   $: columnsInTable = Array.from($processedColumns.values());
   $: nameValidationErrors = getNameValidationErrors(
+    namingStrategy,
     constraintName,
     existingConstraintNames,
   );
   $: canProceed = constraintColumns.length > 0 && !nameValidationErrors.length;
+
+  function handleNamingStrategyChange() {
+    // Begin with a suggested name as the starting value, but only do it when
+    // the user switches from 'auto' to 'manual'.
+    constraintName =
+      namingStrategy === 'manual'
+        ? getSuggestedName(
+            tableName,
+            constraintColumns,
+            existingConstraintNames,
+          )
+        : undefined;
+  }
 
   async function handleSave() {
     try {
@@ -91,10 +115,6 @@
   function handleCancel() {
     onClose?.();
   }
-
-  onMount(() => {
-    init();
-  });
 </script>
 
 <div class="add-new-unique-constraint">
@@ -113,14 +133,28 @@
       </LabeledInput>
     </FormField>
 
-    <FormField errors={nameValidationErrors}>
-      <LabeledInput label="Constraint Name" layout="stacked">
-        <TextInput
-          bind:value={constraintName}
-          hasError={nameValidationErrors.length > 0}
-        />
-      </LabeledInput>
+    <FormField>
+      <RadioGroup
+        options={namingStrategies}
+        bind:value={namingStrategy}
+        isInline
+        on:change={handleNamingStrategyChange}
+        getRadioLabel={(s) => namingStrategyLabelMap.get(s) ?? ''}
+      >
+        Set Constraint Name <ConstraintNameHelp />
+      </RadioGroup>
     </FormField>
+
+    {#if namingStrategy === 'manual'}
+      <FormField errors={nameValidationErrors}>
+        <LabeledInput label="Constraint Name" layout="stacked">
+          <TextInput
+            bind:value={constraintName}
+            hasError={nameValidationErrors.length > 0}
+          />
+        </LabeledInput>
+      </FormField>
+    {/if}
   </Form>
 
   <CancelOrProceedButtonPair
