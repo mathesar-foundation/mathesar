@@ -34,9 +34,11 @@
       </span>
     {/each}
   </div>
-  <Button on:click={handleDrop} size="small" appearance="plain"
-    ><Icon {...iconDeleteMajor} /></Button
-  >
+  {#if constraint.type !== 'primary'}
+    <Button on:click={handleDrop} size="small" appearance="plain">
+      <Icon {...iconDeleteMajor} />
+    </Button>
+  {/if}
 </div>
 
 <style lang="scss">
