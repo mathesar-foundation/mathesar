@@ -1,25 +1,32 @@
 <script lang="ts">
-  // import { Help, Icon, iconSettings } from '@mathesar/component-library';
-  // import { iconConstraint } from '@mathesar/icons';
-  import TableConstraints from '../../constraints/TableConstraints.svelte';
-  // import ActionItem from '../ActionItem.svelte';
+  import {
+    Button,
+    Help,
+    Icon,
+    iconSettings,
+  } from '@mathesar/component-library';
+  import { iconConstraint } from '@mathesar/icons';
+  import { modal } from '@mathesar/stores/modal';
+  import TableConstraintsModal from '../../constraints/TableConstraintsModal.svelte';
+
+  const constraintsModal = modal.spawnModalController();
 </script>
 
 <div class="actions-container">
-  <!-- 
-    TODO: Implemenet as a part of constraints modal 
-    rendering `TableConstraints` as it is for now
-    to avoid loss of functionality
-  -->
-  <!-- <ActionItem suffixIcon={iconSettings}>
-    <Icon {...iconConstraint} />
-    <span>Constraints</span>
-    <Help
-      >Constraints are rules that apply to the data in a column to ensure that
-      it is valid.</Help
-    >
-  </ActionItem> -->
-  <TableConstraints />
+  <Button on:click={() => constraintsModal.open()}>
+    <div class="action-item">
+      <div>
+        <Icon {...iconConstraint} /> <span>Constraints</span>
+        <Help
+          >Constraints are rules that apply to the data in a column to ensure
+          that it is valid.</Help
+        >
+      </div>
+      <Icon {...iconSettings} />
+    </div>
+  </Button>
+
+  <TableConstraintsModal controller={constraintsModal} />
 </div>
 
 <style lang="scss">
@@ -30,5 +37,12 @@
     > :global(* + *) {
       margin-top: 0.5rem;
     }
+  }
+
+  .action-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 </style>
