@@ -39,6 +39,7 @@
   ) => opt === opt2;
   export let checkIfOptionIsDisabled: DefinedProps['checkIfOptionIsDisabled'] =
     () => false;
+  export let mode: DefinedProps['mode'] = 'dropdown';
 
   const isOpen = writable(false);
   const focusedOptionIndex = writable(-1);
@@ -163,7 +164,7 @@
   }
 
   function handleKeyDown(e: KeyboardEvent): void {
-    if ($isOpen) {
+    if ($isOpen || mode !== 'dropdown') {
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
@@ -229,6 +230,7 @@
     disabled,
     checkEquality,
     checkIfOptionIsDisabled,
+    mode,
   });
   $: staticProps.set({
     selectionType,
@@ -237,6 +239,7 @@
     disabled,
     checkEquality,
     checkIfOptionIsDisabled,
+    mode,
   });
 
   const state: ListBoxContextState<Option> = {

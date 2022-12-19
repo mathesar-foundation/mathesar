@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, getContext, tick } from 'svelte';
-  import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
+  import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';
   import type { ListBoxContext } from './ListBoxTypes';
 
   type Option = $$Generic;
@@ -53,6 +53,9 @@
   aria-expanded="true"
   class={['list-box-options', $staticProps.selectionType, classes].join(' ')}
   class:truncate={truncateOnOverflow}
+  on:focus
+  on:blur
+  on:keydown
 >
   {#each $displayedOptions as option, index (option)}
     {@const isSelected = $value.some((opt) =>

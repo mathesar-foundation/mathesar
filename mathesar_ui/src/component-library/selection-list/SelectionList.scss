@@ -1,0 +1,11 @@
+.selection-list {
+  padding: var(--SelectionList__padding, 0.3em);
+
+  li {
+    border-radius: 0.2em;
+
+    & + li {
+      margin-top: var(--SelectionList__spacing-x, 0.2em);
+    }
+  }
+}
