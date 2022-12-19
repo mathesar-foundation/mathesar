@@ -11,7 +11,16 @@
   export let constraintType: ConstraintType;
   export let constraints: Constraint[];
 
-  let addConstraintType: 'foreignKey' | 'unique' | 'none' = 'none';
+  const CONSTRAINT_TYPE_SUPPORTING_CAN_ADD: ConstraintType[] = [
+    'unique',
+    'foreignkey',
+  ];
+  const CONSTRAINT_TYPE_SUPPORTING_CAN_DROP: ConstraintType[] = [
+    'unique',
+    'foreignkey',
+  ];
+
+  let isAddingNewConstraint = false;
 
   const helpMap: Record<ConstraintType, string> = {
     primary:
@@ -31,16 +40,12 @@
     exclude: '',
   };
 
-  function addNewFkConstraint() {
-    addConstraintType = 'foreignKey';
+  function addConstraint() {
+    isAddingNewConstraint = true;
   }
 
-  function addNewUniqueConstraint() {
-    addConstraintType = 'unique';
-  }
-
-  function resetAddConstraintType() {
-    addConstraintType = 'none';
+  function cancelAddConstraint() {
+    isAddingNewConstraint = false;
   }
 </script>
 
@@ -50,35 +55,28 @@
       {titleMap[constraintType]}
       <Help>{helpMap[constraintType]}</Help>
     </span>
-    {#if constraintType === 'unique'}
-      <Button
-        appearance="plain-primary"
-        size="small"
-        on:click={addNewUniqueConstraint}>Add</Button
-      >
-    {:else if constraintType === 'foreignkey'}
-      <Button
-        appearance="plain-primary"
-        size="small"
-        on:click={addNewFkConstraint}
-      >
+    {#if CONSTRAINT_TYPE_SUPPORTING_CAN_ADD.includes(constraintType)}
+      <Button appearance="plain-primary" size="small" on:click={addConstraint}>
         Add
       </Button>
     {/if}
   </span>
-  {#if addConstraintType !== 'none'}
+  {#if isAddingNewConstraint}
     <div class="add-constraint">
-      {#if addConstraintType === 'foreignKey'}
-        <NewFkConstraint onClose={resetAddConstraintType} />
-      {:else if addConstraintType === 'unique'}
-        <NewUniqueConstraint onClose={resetAddConstraintType} />
+      {#if constraintType === 'foreignkey'}
+        <NewFkConstraint onClose={cancelAddConstraint} />
+      {:else if constraintType === 'unique'}
+        <NewUniqueConstraint onClose={cancelAddConstraint} />
       {/if}
     </div>
   {/if}
   {#each constraints as constraint (constraint.id)}
     <Collapsible triggerAppearance="ghost">
       <span slot="header">
-        <ConstraintCollapseHeader {constraint} />
+        <ConstraintCollapseHeader
+          canDrop={CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType)}
+          {constraint}
+        />
       </span>
       <div slot="content">
         {#if constraintType === 'foreignkey'}
@@ -89,7 +87,9 @@
       </div>
     </Collapsible>
   {:else}
-    <span class="null">No {titleMap[constraintType]} Constraints</span>
+    {#if !isAddingNewConstraint}
+      <span class="null">No {titleMap[constraintType]} Constraints</span>
+    {/if}
   {/each}
 </div>
 

@@ -7,6 +7,7 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
 
   export let constraint: Constraint;
+  export let canDrop = false;
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -34,7 +35,7 @@
       </span>
     {/each}
   </div>
-  {#if constraint.type !== 'primary'}
+  {#if canDrop}
     <Button on:click={handleDrop} size="small" appearance="plain">
       <Icon {...iconDeleteMajor} />
     </Button>
