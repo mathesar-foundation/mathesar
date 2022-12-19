@@ -171,7 +171,6 @@
 
     .upload-method-input {
       font-size: var(--text-size-large);
-      --spacing-x: 0.5em;
 
       :global(legend) {
         font-weight: 500;
@@ -179,7 +178,6 @@
 
       :global(.option) {
         padding: 0.8rem 0;
-        margin-right: 0.5rem;
       }
     }
     .uploading-info {
