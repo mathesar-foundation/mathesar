@@ -4,7 +4,7 @@
 </script>
 
 <div class="info-box">
-  <MessageBox icon={iconInfo}><slot /></MessageBox>
+  <MessageBox icon={iconInfo} {...$$restProps}><slot /></MessageBox>
 </div>
 
 <style>

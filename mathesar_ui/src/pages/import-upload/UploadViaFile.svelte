@@ -1,6 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { FileUpload as FileUploadComponent } from '@mathesar/component-library';
+  import {
+    FileUpload as FileUploadComponent,
+    Button,
+  } from '@mathesar-component-library';
   import type {
     FileUpload,
     FileUploadAddDetail,
@@ -10,6 +13,10 @@
   import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();
+
+  export let isLoading: boolean;
+  export let showCancelButton: boolean;
+  export let hideAllActions = false;
 
   let uploads: FileUpload[] | undefined;
   let uploadProgress: UploadCompletionOpts | undefined;
@@ -59,7 +66,22 @@
   <FileUploadComponent
     bind:fileUploads={uploads}
     fileProgress={fileUploadProgress}
+    disabled={isLoading}
     on:add={(e) => uploadNewFile(e.detail)}
   />
-  <div class="help-content">You can import tabular (CSV, TSV) data.</div>
+  {#if !uploadProgress}
+    <div class="help-content">
+      The file must be in tabular format (CSV, TSV etc.)
+    </div>
+  {/if}
 </div>
+
+<slot />
+
+{#if !hideAllActions && showCancelButton}
+  <div class="buttons">
+    <Button appearance="secondary" on:click={() => dispatch('cancel')}>
+      Cancel
+    </Button>
+  </div>
+{/if}
