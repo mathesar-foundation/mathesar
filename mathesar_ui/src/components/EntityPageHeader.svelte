@@ -68,7 +68,7 @@
           font-weight: 510;
         }
         span {
-          color: var(--slate-400);
+          color: var(--slate-500);
         }
         h1,
         span {
