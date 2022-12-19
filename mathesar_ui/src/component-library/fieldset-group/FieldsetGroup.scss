@@ -22,8 +22,9 @@
 
   &.inline .options {
     display: flex;
-    .option + .option {
-      margin-left: var(--spacing-x, var(--spacing-x-default));
+    flex-wrap: wrap;
+    .option:not(:last-child) {
+      margin-right: var(--spacing-x, var(--spacing-x-default));
     }
   }
 }
