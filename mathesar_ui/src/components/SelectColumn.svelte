@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Select } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/types/tables/columns';
+  import ColumnName from './column/ColumnName.svelte';
 
   // Additional classes
   let classes = '';
@@ -19,4 +20,9 @@
   {disabled}
   class={classes}
   on:change
-/>
+  let:option
+>
+  {#if option}
+    <ColumnName column={option} />
+  {/if}
+</Select>
