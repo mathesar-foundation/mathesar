@@ -13,6 +13,7 @@ export interface SheetContextStores<SheetColumnIdentifierKey> {
   rowWidth: Readable<number>;
   horizontalScrollOffset: Readable<number>;
   scrollOffset: Readable<number>;
+  paddingRight: Readable<number>;
 }
 
 export interface SheetContext<SheetColumnIdentifierKey> {
@@ -39,6 +40,7 @@ export function calculateColumnStyleMapAndRowWidth<
   columns: SheetColumnType[],
   getColumnIdentifier: (column: SheetColumnType) => SheetColumnIdentifierKey,
   customizedColumnWidths: ImmutableMap<SheetColumnIdentifierKey, number>,
+  paddingRight: number,
 ): {
   rowWidth: number;
   columnStyleMap: Map<SheetColumnIdentifierKey, ColumnPosition>;
@@ -55,7 +57,8 @@ export function calculateColumnStyleMapAndRowWidth<
     });
     left += width;
   });
-  return { columnStyleMap: map, rowWidth: left };
+  const rowWidth = left + paddingRight;
+  return { columnStyleMap: map, rowWidth };
 }
 
 export function setSheetContext<SheetColumnIdentifierKey>(
