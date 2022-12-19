@@ -83,6 +83,7 @@
           {usesVirtualList}
           {columnWidths}
           hasBorder={sheetHasBorder}
+          restrictWidthToRowWidth={!usesVirtualList}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
         >
