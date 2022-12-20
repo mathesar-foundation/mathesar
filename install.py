@@ -27,7 +27,7 @@ def main():
     if not superuser_exists():
         print("------------Setting up Admin user------------")
         print("Admin user does not exists. We need at least one admin")
-        create_superuser()
+        create_superuser(skip_confirm)
 
     print("------------Setting up User Databases------------")
     user_databases = [key for key in DATABASES if key != "default"]
@@ -39,11 +39,17 @@ def superuser_exists():
     return get_user_model().objects.filter(is_superuser=True).exists()
 
 
-def create_superuser():
-    print("Please enter the details to create a new admin user ")
-    username = input("Username: ")
-    email = input("Email: ")
-    password = getpass.getpass('Password: ')
+def create_superuser(skip_confirm):
+    # TODO Replace argument name used for default admin user creation.
+    if not skip_confirm:
+        print("Please enter the details to create a new admin user ")
+        username = input("Username: ")
+        email = input("Email: ")
+        password = getpass.getpass('Password: ')
+    else:
+        username = "admin"
+        email = "admin@example.com"
+        password = "password"
     get_user_model().objects.create_superuser(username, email, password)
     print(f"Admin user with username {username} was created successfully")
 
