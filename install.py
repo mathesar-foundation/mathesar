@@ -9,10 +9,10 @@ import getpass
 
 import django
 from django.contrib.auth import get_user_model
+from django.core import management
 
 from config.settings import DATABASES
 from db import install
-import secrets
 
 
 def main():
@@ -23,6 +23,7 @@ def main():
             skip_confirm = True
     check_missing_dj_config()
     django.setup()
+    management.call_command('migrate')
     if not superuser_exists():
         create_superuser()
     for database_key in [key for key in DATABASES if key != "default"]:
@@ -40,30 +41,20 @@ def create_superuser():
     get_user_model().objects.create_superuser(username, email, password)
 
 
-def generate_secretkey():
-    secret_key = secrets.token_urlsafe()
-    # TODO Add documentation link
-    documentation_link = ""
-    print(f"Please follow the instructions in {documentation_link} to add the below secret key to the application")
-    print(f"Secret Key: {secret_key}")
-
-
 def check_missing_dj_config():
-    try:
-        os.environ.get('SECRET_KEY', None)
-    except KeyError:
-        generate_secretkey()
     # TODO Add documentation link
     documentation_link = ""
     try:
+        os.environ['ALLOWED_HOSTS']
+        os.environ['SECRET_KEY']
         os.environ['DJANGO_DATABASE_KEY']
         os.environ['DJANGO_SETTINGS_MODULE']
         os.environ['DJANGO_DATABASE_URL']
         os.environ['MATHESAR_DATABASES']
     except KeyError as e:
         missing_config_key = e.args[0]
-        raise Exception(f"{missing_config_key} is missing from the config."
-                        f" Please follow the documentation {documentation_link} add the missing config")
+        raise Exception(f"{missing_config_key} environment variable is missing."
+                        f" Please follow the documentation {documentation_link} to add the missing environment variable.")
 
 
 def install_on_db_with_key(database_key, skip_confirm):

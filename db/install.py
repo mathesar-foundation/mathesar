@@ -14,12 +14,9 @@ def install_mathesar(
     )
     try:
         user_db_engine.connect()
-        # TODO uncomment below line when the Installation script is idempotent.
-        # print(f"Installing Mathesar DB {user_database} on preexisting PostgreSQL instance at host {hostname}...")
-        # install.install_mathesar_on_database(user_db_engine)
+        print(f"Installing Mathesar DB {user_database} on preexisting PostgreSQL instance at host {hostname}...")
+        install.install_mathesar_on_database(user_db_engine)
         user_db_engine.dispose()
-        # TODO Remove below line when the Installation script is idempotent.
-        print(f"Database {user_database} already exists! Skipping...")
     except OperationalError:
         database_created = create_mathesar_database(
             hostname,
@@ -31,7 +28,7 @@ def install_mathesar(
             skip_confirm
         )
         if database_created:
-            print(f"Installing Mathesar DB {user_database} on preexisting PostgreSQL instance at host {hostname}...")
+            print(f"Installing Mathesar DB {user_database} on PostgreSQL instance at host {hostname}...")
             install.install_mathesar_on_database(user_db_engine)
             user_db_engine.dispose()
         else:
