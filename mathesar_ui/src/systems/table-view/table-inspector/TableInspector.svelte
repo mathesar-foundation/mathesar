@@ -1,5 +1,6 @@
 <script lang="ts">
   import { TabContainer } from '@mathesar/component-library';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { ComponentType } from 'svelte';
   import ColumnMode from './column/ColumnMode.svelte';
   import RecordMode from './record/RecordMode.svelte';
@@ -26,6 +27,36 @@
   ];
 
   let activeTab: TabItem;
+
+  const tabularData = getTabularDataStoreFromContext();
+  $: ({ selection } = $tabularData);
+  console.log({ selection });
+
+  // if (selection.isAnyColumnCompletelySelected()) {
+  //   activeTab = tabs[1];
+  // }
+
+  // if (selection.isAnyRowCompletelySelected()) {
+  //   activeTab = tabs[2];
+  // }
+
+  // tabularData.subscribe((data) => {
+  //   if (data.selection) {
+  //     data.selection.selectedCells.subscribe(() => {
+  //       console.log({
+  //         isAnyColumnCompletelySelected:
+  //           data.selection.isAnyColumnCompletelySelected(),
+  //       });
+  //       if (data.selection.isAnyColumnCompletelySelected()) {
+  //         activeTab = tabs[1];
+  //       }
+
+  //       if (data.selection.isAnyRowCompletelySelected()) {
+  //         activeTab = tabs[2];
+  //       }
+  //     });
+  //   }
+  // });
 </script>
 
 <div class="table-inspector-container">
