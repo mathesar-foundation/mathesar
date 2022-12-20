@@ -70,12 +70,17 @@ class Transform(ABC):
     @property
     def map_of_output_alias_to_input_alias(self):
         """
-        Expected to return a mapping of output aliases to input aliases.
+        Expected to return a mapping of output alias to input alias.
 
-        Useful when looking for parent aliases of a given alias.
+        Useful when looking for ancestor aliases of a given alias.
 
-        Notice that the reverse mapping (from input aliases to output aliases) would be
+        Note, the reverse mapping (from input aliases to output aliases) would be
         significantly different, because a single input alias can map to multiple output aliases.
+
+        Note, this presumes that a single output alias maps to no more than a single input alias,
+        but that's not true at least in the case of multi-column aggregation functions [0].
+
+        [0] http://www.postgresonline.com/journal/archives/105-How-to-create-multi-column-aggregates.html
         """
         return dict()
 

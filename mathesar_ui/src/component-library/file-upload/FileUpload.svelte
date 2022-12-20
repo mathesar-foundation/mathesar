@@ -23,6 +23,7 @@
     undefined;
   export let multiple = false;
   export let fileUploads: FileUpload[] | undefined = undefined;
+  export let disabled = false;
 
   let fileId = 0;
   let state = 'idle';
@@ -57,19 +58,21 @@
   }
 
   function onFileDrop(event: DragEvent) {
-    const fileList = event.dataTransfer?.files;
-    if (!fileList) {
-      return;
-    }
-    if (multiple) {
-      processFiles(event, fileList);
-    } else {
-      processFiles(event, [fileList[0]]);
+    if (!disabled) {
+      const fileList = event.dataTransfer?.files;
+      if (!fileList) {
+        return;
+      }
+      if (multiple) {
+        processFiles(event, fileList);
+      } else {
+        processFiles(event, [fileList[0]]);
+      }
     }
   }
 
   function checkAndOpen(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
+    if (!disabled && event.key === 'Enter') {
       (event.target as HTMLElement).click();
     }
   }
@@ -77,15 +80,18 @@
 
 <div
   class="file-upload"
+  class:disabled
   class:inprogress={fileUploads && fileUploads.length > 0}
 >
   {#if fileUploads && fileUploads.length > 0}
     <div class="files">
       {#each fileUploads as upload (upload.fileId)}
         <div class="file">
-          <Icon {...iconFile} size="3.5em" />
           <div class="file-info">
-            <div class="name">{upload.file.name}</div>
+            <div class="file-name">
+              <Icon {...iconFile} />
+              <span>{upload.file.name}</span>
+            </div>
             <Progress
               percentage={Math.round(fileProgress?.[upload.fileId] ?? 0)}
             />
@@ -131,10 +137,12 @@
     >
       <slot>
         <div class="message">
-          <Icon size="60px" {...iconUploadFile} />
+          <div class="icon-holder">
+            <Icon {...iconUploadFile} />
+          </div>
           <div class="text">
             <div class="title">Drag a file here</div>
-            <div>or click to browse a file from your computer</div>
+            <div class="desc">or click to browse a file from your computer</div>
           </div>
         </div>
       </slot>

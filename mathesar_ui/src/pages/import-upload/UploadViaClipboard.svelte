@@ -1,11 +1,18 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { SpinnerButton, TextArea } from '@mathesar/component-library';
+  import {
+    SpinnerButton,
+    TextArea,
+    LabeledInput,
+    Button,
+  } from '@mathesar/component-library';
   import { postAPI } from '@mathesar/api/utils/requestUtils';
   import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();
   export let isLoading: boolean;
+  export let showCancelButton: boolean;
+  export let hideAllActions = false;
 
   let clipboardContent = '';
 
@@ -22,14 +29,27 @@
   }
 </script>
 
-<div class="help-content">Paste your data below:</div>
-
-<TextArea bind:value={clipboardContent} rows={10} disabled={isLoading} />
-
-<div class="buttons">
-  <SpinnerButton
-    onClick={importFromText}
-    label="Continue"
-    disabled={!clipboardContent || isLoading}
-  />
+<LabeledInput label="Paste the data you want to import" layout="stacked">
+  <TextArea bind:value={clipboardContent} rows={10} disabled={isLoading} />
+</LabeledInput>
+<div class="help-content">
+  The data must be in tabular format (CSV, TSV etc.)
 </div>
+
+<slot />
+
+{#if !hideAllActions}
+  <div class="buttons">
+    {#if showCancelButton}
+      <Button appearance="secondary" on:click={() => dispatch('cancel')}>
+        Cancel
+      </Button>
+    {/if}
+    <SpinnerButton
+      onClick={importFromText}
+      label="Continue"
+      disabled={!clipboardContent || isLoading}
+      class="continue-action"
+    />
+  </div>
+{/if}

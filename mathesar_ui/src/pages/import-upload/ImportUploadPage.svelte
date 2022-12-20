@@ -1,10 +1,15 @@
 <script lang="ts">
   import { router } from 'tinro';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import { RadioGroup, Spinner } from '@mathesar-component-library';
+  import { RadioGroup, iconUploadFile } from '@mathesar-component-library';
+  import StatusIndicator from '@mathesar/components/StatusIndicator.svelte';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { iconUrl, iconPaste } from '@mathesar/icons';
   import { createTable } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import UploadViaFile from './UploadViaFile.svelte';
@@ -15,23 +20,38 @@
   export let schema: SchemaEntry;
 
   const uploadMethods = [
-    { label: 'Upload a file', component: UploadViaFile },
-    { label: 'Provide a URL to the file', component: UploadViaUrl },
-    { label: 'Copy and Paste Text', component: UploadViaClipboard },
+    { label: 'Upload a file', component: UploadViaFile, icon: iconUploadFile },
+    {
+      label: 'Provide a URL to the file',
+      component: UploadViaUrl,
+      icon: iconUrl,
+    },
+    {
+      label: 'Copy and Paste Text',
+      component: UploadViaClipboard,
+      icon: iconPaste,
+    },
   ];
   let uploadMethod = uploadMethods[0];
 
-  let uploadStatus: RequestStatus;
-  let tableCreationProgress: RequestStatus;
+  let uploadStatus: RequestStatus | undefined;
+  let tableCreationProgress: RequestStatus | undefined;
 
   $: isLoading =
     uploadStatus?.state === 'processing' ||
     tableCreationProgress?.state === 'processing';
-
-  $: statusInfo = [
-    { label: 'Uploading data', status: uploadStatus },
-    { label: 'Preparing preview', status: tableCreationProgress },
-  ];
+  $: isError =
+    uploadStatus?.state === 'failure' ||
+    tableCreationProgress?.state === 'failure';
+  $: errorMessage = (() => {
+    if (uploadStatus?.state === 'failure') {
+      return uploadStatus.errors.join(',');
+    }
+    if (tableCreationProgress?.state === 'failure') {
+      return tableCreationProgress.errors.join(',');
+    }
+    return undefined;
+  })();
 
   async function createPreviewTable(uploadInfo: { dataFileId: number }) {
     uploadStatus = { state: 'success' };
@@ -43,14 +63,13 @@
       });
       router.goto(getImportPreviewPageUrl(database.name, schema.id, table.id));
     } catch (err) {
-      const errorMessage =
+      const message =
         err instanceof Error
           ? err.message
           : 'Unable to create a table from the uploaded data';
-      // Throw toast here?
       tableCreationProgress = {
         state: 'failure',
-        errors: [errorMessage],
+        errors: [message],
       };
     }
   }
@@ -58,18 +77,41 @@
 
 <svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
 
-<LayoutWithHeader>
+<LayoutWithHeader
+  restrictWidth
+  cssVariables={{
+    '--max-layout-width': '67.357rem',
+    '--layout-background-color': 'var(--sand-200)',
+  }}
+>
+  <h1>Create a table by importing your data</h1>
   <div class="import-file-view">
-    <h2>Create a table by importing your data</h2>
-
-    <div class="upload-method-input">
-      <RadioGroup
-        bind:value={uploadMethod}
-        options={uploadMethods}
-        isInline
-        label="How would you like to import your data?"
-      />
-    </div>
+    {#if isLoading || isError}
+      <div class="uploading-info">
+        <span>Uploading Data</span>
+        <WarningBox>
+          Large data sets can sometimes take several minutes to process. Please
+          do not leave this page or close the browser tab while import is in
+          progress.
+        </WarningBox>
+      </div>
+    {:else}
+      <div class="upload-method-input">
+        <RadioGroup
+          bind:value={uploadMethod}
+          options={uploadMethods}
+          isInline
+          label="How would you like to import your data?"
+          getRadioLabel={(opt) => ({
+            component: NameWithIcon,
+            props: {
+              name: opt.label,
+              icon: opt.icon,
+            },
+          })}
+        />
+      </div>
+    {/if}
 
     <div class="upload-section">
       <svelte:component
@@ -85,83 +127,107 @@
             errors: [e.detail ?? 'Upload failed'],
           };
         }}
-      />
-    </div>
+        showCancelButton={isError}
+        on:cancel={() => {
+          uploadStatus = undefined;
+          tableCreationProgress = undefined;
+        }}
+        hideAllActions={tableCreationProgress?.state === 'processing'}
+      >
+        {#if tableCreationProgress?.state === 'processing'}
+          <div class="preview-status">
+            <StatusIndicator
+              state="processing"
+              messages={{ processing: 'Preparing Preview' }}
+            />
+          </div>
+        {/if}
 
-    <div class="help-content bounded">
-      Large data sets can sometimes take several minutes to process.
-      <strong>
-        Please do not leave this page or close the browser tab while import is
-        in progress.
-      </strong>
-
-      <div>
-        {#each statusInfo as info (info)}
-          {#if info.status?.state}
-            <div>
-              {info.label}:
-              {#if info.status?.state === 'processing'}
-                <Spinner />
-              {:else if info.status?.state === 'success'}
-                Success
-              {:else if info.status?.state === 'failure'}
-                {info.status?.errors.join(', ')}
-              {/if}
-            </div>
-          {/if}
-        {/each}
-      </div>
+        {#if errorMessage}
+          <div class="errors">
+            <ErrorBox>
+              <span class="title">Failed to import data</span>
+              <span>{errorMessage}</span>
+            </ErrorBox>
+          </div>
+        {/if}
+      </svelte:component>
     </div>
   </div>
 </LayoutWithHeader>
 
 <style lang="scss">
+  h1 {
+    font-weight: 500;
+    font-size: var(--size-super-ultra-large);
+    margin: 0.83em 0;
+  }
+
   .import-file-view {
-    /**
-     * Temporary style. This is in place
-     * until we have a dedicated layout
-     * for it.
-     */
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+    padding: var(--size-super-ultra-large);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--border-radius-m);
+    background-color: var(--white);
+    margin-bottom: 2rem;
 
-  .upload-method-input {
-    :global(.option) {
-      border: 1px solid var(--color-gray-light);
-      border-radius: 0.2rem;
-      padding: 0.5rem 0.7rem;
-      font-weight: 500;
+    .upload-method-input {
+      font-size: var(--text-size-large);
+
+      :global(legend) {
+        font-weight: 500;
+      }
+
+      :global(.option) {
+        padding: 0.8rem 0;
+      }
     }
-  }
-
-  .upload-section {
-    border-top: 1px solid var(--color-gray-lighter);
-    padding-top: 0.9rem;
-    margin: 0.9rem 0;
-
-    :global(.file-upload-section) {
-      margin-top: 1.1rem;
-    }
-
-    :global(.help-content) {
-      margin: 0.4rem 0;
-      line-height: 1.5;
+    .uploading-info {
+      span {
+        display: block;
+        font-size: var(--text-size-large);
+        margin-bottom: var(--size-large);
+      }
+      :global(.alert-container) {
+        font-size: var(--text-size-small);
+      }
     }
 
-    :global(.buttons) {
-      margin-top: 0.9rem;
-      text-align: right;
-    }
-  }
+    .upload-section {
+      margin-top: var(--size-large);
 
-  .help-content.bounded {
-    border: 1px solid var(--color-gray-light);
-    background: var(--color-gray-lighter);
-    padding: 0.6rem 1rem;
-    line-height: 1.6;
-    margin-top: 2rem;
-    border-radius: 0.2rem;
+      :global(.file-upload-section) {
+        padding-top: var(--size-ultra-small);
+      }
+
+      :global(.help-content) {
+        margin: 0.4rem 0;
+        line-height: 1.5;
+        color: var(--slate-500);
+      }
+
+      :global(.buttons) {
+        margin-top: 0.9rem;
+        display: flex;
+        align-items: center;
+      }
+      :global(.buttons .continue-action) {
+        margin-left: auto;
+      }
+    }
+
+    .errors,
+    .preview-status {
+      margin-top: var(--size-large);
+    }
+    .errors {
+      :global(.alert-container) {
+        max-width: 100%;
+      }
+      .title {
+        display: block;
+        margin-bottom: var(--size-ultra-small);
+        font-size: var(--size-large);
+      }
+    }
   }
 </style>

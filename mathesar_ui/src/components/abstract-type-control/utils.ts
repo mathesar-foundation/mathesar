@@ -91,3 +91,17 @@ export function constructDisplayForm(
     displayFormValues,
   };
 }
+
+export function hasTypeOptionsChanged(
+  previousTypeOptions: NonNullable<ColumnWithAbstractType['type_options']>,
+  currentTypeOptions: NonNullable<ColumnWithAbstractType['type_options']>,
+): boolean {
+  for (const key in currentTypeOptions) {
+    if (Object.hasOwn(currentTypeOptions, key)) {
+      if (currentTypeOptions[key] !== previousTypeOptions[key]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

@@ -7,7 +7,7 @@
   type $$Events = Select<TableEntry | undefined>['$$events_def'];
 
   export let tables: TableEntry[];
-  export let table: TableEntry | undefined = undefined;
+  export let value: TableEntry | undefined = undefined;
   /** TODO: Discuss, do we need prependBlank? */
   export let prependBlank = false;
   export let autoSelect: SelectProps<TableEntry | undefined>['autoSelect'] =
@@ -20,7 +20,7 @@
   options={tableList}
   valuesAreEqual={(a, b) => a?.id === b?.id}
   {autoSelect}
-  bind:value={table}
+  bind:value
   on:change
   let:option
 >
@@ -36,7 +36,7 @@
 <style lang="scss">
   .placeholder {
     display: inherit;
-    --icon-color: var(--slate-400);
-    --name-color: var(--slate-400);
+    --icon-color: var(--slate-500);
+    --name-color: var(--slate-500);
   }
 </style>

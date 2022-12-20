@@ -172,7 +172,7 @@ def test_DBQuery_all_sa_columns_map_summarized_columns(engine_with_library):
             spec={"lesser": [{"column_name": ["Due Date"]}, {"literal": ["2022-08-10"]}]}
         ),
         tbase.Filter(
-            spec={"empty": [{"column_name": ["Check In Time"]}]}
+            spec={"null": [{"column_name": ["Check In Time"]}]}
         ),
         tbase.Summarize(
             spec={

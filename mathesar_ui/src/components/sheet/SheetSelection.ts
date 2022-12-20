@@ -289,7 +289,10 @@ export default class SheetSelection<
     this.selectMultipleCells(cells);
   }
 
-  onMouseEnterWhileSelection(row: SelectionRow, column: SelectionColumn): void {
+  onMouseEnterCellWhileSelection(
+    row: SelectionRow,
+    column: SelectionColumn,
+  ): void {
     const { rowIndex } = row;
     const { columnIndex } = column;
 
@@ -403,9 +406,16 @@ export default class SheetSelection<
     this.selectMultipleCells(cells);
   }
 
+  /**
+   * Use this only for programmatic selection
+   *
+   * Prefer: onColumnSelectionStart when
+   * selection is done using
+   * user interactions
+   */
   toggleColumnSelection(column: Column): boolean {
     const isCompleteColumnSelected = this.isCompleteColumnSelected(column);
-    this.activateCellByIndexAndId(0, column.id);
+    this.activateCell({ rowIndex: 0 }, column);
 
     if (isCompleteColumnSelected) {
       this.resetSelection();
@@ -433,6 +443,13 @@ export default class SheetSelection<
     return true;
   }
 
+  /**
+   * Use this only for programmatic selection
+   *
+   * Prefer: onRowSelectionStart when
+   * selection is done using
+   * user interactions
+   */
   toggleRowSelection(row: Row): void {
     const isCompleteRowSelected = this.isCompleteRowSelected(row);
 
@@ -453,24 +470,68 @@ export default class SheetSelection<
     }
   }
 
+  onColumnSelectionStart(column: Column): boolean {
+    this.activateCell({ rowIndex: 0 }, { id: column.id });
+    const rows = this.getRows();
+
+    if (rows.length === 0) {
+      this.resetSelection();
+      this.columnsSelectedWhenTheTableIsEmpty.add(column.id);
+      return true;
+    }
+
+    this.onStartSelection(rows[0], column);
+    this.onMouseEnterCellWhileSelection(rows[rows.length - 1], column);
+    return true;
+  }
+
+  onMouseEnterColumnHeaderWhileSelection(column: Column): boolean {
+    const rows = this.getRows();
+
+    if (rows.length === 0) {
+      this.resetSelection();
+      this.columnsSelectedWhenTheTableIsEmpty.add(column.id);
+      return true;
+    }
+
+    this.onMouseEnterCellWhileSelection(rows[rows.length - 1], column);
+    return true;
+  }
+
+  onRowSelectionStart(row: Row): boolean {
+    const columns = this.getColumns();
+
+    if (!columns.length) {
+      // Not possible to have tables without columns
+    }
+
+    const startColumn = columns[0];
+    this.activateCell(row, startColumn);
+
+    this.onStartSelection(row, startColumn);
+    return true;
+  }
+
+  onMouseEnterRowHeaderWhileSelection(row: Row): boolean {
+    const columns = this.getColumns();
+
+    if (!columns.length) {
+      // Not possible to have tables without columns
+    }
+
+    const endColumn = columns[columns.length - 1];
+    this.onMouseEnterCellWhileSelection(row, endColumn);
+    return true;
+  }
+
   resetActiveCell(): void {
     this.activeCell.set(undefined);
   }
 
-  activateCell(row: Row, column: Column): void {
+  activateCell(row: Pick<Row, 'rowIndex'>, column: Pick<Column, 'id'>): void {
     this.activeCell.set({
       rowIndex: row.rowIndex,
       columnId: column.id,
-    });
-  }
-
-  activateCellByIndexAndId(
-    rowIndex: Row['rowIndex'],
-    columnId: Column['id'],
-  ): void {
-    this.activeCell.set({
-      rowIndex,
-      columnId,
     });
   }
 
@@ -544,7 +605,7 @@ export default class SheetSelection<
   activateFirstCellInSelectedColumn() {
     const activeCell = get(this.activeCell);
     if (activeCell) {
-      this.activateCellByIndexAndId(0, activeCell.columnId);
+      this.activateCell({ rowIndex: 0 }, { id: activeCell.columnId });
     }
   }
 

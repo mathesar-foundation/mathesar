@@ -211,10 +211,6 @@ class UIQuery(BaseModel, Relation):
         )
 
     def _describe_query_column(self, sa_col):
-        """
-        Note, has some conditional fields depending on whether the column is an initial column or
-        is generated mid-query (created via a summarization).
-        """
         alias = sa_col.name
         assert not alias.startswith('%')
         initial_db_column = self._get_db_initial_column_by_alias(alias)
@@ -345,13 +341,20 @@ class UIQuery(BaseModel, Relation):
 
     def _get_display_options_for_alias(self, alias):
         display_options = None
+        # Try getting display options from this model's field
         if self.display_options:
             display_options = self.display_options.get(alias)
+        # Try getting display options from Dj column, if this is an initial column
         if display_options is None:
-            # notice that this isn't meant to support non-initial-column aliases
             dj_col = self._map_of_initial_col_alias_to_dj_column.get(alias)
             if dj_col:
                 display_options = dj_col.display_options
+        # Try recursively repeating these steps for its parent alias, if it can be found
+        if display_options is None:
+            parent_alias = \
+                self.db_query.map_of_output_alias_to_input_alias.get(alias)
+            if parent_alias:
+                display_options = self._get_display_options_for_alias(parent_alias)
         return display_options
 
     @cached_property

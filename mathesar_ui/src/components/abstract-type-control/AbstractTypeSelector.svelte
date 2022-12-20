@@ -19,6 +19,7 @@
 
   export let column: ColumnWithAbstractType;
   export let selectedAbstractType: AbstractType;
+  export let disabled = false;
 
   $: allowedTypeConversions = getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
     column.type,
@@ -53,7 +54,7 @@
   }
 </script>
 
-<LabeledInput label="Column Data Type" layout={'stacked'}>
+<LabeledInput label="Data Type" layout={'stacked'}>
   <Select
     options={allowedTypeConversions}
     value={selectedAbstractType}
@@ -62,6 +63,7 @@
     on:change={(e) => selectAbstractType(e.detail)}
     let:option
     let:label
+    {disabled}
   >
     <NameWithIcon icon={option.getIcon()}>
       {label}

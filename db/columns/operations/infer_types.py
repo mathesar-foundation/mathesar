@@ -41,7 +41,7 @@ TYPE_INFERENCE_DAG = {
 }
 
 
-def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=TYPE_INFERENCE_DAG, metadata=None):
+def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=None, metadata=None):
     """
     Attempts to cast the column to the best type for it, given the mappings defined in TYPE_INFERENCE_DAG
     and _get_type_classes_mapped_to_dag_nodes. Returns the resulting column type's class.
@@ -58,6 +58,8 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
             - if none of the column type alterations succeed, return the current column type's
             class.
     """
+    if type_inference_dag is None:
+        type_inference_dag = TYPE_INFERENCE_DAG
     metadata = metadata if metadata else get_empty_metadata()
     if depth > MAX_INFERENCE_DAG_DEPTH:
         raise DagCycleError("The type_inference_dag likely has a cycle")
