@@ -5,6 +5,7 @@
     getAllowedAbstractTypesForNewColumn,
     getAbstractTypeForDbType,
     defaultDbType,
+    getDefaultDbTypeOfAbstractType,
   } from '@mathesar/stores/abstract-types';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
 
@@ -26,7 +27,7 @@
   getLabel={(entry) => entry?.name ?? ''}
   value={abstractType}
   on:change={(e) => {
-    value = e.detail?.defaultDbType ?? defaultDbType;
+    value = e.detail ? getDefaultDbTypeOfAbstractType(e.detail) : defaultDbType;
   }}
   valuesAreEqual={(a, b) => a?.identifier === b?.identifier}
   offsetOnFocus={2}

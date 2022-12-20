@@ -165,3 +165,15 @@ export function getAllowedAbstractTypesForNewColumn(
     .filter((type) => !comboAbstractTypeCategories[type.identifier])
     .sort((a, b) => a.name.localeCompare(b.name));
 }
+
+export function getDefaultDbTypeOfAbstractType(
+  abstractType: AbstractType,
+): DbType {
+  if (abstractType.defaultDbType) {
+    return abstractType.defaultDbType;
+  }
+  if (abstractType.dbTypes.size > 0) {
+    return [...abstractType.dbTypes][0];
+  }
+  return defaultDbType;
+}
