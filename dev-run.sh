@@ -22,6 +22,5 @@ else
 fi
 
 cd ..
-python manage.py migrate && python install.py
-python manage.py createsuperuser --no-input --username admin --email admin@example.com
+python manage.py migrate && python install.py -s
 python manage.py runserver 0.0.0.0:8000 && fg
