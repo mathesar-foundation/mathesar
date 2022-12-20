@@ -67,10 +67,10 @@ def check_missing_dj_config():
 def install_on_db_with_key(database_key, skip_confirm):
     install.install_mathesar(
         user_database=DATABASES[database_key]["NAME"],
-        username=DATABASES["default"]["USER"],
-        password=DATABASES["default"]["PASSWORD"],
-        hostname=DATABASES["default"]["HOST"],
-        port=DATABASES["default"]["PORT"],
+        username=DATABASES[database_key]["USER"],
+        password=DATABASES[database_key]["PASSWORD"],
+        hostname=DATABASES[database_key]["HOST"],
+        port=DATABASES[database_key]["PORT"],
         skip_confirm=skip_confirm
     )
 
