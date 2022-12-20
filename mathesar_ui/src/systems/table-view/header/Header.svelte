@@ -48,7 +48,9 @@
             $columnsSelectedWhenTheTableIsEmpty,
             processedColumn,
           )}
-          on:click={() => selection.toggleColumnSelection(processedColumn)}
+          on:mousedown={() => selection.onColumnSelectionStart(processedColumn)}
+          on:mouseenter={() =>
+            selection.onMouseEnterColumnHeaderWhileSelection(processedColumn)}
         />
         <SheetCellResizer columnIdentifierKey={columnId} />
       </div>
