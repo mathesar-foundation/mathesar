@@ -100,8 +100,8 @@ class QueryViewSet(
         input_serializer.is_valid(raise_exception=True)
         query = UIQuery(**input_serializer.validated_data)
         try:
-            # TODO Consider treating the transformation as immutable
             query.replace_transformations_with_processed_transformations()
+            query.add_defaults_to_display_names()
             record_serializer = RecordListParameterSerializer(data=request.GET)
             record_serializer.is_valid(raise_exception=True)
             output_serializer = BaseQuerySerializer(query)

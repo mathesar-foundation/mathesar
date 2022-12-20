@@ -54,9 +54,15 @@
     }
   }
 
-  const handleRowClick = () => {
+  const handleRowMouseDown = () => {
     if (rowHasRecord(row) && !isPlaceholderRow(row)) {
-      selection.toggleRowSelection(row);
+      selection.onRowSelectionStart(row);
+    }
+  };
+
+  const handleRowMouseEnter = () => {
+    if (rowHasRecord(row) && !isPlaceholderRow(row)) {
+      selection.onMouseEnterRowHeaderWhileSelection(row);
     }
   };
 </script>
@@ -82,7 +88,12 @@
       let:htmlAttributes={cellHtmlAttr}
       let:style
     >
-      <div {...cellHtmlAttr} {style} on:click={handleRowClick}>
+      <div
+        {...cellHtmlAttr}
+        {style}
+        on:mousedown={handleRowMouseDown}
+        on:mouseenter={handleRowMouseEnter}
+      >
         {#if rowHasRecord(row)}
           <RowControl
             {primaryKeyColumnId}

@@ -34,7 +34,7 @@
   .divider {
     width: 4px;
     height: 4px;
-    background-color: var(--slate-400);
+    background-color: var(--slate-500);
     border-radius: var(--border-radius-m);
   }
 </style>
