@@ -3,9 +3,9 @@
 
 .radio {
   --size: var(--radio-size, 1em);
-  --hue: var(--radio-hue, 207);
-  --saturation: var(--radio-saturation, 90%);
-  --base-lightness: var(--radio-lightness, 59%);
+  --hue: var(--radio-hue, 212);
+  --saturation: var(--radio-saturation, 84%);
+  --base-lightness: var(--radio-lightness, 44.1%);
 
   --lightness: var(--base-lightness);
   --color-unchecked: hsl(0, 0%, var(--lightness));
@@ -18,7 +18,7 @@
   width: var(--size);
   height: var(--size);
   appearance: none;
-  border: solid var(--color-unchecked) 0.15em;
+  border: solid var(--color-unchecked) 0.1em;
   border-radius: 50%;
   background: white;
 
@@ -38,7 +38,7 @@
     background-image: var(--icon-donut);
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 0.9em auto;
+    background-size: 1em auto;
   }
 
   cursor: pointer;

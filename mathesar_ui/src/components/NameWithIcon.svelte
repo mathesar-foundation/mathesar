@@ -4,6 +4,7 @@
 
   /** TODO: Update component and prop names */
   export let icon: IconProps | IconProps[];
+  export let name: string | undefined = undefined;
   export let isLoading = false;
   /** When true, the icon will be rendered within a box */
   export let iconHasBox = false;
@@ -23,7 +24,13 @@
         {/each}
       {/if}
     </span>
-    <span class="name"><slot /></span>
+    <span class="name">
+      {#if name}
+        {name}
+      {:else}
+        <slot />
+      {/if}
+    </span>
   </span>
 </Truncate>
 

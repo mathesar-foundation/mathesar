@@ -14,6 +14,8 @@
   export let disabled = false;
   export let isProcessing = false;
   export let size: Size | undefined = undefined;
+  let classes = '';
+  export { classes as class };
 
   /**
    * Bind to this function if you want to be able to programmatically call the
@@ -34,6 +36,7 @@
   on:click={proceed}
   appearance="primary"
   disabled={disabled || isProcessing}
+  class={classes}
   {size}
 >
   {#if isProcessing}

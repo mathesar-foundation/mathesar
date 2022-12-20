@@ -21,6 +21,7 @@
   export let save: (
     options: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
   ) => Promise<unknown>;
+  export let showWarnings = true;
 
   let selectedAbstractType: ColumnWithAbstractType['abstractType'] =
     column.abstractType;
@@ -108,12 +109,14 @@
 
 {#if actionButtonsVisible}
   <div class="footer">
-    <WarningBox>
-      <span class="warning-alert">
-        Data loss can result from changing the data type of a column. This
-        action cannot be undone.
-      </span>
-    </WarningBox>
+    {#if showWarnings}
+      <WarningBox>
+        <span class="warning-alert">
+          Data loss can result from changing the data type of a column. This
+          action cannot be undone.
+        </span>
+      </WarningBox>
+    {/if}
     <CancelOrProceedButtonPair
       onProceed={onSave}
       onCancel={cancel}
