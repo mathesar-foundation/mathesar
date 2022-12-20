@@ -386,7 +386,7 @@ class ArrayAgg(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
-        _maybe_downcast(column_expr)
+        column_expr = _maybe_downcast(column_expr)
         return array_agg(column_expr)
 
 
