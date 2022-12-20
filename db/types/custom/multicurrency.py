@@ -3,6 +3,7 @@ from sqlalchemy import cast, text, func
 from sqlalchemy.types import UserDefinedType
 
 from db.types.base import MathesarCustomType
+from db.utils import ignore_duplicate_wrapper
 
 DB_TYPE = MathesarCustomType.MULTICURRENCY_MONEY.id
 VALUE = 'value'
@@ -25,16 +26,11 @@ class MulticurrencyMoney(UserDefinedType):
 
 
 def install(engine):
-
-    drop_type_query = f"""
-    DROP TYPE IF EXISTS {DB_TYPE};
-    """
-
     create_type_query = f"""
     CREATE TYPE {DB_TYPE} AS ({VALUE} NUMERIC, {CURRENCY} CHAR(3));
     """
+    create_if_not_exist_type_query = ignore_duplicate_wrapper(create_type_query)
 
     with engine.begin() as conn:
-        conn.execute(text(drop_type_query))
-        conn.execute(text(create_type_query))
+        conn.execute(text(create_if_not_exist_type_query))
         conn.commit()
