@@ -26,7 +26,10 @@
     database.name,
     schema.id,
     {
-      baseTableId: id,
+      baseTable: {
+        id,
+        name: table.name,
+      },
       columns: $columns,
       terseGrouping: $grouping.terse(),
     },
@@ -54,9 +57,7 @@
     {/if}
 
     <div class="aux-actions">
-      <!-- Restricting Data Explorer redirection to single column
-      grouping for the time being -->
-      {#if summarizationUrl && $grouping.entries.length === 1}
+      {#if summarizationUrl}
         <SummarizationLink {summarizationUrl} />
       {/if}
       <Button
