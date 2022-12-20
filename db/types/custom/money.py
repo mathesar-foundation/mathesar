@@ -7,6 +7,7 @@ from db.tables.operations.select import reflect_table_from_oid
 from db.types.base import get_ma_qualified_schema
 from db.metadata import get_empty_metadata
 from db.types.custom.underlying_type import HasUnderlyingType
+from db.utils import ignore_duplicate_wrapper
 
 MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
 DB_TYPE = MathesarCustomType.MATHESAR_MONEY.id
@@ -20,16 +21,13 @@ class MathesarMoney(UserDefinedType, HasUnderlyingType):
 
 
 def install(engine):
-    drop_domain_query = f"""
-    DROP DOMAIN IF EXISTS {DB_TYPE};
-    """
     create_domain_query = f"""
     CREATE DOMAIN {DB_TYPE} AS NUMERIC;
     """
+    create_if_not_exist_domain_query = ignore_duplicate_wrapper(create_domain_query)
 
     with engine.begin() as conn:
-        conn.execute(text(drop_domain_query))
-        conn.execute(text(create_domain_query))
+        conn.execute(text(create_if_not_exist_domain_query))
         conn.commit()
 
 
