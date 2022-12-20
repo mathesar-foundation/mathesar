@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
   import type { Writable } from 'svelte/store';
   import { setContext, createEventDispatcher } from 'svelte';
@@ -58,6 +59,12 @@
       checkEquality(lastSelectedOption, opt),
     );
   }
+
+  onMount(() => {
+    if (mode === 'static') {
+      focusSelected();
+    }
+  });
 
   function open(): void {
     if (disabled) return;

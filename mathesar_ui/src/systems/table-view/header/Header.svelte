@@ -61,9 +61,15 @@
       let:htmlAttributes
       let:style
     >
-      <div {...htmlAttributes} {style}>
+      <div {...htmlAttributes} class="new-column-cell" {style}>
         <NewColumnCell columns={$columns} on:addColumn={addColumn} />
       </div>
     </SheetCell>
   {/if}
 </SheetHeader>
+
+<style lang="scss">
+  .new-column-cell {
+    padding: 0 0.2rem;
+  }
+</style>

@@ -60,6 +60,8 @@
 
   export let autoSelect: DefinedProps['autoSelect'] = 'first';
 
+  export let offsetOnFocus: DefinedProps['offsetOnFocus'] = 0;
+
   function setValueFromArray(values: (Option | undefined)[]) {
     [value] = values;
     dispatch('change', value);
@@ -115,6 +117,7 @@
   on:change={(e) => setValueFromArray(e.detail)}
   {labelKey}
   {getLabel}
+  {disabled}
   mode="static"
   checkEquality={valuesAreEqual}
   let:api
@@ -122,6 +125,7 @@
   <ListBoxOptions
     {id}
     class="input-element selection-list {classes}"
+    {offsetOnFocus}
     let:option
     let:label
     on:keydown={(e) => api.handleKeyDown(e)}

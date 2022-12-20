@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ImmutableMap } from '@mathesar/component-library';
+  import { ImmutableMap } from '@mathesar-component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import {
     getTabularDataStoreFromContext,
@@ -44,7 +44,7 @@
 
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
-    [ID_ADD_NEW_COLUMN, 100],
+    [ID_ADD_NEW_COLUMN, 32],
   ]);
   $: showTableInspector =
     $isTableInspectorVisible && !$isLoading && supportsTableInspector;

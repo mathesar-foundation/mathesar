@@ -9,6 +9,12 @@
   let classes = '';
   export { classes as class };
   export let truncateOnOverflow = true;
+  /**
+   * This prop determines the additional offset (in px)
+   * that needs to be taken into account while focusing
+   * an option.
+   */
+  export let offsetOnFocus = 0;
 
   const { api, state } = getContext<ListBoxContext<Option>>('LIST_BOX_CONTEXT');
   const { displayedOptions, value, focusedOptionIndex, staticProps } = state;
@@ -19,18 +25,24 @@
     if (listBoxElement) {
       const elementInFocus: HTMLElement | null =
         listBoxElement.querySelector('.in-focus');
-      const container = listBoxElement.parentElement as HTMLElement;
+      const container =
+        $staticProps.mode === 'dropdown'
+          ? (listBoxElement.parentElement as HTMLElement)
+          : listBoxElement;
       if (elementInFocus && container) {
         if (
-          elementInFocus.offsetTop + elementInFocus.clientHeight >
+          elementInFocus.offsetTop +
+            elementInFocus.clientHeight +
+            offsetOnFocus >
           container.scrollTop + container.clientHeight
         ) {
           const offsetValue: number =
             container.getBoundingClientRect().bottom -
-            elementInFocus.getBoundingClientRect().bottom;
+            elementInFocus.getBoundingClientRect().bottom -
+            offsetOnFocus * 2;
           container.scrollTop -= offsetValue;
         } else if (elementInFocus.offsetTop < container.scrollTop) {
-          container.scrollTop = elementInFocus.offsetTop;
+          container.scrollTop = elementInFocus.offsetTop - offsetOnFocus;
         }
       }
     }
@@ -51,8 +63,8 @@
   {id}
   role="listbox"
   aria-expanded="true"
-  class={['list-box-options', $staticProps.selectionType, classes].join(' ')}
   class:truncate={truncateOnOverflow}
+  class={['list-box-options', $staticProps.selectionType, classes].join(' ')}
   on:focus
   on:blur
   on:keydown

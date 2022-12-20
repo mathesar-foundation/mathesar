@@ -1,11 +1,17 @@
 .selection-list {
   padding: var(--SelectionList__padding, 0.3em);
+  max-height: var(--SelectionList__max-height, 12em);
+  overflow: auto;
+
+  &.truncate {
+    overflow-y: auto;
+  }
 
   li {
     border-radius: 0.2em;
 
     & + li {
-      margin-top: var(--SelectionList__spacing-x, 0.2em);
+      margin-top: var(--SelectionList__option-spacing-y, 0.2em);
     }
   }
 }

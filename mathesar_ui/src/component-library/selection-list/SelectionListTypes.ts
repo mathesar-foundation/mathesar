@@ -19,4 +19,5 @@ export interface SelectionListProps<Option> extends BaseInputProps {
    * none: Disables auto select. Current value stays as it is.
    */
   autoSelect?: 'first' | 'clear' | 'none';
+  offsetOnFocus?: number;
 }

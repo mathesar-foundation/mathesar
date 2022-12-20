@@ -1,4 +1,8 @@
-export { getAllowedAbstractTypesForDbTypeAndItsTargetTypes } from './abstractTypeCategories';
+export {
+  getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
+  getAllowedAbstractTypesForNewColumn,
+  defaultDbType,
+} from './abstractTypeCategories';
 export { getAbstractTypeForDbType } from './utils';
 export { currentDbAbstractTypes, refetchTypesForDb } from './store';
 export {
