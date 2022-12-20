@@ -1,10 +1,13 @@
 from enum import Enum
 import os
 from sqlalchemy import text, Table, Column, String, MetaData, TEXT
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.types import UserDefinedType
+from psycopg2.errors import DuplicateTable
 
 from db.types.base import MathesarCustomType, PostgresType, get_qualified_name, get_ma_qualified_schema
 from db.types.custom.underlying_type import HasUnderlyingType
+from db.utils import ignore_duplicate_wrapper
 
 DB_TYPE = MathesarCustomType.URI.id
 
@@ -40,10 +43,6 @@ class URI(UserDefinedType, HasUnderlyingType):
 
 
 def install(engine):
-    drop_domain_query = f"""
-    DROP DOMAIN IF EXISTS {DB_TYPE};
-    """
-
     create_uri_parts_query = f"""
     CREATE OR REPLACE FUNCTION {URIFunction.PARTS.value}({PostgresType.TEXT.value})
     RETURNS {PostgresType.TEXT.value}[] AS $$
@@ -65,9 +64,9 @@ def install(engine):
         AND {URIFunction.PATH.value}(value) IS NOT NULL)
     );
     """
+    create_if_not_exist_domain_query = ignore_duplicate_wrapper(create_domain_query)
 
     with engine.begin() as conn:
-        conn.execute(text(drop_domain_query))
         conn.execute(text(create_uri_parts_query))
         for part, index in uri_parts_map.items():
             create_uri_part_getter_query = f"""
@@ -78,7 +77,7 @@ def install(engine):
             LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
             """
             conn.execute(text(create_uri_part_getter_query))
-        conn.execute(text(create_domain_query))
+        conn.execute(text(create_if_not_exist_domain_query))
         conn.commit()
 
 
@@ -89,9 +88,13 @@ def install_tld_lookup_table(engine):
         Column("tld", String, primary_key=True),
         schema=get_ma_qualified_schema(),
     )
-    tlds_table.create()
-    with engine.begin() as conn, open(TLDS_PATH) as f:
-        conn.execute(
-            tlds_table.insert(),
-            [{"tld": tld.strip().lower()} for tld in f if tld[:2] != "# "],
-        )
+    try:
+        tlds_table.create()
+        with engine.begin() as conn, open(TLDS_PATH) as f:
+            conn.execute(
+                tlds_table.insert(),
+                [{"tld": tld.strip().lower()} for tld in f if tld[:2] != "# "],
+            )
+    except ProgrammingError as e:
+        if e.orig == DuplicateTable:
+            pass

@@ -1,8 +1,9 @@
-ul.list-box-options {
+.list-box-options {
   list-style: none;
   padding: 0;
   margin: 0;
   position: relative;
+  cursor: default;
 
   li {
     position: relative;

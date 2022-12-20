@@ -1,6 +1,6 @@
 import type { DbType } from '@mathesar/AppTypes';
 import { abstractTypeCategory } from './constants';
-import Text from './type-configs/text';
+import Text, { DB_TYPES as textDbTypes } from './type-configs/text';
 import Money from './type-configs/money';
 import Email from './type-configs/email';
 import Number from './type-configs/number';
@@ -48,6 +48,8 @@ const comboAbstractTypeCategories: Partial<
   [abstractTypeCategory.JsonArray]: jsonArrayFactory,
   [abstractTypeCategory.JsonObject]: jsonObjectFactory,
 };
+
+export const defaultDbType = textDbTypes.TEXT;
 
 export function constructAbstractTypeMapFromResponse(
   abstractTypesResponse: AbstractTypeResponse[],
@@ -154,4 +156,24 @@ export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
     abstractTypeList.push(unknownAbstractType);
   }
   return abstractTypeList;
+}
+
+export function getAllowedAbstractTypesForNewColumn(
+  abstractTypesMap: AbstractTypesMap,
+) {
+  return [...abstractTypesMap.values()]
+    .filter((type) => !comboAbstractTypeCategories[type.identifier])
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function getDefaultDbTypeOfAbstractType(
+  abstractType: AbstractType,
+): DbType {
+  if (abstractType.defaultDbType) {
+    return abstractType.defaultDbType;
+  }
+  if (abstractType.dbTypes.size > 0) {
+    return [...abstractType.dbTypes][0];
+  }
+  return defaultDbType;
 }

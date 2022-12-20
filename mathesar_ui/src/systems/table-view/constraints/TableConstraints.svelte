@@ -1,45 +1,44 @@
 <script lang="ts">
-  import {
-    Icon,
-    DropdownMenu,
-    ButtonMenuItem,
-    iconLoading,
-  } from '@mathesar-component-library';
+  import { Icon, iconLoading } from '@mathesar-component-library';
   import {
     getTabularDataStoreFromContext,
     type Constraint,
-    type ConstraintsDataStore,
   } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/api/utils/requestUtils';
-  import { modal } from '@mathesar/stores/modal';
-  import {
-    iconAddNew,
-    iconTableLink,
-    iconConstraintUnique,
-  } from '@mathesar/icons';
-  import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
-  import TableConstraint from './TableConstraint.svelte';
-  import NewFkConstraintModal from './NewFkConstraintModal.svelte';
+  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
+  import ConstraintTypeSection from './ConstraintTypeSection.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
-  const newUniqueConstraintModal = modal.spawnModalController();
-  const newFkConstraintModal = modal.spawnModalController();
 
   $: constraintsDataStore = $tabularData.constraintsDataStore;
   $: state = $constraintsDataStore.state;
   $: errorMsg = $constraintsDataStore.error;
   $: constraints = $constraintsDataStore.constraints;
+
+  $: constraintsGroupedByType = constraints.reduce(
+    (groupedConstraints, constraint) => {
+      const alreadyExistingConstraints = groupedConstraints.get(
+        constraint.type,
+      );
+      if (Array.isArray(alreadyExistingConstraints)) {
+        groupedConstraints.set(constraint.type, [
+          ...alreadyExistingConstraints,
+          constraint,
+        ]);
+        return groupedConstraints;
+      }
+      groupedConstraints.set(constraint.type, [constraint]);
+      return groupedConstraints;
+    },
+    new Map<ConstraintType, Constraint[]>(),
+  );
+
   $: isEmpty = constraints.length === 0;
   $: isLoading = state === States.Idle || state === States.Loading;
   // Only show the spinner during the _initial_ loading event. Hide it for
   // subsequent updates so that we can rely on the spinner used on the button
   // for the more specific update.
   $: shouldShowLoadingSpinner = isEmpty && isLoading;
-  $: countText = isEmpty ? '' : ` (${constraints.length as number})`;
-
-  function remove(constraint: Constraint) {
-    return (constraintsDataStore as ConstraintsDataStore).remove(constraint.id);
-  }
 </script>
 
 <div class="table-constraints">
@@ -52,27 +51,29 @@
     <div>No constraints</div>
   {:else}
     <div class="constraints-list">
-      {#each constraints as constraint (constraint.id)}
-        <TableConstraint {constraint} drop={() => remove(constraint)} />
-      {/each}
+      <ConstraintTypeSection
+        constraintType="primary"
+        constraints={constraintsGroupedByType.get('primary') || []}
+      />
+      <ConstraintTypeSection
+        constraintType="foreignkey"
+        constraints={constraintsGroupedByType.get('foreignkey') || []}
+      />
+      <ConstraintTypeSection
+        constraintType="unique"
+        constraints={constraintsGroupedByType.get('unique') || []}
+      />
     </div>
   {/if}
 </div>
 
-<DropdownMenu label="New Constraint" icon={iconAddNew}>
-  <ButtonMenuItem
-    on:click={() => newUniqueConstraintModal.open()}
-    icon={iconConstraintUnique}
-  >
-    Unique
-  </ButtonMenuItem>
-  <ButtonMenuItem
-    on:click={() => newFkConstraintModal.open()}
-    icon={iconTableLink}
-  >
-    Foreign Key
-  </ButtonMenuItem>
-</DropdownMenu>
+<style lang="scss">
+  .constraints-list {
+    display: flex;
+    flex-direction: column;
 
-<NewUniqueConstraintModal controller={newUniqueConstraintModal} />
-<NewFkConstraintModal controller={newFkConstraintModal} />
+    > :global(* + *) {
+      margin-top: 1rem;
+    }
+  }
+</style>

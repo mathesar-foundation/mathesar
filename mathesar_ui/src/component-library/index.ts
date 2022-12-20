@@ -54,6 +54,7 @@ export { default as Notification } from './notification/Notification.svelte';
 export { ListBox, ListBoxOptions } from './list-box';
 export { default as Pagination } from './pagination/Pagination.svelte';
 export { default as Select } from './select/Select.svelte';
+export { default as SelectionList } from './selection-list/SelectionList.svelte';
 export { default as TabContainer } from './tabs/TabContainer.svelte';
 export { default as Tree } from './tree/Tree.svelte';
 
