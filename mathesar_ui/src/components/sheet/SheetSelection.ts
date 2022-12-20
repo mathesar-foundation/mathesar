@@ -150,8 +150,8 @@ const ROW_COLUMN_SEPARATOR = '-';
  * enables easier usage of the Set data type & faster equality checks
  */
 const createSelectedCellIdentifier = (
-  { rowIndex }: Pick<SelectionRow, "rowIndex">,
-  { id }: Pick<SelectionColumn, "id">,
+  { rowIndex }: Pick<SelectionRow, 'rowIndex'>,
+  { id }: Pick<SelectionColumn, 'id'>,
 ): string => `${rowIndex}${ROW_COLUMN_SEPARATOR}${id}`;
 
 export const isRowSelected = (
@@ -165,15 +165,15 @@ export const isRowSelected = (
 export const isColumnSelected = (
   selectedCells: ImmutableSet<string>,
   columnsSelectedWhenTheTableIsEmpty: ImmutableSet<SelectionColumn['id']>,
-  column: Pick<SelectionColumn, "id">,
+  column: Pick<SelectionColumn, 'id'>,
 ): boolean =>
   columnsSelectedWhenTheTableIsEmpty.has(column.id) ||
   selectedCells.valuesArray().some((cell) => cell.endsWith(`-${column.id}`));
 
 export const isCellSelected = (
   selectedCells: ImmutableSet<string>,
-  row: Pick<SelectionRow, "rowIndex">,
-  column: Pick<SelectionColumn, "id">,
+  row: Pick<SelectionRow, 'rowIndex'>,
+  column: Pick<SelectionColumn, 'id'>,
 ): boolean => selectedCells.has(createSelectedCellIdentifier(row, column));
 
 function getSelectedColumnId(selectedCell: string): SelectionColumn['id'] {
@@ -364,7 +364,7 @@ export default class SheetSelection<
     this.selectedCells.clear();
   }
 
-  private isCompleteColumnSelected(column: Pick<Column, "id">): boolean {
+  private isCompleteColumnSelected(column: Pick<Column, 'id'>): boolean {
     if (this.getRows().length) {
       return (
         this.columnsSelectedWhenTheTableIsEmpty.getHas(column.id) ||
@@ -376,7 +376,7 @@ export default class SheetSelection<
     return this.columnsSelectedWhenTheTableIsEmpty.getHas(column.id);
   }
 
-  private isCompleteRowSelected(row: Pick<Row, "rowIndex">): boolean {
+  private isCompleteRowSelected(row: Pick<Row, 'rowIndex'>): boolean {
     const columns = this.getColumns();
     return (
       columns.length > 0 &&
@@ -390,14 +390,13 @@ export default class SheetSelection<
     const selectedCellsArray = get(this.selectedCells).valuesArray();
     const checkedColumns: (number | string)[] = [];
 
-    for (let cell of selectedCellsArray) {
+    for (const cell of selectedCellsArray) {
       const columnId = getSelectedColumnId(cell);
       if (!checkedColumns.includes(columnId)) {
         if (this.isCompleteColumnSelected({ id: columnId })) {
           return true;
-        } else {
-          checkedColumns.push(columnId);
         }
+          checkedColumns.push(columnId);
       }
     }
 
@@ -408,14 +407,13 @@ export default class SheetSelection<
     const selectedCellsArray = get(this.selectedCells).valuesArray();
     const checkedRows: number[] = [];
 
-    for (let cell of selectedCellsArray) {
+    for (const cell of selectedCellsArray) {
       const rowIndex = getSelectedRowIndex(cell);
       if (!checkedRows.includes(rowIndex)) {
         if (this.isCompleteRowSelected({ rowIndex })) {
           return true;
-        } else {
-          checkedRows.push(rowIndex);
         }
+          checkedRows.push(rowIndex);
       }
     }
 

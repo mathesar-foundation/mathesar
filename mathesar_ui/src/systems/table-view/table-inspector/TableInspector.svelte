@@ -30,33 +30,20 @@
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ selection } = $tabularData);
-  console.log({ selection });
+  $: ({ selectedCells } = selection);
 
-  // if (selection.isAnyColumnCompletelySelected()) {
-  //   activeTab = tabs[1];
-  // }
+  $: {
+    // Explicit dependency
+    $selectedCells;
 
-  // if (selection.isAnyRowCompletelySelected()) {
-  //   activeTab = tabs[2];
-  // }
+    if (selection.isAnyColumnCompletelySelected()) {
+      [, activeTab] = tabs;
+    }
 
-  // tabularData.subscribe((data) => {
-  //   if (data.selection) {
-  //     data.selection.selectedCells.subscribe(() => {
-  //       console.log({
-  //         isAnyColumnCompletelySelected:
-  //           data.selection.isAnyColumnCompletelySelected(),
-  //       });
-  //       if (data.selection.isAnyColumnCompletelySelected()) {
-  //         activeTab = tabs[1];
-  //       }
-
-  //       if (data.selection.isAnyRowCompletelySelected()) {
-  //         activeTab = tabs[2];
-  //       }
-  //     });
-  //   }
-  // });
+    if (selection.isAnyRowCompletelySelected()) {
+      [, , activeTab] = tabs;
+    }
+  }
 </script>
 
 <div class="table-inspector-container">
