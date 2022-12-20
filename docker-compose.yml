@@ -16,7 +16,7 @@ services:
     build:
       context: .
       dockerfile: ${DOCKERFILE}
-    container_name: mathesar_service-w-db
+    container_name: mathesar_service
     environment:
       - MODE=${MODE-PRODUCTION}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
@@ -30,5 +30,23 @@ services:
     extends: service-without-db
     depends_on:
       - db
+  dev-service:
+    extends: service-without-db
+    environment:
+      - MODE=${MODE-PRODUCTION}
+      - DJANGO_ALLOW_ASYNC_UNSAFE=true
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=/.Xauthority
+      - DJANGO_SUPERUSER_PASSWORD=password
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings}
+    command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./dev-run.sh
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/.Xauthority
+      - .:/code/
+      - ui_node_modules:/code/mathesar_ui/node_modules/
+    depends_on:
+      - db
 volumes:
   postgresql_data:
+  ui_node_modules:
