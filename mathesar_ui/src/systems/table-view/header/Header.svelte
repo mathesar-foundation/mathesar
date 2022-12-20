@@ -4,7 +4,6 @@
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
   } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/api/types/tables/columns';
   import {
     SheetHeader,
     SheetCell,
@@ -18,13 +17,8 @@
 
   export let hasNewColumnButton = false;
 
-  $: ({ columnsDataStore, selection, processedColumns } = $tabularData);
-  $: ({ columns } = columnsDataStore);
+  $: ({ selection, processedColumns } = $tabularData);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
-
-  function addColumn(e: CustomEvent<Partial<Column>>) {
-    void columnsDataStore.add(e.detail);
-  }
 </script>
 
 <SheetHeader>
@@ -62,7 +56,7 @@
       let:style
     >
       <div {...htmlAttributes} class="new-column-cell" {style}>
-        <NewColumnCell columns={$columns} on:addColumn={addColumn} />
+        <NewColumnCell />
       </div>
     </SheetCell>
   {/if}

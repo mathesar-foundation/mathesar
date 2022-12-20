@@ -49,7 +49,7 @@ const comboAbstractTypeCategories: Partial<
   [abstractTypeCategory.JsonObject]: jsonObjectFactory,
 };
 
-export const defaultDbType = textDbTypes.VARCHAR;
+export const defaultDbType = textDbTypes.TEXT;
 
 export function constructAbstractTypeMapFromResponse(
   abstractTypesResponse: AbstractTypeResponse[],

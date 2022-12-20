@@ -3,6 +3,10 @@
   max-height: var(--SelectionList__max-height, 12em);
   overflow: auto;
 
+  &.disabled {
+    pointer-events: none;
+  }
+
   &.truncate {
     overflow-y: auto;
   }

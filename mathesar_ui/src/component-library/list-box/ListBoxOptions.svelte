@@ -64,6 +64,7 @@
   role="listbox"
   aria-expanded="true"
   class:truncate={truncateOnOverflow}
+  class:disabled={$staticProps.disabled}
   class={['list-box-options', $staticProps.selectionType, classes].join(' ')}
   on:focus
   on:blur

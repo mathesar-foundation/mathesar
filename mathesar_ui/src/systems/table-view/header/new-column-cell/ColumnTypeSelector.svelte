@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { LabeledInput, SelectionList } from '@mathesar-component-library';
+  import { SelectionList } from '@mathesar-component-library';
   import {
     currentDbAbstractTypes,
     getAllowedAbstractTypesForNewColumn,
@@ -9,6 +9,7 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
 
   export let value = defaultDbType;
+  export let disabled = false;
 
   $: abstractType = getAbstractTypeForDbType(
     value,
@@ -20,21 +21,20 @@
   );
 </script>
 
-<LabeledInput label="Select Type" layout="stacked">
-  <SelectionList
-    {options}
-    getLabel={(entry) => entry?.name ?? ''}
-    value={abstractType}
-    on:change={(e) => {
-      value = e.detail?.defaultDbType ?? defaultDbType;
-    }}
-    valuesAreEqual={(a, b) => a?.identifier === b?.identifier}
-    offsetOnFocus={2}
-    let:option
-    let:label
-  >
-    <NameWithIcon icon={option.getIcon()}>
-      {label}
-    </NameWithIcon>
-  </SelectionList>
-</LabeledInput>
+<SelectionList
+  {options}
+  getLabel={(entry) => entry?.name ?? ''}
+  value={abstractType}
+  on:change={(e) => {
+    value = e.detail?.defaultDbType ?? defaultDbType;
+  }}
+  valuesAreEqual={(a, b) => a?.identifier === b?.identifier}
+  offsetOnFocus={2}
+  {disabled}
+  let:option
+  let:label
+>
+  <NameWithIcon icon={option.getIcon()}>
+    {label}
+  </NameWithIcon>
+</SelectionList>
