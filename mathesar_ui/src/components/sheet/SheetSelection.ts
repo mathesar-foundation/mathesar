@@ -396,7 +396,7 @@ export default class SheetSelection<
         if (this.isCompleteColumnSelected({ id: columnId })) {
           return true;
         }
-          checkedColumns.push(columnId);
+        checkedColumns.push(columnId);
       }
     }
 
@@ -413,7 +413,7 @@ export default class SheetSelection<
         if (this.isCompleteRowSelected({ rowIndex })) {
           return true;
         }
-          checkedRows.push(rowIndex);
+        checkedRows.push(rowIndex);
       }
     }
 
