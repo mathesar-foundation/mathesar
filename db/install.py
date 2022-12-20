@@ -14,7 +14,7 @@ def install_mathesar(
     )
     try:
         user_db_engine.connect()
-        print(f"Installing Mathesar DB {user_database} on preexisting PostgreSQL instance at host {hostname}...")
+        print(f"Installing Mathesar on preexisting PostgreSQL database {user_database} at host {hostname}...")
         install.install_mathesar_on_database(user_db_engine)
         user_db_engine.dispose()
     except OperationalError:
@@ -28,11 +28,11 @@ def install_mathesar(
             skip_confirm
         )
         if database_created:
-            print(f"Installing Mathesar DB {user_database} on PostgreSQL instance at host {hostname}...")
+            print(f"Installing Mathesar on PostgreSQL database {user_database} at host {hostname}...")
             install.install_mathesar_on_database(user_db_engine)
             user_db_engine.dispose()
         else:
-            print("Skipping installing on DB with key {database_key}.")
+            print(f"Skipping installing on DB with key {user_database}.")
 
 
 def create_mathesar_database(hostname, password, port, user_database, user_db_engine, username, skip_confirm):
@@ -40,12 +40,10 @@ def create_mathesar_database(hostname, password, port, user_database, user_db_en
         create_database = "y"
     else:
         create_database = input(
-            f"Do you want to create a new Database called {user_database}?"
-            f"The supplied Database user should have a CREATE role in order to create the Database."
-            f"Create? (y/n) >  "
+            f"Create a new Database called {user_database}? (y/n) > "
         )
     if create_database.lower() in ["y", "yes"]:
-        # We need some database to connect to inorder to create a new Database.
+        # We need to connect to an existing database inorder to create a new Database.
         # So we use the default Database `postgres` that comes with postgres.
         # TODO Throw correct error when the default postgres database does not exists(which is very rare but still possible)
         root_database = "postgres"
@@ -59,5 +57,5 @@ def create_mathesar_database(hostname, password, port, user_database, user_db_en
         print(f"Created DB is {user_database}.")
         return True
     else:
-        print(f"Database {user_database} not created! ")
+        print(f"Database {user_database} not created!")
         return False
