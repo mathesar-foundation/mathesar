@@ -30,11 +30,6 @@
   let requestStatus: RequestStatus;
   $: isLoading = requestStatus?.state === 'processing';
 
-  function clearValues() {
-    $columnName = '';
-    $columnType = undefined;
-  }
-
   async function addColumn(closeDropdown: () => void) {
     const newColumn = {
       name: $columnName,
@@ -60,7 +55,7 @@
   triggerAppearance="secondary"
   showArrow={false}
   ariaLabel="New Column"
-  on:close={clearValues}
+  on:close={form.reset}
   disabled={isLoading}
 >
   <svelte:fragment slot="trigger">
