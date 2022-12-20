@@ -4,7 +4,7 @@
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import ProcessedColumnName from './column/ProcessedColumnName.svelte';
 
-  export let availableColumns: ProcessedColumn[];
+  export let options: ProcessedColumn[];
   export let value: ProcessedColumn[] = [];
 
   function getLabel(processedColumn: ProcessedColumn): ComponentAndProps {
@@ -15,4 +15,4 @@
   }
 </script>
 
-<MultiSelect options={availableColumns} bind:values={value} {getLabel} />
+<MultiSelect {options} bind:values={value} {getLabel} />
