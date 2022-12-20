@@ -81,28 +81,6 @@
     top: var(--row-height);
     z-index: var(--z-index__record_selector__thead);
   }
-  .input :global(.record-selector-input) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    outline: none;
-    resize: none;
-    color: inherit;
-  }
-  .input :global(.linked-record-input) {
-    position: static;
-    min-width: 100%;
-    width: max-content;
-    max-width: 100%;
-  }
-  .input :global(.record-selector-input:focus) {
-    border: none;
-    outline: none;
-    box-shadow: none;
-  }
   .divider {
     height: 10px;
     border: none;
