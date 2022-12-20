@@ -56,7 +56,8 @@ def _db_function_to_sa_expression(db_function_or_literal):
             for raw_parameter in raw_parameters
         ]
         db_function_subclass = type(db_function)
-        return db_function_subclass.to_sa_expression(*sa_expression_parameters)
+        sa_expression = db_function_subclass.to_sa_expression(*sa_expression_parameters)
+        return sa_expression
     else:
         literal = db_function_or_literal
         return literal
