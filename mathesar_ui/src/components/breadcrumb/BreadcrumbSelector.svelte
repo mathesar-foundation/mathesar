@@ -22,6 +22,8 @@
   let textInputEl: HTMLInputElement | undefined;
   $: if (isOpen) {
     textInputEl?.focus();
+  } else {
+    filterString = '';
   }
 
   // Filter the selector data based on text input
