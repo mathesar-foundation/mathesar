@@ -91,7 +91,7 @@
           if (row) {
             // This enables the click + drag to
             // select multiple cells
-            selection.onMouseEnterWhileSelection(row, processedQueryColumn);
+            selection.onMouseEnterCellWhileSelection(row, processedQueryColumn);
           }
         }}
       />

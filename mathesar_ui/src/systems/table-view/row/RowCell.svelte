@@ -167,7 +167,7 @@
       on:mouseenter={() => {
         // This enables the click + drag to
         // select multiple cells
-        selection.onMouseEnterWhileSelection(row, processedColumn);
+        selection.onMouseEnterCellWhileSelection(row, processedColumn);
       }}
     />
     <ContextMenu>
