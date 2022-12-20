@@ -25,8 +25,13 @@ def main():
     django.setup()
     management.call_command('migrate')
     if not superuser_exists():
+        print("------------Setting up Admin user------------")
+        print("Admin user does not exists. We need at least one admin")
         create_superuser()
-    for database_key in [key for key in DATABASES if key != "default"]:
+
+    print("------------Setting up User Databases------------")
+    user_databases = [key for key in DATABASES if key != "default"]
+    for database_key in user_databases:
         install_on_db_with_key(database_key, skip_confirm)
 
 
@@ -35,10 +40,12 @@ def superuser_exists():
 
 
 def create_superuser():
+    print("Please enter the details to create a new admin user ")
     username = input("Username: ")
     email = input("Email: ")
-    password = getpass.getpass('Password:')
+    password = getpass.getpass('Password: ')
     get_user_model().objects.create_superuser(username, email, password)
+    print(f"Admin user with username {username} was created successfully")
 
 
 def check_missing_dj_config():
