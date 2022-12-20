@@ -125,7 +125,7 @@
 
     {#if isSaved}
       <ModificationStatus
-        requestStatus={$state.saveState}
+        requestState={$state.saveState?.state}
         hasChanges={$queryHasUnsavedChanges}
       />
     {/if}
