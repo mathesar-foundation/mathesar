@@ -2,12 +2,12 @@
 This script installs functions and types for Mathesar onto the configured DB.
 """
 import getopt
-import os
 import sys
 
 import getpass
 
 import django
+from decouple import UndefinedValueError, config as decouple_config
 from django.contrib.auth import get_user_model
 from django.core import management
 
@@ -52,13 +52,13 @@ def check_missing_dj_config():
     # TODO Add documentation link
     documentation_link = ""
     try:
-        os.environ['ALLOWED_HOSTS']
-        os.environ['SECRET_KEY']
-        os.environ['DJANGO_DATABASE_KEY']
-        os.environ['DJANGO_SETTINGS_MODULE']
-        os.environ['DJANGO_DATABASE_URL']
-        os.environ['MATHESAR_DATABASES']
-    except KeyError as e:
+        decouple_config('ALLOWED_HOSTS')
+        decouple_config('SECRET_KEY')
+        decouple_config('DJANGO_DATABASE_KEY')
+        decouple_config('DJANGO_SETTINGS_MODULE')
+        decouple_config('DJANGO_DATABASE_URL')
+        decouple_config('MATHESAR_DATABASES')
+    except UndefinedValueError as e:
         missing_config_key = e.args[0]
         raise Exception(f"{missing_config_key} environment variable is missing."
                         f" Please follow the documentation {documentation_link} to add the missing environment variable.")
