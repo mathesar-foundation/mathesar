@@ -16,56 +16,19 @@ services:
     build:
       context: .
       dockerfile: ${DOCKERFILE}
-    container_name: mathesar_service
+    container_name: mathesar_service-w-db
     environment:
       - MODE=${MODE-PRODUCTION}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings}
-    command: ./prod-run.sh
+    command: ./run.sh
     ports:
       - "8000:8000"
       - "3000:3000"
       - "6006:6006"
   service:
-    build:
-      context: .
-      dockerfile: ${DOCKERFILE}
-    container_name: mathesar_service
-    environment:
-      - MODE=${MODE-PRODUCTION}
-      - DJANGO_ALLOW_ASYNC_UNSAFE=true
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings}
-    command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./prod-run.sh
-    ports:
-      - "8000:8000"
-      - "3000:3000"
-      - "6006:6006"
-    depends_on:
-      - db
-  dev-service:
-    build:
-      context: .
-      dockerfile: ${DOCKERFILE}
-    container_name: mathesar_service
-    environment:
-      - MODE=${MODE-PRODUCTION}
-      - DJANGO_ALLOW_ASYNC_UNSAFE=true
-      - DISPLAY=${DISPLAY}
-      - XAUTHORITY=/.Xauthority
-      - DJANGO_SUPERUSER_PASSWORD=password
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings}
-    command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./run.sh
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - ~/.Xauthority:/.Xauthority
-      - .:/code/
-      - ui_node_modules:/code/mathesar_ui/node_modules/
-    ports:
-      - "8000:8000"
-      - "3000:3000"
-      - "6006:6006"
+    extends: service-without-db
     depends_on:
       - db
 volumes:
-  ui_node_modules:
   postgresql_data:
