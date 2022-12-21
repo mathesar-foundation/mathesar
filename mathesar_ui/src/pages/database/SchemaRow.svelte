@@ -117,7 +117,7 @@
   }
 
   .name {
-    font-size: var(--text-size-xx-large);
+    font-size: var(--text-size-x-large);
     font-weight: 500;
     --icon-color: var(--brand-500);
   }
