@@ -44,6 +44,7 @@
   on:blur
   on:mouseenter
   on:mouseleave
+  on:mousedown
 >
   <slot />
 </button>

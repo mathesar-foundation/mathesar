@@ -1,75 +1,102 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import {
-    Button,
     Dropdown,
-    TextInput,
     Icon,
-    InputGroup,
-    InputGroupText,
+    TextInput,
+    Spinner,
   } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    requiredField,
+    makeForm,
+    Field,
+    FormSubmit,
+  } from '@mathesar/components/form';
+  import { columnNameIsAvailable } from '@mathesar/utils/columnUtils';
   import { iconAddNew } from '@mathesar/icons';
+  import { toast } from '@mathesar/stores/toast';
+  import { getErrorMessage } from '@mathesar/utils/errors';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import ColumnTypeSelector from './ColumnTypeSelector.svelte';
 
-  const dispatch = createEventDispatcher();
-  export let columns: Column[];
+  const tabularData = getTabularDataStoreFromContext();
+  $: ({ columnsDataStore } = $tabularData);
+  $: ({ columns } = columnsDataStore);
 
-  let isDropdownOpen = false;
-  let columnName = '';
+  $: columnName = requiredField('', [columnNameIsAvailable($columns)]);
+  const columnType = requiredField<string | undefined>(undefined);
+  $: form = makeForm({ columnName, columnType });
 
-  $: isDuplicateColumn = columns?.some(
-    (column) => column.name.toLowerCase() === columnName?.toLowerCase(),
-  );
+  let requestStatus: RequestStatus;
+  $: isLoading = requestStatus?.state === 'processing';
 
-  function addColumn() {
+  async function addColumn(closeDropdown: () => void) {
     const newColumn = {
-      name: columnName,
-      // We should probably let the server decide the following
-      type: 'TEXT',
+      name: $columnName,
+      type: $columnType,
       nullable: true,
       primary_key: false,
     };
-    dispatch('addColumn', newColumn);
-    isDropdownOpen = false;
-    columnName = '';
+    try {
+      requestStatus = { state: 'processing' };
+      await columnsDataStore.add(newColumn);
+      closeDropdown();
+      requestStatus = { state: 'success' };
+    } catch (err) {
+      const errorMessage = getErrorMessage(err);
+      toast.error(`Unable to add column. ${errorMessage}`);
+      requestStatus = { state: 'failure', errors: [errorMessage] };
+    }
   }
 </script>
 
 <Dropdown
   closeOnInnerClick={false}
-  contentClass="content"
-  bind:isOpen={isDropdownOpen}
   triggerAppearance="secondary"
   showArrow={false}
   ariaLabel="New Column"
+  on:close={form.reset}
+  disabled={isLoading}
 >
   <svelte:fragment slot="trigger">
-    <Icon class="opt" {...iconAddNew} size="0.75em" />
+    {#if isLoading}
+      <Spinner />
+    {:else}
+      <Icon class="opt" {...iconAddNew} size="0.9em" />
+    {/if}
   </svelte:fragment>
-  <svelte:fragment slot="content">
-    <div class="new-column-dropdown" style="width:250px">
-      <div class="grid">
-        <InputGroup>
-          <InputGroupText>Name</InputGroupText>
-          <TextInput bind:value={columnName} />
-        </InputGroup>
-        <Button
-          appearance="primary"
-          disabled={!columnName?.trim() || isDuplicateColumn}
-          on:click={() => addColumn()}
-        >
-          Add
-        </Button>
-      </div>
-      {#if isDuplicateColumn}
-        <p class="messages">
-          <strong>Warning!</strong> The column name must be unique.
-        </p>
-      {/if}
+  <div slot="content" class="new-column-dropdown" let:close>
+    <Field
+      field={columnName}
+      input={{ component: TextInput, props: { disabled: isLoading } }}
+      label="Column Name"
+      layout="stacked"
+    />
+    <Field
+      field={columnType}
+      input={{ component: ColumnTypeSelector, props: { disabled: isLoading } }}
+      label="Select Type"
+      layout="stacked"
+    />
+    <div class="submit">
+      <FormSubmit
+        {form}
+        proceedButton={{ label: 'Add' }}
+        onProceed={() => addColumn(close)}
+        onCancel={close}
+      />
     </div>
-  </svelte:fragment>
+  </div>
 </Dropdown>
 
-<style global lang="scss">
-  @import 'NewColumnCell.scss';
+<style lang="scss">
+  .new-column-dropdown {
+    padding: 0.8em;
+    overflow: hidden;
+    width: 16em;
+
+    .submit {
+      margin-top: 1em;
+    }
+  }
 </style>

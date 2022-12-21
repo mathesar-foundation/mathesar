@@ -4,31 +4,36 @@
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import StatusIndicator from './StatusIndicator.svelte';
 
-  let incomingRequestStatus: RequestStatus | undefined;
-  export { incomingRequestStatus as requestStatus };
+  let incomingRequestState: RequestStatus['state'] | undefined;
+  export { incomingRequestState as requestState };
   export let hasChanges = false;
 
-  let requestStatus: RequestStatus | undefined;
+  let requestState: RequestStatus['state'] | undefined;
   let timeout: number | undefined;
+  let transitionDuration = 0;
 
   function clearRequestStatus() {
-    requestStatus = undefined;
+    transitionDuration = 1000;
+    requestState = undefined;
   }
 
-  function handleNewIncomingRequestStatus(s: RequestStatus | undefined) {
+  function handleNewIncomingRequestStatus(
+    s: RequestStatus['state'] | undefined,
+  ) {
     window.clearTimeout(timeout);
     timeout = undefined;
-    requestStatus = s;
-    if (requestStatus?.state === 'success') {
+    transitionDuration = 0;
+    requestState = s;
+    if (requestState === 'success') {
       timeout = window.setTimeout(clearRequestStatus, 5000);
     }
   }
-  $: handleNewIncomingRequestStatus(incomingRequestStatus);
+  $: handleNewIncomingRequestStatus(incomingRequestState);
 
   function handleNewHasChanges(_hasChanges: boolean) {
     // If user gets server errors and then clears the form, we clear errors.
-    if (!_hasChanges && requestStatus?.state === 'failure') {
-      requestStatus = undefined;
+    if (!_hasChanges && requestState === 'failure') {
+      requestState = undefined;
     }
   }
   $: handleNewHasChanges(hasChanges);
@@ -43,25 +48,23 @@
     | 'warning'
     | 'success'
     | undefined => {
-    if (requestStatus?.state === 'processing') {
+    if (requestState === 'processing') {
       return 'processing';
     }
-    if (hasChanges && requestStatus?.state === 'failure') {
+    if (hasChanges && requestState === 'failure') {
       return 'failure';
     }
     if (hasChanges) {
       return 'warning';
     }
-    if (requestStatus?.state === 'success') {
+    if (requestState === 'success') {
       return 'success';
     }
     return undefined;
   })();
-
-  $: transitionDuration = hasChanges ? 0 : 1000;
 </script>
 
-{#if state === 'success'}
+{#if state}
   <span
     class="modification-status-indicator"
     out:fade|local={{ duration: transitionDuration }}
@@ -69,18 +72,10 @@
     <StatusIndicator
       {state}
       messages={{
-        success: 'All Changes Saved',
-      }}
-    />
-  </span>
-{:else if state}
-  <span class="modification-status-indicator">
-    <StatusIndicator
-      {state}
-      messages={{
         processing: 'Saving Changes',
         failure: 'Unable to save changes',
         warning: 'Unsaved Changes',
+        success: 'All Changes Saved',
       }}
     />
   </span>
