@@ -18,17 +18,17 @@
   will-change: transform, opacity;
   -webkit-tap-highlight-color: transparent;
 
-  .content {
+  > .content {
     padding: 0.75rem 0.5rem;
     flex: 1 1 0%;
-    .title {
+    > .title {
       font-weight: bold;
       margin-bottom: 1em;
     }
   }
 
-  .close-button,
-  .icon {
+  > .close-button,
+  > .icon {
     width: 2rem;
     height: 100%;
     display: flex;
@@ -37,12 +37,12 @@
     outline: none;
   }
 
-  .close-button {
+  > .close-button {
     cursor: pointer;
     outline: none;
   }
 
-  progress {
+  > progress {
     top: auto;
     right: auto;
     bottom: 0;
@@ -58,13 +58,13 @@
     background: transparent;
     pointer-events: none;
   }
-  progress::-webkit-progress-bar {
+  > progress::-webkit-progress-bar {
     background: transparent;
   }
-  progress::-webkit-progress-value {
+  > progress::-webkit-progress-value {
     background: var(--toast-item-progress-color);
   }
-  progress::-moz-progress-bar {
+  > progress::-moz-progress-bar {
     background: var(--toast-item-progress-color);
   }
 }
