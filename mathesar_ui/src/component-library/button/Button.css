@@ -3,16 +3,17 @@
   display: -ms-inline-flexbox;
   display: inline-flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   vertical-align: middle;
   border: 1px solid;
   color: inherit;
   font-family: inherit;
   cursor: pointer;
   border-radius: 4px;
-  -webkit-box-shadow: #000 0 0 0 0, #000 0 0 0 0, rgba(0, 0, 0, 0.05) 0 1px 2px 0;
-          box-shadow: #000 0 0 0 0, #000 0 0 0 0, rgba(0, 0, 0, 0.05) 0 1px 2px 0;
+  -webkit-box-shadow: #000 0 0 0 0, #000 0 0 0 0,
+    rgba(0, 0, 0, 0.05) 0 1px 2px 0;
+  box-shadow: #000 0 0 0 0, #000 0 0 0 0, rgba(0, 0, 0, 0.05) 0 1px 2px 0;
   font-weight: inherit;
   position: relative;
   padding: 0.5em 0.5em;
@@ -25,7 +26,9 @@
   margin-left: 0.25em;
 }
 
-.btn:active, .btn.active, .btn:focus {
+.btn:active,
+.btn.active,
+.btn:focus {
   outline: 0;
 }
 
@@ -44,12 +47,14 @@
   color: var(--white);
 }
 
-.btn.btn-primary:not(:disabled):hover, .btn.btn-primary:not(:disabled).hover {
+.btn.btn-primary:not(:disabled):hover,
+.btn.btn-primary:not(:disabled).hover {
   background: var(--brand-600);
   border-color: var(--brand-600);
 }
 
-.btn.btn-primary:not(:disabled):active, .btn.btn-primary:not(:disabled).active {
+.btn.btn-primary:not(:disabled):active,
+.btn.btn-primary:not(:disabled).active {
   background: var(--brand-800);
   border-color: var(--brand-800);
 }
@@ -59,12 +64,14 @@
   border-color: var(--slate-200);
 }
 
-.btn.btn-secondary:not(:disabled):hover, .btn.btn-secondary:not(:disabled).hover {
+.btn.btn-secondary:not(:disabled):hover,
+.btn.btn-secondary:not(:disabled).hover {
   background: var(--slate-200);
   border-color: var(--slate-300);
 }
 
-.btn.btn-secondary:not(:disabled):active, .btn.btn-secondary:not(:disabled).active {
+.btn.btn-secondary:not(:disabled):active,
+.btn.btn-secondary:not(:disabled).active {
   background: var(--slate-500);
   color: var(--white);
 }
@@ -75,17 +82,20 @@
   color: var(--brand-500);
 }
 
-.btn.btn-outline-primary:not(:disabled):hover, .btn.btn-outline-primary:not(:disabled).hover {
+.btn.btn-outline-primary:not(:disabled):hover,
+.btn.btn-outline-primary:not(:disabled).hover {
   background: var(--slate-100);
   border-color: var(--brand-600);
 }
 
-.btn.btn-outline-primary:not(:disabled):active, .btn.btn-outline-primary:not(:disabled).active {
+.btn.btn-outline-primary:not(:disabled):active,
+.btn.btn-outline-primary:not(:disabled).active {
   background: var(--slate-200);
   border-color: var(--brand-800);
 }
 
-.btn.btn-plain, .btn.btn-plain-primary {
+.btn.btn-plain,
+.btn.btn-plain-primary {
   background: transparent;
 }
 
@@ -97,23 +107,46 @@
   background: transparent;
 }
 
-.btn.btn-plain, .btn.btn-ghost, .btn.btn-plain-primary {
+.btn.btn-plain,
+.btn.btn-ghost,
+.btn.btn-plain-primary {
   border-color: transparent;
   border-radius: 0px;
   -webkit-box-shadow: none !important;
-          box-shadow: none !important;
+  box-shadow: none !important;
 }
 
-.btn.btn-default:not(:disabled):hover, .btn.btn-default:not(:disabled).hover, .btn.btn-plain:not(:disabled):hover, .btn.btn-plain:not(:disabled).hover, .btn.btn-plain-primary:not(:disabled):hover, .btn.btn-plain-primary:not(:disabled).hover {
+.btn.btn-default:not(:disabled):hover,
+.btn.btn-default:not(:disabled).hover,
+.btn.btn-plain:not(:disabled):hover,
+.btn.btn-plain:not(:disabled).hover,
+.btn.btn-plain-primary:not(:disabled):hover,
+.btn.btn-plain-primary:not(:disabled).hover {
   background: var(--slate-100);
 }
 
-.btn.btn-default:not(:disabled):active, .btn.btn-default:not(:disabled).active, .btn.btn-default:not(:disabled):focus, .btn.btn-default:not(:disabled).focus, .btn.btn-plain:not(:disabled):active, .btn.btn-plain:not(:disabled).active, .btn.btn-plain:not(:disabled):focus, .btn.btn-plain:not(:disabled).focus, .btn.btn-plain-primary:not(:disabled):active, .btn.btn-plain-primary:not(:disabled).active, .btn.btn-plain-primary:not(:disabled):focus, .btn.btn-plain-primary:not(:disabled).focus {
+.btn.btn-default:not(:disabled):active,
+.btn.btn-default:not(:disabled).active,
+.btn.btn-default:not(:disabled):focus,
+.btn.btn-default:not(:disabled).focus,
+.btn.btn-plain:not(:disabled):active,
+.btn.btn-plain:not(:disabled).active,
+.btn.btn-plain:not(:disabled):focus,
+.btn.btn-plain:not(:disabled).focus,
+.btn.btn-plain-primary:not(:disabled):active,
+.btn.btn-plain-primary:not(:disabled).active,
+.btn.btn-plain-primary:not(:disabled):focus,
+.btn.btn-plain-primary:not(:disabled).focus {
   -webkit-box-shadow: 0 0 0 2px var(--slate-100) !important;
-          box-shadow: 0 0 0 2px var(--slate-100) !important;
+  box-shadow: 0 0 0 2px var(--slate-100) !important;
 }
 
-.btn.btn-default:not(:disabled):active, .btn.btn-default:not(:disabled).active, .btn.btn-plain:not(:disabled):active, .btn.btn-plain:not(:disabled).active, .btn.btn-plain-primary:not(:disabled):active, .btn.btn-plain-primary:not(:disabled).active {
+.btn.btn-default:not(:disabled):active,
+.btn.btn-default:not(:disabled).active,
+.btn.btn-plain:not(:disabled):active,
+.btn.btn-plain:not(:disabled).active,
+.btn.btn-plain-primary:not(:disabled):active,
+.btn.btn-plain-primary:not(:disabled).active {
   background: var(--slate-200);
 }
 

@@ -17,7 +17,7 @@
   content: '';
   background: #dfdfdf;
   -webkit-animation: 2s ease-in-out infinite skeleton;
-          animation: 2s ease-in-out infinite skeleton;
+  animation: 2s ease-in-out infinite skeleton;
 }
 
 @-webkit-keyframes skeleton {

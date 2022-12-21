@@ -14,8 +14,8 @@
   width: var(--size);
   height: var(--size);
   -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   border: solid var(--color-unchecked) 0.1em;
   border-radius: 50%;
   background: white;

@@ -8,9 +8,9 @@
   display: grid;
   -ms-grid-rows: auto 1fr auto;
   -ms-grid-columns: auto;
-      grid-template: auto 1fr auto / auto;
+  grid-template: auto 1fr auto / auto;
   -webkit-box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
-          box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
   position: relative;
   isolation: isolate;
 }
@@ -22,17 +22,17 @@
   display: -ms-flexbox;
   display: flex;
   -webkit-box-pack: end;
-      -ms-flex-pack: end;
-          justify-content: flex-end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
   -webkit-box-align: start;
-      -ms-flex-align: start;
-          align-items: flex-start;
+  -ms-flex-align: start;
+  align-items: flex-start;
 }
 
 .window .title-bar .title {
   -webkit-box-flex: 1;
-      -ms-flex: 1 1 100%;
-          flex: 1 1 100%;
+  -ms-flex: 1 1 100%;
+  flex: 1 1 100%;
   padding: 1em 1em 0.5em 1em;
   font-weight: bold;
 }
@@ -91,13 +91,13 @@
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
 .window:not(.can-scroll-body) > .body > * {
   -webkit-box-flex: 0;
-      -ms-flex: 0 1 auto;
-          flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
 }
 /*# sourceMappingURL=Window.css.map */

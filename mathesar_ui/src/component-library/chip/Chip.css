@@ -5,7 +5,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   -webkit-box-sizing: content-box;
-          box-sizing: content-box;
+  box-sizing: content-box;
 }
 
 .chip.display-block {

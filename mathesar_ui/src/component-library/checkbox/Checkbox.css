@@ -15,8 +15,8 @@
   width: var(--size);
   height: var(--size);
   -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   border: solid var(--color-unchecked) 0.15em;
   border-radius: 0.15em;
   background: white;
@@ -35,7 +35,8 @@
   background: #f7f7f7;
 }
 
-.checkbox:checked, .checkbox:indeterminate {
+.checkbox:checked,
+.checkbox:indeterminate {
   border-color: var(--color-checked);
   background: var(--color-checked);
   background-position: center;

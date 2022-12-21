@@ -25,5 +25,4 @@
     font-weight: 500;
     font-size: var(--text-size-base);
   }
-
 </style>

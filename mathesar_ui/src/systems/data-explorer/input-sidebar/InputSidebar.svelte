@@ -73,7 +73,13 @@
 <aside class="input-sidebar">
   <header>Build your Exploration</header>
   <section class="input-pane">
-    <TabContainer {tabs} tabStyle="compact" fillTabWidth fillContainerHeight bind:activeTab>
+    <TabContainer
+      {tabs}
+      tabStyle="compact"
+      fillTabWidth
+      fillContainerHeight
+      bind:activeTab
+    >
       {#if inputColumnsFetchState?.state === 'processing'}
         <div class="loading-state">
           <Spinner />

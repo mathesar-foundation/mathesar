@@ -1,8 +1,8 @@
 .input-element {
   border: 1px solid var(--slate-200);
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   border-radius: 0.285rem;
   background: #fff;
   margin: 0;
@@ -13,15 +13,15 @@
   display: block;
   width: 100%;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
-  text-align: var(--input-element-text-align, "left");
+  box-sizing: border-box;
+  text-align: var(--input-element-text-align, 'left');
 }
 
 .input-element:focus {
   border-color: var(--slate-300);
   outline: 0;
   -webkit-box-shadow: 0 0 0 2px var(--slate-100);
-          box-shadow: 0 0 0 2px var(--slate-100);
+  box-shadow: 0 0 0 2px var(--slate-100);
 }
 
 .input-element:disabled {

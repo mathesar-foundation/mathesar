@@ -155,7 +155,6 @@
     .schema-list-title {
       font-size: var(--text-size-x-large);
       font-weight: 500;
-
     }
 
     .search-results-info {

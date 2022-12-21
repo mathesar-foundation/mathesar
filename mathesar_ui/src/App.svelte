@@ -128,8 +128,6 @@
 
     overflow: hidden;
     height: 100vh;
-
-
   }
 
   h1 {

@@ -4,8 +4,16 @@
   display: -ms-inline-grid;
   display: inline-grid;
   min-width: var(--min-width, 0);
-  -ms-grid-columns: [spacer-left] var(--spacing-x, var(--spacing-x-default)) [control] auto [icon] auto [label] 1fr [spacer-right] var(--spacing-x, var(--spacing-x-default));
-      grid-template-columns: [spacer-left] var(--spacing-x, var(--spacing-x-default)) [control] auto [icon] auto [label] 1fr [spacer-right] var(--spacing-x, var(--spacing-x-default));
+  -ms-grid-columns: [spacer-left] var(--spacing-x, var(--spacing-x-default))
+    [control] auto [icon] auto [label] 1fr [spacer-right]
+    var(--spacing-x, var(--spacing-x-default));
+  grid-template-columns: [spacer-left] var(
+      --spacing-x,
+      var(--spacing-x-default)
+    ) [control] auto [icon] auto [label] 1fr [spacer-right] var(
+      --spacing-x,
+      var(--spacing-x-default)
+    );
   /**
    * Tricky aspects of this CSS:
    *
@@ -76,7 +84,8 @@
 }
 
 .menu .menu-item > .cell:not(:empty) {
-  padding: var(--spacing-y, var(--spacing-y-default)) var(--spacing-x, var(--spacing-x-default));
+  padding: var(--spacing-y, var(--spacing-y-default))
+    var(--spacing-x, var(--spacing-x-default));
 }
 
 .menu .menu-item > .control,
@@ -85,8 +94,8 @@
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .menu .menu-item > .cell.control {

@@ -348,8 +348,8 @@
 }
 
 .flatpickr-current-month
-.flatpickr-monthDropdown-months
-.flatpickr-monthDropdown-month {
+  .flatpickr-monthDropdown-months
+  .flatpickr-monthDropdown-month {
   background-color: transparent;
   outline: none;
   padding: 0;
@@ -717,7 +717,7 @@ span.flatpickr-weekday {
   -webkit-align-self: center;
   -ms-flex-item-align: center;
   -ms-grid-row-align: center;
-      align-self: center;
+  align-self: center;
 }
 
 .flatpickr-time .flatpickr-am-pm {

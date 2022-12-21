@@ -85,7 +85,6 @@
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
-
   }
 
   .schema-row {
@@ -95,7 +94,6 @@
     display: flex;
     flex-direction: column;
     transition: border-color 0.2s ease-in-out;
-    
 
     > :global(* + *) {
       margin-top: 0.25rem;
@@ -117,8 +115,7 @@
     justify-content: space-between;
     align-items: center;
   }
-  
-  
+
   .name {
     font-size: var(--text-size-xx-large);
     font-weight: 500;

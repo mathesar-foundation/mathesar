@@ -4,68 +4,68 @@
   vertical-align: -10%;
   fill: currentColor;
   -ms-flex-negative: 0;
-      flex-shrink: 0;
+  flex-shrink: 0;
 }
 
 .fa-flip-horizontal {
   -webkit-transform: scale(-1, 1);
-          transform: scale(-1, 1);
+  transform: scale(-1, 1);
 }
 
 .fa-flip-vertical {
   -webkit-transform: scale(1, -1);
-          transform: scale(1, -1);
+  transform: scale(1, -1);
 }
 
 .fa-flip-both {
   -webkit-transform: scale(-1);
-          transform: scale(-1);
+  transform: scale(-1);
 }
 
 .fa-spin {
   -webkit-animation: spin 1s 0s infinite linear;
-          animation: spin 1s 0s infinite linear;
+  animation: spin 1s 0s infinite linear;
 }
 
 .fa-pulse {
   -webkit-animation: spin 1s infinite steps(8);
-          animation: spin 1s infinite steps(8);
+  animation: spin 1s infinite steps(8);
 }
 
 .fa-rotate-90 {
   -webkit-transform: rotate(90deg);
-          transform: rotate(90deg);
+  transform: rotate(90deg);
 }
 
 .fa-rotate-180 {
   -webkit-transform: rotate(180deg);
-          transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .fa-rotate-270 {
   -webkit-transform: rotate(270deg);
-          transform: rotate(270deg);
+  transform: rotate(270deg);
 }
 
 @-webkit-keyframes spin {
   0% {
     -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
+    transform: rotate(0deg);
   }
   100% {
     -webkit-transform: rotate(360deg);
-            transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
 @keyframes spin {
   0% {
     -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
+    transform: rotate(0deg);
   }
   100% {
     -webkit-transform: rotate(360deg);
-            transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 /*# sourceMappingURL=Icon.css.map */

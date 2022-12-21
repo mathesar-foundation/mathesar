@@ -119,8 +119,8 @@
     border: 1px solid var(--slate-200);
     border-radius: var(--border-radius-l);
     overflow: hidden;
-    min-height: 7rem;  
-    max-width: 24rem; 
+    min-height: 7rem;
+    max-width: 24rem;
   }
 
   .table-item-header {

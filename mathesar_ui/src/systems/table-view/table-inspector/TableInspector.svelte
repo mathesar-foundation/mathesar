@@ -47,7 +47,13 @@
 </script>
 
 <div class="table-inspector-container">
-  <TabContainer bind:activeTab {tabs} tabStyle='compact' fillContainerHeight fillTabWidth>
+  <TabContainer
+    bind:activeTab
+    {tabs}
+    tabStyle="compact"
+    fillContainerHeight
+    fillTabWidth
+  >
     <slot>
       {#if activeTab}
         <div class="tabs-container">

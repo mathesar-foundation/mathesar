@@ -29,7 +29,7 @@
   display: -ms-flexbox;
   display: flex;
   -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
 .fieldset-group.inline .options .option:not(:last-child) {

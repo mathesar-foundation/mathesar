@@ -10,7 +10,7 @@ ul.list-box-options li {
   padding: 6px 12px;
   cursor: default;
   -webkit-box-sizing: content-box;
-          box-sizing: content-box;
+  box-sizing: content-box;
   line-height: 1.2;
   min-height: 1.2em;
   -webkit-user-select: none;
