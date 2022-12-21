@@ -10,12 +10,11 @@
 </script>
 
 <span class="schema-name" class:is-locked={isLocked}>
-  {schema.name}
-  <!--
+
   <NameWithIcon icon={iconSchema} {iconHasBox}>
     {schema.name}
   </NameWithIcon>
-  -->
+  
 </span>
 
 <style>
