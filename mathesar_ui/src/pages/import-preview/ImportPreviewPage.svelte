@@ -467,16 +467,18 @@
         </div>
       {/if}
 
-      <div class="footer contain-width">
-        {#if !isLoading}
-          <CancelOrProceedButtonPair
-            onCancel={handleCancel}
-            onProceed={finishImport}
-            cancelButton={{ icon: iconDeleteMajor }}
-            proceedButton={{ label: 'Confirm & create table' }}
-            {canProceed}
-          />
-        {/if}
+      <div class="footer">
+        <div class="contain-width">
+          {#if !isLoading}
+            <CancelOrProceedButtonPair
+              onCancel={handleCancel}
+              onProceed={finishImport}
+              cancelButton={{ icon: iconDeleteMajor }}
+              proceedButton={{ label: 'Confirm & create table' }}
+              {canProceed}
+            />
+          {/if}
+        </div>
       </div>
     {/if}
   </div>
@@ -485,23 +487,18 @@
 <style lang="scss">
   .table-preview-confirmation {
     --sheet-header-height: 5.25rem;
+    position: relative;
 
     h1 {
       font-weight: 500;
-      font-size: var(--size-super-ultra-large);
-      margin: 0.83em 0;
+      font-size: var(--size-xx-large);
+      margin: 1em 0;
     }
 
     h2 {
       font-weight: 600;
       font-size: var(--size-large);
       margin: 0;
-    }
-
-    > .contain-width {
-      max-width: var(--max-layout-width);
-      margin-left: auto;
-      margin-right: auto;
     }
 
     .table-properties {
@@ -525,16 +522,14 @@
 
     .table-preview-content {
       overflow: hidden;
-      margin-top: var(--size-xx-large);
+      margin-top: var(--size-x-large);
 
       .preview {
         margin: 0 auto;
         overflow: hidden;
-        width: fit-content;
         max-width: 100%;
         background: var(--white);
-        border: solid 1px var(--slate-300);
-        border-radius: 0.3rem;
+        border-top: solid 1px var(--slate-300);
 
         h2 {
           padding: var(--size-small) var(--inset-page-padding);
@@ -543,17 +538,26 @@
 
         .content {
           padding: var(--inset-page-padding);
-          background: var(--sand-100);
+          background: var(--slate-50);
+          margin-bottom: 3rem;
         }
 
         .sheet-holder {
           border: 1px solid var(--slate-200);
+          width: fit-content;
           min-height: 20rem;
           overflow: auto;
+          margin: 0 auto;
+          background: var(--white);
         }
 
         :global(.sheet) {
-          min-width: 61.8rem;
+          min-width: 64.8rem;
+          margin: 0 auto;
+        }
+
+        :global(.sheet [data-sheet-element='header']) {
+          background: var(--slate-100);
         }
 
         :global(.sheet [data-sheet-element='row'] [data-sheet-element='cell']) {
@@ -563,8 +567,18 @@
     }
 
     .footer {
-      margin: 1.6rem auto;
-      padding: 0 1rem;
+      width: 100%;
+      border-top: 1px solid var(--slate-200);
+      padding: 0.5rem 1rem;
+      background: var(--white);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      > .contain-width {
+        max-width: var(--max-layout-width);
+        margin-left: auto;
+        margin-right: auto;
+      }
     }
   }
 </style>
