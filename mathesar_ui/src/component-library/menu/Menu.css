@@ -7,10 +7,9 @@
   -ms-grid-columns: [spacer-left] var(--spacing-x, var(--spacing-x-default))
     [control] auto [icon] auto [label] 1fr [spacer-right]
     var(--spacing-x, var(--spacing-x-default));
-  grid-template-columns: [spacer-left] var(
-      --spacing-x,
-      var(--spacing-x-default)
-    ) [control] auto [icon] auto [label] 1fr [spacer-right] var(
+  grid-template-columns:
+    [spacer-left] var(--spacing-x, var(--spacing-x-default))
+    [control] auto [icon] auto [label] 1fr [spacer-right] var(
       --spacing-x,
       var(--spacing-x-default)
     );
