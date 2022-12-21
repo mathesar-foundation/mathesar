@@ -83,6 +83,7 @@ def get_records(
         search=search,
         duplicate_only=duplicate_only,
     )
+    print(str(relation))
     return execute_pg_query(engine, relation)
 
 

@@ -7,6 +7,8 @@ from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.transforms.operations.deserialize import deserialize_transformation
 from db.transforms.operations.serialize import serialize_transformation
 from db.transforms.base import Summarize
+from db.functions.base import Count, ArrayAgg
+from db.functions.packed import DistinctArrayAgg
 
 from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
 from mathesar.state.cached_property import cached_property
@@ -495,10 +497,11 @@ def _get_default_display_name_for_agg_output_alias(
     current_display_names,
 ):
     if output_alias and input_alias and agg_function:
-        map_of_agg_function_to_suffix = dict(
-            aggregate_to_array=" list",
-            count=" count",
-        )
+        map_of_agg_function_to_suffix = {
+            DistinctArrayAgg.id: " distinct list",
+            ArrayAgg.id: " list",
+            Count.id: " count",
+        }
         suffix_to_add = map_of_agg_function_to_suffix.get(agg_function)
         if suffix_to_add:
             input_alias_display_name = current_display_names.get(input_alias)

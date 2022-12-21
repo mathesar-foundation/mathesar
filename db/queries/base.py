@@ -139,8 +139,8 @@ class DBQuery:
                 name=f'{self.name}_{i}'
             ).transformed_relation.columns
         }
-
-        return initial_columns_map | transforms_columns_map | output_columns_map
+        map_of_alias_to_sa_col = initial_columns_map | transforms_columns_map | output_columns_map
+        return map_of_alias_to_sa_col
 
     @property
     def sa_output_columns(self):
