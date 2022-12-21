@@ -14,7 +14,7 @@ services:
     volumes:
       - postgresql_data:/var/lib/postgresql/data
   service-without-db:
-    profiles: ["only-web-server"]
+    profiles: ["web-server"]
     build:
       context: .
       dockerfile: ${DOCKERFILE}
@@ -30,7 +30,6 @@ services:
       - "6006:6006"
   service:
     profiles: ["prod"]
-
     extends: service-without-db
     depends_on:
       - db
