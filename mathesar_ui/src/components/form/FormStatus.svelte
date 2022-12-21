@@ -8,4 +8,4 @@
   $: ({ hasChanges } = $form);
 </script>
 
-<ModificationStatus {hasChanges} requestStatus={$requestStatus} />
+<ModificationStatus {hasChanges} requestState={$requestStatus?.state} />

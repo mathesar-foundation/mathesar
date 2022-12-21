@@ -468,39 +468,55 @@ class SelectSubsetOfColumns(Transform):
     type = "select"
 
     def apply_to_relation(self, relation):
-        columns_to_select = self._columns_to_select
-        if columns_to_select:
-            processed_columns_to_select = [
-                _make_sure_column_expression(column)
-                for column
-                in columns_to_select
-            ]
-            executable = select(*processed_columns_to_select).select_from(relation)
+        sa_columns_to_select = self._get_sa_columns_to_select(relation)
+        if sa_columns_to_select:
+            executable = select(*sa_columns_to_select).select_from(relation)
             return _to_non_executable(executable)
         else:
             return relation
 
     def get_unique_constraint_mappings(self, _):
-        columns_to_select = self._columns_to_select
+        # We presume that when we're looking at uc mappings, the raw spec will always be string
+        # names.
+        column_names_to_select = self._raw_columns_to_select
         return [
             UniqueConstraintMapping(
-                column_to_select,
-                column_to_select,
+                column_names_to_select,
+                column_names_to_select,
             )
-            for column_to_select
-            in columns_to_select
+            for column_names_to_select
+            in column_names_to_select
         ]
 
+    def _get_sa_columns_to_select(self, relation):
+        return tuple(
+            _make_sure_sa_col_expr(raw_col, relation)
+            for raw_col
+            in self._raw_columns_to_select
+        )
+
     @property
-    def _columns_to_select(self):
-        return self.spec
+    def _raw_columns_to_select(self):
+        """
+        The spec will be a list whose items will be SQLAlchemy column expressions and/or string
+        names.
+
+        This accepts SQLAlchemy column expressions so that we can count records by doing
+        SelectSubsetOfColumns(count(1).label("_count")).
+        """
+        return self.spec or []
 
 
-def _make_sure_column_expression(input):
-    if isinstance(input, str):
-        return sqlalchemy.column(input)
+def _make_sure_sa_col_expr(raw_col, relation):
+    if isinstance(raw_col, str):
+        # If raw_col is a string, we consider it a column name and look up an SQL column using it
+        col_name = raw_col
+        sa_col = relation.c[col_name]
+        return sa_col
     else:
-        return input
+        # If raw_col isn't a string, we presume it's an SA column expression
+        sa_col = raw_col
+        return sa_col
 
 
 def _to_executable(relation):

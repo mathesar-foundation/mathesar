@@ -4,6 +4,7 @@ from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.compiler import compiles
 
 from db.types.base import MathesarCustomType
+from db.utils import ignore_duplicate_wrapper
 
 DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
 
@@ -32,14 +33,11 @@ def _compile_mathesarjsonobject(element, compiler, **kw):
 
 
 def install(engine):
-    drop_domain_query = f"""
-    DROP DOMAIN IF EXISTS {DB_TYPE};
-    """
     create_domain_query = f"""
     CREATE DOMAIN {DB_TYPE} AS JSONB CHECK (jsonb_typeof(VALUE) = 'array');
     """
+    create_if_not_exist_domain_query = ignore_duplicate_wrapper(create_domain_query)
 
     with engine.begin() as conn:
-        conn.execute(text(drop_domain_query))
-        conn.execute(text(create_domain_query))
+        conn.execute(text(create_if_not_exist_domain_query))
         conn.commit()
