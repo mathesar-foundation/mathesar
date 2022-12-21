@@ -120,7 +120,7 @@
     border-radius: var(--border-radius-l);
     overflow: hidden;
     min-height: 7rem;  
-    max-width: 22rem; 
+    max-width: 24rem; 
   }
 
   .table-item-header {

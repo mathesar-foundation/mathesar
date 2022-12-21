@@ -25,12 +25,13 @@
     display: grid;
     grid-gap: 1rem;
     --minimum-item-width: 18rem;
+    // align all child items to the left
   }
   @supports (width: min(var(--minimum-item-width), 100%)) {
     .container {
       grid-template-columns: repeat(
-        auto-fit,
-        minmax(min(var(--minimum-item-width), 100%), 1fr)
+        auto-fill,
+        minmax(var(--minimum-item-width), 1fr)
       );
     }
   }

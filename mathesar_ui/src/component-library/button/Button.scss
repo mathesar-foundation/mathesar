@@ -123,14 +123,14 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        color: var(--brand-600)
+        background: var(--slate-100);
       }
 
       &:active,
       &.active,
       &:focus,
       &.focus {
-        box-shadow: 0 0 0 2px var(--slate-100) !important;
+        box-shadow: 0 0 0 2px var(--slate-100);
       }
 
       &:active,
