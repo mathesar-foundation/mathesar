@@ -117,8 +117,10 @@
     justify-content: space-between;
     align-items: center;
   }
+  
+  
   .name {
-    font-size: var(--text-size-ultra-large);
+    font-size: var(--text-size-xx-large);
     font-weight: 500;
     --icon-color: var(--brand-500);
   }

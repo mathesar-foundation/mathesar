@@ -112,7 +112,7 @@
   }
   .columns {
     color: var(--slate-500);
-    font-size: 0.9rem;
+    font-size: var(--text-size-base);
   }
   .referent {
     color: var(--slate-500);

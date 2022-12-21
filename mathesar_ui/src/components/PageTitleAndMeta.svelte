@@ -66,7 +66,7 @@
   }
 
   .entity-type {
-    font-size: 0.85rem;
+    font-size: var(--text-size-small);
     line-height: 0.5rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -74,6 +74,6 @@
 
   .entity-name {
     font-weight: 500;
-    font-size: 2.28rem;
+    font-size: var(--text-size-ultra-large);
   }
 </style>

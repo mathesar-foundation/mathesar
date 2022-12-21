@@ -29,8 +29,7 @@
 
 <style lang="scss">
   .save-status {
-    font-size: 0.9em;
-    color: #888;
+    color: var(--slate-300);
 
     &.error {
       color: var(--color-error);
