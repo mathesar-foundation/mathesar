@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   db:
+    profiles: ["dev", "prod"]
     image: postgres:13
     container_name: mathesar_db
     environment:
@@ -13,6 +14,7 @@ services:
     volumes:
       - postgresql_data:/var/lib/postgresql/data
   service-without-db:
+    profiles: ["only-web-server"]
     build:
       context: .
       dockerfile: ${DOCKERFILE}
@@ -27,10 +29,13 @@ services:
       - "3000:3000"
       - "6006:6006"
   service:
+    profiles: ["prod"]
+
     extends: service-without-db
     depends_on:
       - db
   dev-service:
+    profiles: ["dev"]
     extends: service-without-db
     environment:
       - MODE=${MODE-PRODUCTION}
