@@ -63,7 +63,9 @@
     --text-size-small: var(--size-small); // 12px
     --text-size-base: var(--size-base); // 14px
     --text-size-large: var(--size-large); // 16px
+    --text-size-x-large: var(--size-x-large); // 18px
     --text-size-xx-large: var(--size-xx-large); // 20px
+    --text-size-ultra-large: var(--size-ultra-large); // 24px
 
     --modal-z-index: 50;
     --modal-record-selector-z-index: 50;
@@ -125,6 +127,8 @@
 
     overflow: hidden;
     height: 100vh;
+
+
   }
 
   h1 {

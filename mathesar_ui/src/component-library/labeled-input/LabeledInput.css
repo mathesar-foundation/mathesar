@@ -1,0 +1,85 @@
+.labeled-input {
+  --spacing-y-default: 0.4em;
+  --spacing-x-default: 0.4em;
+}
+
+.labeled-input .label {
+  display: inline-block;
+  color: var(--slate-800);
+}
+
+.labeled-input .input {
+  display: block;
+}
+
+.labeled-input .input > button.dropdown.trigger {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+}
+
+.labeled-input .help {
+  display: block;
+  font-size: var(--text-size-small);
+  color: var(--color-text-muted);
+  margin-top: 0.5rem;
+}
+
+.labeled-input .help:empty {
+  display: none;
+}
+
+.labeled-input.layout-stacked .input {
+  margin-top: var(--spacing-y, var(--spacing-y-default));
+}
+
+.labeled-input.layout-inline .label-content,
+.labeled-input.layout-inline-input-first .label-content {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+}
+
+.labeled-input.layout-inline .label-content .label,
+.labeled-input.layout-inline-input-first .label-content .label {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+}
+
+.labeled-input.layout-inline .label-content .input,
+.labeled-input.layout-inline-input-first .label-content .input {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+}
+
+.labeled-input.layout-inline .label-content {
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.labeled-input.layout-inline .label-content .input {
+  margin-left: var(--spacing-x, var(--spacing-x-default));
+}
+
+.labeled-input.layout-inline-input-first .label-content {
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: reverse;
+      -ms-flex-direction: row-reverse;
+          flex-direction: row-reverse;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+}
+
+.labeled-input.layout-inline-input-first .label-content .input {
+  margin-right: var(--spacing-x, var(--spacing-x-default));
+}
+/*# sourceMappingURL=LabeledInput.css.map */

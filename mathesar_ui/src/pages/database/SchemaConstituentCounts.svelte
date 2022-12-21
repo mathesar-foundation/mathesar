@@ -16,9 +16,9 @@
 
 <style lang="scss">
   .constituent {
-    font-size: var(--text-size-large);
+    font-size: var(--text-size-small);
     font-weight: 400;
-    margin: 0;
+    margin-top: 0.5rem;
   }
 
   .container {

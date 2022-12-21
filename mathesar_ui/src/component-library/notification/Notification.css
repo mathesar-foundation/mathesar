@@ -1,0 +1,60 @@
+.notification {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.notification.danger {
+  background: #393939;
+  border-left: 6px solid #fa4d56;
+  color: #fff;
+  padding: 15px;
+  border-radius: 3px;
+  line-height: 1.4em;
+}
+
+.notification.danger .header {
+  color: #fa4d56;
+}
+
+.notification > .header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+}
+
+.notification > .header .icon,
+.notification > .header .close {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  -ms-flex-preferred-size: 1rem;
+      flex-basis: 1rem;
+}
+
+.notification > .header .icon {
+  margin-right: 10px;
+}
+
+.notification > .header .message {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+}
+
+.notification > .header button.btn.close {
+  margin-left: 10px;
+  padding: 0;
+  color: #fff;
+}
+
+.notification > .description {
+  margin-top: 10px;
+}
+/*# sourceMappingURL=Notification.css.map */

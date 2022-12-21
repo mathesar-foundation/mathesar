@@ -1,0 +1,9 @@
+{
+    "version": 3,
+    "mappings": "AAAA,AAAA,8BAA8B,CAAC;EAC7B,OAAO,EAAE,IAAI;EACb,eAAe,EAAE,aAAa;CAC/B",
+    "sources": [
+        "CancelOrProceedButtonPair.scss"
+    ],
+    "names": [],
+    "file": "CancelOrProceedButtonPair.css"
+}

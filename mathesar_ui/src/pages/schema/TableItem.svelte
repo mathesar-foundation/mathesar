@@ -116,18 +116,18 @@
   .container {
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--slate-300);
+    border: 1px solid var(--slate-200);
     border-radius: var(--border-radius-l);
-    max-width: 22rem;
     overflow: hidden;
-    min-height: 7.5rem;
+    min-height: 7rem;  
+    max-width: 22rem; 
   }
 
   .table-item-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 0.25rem 0.75rem 1rem;
+    padding: 0.5rem 1rem;
 
     > :global(* + *) {
       margin-left: 0.75rem;
@@ -141,6 +141,7 @@
 
     .name {
       font-size: var(--text-size-large);
+      font-weight: 500;
     }
 
     > :global(* + *) {

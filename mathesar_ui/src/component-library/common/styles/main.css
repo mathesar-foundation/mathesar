@@ -1,0 +1,101 @@
+/**
+ * File to place common css & scss variables for the component library
+ */
+:root {
+  --danger-color: #d67171;
+  --danger-background-color: #fde9e9;
+  --dander-border-color: #f2aaaa;
+  --green-100: #e5fde6;
+  --purple-100: #ebe5fd;
+  --purple-300: #a586ff;
+  --purple-400: #6b45dd;
+  --red-100: #fdeeed;
+  --red-200: #f9cdc8;
+  --red-500: #eb5441;
+  --red-600: #dd4734;
+  --red-800: #c63826;
+  --slate-100: #eff1f1;
+  --slate-200: #d5d8dc;
+  --slate-300: #b1b7be;
+  --slate-400: #959da7;
+  --slate-500: #4b535d;
+  --slate-700: #424952;
+  --slate-800: #25292e;
+  --sand-100: #f9f8f6;
+  --sand-200: #efece7;
+  --sand-300: #e2dcd4;
+  --sand-400: #cec5b6;
+  --sand-800: #776850;
+  --sky-200: #e8f1fd;
+  --sky-300: #b0ccf0;
+  --sky-500: #bcd9f9;
+  --sky-800: #36537a;
+  --slate-50-tentative: #f6f9f9;
+  --sky-600-tentative: #87bcf6;
+  --yellow-100: #fdf7ed;
+  --yellow-200: #ffedaf;
+  --yellow-300: #f8ceb0;
+  --white: white;
+  --red-box-shadow: #eb544133;
+  --brand-100: var(--red-100);
+  --brand-500: var(--red-500);
+  --brand-600: var(--red-600);
+  --brand-800: var(--red-800);
+  --brand-box-shadow: var(--red-box-shadow);
+  --size-extreme-small: 0.1429rem;
+  --size-super-ultra-small: 0.2858rem;
+  --size-ultra-small: 0.4286rem;
+  --size-xx-small: 0.5715rem;
+  --size-x-small: 0.7143rem;
+  --size-small: 0.8572rem;
+  --size-base: 1rem;
+  --size-large: 1.1429rem;
+  --size-x-large: 1.2858rem;
+  --size-xx-large: 1.4286rem;
+  --size-ultra-large: 1.5715rem;
+  --size-super-ultra-large: 1.7143rem;
+  --border-radius-s: 0.142rem;
+  --border-radius-m: 0.285rem;
+  --border-radius-l: 0.571rem;
+  --border-radius-xl: 1.142rem;
+}
+
+.input-element {
+  border: 1px solid var(--slate-200);
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  border-radius: 0.285rem;
+  background: #fff;
+  margin: 0;
+  padding: 6px 8px;
+  line-height: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  display: block;
+  width: 100%;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  text-align: var(--input-element-text-align, "left");
+}
+
+.input-element:focus {
+  border-color: var(--slate-300);
+  outline: 0;
+  -webkit-box-shadow: 0 0 0 2px var(--slate-100);
+          box-shadow: 0 0 0 2px var(--slate-100);
+}
+
+.input-element:disabled {
+  background: var(--slate-100);
+}
+
+.input-element.has-error {
+  border-color: var(--red-500);
+  background: var(--red-100);
+}
+
+.input-element.text-area {
+  resize: vertical;
+}
+/*# sourceMappingURL=main.css.map */

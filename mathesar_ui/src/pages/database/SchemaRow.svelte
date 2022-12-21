@@ -79,23 +79,32 @@
   .description {
     font-weight: 400;
     font-size: var(--text-size-large);
+    color: var(--slate-700);
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+
   }
 
   .schema-row {
     border-radius: 0.57rem;
-    padding: 1.142em;
+    padding: 1em;
     border: 1px solid var(--slate-300);
     display: flex;
     flex-direction: column;
+    transition: border-color 0.2s ease-in-out;
+    
 
     > :global(* + *) {
-      margin-top: 0.75rem;
+      margin-top: 0.25rem;
     }
+  }
+
+  .schema-row:hover {
+    border-color: var(--slate-500);
+    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
   }
 
   .schema-row.is-locked {
@@ -109,7 +118,8 @@
     align-items: center;
   }
   .name {
-    font-size: var(--text-size-xx-large);
+    font-size: var(--text-size-ultra-large);
+    font-weight: 500;
     --icon-color: var(--brand-500);
   }
 

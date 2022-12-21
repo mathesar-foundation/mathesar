@@ -1,0 +1,16 @@
+.progress {
+  height: 10px;
+  border-radius: 2px;
+  background: var(--sky-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress > div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: var(--sky-600-tentative);
+}
+/*# sourceMappingURL=Progress.css.map */

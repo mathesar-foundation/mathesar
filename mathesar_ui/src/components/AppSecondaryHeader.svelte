@@ -30,7 +30,7 @@
 
 <style>
   .container {
-    padding: var(--page-padding);
+    padding: 1.5rem 0;
   }
   .theme-dark {
     background-color: var(--slate-500);

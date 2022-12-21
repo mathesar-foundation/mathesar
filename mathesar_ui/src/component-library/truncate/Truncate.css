@@ -1,0 +1,29 @@
+.truncate {
+  overflow: hidden;
+  text-align: left;
+}
+
+.truncate:not(.multiline) {
+  display: block;
+  max-width: 100%;
+  /**
+   * Why not just use `-webkit-box` for single line cases too? Because it
+   * doesn't perform as well when truncating very short strings. For example,
+   * the text "foobar" gets truncated to "..." instead of "foo..."
+   */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.truncate.multiline {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.dropdown.truncation-content {
+  padding: 0.5rem;
+  font-size: var(--size-small);
+  background: var(--sand-100);
+  border-radius: 0.2rem;
+}
+/*# sourceMappingURL=Truncate.css.map */

@@ -1,0 +1,72 @@
+.input-group {
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  isolation: isolate;
+}
+
+.input-group .input-group-text {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 0.375rem 0.5rem;
+  color: #212323;
+  text-align: center;
+  white-space: nowrap;
+  background-color: #f3f4f4;
+  border: 1px solid #dfdfdf;
+  border-radius: 0.25rem;
+}
+
+.input-group .input-element {
+  position: relative;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+}
+
+.input-group .input-element:focus,
+.input-group button:focus {
+  z-index: 1;
+}
+
+.input-group.vertical {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  gap: 0.4rem;
+}
+
+.input-group:not(.vertical) {
+  width: 100%;
+}
+
+.input-group:not(.vertical) .input-element {
+  width: 1%;
+  min-width: 0;
+}
+
+.input-group:not(.vertical) > *:not(:last-child) {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+.input-group:not(.vertical) > * + * {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  margin-left: -1px !important;
+}
+/*# sourceMappingURL=InputGroup.css.map */

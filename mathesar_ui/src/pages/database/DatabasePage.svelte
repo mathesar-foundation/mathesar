@@ -152,14 +152,10 @@
     flex-direction: column;
     width: 100%;
 
-    .schema-list-title-container {
-      border-bottom: 1px solid var(--slate-200);
-      margin-bottom: 1rem;
-    }
-
     .schema-list-title {
-      font-size: var(--text-size-large);
-      font-weight: 700;
+      font-size: var(--text-size-x-large);
+      font-weight: 500;
+
     }
 
     .search-results-info {

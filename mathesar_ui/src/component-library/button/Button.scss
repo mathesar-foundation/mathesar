@@ -11,6 +11,8 @@
   font-weight: inherit;
   position: relative;
   padding: 0.5em 0.5em;
+  gap: 0.25em;
+  transition: all 0.2s ease-in-out;
 
   > * + * {
     margin-left: 0.25em;
@@ -112,6 +114,7 @@
     border-color: transparent;
     border-radius: 0px;
     box-shadow: none !important;
+    font-weight: 500;
   }
 
   &.btn-default,
@@ -120,7 +123,7 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        background: var(--slate-100);
+        color: var(--brand-600)
       }
 
       &:active,

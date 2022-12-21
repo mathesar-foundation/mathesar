@@ -24,6 +24,7 @@
   export let fillTabWidth = false;
   export let fillContainerHeight = false;
   export let uniformTabWidth = true;
+  export let tabStyle = 'default';
 
   function selectActiveTab(e: Event, tab: Tab) {
     activeTab = tab;
@@ -76,6 +77,7 @@
   class="tab-container"
   role="navigation"
   class:fill-container-height={fillContainerHeight}
+  class:compact={tabStyle === 'compact'}
 >
   <ul role="tablist" class="tabs" class:fill-tab-width={fillTabWidth}>
     {#each tabs as tab, index (tab[idKey] || tab)}

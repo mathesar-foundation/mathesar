@@ -1,0 +1,32 @@
+.form-builder .form-element + .form-element {
+  margin-top: 0.6rem;
+}
+
+.form-builder .form-layout.horizontal {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  width: 100%;
+  gap: 0.6rem;
+}
+
+.form-builder .form-layout.horizontal .form-input {
+  position: relative;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  width: 1%;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.form-builder .form-input .validation-error {
+  margin-top: 5px;
+  color: var(--danger-color);
+}
+/*# sourceMappingURL=FormBuilder.css.map */

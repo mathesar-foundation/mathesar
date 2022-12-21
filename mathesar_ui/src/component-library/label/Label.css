@@ -1,0 +1,13 @@
+.label-component {
+  display: var(--Label__display, inline);
+}
+
+.label-component:hover {
+  cursor: pointer;
+}
+
+.label-component.disabled {
+  color: #777;
+  cursor: not-allowed;
+}
+/*# sourceMappingURL=Label.css.map */

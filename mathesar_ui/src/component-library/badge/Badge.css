@@ -1,0 +1,10 @@
+.badge {
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-m);
+  background-color: var(--badge-background-color, var(--brand-500));
+  font-size: var(--badge-font-size, inherit);
+  color: var(--badge-text-color, var(--white));
+  padding: 0.07rem 0.28rem;
+  display: inline-block;
+}
+/*# sourceMappingURL=Badge.css.map */
