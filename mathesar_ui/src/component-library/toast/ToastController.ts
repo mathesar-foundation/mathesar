@@ -82,9 +82,9 @@ interface ToastEntryProps {
 }
 
 const baseDefaultProps: ToastEntryProps = {
-  backgroundColor: 'rgba(77, 77, 77, 0.9)',
-  textColor: 'white',
-  progressColor: 'rgba(255, 255, 255, 0.7)',
+  backgroundColor: 'rgba(188, 217, 249, 0.9)',
+  textColor: 'rgba(37, 41, 46, 0.8)',
+  progressColor: 'rgba(37, 41, 46, 0.2)',
   lifetime: 6000,
   hasProgress: true,
   initialProgress: 1,
@@ -203,7 +203,7 @@ export function makeToast(
   function success(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconSuccess,
-      backgroundColor: 'rgba(92, 159, 84, 0.9)',
+      backgroundColor: 'rgba(229, 253, 230, 0.9)',
       ...makeToastProps(detail),
     });
   }
@@ -211,7 +211,7 @@ export function makeToast(
   function error(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconError,
-      backgroundColor: 'rgba(159, 86, 77, 0.9)',
+      backgroundColor: 'rgba(249, 205, 200, 0.9)',
       ...makeToastProps(detail),
     });
   }
