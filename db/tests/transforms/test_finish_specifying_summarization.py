@@ -59,7 +59,7 @@ def _gen_agg_expr(alias):
     return dict(
         input_alias=alias,
         output_alias=alias + agg_output_alias_suffix,
-        function="aggregate_to_array",
+        function="distinct_aggregate_to_array",
     )
 
 

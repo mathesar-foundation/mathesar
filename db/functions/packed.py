@@ -30,6 +30,25 @@ class DBFunctionPacked(base.DBFunction):
         pass
 
 
+class DistinctArrayAgg(DBFunctionPacked):
+    """
+    These two functions together are meant to be a user-friendly alternative to plain array_agg.
+
+    See: https://github.com/centerofci/mathesar/issues/2059
+    """
+    id = 'distinct_aggregate_to_array'
+    name = 'distinct aggregate to array'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        return base.ArrayAgg([
+            base.Distinct([param0]),
+        ])
+
+
 class NotNull(DBFunctionPacked):
     id = 'not_null'
     name = 'Is not null'
