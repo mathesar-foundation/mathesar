@@ -22,5 +22,5 @@ else
 fi
 
 cd ..
-python manage.py migrate && python install.py -s
+python install.py -s
 python manage.py runserver 0.0.0.0:8000 && fg
