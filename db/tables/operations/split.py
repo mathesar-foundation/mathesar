@@ -89,23 +89,7 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
             fk_column_name,
         )
         conn.execute(split_ins)
-        _preparer = engine.dialect.identifier_preparer
-        quoted_table_name = _preparer.quote(extracted_table.schema) + "." + _preparer.quote(extracted_table.name)
-        update_pk_sequence_stmt = func.setval(
-            # `pg_get_serial_sequence needs a string of the Table name
-            func.pg_get_serial_sequence(
-                f"{quoted_table_name}",
-                f"{extracted_table.c[constants.ID].name}"
-            ),
-            func.coalesce(
-                func.max(extracted_table.c[constants.ID]) + 1,
-                1
-            ),
-            False
-        )
-        conn.execute(
-            select(update_pk_sequence_stmt)
-        )
+        update_sequence_to_latest(conn, engine, extracted_table)
 
         remainder_table_oid = get_oid_from_table(remainder_table_with_fk_column.name, schema, engine)
         deletion_column_data = [
@@ -114,3 +98,28 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
         ]
         batch_alter_table_drop_columns(remainder_table_oid, deletion_column_data, conn, engine)
     return extracted_table, remainder_table_with_fk_column, fk_column_name
+
+
+def update_sequence_to_latest(conn, engine, extracted_table):
+    _preparer = engine.dialect.identifier_preparer
+    quoted_table_name = _preparer.quote(extracted_table.schema) + "." + _preparer.quote(extracted_table.name)
+    update_pk_sequence_stmt = func.setval(
+        # `pg_get_serial_sequence needs a string of the Table name
+        func.pg_get_serial_sequence(
+            quoted_table_name,
+            extracted_table.c[constants.ID].name
+        ),
+        # If the table can be empty, start from 1 instead of using Null
+        func.coalesce(
+            func.max(extracted_table.c[constants.ID]) + 1,
+            1
+        ),
+        # Set the sequence to use the last value of the sequence
+        # Setting is_called field to false, meaning that the next nextval will not advance the sequence before returning a value.
+        # We need to do it as our default coalesce value is 1 instead of 0
+        # Refer the postgres docs https://www.postgresql.org/docs/current/functions-sequence.html
+        False
+    )
+    conn.execute(
+        select(update_pk_sequence_stmt)
+    )
