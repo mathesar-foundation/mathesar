@@ -274,10 +274,9 @@ class Summarize(Transform):
             output_alias = col_spec['output_alias']
             agg_db_function_subclass_id = col_spec['function']
             column_to_aggregate = relation.columns[input_alias]
-            sa_expression = column_to_aggregate
             sa_expression = apply_db_function_by_id(
                 agg_db_function_subclass_id,
-                [sa_expression],
+                [column_to_aggregate],
             )
             return sa_expression.label(output_alias)
 
