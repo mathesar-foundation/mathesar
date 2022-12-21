@@ -105,16 +105,16 @@
   }
   .type {
     text-transform: uppercase;
-    color: #666;
+    color: var(--slate-500);
   }
   .drop {
     color: var(--color-error);
   }
   .columns {
-    color: #666;
+    color: var(--slate-500);
     font-size: 0.9rem;
   }
   .referent {
-    color: #666;
+    color: var(--slate-500);
   }
 </style>

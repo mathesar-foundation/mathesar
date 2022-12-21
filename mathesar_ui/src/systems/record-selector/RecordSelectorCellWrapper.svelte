@@ -61,7 +61,7 @@
 
   /** Row types ***************************************************************/
   .column-header {
-    background: #f7f8f8;
+    background: var(--slate-100);
     padding: 0 0.5rem;
     /** 0.5px below is a hack to deal with a Firefox-only issue. When vertically
      * scrolling the table, the data cells were peeking through between a tiny
