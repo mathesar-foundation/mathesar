@@ -1,9 +1,0 @@
-{
-    "version": 3,
-    "mappings": "AAAA,AAAA,SAAS,CAAC;EACR,MAAM,EAAE,IAAI;EACZ,aAAa,EAAE,GAAG;EAClB,UAAU,EAAE,cAAc;EAC1B,QAAQ,EAAE,QAAQ;EAClB,QAAQ,EAAE,MAAM;CASjB;;AAdD,AAOE,SAPO,GAOL,GAAG,CAAC;EACJ,QAAQ,EAAE,QAAQ;EAClB,GAAG,EAAE,CAAC;EACN,IAAI,EAAE,CAAC;EACP,MAAM,EAAE,CAAC;EACT,UAAU,EAAE,wBAAwB;CACrC",
-    "sources": [
-        "Progress.scss"
-    ],
-    "names": [],
-    "file": "Progress.css"
-}

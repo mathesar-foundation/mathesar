@@ -1,9 +1,0 @@
-{
-    "version": 3,
-    "mappings": "AAAA,AAAA,OAAO,AAAA,SAAS,AAAA,QAAQ,CAAC;EACvB,UAAU,EAAE,KAAK;CAClB",
-    "sources": [
-        "Select.scss"
-    ],
-    "names": [],
-    "file": "Select.css"
-}

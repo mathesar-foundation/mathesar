@@ -1,9 +1,0 @@
-{
-    "version": 3,
-    "mappings": "AAAA,AAAA,YAAY,CAAC;EACX,OAAO,EAAE,WAAW;EACpB,UAAU,EAAE,MAAM;EAClB,WAAW,EAAE,MAAM;EACnB,MAAM,EAAE,IAAI;EACZ,aAAa,EAAE,GAAG;EAClB,KAAK,EAAE,IAAI;CAKZ;;AAXD,AAQE,YARU,GAQR,GAAG,CAAC;EACJ,KAAK,EAAE,IAAI;CACZ",
-    "sources": [
-        "TextAvatar.scss"
-    ],
-    "names": [],
-    "file": "TextAvatar.css"
-}

@@ -1,9 +1,0 @@
-{
-    "version": 3,
-    "mappings": "AAAA,AAAA,gBAAgB,CAAC;EACf,GAAG,EAAE,MAAM;EACX,KAAK,EAAE,IAAI;EACX,MAAM,EAAE,IAAI;EACZ,IAAI,EAAE,IAAI;EACV,QAAQ,EAAE,KAAK;EACf,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,eAAe,EAAE,IAAI;EACrB,OAAO,EAAE,yBAAyB;CACnC",
-    "sources": [
-        "ToastPresenter.scss"
-    ],
-    "names": [],
-    "file": "ToastPresenter.css"
-}

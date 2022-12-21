@@ -1,9 +1,0 @@
-{
-    "version": 3,
-    "mappings": "AAAA,AAAA,cAAc,CAAC;EACb,eAAe,EAAE,IAAI;CACtB",
-    "sources": [
-        "AnchorButton.scss"
-    ],
-    "names": [],
-    "file": "AnchorButton.css"
-}
