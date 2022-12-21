@@ -89,6 +89,24 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
             fk_column_name,
         )
         conn.execute(split_ins)
+        _preparer = engine.dialect.identifier_preparer
+        quoted_table_name = _preparer.quote(extracted_table.schema) + "." + _preparer.quote(extracted_table.name)
+        update_pk_sequence_stmt = func.setval(
+            # `pg_get_serial_sequence needs a string of the Table name
+            func.pg_get_serial_sequence(
+                f"{quoted_table_name}",
+                f"{extracted_table.c[constants.ID].name}"
+            ),
+            func.coalesce(
+                func.max(extracted_table.c[constants.ID]) + 1,
+                1
+            ),
+            False
+        )
+        conn.execute(
+            select(update_pk_sequence_stmt)
+        )
+
         remainder_table_oid = get_oid_from_table(remainder_table_with_fk_column.name, schema, engine)
         deletion_column_data = [
             {'attnum': column_attnum, 'delete': True}
