@@ -4,7 +4,6 @@
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
   } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/api/types/tables/columns';
   import {
     SheetHeader,
     SheetCell,
@@ -18,13 +17,8 @@
 
   export let hasNewColumnButton = false;
 
-  $: ({ columnsDataStore, selection, processedColumns } = $tabularData);
-  $: ({ columns } = columnsDataStore);
+  $: ({ selection, processedColumns } = $tabularData);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
-
-  function addColumn(e: CustomEvent<Partial<Column>>) {
-    void columnsDataStore.add(e.detail);
-  }
 </script>
 
 <SheetHeader>
@@ -48,7 +42,9 @@
             $columnsSelectedWhenTheTableIsEmpty,
             processedColumn,
           )}
-          on:click={() => selection.toggleColumnSelection(processedColumn)}
+          on:mousedown={() => selection.onColumnSelectionStart(processedColumn)}
+          on:mouseenter={() =>
+            selection.onMouseEnterColumnHeaderWhileSelection(processedColumn)}
         />
         <SheetCellResizer columnIdentifierKey={columnId} />
       </div>
@@ -61,9 +57,15 @@
       let:htmlAttributes
       let:style
     >
-      <div {...htmlAttributes} {style}>
-        <NewColumnCell columns={$columns} on:addColumn={addColumn} />
+      <div {...htmlAttributes} class="new-column-cell" {style}>
+        <NewColumnCell />
       </div>
     </SheetCell>
   {/if}
 </SheetHeader>
+
+<style lang="scss">
+  .new-column-cell {
+    padding: 0 0.2rem;
+  }
+</style>

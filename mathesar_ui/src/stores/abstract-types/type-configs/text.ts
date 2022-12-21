@@ -9,7 +9,7 @@ import type {
   AbstractTypeDbConfig,
 } from '../types';
 
-const DB_TYPES = {
+export const DB_TYPES = {
   VARCHAR: 'character varying',
   CHAR: 'character',
   TEXT: 'text',
@@ -35,7 +35,7 @@ const dbForm: AbstractTypeConfigForm = {
       {
         type: 'input',
         variable: 'restrictFieldSize',
-        label: 'Restrict Field Size',
+        label: 'Set a maximum length',
       },
       {
         type: 'if',

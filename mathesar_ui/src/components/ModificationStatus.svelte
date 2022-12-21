@@ -1,101 +1,88 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { fade } from 'svelte/transition';
-
-  import {
-    Icon,
-    iconError,
-    iconSuccess,
-    Spinner,
-  } from '@mathesar-component-library';
-  import { iconUnsavedChanges } from '@mathesar/icons';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import StatusIndicator from './StatusIndicator.svelte';
 
-  let incomingRequestStatus: RequestStatus | undefined;
-  export { incomingRequestStatus as requestStatus };
+  let incomingRequestState: RequestStatus['state'] | undefined;
+  export { incomingRequestState as requestState };
   export let hasChanges = false;
 
-  let requestStatus: RequestStatus | undefined;
+  let requestState: RequestStatus['state'] | undefined;
   let timeout: number | undefined;
+  let transitionDuration = 0;
 
   function clearRequestStatus() {
-    requestStatus = undefined;
+    transitionDuration = 1000;
+    requestState = undefined;
   }
 
-  function handleNewIncomingRequestStatus(s: RequestStatus | undefined) {
+  function handleNewIncomingRequestStatus(
+    s: RequestStatus['state'] | undefined,
+  ) {
     window.clearTimeout(timeout);
     timeout = undefined;
-    requestStatus = s;
-    if (requestStatus?.state === 'success') {
+    transitionDuration = 0;
+    requestState = s;
+    if (requestState === 'success') {
       timeout = window.setTimeout(clearRequestStatus, 5000);
     }
   }
-  $: handleNewIncomingRequestStatus(incomingRequestStatus);
+  $: handleNewIncomingRequestStatus(incomingRequestState);
 
   function handleNewHasChanges(_hasChanges: boolean) {
     // If user gets server errors and then clears the form, we clear errors.
-    if (!_hasChanges && requestStatus?.state === 'failure') {
-      requestStatus = undefined;
+    if (!_hasChanges && requestState === 'failure') {
+      requestState = undefined;
     }
   }
   $: handleNewHasChanges(hasChanges);
 
-  $: transitionDuration = hasChanges ? 0 : 1000;
+  onDestroy(() => {
+    window.clearTimeout(timeout);
+  });
+
+  $: state = (():
+    | 'processing'
+    | 'failure'
+    | 'warning'
+    | 'success'
+    | undefined => {
+    if (requestState === 'processing') {
+      return 'processing';
+    }
+    if (hasChanges && requestState === 'failure') {
+      return 'failure';
+    }
+    if (hasChanges) {
+      return 'warning';
+    }
+    if (requestState === 'success') {
+      return 'success';
+    }
+    return undefined;
+  })();
 </script>
 
-{#if requestStatus?.state === 'processing'}
-  <span class="modification-status-indicator processing">
-    <span class="icon"><Spinner /></span>
-    <span>Saving Changes</span>
-  </span>
-{:else if hasChanges && requestStatus?.state === 'failure'}
-  <span class="modification-status-indicator failure">
-    <span class="icon"><Icon {...iconError} /></span>
-    <span>Unable to save changes</span>
-  </span>
-{:else if hasChanges}
-  <span class="modification-status-indicator unsaved">
-    <span class="icon"><Icon {...iconUnsavedChanges} /></span>
-    <span>Unsaved Changes</span>
-  </span>
-{:else if requestStatus?.state === 'success'}
+{#if state}
   <span
-    class="modification-status-indicator success"
+    class="modification-status-indicator"
     out:fade|local={{ duration: transitionDuration }}
   >
-    <span class="icon"><Icon {...iconSuccess} /></span>
-    <span>All Changes Saved</span>
+    <StatusIndicator
+      {state}
+      messages={{
+        processing: 'Saving Changes',
+        failure: 'Unable to save changes',
+        warning: 'Unsaved Changes',
+        success: 'All Changes Saved',
+      }}
+    />
   </span>
 {/if}
 
-<style>
+<style lang="scss">
   .modification-status-indicator {
-    border-radius: 500px;
-    padding: 0.5em 0.75rem;
-    font-size: var(--text-size-small);
     display: inline-flex;
-    align-items: center;
-    color: var(--slate-400);
-    white-space: nowrap;
-  }
-  .icon > :global(*) {
-    display: block;
-  }
-  .modification-status-indicator > :global(* + *) {
-    margin-left: 0.5em;
-  }
-  .processing {
-    background: var(--sky-200);
-  }
-  .unsaved {
-    background: var(--yellow-100);
-  }
-  .success {
-    background: var(--green-100);
-  }
-  .failure {
-    background-color: var(--danger-background-color);
-  }
-  .failure .icon {
-    color: var(--danger-color);
   }
 </style>

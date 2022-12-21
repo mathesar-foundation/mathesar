@@ -108,7 +108,7 @@
       {:else}
         <SelectTableWithinCurrentSchema
           autoSelect="none"
-          table={currentTable}
+          value={currentTable}
           on:change={(e) => updateBaseTable(e.detail)}
         />
       {/if}
@@ -125,7 +125,7 @@
 
     {#if isSaved}
       <ModificationStatus
-        requestStatus={$state.saveState}
+        requestState={$state.saveState?.state}
         hasChanges={$queryHasUnsavedChanges}
       />
     {/if}

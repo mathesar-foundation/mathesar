@@ -54,9 +54,9 @@ export { default as Notification } from './notification/Notification.svelte';
 export { ListBox, ListBoxOptions } from './list-box';
 export { default as Pagination } from './pagination/Pagination.svelte';
 export { default as Select } from './select/Select.svelte';
+export { default as SelectionList } from './selection-list/SelectionList.svelte';
 export { default as TabContainer } from './tabs/TabContainer.svelte';
 export { default as Tree } from './tree/Tree.svelte';
-export { default as Window } from './window/Window.svelte';
 
 // Systems
 export * from './label';
@@ -68,3 +68,4 @@ export * from './modal';
 export * from './toast';
 export * from './form-builder';
 export * from './common/icons';
+export * from './window';

@@ -4,6 +4,7 @@
 
   const { stores, api } = getSheetContext();
   const { horizontalScrollOffset } = stores;
+  const { rowWidth } = stores;
 
   export let inheritFontStyle = false;
   let headerRef: HTMLElement;
@@ -43,23 +44,29 @@
   data-sheet-element="header"
   class:inherit-font-style={inheritFontStyle}
 >
-  <slot />
+  <div style:width="{$rowWidth}px">
+    <slot />
+  </div>
 </div>
 
 <style lang="scss">
   [data-sheet-element='header'] {
-    height: var(--sheet-header-height, 32px);
     min-width: 100%;
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    border-bottom: 1px solid var(--color-gray-medium);
+    border-bottom: 1px solid var(--slate-200);
     user-select: none;
     overflow: hidden;
 
+    > div {
+      position: relative;
+      height: var(--sheet-header-height, 32px);
+    }
+
     :global([data-sheet-element='cell']) {
       border-bottom: none;
-      background: var(--color-gray-lighter);
+      background: var(--slate-100);
       font-size: var(--text-size-small);
       font-weight: 500;
       overflow: hidden;

@@ -22,6 +22,7 @@
   export let scrollOffset = 0;
 
   export let horizontalScrollOffset = 0;
+  export let paddingRight = 100;
 
   export let columnWidths: ImmutableMap<SheetColumnIdentifierKey, number> =
     new ImmutableMap();
@@ -30,6 +31,7 @@
     columns,
     getColumnIdentifier,
     columnWidths,
+    paddingRight,
   ));
 
   function getColumnWidth(
@@ -69,6 +71,7 @@
     rowWidth: writable(rowWidth),
     horizontalScrollOffset: writable(horizontalScrollOffset),
     scrollOffset: writable(scrollOffset),
+    paddingRight: writable(paddingRight),
   };
 
   // Setting these values in stores for reactivity in context
@@ -76,16 +79,18 @@
   $: stores.columnStyleMap.set(columnStyleMap);
   $: stores.horizontalScrollOffset.set(horizontalScrollOffset);
   $: stores.scrollOffset.set(scrollOffset);
+  $: stores.paddingRight.set(paddingRight);
 
   setSheetContext({ stores, api });
 
-  $: style = restrictWidthToRowWidth ? `width:${rowWidth + 2}px;` : undefined;
+  $: style = restrictWidthToRowWidth ? `width:${rowWidth}px;` : undefined;
 </script>
 
 <div
   class="sheet"
   class:has-border={hasBorder}
   class:uses-virtual-list={usesVirtualList}
+  class:set-to-row-width={restrictWidthToRowWidth}
   {style}
   on:click
 >
@@ -125,6 +130,10 @@
       right: 0;
       top: 0;
       bottom: 0;
+    }
+
+    &.set-to-row-width {
+      min-width: 100%;
     }
 
     :global([data-sheet-element='cell']) {

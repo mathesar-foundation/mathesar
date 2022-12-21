@@ -1,8 +1,6 @@
 <script lang="ts">
-  import type { ModalController } from '@mathesar-component-library';
   import {
     CancelOrProceedButtonPair,
-    ControlledModal,
     ensureReadable,
     LabeledInput,
     RadioGroup,
@@ -24,9 +22,10 @@
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { getAvailableName } from '@mathesar/utils/db';
+  import { onMount } from 'svelte';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
-  export let controller: ModalController;
+  export let onClose: (() => void) | undefined = undefined;
 
   type NamingStrategy = 'auto' | 'manual';
   const namingStrategyLabelMap = new Map<NamingStrategy, string>([
@@ -139,20 +138,28 @@
       // the constraint name validation shows an error due to the name being a
       // duplicate at that point.
       init();
-      controller.close();
+      onClose?.();
     } catch (e) {
       toast.error(`Unable to add constraint. ${getErrorMessage(e)}`);
     }
   }
+
+  function handleCancel() {
+    onClose?.();
+  }
+
+  onMount(() => {
+    init();
+  });
 </script>
 
-<ControlledModal {controller} on:open={init}>
-  <span slot="title">New Foreign Key Constraint</span>
+<div class="add-new-fk-constraint">
+  <span class="title">New Foreign Key Constraint</span>
   <Form>
     <FormField>
       <LabeledInput layout="stacked">
         <span slot="label">
-          Column in This Table Which References the Target Table
+          Column in this table which references the target table
         </span>
         <SelectColumn columns={$baseTableColumns} bind:column={baseColumn} />
       </LabeledInput>
@@ -160,7 +167,7 @@
 
     <FormField>
       <LabeledInput label="Target Table" layout="stacked">
-        <SelectTable {tables} bind:table={targetTable} autoSelect="clear" />
+        <SelectTable {tables} bind:value={targetTable} autoSelect="clear" />
       </LabeledInput>
     </FormField>
 
@@ -209,10 +216,21 @@
   </Form>
 
   <CancelOrProceedButtonPair
-    slot="footer"
     onProceed={handleSave}
-    onCancel={() => controller.close()}
+    onCancel={handleCancel}
     proceedButton={{ label: 'Add' }}
     {canProceed}
+    size="small"
   />
-</ControlledModal>
+</div>
+
+<style lang="scss">
+  .add-new-fk-constraint {
+    display: flex;
+    flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 1rem;
+    }
+  }
+</style>

@@ -1,6 +1,8 @@
 import { get } from 'svelte/store';
 import type { FieldStore, FieldValue, ValuedField } from './field';
 
+export type Filled<T> = Exclude<T, null | undefined>;
+
 export type Valid = { type: 'valid' };
 export type Invalid = { type: 'invalid'; errorMsg: string };
 export type ValidationOutcome = Valid | Invalid;
@@ -20,16 +22,6 @@ export function valid(): Valid {
 
 export function invalid(errorMsg: string): Invalid {
   return { type: 'invalid', errorMsg };
-}
-
-export function getErrors<T>(
-  value: T,
-  validators: ValidationFn<T>[],
-): string[] {
-  return validators
-    .map((fn) => fn(value))
-    .filter(isInvalid)
-    .map(({ errorMsg }) => errorMsg);
 }
 
 export function validIf<T>(
@@ -90,6 +82,33 @@ export function max(
     v === null || v === undefined || v <= upperBound
       ? valid()
       : invalid(msg ?? `Value must be at most ${upperBound}.`);
+}
+
+export function getErrors<T>({
+  value,
+  isRequired,
+  validators,
+}: {
+  value: T;
+  isRequired: boolean;
+  validators?: (ValidationFn<T> | ValidationFn<Filled<T>>)[];
+}): string[] {
+  if (isRequired) {
+    const outcome = required()(value);
+    if (outcome.type === 'invalid') {
+      return [outcome.errorMsg];
+    }
+  }
+  if (!validators) {
+    return [];
+  }
+  // We know value will be filled here because we already returned if the
+  // `required` validator failed.
+  const filledValue = value as Filled<T>;
+  return validators
+    .map((fn) => fn(filledValue))
+    .filter(isInvalid)
+    .map(({ errorMsg }) => errorMsg);
 }
 
 interface ComboValidationOutcome {

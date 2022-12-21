@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { ComponentProps, ComponentType, SvelteComponent } from 'svelte';
 
-  import { TextInput, type LabeledInput } from '@mathesar-component-library';
+  import { LabeledInput, TextInput } from '@mathesar-component-library';
   import type { FieldStore } from './field';
-  import FieldWrapper from './FieldWrapper.svelte';
   import FieldErrors from './FieldErrors.svelte';
+  import FieldLayout from './FieldLayout.svelte';
 
   type Layout = ComponentProps<LabeledInput>['layout'];
   type Value = $$Generic;
@@ -14,7 +14,7 @@
   // refactor that type to be generic.
   type ComponentAndProps<T extends SvelteComponent> = {
     component: ComponentType<T>;
-    props: ComponentProps<T>;
+    props?: ComponentProps<T>;
   };
 
   export let field: FieldStore<Value>;
@@ -29,25 +29,27 @@
   $: ({ showsError } = field);
 </script>
 
-<span class="field">
-  <FieldWrapper {label} {layout} {help}>
-    <slot name="help" slot="help" />
+<FieldLayout>
+  {#if label || $$slots.label}
+    <LabeledInput {label} {layout} {help}>
+      <slot name="label" slot="label" />
+      <slot name="help" slot="help" />
+      <svelte:component
+        this={inputComponent}
+        bind:value={$field}
+        hasError={$showsError}
+        {...inputComponentProps}
+      />
+    </LabeledInput>
+  {:else}
     <svelte:component
       this={inputComponent}
       bind:value={$field}
       hasError={$showsError}
       {...inputComponentProps}
-    />
-  </FieldWrapper>
+    >
+      <slot />
+    </svelte:component>
+  {/if}
   <FieldErrors {field} />
-</span>
-
-<style>
-  .field {
-    display: block;
-    --spacing: 1rem;
-  }
-  :global(.field + .field) {
-    margin-top: var(--spacing);
-  }
-</style>
+</FieldLayout>
