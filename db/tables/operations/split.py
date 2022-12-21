@@ -89,7 +89,7 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
             fk_column_name,
         )
         conn.execute(split_ins)
-        update_sequence_to_latest(conn, engine, extracted_table)
+        update_pk_sequence_to_latest(conn, engine, extracted_table)
 
         remainder_table_oid = get_oid_from_table(remainder_table_with_fk_column.name, schema, engine)
         deletion_column_data = [
@@ -100,7 +100,7 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
     return extracted_table, remainder_table_with_fk_column, fk_column_name
 
 
-def update_sequence_to_latest(conn, engine, extracted_table):
+def update_pk_sequence_to_latest(conn, engine, extracted_table):
     _preparer = engine.dialect.identifier_preparer
     quoted_table_name = _preparer.quote(extracted_table.schema) + "." + _preparer.quote(extracted_table.name)
     update_pk_sequence_stmt = func.setval(
