@@ -2,7 +2,7 @@
   import { Button, Icon } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import SaveStatusIndicator from '@mathesar/components/SaveStatusIndicator.svelte';
+  import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import TableNameAndDescription from '@mathesar/components/TableNameAndDescription.svelte';
   import { iconInspector } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
@@ -26,7 +26,10 @@
     database.name,
     schema.id,
     {
-      baseTableId: id,
+      baseTable: {
+        id,
+        name: table.name,
+      },
       columns: $columns,
       terseGrouping: $grouping.terse(),
     },
@@ -49,14 +52,10 @@
       <GroupDropdown {grouping} />
     </div>
 
-    {#if $sheetState}
-      <SaveStatusIndicator status={$sheetState} />
-    {/if}
+    <ModificationStatus requestState={$sheetState} />
 
     <div class="aux-actions">
-      <!-- Restricting Data Explorer redirection to single column
-      grouping for the time being -->
-      {#if summarizationUrl && $grouping.entries.length === 1}
+      {#if summarizationUrl}
         <SummarizationLink {summarizationUrl} />
       {/if}
       <Button
@@ -99,11 +98,11 @@
     padding: 1rem;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
   }
   .quick-access {
     display: flex;
     flex-direction: row;
+    margin-right: 0.6em;
 
     > :global(* + *) {
       margin-left: 0.5rem;
@@ -114,6 +113,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-left: auto;
 
     > :global(* + *) {
       margin-left: 1rem;

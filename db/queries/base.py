@@ -139,8 +139,12 @@ class DBQuery:
                 name=f'{self.name}_{i}'
             ).transformed_relation.columns
         }
-
-        return initial_columns_map | transforms_columns_map | output_columns_map
+        map_of_alias_to_sa_col = initial_columns_map | transforms_columns_map | output_columns_map
+        for sa_col in map_of_alias_to_sa_col.values():
+            # Below assert will throw an UnknownDbTypeId exception if something is wrong.
+            # Purpose of this is to fail early.
+            assert sa_col.db_type
+        return map_of_alias_to_sa_col
 
     @property
     def sa_output_columns(self):
