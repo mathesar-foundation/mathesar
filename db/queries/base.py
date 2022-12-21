@@ -179,6 +179,7 @@ class DBQuery:
         from_clause = base_table
         # We cache this to avoid copies of the same join path to a given table
         jp_path_alias_map = {(): base_table}
+        jp_path_unique_set = set()
 
         def _get_table(oid):
             """
@@ -199,15 +200,22 @@ class DBQuery:
 
             for i, jp in enumerate(jp_path):
                 left = jp_path_alias_map[jp_path[:i]]
-                right = _get_table(jp[1][0]).alias()
-                jp_path_alias_map[jp_path[:i + 1]] = right
+                right_table = jp_path[:i + 1]
+                if right_table in jp_path_alias_map:
+                    right = jp_path_alias_map[right_table]
+                else:
+                    right = _get_table(jp[1][0]).alias()
+                    jp_path_alias_map[jp_path[:i + 1]] = right
                 left_col_name = _get_column_name(jp[0][0], jp[0][1])
                 right_col_name = _get_column_name(jp[1][0], jp[1][1])
                 left_col = left.columns[left_col_name]
                 right_col = right.columns[right_col_name]
-                from_clause = from_clause.join(
-                    right, onclause=left_col == right_col, isouter=True,
-                )
+                join_columns = f"{left_col}, {right_col}"
+                if join_columns not in jp_path_unique_set:
+                    jp_path_unique_set.add(join_columns)
+                    from_clause = from_clause.join(
+                        right, onclause=left_col == right_col, isouter=True,
+                    )
 
             return right.columns[col_name].label(col.alias)
 
