@@ -8,11 +8,11 @@
   import { iconSchema, iconEdit } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { Button, TabContainer, Icon } from '@mathesar-component-library';
+  import { States } from '@mathesar/api/utils/requestUtils';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
-  import { States } from '@mathesar/api/utils/requestUtils';
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
 
