@@ -1,3 +1,5 @@
+from sqlalchemy import inspect
+
 from db.tables.operations import select as tables_select
 from db.tables.operations.select import get_joinable_tables
 from db.transforms.base import Summarize
@@ -172,14 +174,20 @@ def _is_initial_column_unique_constrained(initial_column, engine, metadata):
         engine=engine,
         metadata=metadata,
     )
-    return _is_sa_column_unique_constrained(sa_column)
+    return _is_sa_column_unique_constrained(sa_column, engine)
 
 
-def _is_sa_column_unique_constrained(sa_column):
-    return bool(
-        sa_column.primary_key
-        or sa_column.unique
-    )
+def _is_sa_column_unique_constrained(sa_column, engine):
+    is_primary_key = bool(sa_column.primary_key)
+    if is_primary_key:
+        return True
+    table_name = sa_column.table.name
+    schema_name = sa_column.table.schema
+    unique_constraints = inspect(engine).get_unique_constraints(table_name, schema_name)
+    for unique_constraint in unique_constraints:
+        if sa_column.name in unique_constraint['column_names']:
+            return True
+    return False
 
 
 def _get_oid_of_initial_column(initial_column):
