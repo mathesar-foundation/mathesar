@@ -12,6 +12,9 @@
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
+  import { States } from '@mathesar/api/utils/requestUtils';
+  import TableSkeleton from './TableSkeleton.svelte';
+  import ExplorationSkeleton from './ExplorationSkeleton.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -36,6 +39,8 @@
   let activeTab: TabItem;
   $: tablesMap = $tablesStore.data;
   $: explorationsMap = $queries.data;
+  $: isTablesLoading = $tablesStore.state === States.Loading;
+  $: isExplorationsLoading = $queries.requestStatus.state === 'processing';
 
   $: tabs = [
     {
@@ -96,20 +101,35 @@
     </div>
     {#if activeTab?.id === 'overview'}
       <div class="tab-container">
-        <SchemaOverview {tablesMap} {explorationsMap} {database} {schema} />
-      </div>
-    {:else if activeTab?.id === 'tables'}
-      <div class="tab-container">
-        <SchemaTables {tablesMap} {database} {schema} />
-      </div>
-    {:else if activeTab?.id === 'explorations'}
-      <div class="tab-container">
-        <SchemaExplorations
-          hasTablesToExplore={!!tablesMap.size}
+        <SchemaOverview
+          {isTablesLoading}
+          {isExplorationsLoading}
+          {tablesMap}
           {explorationsMap}
           {database}
           {schema}
         />
+      </div>
+    {:else if activeTab?.id === 'tables'}
+      <div class="tab-container">
+        {#if isTablesLoading}
+          <TableSkeleton />
+        {:else}
+          <SchemaTables {tablesMap} {database} {schema} />
+        {/if}
+      </div>
+    {:else if activeTab?.id === 'explorations'}
+      <div class="tab-container">
+        {#if isExplorationsLoading}
+          <ExplorationSkeleton />
+        {:else}
+          <SchemaExplorations
+            hasTablesToExplore={!!tablesMap.size}
+            {explorationsMap}
+            {database}
+            {schema}
+          />
+        {/if}
       </div>
     {/if}
   </TabContainer>
