@@ -117,6 +117,7 @@
      * reactive $newFkColumnName value is reset.
      */
     const constFkColumnName = $newFkColumnName;
+    const newTableName = $tableName;
     const followUps: Promise<unknown>[] = [];
     try {
       if ($targetType === 'existingTable') {
@@ -133,12 +134,25 @@
         const response = await splitTable({
           id: $tabularData.id,
           idsOfColumnsToExtract: $columns.map((c) => c.id),
-          extractedTableName: $tableName,
+          extractedTableName: newTableName,
           newFkColumnName: $newFkColumnName,
         });
         followUps.push(getTableFromStoreOrApi(response.extracted_table));
       }
       followUps.push($tabularData.refresh());
+      if ($targetType === 'newTable') {
+        toast.success({
+          title: `A new table '${newTableName}' has been created with the extracted column(s)`,
+          contentComponent: SuccessToastContent,
+          contentComponentProps: {
+            newFkColumnName: constFkColumnName,
+          },
+        });
+      } else {
+        toast.success({
+          title: `The column(s) have been moved to '${$linkedTable?.table.name}'`,
+        });
+      }
       await Promise.all(followUps);
       if ($targetType === 'newTable') {
         // We ase using `get(processedColumns)` instead of `$processedColumns`
@@ -154,10 +168,6 @@
         selection.toggleColumnSelection(newFkColumn);
         await tick();
         scrollBasedOnSelection();
-        toast.success({
-          contentComponent: SuccessToastContent,
-          contentComponentProps: { newFkColumnName: constFkColumnName },
-        });
       }
       controller.close();
     } catch (e) {
