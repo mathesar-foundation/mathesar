@@ -24,7 +24,7 @@
   export let fillTabWidth = false;
   export let fillContainerHeight = false;
   export let uniformTabWidth = true;
-  export let tabStyle = 'default';
+  export let tabStyle: 'default' | 'compact' = 'default';
 
   function selectActiveTab(e: Event, tab: Tab) {
     activeTab = tab;
