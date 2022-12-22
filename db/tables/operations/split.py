@@ -108,7 +108,7 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
         fk_column_attnum = get_column_attnum_from_name(remainder_table_oid, fk_column_name, engine, get_empty_metadata())
         if relationship_fk_column_name != fk_column_name:
             rename_column(remainder_table_oid, fk_column_attnum, engine, conn, relationship_fk_column_name)
-    return extracted_table, remainder_table_with_fk_column, fk_column_name
+    return extracted_table, remainder_table_with_fk_column, fk_column_attnum
 
 
 def update_pk_sequence_to_latest(conn, engine, extracted_table):
