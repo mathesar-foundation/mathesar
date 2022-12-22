@@ -198,9 +198,9 @@
 
   async function handleSave() {
     await postAPI('/api/db/v0/links/', getRequestBody());
+    toast.success('Successfully created a link');
     await reFetchOtherThingsThatChanged();
     close();
-    toast.success('Link created.');
   }
 </script>
 

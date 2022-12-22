@@ -2,16 +2,17 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { iconTableLink } from '@mathesar/icons';
 
+  export let tablename: string;
   export let newFkColumnName: string;
 </script>
 
-<div class="title">A link column has been added to this table</div>
-<div class="message">
-  The extracted columns are now linked via
-  <NameWithIcon
-    icon={iconTableLink}
-    name={newFkColumnName}
-    truncate={false}
-    bold
-  />
-</div>
+<span>
+  A new table '{tablename}' has been created with the extracted columns. It is
+  now linked via
+</span>
+<NameWithIcon
+  icon={iconTableLink}
+  name={newFkColumnName}
+  truncate={false}
+  bold
+/>
