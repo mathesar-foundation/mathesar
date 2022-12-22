@@ -14,7 +14,7 @@ from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import (
-    get_column_attnum_from_name, get_column_attnum_from_names_as_map, get_column_name_from_attnum,
+    get_column_attnum_from_names_as_map, get_column_name_from_attnum,
     get_map_of_attnum_to_column_name, get_map_of_attnum_and_table_oid_to_column_name,
 )
 from db.constraints.operations.create import create_constraint
@@ -625,7 +625,7 @@ class Table(DatabaseObject, Relation):
         remainder_column_names = column_names_id_map.keys() - extracted_column_names
 
         # Mutate on Postgres
-        extracted_sa_table, remainder_sa_table, remainder_fk_name = extract_columns_from_table(
+        extracted_sa_table, remainder_sa_table, linking_fk_column_attnum = extract_columns_from_table(
             self.oid,
             columns_attnum_to_extract,
             extracted_table_name,
@@ -646,13 +646,7 @@ class Table(DatabaseObject, Relation):
         remainder_table = Table.current_objects.get(oid=remainder_table_oid)
         remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
         reset_reflection()
-        remainder_fk_column_attnum = get_column_attnum_from_name(
-            remainder_table.oid,
-            remainder_fk_name,
-            remainder_table._sa_engine,
-            metadata=get_empty_metadata()
-        )
-        remainder_fk_column = Column.objects.get(table=remainder_table, attnum=remainder_fk_column_attnum)
+        remainder_fk_column = Column.objects.get(table=remainder_table, attnum=linking_fk_column_attnum)
 
         return extracted_table, remainder_table, remainder_fk_column
 
