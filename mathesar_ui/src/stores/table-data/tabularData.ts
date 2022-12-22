@@ -175,7 +175,11 @@ export class TabularData {
       const firstExtractedColumnWithSort = extractedColumnIds.find((columnId) =>
         s.has(columnId),
       );
-      if (firstExtractedColumnWithSort && foreignKeyColumnId) {
+      if (
+        firstExtractedColumnWithSort &&
+        foreignKeyColumnId &&
+        !s.has(foreignKeyColumnId)
+      ) {
         const sortDirection = s.get(firstExtractedColumnWithSort);
         return s
           .without(extractedColumnIds)
@@ -188,7 +192,11 @@ export class TabularData {
       const extractedColumnsHaveGrouping = extractedColumnIds.some((columnId) =>
         g.hasColumn(columnId),
       );
-      if (extractedColumnsHaveGrouping && foreignKeyColumnId) {
+      if (
+        extractedColumnsHaveGrouping &&
+        foreignKeyColumnId &&
+        !g.hasColumn(foreignKeyColumnId)
+      ) {
         return g.withoutColumns(extractedColumnIds).withEntry({
           columnId: foreignKeyColumnId,
         });
