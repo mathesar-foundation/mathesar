@@ -50,8 +50,11 @@
   $: ({ processedColumns, constraintsDataStore, selection } = $tabularData);
   $: ({ constraints } = $constraintsDataStore);
   $: availableProcessedColumns = [...$processedColumns.values()];
-  $: availableColumns = availableProcessedColumns.map((c) => c.column);
   $: ({ targetType, columns, isOpen } = controller);
+  $: selectedColumnNames = new Set($columns.map((c) => c.column.name));
+  $: availableColumns = availableProcessedColumns
+    .map((c) => c.column)
+    .filter((c) => !selectedColumnNames.has(c.name));
   $: linkedTable = requiredField<LinkedTable | undefined>(undefined);
   $: tableName = requiredField('', [$validateNewTableName]);
   $: newFkColumnName = requiredField('', [
@@ -81,13 +84,16 @@
   $: actionTitleCase = $targetType === 'newTable' ? 'Extract' : 'Move';
   $: s = $columns.length > 1 ? 's' : '';
 
-  function handleTableNameUpdate(newTableName: string) {
+  function suggestNewFkColumnName(
+    newTableName: string,
+    newAvailableColumns: { name: string }[],
+  ) {
     $newFkColumnName = getSuggestedFkColumnName(
       { name: newTableName },
-      availableColumns,
+      newAvailableColumns,
     );
   }
-  $: handleTableNameUpdate($tableName);
+  $: suggestNewFkColumnName($tableName, availableColumns);
 
   function handleColumnsChange(_columns: ProcessedColumn[]) {
     if (!$isOpen) {
