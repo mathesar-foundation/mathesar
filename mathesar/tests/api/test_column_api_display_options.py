@@ -306,12 +306,12 @@ def test_default_display_options_for_mathesar_money(
 ):
     name = "moneycolumn"
     expected_display_options = {
-            'use_grouping': 'true',
-            'number_format': None,
-            'currency_symbol': None,
-            'maximum_fraction_digits': 2,
-            'minimum_fraction_digits': 2,
-            'currency_symbol_location': 'after-minus'}
+        'use_grouping': 'true',
+        'number_format': None,
+        'currency_symbol': None,
+        'maximum_fraction_digits': 2,
+        'minimum_fraction_digits': 2,
+        'currency_symbol_location': 'after-minus'}
 
     data = {"name": name, "type": MathesarCustomType.MATHESAR_MONEY.id, "display_options": None}
 
