@@ -91,7 +91,7 @@
   >
     <Button slot="action" on:click={addSchema} appearance="primary">
       <Icon {...iconAddNew} />
-      Create Schema
+      <span>Create Schema</span>
     </Button>
   </AppSecondaryHeader>
 
