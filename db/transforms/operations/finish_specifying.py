@@ -182,7 +182,8 @@ def _is_sa_column_unique_constrained(sa_column, engine):
     if is_primary_key:
         return True
     table_name = sa_column.table.name
-    unique_constraints = inspect(engine).get_unique_constraints(table_name)
+    schema_name = sa_column.table.schema
+    unique_constraints = inspect(engine).get_unique_constraints(table_name, schema_name)
     for unique_constraint in unique_constraints:
         if sa_column.name in unique_constraint['column_names']:
             return True
