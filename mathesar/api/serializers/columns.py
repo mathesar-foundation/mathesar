@@ -216,10 +216,10 @@ class ColumnSerializer(SimpleColumnSerializer):
                     if f not in self.initial_data
                 })
         return data
-    
+
     def to_representation(self, instance):
         # Set default display_options for mathesar_money type if none are provided.
-        if(
+        if (
             instance.db_type == MathesarCustomType.MATHESAR_MONEY
             and instance.display_options is None
         ):
