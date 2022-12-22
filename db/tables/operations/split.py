@@ -2,8 +2,11 @@ from sqlalchemy import exists, func, literal, select
 
 from db import constants
 from db.columns.base import MathesarColumn
-from db.columns.operations.alter import batch_alter_table_drop_columns
-from db.columns.operations.select import get_column_names_from_attnums
+from db.columns.operations.alter import batch_alter_table_drop_columns, rename_column
+from db.columns.operations.select import (
+    get_column_attnum_from_name,
+    get_column_names_from_attnums,
+)
 from db.links.operations.create import create_foreign_key_link
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table, reflect_table_from_oid
@@ -18,6 +21,11 @@ def _create_split_tables(extracted_table_name, extracted_columns, remainder_tabl
         engine,
     )
     fk_column_name = fk_column_name if fk_column_name else f"{extracted_table.name}_{constants.ID}"
+    extracted_column_names = [
+        col.name for col in extracted_columns
+    ]
+    if fk_column_name in extracted_column_names:
+        fk_column_name = f"mathesar_temp_{fk_column_name}"
     remainder_table_oid = get_oid_from_table(remainder_table_name, schema, engine)
     extracted_table_oid = get_oid_from_table(extracted_table_name, schema, engine)
     create_foreign_key_link(engine, schema, fk_column_name, remainder_table_oid, extracted_table_oid)
@@ -97,6 +105,9 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
             for column_attnum in extracted_column_attnums
         ]
         batch_alter_table_drop_columns(remainder_table_oid, deletion_column_data, conn, engine)
+        fk_column_attnum = get_column_attnum_from_name(remainder_table_oid, fk_column_name, engine, get_empty_metadata())
+        if relationship_fk_column_name != fk_column_name:
+            rename_column(remainder_table_oid, fk_column_attnum, engine, conn, relationship_fk_column_name)
     return extracted_table, remainder_table_with_fk_column, fk_column_name
 
 
