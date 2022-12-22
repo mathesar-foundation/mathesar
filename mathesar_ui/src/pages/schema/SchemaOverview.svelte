@@ -54,7 +54,7 @@
       {/if}
     </div>
 
-    {#if tablesMap.size && explorationsMap.size}
+    {#if tablesMap.size && explorationsMap.size && !isExplorationsLoading}
       <div class="vertical-container">
         <OverviewHeader title="Explore your Data" />
         <span>
