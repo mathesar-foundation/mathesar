@@ -142,16 +142,15 @@
       followUps.push($tabularData.refresh());
       if ($targetType === 'newTable') {
         toast.success({
-          title: `Successfully created '${newTableName}'`,
+          title: `A new table '${newTableName}' has been created with the extracted column(s)`,
           contentComponent: SuccessToastContent,
           contentComponentProps: {
-            tablename: newTableName,
             newFkColumnName: constFkColumnName,
           },
         });
       } else {
         toast.success({
-          title: `Successfully moved the columns to '${$linkedTable?.table.name}'`,
+          title: `The column(s) have been moved to '${$linkedTable?.table.name}'`,
         });
       }
       await Promise.all(followUps);
@@ -172,10 +171,7 @@
       }
       controller.close();
     } catch (e) {
-      toast.error({
-        title: 'Failed to extract columns',
-        message: getErrorMessage(e),
-      });
+      toast.error(getErrorMessage(e));
     }
   }
 </script>
