@@ -119,7 +119,8 @@
     const constFkColumnName = $newFkColumnName;
     const newTableName = $tableName;
     const followUps: Promise<unknown>[] = [];
-    const extractedColumnIds = $columns.map((c) => c.id);
+    const extractedColumns = $columns;
+    const extractedColumnIds = extractedColumns.map((c) => c.id);
     try {
       if ($targetType === 'existingTable') {
         const targetTableId = $linkedTable?.table.id;
@@ -162,9 +163,15 @@
           },
         });
       } else {
-        toast.success({
-          title: `The column(s) have been moved to '${$linkedTable?.table.name}'`,
-        });
+        const columnNames = extractedColumns.map(
+          (processedColumn) => processedColumn.column.name,
+        );
+        const message = `${
+          columnNames.length > 1
+            ? `Columns ${columnNames.join(',')} have`
+            : `Column ${columnNames[0]} has`
+        } been moved to table '${$linkedTable?.table.name}'`;
+        toast.success(message);
       }
       controller.close();
       await Promise.all(followUps);
