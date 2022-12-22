@@ -119,27 +119,40 @@
     const constFkColumnName = $newFkColumnName;
     const newTableName = $tableName;
     const followUps: Promise<unknown>[] = [];
+    const extractedColumnIds = $columns.map((c) => c.id);
     try {
       if ($targetType === 'existingTable') {
         const targetTableId = $linkedTable?.table.id;
         if (!targetTableId) {
           throw new Error('No target table selected');
         }
-        await moveColumns(
-          $tabularData.id,
-          $columns.map((c) => c.id),
-          targetTableId,
+        await moveColumns($tabularData.id, extractedColumnIds, targetTableId);
+        const fkColumns = $linkedTable?.columns ?? [];
+        let fkColumnId: number | undefined = undefined;
+        if (fkColumns.length === 1) {
+          fkColumnId = fkColumns[0].column.id;
+        }
+        followUps.push(
+          $tabularData.refreshAfterColumnExtraction(
+            extractedColumnIds,
+            fkColumnId,
+          ),
         );
       } else {
         const response = await splitTable({
           id: $tabularData.id,
-          idsOfColumnsToExtract: $columns.map((c) => c.id),
+          idsOfColumnsToExtract: extractedColumnIds,
           extractedTableName: newTableName,
           newFkColumnName: $newFkColumnName,
         });
         followUps.push(getTableFromStoreOrApi(response.extracted_table));
+        followUps.push(
+          $tabularData.refreshAfterColumnExtraction(
+            extractedColumnIds,
+            response.fk_column,
+          ),
+        );
       }
-      followUps.push($tabularData.refresh());
       if ($targetType === 'newTable') {
         toast.success({
           title: `A new table '${newTableName}' has been created with the extracted column(s)`,
@@ -153,6 +166,7 @@
           title: `The column(s) have been moved to '${$linkedTable?.table.name}'`,
         });
       }
+      controller.close();
       await Promise.all(followUps);
       if ($targetType === 'newTable') {
         // We ase using `get(processedColumns)` instead of `$processedColumns`
@@ -169,7 +183,6 @@
         await tick();
         scrollBasedOnSelection();
       }
-      controller.close();
     } catch (e) {
       toast.error(getErrorMessage(e));
     }

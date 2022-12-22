@@ -53,9 +53,11 @@ export class Grouping {
     });
   }
 
-  withoutColumn(columnId: number): Grouping {
+  withoutColumns(columnIds: number[]): Grouping {
     return new Grouping({
-      entries: this.entries.filter((entry) => entry.columnId !== columnId),
+      entries: this.entries.filter(
+        (entry) => !columnIds.includes(entry.columnId),
+      ),
     });
   }
 
