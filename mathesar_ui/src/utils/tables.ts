@@ -1,4 +1,5 @@
 import type { TableEntry } from '@mathesar/api/types/tables';
+import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
 export function isTableImportConfirmationRequired(
   table: Partial<Pick<TableEntry, 'import_verified' | 'data_files'>>,
@@ -13,4 +14,23 @@ export function isTableImportConfirmationRequired(
     table.data_files !== undefined &&
     table.data_files.length > 0
   );
+}
+
+export function orderProcessedColumns(processedColumns: Map<number, ProcessedColumn>, columnOrder: number[] = [] ):Map<number, ProcessedColumn> {
+  const allColumns = [...processedColumns.values()];
+  const orderedColumns = new Map<number, ProcessedColumn>();
+  console.log("orderProcessedColumns")
+  console.log(columnOrder);
+  columnOrder = columnOrder ?? [];
+  columnOrder.forEach((id) => {
+    const index = allColumns.map((column) => column.id).indexOf(id);
+    if (index !== -1) {
+      const orderColumn = allColumns.splice(index, 1)[0];
+      orderedColumns.set(orderColumn.id, orderColumn);
+    }
+  });
+  allColumns.forEach((column) => {
+    orderedColumns.set(column.id, column);
+  });
+  return orderedColumns;
 }

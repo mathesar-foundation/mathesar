@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ImmutableMap } from '@mathesar-component-library';
+  import { ImmutableMap } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import {
     getTabularDataStoreFromContext,
@@ -8,22 +8,25 @@
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { orderProcessedColumns } from '@mathesar/utils/tables';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
   import TableInspector from './table-inspector/TableInspector.svelte';
+  import type { TableEntry } from '@mathesar/api/tables';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  export let context: 'page' | 'widget' = 'page';
+  export let usesVirtualList = false;
+  export let allowsDdlOperations = false;
+  export let table: TableEntry;
 
-  $: usesVirtualList = context === 'page';
-  $: allowsDdlOperations = context === 'page';
-  $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection } = $tabularData);
   $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
+  $: ({ settings } = table || {settings : {column_order: []}});
+  $: ({ column_order } = settings  || {column_order: []});
   $: hasNewColumnButton = allowsDdlOperations;
   /**
    * These are separate variables for readability and also to keep the door open
@@ -32,9 +35,10 @@
    */
   $: supportsTableInspector = allowsDdlOperations;
   $: sheetColumns = (() => {
+    const orderedProcessedColumns = orderProcessedColumns($processedColumns, column_order);
     const columns = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...$processedColumns.values(),
+      ...orderedProcessedColumns.values(),
     ];
     if (hasNewColumnButton) {
       columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });
@@ -44,7 +48,7 @@
 
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
-    [ID_ADD_NEW_COLUMN, 32],
+    [ID_ADD_NEW_COLUMN, 100],
   ]);
   $: showTableInspector =
     $isTableInspectorVisible && !$isLoading && supportsTableInspector;
@@ -82,12 +86,10 @@
           getColumnIdentifier={(entry) => entry.column.id}
           {usesVirtualList}
           {columnWidths}
-          hasBorder={sheetHasBorder}
-          restrictWidthToRowWidth={!usesVirtualList}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
         >
-          <Header {hasNewColumnButton} />
+          <Header {hasNewColumnButton} {column_order} {table} />
           <Body {usesVirtualList} />
         </Sheet>
       {/if}
@@ -96,7 +98,7 @@
       <TableInspector />
     {/if}
   </div>
-  <StatusPane {context} />
+  <StatusPane />
 </div>
 
 <style>

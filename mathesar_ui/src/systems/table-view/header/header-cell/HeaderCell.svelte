@@ -37,26 +37,28 @@
 
 <div class="header-cell-root">
   <CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
-  <Button appearance="ghost" on:click on:mousedown on:mouseenter>
-    <ProcessedColumnName {processedColumn} />
-    {#if sorter || hasFilter || grouped}
-      <div class="indicator-icons">
-        {#if sorter}
-          <Icon
-            {...sorter === SortDirection.A
-              ? iconSortAscending
-              : iconSortDescending}
-          />
-        {/if}
-        {#if hasFilter}
-          <Icon {...iconFiltering} />
-        {/if}
-        {#if grouped}
-          <Icon {...iconGrouping} />
-        {/if}
-      </div>
-    {/if}
-  </Button>
+  <div on:dragstart on:drop on:dragover on:dragenter on:dragleave draggable={isSelected}>
+    <Button appearance="ghost" on:click on:mousedown on:mouseenter>
+      <ProcessedColumnName {processedColumn} />
+      {#if sorter || hasFilter || grouped}
+        <div class="indicator-icons">
+          {#if sorter}
+            <Icon
+              {...sorter === SortDirection.A
+                ? iconSortAscending
+                : iconSortDescending}
+            />
+          {/if}
+          {#if hasFilter}
+            <Icon {...iconFiltering} />
+          {/if}
+          {#if grouped}
+            <Icon {...iconGrouping} />
+          {/if}
+        </div>
+      {/if}
+    </Button>
+  </div>
 </div>
 
 <style lang="scss">

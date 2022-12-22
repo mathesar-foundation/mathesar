@@ -46,7 +46,7 @@
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
     <ActionsPane {database} {schema} {table} />
-    <TableView />
+    <TableView {table} />
   </div>
 </LayoutWithHeader>
 

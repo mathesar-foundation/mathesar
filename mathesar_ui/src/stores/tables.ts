@@ -459,3 +459,12 @@ export function saveRecordSummaryTemplate(
     preview_settings: customized ? previewSettings : { customized },
   });
 }
+
+export function saveColumnOrder(
+  table: Pick<TableEntry, 'id' | 'settings' | 'schema'>,
+  columnOrder: TableSettings['column_order'],
+): Promise<void> {
+  return saveTableSettings(table, {
+    column_order: columnOrder
+  });
+}
