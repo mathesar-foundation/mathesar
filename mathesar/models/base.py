@@ -649,7 +649,7 @@ class Table(DatabaseObject, Relation):
         remainder_fk_column_attnum = get_column_attnum_from_name(
             remainder_table.oid,
             remainder_fk_name,
-            remainder_table._sa,
+            remainder_table._sa_engine,
             metadata=get_empty_metadata()
         )
         remainder_fk_column = Column.objects.get(table=remainder_table, attnum=remainder_fk_column_attnum)
