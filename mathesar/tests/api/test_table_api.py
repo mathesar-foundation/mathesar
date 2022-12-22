@@ -1564,7 +1564,7 @@ def test_table_extract_columns_specify_fk_column_name(create_patents_table, clie
     column_name_id_map = table.get_column_name_id_bidirectional_map()
     column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
-    relationship_fk_column_name = "patent_info"
+    relationship_fk_column_name = "Patent Number"
     extract_table_name = "Patent Info"
     split_data = {
         'extract_columns': column_ids_to_extract,

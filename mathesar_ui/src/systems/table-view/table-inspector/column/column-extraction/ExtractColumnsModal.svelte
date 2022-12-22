@@ -50,8 +50,11 @@
   $: ({ processedColumns, constraintsDataStore, selection } = $tabularData);
   $: ({ constraints } = $constraintsDataStore);
   $: availableProcessedColumns = [...$processedColumns.values()];
-  $: availableColumns = availableProcessedColumns.map((c) => c.column);
   $: ({ targetType, columns, isOpen } = controller);
+  $: selectedColumnNames = new Set($columns.map((c) => c.column.name));
+  $: availableColumns = availableProcessedColumns
+    .map((c) => c.column)
+    .filter((c) => !selectedColumnNames.has(c.name));
   $: linkedTable = requiredField<LinkedTable | undefined>(undefined);
   $: tableName = requiredField('', [$validateNewTableName]);
   $: newFkColumnName = requiredField('', [
@@ -81,13 +84,16 @@
   $: actionTitleCase = $targetType === 'newTable' ? 'Extract' : 'Move';
   $: s = $columns.length > 1 ? 's' : '';
 
-  function handleTableNameUpdate(newTableName: string) {
+  function suggestNewFkColumnName(
+    newTableName: string,
+    newAvailableColumns: { name: string }[],
+  ) {
     $newFkColumnName = getSuggestedFkColumnName(
       { name: newTableName },
-      availableColumns,
+      newAvailableColumns,
     );
   }
-  $: handleTableNameUpdate($tableName);
+  $: suggestNewFkColumnName($tableName, availableColumns);
 
   function handleColumnsChange(_columns: ProcessedColumn[]) {
     if (!$isOpen) {
@@ -111,6 +117,7 @@
      * reactive $newFkColumnName value is reset.
      */
     const constFkColumnName = $newFkColumnName;
+    const newTableName = $tableName;
     const followUps: Promise<unknown>[] = [];
     try {
       if ($targetType === 'existingTable') {
@@ -127,12 +134,25 @@
         const response = await splitTable({
           id: $tabularData.id,
           idsOfColumnsToExtract: $columns.map((c) => c.id),
-          extractedTableName: $tableName,
+          extractedTableName: newTableName,
           newFkColumnName: $newFkColumnName,
         });
         followUps.push(getTableFromStoreOrApi(response.extracted_table));
       }
       followUps.push($tabularData.refresh());
+      if ($targetType === 'newTable') {
+        toast.success({
+          title: `A new table '${newTableName}' has been created with the extracted column(s)`,
+          contentComponent: SuccessToastContent,
+          contentComponentProps: {
+            newFkColumnName: constFkColumnName,
+          },
+        });
+      } else {
+        toast.success({
+          title: `The column(s) have been moved to '${$linkedTable?.table.name}'`,
+        });
+      }
       await Promise.all(followUps);
       if ($targetType === 'newTable') {
         // We ase using `get(processedColumns)` instead of `$processedColumns`
@@ -148,10 +168,6 @@
         selection.toggleColumnSelection(newFkColumn);
         await tick();
         scrollBasedOnSelection();
-        toast.success({
-          contentComponent: SuccessToastContent,
-          contentComponentProps: { newFkColumnName: constFkColumnName },
-        });
       }
       controller.close();
     } catch (e) {
