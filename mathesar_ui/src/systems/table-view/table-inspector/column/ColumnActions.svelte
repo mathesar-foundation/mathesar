@@ -57,7 +57,7 @@
     <div class="action-item">
       <div>
         <Icon {...iconMoveColumnsToNewLinkedTable} />
-        <span>New linked table from column{s}</span>
+        <span>Extract Column{s} Into a New Table</span>
       </div>
       <Icon {...iconSettings} />
     </div>
@@ -67,7 +67,7 @@
       <div class="action-item">
         <div>
           <Icon {...iconMoveColumnsToExistingLinkedTable} />
-          <span>Move column{s} to existing linked table</span>
+          <span>Move Column{s} to Linked Table</span>
         </div>
         <Icon {...iconSettings} />
       </div>

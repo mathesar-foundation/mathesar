@@ -275,7 +275,7 @@ def test_DBQuery_all_sa_columns_map_overwriting(engine_with_library):
                     {
                         "input_alias": "Checkout",
                         "output_alias": "Checkout_arr",
-                        "function": "aggregate_to_array"
+                        "function": "distinct_aggregate_to_array"
                     },
                 ]
             }
