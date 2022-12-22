@@ -30,12 +30,14 @@
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { columnNameIsAvailable } from '@mathesar/utils/columnUtils';
+  import {
+    columnNameIsAvailable,
+    getSuggestedFkColumnName,
+  } from '@mathesar/utils/columnUtils';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import Pill from './LinkTablePill.svelte';
   import {
     columnNameIsNotId,
-    suggestFkColumnName,
     suggestMappingTableName,
     type LinkType,
   } from './linkTableUtils';
@@ -53,12 +55,10 @@
   $: tables = [...$tablesDataStore.data.values()];
   $: ({ columnsDataStore } = $tabularData);
   $: baseColumns = columnsDataStore.columns;
-  $: baseColumnNames = new Set($baseColumns.map((c) => c.name));
   $: targetColumnsStore = target
     ? new ColumnsDataStore({ parentId: target.id })
     : undefined;
   $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
-  $: targetColumnNames = new Set($targetColumns.map((c) => c.name));
   $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);
   $: targetColumnsAreLoading =
     $targetColumnsFetchStatus?.state === 'processing';
@@ -78,23 +78,24 @@
   $: target = $targetTable;
   $: linkType = requiredField<LinkType>('manyToOne');
   $: columnNameInBase = requiredField(
-    suggestFkColumnName(target, baseColumnNames),
+    getSuggestedFkColumnName(target, $baseColumns),
     [columnNameIsAvailable($baseColumns)],
   );
   $: columnNameInTarget = requiredField(
-    suggestFkColumnName(base, targetColumnNames),
+    getSuggestedFkColumnName(base, $targetColumns),
     [columnNameIsAvailable($targetColumns)],
   );
   $: mappingTableName = requiredField(
     suggestMappingTableName(base, target, tables),
     [$validateNewTableName],
   );
-  $: columnNameMappingToBase = requiredField(suggestFkColumnName(base), [
+  $: columnNameMappingToBase = requiredField(getSuggestedFkColumnName(base), [
     columnNameIsNotId,
   ]);
-  $: columnNameMappingToTarget = requiredField(suggestFkColumnName(target), [
-    columnNameIsNotId,
-  ]);
+  $: columnNameMappingToTarget = requiredField(
+    getSuggestedFkColumnName(target),
+    [columnNameIsNotId],
+  );
 
   // ===========================================================================
   // Helper values

@@ -4,6 +4,7 @@
 export interface SplitTableRequest {
   extract_columns: number[];
   extracted_table_name: string;
+  relationship_fk_column_name?: string;
 }
 
 /**
