@@ -5,7 +5,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-import mathesar #from mathesar import __version__
+import mathesar
 # TODO this import path is pretty long; might want to remove redundant occurances of "_exceptions"
 from mathesar.api.exceptions.version_exceptions.base_exceptions import GithubReleasesAPIException
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import NetworkException
@@ -43,7 +43,7 @@ def _get_release_info_from_github_by_tag_name(tag_name):
     url = f'{_release_api_base_url}/tags/{tag_name}'
     try:
         response = requests.get(url, _github_request_headers)
-    except ConnectionError as e:
+    except ConnectionError:
         return (release_info_with_only_the_tag_name(), 503)
     if response.ok:
         release_info = response.json()
