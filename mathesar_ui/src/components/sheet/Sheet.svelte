@@ -107,8 +107,8 @@
     --z-index__sheet__column-resizer: 2;
     --z-index__sheet__top-left-cell: 3;
     --z-index__sheet_group-header: 3;
-    --z-index__sheet__active-cell: 3;
     --z-index__sheet_new-record-message: 3;
+    --z-index__sheet__active-cell: 4;
     --z-index__sheet__horizontal-scrollbar: 4;
     --z-index__sheet__vertical-scrollbar: 5;
 
