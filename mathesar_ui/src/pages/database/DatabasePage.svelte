@@ -17,6 +17,7 @@
   import { deleteSchema as deleteSchemaAPI } from '@mathesar/stores/schemas';
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
   import SchemaRow from './SchemaRow.svelte';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
@@ -109,19 +110,13 @@
 
     {#if filterQuery}
       <div class="search-results-info">
-        {#if displayList.length}
-          <p>
-            {displayList.length} result{displayList.length > 1 ? 's' : ''} for all
-            schemas matching <strong>{filterQuery}</strong>
-          </p>
-        {:else}
-          <p>
-            0 results for all schemas matching <strong>{filterQuery}</strong>
-          </p>
-        {/if}
-        <Button appearance="secondary" on:click={handleClearFilterQuery}
-          >Clear</Button
-        >
+        <p>
+          {labeledCount(displayList, 'results')}
+          for all schemas matching <strong>{filterQuery}</strong>
+        </p>
+        <Button appearance="secondary" on:click={handleClearFilterQuery}>
+          Clear
+        </Button>
       </div>
     {/if}
 
