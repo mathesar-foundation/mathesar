@@ -40,15 +40,9 @@ def _get_release_info_from_github_by_tag_name(tag_name):
         Follows the same json schema as returned by GH, except that only the tag_name key is set.
         """
         return dict(tag_name=tag_name)
-    owner = 'centerofci'
-    repo = 'mathesar'
-    url = f'https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag_name}'
-    headers = {
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-    }
+    url = f'{_release_api_base_url}/tags/{tag_name}'
     try:
-        response = requests.get(url, headers)
+        response = requests.get(url, _github_request_headers)
     except ConnectionError:
         return (release_info_with_only_the_tag_name(), 503)
     if response.ok:
@@ -63,15 +57,9 @@ def _get_latest_release_info_from_github():
     If Github API returns a non-200 response, will raise an exception with the status code and
     body of Github API's response.
     """
-    owner = 'centerofci'
-    repo = 'mathesar'
-    url = f'https://api.github.com/repos/{owner}/{repo}/releases/latest'
-    headers = {
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-    }
+    url = f'{_release_api_base_url}/releases/latest'
     try:
-        response = requests.get(url, headers)
+        response = requests.get(url, _github_request_headers)
     except ConnectionError as e:
         raise NetworkException(e)
     if response.ok:
@@ -79,3 +67,12 @@ def _get_latest_release_info_from_github():
         return json
     else:
         raise GithubReleasesAPIException(response)
+
+
+_repo_owner = 'centerofci'
+_repo = 'mathesar'
+_release_api_base_url = f'https://api.github.com/repos/{_repo_owner}/{_repo}/releases'
+_github_request_headers = {
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+}
