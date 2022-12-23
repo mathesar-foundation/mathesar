@@ -13,4 +13,5 @@ export interface SplitTableRequest {
 export interface SplitTableResponse {
   extracted_table: number;
   remainder_table: number;
+  fk_column: number;
 }

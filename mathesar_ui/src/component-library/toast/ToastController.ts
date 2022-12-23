@@ -9,6 +9,7 @@ import {
   iconSuccess,
   iconLoading,
   iconError,
+  iconInfo,
 } from '@mathesar-component-library-dir/common/icons';
 
 /**
@@ -82,9 +83,9 @@ interface ToastEntryProps {
 }
 
 const baseDefaultProps: ToastEntryProps = {
-  backgroundColor: 'rgba(188, 217, 249, 0.9)',
-  textColor: 'rgba(37, 41, 46, 0.8)',
-  progressColor: 'rgba(37, 41, 46, 0.2)',
+  backgroundColor: 'var(--sky-500)',
+  textColor: 'var(--slate-800)',
+  progressColor: 'rgba(255, 255, 255, 0.6)',
   lifetime: 6000,
   hasProgress: true,
   initialProgress: 1,
@@ -186,7 +187,7 @@ interface MakeToast {
 
 export function makeToastProps(detail: ToastDetail): Partial<ToastEntryProps> {
   if (typeof detail === 'string') {
-    return { message: detail };
+    return { title: detail };
   }
   return detail;
 }
@@ -197,13 +198,18 @@ export function makeToast(
   const controller = new ToastController({ defaultProps });
 
   function info(detail: ToastDetail = {}) {
-    return controller.show(makeToastProps(detail));
+    return controller.show(
+      makeToastProps({
+        icon: iconInfo,
+        ...makeToastProps(detail),
+      }),
+    );
   }
 
   function success(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconSuccess,
-      backgroundColor: 'rgba(229, 253, 230, 0.9)',
+      backgroundColor: 'var(--green-100)',
       ...makeToastProps(detail),
     });
   }
@@ -211,7 +217,7 @@ export function makeToast(
   function error(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconError,
-      backgroundColor: 'rgba(249, 205, 200, 0.9)',
+      backgroundColor: 'var(--red-100)',
       ...makeToastProps(detail),
     });
   }

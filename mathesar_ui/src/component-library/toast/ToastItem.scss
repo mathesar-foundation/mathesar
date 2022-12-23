@@ -1,45 +1,52 @@
 .toast-item {
-  width: 18rem;
+  width: 22rem;
   height: auto;
-  min-height: 3.5rem;
+  min-height: 2.5rem;
   margin: 0 0 0.5rem 0;
-  padding: 0.5rem;
+  padding: var(--size-small);
   background-color: var(--toast-item-background-color);
   color: var(--toast-item-text-color);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
   border: none;
-  border-radius: 0.25rem;
+  border-radius: var(--size-ultra-small);
   position: relative;
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   overflow: hidden;
   will-change: transform, opacity;
   -webkit-tap-highlight-color: transparent;
 
-  > .content {
-    padding: 0 0.5rem;
-    flex: 1 1 0%;
+  > .header {
+    font-size: var(--size-large);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    overflow: hidden;
+    width: 100%;
+
     > .title {
-      font-weight: bold;
-      margin-bottom: 1em;
+      overflow: hidden;
+      overflow-wrap: break-word;
+    }
+
+    > * + * {
+      margin-left: 0.5rem;
+    }
+
+    > .close-button {
+      margin-left: auto;
+      cursor: pointer;
+      outline: none;
     }
   }
 
-  > .close-button,
-  > .icon {
-    width: 2rem;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    outline: none;
-  }
-
-  > .close-button {
-    cursor: pointer;
-    outline: none;
+  > .message {
+    overflow: hidden;
+    width: 100%;
+    overflow-wrap: break-word;
+    margin-top: 0.6rem;
   }
 
   > progress {
