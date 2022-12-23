@@ -156,7 +156,10 @@
       }
       if ($targetType === 'newTable') {
         toast.success({
-          title: `A new table '${newTableName}' has been created with the extracted column(s)`,
+          title: `A new table ${newTableName} has been created with the extracted ${pluralize(
+            extractedColumns,
+            'columns',
+          )}`,
           contentComponent: SuccessToastContent,
           contentComponentProps: {
             newFkColumnName: constFkColumnName,
