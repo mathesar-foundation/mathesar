@@ -18,18 +18,17 @@
   .constituent {
     font-size: var(--text-size-base);
     font-weight: 400;
+    margin: 0;
   }
 
   .container {
     display: flex;
     flex-direction: row;
     align-items: center;
-
     > :global(* + *) {
       margin-left: 0.5rem;
     }
   }
-
   .divider {
     width: 4px;
     height: 4px;

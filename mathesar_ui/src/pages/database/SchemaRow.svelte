@@ -53,6 +53,7 @@
         </DropdownMenu>
       {/if}
     </div>
+
     {#if schema.description}
       <p class="description" title={schema.description}>
         {schema.description}
@@ -89,14 +90,13 @@
 
   .schema-row {
     border-radius: 0.57rem;
-    padding: 1em;
+    padding: 1.142em;
     border: 1px solid var(--slate-300);
     display: flex;
     flex-direction: column;
     transition: border-color 0.2s ease-in-out;
-
     > :global(* + *) {
-      margin-top: 0.25rem;
+      margin-top: 0.75rem;
     }
   }
 
@@ -114,6 +114,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    flex-grow: 1;
   }
 
   .name {
