@@ -5,7 +5,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from mathesar import __version__
+import mathesar #from mathesar import __version__
 # TODO this import path is pretty long; might want to remove redundant occurances of "_exceptions"
 from mathesar.api.exceptions.version_exceptions.base_exceptions import GithubReleasesAPIException
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import NetworkException
@@ -15,7 +15,7 @@ class VersionViewSet(viewsets.ViewSet):
 
     @action(methods=['get'], detail=False)
     def current(self, _):
-        current_version = __version__
+        current_version = mathesar.__version__
         release_info, status_code = _get_release_info_from_github_by_tag_name(
             current_version
         )
@@ -43,7 +43,7 @@ def _get_release_info_from_github_by_tag_name(tag_name):
     url = f'{_release_api_base_url}/tags/{tag_name}'
     try:
         response = requests.get(url, _github_request_headers)
-    except ConnectionError:
+    except ConnectionError as e:
         return (release_info_with_only_the_tag_name(), 503)
     if response.ok:
         release_info = response.json()
@@ -57,7 +57,7 @@ def _get_latest_release_info_from_github():
     If Github API returns a non-200 response, will raise an exception with the status code and
     body of Github API's response.
     """
-    url = f'{_release_api_base_url}/releases/latest'
+    url = f'{_release_api_base_url}/latest'
     try:
         response = requests.get(url, _github_request_headers)
     except ConnectionError as e:
