@@ -1,4 +1,5 @@
 import requests
+from requests import ConnectionError
 
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 from mathesar import __version__
 # TODO this import path is pretty long; might want to remove redundant occurances of "_exceptions"
 from mathesar.api.exceptions.version_exceptions.base_exceptions import GithubReleasesAPIException
+from mathesar.api.exceptions.generic_exceptions.base_exceptions import NetworkException
 
 
 class VersionViewSet(viewsets.ViewSet):
@@ -14,16 +16,10 @@ class VersionViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
     def current(self, _):
         current_version = __version__
-        release_info = _get_release_info_from_github_by_tag_name(
+        release_info, status_code = _get_release_info_from_github_by_tag_name(
             current_version
         )
-        if release_info:
-            return Response(release_info)
-        else:
-            return dummy_release_info_with_just_the_tag_name(
-                current_version
-            )
-
+        return Response(release_info, status=status_code)
 
     @action(methods=['get'], detail=False)
     def latest(self, _):
@@ -31,22 +27,19 @@ class VersionViewSet(viewsets.ViewSet):
         return Response(latest_version)
 
 
-def dummy_release_info_with_just_the_tag_name(tag_name):
-    """
-    If we can't provide a release description from Github, we'll sometimes still be able to
-    provide the version/tag.
-    """
-    return dict(tag_name=tag_name)
-
-
 def _get_release_info_from_github_by_tag_name(tag_name):
     """
-    Will return None, if release with this tag name is not found, or if the HTTP request failed
-    for some other reason (e.g. client or Github offline).
+    Returns a tuple of (release info json, github api response status code). The resulting response
+    is meant to use Github API's response code.
 
     Will not panic in case of failure querying Github's APIs, because we can still provide the
-    version/tag string.
+    version/tag_name.
     """
+    def release_info_with_only_the_tag_name():
+        """
+        Follows the same json schema as returned by GH, except that only the tag_name key is set.
+        """
+        return dict(tag_name=tag_name)
     owner = 'centerofci'
     repo = 'mathesar'
     url = f'https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag_name}'
@@ -54,12 +47,15 @@ def _get_release_info_from_github_by_tag_name(tag_name):
         'Accept': 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
     }
-    response = requests.get(url, headers)
+    try:
+        response = requests.get(url, headers)
+    except ConnectionError:
+        return (release_info_with_only_the_tag_name(), 503)
     if response.ok:
-        json = response.json()
-        return json
+        release_info = response.json()
+        return (release_info, 200)
     else:
-        return None
+        return (release_info_with_only_the_tag_name(), response.status_code)
 
 
 def _get_latest_release_info_from_github():
@@ -74,16 +70,12 @@ def _get_latest_release_info_from_github():
         'Accept': 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
     }
-    response = requests.get(url, headers)
+    try:
+        response = requests.get(url, headers)
+    except ConnectionError as e:
+        raise NetworkException(e)
     if response.ok:
         json = response.json()
         return json
     else:
-        status = response.status_code
-        message = f"Github Releases API returned a {status} response."
-        raise GithubReleasesAPIException(
-            Exception(),
-            status_code=status,
-            message=message,
-            details=response.json(),
-        )
+        raise GithubReleasesAPIException(response)

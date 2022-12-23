@@ -14,6 +14,7 @@ class ErrorCodes(Enum):
     ProgrammingError = 4101
     TypeError = 4102
     ValueError = 4103
+    NetworkError = 4104
 
     # DB Error Codes
     DuplicateTableError = 4205

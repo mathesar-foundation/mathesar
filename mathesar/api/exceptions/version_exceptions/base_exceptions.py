@@ -5,15 +5,21 @@ from mathesar.api.exceptions.generic_exceptions.base_exceptions import MathesarA
 
 
 class GithubReleasesAPIException(MathesarAPIException):
-    # Default message is not needed as the exception string provides enough details
+    """
+    Builds exception from a Github API response.
+    """
 
     def __init__(
         self,
-        exception,
-        error_code=ErrorCodes.GithubReleasesAPIFailure.value,
-        message=None,
-        field=None,
-        details=None,
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        response
     ):
+        exception = Exception()
+        error_code = ErrorCodes.GithubReleasesAPIFailure.value
+        field = None
+        status_code = response.status_code
+        message = f"Github Releases API returned a {status} response."
+        try:
+            details = response.json()
+        except ValueError:
+            details = response.text
         super().__init__(exception, error_code, message, field, details, status_code)
