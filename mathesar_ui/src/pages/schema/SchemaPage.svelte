@@ -8,6 +8,13 @@
   import { iconSchema, iconEdit } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { Button, TabContainer, Icon } from '@mathesar-component-library';
+  import type { TabEvents } from '@mathesar/component-library/tabs/TabContainerTypes';
+  import { router } from 'tinro';
+  import {
+    getSchemaPageExplorationsSectionUrl,
+    getSchemaPageTablesSectionUrl,
+    getSchemaPageUrl,
+  } from '@mathesar/routes/urls';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
@@ -15,25 +22,19 @@
 
   export let database: Database;
   export let schema: SchemaEntry;
-
-  /**
-   * This property will be used for the latest design changes
-   * Based on the subroute, the desired tab/section will be selected
-   * Make this a variable and pass value to it from SchemaRoute.svelte
-   *
-   * The eslint warning is in place because SchemaRoute will throw
-   * ts errors without it. We can remove it once we actually use the
-   * variable.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-  export const section: string = 'overview';
+  export let section: string;
 
   const addEditModal = modal.spawnModalController();
 
+  // NOTE: This has to be same as the name key in the paths prop of Route component
   type TabsKey = 'overview' | 'tables' | 'explorations';
-  type TabItem = { label: string; id: TabsKey; count?: number };
+  type TabItem = {
+    label: string;
+    id: TabsKey;
+    count?: number;
+    getUrl: () => string;
+  };
 
-  let activeTab: TabItem;
   $: tablesMap = $tablesStore.data;
   $: explorationsMap = $queries.data;
 
@@ -41,21 +42,32 @@
     {
       label: 'Overview',
       id: 'overview',
+      getUrl: () => getSchemaPageUrl(database.name, schema.id),
     },
     {
       label: 'Tables',
       id: 'tables',
       count: tablesMap.size,
+      getUrl: () => getSchemaPageTablesSectionUrl(database.name, schema.id),
     },
     {
       label: 'Explorations',
       id: 'explorations',
       count: explorationsMap.size,
+      getUrl: () =>
+        getSchemaPageExplorationsSectionUrl(database.name, schema.id),
     },
-  ];
+  ] as TabItem[];
+
+  $: activeTab = tabs.find((tab) => tab.id === section) || tabs[0];
 
   function handleEditSchema() {
     addEditModal.open();
+  }
+
+  function handleTabSelected(event: CustomEvent<TabEvents['tabSelected']>) {
+    const selectedTab = event.detail.tab as TabItem;
+    router.goto(selectedTab.getUrl());
   }
 </script>
 
@@ -87,7 +99,12 @@
     </slot>
   </AppSecondaryHeader>
 
-  <TabContainer bind:activeTab {tabs} uniformTabWidth={false}>
+  <TabContainer
+    {activeTab}
+    {tabs}
+    uniformTabWidth={false}
+    on:tabSelected={handleTabSelected}
+  >
     <div slot="tab" let:tab class="tab-header-container">
       <span>{tab.label}</span>
       {#if tab.count !== undefined}
