@@ -3,6 +3,7 @@
   import { tables } from '@mathesar/stores/tables';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
   import RenameColumn from './RenameColumn.svelte';
   import ColumnActions from './ColumnActions.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
@@ -42,7 +43,7 @@
   {:else}
     {#if selectedColumns.length > 1}
       <span class="columns-selected-count">
-        {selectedColumns.length} columns selected
+        {labeledCount(selectedColumns, 'columns')} selected
       </span>
     {/if}
     {#if column}

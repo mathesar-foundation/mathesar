@@ -31,6 +31,7 @@
     columnNameIsAvailable,
     getSuggestedFkColumnName,
   } from '@mathesar/utils/columnUtils';
+  import { pluralize } from '@mathesar/utils/languageUtils';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import type { LinkedTable } from './columnExtractionTypes';
   import {
@@ -82,7 +83,6 @@
   });
   $: action = $targetType === 'newTable' ? 'extract' : 'move';
   $: actionTitleCase = $targetType === 'newTable' ? 'Extract' : 'Move';
-  $: s = $columns.length > 1 ? 's' : '';
 
   function suggestNewFkColumnName(
     newTableName: string,
@@ -156,7 +156,10 @@
       }
       if ($targetType === 'newTable') {
         toast.success({
-          title: `A new table '${newTableName}' has been created with the extracted column(s)`,
+          title: `A new table ${newTableName} has been created with the extracted ${pluralize(
+            extractedColumns,
+            'columns',
+          )}`,
           contentComponent: SuccessToastContent,
           contentComponentProps: {
             newFkColumnName: constFkColumnName,
@@ -242,7 +245,7 @@
   <FieldLayout>
     <OutcomeBox>
       <p>
-        The column{s} above will be removed from
+        The {pluralize($columns, 'columns')} above will be removed from
         <CurrentTable table={$currentTable} />
         and added to
         <TargetTable name={targetTableName} />
