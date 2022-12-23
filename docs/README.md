@@ -1,8 +1,6 @@
-# Documentation
+# Contributing to documentation
 
-Runs on a distribution of [`mkdocs`](https://www.mkdocs.org/) called [`mkdocs-material`](https://squidfunk.github.io/mkdocs-material/).
-
-## References
+Our docs run on a distribution of [`mkdocs`](https://www.mkdocs.org/) called [`mkdocs-material`](https://squidfunk.github.io/mkdocs-material/).
 
 For basics of doc writing, see the [Writing your docs](https://www.mkdocs.org/user-guide/writing-your-docs/) section of `mkdocs` user guide.
 
