@@ -31,7 +31,7 @@
 </script>
 
 <EntityLayout
-  searchPlaceholder="Search Table"
+  searchPlaceholder="Search Tables"
   bind:searchQuery={tableSearchQuery}
   on:clear={clearQuery}
 >

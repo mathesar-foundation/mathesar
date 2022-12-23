@@ -103,7 +103,7 @@
       </h2>
     </div>
     <TextInputWithPrefix
-      placeholder="Search Schemas..."
+      placeholder="Search Schemas"
       bind:value={filterQuery}
       prefixIcon={iconSearch}
     />
