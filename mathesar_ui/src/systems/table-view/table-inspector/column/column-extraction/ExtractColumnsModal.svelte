@@ -199,7 +199,7 @@
   }
 </script>
 
-<ControlledModal {controller} on:close{form.reset}>
+<ControlledModal {controller} on:close={form.reset}>
   <span slot="title">
     {#if $targetType === 'existingTable'}
       Move Columns To Linked Table
