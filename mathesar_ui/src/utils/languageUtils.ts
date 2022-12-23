@@ -9,7 +9,7 @@ export function makeSingular(word: string): string {
 }
 
 export function makeSentenceCase(text: string): string {
-  return (text[0]?.toLocaleLowerCase() ?? '') + text.slice(1);
+  return (text[0]?.toLocaleUpperCase() ?? '') + text.slice(1);
 }
 
 export function makeTitleCase(text: string): string {
