@@ -76,10 +76,12 @@ export class Filtering {
     });
   }
 
-  withoutColumn(columnId: number): Filtering {
+  withoutColumns(columnIds: number[]): Filtering {
     return new Filtering({
       combination: this.combination,
-      entries: this.entries.filter((entry) => entry.columnId !== columnId),
+      entries: this.entries.filter(
+        (entry) => !columnIds.includes(entry.columnId),
+      ),
     });
   }
 

@@ -4,6 +4,7 @@
 export interface SplitTableRequest {
   extract_columns: number[];
   extracted_table_name: string;
+  relationship_fk_column_name?: string;
 }
 
 /**
@@ -12,4 +13,5 @@ export interface SplitTableRequest {
 export interface SplitTableResponse {
   extracted_table: number;
   remainder_table: number;
+  fk_column: number;
 }

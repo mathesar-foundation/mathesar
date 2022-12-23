@@ -9,7 +9,7 @@ import type {
   AbstractTypeDbConfig,
 } from '../types';
 
-const DB_TYPES = {
+export const DB_TYPES = {
   VARCHAR: 'character varying',
   CHAR: 'character',
   TEXT: 'text',

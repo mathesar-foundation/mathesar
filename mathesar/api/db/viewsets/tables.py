@@ -107,7 +107,7 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
             columns_to_extract = serializer.validated_data['extract_columns']
             extracted_table_name = serializer.validated_data['extracted_table_name']
             relationship_fk_column_name = serializer.validated_data['relationship_fk_column_name']
-            extracted_table, remainder_table, _ = table.split_table(
+            extracted_table, remainder_table, remainder_fk_column = table.split_table(
                 columns_to_extract=columns_to_extract,
                 extracted_table_name=extracted_table_name,
                 column_names_id_map=column_names_id_map,
@@ -115,7 +115,8 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
             )
             split_table_response = {
                 'extracted_table': extracted_table.id,
-                'remainder_table': remainder_table.id
+                'remainder_table': remainder_table.id,
+                'fk_column': remainder_fk_column.id
             }
             response_serializer = SplitTableResponseSerializer(data=split_table_response)
             response_serializer.is_valid(True)

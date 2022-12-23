@@ -3,6 +3,7 @@ from sqlalchemy.types import UserDefinedType
 
 from db.types.base import MathesarCustomType
 from db.types.custom.underlying_type import HasUnderlyingType
+from db.utils import ignore_duplicate_wrapper
 
 DB_TYPE = MathesarCustomType.EMAIL.id
 
@@ -30,12 +31,8 @@ def install(engine):
     # We'll use postgres domains to check that a given string conforms to what
     # an email should look like.  We also create some DB-level functions to
     # split out the different parts of an email address for grouping.
-    drop_domain_query = f"""
-    DROP DOMAIN IF EXISTS {DB_TYPE};
-    """
-    create_domain_query = f"""
-    CREATE DOMAIN {DB_TYPE} AS text CHECK (value ~ {EMAIL_REGEX_STR});
-    """
+    create_domain_query = f"CREATE DOMAIN {DB_TYPE} AS text CHECK (value ~ {EMAIL_REGEX_STR});"
+    create_if_not_exist_domain_query = ignore_duplicate_wrapper(create_domain_query)
     create_email_domain_name_query = f"""
     CREATE OR REPLACE FUNCTION {EMAIL_DOMAIN_NAME}({DB_TYPE})
     RETURNS text AS $$
@@ -51,8 +48,7 @@ def install(engine):
     LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
     """
     with engine.begin() as conn:
-        conn.execute(text(drop_domain_query))
-        conn.execute(text(create_domain_query))
+        conn.execute(text(create_if_not_exist_domain_query))
         conn.execute(text(create_email_domain_name_query))
         conn.execute(text(create_email_local_part_query))
         conn.commit()

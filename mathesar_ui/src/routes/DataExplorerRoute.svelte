@@ -72,7 +72,7 @@
       try {
         const newQueryModel = constructQueryModelFromHash(hash);
         router.location.hash.clear();
-        createQueryManager(newQueryModel);
+        createQueryManager(newQueryModel ?? {});
         return;
       } catch {
         // fail silently
