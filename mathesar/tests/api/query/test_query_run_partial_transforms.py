@@ -9,7 +9,7 @@ fully_speced_summarize = \
         dict(
             aggregation_expressions=[
                 dict(
-                    function='aggregate_to_array',
+                    function='distinct_aggregate_to_array',
                     input_alias='col2',
                     output_alias='col2_agged'
                 )
@@ -33,7 +33,7 @@ fully_speced_summarize = \
                     base_grouping_column='col1',
                     aggregation_expressions=[
                         dict(
-                            function='aggregate_to_array',
+                            function='distinct_aggregate_to_array',
                             input_alias='col2',
                             output_alias='col2_agged'
                         )
@@ -115,7 +115,7 @@ def test_partial_summarize_transform(
                 'col1': 'Center',
                 'col1_grouped': 'Center group',
                 'col2': 'Case Number',
-                'col2_agged': 'Case Number list',
+                'col2_agged': 'Case Number distinct list',
             },
         }
     )
@@ -156,7 +156,7 @@ def test_partial_summarize_transform(
             },
             'col2_agged': {
                 'alias': 'col2_agged',
-                'display_name': 'Case Number list',
+                'display_name': 'Case Number distinct list',
                 'display_options': None,
                 'input_alias': 'col2',
                 'input_column_name': None,

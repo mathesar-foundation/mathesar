@@ -301,14 +301,21 @@ export function getTable(id: TableEntry['id']): CancellablePromise<TableEntry> {
   return getAPI(`/api/db/v0/tables/${id}/`);
 }
 
-export function splitTable(
-  id: number,
-  idsOfColumnsToExtract: number[],
-  extractedTableName: string,
-): CancellablePromise<SplitTableResponse> {
+export function splitTable({
+  id,
+  idsOfColumnsToExtract,
+  extractedTableName,
+  newFkColumnName,
+}: {
+  id: number;
+  idsOfColumnsToExtract: number[];
+  extractedTableName: string;
+  newFkColumnName?: string;
+}): CancellablePromise<SplitTableResponse> {
   const body: SplitTableRequest = {
     extract_columns: idsOfColumnsToExtract,
     extracted_table_name: extractedTableName,
+    relationship_fk_column_name: newFkColumnName,
   };
   return postAPI(`/api/db/v0/tables/${id}/split_table/`, body);
 }
