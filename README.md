@@ -30,6 +30,10 @@ We started building Mathesar in March 2021 and are making steady progress toward
 
 We actively encourage contribution! [Join our community](https://wiki.mathesar.org/community) and read through [our contributing guidelines](https://wiki.mathesar.org/community/contributing).
 
+### Help with documentation
+
+See the [README file in our docs/ subfolder](./docs/README.md).
+
 ## Local Development
 
 First, [ensure that you have Docker installed](https://docs.docker.com/get-docker/).
