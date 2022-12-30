@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ImmutableMap } from '@mathesar/component-library';
+  import { ImmutableMap } from '@mathesar-component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import {
     getTabularDataStoreFromContext,
@@ -17,10 +17,12 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  export let usesVirtualList = false;
-  export let allowsDdlOperations = false;
+  export let context: 'page' | 'widget' = 'page';
   export let table: TableEntry;
 
+  $: usesVirtualList = context === 'page';
+  $: allowsDdlOperations = context === 'page';
+  $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection } = $tabularData);
   $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
@@ -48,7 +50,7 @@
 
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
-    [ID_ADD_NEW_COLUMN, 100],
+    [ID_ADD_NEW_COLUMN, 32],
   ]);
   $: showTableInspector =
     $isTableInspectorVisible && !$isLoading && supportsTableInspector;
@@ -86,6 +88,8 @@
           getColumnIdentifier={(entry) => entry.column.id}
           {usesVirtualList}
           {columnWidths}
+          hasBorder={sheetHasBorder}
+          restrictWidthToRowWidth={!usesVirtualList}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
         >
@@ -98,7 +102,7 @@
       <TableInspector />
     {/if}
   </div>
-  <StatusPane />
+  <StatusPane {context} />
 </div>
 
 <style>

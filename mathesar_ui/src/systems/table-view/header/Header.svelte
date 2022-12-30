@@ -24,29 +24,33 @@
   export let table: TableEntry;
 
   $: ({ selection, processedColumns } = $tabularData);
-  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
-
-  let draggedColumn: ProcessedColumn;
-
-  function dragStart(e: DragEvent, column: ProcessedColumn) {
-    draggedColumn = column;
-  }
+  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty} = selection);
+  $: selectedColumnsIds =  selection.getSelectedUniqueColumnsId(
+      $selectedCells,
+      $columnsSelectedWhenTheTableIsEmpty,
+    );
 
   function dropColumn(e: DragEvent, columnDroppedOn?: ProcessedColumn) {
     column_order = column_order ?? [];
-
+    
+    //Keep only IDs for which the column exists
     for (let column_id of $processedColumns.keys())  {
       if (!column_order.includes(column_id)) {
         column_order.push(column_id);
       }
     }
-    column_order.splice(column_order.indexOf(draggedColumn.id), 1);
 
+    //Remove selected column IDs
+    for (const id of selectedColumnsIds) {
+      column_order.splice(column_order.indexOf(id), 1);
+    }
+
+    //Insert selected column IDs after the column where they are dropped
     if (columnDroppedOn) {
-      column_order.splice(column_order.indexOf(columnDroppedOn.id)+1, 0, draggedColumn.id);
+      column_order.splice(column_order.indexOf(columnDroppedOn.id)+1, 0, ...selectedColumnsIds);
       saveColumnOrder(table, column_order);//
     } else {
-      column_order.splice(0, 0, draggedColumn.id);
+      column_order.splice(0, 0, ...selectedColumnsIds);
     }
     saveColumnOrder(table, column_order);//
   }
@@ -79,9 +83,7 @@
         $selectedCells,
         $columnsSelectedWhenTheTableIsEmpty,
         processedColumn,
-      )}
-      on:dragstart={(e) => dragStart(e, processedColumn)}
-      >
+      )}      >
         <Droppable
         on:drop={(e) => dropColumn(e, processedColumn)}
         >
