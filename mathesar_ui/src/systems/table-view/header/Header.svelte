@@ -10,6 +10,7 @@
     SheetCellResizer,
     isColumnSelected,
   } from '@mathesar/components/sheet';
+  import { Draggable, Droppable } from './drag-and-drop';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
@@ -31,51 +32,75 @@
     draggedColumn = column;
   }
 
-  function dropColumn(e: DragEvent, column: ProcessedColumn) {
+  function dropColumn(e: DragEvent, columnDroppedOn?: ProcessedColumn) {
     column_order = column_order ?? [];
+
     for (let column_id of $processedColumns.keys())  {
       if (!column_order.includes(column_id)) {
         column_order.push(column_id);
       }
     }
     column_order.splice(column_order.indexOf(draggedColumn.id), 1);
-    column_order.splice(column_order.indexOf(column.id)+1, 0, draggedColumn.id);
+
+    if (columnDroppedOn) {
+      column_order.splice(column_order.indexOf(columnDroppedOn.id)+1, 0, draggedColumn.id);
+      saveColumnOrder(table, column_order);//
+    } else {
+      column_order.splice(0, 0, draggedColumn.id);
+    }
     saveColumnOrder(table, column_order);//
   }
 
 </script>
 
 <SheetHeader>
-  <SheetCell
+
+    <SheetCell
     columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
     isStatic
     isControlCell
     let:htmlAttributes
     let:style
-    on:dragover={(e) => {e.preventDefault()}}
-  >
-    <div {...htmlAttributes} {style} />
-  </SheetCell>
+    >
+      <Droppable
+      on:drop={(e) => dropColumn(e)}
+      on:dragover={(e) => {e.preventDefault()}}
+      >
+        <div {...htmlAttributes} {style} />
+      </Droppable>
+    </SheetCell>
+
 
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+
     <SheetCell columnIdentifierKey={columnId} let:htmlAttributes let:style>
-      <div {...htmlAttributes} {style}>
-        <HeaderCell
-          {processedColumn}
-          isSelected={isColumnSelected(
-            $selectedCells,
-            $columnsSelectedWhenTheTableIsEmpty,
-            processedColumn,
-          )}
-          on:mousedown={() => selection.onColumnSelectionStart(processedColumn)}
-          on:mouseenter={() =>
-            selection.onMouseEnterColumnHeaderWhileSelection(processedColumn)}
-          on:dragstart={(e) => dragStart(e, processedColumn)}
-          on:drop={(e) => dropColumn(e, processedColumn)}
-          on:dragover={(e) => {e.preventDefault()}}
-        />
-        <SheetCellResizer columnIdentifierKey={columnId} />
-      </div>
+      <Draggable
+      isSelected={isColumnSelected(
+        $selectedCells,
+        $columnsSelectedWhenTheTableIsEmpty,
+        processedColumn,
+      )}
+      on:dragstart={(e) => dragStart(e, processedColumn)}
+      >
+        <Droppable
+        on:drop={(e) => dropColumn(e, processedColumn)}
+        >
+          <div {...htmlAttributes} {style}>
+            <HeaderCell
+              {processedColumn}
+              isSelected={isColumnSelected(
+                $selectedCells,
+                $columnsSelectedWhenTheTableIsEmpty,
+                processedColumn,
+              )}
+              on:mousedown={() => selection.onColumnSelectionStart(processedColumn)}
+              on:mouseenter={() =>
+                selection.onMouseEnterColumnHeaderWhileSelection(processedColumn)}
+            />
+            <SheetCellResizer columnIdentifierKey={columnId} />
+          </div>
+        </Droppable>
+      </Draggable>
     </SheetCell>
   {/each}
 
