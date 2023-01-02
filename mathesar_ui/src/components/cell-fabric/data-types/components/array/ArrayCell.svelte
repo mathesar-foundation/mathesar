@@ -3,6 +3,7 @@
   import { isDefinedNonNullable, Chip } from '@mathesar-component-library';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import Null from '@mathesar/components/Null.svelte';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
   import CellWrapper from '../CellWrapper.svelte';
   import type { ArrayCellProps } from '../typeDefinitions';
 
@@ -53,7 +54,7 @@
   <CellValue {value}>
     {#if isDefinedNonNullable(value)}
       {#if isIndependentOfSheet}
-        <div class="count">{value.length} value(s)</div>
+        <div class="count">{labeledCount(value, 'values')}</div>
       {/if}
       <div>
         {#each value as entry}
