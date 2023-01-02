@@ -194,7 +194,7 @@ export default class SheetSelection<
 > {
   private getColumns: () => Column[];
 
-  private getColumnOrder: () => Number[];
+  private getColumnOrder: () => number[];
 
   private getRows: () => Row[];
 
@@ -224,7 +224,7 @@ export default class SheetSelection<
 
   constructor(args: {
     getColumns: () => Column[];
-    getColumnOrder: () => Number[];
+    getColumnOrder: () => number[];
     getRows: () => Row[];
     getMaxSelectionRowIndex: () => number;
   }) {
@@ -336,7 +336,7 @@ export default class SheetSelection<
     const maxRowIndex = Math.max(startRowIndex, endRowIndex);
 
     const columnOrder = this.getColumnOrder();
-  
+
     const numericalStartColumnId = Number(startColumnId);
     const numericalEndColumnId = Number(endColumnId);
 
@@ -345,7 +345,7 @@ export default class SheetSelection<
 
     const minColumnPosition = Math.min(startOrderIndex, endOrderIndex);
     const maxColumnposition = Math.max(startOrderIndex, endOrderIndex);
-    const columnOrderSelected = columnOrder.slice(minColumnPosition, maxColumnposition+1)
+    const columnOrderSelected = columnOrder.slice(minColumnPosition, maxColumnposition + 1);
 
     const columns = this.getColumns();
 
@@ -354,7 +354,7 @@ export default class SheetSelection<
       const { rowIndex } = row;
       if (rowIndex >= minRowIndex && rowIndex <= maxRowIndex) {
         columnOrderSelected.forEach((columnId) => {
-          const column = columns.find(column => column.id === columnId);
+          const column = columns.find((c) => c.id === columnId);
           if (column) {
             cells.push([row, column]);
           }

@@ -9,11 +9,11 @@
   } from '@mathesar/stores/table-data';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import { orderProcessedColumns } from '@mathesar/utils/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
   import TableInspector from './table-inspector/TableInspector.svelte';
-  import type { TableEntry } from '@mathesar/api/types/tables';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -28,7 +28,7 @@
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
   $: ({ settings } = table);
-  $: ({ column_order } = settings);
+  $: ({ column_order: columnOrder } = settings);
   $: hasNewColumnButton = allowsDdlOperations;
   /**
    * These are separate variables for readability and also to keep the door open
@@ -37,7 +37,7 @@
    */
   $: supportsTableInspector = allowsDdlOperations;
   $: sheetColumns = (() => {
-    const orderedProcessedColumns = orderProcessedColumns($processedColumns, column_order);
+    const orderedProcessedColumns = orderProcessedColumns($processedColumns, columnOrder);
     const columns = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
       ...orderedProcessedColumns.values(),
@@ -93,7 +93,7 @@
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
         >
-          <Header {hasNewColumnButton} {column_order} {table} />
+          <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
         </Sheet>
       {/if}

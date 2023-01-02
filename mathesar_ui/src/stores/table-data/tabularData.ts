@@ -11,6 +11,8 @@ import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/api/utils/requestUtils';
 import type { Column } from '@mathesar/api/types/tables/columns';
 import { SheetSelection } from '@mathesar/components/sheet';
+import { currentTable } from '@mathesar/stores/tables';
+import { getColumnOrder } from '@mathesar/utils/tables';
 import { Meta } from './meta';
 import { ColumnsDataStore } from './columns';
 import type { RecordRow, TableRecordsData } from './records';
@@ -23,8 +25,6 @@ import type {
   ProcessedColumnsStore,
 } from './processedColumns';
 import { processColumn } from './processedColumns';
-import { currentTable } from '@mathesar/stores/tables';
-import { getColumnOrder } from '@mathesar/utils/tables';
 
 export interface TabularDataProps {
   id: DBObjectEntry['id'];

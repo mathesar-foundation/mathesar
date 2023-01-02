@@ -1,14 +1,14 @@
 <script lang="ts">
-    //Needs to be a counter because dragEnter and dragLeave are fired for child elements
+    // Needs to be a counter because dragEnter and dragLeave are fired for child elements
     let isDraggedOverCounter = 0;
 
     function dragEnter(e: DragEvent) {
         e.preventDefault();
-        isDraggedOverCounter++;
+        isDraggedOverCounter += 1;
     }
 
-    function dragLeave(e: DragEvent) {
-        isDraggedOverCounter--;
+    function dragLeave() {
+        isDraggedOverCounter -= 1;
     }
 </script>
 
@@ -16,9 +16,9 @@
     class="droppable"
     class:dragged_over={isDraggedOverCounter}
     on:drop
-    on:dragover={(e) => {e.preventDefault()}}
+    on:dragover={(e) => e.preventDefault()}
     on:dragenter={(e) => dragEnter(e)}
-    on:dragleave={(e) => dragLeave(e)}>
+    on:dragleave={() => dragLeave()}>
     <slot class="drag-over"></slot>
 </div>
 
