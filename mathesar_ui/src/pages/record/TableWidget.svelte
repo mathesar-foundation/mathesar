@@ -42,7 +42,7 @@
   </div>
 
   <div class="results">
-    <TableView context="widget" />
+    <TableView context="widget" {table} />
   </div>
 </div>
 

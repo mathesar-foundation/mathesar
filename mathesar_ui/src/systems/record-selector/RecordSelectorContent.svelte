@@ -138,9 +138,6 @@
         on:mouseenter={() => {
           isHoveringCreate = true;
         }}
-        on:mouseleave={() => {
-          isHoveringCreate = false;
-        }}
       >
         <Icon {...iconAddNew} />
         <span>Create Record From Search Criteria</span>

@@ -23,6 +23,8 @@ import type {
   ProcessedColumnsStore,
 } from './processedColumns';
 import { processColumn } from './processedColumns';
+import { currentTable } from '@mathesar/stores/tables';
+import { getColumnOrder } from '@mathesar/utils/tables';
 
 export interface TabularDataProps {
   id: DBObjectEntry['id'];
@@ -102,8 +104,11 @@ export class TabularData {
         ),
     );
 
+    const table = get(currentTable);
+
     this.selection = new SheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
+      getColumnOrder: () => getColumnOrder([...get(this.processedColumns).values()], table),
       getRows: () => this.recordsData.getRecordRows(),
       getMaxSelectionRowIndex: () => {
         const totalCount = get(this.recordsData.totalCount) ?? 0;

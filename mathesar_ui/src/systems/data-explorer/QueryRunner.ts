@@ -26,6 +26,8 @@ import {
   type ProcessedQueryOutputColumnMap,
   type InputColumnsStoreSubstance,
 } from './utils';
+import { currentTable } from '@mathesar/stores/tables';
+import { getColumnOrder } from '@mathesar/utils/tables';
 
 // TODO: Find a better way to implement type safety here
 type QueryRunEvent = { run: QueryRunResponse };

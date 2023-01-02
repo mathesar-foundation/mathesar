@@ -15,7 +15,7 @@
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { saveColumnOrder } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -25,34 +25,42 @@
 
   $: ({ selection, processedColumns } = $tabularData);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty} = selection);
-  $: selectedColumnsIds =  selection.getSelectedUniqueColumnsId(
+  $: selectedColumnIds =  selection.getSelectedUniqueColumnsId(
       $selectedCells,
       $columnsSelectedWhenTheTableIsEmpty,
     );
 
   function dropColumn(e: DragEvent, columnDroppedOn?: ProcessedColumn) {
-    column_order = column_order ?? [];
-    
+    var columnOrder = column_order ?? [];
     //Keep only IDs for which the column exists
     for (let column_id of $processedColumns.keys())  {
-      if (!column_order.includes(column_id)) {
-        column_order.push(column_id);
+      if (!columnOrder.includes(column_id)) {
+        columnOrder.push(column_id);
       }
     }
 
-    //Remove selected column IDs
-    for (const id of selectedColumnsIds) {
-      column_order.splice(column_order.indexOf(id), 1);
+    var selectedColumnIdsOrdered:number[] = []
+
+    //Remove selected column IDs and keep their order
+    const newColumnOrder:number[] = [];
+    for (const id of columnOrder) {
+      if (selectedColumnIds.includes(id)) {
+        selectedColumnIdsOrdered.push(id);
+      }
+      else {
+        newColumnOrder.push(id)
+      }
     }
 
     //Insert selected column IDs after the column where they are dropped
     if (columnDroppedOn) {
-      column_order.splice(column_order.indexOf(columnDroppedOn.id)+1, 0, ...selectedColumnsIds);
-      saveColumnOrder(table, column_order);//
+      newColumnOrder.splice(columnOrder.indexOf(columnDroppedOn.id)+1, 0, ...selectedColumnIdsOrdered);
     } else {
-      column_order.splice(0, 0, ...selectedColumnsIds);
+      // If the column is dropped on the ID column, columnDroppedOn is undefined and we can insert at the beginning.
+      newColumnOrder.splice(0, 0, ...selectedColumnIdsOrdered);
     }
-    saveColumnOrder(table, column_order);//
+
+    saveColumnOrder(table, newColumnOrder);//
   }
 
 </script>
@@ -83,7 +91,8 @@
         $selectedCells,
         $columnsSelectedWhenTheTableIsEmpty,
         processedColumn,
-      )}      >
+      )}
+      >
         <Droppable
         on:drop={(e) => dropColumn(e, processedColumn)}
         >
@@ -95,7 +104,7 @@
                 $columnsSelectedWhenTheTableIsEmpty,
                 processedColumn,
               )}
-              on:mousedown={() => selection.onColumnSelectionStart(processedColumn)}
+              on:click={() => selection.toggleColumnSelection(processedColumn)}
               on:mouseenter={() =>
                 selection.onMouseEnterColumnHeaderWhileSelection(processedColumn)}
             />

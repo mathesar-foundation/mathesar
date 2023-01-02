@@ -3,7 +3,6 @@ import { get, writable, type Unsubscriber, type Writable } from 'svelte/store';
 
 interface SelectionColumn {
   id: number | string;
-  columnIndex: number;
 }
 
 interface SelectionRow {
@@ -133,8 +132,8 @@ export function scrollBasedOnSelection(): void {
 type SelectionBounds = {
   startRowIndex: number;
   endRowIndex: number;
-  startColumnIndex: number;
-  endColumnIndex: number;
+  startColumnId: string | number;
+  endColumnId: string | number;
 };
 
 type Cell<Row extends SelectionRow, Column extends SelectionColumn> = [
@@ -195,6 +194,8 @@ export default class SheetSelection<
 > {
   private getColumns: () => Column[];
 
+  private getColumnOrder: () => Number[];
+
   private getRows: () => Row[];
 
   // max index is inclusive
@@ -223,12 +224,14 @@ export default class SheetSelection<
 
   constructor(args: {
     getColumns: () => Column[];
+    getColumnOrder: () => Number[];
     getRows: () => Row[];
     getMaxSelectionRowIndex: () => number;
   }) {
     this.selectedCells = new WritableSet<string>();
     this.columnsSelectedWhenTheTableIsEmpty = new WritableSet<Column['id']>();
     this.getColumns = args.getColumns;
+    this.getColumnOrder = args.getColumnOrder;
     this.getRows = args.getRows;
     this.getMaxSelectionRowIndex = args.getMaxSelectionRowIndex;
     this.freezeSelection = false;
@@ -279,8 +282,8 @@ export default class SheetSelection<
     }
     // Initialize the bounds of the selection
     this.selectionBounds = {
-      startColumnIndex: column.columnIndex,
-      endColumnIndex: column.columnIndex,
+      startColumnId: column.id,
+      endColumnId: column.id,
       startRowIndex: row.rowIndex,
       endRowIndex: row.rowIndex,
     };
@@ -294,7 +297,7 @@ export default class SheetSelection<
     column: SelectionColumn,
   ): void {
     const { rowIndex } = row;
-    const { columnIndex } = column;
+    const { id } = column;
 
     // If there is no selection start cell,
     // this means the selection was never initiated
@@ -303,7 +306,7 @@ export default class SheetSelection<
     }
 
     this.selectionBounds.endRowIndex = rowIndex;
-    this.selectionBounds.endColumnIndex = columnIndex;
+    this.selectionBounds.endColumnId = id;
 
     const cells = this.getIncludedCells(this.selectionBounds);
     this.selectMultipleCells(cells);
@@ -327,22 +330,32 @@ export default class SheetSelection<
   }
 
   getIncludedCells(selectionBounds: SelectionBounds): Cell<Row, Column>[] {
-    const { startRowIndex, endRowIndex, startColumnIndex, endColumnIndex } =
+    const { startRowIndex, endRowIndex, startColumnId, endColumnId } =
       selectionBounds;
     const minRowIndex = Math.min(startRowIndex, endRowIndex);
     const maxRowIndex = Math.max(startRowIndex, endRowIndex);
-    const minColumnIndex = Math.min(startColumnIndex, endColumnIndex);
-    const maxColumnIndex = Math.max(startColumnIndex, endColumnIndex);
+
+    const columnOrder = this.getColumnOrder();
+  
+    const numericalStartColumnId = Number(startColumnId);
+    const numericalEndColumnId = Number(endColumnId);
+
+    const startOrderIndex = columnOrder.indexOf(numericalStartColumnId);
+    const endOrderIndex = columnOrder.indexOf(numericalEndColumnId);
+
+    const minColumnPosition = Math.min(startOrderIndex, endOrderIndex);
+    const maxColumnposition = Math.max(startOrderIndex, endOrderIndex);
+    const columnOrderSelected = columnOrder.slice(minColumnPosition, maxColumnposition+1)
+
+    const columns = this.getColumns();
 
     const cells: Cell<Row, Column>[] = [];
     this.getRows().forEach((row) => {
       const { rowIndex } = row;
       if (rowIndex >= minRowIndex && rowIndex <= maxRowIndex) {
-        this.getColumns().forEach((column) => {
-          if (
-            column.columnIndex >= minColumnIndex &&
-            column.columnIndex <= maxColumnIndex
-          ) {
+        columnOrderSelected.forEach((columnId) => {
+          const column = columns.find(column => column.id === columnId);
+          if (column) {
             cells.push([row, column]);
           }
         });

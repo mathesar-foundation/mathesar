@@ -37,7 +37,7 @@
 
 <div class="header-cell-root">
   <CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
-  <Button appearance="ghost" on:click on:mousedown on:mouseenter>
+  <Button appearance="ghost" on:mousedown on:click on:mouseenter>
     <ProcessedColumnName {processedColumn} />
     {#if sorter || hasFilter || grouped}
       <div class="indicator-icons">

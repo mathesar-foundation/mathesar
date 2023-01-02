@@ -13,7 +13,7 @@
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
   import TableInspector from './table-inspector/TableInspector.svelte';
-  import type { TableEntry } from '@mathesar/api/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -27,8 +27,8 @@
   $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
-  $: ({ settings } = table || {settings : {column_order: []}});
-  $: ({ column_order } = settings  || {column_order: []});
+  $: ({ settings } = table);
+  $: ({ column_order } = settings);
   $: hasNewColumnButton = allowsDdlOperations;
   /**
    * These are separate variables for readability and also to keep the door open
