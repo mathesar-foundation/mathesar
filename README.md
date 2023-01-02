@@ -13,6 +13,7 @@ We started building Mathesar in March 2021 and are making steady progress toward
 **Table of Contents**
 
 - [Contributing](#contributing)
+  - [Help with documentation](#help-with-documentation)
 - [Local Development](#local-development)
   - [Developing in Windows](#developing-in-windows)
   - [Configuration Options](#configuration-options)
@@ -29,6 +30,10 @@ We started building Mathesar in March 2021 and are making steady progress toward
 ## Contributing
 
 We actively encourage contribution! [Join our community](https://wiki.mathesar.org/community) and read through [our contributing guidelines](https://wiki.mathesar.org/community/contributing).
+
+### Help with documentation
+
+See the [README file in our docs/ subfolder](./docs/README.md).
 
 ## Local Development
 
