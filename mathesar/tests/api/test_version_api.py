@@ -39,13 +39,11 @@ def mocked_responses():
 
 
 def test_latest_release_endpoint_200(mocked_responses, client):
-    stubbed_response = responses.Response(
-        method=responses.GET,
+    mocked_responses.get(
         url='https://api.github.com/repos/centerofci/mathesar/releases/latest',
         json=mock_release_info_json,
         status=200,
     )
-    mocked_responses.add(stubbed_response)
     response = client.get('/api/ui/v0/version/latest/')
     json = response.json()
     assert response.status_code == 200
@@ -53,12 +51,10 @@ def test_latest_release_endpoint_200(mocked_responses, client):
 
 
 def test_latest_release_endpoint_404(mocked_responses, client):
-    stubbed_response = responses.Response(
-        method=responses.GET,
+    mocked_responses.get(
         url='https://api.github.com/repos/centerofci/mathesar/releases/latest',
         status=404,
     )
-    mocked_responses.add(stubbed_response)
     response = client.get('/api/ui/v0/version/latest/')
     assert response.status_code == 404
 
@@ -67,13 +63,11 @@ def test_installed_release_endpoint_200(
     mocked_responses, client, hardcoded_version
 ):
     tag_name = hardcoded_version
-    stubbed_response = responses.Response(
-        method=responses.GET,
+    mocked_responses.get(
         url=f'https://api.github.com/repos/centerofci/mathesar/releases/tags/{tag_name}',
         json=mock_release_info_json,
         status=200,
     )
-    mocked_responses.add(stubbed_response)
     response = client.get('/api/ui/v0/version/current/')
     json = response.json()
     assert response.status_code == 200
@@ -84,12 +78,10 @@ def test_installed_release_endpoint_404(
     mocked_responses, client, hardcoded_version
 ):
     tag_name = hardcoded_version
-    stubbed_response = responses.Response(
-        method=responses.GET,
+    mocked_responses.get(
         url=f'https://api.github.com/repos/centerofci/mathesar/releases/tags/{tag_name}',
         status=404,
     )
-    mocked_responses.add(stubbed_response)
     response = client.get('/api/ui/v0/version/current/')
     json = response.json()
     assert response.status_code == 404
