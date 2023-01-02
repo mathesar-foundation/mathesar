@@ -3,6 +3,7 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import AnchorButton from '@mathesar/component-library/anchorButton/AnchorButton.svelte';
   import type { QueryInstance } from '@mathesar/api/types/queries';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
   import ExplorationsList from './ExplorationsList.svelte';
   import EntityLayout from './EntityLayout.svelte';
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
@@ -44,18 +45,11 @@
     </AnchorButton>
   </slot>
   <slot slot="resultInfo">
-    {#if explorationsMap.size}
-      <p>
-        {explorationsMap.size} result{explorationsMap.size > 1 ? 's' : ''} for all
-        exploration{explorationsMap.size > 1 ? 's' : ''} matching
-        <strong>{explorationsSearchQuery}</strong>
-      </p>
-    {:else}
-      <p>
-        0 results for all exploration{explorationsMap.size > 1 ? 's' : ''} matching
-        <strong>{explorationsSearchQuery}</strong>
-      </p>
-    {/if}
+    <p>
+      {labeledCount(filteredExplorations, 'results')}
+      for all explorations matching
+      <strong>{explorationsSearchQuery}</strong>
+    </p>
   </slot>
   <slot slot="content">
     {#if !explorationsMap.size && hasTablesToExplore}

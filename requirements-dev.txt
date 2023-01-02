@@ -8,3 +8,5 @@ pytest-xdist[psutil]==2.5.0
 playwright==1.18.1
 pytest-playwright==0.2.3
 flake8-no-types==1.4.0
+mkdocs-material==8.5.11
+mkdocs-redirects==1.2.0
