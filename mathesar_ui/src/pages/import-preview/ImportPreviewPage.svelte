@@ -328,7 +328,7 @@
   cssVariables={{
     '--max-layout-width': '65.357rem',
     '--layout-background-color': 'var(--sand-200)',
-    '--inset-page-padding': 'var(--size-super-ultra-large)',
+    '--inset-page-padding': 'var(--size-xx-large)',
     '--inset-layout-padding': '0',
   }}
 >
@@ -539,12 +539,12 @@
         .content {
           padding: var(--inset-page-padding);
           background: var(--slate-50);
-          margin-bottom: 3rem;
+          margin-bottom: 5rem;
         }
 
         .sheet-holder {
           border: 1px solid var(--slate-200);
-          width: fit-content;
+          max-width: fit-content;
           min-height: 20rem;
           overflow: auto;
           margin: 0 auto;
@@ -569,7 +569,7 @@
     .footer {
       width: 100%;
       border-top: 1px solid var(--slate-200);
-      padding: 0.5rem 1rem;
+      padding: 1rem 1rem 2rem 1rem;
       background: var(--white);
       position: fixed;
       bottom: 0;

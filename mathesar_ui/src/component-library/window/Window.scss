@@ -20,7 +20,7 @@
         display: none;
       }
       flex: 1 1 100%;
-      padding: 1em 1em 0.5em 1em;
+      padding: 1rem 1rem 0.5rem 1rem;
       font-weight: 500;
       font-size: var(--text-size-x-large);
     }
@@ -37,10 +37,10 @@
   }
 
   &.has-body-padding > .body {
-    padding: 1em;
+    padding: 1rem;
   }
   > .footer {
-    padding: 1em;
+    padding: 1rem;
   }
 
   > .body,

@@ -141,7 +141,6 @@
 
     .name {
       font-size: var(--text-size-large);
-      font-weight: 500;
     }
 
     > :global(* + *) {
