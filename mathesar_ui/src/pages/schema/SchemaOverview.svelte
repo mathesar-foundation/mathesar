@@ -10,9 +10,13 @@
   import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
   import CreateNewTableButton from './CreateNewTableButton.svelte';
+  import TableSkeleton from './TableSkeleton.svelte';
+  import ExplorationSkeleton from './ExplorationSkeleton.svelte';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
+  export let isTablesLoading = false;
+  export let isExplorationsLoading = false;
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -25,7 +29,9 @@
         <CreateNewTableButton {database} {schema} />
       </slot>
     </OverviewHeader>
-    {#if tablesMap.size}
+    {#if isTablesLoading}
+      <TableSkeleton />
+    {:else if tablesMap.size}
       <TablesList tables={[...tablesMap.values()]} {database} {schema} />
     {:else}
       <CreateNewTableTutorial {database} {schema} />
@@ -34,7 +40,9 @@
   <div class="vertical-container explorations">
     <div class="vertical-container">
       <OverviewHeader title="Saved Explorations" />
-      {#if tablesMap.size && !explorationsMap.size}
+      {#if isExplorationsLoading}
+        <ExplorationSkeleton />
+      {:else if tablesMap.size && !explorationsMap.size}
         <CreateNewExplorationTutorial {database} {schema} />
       {:else}
         <ExplorationsList
@@ -46,7 +54,7 @@
       {/if}
     </div>
 
-    {#if tablesMap.size && explorationsMap.size}
+    {#if tablesMap.size && explorationsMap.size && !isExplorationsLoading}
       <div class="vertical-container">
         <OverviewHeader title="Explore your Data" />
         <span>

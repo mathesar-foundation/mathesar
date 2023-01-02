@@ -9,6 +9,7 @@
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import RefreshButton from '@mathesar/components/RefreshButton.svelte';
   import { iconAddNew } from '@mathesar/icons';
+  import { labeledCount, pluralize } from '@mathesar/utils/languageUtils';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -62,17 +63,12 @@
       </Button>
     {/if}
     <div class="record-count">
-      <!-- TODO: Check with team if we need this now? -->
-      <!-- {#if $selectedRows?.size > 0}
-        {$selectedRows.size} record{$selectedRows.size > 1 ? 's' : ''} selected of
-        {$totalCount}
-      {:else if pageCount > 0 && $totalCount} -->
       {#if pageCount > 0 && $totalCount}
         Showing {leftBound} to {max}
         {#if $newRecords.length > 0}
-          (+ {$newRecords.length} new record{$newRecords.length > 1 ? 's' : ''})
+          (+ {$newRecords.length} new {pluralize($newRecords, 'records')})
         {/if}
-        of {$totalCount} records
+        of {labeledCount($totalCount, 'records')}
       {:else if recordState !== States.Loading}
         No records found
       {/if}

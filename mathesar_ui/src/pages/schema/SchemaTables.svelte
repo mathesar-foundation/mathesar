@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
   import TablesList from './TablesList.svelte';
   import EntityLayout from './EntityLayout.svelte';
   import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
@@ -30,7 +31,7 @@
 </script>
 
 <EntityLayout
-  searchPlaceholder="Search Table"
+  searchPlaceholder="Search Tables"
   bind:searchQuery={tableSearchQuery}
   on:clear={clearQuery}
 >
@@ -38,18 +39,11 @@
     <CreateNewTableButton {database} {schema} />
   </slot>
   <slot slot="resultInfo">
-    {#if filteredTables.length}
-      <p>
-        {filteredTables.length} result{filteredTables.length > 1 ? 's' : ''} for
-        all table{filteredTables.length > 1 ? 's' : ''} matching
-        <strong>{tableSearchQuery}</strong>
-      </p>
-    {:else}
-      <p>
-        0 results for all table{filteredTables.length > 1 ? 's' : ''} matching
-        <strong>{tableSearchQuery}</strong>
-      </p>
-    {/if}
+    <p>
+      {labeledCount(filteredTables, 'results')}
+      for all tables matching
+      <strong>{tableSearchQuery}</strong>
+    </p>
   </slot>
   <slot slot="content">
     {#if tablesMap.size}

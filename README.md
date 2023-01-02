@@ -6,7 +6,7 @@ Mathesar is an open source software project to help users store, organize, visua
 
 Potential use cases for Mathesar include publishing and exploring public datasets, running business processes such inventory management and project tracking, providing a ready-made interface for speedy data entry and custom reporting, collecting and processing data from large groups of people, simple data cleaning and analysis, and automatic web API generation.
 
-We started building Mathesar in March 2021 and are making steady progress towards releasing an initial version of the project by spring 2022. Please visit [our public wiki](https://wiki.mathesar.org/) to learn more about the project.
+We started building Mathesar in March 2021 and are making steady progress towards releasing an initial version of the project by early 2023. Please visit [our public wiki](https://wiki.mathesar.org/) to learn more about the project.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
