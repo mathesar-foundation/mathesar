@@ -15,4 +15,4 @@ jobs:
           python-version: 3.x
       - run: pip install mkdocs-material mkdocs-redirects
       - working-directory: ./docs
-        run: mkdocs gh-deploy --strict
+        run: mkdocs gh-deploy --strict --force
