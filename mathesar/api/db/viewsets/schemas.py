@@ -47,7 +47,7 @@ class SchemaViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin,
         schema = self.get_object()
 
         # We forbid editing the public schema
-        if schema.name is "public":
+        if schema.name == "public":
             raise EditingPublicSchemaIsDisallowed()
 
         schema.update_sa_schema(serializer.validated_data)
