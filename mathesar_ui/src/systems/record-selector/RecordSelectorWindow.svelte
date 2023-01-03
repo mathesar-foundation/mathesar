@@ -1,8 +1,7 @@
 <script lang="ts">
   import { portal, Window } from '@mathesar/component-library';
-  import Identifier from '@mathesar/components/Identifier.svelte';
+  import TableName from '@mathesar/components/TableName.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
   import { getTableName } from '@mathesar/stores/tables';
   import { getArticleForWord } from '@mathesar/utils/languageUtils';
@@ -22,7 +21,7 @@
    * consistent height, so it should be okay to hardcode this value. But if we
    * add more UI within that area, we'll need to update this value.
    */
-  const nestedSelectorVerticalOffset = '4.2rem';
+  const nestedSelectorVerticalOffset = '2rem';
 
   export let controller: RecordSelectorController;
   export let windowPositionerElement: HTMLElement;
@@ -42,7 +41,6 @@
       })
     : undefined;
   $: tableName = $tableId ? getTableName($tableId) : undefined;
-  $: tablePageHref = $storeToGetTablePageUrl({ tableId: $tableId });
   $: verb = verbMap.get($purpose) ?? '';
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: marginBottom = $nestedSelectorIsOpen
@@ -60,22 +58,12 @@
 
 {#if tabularData}
   <div class="record-selector-window" style="margin-bottom: {marginBottom};">
-    <Window
-      on:close={() => controller.cancel()}
-      canScrollBody={false}
-      hasBodyPadding={false}
-    >
+    <Window on:close={() => controller.cancel()} canScrollBody={false}>
       <span slot="title">
         {verb}
         {#if tableName}
           {getArticleForWord(tableName)}
-          <a
-            href={tablePageHref}
-            title="View All {tableName} Records"
-            on:click={() => controller.cancel()}
-          >
-            <Identifier>{tableName}</Identifier>
-          </a>
+          <TableName table={{ name: tableName }} truncate={false} />
         {/if}
         Record
       </span>
@@ -105,15 +93,12 @@
 
 <style>
   .record-selector-window {
-    --z-index__record-selector__divider: 1;
-    --z-index__record_selector__row-header: 2;
-    --z-index__record_selector__thead: 3;
-    --z-index__record_selector__focused-input-with-overflow: 4;
-    --z-index__record_selector__thead-row-header: 5;
-    --z-index__record_selector__focused-input: 6;
-    --z-index__record_selector__shadow-inset: 7;
-    --z-index__record_selector__overlay: 8;
-    --z-index__record_selector__above-overlay: 9;
+    --z-index__record_selector__row-header: 1;
+    --z-index__record_selector__thead: 2;
+    --z-index__record_selector__thead-row-header: 3;
+    --z-index__record_selector__shadow-inset: 4;
+    --z-index__record_selector__overlay: 5;
+    --z-index__record_selector__above-overlay: 6;
     display: flex;
     flex-direction: column;
     overflow: hidden;
