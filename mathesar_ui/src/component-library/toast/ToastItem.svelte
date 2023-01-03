@@ -30,27 +30,29 @@
 </script>
 
 <div class="toast-item" on:mouseenter={pause} on:mouseleave={resume} {style}>
-  {#if icon}
-    <div class="icon"><Icon {...icon} /></div>
-  {/if}
-  <div class="content">
-    {#if props.contentComponent}
-      <svelte:component
-        this={props.contentComponent}
-        {...$readableContentComponentProps}
-      />
-    {:else}
-      {#if props.title}
-        <div class="title">{$readableTitle}</div>
-      {/if}
-      {#if props.message}
-        <div class="message">{$readableMessage}</div>
-      {/if}
+  <div class="header">
+    {#if icon}
+      <div class="icon"><Icon {...icon} /></div>
+    {/if}
+    {#if props.title}
+      <div class="title">{$readableTitle}</div>
+    {/if}
+    {#if props.allowDismiss}
+      <div class="close-button" role="button" tabindex="-1" on:click={dismiss}>
+        <Icon {...iconClose} />
+      </div>
     {/if}
   </div>
-  {#if props.allowDismiss}
-    <div class="close-button" role="button" tabindex="-1" on:click={dismiss}>
-      <Icon {...iconClose} />
+  {#if props.contentComponent || props.message}
+    <div class="message">
+      {#if props.contentComponent}
+        <svelte:component
+          this={props.contentComponent}
+          {...$readableContentComponentProps}
+        />
+      {:else if props.message}
+        {$readableMessage}
+      {/if}
     </div>
   {/if}
   {#if props.hasProgress}

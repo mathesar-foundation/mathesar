@@ -5,8 +5,8 @@ import itertools
 import sqlalchemy
 from sqlalchemy import select
 
-from db.functions.operations import apply
-from db.functions.operations.deserialize import get_db_function_subclass_by_id
+from db.functions.operations.apply import apply_db_function_by_id, apply_db_function_spec_as_filter
+from db.functions.packed import DistinctArrayAgg
 from db.records.operations import group, relevance, sort as rec_sort
 
 
@@ -115,7 +115,7 @@ class Filter(Transform):
         enforce_relation_type_expectations(relation)
         executable = _to_executable(relation)
         if filter is not None:
-            executable = apply.apply_db_function_spec_as_filter(executable, filter)
+            executable = apply_db_function_spec_as_filter(executable, filter)
         return _to_non_executable(executable)
 
 
@@ -231,7 +231,7 @@ class Summarize(Transform):
             {
                 "input_alias": "col3",
                 "output_alias": "col3_alias",  # required for aggregation cols
-                "function": "aggregate_to_array"  # required DBFunction id
+                "function": "distinct_aggregate_to_array"  # required DBFunction id
             }
         ]
     }
@@ -257,32 +257,39 @@ class Summarize(Transform):
     def apply_to_relation(self, relation):
 
         def _get_grouping_column(col_spec):
-            preproc = col_spec.get('preproc')
-            out_alias = col_spec.get('output_alias')
-            in_alias = col_spec['input_alias']
+            preproc_db_function_subclass_id = col_spec.get('preproc')
+            input_alias = col_spec['input_alias']
+            output_alias = col_spec['output_alias']
+            sa_expression = relation.columns[input_alias]
+            if preproc_db_function_subclass_id is not None:
+                sa_expression = apply_db_function_by_id(
+                    preproc_db_function_subclass_id,
+                    [sa_expression],
+                )
+            sa_expression = sa_expression.label(output_alias)
+            return sa_expression
 
-            expr = relation.columns[in_alias]
-
-            if preproc is not None:
-                expr = get_db_function_subclass_by_id(preproc).to_sa_expression(expr)
-            if out_alias is not None:
-                expr = expr.label(out_alias)
-
-            return expr
+        def _get_aggregation_column(relation, col_spec):
+            input_alias = col_spec['input_alias']
+            output_alias = col_spec['output_alias']
+            agg_db_function_subclass_id = col_spec['function']
+            column_to_aggregate = relation.columns[input_alias]
+            sa_expression = apply_db_function_by_id(
+                agg_db_function_subclass_id,
+                [column_to_aggregate],
+            )
+            return sa_expression.label(output_alias)
 
         grouping_expressions = [
             _get_grouping_column(col_spec)
-            for col_spec in self._grouping_col_specs
+            for col_spec
+            in self._grouping_col_specs
         ]
         aggregation_expressions = [
-            (
-                get_db_function_subclass_by_id(col_spec['function'])
-                .to_sa_expression(relation.columns[col_spec['input_alias']])
-                .label(col_spec['output_alias'])
-            )
-            for col_spec in self._aggregation_col_specs
+            _get_aggregation_column(relation, col_spec)
+            for col_spec
+            in self.aggregation_col_specs
         ]
-
         executable = (
             select(*grouping_expressions, *aggregation_expressions)
             .group_by(*grouping_expressions)
@@ -304,7 +311,7 @@ class Summarize(Transform):
                 output_alias=col_spec['output_alias'],
             )
             for col_spec
-            in self._aggregation_col_specs
+            in self.aggregation_col_specs
         ]
         return (
             mappings_that_carry_uniqueness_over
@@ -335,7 +342,7 @@ class Summarize(Transform):
             )
         spec_field = 'aggregation_expressions'
         default_suffix = self.default_agg_output_alias_suffix
-        default_aggregation_fn = 'aggregate_to_array'
+        default_aggregation_fn = DistinctArrayAgg.id
         return _add_aliases_to_summarization_expr_field(
             summarization=self,
             spec_field=spec_field,
@@ -346,6 +353,22 @@ class Summarize(Transform):
     @property
     def base_grouping_column(self):
         return self.spec['base_grouping_column']
+
+    @property
+    def aggregation_output_aliases(self):
+        return [
+            col_spec['output_alias']
+            for col_spec
+            in self.aggregation_col_specs
+        ]
+
+    @property
+    def grouping_output_aliases(self):
+        return [
+            col_spec['output_alias']
+            for col_spec
+            in self._grouping_col_specs
+        ]
 
     @property
     def grouping_input_aliases(self):
@@ -360,7 +383,7 @@ class Summarize(Transform):
         return [
             col_spec['input_alias']
             for col_spec
-            in self._aggregation_col_specs
+            in self.aggregation_col_specs
         ]
 
     @property
@@ -368,7 +391,7 @@ class Summarize(Transform):
         return self.spec.get("grouping_expressions", [])
 
     @property
-    def _aggregation_col_specs(self):
+    def aggregation_col_specs(self):
         return self.spec.get("aggregation_expressions", [])
 
 
@@ -445,39 +468,55 @@ class SelectSubsetOfColumns(Transform):
     type = "select"
 
     def apply_to_relation(self, relation):
-        columns_to_select = self._columns_to_select
-        if columns_to_select:
-            processed_columns_to_select = [
-                _make_sure_column_expression(column)
-                for column
-                in columns_to_select
-            ]
-            executable = select(*processed_columns_to_select).select_from(relation)
+        sa_columns_to_select = self._get_sa_columns_to_select(relation)
+        if sa_columns_to_select:
+            executable = select(*sa_columns_to_select).select_from(relation)
             return _to_non_executable(executable)
         else:
             return relation
 
     def get_unique_constraint_mappings(self, _):
-        columns_to_select = self._columns_to_select
+        # We presume that when we're looking at uc mappings, the raw spec will always be string
+        # names.
+        column_names_to_select = self._raw_columns_to_select
         return [
             UniqueConstraintMapping(
-                column_to_select,
-                column_to_select,
+                column_names_to_select,
+                column_names_to_select,
             )
-            for column_to_select
-            in columns_to_select
+            for column_names_to_select
+            in column_names_to_select
         ]
 
+    def _get_sa_columns_to_select(self, relation):
+        return tuple(
+            _make_sure_sa_col_expr(raw_col, relation)
+            for raw_col
+            in self._raw_columns_to_select
+        )
+
     @property
-    def _columns_to_select(self):
-        return self.spec
+    def _raw_columns_to_select(self):
+        """
+        The spec will be a list whose items will be SQLAlchemy column expressions and/or string
+        names.
+
+        This accepts SQLAlchemy column expressions so that we can count records by doing
+        SelectSubsetOfColumns(count(1).label("_count")).
+        """
+        return self.spec or []
 
 
-def _make_sure_column_expression(input):
-    if isinstance(input, str):
-        return sqlalchemy.column(input)
+def _make_sure_sa_col_expr(raw_col, relation):
+    if isinstance(raw_col, str):
+        # If raw_col is a string, we consider it a column name and look up an SQL column using it
+        col_name = raw_col
+        sa_col = relation.c[col_name]
+        return sa_col
     else:
-        return input
+        # If raw_col isn't a string, we presume it's an SA column expression
+        sa_col = raw_col
+        return sa_col
 
 
 def _to_executable(relation):
