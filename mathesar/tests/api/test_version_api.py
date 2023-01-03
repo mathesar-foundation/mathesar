@@ -29,15 +29,6 @@ mock_release_info_json = frozendict(
 )
 
 
-@pytest.fixture
-def mocked_responses():
-    """
-    https://github.com/getsentry/responses#responses-as-a-pytest-fixture
-    """
-    with responses.RequestsMock() as rsps:
-        yield rsps
-
-
 def test_latest_release_endpoint_200(mocked_responses, client):
     mocked_responses.get(
         url='https://api.github.com/repos/centerofci/mathesar/releases/latest',
