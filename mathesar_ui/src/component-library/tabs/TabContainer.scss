@@ -27,7 +27,8 @@
       border-bottom: 2px solid transparent;
       margin-bottom: -1px;
 
-      > div {
+      > div,
+      a {
         padding: 0.5rem 1rem;
         white-space: nowrap;
         text-decoration: none;

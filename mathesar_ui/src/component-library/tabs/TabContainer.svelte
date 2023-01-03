@@ -19,6 +19,7 @@
   export let activeTab: Tab | undefined = tabs[0];
   export let idKey = 'id';
   export let labelKey = 'label';
+  export let linkKey = 'href';
   export let allowRemoval = false;
   export let preventDefault = false;
   export let fillTabWidth = false;
@@ -26,7 +27,10 @@
   export let uniformTabWidth = true;
 
   function selectActiveTab(e: Event, tab: Tab) {
-    activeTab = tab;
+    const hasLink = !!tab[linkKey];
+    if (!hasLink) {
+      activeTab = tab;
+    }
     dispatch('tabSelected', {
       tab,
       originalEvent: e,
@@ -70,6 +74,10 @@
       (tab as HTMLElement)?.focus?.();
     }
   }
+
+  function getTabLink(tab: Tab) {
+    return tab[linkKey] as string | undefined;
+  }
 </script>
 
 <div
@@ -84,6 +92,7 @@
         {tab}
         {allowRemoval}
         {uniformTabWidth}
+        link={getTabLink(tab)}
         totalTabs={tabs.length}
         isActive={tab[idKey] === activeTab?.[idKey]}
         on:focus={focusTab}

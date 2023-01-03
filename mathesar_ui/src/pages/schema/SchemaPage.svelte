@@ -8,8 +8,6 @@
   import { iconSchema, iconEdit } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { Button, TabContainer, Icon } from '@mathesar-component-library';
-  import type { TabEvents } from '@mathesar/component-library/tabs/TabContainerTypes';
-  import { router } from 'tinro';
   import {
     getSchemaPageExplorationsSectionUrl,
     getSchemaPageTablesSectionUrl,
@@ -35,7 +33,7 @@
     label: string;
     id: TabsKey;
     count?: number;
-    getUrl: () => string;
+    href: string;
   };
 
   $: tablesMap = $tablesStore.data;
@@ -47,20 +45,19 @@
     {
       label: 'Overview',
       id: 'overview',
-      getUrl: () => getSchemaPageUrl(database.name, schema.id),
+      href: getSchemaPageUrl(database.name, schema.id),
     },
     {
       label: 'Tables',
       id: 'tables',
       count: tablesMap.size,
-      getUrl: () => getSchemaPageTablesSectionUrl(database.name, schema.id),
+      href: getSchemaPageTablesSectionUrl(database.name, schema.id),
     },
     {
       label: 'Explorations',
       id: 'explorations',
       count: explorationsMap.size,
-      getUrl: () =>
-        getSchemaPageExplorationsSectionUrl(database.name, schema.id),
+      href: getSchemaPageExplorationsSectionUrl(database.name, schema.id),
     },
   ] as TabItem[];
 
@@ -68,11 +65,6 @@
 
   function handleEditSchema() {
     addEditModal.open();
-  }
-
-  function handleTabSelected(event: CustomEvent<TabEvents['tabSelected']>) {
-    const selectedTab = event.detail.tab as TabItem;
-    router.goto(selectedTab.getUrl());
   }
 </script>
 
@@ -104,12 +96,7 @@
     </slot>
   </AppSecondaryHeader>
 
-  <TabContainer
-    {activeTab}
-    {tabs}
-    uniformTabWidth={false}
-    on:tabSelected={handleTabSelected}
-  >
+  <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
     <div slot="tab" let:tab class="tab-header-container">
       <span>{tab.label}</span>
       {#if tab.count !== undefined}
