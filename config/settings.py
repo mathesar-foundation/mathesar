@@ -230,6 +230,7 @@ STATICFILES_DIRS = [MATHESAR_UI_SOURCE_LOCATION, MATHESAR_STATIC_NON_CODE_FILES_
 AUTH_USER_MODEL = 'mathesar.User'
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = LOGIN_URL
 DRF_ACCESS_POLICY = {
     'reusable_conditions': ['mathesar.api.permission_conditions']
 }
