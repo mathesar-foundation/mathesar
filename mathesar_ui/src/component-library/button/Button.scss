@@ -11,7 +11,6 @@
   font-weight: inherit;
   position: relative;
   padding: 0.5em 0.5em;
-  transition: background-color 0.2s ease-in-out;
 
   > * + * {
     margin-left: 0.25em;
@@ -74,7 +73,7 @@
       }
       &:active:hover,
       &.active:hover {
-        background: var(--slate-700);
+        background: var(--slate-600);
       }
     }
   }
@@ -118,7 +117,6 @@
     border-color: transparent;
     border-radius: 0px;
     box-shadow: none !important;
-    font-weight: 500;
   }
 
   &.btn-default,
@@ -134,7 +132,7 @@
       &.active,
       &:focus,
       &.focus {
-        box-shadow: 0 0 0 2px var(--slate-100);
+        box-shadow: 0 0 0 2px var(--slate-100) !important;
       }
 
       &:active,
