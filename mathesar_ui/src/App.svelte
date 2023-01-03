@@ -58,6 +58,8 @@
     --color-link: var(--color-blue-dark);
     --color-text: #171717;
     --color-text-muted: #6b7280;
+    --color-substring-match: rgb(254, 221, 72);
+    --color-substring-match-light: rgba(254, 221, 72, 0.2);
     --text-size-xx-small: var(--size-xx-small); // 8px
     --text-size-x-small: var(--size-x-small); // 10px
     --text-size-small: var(--size-small); // 12px
@@ -67,6 +69,9 @@
 
     --modal-z-index: 50;
     --modal-record-selector-z-index: 50;
+
+    /** Component theming */
+    --Match__highlight-color: var(--color-substring-match);
   }
 
   body {
