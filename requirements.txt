@@ -17,6 +17,7 @@ pglast==3.4
 psycopg2==2.8.6
 python-decouple==3.4
 requests==2.22.0
+responses==0.22.0
 SQLAlchemy==1.4.18
 SQLAlchemy-Utils==0.38.2
 thefuzz==0.19.0
