@@ -1,5 +1,4 @@
 import pytest
-import responses
 from frozendict import frozendict
 import mathesar
 
@@ -30,19 +29,22 @@ mock_release_info_json = frozendict(
 
 
 @pytest.fixture
-def mocked_responses():
+def mocked_responses(requests_mock):
     """
-    https://github.com/getsentry/responses#responses-as-a-pytest-fixture
+    requests_mock fixture provides a way to mock requests library's responses. As long as
+    requests-mock is installed, this fixture should be accessible; i.e. it doesn't have to be
+    imported.
+
+    See https://requests-mock.readthedocs.io/en/latest/pytest.html
     """
-    with responses.RequestsMock() as rsps:
-        yield rsps
+    return requests_mock
 
 
 def test_latest_release_endpoint_200(mocked_responses, client):
     mocked_responses.get(
         url='https://api.github.com/repos/centerofci/mathesar/releases/latest',
         json=mock_release_info_json,
-        status=200,
+        status_code=200,
     )
     response = client.get('/api/ui/v0/version/latest/')
     json = response.json()
@@ -53,7 +55,7 @@ def test_latest_release_endpoint_200(mocked_responses, client):
 def test_latest_release_endpoint_404(mocked_responses, client):
     mocked_responses.get(
         url='https://api.github.com/repos/centerofci/mathesar/releases/latest',
-        status=404,
+        status_code=404,
     )
     response = client.get('/api/ui/v0/version/latest/')
     assert response.status_code == 404
@@ -66,7 +68,7 @@ def test_installed_release_endpoint_200(
     mocked_responses.get(
         url=f'https://api.github.com/repos/centerofci/mathesar/releases/tags/{tag_name}',
         json=mock_release_info_json,
-        status=200,
+        status_code=200,
     )
     response = client.get('/api/ui/v0/version/current/')
     json = response.json()
@@ -80,7 +82,7 @@ def test_installed_release_endpoint_404(
     tag_name = hardcoded_version
     mocked_responses.get(
         url=f'https://api.github.com/repos/centerofci/mathesar/releases/tags/{tag_name}',
-        status=404,
+        status_code=404,
     )
     response = client.get('/api/ui/v0/version/current/')
     json = response.json()
