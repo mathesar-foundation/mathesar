@@ -1,16 +1,17 @@
 <script lang="ts">
   import type { SchemaEntry } from '@mathesar/AppTypes';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
 
   export let schema: SchemaEntry;
 </script>
 
 <div class="container">
   <p class="constituent">
-    {schema.num_tables} Table{schema.num_tables > 0 ? 's' : ''}
+    {labeledCount(schema.num_tables, 'tables')}
   </p>
   <span class="divider" />
   <p class="constituent">
-    {schema.num_queries} Exploration{schema.num_queries > 0 ? 's' : ''}
+    {labeledCount(schema.num_queries, 'explorations')}
   </p>
 </div>
 
