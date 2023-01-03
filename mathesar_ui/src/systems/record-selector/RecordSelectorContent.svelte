@@ -167,7 +167,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #aaa;
+    color: var(--slate-200);
     z-index: var(--z-index__record_selector__overlay);
     pointer-events: none;
   }
@@ -180,7 +180,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #aaa;
+    color: var(--slate-200);
   }
   .no-results {
     padding: 1.5rem;

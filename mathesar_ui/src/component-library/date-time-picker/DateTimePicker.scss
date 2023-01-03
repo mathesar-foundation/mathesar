@@ -22,7 +22,7 @@
   box-sizing: border-box;
   -ms-touch-action: manipulation;
   touch-action: manipulation;
-  background: #fff;
+  background: var(--white);
   max-height: 40em;
   max-width: 19.6em;
 }
@@ -37,7 +37,7 @@
 }
 .flatpickr-calendar.hasTime .flatpickr-time {
   height: 40px;
-  border-top: 1px solid #e6e6e6;
+  border-top: 1px solid var(--slate-200);
 }
 .flatpickr-calendar.noCalendar.hasTime .flatpickr-time {
   height: auto;
@@ -392,8 +392,8 @@ span.flatpickr-weekday {
   opacity: 1;
 }
 .dayContainer + .dayContainer {
-  -webkit-box-shadow: -1px 0 0 #e6e6e6;
-  box-shadow: -1px 0 0 #e6e6e6;
+  -webkit-box-shadow: -1px 0 0 var(--slate-200);
+  box-shadow: -1px 0 0 var(--slate-200);
 }
 .flatpickr-day {
   background: none;
@@ -435,17 +435,17 @@ span.flatpickr-weekday {
 .flatpickr-months .flatpickr-next-month:hover {
   cursor: pointer;
   outline: 0;
-  background: #e6e6e6;
-  border-color: #e6e6e6;
+  background: var(--slate-200);
+  border-color: var(--slate-200);
 }
 .flatpickr-day.today {
-  border-color: #959ea9;
+  border-color: var(--slate-400);
 }
 .flatpickr-day.today:hover,
 .flatpickr-day.today:focus {
-  border-color: #959ea9;
-  background: #959ea9;
-  color: #fff;
+  border-color: var(--slate-400);
+  background: var(--slate-400);
+  color: var(--white);
 }
 .flatpickr-day.selected,
 .flatpickr-day.startRange,
@@ -494,8 +494,8 @@ span.flatpickr-weekday {
 }
 .flatpickr-day.inRange {
   border-radius: 0;
-  -webkit-box-shadow: -5px 0 0 #e6e6e6, 5px 0 0 #e6e6e6;
-  box-shadow: -5px 0 0 #e6e6e6, 5px 0 0 #e6e6e6;
+  -webkit-box-shadow: -5px 0 0 var(--slate-200), 5px 0 0 var(--slate-200);
+  box-shadow: -5px 0 0 var(--slate-200), 5px 0 0 var(--slate-200);
 }
 .flatpickr-day.flatpickr-disabled,
 .flatpickr-day.flatpickr-disabled:hover,
@@ -530,8 +530,8 @@ span.flatpickr-weekday {
 }
 .flatpickr-weekwrapper .flatpickr-weeks {
   padding: 0 12px;
-  -webkit-box-shadow: 1px 0 0 #e6e6e6;
-  box-shadow: 1px 0 0 #e6e6e6;
+  -webkit-box-shadow: 1px 0 0 var(--slate-200);
+  box-shadow: 1px 0 0 var(--slate-200);
 }
 .flatpickr-weekwrapper .flatpickr-weekday {
   float: none;

@@ -84,11 +84,11 @@
     }
 
     &.is-active {
-      box-shadow: 0 0 0 2px #428af4;
+      box-shadow: 0 0 0 2px var(--sky-700);
       border-radius: 2px;
 
       &.disabled {
-        box-shadow: 0 0 0 2px #a8a8a8;
+        box-shadow: 0 0 0 2px var(--slate-200);
       }
     }
 
@@ -99,7 +99,7 @@
 
     &.is-edit-mode {
       padding: 0px;
-      box-shadow: 0 0 0 3px #428af4, 0 0 8px #000000 !important;
+      box-shadow: 0 0 0 3px var(--sky-700), 0 0 8px #000000 !important;
     }
 
     &.truncate {
