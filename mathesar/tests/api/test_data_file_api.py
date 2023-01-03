@@ -138,7 +138,6 @@ def test_data_file_create_paste(client, paste_filename, header):
 
 @pytest.mark.parametrize('header', [True, False])
 def test_data_file_create_url(client, header, patents_url, patents_url_data, mocked_responses):
-    #patents_url_data_bytes = bytes(patents_url_data, 'utf-8')
     mocked_responses.get(
         url=patents_url,
         body=patents_url_data,

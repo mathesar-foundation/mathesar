@@ -1,5 +1,4 @@
 import pytest
-import responses
 from frozendict import frozendict
 import mathesar
 
