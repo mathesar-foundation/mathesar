@@ -60,7 +60,7 @@
 <style lang="scss">
   .group-header {
     padding: 0.5rem 1.5rem;
-    z-index: var(--z-index-group-header);
+    z-index: var(--z-index__sheet_group-header);
 
     .groups-data {
       align-items: start;

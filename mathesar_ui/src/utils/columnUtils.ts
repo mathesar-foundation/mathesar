@@ -1,13 +1,16 @@
 import { get } from 'svelte/store';
 
 import type { IconProps } from '@mathesar-component-library/types';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type { DisplayColumn } from '@mathesar/components/column/types';
+import { uniqueWith, type ValidationFn } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';
 import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
-import { uniqueWith, type ValidationFn } from '@mathesar/components/form';
+import { getAvailableName } from '@mathesar/utils/db';
+import { makeSingular } from './languageUtils';
 
 export function getColumnIconProps(
   _column: DisplayColumn,
@@ -27,6 +30,16 @@ export function getColumnIconProps(
     dbType: _column.type,
     typeOptions: _column.type_options,
   });
+}
+
+export function getSuggestedFkColumnName(
+  targetTable: Pick<TableEntry, 'name'> | undefined,
+  existingColumns: { name: string }[] = [],
+): string {
+  const columnNames = new Set(existingColumns.map((c) => c.name));
+  return targetTable
+    ? getAvailableName(makeSingular(targetTable.name), columnNames)
+    : '';
 }
 
 export function columnNameIsAvailable(

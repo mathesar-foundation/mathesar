@@ -15,7 +15,7 @@ access hints on what composition of functions and parameters should be valid.
 from abc import ABC, abstractmethod
 import warnings
 
-from sqlalchemy import column, not_, and_, or_, func, literal, cast
+from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct
 from sqlalchemy.dialects.postgresql import array_agg, TEXT, array
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat
@@ -143,8 +143,14 @@ class Noop(DBFunction):
         return primitive
 
 
-# This represents referencing columns by their Postgres name.
 class ColumnName(DBFunction):
+    """
+    This represents referencing columns by their Postgres name.
+
+    Important note: referencing a column this way only provides its name to SQLAlchemy. It doesn't
+    provide, for example, type information (the type will be "NullType"). As of the time of
+    writing, we don't have a recommended alternative; this is a to-be-solved oversight.
+    """
     id = 'column_name'
     name = 'as column name'
     hints = tuple([
@@ -388,6 +394,15 @@ class ArrayAgg(DBFunction):
     def to_sa_expression(column_expr):
         column_expr = _maybe_downcast(column_expr)
         return array_agg(column_expr)
+
+
+class Distinct(DBFunction):
+    id = 'distinct'
+    name = 'distinct'
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return distinct(column_expr)
 
 
 class ArrayContains(DBFunction):
