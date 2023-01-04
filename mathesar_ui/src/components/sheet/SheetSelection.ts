@@ -540,9 +540,11 @@ export default class SheetSelection<
     }
 
     const startColumn = columns[0];
+    const endColumn = columns[columns.length - 1];
     this.activateCell(row, startColumn);
 
     this.onStartSelection(row, startColumn);
+    this.onMouseEnterCellWhileSelection(row, endColumn);
     return true;
   }
 
