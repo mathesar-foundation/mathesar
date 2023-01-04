@@ -24,6 +24,7 @@ def main():
     check_missing_dj_config()
     django.setup()
     management.call_command('migrate')
+    management.call_command('collectstatic')
     if not superuser_exists():
         print("------------Setting up Admin user------------")
         print("Admin user does not exists. We need at least one admin")
