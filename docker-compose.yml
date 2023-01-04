@@ -17,10 +17,12 @@ services:
     profiles: ["web-server"]
     build:
       context: .
-      dockerfile: ${DOCKERFILE}
+      dockerfile: Dockerfile
+      target: base
     container_name: mathesar_service
     environment:
       - MODE=${MODE-PRODUCTION}
+      - DEBUG=${DEBUG-false}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings}
     command: ./run.sh
@@ -34,6 +36,10 @@ services:
     depends_on:
       - db
   dev-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
     profiles: ["dev"]
     extends: service-without-db
     environment:
