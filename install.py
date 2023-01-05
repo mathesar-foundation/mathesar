@@ -11,7 +11,7 @@ from decouple import UndefinedValueError, config as decouple_config
 from django.contrib.auth import get_user_model
 from django.core import management
 
-from config.settings import DATABASES
+from django.conf import settings
 from db import install
 
 
@@ -31,7 +31,7 @@ def main():
         create_superuser(skip_confirm)
 
     print("------------Setting up User Databases------------")
-    user_databases = [key for key in DATABASES if key != "default"]
+    user_databases = [key for key in settings.DATABASES if key != "default"]
     for database_key in user_databases:
         install_on_db_with_key(database_key, skip_confirm)
 
@@ -72,12 +72,13 @@ def check_missing_dj_config():
 
 
 def install_on_db_with_key(database_key, skip_confirm):
+    databases = settings.DATABASES
     install.install_mathesar(
-        user_database=DATABASES[database_key]["NAME"],
-        username=DATABASES[database_key]["USER"],
-        password=DATABASES[database_key]["PASSWORD"],
-        hostname=DATABASES[database_key]["HOST"],
-        port=DATABASES[database_key]["PORT"],
+        user_database=databases[database_key]["NAME"],
+        username=databases[database_key]["USER"],
+        password=databases[database_key]["PASSWORD"],
+        hostname=databases[database_key]["HOST"],
+        port=databases[database_key]["PORT"],
         skip_confirm=skip_confirm
     )
 

@@ -24,7 +24,7 @@ services:
       - MODE=${MODE-PRODUCTION}
       - DEBUG=${DEBUG-false}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.production}
     command: ./run.sh
     ports:
       - "8000:8000"
@@ -48,7 +48,7 @@ services:
       - DISPLAY=${DISPLAY}
       - XAUTHORITY=/.Xauthority
       - DJANGO_SUPERUSER_PASSWORD=password
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
     command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./dev-run.sh
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
