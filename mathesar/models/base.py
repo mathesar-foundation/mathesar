@@ -625,7 +625,7 @@ class Table(DatabaseObject, Relation):
         remainder_column_names = column_names_id_map.keys() - extracted_column_names
 
         # Mutate on Postgres
-        extracted_sa_table, remainder_sa_table, remainder_fk = extract_columns_from_table(
+        extracted_sa_table, remainder_sa_table, linking_fk_column_attnum = extract_columns_from_table(
             self.oid,
             columns_attnum_to_extract,
             extracted_table_name,
@@ -646,7 +646,9 @@ class Table(DatabaseObject, Relation):
         remainder_table = Table.current_objects.get(oid=remainder_table_oid)
         remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
         reset_reflection()
-        return extracted_table, remainder_table, remainder_fk
+        remainder_fk_column = Column.objects.get(table=remainder_table, attnum=linking_fk_column_attnum)
+
+        return extracted_table, remainder_table, remainder_fk_column
 
     def update_column_reference(self, column_names, column_name_id_map):
         """

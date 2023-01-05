@@ -2,6 +2,7 @@
   import { Collapsible, Button, Icon } from '@mathesar-component-library';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
+  import { pluralize } from '@mathesar/utils/languageUtils';
   import type QueryManager from '../../QueryManager';
   import type { ProcessedQueryOutputColumn } from '../../utils';
 
@@ -48,7 +49,7 @@
       on:click={deleteSelectedColumn}
     >
       <Icon {...iconDeleteMajor} />
-      <span>Delete column(s)</span>
+      <span>Delete {pluralize(selectedColumnAliases, 'columns', 'title')}</span>
     </Button>
   </div>
 </Collapsible>
