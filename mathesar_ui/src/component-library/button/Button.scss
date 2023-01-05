@@ -70,6 +70,11 @@
       &.active {
         background: var(--slate-500);
         color: var(--white);
+        border-color: var(--slate-500);
+      }
+      &:active:hover,
+      &.active:hover {
+        background: var(--slate-600);
       }
     }
   }

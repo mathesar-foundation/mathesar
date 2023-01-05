@@ -115,7 +115,7 @@
     left: calc(-1 * var(--border-width));
     top: calc(-1 * var(--border-width));
     box-sizing: content-box;
-    border: solid var(--border-width) #666;
+    border: solid var(--border-width) var(--slate-400);
   }
   .record-summary {
     position: relative;
@@ -135,7 +135,7 @@
     padding: 0 0.3rem;
   }
   .linked-record.is-hovering-delete .background {
-    background: #bbb;
+    background: var(--slate-200);
     opacity: 0.5;
   }
   .linked-record.is-hovering-delete .record-summary {

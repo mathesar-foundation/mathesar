@@ -70,7 +70,7 @@
 
 <LayoutWithHeader
   restrictWidth
-  cssVariables={{ '--max-layout-width': '64rem' }}
+  cssVariables={{ '--max-layout-width': '72rem' }}
 >
   <AppSecondaryHeader
     slot="secondary-header"
@@ -156,8 +156,11 @@
 
     .count {
       border-radius: var(--border-radius-l);
-      background: var(--slate-100);
-      padding: 0.071rem 0.14rem;
+      background: var(--slate-200);
+      font-size: var(--text-size-small);
+      text-align: center;
+      padding: 0.071rem 0.5rem;
+      margin-left: 0.5rem;
     }
   }
 </style>

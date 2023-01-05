@@ -326,7 +326,7 @@
   <div class="inset-shadow" />
 </div>
 
-<style>
+<style lang="scss">
   .inset-shadow-positioner {
     flex: 0 1 auto;
     display: flex;
@@ -345,6 +345,7 @@
     min-height: 0;
     overflow: auto;
     position: relative;
+    border-top: 1px solid var(--slate-300);
   }
   .table {
     display: table;
@@ -353,6 +354,7 @@
     position: relative;
     border-spacing: 0;
     margin-left: var(--focus-highlight-width);
+    width: 100%;
     --border-width: 1px;
     --border-color: #e7e7e7;
     --row-height: 2.25rem;

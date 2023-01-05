@@ -149,7 +149,7 @@
   {/if}
 </div>
 
-<style>
+<style lang="scss">
   .record-selector-content {
     position: relative;
     display: flex;
@@ -164,7 +164,7 @@
      * of the submit buttons aligned with the right edge of the "create new"
      * button. */
     --extra-body-padding: 0.5rem;
-    padding: var(--body-padding);
+    //padding: var(--body-padding);
     /** So that the table's vertical scroll bar is flush against window */
     padding-right: 0;
   }
@@ -178,7 +178,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #aaa;
+    color: var(--slate-200);
     z-index: var(--z-index__record_selector__overlay);
     pointer-events: none;
   }
@@ -191,7 +191,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #aaa;
+    color: var(--slate-200);
   }
   .no-results {
     padding: 1.5rem;
