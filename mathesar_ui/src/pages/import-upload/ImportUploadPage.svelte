@@ -159,12 +159,12 @@
 <style lang="scss">
   h1 {
     font-weight: 500;
-    font-size: var(--size-super-ultra-large);
+    font-size: var(--size-xx-large);
     margin: 0.83em 0;
   }
 
   .import-file-view {
-    padding: var(--size-super-ultra-large);
+    padding: var(--size-xx-large);
     border: 1px solid var(--slate-300);
     border-radius: var(--border-radius-m);
     background-color: var(--white);

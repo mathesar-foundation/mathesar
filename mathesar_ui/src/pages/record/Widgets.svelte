@@ -49,7 +49,6 @@
         </NameWithIcon>
         from another table.
       </Help>
-      <hr />
     </h2>
     <div class="widgets">
       {#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
@@ -65,16 +64,18 @@
 
 <style lang="scss">
   .widgets-area {
-    background: var(--sand-100);
+    background: var(--slate-50);
+    border-top: 1px solid var(--slate-300);
   }
   .no-widgets {
     background: var(--sand-200);
   }
   h2 {
-    font-weight: bold;
+    padding: var(--size-small);
+    border-bottom: 1px solid var(--slate-200);
+    font-weight: 600;
+    font-size: var(--size-large);
     background: var(--white);
-    padding: 0.5em 1em;
-    position: relative;
   }
   h2 hr {
     margin: 0;
@@ -85,8 +86,17 @@
     border: solid var(--slate-200) 1px;
   }
   .widgets {
-    padding: 1rem;
+    padding: var(--size-small);
+
+    :global(.sheet) {
+      background: var(--white);
+    }
+
+    :global(.sheet [data-sheet-element='header']) {
+      background: var(--slate-100);
+    }
   }
+
   .table-widget-positioner {
     margin: 4rem 0;
     &:first-child {
