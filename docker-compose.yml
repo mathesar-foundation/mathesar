@@ -27,8 +27,6 @@ services:
     command: ./run.sh
     ports:
       - "8000:8000"
-      - "3000:3000"
-      - "6006:6006"
   service:
     profiles: ["prod"]
     extends: service-without-db
@@ -57,6 +55,10 @@ services:
       - ui_node_modules:/code/mathesar_ui/node_modules/
     depends_on:
       - db
+    ports:
+      - "8000:8000"
+      - "3000:3000"
+      - "6006:6006"
 volumes:
   postgresql_data:
   ui_node_modules:
