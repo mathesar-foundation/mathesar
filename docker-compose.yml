@@ -18,7 +18,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: base
     container_name: mathesar_service
     environment:
       - MODE=${MODE-PRODUCTION}
@@ -39,7 +38,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: dev
+      args:
+        PYTHON_REQUIREMENTS: requirements-dev.txt
     profiles: ["dev"]
     extends: service-without-db
     environment:
