@@ -24,7 +24,9 @@ def main():
     check_missing_dj_config()
     django.setup()
     management.call_command('migrate')
-    management.call_command('collectstatic')
+    # A production server(other than the default django server) can run with DEBUG flag set to `True`
+    # So better to call collectstatic so that the production server can find the static files.
+    management.call_command('collectstatic', '--no-input=y')
     if not superuser_exists():
         print("------------Setting up Admin user------------")
         print("Admin user does not exists. We need at least one admin")
