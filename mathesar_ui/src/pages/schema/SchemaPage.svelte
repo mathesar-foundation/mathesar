@@ -62,6 +62,8 @@
   function handleEditSchema() {
     addEditModal.open();
   }
+
+  $: isDefault = schema.name === 'public';
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
@@ -79,10 +81,12 @@
       icon: iconSchema,
     }}
   >
-    <Button slot="action" on:click={handleEditSchema} appearance="secondary">
-      <Icon {...iconEdit} />
-      <span>Edit Schema</span>
-    </Button>
+    {#if !isDefault}
+      <Button slot="action" on:click={handleEditSchema} appearance="secondary">
+        <Icon {...iconEdit} />
+        <span>Edit Schema</span>
+      </Button>
+    {/if}
     <slot slot="bottom">
       {#if schema.description}
         <span class="description">
