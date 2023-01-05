@@ -57,13 +57,20 @@
   <div class="table-item-header">
     <div class="name-and-description">
       <div class="name"><TableName {table} /></div>
+      {#if table.description}
+        <div title={table.description} class="description">
+          {table.description}
+        </div>
+      {/if}
     </div>
     <DropdownMenu
       showArrow={false}
       triggerAppearance="plain"
       closeOnInnerClick={true}
+      trigger
       label=""
       icon={iconShowMore}
+      size="small"
     >
       {#if !isTableImportConfirmationNeeded}
         <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
@@ -125,9 +132,9 @@
 
   .table-item-header {
     display: flex;
-    align-items: center;
+    align-items: start;
     justify-content: space-between;
-    padding: 0.75rem 0.25rem 0.75rem 1rem;
+    padding: 0.75rem 0.5rem 0.75rem 1rem;
 
     > :global(* + *) {
       margin-left: 0.75rem;
@@ -141,6 +148,13 @@
 
     .name {
       font-size: var(--text-size-large);
+    }
+
+    .description {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     > :global(* + *) {
