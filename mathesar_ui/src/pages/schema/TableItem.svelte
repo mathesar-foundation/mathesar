@@ -12,6 +12,7 @@
     ButtonMenuItem,
     MenuDivider,
     iconShowMore,
+    Truncate,
   } from '@mathesar-component-library';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableName from '@mathesar/components/TableName.svelte';
@@ -58,9 +59,7 @@
     <div class="name-and-description">
       <div class="name"><TableName {table} /></div>
       {#if table.description}
-        <div title={table.description} class="description">
-          {table.description}
-        </div>
+        <Truncate lines={2}>{table.description}</Truncate>
       {/if}
     </div>
     <DropdownMenu
@@ -148,13 +147,6 @@
 
     .name {
       font-size: var(--text-size-large);
-    }
-
-    .description {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
 
     > :global(* + *) {
