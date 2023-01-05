@@ -3,4 +3,5 @@ export { default as PrecomputedMatchHighlighter } from './PrecomputedMatchHighli
 export {
   splitMatchParts,
   getValueComparisonOutcome,
+  compareWholeValues,
 } from './matchHighlighterUtils';
