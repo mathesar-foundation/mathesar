@@ -27,7 +27,7 @@ def pipe_delim(pipe_string):
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Application definition
 
@@ -154,7 +154,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 # https://docs.djangoproject.com/en/3.1/ref/contrib/staticfiles/
 
-STATIC_URL = "/static/"
+STATIC_URL = "static/"
 
 # When running with DEBUG=False, the webserver needs to serve files from this location
 # python manage.py collectstatic has to be run to collect all static files into this location
@@ -163,7 +163,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Media files (uploaded by the user)
 
-MEDIA_ROOT = os.path.join(BASE_DIR, '../../.media/')
+MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
 
 MEDIA_URL = "/media/"
 
@@ -211,10 +211,10 @@ FRIENDLY_ERRORS = {
 }
 # Mathesar settings
 MATHESAR_MODE = decouple_config('MODE', default='PRODUCTION')
-MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/../../mathesar/static/mathesar/')
-MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, '../../mathesar/static/mathesar/manifest.json')
+MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
+MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, 'manifest.json')
 MATHESAR_CLIENT_DEV_URL = 'http://localhost:3000'
-MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, '../../mathesar_ui/')
+MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
 MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPTION', default=False)
 
 # UI source files have to be served by Django in order for static assets to be included during dev mode
