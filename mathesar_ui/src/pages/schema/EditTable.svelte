@@ -15,8 +15,7 @@
     save={onUpdate}
     {getNameValidationErrors}
     getInitialName={() => table.name ?? ''}
-    getInitialDescription={() => ''}
-    hideDescription
+    getInitialDescription={() => table.description ?? ''}
   >
     <span slot="title" let:initialName>
       Edit <Identifier>{initialName}</Identifier> Table

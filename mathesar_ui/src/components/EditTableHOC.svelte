@@ -2,7 +2,7 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     refetchTablesForSchema,
-    renameTable,
+    updateTableMetaData,
     tables,
   } from '@mathesar/stores/tables';
 
@@ -27,12 +27,15 @@
     return [];
   }
 
-  async function handleTableNameChange(name: string): Promise<void> {
-    await renameTable(tableId, name);
+  async function handleTableMetaUpdate(
+    name: string,
+    description: string,
+  ): Promise<void> {
+    await updateTableMetaData(tableId, name, description);
     if ($currentSchemaId) {
       await refetchTablesForSchema($currentSchemaId);
     }
   }
 </script>
 
-<slot {getNameValidationErrors} onUpdate={handleTableNameChange} />
+<slot {getNameValidationErrors} onUpdate={handleTableMetaUpdate} />

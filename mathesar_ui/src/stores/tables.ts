@@ -208,11 +208,13 @@ export function deleteTable(id: number): CancellablePromise<TableEntry> {
   );
 }
 
-export function renameTable(
+export function updateTableMetaData(
   id: number,
   name: string,
+  description?: string
 ): CancellablePromise<TableEntry> {
-  const promise = patchAPI<TableEntry>(`/api/db/v0/tables/${id}/`, { name });
+  const payload = typeof description !== undefined ? { name, description } : { name };
+  const promise = patchAPI<TableEntry>(`/api/db/v0/tables/${id}/`, payload);
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
