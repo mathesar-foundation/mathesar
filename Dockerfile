@@ -17,7 +17,10 @@ RUN apt install -y sudo nodejs && rm -rf /var/lib/apt/lists/*
 # Change work directory
 WORKDIR /code/
 
+# Copy the base requirements needed for other requirements file
 COPY requirements.txt .
+# Hacky fix to use development requirements file during development.
+# In case of production build, it will replace the requirement file from the previous step with the same requirements file.
 COPY ${PYTHON_REQUIREMENTS} .
 
 RUN pip install --no-cache-dir -r ${PYTHON_REQUIREMENTS} --force-reinstall sqlalchemy-filters
