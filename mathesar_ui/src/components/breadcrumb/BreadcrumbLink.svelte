@@ -14,7 +14,7 @@
     border-radius: 0.25rem;
     transition: background-color 0.2s ease-in-out;
     &:hover {
-      background-color: var(--slate-700);
+      background-color: var(--slate-600);
     }
   }
   .breadcrumb-link a {

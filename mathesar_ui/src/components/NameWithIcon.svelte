@@ -62,6 +62,5 @@
   }
   .name {
     color: var(--name-color, currentcolor);
-    margin-left: 0.2em;
   }
 </style>

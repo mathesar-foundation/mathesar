@@ -56,7 +56,6 @@
 
     overflow: hidden;
     > h3 {
-      font-size: var(--text-size-large);
       font-weight: 500;
     }
   }
