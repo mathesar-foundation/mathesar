@@ -19,7 +19,7 @@ jobs:
         run: sudo chown -R 1000:1000 .
 
       - name: Build the stack
-        run: PYTHON_REQUIREMENTS=requirements-dev.txt docker-compose --profile prod up --build -d
+        run: docker-compose --profile test up --build -d
 
       - name: Create coverage directory
         run: docker exec mathesar_service mkdir coverage_report

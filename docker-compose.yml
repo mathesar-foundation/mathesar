@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   db:
-    profiles: ["dev", "prod"]
+    profiles: ["dev", "prod", "test"]
     image: postgres:13
     container_name: mathesar_db
     environment:
@@ -21,7 +21,7 @@ services:
     container_name: mathesar_service
     environment:
       - MODE=${MODE-PRODUCTION}
-      - DEBUG=${DEBUG-false}
+      - DEBUG=${DEBUG-False}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.production}
     command: ./run.sh
@@ -30,6 +30,17 @@ services:
   service:
     profiles: ["prod"]
     extends: service-without-db
+    depends_on:
+      - db
+  test-service:
+    profiles: [ "test" ]
+    extends: service-without-db
+    build:
+      context: .
+      # Replace with Dockerfile.integ-test when running integration tests
+      dockerfile: Dockerfile
+      args:
+        PYTHON_REQUIREMENTS: requirements-dev.txt
     depends_on:
       - db
   dev-service:
@@ -41,7 +52,8 @@ services:
     profiles: ["dev"]
     extends: service-without-db
     environment:
-      - MODE=${MODE-PRODUCTION}
+      - MODE=${MODE-DEVELOPMENT}
+      - DEBUG=${DEBUG-True}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DISPLAY=${DISPLAY}
       - XAUTHORITY=/.Xauthority
