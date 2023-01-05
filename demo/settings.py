@@ -1,4 +1,4 @@
-from config.settings import *  # noqa
+from config.settings.production import *  # noqa
 
 MIDDLEWARE += [  # noqa
     "demo.middleware.LiveDemoModeMiddleware",
