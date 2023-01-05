@@ -2,6 +2,7 @@
   import { Collapsible } from '@mathesar-component-library';
   import { getSelectedRowIndex } from '@mathesar/components/sheet';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import RowActions from './RowActions.svelte';
 
@@ -18,7 +19,7 @@
   {#if uniquelySelectedRowIndices.length}
     {#if uniquelySelectedRowIndices.length > 1}
       <span class="records-selected-count">
-        {uniquelySelectedRowIndices.length} records selected
+        {labeledCount(uniquelySelectedRowIndices, 'records')} selected
       </span>
     {/if}
     <Collapsible isOpen triggerAppearance="plain">

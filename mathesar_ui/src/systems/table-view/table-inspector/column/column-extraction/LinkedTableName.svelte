@@ -10,25 +10,12 @@
 
 <span class="linked-table-name">
   <span class="table">
-    <TableName {table} />
+    <TableName {table} bold truncate={false} />
   </span>
   <span class="columns">
     via
     {#each columns as column}
-      <ProcessedColumnName processedColumn={column} />
+      <ProcessedColumnName processedColumn={column} truncate={false} bold />
     {/each}
   </span>
 </span>
-
-<style>
-  .linked-table-name {
-    display: flex;
-    align-items: center;
-  }
-  .columns {
-    margin-left: 0.7rem;
-    font-size: var(--text-size-x-small);
-    opacity: 0.7;
-    font-style: italic;
-  }
-</style>

@@ -22,7 +22,7 @@ jobs:
       uses: ./mathesar/.github/actions/ansible
       with:
         playbook: staging
-        inventory: hosts/staging
+        inventory: hosts
         vault_password: ${{ secrets.ANSIBLE_VAULT_PASS }}
         deploy_key: ${{ secrets.STAGING_DEPLOY_KEY }}
       env:

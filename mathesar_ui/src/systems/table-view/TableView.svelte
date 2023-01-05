@@ -46,8 +46,7 @@
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
     [ID_ADD_NEW_COLUMN, 32],
   ]);
-  $: showTableInspector =
-    $isTableInspectorVisible && !$isLoading && supportsTableInspector;
+  $: showTableInspector = $isTableInspectorVisible && supportsTableInspector;
 
   function selectAndActivateFirstCellOnTableLoad(
     _isLoading: boolean,
