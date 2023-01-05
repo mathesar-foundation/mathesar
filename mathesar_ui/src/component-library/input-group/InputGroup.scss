@@ -32,7 +32,10 @@
   &.vertical {
     flex-direction: column;
     flex-grow: 1;
-    gap: 0.4rem;
+
+    .input-element {
+      margin: 0.6rem 0;
+    }
   }
   &:not(.vertical) {
     width: 100%;

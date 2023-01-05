@@ -23,6 +23,8 @@
   let textInputEl: HTMLInputElement | undefined;
   $: if (isOpen) {
     textInputEl?.focus();
+  } else {
+    filterString = '';
   }
 
   // Filter the selector data based on text input
@@ -122,8 +124,8 @@
     margin: 0;
   }
   .entity-switcher .trigger {
-    border: 1px solid var(--slate-500);
-    color: var(--slate-400);
+    border: 1px solid var(--slate-400);
+    color: var(--slate-300);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;

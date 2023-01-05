@@ -220,6 +220,7 @@
       .detail,
       .base-table-holder {
         font-size: var(--text-size-large);
+        font-weight: 500;
       }
 
       .base-table-holder {
@@ -228,7 +229,7 @@
         margin: 0 var(--size-base);
 
         &.table-selected {
-          font-weight: 590;
+          font-weight: 600;
         }
 
         > :global(.select) {

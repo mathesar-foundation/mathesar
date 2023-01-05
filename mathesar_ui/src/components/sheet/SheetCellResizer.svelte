@@ -81,7 +81,7 @@
     position: relative;
     height: 100%;
     width: 0.3rem;
-    background: #39a0f5;
+    background: var(--sky-700);
   }
   .column-resizer:not(:hover):not(.is-resizing) .indicator {
     display: none;
