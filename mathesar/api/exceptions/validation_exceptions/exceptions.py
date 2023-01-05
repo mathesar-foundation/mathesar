@@ -154,8 +154,18 @@ class IncorrectOldPassword(MathesarValidationException):
 
     def __init__(
             self,
-
             field=None,
     ):
-        message = "Old password is not correct"
+        message = "Old password is not correct."
         super().__init__(None, self.error_code, message, field, None)
+
+
+class EditingPublicSchemaIsDisallowed(MathesarValidationException):
+    error_code = ErrorCodes.EditingPublicSchema.value
+
+    def __init__(
+            self,
+            message="Editing the public schema is disallowed.",
+            field=None,
+    ):
+        super().__init__(None, self.error_code, message, field)
