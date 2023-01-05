@@ -5,6 +5,7 @@
     updateTableMetaData,
     tables,
   } from '@mathesar/stores/tables';
+  import type { AtLeastOne } from '@mathesar/typeUtils';
 
   export let tableId: number;
 
@@ -28,10 +29,9 @@
   }
 
   async function handleTableMetaUpdate(
-    name: string,
-    description: string,
+    data: AtLeastOne<{ name: string; description: string }>,
   ): Promise<void> {
-    await updateTableMetaData(tableId, name, description);
+    await updateTableMetaData(tableId, data);
     if ($currentSchemaId) {
       await refetchTablesForSchema($currentSchemaId);
     }
