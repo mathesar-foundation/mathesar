@@ -24,9 +24,9 @@
 
 <style>
   .record-page-link {
-    color: #aaa;
+    color: var(--slate-300);
   }
   .record-page-link:hover {
-    color: black;
+    color: var(--slate-800);
   }
 </style>

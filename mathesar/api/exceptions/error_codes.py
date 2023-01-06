@@ -58,6 +58,7 @@ class ErrorCodes(Enum):
     DictHasBadKeys = 4416
     DeletedColumnAccess = 4418
     IncorrectOldPassword = 4419
+    EditingPublicSchema = 4421
 
     # Version API errors
     GithubReleasesAPIFailure = 4501

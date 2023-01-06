@@ -18,9 +18,9 @@
     text-decoration: underline;
   }
   .link {
-    color: #3867ad;
+    color: var(--sky-700);
   }
   .link:visited {
-    color: #6138ad;
+    color: var(--purple-500);
   }
 </style>
