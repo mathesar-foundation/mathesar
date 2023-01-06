@@ -1,5 +1,5 @@
 import { ImmutableSet, WritableSet } from '@mathesar-component-library';
-import { get, writable, readable, type Unsubscriber, type Writable, type Readable } from 'svelte/store';
+import { get, writable, type Unsubscriber, type Writable } from 'svelte/store';
 
 interface SelectionColumn {
   id: number | string;
