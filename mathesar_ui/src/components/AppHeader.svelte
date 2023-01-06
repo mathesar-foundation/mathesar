@@ -18,6 +18,7 @@
     getDataExplorerPageUrl,
     getImportPageUrl,
     getTablePageUrl,
+    LOGOUT_URL,
   } from '@mathesar/routes/urls';
   import DatabaseName from '@mathesar/components/DatabaseName.svelte';
   import { currentSchemaId } from '@mathesar/stores/schemas';
@@ -91,6 +92,7 @@
         <LinkMenuItem href={getDatabasePageUrl(database.name)}>
           <DatabaseName {database} />
         </LinkMenuItem>
+        <LinkMenuItem href={LOGOUT_URL} tinro-ignore>Log Out</LinkMenuItem>
       {/if}
     </DropdownMenu>
   </div>

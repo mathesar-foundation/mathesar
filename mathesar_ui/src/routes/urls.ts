@@ -63,3 +63,5 @@ export function getRecordPageUrl(
 ): string {
   return `/${databaseName}/${schemaId}/tables/${tableId}/${String(recordId)}`;
 }
+
+export const LOGOUT_URL = '/auth/logout/';
