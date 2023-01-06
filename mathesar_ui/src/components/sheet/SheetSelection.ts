@@ -527,13 +527,13 @@ export default class SheetSelection<
     if (!isColumnSelected(new ImmutableSet(this.selectedCells.getValues()), new ImmutableSet(this.columnsSelectedWhenTheTableIsEmpty.getValues()), column)) {
       this.activateCell({ rowIndex: 0 }, { id: column.id });
       const rows = this.getRows();
-  
+
       if (rows.length === 0) {
         this.resetSelection();
         this.columnsSelectedWhenTheTableIsEmpty.add(column.id);
         return true;
       }
-  
+
       this.onStartSelection(rows[0], column);
       this.onMouseEnterCellWhileSelection(rows[rows.length - 1], column);
     }
