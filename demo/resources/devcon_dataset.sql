@@ -41,8 +41,8 @@ ALTER SEQUENCE "Positions_id_seq" OWNED BY "Positions".id;
 
 CREATE TABLE "Presenters" (
     id integer NOT NULL,
-    "Last Name" text,
     "First Name" text,
+    "Last Name" text,
     "Email" mathesar_types.email NOT NULL,
     "Bio" text,
     "Position" integer
