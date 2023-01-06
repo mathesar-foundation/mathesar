@@ -22,7 +22,7 @@
   });
 
   export let recordId: number;
-  export let table: Pick<TableEntry, 'id' | 'name'>;
+  export let table: Pick<TableEntry, 'id' | 'name' | 'settings' | 'schema'>;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;

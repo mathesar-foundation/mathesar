@@ -106,29 +106,30 @@ export class TabularData {
     );
 
     const table = get(currentTable);
-
-    this.selection = new SheetSelection({
-      getColumns: () => [...get(this.processedColumns).values()],
-      getColumnOrder: () =>
-        getColumnOrder([...get(this.processedColumns).values()], table),
-      getRows: () => this.recordsData.getRecordRows(),
-      getMaxSelectionRowIndex: () => {
-        const totalCount = get(this.recordsData.totalCount) ?? 0;
-        const savedRecords = get(this.recordsData.savedRecords);
-        const newRecords = get(this.recordsData.newRecords);
-        const pagination = get(this.meta.pagination);
-        const { offset } = pagination;
-        const pageSize = pagination.size;
-        /**
-         * We are not subtracting 1 from the below maxRowIndex calculation
-         * inorder to account for the add-new-record placeholder row
-         */
-        return (
-          Math.min(pageSize, totalCount - offset, savedRecords.length) +
-          newRecords.length
-        );
-      },
-    });
+    if (table) {
+      this.selection = new SheetSelection({
+        getColumns: () => [...get(this.processedColumns).values()],
+        getColumnOrder: () =>
+          getColumnOrder([...get(this.processedColumns).values()], table),
+        getRows: () => this.recordsData.getRecordRows(),
+        getMaxSelectionRowIndex: () => {
+          const totalCount = get(this.recordsData.totalCount) ?? 0;
+          const savedRecords = get(this.recordsData.savedRecords);
+          const newRecords = get(this.recordsData.newRecords);
+          const pagination = get(this.meta.pagination);
+          const { offset } = pagination;
+          const pageSize = pagination.size;
+          /**
+           * We are not subtracting 1 from the below maxRowIndex calculation
+           * inorder to account for the add-new-record placeholder row
+           */
+          return (
+            Math.min(pageSize, totalCount - offset, savedRecords.length) +
+            newRecords.length
+          );
+        },
+      });
+    }
 
     this.isLoading = derived(
       [
