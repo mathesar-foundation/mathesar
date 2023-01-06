@@ -1,5 +1,5 @@
 import { ImmutableSet, WritableSet } from '@mathesar-component-library';
-import { get, writable, type Unsubscriber, type Writable } from 'svelte/store';
+import { get, writable, readable, type Unsubscriber, type Writable, type Readable } from 'svelte/store';
 
 interface SelectionColumn {
   id: number | string;
@@ -222,6 +222,8 @@ export default class SheetSelection<
 
   freezeSelection: boolean;
 
+  selectionInProgress: Writable<boolean>;
+
   constructor(args: {
     getColumns: () => Column[];
     getColumnOrder: () => number[];
@@ -235,6 +237,7 @@ export default class SheetSelection<
     this.getRows = args.getRows;
     this.getMaxSelectionRowIndex = args.getMaxSelectionRowIndex;
     this.freezeSelection = false;
+    this.selectionInProgress = writable<false>(false);
     this.activeCell = writable<ActiveCell | undefined>(undefined);
 
     /**
@@ -280,6 +283,8 @@ export default class SheetSelection<
     if (this.freezeSelection) {
       return;
     }
+
+    this.selectionInProgress.set(true);
     // Initialize the bounds of the selection
     this.selectionBounds = {
       startColumnId: column.id,
@@ -318,6 +323,7 @@ export default class SheetSelection<
       this.selectMultipleCells(cells);
       this.selectionBounds = undefined;
     }
+    this.selectionInProgress.set(false);
   }
 
   selectAndActivateFirstCellIfExists(): void {
@@ -518,17 +524,19 @@ export default class SheetSelection<
   }
 
   onColumnSelectionStart(column: Column): boolean {
-    this.activateCell({ rowIndex: 0 }, { id: column.id });
-    const rows = this.getRows();
-
-    if (rows.length === 0) {
-      this.resetSelection();
-      this.columnsSelectedWhenTheTableIsEmpty.add(column.id);
-      return true;
+    if (!this.isCompleteColumnSelected(column)) {
+      this.activateCell({ rowIndex: 0 }, { id: column.id });
+      const rows = this.getRows();
+  
+      if (rows.length === 0) {
+        this.resetSelection();
+        this.columnsSelectedWhenTheTableIsEmpty.add(column.id);
+        return true;
+      }
+  
+      this.onStartSelection(rows[0], column);
+      this.onMouseEnterCellWhileSelection(rows[rows.length - 1], column);
     }
-
-    this.onStartSelection(rows[0], column);
-    this.onMouseEnterCellWhileSelection(rows[rows.length - 1], column);
     return true;
   }
 

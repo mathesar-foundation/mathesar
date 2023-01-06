@@ -24,7 +24,7 @@
   export let table: TableEntry;
 
   $: ({ selection, processedColumns } = $tabularData);
-  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
+  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty, selectionInProgress } = selection);
   $: selectedColumnIds =  selection.getSelectedUniqueColumnsId(
       $selectedCells,
       $columnsSelectedWhenTheTableIsEmpty,
@@ -66,21 +66,20 @@
 </script>
 
 <SheetHeader>
-
-    <SheetCell
-    columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-    isStatic
-    isControlCell
-    let:htmlAttributes
-    let:style
+  <SheetCell
+  columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+  isStatic
+  isControlCell
+  let:htmlAttributes
+  let:style
+  >
+    <Droppable
+    on:drop={(e) => dropColumn(e)}
+    on:dragover={(e) => e.preventDefault()}
     >
-      <Droppable
-      on:drop={(e) => dropColumn(e)}
-      on:dragover={(e) => e.preventDefault()}
-      >
-        <div {...htmlAttributes} {style} />
-      </Droppable>
-    </SheetCell>
+      <div {...htmlAttributes} {style} />
+    </Droppable>
+  </SheetCell>
 
 
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
@@ -92,6 +91,7 @@
         $columnsSelectedWhenTheTableIsEmpty,
         processedColumn,
       )}
+      selectionInProgress={$selectionInProgress}
       >
         <Droppable
         on:drop={(e) => dropColumn(e, processedColumn)}
@@ -104,7 +104,7 @@
                 $columnsSelectedWhenTheTableIsEmpty,
                 processedColumn,
               )}
-              on:click={() => selection.toggleColumnSelection(processedColumn)}
+              on:mousedown={() => selection.onColumnSelectionStart(processedColumn)  }
               on:mouseenter={() =>
                 selection.onMouseEnterColumnHeaderWhileSelection(processedColumn)}
             />
