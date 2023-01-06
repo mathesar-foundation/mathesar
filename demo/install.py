@@ -14,24 +14,6 @@ MOVIE_COLLECTION = 'Movie Collection'
 MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
 
 
-def setup_and_register_schema_for_receiving_arxiv_data(engine):
-    _setup_arxiv_schema(engine)
-    # log the database+schema identifiers
-
-
-def _setup_arxiv_schema(engine):
-    ARXIV = 'Arxiv'
-    ARXIV_SQL = os.path.join(RESOURCES, "arxiv.sql")
-    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{ARXIV}";""")
-    create_schema_query = text(f"""CREATE SCHEMA "{ARXIV}";""")
-    set_search_path = text(f"""SET search_path="{ARXIV}";""")
-    with engine.begin() as conn, open(ARXIV_SQL) as f1:
-        conn.execute(drop_schema_query)
-        conn.execute(create_schema_query)
-        conn.execute(set_search_path)
-        conn.execute(text(f1.read()))
-
-
 def load_datasets(engine):
     """Load some SQL files with demo data to DB targeted by `engine`."""
     _load_library_dataset(engine)
