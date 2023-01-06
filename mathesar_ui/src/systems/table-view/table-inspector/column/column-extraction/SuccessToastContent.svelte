@@ -5,13 +5,10 @@
   export let newFkColumnName: string;
 </script>
 
-<div class="title">A link column has been added to this table</div>
-<div class="message">
-  The extracted columns are now linked via
-  <NameWithIcon
-    icon={iconTableLink}
-    name={newFkColumnName}
-    truncate={false}
-    bold
-  />
-</div>
+<span> It is linked via a foreign key column: </span>
+<NameWithIcon
+  icon={iconTableLink}
+  name={newFkColumnName}
+  truncate={false}
+  bold
+/>

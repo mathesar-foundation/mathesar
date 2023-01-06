@@ -1564,7 +1564,7 @@ def test_table_extract_columns_specify_fk_column_name(create_patents_table, clie
     column_name_id_map = table.get_column_name_id_bidirectional_map()
     column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
-    relationship_fk_column_name = "patent_info"
+    relationship_fk_column_name = "Patent Number"
     extract_table_name = "Patent Info"
     split_data = {
         'extract_columns': column_ids_to_extract,
@@ -1575,11 +1575,12 @@ def test_table_extract_columns_specify_fk_column_name(create_patents_table, clie
     assert current_table_response.status_code == 201
     response_data = current_table_response.json()
     remainder_table_id = response_data['remainder_table']
+    fk_column = response_data['fk_column']
     remainder_table = Table.objects.get(id=remainder_table_id)
     metadata = get_empty_metadata()
     relationship_fk_column_attnum = get_column_attnum_from_name(remainder_table.oid, relationship_fk_column_name, remainder_table._sa_engine, metadata=metadata)
     assert relationship_fk_column_attnum is not None
-    Column.objects.get(table_id=remainder_table_id, attnum=relationship_fk_column_attnum)
+    assert fk_column == Column.objects.get(table_id=remainder_table_id, attnum=relationship_fk_column_attnum).id
 
 
 def test_table_extract_columns_with_display_options(create_patents_table, client):

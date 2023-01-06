@@ -31,6 +31,7 @@
     columnNameIsAvailable,
     getSuggestedFkColumnName,
   } from '@mathesar/utils/columnUtils';
+  import { pluralize } from '@mathesar/utils/languageUtils';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import type { LinkedTable } from './columnExtractionTypes';
   import {
@@ -50,8 +51,11 @@
   $: ({ processedColumns, constraintsDataStore, selection } = $tabularData);
   $: ({ constraints } = $constraintsDataStore);
   $: availableProcessedColumns = [...$processedColumns.values()];
-  $: availableColumns = availableProcessedColumns.map((c) => c.column);
   $: ({ targetType, columns, isOpen } = controller);
+  $: selectedColumnNames = new Set($columns.map((c) => c.column.name));
+  $: availableColumns = availableProcessedColumns
+    .map((c) => c.column)
+    .filter((c) => !selectedColumnNames.has(c.name));
   $: linkedTable = requiredField<LinkedTable | undefined>(undefined);
   $: tableName = requiredField('', [$validateNewTableName]);
   $: newFkColumnName = requiredField('', [
@@ -79,15 +83,17 @@
   });
   $: action = $targetType === 'newTable' ? 'extract' : 'move';
   $: actionTitleCase = $targetType === 'newTable' ? 'Extract' : 'Move';
-  $: s = $columns.length > 1 ? 's' : '';
 
-  function handleTableNameUpdate(newTableName: string) {
+  function suggestNewFkColumnName(
+    newTableName: string,
+    newAvailableColumns: { name: string }[],
+  ) {
     $newFkColumnName = getSuggestedFkColumnName(
       { name: newTableName },
-      availableColumns,
+      newAvailableColumns,
     );
   }
-  $: handleTableNameUpdate($tableName);
+  $: suggestNewFkColumnName($tableName, availableColumns);
 
   function handleColumnsChange(_columns: ProcessedColumn[]) {
     if (!$isOpen) {
@@ -111,28 +117,66 @@
      * reactive $newFkColumnName value is reset.
      */
     const constFkColumnName = $newFkColumnName;
+    const newTableName = $tableName;
     const followUps: Promise<unknown>[] = [];
+    const extractedColumns = $columns;
+    const extractedColumnIds = extractedColumns.map((c) => c.id);
     try {
       if ($targetType === 'existingTable') {
         const targetTableId = $linkedTable?.table.id;
         if (!targetTableId) {
           throw new Error('No target table selected');
         }
-        await moveColumns(
-          $tabularData.id,
-          $columns.map((c) => c.id),
-          targetTableId,
+        await moveColumns($tabularData.id, extractedColumnIds, targetTableId);
+        const fkColumns = $linkedTable?.columns ?? [];
+        let fkColumnId: number | undefined = undefined;
+        if (fkColumns.length === 1) {
+          fkColumnId = fkColumns[0].column.id;
+        }
+        followUps.push(
+          $tabularData.refreshAfterColumnExtraction(
+            extractedColumnIds,
+            fkColumnId,
+          ),
         );
       } else {
         const response = await splitTable({
           id: $tabularData.id,
-          idsOfColumnsToExtract: $columns.map((c) => c.id),
-          extractedTableName: $tableName,
+          idsOfColumnsToExtract: extractedColumnIds,
+          extractedTableName: newTableName,
           newFkColumnName: $newFkColumnName,
         });
         followUps.push(getTableFromStoreOrApi(response.extracted_table));
+        followUps.push(
+          $tabularData.refreshAfterColumnExtraction(
+            extractedColumnIds,
+            response.fk_column,
+          ),
+        );
       }
-      followUps.push($tabularData.refresh());
+      if ($targetType === 'newTable') {
+        toast.success({
+          title: `A new table ${newTableName} has been created with the extracted ${pluralize(
+            extractedColumns,
+            'columns',
+          )}`,
+          contentComponent: SuccessToastContent,
+          contentComponentProps: {
+            newFkColumnName: constFkColumnName,
+          },
+        });
+      } else {
+        const columnNames = extractedColumns.map(
+          (processedColumn) => processedColumn.column.name,
+        );
+        const message = `${
+          columnNames.length > 1
+            ? `Columns ${columnNames.join(',')} have`
+            : `Column ${columnNames[0]} has`
+        } been moved to table '${$linkedTable?.table.name}'`;
+        toast.success(message);
+      }
+      controller.close();
       await Promise.all(followUps);
       if ($targetType === 'newTable') {
         // We ase using `get(processedColumns)` instead of `$processedColumns`
@@ -148,19 +192,14 @@
         selection.toggleColumnSelection(newFkColumn);
         await tick();
         scrollBasedOnSelection();
-        toast.success({
-          contentComponent: SuccessToastContent,
-          contentComponentProps: { newFkColumnName: constFkColumnName },
-        });
       }
-      controller.close();
     } catch (e) {
       toast.error(getErrorMessage(e));
     }
   }
 </script>
 
-<ControlledModal {controller} on:close{form.reset}>
+<ControlledModal {controller} on:close={form.reset}>
   <span slot="title">
     {#if $targetType === 'existingTable'}
       Move Columns To Linked Table
@@ -206,7 +245,7 @@
   <FieldLayout>
     <OutcomeBox>
       <p>
-        The column{s} above will be removed from
+        The {pluralize($columns, 'columns')} above will be removed from
         <CurrentTable table={$currentTable} />
         and added to
         <TargetTable name={targetTableName} />

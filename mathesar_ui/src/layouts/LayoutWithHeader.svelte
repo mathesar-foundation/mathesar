@@ -64,6 +64,6 @@
 
   // TODO: Remove default styling properties on layout components
   .app-layout:not(.fit-viewport) .app-layout-content {
-    padding: var(--page-padding);
+    padding: 0 var(--page-padding);
   }
 </style>
