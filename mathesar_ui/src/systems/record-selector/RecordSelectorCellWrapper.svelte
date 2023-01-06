@@ -40,7 +40,7 @@
   {/if}
 </div>
 
-<style>
+<style lang="scss">
   .td {
     display: table-cell;
     vertical-align: middle;
@@ -61,7 +61,7 @@
 
   /** Row types ***************************************************************/
   .column-header {
-    background: #f7f8f8;
+    background: var(--slate-100);
     padding: 0 0.5rem;
     /** 0.5px below is a hack to deal with a Firefox-only issue. When vertically
      * scrolling the table, the data cells were peeking through between a tiny
@@ -82,7 +82,7 @@
     z-index: var(--z-index__record_selector__thead);
   }
   .divider {
-    height: 10px;
+    height: 8px;
     border: none;
     position: sticky;
     z-index: var(--z-index__record-selector__divider);
@@ -101,13 +101,21 @@
 
   /** Column types ************************************************************/
   .row-header {
-    padding-left: 0.5rem;
-    border: none;
-    background: white;
-    padding-right: calc(var(--body-padding) + var(--extra-body-padding));
+    //padding-left: 0.5rem;
+
+    background: var(--slate-100);
+    //padding-right: calc(var(--body-padding) + var(--extra-body-padding));
     position: sticky;
     right: 0;
     z-index: var(--z-index__record_selector__row-header);
+
+    > :global(.btn-secondary) {
+      width: 100%;
+      border: none;
+      height: var(--row-height);
+      border-radius: 0px;
+      font-weight: 600;
+    }
   }
 
   /** Upper right corner ******************************************************/
@@ -115,10 +123,6 @@
   .input.row-header,
   .divider.row-header {
     z-index: var(--z-index__record_selector__thead-row-header);
-  }
-  .divider.row-header .divider-bg {
-    background: white;
-    width: calc(100% - var(--body-padding) + 1px);
   }
 
   /** Focus indicator *********************************************************/

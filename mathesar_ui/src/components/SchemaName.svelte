@@ -20,6 +20,6 @@
     --icon-opacity: 1;
   }
   .schema-name.is-locked {
-    --icon-color: var(--slate-800);
+    --icon-color: var(--slate-500);
   }
 </style>

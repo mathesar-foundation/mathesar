@@ -301,6 +301,26 @@ def test_column_create_wrong_display_options(
     assert response.status_code == 400
 
 
+def test_default_display_options_for_mathesar_money(
+    column_test_table, client
+):
+    name = "moneycolumn"
+    expected_display_options = {
+        'use_grouping': 'true',
+        'number_format': None,
+        'currency_symbol': None,
+        'maximum_fraction_digits': 2,
+        'minimum_fraction_digits': 2,
+        'currency_symbol_location': 'after-minus'}
+
+    data = {"name": name, "type": MathesarCustomType.MATHESAR_MONEY.id, "display_options": None}
+
+    response = client.post(f"/api/db/v0/tables/{column_test_table.id}/columns/", data)
+    response_data = response.json()
+    assert response.status_code == 201
+    assert response_data["display_options"] == expected_display_options
+
+
 def test_column_update_display_options(column_test_table_with_service_layer_options, client):
     table, _ = column_test_table_with_service_layer_options
     column_indexes = [2, 3, 4]

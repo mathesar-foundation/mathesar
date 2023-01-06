@@ -48,8 +48,8 @@
   }
 
   .entity-icon {
-    width: 3.42rem;
-    height: 3.42rem;
+    width: 3.4rem;
+    height: 3.4rem;
     background-color: var(--brand-500);
     display: flex;
     justify-content: center;
@@ -62,15 +62,18 @@
     display: flex;
     flex-direction: column;
     margin-left: 0.75rem;
+    padding-top: 0.5rem;
   }
 
   .entity-type {
-    font-size: 0.857rem;
+    font-size: var(--text-size-small);
+    line-height: 0.5rem;
+    font-weight: 600;
     text-transform: uppercase;
   }
 
   .entity-name {
-    font-weight: 700;
-    font-size: 2.28rem;
+    font-weight: 500;
+    font-size: var(--text-size-ultra-large);
   }
 </style>
