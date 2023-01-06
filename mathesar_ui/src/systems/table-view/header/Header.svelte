@@ -24,37 +24,44 @@
   export let table: TableEntry;
 
   $: ({ selection, processedColumns } = $tabularData);
-  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty, selectionInProgress } = selection);
-  $: selectedColumnIds =  selection.getSelectedUniqueColumnsId(
-      $selectedCells,
-      $columnsSelectedWhenTheTableIsEmpty,
-    );
+  $: ({
+    selectedCells,
+    columnsSelectedWhenTheTableIsEmpty,
+    selectionInProgress,
+  } = selection);
+  $: selectedColumnIds = selection.getSelectedUniqueColumnsId(
+    $selectedCells,
+    $columnsSelectedWhenTheTableIsEmpty,
+  );
 
   function dropColumn(e: DragEvent, columnDroppedOn?: ProcessedColumn) {
     columnOrder = columnOrder ?? [];
     // Keep only IDs for which the column exists
-    for (const columnId of $processedColumns.keys())  {
+    for (const columnId of $processedColumns.keys()) {
       if (!columnOrder.includes(columnId)) {
         columnOrder.push(columnId);
       }
     }
 
-    const selectedColumnIdsOrdered:number[] = [];
+    const selectedColumnIdsOrdered: number[] = [];
 
     // Remove selected column IDs and keep their order
-    const newColumnOrder:number[] = [];
+    const newColumnOrder: number[] = [];
     for (const id of columnOrder) {
       if (selectedColumnIds.includes(id)) {
         selectedColumnIdsOrdered.push(id);
-      }
-      else {
+      } else {
         newColumnOrder.push(id);
       }
     }
 
     // Insert selected column IDs after the column where they are dropped
     if (columnDroppedOn) {
-      newColumnOrder.splice(columnOrder.indexOf(columnDroppedOn.id) + 1, 0, ...selectedColumnIdsOrdered);
+      newColumnOrder.splice(
+        columnOrder.indexOf(columnDroppedOn.id) + 1,
+        0,
+        ...selectedColumnIdsOrdered,
+      );
     } else {
       // If the column is dropped on the ID column, columnDroppedOn is undefined and we can insert at the beginning.
       newColumnOrder.splice(0, 0, ...selectedColumnIdsOrdered);
@@ -62,7 +69,6 @@
 
     void saveColumnOrder(table, newColumnOrder);
   }
-
 </script>
 
 <SheetHeader>
@@ -74,28 +80,24 @@
     let:style
   >
     <Droppable
-    on:drop={(e) => dropColumn(e)}
-    on:dragover={(e) => e.preventDefault()}
+      on:drop={(e) => dropColumn(e)}
+      on:dragover={(e) => e.preventDefault()}
     >
       <div {...htmlAttributes} {style} />
     </Droppable>
   </SheetCell>
 
-
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-
     <SheetCell columnIdentifierKey={columnId} let:htmlAttributes let:style>
       <Draggable
-      isSelected={isColumnSelected(
-        $selectedCells,
-        $columnsSelectedWhenTheTableIsEmpty,
-        processedColumn,
-      )}
-      selectionInProgress={$selectionInProgress}
+        isSelected={isColumnSelected(
+          $selectedCells,
+          $columnsSelectedWhenTheTableIsEmpty,
+          processedColumn,
+        )}
+        selectionInProgress={$selectionInProgress}
       >
-        <Droppable
-        on:drop={(e) => dropColumn(e, processedColumn)}
-        >
+        <Droppable on:drop={(e) => dropColumn(e, processedColumn)}>
           <div {...htmlAttributes} {style}>
             <HeaderCell
               {processedColumn}
@@ -104,9 +106,12 @@
                 $columnsSelectedWhenTheTableIsEmpty,
                 processedColumn,
               )}
-              on:mousedown={() => selection.onColumnSelectionStart(processedColumn)  }
+              on:mousedown={() =>
+                selection.onColumnSelectionStart(processedColumn)}
               on:mouseenter={() =>
-                selection.onMouseEnterColumnHeaderWhileSelection(processedColumn)}
+                selection.onMouseEnterColumnHeaderWhileSelection(
+                  processedColumn,
+                )}
             />
             <SheetCellResizer columnIdentifierKey={columnId} />
           </div>

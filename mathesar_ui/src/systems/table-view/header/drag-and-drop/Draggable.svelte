@@ -1,8 +1,8 @@
 <script lang="ts">
-    export let isSelected = false;
-    export let selectionInProgress = true;
+  export let isSelected = false;
+  export let selectionInProgress = true;
 </script>
 
 <div on:dragstart draggable={isSelected && !selectionInProgress}>
-    <slot></slot>
+  <slot />
 </div>

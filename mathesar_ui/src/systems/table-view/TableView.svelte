@@ -37,7 +37,10 @@
    */
   $: supportsTableInspector = allowsDdlOperations;
   $: sheetColumns = (() => {
-    const orderedProcessedColumns = orderProcessedColumns($processedColumns, table);
+    const orderedProcessedColumns = orderProcessedColumns(
+      $processedColumns,
+      table,
+    );
     const columns = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
       ...orderedProcessedColumns.values(),

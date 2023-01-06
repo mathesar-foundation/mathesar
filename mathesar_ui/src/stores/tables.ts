@@ -465,6 +465,6 @@ export function saveColumnOrder(
   columnOrder: TableSettings['column_order'],
 ): Promise<void> {
   return saveTableSettings(table, {
-    column_order: columnOrder
+    column_order: columnOrder,
   });
 }

@@ -16,7 +16,10 @@ export function isTableImportConfirmationRequired(
   );
 }
 
-export function orderProcessedColumns(processedColumns: Map<number, ProcessedColumn>, table: Partial<Pick<TableEntry, 'settings'>>):Map<number, ProcessedColumn> {
+export function orderProcessedColumns(
+  processedColumns: Map<number, ProcessedColumn>,
+  table: Partial<Pick<TableEntry, 'settings'>>,
+): Map<number, ProcessedColumn> {
   const columns = [...processedColumns.values()];
   const orderedColumns = new Map<number, ProcessedColumn>();
 
@@ -34,10 +37,10 @@ export function orderProcessedColumns(processedColumns: Map<number, ProcessedCol
 
 export function getColumnOrder(
   processedColumns: ProcessedColumn[],
-  table: Partial<Pick<TableEntry, 'settings'>>
+  table: Partial<Pick<TableEntry, 'settings'>>,
 ) {
   const allColumns = [...processedColumns.values()];
-  let completeColumnOrder:number[] = [];
+  let completeColumnOrder: number[] = [];
   const { settings } = table;
   if (settings) {
     const { column_order: columnOrder } = settings;

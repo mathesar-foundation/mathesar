@@ -348,7 +348,10 @@ export default class SheetSelection<
 
     const minColumnPosition = Math.min(startOrderIndex, endOrderIndex);
     const maxColumnposition = Math.max(startOrderIndex, endOrderIndex);
-    const columnOrderSelected = columnOrder.slice(minColumnPosition, maxColumnposition + 1);
+    const columnOrderSelected = columnOrder.slice(
+      minColumnPosition,
+      maxColumnposition + 1,
+    );
 
     const columns = this.getColumns();
 
@@ -521,7 +524,13 @@ export default class SheetSelection<
   }
 
   onColumnSelectionStart(column: Column): boolean {
-    if (!isColumnSelected(new ImmutableSet(this.selectedCells.getValues()), new ImmutableSet(this.columnsSelectedWhenTheTableIsEmpty.getValues()), column)) {
+    if (
+      !isColumnSelected(
+        new ImmutableSet(this.selectedCells.getValues()),
+        new ImmutableSet(this.columnsSelectedWhenTheTableIsEmpty.getValues()),
+        column,
+      )
+    ) {
       this.activateCell({ rowIndex: 0 }, { id: column.id });
       const rows = this.getRows();
 
