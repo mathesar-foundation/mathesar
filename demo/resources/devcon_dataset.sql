@@ -194,7 +194,8 @@ CREATE TABLE "Mathesar DevCon"."Talks" (
     "Room" integer,
     "Presenter" integer,
     "Abstract" text,
-    "Time Slot" integer
+    "Time Slot" integer,
+    "Track" integer
 );
 
 
@@ -255,7 +256,7 @@ ALTER SEQUENCE "Mathesar DevCon"."Talk Topic Map_id_seq" OWNED BY "Mathesar DevC
 
 CREATE TABLE "Mathesar DevCon"."Time Slots" (
     id integer NOT NULL,
-    "Time" text NOT NULL
+    "Slot" text NOT NULL
 );
 
 
@@ -277,6 +278,36 @@ CREATE SEQUENCE "Mathesar DevCon"."Time Slots_id_seq"
 --
 
 ALTER SEQUENCE "Mathesar DevCon"."Time Slots_id_seq" OWNED BY "Mathesar DevCon"."Time Slots".id;
+
+
+--
+-- Name: Tracks; Type: TABLE; Schema: Mathesar DevCon; Owner: -
+--
+
+CREATE TABLE "Mathesar DevCon"."Tracks" (
+    id integer NOT NULL,
+    "Name" text
+);
+
+
+--
+-- Name: Tracks_id_seq; Type: SEQUENCE; Schema: Mathesar DevCon; Owner: -
+--
+
+CREATE SEQUENCE "Mathesar DevCon"."Tracks_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: Tracks_id_seq; Type: SEQUENCE OWNED BY; Schema: Mathesar DevCon; Owner: -
+--
+
+ALTER SEQUENCE "Mathesar DevCon"."Tracks_id_seq" OWNED BY "Mathesar DevCon"."Tracks".id;
 
 
 --
@@ -336,12 +367,19 @@ ALTER TABLE ONLY "Mathesar DevCon"."Topics" ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
+-- Name: Tracks id; Type: DEFAULT; Schema: Mathesar DevCon; Owner: -
+--
+
+ALTER TABLE ONLY "Mathesar DevCon"."Tracks" ALTER COLUMN id SET DEFAULT nextval('"Mathesar DevCon"."Tracks_id_seq"'::regclass);
+
+
+--
 -- Data for Name: Days; Type: TABLE DATA; Schema: Mathesar DevCon; Owner: -
 --
 
-INSERT INTO "Mathesar DevCon"."Days" (id, "Name", "Date") VALUES (1, 'Day One', '2023-01-20');
-INSERT INTO "Mathesar DevCon"."Days" (id, "Name", "Date") VALUES (2, 'Day Two', '2023-01-21');
-INSERT INTO "Mathesar DevCon"."Days" (id, "Name", "Date") VALUES (3, 'Day Three', '2023-01-22');
+INSERT INTO "Mathesar DevCon"."Days" (id, "Name", "Date") VALUES (1, 'Friday', '2023-01-20');
+INSERT INTO "Mathesar DevCon"."Days" (id, "Name", "Date") VALUES (2, 'Saturday', '2023-01-21');
+INSERT INTO "Mathesar DevCon"."Days" (id, "Name", "Date") VALUES (3, 'Sunday', '2023-01-22');
 
 
 --
@@ -433,36 +471,36 @@ INSERT INTO "Mathesar DevCon"."Talk Topic Map" (id, "Talk", "Topic") VALUES (25,
 -- Data for Name: Talks; Type: TABLE DATA; Schema: Mathesar DevCon; Owner: -
 --
 
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (1, 'The Mathesar Vision', 1, 1, 5, 'In this introduction and welcome, we discuss the vision of Mathesar, and why you should be excited to attend our exclusive conference.', 1);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (16, 'Data Engineering and Mathesar', 3, 1, 6, 'In this talk, we take a look at data tools such as Apache Spark, and how you can integrate their use with the Mathesar UI.', 7);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (6, 'No-Code Data Analysis: Tools and Techniques', 1, 3, 2, 'In this talk, you will learn about different tools and techniques that you can use to perform data analysis without writing any code. You will learn about platforms like Excel, Google Sheets, and Mathesar, and how to use them to manipulate, analyze, and visualize data. You will also learn about some of the benefits and limitations of using no-code data analysis tools, and how to choose the right one for your needs.', 7);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (10, 'PostgreSQL: The best SQL', 2, 1, 4, 'In this talk we will take a look at the current state of PostgreSQL, and explore its features which made it a natural fit for the Database System backing Mathesar.', 8);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (13, 'Designing for Data', 2, 3, 2, 'In this talk we discuss principles, approaches, and some challenges associated with designing a product for data input and analysis.', 7);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (17, 'Data Science and Mathesar', 3, 1, 4, 'In this talk, we will review some basics of data science, including key concepts. You will learn how these concepts can be implemented and used when working with Mathesar.', 1);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (5, 'Python for databases', 1, 2, 1, 'In this talk we explore a number of challenges and constraints encountered when using python to interact with a PostgreSQL DB.', 8);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (4, 'Exploring Data Visualization: Techniques and Tools', 1, 1, 9, 'In this talk, you will learn about different techniques and tools that you can use to create effective data visualizations. You will learn about different types of charts and graphs, and how to choose the right visualization for your data. You will also learn about tools like D3.js and Tableau, and how to use them to create interactive and engaging visualizations.', 7);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (11, 'Advanced Svelte.js Techniques: Animations, Server-Side Rendering, and More', 2, 2, 3, 'In this talk, you will learn about advanced techniques for using Svelte.js, such as animations, server-side rendering, and performance optimization. You will learn about different tools and libraries that you can use to extend the capabilities of Svelte, and how to apply these techniques in real-world projects. You will also learn about some of the trade-offs and considerations when using advanced Svelte techniques.
-', 7);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (8, 'Building Modern Web Applications with Svelte.js', 2, 1, 7, 'In this talk, you will learn about Svelte.js, a modern JavaScript framework for building web applications. You will learn about the principles and philosophy behind Svelte, and how it differs from other frameworks. You will also learn about the core concepts and features of Svelte, and how to use them to build efficient and reactive applications.', 1);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (7, 'Integrating with No-Code tools', 1, 3, 8, 'In this talk, you will learn about different no-code tools, and how to integrate with them in the context of a Mathesar project.', 8);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (3, 'Optimizing Web Performance: Techniques and Tools', 1, 1, 3, 'n this talk, you will learn about different techniques and tools that you can use to optimize the performance of your web applications. You will learn about techniques such as code optimization, caching, and load balancing, as well as tools like performance monitoring and profiling.', 8);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (19, 'Svelte.js Best Practices: Tips and Tricks', 3, 3, 7, 'In this talk, you will learn about best practices and tips and tricks for using Svelte.js. You will learn about techniques such as code organization, testing, and performance optimization, and how to apply them in your Svelte projects. You will also learn about some of the common pitfalls and mistakes to avoid when using Svelte.', 7);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (2, 'SQLAlchemy and Dynamic Defaults', 1, 2, 8, 'SQLAlchemy doesn''t support dynamic default values very well. In this talk, we explore options for how to both create and parse dynamic default values for database columns using SQLAlchemy.', 7);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (15, 'The Mathesar Vision, part 2', 3, 1, 5, 'In this final talk of the last day, we look at how we think Mathesar will evolve over the coming months and years, and hope to inspire you with our direction!', 8);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (14, 'Managing Engineers: a metaphorical approach', 2, 3, 5, 'When your cats are on a hot tin roof, should you herd them, skin them, or let them out of the bag? The roof is a deadline. The cats are engineers.', 8);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (12, 'Integrating Svelte.js with Other Technologies', 2, 2, 9, 'In this talk, you will learn about how to integrate Svelte.js with other technologies such as APIs, databases, and front-end libraries. You will learn about different techniques and tools for connecting Svelte to external data sources and services, and how to build full-stack applications with Svelte. You will also learn about some of the considerations and challenges when integrating Svelte with other technologies.
-', 8);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (9, 'Django and its use in Mathesar', 2, 1, 6, 'In this talk we will explore Django, how it''s used in Mathesar, and the pros/cons of the tool when solving our problems.', 7);
-INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot") VALUES (18, 'Building APIs with Django Rest Framework', 3, 2, 1, 'n this talk, you will learn about how to use Django Rest Framework (DRF), a powerful Django extension for building APIs. You will learn about the features and architecture of DRF, and how to use it to build RESTful APIs for your Django projects. You will also learn about some of the best practices and tools for testing and documenting your APIs.', 7);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (15, 'The Mathesar Vision, part 2', 3, 1, 5, 'In this final talk of the last day, we look at how we think Mathesar will evolve over the coming months and years, and hope to inspire you with our direction!', 8, 1);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (14, 'Managing Engineers: a metaphorical approach', 2, 3, 5, 'When your cats are on a hot tin roof, should you herd them, skin them, or let them out of the bag? The roof is a deadline. The cats are engineers.', 8, 1);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (1, 'The Mathesar Vision', 1, 1, 5, 'In this introduction and welcome, we discuss the vision of Mathesar, and why you should be excited to attend our exclusive conference.', 1, 1);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (3, 'Optimizing Web Performance: Techniques and Tools', 1, 1, 3, 'n this talk, you will learn about different techniques and tools that you can use to optimize the performance of your web applications. You will learn about techniques such as code optimization, caching, and load balancing, as well as tools like performance monitoring and profiling.', 8, 4);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (2, 'SQLAlchemy and Dynamic Defaults', 1, 2, 8, 'SQLAlchemy doesn''t support dynamic default values very well. In this talk, we explore options for how to both create and parse dynamic default values for database columns using SQLAlchemy.', 7, 3);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (5, 'Python for databases', 1, 2, 1, 'In this talk we explore a number of challenges and constraints encountered when using python to interact with a PostgreSQL DB.', 8, 3);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (10, 'PostgreSQL: The best SQL', 2, 1, 4, 'In this talk we will take a look at the current state of PostgreSQL, and explore its features which made it a natural fit for the Database System backing Mathesar.', 8, 3);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (16, 'Data Engineering and Mathesar', 3, 1, 6, 'In this talk, we take a look at data tools such as Apache Spark, and how you can integrate their use with the Mathesar UI.', 7, 3);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (17, 'Data Science and Mathesar', 3, 1, 4, 'In this talk, we will review some basics of data science, including key concepts. You will learn how these concepts can be implemented and used when working with Mathesar.', 1, 3);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (4, 'Exploring Data Visualization: Techniques and Tools', 1, 1, 9, 'In this talk, you will learn about different techniques and tools that you can use to create effective data visualizations. You will learn about different types of charts and graphs, and how to choose the right visualization for your data. You will also learn about tools like D3.js and Tableau, and how to use them to create interactive and engaging visualizations.', 7, 4);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (8, 'Building Modern Web Applications with Svelte.js', 2, 1, 7, 'In this talk, you will learn about Svelte.js, a modern JavaScript framework for building web applications. You will learn about the principles and philosophy behind Svelte, and how it differs from other frameworks. You will also learn about the core concepts and features of Svelte, and how to use them to build efficient and reactive applications.', 1, 4);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (11, 'Advanced Svelte.js Techniques: Animations, Server-Side Rendering, and More', 2, 2, 3, 'In this talk, you will learn about advanced techniques for using Svelte.js, such as animations, server-side rendering, and performance optimization. You will learn about different tools and libraries that you can use to extend the capabilities of Svelte, and how to apply these techniques in real-world projects. You will also learn about some of the trade-offs and considerations when using advanced Svelte techniques.
+', 7, 4);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (12, 'Integrating Svelte.js with Other Technologies', 2, 2, 9, 'In this talk, you will learn about how to integrate Svelte.js with other technologies such as APIs, databases, and front-end libraries. You will learn about different techniques and tools for connecting Svelte to external data sources and services, and how to build full-stack applications with Svelte. You will also learn about some of the considerations and challenges when integrating Svelte with other technologies.
+', 8, 4);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (19, 'Svelte.js Best Practices: Tips and Tricks', 3, 3, 7, 'In this talk, you will learn about best practices and tips and tricks for using Svelte.js. You will learn about techniques such as code organization, testing, and performance optimization, and how to apply them in your Svelte projects. You will also learn about some of the common pitfalls and mistakes to avoid when using Svelte.', 7, 4);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (9, 'Django and its use in Mathesar', 2, 1, 6, 'In this talk we will explore Django, how it''s used in Mathesar, and the pros/cons of the tool when solving our problems.', 7, 5);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (18, 'Building APIs with Django Rest Framework', 3, 2, 1, 'n this talk, you will learn about how to use Django Rest Framework (DRF), a powerful Django extension for building APIs. You will learn about the features and architecture of DRF, and how to use it to build RESTful APIs for your Django projects. You will also learn about some of the best practices and tools for testing and documenting your APIs.', 7, 5);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (6, 'No-Code Data Analysis: Tools and Techniques', 1, 3, 2, 'In this talk, you will learn about different tools and techniques that you can use to perform data analysis without writing any code. You will learn about platforms like Excel, Google Sheets, and Mathesar, and how to use them to manipulate, analyze, and visualize data. You will also learn about some of the benefits and limitations of using no-code data analysis tools, and how to choose the right one for your needs.', 7, NULL);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (7, 'Integrating with No-Code tools', 1, 3, 8, 'In this talk, you will learn about different no-code tools, and how to integrate with them in the context of a Mathesar project.', 8, NULL);
+INSERT INTO "Mathesar DevCon"."Talks" (id, "Title", "Day", "Room", "Presenter", "Abstract", "Time Slot", "Track") VALUES (13, 'Designing for Data', 2, 3, 2, 'In this talk we discuss principles, approaches, and some challenges associated with designing a product for data input and analysis.', 7, NULL);
 
 
 --
 -- Data for Name: Time Slots; Type: TABLE DATA; Schema: Mathesar DevCon; Owner: -
 --
 
-INSERT INTO "Mathesar DevCon"."Time Slots" (id, "Time") VALUES (1, 'Morning');
-INSERT INTO "Mathesar DevCon"."Time Slots" (id, "Time") VALUES (7, 'Early Afternoon');
-INSERT INTO "Mathesar DevCon"."Time Slots" (id, "Time") VALUES (8, 'Late Afternoon');
+INSERT INTO "Mathesar DevCon"."Time Slots" (id, "Slot") VALUES (7, '13:00-15:00');
+INSERT INTO "Mathesar DevCon"."Time Slots" (id, "Slot") VALUES (1, '08:00-10:00');
+INSERT INTO "Mathesar DevCon"."Time Slots" (id, "Slot") VALUES (8, '15:30-17:30');
 
 
 --
@@ -478,6 +516,16 @@ INSERT INTO "Mathesar DevCon"."Topics" (id, "Name") VALUES (6, 'Design');
 INSERT INTO "Mathesar DevCon"."Topics" (id, "Name") VALUES (7, 'Product');
 INSERT INTO "Mathesar DevCon"."Topics" (id, "Name") VALUES (8, 'Management');
 INSERT INTO "Mathesar DevCon"."Topics" (id, "Name") VALUES (9, 'Database');
+
+
+--
+-- Data for Name: Tracks; Type: TABLE DATA; Schema: Mathesar DevCon; Owner: -
+--
+
+INSERT INTO "Mathesar DevCon"."Tracks" (id, "Name") VALUES (1, 'Management');
+INSERT INTO "Mathesar DevCon"."Tracks" (id, "Name") VALUES (3, 'Databases');
+INSERT INTO "Mathesar DevCon"."Tracks" (id, "Name") VALUES (4, 'Front End');
+INSERT INTO "Mathesar DevCon"."Tracks" (id, "Name") VALUES (5, 'Web Service');
 
 
 --
@@ -534,6 +582,13 @@ SELECT pg_catalog.setval('"Mathesar DevCon"."Talk Topic Map_id_seq"', 38, true);
 --
 
 SELECT pg_catalog.setval('"Mathesar DevCon"."Time Slots_id_seq"', 8, true);
+
+
+--
+-- Name: Tracks_id_seq; Type: SEQUENCE SET; Schema: Mathesar DevCon; Owner: -
+--
+
+SELECT pg_catalog.setval('"Mathesar DevCon"."Tracks_id_seq"', 5, true);
 
 
 --
@@ -621,7 +676,7 @@ ALTER TABLE ONLY "Mathesar DevCon"."Talk Topic Map"
 --
 
 ALTER TABLE ONLY "Mathesar DevCon"."Time Slots"
-    ADD CONSTRAINT "Time Slots_Time_key" UNIQUE ("Time");
+    ADD CONSTRAINT "Time Slots_Time_key" UNIQUE ("Slot");
 
 
 --
@@ -630,6 +685,14 @@ ALTER TABLE ONLY "Mathesar DevCon"."Time Slots"
 
 ALTER TABLE ONLY "Mathesar DevCon"."Time Slots"
     ADD CONSTRAINT "Time Slots_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Tracks Tracks_pkey; Type: CONSTRAINT; Schema: Mathesar DevCon; Owner: -
+--
+
+ALTER TABLE ONLY "Mathesar DevCon"."Tracks"
+    ADD CONSTRAINT "Tracks_pkey" PRIMARY KEY (id);
 
 
 --
@@ -686,6 +749,14 @@ ALTER TABLE ONLY "Mathesar DevCon"."Talks"
 
 ALTER TABLE ONLY "Mathesar DevCon"."Talks"
     ADD CONSTRAINT "Talks_Time Slot_fkey" FOREIGN KEY ("Time Slot") REFERENCES "Mathesar DevCon"."Time Slots"(id);
+
+
+--
+-- Name: Talks Talks_mathesar_temp_Track_fkey; Type: FK CONSTRAINT; Schema: Mathesar DevCon; Owner: -
+--
+
+ALTER TABLE ONLY "Mathesar DevCon"."Talks"
+    ADD CONSTRAINT "Talks_mathesar_temp_Track_fkey" FOREIGN KEY ("Track") REFERENCES "Mathesar DevCon"."Tracks"(id);
 
 
 --
