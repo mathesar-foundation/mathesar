@@ -41,6 +41,7 @@ import {
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
+import type { AtLeastOne } from '@mathesar/typeUtils';
 import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
@@ -208,11 +209,14 @@ export function deleteTable(id: number): CancellablePromise<TableEntry> {
   );
 }
 
-export function renameTable(
+export function updateTableMetaData(
   id: number,
-  name: string,
+  updatedMetaData: AtLeastOne<{ name: string; description: string }>,
 ): CancellablePromise<TableEntry> {
-  const promise = patchAPI<TableEntry>(`/api/db/v0/tables/${id}/`, { name });
+  const promise = patchAPI<TableEntry>(
+    `/api/db/v0/tables/${id}/`,
+    updatedMetaData,
+  );
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {

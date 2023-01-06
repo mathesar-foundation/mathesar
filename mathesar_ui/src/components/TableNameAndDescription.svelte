@@ -15,7 +15,7 @@
       <Truncate>{table.name}</Truncate>
     </div>
     {#if table.description}
-      <div class="description" title={table.description}>
+      <div class="description">
         <Truncate>{table.description}</Truncate>
       </div>
     {/if}
