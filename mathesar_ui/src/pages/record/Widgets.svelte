@@ -10,7 +10,7 @@
   export let recordId: number;
   export let recordSummary: string;
   export let joinableTablesResult: JoinableTablesResult;
-  
+
   $: currTable = $currentTable as TableEntry;
   $: tableNameMap = new Map(
     Object.entries(joinableTablesResult.tables).map(([tableId, table]) => [
@@ -56,7 +56,7 @@
     <div class="widgets">
       {#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
         <section class="table-widget-positioner">
-          <TableWidget {recordId} table={currTable} {fkColumn}  />
+          <TableWidget {recordId} table={currTable} {fkColumn} />
         </section>
       {/each}
     </div>
