@@ -21,7 +21,7 @@
 
   export let hasNewColumnButton = false;
   export let columnOrder: number[];
-  export let table: Pick<TableEntry,  'id' | 'settings' | 'schema' >;
+  export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
 
   $: ({ selection, processedColumns } = $tabularData);
   $: ({

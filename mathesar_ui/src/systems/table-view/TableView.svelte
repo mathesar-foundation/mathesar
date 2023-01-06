@@ -18,7 +18,7 @@
   const tabularData = getTabularDataStoreFromContext();
 
   export let context: 'page' | 'widget' = 'page';
-  export let table: Pick<TableEntry,  'id' | 'settings' | 'schema'>;
+  export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
 
   $: usesVirtualList = context === 'page';
   $: allowsDdlOperations = context === 'page';
