@@ -90,7 +90,7 @@
     right: var(--cell-padding);
     bottom: var(--cell-padding);
     position: absolute;
-    background: #efefef;
+    background: var(--slate-100);
   }
   .cell-fabric:not(.show-as-skeleton) .loader {
     display: none;

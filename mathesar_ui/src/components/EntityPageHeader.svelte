@@ -65,7 +65,7 @@
         h1 {
           font-size: var(--text-size-large);
           margin: 0;
-          font-weight: 510;
+          font-weight: 600;
         }
         span {
           color: var(--slate-500);
