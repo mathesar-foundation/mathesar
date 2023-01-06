@@ -116,11 +116,14 @@
         <strong>Live Demo Mode</strong>
       </div>
       <div class="body">
-        Mathesar's live demo is available to anyone to try out. Use the following credentials to login:
-        <ul>
-          <li>username: <strong>demo</strong></li>
-          <li>password: <strong>demo</strong></li>
-        </ul>
+        Mathesar's live demo is available to anyone to try out.
+        {% if live_demo_username and live_demo_password %}
+          Use the following credentials to login:
+          <ul>
+            <li>username: <strong>{{live_demo_username}}</strong></li>
+            <li>password: <strong>{{live_demo_password}}</strong></li>
+          </ul>
+        {% endif %}
         Keep in mind that the data in the live demo is reset regularly.
       </div>
     </div>
