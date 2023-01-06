@@ -524,7 +524,7 @@ export default class SheetSelection<
   }
 
   onColumnSelectionStart(column: Column): boolean {
-    if (!this.isCompleteColumnSelected(column)) {
+    if (!isColumnSelected(new ImmutableSet(this.selectedCells.getValues()), new ImmutableSet(this.columnsSelectedWhenTheTableIsEmpty.getValues()), column)) {
       this.activateCell({ rowIndex: 0 }, { id: column.id });
       const rows = this.getRows();
   
