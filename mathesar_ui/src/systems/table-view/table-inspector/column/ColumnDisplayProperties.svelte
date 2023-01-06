@@ -28,7 +28,7 @@
 
   function toggleGroup() {
     if (hasGrouping) {
-      grouping.update((g) => g.withoutColumn(column.id));
+      grouping.update((g) => g.withoutColumns([column.id]));
     } else {
       grouping.update((g) =>
         g.withEntry({

@@ -3,6 +3,7 @@ from sqlalchemy import MetaData, select
 from db import constants
 from db.columns.defaults import DEFAULT_COLUMNS
 from db.columns.operations.select import get_columns_attnum_from_names
+from db.records.operations.insert import insert_record_or_records
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
 from db.metadata import get_empty_metadata
@@ -141,3 +142,10 @@ def test_extract_columns_leaves_correct_data(engine_with_roster, roster_table_na
     with engine.begin() as conn:
         actual_tuples = conn.execute(actual_tuple_sel).fetchall()
     assert sorted(expect_tuples) == sorted(actual_tuples)
+
+
+def test_extract_columns_insert_new_record(engine_with_roster, extracted_remainder_roster, roster_extracted_cols, roster_fkey_col):
+    engine, schema = engine_with_roster
+    extracted, remainder, _, _ = extracted_remainder_roster
+    # Verify if we are able to add new records to the Table. Refer https://github.com/centerofci/mathesar/issues/2144
+    insert_record_or_records(extracted, engine, {"Teacher": "Miyagi", "Teacher Email": "miyagi@karatekid.com"})

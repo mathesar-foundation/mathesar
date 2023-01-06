@@ -86,7 +86,7 @@
     * restricting the max-width 
     * so that long descriptions does not take all the available space
     */
-    max-width: 20%;
+    max-width: 20rem;
     padding: 1rem;
     font-size: var(--text-size-large);
   }

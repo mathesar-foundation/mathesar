@@ -17,6 +17,7 @@
   import { deleteSchema as deleteSchemaAPI } from '@mathesar/stores/schemas';
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
   import SchemaRow from './SchemaRow.svelte';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
@@ -91,7 +92,7 @@
   >
     <Button slot="action" on:click={addSchema} appearance="primary">
       <Icon {...iconAddNew} />
-      Create Schema
+      <span>Create Schema</span>
     </Button>
   </AppSecondaryHeader>
 
@@ -102,26 +103,20 @@
       </h2>
     </div>
     <TextInputWithPrefix
-      placeholder="Search Schemas..."
+      placeholder="Search Schemas"
       bind:value={filterQuery}
       prefixIcon={iconSearch}
     />
 
     {#if filterQuery}
       <div class="search-results-info">
-        {#if displayList.length}
-          <p>
-            {displayList.length} result{displayList.length > 1 ? 's' : ''} for all
-            schemas matching <strong>{filterQuery}</strong>
-          </p>
-        {:else}
-          <p>
-            0 results for all schemas matching <strong>{filterQuery}</strong>
-          </p>
-        {/if}
-        <Button appearance="secondary" on:click={handleClearFilterQuery}
-          >Clear</Button
-        >
+        <p>
+          {labeledCount(displayList, 'results')}
+          for all schemas matching <strong>{filterQuery}</strong>
+        </p>
+        <Button appearance="secondary" on:click={handleClearFilterQuery}>
+          Clear
+        </Button>
       </div>
     {/if}
 
@@ -152,14 +147,9 @@
     flex-direction: column;
     width: 100%;
 
-    .schema-list-title-container {
-      border-bottom: 1px solid var(--slate-200);
-      margin-bottom: 1rem;
-    }
-
     .schema-list-title {
-      font-size: var(--text-size-large);
-      font-weight: 700;
+      font-size: var(--text-size-x-large);
+      font-weight: 500;
     }
 
     .search-results-info {
@@ -178,7 +168,6 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-
       * + * {
         margin-top: 0.714rem;
       }

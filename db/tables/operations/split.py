@@ -2,8 +2,11 @@ from sqlalchemy import exists, func, literal, select
 
 from db import constants
 from db.columns.base import MathesarColumn
-from db.columns.operations.alter import batch_alter_table_drop_columns
-from db.columns.operations.select import get_column_names_from_attnums
+from db.columns.operations.alter import batch_alter_table_drop_columns, rename_column
+from db.columns.operations.select import (
+    get_column_attnum_from_name,
+    get_column_names_from_attnums,
+)
 from db.links.operations.create import create_foreign_key_link
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table, reflect_table_from_oid
@@ -18,6 +21,11 @@ def _create_split_tables(extracted_table_name, extracted_columns, remainder_tabl
         engine,
     )
     fk_column_name = fk_column_name if fk_column_name else f"{extracted_table.name}_{constants.ID}"
+    extracted_column_names = [
+        col.name for col in extracted_columns
+    ]
+    if fk_column_name in extracted_column_names:
+        fk_column_name = f"mathesar_temp_{fk_column_name}"
     remainder_table_oid = get_oid_from_table(remainder_table_name, schema, engine)
     extracted_table_oid = get_oid_from_table(extracted_table_name, schema, engine)
     create_foreign_key_link(engine, schema, fk_column_name, remainder_table_oid, extracted_table_oid)
@@ -89,10 +97,40 @@ def extract_columns_from_table(old_table_oid, extracted_column_attnums, extracte
             fk_column_name,
         )
         conn.execute(split_ins)
+        update_pk_sequence_to_latest(conn, engine, extracted_table)
+
         remainder_table_oid = get_oid_from_table(remainder_table_with_fk_column.name, schema, engine)
         deletion_column_data = [
             {'attnum': column_attnum, 'delete': True}
             for column_attnum in extracted_column_attnums
         ]
         batch_alter_table_drop_columns(remainder_table_oid, deletion_column_data, conn, engine)
-    return extracted_table, remainder_table_with_fk_column, fk_column_name
+        fk_column_attnum = get_column_attnum_from_name(remainder_table_oid, fk_column_name, engine, get_empty_metadata())
+        if relationship_fk_column_name != fk_column_name:
+            rename_column(remainder_table_oid, fk_column_attnum, engine, conn, relationship_fk_column_name)
+    return extracted_table, remainder_table_with_fk_column, fk_column_attnum
+
+
+def update_pk_sequence_to_latest(conn, engine, extracted_table):
+    _preparer = engine.dialect.identifier_preparer
+    quoted_table_name = _preparer.quote(extracted_table.schema) + "." + _preparer.quote(extracted_table.name)
+    update_pk_sequence_stmt = func.setval(
+        # `pg_get_serial_sequence needs a string of the Table name
+        func.pg_get_serial_sequence(
+            quoted_table_name,
+            extracted_table.c[constants.ID].name
+        ),
+        # If the table can be empty, start from 1 instead of using Null
+        func.coalesce(
+            func.max(extracted_table.c[constants.ID]) + 1,
+            1
+        ),
+        # Set the sequence to use the last value of the sequence
+        # Setting is_called field to false, meaning that the next nextval will not advance the sequence before returning a value.
+        # We need to do it as our default coalesce value is 1 instead of 0
+        # Refer the postgres docs https://www.postgresql.org/docs/current/functions-sequence.html
+        False
+    )
+    conn.execute(
+        select(update_pk_sequence_stmt)
+    )

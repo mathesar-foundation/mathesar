@@ -230,10 +230,10 @@
     }
 
     :global(.column-name-wrapper.selected) {
-      background: #dedede !important;
+      background: var(--slate-200) !important;
     }
     :global([data-sheet-element='cell'].selected) {
-      background: #fafafa;
+      background: var(--slate-100);
     }
   }
 </style>

@@ -8,10 +8,13 @@
   import { iconSchema, iconEdit } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { Button, TabContainer, Icon } from '@mathesar-component-library';
+  import { States } from '@mathesar/api/utils/requestUtils';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
+  import TableSkeleton from './TableSkeleton.svelte';
+  import ExplorationSkeleton from './ExplorationSkeleton.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -36,6 +39,8 @@
   let activeTab: TabItem;
   $: tablesMap = $tablesStore.data;
   $: explorationsMap = $queries.data;
+  $: isTablesLoading = $tablesStore.state === States.Loading;
+  $: isExplorationsLoading = $queries.requestStatus.state === 'processing';
 
   $: tabs = [
     {
@@ -57,13 +62,15 @@
   function handleEditSchema() {
     addEditModal.open();
   }
+
+  $: isDefault = schema.name === 'public';
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
 
 <LayoutWithHeader
   restrictWidth
-  cssVariables={{ '--max-layout-width': '64rem' }}
+  cssVariables={{ '--max-layout-width': '72rem' }}
 >
   <AppSecondaryHeader
     slot="secondary-header"
@@ -74,10 +81,12 @@
       icon: iconSchema,
     }}
   >
-    <Button slot="action" on:click={handleEditSchema} appearance="secondary">
-      <Icon {...iconEdit} />
-      <span>Edit Schema</span>
-    </Button>
+    {#if !isDefault}
+      <Button slot="action" on:click={handleEditSchema} appearance="secondary">
+        <Icon {...iconEdit} />
+        <span>Edit Schema</span>
+      </Button>
+    {/if}
     <slot slot="bottom">
       {#if schema.description}
         <span class="description">
@@ -96,20 +105,35 @@
     </div>
     {#if activeTab?.id === 'overview'}
       <div class="tab-container">
-        <SchemaOverview {tablesMap} {explorationsMap} {database} {schema} />
-      </div>
-    {:else if activeTab?.id === 'tables'}
-      <div class="tab-container">
-        <SchemaTables {tablesMap} {database} {schema} />
-      </div>
-    {:else if activeTab?.id === 'explorations'}
-      <div class="tab-container">
-        <SchemaExplorations
-          hasTablesToExplore={!!tablesMap.size}
+        <SchemaOverview
+          {isTablesLoading}
+          {isExplorationsLoading}
+          {tablesMap}
           {explorationsMap}
           {database}
           {schema}
         />
+      </div>
+    {:else if activeTab?.id === 'tables'}
+      <div class="tab-container">
+        {#if isTablesLoading}
+          <TableSkeleton />
+        {:else}
+          <SchemaTables {tablesMap} {database} {schema} />
+        {/if}
+      </div>
+    {:else if activeTab?.id === 'explorations'}
+      <div class="tab-container">
+        {#if isExplorationsLoading}
+          <ExplorationSkeleton />
+        {:else}
+          <SchemaExplorations
+            hasTablesToExplore={!!tablesMap.size}
+            {explorationsMap}
+            {database}
+            {schema}
+          />
+        {/if}
       </div>
     {/if}
   </TabContainer>
@@ -132,8 +156,11 @@
 
     .count {
       border-radius: var(--border-radius-l);
-      background: var(--slate-100);
-      padding: 0.071rem 0.14rem;
+      background: var(--slate-200);
+      font-size: var(--text-size-small);
+      text-align: center;
+      padding: 0.071rem 0.5rem;
+      margin-left: 0.5rem;
     }
   }
 </style>

@@ -15,6 +15,7 @@
   } from '@mathesar/stores/table-data';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
 
   export let selectedRowIndices: number[];
   export let recordsData: RecordsData;
@@ -78,9 +79,7 @@
   <Button appearance="outline-primary" on:click={handleDeleteRecords}>
     <Icon {...isDeleting ? iconLoading : iconDeleteMajor} />
     <span>
-      Delete {selectedRowIndices.length} record{selectedRowIndices.length > 1
-        ? 's'
-        : ''}
+      Delete {labeledCount(selectedRowIndices, 'records')}
     </span>
   </Button>
 </div>
