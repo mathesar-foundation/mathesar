@@ -50,7 +50,8 @@ def persist_paper(conn, schema_name, paper):
             RETURNING id
         """
     )
-    conn.execute(insert_query)
+    [paper_id] = conn.execute(insert_query)
+    # TODO insert into Paper-Author, Paper-Category, Paper-Link bridge tables
 
 
 def _persist_authors(conn, author_names):
