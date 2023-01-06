@@ -230,7 +230,6 @@ class ColumnSerializer(SimpleColumnSerializer):
                 'maximum_fraction_digits': 2,
                 'minimum_fraction_digits': 2,
                 'currency_symbol_location': 'after-minus'}
-            instance.save()
         return super().to_representation(instance)
 
     @property
