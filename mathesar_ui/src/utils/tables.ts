@@ -16,25 +16,6 @@ export function isTableImportConfirmationRequired(
   );
 }
 
-export function orderProcessedColumns(
-  processedColumns: Map<number, ProcessedColumn>,
-  table: Partial<Pick<TableEntry, 'settings'>>,
-): Map<number, ProcessedColumn> {
-  const columns = [...processedColumns.values()];
-  const orderedColumns = new Map<number, ProcessedColumn>();
-
-  const columnOrder = getColumnOrder(columns, table);
-  columnOrder.forEach((id) => {
-    const index = columns.map((column) => column.id).indexOf(id);
-    if (index !== -1) {
-      const orderColumn = columns.splice(index, 1)[0];
-      orderedColumns.set(orderColumn.id, orderColumn);
-    }
-  });
-
-  return orderedColumns;
-}
-
 export function getColumnOrder(
   processedColumns: ProcessedColumn[],
   table: Partial<Pick<TableEntry, 'settings'>>,
@@ -54,4 +35,23 @@ export function getColumnOrder(
   });
 
   return completeColumnOrder;
+}
+
+export function orderProcessedColumns(
+  processedColumns: Map<number, ProcessedColumn>,
+  table: Partial<Pick<TableEntry, 'settings'>>,
+): Map<number, ProcessedColumn> {
+  const columns = [...processedColumns.values()];
+  const orderedColumns = new Map<number, ProcessedColumn>();
+
+  const columnOrder = getColumnOrder(columns, table);
+  columnOrder.forEach((id) => {
+    const index = columns.map((column) => column.id).indexOf(id);
+    if (index !== -1) {
+      const orderColumn = columns.splice(index, 1)[0];
+      orderedColumns.set(orderColumn.id, orderColumn);
+    }
+  });
+
+  return orderedColumns;
 }
