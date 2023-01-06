@@ -4,8 +4,5 @@
 </script>
 
 <div on:dragstart draggable={isSelected && !selectionInProgress}>
-    <div>{isSelected}</div>
-    <div>{selectionInProgress}</div>
     <slot></slot>
 </div>
-  

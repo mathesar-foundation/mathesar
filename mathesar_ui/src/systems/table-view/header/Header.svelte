@@ -67,11 +67,11 @@
 
 <SheetHeader>
   <SheetCell
-  columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-  isStatic
-  isControlCell
-  let:htmlAttributes
-  let:style
+    columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+    isStatic
+    isControlCell
+    let:htmlAttributes
+    let:style
   >
     <Droppable
     on:drop={(e) => dropColumn(e)}

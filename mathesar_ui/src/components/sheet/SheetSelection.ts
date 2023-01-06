@@ -237,7 +237,7 @@ export default class SheetSelection<
     this.getRows = args.getRows;
     this.getMaxSelectionRowIndex = args.getMaxSelectionRowIndex;
     this.freezeSelection = false;
-    this.selectionInProgress = writable<false>(false);
+    this.selectionInProgress = writable<boolean>(false);
     this.activeCell = writable<ActiveCell | undefined>(undefined);
 
     /**
@@ -343,11 +343,8 @@ export default class SheetSelection<
 
     const columnOrder = this.getColumnOrder();
 
-    const numericalStartColumnId = Number(startColumnId);
-    const numericalEndColumnId = Number(endColumnId);
-
-    const startOrderIndex = columnOrder.indexOf(numericalStartColumnId);
-    const endOrderIndex = columnOrder.indexOf(numericalEndColumnId);
+    const startOrderIndex = columnOrder.indexOf(Number(startColumnId));
+    const endOrderIndex = columnOrder.indexOf(Number(endColumnId));
 
     const minColumnPosition = Math.min(startOrderIndex, endOrderIndex);
     const maxColumnposition = Math.max(startOrderIndex, endOrderIndex);
