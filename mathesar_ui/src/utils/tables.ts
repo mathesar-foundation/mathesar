@@ -16,21 +16,19 @@ export function isTableImportConfirmationRequired(
   );
 }
 
-export function orderProcessedColumns(processedColumns: Map<number, ProcessedColumn>, columnOrder: number[] = [] ):Map<number, ProcessedColumn> {
-  // TODO, improve by calling getColumnOrder
-  const allColumns = [...processedColumns.values()];
+export function orderProcessedColumns(processedColumns: Map<number, ProcessedColumn>, table: Partial<Pick<TableEntry, 'settings'>>):Map<number, ProcessedColumn> {
+  const columns = [...processedColumns.values()];
   const orderedColumns = new Map<number, ProcessedColumn>();
-  // columnOrder = columnOrder ?? [];
+
+  const columnOrder = getColumnOrder(columns, table);
   columnOrder.forEach((id) => {
-    const index = allColumns.map((column) => column.id).indexOf(id);
+    const index = columns.map((column) => column.id).indexOf(id);
     if (index !== -1) {
-      const orderColumn = allColumns.splice(index, 1)[0];
+      const orderColumn = columns.splice(index, 1)[0];
       orderedColumns.set(orderColumn.id, orderColumn);
     }
   });
-  allColumns.forEach((column) => {
-    orderedColumns.set(column.id, column);
-  });
+
   return orderedColumns;
 }
 
