@@ -17,12 +17,10 @@ export interface TerseSummarization {
 export function createDataExplorerUrlToExploreATable(
   databaseName: string,
   schemaId: number,
-  tableId: number,
+  baseTable: TerseSummarization['baseTable'],
 ) {
   const dataExplorerRouteUrl = getDataExplorerPageUrl(databaseName, schemaId);
-  const tableInformationHash = Url64.encode(
-    JSON.stringify({ baseTableId: tableId }),
-  );
+  const tableInformationHash = Url64.encode(JSON.stringify({ baseTable }));
   return `${dataExplorerRouteUrl}#${tableInformationHash}`;
 }
 
@@ -67,7 +65,7 @@ export function constructQueryModelFromHash(
     !terseSummarization.terseGrouping?.length ||
     !terseSummarization.columns
   ) {
-    return undefined;
+    return { base_table: baseTable.id };
   }
 
   const columnMap = new Map(
@@ -81,7 +79,7 @@ export function constructQueryModelFromHash(
     .filter((entry): entry is TerseSummarizedColumn => entry !== undefined);
 
   if (groupingColumns.length === 0) {
-    return undefined;
+    return { base_table: baseTable.id };
   }
 
   const baseGroupingColumn = groupingColumns[0];
