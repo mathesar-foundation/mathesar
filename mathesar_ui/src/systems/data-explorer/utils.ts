@@ -301,6 +301,7 @@ function processColumn(
         is_initial_column: true,
         input_column_name: columnInfo.input_column_name,
         input_table_name: columnInfo.input_table_name,
+        input_table_id: columnInfo.input_table_id,
       }
     : {
         is_initial_column: false,
@@ -390,6 +391,7 @@ export function speculateColumnMetaData({
             is_initial_column: true,
             input_column_name: inputColumnInformation?.name,
             input_table_name: inputColumnInformation?.tableName,
+            input_table_id: inputColumnInformation?.tableId,
           },
           abstractTypeMap,
         ),
