@@ -46,17 +46,6 @@
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
-  $: refreshButtonState = (() => {
-    let buttonState: 'loading' | 'error' | undefined = undefined;
-    const queryRunState = $runState?.state;
-    if (queryRunState === 'processing') {
-      buttonState = 'loading';
-    }
-    if (queryRunState === 'failure') {
-      buttonState = 'error';
-    }
-    return buttonState;
-  })();
 
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
