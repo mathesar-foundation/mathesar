@@ -10,7 +10,7 @@
   } from '@mathesar/components/sheet';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
-  import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
@@ -109,7 +109,7 @@
       <SheetVirtualRows
         itemCount={sheetItemCount}
         paddingBottom={30}
-        itemSize={() => 30}
+        itemSize={() => rowHeightPx}
         let:items
       >
         {#each items as item (item.key)}
