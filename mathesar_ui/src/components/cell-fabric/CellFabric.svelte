@@ -67,9 +67,9 @@
     isolation: isolate;
 
     &:not(.is-independent) {
-      --cell-height: 29px;
+      --default-cell-height: 29px;
       --cell-padding: 0.5rem;
-      min-height: var(--cell-height);
+      min-height: var(--cell-height, var(--default-cell-height));
     }
     &.is-independent {
       --cell-padding: 0rem;

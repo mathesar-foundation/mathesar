@@ -104,7 +104,10 @@
         {#each items as item (item.key)}
           {#if rows[item.index] || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
-              <div {...htmlAttributes} style={styleString}>
+              <div
+                {...htmlAttributes}
+                style="--cell-height:{rowHeightPx - 1}px;{styleString}"
+              >
                 <SheetCell
                   columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
                   isStatic
