@@ -21,6 +21,7 @@ def update_our_arxiv_dbs():
 
 def _download_arxiv_papers():
     arxiv_search = arxiv.Search(
+        query="all:electron",
         max_results=50,
         sort_by=arxiv.SortCriterion.LastUpdatedDate
     )
@@ -33,9 +34,9 @@ def _set_search_path(conn, schema_name):
 
 
 def persist_paper(conn, paper):
-    authors = paper.authors
+    authors = [author.name for author in paper.authors]
     categories = paper.categories
-    links = paper.links
+    links = [link.href for link in paper.links]
     for x in [*authors, *categories, *links]:
         #TODO remove before merge
         assert type(x) is str
@@ -43,7 +44,7 @@ def persist_paper(conn, paper):
     _persist_categories(conn, categories)
     _persist_links(conn, links)
     insert_query = _get_persist_paper_insert_query(paper)
-    [paper_id] = conn.execute(insert_query)
+    [paper_id], = conn.execute(insert_query)
     _persist_paper_authors(conn, paper_id, authors)
     _persist_paper_categories(conn, paper_id, categories)
     _persist_paper_links(conn, paper_id, links)
@@ -51,8 +52,8 @@ def persist_paper(conn, paper):
 
 def _get_persist_paper_insert_query(paper):
     id = paper.entry_id
-    updated = paper.updated
-    published = paper.published
+    updated = str(paper.updated)
+    published = str(paper.published)
     title = paper.title
     summary = paper.summary
     comment = paper.comment
@@ -61,19 +62,37 @@ def _get_persist_paper_insert_query(paper):
     primary_category = paper.primary_category
     return text(
         f"""
-                INSERT INTO Papers (id, Updated, Published, Title, Summary, Comment, "Journal reference", DOI, "Primary category")
-                VALUES ({id, updated, published, title, summary, comment, journal_reference, doi, primary_category})
+                INSERT INTO "Papers" (id, "Updated", "Published", "Title", "Summary", "Comment", "Journal reference", "DOI", "Primary category")
+                VALUES ({
+                    _value_list(
+                        _prep_value(id),
+                        _prep_value(updated),
+                        _prep_value(published),
+                        _prep_value(title),
+                        _prep_value(summary),
+                        _prep_value(comment),
+                        _prep_value(journal_reference),
+                        _prep_value(doi),
+                        _prep_value(primary_category),
+                    )
+                })
+                ON CONFLICT DO NOTHING
                 RETURNING id
             """
     )
+
+
+def _value_list(*strs):
+    return ', '.join(strs)
 
 
 def _persist_authors(conn, author_names):
     for author_name in author_names:
         insert_query = text(
             f"""
-                INSERT INTO Authors (Name)
-                VALUES ({author_name})
+                INSERT INTO "Authors" ("Name")
+                VALUES ({_prep_value(author_name)})
+                ON CONFLICT DO NOTHING
             """
         )
         conn.execute(insert_query)
@@ -83,8 +102,9 @@ def _persist_categories(conn, categories):
     for category in categories:
         insert_query = text(
             f"""
-                INSERT INTO Categories (Name)
-                VALUES ({category})
+                INSERT INTO "Categories" ("Name")
+                VALUES ({_prep_value(category)})
+                ON CONFLICT DO NOTHING
             """
         )
         conn.execute(insert_query)
@@ -94,8 +114,9 @@ def _persist_links(conn, links):
     for link in links:
         insert_query = text(
             f"""
-                INSERT INTO Links (URL)
-                VALUES ({link})
+                INSERT INTO "Links" ("HREF")
+                VALUES ({_prep_value(link)})
+                ON CONFLICT DO NOTHING
             """
         )
         conn.execute(insert_query)
@@ -105,8 +126,14 @@ def _persist_paper_authors(conn, paper_id, author_ids):
     for author_id in author_ids:
         insert_query = text(
             f"""
-                INSERT INTO Paper-Author (paper_id, author_id)
-                VALUES ({paper_id, author_id})
+                INSERT INTO "Paper-Author" (paper_id, author_id)
+                VALUES ({
+                    _value_list(
+                        _prep_value(paper_id),
+                        _prep_value(author_id),
+                    )
+                })
+                ON CONFLICT DO NOTHING
             """
         )
         conn.execute(insert_query)
@@ -116,8 +143,14 @@ def _persist_paper_categories(conn, paper_id, category_ids):
     for category_id in category_ids:
         insert_query = text(
             f"""
-                INSERT INTO Paper-Category (paper_id, category_id)
-                VALUES ({paper_id, category_id})
+                INSERT INTO "Paper-Category" (paper_id, category_id)
+                VALUES ({
+                    _value_list(
+                        _prep_value(paper_id),
+                        _prep_value(category_id),
+                    )
+                })
+                ON CONFLICT DO NOTHING
             """
         )
         conn.execute(insert_query)
@@ -127,11 +160,21 @@ def _persist_paper_links(conn, paper_id, link_ids):
     for link_id in link_ids:
         insert_query = text(
             f"""
-                INSERT INTO Paper-Link (paper_id, link_id)
-                VALUES ({paper_id, link_id})
+                INSERT INTO "Paper-Link" (paper_id, link_id)
+                VALUES ({
+                    _value_list(
+                        _prep_value(paper_id),
+                        _prep_value(link_id),
+                    )
+                })
+                ON CONFLICT DO NOTHING
             """
         )
         conn.execute(insert_query)
+
+
+def _prep_value(s):
+    return f"$escape_token${s}$escape_token$" if s is not None else "NULL"
 
 
 def _get_logged_db_schema_pairs():
@@ -142,6 +185,7 @@ def _get_logged_db_schema_pairs():
             for line
             in lines
         ]
+    #TODO deduplicate
 
 
 if __name__ == '__main__':

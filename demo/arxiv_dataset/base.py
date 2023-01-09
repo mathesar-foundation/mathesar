@@ -22,6 +22,7 @@ def _append_db_and_schema_to_log(db_name, schema_name):
     db_and_schema = [db_name, schema_name]
     with open(path, 'a') as f:
         json.dump(db_and_schema, f)
+        f.write('\n')
 
 
 def get_arxiv_db_and_schema_log_path():
@@ -32,7 +33,7 @@ def get_arxiv_db_and_schema_log_path():
 
 def _setup_arxiv_schema(engine):
     schema_name = 'Arxiv'
-    drop_schema_query = text(f'DROP SCHEMA IF EXISTS "{schema_name}";')
+    drop_schema_query = text(f'DROP SCHEMA IF EXISTS "{schema_name}" CASCADE;')
     create_schema_query = text(f'CREATE SCHEMA "{schema_name}";')
     set_search_path = text(f'SET search_path="{schema_name}";')
     sql_setup_script = _get_sql_setup_script_path()
