@@ -42,20 +42,36 @@ function getTransformationModel(
   }
 }
 
+function validate(
+  queryModel: Pick<QueryModel, 'base_table' | 'transformationModels'>,
+): { isValid: boolean; isRunnable: boolean } {
+  if (queryModel.base_table === undefined) {
+    return { isValid: false, isRunnable: false };
+  }
+  const isValid = queryModel.transformationModels.every((transformation) =>
+    transformation.isValid(),
+  );
+  return { isValid, isRunnable: true };
+}
+
 export default class QueryModel {
-  base_table: UnsavedQueryInstance['base_table'];
+  readonly base_table: UnsavedQueryInstance['base_table'];
 
-  id: UnsavedQueryInstance['id'];
+  readonly id: UnsavedQueryInstance['id'];
 
-  name: UnsavedQueryInstance['name'];
+  readonly name: UnsavedQueryInstance['name'];
 
-  description: UnsavedQueryInstance['description'];
+  readonly description: UnsavedQueryInstance['description'];
 
-  initial_columns: QueryInstanceInitialColumn[];
+  readonly initial_columns: QueryInstanceInitialColumn[];
 
-  transformationModels: QueryTransformationModel[];
+  readonly transformationModels: QueryTransformationModel[];
 
-  display_names: QueryInstance['display_names'];
+  readonly display_names: QueryInstance['display_names'];
+
+  readonly isValid: boolean;
+
+  readonly isRunnable: boolean;
 
   constructor(model?: UnsavedQueryInstance | QueryModel) {
     this.base_table = model?.base_table;
@@ -63,13 +79,21 @@ export default class QueryModel {
     this.name = model?.name;
     this.description = model?.description;
     this.initial_columns = model?.initial_columns ?? [];
+    let transformationModels;
     if (model && 'transformationModels' in model) {
-      this.transformationModels = [...model.transformationModels];
+      transformationModels = [...model.transformationModels];
     } else {
-      this.transformationModels =
+      transformationModels =
         model?.transformations?.map(getTransformationModel) ?? [];
     }
+    this.transformationModels = transformationModels;
     this.display_names = model?.display_names ?? {};
+    const validationResult = validate({
+      base_table: model?.base_table,
+      transformationModels,
+    });
+    this.isValid = validationResult.isValid;
+    this.isRunnable = validationResult.isRunnable;
   }
 
   withBaseTable(base_table?: number): QueryModelUpdateDiff {
@@ -304,10 +328,13 @@ export default class QueryModel {
         'Cannot formulate run request since base_table is undefined',
       );
     }
+    const transformations = this.isValid
+      ? this.transformationModels
+      : this.transformationModels.filter((transform) => transform.isValid());
     return {
       base_table: this.base_table,
       initial_columns: this.initial_columns,
-      transformations: this.transformationModels.map((entry) => entry.toJson()),
+      transformations: transformations.map((entry) => entry.toJson()),
       display_names: this.display_names,
     };
   }
