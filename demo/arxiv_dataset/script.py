@@ -38,7 +38,6 @@ def persist_paper(conn, paper):
     categories = paper.categories
     links = [link.href for link in paper.links]
     for x in [*authors, *categories, *links]:
-        #TODO remove before merge
         assert type(x) is str
     _persist_authors(conn, authors)
     _persist_categories(conn, categories)
@@ -178,14 +177,18 @@ def _prep_value(s):
 
 
 def _get_logged_db_schema_pairs():
+    """
+    Note, deduplicates the resulting pairs.
+    """
     db_schema_log_path = get_arxiv_db_and_schema_log_path()
     with open(db_schema_log_path, 'r') as lines:
-        return [
-            json.loads(line)
+        return set(
+            tuple(
+                json.loads(line)
+            )
             for line
             in lines
-        ]
-    #TODO deduplicate
+        )
 
 
 if __name__ == '__main__':
