@@ -1,12 +1,20 @@
 import os
 import json
+from pathlib import Path
 
 from sqlalchemy import text
 
 
 def setup_and_register_schema_for_receiving_arxiv_data(engine):
     db_name, schema_name = _setup_arxiv_schema(engine)
+    _make_sure_parent_directories_present(get_arxiv_db_and_schema_log_path())
     _append_db_and_schema_to_log(db_name, schema_name)
+
+
+def _make_sure_parent_directories_present(path_to_file):
+    path_to_file = Path(path_to_file)
+    parent_directory_of_file = path_to_file.parent
+    parent_directory_of_file.mkdir(parents=True, exist_ok=True)
 
 
 def _append_db_and_schema_to_log(db_name, schema_name):
