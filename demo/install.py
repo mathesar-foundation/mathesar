@@ -3,6 +3,7 @@ import os
 
 from sqlalchemy import text
 
+from db.schemas.operations.select import get_mathesar_schemas_with_oids
 from mathesar.models.base import Table, Schema, PreviewColumnSettings
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -12,6 +13,12 @@ LIBRARY_TWO = os.path.join(RESOURCES, "library_add_checkouts.sql")
 LIBRARY_MANAGEMENT = 'Library Management'
 MOVIE_COLLECTION = 'Movie Collection'
 MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
+
+
+def check_datasets(engine):
+    expect_schemas = [LIBRARY_MANAGEMENT, MOVIE_COLLECTION]
+    actual_schemas = [s['schema'] for s in get_mathesar_schemas_with_oids(engine)]
+    return all(schema in actual_schemas for schema in expect_schemas)
 
 
 def load_datasets(engine):
@@ -28,7 +35,7 @@ def _load_library_dataset(engine):
     Destructive, and will knock out any previous "Library Management"
     schema in the given database.
     """
-    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{LIBRARY_MANAGEMENT}";""")
+    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{LIBRARY_MANAGEMENT}" CASCADE;""")
     create_schema_query = text(f"""CREATE SCHEMA "{LIBRARY_MANAGEMENT}";""")
     set_search_path = text(f"""SET search_path="{LIBRARY_MANAGEMENT}";""")
     with engine.begin() as conn, open(LIBRARY_ONE) as f1, open(LIBRARY_TWO) as f2:
