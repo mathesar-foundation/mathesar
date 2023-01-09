@@ -16,7 +16,7 @@
     <span class="label">Name</span>
     <EditableTextWithActions
       initialValue={$tables.data.get($tabularData.id)?.name ?? ''}
-      onSubmit={onUpdate}
+      onSubmit={(name) => onUpdate({ name })}
       getValidationErrors={getNameValidationErrors}
     />
   </div>
