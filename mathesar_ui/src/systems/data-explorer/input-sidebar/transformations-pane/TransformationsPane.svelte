@@ -41,7 +41,7 @@
     const newFilter = new QueryFilterTransformationModel({
       columnIdentifier: firstColumn.column.alias,
       conditionIdentifier: firstCondition.id,
-      value: undefined,
+      value: firstColumn.initialInputValue,
     });
     await queryManager.update((q) => q.addFilterTransform(newFilter));
   }
