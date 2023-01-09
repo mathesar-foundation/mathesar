@@ -37,7 +37,7 @@
 
 <div class="table-widget">
   <div class="top">
-    <strong><TableName {table} /></strong>
+    <h3><TableName {table} /></h3>
     <MiniActionsPane />
   </div>
 
@@ -46,15 +46,18 @@
   </div>
 </div>
 
-<style>
+<style lang="scss">
   .top {
     display: grid;
     grid-template: auto / 1fr auto;
     gap: 0.5rem;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 0.5rem;
+
     overflow: hidden;
+    > h3 {
+      font-weight: 500;
+    }
   }
   .top > :global(*) {
     overflow: hidden;

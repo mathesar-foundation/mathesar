@@ -19,8 +19,6 @@
     justify-content: space-between;
     padding-bottom: 0.25rem;
     position: relative;
-
-    border-bottom: 1px solid var(--slate-200);
   }
 
   .action-container {
@@ -30,7 +28,7 @@
   }
 
   .title {
-    font-size: var(--text-size-large);
-    font-weight: bolder;
+    font-size: var(--text-size-x-large);
+    font-weight: 500;
   }
 </style>

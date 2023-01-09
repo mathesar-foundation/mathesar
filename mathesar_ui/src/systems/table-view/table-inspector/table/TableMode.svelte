@@ -3,11 +3,12 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
   import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
-  import RenameTable from './RenameTable.svelte';
+  import RenameTable from './TableName.svelte';
   import TableActions from './TableActions.svelte';
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import AdvancedActions from './AdvancedActions.svelte';
   import TableLinks from './links/TableLinks.svelte';
+  import TableDescription from './TableDescription.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 </script>
@@ -21,6 +22,7 @@
     />
     <div slot="content" class="content-container">
       <RenameTable />
+      <TableDescription />
     </div>
   </Collapsible>
 
@@ -53,12 +55,18 @@
   </Collapsible>
 </div>
 
-<style>
+<style lang="scss">
   .table-mode-container {
     padding-bottom: 1rem;
   }
 
   .content-container {
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: 1rem;
+    }
   }
 </style>

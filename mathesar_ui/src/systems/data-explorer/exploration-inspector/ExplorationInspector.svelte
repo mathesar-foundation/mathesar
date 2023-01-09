@@ -14,6 +14,7 @@
 
 <aside class="exploration-inspector">
   <TabContainer
+    tabStyle="compact"
     tabs={$tabs}
     bind:activeTab={$activeTab}
     fillTabWidth

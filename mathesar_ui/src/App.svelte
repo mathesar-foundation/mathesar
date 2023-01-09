@@ -63,7 +63,10 @@
     --text-size-small: var(--size-small); // 12px
     --text-size-base: var(--size-base); // 14px
     --text-size-large: var(--size-large); // 16px
+    --text-size-x-large: var(--size-x-large); // 18px
     --text-size-xx-large: var(--size-xx-large); // 20px
+    --text-size-ultra-large: var(--size-ultra-large); // 24px
+    --text-size-super-ultra-large: var(--size-super-ultra-large); // 32px
 
     --modal-z-index: 50;
     --modal-record-selector-z-index: 50;
