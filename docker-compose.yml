@@ -18,6 +18,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        PYTHON_REQUIREMENTS: requirements-prod.txt
     container_name: mathesar_service
     environment:
       - MODE=${MODE-PRODUCTION}
