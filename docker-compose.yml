@@ -39,12 +39,16 @@ services:
     extends: service-without-db
     build:
       context: .
-      # Replace with Dockerfile.integ-test when running integration tests
       dockerfile: Dockerfile
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
     depends_on:
       - db
+  caddy-reverse-proxy:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: caddy.Dockerfile
   dev-service:
     build:
       context: .
