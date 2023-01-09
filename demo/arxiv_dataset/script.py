@@ -18,8 +18,8 @@ def update_our_arxiv_dbs():
 
 def _download_arxiv_papers():
     arxiv_search = arxiv.Search(
-      max_results = 50,
-      sort_by = arxiv.SortCriterion.LastUpdatedDate
+        max_results=50,
+        sort_by=arxiv.SortCriterion.LastUpdatedDate
     )
     return arxiv_search.results()
 
