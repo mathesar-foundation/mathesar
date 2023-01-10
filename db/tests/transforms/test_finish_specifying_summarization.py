@@ -3,7 +3,7 @@ import types
 import functools
 
 from db.tables.operations.select import get_oid_from_table
-from db.queries.base import DBQuery, InitialColumn
+from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.metadata import get_empty_metadata
 from db.transforms.base import Summarize, SelectSubsetOfColumns, Limit
 from db.columns.operations.select import get_column_attnum_from_name
@@ -132,10 +132,10 @@ def initial_columns(academics_ids):
             attnum=ids.attnum.universities.name,
             alias=gen_alias.universities.name,
             jp_path=[
-                [
-                    (ids.oid.academics, ids.attnum.academics.institution),
-                    (ids.oid.universities, ids.attnum.universities.id),
-                ],
+                JoinParameter(
+                    ids.oid.academics, ids.attnum.academics.institution,
+                    ids.oid.universities, ids.attnum.universities.id,
+                ),
             ],
         ),
         # Serves as a "multiple result" initial column
@@ -144,10 +144,10 @@ def initial_columns(academics_ids):
             attnum=ids.attnum.articles.title,
             alias=gen_alias.articles.title,
             jp_path=[
-                [
-                    (ids.oid.academics, ids.attnum.academics.id),
-                    (ids.oid.articles, ids.attnum.articles.primary_author),
-                ],
+                JoinParameter(
+                    ids.oid.academics, ids.attnum.academics.id,
+                    ids.oid.articles, ids.attnum.articles.primary_author,
+                ),
             ],
         ),
     ]
