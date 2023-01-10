@@ -305,9 +305,12 @@ class InitialColumn:
         self.reloid = reloid
         self.attnum = attnum
         self.alias = alias
-        self.jp_path = _guarantee_jp_path_tuples(jp_path)
-        for join_parameter in self.jp_path:
-            assert type(join_parameter) is JoinParameter
+        if jp_path:
+            for join_parameter in jp_path:
+                assert type(join_parameter) is JoinParameter
+        else:
+            jp_path = tuple()
+        self.jp_path = jp_path
 
     def get_name(self, engine, metadata):
         return get_column_name_from_attnum(
@@ -330,20 +333,3 @@ class InitialColumn:
     def __hash__(self):
         """Hashes are equal when attributes are equal."""
         return hash(frozendict(self.__dict__))
-
-
-def _guarantee_jp_path_tuples(jp_path):
-    """
-    Makes sure that jp_path is made up of tuples or is an empty tuple.
-    """
-    if jp_path is not None:
-        return tuple(
-            (
-                tuple(edge[0]),
-                tuple(edge[1]),
-            )
-            for edge
-            in jp_path
-        )
-    else:
-        return tuple()
