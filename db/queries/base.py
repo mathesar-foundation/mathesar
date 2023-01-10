@@ -184,15 +184,6 @@ class DBQuery:
         # We keep track of created joins, so that we don't perform the same join more than once.
         created_joins = set()
 
-        def _get_table(oid):
-            """
-            We use the function-scoped metadata so all involved tables are aware
-            of each other.
-            """
-            return reflect_table_from_oid(
-                oid, self.engine, metadata=metadata, keep_existing=True
-            )
-
         def _get_join_id(previous_and_this_jps):
             """
             A join (given a base table) can be uniquely identified by the JoinParameter path used to create it.
@@ -221,7 +212,9 @@ class DBQuery:
                 if previous_and_this_jps in map_of_jp_subpath_to_alias:
                     right = map_of_jp_subpath_to_alias[previous_and_this_jps]
                 else:
-                    right = _get_table(jp.right_oid).alias()
+                    right = reflect_table_from_oid(
+                        jp.right_oid, self.engine, metadata=metadata
+                    ).alias()
                     map_of_jp_subpath_to_alias[previous_and_this_jps] = right
                 left_col, right_col = jp._get_sa_cols(left, right, self.engine, metadata)
                 join_id = _get_join_id(previous_and_this_jps)
