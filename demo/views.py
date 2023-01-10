@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from demo.install import load_datasets, customize_settings, check_datasets
 from mathesar.database.base import create_mathesar_engine
 from mathesar.state import reset_reflection
+from mathesar.views import SchemasView as RootSchemasView
 
 
 @login_required
@@ -28,3 +29,10 @@ def data_exists(request):
     engine = create_mathesar_engine(db_name)
     datasets_exist = check_datasets(engine)
     return Response({'datasets_exist': datasets_exist})
+
+
+class SchemasView(RootSchemasView):
+    """Exteded to add info about demo data sets."""
+    def _get_common_data(self):
+        common_data = super()._get_common_data()
+        return common_data | {"datasets_exist": data_exists(self.request).data['datasets_exist']}
