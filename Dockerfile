@@ -21,6 +21,7 @@ COPY requirements-dev.txt .
 
 RUN pip install -r requirements.txt --force-reinstall sqlalchemy-filters
 RUN pip install -r requirements-dev.txt
+RUN pip install -r requirements-demo.txt
 COPY . .
 
 RUN sudo npm install -g npm-force-resolutions
