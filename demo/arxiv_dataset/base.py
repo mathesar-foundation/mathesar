@@ -5,8 +5,10 @@ from pathlib import Path
 from sqlalchemy import text
 
 
-def setup_and_register_schema_for_receiving_arxiv_data(engine):
-    db_name, schema_name = _setup_arxiv_schema(engine)
+def setup_and_register_schema_for_receiving_arxiv_data(
+    engine, schema_name='Arxiv'
+):
+    db_name, schema_name = _setup_arxiv_schema(engine, schema_name)
     _make_sure_parent_directories_present(get_arxiv_db_and_schema_log_path())
     _append_db_and_schema_to_log(db_name, schema_name)
 
@@ -31,8 +33,7 @@ def get_arxiv_db_and_schema_log_path():
     )
 
 
-def _setup_arxiv_schema(engine):
-    schema_name = 'Arxiv'
+def _setup_arxiv_schema(engine, schema_name):
     drop_schema_query = text(f'DROP SCHEMA IF EXISTS "{schema_name}" CASCADE;')
     create_schema_query = text(f'CREATE SCHEMA "{schema_name}";')
     set_search_path = text(f'SET search_path="{schema_name}";')
