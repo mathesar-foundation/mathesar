@@ -192,8 +192,8 @@ class DBQuery:
 
         def _process_initial_column(initial_col):
             """
-            - Mutably performs joins on `from_clause`;
-            - Returns the SA column that the initial column represents.
+            Mutably performs joins on `from_clause`, if this is not a base table initial column,
+            and returns the SA column that the initial column represents.
             """
             nonlocal from_clause
             nonlocal base_table
