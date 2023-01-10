@@ -106,6 +106,7 @@ export interface QueryInitialColumnSource {
   is_initial_column: true;
   input_column_name: string;
   input_table_name: string;
+  input_table_id: number;
 }
 
 export interface QueryGeneratedColumnSource {
