@@ -25,7 +25,9 @@ export function getColumnOrder(
   const { settings } = table;
   if (settings) {
     const { column_order: columnOrder } = settings;
-    completeColumnOrder = columnOrder;
+    if (columnOrder) {
+      completeColumnOrder = columnOrder;
+    }
   }
 
   allColumns.forEach((column) => {
