@@ -263,7 +263,7 @@ class JoinParameter:
 
     def _get_sa_cols(self, left, right, engine, metadata):
         """
-        Returns the left and right SA columns represented by this JoinParameter. 
+        Returns the left and right SA columns represented by this JoinParameter.
 
         It takes left and right SA from-clauses, because a JoinParameter on its own is not enough to
         identify columns. You need the context of the base table and the JoinParameter path
