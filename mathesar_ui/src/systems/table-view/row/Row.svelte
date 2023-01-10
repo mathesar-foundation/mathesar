@@ -16,10 +16,12 @@
     SheetCell,
     isRowSelected,
   } from '@mathesar/components/sheet';
-  import RowControl from './RowControl.svelte';
-  import RowCell from './RowCell.svelte';
-  import GroupHeader from './GroupHeader.svelte';
+  import { ContextMenu } from '@mathesar/component-library';
   import NewRecordMessage from './NewRecordMessage.svelte';
+  import GroupHeader from './GroupHeader.svelte';
+  import RowCell from './RowCell.svelte';
+  import RowControl from './RowControl.svelte';
+  import RowContextOptions from './RowContextOptions.svelte';
 
   export let row: Row;
   export let style: { [key: string]: string | number };
@@ -103,6 +105,9 @@
             {isSelected}
             hasErrors={hasAnyErrors}
           />
+          <ContextMenu>
+            <RowContextOptions recordId={Number(rowKey)} {recordsData} {row} />
+          </ContextMenu>
         {/if}
       </div>
     </SheetCell>
