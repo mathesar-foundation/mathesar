@@ -1,3 +1,19 @@
+"""
+In summary, the `arxiv_dataset` package demos a schema that is being continuously inserted to from
+outside Mathesar. The source of the data is the arxiv.org API.
+
+Logic in this package does two basic things:
+
+1. the necessary setup so that the Arxiv dataset could be continuously inserted from outside
+Mathesar (`setup_and_register_schema_for_receiving_arxiv_data`);
+2. provides the script (`script.py`) that pulls down some recent Arxiv data and inserts it into the
+schemas setup by `setup_and_register_schema_for_receiving_arxiv_data`;
+
+In order for `script.py` to find the schemas that it should update,
+`setup_and_register_schema_for_receiving_arxiv_data` also sets up a log file where it keeps track
+of database-schema-name pairs of the schemas it set up (see `_append_db_and_schema_to_log`).
+"""
+
 import os
 import json
 from pathlib import Path
