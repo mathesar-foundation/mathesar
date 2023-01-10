@@ -275,8 +275,8 @@ class JoinParameter:
         right_col_name = get_column_name_from_attnum(
             self.right_oid, self.right_attnum, engine, metadata=metadata
         )
-        left_col = left.columns(left_col_name)
-        right_col = right.columns(right_col_name)
+        left_col = left.columns[left_col_name]
+        right_col = right.columns[right_col_name]
         return left_col, right_col
 
     def __eq__(self, other):
