@@ -193,11 +193,11 @@ class DBQuery:
                 oid, self.engine, metadata=metadata, keep_existing=True
             )
 
-        def _get_join_id(left_col, right_col, previous_and_this_jps):
-            return (
-                f"{hash(tuple(previous_and_this_jps))}: "
-                f"{left_col}, {right_col}"
-            )
+        def _get_join_id(previous_and_this_jps):
+            """
+            A join (given a base table) can be uniquely identified by the JoinParameter path used to create it.
+            """
+            return tuple(previous_and_this_jps)
 
         def _process_initial_column(initial_col):
             """
@@ -212,7 +212,7 @@ class DBQuery:
             right = base_table
             for i, jp in enumerate(jp_path):
                 previous_jps = tuple(jp_path[:i])
-                is_first_jp = i == 0
+                is_first_jp = len(previous_jps) == 0
                 if is_first_jp:
                     left = base_table
                 else:
@@ -224,11 +224,7 @@ class DBQuery:
                     right = _get_table(jp.right_oid).alias()
                     map_of_jp_subpath_to_alias[previous_and_this_jps] = right
                 left_col, right_col = jp._get_sa_cols(left, right, self.engine, metadata)
-                join_id = _get_join_id(
-                    left_col=left_col,
-                    right_col=right_col,
-                    previous_and_this_jps=previous_and_this_jps,
-                )
+                join_id = _get_join_id(previous_and_this_jps)
                 if join_id not in created_joins:
                     created_joins.add(join_id)
                     from_clause = from_clause.join(
