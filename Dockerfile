@@ -18,6 +18,7 @@ WORKDIR /code/
 
 COPY requirements.txt .
 COPY requirements-dev.txt .
+COPY requirements-demo.txt .
 
 RUN pip install -r requirements.txt --force-reinstall sqlalchemy-filters
 RUN pip install -r requirements-dev.txt
