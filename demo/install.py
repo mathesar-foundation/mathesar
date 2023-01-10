@@ -1,9 +1,17 @@
 import bz2
 import os
+from datetime import timedelta
 
+from django.conf import settings
+from django.utils.timezone import now
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
 
 from db.schemas.operations.select import get_mathesar_schemas_with_oids
+from db import engine
+from db.metadata import get_empty_metadata
+from mathesar.models.base import Database
+from mathesar.state.django import reflect_db_objects
 from mathesar.models.base import Table, Schema, PreviewColumnSettings
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -101,3 +109,39 @@ def _get_dj_column_by_name(table, name):
     for c in columns:
         if c.name == name:
             return c
+
+
+def drop_all_stale_databases():
+    excluded_databases = ['mathesar', 'postgres', 'template0', 'template1']
+    databases = Database.objects.filter(created_at__gt=now() - timedelta(days=5))
+    for database in databases:
+        if database.name not in excluded_databases and database.deleted is False:
+            drop_mathesar_database(
+                database,
+                username=settings.DATABASES["default"]["USER"],
+                password=settings.DATABASES["default"]["PASSWORD"],
+                hostname=settings.DATABASES["default"]["HOST"],
+                port=settings.DATABASES["default"]["PORT"]
+            )
+            reflect_db_objects(get_empty_metadata())
+    reflect_db_objects(get_empty_metadata())
+
+
+def drop_mathesar_database(
+        user_database, username, password, hostname, port,
+):
+    user_db_engine = engine.create_future_engine(
+        username, password, hostname, user_database.name, port
+    )
+    try:
+        user_db_engine.connect()
+        with user_db_engine.connect() as conn:
+            conn.execution_options(isolation_level="AUTOCOMMIT")
+            conn.execute(text(f"DROP DATABASE {user_database.name}"))
+    except OperationalError:
+        user_db_engine.dispose()
+    finally:
+        # This database is not created using a config file,
+        # so their objects can be safety delete
+        # as won't be created again during reflection or when running install script
+        user_database.delete()
