@@ -85,12 +85,15 @@
       icon: iconSchema,
     }}
   >
-    {#if !isDefault}
-      <Button slot="action" on:click={handleEditSchema} appearance="secondary">
-        <Icon {...iconEdit} />
-        <span>Edit Schema</span>
-      </Button>
-    {/if}
+    <svelte:fragment slot="action">
+      {#if !isDefault}
+        <Button on:click={handleEditSchema} appearance="secondary">
+          <Icon {...iconEdit} />
+          <span>Edit Schema</span>
+        </Button>
+      {/if}
+    </svelte:fragment>
+
     <slot slot="bottom">
       {#if schema.description}
         <span class="description">
