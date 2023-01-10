@@ -21,7 +21,7 @@ def update_our_arxiv_dbs():
 
 def _download_arxiv_papers():
     arxiv_search = arxiv.Search(
-        query="all:electron",
+        query="cat:cs.DB",
         max_results=50,
         sort_by=arxiv.SortCriterion.LastUpdatedDate
     )
