@@ -225,6 +225,7 @@ class UIQuery(BaseModel, Relation):
         optionals = dict(
             input_column_name=None,
             input_table_name=None,
+            input_table_id=None,
             input_alias=None,
         )
         output = output | optionals
@@ -233,6 +234,7 @@ class UIQuery(BaseModel, Relation):
             output = output | dict(
                 input_column_name=initial_dj_column.name,
                 input_table_name=initial_dj_column.table.name,
+                input_table_id=initial_dj_column.table.id,
             )
         else:
             input_alias = self.db_query.get_input_alias_for_output_alias(alias)
