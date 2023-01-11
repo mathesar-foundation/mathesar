@@ -142,19 +142,30 @@ def drop_all_stale_databases(force=False, max_days=3):
 def drop_mathesar_database(
         user_database, username, password, hostname, root_database, port, force=False
 ):
+    user_db_engine = engine.create_future_engine(
+        username, password, hostname, user_database, port
+    )
     try:
-        root_db_engine = engine.create_future_engine(
-            username, password, hostname, root_database, port,
-        )
-        with root_db_engine.connect() as conn:
-            conn.execution_options(isolation_level="AUTOCOMMIT")
-            delete_stmt = f"DROP DATABASE {user_database} {'WITH (FORCE)' if force else ''}"
-            conn.execute(text(delete_stmt))
-            # This database is not created using a config file,
-            # so their objects can be safety delete
-            # as won't be created again during reflection or when running install script
-            return True
+        user_db_engine.connect()
     except OperationalError:
-        # Database is in use
-        pass
+        # Non existent db object
+        user_db_engine.dispose()
+        user_database.delete()
+        return True
+    else:
+        try:
+            root_db_engine = engine.create_future_engine(
+                username, password, hostname, root_database, port,
+            )
+            with root_db_engine.connect() as conn:
+                conn.execution_options(isolation_level="AUTOCOMMIT")
+                delete_stmt = f"DROP DATABASE {user_database} {'WITH (FORCE)' if force else ''}"
+                conn.execute(text(delete_stmt))
+                # This database is not created using a config file,
+                # so their objects can be safety delete
+                # as won't be created again during reflection or when running install script
+                return True
+        except OperationalError:
+            # Database is in use, ignore
+            pass
     return False
