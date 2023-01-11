@@ -46,7 +46,7 @@ def persist_paper(conn, paper):
     category_ids = _persist_values_to_single_value_table(
         conn,
         table_name="Categories",
-        column_name="Name",
+        column_name="id",
         values=categories
     )
     link_ids = _persist_values_to_single_value_table(
@@ -132,7 +132,7 @@ def _persist_primary_category(conn, paper):
     resulting_ids = _persist_values_to_single_value_table(
         conn,
         table_name="Categories",
-        column_name="Name",
+        column_name="id",
         values=[primary_category],
     )
     primary_category_id = resulting_ids.pop()
