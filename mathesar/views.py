@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.base import TemplateView
+from django.shortcuts import redirect, get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -14,12 +16,14 @@ from mathesar.models.base import Database, Schema, Table
 from mathesar.models.query import UIQuery
 from mathesar.state import reset_reflection
 
+REQUEST = 'request'
+
 
 def get_schema_list(request, database):
     schema_serializer = SchemaSerializer(
         Schema.objects.filter(database=database),
         many=True,
-        context={'request': request}
+        context={REQUEST: request}
     )
     return schema_serializer.data
 
@@ -28,7 +32,7 @@ def get_database_list(request):
     database_serializer = DatabaseSerializer(
         Database.objects.all(),
         many=True,
-        context={'request': request}
+        context={REQUEST: request}
     )
     return database_serializer.data
 
@@ -39,7 +43,7 @@ def get_table_list(request, schema):
     table_serializer = TableSerializer(
         Table.objects.filter(schema=schema),
         many=True,
-        context={'request': request}
+        context={REQUEST: request}
     )
     return table_serializer.data
 
@@ -50,7 +54,7 @@ def get_queries_list(request, schema):
     query_serializer = QuerySerializer(
         UIQuery.objects.filter(base_table__schema=schema),
         many=True,
-        context={'request': request}
+        context={REQUEST: request}
     )
     return query_serializer.data
 
@@ -61,22 +65,9 @@ def get_ui_type_list(request, database):
     type_serializer = TypeSerializer(
         UIType,
         many=True,
-        context={'request': request}
+        context={REQUEST: request}
     )
     return type_serializer.data
-
-
-def get_common_data(request, database, schema=None):
-    return {
-        'current_db': database.name if database else None,
-        'current_schema': schema.id if schema else None,
-        'schemas': get_schema_list(request, database),
-        'databases': get_database_list(request),
-        'tables': get_table_list(request, schema),
-        'queries': get_queries_list(request, schema),
-        'abstract_types': get_ui_type_list(request, database),
-        'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
-    }
 
 
 def get_current_database(request, db_name):
@@ -131,18 +122,26 @@ def home(request):
     return redirect('schemas', db_name=database.name)
 
 
-@login_required
-def schema_home(request, db_name, schema_id, **kwargs):
-    database = get_current_database(request, db_name)
-    schema = get_current_schema(request, schema_id, database)
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request, database, schema)
-    })
+class SchemasView(TemplateView, LoginRequiredMixin):
+    template_name = 'mathesar/index.html'
 
+    def get_context_data(self, **kwargs):
+        """Add common data to default context."""
+        context = super().get_context_data(**kwargs)
+        context['common_data'] = self._get_common_data()
+        return context
 
-@login_required
-def schemas(request, db_name):
-    database = get_current_database(request, db_name)
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request, database, None)
-    })
+    def _get_common_data(self):
+        database = get_current_database(self.request, self.kwargs['db_name'])
+        schema_id = self.kwargs.get('schema_id')
+        schema = schema_id and get_current_schema(self.request, schema_id, database)
+        return {
+            'current_db': database.name if database else None,
+            'current_schema': schema.id if schema else None,
+            'schemas': get_schema_list(self.request, database),
+            'databases': get_database_list(self.request),
+            'tables': get_table_list(self.request, schema),
+            'queries': get_queries_list(self.request, schema),
+            'abstract_types': get_ui_type_list(self.request, database),
+            'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
+        }
