@@ -16,6 +16,7 @@
     SheetCell,
     isRowSelected,
   } from '@mathesar/components/sheet';
+  import { rowHeightPx } from '@mathesar/geometry';
   import { ContextMenu } from '@mathesar/component-library';
   import NewRecordMessage from './NewRecordMessage.svelte';
   import GroupHeader from './GroupHeader.svelte';
@@ -80,7 +81,7 @@
     class:is-group-header={isGroupHeaderRow(row)}
     class:is-add-placeholder={isPlaceholderRow(row)}
     {...htmlAttributes}
-    style={styleString}
+    style="--cell-height:{rowHeightPx - 1}px;{styleString}"
     on:mousedown={checkAndCreateEmptyRow}
   >
     <SheetCell
