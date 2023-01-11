@@ -1,7 +1,9 @@
 import bz2
 import os
+from datetime import timedelta
 
 from django.conf import settings
+from django.utils.timezone import now
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
@@ -109,7 +111,7 @@ def _get_dj_column_by_name(table, name):
             return c
 
 
-def drop_all_stale_databases():
+def drop_all_stale_databases(force=False, max_days=3):
     excluded_databases = [
         settings.DATABASES["default"]["NAME"],
         # Exclude Postgres default databases
@@ -117,42 +119,42 @@ def drop_all_stale_databases():
         'template0',
         'template1'
     ]
-    databases = Database.objects.all()
-    for database in databases:
+    stale_databases = Database.objects.filter(created_at__lt=now() - timedelta(days=max_days))
+    deleted_databases = []
+    for database in stale_databases:
         if database.name not in excluded_databases and database.deleted is False:
-            print(f"Dropping {database.name}")
-            drop_mathesar_database(
-                database,
+            dropped = drop_mathesar_database(
+                database.name,
                 username=settings.DATABASES["default"]["USER"],
                 password=settings.DATABASES["default"]["PASSWORD"],
                 hostname=settings.DATABASES["default"]["HOST"],
-                port=settings.DATABASES["default"]["PORT"]
+                root_database=settings.DATABASES["default"]["NAME"],
+                port=settings.DATABASES["default"]["PORT"],
+                force=force
             )
+            if dropped:
+                deleted_databases.append(database.name)
+                database.delete()
     reflect_db_objects(get_empty_metadata())
+    return deleted_databases
 
 
 def drop_mathesar_database(
-        user_database, username, password, hostname, port,
+        user_database, username, password, hostname, root_database, port, force=False
 ):
-    user_db_engine = engine.create_future_engine(
-        username, password, hostname, user_database.name, port
-    )
     try:
-        user_db_engine.connect()
+        root_db_engine = engine.create_future_engine(
+            username, password, hostname, root_database, port,
+        )
+        with root_db_engine.connect() as conn:
+            conn.execution_options(isolation_level="AUTOCOMMIT")
+            delete_stmt = f"DROP DATABASE {user_database} {'WITH (FORCE)' if force else ''}"
+            conn.execute(text(delete_stmt))
+            # This database is not created using a config file,
+            # so their objects can be safety delete
+            # as won't be created again during reflection or when running install script
+            return True
     except OperationalError:
-        user_db_engine.dispose()
-        user_database.delete()
-    else:
-        try:
-            with user_db_engine.connect() as conn:
-                conn.execution_options(isolation_level="AUTOCOMMIT")
-                conn.execute(text(f"DROP DATABASE {user_database.name}"))
-                print("dropped")
-                # This database is not created using a config file,
-                # so their objects can be safety delete
-                # as won't be created again during reflection or when running install script
-                user_database.delete()
-                print("deleted")
-        except OperationalError:
-            user_db_engine.dispose()
-            print("in use")
+        # Database is in use
+        pass
+    return False

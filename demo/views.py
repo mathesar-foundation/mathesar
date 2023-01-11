@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import serializers
 
 from demo.install import drop_all_stale_databases, load_datasets, customize_settings, check_datasets
 from mathesar.database.base import create_mathesar_engine
@@ -22,6 +23,11 @@ def load_data(request):
     return Response(status=status.HTTP_200_OK)
 
 
+class StaleDbRequestSerializer(serializers.Serializer):
+    force = serializers.BooleanField(default=False)
+    max_days = serializers.IntegerField(default=3)
+
+
 @login_required
 @api_view(['GET'])
 def data_exists(request):
@@ -37,8 +43,16 @@ def data_exists(request):
 @api_view(['GET'])
 def remove_stale_db(request):
     """Remove databases older than MAX_DAYS"""
-    drop_all_stale_databases()
-    return Response(status=status.HTTP_200_OK)
+    serializer = StaleDbRequestSerializer(data=request.data)
+    if serializer.is_valid(True):
+        deleted_databases = drop_all_stale_databases(
+            force=serializer.validated_data['force'],
+            max_days=serializer.validated_data['max_days']
+        )
+        return Response(
+            {'deleted_databases': deleted_databases},
+            status=status.HTTP_200_OK
+        )
 
 
 class SchemasView(RootSchemasView):
