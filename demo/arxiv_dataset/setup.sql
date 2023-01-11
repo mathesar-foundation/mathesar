@@ -20,14 +20,14 @@ CREATE TABLE "Links" (
 
 CREATE TABLE "Papers" (
     id text PRIMARY KEY,
-    "Updated" timestamp,
-    "Published" timestamp,
     "Title" text,
     "Summary" text,
-    "Comment" text,
     "Journal reference" text,
-    "DOI" text,
     "Primary category" text references "Categories"("Name")
+    "Updated" timestamp,
+    "Published" timestamp,
+    "Comment" text,
+    "DOI" text,
 );
 
 -- Paper-Author map table
