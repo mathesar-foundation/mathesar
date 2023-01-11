@@ -40,19 +40,20 @@ def data_exists(request):
 
 @login_required
 @staff_member_required
-@api_view(['GET'])
+@api_view(['POST'])
 def remove_stale_db(request):
     """Remove databases older than MAX_DAYS"""
-    serializer = StaleDbRequestSerializer(data=request.data)
-    if serializer.is_valid(True):
-        deleted_databases = drop_all_stale_databases(
-            force=serializer.validated_data['force'],
-            max_days=serializer.validated_data['max_days']
-        )
-        return Response(
-            {'deleted_databases': deleted_databases},
-            status=status.HTTP_200_OK
-        )
+    if request.method == 'POST':
+        serializer = StaleDbRequestSerializer(data=request.data)
+        if serializer.is_valid(True):
+            deleted_databases = drop_all_stale_databases(
+                force=serializer.validated_data['force'],
+                max_days=serializer.validated_data['max_days']
+            )
+            return Response(
+                {'deleted_databases': deleted_databases},
+                status=status.HTTP_200_OK
+            )
 
 
 class SchemasView(RootSchemasView):
