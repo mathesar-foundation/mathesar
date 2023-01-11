@@ -20,6 +20,12 @@ from pathlib import Path
 
 from sqlalchemy import text
 
+SCHEMA_DESCRIPTION = (
+"Regularly updated by a cronjob that queries the arXiv API for the 50 most recent papers,"
+" normalizes the data, and inserts it into this schema."
+" Data from previous cronjob runs is not removed."
+)
+
 
 def setup_and_register_schema_for_receiving_arxiv_data(
     engine, schema_name='Latest Papers from arXiv'
@@ -54,11 +60,16 @@ def _setup_arxiv_schema(engine, schema_name):
     create_schema_query = text(f'CREATE SCHEMA "{schema_name}";')
     set_search_path = text(f'SET search_path="{schema_name}";')
     sql_setup_script = _get_sql_setup_script_path()
+    set_schema_comment_query = text(
+        f'COMMENT ON SCHEMA "{schema_name}"'
+        f'IS $escape_token${SCHEMA_DESCRIPTION}$escape_token$;'
+    )
     with engine.begin() as conn, open(sql_setup_script) as f:
         conn.execute(drop_schema_query)
         conn.execute(create_schema_query)
         conn.execute(set_search_path)
         conn.execute(text(f.read()))
+        conn.execute(set_schema_comment_query)
     db_name = engine.url.database
     return db_name, schema_name
 
