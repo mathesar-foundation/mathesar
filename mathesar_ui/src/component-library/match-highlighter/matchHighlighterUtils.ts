@@ -42,6 +42,26 @@ export function splitMatchParts(text: string, substring: string): MatchPart[] {
   return matchParts;
 }
 
+function valueComparisonMatchIf(b: boolean): ValueComparisonOutcome {
+  return b ? 'exactMatch' : 'noMatch';
+}
+
+export function compareWholeValues<T>(
+  searchValue: unknown,
+  storedValue: T,
+  formatter?: (v: T) => string,
+): ValueComparisonOutcome | undefined {
+  if (searchValue === undefined || searchValue === null || searchValue === '') {
+    return undefined;
+  }
+  if (formatter && formatter(storedValue) === searchValue) {
+    return 'exactMatch';
+  }
+  return valueComparisonMatchIf(
+    searchValue === storedValue || String(searchValue) === String(storedValue),
+  );
+}
+
 export function getValueComparisonOutcome(
   matchParts: MatchPart[],
 ): ValueComparisonOutcome | undefined {
@@ -49,7 +69,7 @@ export function getValueComparisonOutcome(
     return undefined;
   }
   if (matchParts.length === 1) {
-    return matchParts[0].isMatch ? 'exactMatch' : 'noMatch';
+    return valueComparisonMatchIf(matchParts[0].isMatch);
   }
   return 'substringMatch';
 }

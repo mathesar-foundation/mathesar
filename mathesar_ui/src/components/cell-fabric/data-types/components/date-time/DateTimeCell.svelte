@@ -24,6 +24,7 @@
   {isActive}
   {isSelectedInRange}
   {disabled}
+  highlightSubstringMatches={false}
   {isIndependentOfSheet}
   let:handleInputBlur
   let:handleInputKeydown
