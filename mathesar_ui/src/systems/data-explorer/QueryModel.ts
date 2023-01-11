@@ -9,6 +9,7 @@ import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 import QueryHideTransformationModel from './QueryHideTransformationModel';
+import QuerySortTransformationModel from './QuerySortTransformationModel';
 
 export interface QueryModelUpdateDiff {
   model: QueryModel;
@@ -25,7 +26,8 @@ export interface QueryModelUpdateDiff {
 export type QueryTransformationModel =
   | QueryFilterTransformationModel
   | QuerySummarizationTransformationModel
-  | QueryHideTransformationModel;
+  | QueryHideTransformationModel
+  | QuerySortTransformationModel;
 
 function getTransformationModel(
   transformation: QueryInstanceTransformation,
@@ -37,6 +39,8 @@ function getTransformationModel(
       return new QuerySummarizationTransformationModel(transformation);
     case 'hide':
       return new QueryHideTransformationModel(transformation);
+    case 'order':
+      return new QuerySortTransformationModel(transformation);
     default:
       throw new MissingExhaustiveConditionError(transformation);
   }
@@ -252,6 +256,12 @@ export default class QueryModel {
     hideTransformModel: QueryHideTransformationModel,
   ): QueryModelUpdateDiff {
     return this.addTransform(hideTransformModel);
+  }
+
+  addSortTransform(
+    sortTransformModel: QuerySortTransformationModel,
+  ): QueryModelUpdateDiff {
+    return this.addTransform(sortTransformModel);
   }
 
   removeLastTransform(): QueryModelUpdateDiff {

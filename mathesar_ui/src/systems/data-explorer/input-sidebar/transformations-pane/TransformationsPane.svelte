@@ -16,6 +16,8 @@
   import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
   import HideTransformation from './HideTransformation.svelte';
   import QueryHideTransformationModel from '../../QueryHideTransformationModel';
+  import SortTransformation from './SortTransformation.svelte';
+  import QuerySortTransformationModel from '../../QuerySortTransformationModel';
   import type { QueryTransformationModel } from '../../QueryModel';
 
   export let queryManager: QueryManager;
@@ -68,6 +70,18 @@
       columnAliases: [],
     });
     await queryManager.update((q) => q.addHideTransform(newHide));
+  }
+
+  async function addSortTransform() {
+    const firstColumn = [...$processedColumns.values()][0];
+    if (!firstColumn) {
+      return;
+    }
+    const newSort = new QuerySortTransformationModel({
+      columnIdentifier: firstColumn.column.alias,
+      sortDirection: 'ASCENDING',
+    });
+    await queryManager.update((q) => q.addSortTransform(newSort));
   }
 
   async function removeLastTransformation() {
@@ -140,6 +154,13 @@
               limitEditing={hasNoColumns}
               on:update={() => updateTransformation(index, transformationModel)}
             />
+          {:else if transformationModel.type === 'order'}
+            <SortTransformation
+              columns={allowedColumnsPerTransformation[index]}
+              model={transformationModel}
+              limitEditing={hasNoColumns}
+              on:update={() => updateTransformation(index, transformationModel)}
+            />
           {/if}
         </div>
       </Collapsible>
@@ -154,6 +175,7 @@
       triggerAppearance="secondary"
     >
       <ButtonMenuItem on:click={addFilter}>Filter</ButtonMenuItem>
+      <ButtonMenuItem on:click={addSortTransform}>Sort</ButtonMenuItem>
       <ButtonMenuItem
         disabled={$query.hasSummarizationTransform()}
         on:click={addSummarization}
