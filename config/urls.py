@@ -17,10 +17,13 @@ from django.contrib import admin
 from django.urls import include, path
 
 from mathesar import urls as mathesar_urls
+from mathesar import wildcard_urls as mathesar_wildcard_urls
 
-
-urlpatterns = [
+urls = [
     path('admin/', admin.site.urls),
     path('', include(mathesar_urls)),
     path('api-docs/', include('rest_framework.urls')),
+]
+urlpatterns = urls + [
+    path('', include(mathesar_wildcard_urls)),
 ]
