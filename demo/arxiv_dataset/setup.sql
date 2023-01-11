@@ -20,6 +20,8 @@ CREATE TABLE "Links" (
     "URL" mathesar_types.uri UNIQUE
 );
 
+COMMENT ON TABLE "Links" IS 'Links associated with a given paper; each paper is expected to at least have a link to its PDF version.'
+
 -- Papers
 
 CREATE TABLE "Papers" (
@@ -35,6 +37,8 @@ CREATE TABLE "Papers" (
     "arXiv URL" mathesar_types.uri UNIQUE
 );
 
+COMMENT ON TABLE "Papers" IS 'Academic papers sourced from the arXiv API.'
+
 -- Paper-Author map table
 
 CREATE TABLE "Paper-Author Map" (
@@ -44,6 +48,8 @@ CREATE TABLE "Paper-Author Map" (
   CONSTRAINT fk_paper FOREIGN KEY(paper_id) REFERENCES "Papers"(id),
   CONSTRAINT fk_author FOREIGN KEY(author_id) REFERENCES "Authors"(id)
 );
+
+COMMENT ON TABLE "Paper-Author Map" IS 'Maps papers to authors.'
 
 -- Paper-Category map table
 
@@ -55,6 +61,8 @@ CREATE TABLE "Paper-Category Map" (
   CONSTRAINT fk_category FOREIGN KEY(category_id) REFERENCES "Categories"(id)
 );
 
+COMMENT ON TABLE "Paper-Category Map" IS 'Maps papers to categories.'
+
 -- Paper-Link map table
 
 CREATE TABLE "Paper-Link Map" (
@@ -64,6 +72,8 @@ CREATE TABLE "Paper-Link Map" (
   CONSTRAINT fk_paper FOREIGN KEY(paper_id) REFERENCES "Papers"(id),
   CONSTRAINT fk_link FOREIGN KEY(link_id) REFERENCES "Links"(id)
 );
+
+COMMENT ON TABLE "Paper-Link Map" IS 'Maps papers to links.'
 
 -- Populate Categories with Computer Science information from https://arxiv.org/category_taxonomy
 
