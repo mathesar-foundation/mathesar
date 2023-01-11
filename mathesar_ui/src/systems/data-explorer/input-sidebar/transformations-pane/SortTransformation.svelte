@@ -5,6 +5,7 @@
 
   export let columns: ProcessedQueryResultColumnMap;
   export let model: QuerySortTransformationModel;
+  export let columnsAllowedForSelection: string[];
 
   export let limitEditing = false;
 </script>
@@ -12,6 +13,7 @@
 <SortEntryComponent
   allowDelete={false}
   {columns}
+  {columnsAllowedForSelection}
   getColumnLabel={(column) =>
     (column && columns.get(column.id)?.column.display_name) ?? ''}
   disableColumnChange={limitEditing}

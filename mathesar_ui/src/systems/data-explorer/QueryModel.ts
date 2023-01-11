@@ -332,6 +332,22 @@ export default class QueryModel {
     return this.initial_columns.map((entry) => entry.alias);
   }
 
+  getAllSortedColumns(): string[] {
+    return this.transformationModels
+      .filter(
+        (transform): transform is QuerySortTransformationModel =>
+          transform.type === 'order',
+      )
+      .map((entry) => entry.columnIdentifier);
+  }
+
+  getAllSortableColumns(): string[] {
+    const sortedColumns = new Set(this.getAllSortedColumns());
+    return this.getOutputColumnAliases().filter(
+      (alias) => !sortedColumns.has(alias),
+    );
+  }
+
   toRunRequestJson(): Omit<QueryRunRequest, 'parameters'> {
     if (this.base_table === undefined) {
       throw new Error(

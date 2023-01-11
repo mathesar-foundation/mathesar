@@ -30,6 +30,8 @@
     transformationModels,
     $columnsMetaData,
   );
+  $: sortableColumnsForNextStep = $query.getAllSortableColumns();
+  $: isSortableColumnPresent = sortableColumnsForNextStep.length > 0;
 
   async function addFilter() {
     const firstColumn = [...$processedColumns.values()][0];
@@ -73,12 +75,12 @@
   }
 
   async function addSortTransform() {
-    const firstColumn = [...$processedColumns.values()][0];
+    const firstColumn = sortableColumnsForNextStep[0];
     if (!firstColumn) {
       return;
     }
     const newSort = new QuerySortTransformationModel({
-      columnIdentifier: firstColumn.column.alias,
+      columnIdentifier: firstColumn,
       sortDirection: 'ASCENDING',
     });
     await queryManager.update((q) => q.addSortTransform(newSort));
@@ -157,6 +159,11 @@
           {:else if transformationModel.type === 'order'}
             <SortTransformation
               columns={allowedColumnsPerTransformation[index]}
+              columnsAllowedForSelection={[
+                ...allowedColumnsPerTransformation[index]
+                  .without($query.getAllSortedColumns())
+                  .values(),
+              ].map((entry) => entry.column.alias)}
               model={transformationModel}
               limitEditing={hasNoColumns}
               on:update={() => updateTransformation(index, transformationModel)}
@@ -175,7 +182,10 @@
       triggerAppearance="secondary"
     >
       <ButtonMenuItem on:click={addFilter}>Filter</ButtonMenuItem>
-      <ButtonMenuItem on:click={addSortTransform}>Sort</ButtonMenuItem>
+      <ButtonMenuItem
+        disabled={!isSortableColumnPresent}
+        on:click={addSortTransform}>Sort</ButtonMenuItem
+      >
       <ButtonMenuItem
         disabled={$query.hasSummarizationTransform()}
         on:click={addSummarization}
