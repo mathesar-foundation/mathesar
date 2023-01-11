@@ -1,25 +1,29 @@
 -- Authors
 
 CREATE TABLE "Authors" (
-    "Name" text PRIMARY KEY
+    id SERIAL PRIMARY KEY,
+    "Name" text UNIQUE
 );
 
 -- Categories
 
 CREATE TABLE "Categories" (
-    "Name" text PRIMARY KEY
+    id SERIAL PRIMARY KEY,
+    "Name" text UNIQUE
 );
 
 -- Links
 
 CREATE TABLE "Links" (
-    "HREF" mathesar_types.uri PRIMARY KEY
+    id SERIAL PRIMARY KEY,
+    "URL" mathesar_types.uri UNIQUE
 );
 
 -- Papers
 
 CREATE TABLE "Papers" (
-    id text PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    "arXiv URL" mathesar_types.uri UNIQUE,
     "Title" text,
     "Summary" text,
     "Journal reference" text,
@@ -33,29 +37,29 @@ CREATE TABLE "Papers" (
 -- Paper-Author map table
 
 CREATE TABLE "Paper-Author Map" (
-  paper_id text,
-  author_id text,
+  paper_id int,
+  author_id int,
   PRIMARY KEY (paper_id, author_id),
   CONSTRAINT fk_paper FOREIGN KEY(paper_id) REFERENCES "Papers"(id),
-  CONSTRAINT fk_author FOREIGN KEY(author_id) REFERENCES "Authors"("Name")
+  CONSTRAINT fk_author FOREIGN KEY(author_id) REFERENCES "Authors"(id)
 );
 
 -- Paper-Category map table
 
 CREATE TABLE "Paper-Category Map" (
-  paper_id text,
-  category_id text,
+  paper_id int,
+  category_id int,
   PRIMARY KEY (paper_id, category_id),
   CONSTRAINT fk_paper FOREIGN KEY(paper_id) REFERENCES "Papers"(id),
-  CONSTRAINT fk_category FOREIGN KEY(category_id) REFERENCES "Categories"("Name")
+  CONSTRAINT fk_category FOREIGN KEY(category_id) REFERENCES "Categories"(id)
 );
 
 -- Paper-Link map table
 
 CREATE TABLE "Paper-Link Map" (
-  paper_id text,
-  link_id text,
+  paper_id int,
+  link_id int,
   PRIMARY KEY (paper_id, link_id),
   CONSTRAINT fk_paper FOREIGN KEY(paper_id) REFERENCES "Papers"(id),
-  CONSTRAINT fk_link FOREIGN KEY(link_id) REFERENCES "Links"("HREF")
+  CONSTRAINT fk_link FOREIGN KEY(link_id) REFERENCES "Links"(id)
 );

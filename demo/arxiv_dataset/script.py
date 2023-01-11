@@ -37,20 +37,50 @@ def persist_paper(conn, paper):
     authors = [author.name for author in paper.authors]
     categories = paper.categories
     links = [link.href for link in paper.links]
-    for x in [*authors, *categories, *links]:
-        assert type(x) is str
-    _persist_authors(conn, authors)
-    _persist_categories(conn, categories)
-    _persist_links(conn, links)
-    insert_query = _get_persist_paper_insert_query(paper)
-    [paper_id], = conn.execute(insert_query)
-    _persist_paper_authors(conn, paper_id, authors)
-    _persist_paper_categories(conn, paper_id, categories)
-    _persist_paper_links(conn, paper_id, links)
+    author_ids = _persist_values_to_single_value_table(
+        conn,
+        table_name="Authors",
+        column_name="Name",
+        values=authors
+    )
+    category_ids = _persist_values_to_single_value_table(
+        conn,
+        table_name="Categories",
+        column_name="Name",
+        values=categories
+    )
+    link_ids = _persist_values_to_single_value_table(
+        conn,
+        table_name="Links",
+        column_name="URL",
+        values=links
+    )
+    paper_id = _persist_paper(conn, paper)
+    _persist_paper_mappings(
+        conn,
+        paper_id=paper_id,
+        table_name="Paper-Author Map",
+        column_name="author_id",
+        values=author_ids
+    )
+    _persist_paper_mappings(
+        conn,
+        paper_id=paper_id,
+        table_name="Paper-Category Map",
+        column_name="category_id",
+        values=category_ids
+    )
+    _persist_paper_mappings(
+        conn,
+        paper_id=paper_id,
+        table_name="Paper-Link Map",
+        column_name="link_id",
+        values=link_ids
+    )
 
 
-def _get_persist_paper_insert_query(paper):
-    id = paper.entry_id
+def _persist_paper(conn, paper):
+    arxiv_url = paper.entry_id
     updated = str(paper.updated)
     published = str(paper.published)
     title = paper.title
@@ -58,13 +88,23 @@ def _get_persist_paper_insert_query(paper):
     comment = paper.comment
     journal_reference = paper.journal_ref
     doi = paper.doi
-    primary_category = paper.primary_category
-    return text(
+    primary_category_id = _persist_primary_category(conn, paper)
+    insert_query = text(
         f"""
-                INSERT INTO "Papers" (id, "Updated", "Published", "Title", "Summary", "Comment", "Journal reference", "DOI", "Primary category")
+                INSERT INTO "Papers" (
+                    "arXiv URL",
+                    "Updated",
+                    "Published",
+                    "Title",
+                    "Summary",
+                    "Comment",
+                    "Journal reference",
+                    "DOI",
+                    "Primary category"
+                )
                 VALUES ({
                     _value_list(
-                        _prep_value(id),
+                        _prep_value(arxiv_url),
                         _prep_value(updated),
                         _prep_value(published),
                         _prep_value(title),
@@ -72,98 +112,66 @@ def _get_persist_paper_insert_query(paper):
                         _prep_value(comment),
                         _prep_value(journal_reference),
                         _prep_value(doi),
-                        _prep_value(primary_category),
+                        _prep_value(primary_category_id),
                     )
                 })
                 ON CONFLICT DO NOTHING
                 RETURNING id
             """
     )
+    [paper_id], = conn.execute(insert_query)
+    return paper_id
+
+
+def _persist_primary_category(conn, paper):
+    primary_category = paper.primary_category
+    resulting_ids = _persist_values_to_single_value_table(
+        conn,
+        table_name="Categories",
+        column_name="Name",
+        values=[primary_category],
+    )
+    primary_category_id = resulting_ids.pop()
+    return primary_category_id
 
 
 def _value_list(*strs):
     return ', '.join(strs)
 
 
-def _persist_authors(conn, author_names):
-    for author_name in author_names:
+def _persist_values_to_single_value_table(
+    conn, table_name, column_name, values
+):
+    """
+    Note, we use a seemingly meaningless DO UPDATE, because, in constrast to DO
+    NOTHING, that makes the query's RETURNING work regardless of whether there was a
+    conflict. Otherwise, we would not receive an id if the record already exists.
+    """
+    ids = set()
+    for value in values:
         insert_query = text(
             f"""
-                INSERT INTO "Authors" ("Name")
-                VALUES ({_prep_value(author_name)})
-                ON CONFLICT DO NOTHING
+                INSERT INTO "{table_name}" ("{column_name}")
+                VALUES ({_prep_value(value)})
+                ON CONFLICT ("{column_name}")
+                DO UPDATE SET "{column_name}" = excluded."{column_name}"
+                RETURNING id
             """
         )
-        conn.execute(insert_query)
+        [row_id], = conn.execute(insert_query)
+        ids.add(row_id)
+    return ids
 
 
-def _persist_categories(conn, categories):
-    for category in categories:
+def _persist_paper_mappings(conn, table_name, paper_id, column_name, values):
+    for value in values:
         insert_query = text(
             f"""
-                INSERT INTO "Categories" ("Name")
-                VALUES ({_prep_value(category)})
-                ON CONFLICT DO NOTHING
-            """
-        )
-        conn.execute(insert_query)
-
-
-def _persist_links(conn, links):
-    for link in links:
-        insert_query = text(
-            f"""
-                INSERT INTO "Links" ("HREF")
-                VALUES ({_prep_value(link)})
-                ON CONFLICT DO NOTHING
-            """
-        )
-        conn.execute(insert_query)
-
-
-def _persist_paper_authors(conn, paper_id, author_ids):
-    for author_id in author_ids:
-        insert_query = text(
-            f"""
-                INSERT INTO "Paper-Author Map" (paper_id, author_id)
+                INSERT INTO "{table_name}" (paper_id, {column_name})
                 VALUES ({
                     _value_list(
                         _prep_value(paper_id),
-                        _prep_value(author_id),
-                    )
-                })
-                ON CONFLICT DO NOTHING
-            """
-        )
-        conn.execute(insert_query)
-
-
-def _persist_paper_categories(conn, paper_id, category_ids):
-    for category_id in category_ids:
-        insert_query = text(
-            f"""
-                INSERT INTO "Paper-Category Map" (paper_id, category_id)
-                VALUES ({
-                    _value_list(
-                        _prep_value(paper_id),
-                        _prep_value(category_id),
-                    )
-                })
-                ON CONFLICT DO NOTHING
-            """
-        )
-        conn.execute(insert_query)
-
-
-def _persist_paper_links(conn, paper_id, link_ids):
-    for link_id in link_ids:
-        insert_query = text(
-            f"""
-                INSERT INTO "Paper-Link Map" (paper_id, link_id)
-                VALUES ({
-                    _value_list(
-                        _prep_value(paper_id),
-                        _prep_value(link_id),
+                        _prep_value(value),
                     )
                 })
                 ON CONFLICT DO NOTHING
