@@ -71,7 +71,7 @@
     width: 100%;
     overflow: hidden;
     position: relative;
-    min-height: var(--cell-height);
+    min-height: var(--cell-height, var(--default-cell-height));
     display: flex;
     flex-direction: column;
 

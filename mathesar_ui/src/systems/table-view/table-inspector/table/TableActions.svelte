@@ -10,7 +10,11 @@
   import { iconDeleteMajor, iconExploration } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
+  import {
+    deleteTable,
+    refetchTablesForSchema,
+    tables,
+  } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDatabase } from '@mathesar/stores/databases';
@@ -41,7 +45,10 @@
       ? createDataExplorerUrlToExploreATable(
           $currentDatabase?.name,
           $currentSchemaId,
-          $tabularData.id,
+          {
+            id: $tabularData.id,
+            name: $tables.data.get($tabularData.id)?.name ?? '',
+          },
         )
       : '';
 </script>

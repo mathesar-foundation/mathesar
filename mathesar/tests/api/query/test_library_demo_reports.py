@@ -101,7 +101,8 @@ def create_overdue_books_query(library_ma_tables, get_uid, client):
 
 
 @pytest.fixture
-def check_overdue_books_columns(create_overdue_books_query, client):
+def check_overdue_books_columns(library_ma_tables, create_overdue_books_query, client):
+    patrons = library_ma_tables["Patrons"]
     query_id = create_overdue_books_query.json()['id']
     expect_response_data = [
         {
@@ -114,6 +115,7 @@ def check_overdue_books_columns(create_overdue_books_query, client):
             },
             'is_initial_column': False,
             'input_table_name': None,
+            'input_table_id': None,
             'input_column_name': None,
             'input_alias': 'Book Title',
         },
@@ -127,6 +129,7 @@ def check_overdue_books_columns(create_overdue_books_query, client):
             },
             'is_initial_column': True,
             'input_table_name': 'Patrons',
+            'input_table_id': patrons.id,
             'input_column_name': 'Email',
             'input_alias': None,
         },
@@ -241,6 +244,7 @@ def check_monthly_checkouts_columns(create_monthly_checkouts_query, client):
             },
             'is_initial_column': False,
             'input_table_name': None,
+            'input_table_id': None,
             'input_column_name': None,
             'input_alias': 'Checkout Time',
         }, {
@@ -253,6 +257,7 @@ def check_monthly_checkouts_columns(create_monthly_checkouts_query, client):
             },
             'is_initial_column': False,
             'input_table_name': None,
+            'input_table_id': None,
             'input_column_name': None,
             'input_alias': 'id',
         }

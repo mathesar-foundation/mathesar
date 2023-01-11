@@ -128,6 +128,7 @@ def test_partial_summarize_transform(
                 'input_alias': None,
                 'input_column_name': 'Center',
                 'input_table_name': 'patent_query_run_minimal_table',
+                'input_table_id': base_table.id,
                 'is_initial_column': True,
                 'type': 'text',
                 'type_options': None
@@ -139,6 +140,7 @@ def test_partial_summarize_transform(
                 'input_alias': 'col1',
                 'input_column_name': None,
                 'input_table_name': None,
+                'input_table_id': None,
                 'is_initial_column': False,
                 'type': 'text',
                 'type_options': None
@@ -150,6 +152,7 @@ def test_partial_summarize_transform(
                 'input_alias': None,
                 'input_column_name': 'Case Number',
                 'input_table_name': 'patent_query_run_minimal_table',
+                'input_table_id': base_table.id,
                 'is_initial_column': True,
                 'type': 'text',
                 'type_options': None
@@ -161,6 +164,7 @@ def test_partial_summarize_transform(
                 'input_alias': 'col2',
                 'input_column_name': None,
                 'input_table_name': None,
+                'input_table_id': None,
                 'is_initial_column': False,
                 'type': '_array',
                 'type_options': {'item_type': 'text'}
