@@ -1,3 +1,5 @@
+import { assertExhaustive } from './typeUtils';
+
 const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
 
 export function getArticleForWord(word: string): string {
@@ -94,10 +96,12 @@ const wordMap = {
 
 type Word = keyof typeof wordMap;
 
+type Casing = 'lower' | 'title' | 'sentence';
+
 export function pluralize(
   countable: Countable,
   word: Word,
-  casing: 'lower' | 'title' | 'sentence' = 'lower',
+  casing: Casing = 'lower',
 ): string {
   const result = wordMap[word][getCountablePluralRule(countable)];
   switch (casing) {
@@ -110,12 +114,53 @@ export function pluralize(
   }
 }
 
+type CountWhenZero = 'numeric' | { word: string };
+type CountWhenSingular = 'hidden' | 'numeric' | { word: string };
+
+function getCountText(
+  count: number,
+  countWhenZero: CountWhenZero,
+  countWhenSingular: CountWhenSingular,
+): string {
+  if (count === 0) {
+    if (countWhenZero === 'numeric') {
+      return String(count);
+    }
+    if ('word' in countWhenZero) {
+      return countWhenZero.word;
+    }
+    assertExhaustive(countWhenZero);
+  }
+  if (count === 1) {
+    if (countWhenSingular === 'numeric') {
+      return String(count);
+    }
+    if (countWhenSingular === 'hidden') {
+      return '';
+    }
+    if ('word' in countWhenSingular) {
+      return countWhenSingular.word;
+    }
+    assertExhaustive(countWhenSingular);
+  }
+  return String(count);
+}
+
 export function labeledCount(
   countable: Countable,
   word: Word,
-  casing?: 'lower' | 'title' | 'sentence',
+  {
+    casing,
+    countWhenZero = 'numeric',
+    countWhenSingular = 'numeric',
+  }: {
+    casing?: Casing;
+    countWhenZero?: CountWhenZero;
+    countWhenSingular?: CountWhenSingular;
+  } = {},
 ): string {
   const count = getCount(countable);
+  const countText = getCountText(count, countWhenZero, countWhenSingular);
   const label = pluralize(count, word, casing);
-  return `${count} ${label}`;
+  return [countText, label].filter(Boolean).join(' ');
 }
