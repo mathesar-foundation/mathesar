@@ -13,7 +13,7 @@ class GithubReleasesAPIException(MathesarAPIException):
         self,
         response
     ):
-        exception = Exception()
+        exception = None
         error_code = ErrorCodes.GithubReleasesAPIFailure.value
         field = None
         status_code = response.status_code
