@@ -125,7 +125,7 @@ def _persist_paper_authors(conn, paper_id, author_ids):
     for author_id in author_ids:
         insert_query = text(
             f"""
-                INSERT INTO "Paper-Author" (paper_id, author_id)
+                INSERT INTO "Paper-Author Map" (paper_id, author_id)
                 VALUES ({
                     _value_list(
                         _prep_value(paper_id),
@@ -142,7 +142,7 @@ def _persist_paper_categories(conn, paper_id, category_ids):
     for category_id in category_ids:
         insert_query = text(
             f"""
-                INSERT INTO "Paper-Category" (paper_id, category_id)
+                INSERT INTO "Paper-Category Map" (paper_id, category_id)
                 VALUES ({
                     _value_list(
                         _prep_value(paper_id),
@@ -159,7 +159,7 @@ def _persist_paper_links(conn, paper_id, link_ids):
     for link_id in link_ids:
         insert_query = text(
             f"""
-                INSERT INTO "Paper-Link" (paper_id, link_id)
+                INSERT INTO "Paper-Link Map" (paper_id, link_id)
                 VALUES ({
                     _value_list(
                         _prep_value(paper_id),
