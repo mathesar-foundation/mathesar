@@ -1,9 +1,10 @@
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from demo.install import load_datasets, customize_settings, check_datasets
+from demo.install import drop_all_stale_databases, load_datasets, customize_settings, check_datasets
 from mathesar.database.base import create_mathesar_engine
 from mathesar.state import reset_reflection
 from mathesar.views import SchemasView as RootSchemasView
@@ -29,6 +30,15 @@ def data_exists(request):
     engine = create_mathesar_engine(db_name)
     datasets_exist = check_datasets(engine)
     return Response({'datasets_exist': datasets_exist})
+
+
+@login_required
+@staff_member_required
+@api_view(['GET'])
+def remove_stale_db(request):
+    """Remove databases older than MAX_DAYS"""
+    drop_all_stale_databases()
+    return Response(status=status.HTTP_200_OK)
 
 
 class SchemasView(RootSchemasView):

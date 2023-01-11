@@ -1,18 +1,16 @@
 import bz2
 import os
-from datetime import timedelta
 
 from django.conf import settings
-from django.utils.timezone import now
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from db import engine
 from db.metadata import get_empty_metadata
-from mathesar.models.base import Database
-from mathesar.state.django import reflect_db_objects
 from db.schemas.operations.select import get_mathesar_schemas_with_oids
-from mathesar.models.base import Table, Schema, PreviewColumnSettings
+from mathesar.models.base import Database
+from mathesar.models.base import PreviewColumnSettings, Schema, Table
+from mathesar.state.django import reflect_db_objects
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
@@ -112,10 +110,17 @@ def _get_dj_column_by_name(table, name):
 
 
 def drop_all_stale_databases():
-    excluded_databases = ['mathesar', 'postgres', 'template0', 'template1']
-    databases = Database.objects.filter(created_at__gt=now() - timedelta(days=5))
+    excluded_databases = [
+        settings.DATABASES["default"]["NAME"],
+        # Exclude Postgres default databases
+        'postgres',
+        'template0',
+        'template1'
+    ]
+    databases = Database.objects.all()
     for database in databases:
         if database.name not in excluded_databases and database.deleted is False:
+            print(f"Dropping {database.name}")
             drop_mathesar_database(
                 database,
                 username=settings.DATABASES["default"]["USER"],
@@ -123,7 +128,6 @@ def drop_all_stale_databases():
                 hostname=settings.DATABASES["default"]["HOST"],
                 port=settings.DATABASES["default"]["PORT"]
             )
-            reflect_db_objects(get_empty_metadata())
     reflect_db_objects(get_empty_metadata())
 
 
@@ -135,13 +139,20 @@ def drop_mathesar_database(
     )
     try:
         user_db_engine.connect()
-        with user_db_engine.connect() as conn:
-            conn.execution_options(isolation_level="AUTOCOMMIT")
-            conn.execute(text(f"DROP DATABASE {user_database.name}"))
     except OperationalError:
         user_db_engine.dispose()
-    finally:
-        # This database is not created using a config file,
-        # so their objects can be safety delete
-        # as won't be created again during reflection or when running install script
         user_database.delete()
+    else:
+        try:
+            with user_db_engine.connect() as conn:
+                conn.execution_options(isolation_level="AUTOCOMMIT")
+                conn.execute(text(f"DROP DATABASE {user_database.name}"))
+                print("dropped")
+                # This database is not created using a config file,
+                # so their objects can be safety delete
+                # as won't be created again during reflection or when running install script
+                user_database.delete()
+                print("deleted")
+        except OperationalError:
+            user_db_engine.dispose()
+            print("in use")
