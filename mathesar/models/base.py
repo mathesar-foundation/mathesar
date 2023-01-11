@@ -257,6 +257,7 @@ class ColumnPrefetcher(Prefetcher):
                 engine=engine,
                 metadata=get_cached_metadata(),
             )
+
         return ColumnNamePrefetcher(
             filter=lambda column_attnums, columns: _get_column_names_from_tables(table_oids),
             mapper=lambda column: (column.attnum, column.table.oid)
@@ -308,7 +309,7 @@ class Table(DatabaseObject, Relation):
     def validate_unique(self, exclude=None):
         # Ensure oid is unique on db level
         if Table.current_objects.filter(
-            oid=self.oid, schema__database=self.schema.database
+                oid=self.oid, schema__database=self.schema.database
         ).exists():
             raise ValidationError("Table OID is not unique")
         super().validate_unique(exclude=exclude)
@@ -489,14 +490,14 @@ class Table(DatabaseObject, Relation):
 
     # TODO consider using **kwargs instead of forwarding params one-by-one
     def get_records(
-        self,
-        limit=None,
-        offset=None,
-        filter=None,
-        order_by=None,
-        group_by=None,
-        search=None,
-        duplicate_only=None,
+            self,
+            limit=None,
+            offset=None,
+            filter=None,
+            order_by=None,
+            group_by=None,
+            search=None,
+            duplicate_only=None,
     ):
         if order_by is None:
             order_by = []
@@ -717,6 +718,7 @@ class Column(ReflectionManagerMixin, BaseModel):
                 return getattr(self._sa_column, name)
             else:
                 raise e
+
     current_objects = models.Manager()
     objects = DatabaseObjectManager(
         name=ColumnNamePrefetcher
@@ -819,7 +821,8 @@ class Constraint(DatabaseObject):
         column_attnum_list = self._constraint_record['confkey']
         if column_attnum_list:
             foreign_relation_oid = self._constraint_record['confrelid']
-            columns = Column.objects.filter(table__oid=foreign_relation_oid, table__schema=self.table.schema, attnum__in=column_attnum_list).order_by("attnum")
+            columns = Column.objects.filter(table__oid=foreign_relation_oid, table__schema=self.table.schema,
+                                            attnum__in=column_attnum_list).order_by("attnum")
             return columns
 
     @property
@@ -910,5 +913,9 @@ def compute_default_preview_template(table):
             break
     if preview_column is None:
         preview_column = primary_key_column
-    preview_template = f"{{{preview_column.id}}}"
+
+    if preview_column:
+        preview_template = f"{{{preview_column.id}}}"
+    else:
+        preview_template = table.id
     return preview_template
