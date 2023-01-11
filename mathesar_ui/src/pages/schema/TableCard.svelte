@@ -1,13 +1,9 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
-  import {
-    getTablePageUrl,
-    getImportPreviewPageUrl,
-  } from '@mathesar/routes/urls';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { ButtonMenuItem, Truncate } from '@mathesar-component-library';
-  import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
+  import HyperlinkCard from '@mathesar/components/HyperlinkCard.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import {
     iconDeleteMajor,
@@ -15,13 +11,17 @@
     iconExploration,
     iconSelectRecord,
   } from '@mathesar/icons';
+  import {
+    getImportPreviewPageUrl,
+    getTablePageUrl,
+  } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
-  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
-  import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { modal } from '@mathesar/stores/modal';
+  import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
+  import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
+  import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
   import EditTable from './EditTable.svelte';
-  import HyperlinkCard from '@mathesar/components/HyperlinkCard.svelte';
 
   const recordSelector = getRecordSelectorFromContext();
   const editTableModalController = modal.spawnModalController();
