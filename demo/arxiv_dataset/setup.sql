@@ -23,15 +23,15 @@ CREATE TABLE "Links" (
 
 CREATE TABLE "Papers" (
     id SERIAL PRIMARY KEY,
-    "arXiv URL" mathesar_types.uri UNIQUE,
     "Title" text,
     "Summary" text,
     "Journal reference" text,
-    "Primary category" text references "Categories"("Name"),
+    "Primary category" int references "Categories"(id),
     "Updated" timestamp,
     "Published" timestamp,
     "Comment" text,
-    "DOI" text
+    "DOI" text,
+    "arXiv URL" mathesar_types.uri UNIQUE
 );
 
 -- Paper-Author map table

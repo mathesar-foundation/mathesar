@@ -80,6 +80,9 @@ def persist_paper(conn, paper):
 
 
 def _persist_paper(conn, paper):
+    """
+    See _persist_values_to_single_value_table docstring, for reason to use DO UPDATE below.
+    """
     arxiv_url = paper.entry_id
     updated = str(paper.updated)
     published = str(paper.published)
@@ -115,7 +118,8 @@ def _persist_paper(conn, paper):
                         _prep_value(primary_category_id),
                     )
                 })
-                ON CONFLICT DO NOTHING
+                ON CONFLICT ("arXiv URL")
+                DO UPDATE SET "DOI" = excluded."DOI"
                 RETURNING id
             """
     )
