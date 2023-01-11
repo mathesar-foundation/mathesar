@@ -50,6 +50,10 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     inputColumnInformationMap: new Map(),
   });
 
+  /**
+   * To be used later when we need to present the user with a checkbox
+   * to remember their choice
+   */
   confirmationNeededForMultipleResults: Writable<boolean> = writable(true);
 
   queryHasUnsavedChanges: Writable<boolean> = writable(false);
