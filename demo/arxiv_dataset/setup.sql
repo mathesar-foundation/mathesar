@@ -27,11 +27,11 @@ CREATE TABLE "Papers" (
     "Title" text,
     "Summary" text,
     "Journal reference" text,
-    "Primary category" text references "Categories"("Name")
+    "Primary category" text references "Categories"("Name"),
     "Updated" timestamp,
     "Published" timestamp,
     "Comment" text,
-    "DOI" text,
+    "DOI" text
 );
 
 -- Paper-Author map table
