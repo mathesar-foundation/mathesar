@@ -37,20 +37,20 @@
 </script>
 
 <div class="properties-container">
-  <Button appearance="plain" on:click={() => handleSort('asc')}>
+  <Button appearance="plain" on:click={() => handleSort('ASCENDING')}>
     <Icon class="opt" {...iconSortAscending} />
     <span>
-      {#if sortDirection === 'asc'}
+      {#if sortDirection === 'ASCENDING'}
         Remove asc sort
       {:else}
         Sort Ascending
       {/if}
     </span>
   </Button>
-  <Button appearance="plain" on:click={() => handleSort('desc')}>
+  <Button appearance="plain" on:click={() => handleSort('DESCENDING')}>
     <Icon class="opt" {...iconSortDescending} />
     <span>
-      {#if sortDirection === 'desc'}
+      {#if sortDirection === 'DESCENDING'}
         Remove desc sort
       {:else}
         Sort Descending

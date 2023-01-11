@@ -42,7 +42,7 @@
       <div class="indicator-icons">
         {#if sorter}
           <Icon
-            {...sorter === 'asc' ? iconSortAscending : iconSortDescending}
+            {...sorter === 'ASCENDING' ? iconSortAscending : iconSortDescending}
           />
         {/if}
         {#if hasFilter}

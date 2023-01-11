@@ -15,8 +15,8 @@ function sortDirectionIsValid(d: string): boolean {
 }
 
 const apiSortDirectionMap = new Map<SortDirection, ApiSortDirection>([
-  ['asc', 'asc'],
-  ['desc', 'desc'],
+  ['ASCENDING', 'asc'],
+  ['DESCENDING', 'desc'],
 ]);
 function getApiSortDirection(sortDirection: SortDirection): ApiSortDirection {
   const d = apiSortDirectionMap.get(sortDirection);
@@ -66,7 +66,7 @@ export class Sorting extends ImmutableMap<number, SortDirection> {
     grouping: Grouping,
   ): Pick<GetRequestParams, 'order_by'> {
     const sortingFromGrouping = new Sorting(
-      grouping.entries.map((g) => [g.columnId, 'asc']),
+      grouping.entries.map((g) => [g.columnId, 'ASCENDING']),
     );
     return sortingFromGrouping.withEntries(this).recordsRequestParams();
   }

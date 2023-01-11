@@ -21,7 +21,7 @@
 
   function addSortColumn() {
     const [newSortColumnId] = availableColumnIds;
-    sorting.update((s) => s.with(newSortColumnId, 'asc'));
+    sorting.update((s) => s.with(newSortColumnId, 'ASCENDING'));
   }
 
   function removeSortColumn(columnId: number) {

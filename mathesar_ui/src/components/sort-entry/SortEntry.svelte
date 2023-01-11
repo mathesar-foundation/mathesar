@@ -10,7 +10,7 @@
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
-  import type { SortDirection } from './utils';
+  import { type SortDirection, allowedSortDirections } from './utils';
 
   type T = $$Generic;
   type ColumnLikeType = Pick<CellColumnFabric, 'id' | 'column'> & T;
@@ -30,10 +30,10 @@
   export let getSortDirectionLabel: (
     sortDirection?: SortDirection,
   ) => string = (sortDirection?: SortDirection) =>
-    sortDirection === 'desc' ? 'Descending' : 'Ascending';
+    sortDirection === 'DESCENDING' ? 'Descending' : 'Ascending';
 
   export let columnIdentifier: ColumnLikeType['id'];
-  export let sortDirection: SortDirection = 'asc';
+  export let sortDirection: SortDirection = 'ASCENDING';
   export let disableColumnChange = false;
   export let allowDelete = true;
 
@@ -84,7 +84,7 @@
     />
   </Select>
   <Select
-    options={['asc', 'desc']}
+    options={allowedSortDirections}
     getLabel={getSortDirectionLabel}
     bind:value={sortDirection}
     on:change={update}

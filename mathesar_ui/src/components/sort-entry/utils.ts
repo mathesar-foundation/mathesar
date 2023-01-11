@@ -1,3 +1,6 @@
-export type SortDirection = 'asc' | 'desc';
+export type SortDirection = 'ASCENDING' | 'DESCENDING';
 
-export const allowedSortDirections: SortDirection[] = ['asc', 'desc'];
+export const allowedSortDirections: SortDirection[] = [
+  'ASCENDING',
+  'DESCENDING',
+];

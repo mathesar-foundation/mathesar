@@ -182,7 +182,7 @@ export class TabularData {
         const sortDirection = s.get(firstExtractedColumnWithSort);
         return s
           .without(extractedColumnIds)
-          .with(foreignKeyColumnId, sortDirection ?? 'asc');
+          .with(foreignKeyColumnId, sortDirection ?? 'ASCENDING');
       }
       return s.without(extractedColumnIds);
     });
