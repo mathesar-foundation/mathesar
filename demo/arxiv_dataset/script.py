@@ -20,12 +20,25 @@ def update_our_arxiv_dbs():
 
 
 def _download_arxiv_papers():
+    query_expression = _construct_arxiv_search_query_expression()
     arxiv_search = arxiv.Search(
-        query="cat:cs.DB",
+        query=query_expression,
         max_results=50,
         sort_by=arxiv.SortCriterion.LastUpdatedDate
     )
     return arxiv_search.results()
+
+
+def _construct_arxiv_search_query_expression():
+    """
+    Meant to return papers that have the Computer Science Database category in their category set,
+    and don't have non-computer-science categories in their category set. That's because we only
+    have human-friendly names and descriptions for Computer Science categories.
+    """
+    query = "cat:cs.DB"
+    for non_cs_arxiv_cat in _non_cs_arxiv_categories:
+        query += f' ANDNOT cat:{non_cs_arxiv_cat}'
+    return query
 
 
 def _set_search_path(conn, schema_name):
@@ -205,3 +218,122 @@ def _get_logged_db_schema_pairs():
 
 if __name__ == '__main__':
     update_our_arxiv_dbs()
+
+
+_non_cs_arxiv_categories = {
+    'econ.EM',
+    'econ.GN',
+    'econ.TH',
+    'eess.AS',
+    'eess.IV',
+    'eess.SP',
+    'eess.SY',
+    'math.AC',
+    'math.AG',
+    'math.AP',
+    'math.AT',
+    'math.CA',
+    'math.CO',
+    'math.CT',
+    'math.CV',
+    'math.DG',
+    'math.DS',
+    'math.FA',
+    'math.GM',
+    'math.GN',
+    'math.GR',
+    'math.GT',
+    'math.HO',
+    'math.IT',
+    'math.KT',
+    'math.LO',
+    'math.MG',
+    'math.MP',
+    'math.NA',
+    'math.NT',
+    'math.OA',
+    'math.OC',
+    'math.PR',
+    'math.QA',
+    'math.RA',
+    'math.RT',
+    'math.SG',
+    'math.SP',
+    'math.ST',
+    'astro-ph.CO',
+    'astro-ph.EP',
+    'astro-ph.GA',
+    'astro-ph.HE',
+    'astro-ph.IM',
+    'astro-ph.SR',
+    'cond-mat.dis-nn',
+    'cond-mat.mes-hall',
+    'cond-mat.mtrl-sci',
+    'cond-mat.other',
+    'cond-mat.quant-gas',
+    'cond-mat.soft',
+    'cond-mat.stat-mech',
+    'cond-mat.str-el',
+    'cond-mat.supr-con',
+    'gr-qc',
+    'hep-ex',
+    'hep-lat',
+    'hep-ph',
+    'hep-th',
+    'math-ph',
+    'nlin.AO',
+    'nlin.CD',
+    'nlin.CG',
+    'nlin.PS',
+    'nlin.SI',
+    'nucl-ex',
+    'nucl-th',
+    'physics.acc-ph',
+    'physics.ao-ph',
+    'physics.app-ph',
+    'physics.atm-clus',
+    'physics.atom-ph',
+    'physics.bio-ph',
+    'physics.chem-ph',
+    'physics.class-ph',
+    'physics.comp-ph',
+    'physics.data-an',
+    'physics.ed-ph',
+    'physics.flu-dyn',
+    'physics.gen-ph',
+    'physics.geo-ph',
+    'physics.hist-ph',
+    'physics.ins-det',
+    'physics.med-ph',
+    'physics.optics',
+    'physics.plasm-ph',
+    'physics.pop-ph',
+    'physics.soc-ph',
+    'physics.space-ph',
+    'quant-ph',
+    'q-bio.BM',
+    'q-bio.CB',
+    'q-bio.GN',
+    'q-bio.MN',
+    'q-bio.NC',
+    'q-bio.OT',
+    'q-bio.PE',
+    'q-bio.QM',
+    'q-bio.SC',
+    'q-bio.TO',
+    'q-fin.CP',
+    'q-fin.EC',
+    'q-fin.GN',
+    'q-fin.MF',
+    'q-fin.PM',
+    'q-fin.PR',
+    'q-fin.RM',
+    'q-fin.ST',
+    'q-fin.TR',
+    'stat.AP',
+    'stat.CO',
+    'stat.ME',
+    'stat.ML',
+    'stat.OT',
+    'stat.TH',
+}
