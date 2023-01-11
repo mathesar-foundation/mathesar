@@ -12,6 +12,7 @@
     ButtonMenuItem,
     MenuDivider,
     iconShowMore,
+    Truncate,
   } from '@mathesar-component-library';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableName from '@mathesar/components/TableName.svelte';
@@ -49,7 +50,7 @@
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
     database.name,
     schema.id,
-    table.id,
+    table,
   );
 </script>
 
@@ -57,13 +58,18 @@
   <div class="table-item-header">
     <div class="name-and-description">
       <div class="name"><TableName {table} /></div>
+      {#if table.description}
+        <Truncate lines={2}>{table.description}</Truncate>
+      {/if}
     </div>
     <DropdownMenu
       showArrow={false}
       triggerAppearance="plain"
       closeOnInnerClick={true}
+      trigger
       label=""
       icon={iconShowMore}
+      size="small"
     >
       {#if !isTableImportConfirmationNeeded}
         <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
@@ -125,9 +131,9 @@
 
   .table-item-header {
     display: flex;
-    align-items: center;
+    align-items: start;
     justify-content: space-between;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 0.5rem 0.75rem 1rem;
 
     > :global(* + *) {
       margin-left: 0.75rem;

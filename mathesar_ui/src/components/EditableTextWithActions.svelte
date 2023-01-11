@@ -7,6 +7,7 @@
   import {
     CancelOrProceedButtonPair,
     TextInput,
+    TextArea,
   } from '@mathesar-component-library';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
@@ -14,6 +15,7 @@
   export let initialValue = '';
   export let onSubmit: (value: string) => Promise<void>;
   export let getValidationErrors: (value: string) => string[] = () => [];
+  export let isLongText = false;
 
   let isEditable = false;
   let value = '';
@@ -22,6 +24,7 @@
   $: validationErrors =
     value === initialValue ? [] : getValidationErrors(value);
   $: canSave = validationErrors.length === 0 && value !== initialValue;
+  $: inputElement = isLongText ? TextArea : TextInput;
 
   function makeEditable() {
     value = initialValue;
@@ -49,10 +52,19 @@
 
 <div class="editable-text">
   {#if !isEditable}
-    <TextInput on:focus={makeEditable} value={initialValue} />
+    <svelte:component
+      this={inputElement}
+      on:focus={makeEditable}
+      value={initialValue}
+    />
   {:else}
     <div class="input-container">
-      <TextInput disabled={isSubmitting} autofocus bind:value />
+      <svelte:component
+        this={inputElement}
+        disabled={isSubmitting}
+        autofocus
+        bind:value
+      />
       {#if validationErrors.length}
         {#each validationErrors as error}
           <span class="error">{error}</span>
