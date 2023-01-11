@@ -21,8 +21,8 @@ from pathlib import Path
 from sqlalchemy import text
 
 SCHEMA_DESCRIPTION = (
-    "Regularly updated by a cronjob that queries the arXiv API for the 50 most recent papers,"
-    " normalizes the data, and inserts it into this schema."
+    "Regularly updated by a cronjob that queries the arXiv API for the 50 most recent Computer"
+    " Science papers, normalizes the data, and inserts it into this schema."
     " Data from previous cronjob runs is not removed."
 )
 
