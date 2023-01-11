@@ -82,7 +82,7 @@ def drop_mathesar_database(
                 delete_stmt = f"DROP DATABASE {user_database} {'WITH (FORCE)' if force else ''}"
                 conn.execute(text(delete_stmt))
                 # This database is not created using a config file,
-                # so their objects can be safety delete
+                # so their objects can be safety deleted
                 # as they won't be created again during reflection
                 return True
         except OperationalError:
