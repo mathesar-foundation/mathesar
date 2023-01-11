@@ -30,9 +30,9 @@ CREATE TABLE "Papers" (
     "Primary category" text references "Categories"("Name")
 );
 
--- Paper-Author bridge table
+-- Paper-Author map table
 
-CREATE TABLE "Paper-Author" (
+CREATE TABLE "Paper-Author Map" (
   paper_id text,
   author_id text,
   PRIMARY KEY (paper_id, author_id),
@@ -40,9 +40,9 @@ CREATE TABLE "Paper-Author" (
   CONSTRAINT fk_author FOREIGN KEY(author_id) REFERENCES "Authors"("Name")
 );
 
--- Paper-Category bridge table
+-- Paper-Category map table
 
-CREATE TABLE "Paper-Category" (
+CREATE TABLE "Paper-Category Map" (
   paper_id text,
   category_id text,
   PRIMARY KEY (paper_id, category_id),
@@ -50,9 +50,9 @@ CREATE TABLE "Paper-Category" (
   CONSTRAINT fk_category FOREIGN KEY(category_id) REFERENCES "Categories"("Name")
 );
 
--- Paper-Link bridge table
+-- Paper-Link map table
 
-CREATE TABLE "Paper-Link" (
+CREATE TABLE "Paper-Link Map" (
   paper_id text,
   link_id text,
   PRIMARY KEY (paper_id, link_id),

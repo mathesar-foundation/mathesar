@@ -22,7 +22,7 @@ from sqlalchemy import text
 
 
 def setup_and_register_schema_for_receiving_arxiv_data(
-    engine, schema_name='Arxiv'
+    engine, schema_name='Latest Papers from arXiv'
 ):
     db_name, schema_name = _setup_arxiv_schema(engine, schema_name)
     _make_sure_parent_directories_present(get_arxiv_db_and_schema_log_path())
