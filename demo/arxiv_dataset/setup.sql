@@ -20,7 +20,7 @@ CREATE TABLE "Links" (
     "URL" mathesar_types.uri UNIQUE
 );
 
-COMMENT ON TABLE "Links" IS 'Links associated with a given paper; each paper is expected to at least have a link to its PDF version.';
+COMMENT ON TABLE "Links" IS 'Links (URLs) associated with a given paper; each paper is expected to at least have a link to its PDF version.';
 
 -- Papers
 
