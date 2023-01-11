@@ -1,4 +1,4 @@
-from django.urls import include, path, re_path
+from django.urls import include, path
 from rest_framework_nested import routers
 
 from mathesar import views
@@ -34,10 +34,4 @@ urlpatterns = [
     path('auth/password_reset_confirm', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('auth/', include('django.contrib.auth.urls')),
     path('', views.home, name='home'),
-    path('<db_name>/', views.SchemasView.as_view(), name='schemas'),
-    re_path(
-        r'^(?P<db_name>\w+)/(?P<schema_id>\w+)/',
-        views.SchemasView.as_view(),
-        name='schema_home'
-    ),
 ]
