@@ -7,7 +7,6 @@
   import { Button, Icon } from '@mathesar-component-library';
   import {
     getTabularDataStoreFromContext,
-    SortDirection,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
@@ -43,9 +42,7 @@
       <div class="indicator-icons">
         {#if sorter}
           <Icon
-            {...sorter === SortDirection.A
-              ? iconSortAscending
-              : iconSortDescending}
+            {...sorter === 'asc' ? iconSortAscending : iconSortDescending}
           />
         {/if}
         {#if hasFilter}

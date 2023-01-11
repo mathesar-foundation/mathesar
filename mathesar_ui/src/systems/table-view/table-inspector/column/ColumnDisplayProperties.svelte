@@ -5,11 +5,8 @@
     iconSortAscending,
     iconGrouping,
   } from '@mathesar/icons';
-  import {
-    Meta,
-    SortDirection,
-    type ProcessedColumn,
-  } from '@mathesar/stores/table-data';
+  import type { Meta, ProcessedColumn } from '@mathesar/stores/table-data';
+  import type { SortDirection } from '@mathesar/components/sort-entry/utils';
 
   export let column: ProcessedColumn;
   export let meta: Meta;
@@ -40,20 +37,20 @@
 </script>
 
 <div class="properties-container">
-  <Button appearance="plain" on:click={() => handleSort(SortDirection.A)}>
+  <Button appearance="plain" on:click={() => handleSort('asc')}>
     <Icon class="opt" {...iconSortAscending} />
     <span>
-      {#if sortDirection === SortDirection.A}
+      {#if sortDirection === 'asc'}
         Remove asc sort
       {:else}
         Sort Ascending
       {/if}
     </span>
   </Button>
-  <Button appearance="plain" on:click={() => handleSort(SortDirection.D)}>
+  <Button appearance="plain" on:click={() => handleSort('desc')}>
     <Icon class="opt" {...iconSortDescending} />
     <span>
-      {#if sortDirection === SortDirection.D}
+      {#if sortDirection === 'desc'}
         Remove desc sort
       {:else}
         Sort Descending
