@@ -3,7 +3,7 @@ import logging
 
 from django.conf import settings
 
-from demo.install import load_datasets, customize_settings, create_demo_database
+from demo.install import customize_settings, create_demo_database
 from demo.db_namer import get_name
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Database
