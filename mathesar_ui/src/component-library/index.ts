@@ -58,6 +58,9 @@ export { default as SelectionList } from './selection-list/SelectionList.svelte'
 export { default as TabContainer } from './tabs/TabContainer.svelte';
 export { default as Tree } from './tree/Tree.svelte';
 
+// Higher order actions
+export { default as tooltip } from './tooltip/TooltipAction';
+
 // Systems
 export * from './label';
 export * from './confirmation';
