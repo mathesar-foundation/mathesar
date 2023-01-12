@@ -1,3 +1,4 @@
+import re
 import arxiv
 import json
 from sqlalchemy import text
@@ -47,9 +48,22 @@ def _set_search_path(conn, schema_name):
 
 
 def persist_paper(conn, paper):
-    authors = [author.name for author in paper.authors]
-    categories = paper.categories
-    links = [link.href for link in paper.links]
+    authors = [
+        author.name
+        for author
+        in paper.authors
+    ]
+    categories = [
+        category
+        for category
+        in paper.categories
+        if _is_category_in_arxiv_taxonomy(category)
+    ]
+    links = [
+        link.href
+        for link
+        in paper.links
+    ]
     author_ids = _persist_values_to_single_value_table(
         conn,
         table_name="Authors",
@@ -142,14 +156,15 @@ def _persist_paper(conn, paper):
 
 def _persist_primary_category(conn, paper):
     primary_category = paper.primary_category
-    resulting_ids = _persist_values_to_single_value_table(
-        conn,
-        table_name="Categories",
-        column_name="id",
-        values=[primary_category],
-    )
-    primary_category_id = resulting_ids.pop()
-    return primary_category_id
+    if _is_category_in_arxiv_taxonomy(primary_category):
+        resulting_ids = _persist_values_to_single_value_table(
+            conn,
+            table_name="Categories",
+            column_name="id",
+            values=[primary_category],
+        )
+        primary_category_id = resulting_ids.pop()
+        return primary_category_id
 
 
 def _value_list(*strs):
@@ -178,6 +193,25 @@ def _persist_values_to_single_value_table(
         [row_id], = conn.execute(insert_query)
         ids.add(row_id)
     return ids
+
+
+def _is_category_in_arxiv_taxonomy(category_name):
+    """
+    Helps exclude categories not in arXiv category taxonomy [0].
+
+    Currently, we only have human-readable names and descriptions for CS categories, and we want
+    all categories we record to have those. Normally, excluding papers that have non-CS categories
+    would be enough (which we're doing by manipulating the arXiv API query string, but a paper
+    might also have categories that aren't in the arXiv taxonomy. This predicate is meant to detect
+    those non-arXiv categories.
+
+    [0] https://arxiv.org/category_taxonomy
+    """
+    is_cs_category = bool(
+        re.fullmatch(r"cs\.\w\w", category_name, flags=re.IGNORECASE)
+    )
+    is_non_cs_category = (category_name in _non_cs_arxiv_categories)
+    return is_cs_category or is_non_cs_category
 
 
 def _persist_paper_mappings(conn, table_name, paper_id, column_name, values):
