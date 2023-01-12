@@ -151,14 +151,16 @@ def _create_reflected_columns(attnum_tuples, tables):
 
 def _delete_stale_columns(attnum_tuples, tables):
     attnums_mapped_by_table_oid = defaultdict(list)
+    for table in tables:
+        # Incase a table does not contain any column, it won't show up in the `attnum_tuples`
+        # In such cases we should delete all the column on Django
+        attnums_mapped_by_table_oid[table.oid] = []
     for attnum, table_oid in attnum_tuples:
         attnums_mapped_by_table_oid[table_oid].append(attnum)
     stale_columns_conditions = []
     for table_oid, attnums in attnums_mapped_by_table_oid.items():
         table = next(table for table in tables if table.oid == table_oid)
         stale_columns_conditions.append(Q(table=table) & ~Q(attnum__in=attnums))
-
-    if len(stale_columns_conditions) > 0:
         stale_columns_query = reduce(
             operator.or_,
             stale_columns_conditions
