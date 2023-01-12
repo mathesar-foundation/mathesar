@@ -59,11 +59,6 @@ def persist_paper(conn, paper):
         in paper.categories
         if _is_category_in_arxiv_taxonomy(category)
     ]
-    links = [
-        link.href
-        for link
-        in paper.links
-    ]
     author_ids = _persist_values_to_single_value_table(
         conn,
         table_name="Authors",
@@ -76,12 +71,8 @@ def persist_paper(conn, paper):
         column_name="id",
         values=categories
     )
-    link_ids = _persist_values_to_single_value_table(
-        conn,
-        table_name="Links",
-        column_name="URL",
-        values=links
-    )
+    links = paper.links
+    link_ids = _persist_links(conn, links)
     paper_id = _persist_paper(conn, paper)
     _persist_paper_mappings(
         conn,
@@ -169,6 +160,42 @@ def _persist_primary_category(conn, paper):
 
 def _value_list(*strs):
     return ', '.join(strs)
+
+
+def _persist_links(
+    conn, links
+):
+    """
+    Derives the link's purpose (see _get_link_purpose), and adds that to the table as well.
+    """
+    table_name = "Links"
+    href_column_name = "URL"
+    purpose_column_name = "Purpose"
+    ids = set()
+    for link in links:
+        purpose = _get_link_purpose(link)
+        insert_query = text(
+            f"""
+                INSERT INTO "{table_name}" ("{href_column_name}", "{purpose_column_name}")
+                VALUES ({_prep_value(link.href)}, {_prep_value(purpose)})
+                ON CONFLICT ("{href_column_name}")
+                DO UPDATE SET "{href_column_name}" = excluded."{href_column_name}"
+                RETURNING id
+            """
+        )
+        [row_id], = conn.execute(insert_query)
+        ids.add(row_id)
+    return ids
+
+
+def _get_link_purpose(link):
+    purpose = "Other"
+    href = link.href
+    if href.startswith('http://arxiv.org/abs/'):
+        purpose = "Abstract"
+    elif href.startswith('http://arxiv.org/pdf/'):
+        purpose = "PDF version"
+    return purpose
 
 
 def _persist_values_to_single_value_table(

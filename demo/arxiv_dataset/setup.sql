@@ -17,6 +17,7 @@ CREATE TABLE "Categories" (
 
 CREATE TABLE "Links" (
     id SERIAL PRIMARY KEY,
+    "Purpose" text,
     "URL" mathesar_types.uri UNIQUE
 );
 
