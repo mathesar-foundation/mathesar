@@ -29,7 +29,7 @@
   >
     <DropdownMenu
       showArrow={false}
-      triggerAppearance="plain"
+      triggerAppearance="ghost"
       triggerClass="dropdown-menu-button"
       closeOnInnerClick={true}
       trigger
@@ -101,6 +101,5 @@
   }
   .menu-container :global(.dropdown-menu-button:hover) {
     color: var(--slate-800);
-    background: none;
   }
 </style>
