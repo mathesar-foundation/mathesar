@@ -8,6 +8,7 @@
     DropdownMenu,
     ButtonMenuItem,
     iconExpandDown,
+    Help,
   } from '@mathesar-component-library';
   import {
     iconRedo,
@@ -120,12 +121,20 @@
       <div class="base-table-holder" class:table-selected={currentTable}>
         {#if currentTable}
           <TableName table={currentTable} />
+          <Help>
+            The base table is the table that is being explored and determines
+            the columns that are available for exploration.
+          </Help>
         {:else}
           <SelectTableWithinCurrentSchema
             autoSelect="none"
             value={currentTable}
             on:change={(e) => updateBaseTable(e.detail)}
           />
+          <Help>
+            The base table determines the columns that are available for
+            exploration.
+          </Help>
         {/if}
       </div>
 
@@ -233,9 +242,15 @@
     }
 
     .base-table-holder {
+      display: flex;
+      align-items: center;
       flex-grow: 0;
       flex-shrink: 0;
       margin: 0 var(--size-small);
+
+      > :global(* + *) {
+        margin-left: 0.4rem;
+      }
 
       &.table-selected {
         font-weight: 500;
