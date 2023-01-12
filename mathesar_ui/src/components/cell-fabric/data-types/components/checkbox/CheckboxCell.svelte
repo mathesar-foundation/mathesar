@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Checkbox } from '@mathesar-component-library';
+  import { Checkbox, compareWholeValues } from '@mathesar-component-library';
   import Default from '@mathesar/components/Default.svelte';
   import CellWrapper from '../CellWrapper.svelte';
   import type { CheckBoxCellProps } from '../typeDefinitions';
@@ -13,11 +13,14 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
+  export let searchValue: $$Props['searchValue'] = undefined;
   export let isProcessing: $$Props['isProcessing'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   let cellRef: HTMLElement;
   let isFirstActivated = false;
+
+  $: valueComparisonOutcome = compareWholeValues(searchValue, value);
 
   function dispatchUpdate() {
     dispatch('update', { value });
@@ -69,6 +72,7 @@
   {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
+  {valueComparisonOutcome}
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
   on:click={checkAndToggle}
