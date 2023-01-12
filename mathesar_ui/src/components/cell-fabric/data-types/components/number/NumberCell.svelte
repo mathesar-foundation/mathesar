@@ -12,6 +12,7 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
+  export let searchValue: $$Props['searchValue'] = undefined;
   export let formatterOptions: $$Props['formatterOptions'];
   export let horizontalAlignment: HorizontalAlignment = 'right';
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
@@ -24,6 +25,7 @@
   {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
+  {searchValue}
   formatValue={formatForDisplay}
   {horizontalAlignment}
   let:handleInputBlur
