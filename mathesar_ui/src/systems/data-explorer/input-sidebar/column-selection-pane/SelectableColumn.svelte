@@ -1,12 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Button } from '@mathesar-component-library';
+  import { Button, BadgeCount } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type { ColumnWithLink } from '../../utils';
 
   const dispatch = createEventDispatcher();
 
   export let column: ColumnWithLink;
+  export let usageCount = 0;
 </script>
 
 <div class="selectable-column">
@@ -25,6 +26,7 @@
     </div>
     <span class="add">
       <span class="text">Add</span>
+      <BadgeCount value={usageCount} />
       <span>+</span>
     </span>
   </Button>
@@ -46,6 +48,11 @@
       overflow: hidden;
     }
     .add {
+      --badge-background-color: var(--slate-200);
+      --badge-text-color: var(--slate-800);
+      --badge-padding: 0 0.45rem;
+      --badge-border-radius: var(--border-radius-l);
+      --badge-font-size: var(--text-size-small);
       flex-shrink: 0;
     }
 
