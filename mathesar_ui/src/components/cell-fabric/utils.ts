@@ -65,3 +65,15 @@ export function getDbTypeBasedInputCap(
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
+
+export function getInitialInputValue(
+  column: CellColumnLike,
+  fkTargetTableId?: TableEntry['id'],
+  optionalCellInfo?: CellInfo,
+): unknown {
+  if (fkTargetTableId) {
+    return undefined;
+  }
+  const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
+  return DataTypes[cellInfo?.type ?? 'string'].initialInputValue;
+}

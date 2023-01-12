@@ -23,7 +23,6 @@ import type {
   ProcessedColumnsStore,
 } from './processedColumns';
 import { processColumn } from './processedColumns';
-import { SortDirection } from './sorting';
 
 export interface TabularDataProps {
   id: DBObjectEntry['id'];
@@ -183,7 +182,7 @@ export class TabularData {
         const sortDirection = s.get(firstExtractedColumnWithSort);
         return s
           .without(extractedColumnIds)
-          .with(foreignKeyColumnId, sortDirection ?? SortDirection.A);
+          .with(foreignKeyColumnId, sortDirection ?? 'ASCENDING');
       }
       return s.without(extractedColumnIds);
     });

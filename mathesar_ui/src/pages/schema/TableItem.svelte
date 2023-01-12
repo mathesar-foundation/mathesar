@@ -50,7 +50,7 @@
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
     database.name,
     schema.id,
-    table.id,
+    table,
   );
 </script>
 
