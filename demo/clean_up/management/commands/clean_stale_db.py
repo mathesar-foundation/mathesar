@@ -25,6 +25,7 @@ class Command(BaseCommand):
             '--max-days',
             action='store',
             type=int,
+            default=3,
             help='A database is considered for deletion if it has existed for more than --max-days',
         )
 
@@ -35,6 +36,7 @@ class Command(BaseCommand):
 def drop_all_stale_databases(force=False, max_days=3, *args, **kwargs):
     excluded_databases = [
         settings.DATABASES["default"]["NAME"],
+        'mathesar',
         # Exclude Postgres default databases
         'postgres',
         'template0',
