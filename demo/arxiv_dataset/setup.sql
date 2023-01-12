@@ -42,9 +42,10 @@ COMMENT ON TABLE "Papers" IS 'Academic papers sourced from the arXiv API.';
 -- Paper-Author map table
 
 CREATE TABLE "Paper-Author Map" (
+  id SERIAL PRIMARY KEY,
   paper_id int,
   author_id int,
-  PRIMARY KEY (paper_id, author_id),
+  UNIQUE (paper_id, author_id),
   CONSTRAINT fk_paper FOREIGN KEY(paper_id) REFERENCES "Papers"(id),
   CONSTRAINT fk_author FOREIGN KEY(author_id) REFERENCES "Authors"(id)
 );
@@ -54,9 +55,10 @@ COMMENT ON TABLE "Paper-Author Map" IS 'Maps papers to authors.';
 -- Paper-Category map table
 
 CREATE TABLE "Paper-Category Map" (
+  id SERIAL PRIMARY KEY,
   paper_id int,
   category_id text,
-  PRIMARY KEY (paper_id, category_id),
+  UNIQUE (paper_id, category_id),
   CONSTRAINT fk_paper FOREIGN KEY(paper_id) REFERENCES "Papers"(id),
   CONSTRAINT fk_category FOREIGN KEY(category_id) REFERENCES "Categories"(id)
 );
@@ -66,9 +68,10 @@ COMMENT ON TABLE "Paper-Category Map" IS 'Maps papers to categories.';
 -- Paper-Link map table
 
 CREATE TABLE "Paper-Link Map" (
+  id SERIAL PRIMARY KEY,
   paper_id int,
   link_id int,
-  PRIMARY KEY (paper_id, link_id),
+  UNIQUE (paper_id, link_id),
   CONSTRAINT fk_paper FOREIGN KEY(paper_id) REFERENCES "Papers"(id),
   CONSTRAINT fk_link FOREIGN KEY(link_id) REFERENCES "Links"(id)
 );
