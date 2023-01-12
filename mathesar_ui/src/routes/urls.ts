@@ -9,6 +9,20 @@ export function getSchemaPageUrl(
   return `/${databaseName}/${schemaId}/`;
 }
 
+export function getSchemaPageTablesSectionUrl(
+  databaseName: string,
+  schemaId: number,
+): string {
+  return `/${databaseName}/${schemaId}/tables/`;
+}
+
+export function getSchemaPageExplorationsSectionUrl(
+  databaseName: string,
+  schemaId: number,
+): string {
+  return `/${databaseName}/${schemaId}/explorations/`;
+}
+
 export function getImportPageUrl(
   databaseName: string,
   schemaId: number,
@@ -63,3 +77,5 @@ export function getRecordPageUrl(
 ): string {
   return `/${databaseName}/${schemaId}/tables/${tableId}/${String(recordId)}`;
 }
+
+export const LOGOUT_URL = '/auth/logout/';

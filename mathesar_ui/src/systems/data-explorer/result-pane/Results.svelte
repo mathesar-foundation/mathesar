@@ -10,7 +10,7 @@
   } from '@mathesar/components/sheet';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
-  import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
@@ -46,17 +46,6 @@
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
-  $: refreshButtonState = (() => {
-    let buttonState: 'loading' | 'error' | undefined = undefined;
-    const queryRunState = $runState?.state;
-    if (queryRunState === 'processing') {
-      buttonState = 'loading';
-    }
-    if (queryRunState === 'failure') {
-      buttonState = 'error';
-    }
-    return buttonState;
-  })();
 
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
@@ -109,13 +98,16 @@
       <SheetVirtualRows
         itemCount={sheetItemCount}
         paddingBottom={30}
-        itemSize={() => 30}
+        itemSize={() => rowHeightPx}
         let:items
       >
         {#each items as item (item.key)}
           {#if rows[item.index] || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
-              <div {...htmlAttributes} style={styleString}>
+              <div
+                {...htmlAttributes}
+                style="--cell-height:{rowHeightPx - 1}px;{styleString}"
+              >
                 <SheetCell
                   columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
                   isStatic

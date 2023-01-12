@@ -2,9 +2,10 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     refetchTablesForSchema,
-    renameTable,
+    updateTableMetaData,
     tables,
   } from '@mathesar/stores/tables';
+  import type { AtLeastOne } from '@mathesar/typeUtils';
 
   export let tableId: number;
 
@@ -27,12 +28,14 @@
     return [];
   }
 
-  async function handleTableNameChange(name: string): Promise<void> {
-    await renameTable(tableId, name);
+  async function handleTableMetaUpdate(
+    data: AtLeastOne<{ name: string; description: string }>,
+  ): Promise<void> {
+    await updateTableMetaData(tableId, data);
     if ($currentSchemaId) {
       await refetchTablesForSchema($currentSchemaId);
     }
   }
 </script>
 
-<slot {getNameValidationErrors} onUpdate={handleTableNameChange} />
+<slot {getNameValidationErrors} onUpdate={handleTableMetaUpdate} />

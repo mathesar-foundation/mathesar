@@ -42,6 +42,7 @@ function getFormatterOptions(
     locale: (format && localeMap.get(format)) ?? undefined,
     useGrouping: getUseGrouping(displayOptions?.use_grouping ?? 'true'),
     allowFloat: !moneyColumnIsInteger(column),
+    allowNegative: true,
     minimumFractionDigits: displayOptions?.minimum_fraction_digits ?? undefined,
     maximumFractionDigits: displayOptions?.maximum_fraction_digits ?? undefined,
     currencySymbol: displayOptions?.currency_symbol ?? FALLBACK_CURRENCY_SYMBOL,
