@@ -1,31 +1,10 @@
 <script lang="ts">
-  import AttachableDropdown from '@mathesar-component-library-dir/dropdown/AttachableDropdown.svelte';
+  import Tooltip from '@mathesar-component-library-dir/tooltip/Tooltip.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { iconHelp } from '@mathesar-component-library-dir/common/icons';
-
-  let trigger: HTMLElement | undefined;
-  let isContentShown = false;
 </script>
 
-<span
-  bind:this={trigger}
-  aria-label="Help"
-  class="help-trigger"
-  on:mouseenter={() => {
-    isContentShown = true;
-  }}
-  on:mouseleave={() => {
-    isContentShown = false;
-  }}
->
-  <Icon {...iconHelp} />
-</span>
-
-<AttachableDropdown
-  {trigger}
-  isOpen={isContentShown}
-  placement="top"
-  class="help-content tooltip"
->
-  <slot />
-</AttachableDropdown>
+<Tooltip aria-label="Help" class="help-trigger">
+  <Icon slot="trigger" {...iconHelp} />
+  <slot slot="content" />
+</Tooltip>
