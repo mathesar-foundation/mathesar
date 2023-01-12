@@ -13,9 +13,12 @@
 
   export let table: Pick<TableEntry, 'name' | 'description'>;
 
+  let width = 0;
+
   $: ({ meta, isLoading, display } = $tabularData);
   $: ({ filtering, sorting, grouping, sheetState } = meta);
   $: ({ isTableInspectorVisible } = display);
+  $: buttonsShowLabels = width > 600;
 
   function toggleTableInspector() {
     isTableInspectorVisible.set(!$isTableInspectorVisible);
@@ -28,11 +31,12 @@
     description: table.description ?? undefined,
     icon: iconTable,
   }}
+  bind:width
 >
   <div class="quick-access">
-    <FilterDropdown {filtering} />
-    <SortDropdown {sorting} />
-    <GroupDropdown {grouping} />
+    <FilterDropdown {filtering} showsLabel={buttonsShowLabels} />
+    <SortDropdown {sorting} showsLabel={buttonsShowLabels} />
+    <GroupDropdown {grouping} showsLabel={buttonsShowLabels} />
   </div>
 
   <ModificationStatus requestState={$sheetState} />
@@ -44,9 +48,12 @@
       disabled={$isLoading}
       on:click={toggleTableInspector}
       active={$isTableInspectorVisible}
+      aria-label={buttonsShowLabels ? 'Inspector' : undefined}
     >
       <Icon {...iconInspector} />
-      <span>Inspector</span>
+      {#if buttonsShowLabels}
+        <span>Inspector</span>
+      {/if}
     </Button>
   </div>
 </EntityPageHeader>

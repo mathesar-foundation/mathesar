@@ -10,15 +10,24 @@
 
   interface $$Props extends ComponentProps<Dropdown> {
     grouping: Writable<Grouping>;
+    showsLabel?: boolean;
   }
 
   export let grouping: Writable<Grouping>;
+  export let showsLabel = true;
 </script>
 
-<Dropdown showArrow={false} triggerAppearance="secondary" {...$$restProps}>
+<Dropdown
+  showArrow={false}
+  triggerAppearance="secondary"
+  {...$$restProps}
+  ariaLabel="Group"
+>
   <svelte:fragment slot="trigger">
     <Icon {...iconGrouping} />
-    <span>Group <BadgeCount value={$grouping.entries.length} /></span>
+    {#if showsLabel}
+      <span>Group <BadgeCount value={$grouping.entries.length} /></span>
+    {/if}
   </svelte:fragment>
   <Group slot="content" {grouping} />
 </Dropdown>

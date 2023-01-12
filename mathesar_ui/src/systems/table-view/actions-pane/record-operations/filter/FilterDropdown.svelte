@@ -10,15 +10,24 @@
 
   interface $$Props extends ComponentProps<Dropdown> {
     filtering: Writable<Filtering>;
+    showsLabel?: boolean;
   }
 
   export let filtering: Writable<Filtering>;
+  export let showsLabel = true;
 </script>
 
-<Dropdown showArrow={false} triggerAppearance="secondary" {...$$restProps}>
+<Dropdown
+  showArrow={false}
+  triggerAppearance="secondary"
+  {...$$restProps}
+  ariaLabel="Filter"
+>
   <svelte:fragment slot="trigger">
     <Icon {...iconFiltering} size="0.8em" />
-    <span>Filter <BadgeCount value={$filtering.entries.length} /></span>
+    {#if showsLabel}
+      <span>Filter <BadgeCount value={$filtering.entries.length} /></span>
+    {/if}
   </svelte:fragment>
   <Filter slot="content" {filtering} />
 </Dropdown>

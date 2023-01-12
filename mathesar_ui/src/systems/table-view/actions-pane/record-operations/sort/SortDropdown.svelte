@@ -9,15 +9,24 @@
 
   interface $$Props extends ComponentProps<Dropdown> {
     sorting: Writable<Sorting>;
+    showsLabel?: boolean;
   }
 
   export let sorting: Writable<Sorting>;
+  export let showsLabel = true;
 </script>
 
-<Dropdown showArrow={false} triggerAppearance="secondary" {...$$restProps}>
+<Dropdown
+  showArrow={false}
+  triggerAppearance="secondary"
+  {...$$restProps}
+  ariaLabel="Sort"
+>
   <svelte:fragment slot="trigger">
     <Icon {...iconSorting} />
-    <span>Sort <BadgeCount value={$sorting.size} /></span>
+    {#if showsLabel}
+      <span>Sort <BadgeCount value={$sorting.size} /></span>
+    {/if}
   </svelte:fragment>
   <Sort slot="content" {sorting} />
 </Dropdown>
