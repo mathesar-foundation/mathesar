@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
 
   import {
+    compareWholeValues,
     getValueComparisonOutcome,
     splitMatchParts,
   } from '@mathesar-component-library';
@@ -27,12 +28,18 @@
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
   export let searchValue: unknown | undefined = undefined;
   export let isIndependentOfSheet = false;
+  export let highlightSubstringMatches = true;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
 
+  $: formattedValue = formatValue?.(value) ?? value;
   $: matchParts = (() => {
-    if (typeof value !== 'string' || typeof searchValue !== 'string') {
+    if (
+      !highlightSubstringMatches ||
+      typeof value !== 'string' ||
+      typeof searchValue !== 'string'
+    ) {
       return undefined;
     }
     return splitMatchParts(value, searchValue);
@@ -41,12 +48,9 @@
     if (matchParts) {
       return getValueComparisonOutcome(matchParts);
     }
-    const hasSearchValue =
-      searchValue !== null && searchValue !== undefined && searchValue !== '';
-    if (hasSearchValue) {
-      return searchValue === value ? 'exactMatch' : 'noMatch';
-    }
-    return undefined;
+    const formatter = (v: Value | null | undefined) =>
+      v === undefined || v === null ? '' : formatValue?.(v) ?? '';
+    return compareWholeValues(searchValue, value, formatter);
   })();
 
   function setModeToEdit() {
@@ -152,7 +156,7 @@
       class:truncate={isActive && multiLineTruncate && !isIndependentOfSheet}
     >
       <slot name="content" {value} {formatValue} {matchParts}>
-        <CellValue {value} {formatValue} {matchParts} />
+        <CellValue value={formattedValue} {matchParts} />
       </slot>
     </div>
   {/if}
