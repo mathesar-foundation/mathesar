@@ -161,11 +161,11 @@ def _delete_stale_columns(attnum_tuples, tables):
     for table_oid, attnums in attnums_mapped_by_table_oid.items():
         table = next(table for table in tables if table.oid == table_oid)
         stale_columns_conditions.append(Q(table=table) & ~Q(attnum__in=attnums))
-        stale_columns_query = reduce(
-            operator.or_,
-            stale_columns_conditions
-        )
-        models.Column.objects.filter(stale_columns_query).delete()
+    stale_columns_query = reduce(
+        operator.or_,
+        stale_columns_conditions
+    )
+    models.Column.objects.filter(stale_columns_query).delete()
 
 
 # TODO pass in a cached engine instead of creating a new one
