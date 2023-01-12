@@ -21,6 +21,7 @@ export interface StringLikeColumn extends CellColumnLike {
 }
 
 const stringType: CellComponentFactory = {
+  initialInputValue: '',
   get: (
     column: StringLikeColumn,
     config?: { multiLine?: boolean },

@@ -23,6 +23,10 @@ export default class QueryHideTransformationModel
     }
   }
 
+  isValid(): boolean {
+    return this.columnAliases.length > 0;
+  }
+
   toJson(): QueryInstanceHideTransformation {
     return {
       type: this.type,
