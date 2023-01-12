@@ -4,7 +4,7 @@
   using table inspector
  -->
 <script lang="ts">
-  import { Button, Icon } from '@mathesar-component-library';
+  import { Button, ContextMenu, Icon } from '@mathesar-component-library';
   import {
     getTabularDataStoreFromContext,
     SortDirection,
@@ -18,6 +18,7 @@
     iconSortAscending,
     iconSortDescending,
   } from '@mathesar/icons';
+  import ColumnHeaderContextMenu from './ColumnHeaderContextMenu.svelte';
 
   export let processedColumn: ProcessedColumn;
   export let isSelected = false;
@@ -57,6 +58,9 @@
       </div>
     {/if}
   </Button>
+  <ContextMenu>
+    <ColumnHeaderContextMenu {processedColumn} />
+  </ContextMenu>
 </div>
 
 <style lang="scss">
