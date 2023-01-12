@@ -10,12 +10,12 @@ export function calcAllowedColumnsPerTransformation(
   transformationModels: QueryTransformationModel[],
   columnsMetaData: ProcessedQueryResultColumnMap,
 ): ProcessedQueryResultColumnMap[] {
-  const allowedTransformations: ProcessedQueryResultColumnMap[] = [];
+  const allowedColumnsPerTransform: ProcessedQueryResultColumnMap[] = [];
   let latestColumnList = getProcessedOutputColumns(
     initialColumns.map((column) => column.alias),
     columnsMetaData,
   );
-  allowedTransformations.push(latestColumnList);
+  allowedColumnsPerTransform.push(latestColumnList);
   for (let index = 1; index < transformationModels.length; index += 1) {
     const transformation = transformationModels[index - 1];
     if (transformation.type === 'summarize') {
@@ -24,7 +24,7 @@ export function calcAllowedColumnsPerTransformation(
         columnsMetaData,
       );
     }
-    allowedTransformations.push(latestColumnList);
+    allowedColumnsPerTransform.push(latestColumnList);
   }
-  return allowedTransformations;
+  return allowedColumnsPerTransform;
 }

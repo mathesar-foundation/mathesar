@@ -1,4 +1,5 @@
 import type { FkConstraint } from '@mathesar/api/types/tables/constraints';
+import { isDefinedNonNullable } from '@mathesar-component-library';
 import {
   getEqualityFiltersForAbstractType,
   getFiltersForAbstractType,
@@ -6,16 +7,23 @@ import {
 import type {
   AbstractTypeCategoryIdentifier,
   AbstractTypeFilterDefinition,
+  AbstractTypeLimitedFilterInformation,
 } from '@mathesar/stores/abstract-types/types';
 
 export function validateFilterEntry(
-  filterCondition: AbstractTypeFilterDefinition,
+  filterCondition:
+    | AbstractTypeFilterDefinition
+    | AbstractTypeLimitedFilterInformation,
   value: unknown,
 ): boolean {
-  if (filterCondition.parameters.length === 0) {
-    return typeof value === 'undefined';
+  if ('hasParams' in filterCondition) {
+    if (!filterCondition.hasParams) {
+      return value === undefined;
+    }
+  } else if (filterCondition.parameters.length === 0) {
+    return value === undefined;
   }
-  return typeof value !== 'undefined' && value !== null && String(value) !== '';
+  return isDefinedNonNullable(value) && String(value) !== '';
 }
 
 export function retrieveFilters(
