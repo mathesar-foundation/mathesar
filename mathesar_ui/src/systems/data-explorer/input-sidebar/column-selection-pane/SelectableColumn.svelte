@@ -1,7 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Button, BadgeCount } from '@mathesar-component-library';
+  import { Button, Badge, Tooltip } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { labeledCountWithoutUnit } from '@mathesar/utils/languageUtils';
   import type { ColumnWithLink } from '../../utils';
 
   const dispatch = createEventDispatcher();
@@ -26,7 +27,16 @@
     </div>
     <span class="add">
       <span class="text">Add</span>
-      <BadgeCount value={usageCount} />
+      {#if usageCount > 0}
+        <Tooltip>
+          <Badge slot="trigger">
+            {usageCount}
+          </Badge>
+          <svelte:fragment slot="content">
+            This column has been added {labeledCountWithoutUnit(usageCount)}
+          </svelte:fragment>
+        </Tooltip>
+      {/if}
       <span>+</span>
     </span>
   </Button>
