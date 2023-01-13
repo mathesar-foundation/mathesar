@@ -226,10 +226,7 @@ export function labeledCount(
   return [countText, label].filter(Boolean).join(' ');
 }
 
-export function labeledCountWithoutUnit(
-  countable: Countable,
-  casing?: Casing,
-): string {
+export function numberOfTimes(countable: Countable, casing?: Casing): string {
   const count = getCount(countable);
   if (count === 1) {
     return 'once';
