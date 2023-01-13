@@ -42,38 +42,12 @@ def patents_url_data(patents_url_filename):
         return f.read()
 
 
-@pytest.fixture
-def mock_get_patents_url(patents_url_data):
-    mock_get_patcher = patch('requests.get')
-    mock_get = mock_get_patcher.start()
-
-    data = bytes(patents_url_data, 'utf-8')
-    mock_get.return_value.__enter__.return_value.iter_content.return_value = [data]
-    mock_get.return_value.__enter__.return_value.ok = True
-    mock_get.return_value.__enter__.return_value.headers = {
-        'content-type': 'text/csv',
-        'content-length': None
-    }
-
-    mock_head_patcher = patch('requests.head')
-    mock_head = mock_head_patcher.start()
-    mock_head.return_value.headers = {
-        'content-type': 'text/csv',
-        'content-length': None
-    }
-
-    yield mock_get
-
-    mock_get.stop()
-    mock_head.stop()
-
-
 def check_create_data_file_response(response, num_files, created_from, base_name,
                                     delimiter, quotechar, escapechar, header):
+    assert response.status_code == 201
     data_file_dict = response.json()
     data_file = DataFile.objects.get(id=data_file_dict['id'])
 
-    assert response.status_code == 201
     assert DataFile.objects.count() == num_files + 1
     assert data_file.created_from == created_from
     assert data_file.base_name == base_name
@@ -163,7 +137,18 @@ def test_data_file_create_paste(client, paste_filename, header):
 
 
 @pytest.mark.parametrize('header', [True, False])
-def test_data_file_create_url(client, header, patents_url, mock_get_patents_url):
+def test_data_file_create_url(client, header, patents_url, patents_url_data, mocked_responses):
+    mocked_responses.get(
+        url=patents_url,
+        body=patents_url_data,
+        status=200,
+        content_type='text/csv',
+    )
+    mocked_responses.head(
+        url=patents_url,
+        status=200,
+        content_type='text/csv',
+    )
     num_data_files = DataFile.objects.count()
     data = {'url': patents_url, 'header': header}
     response = client.post('/api/db/v0/data_files/', data)
@@ -230,31 +215,44 @@ def test_data_file_create_url_invalid_format(client):
     assert response_dict[0]['field'] == 'url'
 
 
-def test_data_file_create_url_invalid_address(client):
+def test_data_file_create_url_invalid_address(client, mocked_responses):
     url = 'https://www.test.invalid'
-    with patch('requests.head', side_effect=URLNotReachable):
-        response = client.post('/api/db/v0/data_files/', data={'url': url})
-        response_dict = response.json()
+    mocked_responses.head(
+        url=url,
+        body=URLNotReachable(),
+    )
+    response = client.post('/api/db/v0/data_files/', data={'url': url})
+    response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == 'URL cannot be reached.'
 
 
 def test_data_file_create_url_invalid_download(
-    client, patents_url, mock_get_patents_url
+    client, patents_url, mocked_responses
 ):
-    mock_get_patents_url.return_value.__enter__.return_value.ok = False
+    mocked_responses.head(
+        url=patents_url,
+        status=400,
+    )
+    mocked_responses.get(
+        url=patents_url,
+        status=400,
+    )
     response = client.post('/api/db/v0/data_files/', data={'url': patents_url})
     response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == 'URL cannot be downloaded.'
 
 
-def test_data_file_create_url_invalid_content_type(client):
+def test_data_file_create_url_invalid_content_type(client, mocked_responses):
     url = 'https://www.google.com'
-    with patch('requests.head') as mock:
-        mock.return_value.headers = {'content-type': 'text/html'}
-        response = client.post('/api/db/v0/data_files/', data={'url': url})
-        response_dict = response.json()
+    mocked_responses.head(
+        url=url,
+        status=200,
+        content_type='text/html',
+    )
+    response = client.post('/api/db/v0/data_files/', data={'url': url})
+    response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == "URL resource 'text/html' not a valid type."
 
