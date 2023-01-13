@@ -7,7 +7,7 @@ import pytest
 
 from db.columns.operations.select import get_column_attnum_from_name as get_attnum
 from db.tables.operations.select import get_oid_from_table
-from db.queries.base import DBQuery, InitialColumn
+from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.metadata import get_empty_metadata
 
 
@@ -61,14 +61,14 @@ def test_deep_link(engine_with_academics):
             get_attnum(uni_oid, 'name', engine, metadata=metadata),
             alias='primary_author_institution_name',
             jp_path=[
-                [
-                    (art_oid, get_attnum(art_oid, 'primary_author', engine, metadata=metadata)),
-                    (acad_oid, get_attnum(acad_oid, 'id', engine, metadata=metadata)),
-                ],
-                [
-                    (acad_oid, get_attnum(acad_oid, 'institution', engine, metadata=metadata)),
-                    (uni_oid, get_attnum(uni_oid, 'id', engine, metadata=metadata)),
-                ]
+                JoinParameter(
+                    art_oid, get_attnum(art_oid, 'primary_author', engine, metadata=metadata),
+                    acad_oid, get_attnum(acad_oid, 'id', engine, metadata=metadata),
+                ),
+                JoinParameter(
+                    acad_oid, get_attnum(acad_oid, 'institution', engine, metadata=metadata),
+                    uni_oid, get_attnum(uni_oid, 'id', engine, metadata=metadata),
+                ),
             ],
         ),
     ]
@@ -96,10 +96,10 @@ def test_self_referencing_table(engine_with_academics):
             get_attnum(acad_oid, 'name', engine, metadata=metadata),
             alias='advisor name',
             jp_path=[
-                [
-                    (acad_oid, get_attnum(acad_oid, 'advisor', engine, metadata=metadata)),
-                    (acad_oid, get_attnum(acad_oid, 'id', engine, metadata=metadata)),
-                ]
+                JoinParameter(
+                    acad_oid, get_attnum(acad_oid, 'advisor', engine, metadata=metadata),
+                    acad_oid, get_attnum(acad_oid, 'id', engine, metadata=metadata),
+                ),
             ],
         ),
         InitialColumn(
@@ -107,10 +107,10 @@ def test_self_referencing_table(engine_with_academics):
             get_attnum(acad_oid, 'name', engine, metadata=metadata),
             alias='advisee name',
             jp_path=[
-                [
-                    (acad_oid, get_attnum(acad_oid, 'id', engine, metadata=metadata)),
-                    (acad_oid, get_attnum(acad_oid, 'advisor', engine, metadata=metadata)),
-                ]
+                JoinParameter(
+                    acad_oid, get_attnum(acad_oid, 'id', engine, metadata=metadata),
+                    acad_oid, get_attnum(acad_oid, 'advisor', engine, metadata=metadata),
+                ),
             ],
         ),
     ]
