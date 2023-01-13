@@ -23,7 +23,7 @@ def load_datasets(engine):
     """Load some SQL files with demo data to DB targeted by `engine`."""
     _load_library_dataset(engine)
     _load_movies_dataset(engine)
-    _load_arxiv_dataset(engine)
+    _load_arxiv_data_skeleton(engine)
 
 
 def _load_library_dataset(engine):
@@ -56,7 +56,7 @@ def _load_movies_dataset(engine):
         conn.execute(text(f.read()))
 
 
-def _load_arxiv_dataset(engine):
+def _load_arxiv_data_skeleton(engine):
     setup_and_register_schema_for_receiving_arxiv_data(engine, schema_name=ARXIV)
 
 
