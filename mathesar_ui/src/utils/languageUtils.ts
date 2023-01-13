@@ -234,8 +234,5 @@ export function numberOfTimes(countable: Countable, casing?: Casing): string {
   if (count === 2) {
     return 'twice';
   }
-  if (count === 3) {
-    return 'thrice';
-  }
   return labeledCount(countable, 'times', { casing });
 }
