@@ -80,7 +80,7 @@
   </svelte:fragment>
   <svelte:fragment slot="bottom">
     {#if description}
-      <Truncate lines={2}>{description}</Truncate>
+      <Truncate lines={2} popoverPlacement="bottom">{description}</Truncate>
     {/if}
   </svelte:fragment>
 </HyperlinkCard>
