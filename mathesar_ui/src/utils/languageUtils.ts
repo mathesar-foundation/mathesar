@@ -92,7 +92,7 @@ const wordMap = {
   matches: makePluralFormsFromEnglish('match', 'matches'),
   results: makePluralFormsFromEnglish('result', 'results'),
   values: makePluralFormsFromEnglish('value', 'values'),
-  times: makePluralFormsFromEnglish('instance', 'times'),
+  times: makePluralFormsFromEnglish('time', 'times'),
 } as const;
 
 type Word = keyof typeof wordMap;
