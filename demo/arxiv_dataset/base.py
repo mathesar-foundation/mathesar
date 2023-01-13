@@ -57,10 +57,6 @@ def get_arxiv_db_and_schema_log_path():
     )
 
 
-def remove_arxiv_db_and_schema_log():
-    os.remove(get_arxiv_db_and_schema_log_path())
-
-
 def _setup_arxiv_schema(engine, schema_name):
     drop_schema_query = text(f'DROP SCHEMA IF EXISTS "{schema_name}" CASCADE;')
     create_schema_query = text(f'CREATE SCHEMA "{schema_name}";')
