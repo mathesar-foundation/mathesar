@@ -2,6 +2,7 @@ from io import TextIOWrapper
 
 import clevercsv as csv
 
+from db.tables.operations.alter import update_pk_sequence_to_latest
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Table
 from db.records.operations.insert import insert_records_from_csv
@@ -144,6 +145,7 @@ def create_db_table_from_data_file(data_file, name, schema, comment=None):
             quote=dialect.quotechar,
             encoding=encoding
         )
+        update_pk_sequence_to_latest(engine, table)
     except (IntegrityError, DataError):
         drop_table(name=name, schema=schema.name, engine=engine)
         table = create_string_column_table(
