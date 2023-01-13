@@ -86,7 +86,7 @@
     </div>
     <div class="bottom">
       {#if isTableImportConfirmationNeeded}
-        Confirm Imported Data
+        Needs Import Confirmation
       {/if}
     </div>
   </a>
