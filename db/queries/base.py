@@ -6,6 +6,7 @@ from db.columns.base import MathesarColumn
 from db.columns.operations.select import get_column_name_from_attnum
 from db.tables.operations.select import reflect_table_from_oid
 from db.transforms.operations.apply import apply_transformations
+from db.transforms.base import Order
 from db.metadata import get_empty_metadata
 
 
@@ -101,12 +102,36 @@ class DBQuery:
 
     # mirrors a method in db.records.operations.select
     def get_records(self, **kwargs):
-        # NOTE how through this method you can perform a second batch of
-        # transformations.  this reflects fact that we can form a query, and
-        # then apply temporary transforms on it, like how you can apply
-        # temporary transforms to a table when in a table view.
-        return records_select.get_records_with_default_order(
-            table=self.transformed_relation, engine=self.engine, **kwargs,
+        """
+        Note how through this method you can perform a second batch of
+        transformations. This reflects the fact that we can form a query, and
+        then apply temporary transforms on it, like how you can apply
+        temporary transforms to a table when in a table view.
+
+        Also, note that we have to take care not to apply default ordering on top of the
+        transformations if one of the transformations already defines an ordering (because
+        that would override the transformation).
+        """
+        relation = self.transformed_relation
+        engine = self.engine
+        if self._is_sorting_transform_used:
+            return records_select.get_records(
+                table=relation, engine=engine, **kwargs,
+            )
+        else:
+            return records_select.get_records_with_default_order(
+                table=relation, engine=engine, **kwargs,
+            )
+
+    @property
+    def _is_sorting_transform_used(self):
+        """
+        Checks if any of the transforms define a sorting for the results.
+        """
+        return any(
+            type(transform) is Order
+            for transform
+            in self.transformations
         )
 
     # mirrors a method in db.records.operations.select
