@@ -2,6 +2,7 @@
   import {
     ButtonMenuItem,
     DropdownMenu,
+    Icon,
     Truncate,
   } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
@@ -35,6 +36,7 @@
   export let schema: SchemaEntry;
 
   let isHoveringMenuTrigger = false;
+  let isHoveringBottomButton = false;
 
   $: isTableImportConfirmationNeeded = isTableImportConfirmationRequired(table);
   $: tablePageUrl = isTableImportConfirmationNeeded
@@ -66,15 +68,25 @@
   }
 </script>
 
-<div class="table-card" class:hovering-menu-trigger={isHoveringMenuTrigger}>
+<div
+  class="table-card"
+  class:hovering-menu-trigger={isHoveringMenuTrigger}
+  class:hovering-bottom-button={isHoveringBottomButton}
+  class:unconfirmed-import={isTableImportConfirmationNeeded}
+>
   <a class="link passthrough" href={tablePageUrl} aria-label={table.name}>
     <div class="top">
       <div class="top-content"><TableName {table} /></div>
       <div class="fake-button" />
     </div>
-    <div class="bottom">
+    <div class="description">
       {#if description}
         <Truncate lines={2} popoverPlacement="bottom">{description}</Truncate>
+      {/if}
+    </div>
+    <div class="bottom">
+      {#if isTableImportConfirmationNeeded}
+        Confirm Imported Data
       {/if}
     </div>
   </a>
@@ -98,9 +110,6 @@
       size="small"
     >
       {#if !isTableImportConfirmationNeeded}
-        <ButtonMenuItem on:click={handleFindRecord} icon={iconSelectRecord}>
-          Find a Record
-        </ButtonMenuItem>
         <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
           Edit Table
         </ButtonMenuItem>
@@ -117,6 +126,21 @@
       </ButtonMenuItem>
     </DropdownMenu>
   </div>
+  {#if !isTableImportConfirmationNeeded}
+    <button
+      class="bottom-button passthrough"
+      on:mouseenter={() => {
+        isHoveringBottomButton = true;
+      }}
+      on:mouseleave={() => {
+        isHoveringBottomButton = false;
+      }}
+      on:click={handleFindRecord}
+    >
+      <Icon {...iconSelectRecord} />
+      <span class="label">Find a Record</span>
+    </button>
+  {/if}
 </div>
 
 <EditTable modalController={editTableModalController} {table} />
@@ -127,9 +151,14 @@
     isolation: isolate;
     --menu-trigger-size: 3rem;
     --padding: 1rem;
+    --bottom-height: 2.5rem;
+  }
+  .table-card.unconfirmed-import {
+    color: var(--color-text-muted);
   }
   .link {
-    display: block;
+    display: grid;
+    grid-template: auto 1fr auto / 1fr;
     border: 1px solid var(--slate-300);
     border-radius: var(--border-radius-l);
     cursor: pointer;
@@ -153,6 +182,12 @@
     align-items: center;
     padding: 0 var(--padding);
   }
+  .description:not(:empty) {
+    padding: 0 var(--padding) var(--padding) var(--padding);
+    font-size: var(--text-size-small);
+  }
+
+  /** Menu button =========================================================== */
   .fake-button {
     flex: 0 0 auto;
     width: var(--menu-trigger-size);
@@ -160,9 +195,6 @@
   }
   .hovering-menu-trigger .fake-button {
     background: var(--slate-100);
-  }
-  .bottom:not(:empty) {
-    padding: 0 var(--padding) var(--padding) var(--padding);
   }
   .menu-container {
     position: absolute;
@@ -180,5 +212,45 @@
   }
   .menu-container :global(.dropdown-menu-button:hover) {
     color: var(--slate-800);
+  }
+
+  /** Bottom button========================================================== */
+  .table-card .bottom {
+    background: var(--sand-100);
+    border-top: solid 1px var(--sand-200);
+  }
+  .table-card.unconfirmed-import .bottom {
+    background: none;
+    border-top: none;
+  }
+  .table-card.unconfirmed-import .bottom {
+    color: var(--color-text);
+  }
+  .bottom-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1;
+    cursor: pointer;
+  }
+  .hovering-bottom-button .bottom-button {
+    color: inherit;
+  }
+  .hovering-bottom-button .bottom {
+    color: inherit;
+    background: var(--sand-200);
+  }
+  .bottom-button,
+  .bottom {
+    height: var(--bottom-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-size-small);
+    color: var(--color-text-muted);
+  }
+  .bottom-button .label {
+    margin-left: 0.25rem;
   }
 </style>
