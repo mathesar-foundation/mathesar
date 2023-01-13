@@ -1,46 +1,50 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
   import { Icon, Button } from '@mathesar-component-library';
-  import { SortDirection, type Sorting } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import {
+    getTabularDataStoreFromContext,
+    type Sorting,
+  } from '@mathesar/stores/table-data';
   import { iconAddNew } from '@mathesar/icons';
-  import SortEntries from './SortEntry.svelte';
-  import type { SortEntryEvents } from '../types';
+  import SortEntry from '@mathesar/components/sort-entry/SortEntry.svelte';
+  import type { SortDirection } from '@mathesar/components/sort-entry/utils';
+
+  const tabularData = getTabularDataStoreFromContext();
 
   export let sorting: Writable<Sorting>;
-  export let columns: Column[];
+  $: ({ processedColumns } = $tabularData);
 
   /** Columns which are not already used as a sorting entry */
-  $: availableColumns = columns.filter((column) => !$sorting.has(column.id));
+  $: availableColumnIds = [...$processedColumns.values()]
+    .filter((column) => !$sorting.has(column.id))
+    .map((entry) => entry.id);
 
   function addSortColumn() {
-    const [newSortColumn] = availableColumns;
-    const newSortDirection = SortDirection.A;
-    sorting.update((s) => s.with(newSortColumn.id, newSortDirection));
+    const [newSortColumnId] = availableColumnIds;
+    sorting.update((s) => s.with(newSortColumnId, 'ASCENDING'));
   }
 
-  function removeSortColumn(
-    columnId: CustomEvent<SortEntryEvents['remove']>['detail'],
-  ) {
+  function removeSortColumn(columnId: number) {
     sorting.update((s) => s.without(columnId));
   }
 
-  function updateSorter(
-    sorter: CustomEvent<SortEntryEvents['update']>['detail'],
+  function updateSortEntry(
     oldColumnId: number,
+    newColumnId: number,
+    sortDirection: SortDirection,
   ) {
-    const { columnId, direction } = sorter;
-    if (typeof columnId === 'number') {
-      /**
-       * This check will esure that the order of the
-       * sorters are not changed when the user
-       * changes the SortDirection of the top sorters
-       */
-      if (oldColumnId !== columnId) {
-        sorting.update((s) => s.without(oldColumnId));
+    sorting.update((s) => {
+      let newSort = s;
+      if (oldColumnId !== newColumnId) {
+        /**
+         * This check will esure that the order of the
+         * sorters are not changed when the user
+         * changes the SortDirection of the top sorters
+         */
+        newSort = newSort.without(oldColumnId);
       }
-      sorting.update((s) => s.with(columnId, direction));
-    }
+      return newSort.with(newColumnId, sortDirection);
+    });
   }
 </script>
 
@@ -48,24 +52,30 @@
   <div class="header">Sort</div>
   <div class="content">
     {#each [...$sorting] as [columnId, sortDirection], index (columnId)}
-      <SortEntries
-        {availableColumns}
+      <SortEntry
+        columns={$processedColumns}
+        columnsAllowedForSelection={availableColumnIds}
+        getColumnLabel={(processedColumn) => processedColumn?.column.name ?? ''}
+        columnIdentifier={columnId}
         {sortDirection}
-        {columns}
-        sortColumnId={columnId}
-        on:remove={(e) => removeSortColumn(e.detail)}
-        disabled={index < $sorting.size - 1}
-        on:update={(e) => updateSorter(e.detail, columnId)}
+        on:remove={() => removeSortColumn(columnId)}
+        disableColumnChange={index < $sorting.size - 1}
+        on:update={(e) =>
+          updateSortEntry(
+            columnId,
+            e.detail.columnIdentifier,
+            e.detail.sortDirection,
+          )}
       />
     {:else}
-      <span>No Sorters have been added</span>
+      <span>No sorting condition has been added</span>
     {/each}
   </div>
-  {#if availableColumns.length > 0}
+  {#if availableColumnIds.length > 0}
     <div class="footer">
       <Button appearance="secondary" on:click={addSortColumn}>
         <Icon {...iconAddNew} />
-        <span>Add new sort column</span>
+        <span>Add new sort condition</span>
       </Button>
     </div>
   {/if}
@@ -84,6 +94,15 @@
     .content {
       display: flex;
       flex-direction: column;
+      min-width: 21rem;
+
+      :global(.input-group .select-sort-direction) {
+        width: 9rem;
+        flex-grow: 0;
+      }
+      :global(.select-sort-column) {
+        flex-grow: 1;
+      }
 
       > :global(* + *) {
         margin-top: 0.5rem;
