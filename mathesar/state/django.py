@@ -31,9 +31,12 @@ def clear_dj_cache():
 # queryset is created, and will recurse if used in these functions.
 
 
-def reflect_db_objects(metadata):
+def reflect_db_objects(metadata, db_name=None):
     sync_databases_status()
     databases = models.Database.current_objects.all()
+    if db_name is not None:
+        databases = databases.filter(name=db_name)
+
     for database in databases:
         if database.deleted is False:
             reflect_schemas_from_database(database)

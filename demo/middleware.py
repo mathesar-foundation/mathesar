@@ -31,7 +31,7 @@ class LiveDemoModeMiddleware:
                 settings.DATABASES["default"]["PORT"],
                 settings.MATHESAR_DEMO_TEMPLATE
             )
-            reset_reflection()
+            reset_reflection(db_name=db_name)
             engine = create_mathesar_engine(db_name)
             customize_settings(engine)
 
