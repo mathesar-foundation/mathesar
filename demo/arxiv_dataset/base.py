@@ -11,13 +11,14 @@ schemas setup by `setup_and_register_schema_for_receiving_arxiv_data`;
 
 In order for `script.py` to find the schemas that it should update,
 `setup_and_register_schema_for_receiving_arxiv_data` also sets up a log file where it keeps track
-of database-schema-name pairs of the schemas it set up (see `_append_db_and_schema_to_log`).
+of database-schema-name pairs of the schemas it set up (see `append_db_and_arxiv_schema_to_log`).
 """
 
 import os
 import json
 from pathlib import Path
 
+from django.conf import settings
 from sqlalchemy import text
 
 SCHEMA_DESCRIPTION = (
@@ -31,7 +32,7 @@ def setup_and_register_schema_for_receiving_arxiv_data(
 ):
     db_name, schema_name = _setup_arxiv_schema(engine, schema_name)
     _make_sure_parent_directories_present(get_arxiv_db_and_schema_log_path())
-    _append_db_and_schema_to_log(db_name, schema_name)
+    append_db_and_arxiv_schema_to_log(db_name, schema_name)
 
 
 def _make_sure_parent_directories_present(path_to_file):
@@ -40,8 +41,10 @@ def _make_sure_parent_directories_present(path_to_file):
     parent_directory_of_file.mkdir(parents=True, exist_ok=True)
 
 
-def _append_db_and_schema_to_log(db_name, schema_name):
+def append_db_and_arxiv_schema_to_log(db_name, schema_name):
     path = get_arxiv_db_and_schema_log_path()
+    if db_name == getattr(settings, 'MATHESAR_DEMO_TEMPLATE', None):
+        return
     db_and_schema = [db_name, schema_name]
     with open(path, 'a') as f:
         json.dump(db_and_schema, f)
@@ -52,6 +55,10 @@ def get_arxiv_db_and_schema_log_path():
     return os.path.abspath(
         '/var/lib/mathesar/demo/arxiv_db_schema_log'
     )
+
+
+def remove_arxiv_db_and_schema_log():
+    os.remove(get_arxiv_db_and_schema_log_path())
 
 
 def _setup_arxiv_schema(engine, schema_name):
