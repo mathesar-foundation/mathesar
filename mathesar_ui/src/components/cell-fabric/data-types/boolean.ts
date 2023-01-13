@@ -49,6 +49,7 @@ function getProps(
 }
 
 const booleanType: CellComponentFactory = {
+  initialInputValue: null,
   get: (column: BooleanLikeColumn): ComponentAndProps<Props> => {
     const displayOptions = column.display_options ?? undefined;
     if (displayOptions && displayOptions.input === 'dropdown') {
