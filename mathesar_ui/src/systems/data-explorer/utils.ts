@@ -20,6 +20,7 @@ import type {
 import {
   getCellCap,
   getDbTypeBasedInputCap,
+  getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import type { TableEntry } from '@mathesar/api/types/tables';
@@ -40,6 +41,7 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   column: QueryResultColumn;
   abstractType: AbstractType;
   inputComponentAndProps: ComponentAndProps;
+  initialInputValue: unknown;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
   source: ProcessedQueryResultColumnSource;
@@ -316,6 +318,11 @@ function processColumn(
       column,
     }),
     inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      undefined,
+      abstractType.cellInfo,
+    ),
+    initialInputValue: getInitialInputValue(
       column,
       undefined,
       abstractType.cellInfo,

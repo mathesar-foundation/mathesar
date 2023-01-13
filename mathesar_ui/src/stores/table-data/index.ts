@@ -8,7 +8,7 @@ export {
   Filtering,
   type FilterEntry,
 } from './filtering';
-export { Sorting, SortDirection, getDirectionLabel } from './sorting';
+export { Sorting } from './sorting';
 export { Grouping, type GroupEntry, type TerseGrouping } from './grouping';
 export {
   getRowKey,

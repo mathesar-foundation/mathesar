@@ -35,6 +35,8 @@ export default class QuerySummarizationTransformationModel
 
   aggregations;
 
+  isValid = () => true;
+
   constructor(
     transformation:
       | QueryInstanceSummarizationTransformation

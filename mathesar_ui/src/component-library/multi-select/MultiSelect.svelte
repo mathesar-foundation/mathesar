@@ -122,6 +122,7 @@
     on:click={api.toggle}
     aria-label={ariaLabel}
     tabindex="0"
+    {id}
     on:keydown={api.handleKeyDown}
   >
     <span class="selected-values">
