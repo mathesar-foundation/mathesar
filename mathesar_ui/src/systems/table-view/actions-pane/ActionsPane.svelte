@@ -49,7 +49,7 @@
 >
   <div class="quick-access">
     <FilterDropdown {filtering} />
-    <SortDropdown {sorting} columns={$columns} />
+    <SortDropdown {sorting} />
     <GroupDropdown {grouping} />
   </div>
 

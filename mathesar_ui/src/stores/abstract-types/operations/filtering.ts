@@ -4,6 +4,7 @@ import type {
   AbstractTypeFilterDefinitionResponse,
   AbstractTypeFilterDefinitionMap,
   AbstractTypeFilterDefinition,
+  AbstractTypeLimitedFilterInformation,
 } from '../types';
 
 const allDateTimeTypes = [
@@ -258,4 +259,19 @@ export function getFiltersForAbstractType(
   });
 
   return allowedFiltersMap;
+}
+
+export function getLimitedFilterInformationById(
+  filterIdentifier: AbstractTypeFilterDefinition['id'],
+): AbstractTypeLimitedFilterInformation | undefined {
+  const filter = filterResponse.find((entry) => entry.id === filterIdentifier);
+  if (filter) {
+    return {
+      id: filter.id,
+      name: filter.name,
+      hasAliases: !!filter.aliases,
+      hasParams: Object.keys(filter.uiTypeParameterMap).length > 0,
+    };
+  }
+  return undefined;
 }
