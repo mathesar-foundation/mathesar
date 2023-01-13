@@ -5,7 +5,7 @@ from django.db.models.signals import post_migrate
 
 def _prepare_database_model(**kwargs):
     from mathesar.models.base import Database  # noqa
-    from mathesar.state.django import sync_databases_status  # noqa
+    from mathesar.state import make_sure_initial_reflection_happened  # noqa
     dbs_in_settings = set(settings.DATABASES)
     # We only want to track non-django dbs
     dbs_in_settings.remove('default')
@@ -13,7 +13,7 @@ def _prepare_database_model(**kwargs):
         Database.current_objects.get_or_create(name=db_name)
     # TODO fix test DB loading to make this unnecessary
     if not settings.TEST:
-        sync_databases_status()
+        make_sure_initial_reflection_happened()
 
 
 class MathesarConfig(AppConfig):

@@ -2,6 +2,9 @@ import bz2
 import os
 
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
+
+from db.engine import create_future_engine
 
 from mathesar.models.base import Table, Schema, PreviewColumnSettings
 
@@ -94,3 +97,26 @@ def _get_dj_column_by_name(table, name):
     for c in columns:
         if c.name == name:
             return c
+
+
+def create_demo_database(
+        user_db, username, password, hostname, root_db, port, template_db
+):
+    """Create database, install Mathesar on it, add demo data."""
+    user_db_engine = create_future_engine(
+        username, password, hostname, user_db, port
+    )
+    try:
+        user_db_engine.connect()
+        user_db_engine.dispose()
+        print(f"Database {user_db} already exists! Skipping...")
+    except OperationalError:
+        root_db_engine = create_future_engine(
+            username, password, hostname, root_db, port,
+        )
+        with root_db_engine.connect() as conn:
+            conn.execution_options(isolation_level="AUTOCOMMIT")
+            conn.execute(text(f"CREATE DATABASE {user_db} TEMPLATE {template_db};"))
+        root_db_engine.dispose()
+        user_db_engine.dispose()
+        print(f"Created DB is {user_db}.")
