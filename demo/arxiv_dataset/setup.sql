@@ -17,8 +17,8 @@ CREATE TABLE "Categories" (
 
 CREATE TABLE "Links" (
     id SERIAL PRIMARY KEY,
-    "Purpose" text,
-    "URL" mathesar_types.uri UNIQUE
+    "URL" mathesar_types.uri UNIQUE,
+    "Purpose" text
 );
 
 COMMENT ON TABLE "Links" IS 'Links (URLs) associated with a given paper; each paper is expected to at least have a link to its PDF version.';
