@@ -12,6 +12,7 @@ from mathesar.api.serializers.shared_serializers import (
     ReadWritePolymorphicSerializerMappingMixin,
 )
 from mathesar.models.base import Table
+from mathesar.state import reset_reflection
 
 
 class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
@@ -47,6 +48,7 @@ class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
             validated_data.get('referent_table').oid,
             unique_link=self.is_link_unique()
         )
+        reset_reflection(db_name=reference_table.schema.database.name)
         return validated_data
 
 
@@ -95,6 +97,7 @@ class ManyToManySerializer(MathesarErrorMessageMixin, serializers.Serializer):
             validated_data.get('mapping_table_name'),
             referent_tables_oid,
         )
+        reset_reflection(db_name=referents[0]['referent_table'].schema.database.name)
         return validated_data
 
 
