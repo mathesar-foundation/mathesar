@@ -36,7 +36,8 @@ class Command(BaseCommand):
 def drop_all_stale_databases(force=False, max_days=3, *args, **kwargs):
     excluded_databases = [
         settings.DATABASES["default"]["NAME"],
-        'mathesar',
+        settings.DATABASES["mathesar_tables"]["NAME"],
+        getattr(settings, "MATHESAR_DEMO_TEMPLATE", None),
         # Exclude Postgres default databases
         'postgres',
         'template0',
