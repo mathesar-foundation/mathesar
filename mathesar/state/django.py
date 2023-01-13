@@ -33,11 +33,9 @@ def clear_dj_cache():
 
 def reflect_db_objects(metadata, db_name=None):
     sync_databases_status()
-
+    databases = models.Database.current_objects.all()
     if db_name is not None:
-        databases = models.Database.current_objects.filter(name=db_name)
-    else:
-        databases = models.Database.current_objects.all()
+        databases = databases.filter(name=db_name)
 
     for database in databases:
         if database.deleted is False:
