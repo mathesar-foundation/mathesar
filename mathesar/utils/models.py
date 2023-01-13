@@ -34,7 +34,7 @@ def update_sa_table(table, validated_data):
     try:
         data = _update_columns_side_effector(table, validated_data)
         alter_table(table.name, table.oid, table.schema.name, table.schema._sa_engine, data)
-        reset_reflection()
+        reset_reflection(db_name=table.schema.database.name)
     # TODO: Catch more specific exceptions
     except InvalidTypeError as e:
         raise e

@@ -202,51 +202,61 @@ class DBQuery:
             self.base_table_oid, self.engine, metadata=metadata
         )
         from_clause = base_table
-        # We cache this to avoid copies of the same join path to a given table
-        jp_path_alias_map = {(): base_table}
-        jp_path_unique_set = set()
 
-        def _get_table(oid):
+        # We cache aliases, because we want a given join-param subpath to have only one alias.
+        map_of_jp_subpath_to_alias = {}
+
+        # We keep track of created joins, so that we don't perform the same join more than once.
+        created_joins = set()
+
+        def _get_join_id(previous_and_this_jps):
             """
-            We use the function-scoped metadata so all involved tables are aware
-            of each other.
+            A join (given a base table) can be uniquely identified by the JoinParameter path used to create it.
             """
-            return reflect_table_from_oid(oid, self.engine, metadata=metadata, keep_existing=True)
+            return tuple(previous_and_this_jps)
 
-        def _get_column_name(oid, attnum):
-            return get_column_name_from_attnum(oid, attnum, self.engine, metadata=metadata)
-
-        def _process_initial_column(col):
+        def _process_initial_column(initial_col):
+            """
+            Mutably performs joins on `from_clause`, if this is not a base table initial column,
+            and returns the SA column that the initial column represents.
+            """
             nonlocal from_clause
-            col_name = _get_column_name(col.reloid, col.attnum)
-            # Make the path hashable so it can be a dict key
-            jp_path = _guarantee_jp_path_tuples(col.jp_path)
+            nonlocal base_table
+            nonlocal map_of_jp_subpath_to_alias
+            nonlocal created_joins
+            jp_path = initial_col.jp_path
             right = base_table
-
             for i, jp in enumerate(jp_path):
-                left = jp_path_alias_map[jp_path[:i]]
-                right_table = jp_path[:i + 1]
-                if right_table in jp_path_alias_map:
-                    right = jp_path_alias_map[right_table]
+                previous_jps = tuple(jp_path[:i])
+                is_first_jp = len(previous_jps) == 0
+                if is_first_jp:
+                    left = base_table
                 else:
-                    right = _get_table(jp[1][0]).alias()
-                    jp_path_alias_map[jp_path[:i + 1]] = right
-                left_col_name = _get_column_name(jp[0][0], jp[0][1])
-                right_col_name = _get_column_name(jp[1][0], jp[1][1])
-                left_col = left.columns[left_col_name]
-                right_col = right.columns[right_col_name]
-                join_columns = f"{left_col}, {right_col}"
-                if join_columns not in jp_path_unique_set:
-                    jp_path_unique_set.add(join_columns)
+                    left = map_of_jp_subpath_to_alias[previous_jps]
+                previous_and_this_jps = tuple(previous_jps) + (jp,)
+                if previous_and_this_jps in map_of_jp_subpath_to_alias:
+                    right = map_of_jp_subpath_to_alias[previous_and_this_jps]
+                else:
+                    right = reflect_table_from_oid(
+                        jp.right_oid, self.engine, metadata=metadata
+                    ).alias()
+                    map_of_jp_subpath_to_alias[previous_and_this_jps] = right
+                left_col, right_col = jp._get_sa_cols(left, right, self.engine, metadata)
+                join_id = _get_join_id(previous_and_this_jps)
+                if join_id not in created_joins:
+                    created_joins.add(join_id)
                     from_clause = from_clause.join(
                         right, onclause=left_col == right_col, isouter=True,
                     )
+            initial_col_name = initial_col.get_name(self.engine, metadata)
+            return right.columns[initial_col_name].label(initial_col.alias)
 
-            return right.columns[col_name].label(col.alias)
-
-        stmt = select(
-            [_process_initial_column(col) for col in self.initial_columns]
-        ).select_from(from_clause)
+        processed_initial_columns = [
+            _process_initial_column(initial_col)
+            for initial_col
+            in self.initial_columns
+        ]
+        stmt = select(processed_initial_columns).select_from(from_clause)
         return stmt.cte()
 
     def get_input_alias_for_output_alias(self, output_alias):
@@ -261,6 +271,48 @@ class DBQuery:
             for transform in transforms:
                 m = m | transform.map_of_output_alias_to_input_alias
         return m
+
+
+class JoinParameter:
+    def __init__(
+            self,
+            left_oid,
+            left_attnum,
+            right_oid,
+            right_attnum,
+    ):
+        self.left_oid = left_oid
+        self.left_attnum = left_attnum
+        self.right_oid = right_oid
+        self.right_attnum = right_attnum
+
+    def _get_sa_cols(self, left, right, engine, metadata):
+        """
+        Returns the left and right SA columns represented by this JoinParameter.
+
+        It takes left and right SA from-clauses, because a JoinParameter on its own is not enough to
+        identify columns. You need the context of the base table and the JoinParameter path
+        (up to this JoinParameter), which are here embodied in the left and right SA from-clauses.
+        """
+        left_col_name = get_column_name_from_attnum(
+            self.left_oid, self.left_attnum, engine, metadata=metadata
+        )
+        right_col_name = get_column_name_from_attnum(
+            self.right_oid, self.right_attnum, engine, metadata=metadata
+        )
+        left_col = left.columns[left_col_name]
+        right_col = right.columns[right_col_name]
+        return left_col, right_col
+
+    def __eq__(self, other):
+        """Instances are equal when attributes are equal."""
+        if type(other) is type(self):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __hash__(self):
+        """Hashes are equal when attributes are equal."""
+        return hash(frozendict(self.__dict__))
 
 
 class InitialColumn:
@@ -278,7 +330,17 @@ class InitialColumn:
         self.reloid = reloid
         self.attnum = attnum
         self.alias = alias
-        self.jp_path = _guarantee_jp_path_tuples(jp_path)
+        if jp_path:
+            for join_parameter in jp_path:
+                assert type(join_parameter) is JoinParameter
+        else:
+            jp_path = tuple()
+        self.jp_path = jp_path
+
+    def get_name(self, engine, metadata):
+        return get_column_name_from_attnum(
+            self.reloid, self.attnum, engine, metadata=metadata
+        )
 
     @property
     def is_base_column(self):
@@ -296,20 +358,3 @@ class InitialColumn:
     def __hash__(self):
         """Hashes are equal when attributes are equal."""
         return hash(frozendict(self.__dict__))
-
-
-def _guarantee_jp_path_tuples(jp_path):
-    """
-    Makes sure that jp_path is made up of tuples or is an empty tuple.
-    """
-    if jp_path is not None:
-        return tuple(
-            (
-                tuple(edge[0]),
-                tuple(edge[1]),
-            )
-            for edge
-            in jp_path
-        )
-    else:
-        return tuple()

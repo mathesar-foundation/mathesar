@@ -8,7 +8,7 @@ def make_sure_initial_reflection_happened():
         reset_reflection()
 
 
-def reset_reflection():
+def reset_reflection(db_name=None):
     """
     Resets our reflection of what's on Postgres databases. Reset meaning that information is
     either deleted (to be refreshed on demand) or is preemptively refreshed.
@@ -24,11 +24,11 @@ def reset_reflection():
     clear_cached_property_cache()
     set_initial_reflection_happened()
     reset_cached_metadata()
-    _trigger_django_model_reflection()
+    _trigger_django_model_reflection(db_name)
 
 
-def _trigger_django_model_reflection():
-    reflect_db_objects(metadata=get_cached_metadata())
+def _trigger_django_model_reflection(db_name):
+    reflect_db_objects(metadata=get_cached_metadata(), db_name=db_name)
 
 
 def set_initial_reflection_happened(has_it_happened=True):

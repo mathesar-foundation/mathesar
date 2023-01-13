@@ -1,0 +1,6 @@
+.dropdown.content.tooltip {
+  max-width: min(80vw, 25rem);
+  --dropdown-background: var(--slate-800);
+  color: var(--white);
+  padding: var(--size-xx-small);
+}
