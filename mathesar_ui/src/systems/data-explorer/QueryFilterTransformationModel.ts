@@ -1,4 +1,6 @@
 import type { QueryInstanceFilterTransformation } from '@mathesar/api/types/queries';
+import { getLimitedFilterInformationById } from '@mathesar/stores/abstract-types';
+import { validateFilterEntry } from '@mathesar/components/filter-entry';
 
 export interface QueryFilterTransformationEntry {
   columnIdentifier: string;
@@ -32,6 +34,14 @@ export default class QueryFilterTransformationModel
         data.spec[this.conditionIdentifier][0].column_name;
       this.value = data.spec[this.conditionIdentifier][1]?.literal[0];
     }
+  }
+
+  isValid(): boolean {
+    const condition = getLimitedFilterInformationById(this.conditionIdentifier);
+    if (condition) {
+      return validateFilterEntry(condition, this.value);
+    }
+    return false;
   }
 
   toJson(): QueryInstanceFilterTransformation {

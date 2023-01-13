@@ -13,14 +13,13 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ columnsDataStore, meta } = $tabularData);
+  $: ({ meta } = $tabularData);
   $: ({ filtering, sorting, grouping } = meta);
-  $: ({ columns } = columnsDataStore);
 </script>
 
 <div class="mini-actions-pane">
   <FilterDropdown {filtering} {...dropdownProps} />
-  <SortDropdown {sorting} columns={$columns} {...dropdownProps} />
+  <SortDropdown {sorting} {...dropdownProps} />
   <GroupDropdown {grouping} {...dropdownProps} />
 </div>
 

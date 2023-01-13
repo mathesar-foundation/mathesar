@@ -3,6 +3,7 @@ This inherits the fixtures in the root conftest.py
 """
 import pytest
 import logging
+import responses
 from copy import deepcopy
 
 from django.core.files import File
@@ -29,6 +30,17 @@ import conftest
 from mathesar.state import reset_reflection
 from mathesar.state.base import set_initial_reflection_happened
 from db.metadata import get_empty_metadata
+
+
+@pytest.fixture
+def mocked_responses():
+    """
+    For mocking requests library's responses.
+
+    See https://github.com/getsentry/responses#responses-as-a-pytest-fixture
+    """
+    with responses.RequestsMock() as rsps:
+        yield rsps
 
 
 @pytest.fixture(autouse=True)
