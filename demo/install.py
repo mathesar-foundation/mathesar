@@ -6,6 +6,7 @@ from sqlalchemy.exc import OperationalError
 
 from db.engine import create_future_engine
 
+from demo.arxiv_dataset.base import setup_and_register_schema_for_receiving_arxiv_data
 from mathesar.models.base import Table, Schema, PreviewColumnSettings
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -14,6 +15,7 @@ LIBRARY_ONE = os.path.join(RESOURCES, "library_without_checkouts.sql")
 LIBRARY_TWO = os.path.join(RESOURCES, "library_add_checkouts.sql")
 LIBRARY_MANAGEMENT = 'Library Management'
 MOVIE_COLLECTION = 'Movie Collection'
+ARXIV = 'Latest Papers from arXiv'
 MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
 
 
@@ -21,6 +23,7 @@ def load_datasets(engine):
     """Load some SQL files with demo data to DB targeted by `engine`."""
     _load_library_dataset(engine)
     _load_movies_dataset(engine)
+    _load_arxiv_data_skeleton(engine)
 
 
 def _load_library_dataset(engine):
@@ -51,6 +54,10 @@ def _load_movies_dataset(engine):
         conn.execute(create_schema_query)
         conn.execute(set_search_path)
         conn.execute(text(f.read()))
+
+
+def _load_arxiv_data_skeleton(engine):
+    setup_and_register_schema_for_receiving_arxiv_data(engine, schema_name=ARXIV)
 
 
 def customize_settings(engine):

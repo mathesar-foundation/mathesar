@@ -3,7 +3,8 @@ import logging
 
 from django.conf import settings
 
-from demo.install import customize_settings, create_demo_database
+from demo.arxiv_dataset.base import append_db_and_arxiv_schema_to_log
+from demo.install import customize_settings, create_demo_database, ARXIV
 from demo.db_namer import get_name
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Database
@@ -31,6 +32,7 @@ class LiveDemoModeMiddleware:
                 settings.DATABASES["default"]["PORT"],
                 settings.MATHESAR_DEMO_TEMPLATE
             )
+            append_db_and_arxiv_schema_to_log(db_name, ARXIV)
             reset_reflection(db_name=db_name)
             engine = create_mathesar_engine(db_name)
             customize_settings(engine)
