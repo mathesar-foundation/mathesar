@@ -9,10 +9,9 @@
         description?: string;
       }
     | undefined = undefined;
-  export let width = 0;
 </script>
 
-<div class="entity-page-header" bind:clientWidth={width}>
+<div class="entity-page-header">
   {#if title}
     <div class="heading">
       <div class="icon">
@@ -123,6 +122,12 @@
         > :global(* + *) {
           margin-left: var(--size-xx-small);
         }
+      }
+    }
+
+    @media (max-width: 38rem) {
+      & :global(.responsive-button-label) {
+        display: none;
       }
     }
   }

@@ -10,11 +10,9 @@
 
   interface $$Props extends ComponentProps<Dropdown> {
     filtering: Writable<Filtering>;
-    showsLabel?: boolean;
   }
 
   export let filtering: Writable<Filtering>;
-  export let showsLabel = true;
 </script>
 
 <Dropdown
@@ -25,9 +23,9 @@
 >
   <svelte:fragment slot="trigger">
     <Icon {...iconFiltering} size="0.8em" />
-    {#if showsLabel}
-      <span>Filter <BadgeCount value={$filtering.entries.length} /></span>
-    {/if}
+    <span class="responsive-button-label">
+      Filter <BadgeCount value={$filtering.entries.length} />
+    </span>
   </svelte:fragment>
   <Filter slot="content" {filtering} />
 </Dropdown>
