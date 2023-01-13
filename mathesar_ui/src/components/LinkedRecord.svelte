@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
 
   import { Icon } from '@mathesar-component-library';
+  import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
   import { iconDeleteMinor } from '@mathesar/icons';
   import RecordSummary from './RecordSummary.svelte';
 
@@ -11,6 +12,8 @@
   export let recordSummary: string | undefined = undefined;
   export let hasDeleteButton = false;
   export let recordPageHref: string | undefined = undefined;
+  export let valueComparisonOutcome: ValueComparisonOutcome | undefined =
+    undefined;
 
   let isHoveringDelete = false;
   let isHoveringRecordPageLink = false;
@@ -34,6 +37,8 @@
   class="linked-record"
   class:is-hovering-delete={isHoveringDelete}
   class:is-hovering-record-page-link={isHoveringRecordPageLink}
+  class:exact-match={valueComparisonOutcome === 'exactMatch'}
+  class:no-match={valueComparisonOutcome === 'noMatch'}
   on:click
 >
   {#if recordPageHref}
@@ -102,6 +107,15 @@
     background: var(--color-fk);
     border-radius: 0.25rem;
     z-index: 0;
+  }
+  .exact-match .background {
+    background: var(--color-substring-match);
+  }
+  .no-match {
+    text-decoration: line-through;
+  }
+  .no-match .background {
+    background: var(--slate-200);
   }
   .record-page-link {
     color: inherit;

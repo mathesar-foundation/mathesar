@@ -3,6 +3,7 @@
   import { getAvailableName } from '@mathesar/utils/db';
   import { confirm } from '@mathesar/stores/confirmation';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
   import TransformationsPane from './transformations-pane/TransformationsPane.svelte';
   import type QueryManager from '../QueryManager';
@@ -33,17 +34,29 @@
       queryHasNoSummarization
     ) {
       addNewAutoSummarization = await confirm({
-        title: "You're adding a column with multiple related records",
-        body: `By default, Mathesar shows only one related record per row.
-               We recommend adding a summarization step if you'd like to see
-               related records as a list instead.`,
+        title: {
+          component: PhraseContainingIdentifier,
+          props: {
+            pre: 'Summarize the ',
+            identifier: column.name,
+            post: ' column?',
+          },
+        },
+        body: [
+          `By default, Mathesar shows only one related record per row when adding a
+                column with multiple related records. We recommend adding a summarization
+                step if you'd like to see related records as a list instead.`,
+          'You can manually configure a summarization later via the "Transform Results" pane.',
+        ],
         proceedButton: {
-          label: 'Yes, show related records as a list',
+          label: 'Yes, summarize as a list',
           icon: undefined,
         },
-        cancelButton: { label: 'Do not summarize', icon: undefined },
+        cancelButton: {
+          label: 'No, continue without summarizing',
+          icon: undefined,
+        },
       });
-      confirmationNeededForMultipleResults.set(false);
     }
     await queryManager.update((q) => {
       const newQuery = q.withColumn({

@@ -31,9 +31,12 @@ def clear_dj_cache():
 # queryset is created, and will recurse if used in these functions.
 
 
-def reflect_db_objects(metadata):
+def reflect_db_objects(metadata, db_name=None):
     sync_databases_status()
     databases = models.Database.current_objects.all()
+    if db_name is not None:
+        databases = databases.filter(name=db_name)
+
     for database in databases:
         if database.deleted is False:
             reflect_schemas_from_database(database)
@@ -151,6 +154,10 @@ def _create_reflected_columns(attnum_tuples, tables):
 
 def _delete_stale_columns(attnum_tuples, tables):
     attnums_mapped_by_table_oid = defaultdict(list)
+    for table in tables:
+        # Incase a table does not contain any column, it won't show up in the `attnum_tuples`
+        # In such cases we should delete all the column on Django
+        attnums_mapped_by_table_oid[table.oid] = []
     for attnum, table_oid in attnum_tuples:
         attnums_mapped_by_table_oid[table_oid].append(attnum)
     stale_columns_conditions = []

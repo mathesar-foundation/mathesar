@@ -9,12 +9,18 @@
     ButtonMenuItem,
     iconExpandDown,
   } from '@mathesar-component-library';
-  import { iconRedo, iconUndo, iconInspector } from '@mathesar/icons';
+  import {
+    iconRedo,
+    iconUndo,
+    iconInspector,
+    iconExploration,
+  } from '@mathesar/icons';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import { tables as tablesDataStore } from '@mathesar/stores/tables';
   import TableName from '@mathesar/components/TableName.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
+  import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
@@ -98,99 +104,109 @@
 </script>
 
 <div class="actions-pane">
-  <div class="detail-wrapper">
-    <div class="detail">
-      {isSaved ? 'Based on' : 'Exploring from'}
-    </div>
-    <div class="base-table-holder" class:table-selected={currentTable}>
-      {#if currentTable}
-        <TableName table={currentTable} />
-      {:else}
-        <SelectTableWithinCurrentSchema
-          autoSelect="none"
-          value={currentTable}
-          on:change={(e) => updateBaseTable(e.detail)}
+  <EntityPageHeader
+    title={isSaved
+      ? {
+          name: $query.name ?? '',
+          description: $query.description,
+          icon: iconExploration,
+        }
+      : undefined}
+  >
+    <div class="detail-wrapper">
+      <div class="detail">
+        {isSaved ? 'Based on' : 'Exploring from'}
+      </div>
+      <div class="base-table-holder" class:table-selected={currentTable}>
+        {#if currentTable}
+          <TableName table={currentTable} />
+        {:else}
+          <SelectTableWithinCurrentSchema
+            autoSelect="none"
+            value={currentTable}
+            on:change={(e) => updateBaseTable(e.detail)}
+          />
+        {/if}
+      </div>
+
+      {#if !isSaved && currentTable}
+        <Button
+          appearance="secondary"
+          on:click={() => updateBaseTable(undefined)}
+        >
+          Start Over
+        </Button>
+      {/if}
+
+      {#if isSaved}
+        <ModificationStatus
+          requestState={$state.saveState?.state}
+          hasChanges={$queryHasUnsavedChanges}
         />
       {/if}
     </div>
 
-    {#if !isSaved && currentTable}
-      <Button
-        appearance="secondary"
-        on:click={() => updateBaseTable(undefined)}
-      >
-        Start Over
-      </Button>
-    {/if}
+    <svelte:fragment slot="actions-right">
+      {#if currentTable}
+        <InputGroup>
+          <!-- TODO: Change disabled condition to is_valid(query) -->
+          <SpinnerButton
+            label={querySaveRequestStatus === 'processing' ? 'Saving' : 'Save'}
+            disabled={!$query.base_table ||
+              hasNoColumns ||
+              querySaveRequestStatus === 'processing'}
+            onClick={saveExistingOrCreateNew}
+          />
+          {#if isSaved}
+            <DropdownMenu
+              triggerAppearance="primary"
+              placement="bottom-end"
+              closeOnInnerClick={true}
+              icon={{
+                ...iconExpandDown,
+                size: '0.8em',
+              }}
+              showArrow={false}
+            >
+              <ButtonMenuItem on:click={save}>Save</ButtonMenuItem>
+              <ButtonMenuItem on:click={saveAndClose}>
+                Save and Close
+              </ButtonMenuItem>
+            </DropdownMenu>
+          {/if}
+        </InputGroup>
 
-    {#if isSaved}
-      <ModificationStatus
-        requestState={$state.saveState?.state}
-        hasChanges={$queryHasUnsavedChanges}
-      />
-    {/if}
-  </div>
-
-  {#if currentTable}
-    <div class="actions">
-      <InputGroup>
-        <!-- TODO: Change disabled condition to is_valid(query) -->
-        <SpinnerButton
-          label={querySaveRequestStatus === 'processing' ? 'Saving' : 'Save'}
-          disabled={!$query.base_table ||
-            hasNoColumns ||
-            querySaveRequestStatus === 'processing'}
-          onClick={saveExistingOrCreateNew}
-        />
-        {#if isSaved}
-          <DropdownMenu
-            triggerAppearance="primary"
-            placement="bottom-end"
-            closeOnInnerClick={true}
-            icon={{
-              ...iconExpandDown,
-              size: '0.8em',
-            }}
-            showArrow={false}
+        <InputGroup>
+          <Button
+            appearance="secondary"
+            disabled={!$state.isUndoPossible}
+            on:click={() => queryManager.undo()}
           >
-            <ButtonMenuItem on:click={save}>Save</ButtonMenuItem>
-            <ButtonMenuItem on:click={saveAndClose}>
-              Save and Close
-            </ButtonMenuItem>
-          </DropdownMenu>
-        {/if}
-      </InputGroup>
-
-      <InputGroup>
+            <Icon {...iconUndo} size="0.8rem" />
+            <span>Undo</span>
+          </Button>
+          <Button
+            appearance="secondary"
+            disabled={!$state.isRedoPossible}
+            on:click={() => queryManager.redo()}
+          >
+            <Icon {...iconRedo} size="0.8rem" />
+            <span>Redo</span>
+          </Button>
+        </InputGroup>
         <Button
           appearance="secondary"
-          disabled={!$state.isUndoPossible}
-          on:click={() => queryManager.undo()}
+          disabled={hasNoColumns}
+          on:click={() => {
+            isInspectorOpen = !isInspectorOpen;
+          }}
         >
-          <Icon {...iconUndo} size="0.8rem" />
-          <span>Undo</span>
+          <Icon {...iconInspector} size="0.8rem" />
+          <span>Inspector</span>
         </Button>
-        <Button
-          appearance="secondary"
-          disabled={!$state.isRedoPossible}
-          on:click={() => queryManager.redo()}
-        >
-          <Icon {...iconRedo} size="0.8rem" />
-          <span>Redo</span>
-        </Button>
-      </InputGroup>
-      <Button
-        appearance="secondary"
-        disabled={hasNoColumns}
-        on:click={() => {
-          isInspectorOpen = !isInspectorOpen;
-        }}
-      >
-        <Icon {...iconInspector} size="0.8rem" />
-        <span>Inspector</span>
-      </Button>
-    </div>
-  {/if}
+      {/if}
+    </svelte:fragment>
+  </EntityPageHeader>
 </div>
 
 <NameAndDescInputModalForm
@@ -204,50 +220,30 @@
 </NameAndDescInputModalForm>
 
 <style lang="scss">
-  .actions-pane {
-    display: flex;
+  .detail-wrapper {
+    display: inline-flex;
     align-items: center;
     overflow: hidden;
-    height: 4.28575rem;
-    flex-grow: 1;
+    flex-shrink: 0;
 
-    .detail-wrapper {
-      display: inline-flex;
-      align-items: center;
-      overflow: hidden;
+    .detail,
+    .base-table-holder {
+      font-size: var(--text-size-large);
+      font-weight: 500;
+    }
+
+    .base-table-holder {
+      flex-grow: 0;
       flex-shrink: 0;
+      margin: 0 var(--size-small);
 
-      .detail,
-      .base-table-holder {
-        font-size: var(--text-size-large);
+      &.table-selected {
         font-weight: 500;
       }
 
-      .base-table-holder {
-        flex-grow: 0;
-        flex-shrink: 0;
-        margin: 0 var(--size-base);
-
-        &.table-selected {
-          font-weight: 600;
-        }
-
-        > :global(.select) {
-          min-width: 12rem;
-          font-size: var(--text-size-base);
-        }
-      }
-    }
-
-    .actions {
-      flex-shrink: 0;
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: var(--size-small);
-
-      :global(button) {
-        flex-shrink: 0;
+      > :global(.select) {
+        min-width: 12rem;
+        font-size: var(--text-size-base);
       }
     }
   }
