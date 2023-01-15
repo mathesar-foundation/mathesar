@@ -167,10 +167,8 @@ def get_full_cast_map(engine):
         PostgresType.DATE: _get_date_type_body_map(),
         PostgresType.JSON: _get_json_type_body_map(target_type=PostgresType.JSON),
         PostgresType.JSONB: _get_json_type_body_map(target_type=PostgresType.JSONB),
-        MathesarCustomType.MATHESAR_JSON_ARRAY: _get_json_type_body_map(
-            target_type=MathesarCustomType.MATHESAR_JSON_ARRAY),
-        MathesarCustomType.MATHESAR_JSON_OBJECT: _get_json_type_body_map(
-            target_type=MathesarCustomType.MATHESAR_JSON_OBJECT),
+        MathesarCustomType.MATHESAR_JSON_ARRAY: _get_json_type_body_map(target_type=MathesarCustomType.MATHESAR_JSON_ARRAY),
+        MathesarCustomType.MATHESAR_JSON_OBJECT: _get_json_type_body_map(target_type=MathesarCustomType.MATHESAR_JSON_OBJECT),
         PostgresType.DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type=PostgresType.DOUBLE_PRECISION),
         MathesarCustomType.EMAIL: _get_email_type_body_map(),
         PostgresType.INTEGER: _get_integer_type_body_map(target_type=PostgresType.INTEGER),
@@ -183,8 +181,7 @@ def get_full_cast_map(engine):
         PostgresType.SMALLINT: _get_integer_type_body_map(target_type=PostgresType.SMALLINT),
         PostgresType.TIME_WITHOUT_TIME_ZONE: _get_time_type_body_map(PostgresType.TIME_WITHOUT_TIME_ZONE),
         PostgresType.TIME_WITH_TIME_ZONE: _get_time_type_body_map(PostgresType.TIME_WITH_TIME_ZONE),
-        PostgresType.TIMESTAMP_WITH_TIME_ZONE: _get_timestamp_with_timezone_type_body_map(
-            PostgresType.TIMESTAMP_WITH_TIME_ZONE),
+        PostgresType.TIMESTAMP_WITH_TIME_ZONE: _get_timestamp_with_timezone_type_body_map(PostgresType.TIMESTAMP_WITH_TIME_ZONE),
         PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE: _get_timestamp_without_timezone_type_body_map(),
         PostgresType.TEXT: _get_textual_type_body_map(engine),
         MathesarCustomType.URI: _get_uri_type_body_map(),
@@ -279,9 +276,7 @@ def _get_json_type_body_map(target_type):
     Allow casting from text, primitive json types and Mathesar custom json types.
     Target types include primitive json, jsonb, Mathesar json object and Mathesar json array
     """
-    default_behavior_source_types = categories.STRING_TYPES | frozenset(
-        [PostgresType.JSON, PostgresType.JSONB, MathesarCustomType.MATHESAR_JSON_ARRAY,
-         MathesarCustomType.MATHESAR_JSON_OBJECT])
+    default_behavior_source_types = categories.STRING_TYPES | frozenset([PostgresType.JSON, PostgresType.JSONB, MathesarCustomType.MATHESAR_JSON_ARRAY, MathesarCustomType.MATHESAR_JSON_OBJECT])
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type
     )
@@ -421,8 +416,7 @@ def _get_integer_type_body_map(target_type=PostgresType.INTEGER):
     etc.
     """
     default_behavior_source_types = categories.INTEGER_TYPES | categories.STRING_TYPES
-    no_rounding_source_types = categories.DECIMAL_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES | frozenset(
-        [PostgresType.NUMERIC])
+    no_rounding_source_types = categories.DECIMAL_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES | frozenset([PostgresType.NUMERIC])
     target_type_str = target_type.id
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
@@ -464,7 +458,7 @@ def _get_decimal_number_type_body_map(target_type=PostgresType.NUMERIC):
     """
 
     default_behavior_source_types = (
-            categories.NUMERIC_TYPES | categories.STRING_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES
+        categories.NUMERIC_TYPES | categories.STRING_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES
     )
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type,
@@ -487,8 +481,7 @@ def _get_boolean_to_number_cast(target_type):
 
 def _get_time_type_body_map(target_type):
     default_behavior_source_types = [
-        PostgresType.TEXT, PostgresType.CHARACTER_VARYING, PostgresType.TIME_WITHOUT_TIME_ZONE,
-        PostgresType.TIME_WITH_TIME_ZONE
+        PostgresType.TEXT, PostgresType.CHARACTER_VARYING, PostgresType.TIME_WITHOUT_TIME_ZONE, PostgresType.TIME_WITH_TIME_ZONE
     ]
     return _get_default_type_body_map(
         default_behavior_source_types, target_type,
