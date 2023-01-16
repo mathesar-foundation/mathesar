@@ -13,7 +13,7 @@ from mathesar.database.types import UIType
 
 class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     filter = serializers.JSONField(required=False, default=None)
-    order_by = serializers.JSONField(required=False, default=[])
+    order_by = serializers.JSONField(required=False, default=None)
     grouping = serializers.JSONField(required=False, default={})
     duplicate_only = serializers.JSONField(required=False, default=None)
     search_fuzzy = serializers.JSONField(required=False, default=[])

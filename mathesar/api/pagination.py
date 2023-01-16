@@ -66,8 +66,6 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         search=None,
         duplicate_only=None,
     ):
-        if order_by is None:
-            order_by = []
         if grouping is None:
             grouping = {}
         if search is None:

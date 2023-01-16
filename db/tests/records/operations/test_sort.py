@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import DropConstraint
 
-from db.records.operations.select import get_records, get_records_with_default_order
+from db.records.operations.select import get_records, get_records_with_deterministic_order
 from db.records.operations.sort import BadSortFormat, SortFieldNotFound
 
 
@@ -138,7 +138,7 @@ def check_multi_field_ordered(record_list, field_dir_pairs):
 def test_get_records_default_order_single_primary_key(roster_table_obj):
     roster, engine = roster_table_obj
     primary_column = roster.primary_key.columns[0].name
-    record_list = get_records_with_default_order(roster, engine)
+    record_list = get_records_with_deterministic_order(roster, engine)
     check_single_field_ordered(record_list, primary_column, 'asc')
 
 
@@ -146,7 +146,7 @@ def test_get_records_default_order_adds_primary_key(roster_table_obj):
     roster, engine = roster_table_obj
     primary_column = roster.primary_key.columns[0].name
     passed_order_by = [{"field": "Subject", "direction": "asc"}]
-    record_list = get_records_with_default_order(roster, engine, order_by=passed_order_by)
+    record_list = get_records_with_deterministic_order(roster, engine, order_by=passed_order_by)
     field_dir_pairs = [("Subject", "asc"), (primary_column, "asc")]
     check_multi_field_ordered(record_list, field_dir_pairs)
 

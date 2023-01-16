@@ -112,16 +112,13 @@ class DBQuery:
         transformations if one of the transformations already defines an ordering (because
         that would override the transformation).
         """
-        relation = self.transformed_relation
-        engine = self.engine
-        if self._is_sorting_transform_used:
-            return records_select.get_records(
-                table=relation, engine=engine, **kwargs,
-            )
-        else:
-            return records_select.get_records_with_default_order(
-                table=relation, engine=engine, **kwargs,
-            )
+        fallback_to_default_ordering = not self._is_sorting_transform_used
+        return records_select.get_records(
+            table=self.transformed_relation,
+            engine=self.engine,
+            fallback_to_default_ordering=fallback_to_default_ordering,
+            **kwargs,
+        )
 
     @property
     def _is_sorting_transform_used(self):

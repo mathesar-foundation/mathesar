@@ -4,13 +4,21 @@ from db.columns import utils as col_utils
 from db.records.exceptions import BadSortFormat, SortFieldNotFound
 
 
-def get_default_order_by(relation, order_by=None):
+def make_ordering_deterministic(relation, order_by=None):
+    """
+    Makes an order_by deterministic (totally ordering).
+
+    Given a relation, and a `order_by` spec, that defines the ordering to be applied to the
+    relation, returns a new order_by that is the totally ordered (deterministic) version of the
+    input order_by.
+
+    Appending primary key sort guarantees determinism, but if that fails, we revert to ordering by
+    all columns.
+    """
     if order_by is None:
         order_by = []
-    # appending primary key sort guarantees determinism
     order_by = _append_primary_key_sort(relation, order_by)
     if not order_by:
-        # This is a last-ditch attempt to guarantee determinism
         order_by = _build_order_by_all_columns_clause(relation)
     return order_by
 
