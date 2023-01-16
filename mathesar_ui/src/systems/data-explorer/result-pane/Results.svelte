@@ -12,12 +12,13 @@
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
+  import type QueryManager from '../QueryManager';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
   import QueryRunErrors from './QueryRunErrors.svelte';
 
-  export let queryRunner: QueryRunner;
+  export let queryHandler: QueryRunner | QueryManager;
   export let isExplorationPage = false;
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
@@ -30,7 +31,7 @@
     runState,
     selection,
     inspector,
-  } = queryRunner);
+  } = queryHandler);
   $: ({ initial_columns } = $query);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
@@ -61,7 +62,7 @@
     </div>
   {:else if errors}
     <div class="empty-state">
-      <QueryRunErrors {errors} />
+      <QueryRunErrors {errors} {queryHandler} />
     </div>
   {:else}
     <Sheet
@@ -84,7 +85,7 @@
         {#each columnList as processedQueryColumn (processedQueryColumn.id)}
           <ResultHeaderCell
             {processedQueryColumn}
-            {queryRunner}
+            queryRunner={queryHandler}
             isSelected={isColumnSelected(
               $selectedCells,
               $columnsSelectedWhenTheTableIsEmpty,
@@ -151,11 +152,11 @@
           pagination={$pagination}
           {totalCount}
           on:change={(e) => {
-            void queryRunner.setPagination(e.detail);
+            void queryHandler.setPagination(e.detail);
           }}
         />
         {#if isExplorationPage}
-          <QueryRefreshButton {queryRunner} />
+          <QueryRefreshButton queryRunner={queryHandler} />
         {/if}
       </div>
     </div>
