@@ -15,6 +15,7 @@
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
+  import QueryRunErrors from './QueryRunErrors.svelte';
 
   export let queryRunner: QueryRunner;
   export let isExplorationPage = false;
@@ -34,7 +35,7 @@
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
   $: recordRunState = $runState?.state;
-  $: errors = $runState?.state === 'failure' ? $runState.errors : [];
+  $: errors = $runState?.state === 'failure' ? $runState.errors : undefined;
   $: columnList = [...$processedColumns.values()];
   $: sheetColumns = columnList.length
     ? [{ id: ID_ROW_CONTROL_COLUMN }, ...columnList]
@@ -58,11 +59,9 @@
       This exploration does not contain any columns. Edit the exploration to add
       columns to it.
     </div>
-  {:else if errors.length}
-    <div class="empty-state errors">
-      {#each errors as error}
-        <p>{error}</p>
-      {/each}
+  {:else if errors}
+    <div class="empty-state">
+      <QueryRunErrors {errors} />
     </div>
   {:else}
     <Sheet
@@ -175,14 +174,6 @@
 
     .empty-state {
       padding: 1rem;
-
-      &.errors {
-        color: var(--danger-color);
-      }
-
-      p {
-        margin: 0;
-      }
     }
 
     :global(.sheet) {
