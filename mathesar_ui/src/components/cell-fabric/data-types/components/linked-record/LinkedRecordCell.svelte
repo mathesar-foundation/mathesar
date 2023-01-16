@@ -1,7 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  import { Icon, iconExpandDown } from '@mathesar-component-library';
+  import {
+    Icon,
+    iconExpandDown,
+    compareWholeValues,
+  } from '@mathesar-component-library';
   import Default from '@mathesar/components/Default.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
@@ -18,6 +22,7 @@
   export let isActive: $$Props['isActive'];
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
+  export let searchValue: $$Props['searchValue'] = undefined;
   export let recordSummary: $$Props['recordSummary'] = undefined;
   export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
   export let disabled: $$Props['disabled'];
@@ -27,6 +32,7 @@
   let wasActiveBeforeClick = false;
 
   $: hasValue = value !== undefined && value !== null;
+  $: valueComparisonOutcome = compareWholeValues(searchValue, value);
 
   async function launchRecordSelector(event?: MouseEvent) {
     if (disabled) {
@@ -98,7 +104,11 @@
   <div class="linked-record-cell" class:disabled>
     <div class="value">
       {#if hasValue}
-        <LinkedRecord recordId={value} {recordSummary} />
+        <LinkedRecord
+          recordId={value}
+          {recordSummary}
+          {valueComparisonOutcome}
+        />
       {:else if value === undefined}
         <Default />
       {:else}
@@ -109,7 +119,7 @@
       <button
         class="dropdown-button passthrough"
         on:click={launchRecordSelector}
-        label="Pick a record"
+        aria-label="Pick a record"
         title="Pick a record"
       >
         <Icon {...iconExpandDown} />

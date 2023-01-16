@@ -24,7 +24,11 @@
     <header>From Base table</header>
     <div class="content">
       {#each [...baseTableColumns] as [columnId, column] (columnId)}
-        <SelectableColumn {column} on:add />
+        <SelectableColumn
+          {column}
+          usageCount={$query.getColumnCount(columnId)}
+          on:add
+        />
       {/each}
     </div>
   </section>
@@ -46,6 +50,7 @@
           <SelectableColumnTree
             columnsWithLinks={baseTableColumnsWithLinks}
             {linkCollapsibleOpenState}
+            {query}
             on:add
           />
         </div>
@@ -66,6 +71,7 @@
                 <SelectableColumnTree
                   {linkCollapsibleOpenState}
                   columnsWithLinks={table.columns}
+                  {query}
                   on:add
                 />
               </TableGroupCollapsible>

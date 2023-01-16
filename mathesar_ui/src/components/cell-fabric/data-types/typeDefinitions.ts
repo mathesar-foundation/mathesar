@@ -26,6 +26,7 @@ export type CellColumnLike = Pick<
 >;
 
 export interface CellComponentFactory<T = never> {
+  initialInputValue?: unknown;
   get(
     column: CellColumnLike,
     config?: Record<string, unknown>,
