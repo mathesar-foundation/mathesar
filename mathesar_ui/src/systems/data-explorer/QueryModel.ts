@@ -365,6 +365,10 @@ export default class QueryModel {
     };
   }
 
+  getColumnCount(id: QueryInstanceInitialColumn['id']): number {
+    return this.initial_columns.filter((entry) => entry.id === id).length;
+  }
+
   toJson(): UnsavedQueryInstance {
     return {
       id: this.id,
