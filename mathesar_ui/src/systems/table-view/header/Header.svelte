@@ -10,9 +10,9 @@
     SheetCellResizer,
     isColumnSelected,
   } from '@mathesar/components/sheet';
+  import { ContextMenu } from '@mathesar/component-library';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
-  import { ContextMenu } from '@mathesar/component-library';
   import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
 
   const tabularData = getTabularDataStoreFromContext();

@@ -1,11 +1,11 @@
-import type { CellDataType } from "../cell-fabric/data-types/typeDefinitions";
+import type { CellDataType } from '../cell-fabric/data-types/typeDefinitions';
+
 export type SortDirection = 'ASCENDING' | 'DESCENDING';
 
 export const allowedSortDirections: SortDirection[] = [
   'ASCENDING',
   'DESCENDING',
 ];
-
 
 export function getSortingLabelForColumn(
   dataType: CellDataType,
