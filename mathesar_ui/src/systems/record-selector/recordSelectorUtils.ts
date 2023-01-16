@@ -8,31 +8,11 @@ import type { Column } from '@mathesar/api/types/tables/columns';
 export type RecordSelectorPurpose = 'dataEntry' | 'navigation';
 
 /** What kind of row are we in? */
-export type CellLayoutRowType =
-  | 'columnHeaderRow'
-  | 'searchInputRow'
-  | 'dividerRow'
-  | 'dataRow';
+export type CellLayoutRowType = 'columnHeaderRow' | 'dataRow';
 /** What kind of column are we in? */
 export type CellLayoutColumnType = 'dataColumn' | 'rowHeaderColumn';
 
 export type CellState = 'focused' | 'acquiringFkValue';
-
-export function getCellState({
-  hasNestedSelectorOpen,
-  hasFocus,
-}: {
-  hasNestedSelectorOpen: boolean;
-  hasFocus: boolean;
-}): CellState | undefined {
-  if (hasNestedSelectorOpen) {
-    return 'acquiringFkValue';
-  }
-  if (hasFocus) {
-    return 'focused';
-  }
-  return undefined;
-}
 
 export function getColumnIdToFocusInitially({
   table,

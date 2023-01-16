@@ -10,6 +10,11 @@
   export let isActive = false;
   export let allowRemoval = false;
   export let uniformTabWidth = true;
+  export let link: string | undefined = undefined;
+
+  $: hasLink = typeof link !== 'undefined';
+  $: tabComponent = hasLink ? 'a' : 'div';
+  $: linkProps = hasLink ? { href: link } : {};
 </script>
 
 <li
@@ -19,21 +24,22 @@
   tabindex="-1"
   style={uniformTabWidth ? `width:${Math.floor(100 / totalTabs)}%;` : undefined}
 >
-  <div
+  <svelte:element
+    this={tabComponent}
     role="tab"
     tabindex="0"
     aria-selected={isActive}
     aria-disabled={!!tab.disabled}
     id={isActive ? `mtsr-${componentId}-tab` : undefined}
-    data-tinro-ignore
     aria-controls={isActive ? `mtsr-${componentId}-tabpanel` : undefined}
+    {...linkProps}
     on:focus
     on:blur
     on:mousedown
     on:click
   >
     <slot />
-  </div>
+  </svelte:element>
 
   {#if allowRemoval}
     <button

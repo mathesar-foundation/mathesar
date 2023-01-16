@@ -204,12 +204,12 @@ class Schema(DatabaseObject):
 
     def update_sa_schema(self, update_params):
         result = model_utils.update_sa_schema(self, update_params)
-        reset_reflection()
+        reset_reflection(db_name=self.database.name)
         return result
 
     def delete_sa_schema(self):
         result = drop_schema(self.name, self._sa_engine, cascade=True)
-        reset_reflection()
+        reset_reflection(db_name=self.database.name)
         return result
 
     def clear_name_cache(self):
@@ -257,6 +257,7 @@ class ColumnPrefetcher(Prefetcher):
                 engine=engine,
                 metadata=get_cached_metadata(),
             )
+
         return ColumnNamePrefetcher(
             filter=lambda column_attnums, columns: _get_column_names_from_tables(table_oids),
             mapper=lambda column: (column.attnum, column.table.oid)
@@ -418,7 +419,7 @@ class Table(DatabaseObject, Relation):
             self.oid,
             column_data,
         )
-        reset_reflection()
+        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def alter_column(self, column_attnum, column_data):
@@ -428,7 +429,7 @@ class Table(DatabaseObject, Relation):
             column_attnum,
             column_data,
         )
-        reset_reflection()
+        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def drop_column(self, column_attnum):
@@ -437,7 +438,7 @@ class Table(DatabaseObject, Relation):
             column_attnum,
             self.schema._sa_engine,
         )
-        reset_reflection()
+        reset_reflection(db_name=self.schema.database.name)
 
     def duplicate_column(self, column_attnum, copy_data, copy_constraints, name=None):
         result = duplicate_column(
@@ -448,7 +449,7 @@ class Table(DatabaseObject, Relation):
             copy_data=copy_data,
             copy_constraints=copy_constraints,
         )
-        reset_reflection()
+        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def get_preview(self, column_definitions):
@@ -476,12 +477,12 @@ class Table(DatabaseObject, Relation):
 
     def update_sa_table(self, update_params):
         result = model_utils.update_sa_table(self, update_params)
-        reset_reflection()
+        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def delete_sa_table(self):
         result = drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
-        reset_reflection()
+        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def get_record(self, id_value):
@@ -546,7 +547,7 @@ class Table(DatabaseObject, Relation):
             )
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         result = Constraint.current_objects.create(oid=constraint_oid, table=self)
-        reset_reflection()
+        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def get_column_name_id_bidirectional_map(self):
@@ -609,7 +610,7 @@ class Table(DatabaseObject, Relation):
         self.save()
         remainder_column_names = column_names_id_map.keys() - column_names_to_move
         self.update_column_reference(remainder_column_names, column_names_id_map)
-        reset_reflection()
+        reset_reflection(db_name=self.schema.database.name)
         return extracted_sa_table, remainder_sa_table
 
     def split_table(
@@ -645,7 +646,7 @@ class Table(DatabaseObject, Relation):
         extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
         remainder_table = Table.current_objects.get(oid=remainder_table_oid)
         remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
-        reset_reflection()
+        reset_reflection(db_name=self.schema.database.name)
         remainder_fk_column = Column.objects.get(table=remainder_table, attnum=linking_fk_column_attnum)
 
         return extracted_table, remainder_table, remainder_fk_column
@@ -717,6 +718,7 @@ class Column(ReflectionManagerMixin, BaseModel):
                 return getattr(self._sa_column, name)
             else:
                 raise e
+
     current_objects = models.Manager()
     objects = DatabaseObjectManager(
         name=ColumnNamePrefetcher
@@ -819,7 +821,11 @@ class Constraint(DatabaseObject):
         column_attnum_list = self._constraint_record['confkey']
         if column_attnum_list:
             foreign_relation_oid = self._constraint_record['confrelid']
-            columns = Column.objects.filter(table__oid=foreign_relation_oid, table__schema=self.table.schema, attnum__in=column_attnum_list).order_by("attnum")
+            columns = Column.objects.filter(
+                table__oid=foreign_relation_oid,
+                table__schema=self.table.schema,
+                attnum__in=column_attnum_list
+            ).order_by("attnum")
             return columns
 
     @property
@@ -849,7 +855,7 @@ class Constraint(DatabaseObject):
             self.name
         )
         self.delete()
-        reset_reflection()
+        reset_reflection(db_name=self.table.schema.database.name)
 
 
 class DataFile(BaseModel):
@@ -910,5 +916,10 @@ def compute_default_preview_template(table):
             break
     if preview_column is None:
         preview_column = primary_key_column
-    preview_template = f"{{{preview_column.id}}}"
+
+    if preview_column:
+        preview_template = f"{{{preview_column.id}}}"
+    else:
+        # The table does not contain any column, show blank in such scenario.
+        preview_template = ""
     return preview_template

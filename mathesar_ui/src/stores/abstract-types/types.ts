@@ -105,6 +105,13 @@ export interface AbstractTypeFilterDefinitionResponse {
   >;
 }
 
+export interface AbstractTypeLimitedFilterInformation {
+  id: AbstractTypeFilterDefinitionResponse['id'];
+  name: AbstractTypeFilterDefinitionResponse['name'];
+  hasAliases: boolean;
+  hasParams: boolean;
+}
+
 export interface AbstractTypeFilterDefinition {
   id: AbstractTypeFilterDefinitionResponse['id'];
   name: AbstractTypeFilterDefinitionResponse['name']; // Would be extraced from alias if present

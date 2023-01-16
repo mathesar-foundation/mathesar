@@ -2,7 +2,6 @@ from rest_framework.mixins import CreateModelMixin
 from rest_framework.viewsets import GenericViewSet
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.links import LinksMappingSerializer
-from mathesar.state import reset_reflection
 
 
 class LinkViewSet(CreateModelMixin, GenericViewSet):
@@ -14,5 +13,4 @@ class LinkViewSet(CreateModelMixin, GenericViewSet):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        reset_reflection()
         return response

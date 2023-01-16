@@ -27,7 +27,8 @@
       margin-right: 2rem;
       font-size: var(--text-size-large);
 
-      > div {
+      > div,
+      a {
         padding: 0.75rem 0;
         white-space: nowrap;
         text-decoration: none;

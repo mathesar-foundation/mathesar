@@ -2,7 +2,11 @@ import bz2
 import os
 
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
 
+from db.engine import create_future_engine
+
+from demo.arxiv_dataset.base import setup_and_register_schema_for_receiving_arxiv_data
 from mathesar.models.base import Table, Schema, PreviewColumnSettings
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -15,6 +19,8 @@ MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
 LIBRARY_MANAGEMENT = 'Library Management'
 MATHESAR_DEVCON = 'Mathesar DevCon'
 MOVIE_COLLECTION = 'Movie Collection'
+ARXIV = 'Latest Papers from arXiv'
+MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
 
 
 def load_datasets(engine):
@@ -22,6 +28,7 @@ def load_datasets(engine):
     _load_library_dataset(engine)
     _load_movies_dataset(engine)
     _load_devcon_dataset(engine)
+    _load_arxiv_data_skeleton(engine)
 
 
 def _load_library_dataset(engine):
@@ -63,6 +70,10 @@ def _load_devcon_dataset(engine):
         conn.execute(create_schema_query)
         conn.execute(set_search_path)
         conn.execute(text(f.read()))
+
+
+def _load_arxiv_data_skeleton(engine):
+    setup_and_register_schema_for_receiving_arxiv_data(engine, schema_name=ARXIV)
 
 
 def customize_settings(engine):
@@ -116,3 +127,26 @@ def _get_dj_column_by_name(table, name):
     for c in columns:
         if c.name == name:
             return c
+
+
+def create_demo_database(
+        user_db, username, password, hostname, root_db, port, template_db
+):
+    """Create database, install Mathesar on it, add demo data."""
+    user_db_engine = create_future_engine(
+        username, password, hostname, user_db, port
+    )
+    try:
+        user_db_engine.connect()
+        user_db_engine.dispose()
+        print(f"Database {user_db} already exists! Skipping...")
+    except OperationalError:
+        root_db_engine = create_future_engine(
+            username, password, hostname, root_db, port,
+        )
+        with root_db_engine.connect() as conn:
+            conn.execution_options(isolation_level="AUTOCOMMIT")
+            conn.execute(text(f"CREATE DATABASE {user_db} TEMPLATE {template_db};"))
+        root_db_engine.dispose()
+        user_db_engine.dispose()
+        print(f"Created DB is {user_db}.")

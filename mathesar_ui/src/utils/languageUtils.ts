@@ -90,9 +90,24 @@ const wordMap = {
   matches: makePluralFormsFromEnglish('match', 'matches'),
   results: makePluralFormsFromEnglish('result', 'results'),
   values: makePluralFormsFromEnglish('value', 'values'),
+  times: makePluralFormsFromEnglish('instance', 'times'),
 } as const;
 
 type Word = keyof typeof wordMap;
+
+function caseString(
+  value: string,
+  casing: 'lower' | 'title' | 'sentence' = 'lower',
+): string {
+  switch (casing) {
+    case 'title':
+      return makeTitleCase(value);
+    case 'sentence':
+      return makeSentenceCase(value);
+    default:
+      return value;
+  }
+}
 
 export function pluralize(
   countable: Countable,
@@ -100,14 +115,7 @@ export function pluralize(
   casing: 'lower' | 'title' | 'sentence' = 'lower',
 ): string {
   const result = wordMap[word][getCountablePluralRule(countable)];
-  switch (casing) {
-    case 'title':
-      return makeTitleCase(result);
-    case 'sentence':
-      return makeSentenceCase(result);
-    default:
-      return result;
-  }
+  return caseString(result, casing);
 }
 
 export function labeledCount(
@@ -118,4 +126,21 @@ export function labeledCount(
   const count = getCount(countable);
   const label = pluralize(count, word, casing);
   return `${count} ${label}`;
+}
+
+export function labeledCountWithoutUnit(
+  countable: Countable,
+  casing?: 'lower' | 'title' | 'sentence',
+): string {
+  const count = getCount(countable);
+  if (count === 1) {
+    return 'once';
+  }
+  if (count === 2) {
+    return 'twice';
+  }
+  if (count === 3) {
+    return 'thrice';
+  }
+  return labeledCount(countable, 'times', casing);
 }
