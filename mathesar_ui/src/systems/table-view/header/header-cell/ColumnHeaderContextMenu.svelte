@@ -1,6 +1,9 @@
 <script lang="ts">
   import { ButtonMenuItem } from '@mathesar/component-library';
-  import type { SortDirection } from '@mathesar/components/sort-entry/utils';
+  import {
+    getSortingLabelForColumn,
+    type SortDirection,
+  } from '@mathesar/components/sort-entry/utils';
   import {
     iconGrouping,
     iconSortAscending,
@@ -10,7 +13,6 @@
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
-  import { getSortingLabelForColumn } from './utils';
 
   export let processedColumn: ProcessedColumn;
 
