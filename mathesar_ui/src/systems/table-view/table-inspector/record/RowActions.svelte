@@ -79,7 +79,10 @@
   <Button appearance="outline-primary" on:click={handleDeleteRecords}>
     <Icon {...isDeleting ? iconLoading : iconDeleteMajor} />
     <span>
-      Delete {labeledCount(selectedRowIndices, 'records')}
+      Delete {labeledCount(selectedRowIndices, 'records', {
+        casing: 'title',
+        countWhenSingular: 'hidden',
+      })}
     </span>
   </Button>
 </div>
