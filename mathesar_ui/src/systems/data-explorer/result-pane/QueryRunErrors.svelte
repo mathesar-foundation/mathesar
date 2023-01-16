@@ -15,6 +15,12 @@
   $: queryManager =
     queryHandler instanceof QueryManager ? queryHandler : undefined;
   $: ({ query } = queryHandler);
+
+  function deleteMissingColumns(column_id: number) {
+    if (queryManager) {
+      queryManager.update((q) => q.withoutColumnsById([column_id]));
+    }
+  }
 </script>
 
 <div class="query-run-errors">
@@ -24,24 +30,60 @@
       {#each errors.errors as apierror}
         <ul>
           {#if apierror.code === QUERY_CONTAINS_DELETED_COLUMN && hasProperty(apierror.detail, 'column_id')}
+            {@const columnId = Number(apierror.detail.column_id)}
             <li class="error">
               <p class="strong">
                 Some of the columns present in the query are missing in the
                 underlying base table.
               </p>
-              <p>
-                {apierror.detail.column_id}
-              </p>
               {#if queryManager}
+                {@const columnsAndTransformsToDelete =
+                  $query.getInitialColumnsAndTransformsUtilizingThemByColumnIds(
+                    [columnId],
+                  )}
+                {@const initialColumns =
+                  columnsAndTransformsToDelete.initialColumnsUsingColumnIds}
+                {@const transformsWithIndex =
+                  columnsAndTransformsToDelete.transformsUsingColumnIds}
                 <p>
-                  You can attempt to recover the query by removing those columns
-                  and the transformations ulitizing them by clicking on the
-                  following button.
+                  You can attempt to recover the query by clicking on the button
+                  below.
                 </p>
+                {#if initialColumns.length > 0}
+                  <p>This will remove the following column(s):</p>
+                  <ul class="removal-list">
+                    {#each initialColumns as initialColumn (initialColumn.alias)}
+                      <li>
+                        {$query.display_names[initialColumn.alias] ??
+                          initialColumn.alias}
+                      </li>
+                    {/each}
+                  </ul>
+                {/if}
+                {#if transformsWithIndex.length > 0}
+                  <p>This will remove the following transformation(s):</p>
+                  <ul class="removal-list">
+                    {#each transformsWithIndex as transformInfo (transformInfo)}
+                      <li>
+                        {transformInfo.index + 1}: {transformInfo.transform
+                          .name}
+                      </li>
+                    {/each}
+                  </ul>
+                {/if}
                 <p>
-                  <Button appearance="secondary">Delete missing columns</Button>
+                  <Button
+                    appearance="secondary"
+                    on:click={() => deleteMissingColumns(columnId)}
+                  >
+                    Attempt Exploration recovery
+                  </Button>
                 </p>
               {:else if $currentDatabase && $currentSchema && $query.id}
+                <p>
+                  You can edit the exploration in the Data Explorer to attempt
+                  recovering it.
+                </p>
                 <p>
                   <a
                     class="btn btn-secondary"
@@ -88,13 +130,15 @@
     p {
       margin: 0;
     }
-    p + p {
+    p + p,
+    p + ul,
+    ul + p {
       margin-top: var(--size-xx-small);
     }
 
     ul {
       list-style: disc outside none;
-      padding-left: 1rem;
+      padding-left: 1.3rem;
       font-size: var(--text-size-base);
     }
   }

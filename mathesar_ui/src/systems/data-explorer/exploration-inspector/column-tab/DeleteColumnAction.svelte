@@ -47,7 +47,9 @@
     denyDeletionDueToLastRemainingBaseColumn || columnsAreUsedInTransformations;
 
   function deleteSelectedColumn() {
-    void queryManager.update((q) => q.withoutColumns(selectedColumnAliases));
+    void queryManager.update((q) =>
+      q.withoutInitialColumns(selectedColumnAliases),
+    );
     queryManager.clearSelection();
   }
 </script>
