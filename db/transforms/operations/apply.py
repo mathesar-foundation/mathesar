@@ -36,9 +36,9 @@ def apply_transformations_deprecated(
     even if `order_by` is not provided. When `order_by` is provided, it will be converted into a
     total ordering automatically. As a consequence, the ordering is always total.
 
-    At the same time, when both `order_by` and `fallback_to_default_ordering` are falsy, an ordering will
-    not be applied. This is useful, when `table` has already been pre-sorted (because it's actually
-    the result of a DBQuery that defines an ordering that we don't want to override.
+    At the same time, when both `order_by` and `fallback_to_default_ordering` are falsy, an ordering
+    will not be applied. This is useful, when `table` has already been pre-sorted (e.g. because it's
+    actually the result of a DBQuery that defines an ordering that we don't want to override).
     """
     # TODO rename the actual method parameter
     if search is None:
