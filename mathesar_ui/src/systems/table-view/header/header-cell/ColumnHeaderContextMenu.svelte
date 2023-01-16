@@ -1,9 +1,9 @@
 <script lang="ts">
   import { ButtonMenuItem } from '@mathesar/component-library';
+  import type { SortDirection } from '@mathesar/components/sort-entry/utils';
   import { iconGrouping, iconSorting } from '@mathesar/icons';
   import {
     getTabularDataStoreFromContext,
-    SortDirection,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import { getSortingLabelForColumn } from './utils';
@@ -47,29 +47,26 @@
   }
 </script>
 
-{#if currentSorting === SortDirection.A}
+{#if currentSorting === 'ASCENDING'}
   <ButtonMenuItem icon={iconSorting} on:click={removeSorting}>
-    Remove {sortingLabel[SortDirection.A]} Sorting
+    Remove {sortingLabel.ASCENDING} Sorting
   </ButtonMenuItem>
 {:else}
-  <ButtonMenuItem
-    icon={iconSorting}
-    on:click={() => applySorting(SortDirection.A)}
-  >
-    Sort {sortingLabel[SortDirection.A]}
+  <ButtonMenuItem icon={iconSorting} on:click={() => applySorting('ASCENDING')}>
+    Sort {sortingLabel.ASCENDING}
   </ButtonMenuItem>
 {/if}
 
-{#if currentSorting === SortDirection.D}
+{#if currentSorting === 'DESCENDING'}
   <ButtonMenuItem icon={iconSorting} on:click={removeSorting}>
-    Remove {sortingLabel[SortDirection.D]} Sorting
+    Remove {sortingLabel.DESCENDING} Sorting
   </ButtonMenuItem>
 {:else}
   <ButtonMenuItem
     icon={iconSorting}
-    on:click={() => applySorting(SortDirection.D)}
+    on:click={() => applySorting('DESCENDING')}
   >
-    Sort {sortingLabel[SortDirection.D]}
+    Sort {sortingLabel.DESCENDING}
   </ButtonMenuItem>
 {/if}
 
