@@ -1,3 +1,4 @@
+from django.contrib.auth.views import LoginView
 from django.urls import include, path, re_path
 from rest_framework_nested import routers
 
@@ -33,6 +34,7 @@ urlpatterns = [
     path('api/ui/v0/', include(ui_router.urls)),
     path('api/ui/v0/reflect/', views.reflect_all, name='reflect_all'),
     path('auth/password_reset_confirm', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('auth/login/', LoginView.as_view(redirect_authenticated_user=True), name='login'),
     path('auth/', include('django.contrib.auth.urls')),
     path('', views.home, name='home'),
     path('<db_name>/', views.schemas, name='schemas'),
