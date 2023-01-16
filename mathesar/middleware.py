@@ -4,7 +4,6 @@ import warnings
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from sqlalchemy.exc import InterfaceError
-from django.shortcuts import redirect
 
 
 class CursorClosedHandlerMiddleware:
@@ -34,15 +33,3 @@ class PasswordChangeNeededMiddleware:
             return HttpResponseRedirect(reverse('password_reset_confirm'))
         response = self.get_response(request)
         return response
-
-
-class CheckIfUserAlreadyLoggedInMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        if not request.user.is_authenticated and request.path == '/auth/login/':
-            response = self.get_response(request)
-            return response
-
-        return redirect('/')
