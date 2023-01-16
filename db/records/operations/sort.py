@@ -4,7 +4,7 @@ from db.columns import utils as col_utils
 from db.records.exceptions import BadSortFormat, SortFieldNotFound
 
 
-def make_ordering_deterministic(relation, order_by=None):
+def make_order_by_deterministic(relation, order_by=None):
     """
     Makes an order_by deterministic (totally ordering).
 
