@@ -1,7 +1,11 @@
 <script lang="ts">
   import { ButtonMenuItem } from '@mathesar/component-library';
   import type { SortDirection } from '@mathesar/components/sort-entry/utils';
-  import { iconGrouping, iconSorting } from '@mathesar/icons';
+  import {
+    iconGrouping,
+    iconSortAscending,
+    iconSortDescending,
+  } from '@mathesar/icons';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
@@ -48,22 +52,25 @@
 </script>
 
 {#if currentSorting === 'ASCENDING'}
-  <ButtonMenuItem icon={iconSorting} on:click={removeSorting}>
+  <ButtonMenuItem icon={iconSortAscending} on:click={removeSorting}>
     Remove {sortingLabel.ASCENDING} Sorting
   </ButtonMenuItem>
 {:else}
-  <ButtonMenuItem icon={iconSorting} on:click={() => applySorting('ASCENDING')}>
+  <ButtonMenuItem
+    icon={iconSortAscending}
+    on:click={() => applySorting('ASCENDING')}
+  >
     Sort {sortingLabel.ASCENDING}
   </ButtonMenuItem>
 {/if}
 
 {#if currentSorting === 'DESCENDING'}
-  <ButtonMenuItem icon={iconSorting} on:click={removeSorting}>
+  <ButtonMenuItem icon={iconSortDescending} on:click={removeSorting}>
     Remove {sortingLabel.DESCENDING} Sorting
   </ButtonMenuItem>
 {:else}
   <ButtonMenuItem
-    icon={iconSorting}
+    icon={iconSortDescending}
     on:click={() => applySorting('DESCENDING')}
   >
     Sort {sortingLabel.DESCENDING}
