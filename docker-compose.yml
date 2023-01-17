@@ -29,9 +29,16 @@ services:
     command: ./run.sh
     ports:
       - "8000:8000"
+    volumes:
+      - static:/code/static
+      - media:/code/media
   service:
     profiles: ["prod"]
     extends: service-without-db
+    # Volumes are not shared when extending
+    volumes:
+      - static:/code/static
+      - media:/code/media
     depends_on:
       - db
   test-service:
@@ -49,6 +56,11 @@ services:
     build:
       context: .
       dockerfile: caddy.Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - media:/mathesar/media
+      - static:/mathesar/static
   dev-service:
     build:
       context: .
@@ -80,3 +92,5 @@ services:
 volumes:
   postgresql_data:
   ui_node_modules:
+  media:
+  static:

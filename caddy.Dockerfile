@@ -11,9 +11,11 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | t
 RUN apt-get update
 RUN apt install caddy
 
-EXPOSE 80 443 2015
+EXPOSE 80
+EXPOSE 443
+EXPOSE 443/udp
+EXPOSE 2019
 
 COPY Caddyfile /etc/caddy/Caddyfile
 
-ENTRYPOINT ["/usr/bin/caddy"]
-CMD ["--config", "/etc/caddy/Caddyfile", "--log", "stdout"]
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]

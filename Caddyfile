@@ -1,9 +1,7 @@
-0.0.0.0:80 {
-	handle /api/* {
-		reverse_proxy {localhost:8000}
-	}
-
-
+:80 {
+    log {
+        output stdout
+    }
 	respond /caddy-health-check 200
 
 	handle_path /media/* {
@@ -22,4 +20,5 @@
 			root {$STATIC_ROOT:/mathesar/static/}
 		}
 	}
+	reverse_proxy mathesar_service:8000
 }
