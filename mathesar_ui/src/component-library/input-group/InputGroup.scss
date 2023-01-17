@@ -33,8 +33,8 @@
     flex-direction: column;
     flex-grow: 1;
 
-    .input-element {
-      margin: 0.6rem 0;
+    .input-element + .input-element {
+      margin-top: 0.6rem;
     }
   }
   &:not(.vertical) {

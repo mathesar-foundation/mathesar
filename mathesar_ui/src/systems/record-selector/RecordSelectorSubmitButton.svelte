@@ -23,7 +23,7 @@
 
 <svelte:element
   this={element}
-  class="submit btn btn-secondary size-small"
+  class="submit passthrough"
   class:hover={isSelected}
   on:click={handleClick}
 >
@@ -34,3 +34,11 @@
     {phrase}
   </span>
 </svelte:element>
+
+<style>
+  .submit {
+    font-size: var(--text-size-small);
+    font-weight: bold;
+    white-space: nowrap;
+  }
+</style>
