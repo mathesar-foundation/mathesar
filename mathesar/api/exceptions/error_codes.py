@@ -62,3 +62,6 @@ class ErrorCodes(Enum):
 
     # Version API errors
     GithubReleasesAPIFailure = 4501
+
+    # Upgrade API errors
+    MathesarUpdateFailure = 4601
