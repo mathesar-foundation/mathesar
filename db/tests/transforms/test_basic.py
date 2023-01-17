@@ -29,9 +29,9 @@ from db.records.operations.select import get_records
                 ),
             ],
             [
-                (978,),
-                (194,),
                 (99,),
+                (194,),
+                (978,),
                 (155,),
                 (192,),
             ]
