@@ -42,12 +42,26 @@ def _build_order_by_all_columns_clause(relation):
     """
     To be used when we have failed to find any other ordering criteria,
     since ordering by all columns is inherently inefficient.
+
+    Note the filtering out of internal columns. Before applying this fix, psycopg was throwing an error
+    like "could not identify an ordering operator for type json", because we were trying to
+    sort by an internal column like `__mathesar_group_metadata`, which has type `json`, which
+    requires special handling to be sorted. The problem is bypassed by not attempting to sort on
+    internal columns.
     """
     return [
         {'field': col, 'direction': 'asc'}
         for col
         in relation.columns
+        if not _is_internal_column(col)
     ]
+
+
+def _is_internal_column(col):
+    """
+    Might not be exhaustive, take care.
+    """
+    return col.name == '__mathesar_group_metadata'
 
 
 def apply_relation_sorting(relation, sort_spec):
