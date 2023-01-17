@@ -60,8 +60,8 @@ from db.records.operations.select import get_records
                 ),
             ],
             [
-                (31,),
                 (16,),
+                (31,),
                 (18,),
                 (24,),
                 (33,),
