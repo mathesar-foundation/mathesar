@@ -4,13 +4,21 @@ from db.columns import utils as col_utils
 from db.records.exceptions import BadSortFormat, SortFieldNotFound
 
 
-def get_default_order_by(relation, order_by=None):
+def make_order_by_deterministic(relation, order_by=None):
+    """
+    Makes an order_by deterministic (totally ordering).
+
+    Given a relation, and a `order_by` spec, that defines the ordering to be applied to the
+    relation, returns a new order_by that is the totally ordered (deterministic) version of the
+    input order_by.
+
+    Appending primary key sort guarantees determinism, but if that fails, we revert to ordering by
+    all columns.
+    """
     if order_by is None:
         order_by = []
-    # appending primary key sort guarantees determinism
     order_by = _append_primary_key_sort(relation, order_by)
     if not order_by:
-        # This is a last-ditch attempt to guarantee determinism
         order_by = _build_order_by_all_columns_clause(relation)
     return order_by
 
@@ -21,6 +29,7 @@ def _append_primary_key_sort(relation, order_by):
     overall by appending a final ordering by primary key if one exists.
     """
     pk_cols = col_utils.get_primary_key_column_collection_from_relation(relation)
+    order_by = list(order_by)
     if pk_cols is not None:
         order_by += [
             {'field': col, 'direction': 'asc'}
@@ -34,12 +43,26 @@ def _build_order_by_all_columns_clause(relation):
     """
     To be used when we have failed to find any other ordering criteria,
     since ordering by all columns is inherently inefficient.
+
+    Note the filtering out of internal columns. Before applying this fix, psycopg was throwing an error
+    like "could not identify an ordering operator for type json", because we were trying to
+    sort by an internal column like `__mathesar_group_metadata`, which has type `json`, which
+    requires special handling to be sorted. The problem is bypassed by not attempting to sort on
+    internal columns.
     """
     return [
         {'field': col, 'direction': 'asc'}
         for col
         in relation.columns
+        if not _is_internal_column(col)
     ]
+
+
+def _is_internal_column(col):
+    """
+    Might not be exhaustive, take care.
+    """
+    return col.name == '__mathesar_group_metadata'
 
 
 def apply_relation_sorting(relation, sort_spec):
