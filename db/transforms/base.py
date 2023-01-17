@@ -125,6 +125,7 @@ class Order(Transform):
     def apply_to_relation(self, relation):
         order_by = self.spec
         enforce_relation_type_expectations(relation)
+        order_by = rec_sort.make_order_by_deterministic(relation, order_by)
         if order_by is not None:
             executable = rec_sort.apply_relation_sorting(relation, order_by)
         else:
