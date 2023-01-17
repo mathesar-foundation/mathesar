@@ -100,14 +100,12 @@ for db_key, db_dict in DATABASES.items():
             f"{db_dict['ENGINE']} found for {db_key}'s engine."
         )
 
-
 # pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
 TEST = decouple_config('TEST', default=False, cast=bool)
 if TEST:
     for db_key, _ in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim)):
         DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -138,7 +136,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -151,7 +148,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
