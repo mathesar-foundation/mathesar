@@ -8,6 +8,7 @@
   import type { LinkType } from './linkTableUtils';
 
   export let linkType: LinkType;
+  export let isSelfReferential: boolean;
   export let field: FieldStore<LinkType>;
   export let base: Pick<TableEntry, 'name'>;
   export let target: Pick<TableEntry, 'name'>;
@@ -58,12 +59,19 @@
         <Pill table={target} which="target" />
         record.
       {:else if linkType === 'manyToMany'}
-        Multiple
-        <Pill table={base} which="base" />
-        and
-        <Pill table={target} which="target" />
-        records can link to each other through a new
-        <Pill table={{ name: 'Linking Table' }} which="mapping" />
+        {#if isSelfReferential}
+          Multiple
+          <Pill table={base} which="base" />
+          records can link to each other through a new
+          <Pill table={{ name: 'Linking Table' }} which="mapping" />
+        {:else}
+          Multiple
+          <Pill table={base} which="base" />
+          and
+          <Pill table={target} which="target" />
+          records can link to each other through a new
+          <Pill table={{ name: 'Linking Table' }} which="mapping" />
+        {/if}
       {:else}
         {assertExhaustive(linkType)}
       {/if}
@@ -139,7 +147,7 @@
 
   @media (min-width: $breakpoint) {
     .link-type-option {
-      grid-template: auto minmax(7rem, 1fr) auto / 1fr;
+      grid-template: auto minmax(7rem, 10rem) auto / 1fr;
     }
     .top {
       grid-row: 1;
