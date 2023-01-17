@@ -3,7 +3,7 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import EmptyEntity from './EmptyEntity.svelte';
-  import TableItem from './TableItem.svelte';
+  import TableCard from './TableCard.svelte';
 
   export let tables: TableEntry[];
   export let database: Database;
@@ -12,7 +12,7 @@
 
 <div class="container">
   {#each tables as table (table.id)}
-    <TableItem {table} {database} {schema} />
+    <TableCard {table} {database} {schema} />
   {:else}
     <EmptyEntity icon={iconTable}>
       <p>No Tables</p>
