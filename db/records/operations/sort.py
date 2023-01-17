@@ -29,6 +29,7 @@ def _append_primary_key_sort(relation, order_by):
     overall by appending a final ordering by primary key if one exists.
     """
     pk_cols = col_utils.get_primary_key_column_collection_from_relation(relation)
+    order_by = list(order_by)
     if pk_cols is not None:
         order_by += [
             {'field': col, 'direction': 'asc'}
