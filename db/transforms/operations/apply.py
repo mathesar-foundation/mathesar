@@ -27,7 +27,19 @@ def apply_transformations_deprecated(
     group_by=None,
     duplicate_only=None,
     search=None,
+    fallback_to_default_ordering=False,
 ):
+    """
+    ## Regarding ordering
+
+    The `fallback_to_default_ordering` flag, when true, will make sure that the ordering is total,
+    even if `order_by` is not provided. When `order_by` is provided, it will be converted into a
+    total ordering automatically. As a consequence, the ordering is always total.
+
+    At the same time, when both `order_by` and `fallback_to_default_ordering` are falsy, an ordering
+    will not be applied. This is useful, when `table` has already been pre-sorted (e.g. because it's
+    actually the result of a DBQuery that defines an ordering that we don't want to override).
+    """
     # TODO rename the actual method parameter
     if search is None:
         search = []
@@ -43,7 +55,7 @@ def apply_transformations_deprecated(
         transforms.append(base.DuplicateOnly(duplicate_only))
     if group_by:
         transforms.append(base.Group(group_by))
-    if order_by:
+    if order_by or fallback_to_default_ordering:
         transforms.append(base.Order(order_by))
     if search:
         transforms.append(base.Search([search, limit]))
