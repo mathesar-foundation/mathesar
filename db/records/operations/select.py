@@ -50,6 +50,8 @@ def get_records(
         duplicate_only:  list of column names; only rows that have duplicates across those rows
                          will be returned
     """
+    if order_by is None:
+        order_by = []
     if search is None:
         search = []
     relation = apply_transformations_deprecated(
