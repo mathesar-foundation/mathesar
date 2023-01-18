@@ -10,8 +10,8 @@
   /** `item` as it was before the most recent reactive update */
   let previousItem: BreadcrumbItem | undefined;
 
-  function removeItemAtEnd() {
-    $items = $items.slice(0, -1);
+  function removeItem() {
+    $items = $items.filter((i) => i !== item);
   }
 
   function removePreviousItem() {
@@ -26,5 +26,5 @@
 
   $: handleItemChange(item);
 
-  onDestroy(removeItemAtEnd);
+  onDestroy(removeItem);
 </script>
