@@ -17,7 +17,7 @@ DEVCON_DATASET = os.path.join(RESOURCES, "devcon_dataset.sql")
 MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
 
 LIBRARY_MANAGEMENT = 'Library Management'
-MATHESAR_DEVCON = 'Mathesar DevCon'
+MATHESAR_CON = 'Mathesar Con'
 MOVIE_COLLECTION = 'Movie Collection'
 ARXIV = 'Latest Papers from arXiv'
 MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
@@ -62,9 +62,9 @@ def _load_movies_dataset(engine):
 
 
 def _load_devcon_dataset(engine):
-    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{MATHESAR_DEVCON}" CASCADE;""")
-    create_schema_query = text(f"""CREATE SCHEMA "{MATHESAR_DEVCON}";""")
-    set_search_path = text(f"""SET search_path="{MATHESAR_DEVCON}";""")
+    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{MATHESAR_CON}" CASCADE;""")
+    create_schema_query = text(f"""CREATE SCHEMA "{MATHESAR_CON}";""")
+    set_search_path = text(f"""SET search_path="{MATHESAR_CON}";""")
     with engine.begin() as conn, open(DEVCON_DATASET) as f:
         conn.execute(drop_schema_query)
         conn.execute(create_schema_query)
@@ -91,7 +91,7 @@ def _customize_library_preview_settings(engine):
 
 
 def _customize_devcon_preview_settings(engine):
-    schema = _get_dj_schema_by_name(engine, MATHESAR_DEVCON)
+    schema = _get_dj_schema_by_name(engine, MATHESAR_CON)
     presenters = _get_dj_table_by_name(schema, 'Presenters')
     _set_first_and_last_names_preview(presenters)
 
