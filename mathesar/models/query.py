@@ -230,7 +230,7 @@ class UIQuery(BaseModel, Relation):
         )
         output = output | optionals
         if is_initial_column:
-            initial_dj_column = _get_dj_column_for_initial_db_column(initial_db_column)
+            initial_dj_column = _get_dj_column_for_initial_db_column(initial_db_column, self._database)
             output = output | dict(
                 input_column_name=initial_dj_column.name,
                 input_table_name=initial_dj_column.table.name,
@@ -465,11 +465,11 @@ class UIQuery(BaseModel, Relation):
         )
 
 
-def _get_dj_column_for_initial_db_column(initial_column):
+def _get_dj_column_for_initial_db_column(initial_column, database):
     oid = initial_column.reloid
     attnum = initial_column.attnum
     return Column.objects.get(
-        table__oid=oid, attnum=attnum, table__schema__database=self._database
+        table__oid=oid, attnum=attnum, table__schema__database=database
     )
 
 
