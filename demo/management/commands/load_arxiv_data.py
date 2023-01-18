@@ -3,9 +3,17 @@ import arxiv
 import json
 from sqlalchemy import text
 
-from mathesar.database.base import create_mathesar_engine
+from django.core.management import BaseCommand
 
 from demo.arxiv_skeleton import get_arxiv_db_and_schema_log_path
+from mathesar.database.base import create_mathesar_engine
+
+
+class Command(BaseCommand):
+    help = 'Refreshes the arXiv data set in all relevant DBs'
+
+    def handle(self, *args, **options):
+        update_our_arxiv_dbs()
 
 
 def update_our_arxiv_dbs():
