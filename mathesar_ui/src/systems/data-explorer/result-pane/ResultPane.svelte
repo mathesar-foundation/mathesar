@@ -1,19 +1,20 @@
 <script lang="ts">
   import type QueryRunner from '../QueryRunner';
+  import type QueryManager from '../QueryManager';
   import Results from './Results.svelte';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
 
-  export let queryRunner: QueryRunner;
+  export let queryHandler: QueryRunner | QueryManager;
 </script>
 
 <section data-identifier="result">
   <header>
     <span class="title">Result</span>
     <div class="actions">
-      <QueryRefreshButton {queryRunner} />
+      <QueryRefreshButton queryRunner={queryHandler} />
     </div>
   </header>
-  <Results {queryRunner} />
+  <Results {queryHandler} />
 </section>
 
 <style lang="scss">
