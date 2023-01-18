@@ -16,10 +16,10 @@ export enum States {
   Error = 'error',
 }
 
-export type RequestStatus =
+export type RequestStatus<ErrorType = string[]> =
   | { state: 'processing' }
   | { state: 'success' }
-  | { state: 'failure'; errors: string[] };
+  | { state: 'failure'; errors: ErrorType };
 
 /**
  * When multiple states are present, the one listed highest here is considered

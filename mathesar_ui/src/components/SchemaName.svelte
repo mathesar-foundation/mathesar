@@ -17,9 +17,12 @@
 
 <style>
   .schema-name {
-    --icon-opacity: 1;
+    --NameWithIcon__icon-opacity: 1;
   }
   .schema-name.is-locked {
-    --icon-color: var(--slate-500);
+    --icon-color: var(
+      var(--SchemaName__locked-schema-icon-color),
+      var(--slate-500)
+    );
   }
 </style>
