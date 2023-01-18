@@ -373,7 +373,7 @@ export function speculateColumnMetaData({
   );
   // Only change display names for columns present in meta data
   const displayNamesRequiringChange = Object.entries(
-    queryModel.display_names ?? {},
+    queryModel.display_names,
   ).filter(
     ([alias, displayName]) =>
       currentProcessedColumnsMetaData.has(alias) &&

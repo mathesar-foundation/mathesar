@@ -261,6 +261,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
           }
           break;
         case 'transformations':
+        case 'initialColumnsAndTransformations':
           await this.resetPaginationAndRun();
           break;
         default:
