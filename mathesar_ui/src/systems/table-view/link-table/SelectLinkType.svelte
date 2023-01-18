@@ -4,9 +4,11 @@
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
   import Pill from './LinkTablePill.svelte';
-  import { linkTypes, type LinkType } from './linkTableUtils';
+  import type { LinkType } from './linkTableUtils';
   import LinkTypeOption from './LinkTypeOption.svelte';
 
+  export let linkTypes: LinkType[];
+  export let isSelfReferential: boolean;
   export let field: FieldStore<LinkType>;
   export let base: Pick<TableEntry, 'name'>;
   export let target: Pick<TableEntry, 'name'>;
@@ -19,7 +21,13 @@
     </legend>
     <div class="options">
       {#each linkTypes as linkType (linkType)}
-        <LinkTypeOption {linkType} {field} {base} {target} />
+        <LinkTypeOption
+          {linkType}
+          {isSelfReferential}
+          {field}
+          {base}
+          {target}
+        />
       {/each}
     </div>
   </fieldset>
