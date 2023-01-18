@@ -42,9 +42,7 @@ def append_db_and_arxiv_schema_to_log(db_name, schema_name):
 
 
 def get_arxiv_db_and_schema_log_path():
-    return os.path.abspath(
-        '/var/lib/mathesar/demo/arxiv_db_schema_log'
-    )
+    return os.path.abspath(settings.MATHESAR_DEMO_ARXIV_LOG_PATH)
 
 
 def _setup_arxiv_schema(engine, schema_name):
