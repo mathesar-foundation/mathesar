@@ -369,6 +369,10 @@ class UIQuery(BaseModel, Relation):
     def _sa_engine(self):
         return self.base_table._sa_engine
 
+    @property
+    def _database(self):
+        return self.base_table.schema.database
+
     def add_defaults_to_display_names(self):
         """
         We have some logic for producing default display names. This method fetches those default
@@ -464,7 +468,9 @@ class UIQuery(BaseModel, Relation):
 def _get_dj_column_for_initial_db_column(initial_column):
     oid = initial_column.reloid
     attnum = initial_column.attnum
-    return Column.objects.get(table__oid=oid, attnum=attnum)
+    return Column.objects.get(
+        table__oid=oid, attnum=attnum, table__schema__database=self._database
+    )
 
 
 def _get_column_pair_from_id(col_id):
