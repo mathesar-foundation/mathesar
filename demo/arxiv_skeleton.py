@@ -1,17 +1,7 @@
 """
-In summary, the `arxiv_dataset` package demos a schema that is being continuously inserted to from
-outside Mathesar. The source of the data is the arxiv.org API.
-
-Logic in this package does two basic things:
-
-1. the necessary setup so that the Arxiv dataset could be continuously inserted from outside
-Mathesar (`setup_and_register_schema_for_receiving_arxiv_data`);
-2. provides the script (`script.py`) that pulls down some recent Arxiv data and inserts it into the
-schemas setup by `setup_and_register_schema_for_receiving_arxiv_data`;
-
-In order for `script.py` to find the schemas that it should update,
-`setup_and_register_schema_for_receiving_arxiv_data` also sets up a log file where it keeps track
-of database-schema-name pairs of the schemas it set up (see `append_db_and_arxiv_schema_to_log`).
+We load the arXiv data set by first setting up a skeleton defining the data
+model whenever a user starts a new demo, and then loading data into the data
+model via a cron job that runs a management command.
 """
 
 import os
@@ -78,4 +68,5 @@ def _setup_arxiv_schema(engine, schema_name):
 
 def _get_sql_setup_script_path():
     current_dir = os.path.abspath(os.path.dirname(__file__))
-    return os.path.join(current_dir, 'setup.sql')
+    resources = os.path.join(current_dir, 'resources')
+    return os.path.join(resources, 'arxiv_dataset_setup.sql')

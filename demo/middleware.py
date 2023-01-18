@@ -3,7 +3,7 @@ import logging
 
 from django.conf import settings
 
-from demo.arxiv_dataset.base import append_db_and_arxiv_schema_to_log
+from demo.arxiv_skeleton import append_db_and_arxiv_schema_to_log
 from demo.install import customize_settings, create_demo_database, ARXIV
 from demo.db_namer import get_name
 from mathesar.database.base import create_mathesar_engine

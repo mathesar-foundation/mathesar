@@ -5,7 +5,7 @@ from sqlalchemy import text
 
 from mathesar.database.base import create_mathesar_engine
 
-from demo.arxiv_dataset.base import get_arxiv_db_and_schema_log_path
+from demo.arxiv_skeleton import get_arxiv_db_and_schema_log_path
 
 
 def update_our_arxiv_dbs():
@@ -275,10 +275,6 @@ def _get_logged_db_schema_pairs():
             for line
             in lines
         )
-
-
-if __name__ == '__main__':
-    update_our_arxiv_dbs()
 
 
 _non_cs_arxiv_categories = {
