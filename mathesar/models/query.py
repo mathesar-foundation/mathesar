@@ -123,7 +123,6 @@ def _get_validator_for_dict(field_name):
 class UIQuery(BaseModel, Relation):
     name = models.CharField(
         max_length=128,
-        unique=True,
     )
 
     description = models.TextField(
