@@ -43,4 +43,8 @@ export default class QuerySortTransformationModel
       ],
     };
   }
+
+  isColumnUsedInTransformation(columnAlias: string): boolean {
+    return this.columnIdentifier === columnAlias;
+  }
 }

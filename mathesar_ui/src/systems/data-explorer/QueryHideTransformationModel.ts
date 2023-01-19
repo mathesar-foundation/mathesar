@@ -33,4 +33,8 @@ export default class QueryHideTransformationModel
       spec: this.columnAliases,
     };
   }
+
+  isColumnUsedInTransformation(columnAlias: string): boolean {
+    return this.columnAliases.includes(columnAlias);
+  }
 }

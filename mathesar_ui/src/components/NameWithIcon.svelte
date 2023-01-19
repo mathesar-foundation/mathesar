@@ -44,7 +44,7 @@
   }
   .icon {
     color: var(--icon-color, currentcolor);
-    opacity: var(--icon-opacity, 0.75);
+    opacity: var(--NameWithIcon__icon-opacity, 0.75);
   }
   .icon > :global(.fa-icon + .fa-icon) {
     margin-left: 0.2em;

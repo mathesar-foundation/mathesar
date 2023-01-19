@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { Placement } from '@popperjs/core/lib/enums';
+
   import AttachableDropdown from '@mathesar-component-library-dir/dropdown/AttachableDropdown.svelte';
 
   export let lines = 1;
@@ -7,6 +9,7 @@
    * true.
    */
   export let passthrough = false;
+  export let popoverPlacement: Placement = 'top';
 
   let element: HTMLSpanElement;
   let dropdownIsOpen = false;
@@ -54,7 +57,7 @@
   <AttachableDropdown
     isOpen={dropdownIsOpen}
     trigger={element}
-    placement="top"
+    placement={popoverPlacement}
     class="truncation-content"
   >
     <slot />
