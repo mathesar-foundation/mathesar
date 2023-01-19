@@ -26,6 +26,8 @@ def get_processed_joinable_tables(table, limit=None, offset=None, max_depth=2):
     table_info = {}
     column_info = {}
 
+    database = table.schema.database
+
     def _prefetch_metadata_side_effector(table):
         columns = table.columns.all()
         table_info.update(
@@ -46,17 +48,24 @@ def get_processed_joinable_tables(table, limit=None, offset=None, max_depth=2):
     joinable_tables = [
         {
             TARGET: _prefetch_metadata_side_effector(
-                Table.objects.get(oid=row[ma_sel.TARGET])
+                Table.objects.get(
+                    schema__database=database,
+                    oid=row[ma_sel.TARGET],
+                )
             ),
             JP_PATH: [
                 [
-                    Column.objects.get(table__oid=oid, attnum=attnum).id
+                    Column.objects.get(
+                        table__schema__database=database,
+                        table__oid=oid,
+                        attnum=attnum,
+                    ).id
                     for oid, attnum in edge
                 ]
                 for edge in row[ma_sel.JP_PATH]
             ],
             FK_PATH: [
-                [Constraint.objects.get(oid=oid).id, reverse]
+                [Constraint.objects.get(table__schema__database=database, oid=oid).id, reverse]
                 for oid, reverse in row[ma_sel.FK_PATH]
             ],
             DEPTH: row[ma_sel.DEPTH],
