@@ -28,7 +28,7 @@ from db.metadata import get_empty_metadata
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
-from db.records.operations.select import get_records_with_default_order as db_get_records_with_default_order
+from db.records.operations.select import get_records
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
 from db.schemas.operations.select import get_schema_description
@@ -460,9 +460,10 @@ class Table(DatabaseObject, Relation):
     # TODO unused? delete if so
     @property
     def sa_all_records(self):
-        return db_get_records_with_default_order(
+        return get_records(
             table=self._sa_table,
             engine=self.schema._sa_engine,
+            fallback_to_default_ordering=True,
         )
 
     def sa_num_records(self, filter=None, search=None):
@@ -503,7 +504,7 @@ class Table(DatabaseObject, Relation):
             order_by = []
         if search is None:
             search = []
-        return db_get_records_with_default_order(
+        return get_records(
             table=self._sa_table,
             engine=self.schema._sa_engine,
             limit=limit,
@@ -513,6 +514,7 @@ class Table(DatabaseObject, Relation):
             group_by=group_by,
             search=search,
             duplicate_only=duplicate_only,
+            fallback_to_default_ordering=True,
         )
 
     def create_record_or_records(self, record_data):
@@ -644,7 +646,7 @@ class Table(DatabaseObject, Relation):
 
         # Update attnum as it would have changed due to columns moving to a new table.
         extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
-        remainder_table = Table.current_objects.get(oid=remainder_table_oid)
+        remainder_table = Table.current_objects.get(schema__database=self.schema.database, oid=remainder_table_oid)
         remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
         reset_reflection(db_name=self.schema.database.name)
         remainder_fk_column = Column.objects.get(table=remainder_table, attnum=linking_fk_column_attnum)

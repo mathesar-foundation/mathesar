@@ -43,7 +43,7 @@ class UniqueViolationAPIException(MathesarAPIException):
                     table.oid,
                     table._sa_engine
                 )
-                constraint = Constraint.objects.get(oid=constraint_oid)
+                constraint = Constraint.objects.get(table=table, oid=constraint_oid)
                 details = {
                     "constraint": constraint.id,
                     "constraint_columns": [c.id for c in constraint.columns],
@@ -325,7 +325,7 @@ class ForeignKeyViolationAPIException(MathesarAPIException):
                 referent_table.oid,
                 referent_table._sa_engine,
             )
-            constraint = Constraint.objects.get(oid=constraint_oid)
+            constraint = Constraint.objects.get(table=referent_table, oid=constraint_oid)
             details.update({
                 "constraint": constraint.id,
                 "constraint_columns": [c.id for c in constraint.columns],

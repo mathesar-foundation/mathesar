@@ -6,14 +6,18 @@ from sqlalchemy.exc import OperationalError
 
 from db.engine import create_future_engine
 
-from demo.arxiv_dataset.base import setup_and_register_schema_for_receiving_arxiv_data
+from demo.arxiv_skeleton import setup_and_register_schema_for_receiving_arxiv_data
 from mathesar.models.base import Table, Schema, PreviewColumnSettings
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
 LIBRARY_ONE = os.path.join(RESOURCES, "library_without_checkouts.sql")
 LIBRARY_TWO = os.path.join(RESOURCES, "library_add_checkouts.sql")
+DEVCON_DATASET = os.path.join(RESOURCES, "devcon_dataset.sql")
+MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
+
 LIBRARY_MANAGEMENT = 'Library Management'
+MATHESAR_CON = 'Mathesar Con'
 MOVIE_COLLECTION = 'Movie Collection'
 ARXIV = 'Latest Papers from arXiv'
 MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
@@ -23,6 +27,7 @@ def load_datasets(engine):
     """Load some SQL files with demo data to DB targeted by `engine`."""
     _load_library_dataset(engine)
     _load_movies_dataset(engine)
+    _load_devcon_dataset(engine)
     _load_arxiv_data_skeleton(engine)
 
 
@@ -56,6 +61,17 @@ def _load_movies_dataset(engine):
         conn.execute(text(f.read()))
 
 
+def _load_devcon_dataset(engine):
+    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{MATHESAR_CON}" CASCADE;""")
+    create_schema_query = text(f"""CREATE SCHEMA "{MATHESAR_CON}";""")
+    set_search_path = text(f"""SET search_path="{MATHESAR_CON}";""")
+    with engine.begin() as conn, open(DEVCON_DATASET) as f:
+        conn.execute(drop_schema_query)
+        conn.execute(create_schema_query)
+        conn.execute(set_search_path)
+        conn.execute(text(f.read()))
+
+
 def _load_arxiv_data_skeleton(engine):
     setup_and_register_schema_for_receiving_arxiv_data(engine, schema_name=ARXIV)
 
@@ -63,6 +79,7 @@ def _load_arxiv_data_skeleton(engine):
 def customize_settings(engine):
     """Set preview settings so demo data looks good."""
     _customize_library_preview_settings(engine)
+    _customize_devcon_preview_settings(engine)
 
 
 def _customize_library_preview_settings(engine):
@@ -71,6 +88,12 @@ def _customize_library_preview_settings(engine):
     _set_first_and_last_names_preview(authors)
     patrons = _get_dj_table_by_name(schema, 'Patrons')
     _set_first_and_last_names_preview(patrons)
+
+
+def _customize_devcon_preview_settings(engine):
+    schema = _get_dj_schema_by_name(engine, MATHESAR_CON)
+    presenters = _get_dj_table_by_name(schema, 'Presenters')
+    _set_first_and_last_names_preview(presenters)
 
 
 def _set_first_and_last_names_preview(table):
