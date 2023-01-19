@@ -22,7 +22,7 @@ def _customize_library_preview_settings(engine):
 
 def _customize_devcon_preview_settings(engine):
     schema = get_dj_schema_by_name(engine, MATHESAR_CON)
-    presenters = get_dj_table_by_name(schema, 'Presenters')
+    presenters = get_dj_table_by_name(schema, 'Speakers')
     _set_first_and_last_names_preview(presenters)
 
 
