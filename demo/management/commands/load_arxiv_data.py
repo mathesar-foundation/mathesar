@@ -35,7 +35,7 @@ def _download_arxiv_papers():
         max_results=50,
         sort_by=arxiv.SortCriterion.LastUpdatedDate
     )
-    return arxiv_search.results()
+    return list(arxiv_search.results())
 
 
 def _construct_arxiv_search_query_expression():
