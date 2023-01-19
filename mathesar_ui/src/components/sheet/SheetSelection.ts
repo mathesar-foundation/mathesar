@@ -347,10 +347,10 @@ export default class SheetSelection<
     const endOrderIndex = columnOrder.indexOf(Number(endColumnId));
 
     const minColumnPosition = Math.min(startOrderIndex, endOrderIndex);
-    const maxColumnposition = Math.max(startOrderIndex, endOrderIndex);
+    const maxColumnPosition = Math.max(startOrderIndex, endOrderIndex);
     const columnOrderSelected = columnOrder.slice(
       minColumnPosition,
-      maxColumnposition + 1,
+      maxColumnPosition + 1,
     );
 
     const columns = this.getColumns();
