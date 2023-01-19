@@ -12,10 +12,12 @@ FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
 LIBRARY_ONE = os.path.join(RESOURCES, "library_without_checkouts.sql")
 LIBRARY_TWO = os.path.join(RESOURCES, "library_add_checkouts.sql")
+DEVCON_DATASET = os.path.join(RESOURCES, "devcon_dataset.sql")
 MOVIES_SQL_BZ2 = os.path.join(RESOURCES, "movie_collection.sql.bz2")
 ARXIV_SETUP_SQL = os.path.join(RESOURCES, 'arxiv_dataset_setup.sql')
 LIBRARY_MANAGEMENT = 'Library Management'
 MOVIE_COLLECTION = 'Movie Collection'
+MATHESAR_CON = 'Mathesar Con'
 ARXIV = 'Latest Papers from arXiv'
 
 

@@ -7,6 +7,7 @@ from demo.install.arxiv_skeleton import setup_and_register_schema_for_receiving_
 from demo.install.base import (
     LIBRARY_MANAGEMENT, LIBRARY_ONE, LIBRARY_TWO,
     MOVIE_COLLECTION, MOVIES_SQL_BZ2,
+    MATHESAR_CON, DEVCON_DATASET,
     ARXIV,
 )
 
@@ -15,6 +16,7 @@ def load_datasets(engine):
     """Load some SQL files with demo data to DB targeted by `engine`."""
     _load_library_dataset(engine)
     _load_movies_dataset(engine)
+    _load_devcon_dataset(engine)
     _load_arxiv_data_skeleton(engine)
 
 
@@ -42,6 +44,17 @@ def _load_movies_dataset(engine):
     create_schema_query = text(f"""CREATE SCHEMA "{MOVIE_COLLECTION}";""")
     set_search_path = text(f"""SET search_path="{MOVIE_COLLECTION}";""")
     with engine.begin() as conn, bz2.open(MOVIES_SQL_BZ2, 'rt') as f:
+        conn.execute(drop_schema_query)
+        conn.execute(create_schema_query)
+        conn.execute(set_search_path)
+        conn.execute(text(f.read()))
+
+
+def _load_devcon_dataset(engine):
+    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{MATHESAR_CON}" CASCADE;""")
+    create_schema_query = text(f"""CREATE SCHEMA "{MATHESAR_CON}";""")
+    set_search_path = text(f"""SET search_path="{MATHESAR_CON}";""")
+    with engine.begin() as conn, open(DEVCON_DATASET) as f:
         conn.execute(drop_schema_query)
         conn.execute(create_schema_query)
         conn.execute(set_search_path)
