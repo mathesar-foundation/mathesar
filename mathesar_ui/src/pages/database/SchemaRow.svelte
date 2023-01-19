@@ -1,17 +1,18 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  import {
-    ButtonMenuItem,
-    Icon,
-    iconShowMore,
-  } from '@mathesar-component-library';
+  import { ButtonMenuItem, Icon } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
-  import { iconDeleteMajor, iconEdit, iconNotEditable } from '@mathesar/icons';
+  import {
+    iconDeleteMajor,
+    iconEdit,
+    iconMoreActions,
+    iconNotEditable,
+  } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
 
@@ -38,7 +39,7 @@
           triggerAppearance="plain"
           closeOnInnerClick={true}
           label=""
-          icon={iconShowMore}
+          icon={iconMoreActions}
           menuStyle="--spacing-y:0.8em;"
         >
           <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}
@@ -89,7 +90,7 @@
   }
 
   .schema-row {
-    border-radius: 0.57rem;
+    border-radius: var(--border-radius-l);
     padding: 1.142em;
     border: 1px solid var(--slate-300);
     display: flex;

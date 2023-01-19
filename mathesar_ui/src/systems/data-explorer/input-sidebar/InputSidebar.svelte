@@ -59,7 +59,7 @@
       });
     }
     await queryManager.update((q) => {
-      const newQuery = q.withColumn({
+      const newQuery = q.withInitialColumn({
         alias,
         id: column.id,
         jp_path: column.jpPath,

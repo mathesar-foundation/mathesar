@@ -1,6 +1,7 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+import { ApiMultiError } from '@mathesar/api/utils/errors';
 import {
   ImmutableMap,
   CancellablePromise,
@@ -53,7 +54,8 @@ export default class QueryRunner<
 
   abstractTypeMap: AbstractTypesMap;
 
-  runState: Writable<RequestStatus | undefined> = writable();
+  runState: Writable<RequestStatus<string[] | ApiMultiError> | undefined> =
+    writable();
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 100 }));
 
@@ -163,11 +165,15 @@ export default class QueryRunner<
       this.runState.set({ state: 'success' });
       return response;
     } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Unable to run query due to an unknown reason';
-      this.runState.set({ state: 'failure', errors: [errorMessage] });
+      if (err instanceof ApiMultiError) {
+        this.runState.set({ state: 'failure', errors: err });
+      } else {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : 'Unable to run query due to an unknown reason';
+        this.runState.set({ state: 'failure', errors: [errorMessage] });
+      }
     }
     return undefined;
   }

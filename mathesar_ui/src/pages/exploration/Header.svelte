@@ -37,9 +37,3 @@
     </Button>
   </svelte:fragment>
 </EntityPageHeader>
-
-<style lang="scss">
-  a {
-    text-decoration: none;
-  }
-</style>

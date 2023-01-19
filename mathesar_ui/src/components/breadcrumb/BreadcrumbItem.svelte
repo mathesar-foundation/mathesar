@@ -94,6 +94,9 @@
 
 <style lang="scss">
   .breadcrumb-item {
+    --NameWithIcon__icon-opacity: 1;
+    --SchemaName__locked-schema-icon-color: var(--white);
+
     display: flex;
     flex-shrink: 0;
     align-items: center;
@@ -110,6 +113,11 @@
 
     > :global(* + *) {
       margin-left: var(--breadcrumb-spacing);
+    }
+
+    :global(.postgres-keyword) {
+      color: var(--white);
+      background: rgba(255, 255, 255, 0.25);
     }
   }
 </style>

@@ -2,9 +2,7 @@ import type { TableEntry } from '@mathesar/api/types/tables';
 import { invalidIf } from '@mathesar/components/form';
 import { getAvailableName } from '@mathesar/utils/db';
 
-export const linkTypes = ['manyToOne', 'oneToMany', 'manyToMany'] as const;
-
-export type LinkType = typeof linkTypes[number];
+export type LinkType = 'manyToOne' | 'oneToMany' | 'manyToMany';
 
 export const columnNameIsNotId = invalidIf(
   (columnName: string) => columnName === 'id',
