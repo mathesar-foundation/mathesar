@@ -8,6 +8,7 @@ from db.engine import create_future_engine
 
 from demo.arxiv_skeleton import setup_and_register_schema_for_receiving_arxiv_data
 from mathesar.models.base import Table, Schema, PreviewColumnSettings
+from mathesar.models.query import UIQuery
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
@@ -127,3 +128,55 @@ def create_demo_database(
         root_db_engine.dispose()
         user_db_engine.dispose()
         print(f"Created DB is {user_db}.")
+
+
+def load_custom_explorations(engine):
+    _create_checkout_monthly_report(engine)
+
+
+def _create_checkout_monthly_report(engine):
+    schema = _get_dj_schema_by_name(engine, LIBRARY_MANAGEMENT)
+    print(schema)
+    checkouts = _get_dj_table_by_name(schema, "Checkouts")
+    print(checkouts)
+    initial_columns = [
+        {"id": _get_dj_column_by_name(checkouts, "id").id, "alias": "Checkouts_id"},
+        {"id": _get_dj_column_by_name(checkouts, "Checkout Time").id, "alias": "Checkouts_Checkout Time"}
+    ]
+    transformations = [
+        {
+            "spec": {
+                "base_grouping_column": "Checkouts_Checkout Time",
+                "grouping_expressions": [
+                    {
+                        "preproc": "truncate_to_month",
+                        "input_alias": "Checkouts_Checkout Time",
+                        "output_alias": "Checkouts_Checkout Time_grouped"
+                    }
+                ],
+                "aggregation_expressions": [
+                    {
+                        "function": "count",
+                        "input_alias": "Checkouts_id",
+                        "output_alias": "Checkouts_id_agged"
+                    }
+                ]
+            },
+            "type": "summarize"
+        }
+    ]
+    display_names = {
+        "Checkouts_id": "Checkouts_id",
+        "Checkouts_id_agged": "Number of Checkouts",
+        "Checkouts_Checkout Time": "Checkouts_Checkout Time",
+        "Checkouts_Checkout Time_grouped": "Month"
+    }
+
+    UIQuery.objects.create(
+        name="Monthly Checkouts",
+        description="This report gives the number of checkouts each month.",
+        base_table=checkouts,
+        initial_columns=initial_columns,
+        transformations=transformations,
+        display_names=display_names,
+    )

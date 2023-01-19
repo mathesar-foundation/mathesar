@@ -4,7 +4,7 @@ import logging
 from django.conf import settings
 
 from demo.arxiv_skeleton import append_db_and_arxiv_schema_to_log
-from demo.install import customize_settings, create_demo_database, ARXIV
+from demo.install import customize_settings, create_demo_database, ARXIV, load_custom_explorations
 from demo.db_namer import get_name
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Database
@@ -36,6 +36,7 @@ class LiveDemoModeMiddleware:
             reset_reflection(db_name=db_name)
             engine = create_mathesar_engine(db_name)
             customize_settings(engine)
+            load_custom_explorations(engine)
 
         logger.debug(f"Using database {db_name} for sessionid {sessionid}")
         params = request.GET.copy()
