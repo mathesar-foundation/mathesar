@@ -51,7 +51,7 @@
       {#if hasNoColumns}
         <div class="help-text">Get started by adding columns from the left</div>
       {:else}
-        <ResultPane queryRunner={queryManager} />
+        <ResultPane queryHandler={queryManager} />
         {#if isInspectorOpen}
           <ExplorationInspector queryHandler={queryManager} on:delete />
         {/if}

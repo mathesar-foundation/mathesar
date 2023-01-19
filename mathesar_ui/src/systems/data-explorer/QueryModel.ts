@@ -19,7 +19,8 @@ export interface QueryModelUpdateDiff {
     | 'baseTable'
     | 'initialColumnsArray'
     | 'initialColumnName'
-    | 'transformations';
+    | 'transformations'
+    | 'initialColumnsAndTransformations';
   diff: Partial<UnsavedQueryInstance>;
 }
 
@@ -71,7 +72,7 @@ export default class QueryModel {
 
   readonly transformationModels: QueryTransformationModel[];
 
-  readonly display_names: QueryInstance['display_names'];
+  readonly display_names: NonNullable<QueryInstance['display_names']>;
 
   readonly isValid: boolean;
 
@@ -157,7 +158,7 @@ export default class QueryModel {
     };
   }
 
-  withColumn(column: QueryInstanceInitialColumn): QueryModelUpdateDiff {
+  withInitialColumn(column: QueryInstanceInitialColumn): QueryModelUpdateDiff {
     const initialColumns = [...this.initial_columns, column];
     const model = new QueryModel({
       ...this,
@@ -176,7 +177,7 @@ export default class QueryModel {
     };
   }
 
-  withoutColumns(columnAliases: string[]): QueryModelUpdateDiff {
+  withoutInitialColumns(columnAliases: string[]): QueryModelUpdateDiff {
     const initialColumns = this.initial_columns.filter(
       (entry) => !columnAliases.includes(entry.alias),
     );
@@ -193,8 +194,8 @@ export default class QueryModel {
     };
   }
 
-  withoutColumn(columnAlias: string): QueryModelUpdateDiff {
-    return this.withoutColumns([columnAlias]);
+  withoutInitialColumn(columnAlias: string): QueryModelUpdateDiff {
+    return this.withoutInitialColumns([columnAlias]);
   }
 
   withDisplayNameForColumn(
@@ -297,6 +298,90 @@ export default class QueryModel {
     };
   }
 
+  getInitialColumnsAndTransformsUtilizingThemByColumnIds(columnIds: number[]) {
+    const initialColumnsUsingColumnIds = this.initial_columns.filter((entry) =>
+      columnIds.includes(entry.id),
+    );
+    const initialColumnAliases = initialColumnsUsingColumnIds.map(
+      (entry) => entry.alias,
+    );
+    const transformsUsingColumnIds: {
+      index: number;
+      transform: QueryTransformationModel;
+    }[] = [];
+    let selectAllFollowingTransforms = false;
+    this.transformationModels.forEach((transform, index) => {
+      if (selectAllFollowingTransforms) {
+        transformsUsingColumnIds.push({
+          index,
+          transform,
+        });
+        return;
+      }
+      if (transform.type === 'summarize') {
+        selectAllFollowingTransforms = true;
+        transformsUsingColumnIds.push({
+          index,
+          transform,
+        });
+        return;
+      }
+      if (
+        initialColumnAliases.some((alias) =>
+          transform.isColumnUsedInTransformation(alias),
+        )
+      ) {
+        transformsUsingColumnIds.push({
+          index,
+          transform,
+        });
+      }
+    });
+    return {
+      initialColumnsUsingColumnIds,
+      transformsUsingColumnIds,
+    };
+  }
+
+  withoutColumnsById(columnIds: number[]): QueryModelUpdateDiff {
+    const initialColumns = this.initial_columns.filter(
+      (entry) => !columnIds.includes(entry.id),
+    );
+    let retainedTransformationModels = this.transformationModels;
+    const firstSummarizationTransformIndex =
+      this.transformationModels.findIndex(
+        (transformationModel) => transformationModel.type === 'summarize',
+      );
+    if (firstSummarizationTransformIndex > -1) {
+      retainedTransformationModels = retainedTransformationModels.slice(
+        0,
+        firstSummarizationTransformIndex,
+      );
+    }
+    const alaisesForTheIds = this.initial_columns
+      .filter((entry) => columnIds.includes(entry.id))
+      .map((entry) => entry.alias);
+    const transformationModels = retainedTransformationModels.filter(
+      (model) =>
+        !alaisesForTheIds.some((alias) =>
+          model.isColumnUsedInTransformation(alias),
+        ),
+    );
+    const model = new QueryModel({
+      ...this,
+      initial_columns: initialColumns,
+      transformationModels,
+    });
+    return {
+      model,
+      type: 'initialColumnsAndTransformations',
+      diff: {
+        initial_columns: initialColumns,
+        transformations: model.toJson().transformations,
+      },
+    };
+  }
+
   getColumn(columnAlias: string): QueryInstanceInitialColumn | undefined {
     return this.initial_columns.find((column) => column.alias === columnAlias);
   }
@@ -309,10 +394,8 @@ export default class QueryModel {
   }
 
   isColumnUsedInTransformations(columnAlias: string): boolean {
-    return this.transformationModels.some(
-      (transform) =>
-        'isColumnUsedInTransformation' in transform &&
-        transform.isColumnUsedInTransformation(columnAlias),
+    return this.transformationModels.some((transform) =>
+      transform.isColumnUsedInTransformation(columnAlias),
     );
   }
 

@@ -6,7 +6,7 @@ from sqlalchemy.exc import OperationalError
 
 from db.engine import create_future_engine
 
-from demo.arxiv_dataset.base import setup_and_register_schema_for_receiving_arxiv_data
+from demo.arxiv_skeleton import setup_and_register_schema_for_receiving_arxiv_data
 from mathesar.models.base import Table, Schema, PreviewColumnSettings
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
