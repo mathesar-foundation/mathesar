@@ -36,6 +36,9 @@ class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer
     def _validate_uniqueness(self, attrs):
         """
         Uniqueness is only defined when both name and base_table are defined.
+
+        Would be nice to define this in terms of Django's UniqueConstraint, but that doesn't seem
+        possible, due to schema being a child property of base_table.
         """
         name = attrs.get('name')
         if name:
@@ -49,6 +52,7 @@ class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer
                     .exists()
                 if duplicate_in_schema_exists:
                     raise DuplicateUIQueryInSchemaAPIException(field='name')
+
 
 class QuerySerializer(BaseQuerySerializer):
     results_url = serializers.SerializerMethodField('get_results_url')
