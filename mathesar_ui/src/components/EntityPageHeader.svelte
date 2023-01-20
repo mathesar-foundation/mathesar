@@ -51,15 +51,16 @@
     display: flex;
     align-items: center;
     min-height: 4.18214rem;
+    overflow: hidden;
 
     .heading {
       display: flex;
       align-items: center;
       overflow: hidden;
-      min-width: 15rem;
-      max-width: 20rem;
+      min-width: 10rem;
+      max-width: 50%;
       flex-grow: 0;
-      flex-shrink: 0;
+      flex-shrink: 1;
       min-height: 100%;
       border-right: 1px solid var(--slate-200);
       padding: var(--size-small) var(--size-large);
@@ -104,7 +105,7 @@
 
       &.has-right-actions {
         .actions-left {
-          margin-right: var(--size-xx-small);
+          margin-right: var(--size-x-large);
         }
       }
 
@@ -121,6 +122,12 @@
         > :global(* + *) {
           margin-left: var(--size-xx-small);
         }
+      }
+    }
+
+    @media (max-width: 38rem) {
+      & :global(.responsive-button-label) {
+        display: none;
       }
     }
   }

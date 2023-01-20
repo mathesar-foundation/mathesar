@@ -15,10 +15,17 @@
   export let grouping: Writable<Grouping>;
 </script>
 
-<Dropdown showArrow={false} triggerAppearance="secondary" {...$$restProps}>
+<Dropdown
+  showArrow={false}
+  triggerAppearance="secondary"
+  {...$$restProps}
+  ariaLabel="Group"
+>
   <svelte:fragment slot="trigger">
     <Icon {...iconGrouping} />
-    <span>Group <BadgeCount value={$grouping.entries.length} /></span>
+    <span class="responsive-button-label">
+      Group <BadgeCount value={$grouping.entries.length} />
+    </span>
   </svelte:fragment>
   <Group slot="content" {grouping} />
 </Dropdown>
