@@ -3,6 +3,7 @@ name: Sync labels and milestones
 on:
   schedule:
     - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,11 +21,11 @@ jobs:
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-update-companion -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-website -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-wiki -d
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-ansible -s all
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-data-playground -s all
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-design -s all
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-private-notes -s all
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-scripts -s all
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-update-companion -d
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-website -s all
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-wiki -s all
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-ansible -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-data-playground -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-design -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-private-notes -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-scripts -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-update-companion -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-website -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-wiki -s open

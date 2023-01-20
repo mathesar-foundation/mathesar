@@ -1,39 +1,21 @@
 <script lang="ts">
   import { Button, Icon } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
+  import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import { iconInspector, iconTable } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { constructDataExplorerUrlToSummarizeFromGroup } from '@mathesar/systems/data-explorer';
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
-  import SummarizationLink from './SummarizationLink.svelte';
-
-  export let database: Database;
-  export let schema: SchemaEntry;
-  export let table: Pick<TableEntry, 'name' | 'description'>;
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ id, columnsDataStore, meta, isLoading, display } = $tabularData);
-  $: ({ columns } = columnsDataStore);
+  export let table: Pick<TableEntry, 'name' | 'description'>;
+
+  $: ({ meta, isLoading, display } = $tabularData);
   $: ({ filtering, sorting, grouping, sheetState } = meta);
   $: ({ isTableInspectorVisible } = display);
-  $: summarizationUrl = constructDataExplorerUrlToSummarizeFromGroup(
-    database.name,
-    schema.id,
-    {
-      baseTable: {
-        id,
-        name: table.name,
-      },
-      columns: $columns,
-      terseGrouping: $grouping.terse(),
-    },
-  );
 
   function toggleTableInspector() {
     isTableInspectorVisible.set(!$isTableInspectorVisible);
@@ -56,18 +38,16 @@
   <ModificationStatus requestState={$sheetState} />
 
   <div class="aux-actions" slot="actions-right">
-    {#if summarizationUrl}
-      <SummarizationLink {summarizationUrl} />
-    {/if}
     <Button
       appearance="secondary"
       size="medium"
       disabled={$isLoading}
       on:click={toggleTableInspector}
       active={$isTableInspectorVisible}
+      aria-label="Inspector"
     >
       <Icon {...iconInspector} />
-      <span>Inspector</span>
+      <span class="responsive-button-label">Inspector</span>
     </Button>
   </div>
 </EntityPageHeader>

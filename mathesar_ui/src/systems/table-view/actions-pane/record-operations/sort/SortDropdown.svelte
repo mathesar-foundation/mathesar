@@ -14,10 +14,17 @@
   export let sorting: Writable<Sorting>;
 </script>
 
-<Dropdown showArrow={false} triggerAppearance="secondary" {...$$restProps}>
+<Dropdown
+  showArrow={false}
+  triggerAppearance="secondary"
+  {...$$restProps}
+  ariaLabel="Sort"
+>
   <svelte:fragment slot="trigger">
     <Icon {...iconSorting} />
-    <span>Sort <BadgeCount value={$sorting.size} /></span>
+    <span class="responsive-button-label">
+      Sort <BadgeCount value={$sorting.size} />
+    </span>
   </svelte:fragment>
   <Sort slot="content" {sorting} />
 </Dropdown>
