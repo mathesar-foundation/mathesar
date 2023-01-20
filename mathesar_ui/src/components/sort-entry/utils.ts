@@ -13,8 +13,8 @@ export function getSortingLabelForColumn(
 ): Record<SortDirection, string> {
   if (hasFkConstraint) {
     return {
-      ASCENDING: 'Sort by Ascending ID',
-      DESCENDING: 'Sort by Descending ID',
+      ASCENDING: 'Ascending ID',
+      DESCENDING: 'Descending ID',
     };
   }
 
