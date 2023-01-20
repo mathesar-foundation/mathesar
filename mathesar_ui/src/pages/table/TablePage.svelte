@@ -2,7 +2,6 @@
   import { router } from 'tinro';
 
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     setTabularDataStoreInContext,
@@ -22,8 +21,6 @@
     undefined as unknown as TabularData,
   );
 
-  export let database: Database;
-  export let schema: SchemaEntry;
   export let table: TableEntry;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
@@ -47,7 +44,7 @@
 
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
-    <ActionsPane {database} {schema} {table} />
+    <ActionsPane {table} />
     <TableView />
   </div>
 </LayoutWithHeader>
