@@ -5,6 +5,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from mathesar.api.db.permissions.database import DatabaseAccessPolicy
+from mathesar.api.db.permissions.query import QueryAccessPolicy
+from mathesar.api.db.permissions.schema import SchemaAccessPolicy
+from mathesar.api.db.permissions.table import TableAccessPolicy
 from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer
@@ -16,8 +20,10 @@ from mathesar.state import reset_reflection
 
 
 def get_schema_list(request, database):
+    qs = Schema.objects.filter(database=database)
+    permission_restricted_qs = SchemaAccessPolicy.scope_queryset(request, qs)
     schema_serializer = SchemaSerializer(
-        Schema.objects.filter(database=database),
+        permission_restricted_qs,
         many=True,
         context={'request': request}
     )
@@ -25,8 +31,10 @@ def get_schema_list(request, database):
 
 
 def get_database_list(request):
+    qs = Database.objects.all()
+    permission_restricted_qs = DatabaseAccessPolicy.scope_queryset(request, qs)
     database_serializer = DatabaseSerializer(
-        Database.objects.all(),
+        permission_restricted_qs,
         many=True,
         context={'request': request}
     )
@@ -36,8 +44,10 @@ def get_database_list(request):
 def get_table_list(request, schema):
     if schema is None:
         return []
+    qs = Table.objects.filter(schema=schema)
+    permission_restricted_qs = TableAccessPolicy.scope_queryset(request, qs)
     table_serializer = TableSerializer(
-        Table.objects.filter(schema=schema),
+        permission_restricted_qs,
         many=True,
         context={'request': request}
     )
@@ -47,8 +57,11 @@ def get_table_list(request, schema):
 def get_queries_list(request, schema):
     if schema is None:
         return []
+    qs = UIQuery.objects.filter(base_table__schema=schema)
+    permission_restricted_qs = QueryAccessPolicy.scope_queryset(request, qs)
+
     query_serializer = QuerySerializer(
-        UIQuery.objects.filter(base_table__schema=schema),
+        permission_restricted_qs,
         many=True,
         context={'request': request}
     )
