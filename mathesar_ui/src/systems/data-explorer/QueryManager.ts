@@ -1,9 +1,6 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import {
-  isDefinedNonNullable,
-  CancellablePromise,
-} from '@mathesar-component-library';
+import type { CancellablePromise } from '@mathesar-component-library';
 import { getAPI } from '@mathesar/api/utils/requestUtils';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import CacheManager from '@mathesar/utils/CacheManager';
@@ -16,7 +13,6 @@ import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_t
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { validateFilterEntry } from '@mathesar/components/filter-entry';
 import QueryModel from './QueryModel';
 import type { QueryModelUpdateDiff } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
@@ -25,35 +21,9 @@ import {
   getBaseTableColumnsWithLinks,
   getColumnInformationMap,
 } from './utils';
-import type {
-  ProcessedQueryResultColumnMap,
-  InputColumnsStoreSubstance,
-} from './utils';
+import type { InputColumnsStoreSubstance } from './utils';
 import QueryRunner from './QueryRunner';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
-
-function validateQuery(
-  queryModel: QueryModel,
-  columnMap: ProcessedQueryResultColumnMap,
-): boolean {
-  const general = isDefinedNonNullable(queryModel.base_table);
-  if (!general) {
-    return false;
-  }
-  return queryModel.transformationModels.every((transformation) => {
-    if (transformation.type === 'filter') {
-      const column = columnMap.get(transformation.columnIdentifier);
-      const condition = column?.allowedFiltersMap.get(
-        transformation.conditionIdentifier,
-      );
-      if (condition) {
-        return validateFilterEntry(condition, transformation.value);
-      }
-      return false;
-    }
-    return true;
-  });
-}
 
 export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
   private undoRedoManager: QueryUndoRedoManager;
@@ -80,6 +50,10 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
     inputColumnInformationMap: new Map(),
   });
 
+  /**
+   * To be used later when we need to present the user with a checkbox
+   * to remember their choice
+   */
   confirmationNeededForMultipleResults: Writable<boolean> = writable(true);
 
   queryHasUnsavedChanges: Writable<boolean> = writable(false);
@@ -100,15 +74,11 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
 
   constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
     super(query, abstractTypeMap);
-    this.undoRedoManager = new QueryUndoRedoManager();
+    const undoRedoManager = new QueryUndoRedoManager();
+    undoRedoManager.pushState(query, query.isValid);
+    this.undoRedoManager = undoRedoManager;
     void this.calculateInputColumnTree();
-    let isFirstRun = true;
     this.runUnsubscriber = this.on('run', (response: QueryRunResponse) => {
-      if (isFirstRun) {
-        const isQueryValid = validateQuery(query, get(this.columnsMetaData));
-        this.undoRedoManager.pushState(query, isQueryValid);
-        isFirstRun = false;
-      }
       this.checkAndUpdateSummarizationAfterRun(new QueryModel(response.query));
     });
   }
@@ -201,21 +171,15 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
   }
 
   private async updateQuery(queryModel: QueryModel): Promise<{
-    clientValidationState: RequestStatus;
+    isValid: boolean;
+    isRunnable: boolean;
   }> {
     this.query.set(queryModel);
     this.queryHasUnsavedChanges.set(true);
     if (get(this.state).inputColumnsFetchState?.state !== 'success') {
       await this.calculateInputColumnTree();
     }
-    const isQueryValid = validateQuery(queryModel, get(this.columnsMetaData));
-    const clientValidationState: RequestStatus = isQueryValid
-      ? { state: 'success' }
-      : {
-          state: 'failure',
-          errors: ['TODO: Place validation errors here '],
-        };
-    return { clientValidationState };
+    return { isValid: queryModel.isValid, isRunnable: queryModel.isRunnable };
   }
 
   private setUndoRedoStates(): void {
@@ -271,11 +235,10 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       saveState: undefined,
     }));
     const updateDiff = callback(this.getQueryModel());
-    const { clientValidationState } = await this.updateQuery(updateDiff.model);
-    const isValid = clientValidationState.state === 'success';
+    const { isValid, isRunnable } = await this.updateQuery(updateDiff.model);
     this.undoRedoManager.pushState(updateDiff.model, isValid);
     this.setUndoRedoStates();
-    if (isValid) {
+    if (isRunnable) {
       switch (updateDiff.type) {
         case 'baseTable':
           this.resetResults();
@@ -298,6 +261,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
           }
           break;
         case 'transformations':
+        case 'initialColumnsAndTransformations':
           await this.resetPaginationAndRun();
           break;
         default:

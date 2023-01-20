@@ -3,7 +3,7 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import EmptyEntity from './EmptyEntity.svelte';
-  import TableItem from './TableItem.svelte';
+  import TableCard from './TableCard.svelte';
 
   export let tables: TableEntry[];
   export let database: Database;
@@ -12,7 +12,7 @@
 
 <div class="container">
   {#each tables as table (table.id)}
-    <TableItem {table} {database} {schema} />
+    <TableCard {table} {database} {schema} />
   {:else}
     <EmptyEntity icon={iconTable}>
       <p>No Tables</p>
@@ -25,12 +25,13 @@
     display: grid;
     grid-gap: 1rem;
     --minimum-item-width: 18rem;
+    // align all child items to the left
   }
   @supports (width: min(var(--minimum-item-width), 100%)) {
     .container {
       grid-template-columns: repeat(
-        auto-fit,
-        minmax(min(var(--minimum-item-width), 100%), 1fr)
+        auto-fill,
+        minmax(var(--minimum-item-width), 1fr)
       );
     }
   }

@@ -14,6 +14,6 @@
     fill: currentcolor;
   }
   .inner {
-    fill: #eb5441;
+    fill: var(--brand-500);
   }
 </style>

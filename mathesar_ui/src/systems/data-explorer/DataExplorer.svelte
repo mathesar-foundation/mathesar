@@ -1,7 +1,5 @@
 <script lang="ts">
   import { Tutorial } from '@mathesar-component-library';
-  import { iconExploration } from '@mathesar/icons';
-  import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import { queries } from '@mathesar/stores/queries';
   import type QueryManager from './QueryManager';
   import InputSidebar from './input-sidebar/InputSidebar.svelte';
@@ -21,29 +19,12 @@
 </script>
 
 <div class="data-explorer">
-  {#if $query.isSaved()}
-    <EntityPageHeader
-      icon={iconExploration}
-      name={$query.name ?? ''}
-      description={$query.description}
-    >
-      <ActionsPane
-        {queryManager}
-        bind:linkCollapsibleOpenState
-        bind:isInspectorOpen
-        on:close
-      />
-    </EntityPageHeader>
-  {:else}
-    <div class="header">
-      <ActionsPane
-        {queryManager}
-        bind:linkCollapsibleOpenState
-        bind:isInspectorOpen
-        on:close
-      />
-    </div>
-  {/if}
+  <ActionsPane
+    {queryManager}
+    bind:linkCollapsibleOpenState
+    bind:isInspectorOpen
+    on:close
+  />
   {#if !$query.base_table}
     <div class="initial-content">
       {#if $queries.requestStatus.state === 'success' && $queries.data.size === 0}
@@ -70,7 +51,7 @@
       {#if hasNoColumns}
         <div class="help-text">Get started by adding columns from the left</div>
       {:else}
-        <ResultPane queryRunner={queryManager} />
+        <ResultPane queryHandler={queryManager} />
         {#if isInspectorOpen}
           <ExplorationInspector queryHandler={queryManager} on:delete />
         {/if}
@@ -85,17 +66,11 @@
     grid-template: auto 1fr / 1fr;
     height: 100%;
 
-    .header {
-      border-bottom: 1px solid var(--slate-300);
-      position: relative;
-      padding: 0 var(--size-large);
-    }
-
     .help-text {
       display: inline-block;
       margin-left: auto;
       margin-right: auto;
-      font-size: var(--text-size-xx-large);
+      font-size: var(--text-size-x-large);
       color: var(--slate-500);
     }
 

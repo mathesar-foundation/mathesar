@@ -1,3 +1,7 @@
+## CTAGS ##
+
+/tags
+
 ## PYTHON ##
 
 # Byte-compiled / optimized / DLL files
@@ -182,8 +186,7 @@ node_modules/
 storybook-static/
 
 # Client Build files
-mathesar/static/
-static/
+mathesar/static/mathesar/
 
 # Playwright trace files
 test-results/

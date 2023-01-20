@@ -13,9 +13,11 @@
 </script>
 
 <EntityPageHeader
-  icon={iconExploration}
-  name={query.name}
-  description={query.description}
+  title={{
+    icon: iconExploration,
+    name: query.name,
+    description: query.description,
+  }}
 >
   <svelte:fragment slot="actions-right">
     <a
@@ -35,10 +37,3 @@
     </Button>
   </svelte:fragment>
 </EntityPageHeader>
-
-<style lang="scss">
-  a {
-    margin-right: var(--size-small);
-    text-decoration: none;
-  }
-</style>

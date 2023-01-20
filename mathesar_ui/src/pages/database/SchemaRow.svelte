@@ -1,17 +1,18 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  import {
-    ButtonMenuItem,
-    Icon,
-    iconShowMore,
-  } from '@mathesar-component-library';
+  import { ButtonMenuItem, Icon } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
-  import { iconDeleteMajor, iconEdit, iconNotEditable } from '@mathesar/icons';
+  import {
+    iconDeleteMajor,
+    iconEdit,
+    iconMoreActions,
+    iconNotEditable,
+  } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
 
@@ -38,7 +39,7 @@
           triggerAppearance="plain"
           closeOnInnerClick={true}
           label=""
-          icon={iconShowMore}
+          icon={iconMoreActions}
           menuStyle="--spacing-y:0.8em;"
         >
           <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}
@@ -53,6 +54,7 @@
         </DropdownMenu>
       {/if}
     </div>
+
     {#if schema.description}
       <p class="description" title={schema.description}>
         {schema.description}
@@ -79,6 +81,7 @@
   .description {
     font-weight: 400;
     font-size: var(--text-size-large);
+    color: var(--slate-700);
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -87,15 +90,20 @@
   }
 
   .schema-row {
-    border-radius: 0.57rem;
+    border-radius: var(--border-radius-l);
     padding: 1.142em;
     border: 1px solid var(--slate-300);
     display: flex;
     flex-direction: column;
-
+    transition: border-color 0.2s ease-in-out;
     > :global(* + *) {
       margin-top: 0.75rem;
     }
+  }
+
+  .schema-row:hover {
+    border-color: var(--slate-500);
+    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
   }
 
   .schema-row.is-locked {
@@ -107,9 +115,12 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    flex-grow: 1;
   }
+
   .name {
-    font-size: var(--text-size-xx-large);
+    font-size: var(--text-size-x-large);
+    font-weight: 500;
     --icon-color: var(--brand-500);
   }
 

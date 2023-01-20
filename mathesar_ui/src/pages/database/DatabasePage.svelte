@@ -92,7 +92,7 @@
   >
     <Button slot="action" on:click={addSchema} appearance="primary">
       <Icon {...iconAddNew} />
-      Create Schema
+      <span>Create Schema</span>
     </Button>
   </AppSecondaryHeader>
 
@@ -147,14 +147,9 @@
     flex-direction: column;
     width: 100%;
 
-    .schema-list-title-container {
-      border-bottom: 1px solid var(--slate-200);
-      margin-bottom: 1rem;
-    }
-
     .schema-list-title {
-      font-size: var(--text-size-large);
-      font-weight: 700;
+      font-size: var(--text-size-x-large);
+      font-weight: 500;
     }
 
     .search-results-info {
@@ -173,7 +168,6 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-
       * + * {
         margin-top: 0.714rem;
       }

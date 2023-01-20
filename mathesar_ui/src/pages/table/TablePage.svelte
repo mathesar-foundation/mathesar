@@ -2,7 +2,6 @@
   import { router } from 'tinro';
 
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     setTabularDataStoreInContext,
@@ -14,19 +13,19 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
 
+  const metaSerializationQueryKey = 'q';
+
   const tabularDataStore = setTabularDataStoreInContext(
     // Sacrifice type safety here since the value is initialized reactively
     // below.
     undefined as unknown as TabularData,
   );
 
-  export let database: Database;
-  export let schema: SchemaEntry;
   export let table: TableEntry;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
-  $: ({ hash } = $router);
-  $: meta = Meta.fromSerialization(hash);
+  $: ({ query } = $router);
+  $: meta = Meta.fromSerialization(query[metaSerializationQueryKey] ?? '');
   $: tabularData = new TabularData({
     id: table.id,
     abstractTypesMap,
@@ -35,7 +34,7 @@
   $: tabularDataStore.set(tabularData);
 
   function handleMetaSerializationChange(s: string) {
-    router.location.hash.set(s);
+    router.location.query.set(metaSerializationQueryKey, s);
   }
   $: metaSerialization = tabularData.meta.serialization;
   $: handleMetaSerializationChange($metaSerialization);
@@ -45,7 +44,7 @@
 
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
-    <ActionsPane {database} {schema} {table} />
+    <ActionsPane {table} />
     <TableView />
   </div>
 </LayoutWithHeader>

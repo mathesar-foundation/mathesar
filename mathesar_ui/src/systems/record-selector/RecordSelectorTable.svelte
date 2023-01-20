@@ -3,7 +3,6 @@
 
   import { ImmutableSet } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     constraintIsFk,
@@ -28,7 +27,7 @@
   } from './RecordSelectorController';
   import { setRecordSelectorControllerInContext } from './RecordSelectorController';
   import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
-  import RecordSelectorInputCell from './RecordSelectorInputCell.svelte';
+  import RecordSelectorColumnHeaderCell from './RecordSelectorColumnHeaderCell.svelte';
   import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
   import { getColumnIdToFocusInitially } from './recordSelectorUtils';
   import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
@@ -227,23 +226,15 @@
   <div class="scroll-container" use:overflowObserver={overflowDetails}>
     <div class="table">
       <div class="thead">
-        <div class="tr header">
-          {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-            <Cell rowType="columnHeaderRow" columnType="dataColumn">
-              <ProcessedColumnName {processedColumn} />
-            </Cell>
-          {/each}
+        <div class="tr inputs">
           <Cell
             rowType="columnHeaderRow"
             columnType="rowHeaderColumn"
             {overflowDetails}
           />
-        </div>
-        <div class="tr inputs">
           {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
             {@const column = processedColumn.column}
-            <RecordSelectorInputCell
-              hasFocus={column === columnWithFocus}
+            <RecordSelectorColumnHeaderCell
               hasNestedSelectorOpen={column === $columnWithNestedSelectorOpen}
               {overflowDetails}
               {processedColumn}
@@ -262,25 +253,6 @@
               }}
             />
           {/each}
-          <Cell
-            rowType="searchInputRow"
-            columnType="rowHeaderColumn"
-            {overflowDetails}
-          />
-        </div>
-        <div class="tr divider">
-          {#each [...$processedColumns] as [columnId, _] (columnId)}
-            <Cell
-              rowType="dividerRow"
-              columnType="dataColumn"
-              {overflowDetails}
-            />
-          {/each}
-          <Cell
-            rowType="dividerRow"
-            columnType="rowHeaderColumn"
-            {overflowDetails}
-          />
         </div>
       </div>
       <div class="tbody">
@@ -299,17 +271,10 @@
               selectionIndex = i;
             }}
           >
-            {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-              <RecordSelectorDataCell
-                {row}
-                {processedColumn}
-                {recordSummaries}
-                {searchFuzzy}
-              />
-            {/each}
             <Cell
               rowType="dataRow"
               columnType="rowHeaderColumn"
+              rowIsSelected={effectiveSelectionIndex === index}
               {overflowDetails}
             >
               <RecordSelectorSubmitButton
@@ -318,6 +283,14 @@
                 isSelected={effectiveSelectionIndex === index}
               />
             </Cell>
+            {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+              <RecordSelectorDataCell
+                {row}
+                {processedColumn}
+                {recordSummaries}
+                {searchFuzzy}
+              />
+            {/each}
           </RecordSelectorDataRow>
         {/each}
       </div>
@@ -334,10 +307,7 @@
     overflow: hidden;
     position: relative;
     --overflow-shadow-size: 0.75rem;
-    --overflow-shadow-color: rgba(0, 0, 0, 0.4);
-    --clip-path-size: calc(-1 * var(--overflow-shadow-size));
-    --overflow-shadow: 0 0 var(--overflow-shadow-size)
-      var(--overflow-shadow-color);
+    --overflow-shadow-color: rgba(0, 0, 0, 0.5);
     --focus-highlight-width: 0.2rem;
   }
   .scroll-container {
@@ -352,9 +322,8 @@
     overflow: auto;
     position: relative;
     border-spacing: 0;
-    margin-left: var(--focus-highlight-width);
     --border-width: 1px;
-    --border-color: #e7e7e7;
+    --border-color: var(--slate-200);
     --row-height: 2.25rem;
   }
   .thead {
@@ -385,7 +354,7 @@
     top: 0;
     left: 0;
     height: 100%;
-    width: calc(100% - var(--body-padding));
+    width: 100%;
     pointer-events: none;
     z-index: var(--z-index__record_selector__shadow-inset);
   }
@@ -393,13 +362,13 @@
     box-shadow: 0 -1rem var(--overflow-shadow-size) -1rem
       var(--overflow-shadow-color) inset;
   }
-  .has-overflow-left .inset-shadow {
-    box-shadow: 1rem 0 var(--overflow-shadow-size) -1rem var(
+  .has-overflow-right .inset-shadow {
+    box-shadow: -1rem 0 var(--overflow-shadow-size) -1rem var(
         --overflow-shadow-color
       ) inset;
   }
-  .has-overflow-left.has-overflow-bottom .inset-shadow {
-    box-shadow: 1rem -1rem var(--overflow-shadow-size) -1rem
+  .has-overflow-right.has-overflow-bottom .inset-shadow {
+    box-shadow: -1rem -1rem var(--overflow-shadow-size) -1rem
       var(--overflow-shadow-color) inset;
   }
 </style>

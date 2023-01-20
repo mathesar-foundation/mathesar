@@ -26,7 +26,7 @@
     display: block;
   }
   .mathesar {
-    font-size: var(--text-size-xx-large);
+    font-size: var(--text-size-x-large);
     margin-left: 0.5rem;
   }
   @media (max-width: 45rem) {

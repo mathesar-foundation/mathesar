@@ -100,14 +100,12 @@ for db_key, db_dict in DATABASES.items():
             f"{db_dict['ENGINE']} found for {db_key}'s engine."
         )
 
-
 # pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
 TEST = decouple_config('TEST', default=False, cast=bool)
 if TEST:
     for db_key, _ in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim)):
         DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -138,7 +136,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -151,7 +148,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
@@ -219,16 +215,18 @@ MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, 'manifest.
 MATHESAR_CLIENT_DEV_URL = 'http://localhost:3000'
 MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
 MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPTION', default=False)
+MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/non-code/')
 
 # UI source files have to be served by Django in order for static assets to be included during dev mode
 # https://vitejs.dev/guide/assets.html
 # https://vitejs.dev/guide/backend-integration.html
-STATICFILES_DIRS = [MATHESAR_UI_SOURCE_LOCATION] if MATHESAR_MODE == 'DEVELOPMENT' else [MATHESAR_UI_BUILD_LOCATION]
+STATICFILES_DIRS = [MATHESAR_UI_SOURCE_LOCATION, MATHESAR_STATIC_NON_CODE_FILES_LOCATION] if MATHESAR_MODE == 'DEVELOPMENT' else [MATHESAR_UI_BUILD_LOCATION, MATHESAR_STATIC_NON_CODE_FILES_LOCATION]
 
 # Accounts
 AUTH_USER_MODEL = 'mathesar.User'
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = LOGIN_URL
 DRF_ACCESS_POLICY = {
     'reusable_conditions': ['mathesar.api.permission_conditions']
 }

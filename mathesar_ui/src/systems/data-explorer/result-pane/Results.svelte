@@ -10,13 +10,15 @@
   } from '@mathesar/components/sheet';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
-  import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
   import type QueryRunner from '../QueryRunner';
+  import type QueryManager from '../QueryManager';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
+  import QueryRunErrors from './QueryRunErrors.svelte';
 
-  export let queryRunner: QueryRunner;
+  export let queryHandler: QueryRunner | QueryManager;
   export let isExplorationPage = false;
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
@@ -29,12 +31,12 @@
     runState,
     selection,
     inspector,
-  } = queryRunner);
+  } = queryHandler);
   $: ({ initial_columns } = $query);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
   $: recordRunState = $runState?.state;
-  $: errors = $runState?.state === 'failure' ? $runState.errors : [];
+  $: errors = $runState?.state === 'failure' ? $runState.errors : undefined;
   $: columnList = [...$processedColumns.values()];
   $: sheetColumns = columnList.length
     ? [{ id: ID_ROW_CONTROL_COLUMN }, ...columnList]
@@ -46,17 +48,6 @@
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
-  $: refreshButtonState = (() => {
-    let buttonState: 'loading' | 'error' | undefined = undefined;
-    const queryRunState = $runState?.state;
-    if (queryRunState === 'processing') {
-      buttonState = 'loading';
-    }
-    if (queryRunState === 'failure') {
-      buttonState = 'error';
-    }
-    return buttonState;
-  })();
 
   const columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
@@ -69,11 +60,9 @@
       This exploration does not contain any columns. Edit the exploration to add
       columns to it.
     </div>
-  {:else if errors.length}
-    <div class="empty-state errors">
-      {#each errors as error}
-        <p>{error}</p>
-      {/each}
+  {:else if errors}
+    <div class="empty-state">
+      <QueryRunErrors {errors} {queryHandler} />
     </div>
   {:else}
     <Sheet
@@ -96,7 +85,7 @@
         {#each columnList as processedQueryColumn (processedQueryColumn.id)}
           <ResultHeaderCell
             {processedQueryColumn}
-            {queryRunner}
+            queryRunner={queryHandler}
             isSelected={isColumnSelected(
               $selectedCells,
               $columnsSelectedWhenTheTableIsEmpty,
@@ -109,13 +98,16 @@
       <SheetVirtualRows
         itemCount={sheetItemCount}
         paddingBottom={30}
-        itemSize={() => 30}
+        itemSize={() => rowHeightPx}
         let:items
       >
         {#each items as item (item.key)}
           {#if rows[item.index] || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
-              <div {...htmlAttributes} style={styleString}>
+              <div
+                {...htmlAttributes}
+                style="--cell-height:{rowHeightPx - 1}px;{styleString}"
+              >
                 <SheetCell
                   columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
                   isStatic
@@ -160,11 +152,11 @@
           pagination={$pagination}
           {totalCount}
           on:change={(e) => {
-            void queryRunner.setPagination(e.detail);
+            void queryHandler.setPagination(e.detail);
           }}
         />
         {#if isExplorationPage}
-          <QueryRefreshButton {queryRunner} />
+          <QueryRefreshButton queryRunner={queryHandler} />
         {/if}
       </div>
     </div>
@@ -183,14 +175,12 @@
 
     .empty-state {
       padding: 1rem;
-
-      &.errors {
-        color: var(--danger-color);
-      }
-
-      p {
-        margin: 0;
-      }
+      position: absolute;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      top: 0;
+      overflow: auto;
     }
 
     :global(.sheet) {
@@ -230,10 +220,10 @@
     }
 
     :global(.column-name-wrapper.selected) {
-      background: #dedede !important;
+      background: var(--slate-200) !important;
     }
     :global([data-sheet-element='cell'].selected) {
-      background: #fafafa;
+      background: var(--slate-100);
     }
   }
 </style>

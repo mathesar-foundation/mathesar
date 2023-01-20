@@ -7,7 +7,9 @@ def frontend_settings(request):
     frontend_settings = {
         'development_mode': settings.MATHESAR_MODE == 'DEVELOPMENT',
         'manifest_data': get_manifest_data(),
-        'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False)
+        'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
+        'live_demo_username': getattr(settings, 'MATHESAR_LIVE_DEMO_USERNAME', None),
+        'live_demo_password': getattr(settings, 'MATHESAR_LIVE_DEMO_PASSWORD', None),
     }
     # Only include development URL if we're in development mode.
     if frontend_settings['development_mode'] is True:

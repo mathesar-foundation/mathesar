@@ -12,11 +12,10 @@
 <EditTableHoc let:getNameValidationErrors let:onUpdate tableId={table.id}>
   <NameAndDescInputModalForm
     controller={modalController}
-    save={onUpdate}
+    save={(name, description) => onUpdate({ name, description })}
     {getNameValidationErrors}
     getInitialName={() => table.name ?? ''}
-    getInitialDescription={() => ''}
-    hideDescription
+    getInitialDescription={() => table.description ?? ''}
   >
     <span slot="title" let:initialName>
       Edit <Identifier>{initialName}</Identifier> Table

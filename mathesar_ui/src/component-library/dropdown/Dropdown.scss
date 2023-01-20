@@ -9,10 +9,12 @@ button.dropdown.trigger {
     text-overflow: ellipsis;
     white-space: nowrap;
     box-sizing: content-box;
-    gap: 0.25rem;
     line-height: 1.2;
     min-height: 1.2em;
     flex-grow: 1;
+    > *:not(:last-child) {
+      margin-right: 0.25rem;
+    }
   }
 
   > .arrow {
@@ -26,7 +28,7 @@ button.dropdown.trigger {
   box-shadow: #000 0 0 0 0, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
     rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   border-radius: var(--border-radius-m);
-  background: #fff;
+  background: var(--dropdown-background, var(--white));
   z-index: var(--dropdown-z-index, 100);
   max-height: calc(100vh - 5em);
   overflow: auto;

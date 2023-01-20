@@ -3,45 +3,40 @@
   import type { OverflowDetails } from '@mathesar/utils/overflowObserver';
   import type {
     CellLayoutRowType,
-    CellState,
     CellLayoutColumnType,
   } from './recordSelectorUtils';
 
   export let rowType: CellLayoutRowType;
+  export let rowIsSelected = false;
   export let columnType: CellLayoutColumnType;
-  export let state: CellState | undefined = undefined;
   export let overflowDetails: OverflowDetails | undefined = undefined;
   export let title: string | undefined = undefined;
+  export let showAboveOverlay = false;
 
   $: hasOverflowTop = ensureReadable(overflowDetails?.hasOverflowTop ?? false);
-  $: hasOverflowRight = ensureReadable(
-    overflowDetails?.hasOverflowRight ?? false,
+  $: hasOverflowLeft = ensureReadable(
+    overflowDetails?.hasOverflowLeft ?? false,
   );
 </script>
 
 <div
   class="td"
   class:column-header={rowType === 'columnHeaderRow'}
-  class:input={rowType === 'searchInputRow'}
-  class:divider={rowType === 'dividerRow'}
   class:row-header={columnType === 'rowHeaderColumn'}
-  class:has-outline={state === 'focused' || state === 'acquiringFkValue'}
-  class:acquiring-fk-value={state === 'acquiringFkValue'}
+  class:row-is-selected={rowIsSelected}
   class:table-overflow-top={$hasOverflowTop}
-  class:table-overflow-right={$hasOverflowRight}
+  class:table-overflow-left={$hasOverflowLeft}
+  class:show-above-overlay={showAboveOverlay}
   {title}
 >
   <slot />
-  {#if rowType === 'dividerRow'}
-    <div class="divider-bg" />
-  {/if}
-  {#if rowType === 'searchInputRow'}
-    <div class="outline" />
-  {/if}
 </div>
 
 <style>
   .td {
+    --max-column-width: 30ch;
+    --outline-color: var(--sky-600);
+    --separator-width: 7px;
     display: table-cell;
     vertical-align: middle;
     border-style: solid;
@@ -52,111 +47,70 @@
     border-right-width: var(--border-width);
     border-bottom-width: var(--border-width);
     min-width: 8ch;
-    max-width: 30ch;
-    --outline-color: #428af4;
+    max-width: var(--max-column-width);
   }
   .td:first-child {
     border-left-width: var(--border-width);
   }
 
-  /** Row types ***************************************************************/
   .column-header {
-    background: #f7f8f8;
-    padding: 0 0.5rem;
-    /** 0.5px below is a hack to deal with a Firefox-only issue. When vertically
-     * scrolling the table, the data cells were peeking through between a tiny
-     * sub-pixel gap between the column header cell and the input cell, but only
-     * at certain zoom levels.*/
-    height: calc(var(--row-height) - 2 * var(--border-width) + 0.5px);
+    background: var(--slate-100);
+    border-bottom-width: var(--separator-width);
     position: sticky;
     top: 0;
     z-index: var(--z-index__record_selector__thead);
     min-width: max-content;
     box-sizing: content-box;
   }
-  .input {
-    background: white;
-    height: var(--row-height);
-    position: sticky;
-    top: var(--row-height);
-    z-index: var(--z-index__record_selector__thead);
-  }
-  .divider {
-    height: 10px;
-    border: none;
-    position: sticky;
-    z-index: var(--z-index__record-selector__divider);
-    top: calc(2 * var(--row-height));
-    background: white;
-    overflow: visible;
-  }
-  .divider .divider-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--border-color);
-  }
 
-  /** Column types ************************************************************/
   .row-header {
-    padding-left: 0.5rem;
-    border: none;
-    background: white;
-    padding-right: calc(var(--body-padding) + var(--extra-body-padding));
+    padding: 0 0.5rem;
     position: sticky;
-    right: 0;
+    left: 0;
     z-index: var(--z-index__record_selector__row-header);
+    background: var(--slate-100);
+    min-width: 3ch;
+  }
+  .row-header.row-is-selected {
+    background: var(--slate-300);
   }
 
-  /** Upper right corner ******************************************************/
-  .column-header.row-header,
-  .input.row-header,
-  .divider.row-header {
+  .column-header.row-header {
     z-index: var(--z-index__record_selector__thead-row-header);
   }
-  .divider.row-header .divider-bg {
-    background: white;
-    width: calc(100% - var(--body-padding) + 1px);
-  }
 
-  /** Focus indicator *********************************************************/
-  .has-outline {
-    z-index: var(--z-index__record_selector__focused-input);
-  }
-  .outline {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: var(--focus-highlight-width);
-    pointer-events: none;
-    box-shadow: 0 0 0 var(--focus-highlight-width) var(--outline-color);
-  }
-  .td:not(.has-outline) .outline {
-    display: none;
-  }
-  .acquiring-fk-value {
-    --outline-color: #888;
+  .show-above-overlay {
     z-index: var(--z-index__record_selector__above-overlay);
-    pointer-events: none;
-  }
-  .has-outline.table-overflow-right {
-    z-index: var(--z-index__record_selector__focused-input-with-overflow);
   }
 
   /** Overflow shadows ********************************************************/
-  .table-overflow-top.divider .divider-bg {
-    box-shadow: var(--overflow-shadow);
+  .td {
+    /**
+     * We add this spread to create even-looking shadows. Without it, the
+     * shadows look a little bumpy due to the fact that they're set on many
+     * small elements instead of one large element.
+     */
+    --overflow-shadow-spread: 0.5rem;
+    --overflow-shadow: 0 0 var(--overflow-shadow-size)
+      var(--overflow-shadow-spread) var(--overflow-shadow-color);
+    --clip-path-size: -1rem;
+  }
+  .table-overflow-left.row-header {
+    box-shadow: calc(-1 * var(--overflow-shadow-spread)) 0
+      var(--overflow-shadow-size) var(--overflow-shadow-spread)
+      var(--overflow-shadow-color);
+    clip-path: inset(0 var(--clip-path-size) 0 0);
+  }
+  .table-overflow-top.column-header {
+    box-shadow: 0 calc(-1 * var(--overflow-shadow-spread))
+      var(--overflow-shadow-size) var(--overflow-shadow-spread)
+      var(--overflow-shadow-color);
     clip-path: inset(0 0 var(--clip-path-size) 0);
   }
-  .table-overflow-top.divider .divider-bg {
-    background: var(--border-color);
-  }
-  .table-overflow-right.row-header {
-    box-shadow: var(--overflow-shadow);
-    clip-path: inset(0 0 0 var(--clip-path-size));
+  .table-overflow-top.table-overflow-left.row-header.column-header {
+    box-shadow: calc(-1 * var(--overflow-shadow-spread))
+      calc(-1 * var(--overflow-shadow-spread)) var(--overflow-shadow-size)
+      var(--overflow-shadow-spread) var(--overflow-shadow-color);
+    clip-path: inset(0 var(--clip-path-size) var(--clip-path-size) 0);
   }
 </style>

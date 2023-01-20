@@ -14,6 +14,7 @@ class ErrorCodes(Enum):
     ProgrammingError = 4101
     TypeError = 4102
     ValueError = 4103
+    NetworkError = 4104
 
     # DB Error Codes
     DuplicateTableError = 4205
@@ -58,3 +59,7 @@ class ErrorCodes(Enum):
     DeletedColumnAccess = 4418
     IncorrectOldPassword = 4419
     EditingPublicSchema = 4421
+    DuplicateUIQueryInSchema = 4422
+
+    # Version API errors
+    GithubReleasesAPIFailure = 4501
