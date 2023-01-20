@@ -41,14 +41,12 @@
     const column = columns.get(columnIdentifier);
 
     if (column && _sortDirection) {
-      const suffix = getSortingLabelForColumn(
-        column.abstractType.cellInfo.type,
-      );
-      return `Sort ${suffix[_sortDirection]}`;
+      const label = getSortingLabelForColumn(column.abstractType.cellInfo.type);
+      return label[_sortDirection];
     }
 
     // Ideally should never happen
-    return '';
+    return sortDirection === 'DESCENDING' ? 'Descending' : 'Ascending';
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
