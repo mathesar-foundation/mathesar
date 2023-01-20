@@ -5,7 +5,7 @@ from sqlalchemy import text
 
 from django.core.management import BaseCommand
 
-from demo.arxiv_skeleton import get_arxiv_db_and_schema_log_path
+from demo.install.arxiv_skeleton import get_arxiv_db_and_schema_log_path
 from mathesar.database.base import create_mathesar_engine
 
 
