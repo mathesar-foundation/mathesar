@@ -9,13 +9,12 @@ from mathesar.models.query import UIQuery
 def load_custom_explorations(engine):
     """Create some premade explorations to look at demo data."""
     _create_checkout_monthly_report(engine)
+    _create_overdue_books_report(engine)
 
 
 def _create_checkout_monthly_report(engine):
     schema = get_dj_schema_by_name(engine, LIBRARY_MANAGEMENT)
-    print(schema)
     checkouts = get_dj_table_by_name(schema, "Checkouts")
-    print(checkouts)
     initial_columns = [
         {
             "id": get_dj_column_by_name(checkouts, "id").id,
@@ -58,6 +57,107 @@ def _create_checkout_monthly_report(engine):
     UIQuery.objects.create(
         name="Monthly Checkouts",
         description="This report gives the number of checkouts each month.",
+        base_table=checkouts,
+        initial_columns=initial_columns,
+        transformations=transformations,
+        display_names=display_names,
+    )
+
+
+def _create_overdue_books_report(engine):
+    schema = get_dj_schema_by_name(engine, LIBRARY_MANAGEMENT)
+    books = get_dj_table_by_name(schema, "Books")
+    checkouts = get_dj_table_by_name(schema, "Checkouts")
+    items = get_dj_table_by_name(schema, "Items")
+    patrons = get_dj_table_by_name(schema, "Patrons")
+    initial_columns = [
+        {
+            "id": get_dj_column_by_name(patrons, "Email").id,
+            "alias": "Patrons_Email",
+            "jp_path": [
+                [
+                    get_dj_column_by_name(checkouts, "Patron").id,
+                    get_dj_column_by_name(patrons, "id").id
+                ],
+            ]
+        }, {
+            "id": get_dj_column_by_name(books, "Title").id,
+            "alias": "Books_Title",
+            "jp_path": [
+                [
+                    get_dj_column_by_name(checkouts, "Item").id,
+                    get_dj_column_by_name(items, "id").id,
+                ], [
+                    get_dj_column_by_name(items, "Book").id,
+                    get_dj_column_by_name(books, "id").id,
+                ]
+            ]
+        }, {
+            "id": get_dj_column_by_name(checkouts, "Due Date").id,
+            "alias": "Checkouts_Due Date"
+        }, {
+            "id": get_dj_column_by_name(checkouts, "Check In Time").id,
+            "alias": "Checkouts_Check In Time"
+        }, {
+            "id": get_dj_column_by_name(checkouts, "id").id,
+            "alias": "Checkouts_id"
+        },
+    ]
+    transformations = [
+        {
+            "spec": {
+                "lesser": [
+                    {"column_name": ["Checkouts_Due Date"]},
+                    {"literal": ["2023-01-20"]}
+                ]
+            },
+            "type": "filter"
+        }, {
+            "spec": {
+                "null": [
+                    {"column_name": ["Checkouts_Check In Time"]}
+                ]
+            },
+            "type": "filter"
+        }, {
+            "spec": [
+                "Checkouts_Due Date", "Checkouts_Check In Time", "Checkouts_id"
+            ],
+            "type": "hide"
+        }, {
+            "spec": {
+                "base_grouping_column": "Patrons_Email",
+                "grouping_expressions": [
+                    {
+                        "input_alias": "Patrons_Email",
+                        "output_alias": "Patrons_Email_grouped"
+                    }
+                ],
+                "aggregation_expressions": [
+                    {
+                        "function": "aggregate_to_array",
+                        "input_alias": "Books_Title",
+                        "output_alias": "Books_Title_agged"
+                    }
+                ]
+            },
+            "type": "summarize"
+        }
+    ]
+    display_names = {
+        "Books_Title": "Books_Title",
+        "Checkouts_id": "Checkouts_id",
+        "Patrons_Email": "Patrons_Email",
+        "Checkouts_Due Date": "Checkouts_Due Date",
+        "Checkouts_Check In Time": "Checkouts_Check In Time",
+        "Patrons_Email_grouped": "Patron Email",
+        "Books_Title_agged": "Overdue Books",
+    }
+    description = "This shows each patron's overdue books if they have any."
+
+    UIQuery.objects.create(
+        name="Overdue Book Report",
+        description=description,
         base_table=checkouts,
         initial_columns=initial_columns,
         transformations=transformations,
