@@ -10,8 +10,10 @@
     SheetCellResizer,
     isColumnSelected,
   } from '@mathesar/components/sheet';
+  import { ContextMenu } from '@mathesar/component-library';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
+  import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -47,6 +49,9 @@
             selection.onMouseEnterColumnHeaderWhileSelection(processedColumn)}
         />
         <SheetCellResizer columnIdentifierKey={columnId} />
+        <ContextMenu>
+          <ColumnHeaderContextMenu {processedColumn} />
+        </ContextMenu>
       </div>
     </SheetCell>
   {/each}

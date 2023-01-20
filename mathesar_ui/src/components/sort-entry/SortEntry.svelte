@@ -6,14 +6,18 @@
     InputGroup,
     Select,
   } from '@mathesar-component-library';
-  import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
-  import { type SortDirection, allowedSortDirections } from './utils';
+  import {
+    type SortDirection,
+    allowedSortDirections,
+    getSortingLabelForColumn,
+  } from './utils';
+  import type { SortEntryColumnLike } from './types';
 
   type T = $$Generic;
-  type ColumnLikeType = Pick<CellColumnFabric, 'id' | 'column'> & T;
+  type ColumnLikeType = SortEntryColumnLike & T;
 
   const dispatch = createEventDispatcher<{
     remove: undefined;
@@ -27,15 +31,23 @@
   export let getColumnLabel: (column?: ColumnLikeType) => string;
   export let columnsAllowedForSelection: ColumnLikeType['id'][] | undefined =
     undefined;
-  export let getSortDirectionLabel: (
-    sortDirection?: SortDirection,
-  ) => string = (sortDirection?: SortDirection) =>
-    sortDirection === 'DESCENDING' ? 'Descending' : 'Ascending';
-
   export let columnIdentifier: ColumnLikeType['id'];
   export let sortDirection: SortDirection = 'ASCENDING';
   export let disableColumnChange = false;
   export let allowDelete = true;
+  export let getSortDirectionLabel: (
+    sortDirection?: SortDirection,
+  ) => string = (_sortDirection?: SortDirection) => {
+    const column = columns.get(columnIdentifier);
+
+    if (column && _sortDirection) {
+      const label = getSortingLabelForColumn(column.abstractType.cellInfo.type);
+      return label[_sortDirection];
+    }
+
+    // Ideally should never happen
+    return sortDirection === 'DESCENDING' ? 'Descending' : 'Ascending';
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   $: allColumnIds = [...columns.values()].map(
