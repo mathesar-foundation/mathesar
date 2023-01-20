@@ -1,2 +1,1 @@
 -r requirements.txt
-gunicorn==20.1.0
