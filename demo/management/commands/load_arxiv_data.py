@@ -5,7 +5,7 @@ from sqlalchemy import text
 
 from django.core.management import BaseCommand
 
-from demo.arxiv_skeleton import get_arxiv_db_and_schema_log_path
+from demo.install.arxiv_skeleton import get_arxiv_db_and_schema_log_path
 from mathesar.database.base import create_mathesar_engine
 
 
@@ -35,7 +35,7 @@ def _download_arxiv_papers():
         max_results=50,
         sort_by=arxiv.SortCriterion.LastUpdatedDate
     )
-    return arxiv_search.results()
+    return list(arxiv_search.results())
 
 
 def _construct_arxiv_search_query_expression():
