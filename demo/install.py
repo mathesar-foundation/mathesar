@@ -39,7 +39,7 @@ def _load_library_dataset(engine):
     Destructive, and will knock out any previous "Library Management"
     schema in the given database.
     """
-    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{LIBRARY_MANAGEMENT}";""")
+    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{LIBRARY_MANAGEMENT}" CASCADE;""")
     create_schema_query = text(f"""CREATE SCHEMA "{LIBRARY_MANAGEMENT}";""")
     set_search_path = text(f"""SET search_path="{LIBRARY_MANAGEMENT}";""")
     with engine.begin() as conn, open(LIBRARY_ONE) as f1, open(LIBRARY_TWO) as f2:
