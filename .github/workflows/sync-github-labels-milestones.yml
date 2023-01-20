@@ -3,6 +3,7 @@ name: Sync labels and milestones
 on:
   schedule:
     - cron: "0 0 * * *"
+  push:
 
 jobs:
   build:
@@ -25,6 +26,6 @@ jobs:
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-design -s all
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-private-notes -s all
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-scripts -s all
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-update-companion -d
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-update-companion -s all
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-website -s all
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-wiki -s all
