@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
-  import { Button, Collapsible, Help } from '@mathesar/component-library';
+  import { Button, Collapsible, Help, Icon } from '@mathesar/component-library';
   import type { Constraint } from '@mathesar/stores/table-data';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import ConstraintCollapseHeader from './ConstraintCollapseHeader.svelte';
   import NewUniqueConstraint from './NewUniqueConstraint.svelte';
   import NewFkConstraint from './NewFkConstraint.svelte';
@@ -10,6 +13,10 @@
 
   export let constraintType: ConstraintType;
   export let constraints: Constraint[];
+
+  const tabularData = getTabularDataStoreFromContext();
+
+  $: constraintsDataStore = $tabularData.constraintsDataStore;
 
   const CONSTRAINT_TYPE_SUPPORTING_CAN_ADD: ConstraintType[] = [
     'unique',
@@ -47,6 +54,15 @@
   function cancelAddConstraint() {
     isAddingNewConstraint = false;
   }
+
+  function handleDrop(constraint: Constraint) {
+    void confirmDelete({
+      identifierType: 'Constraint',
+      identifierName: constraint.name,
+      body: ['Are you sure you want to proceed?'],
+      onProceed: () => constraintsDataStore.remove(constraint.id),
+    });
+  }
 </script>
 
 <div class="constraint-type-section">
@@ -77,6 +93,17 @@
           canDrop={CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType)}
           {constraint}
         />
+      </span>
+      <span slot="trigger-aside">
+        {#if CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType)}
+          <Button
+            on:click={() => handleDrop(constraint)}
+            size="small"
+            appearance="plain"
+          >
+            <Icon {...iconDeleteMajor} />
+          </Button>
+        {/if}
       </span>
       <div slot="content">
         {#if constraintType === 'foreignkey'}
