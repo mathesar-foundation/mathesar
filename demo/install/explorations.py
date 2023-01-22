@@ -1,6 +1,6 @@
 """This module contains logic for creating premade explorations of demo data."""
 from demo.install.base import (
-    LIBRARY_MANAGEMENT, MATHESAR_CON,
+    LIBRARY_MANAGEMENT, MATHESAR_CON, ARXIV,
     get_dj_column_by_name, get_dj_schema_by_name, get_dj_table_by_name,
 )
 from mathesar.models.query import UIQuery
@@ -12,6 +12,7 @@ def load_custom_explorations(engine):
     _create_overdue_books_report(engine)
     _create_topics_by_organization_view(engine)
     _create_organizations_by_topic_view(engine)
+    _create_paper_authors_view(engine)
 
 
 def _create_checkout_monthly_report(engine):
@@ -325,6 +326,77 @@ def _create_organizations_by_topic_view(engine):
         name="Organizations by Topic",
         description=description,
         base_table=talks,
+        initial_columns=initial_columns,
+        transformations=transformations,
+        display_names=display_names,
+    )
+
+
+def _create_paper_authors_view(engine):
+    schema = get_dj_schema_by_name(engine, ARXIV)
+
+    papers = get_dj_table_by_name(schema, "Papers")
+    pa_map = get_dj_table_by_name(schema, "Paper-Author Map")
+    authors = get_dj_table_by_name(schema, "Authors")
+    initial_columns = [
+        {
+            "id": get_dj_column_by_name(papers, "id").id,
+            "alias": "Papers_id"
+        }, {
+            "id": get_dj_column_by_name(papers, "Title").id,
+            "alias": "Papers_Title"
+        }, {
+            "id": get_dj_column_by_name(authors, "Name").id,
+            "alias": "Authors_Name",
+            "jp_path": [
+                [
+                    get_dj_column_by_name(papers, "id").id,
+                    get_dj_column_by_name(pa_map, "paper_id").id,
+                ], [
+                    get_dj_column_by_name(pa_map, "author_id").id,
+                    get_dj_column_by_name(authors, "id").id,
+                ]
+            ]
+        }
+    ]
+    transformations = [
+        {
+            "spec": {
+                "base_grouping_column": "Papers_id",
+                "grouping_expressions": [
+                    {
+                        "input_alias": "Papers_id",
+                        "output_alias": "Papers_id_grouped"
+                    }, {
+                        "input_alias": "Papers_Title",
+                        "output_alias": "Papers_Title_grouped"
+                    }
+                ],
+                "aggregation_expressions": [
+                    {
+                        "function": "distinct_aggregate_to_array",
+                        "input_alias": "Authors_Name",
+                        "output_alias": "Authors_Name_agged"
+                    }
+                ]
+            },
+            "type": "summarize"
+        }
+    ]
+    display_names = {
+        "Papers_id": "Papers_id",
+        "Authors_Name": "Authors_Name",
+        "Papers_Title": "Papers_Title",
+        "Papers_id_grouped": "Paper id",
+        "Authors_Name_agged": "Authors",
+        "Papers_Title_grouped": "Paper Title"
+    }
+    description = "This report gives the title of each paper, along with a list of its authors."
+
+    UIQuery.objects.create(
+        name="Paper Authors",
+        description=description,
+        base_table=papers,
         initial_columns=initial_columns,
         transformations=transformations,
         display_names=display_names,
