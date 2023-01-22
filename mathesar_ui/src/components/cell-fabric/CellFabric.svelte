@@ -67,9 +67,9 @@
     isolation: isolate;
 
     &:not(.is-independent) {
-      --cell-height: 29px;
+      --default-cell-height: 29px;
       --cell-padding: 0.5rem;
-      min-height: var(--cell-height);
+      min-height: var(--cell-height, var(--default-cell-height));
     }
     &.is-independent {
       --cell-padding: 0rem;
@@ -90,7 +90,7 @@
     right: var(--cell-padding);
     bottom: var(--cell-padding);
     position: absolute;
-    background: #efefef;
+    background: var(--slate-100);
   }
   .cell-fabric:not(.show-as-skeleton) .loader {
     display: none;

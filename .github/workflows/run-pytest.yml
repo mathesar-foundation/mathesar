@@ -25,7 +25,7 @@ jobs:
         run: docker exec mathesar_service mkdir coverage_report
 
       - name: Run tests with pytest
-        run: docker exec mathesar_service pytest  --ignore=mathesar/tests/integration/ --cov-report=xml:coverage_report/coverage.xml
+        run: docker exec mathesar_service pytest --exitfirst --ignore=mathesar/tests/integration/ --cov-report=xml:coverage_report/coverage.xml
 
       - name: Save the coverage report
         uses: codecov/codecov-action@v2

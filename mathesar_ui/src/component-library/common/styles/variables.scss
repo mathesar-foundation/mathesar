@@ -16,6 +16,7 @@
   --purple-100: #ebe5fd;
   --purple-300: #a586ff;
   --purple-400: #6b45dd;
+  --purple-500: #4b2c9d;
 
   --red-100: #fdeeed;
   --red-200: #f9cdc8;
@@ -23,12 +24,13 @@
   --red-600: #dd4734;
   --red-800: #c63826;
 
+  --slate-50: #f6f9f9;
   --slate-100: #eff1f1;
   --slate-200: #d5d8dc;
-  --slate-300: #b1b7be;
-  --slate-400: #959da7;
-  --slate-500: #4b535d;
-  --slate-700: #424952;
+  --slate-300: #b8bdc4;
+  --slate-400: #5e646e;
+  --slate-500: #4a4f58;
+  --slate-600: #3a3f48;
   --slate-800: #25292e;
 
   --sand-100: #f9f8f6;
@@ -40,6 +42,8 @@
   --sky-200: #e8f1fd;
   --sky-300: #b0ccf0;
   --sky-500: #bcd9f9;
+  --sky-600: #1269cf;
+  --sky-700: #145bbe;
   --sky-800: #36537a;
 
   // TODO: Get this incorporated in figma
@@ -71,12 +75,12 @@
   --size-xx-small: 0.5715rem; // 8px
   --size-x-small: 0.7143rem; // 10px
   --size-small: 0.8572rem; // 12px
-  --size-base: 1rem; // 14px
-  --size-large: 1.1429rem; // 16px
-  --size-x-large: 1.2858rem; //18px
-  --size-xx-large: 1.4286rem; // 20px
-  --size-ultra-large: 1.5715rem; // 22px
-  --size-super-ultra-large: 1.7143rem; // 24px
+  --size-base: 1rem; // 1rem/16.00px
+  --size-large: 1.2rem; //1.44rem/23.04px
+  --size-x-large: 1.44rem; // 1.44rem/23.04px
+  --size-xx-large: 1.728rem; // 1.728rem/27.65px
+  --size-ultra-large: 2.074rem; //2.074rem/33.18px
+  --size-super-ultra-large: 2.488rem; //2.488rem/39.81px
 
   --border-radius-s: 0.142rem; //2px
   --border-radius-m: 0.285rem; //4px

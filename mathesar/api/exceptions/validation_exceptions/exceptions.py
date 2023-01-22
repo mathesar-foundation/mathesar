@@ -2,6 +2,18 @@ from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.validation_exceptions.base_exceptions import MathesarValidationException
 
 
+class DuplicateUIQueryInSchemaAPIException(MathesarValidationException):
+    error_code = ErrorCodes.DuplicateUIQueryInSchema.value
+
+    def __init__(
+            self,
+            message="UIQuery names must be unique per schema",
+            field=None,
+            details=None,
+    ):
+        super().__init__(None, self.error_code, message, field, details)
+
+
 class DistinctColumnRequiredAPIException(MathesarValidationException):
     error_code = ErrorCodes.DistinctColumnNameRequired.value
 
@@ -154,8 +166,18 @@ class IncorrectOldPassword(MathesarValidationException):
 
     def __init__(
             self,
-
             field=None,
     ):
-        message = "Old password is not correct"
+        message = "Old password is not correct."
         super().__init__(None, self.error_code, message, field, None)
+
+
+class EditingPublicSchemaIsDisallowed(MathesarValidationException):
+    error_code = ErrorCodes.EditingPublicSchema.value
+
+    def __init__(
+            self,
+            message="Editing the public schema is disallowed.",
+            field=None,
+    ):
+        super().__init__(None, self.error_code, message, field)

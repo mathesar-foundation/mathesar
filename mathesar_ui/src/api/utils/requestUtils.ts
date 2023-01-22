@@ -16,10 +16,10 @@ export enum States {
   Error = 'error',
 }
 
-export type RequestStatus =
+export type RequestStatus<ErrorType = string[]> =
   | { state: 'processing' }
   | { state: 'success' }
-  | { state: 'failure'; errors: string[] };
+  | { state: 'failure'; errors: ErrorType };
 
 /**
  * When multiple states are present, the one listed highest here is considered
@@ -72,6 +72,7 @@ export interface PaginatedResponse<T> {
 
 const NO_CONTENT = 204;
 const successStatusCodes = new Set([200, 201, NO_CONTENT]);
+const FORBIDDEN = 403;
 
 function getResultFromRequest<T>(request: XMLHttpRequest): T | undefined {
   if (request.status === NO_CONTENT) {
@@ -112,6 +113,10 @@ function sendXHRRequest<T>(
         if (successStatusCodes.has(request.status)) {
           resolve(getResultFromRequest<T>(request));
         } else {
+          if (request.status === FORBIDDEN) {
+            window.location.reload();
+            return;
+          }
           try {
             reject(new ApiMultiError(JSON.parse(String(request.response))));
           } catch {

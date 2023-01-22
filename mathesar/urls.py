@@ -1,3 +1,4 @@
+from django.contrib.auth.views import LoginView
 from django.urls import include, path, re_path
 from rest_framework_nested import routers
 
@@ -21,6 +22,7 @@ db_table_router.register(r'columns', db_viewsets.ColumnViewSet, basename='table-
 db_table_router.register(r'constraints', db_viewsets.ConstraintViewSet, basename='table-constraint')
 
 ui_router = routers.DefaultRouter()
+ui_router.register(r'version', ui_viewsets.VersionViewSet, basename='version')
 ui_router.register(r'databases', ui_viewsets.DatabaseViewSet, basename='database')
 ui_router.register(r'users', ui_viewsets.UserViewSet, basename='user')
 ui_router.register(r'database_roles', ui_viewsets.DatabaseRoleViewSet, basename='database_role')
@@ -32,6 +34,7 @@ urlpatterns = [
     path('api/ui/v0/', include(ui_router.urls)),
     path('api/ui/v0/reflect/', views.reflect_all, name='reflect_all'),
     path('auth/password_reset_confirm', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('auth/login/', LoginView.as_view(redirect_authenticated_user=True), name='login'),
     path('auth/', include('django.contrib.auth.urls')),
     path('', views.home, name='home'),
     path('<db_name>/', views.schemas, name='schemas'),

@@ -170,9 +170,9 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
-    border: 1px solid #dfdfdf;
+    border: 1px solid var(--slate-100);
     border-radius: 0.25rem;
-    background: #fff;
+    background: var(--white);
     min-height: 2.25em;
     padding: 0;
     --padding: 0.5rem;
@@ -180,7 +180,7 @@
   }
 
   .linked-record-input:focus {
-    border-color: #489ee4;
+    border-color: var(--sky-700);
     outline: 0;
     box-shadow: 0 0 0 2px #2087e633;
   }

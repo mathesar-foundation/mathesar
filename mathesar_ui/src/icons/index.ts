@@ -54,6 +54,7 @@ import {
   faSlash,
   faStar,
   faPaste,
+  faEllipsisV,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -88,6 +89,7 @@ export const iconDeleteMinor: IconProps = { data: faTimes };
 export const iconEdit: IconProps = { data: faPencilAlt };
 export const iconExpandRight: IconProps = { data: faChevronRight };
 export const iconImportData: IconProps = { data: faUpload };
+export const iconMoreActions: IconProps = { data: faEllipsisV };
 export const iconMoveColumnsToNewLinkedTable = { data: faLink };
 export const iconMoveColumnsToExistingLinkedTable = { data: faLink };
 /** Submit a selection with the record selector for data entry */

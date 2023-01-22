@@ -1,25 +1,34 @@
 <script lang="ts">
-  import { Icon } from '@mathesar-component-library';
+  import { Icon, Truncate } from '@mathesar-component-library';
   import type { IconProps } from '@mathesar-component-library/types';
 
-  export let icon: IconProps;
-  export let name: string;
-  export let description: string | undefined = undefined;
-  export let accentColor = '#eaec75';
+  export let title:
+    | {
+        icon: IconProps;
+        name: string;
+        description?: string;
+      }
+    | undefined = undefined;
 </script>
 
 <div class="entity-page-header">
-  <div class="heading">
-    <div class="icon" style:background={accentColor}>
-      <Icon {...icon} size="1.7143rem" />
+  {#if title}
+    <div class="heading">
+      <div class="icon">
+        <Icon {...title.icon} class="block" />
+      </div>
+      <div class="text">
+        <h1 class="name">
+          <Truncate>{title.name}</Truncate>
+        </h1>
+        {#if title.description}
+          <div class="description">
+            <Truncate>{title.description}</Truncate>
+          </div>
+        {/if}
+      </div>
     </div>
-    <div class="title">
-      <h1>{name}</h1>
-      {#if description}
-        <span>{description}</span>
-      {/if}
-    </div>
-  </div>
+  {/if}
   <div class="actions" class:has-right-actions={$$slots['actions-right']}>
     {#if $$slots.default}
       <div class="actions-left">
@@ -41,41 +50,41 @@
     position: relative;
     display: flex;
     align-items: center;
+    min-height: 4.18214rem;
+    overflow: hidden;
 
     .heading {
       display: flex;
+      align-items: center;
+      overflow: hidden;
+      min-width: 10rem;
+      max-width: 50%;
+      flex-grow: 0;
+      flex-shrink: 1;
+      min-height: 100%;
       border-right: 1px solid var(--slate-200);
       padding: var(--size-small) var(--size-large);
-      align-items: center;
-      min-width: 20rem;
-      max-width: 30rem;
-      flex-grow: 0;
-      flex-shrink: 0;
 
       .icon {
+        font-size: 1.5rem;
         padding: var(--size-ultra-small);
+        background: var(--EntityPageHeader__icon-background, var(--yellow-200));
         border-radius: var(--size-super-ultra-small);
         margin-right: var(--size-xx-small);
       }
-      .title {
-        display: flex;
-        flex-direction: column;
+      .text {
         overflow: hidden;
-
-        h1 {
-          font-size: var(--text-size-large);
-          margin: 0;
-          font-weight: 510;
-        }
-        span {
-          color: var(--slate-500);
-        }
-        h1,
-        span {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
+      }
+      .name {
+        font-size: var(--text-size-large);
+        margin: 0;
+        font-weight: 500;
+        overflow: hidden;
+      }
+      .description {
+        font-size: var(--text-size-small);
+        color: var(--color-text-muted);
+        overflow: hidden;
       }
     }
 
@@ -87,6 +96,17 @@
 
       .actions-left {
         display: flex;
+        flex-shrink: 0;
+
+        > :global(* + *) {
+          margin-left: var(--size-xx-small);
+        }
+      }
+
+      &.has-right-actions {
+        .actions-left {
+          margin-right: var(--size-x-large);
+        }
       }
 
       &:not(.has-right-actions) {
@@ -98,6 +118,16 @@
       .actions-right {
         margin-left: auto;
         display: flex;
+
+        > :global(* + *) {
+          margin-left: var(--size-xx-small);
+        }
+      }
+    }
+
+    @media (max-width: 38rem) {
+      & :global(.responsive-button-label) {
+        display: none;
       }
     }
   }

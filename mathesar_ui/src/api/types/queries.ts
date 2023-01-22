@@ -50,10 +50,21 @@ export interface QueryInstanceHideTransformation {
   spec: QueryColumnAlias[];
 }
 
+export interface QueryInstanceSortTransformation {
+  type: 'order';
+  spec: [
+    {
+      field: string;
+      direction: 'asc' | 'desc';
+    },
+  ];
+}
+
 export type QueryInstanceTransformation =
   | QueryInstanceFilterTransformation
   | QueryInstanceSummarizationTransformation
-  | QueryInstanceHideTransformation;
+  | QueryInstanceHideTransformation
+  | QueryInstanceSortTransformation;
 
 export interface QueryInstance {
   readonly id: number;
@@ -106,6 +117,7 @@ export interface QueryInitialColumnSource {
   is_initial_column: true;
   input_column_name: string;
   input_table_name: string;
+  input_table_id: number;
 }
 
 export interface QueryGeneratedColumnSource {

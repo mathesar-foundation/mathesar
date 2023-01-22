@@ -91,7 +91,23 @@ export function field<T>(props: FieldProps<T>): FieldStore<T> {
     [fieldErrors, comboErrors],
     (a) => a.flat().length === 0,
   );
-  const showsError = derived([hasChanges, isValid], ([d, v]) => d && !v);
+  const showsError = derived(
+    [hasChanges, fieldErrors, comboErrors, serverErrors],
+    ([$hasChanges, $fieldErrors, $comboErrors, $serverErrors]) => {
+      if ($comboErrors.length || $serverErrors.length) {
+        // If we have combo or server errors, then we force display of errors
+        // even if there are no changes.
+        return true;
+      }
+      if (!$hasChanges) {
+        // Hide field errors when the field still has its initial value. This
+        // makes forms with required fields look nicer because they load without
+        // any error messages displaying.
+        return false;
+      }
+      return $fieldErrors.length > 0;
+    },
+  );
   return {
     isRequired: props.isRequired,
     initialValue: props.initialValue,

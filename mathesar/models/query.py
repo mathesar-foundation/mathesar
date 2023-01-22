@@ -2,7 +2,7 @@ from functools import wraps
 from django.db import models
 from frozendict import frozendict
 
-from db.queries.base import DBQuery, InitialColumn
+from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.transforms.operations.deserialize import deserialize_transformation
 from db.transforms.operations.serialize import serialize_transformation
@@ -123,7 +123,6 @@ def _get_validator_for_dict(field_name):
 class UIQuery(BaseModel, Relation):
     name = models.CharField(
         max_length=128,
-        unique=True,
     )
 
     description = models.TextField(
@@ -225,14 +224,16 @@ class UIQuery(BaseModel, Relation):
         optionals = dict(
             input_column_name=None,
             input_table_name=None,
+            input_table_id=None,
             input_alias=None,
         )
         output = output | optionals
         if is_initial_column:
-            initial_dj_column = _get_dj_column_for_initial_db_column(initial_db_column)
+            initial_dj_column = _get_dj_column_for_initial_db_column(initial_db_column, self._database)
             output = output | dict(
                 input_column_name=initial_dj_column.name,
                 input_table_name=initial_dj_column.table.name,
+                input_table_id=initial_dj_column.table.id,
             )
         else:
             input_alias = self.db_query.get_input_alias_for_output_alias(alias)
@@ -367,6 +368,10 @@ class UIQuery(BaseModel, Relation):
     def _sa_engine(self):
         return self.base_table._sa_engine
 
+    @property
+    def _database(self):
+        return self.base_table.schema.database
+
     def add_defaults_to_display_names(self):
         """
         We have some logic for producing default display names. This method fetches those default
@@ -459,10 +464,12 @@ class UIQuery(BaseModel, Relation):
         )
 
 
-def _get_dj_column_for_initial_db_column(initial_column):
+def _get_dj_column_for_initial_db_column(initial_column, database):
     oid = initial_column.reloid
     attnum = initial_column.attnum
-    return Column.objects.get(table__oid=oid, attnum=attnum)
+    return Column.objects.get(
+        table__oid=oid, attnum=attnum, table__schema__database=database
+    )
 
 
 def _get_column_pair_from_id(col_id):
@@ -479,14 +486,28 @@ def _db_initial_column_from_json(col_json):
     attnum = column_pair[1]
     alias = col_json["alias"]
     jp_path = [
-        [_get_column_pair_from_id(col_id) for col_id in edge]
-        for edge in col_json.get("jp_path", [])
+        _join_parameter_from_json(jp_json)
+        for jp_json
+        in col_json.get("jp_path", [])
     ]
     return InitialColumn(
         reloid=reloid,
         attnum=attnum,
         alias=alias,
         jp_path=jp_path if jp_path else None,
+    )
+
+
+def _join_parameter_from_json(jp_json):
+    left_col_id = jp_json[0]
+    left_oid, left_attnum = _get_column_pair_from_id(left_col_id)
+    right_col_id = jp_json[1]
+    right_oid, right_attnum = _get_column_pair_from_id(right_col_id)
+    return JoinParameter(
+        left_oid=left_oid,
+        left_attnum=left_attnum,
+        right_oid=right_oid,
+        right_attnum=right_attnum,
     )
 
 

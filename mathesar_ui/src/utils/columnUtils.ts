@@ -34,7 +34,7 @@ export function getColumnIconProps(
 
 export function getSuggestedFkColumnName(
   targetTable: Pick<TableEntry, 'name'> | undefined,
-  existingColumns: { name: string }[] = [],
+  existingColumns: { name: string }[] = [{ name: 'id' }],
 ): string {
   const columnNames = new Set(existingColumns.map((c) => c.name));
   return targetTable

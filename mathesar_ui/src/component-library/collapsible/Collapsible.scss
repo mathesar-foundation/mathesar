@@ -11,10 +11,17 @@
     .collapsible-header-title {
       flex-grow: 1;
       overflow: hidden;
+      font-weight: 600;
     }
     svg {
       flex-shrink: 0;
       flex-grow: 0;
+    }
+    &:active,
+    &.active,
+    &:focus,
+    &.focus {
+      box-shadow: none;
     }
   }
   .collapsible-content {

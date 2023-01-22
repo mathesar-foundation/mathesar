@@ -10,23 +10,28 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import TabComponent from './Tab.svelte';
-  import type { Tab } from './TabContainerTypes';
+  import type { Tab, TabEvents } from './TabContainerTypes';
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<TabEvents>();
   const componentId = getId();
 
   export let tabs: Tab[] = [];
   export let activeTab: Tab | undefined = tabs[0];
   export let idKey = 'id';
   export let labelKey = 'label';
+  export let linkKey = 'href';
   export let allowRemoval = false;
   export let preventDefault = false;
   export let fillTabWidth = false;
   export let fillContainerHeight = false;
   export let uniformTabWidth = true;
+  export let tabStyle: 'default' | 'compact' = 'default';
 
   function selectActiveTab(e: Event, tab: Tab) {
-    activeTab = tab;
+    const hasLink = !!tab[linkKey];
+    if (!hasLink) {
+      activeTab = tab;
+    }
     dispatch('tabSelected', {
       tab,
       originalEvent: e,
@@ -70,12 +75,17 @@
       (tab as HTMLElement)?.focus?.();
     }
   }
+
+  function getTabLink(tab: Tab) {
+    return tab[linkKey] as string | undefined;
+  }
 </script>
 
 <div
   class="tab-container"
   role="navigation"
   class:fill-container-height={fillContainerHeight}
+  class:compact={tabStyle === 'compact'}
 >
   <ul role="tablist" class="tabs" class:fill-tab-width={fillTabWidth}>
     {#each tabs as tab, index (tab[idKey] || tab)}
@@ -84,6 +94,7 @@
         {tab}
         {allowRemoval}
         {uniformTabWidth}
+        link={getTabLink(tab)}
         totalTabs={tabs.length}
         isActive={tab[idKey] === activeTab?.[idKey]}
         on:focus={focusTab}
