@@ -1,6 +1,6 @@
 """This module contains logic for creating premade explorations of demo data."""
 from demo.install.base import (
-    LIBRARY_MANAGEMENT,
+    LIBRARY_MANAGEMENT, MATHESAR_CON,
     get_dj_column_by_name, get_dj_schema_by_name, get_dj_table_by_name,
 )
 from mathesar.models.query import UIQuery
@@ -10,6 +10,8 @@ def load_custom_explorations(engine):
     """Create some premade explorations to look at demo data."""
     _create_checkout_monthly_report(engine)
     _create_overdue_books_report(engine)
+    _create_topics_by_organization_view(engine)
+    _create_organizations_by_topic_view(engine)
 
 
 def _create_checkout_monthly_report(engine):
@@ -135,7 +137,7 @@ def _create_overdue_books_report(engine):
                 ],
                 "aggregation_expressions": [
                     {
-                        "function": "aggregate_to_array",
+                        "function": "distinct_distinct_aggregate_to_array",
                         "input_alias": "Books_Title",
                         "output_alias": "Books_Title_agged"
                     }
@@ -159,6 +161,170 @@ def _create_overdue_books_report(engine):
         name="Overdue Book Report",
         description=description,
         base_table=checkouts,
+        initial_columns=initial_columns,
+        transformations=transformations,
+        display_names=display_names,
+    )
+
+
+def _create_topics_by_organization_view(engine):
+    schema = get_dj_schema_by_name(engine, MATHESAR_CON)
+
+    organizations = get_dj_table_by_name(schema, "Organizations")
+    speakers = get_dj_table_by_name(schema, "Speakers")
+    talks = get_dj_table_by_name(schema, "Talks")
+    topics = get_dj_table_by_name(schema, "Topics")
+    tt_map = get_dj_table_by_name(schema, "Talk Topic Map")
+
+    initial_columns = [
+        {
+            "id": get_dj_column_by_name(talks, "id").id,
+            "alias": "Talks_id"
+        }, {
+            "id": get_dj_column_by_name(topics, "Name").id,
+            "alias": "Topics_Name",
+            "jp_path": [
+                [
+                    get_dj_column_by_name(talks, "id").id,
+                    get_dj_column_by_name(tt_map, "Talk").id,
+                ], [
+                    get_dj_column_by_name(tt_map, "Topic").id,
+                    get_dj_column_by_name(topics, "id").id,
+                ]
+            ]
+        }, {
+            "id": get_dj_column_by_name(organizations, "Organization").id,
+            "alias": "Organizations_Organization",
+            "jp_path": [
+                [
+                    get_dj_column_by_name(talks, "Speaker").id,
+                    get_dj_column_by_name(speakers, "id").id,
+                ], [
+                    get_dj_column_by_name(speakers, "Organization").id,
+                    get_dj_column_by_name(organizations, "id").id,
+                ]
+            ]
+        }
+    ]
+    transformations = [
+        {
+            "spec": ["Talks_id"],
+            "type": "hide"
+        }, {
+            "spec": {
+                "base_grouping_column": "Organizations_Organization",
+                "grouping_expressions": [
+                    {
+                        "input_alias": "Organizations_Organization",
+                        "output_alias": "Organizations_Organization_grouped"
+                    }
+                ],
+                "aggregation_expressions": [
+                    {
+                        "function": "distinct_aggregate_to_array",
+                        "input_alias": "Topics_Name",
+                        "output_alias": "Topics_Name_agged"
+                    }
+                ]
+            },
+            "type": "summarize"
+        }
+    ]
+    display_names = {
+        "Talks_id": "Talks_id",
+        "Topics_Name": "Topics_Name",
+        "Topics_Name_agged": "Topics",
+        "Organizations_Organization": "Organizations_Organization",
+        "Organizations_Organization_grouped": "Organization"
+    }
+    description = "This gives a list of topics each organization is giving a talk about."
+
+    UIQuery.objects.create(
+        name="Topics by Organization",
+        description=description,
+        base_table=talks,
+        initial_columns=initial_columns,
+        transformations=transformations,
+        display_names=display_names,
+    )
+
+
+def _create_organizations_by_topic_view(engine):
+    schema = get_dj_schema_by_name(engine, MATHESAR_CON)
+
+    organizations = get_dj_table_by_name(schema, "Organizations")
+    speakers = get_dj_table_by_name(schema, "Speakers")
+    talks = get_dj_table_by_name(schema, "Talks")
+    topics = get_dj_table_by_name(schema, "Topics")
+    tt_map = get_dj_table_by_name(schema, "Talk Topic Map")
+
+    initial_columns = [
+        {
+            "id": get_dj_column_by_name(talks, "id").id,
+            "alias": "Talks_id"
+        }, {
+            "id": get_dj_column_by_name(topics, "Name").id,
+            "alias": "Topics_Name",
+            "jp_path": [
+                [
+                    get_dj_column_by_name(talks, "id").id,
+                    get_dj_column_by_name(tt_map, "Talk").id,
+                ], [
+                    get_dj_column_by_name(tt_map, "Topic").id,
+                    get_dj_column_by_name(topics, "id").id,
+                ]
+            ]
+        }, {
+            "id": get_dj_column_by_name(organizations, "Organization").id,
+            "alias": "Organizations_Organization",
+            "jp_path": [
+                [
+                    get_dj_column_by_name(talks, "Speaker").id,
+                    get_dj_column_by_name(speakers, "id").id,
+                ], [
+                    get_dj_column_by_name(speakers, "Organization").id,
+                    get_dj_column_by_name(organizations, "id").id,
+                ]
+            ]
+        }
+    ]
+    transformations = [
+        {
+            "spec": ["Talks_id"],
+            "type": "hide"
+        }, {
+            "spec": {
+                "base_grouping_column": "Topics_Name",
+                "grouping_expressions": [
+                    {
+                        "input_alias": "Topics_Name",
+                        "output_alias": "Topics_Name_grouped"
+                    }
+                ],
+                "aggregation_expressions": [
+                    {
+                        "function": "distinct_aggregate_to_array",
+                        "input_alias": "Organizations_Organization",
+                        "output_alias": "Organizations_Organization_agged"
+                    }
+                ]
+            },
+            "type": "summarize"
+        }
+    ]
+    display_names = {
+        "Talks_id": "Talks_id",
+        "Topics_Name": "Topics_Name",
+        "Topics_Name_grouped": "Topic",
+        "Organizations_Organization": "Organizations_Organization",
+        "Organizations_Organization_agged": "Organizations"
+    }
+    description = "This gives a list of organizations giving talks about each topic."
+
+    UIQuery.objects.create(
+        name="Organizations by Topic",
+        description=description,
+        base_table=talks,
         initial_columns=initial_columns,
         transformations=transformations,
         display_names=display_names,
