@@ -15,10 +15,17 @@
   export let filtering: Writable<Filtering>;
 </script>
 
-<Dropdown showArrow={false} triggerAppearance="secondary" {...$$restProps}>
+<Dropdown
+  showArrow={false}
+  triggerAppearance="secondary"
+  {...$$restProps}
+  ariaLabel="Filter"
+>
   <svelte:fragment slot="trigger">
     <Icon {...iconFiltering} size="0.8em" />
-    <span>Filter <BadgeCount value={$filtering.entries.length} /></span>
+    <span class="responsive-button-label">
+      Filter <BadgeCount value={$filtering.entries.length} />
+    </span>
   </svelte:fragment>
   <Filter slot="content" {filtering} />
 </Dropdown>
