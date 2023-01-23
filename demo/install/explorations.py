@@ -138,7 +138,7 @@ def _create_overdue_books_report(engine):
                 ],
                 "aggregation_expressions": [
                     {
-                        "function": "distinct_distinct_aggregate_to_array",
+                        "function": "distinct_aggregate_to_array",
                         "input_alias": "Books_Title",
                         "output_alias": "Books_Title_agged"
                     }
