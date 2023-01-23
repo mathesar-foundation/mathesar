@@ -63,7 +63,7 @@
   }
 
   function getDataForNewRecord(): Record<number, unknown> {
-    let pkColumnIds = $columns.filter((c) => c.primary_key).map((c) => c.id);
+    const pkColumnIds = $columns.filter((c) => c.primary_key).map((c) => c.id);
     return Object.fromEntries($searchFuzzy.without(pkColumnIds));
   }
 
