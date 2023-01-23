@@ -43,6 +43,7 @@ export { default as TextAvatar } from './text-avatar/TextAvatar.svelte';
 export { default as TextInput } from './text-input/TextInput.svelte';
 export { default as TextInputWithPrefix } from './text-input/TextInputWithPrefix.svelte';
 export { default as Truncate } from './truncate/Truncate.svelte';
+export { default as Tooltip } from './tooltip/Tooltip.svelte';
 
 // Compound Components (Ordered)
 export { DatePicker, InlineDateTimePicker } from './date-time-picker';
@@ -54,8 +55,12 @@ export { default as Notification } from './notification/Notification.svelte';
 export { ListBox, ListBoxOptions } from './list-box';
 export { default as Pagination } from './pagination/Pagination.svelte';
 export { default as Select } from './select/Select.svelte';
+export { default as SelectionList } from './selection-list/SelectionList.svelte';
 export { default as TabContainer } from './tabs/TabContainer.svelte';
 export { default as Tree } from './tree/Tree.svelte';
+
+// Higher order actions
+export { default as tooltipAction } from './tooltip/TooltipAction';
 
 // Systems
 export * from './label';

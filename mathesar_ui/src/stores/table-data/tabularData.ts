@@ -143,8 +143,8 @@ export class TabularData {
     });
     this.columnsDataStore.on('columnDeleted', async (columnId) => {
       this.meta.sorting.update((s) => s.without(columnId));
-      this.meta.grouping.update((g) => g.withoutColumn(columnId));
-      this.meta.filtering.update((f) => f.withoutColumn(columnId));
+      this.meta.grouping.update((g) => g.withoutColumns([columnId]));
+      this.meta.filtering.update((f) => f.withoutColumns([columnId]));
       await this.constraintsDataStore.fetch();
     });
     this.columnsDataStore.on('columnPatched', async () => {
@@ -164,6 +164,45 @@ export class TabularData {
       this.recordsData.fetch(),
       this.constraintsDataStore.fetch(),
     ]);
+  }
+
+  refreshAfterColumnExtraction(
+    extractedColumnIds: Column['id'][],
+    foreignKeyColumnId?: Column['id'],
+  ) {
+    this.meta.sorting.update((s) => {
+      const firstExtractedColumnWithSort = extractedColumnIds.find((columnId) =>
+        s.has(columnId),
+      );
+      if (
+        firstExtractedColumnWithSort &&
+        foreignKeyColumnId &&
+        !s.has(foreignKeyColumnId)
+      ) {
+        const sortDirection = s.get(firstExtractedColumnWithSort);
+        return s
+          .without(extractedColumnIds)
+          .with(foreignKeyColumnId, sortDirection ?? 'ASCENDING');
+      }
+      return s.without(extractedColumnIds);
+    });
+    this.meta.filtering.update((f) => f.withoutColumns(extractedColumnIds));
+    this.meta.grouping.update((g) => {
+      const extractedColumnsHaveGrouping = extractedColumnIds.some((columnId) =>
+        g.hasColumn(columnId),
+      );
+      if (
+        extractedColumnsHaveGrouping &&
+        foreignKeyColumnId &&
+        !g.hasColumn(foreignKeyColumnId)
+      ) {
+        return g.withoutColumns(extractedColumnIds).withEntry({
+          columnId: foreignKeyColumnId,
+        });
+      }
+      return g.withoutColumns(extractedColumnIds);
+    });
+    return this.refresh();
   }
 
   destroy(): void {

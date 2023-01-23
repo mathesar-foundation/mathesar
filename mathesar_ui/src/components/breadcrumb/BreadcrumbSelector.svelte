@@ -7,6 +7,7 @@
   } from '@mathesar/component-library';
   import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
   import { iconExpandRight } from '@mathesar/icons';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
   import BreadcrumbSelectorRow from './BreadcrumbSelectorRow.svelte';
   import type { BreadcrumbSelectorData } from './breadcrumbTypes';
   import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
@@ -22,6 +23,8 @@
   let textInputEl: HTMLInputElement | undefined;
   $: if (isOpen) {
     textInputEl?.focus();
+  } else {
+    filterString = '';
   }
 
   // Filter the selector data based on text input
@@ -68,11 +71,10 @@
               {#if filterString?.length === 0}
                 {categoryName}
               {:else}
-                {`${entries.length} match${
-                  entries.length > 1 ? 's' : ''
-                } for '${filterString}' ${
-                  processedData.size > 1 ? `in ${categoryName}` : ''
-                }`}
+                {labeledCount(entries, 'matches')}
+                for
+                <b>{filterString}</b>
+                {processedData.size > 1 ? `in ${categoryName}` : ''}
               {/if}
             </div>
             <ul class="items">
@@ -90,7 +92,7 @@
         {:else}
           {#if filterString.length > 0}
             <div class="section-name">
-              No matches for '{filterString}'
+              No matches for <b>{filterString}</b>
             </div>
           {/if}
         {/each}
@@ -122,8 +124,8 @@
     margin: 0;
   }
   .entity-switcher .trigger {
-    border: 1px solid var(--slate-500);
-    color: var(--slate-400);
+    border: 1px solid var(--slate-400);
+    color: var(--slate-300);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;

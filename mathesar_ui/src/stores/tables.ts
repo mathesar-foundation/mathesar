@@ -41,6 +41,7 @@ import {
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
+import type { AtLeastOne } from '@mathesar/typeUtils';
 import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
@@ -208,11 +209,14 @@ export function deleteTable(id: number): CancellablePromise<TableEntry> {
   );
 }
 
-export function renameTable(
+export function updateTableMetaData(
   id: number,
-  name: string,
+  updatedMetaData: AtLeastOne<{ name: string; description: string }>,
 ): CancellablePromise<TableEntry> {
-  const promise = patchAPI<TableEntry>(`/api/db/v0/tables/${id}/`, { name });
+  const promise = patchAPI<TableEntry>(
+    `/api/db/v0/tables/${id}/`,
+    updatedMetaData,
+  );
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
@@ -301,14 +305,21 @@ export function getTable(id: TableEntry['id']): CancellablePromise<TableEntry> {
   return getAPI(`/api/db/v0/tables/${id}/`);
 }
 
-export function splitTable(
-  id: number,
-  idsOfColumnsToExtract: number[],
-  extractedTableName: string,
-): CancellablePromise<SplitTableResponse> {
+export function splitTable({
+  id,
+  idsOfColumnsToExtract,
+  extractedTableName,
+  newFkColumnName,
+}: {
+  id: number;
+  idsOfColumnsToExtract: number[];
+  extractedTableName: string;
+  newFkColumnName?: string;
+}): CancellablePromise<SplitTableResponse> {
   const body: SplitTableRequest = {
     extract_columns: idsOfColumnsToExtract,
     extracted_table_name: extractedTableName,
+    relationship_fk_column_name: newFkColumnName,
   };
   return postAPI(`/api/db/v0/tables/${id}/split_table/`, body);
 }

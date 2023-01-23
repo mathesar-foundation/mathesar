@@ -5,7 +5,7 @@ from rest_framework.settings import api_settings
 
 from db.columns.exceptions import InvalidTypeError
 from db.columns.exceptions import InvalidTypeOptionError
-from db.types.base import PostgresType
+from db.types.base import PostgresType, MathesarCustomType
 from db.types.operations.convert import get_db_type_enum_from_id
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
@@ -216,6 +216,21 @@ class ColumnSerializer(SimpleColumnSerializer):
                     if f not in self.initial_data
                 })
         return data
+
+    def to_representation(self, instance):
+        # Set default display_options for mathesar_money type if none are provided.
+        if (
+            instance.db_type == MathesarCustomType.MATHESAR_MONEY
+            and instance.display_options is None
+        ):
+            instance.display_options = {
+                'use_grouping': 'true',
+                'number_format': None,
+                'currency_symbol': None,
+                'maximum_fraction_digits': 2,
+                'minimum_fraction_digits': 2,
+                'currency_symbol_location': 'after-minus'}
+        return super().to_representation(instance)
 
     @property
     def validated_model_fields(self):

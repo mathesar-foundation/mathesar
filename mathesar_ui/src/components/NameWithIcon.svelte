@@ -9,12 +9,13 @@
   /** When true, the icon will be rendered within a box */
   export let iconHasBox = false;
   export let truncate = true;
+  export let bold = false;
 
   $: icons = Array.isArray(icon) ? icon : [icon];
 </script>
 
 <Truncate passthrough={!truncate}>
-  <span class="name-with-icon" on:click class:boxed={iconHasBox}>
+  <span class="name-with-icon" on:click class:boxed={iconHasBox} class:bold>
     <span class="icon">
       {#if isLoading}
         <Spinner />
@@ -38,9 +39,12 @@
   .name-with-icon {
     text-decoration: inherit;
   }
+  .name-with-icon.bold {
+    font-weight: 500;
+  }
   .icon {
     color: var(--icon-color, currentcolor);
-    opacity: var(--icon-opacity, 0.75);
+    opacity: var(--NameWithIcon__icon-opacity, 0.75);
   }
   .icon > :global(.fa-icon + .fa-icon) {
     margin-left: 0.2em;

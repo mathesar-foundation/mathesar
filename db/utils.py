@@ -96,4 +96,18 @@ def ignore_type_warning(f):
 
 @ignore_type_warning
 def get_pg_catalog_table(table_name, engine, metadata):
-    return sqlalchemy.Table(table_name, metadata, autoload_with=engine, schema='pg_catalog')
+    table = sqlalchemy.Table(table_name, metadata, autoload_with=engine, schema='pg_catalog')
+    # Refresh metadata if it hasn't reflected correctly. Refer https://github.com/centerofci/mathesar/issues/2138
+    if len(table.c) < 1:
+        table = sqlalchemy.Table(table_name, metadata, autoload_with=engine, schema='pg_catalog', extend_existing=True)
+    return table
+
+
+def ignore_duplicate_wrapper(stmt):
+    return f"""
+    DO $$ BEGIN
+    {stmt}
+    EXCEPTION
+    WHEN duplicate_object THEN null;
+    END $$;
+    """

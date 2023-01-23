@@ -22,6 +22,7 @@
   export let scrollOffset = 0;
 
   export let horizontalScrollOffset = 0;
+  export let paddingRight = 100;
 
   export let columnWidths: ImmutableMap<SheetColumnIdentifierKey, number> =
     new ImmutableMap();
@@ -30,6 +31,7 @@
     columns,
     getColumnIdentifier,
     columnWidths,
+    paddingRight,
   ));
 
   function getColumnWidth(
@@ -69,6 +71,7 @@
     rowWidth: writable(rowWidth),
     horizontalScrollOffset: writable(horizontalScrollOffset),
     scrollOffset: writable(scrollOffset),
+    paddingRight: writable(paddingRight),
   };
 
   // Setting these values in stores for reactivity in context
@@ -76,6 +79,7 @@
   $: stores.columnStyleMap.set(columnStyleMap);
   $: stores.horizontalScrollOffset.set(horizontalScrollOffset);
   $: stores.scrollOffset.set(scrollOffset);
+  $: stores.paddingRight.set(paddingRight);
 
   setSheetContext({ stores, api });
 
@@ -86,6 +90,7 @@
   class="sheet"
   class:has-border={hasBorder}
   class:uses-virtual-list={usesVirtualList}
+  class:set-to-row-width={restrictWidthToRowWidth}
   {style}
   on:click
 >
@@ -99,12 +104,12 @@
     display: flex;
     flex-direction: column;
     isolation: isolate;
-    --z-index__sheet__active-cell: 1;
     --z-index__sheet__column-resizer: 2;
     --z-index__sheet__top-left-cell: 3;
+    --z-index__sheet_group-header: 3;
+    --z-index__sheet_new-record-message: 3;
+    --z-index__sheet__active-cell: 4;
     --z-index__sheet__horizontal-scrollbar: 4;
-    --z-index-new-record-message: 4;
-    --z-index-group-header: 4;
     --z-index__sheet__vertical-scrollbar: 5;
 
     --virtual-list-horizontal-scrollbar-z-index: var(
@@ -125,6 +130,10 @@
       right: 0;
       top: 0;
       bottom: 0;
+    }
+
+    &.set-to-row-width {
+      min-width: 100%;
     }
 
     :global([data-sheet-element='cell']) {

@@ -9,7 +9,7 @@ fully_speced_summarize = \
         dict(
             aggregation_expressions=[
                 dict(
-                    function='aggregate_to_array',
+                    function='distinct_aggregate_to_array',
                     input_alias='col2',
                     output_alias='col2_agged'
                 )
@@ -33,7 +33,7 @@ fully_speced_summarize = \
                     base_grouping_column='col1',
                     aggregation_expressions=[
                         dict(
-                            function='aggregate_to_array',
+                            function='distinct_aggregate_to_array',
                             input_alias='col2',
                             output_alias='col2_agged'
                         )
@@ -111,50 +111,60 @@ def test_partial_summarize_transform(
         | {
             'schema': base_table.schema.id,
             'transformations': output_transformations,
+            'display_names': {
+                'col1': 'Center',
+                'col1_grouped': 'Center group',
+                'col2': 'Case Number',
+                'col2_agged': 'Case Number distinct list',
+            },
         }
     )
     expect_response_json = {
         'column_metadata': {
             'col1': {
                 'alias': 'col1',
-                'display_name': None,
+                'display_name': 'Center',
                 'display_options': None,
                 'input_alias': None,
                 'input_column_name': 'Center',
                 'input_table_name': 'patent_query_run_minimal_table',
+                'input_table_id': base_table.id,
                 'is_initial_column': True,
                 'type': 'text',
                 'type_options': None
             },
             'col1_grouped': {
                 'alias': 'col1_grouped',
-                'display_name': None,
+                'display_name': 'Center group',
                 'display_options': None,
                 'input_alias': 'col1',
                 'input_column_name': None,
                 'input_table_name': None,
+                'input_table_id': None,
                 'is_initial_column': False,
                 'type': 'text',
                 'type_options': None
             },
             'col2': {
                 'alias': 'col2',
-                'display_name': None,
+                'display_name': 'Case Number',
                 'display_options': None,
                 'input_alias': None,
                 'input_column_name': 'Case Number',
                 'input_table_name': 'patent_query_run_minimal_table',
+                'input_table_id': base_table.id,
                 'is_initial_column': True,
                 'type': 'text',
                 'type_options': None
             },
             'col2_agged': {
                 'alias': 'col2_agged',
-                'display_name': None,
+                'display_name': 'Case Number distinct list',
                 'display_options': None,
                 'input_alias': 'col2',
                 'input_column_name': None,
                 'input_table_name': None,
+                'input_table_id': None,
                 'is_initial_column': False,
                 'type': '_array',
                 'type_options': {'item_type': 'text'}

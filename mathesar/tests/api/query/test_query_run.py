@@ -122,6 +122,7 @@ def test_queries_run_minimal(create_patents_table, client):
                 'display_options': None,
                 'is_initial_column': True,
                 'input_table_name': 'patent_query_run_minimal_table',
+                'input_table_id': base_table.id,
                 'input_column_name': 'Center',
                 'input_alias': None,
             },
@@ -133,6 +134,7 @@ def test_queries_run_minimal(create_patents_table, client):
                 'display_options': None,
                 'is_initial_column': True,
                 'input_table_name': 'patent_query_run_minimal_table',
+                'input_table_id': base_table.id,
                 'input_column_name': 'Case Number',
                 'input_alias': None,
             }
@@ -183,3 +185,105 @@ def test_queries_run_deleted_column(create_patents_table, client):
     assert response.status_code == 400
     assert response_data[0]['code'] == ErrorCodes.DeletedColumnAccess.value
     assert response_data[0]['detail']['column_id'] == to_be_deleted_column_id
+
+
+def test_queries_run_with_transforms(create_patents_table, client):
+    base_table = create_patents_table(table_name='patent_query_run_minimal_table')
+    display_names = {
+        'col1': 'Column 1',
+        'col2': 'Column 2',
+    }
+    initial_columns = [
+        {
+            'id': base_table.get_column_by_name('Center').id,
+            'alias': 'col1',
+        },
+        {
+            'id': base_table.get_column_by_name('Case Number').id,
+            'alias': 'col2',
+        },
+    ]
+    data = {
+        'base_table': base_table.id,
+        'initial_columns': initial_columns,
+        'display_names': display_names,
+        'transformations': [
+            {
+                "type": "hide",
+                "spec": ['col1']
+            },
+        ],
+        'parameters': {
+            'order_by': [
+                {'field': 'col2', 'direction': 'desc'}
+            ],
+            'limit': 2,
+            'offset': 3
+        }
+    }
+
+    expect_query = {
+        k: v
+        for k, v
+        in data.items()
+        if k != 'parameters'
+    } | {
+        'schema': base_table.schema.id,
+        'transformations': [
+            {
+                "type": "hide",
+                "spec": ['col1'],
+            }
+        ]
+    }
+
+    expect_response_json = {
+        'query': expect_query,
+        'records': {
+            'count': 1393,
+            'grouping': None,
+            'preview_data': None,
+            'results': [
+                {'col2': 'SSC-00050'},
+                {'col2': 'SSC-00040'},
+            ]
+        },
+        'output_columns': ['col2'],
+        'column_metadata': {
+            'col1': {
+                'alias': 'col1',
+                'display_name': 'Column 1',
+                'type': 'text',
+                'type_options': None,
+                'display_options': None,
+                'is_initial_column': True,
+                'input_table_name': 'patent_query_run_minimal_table',
+                'input_table_id': base_table.id,
+                'input_column_name': 'Center',
+                'input_alias': None,
+            },
+            'col2': {
+                'alias': 'col2',
+                'display_name': 'Column 2',
+                'type': 'text',
+                'type_options': None,
+                'display_options': None,
+                'is_initial_column': True,
+                'input_table_name': 'patent_query_run_minimal_table',
+                'input_table_id': base_table.id,
+                'input_column_name': 'Case Number',
+                'input_alias': None,
+            }
+        },
+        'parameters': {
+            'order_by': [
+                {'field': 'col2', 'direction': 'desc'}
+            ],
+            'limit': 2,
+            'offset': 3,
+        }
+    }
+
+    response = client.post('/api/db/v0/queries/run/', data, format='json')
+    assert response.status_code == 200
+    assert response.json() == expect_response_json

@@ -3,9 +3,11 @@ import logging
 
 from django.conf import settings
 
-from demo.install import load_datasets, customize_settings
 from demo.db_namer import get_name
-from db.install import create_mathesar_database
+from demo.install.arxiv_skeleton import append_db_and_arxiv_schema_to_log
+from demo.install.base import ARXIV, create_demo_database
+from demo.install.custom_settings import customize_settings
+from demo.install.explorations import load_custom_explorations
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Database
 from mathesar.state import reset_reflection
@@ -20,22 +22,23 @@ class LiveDemoModeMiddleware:
 
     def __call__(self, request):
         sessionid = request.COOKIES.get('sessionid', None)
-        # every 4th character obfuscates sessionid (a bit)
         db_name = get_name(str(sessionid))
         database, created = Database.current_objects.get_or_create(name=db_name)
         if created:
-            create_mathesar_database(
+            create_demo_database(
                 db_name,
-                username=settings.DATABASES["default"]["USER"],
-                password=settings.DATABASES["default"]["PASSWORD"],
-                hostname=settings.DATABASES["default"]["HOST"],
-                root_database=settings.DATABASES["default"]["NAME"],
-                port=settings.DATABASES["default"]["PORT"],
+                settings.DATABASES["default"]["USER"],
+                settings.DATABASES["default"]["PASSWORD"],
+                settings.DATABASES["default"]["HOST"],
+                settings.DATABASES["default"]["NAME"],
+                settings.DATABASES["default"]["PORT"],
+                settings.MATHESAR_DEMO_TEMPLATE
             )
+            append_db_and_arxiv_schema_to_log(db_name, ARXIV)
+            reset_reflection(db_name=db_name)
             engine = create_mathesar_engine(db_name)
-            load_datasets(engine)
-            reset_reflection()
             customize_settings(engine)
+            load_custom_explorations(engine)
 
         logger.debug(f"Using database {db_name} for sessionid {sessionid}")
         params = request.GET.copy()

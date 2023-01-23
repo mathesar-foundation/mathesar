@@ -13,6 +13,7 @@ from mathesar.api.serializers.dependents import DependentSerializer, DependentFi
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.models.base import Schema
 from mathesar.utils.schemas import create_schema_and_object
+from mathesar.api.exceptions.validation_exceptions.exceptions import EditingPublicSchemaIsDisallowed
 
 
 class SchemaViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -45,6 +46,11 @@ class SchemaViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin,
         serializer.is_valid(raise_exception=True)
 
         schema = self.get_object()
+
+        # We forbid editing the public schema
+        if schema.name == "public":
+            raise EditingPublicSchemaIsDisallowed()
+
         schema.update_sa_schema(serializer.validated_data)
 
         # Reload the schema to avoid cached properties

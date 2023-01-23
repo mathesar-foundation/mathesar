@@ -8,62 +8,73 @@
   import { iconSchema, iconEdit } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { Button, TabContainer, Icon } from '@mathesar-component-library';
+  import {
+    getSchemaPageExplorationsSectionUrl,
+    getSchemaPageTablesSectionUrl,
+    getSchemaPageUrl,
+  } from '@mathesar/routes/urls';
+  import { States } from '@mathesar/api/utils/requestUtils';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
+  import TableSkeleton from './TableSkeleton.svelte';
+  import ExplorationSkeleton from './ExplorationSkeleton.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
-
-  /**
-   * This property will be used for the latest design changes
-   * Based on the subroute, the desired tab/section will be selected
-   * Make this a variable and pass value to it from SchemaRoute.svelte
-   *
-   * The eslint warning is in place because SchemaRoute will throw
-   * ts errors without it. We can remove it once we actually use the
-   * variable.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-  export const section: string = 'overview';
+  export let section: string;
 
   const addEditModal = modal.spawnModalController();
 
+  // NOTE: This has to be same as the name key in the paths prop of Route component
   type TabsKey = 'overview' | 'tables' | 'explorations';
-  type TabItem = { label: string; id: TabsKey; count?: number };
+  type TabItem = {
+    label: string;
+    id: TabsKey;
+    count?: number;
+    href: string;
+  };
 
-  let activeTab: TabItem;
   $: tablesMap = $tablesStore.data;
   $: explorationsMap = $queries.data;
+  $: isTablesLoading = $tablesStore.state === States.Loading;
+  $: isExplorationsLoading = $queries.requestStatus.state === 'processing';
 
   $: tabs = [
     {
       label: 'Overview',
       id: 'overview',
+      href: getSchemaPageUrl(database.name, schema.id),
     },
     {
       label: 'Tables',
       id: 'tables',
       count: tablesMap.size,
+      href: getSchemaPageTablesSectionUrl(database.name, schema.id),
     },
     {
       label: 'Explorations',
       id: 'explorations',
       count: explorationsMap.size,
+      href: getSchemaPageExplorationsSectionUrl(database.name, schema.id),
     },
-  ];
+  ] as TabItem[];
+
+  $: activeTab = tabs.find((tab) => tab.id === section) || tabs[0];
 
   function handleEditSchema() {
     addEditModal.open();
   }
+
+  $: isDefault = schema.name === 'public';
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
 
 <LayoutWithHeader
   restrictWidth
-  cssVariables={{ '--max-layout-width': '64rem' }}
+  cssVariables={{ '--max-layout-width': '72rem' }}
 >
   <AppSecondaryHeader
     slot="secondary-header"
@@ -74,10 +85,15 @@
       icon: iconSchema,
     }}
   >
-    <Button slot="action" on:click={handleEditSchema} appearance="secondary">
-      <Icon {...iconEdit} />
-      <span>Edit Schema</span>
-    </Button>
+    <svelte:fragment slot="action">
+      {#if !isDefault}
+        <Button on:click={handleEditSchema} appearance="secondary">
+          <Icon {...iconEdit} />
+          <span>Edit Schema</span>
+        </Button>
+      {/if}
+    </svelte:fragment>
+
     <slot slot="bottom">
       {#if schema.description}
         <span class="description">
@@ -87,7 +103,7 @@
     </slot>
   </AppSecondaryHeader>
 
-  <TabContainer bind:activeTab {tabs} uniformTabWidth={false}>
+  <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
     <div slot="tab" let:tab class="tab-header-container">
       <span>{tab.label}</span>
       {#if tab.count !== undefined}
@@ -96,20 +112,35 @@
     </div>
     {#if activeTab?.id === 'overview'}
       <div class="tab-container">
-        <SchemaOverview {tablesMap} {explorationsMap} {database} {schema} />
-      </div>
-    {:else if activeTab?.id === 'tables'}
-      <div class="tab-container">
-        <SchemaTables {tablesMap} {database} {schema} />
-      </div>
-    {:else if activeTab?.id === 'explorations'}
-      <div class="tab-container">
-        <SchemaExplorations
-          hasTablesToExplore={!!tablesMap.size}
+        <SchemaOverview
+          {isTablesLoading}
+          {isExplorationsLoading}
+          {tablesMap}
           {explorationsMap}
           {database}
           {schema}
         />
+      </div>
+    {:else if activeTab?.id === 'tables'}
+      <div class="tab-container">
+        {#if isTablesLoading}
+          <TableSkeleton />
+        {:else}
+          <SchemaTables {tablesMap} {database} {schema} />
+        {/if}
+      </div>
+    {:else if activeTab?.id === 'explorations'}
+      <div class="tab-container">
+        {#if isExplorationsLoading}
+          <ExplorationSkeleton />
+        {:else}
+          <SchemaExplorations
+            hasTablesToExplore={!!tablesMap.size}
+            {explorationsMap}
+            {database}
+            {schema}
+          />
+        {/if}
       </div>
     {/if}
   </TabContainer>
@@ -132,8 +163,11 @@
 
     .count {
       border-radius: var(--border-radius-l);
-      background: var(--slate-100);
-      padding: 0.071rem 0.14rem;
+      background: var(--slate-200);
+      font-size: var(--text-size-small);
+      text-align: center;
+      padding: 0.071rem 0.5rem;
+      margin-left: 0.5rem;
     }
   }
 </style>

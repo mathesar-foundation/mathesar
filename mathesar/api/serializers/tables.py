@@ -230,6 +230,7 @@ class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Seriali
 class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     extracted_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
     remainder_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+    fk_column = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all())
 
 
 class MappingSerializer(MathesarErrorMessageMixin, serializers.Serializer):

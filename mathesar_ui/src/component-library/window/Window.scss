@@ -1,5 +1,5 @@
 .window {
-  background-color: white;
+  background-color: var(--slate-50);
   border-radius: 0.4em;
   min-height: var(--window-min-height, 7em);
   width: var(--window-width, 100%);
@@ -20,8 +20,9 @@
         display: none;
       }
       flex: 1 1 100%;
-      padding: 1em 1em 0.5em 1em;
-      font-weight: bold;
+      padding: 1rem 1rem 0.5rem 1rem;
+      font-weight: 500;
+      font-size: var(--text-size-large);
     }
   }
 
@@ -31,15 +32,15 @@
 
   > .footer {
     grid-row: 3;
-    border-top: 1px solid #f5f5f5;
-    background: #f3f6f8;
+    border-top: 1px solid var(--slate-200);
+    background: var(--slate-100);
   }
 
   &.has-body-padding > .body {
-    padding: 1em;
+    padding: 1rem;
   }
   > .footer {
-    padding: 1em;
+    padding: 1rem;
   }
 
   > .body,

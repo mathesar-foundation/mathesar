@@ -20,6 +20,7 @@ import type {
 import {
   getCellCap,
   getDbTypeBasedInputCap,
+  getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import type { TableEntry } from '@mathesar/api/types/tables';
@@ -40,6 +41,7 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   column: QueryResultColumn;
   abstractType: AbstractType;
   inputComponentAndProps: ComponentAndProps;
+  initialInputValue: unknown;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
   source: ProcessedQueryResultColumnSource;
@@ -301,6 +303,7 @@ function processColumn(
         is_initial_column: true,
         input_column_name: columnInfo.input_column_name,
         input_table_name: columnInfo.input_table_name,
+        input_table_id: columnInfo.input_table_id,
       }
     : {
         is_initial_column: false,
@@ -315,6 +318,11 @@ function processColumn(
       column,
     }),
     inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      undefined,
+      abstractType.cellInfo,
+    ),
+    initialInputValue: getInitialInputValue(
       column,
       undefined,
       abstractType.cellInfo,
@@ -365,7 +373,7 @@ export function speculateColumnMetaData({
   );
   // Only change display names for columns present in meta data
   const displayNamesRequiringChange = Object.entries(
-    queryModel.display_names ?? {},
+    queryModel.display_names,
   ).filter(
     ([alias, displayName]) =>
       currentProcessedColumnsMetaData.has(alias) &&
@@ -390,6 +398,7 @@ export function speculateColumnMetaData({
             is_initial_column: true,
             input_column_name: inputColumnInformation?.name,
             input_table_name: inputColumnInformation?.tableName,
+            input_table_id: inputColumnInformation?.tableId,
           },
           abstractTypeMap,
         ),

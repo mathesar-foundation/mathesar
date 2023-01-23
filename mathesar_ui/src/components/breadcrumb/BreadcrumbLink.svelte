@@ -6,10 +6,16 @@
   <a {href}><slot /></a>
 </span>
 
-<style>
+<style lang="scss">
   .breadcrumb-link {
     display: block;
     overflow: hidden;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease-in-out;
+    &:hover {
+      background-color: var(--slate-600);
+    }
   }
   .breadcrumb-link a {
     display: block;
@@ -18,9 +24,5 @@
     color: inherit;
     font-weight: 500;
     font-size: var(--text-size-base);
-  }
-  .breadcrumb-link a:hover {
-    text-decoration: underline;
-    border-color: #555;
   }
 </style>

@@ -11,6 +11,7 @@
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
+  import { pluralize } from '@mathesar/utils/languageUtils';
   import ExtractColumnsModal from './column-extraction/ExtractColumnsModal.svelte';
   import { ExtractColumnsModalController } from './column-extraction/ExtractColumnsModalController';
 
@@ -23,7 +24,7 @@
 
   $: ({ processedColumns, columnsDataStore } = $tabularData);
   $: column = columns.length === 1 ? columns[0] : undefined;
-  $: s = columns.length > 1 ? 's' : '';
+  $: columnsWord = pluralize(columns, 'columns', 'title');
   $: canMoveToLinkedTable = [...$processedColumns].some(([, c]) => c.linkFk);
 
   function handleDeleteColumn(c: ProcessedColumn) {
@@ -57,7 +58,7 @@
     <div class="action-item">
       <div>
         <Icon {...iconMoveColumnsToNewLinkedTable} />
-        <span>New linked table from column{s}</span>
+        <span>Extract {columnsWord} Into a New Table</span>
       </div>
       <Icon {...iconSettings} />
     </div>
@@ -67,7 +68,7 @@
       <div class="action-item">
         <div>
           <Icon {...iconMoveColumnsToExistingLinkedTable} />
-          <span>Move column{s} to existing linked table</span>
+          <span>Move {columnsWord} to Linked Table</span>
         </div>
         <Icon {...iconSettings} />
       </div>

@@ -59,12 +59,8 @@
   {#if mode !== 'edit'}
     <CellBackground color="rgba(14, 101, 235, 0.1)" when={isSelectedInRange} />
     <CellBackground
-      color="var(--match-color)"
-      when={valueComparisonOutcome === 'exactMatch'}
-    />
-    <CellBackground
-      color="var(--match-color-light)"
-      when={valueComparisonOutcome === 'substringMatch'}
+      color="var(--cell-background-color)"
+      when={valueComparisonOutcome !== 'noMatch'}
     />
   {/if}
   <slot />
@@ -75,12 +71,9 @@
     width: 100%;
     overflow: hidden;
     position: relative;
-    min-height: var(--cell-height);
+    min-height: var(--cell-height, var(--default-cell-height));
     display: flex;
     flex-direction: column;
-    --match-color: rgba(36, 192, 54, 0.4);
-    --match-color-light: rgba(36, 192, 54, 0.1);
-    --match-background-color: var(--match-color);
 
     &.has-padding {
       padding: var(--cell-padding);
@@ -91,11 +84,11 @@
     }
 
     &.is-active {
-      box-shadow: 0 0 0 2px #428af4;
+      box-shadow: 0 0 0 2px var(--sky-700);
       border-radius: 2px;
 
       &.disabled {
-        box-shadow: 0 0 0 2px #a8a8a8;
+        box-shadow: 0 0 0 2px var(--slate-200);
       }
     }
 
@@ -106,7 +99,7 @@
 
     &.is-edit-mode {
       padding: 0px;
-      box-shadow: 0 0 0 3px #428af4, 0 0 8px #000000 !important;
+      box-shadow: 0 0 0 3px var(--sky-700), 0 0 8px #000000 !important;
     }
 
     &.truncate {
@@ -117,7 +110,11 @@
     }
   }
   .exact-match {
-    --match-background-color: transparent;
+    --Match__highlight-color: transparent;
+    --cell-background-color: var(--color-substring-match);
+  }
+  .substring-match {
+    --cell-background-color: var(--color-substring-match-light);
   }
   .no-match {
     text-decoration: line-through;

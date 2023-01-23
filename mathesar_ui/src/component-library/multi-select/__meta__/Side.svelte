@@ -17,10 +17,10 @@
 
 <style>
   .icon {
-    color: #777;
+    color: var(--slate-500);
   }
   .price {
     font-style: italic;
-    color: rgb(44, 60, 129);
+    color: var(--sky-800);
   }
 </style>

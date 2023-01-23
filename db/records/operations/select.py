@@ -2,7 +2,6 @@ from sqlalchemy import select
 from sqlalchemy.sql.functions import count
 
 from db.columns.base import MathesarColumn
-from db.records.operations.sort import get_default_order_by
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.types.operations.convert import get_db_type_enum_from_id
@@ -18,26 +17,7 @@ def get_record(table, engine, id_value):
     return result[0] if result else None
 
 
-def get_records_with_default_order(
-        table,
-        engine,
-        order_by=None,
-        **kwargs,
-):
-    if order_by is None:
-        order_by = []
-    order_by = get_default_order_by(table, order_by=order_by)
-    return get_records(
-        table=table,
-        engine=engine,
-        order_by=order_by,
-        **kwargs
-    )
-
-
-# TODO change interface to where transformations is a sequence of transform steps
-# first change should be made on the viewset level, where transform steps are currently assigned
-# to named parameters.
+# TODO consider using **kwargs instead of manually redefining defaults and piping all these arguments
 def get_records(
     table,
     engine,
@@ -48,6 +28,7 @@ def get_records(
     group_by=None,
     search=None,
     duplicate_only=None,
+    fallback_to_default_ordering=False,
 ):
     """
     Returns annotated records from a table.
@@ -78,6 +59,7 @@ def get_records(
         limit=limit,
         offset=offset,
         order_by=order_by,
+        fallback_to_default_ordering=fallback_to_default_ordering,
         filter=filter,
         group_by=group_by,
         search=search,

@@ -9,6 +9,7 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
+  export let searchValue: $$Props['searchValue'] = undefined;
   export let formatterOptions: $$Props['formatterOptions'];
   export let formatForDisplay: $$Props['formatForDisplay'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
@@ -19,6 +20,7 @@
   {isActive}
   {isSelectedInRange}
   {disabled}
+  {searchValue}
   {isIndependentOfSheet}
   formatValue={formatForDisplay}
   horizontalAlignment="right"

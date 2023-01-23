@@ -9,7 +9,6 @@
   import {
     comboInvalidIf,
     Field,
-    invalidIf,
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
@@ -30,12 +29,16 @@
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { columnNameIsAvailable } from '@mathesar/utils/columnUtils';
+  import {
+    columnNameIsAvailable,
+    getSuggestedFkColumnName,
+  } from '@mathesar/utils/columnUtils';
+  import { getAvailableName } from '@mathesar/utils/db';
+  import { makeSingular } from '@mathesar/utils/languageUtils';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import Pill from './LinkTablePill.svelte';
   import {
     columnNameIsNotId,
-    suggestFkColumnName,
     suggestMappingTableName,
     type LinkType,
   } from './linkTableUtils';
@@ -50,15 +53,14 @@
   // ===========================================================================
   // Prerequisite data
   // ===========================================================================
+  $: singularBaseTableName = makeSingular(base.name);
   $: tables = [...$tablesDataStore.data.values()];
   $: ({ columnsDataStore } = $tabularData);
   $: baseColumns = columnsDataStore.columns;
-  $: baseColumnNames = new Set($baseColumns.map((c) => c.name));
   $: targetColumnsStore = target
     ? new ColumnsDataStore({ parentId: target.id })
     : undefined;
   $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
-  $: targetColumnNames = new Set($targetColumns.map((c) => c.name));
   $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);
   $: targetColumnsAreLoading =
     $targetColumnsFetchStatus?.state === 'processing';
@@ -66,40 +68,49 @@
   // ===========================================================================
   // Fields
   // ===========================================================================
-  $: targetTable = requiredField<TableEntry | undefined>(undefined, [
-    invalidIf(
-      (t) => t.id === base.id,
-      'Using this form to create self-referential links is not yet ' +
-        'supported. You can manually create such links by creating the ' +
-        'appropriate columns and adding foreign key constraints to ' +
-        'those columns.',
-    ),
-  ]);
+  $: targetTable = requiredField<TableEntry | undefined>(undefined);
   $: target = $targetTable;
+  $: isSelfReferential = base.id === target?.id;
+  $: linkTypes = ((): LinkType[] =>
+    isSelfReferential
+      ? ['manyToOne', 'manyToMany']
+      : ['manyToOne', 'oneToMany', 'manyToMany'])();
   $: linkType = requiredField<LinkType>('manyToOne');
+  $: $targetTable, linkType.reset();
   $: columnNameInBase = requiredField(
-    suggestFkColumnName(target, baseColumnNames),
+    getSuggestedFkColumnName(target, $baseColumns),
     [columnNameIsAvailable($baseColumns)],
   );
   $: columnNameInTarget = requiredField(
-    suggestFkColumnName(base, targetColumnNames),
+    getSuggestedFkColumnName(base, $targetColumns),
     [columnNameIsAvailable($targetColumns)],
   );
   $: mappingTableName = requiredField(
     suggestMappingTableName(base, target, tables),
     [$validateNewTableName],
   );
-  $: columnNameMappingToBase = requiredField(suggestFkColumnName(base), [
-    columnNameIsNotId,
-  ]);
-  $: columnNameMappingToTarget = requiredField(suggestFkColumnName(target), [
-    columnNameIsNotId,
-  ]);
+  $: columnNameMappingToBase = (() => {
+    const initial = isSelfReferential
+      ? getAvailableName(
+          `${singularBaseTableName}_1`,
+          new Set(['id', singularBaseTableName]),
+        )
+      : getSuggestedFkColumnName(base);
+    return requiredField(initial, [columnNameIsNotId]);
+  })();
+  $: columnNameMappingToTarget = (() => {
+    const initial = isSelfReferential
+      ? getAvailableName(
+          `${singularBaseTableName}_2`,
+          new Set(['id', singularBaseTableName]),
+        )
+      : getSuggestedFkColumnName(target);
+    return requiredField(initial, [columnNameIsNotId]);
+  })();
 
   // ===========================================================================
   // Helper values
   // ===========================================================================
-  $: isSelfReferential = base.id === target?.id;
   /**
    * Prevent form submission if we have not yet been able to suggest a name for
    * the the `columnNameInTarget` field (and thus have not yet received user
@@ -197,13 +208,13 @@
 
   async function handleSave() {
     await postAPI('/api/db/v0/links/', getRequestBody());
+    toast.success('The link has been created successfully');
     await reFetchOtherThingsThatChanged();
     close();
-    toast.success('Link created.');
   }
 </script>
 
-<div class="form" class:self-referential={false}>
+<div class="form" class:self-referential={isSelfReferential}>
   <FieldLayout>
     <InfoBox>
       Links are stored in the database as foreign key constraints, which you may
@@ -220,8 +231,14 @@
     </span>
   </Field>
 
-  {#if target && !isSelfReferential}
-    <SelectLinkType field={linkType} {base} {target} />
+  {#if target}
+    <SelectLinkType
+      field={linkType}
+      {isSelfReferential}
+      {linkTypes}
+      {base}
+      {target}
+    />
 
     <FieldLayout>
       <OutcomeBox>
@@ -235,22 +252,37 @@
         {:else if $linkType === 'manyToOne'}
           <NewColumn {base} {target} field={columnNameInBase} />
         {:else if $linkType === 'manyToMany'}
-          <p>We'll create a new table.</p>
-          <Field field={mappingTableName} label="Table Name" />
-          {#if $mappingTableName}
-            <NewColumn
-              base={{ name: $mappingTableName }}
-              baseWhich="mapping"
-              target={base}
-              targetWhich="base"
-              field={columnNameMappingToBase}
-            />
-            <NewColumn
-              base={{ name: $mappingTableName }}
-              baseWhich="mapping"
-              {target}
-              field={columnNameMappingToTarget}
-            />
+          {#if isSelfReferential}
+            <p>We'll create a new table.</p>
+            <Field field={mappingTableName} label="Table Name" />
+            {#if $mappingTableName}
+              <p>
+                We'll add two columns in
+                <Pill table={{ name: $mappingTableName }} which="mapping" />,
+                each linking to
+                <Pill table={target} which="target" />.
+              </p>
+              <Field field={columnNameMappingToBase} label="Column 1 Name" />
+              <Field field={columnNameMappingToTarget} label="Column 2 Name" />
+            {/if}
+          {:else}
+            <p>We'll create a new table.</p>
+            <Field field={mappingTableName} label="Table Name" />
+            {#if $mappingTableName}
+              <NewColumn
+                base={{ name: $mappingTableName }}
+                baseWhich="mapping"
+                target={base}
+                targetWhich="base"
+                field={columnNameMappingToBase}
+              />
+              <NewColumn
+                base={{ name: $mappingTableName }}
+                baseWhich="mapping"
+                {target}
+                field={columnNameMappingToTarget}
+              />
+            {/if}
           {/if}
         {:else}
           {assertExhaustive($linkType)}
@@ -281,6 +313,7 @@
     line-height: 1.6;
   }
   .form.self-referential {
-    --that-table-color: var(--this-table-color);
+    --target-fill: var(--base-fill);
+    --target-stroke: var(--base-stroke);
   }
 </style>

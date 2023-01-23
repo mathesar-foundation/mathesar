@@ -82,7 +82,7 @@
       padding: 0.3rem 0.5rem;
       border-radius: 0.2rem;
       font-weight: 500;
-      background: #efefef;
+      background: var(--slate-100);
     }
   }
 </style>

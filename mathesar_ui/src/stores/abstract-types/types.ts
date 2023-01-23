@@ -103,6 +103,14 @@ export interface AbstractTypeFilterDefinitionResponse {
   uiTypeParameterMap: Partial<
     Record<AbstractTypeCategoryIdentifier, AbstractTypeCategoryIdentifier[]>
   >;
+  hasParams: boolean;
+}
+
+export interface AbstractTypeLimitedFilterInformation {
+  id: AbstractTypeFilterDefinitionResponse['id'];
+  name: AbstractTypeFilterDefinitionResponse['name'];
+  hasAliases: boolean;
+  hasParams: boolean;
 }
 
 export interface AbstractTypeFilterDefinition {

@@ -21,11 +21,11 @@
 
   .selected-value {
     display: flex;
-    padding: 0 var(--spacing-2);
+    padding: 0.285rem 0.428rem;
     margin: var(--spacing);
-    background: #f4f4f4;
-    border: solid 0.02em #ddd;
-    border-radius: 0.1em;
+    background: var(--slate-100);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--border-radius-m);
   }
 
   .icon-button {

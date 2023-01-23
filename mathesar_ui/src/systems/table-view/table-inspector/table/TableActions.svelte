@@ -1,5 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
+
   import {
     AnchorButton,
     Button,
@@ -8,15 +9,52 @@
     iconExternalLink,
   } from '@mathesar-component-library';
   import { iconDeleteMajor, iconExploration } from '@mathesar/icons';
-  import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentDatabase } from '@mathesar/stores/databases';
-  import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    currentTable,
+    deleteTable,
+    refetchTablesForSchema,
+    tables,
+  } from '@mathesar/stores/tables';
+  import {
+    constructDataExplorerUrlToSummarizeFromGroup,
+    createDataExplorerUrlToExploreATable,
+  } from '@mathesar/systems/data-explorer';
 
   const tabularData = getTabularDataStoreFromContext();
+
+  $: ({ id, columnsDataStore, meta } = $tabularData);
+  $: ({ grouping } = meta);
+  $: ({ columns } = columnsDataStore);
+  $: explorationPageUrl =
+    $currentDatabase && $currentSchemaId
+      ? createDataExplorerUrlToExploreATable(
+          $currentDatabase?.name,
+          $currentSchemaId,
+          {
+            id: $tabularData.id,
+            name: $tables.data.get($tabularData.id)?.name ?? '',
+          },
+        )
+      : '';
+  $: summarizationUrl = (() => {
+    if (!$currentTable || !$currentDatabase || !$currentSchemaId) {
+      return undefined;
+    }
+    return constructDataExplorerUrlToSummarizeFromGroup(
+      $currentDatabase.name,
+      $currentSchemaId,
+      {
+        baseTable: { id, name: $currentTable.name },
+        columns: $columns,
+        terseGrouping: $grouping.terse(),
+      },
+    );
+  })();
 
   function handleDeleteTable() {
     void confirmDelete({
@@ -35,15 +73,6 @@
       },
     });
   }
-
-  $: explorationPageUrl =
-    $currentDatabase && $currentSchemaId
-      ? createDataExplorerUrlToExploreATable(
-          $currentDatabase?.name,
-          $currentSchemaId,
-          $tabularData.id,
-        )
-      : '';
 </script>
 
 <div class="actions-container">
@@ -59,6 +88,21 @@
         <Icon {...iconExternalLink} />
       </div>
     </AnchorButton>
+    {#if summarizationUrl}
+      <AnchorButton href={summarizationUrl}>
+        <div class="action-item">
+          <div>
+            <Icon {...iconExploration} />
+            <span>Summarize in Data Explorer</span>
+            <Help>
+              Open a pre-configured exploration based on the current table
+              display.
+            </Help>
+          </div>
+          <Icon {...iconExternalLink} />
+        </div>
+      </AnchorButton>
+    {/if}
   {/if}
 
   <Button appearance="outline-primary" on:click={handleDeleteTable}>
