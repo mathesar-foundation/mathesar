@@ -16,9 +16,8 @@ RUN apt install -y sudo nodejs && rm -rf /var/lib/apt/lists/*
 # Change work directory
 WORKDIR /code/
 
-# Copy the base requirements needed for other requirements file
-COPY requirements* .
-
+# Copy all the requirements
+COPY requirements* ./
 RUN pip install --no-cache-dir -r ${PYTHON_REQUIREMENTS} --force-reinstall sqlalchemy-filters
 COPY . .
 

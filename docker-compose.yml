@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   db:
-    profiles: ["dev", "prod", "test"]
+    profiles: ["dev", "prod", "test", "demo"]
     image: postgres:13
     container_name: mathesar_db
     environment:
@@ -49,6 +49,21 @@ services:
       dockerfile: Dockerfile
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
+    depends_on:
+      - db
+  demo-service:
+    profiles: [ "demo" ]
+    extends: service-without-db
+    environment:
+      - MODE=${MODE-PRODUCTION}
+      - DEBUG=${DEBUG-False}
+      - DJANGO_ALLOW_ASYNC_UNSAFE=true
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-demo.settings}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_REQUIREMENTS: requirements-demo.txt
     depends_on:
       - db
   caddy-reverse-proxy:
