@@ -9,7 +9,7 @@ TEMPLATE_INITIALIZED = 'TEMPLATE_INITIALIZED'
 def _initialize_template():
     print("Initializing demo template...")
     from db.install import create_mathesar_database  # noqa
-    from demo.install import load_datasets  # noqa
+    from demo.install.datasets import load_datasets  # noqa
     from mathesar.database.base import create_mathesar_engine  # noqa
 
     template_db_name = settings.MATHESAR_DEMO_TEMPLATE

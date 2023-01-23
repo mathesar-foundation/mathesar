@@ -3,9 +3,17 @@ import arxiv
 import json
 from sqlalchemy import text
 
+from django.core.management import BaseCommand
+
+from demo.install.arxiv_skeleton import get_arxiv_db_and_schema_log_path
 from mathesar.database.base import create_mathesar_engine
 
-from demo.arxiv_dataset.base import get_arxiv_db_and_schema_log_path
+
+class Command(BaseCommand):
+    help = 'Refreshes the arXiv data set in all relevant DBs'
+
+    def handle(self, *args, **options):
+        update_our_arxiv_dbs()
 
 
 def update_our_arxiv_dbs():
@@ -27,7 +35,7 @@ def _download_arxiv_papers():
         max_results=50,
         sort_by=arxiv.SortCriterion.LastUpdatedDate
     )
-    return arxiv_search.results()
+    return list(arxiv_search.results())
 
 
 def _construct_arxiv_search_query_expression():
@@ -275,10 +283,6 @@ def _get_logged_db_schema_pairs():
             for line
             in lines
         )
-
-
-if __name__ == '__main__':
-    update_our_arxiv_dbs()
 
 
 _non_cs_arxiv_categories = {

@@ -646,7 +646,7 @@ class Table(DatabaseObject, Relation):
 
         # Update attnum as it would have changed due to columns moving to a new table.
         extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
-        remainder_table = Table.current_objects.get(oid=remainder_table_oid)
+        remainder_table = Table.current_objects.get(schema__database=self.schema.database, oid=remainder_table_oid)
         remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
         reset_reflection(db_name=self.schema.database.name)
         remainder_fk_column = Column.objects.get(table=remainder_table, attnum=linking_fk_column_attnum)
