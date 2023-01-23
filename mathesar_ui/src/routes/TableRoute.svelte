@@ -27,7 +27,7 @@
   <AppendBreadcrumb item={{ type: 'table', database, schema, table }} />
 
   <Route path="/">
-    <TablePage {database} {schema} {table} />
+    <TablePage {table} />
   </Route>
 
   <Route path="/:recordId" let:meta>
