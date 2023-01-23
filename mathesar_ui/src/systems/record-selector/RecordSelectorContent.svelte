@@ -62,9 +62,14 @@
     }
   }
 
+  function getDataForNewRecord(): Record<number, unknown> {
+    let pkColumnIds = $columns.filter((c) => c.primary_key).map((c) => c.id);
+    return Object.fromEntries($searchFuzzy.without(pkColumnIds));
+  }
+
   async function submitNewRecord() {
     const url = `/api/db/v0/tables/${tableId}/records/`;
-    const body = Object.fromEntries($searchFuzzy);
+    const body = getDataForNewRecord();
     try {
       isSubmittingNewRecord = true;
       const response = await postAPI<ApiRecordsResponse>(url, body);
