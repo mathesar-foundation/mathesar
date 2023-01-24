@@ -1,10 +1,10 @@
-from psycopg2.errors import ForeignKeyViolation
+from psycopg2.errors import ForeignKeyViolation, InvalidDatetimeFormat
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, DataError
 
 from mathesar.api.db.permissions.records import RecordAccessPolicy
 from mathesar.api.exceptions.error_codes import ErrorCodes
@@ -101,6 +101,13 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
                 details=e.args[0],
                 status_code=status.HTTP_400_BAD_REQUEST
             )
+        except DataError as e:
+            if isinstance(e.orig, InvalidDatetimeFormat):
+                raise database_api_exceptions.InvalidDateFormatAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+
         serializer = RecordSerializer(
             records,
             many=True,
