@@ -27,5 +27,5 @@ export function getLinkForTableItem(
   if (isTableImportConfirmationRequired(table)) {
     return getImportPreviewPageUrl(databaseName, schemaId, table.id);
   }
-    return getTablePageUrl(databaseName, schemaId, table.id);
+  return getTablePageUrl(databaseName, schemaId, table.id);
 }
