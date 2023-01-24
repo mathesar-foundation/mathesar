@@ -2,6 +2,7 @@
   import { MatchHighlighter } from '@mathesar/component-library';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
+  import TableName from '../TableName.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
   export let entry: BreadcrumbSelectorEntry;
@@ -13,9 +14,13 @@
 
 <li class="breadcrumb-selector-row" class:active={entry.isActive()}>
   <a {href} on:click={closeSelector}>
-    <NameWithIcon {icon}>
-      <MatchHighlighter text={label} substring={filterString} />
-    </NameWithIcon>
+    {#if 'table' in entry}
+      <TableName table={entry.table} />
+    {:else}
+      <NameWithIcon {icon}>
+        <MatchHighlighter text={label} substring={filterString} />
+      </NameWithIcon>
+    {/if}
   </a>
   {#if entry.type === 'table'}
     <div class="record-selector">
