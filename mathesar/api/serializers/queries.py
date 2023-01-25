@@ -42,6 +42,13 @@ class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer
         """
         name = attrs.get('name')
         if name:
+            instance = self.instance
+            # Skips validation, if this is a preexisting instance and the name hasn't changed.
+            # Otherwise, updating a preexisting instance would trigger the name constraint.
+            if instance:
+                prev_name = instance.name
+                if prev_name == name:
+                    return
             base_table = attrs.get('base_table')
             if base_table:
                 schema = base_table.schema
