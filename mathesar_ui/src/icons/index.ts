@@ -55,6 +55,7 @@ import {
   faStar,
   faPaste,
   faEllipsisV,
+  faArrowRightFromBracket,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -106,6 +107,7 @@ export const iconSortDescending: IconProps = { data: faSortAmountDown };
 export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
 export const iconPaste: IconProps = { data: faPaste };
+export const iconLogout: IconProps = { data: faArrowRightFromBracket };
 
 // THINGS
 //

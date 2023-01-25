@@ -5,6 +5,8 @@
     iconLoading,
     LinkMenuItem,
     MenuHeading,
+    MenuDivider,
+    iconSettingsMajor,
   } from '@mathesar-component-library';
   import { currentDatabase } from '@mathesar/stores/databases';
   import {
@@ -12,15 +14,18 @@
     iconExploration,
     iconShortcuts,
     iconUser,
+    iconDatabase,
+    iconLogout,
   } from '@mathesar/icons';
   import {
     getDatabasePageUrl,
     getDataExplorerPageUrl,
     getImportPageUrl,
     getTablePageUrl,
+    USER_PROFILE_URL,
     LOGOUT_URL,
+    ADMIN_URL,
   } from '@mathesar/routes/urls';
-  import DatabaseName from '@mathesar/components/DatabaseName.svelte';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { createTable } from '@mathesar/stores/tables';
   import { router } from 'tinro';
@@ -81,19 +86,32 @@
       triggerAppearance="ghost"
       size="small"
       closeOnInnerClick={true}
-      label=""
-      icon={iconUser}
+      menuStyle="--spacing-x: 0.3em;"
     >
       <div class="user-switcher" slot="trigger">
-        <Icon {...iconUser} />
+        <Icon {...iconSettingsMajor} />
       </div>
       {#if database}
         <MenuHeading>Database</MenuHeading>
-        <LinkMenuItem href={getDatabasePageUrl(database.name)}>
-          <DatabaseName {database} />
+        <LinkMenuItem
+          icon={iconDatabase}
+          href={getDatabasePageUrl(database.name)}
+        >
+          {database.name}
         </LinkMenuItem>
-        <LinkMenuItem href={LOGOUT_URL} tinro-ignore>Log Out</LinkMenuItem>
+        <MenuDivider />
       {/if}
+      <MenuHeading>Signed in as</MenuHeading>
+      <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
+        User profile
+      </LinkMenuItem>
+      <MenuDivider />
+      <LinkMenuItem icon={iconSettingsMajor} href={ADMIN_URL}>
+        Administration
+      </LinkMenuItem>
+      <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
+        Log Out
+      </LinkMenuItem>
     </DropdownMenu>
   </div>
 </header>
