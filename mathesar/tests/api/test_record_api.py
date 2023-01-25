@@ -1277,6 +1277,42 @@ def test_number_input_api_validation(empty_nasa_table, client):
         assert response.status_code == status_code
 
 
+def test_invalid_email_post_api_validation(empty_nasa_table, client):
+    table = empty_nasa_table
+    column_name = 'Email'
+    table.add_column({"name": column_name, "type": 'mathesar_types.email'})
+    email_col_id = table.get_column_name_id_bidirectional_map()[column_name]
+    data = {
+        email_col_id: 'foobar' 
+    }
+    response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data[0]['code'] == ErrorCodes.CheckViolation.value
+    assert response_data[0]['message'] == 'The requested insert violates a check constraint'
+    assert response_data[0]['detail'] == 'value for domain mathesar_types.email violates check constraint \"email_check\"\n'
+
+
+def test_invalid_email_patch_api_validation(empty_nasa_table, client):
+    table = empty_nasa_table
+    column_name = 'Email'
+    table.add_column({"name": column_name, "type": 'mathesar_types.email'})
+    email_col_id = table.get_column_name_id_bidirectional_map()[column_name]
+    valid_data = {
+        email_col_id: 'foo@bar.org' 
+    }
+    client.post(f'/api/db/v0/tables/{table.id}/records/', data=valid_data)
+    invalid_data = {
+        email_col_id: 'foobar'
+    }
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/1/', data=invalid_data)
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data[0]['code'] == ErrorCodes.CheckViolation.value
+    assert response_data[0]['message'] == 'The requested update violates a check constraint'
+    assert response_data[0]['detail'] == 'value for domain mathesar_types.email violates check constraint \"email_check\"\n'
+
+
 def test_record_patch_invalid_date(create_patents_table, client):
     table_name = 'NASA Invalid Date'
     table = create_patents_table(table_name)
