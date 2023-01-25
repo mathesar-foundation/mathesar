@@ -1,5 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.db.models import Q
+
 from rest_access_policy import PermittedPkRelatedField
 from rest_framework import serializers
 
@@ -42,23 +44,25 @@ class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer
         """
         name = attrs.get('name')
         if name:
-            instance = self.instance
-            # Skips validation, if this is a preexisting instance and the name hasn't changed.
-            # Otherwise, updating a preexisting instance would trigger the name constraint.
-            if instance:
-                prev_name = instance.name
-                if prev_name == name:
-                    return
             base_table = attrs.get('base_table')
             if base_table:
                 schema = base_table.schema
-                queries_with_same_name = UIQuery.objects.filter(name=name)
-                duplicate_in_schema_exists = \
-                    queries_with_same_name\
-                    .filter(base_table__schema=schema)\
-                    .exists()
-                if duplicate_in_schema_exists:
+                is_duplicate_q = self._get_is_duplicate_q(name, schema)
+                duplicates = UIQuery.objects.filter(is_duplicate_q)
+                if duplicates.exists():
                     raise DuplicateUIQueryInSchemaAPIException(field='name')
+
+    def _get_is_duplicate_q(self, name, schema):
+        has_same_name_q = Q(name=name)
+        has_same_schema_q = Q(base_table__schema=schema)
+        is_duplicate_q = has_same_name_q & has_same_schema_q
+        is_update = self.instance is not None
+        if is_update:
+            # If this is an update, filter self out of found duplicates
+            id = self.instance.id
+            is_not_this_instance_q = ~Q(id=id)
+            is_duplicate_q = is_duplicate_q & is_not_this_instance_q
+        return is_duplicate_q
 
 
 class QuerySerializer(BaseQuerySerializer):
