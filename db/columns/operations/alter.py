@@ -140,10 +140,10 @@ def alter_column_type(
     column = table.columns[column_name]
     column_attnum = get_column_attnum_from_name(table_oid, column_name, engine=engine, metadata=metadata, connection_to_use=connection)
 
-    default = get_column_default(table_oid, column_attnum, engine=engine, metadata=metadata, connection_to_use=connection)
-    if default is not None:
-        default_text = column.server_default.arg.text
-    set_column_default(table_oid, column_attnum, engine, connection, None, metadata=metadata)
+   #default = get_column_default(table_oid, column_attnum, engine=engine, metadata=metadata, connection_to_use=connection)
+   #if default is not None:
+   #    default_text = column.server_default.arg.text
+   #set_column_default(table_oid, column_attnum, engine, connection, None, metadata=metadata)
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
@@ -161,11 +161,11 @@ def alter_column_type(
 
     execute_statement(engine, DDL(alter_stmt), connection)
 
-    if default is not None:
-        cast_stmt = f"{cast_function_name}({default_text})"
-        default_stmt = select(text(cast_stmt))
-        new_default = str(execute_statement(engine, default_stmt, connection).first()[0])
-        set_column_default(table_oid, column_attnum, engine, connection, new_default)
+   #if default is not None:
+   #    cast_stmt = f"{cast_function_name}({default_text})"
+   #    default_stmt = select(text(cast_stmt))
+   #    new_default = str(execute_statement(engine, default_stmt, connection).first()[0])
+   #    set_column_default(table_oid, column_attnum, engine, connection, new_default)
 
 
 def change_column_nullable(table_oid, column_attnum, engine, connection, nullable):
