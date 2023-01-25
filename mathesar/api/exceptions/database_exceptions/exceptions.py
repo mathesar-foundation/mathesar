@@ -7,7 +7,6 @@ from db.constraints.operations.select import (
     get_fkey_constraint_oid_by_name_and_referent_table_oid,
 )
 from db.columns.exceptions import InvalidTypeError
-#from sqlalchemy.exc import IntegrityError
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
@@ -166,9 +165,7 @@ class InvalidTypeCastAPIException(MathesarAPIException):
     def err_msg(exception):
         if type(exception) is InvalidTypeError and exception.column_name and exception.new_type:
             return f'{exception.column_name} cannot be cast to {exception.new_type}.'
-        """ if type(exception) is IntegrityError and "email" in exception.params.keys():
-            return f'{exception.params["email"]} is not a valid email address.'
-        return 'Invalid type cast requested.' """
+        return 'Invalid type cast requested.'
 
 
 class DynamicDefaultAPIException(MathesarAPIException):
