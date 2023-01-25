@@ -1283,7 +1283,7 @@ def test_invalid_email_post_api_validation(empty_nasa_table, client):
     table.add_column({"name": column_name, "type": 'mathesar_types.email'})
     email_col_id = table.get_column_name_id_bidirectional_map()[column_name]
     data = {
-        email_col_id: 'foobar' 
+        email_col_id: 'foobar'
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
     response_data = response.json()
@@ -1299,7 +1299,7 @@ def test_invalid_email_patch_api_validation(empty_nasa_table, client):
     table.add_column({"name": column_name, "type": 'mathesar_types.email'})
     email_col_id = table.get_column_name_id_bidirectional_map()[column_name]
     valid_data = {
-        email_col_id: 'foo@bar.org' 
+        email_col_id: 'foo@bar.org'
     }
     client.post(f'/api/db/v0/tables/{table.id}/records/', data=valid_data)
     invalid_data = {
