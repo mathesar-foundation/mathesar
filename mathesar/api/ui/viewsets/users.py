@@ -14,11 +14,11 @@ from mathesar.api.ui.serializers.users import (
 )
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.ui.permissions.users import UserAccessPolicy
-from mathesar.models.users import User, DatabaseRole, SchemaRole
+from mathesar.models.users import DatabaseRole, SchemaRole
 
 
 class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
-    queryset = User.objects.all().order_by('id')
+    queryset = get_user_model().objects.all().order_by('id')
     serializer_class = UserSerializer
     pagination_class = DefaultLimitOffsetPagination
     access_policy = UserAccessPolicy
