@@ -33,6 +33,10 @@ def get_schema_list(request, database):
 def get_database_list(request):
     qs = Database.objects.all()
     permission_restricted_qs = DatabaseAccessPolicy.scope_queryset(request, qs)
+    schema_qs = Schema.objects.all()
+    permitted_schemas = SchemaAccessPolicy.scope_queryset(request, schema_qs)
+    databases_from_permitted_schema = Database.objects.filter(schemas__in=permitted_schemas)
+    permission_restricted_qs = permission_restricted_qs.union(databases_from_permitted_schema)
     database_serializer = DatabaseSerializer(
         permission_restricted_qs,
         many=True,
@@ -94,17 +98,19 @@ def get_common_data(request, database, schema=None):
 
 def get_current_database(request, db_name):
     """Get database from passed name, with fall back behavior."""
+    base_qs = Database.objects.all()
+    permitted_databases = DatabaseAccessPolicy.scope_queryset(request, base_qs)
     if db_name is not None:
-        current_database = get_object_or_404(Database, name=db_name)
+        current_database = get_object_or_404(permitted_databases, name=db_name)
     else:
         request_database_name = request.GET.get('database')
         try:
             if request_database_name is not None:
                 # Try to get the database named specified in the request
-                current_database = Database.objects.get(name=request_database_name)
+                current_database = permitted_databases.get(name=request_database_name)
             else:
                 # Try to get the first database available
-                current_database = Database.objects.order_by('id').first()
+                current_database = permitted_databases.order_by('id').first()
         except Database.DoesNotExist:
             current_database = None
     return current_database
@@ -113,7 +119,8 @@ def get_current_database(request, db_name):
 def get_current_schema(request, schema_id, database):
     # if there's a schema ID passed in, try to retrieve the schema, or return a 404 error.
     if schema_id is not None:
-        return get_object_or_404(Schema, id=schema_id)
+        permitted_schemas = SchemaAccessPolicy.scope_queryset(request, Schema.objects.all())
+        return get_object_or_404(permitted_schemas, id=schema_id)
     else:
         try:
             # Try to get the first schema in the DB
@@ -141,6 +148,8 @@ def reflect_all(_):
 @login_required
 def home(request):
     database = get_current_database(request, None)
+    if database is None:
+        return Response(status=status.HTTP_200_OK)
     return redirect('schemas', db_name=database.name)
 
 
