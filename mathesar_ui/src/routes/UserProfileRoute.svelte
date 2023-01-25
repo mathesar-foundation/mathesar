@@ -9,7 +9,7 @@
   item={{
     type: 'simple',
     href: USER_PROFILE_URL,
-    label: 'Import',
+    label: 'User Profile',
     icon: iconUser,
   }}
 />

@@ -17,6 +17,7 @@ import {
   faCaretRight,
   faLightbulb,
   faGears,
+  faGear,
   faArrowUpRightFromSquare,
   faCircleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
@@ -54,6 +55,7 @@ export const iconUploadFile: IconProps = { data: faFileUpload };
 
 export const iconFile: IconProps = { data: faFile };
 export const iconSettings: IconProps = { data: faGears };
+export const iconSettingsMajor: IconProps = { data: faGear };
 export const iconExternalLink: IconProps = { data: faArrowUpRightFromSquare };
 
 // STATUSES

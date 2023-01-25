@@ -78,4 +78,6 @@ export function getRecordPageUrl(
   return `/${databaseName}/${schemaId}/tables/${tableId}/${String(recordId)}`;
 }
 
+export const USER_PROFILE_URL = '/profile/';
+export const ADMIN_URL = '/administration/';
 export const LOGOUT_URL = '/auth/logout/';
