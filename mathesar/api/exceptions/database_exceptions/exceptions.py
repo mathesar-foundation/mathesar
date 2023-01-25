@@ -7,7 +7,7 @@ from db.constraints.operations.select import (
     get_fkey_constraint_oid_by_name_and_referent_table_oid,
 )
 from db.columns.exceptions import InvalidTypeError
-from sqlalchemy.exc import IntegrityError
+#from sqlalchemy.exc import IntegrityError
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
@@ -64,6 +64,28 @@ class UniqueViolationAPIException(MathesarAPIException):
         )._asdict()
         self.detail = [exception_detail]
         self.status_code = status_code
+
+
+class CheckViolationAPIException(MathesarAPIException):
+    error_code = ErrorCodes.CheckViolation.value
+
+    def __init__(
+            self,
+            exception,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        if details is None:
+            details = {}
+            if exception.orig.diag.constraint_name == 'email_check':
+                details.update(
+                    {
+                        "original_details": exception.orig.args[0]
+                    }
+                )
+        super().__init__(exception, self.error_code, message, field, details, status_code)
 
 
 class DuplicateTableAPIException(ProgrammingAPIException):
@@ -144,9 +166,9 @@ class InvalidTypeCastAPIException(MathesarAPIException):
     def err_msg(exception):
         if type(exception) is InvalidTypeError and exception.column_name and exception.new_type:
             return f'{exception.column_name} cannot be cast to {exception.new_type}.'
-        if type(exception) is IntegrityError and "email" in exception.params.keys():
+        """ if type(exception) is IntegrityError and "email" in exception.params.keys():
             return f'{exception.params["email"]} is not a valid email address.'
-        return 'Invalid type cast requested.'
+        return 'Invalid type cast requested.' """
 
 
 class DynamicDefaultAPIException(MathesarAPIException):
