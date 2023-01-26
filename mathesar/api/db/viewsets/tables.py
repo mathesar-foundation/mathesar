@@ -93,7 +93,16 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
         table = self.get_object()
-        col_types = get_table_column_types(table)
+        columns_might_have_defaults = request.query_params.get(
+            'columns_might_have_defaults',
+            True,
+        )
+        #REMOVE
+        print(f"columns_might_have_defaults: {columns_might_have_defaults}")
+        col_types = get_table_column_types(
+            table,
+            columns_might_have_defaults=columns_might_have_defaults,
+        )
         return Response(col_types)
 
     @action(methods=['post'], detail=True)
