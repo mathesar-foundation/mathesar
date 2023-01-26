@@ -16,7 +16,7 @@ export interface Grouping {
    */
   num_groups: number | null;
   ranged: boolean;
-  groups: Group[];
+  groups: Group[] | null;
 }
 
 export type SortDirection = 'asc' | 'desc';
