@@ -23,7 +23,7 @@
     padding: var(--inset-layout-padding, 1.5rem 1rem);
 
     :global(.inset-page-section + .inset-page-section) {
-      margin-top: 1rem;
+      margin-top: 1.4rem;
     }
   }
   .restrict-width {
