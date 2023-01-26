@@ -30,7 +30,10 @@
   import { createTable } from '@mathesar/stores/tables';
   import { router } from 'tinro';
   import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
+
+  const userProfile = getUserProfileStoreFromContext();
 
   $: database = $currentDatabase;
   $: schema = $currentSchemaId;
@@ -103,7 +106,7 @@
       {/if}
       <MenuHeading>Signed in as</MenuHeading>
       <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
-        User profile
+        {$userProfile?.getDisplayName() ?? 'User profile'}
       </LinkMenuItem>
       <MenuDivider />
       <LinkMenuItem icon={iconSettingsMajor} href={ADMIN_URL}>
