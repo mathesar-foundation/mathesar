@@ -90,7 +90,6 @@
     <Collapsible triggerAppearance="ghost">
       <span slot="header">
         <ConstraintCollapseHeader
-          canDrop={CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType)}
           {constraint}
         />
       </span>
