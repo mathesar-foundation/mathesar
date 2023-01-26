@@ -19,12 +19,12 @@ def _initialize_template():
         conn.execute(text(f"DROP DATABASE IF EXISTS {template_db_name} WITH (FORCE)"))
     root_engine.dispose()
     create_mathesar_database(
-        template_db_name,
+        database_name=template_db_name,
         username=settings.DATABASES["default"]["USER"],
         password=settings.DATABASES["default"]["PASSWORD"],
         hostname=settings.DATABASES["default"]["HOST"],
-        root_database=settings.DATABASES["default"]["NAME"],
         port=settings.DATABASES["default"]["PORT"],
+        skip_confirm=True
     )
     user_engine = create_mathesar_engine(template_db_name)
     load_datasets(user_engine)

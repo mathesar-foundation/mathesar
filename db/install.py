@@ -19,13 +19,12 @@ def install_mathesar(
         user_db_engine.dispose()
     except OperationalError:
         database_created = create_mathesar_database(
-            hostname,
-            password,
-            port,
-            user_database,
-            user_db_engine,
-            username,
-            skip_confirm
+            database_name=user_database,
+            hostname=hostname,
+            username=username,
+            password=password,
+            port=port,
+            skip_confirm=skip_confirm
         )
         if database_created:
             print(f"Installing Mathesar on PostgreSQL database {user_database} at host {hostname}...")
@@ -35,12 +34,12 @@ def install_mathesar(
             print(f"Skipping installing on DB with key {user_database}.")
 
 
-def create_mathesar_database(hostname, password, port, user_database, user_db_engine, username, skip_confirm):
+def create_mathesar_database(database_name, hostname, username, password, port, skip_confirm=True):
     if skip_confirm is True:
         create_database = "y"
     else:
         create_database = input(
-            f"Create a new Database called {user_database}? (y/n) > "
+            f"Create a new Database called {database_name}? (y/n) > "
         )
     if create_database.lower() in ["y", "yes"]:
         # We need to connect to an existing database inorder to create a new Database.
@@ -52,10 +51,10 @@ def create_mathesar_database(hostname, password, port, user_database, user_db_en
         )
         with root_db_engine.connect() as conn:
             conn.execution_options(isolation_level="AUTOCOMMIT")
-            conn.execute(text(f"CREATE DATABASE {user_database}"))
+            conn.execute(text(f"CREATE DATABASE {database_name}"))
         root_db_engine.dispose()
-        print(f"Created DB is {user_database}.")
+        print(f"Created DB is {database_name}.")
         return True
     else:
-        print(f"Database {user_database} not created!")
+        print(f"Database {database_name} not created!")
         return False
