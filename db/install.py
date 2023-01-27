@@ -18,7 +18,7 @@ def install_mathesar(
         install.install_mathesar_on_database(user_db_engine)
         user_db_engine.dispose()
     except OperationalError:
-        database_created = create_mathesar_database(
+        database_created = _create_database(
             database_name=database_name,
             hostname=hostname,
             username=username,
@@ -34,7 +34,7 @@ def install_mathesar(
             print(f"Skipping installing on DB with key {database_name}.")
 
 
-def create_mathesar_database(database_name, hostname, username, password, port, skip_confirm=True):
+def _create_database(database_name, hostname, username, password, port, skip_confirm=True):
     if skip_confirm is True:
         create_database = "y"
     else:
