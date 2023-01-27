@@ -5,6 +5,7 @@
     type SortDirection,
   } from '@mathesar/components/sort-entry/utils';
   import {
+    iconTable,
     iconGrouping,
     iconSortAscending,
     iconSortDescending,
@@ -13,6 +14,7 @@
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
+  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
 
   export let processedColumn: ProcessedColumn;
 
@@ -30,7 +32,11 @@
   );
 
   $: hasGrouping = $grouping.hasColumn(columnId);
-
+  $: linkFk = processedColumn.linkFk;
+  $: getTablePageUrl = $storeToGetTablePageUrl;
+  $: fk_table_link = linkFk
+    ? getTablePageUrl({ tableId: linkFk.referent_table })
+    : undefined;
   function removeSorting() {
     sorting.update((s) => s.without(columnId));
   }
@@ -50,6 +56,10 @@
 
   function removeGrouping() {
     grouping.update((g) => g.withoutColumns([columnId]));
+  }
+
+  function goToTable() {
+    window.location.href = fk_table_link;
   }
 </script>
 
@@ -86,5 +96,11 @@
 {:else}
   <ButtonMenuItem icon={iconGrouping} on:click={addGrouping}>
     Group by Column
+  </ButtonMenuItem>
+{/if}
+
+{#if fk_table_link !== undefined}
+  <ButtonMenuItem icon={iconTable} on:click={goToTable}>
+    Open {processedColumn.column.name} Table
   </ButtonMenuItem>
 {/if}

@@ -24,10 +24,11 @@
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import { States } from '@mathesar/api/utils/requestUtils';
   import { SheetCell } from '@mathesar/components/sheet';
-  import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
+  import { iconSetToNull, iconRecord, iconTable } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
+  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import CellErrors from './CellErrors.svelte';
 
   export let recordsData: RecordsData;
@@ -76,10 +77,13 @@
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isEditable = !column.primary_key;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
+  $: getTablePageUrl = $storeToGetTablePageUrl;
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
-
+  $: fk_table_link = linkFk
+    ? getTablePageUrl({ tableId: linkFk.referent_table })
+    : undefined;
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
       await tick();
@@ -179,8 +183,11 @@
         Set to <Null />
       </ButtonMenuItem>
       {#if linkedRecordHref}
-        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-          Go To Linked Record
+        <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
+          Open {$recordSummaries.get(String(column.id))?.get(String(value))}
+        </LinkMenuItem>
+        <LinkMenuItem icon={iconTable} href={fk_table_link}>
+          Open {column.name}
         </LinkMenuItem>
       {/if}
     </ContextMenu>
