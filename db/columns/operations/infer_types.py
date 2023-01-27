@@ -41,16 +41,7 @@ TYPE_INFERENCE_DAG = {
 }
 
 
-def infer_column_type(
-    schema,
-    table_name,
-    column_name,
-    engine,
-    depth=0,
-    type_inference_dag=None,
-    metadata=None,
-    columns_might_have_defaults=True
-):
+def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=None, metadata=None, columns_might_have_defaults=True):
     """
     Attempts to cast the column to the best type for it, given the mappings defined in TYPE_INFERENCE_DAG
     and _get_type_classes_mapped_to_dag_nodes. Returns the resulting column type's class.
