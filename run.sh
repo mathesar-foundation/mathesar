@@ -22,6 +22,6 @@ else
 fi
 
 cd ..
-python python install.py
+python install.py
 python manage.py createsuperuser --no-input --username admin --email admin@example.com
 python manage.py runserver 0.0.0.0:8000 && fg
