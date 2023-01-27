@@ -59,7 +59,9 @@
   }
 
   function goToTable() {
-    window.location.href = fk_table_link;
+    if (fk_table_link) {
+      window.location.href = fk_table_link;
+    }
   }
 </script>
 
@@ -99,7 +101,7 @@
   </ButtonMenuItem>
 {/if}
 
-{#if fk_table_link !== undefined}
+{#if fk_table_link}
   <ButtonMenuItem icon={iconTable} on:click={goToTable}>
     Open {processedColumn.column.name} Table
   </ButtonMenuItem>

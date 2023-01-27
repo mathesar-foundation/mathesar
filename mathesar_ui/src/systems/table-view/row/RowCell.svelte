@@ -186,6 +186,8 @@
         <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
           Open {$recordSummaries.get(String(column.id))?.get(String(value))}
         </LinkMenuItem>
+      {/if}
+      {#if fk_table_link}
         <LinkMenuItem icon={iconTable} href={fk_table_link}>
           Open {column.name}
         </LinkMenuItem>
