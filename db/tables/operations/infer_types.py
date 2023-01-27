@@ -39,7 +39,6 @@ def update_table_column_types(schema, table_name, engine, metadata=None, columns
 
 # TODO consider returning a mapping of column identifiers to types
 def infer_table_column_types(schema, table_name, engine, metadata=None, columns_might_have_defaults=True):
-    pr = _start_profiling()
     metadata = metadata if metadata else get_empty_metadata()
     table = reflect_table(table_name, schema, engine, metadata=metadata)
 
@@ -67,7 +66,6 @@ def infer_table_column_types(schema, table_name, engine, metadata=None, columns_
     except Exception as e:
         # Ensure the temp table is deleted
         temp_table.drop(bind=engine)
-        _stop_profiling(pr)
         raise e
     else:
         temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine, metadata=metadata)
@@ -77,21 +75,4 @@ def infer_table_column_types(schema, table_name, engine, metadata=None, columns_
             in temp_table.columns
         )
         temp_table.drop(bind=engine)
-        _stop_profiling(pr)
         return types
-
-
-def _start_profiling():
-    print("started profiling")
-    import cProfile
-    pr = cProfile.Profile()
-    pr.enable()
-    return pr
-
-def _stop_profiling(pr):
-    pr.disable()
-    from datetime import datetime
-    now_str = str(datetime.utcnow())
-    profile_file_name = f"infer_column_types_profile {now_str}"
-    print(f"stopped profiling, dumping to: {profile_file_name}")
-    pr.dump_stats(profile_file_name)
