@@ -21,7 +21,9 @@
   })();
   $: column = (() => {
     if (cell) {
-      const processedColumn = getColumns().find((col: Column) => String(col.id) === String(cell.columnId));
+      const processedColumn = getColumns().find(
+        (col: Column) => col.id === cell.columnId,
+      );
       if (processedColumn) {
         return processedColumn;
       }
