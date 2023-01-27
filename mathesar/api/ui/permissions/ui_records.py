@@ -21,7 +21,7 @@ class RecordAccessPolicy(AccessPolicy):
             'condition_expression': ['(is_superuser or is_table_viewer)']
         },
         {
-            'action': [ 'update', 'partial_update', 'create', 'delete'],
+            'action': ['update', 'partial_update', 'create', 'delete'],
             'principal': '*',
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_table_editor)']

@@ -9,6 +9,7 @@ def delete_record(table, engine, id_value):
     with engine.begin() as conn:
         return conn.execute(query)
 
+
 def bulk_delete_records(table, engine, id_values):
     primary_key_column = get_primary_key_column(table)
     query = delete(table).where(primary_key_column.in_(id_values))

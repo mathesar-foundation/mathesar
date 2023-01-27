@@ -1,4 +1,3 @@
-import json
 from psycopg2.errors import ForeignKeyViolation
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
@@ -12,13 +11,14 @@ import mathesar.api.exceptions.database_exceptions.exceptions as database_api_ex
 from mathesar.api.utils import get_table_or_404
 from mathesar.models.base import Table
 
+
 class RecordViewSet(AccessViewSetMixin, viewsets.GenericViewSet):
     access_policy = RecordAccessPolicy
 
     def get_queryset(self):
         return Table.objects.all().order_by('-created_at')
 
-    @action(methods=['delete'], detail = False)
+    @action(methods=['delete'], detail=False)
     def delete(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
         pks = request.data.get("pks")
