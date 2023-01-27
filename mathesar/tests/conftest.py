@@ -181,6 +181,11 @@ def patents_csv_filepath():
 
 
 @pytest.fixture(scope='session')
+def table_with_id_col_filepath():
+    return 'mathesar/tests/data/table_with_id_col.csv'
+
+
+@pytest.fixture(scope='session')
 def paste_filename():
     return 'mathesar/tests/data/patents.txt'
 
