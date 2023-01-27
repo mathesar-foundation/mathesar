@@ -53,7 +53,12 @@ def alter_column(engine, table_oid, column_attnum, column_data):
             name = column_data[NAME_KEY]
             rename_column(table_oid, column_attnum, engine, conn, name)
     # TODO reuse metadata
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=get_empty_metadata())
+    column_name = get_column_name_from_attnum(
+        table_oid,
+        column_attnum,
+        engine,
+        metadata=get_empty_metadata(),
+    )
     reflected_table = reflect_table_from_oid(
         table_oid,
         engine,
@@ -124,7 +129,14 @@ def retype_column(
 
 
 def alter_column_type(
-    table_oid, column_name, engine, connection, target_type, type_options=None, metadata=None, columns_might_have_defaults=True,
+    table_oid,
+    column_name,
+    engine,
+    connection,
+    target_type,
+    type_options=None,
+    metadata=None,
+    columns_might_have_defaults=True,
 ):
     if type_options is None:
         type_options = {}
@@ -138,13 +150,32 @@ def alter_column_type(
         metadata=metadata,
     )
     column = table.columns[column_name]
-    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine=engine, metadata=metadata, connection_to_use=connection)
+    column_attnum = get_column_attnum_from_name(
+        table_oid,
+        column_name,
+        engine=engine,
+        metadata=metadata,
+        connection_to_use=connection
+    )
 
     if columns_might_have_defaults:
-        default = get_column_default(table_oid, column_attnum, engine=engine, metadata=metadata, connection_to_use=connection)
+        default = get_column_default(
+            table_oid,
+            column_attnum,
+            engine=engine,
+            metadata=metadata,
+            connection_to_use=connection
+        )
         if default is not None:
             default_text = column.server_default.arg.text
-        set_column_default(table_oid, column_attnum, engine, connection, None, metadata=metadata)
+        set_column_default(
+            table_oid,
+            column_attnum,
+            engine,
+            connection,
+            None,
+            metadata=metadata
+        )
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
@@ -166,8 +197,18 @@ def alter_column_type(
         if default is not None:
             cast_stmt = f"{cast_function_name}({default_text})"
             default_stmt = select(text(cast_stmt))
-            new_default = str(execute_statement(engine, default_stmt, connection).first()[0])
-            set_column_default(table_oid, column_attnum, engine, connection, new_default)
+            new_default = str(
+                execute_statement(
+                    engine, default_stmt, connection
+                ).first()[0]
+            )
+            set_column_default(
+                table_oid,
+                column_attnum,
+                engine,
+                connection,
+                new_default
+            )
 
 
 def change_column_nullable(table_oid, column_attnum, engine, connection, nullable):
