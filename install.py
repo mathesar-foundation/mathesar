@@ -22,17 +22,17 @@ def main():
         if (opt == "-s") or (opt == "--skip-confirm"):
             skip_confirm = True
     check_missing_dj_config()
+    print("------------Setting up User Databases------------")
+    user_databases = [key for key in DATABASES if key != "default"]
+    for database_key in user_databases:
+        install_on_db_with_key(database_key, skip_confirm)
+
     django.setup()
     management.call_command('migrate')
     if not superuser_exists():
         print("------------Setting up Admin user------------")
         print("Admin user does not exists. We need at least one admin")
         create_superuser(skip_confirm)
-
-    print("------------Setting up User Databases------------")
-    user_databases = [key for key in DATABASES if key != "default"]
-    for database_key in user_databases:
-        install_on_db_with_key(database_key, skip_confirm)
 
 
 def superuser_exists():
