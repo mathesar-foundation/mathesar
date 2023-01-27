@@ -6,20 +6,20 @@ from db.types import install
 
 
 def install_mathesar(
-        user_database, username, password, hostname, port, skip_confirm
+        database_name, username, password, hostname, port, skip_confirm
 ):
     """Create database and install Mathesar on it."""
     user_db_engine = engine.create_future_engine(
-        username, password, hostname, user_database, port
+        username, password, hostname, database_name, port
     )
     try:
         user_db_engine.connect()
-        print(f"Installing Mathesar on preexisting PostgreSQL database {user_database} at host {hostname}...")
+        print(f"Installing Mathesar on preexisting PostgreSQL database {database_name} at host {hostname}...")
         install.install_mathesar_on_database(user_db_engine)
         user_db_engine.dispose()
     except OperationalError:
         database_created = create_mathesar_database(
-            database_name=user_database,
+            database_name=database_name,
             hostname=hostname,
             username=username,
             password=password,
@@ -27,11 +27,11 @@ def install_mathesar(
             skip_confirm=skip_confirm
         )
         if database_created:
-            print(f"Installing Mathesar on PostgreSQL database {user_database} at host {hostname}...")
+            print(f"Installing Mathesar on PostgreSQL database {database_name} at host {hostname}...")
             install.install_mathesar_on_database(user_db_engine)
             user_db_engine.dispose()
         else:
-            print(f"Skipping installing on DB with key {user_database}.")
+            print(f"Skipping installing on DB with key {database_name}.")
 
 
 def create_mathesar_database(database_name, hostname, username, password, port, skip_confirm=True):

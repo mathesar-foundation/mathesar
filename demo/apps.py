@@ -2,6 +2,7 @@ from django.apps import AppConfig
 from django.conf import settings
 from sqlalchemy import text
 
+from db.install import install_mathesar
 
 TEMPLATE_INITIALIZED = 'TEMPLATE_INITIALIZED'
 
@@ -18,7 +19,7 @@ def _initialize_template():
         conn.execution_options(isolation_level="AUTOCOMMIT")
         conn.execute(text(f"DROP DATABASE IF EXISTS {template_db_name} WITH (FORCE)"))
     root_engine.dispose()
-    create_mathesar_database(
+    install_mathesar(
         database_name=template_db_name,
         username=settings.DATABASES["default"]["USER"],
         password=settings.DATABASES["default"]["PASSWORD"],
