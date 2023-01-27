@@ -89,9 +89,7 @@
   {#each constraints as constraint (constraint.id)}
     <Collapsible triggerAppearance="ghost">
       <span slot="header">
-        <ConstraintCollapseHeader
-          {constraint}
-        />
+        <ConstraintCollapseHeader {constraint} />
       </span>
       <span slot="trigger-aside">
         {#if CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType)}
