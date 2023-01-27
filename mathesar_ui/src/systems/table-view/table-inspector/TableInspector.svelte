@@ -6,6 +6,7 @@
   import RecordMode from './record/RecordMode.svelte';
 
   import TableMode from './table/TableMode.svelte';
+  import CellMode from './cell/CellMode.svelte';
 
   type TabItem = { label: string; id: number; component: ComponentType };
   const tabs: TabItem[] = [
@@ -23,6 +24,11 @@
       label: 'Record',
       component: RecordMode,
       id: 3,
+    },
+    {
+      label: 'Cell',
+      component: CellMode,
+      id: 4,
     },
   ];
 
