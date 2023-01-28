@@ -1147,6 +1147,61 @@ def test_record_delete_fkey_violation(library_ma_tables, client):
     assert response_exception['code'] == ErrorCodes.ForeignKeyViolation.value
     assert 'Items' in response_exception['message']
 
+def test_record_bulk_delete(create_patents_table, client):
+    table_name = 'NASA Record Delete'
+    table = create_patents_table(table_name)
+    records = table.get_records()
+    original_num_records = len(records)
+    record_ids = [records[i]['id'] for i in range(1,4)]
+    data = {
+        'pks': record_ids
+    }
+
+    response = client.delete(f'/api/ui/v0/tables/{table.id}/records/delete/', data = data)
+    assert response.status_code == 204
+    assert len(table.get_records()) == original_num_records - len(record_ids)
+
+
+def test_record_bulk_delete_fkey_violation(library_ma_tables, client):
+    publications = library_ma_tables['Publications']
+    records = publications.get_records()
+    record_ids = [records[i]['id'] for i in range(1,4)]
+    data = {
+        'pks': record_ids
+    }
+
+    response = client.delete(f'/api/ui/v0/tables/{publications.id}/records/delete/', data=data)
+    assert response.status_code == 400
+    response_exception = response.json()[0]
+    assert response_exception['code'] == ErrorCodes.ForeignKeyViolation.value
+    assert 'Items' in response_exception['message']
+
+
+def test_record_bulk_delete_atomicity(library_ma_tables, client):
+    publications = library_ma_tables['Publications']
+    items = library_ma_tables['Items']
+    item_records = items.get_records()
+    original_items_num_records = len(item_records)
+    record_id = item_records[0]['id']
+
+    response = client.delete(f'/api/db/v0/tables/{items.id}/records/{record_id}/')
+    assert response.status_code == 204
+    assert len(items.get_records()) == original_items_num_records - 1
+
+    publication_records = publications.get_records()
+    original_publication_num_records = len(publication_records)
+    record_ids = [publication_records[i]['id'] for i in range(1,4)]
+    data = {
+        'pks': record_ids
+    }
+
+    response = client.delete(f'/api/ui/v0/tables/{publications.id}/records/delete/', data = data)
+    assert response.status_code == 400
+    response_exception = response.json()[0]
+    assert response_exception['code'] == ErrorCodes.ForeignKeyViolation.value
+    assert 'Items' in response_exception['message']
+    assert len(publication_records) == original_publication_num_records
+
 
 def test_record_update(create_patents_table, client):
     table_name = 'NASA Record Put'
