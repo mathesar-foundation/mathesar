@@ -7,6 +7,7 @@
     iconLoading,
   } from '@mathesar/component-library';
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
+    import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type {
     ColumnsDataStore,
@@ -26,17 +27,29 @@
 
   async function handleDeleteRecords() {
     if (!isDeleting) {
-      try {
-        isDeleting = true;
-        selection.freezeSelection = true;
-        await recordsData.deleteSelected(selectedRowIndices);
-        selection.resetSelection();
-      } catch (e) {
-        toast.fromError(e);
-      } finally {
-        selection.freezeSelection = false;
-        isDeleting = true;
-      }
+      isDeleting = true;
+      selection.freezeSelection = true;
+      void confirmDelete({
+        identifierType: 'Row',
+        onProceed: () => recordsData.deleteSelected(selectedRowIndices),
+        onError: (e) => toast.fromError(e),
+        onSuccess: () =>
+          toast.success({
+            title: 'Row deleted successfully!',
+          }),
+      });
+      selection.freezeSelection = false;
+      isDeleting = true;
+      // try {
+      //   isDeleting = true;
+      //   selection.freezeSelection = true;
+      //   await recordsData.deleteSelected(selectedRowIndices);
+      //   selection.resetSelection();
+      // } catch (e) {
+      //   toast.fromError(e);
+      // } finally {
+        
+      // }
     }
   }
 
