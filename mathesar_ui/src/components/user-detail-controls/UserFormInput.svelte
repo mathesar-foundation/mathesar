@@ -32,7 +32,11 @@
 <style lang="scss">
   .left {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: end;
+
+    > :global(label) {
+      margin-top: var(--size-ultra-small);
+    }
   }
 </style>

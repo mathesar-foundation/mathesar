@@ -5,13 +5,24 @@
   import InsetPageSection from '@mathesar/components/InsetPageSection.svelte';
   import UserDetailsForm from '@mathesar/components/user-detail-controls/UserDetailsForm.svelte';
   import { requiredField, Field } from '@mathesar/components/form';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import type { UnsavedUser } from '@mathesar/api/users';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
 
-  export let userDetails;
+  const userProfileStore = getUserProfileStoreFromContext();
+
+  $: userDetails = $userProfileStore;
   const password = requiredField('');
+
+  async function updateProfile(request: Omit<UnsavedUser, 'password'>) {
+    if (userDetails) {
+      await userDetails.update(request);
+    }
+  }
 </script>
 
 <svelte:head>
-  <title>username | Mathesar</title>
+  <title>{userDetails?.getDisplayName() ?? 'User profile'} | Mathesar</title>
 </svelte:head>
 
 <LayoutWithHeader
@@ -24,28 +35,38 @@
 >
   <InsetPageLayout hasMultipleSections>
     <h1 slot="header">User Profile</h1>
-    <InsetPageSection>
-      <h2 slot="header">Account Details</h2>
-      <UserDetailsForm />
-    </InsetPageSection>
-    <InsetPageSection>
-      <h2 slot="header">Credentials</h2>
-      <div>
-        <Field
-          field={password}
-          input={{ component: TextInput }}
-          label="Password"
+    {#if userDetails}
+      <InsetPageSection>
+        <h2 slot="header">Account Details</h2>
+        <UserDetailsForm
+          {userDetails}
+          saveUserDetails={(details) => updateProfile(details.request)}
         />
-      </div>
-    </InsetPageSection>
-    <!-- Do not show below for super user -->
-    <InsetPageSection>
-      <h2 slot="header">Delete Account</h2>
-      <div>
-        Please contact your administrator to request permanent deletion of your
-        account
-      </div>
-    </InsetPageSection>
+      </InsetPageSection>
+      <InsetPageSection>
+        <h2 slot="header">Credentials</h2>
+        <div>
+          <Field
+            field={password}
+            input={{ component: TextInput }}
+            label="Password"
+          />
+        </div>
+      </InsetPageSection>
+      <!-- Do not show below for super user -->
+      <InsetPageSection>
+        <h2 slot="header">Delete Account</h2>
+        <div>
+          Please contact your administrator to request permanent deletion of
+          your account
+        </div>
+      </InsetPageSection>
+    {:else}
+      <!-- This should never happen -->
+      <ErrorBox>
+        Could not fetch user profile details. Try refreshing your page.
+      </ErrorBox>
+    {/if}
   </InsetPageLayout>
 </LayoutWithHeader>
 

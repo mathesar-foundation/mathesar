@@ -14,4 +14,4 @@
   }
 </script>
 
-<Select options={roles} bind:value {getLabel} />
+<Select {...$$restProps} options={roles} bind:value {getLabel} />
