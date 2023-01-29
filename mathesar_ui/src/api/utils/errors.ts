@@ -1,6 +1,10 @@
 /* eslint-disable max-classes-per-file */
 
-import { hasProperty, hasStringProperty } from '@mathesar-component-library';
+import {
+  hasProperty,
+  hasStringProperty,
+  ImmutableMap,
+} from '@mathesar-component-library';
 import { getErrorMessage } from '@mathesar/utils/errors';
 
 /**
@@ -15,6 +19,11 @@ interface ApiErrorData {
   code?: string | number;
   field?: string;
   detail?: unknown;
+}
+
+interface SegregatedErrorMessages<T extends string = string> {
+  commonErrors: string[];
+  fieldSpecificErrors: ImmutableMap<T, string[]>;
 }
 
 function getApiErrorCode(data: unknown): string | number | undefined {
@@ -51,6 +60,21 @@ export class ApiError extends Error {
     this.field = data.field;
     this.detail = data.detail;
   }
+
+  getSegregatedErrors(): SegregatedErrorMessages {
+    if (this.field) {
+      return {
+        commonErrors: [],
+        fieldSpecificErrors: new ImmutableMap([
+          [this.field, [getErrorMessage(this)]],
+        ]),
+      };
+    }
+    return {
+      commonErrors: [getErrorMessage(this)],
+      fieldSpecificErrors: new ImmutableMap(),
+    };
+  }
 }
 
 export class ApiMultiError extends Error {
@@ -63,6 +87,58 @@ export class ApiMultiError extends Error {
     this.name = 'ApiMultiError';
     this.errors = errors;
   }
+
+  getSegregatedErrors(): SegregatedErrorMessages {
+    return this.errors.reduce(
+      (accumulator, currentApiError) => {
+        const currentApiSegregatedErrors =
+          currentApiError.getSegregatedErrors();
+        return {
+          commonErrors: [
+            ...accumulator.commonErrors,
+            ...currentApiSegregatedErrors.commonErrors,
+          ],
+          fieldSpecificErrors: accumulator.fieldSpecificErrors.withEntries(
+            currentApiSegregatedErrors.fieldSpecificErrors,
+            (a, b) => [...a, ...b],
+          ),
+        };
+      },
+      {
+        commonErrors: [],
+        fieldSpecificErrors: new ImmutableMap(),
+      } as SegregatedErrorMessages,
+    );
+  }
+}
+
+export function extractDetailedFieldBasedErrors<T extends string = string>(
+  e: unknown,
+  fieldNameMappings?: Record<string, string>,
+): SegregatedErrorMessages<T> {
+  if (e instanceof ApiMultiError || e instanceof ApiError) {
+    const { commonErrors, fieldSpecificErrors } = e.getSegregatedErrors();
+    if (fieldNameMappings) {
+      return {
+        commonErrors,
+        fieldSpecificErrors: new ImmutableMap<T, string[]>(
+          [...fieldSpecificErrors.entries()].map(([key, value]) => [
+            (fieldNameMappings[key] ?? key) as T,
+            value,
+          ]),
+        ),
+      };
+    }
+    return {
+      commonErrors,
+      fieldSpecificErrors,
+    } as SegregatedErrorMessages<T>;
+  }
+
+  return {
+    commonErrors: [getErrorMessage(e)],
+    fieldSpecificErrors: new ImmutableMap(),
+  };
 }
 
 /* eslint-enable max-classes-per-file */
