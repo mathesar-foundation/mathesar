@@ -1,6 +1,6 @@
 import { setContext, getContext } from 'svelte';
 import { writable, type Readable, type Writable } from 'svelte/store';
-import type { User, UnsavedUser } from '@mathesar/api/users';
+import UserApi, { type User, type UnsavedUser } from '@mathesar/api/users';
 
 const contextKey = Symbol('userprofile store');
 
@@ -43,8 +43,11 @@ export class UserProfile implements Readonly<User> {
     return this.username;
   }
 
-  update(userDetails: Omit<UnsavedUser, 'password'>): UserProfile {
-    // send request
+  /* @throws Error if unable to save */
+  async update(
+    userDetails: Partial<Omit<UnsavedUser, 'password'>>,
+  ): Promise<UserProfile> {
+    await UserApi.update(this.id, userDetails);
     const updatedUserProfile = new UserProfile({
       ...this,
       ...userDetails,

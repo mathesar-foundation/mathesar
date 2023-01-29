@@ -1,4 +1,5 @@
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+import { patchAPI } from './utils/requestUtils';
 
 export interface UnsavedUser {
   full_name: string | null;
@@ -38,7 +39,9 @@ function deleteUser(userId: User['id']) {}
 function update(
   userId: User['id'],
   properties: Partial<Omit<UnsavedUser, 'password'>>,
-) {}
+) {
+  return patchAPI(`/api/ui/v0/users/${userId}/`, properties);
+}
 
 function changePassword(userId: User['id'], password: string) {}
 
