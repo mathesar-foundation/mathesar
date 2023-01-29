@@ -40,16 +40,6 @@
       });
       selection.freezeSelection = false;
       isDeleting = true;
-      // try {
-      //   isDeleting = true;
-      //   selection.freezeSelection = true;
-      //   await recordsData.deleteSelected(selectedRowIndices);
-      //   selection.resetSelection();
-      // } catch (e) {
-      //   toast.fromError(e);
-      // } finally {
-        
-      // }
     }
   }
 
