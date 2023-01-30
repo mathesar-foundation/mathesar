@@ -37,6 +37,17 @@ def data_file(patents_csv_filepath):
 
 
 @pytest.fixture
+def existing_id_col_table_datafile(table_with_id_col_filepath):
+    with open(table_with_id_col_filepath, 'rb') as csv_file:
+        data_file = DataFile.objects.create(
+            file=File(csv_file),
+            created_from='file',
+            base_name='table_with_id'
+        )
+    return data_file
+
+
+@pytest.fixture
 def paste_data_file(paste_filename):
     with open(paste_filename, 'r') as paste_file:
         paste_text = paste_file.read()
@@ -694,6 +705,23 @@ def test_table_create_with_same_name(client, schema):
     assert response.status_code == 400
     assert response_error[0]['code'] == ErrorCodes.DuplicateTableError.value
     assert response_error[0]['message'] == f'Relation {table_name} already exists in schema {schema.id}'
+
+
+def test_table_create_with_existing_id_col(client, existing_id_col_table_datafile, schema, engine):
+    table_name = "Table 1"
+    response, response_table, table = _create_table(
+        client,
+        [existing_id_col_table_datafile],
+        table_name,
+        schema,
+        import_target_table=None
+    )
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    data = {
+        columns_name_id_map['Title']: 'Polyimide Wire Insulation Repair System',
+    }
+    response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
+    assert response.status_code == 201
 
 
 def test_table_create_multiple_users_different_roles(client_bob, client_alice, user_bob, user_alice, schema):

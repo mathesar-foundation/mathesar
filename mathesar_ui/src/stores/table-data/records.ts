@@ -94,7 +94,7 @@ function buildGrouping(apiGrouping: ApiGrouping): RecordGrouping {
     columnIds: apiGrouping.columns,
     preprocIds: apiGrouping.preproc ?? [],
     mode: apiGrouping.mode,
-    groups: apiGrouping.groups.map(buildGroup),
+    groups: (apiGrouping.groups ?? []).map(buildGroup),
   };
 }
 
