@@ -1,68 +1,100 @@
 <script lang="ts">
-  import { TextInput, Button } from '@mathesar-component-library';
+  import {
+    PasswordInput,
+    Button,
+    hasProperty,
+  } from '@mathesar-component-library';
   import {
     requiredField,
     makeForm,
     FormSubmitWithCatch,
     optionalField,
+    invalidIf,
   } from '@mathesar/components/form';
   import { iconSave } from '@mathesar/icons';
-  import type { User } from '@mathesar/api/users';
+  import UserApi, { type User } from '@mathesar/api/users';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import UserFormInput from './UserFormInput.svelte';
   import UserFormInputRow from './UserFormInputRow.svelte';
 
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: loggedInUserDetails = $userProfileStore;
+
   export let userId: User['id'];
+  $: isUserUpdatingTheirOwnPassword = loggedInUserDetails?.id === userId;
 
   const oldPassword = requiredField('');
   const password = requiredField('');
-  const confirmPassword = requiredField('');
+  const confirmPassword = requiredField('', [
+    invalidIf((pw: string) => pw !== $password, 'Passwords do not match'),
+  ]);
   const passwordPlaceholder = optionalField('***************');
-  let changePassword = false;
+  let showChangePasswordForm = false;
 
-  $: form = makeForm({
-    oldPassword,
-    password,
-    confirmPassword,
-  });
+  $: formFields = (() => {
+    const fields = {
+      password,
+      confirmPassword,
+    };
+    return isUserUpdatingTheirOwnPassword
+      ? {
+          ...fields,
+          oldPassword,
+        }
+      : fields;
+  })();
+  $: form = makeForm(formFields);
 
   $: userId,
     (() => {
-      changePassword = false;
+      showChangePasswordForm = false;
       form.reset();
     })();
 
   async function updatePassword() {
     const formValues = $form.values;
-    //
+    if (
+      isUserUpdatingTheirOwnPassword &&
+      hasProperty(formValues, 'oldPassword')
+    ) {
+      // logged in user is updating their own password
+      await UserApi.changePassword(formValues.oldPassword, formValues.password);
+    } else {
+      // logged in user is updating someone else's password
+      await UserApi.resetPassword(userId, formValues.password);
+    }
+    showChangePasswordForm = false;
   }
 </script>
 
 <div class="password-change-form">
-  {#if changePassword}
-    <UserFormInputRow>
-      <UserFormInput
-        label="Old Password *"
-        field={oldPassword}
-        input={{ component: TextInput }}
-        bypassRow
-      />
+  {#if showChangePasswordForm}
+    {#if isUserUpdatingTheirOwnPassword}
+      <UserFormInputRow>
+        <UserFormInput
+          label="Old Password *"
+          field={oldPassword}
+          input={{ component: PasswordInput }}
+          bypassRow
+        />
 
-      <div />
-      <div />
-    </UserFormInputRow>
+        <div />
+        <div />
+      </UserFormInputRow>
+    {/if}
 
     <UserFormInputRow>
       <UserFormInput
         label="New Password *"
         field={password}
-        input={{ component: TextInput }}
+        input={{ component: PasswordInput }}
         bypassRow
       />
 
       <UserFormInput
         label="Confirm Password *"
         field={confirmPassword}
-        input={{ component: TextInput }}
+        input={{ component: PasswordInput }}
         bypassRow
       />
     </UserFormInputRow>
@@ -71,7 +103,7 @@
       <UserFormInput
         label="Password"
         field={passwordPlaceholder}
-        input={{ component: TextInput, props: { disabled: true } }}
+        input={{ component: PasswordInput, props: { disabled: true } }}
         bypassRow
       />
 
@@ -79,7 +111,7 @@
         <Button
           appearance="secondary"
           on:click={() => {
-            changePassword = true;
+            showChangePasswordForm = true;
           }}
         >
           Change Password
@@ -89,13 +121,13 @@
   {/if}
 </div>
 
-{#if changePassword}
+{#if showChangePasswordForm}
   <div class="submit-section">
     <FormSubmitWithCatch
       {form}
       onProceed={updatePassword}
       onCancel={() => {
-        changePassword = false;
+        showChangePasswordForm = false;
       }}
       proceedButton={{ label: 'Save', icon: iconSave }}
       cancelButton={{ label: 'Cancel' }}

@@ -1,5 +1,5 @@
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-import { patchAPI } from './utils/requestUtils';
+import { patchAPI, postAPI } from './utils/requestUtils';
 
 export interface UnsavedUser {
   full_name: string | null;
@@ -43,9 +43,18 @@ function update(
   return patchAPI(`/api/ui/v0/users/${userId}/`, properties);
 }
 
-function changePassword(userId: User['id'], password: string) {}
+function changePassword(old_password: string, password: string) {
+  return postAPI('/api/ui/v0/users/password_change/', {
+    password,
+    old_password,
+  });
+}
 
-function resetPassword(userId: User['id'], password: string) {}
+function resetPassword(userId: User['id'], password: string) {
+  return postAPI(`/api/ui/v0/users/${userId}/password_reset/`, {
+    password,
+  });
+}
 
 export default {
   list,
