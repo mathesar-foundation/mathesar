@@ -4,7 +4,6 @@
     optionalField,
     requiredField,
     makeForm,
-    Field,
     FormSubmitWithCatch,
   } from '@mathesar/components/form';
   import type { User, UnsavedUser } from '@mathesar/api/users';
@@ -28,7 +27,9 @@
   $: role = requiredField<'user' | 'admin' | undefined>(
     userDetails?.is_superuser ? 'admin' : 'user',
   );
-  $: password = requiredField('');
+
+  const password = requiredField('');
+  $: userDetails, password.reset();
 
   $: formFields = (() => {
     const fields = {
@@ -92,34 +93,39 @@
 </script>
 
 <div class="user-details-form">
-  <UserFormInput label="Full Name">
-    <Field field={fullname} input={{ component: TextInput }} />
-  </UserFormInput>
+  <UserFormInput
+    label="Full Name"
+    field={fullname}
+    input={{ component: TextInput }}
+  />
 
-  <UserFormInput label="Short Name">
-    <Field field={shortname} input={{ component: TextInput }} />
-  </UserFormInput>
+  <UserFormInput
+    label="Short Name"
+    field={shortname}
+    input={{ component: TextInput }}
+  />
 
-  <UserFormInput label="Email">
-    <Field field={email} input={{ component: TextInput }} />
-  </UserFormInput>
+  <UserFormInput label="Email" field={email} input={{ component: TextInput }} />
 
-  <UserFormInput label="Username *">
-    <Field field={username} input={{ component: TextInput }} />
-  </UserFormInput>
+  <UserFormInput
+    label="Username *"
+    field={username}
+    input={{ component: TextInput }}
+  />
 
   {#if isNewUser}
-    <UserFormInput label="Password *">
-      <Field field={password} input={{ component: TextInput }} />
-    </UserFormInput>
+    <UserFormInput
+      label="Password *"
+      field={password}
+      input={{ component: TextInput }}
+    />
   {/if}
 
-  <UserFormInput label="Role *">
-    <Field
-      field={role}
-      input={{ component: SelectRole, props: { disabled: !isNewUser } }}
-    />
-  </UserFormInput>
+  <UserFormInput
+    label="Role *"
+    field={role}
+    input={{ component: SelectRole, props: { disabled: !isNewUser } }}
+  />
 </div>
 
 <div class="submit-section">
@@ -137,7 +143,6 @@
   .user-details-form {
     display: grid;
     grid-template-columns: 1fr 3fr;
-    grid-gap: var(--size-large);
   }
   .submit-section {
     --form-submit-margin: var(--size-xx-large) 0 0 0;
