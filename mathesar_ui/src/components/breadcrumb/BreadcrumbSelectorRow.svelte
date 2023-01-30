@@ -15,7 +15,9 @@
 <li class="breadcrumb-selector-row" class:active={entry.isActive()}>
   <a {href} on:click={closeSelector}>
     {#if 'table' in entry}
-      <TableName table={entry.table} />
+      <TableName table={entry.table} let:tableName>
+        <MatchHighlighter text={tableName} substring={filterString} />
+      </TableName>
     {:else}
       <NameWithIcon {icon}>
         <MatchHighlighter text={label} substring={filterString} />
