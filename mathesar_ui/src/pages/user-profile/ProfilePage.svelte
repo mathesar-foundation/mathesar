@@ -3,7 +3,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import InsetPageSection from '@mathesar/components/InsetPageSection.svelte';
-  import UserDetailsForm from '@mathesar/components/user-detail-controls/UserDetailsForm.svelte';
+  import UserDetailsForm from '@mathesar/components/user-administration-forms/UserDetailsForm.svelte';
   import { requiredField, Field } from '@mathesar/components/form';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import type { UnsavedUser } from '@mathesar/api/users';
@@ -44,7 +44,6 @@
         />
       </InsetPageSection>
       <InsetPageSection>
-        <h2 slot="header">Credentials</h2>
         <div>
           <Field
             field={password}
