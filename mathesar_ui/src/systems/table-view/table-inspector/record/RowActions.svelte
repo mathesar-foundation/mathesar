@@ -26,21 +26,17 @@
   let isDeleting = false;
 
   async function handleDeleteRecords() {
-    if (!isDeleting) {
-      isDeleting = true;
-      selection.freezeSelection = true;
-      void confirmDelete({
-        identifierType: 'Row',
-        onProceed: () => recordsData.deleteSelected(selectedRowIndices),
-        onError: (e) => toast.fromError(e),
-        onSuccess: () =>
-          toast.success({
-            title: 'Row deleted successfully!',
-          }),
-      });
-      selection.freezeSelection = false;
-      isDeleting = true;
-    }
+    void confirmDelete({
+      identifierType: 'Row',
+      onProceed: () => recordsData.deleteSelected(selectedRowIndices),
+      onError: (e) => toast.fromError(e),
+      onSuccess: () => {
+        toast.success({
+          title: 'Row deleted successfully!',
+        })
+        selection.resetSelection();
+      }
+    });
   }
 
   $: ({ columns } = columnsDataStore);
