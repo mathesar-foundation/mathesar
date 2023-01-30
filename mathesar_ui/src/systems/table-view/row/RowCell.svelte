@@ -30,6 +30,9 @@
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import CellErrors from './CellErrors.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { getTableName } from '@mathesar/stores/tables';
+    import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
@@ -81,9 +84,10 @@
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
-  $: fk_table_link = linkFk
+  $: fkTableLink = linkFk
     ? getTablePageUrl({ tableId: linkFk.referent_table })
     : undefined;
+  $: tableName = linkFk?.referent_table ? getTableName(linkFk?.referent_table) : undefined;
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
       await tick();
@@ -183,13 +187,13 @@
         Set to <Null />
       </ButtonMenuItem>
       {#if linkedRecordHref}
-        <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
-          Open {$recordSummaries.get(String(column.id))?.get(String(value))}
-        </LinkMenuItem>
+       <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
+        Open <LinkedRecord recordSummary={$recordSummaries.get(String(column.id))?.get(String(value))}></LinkedRecord>
+      </LinkMenuItem>
       {/if}
-      {#if fk_table_link}
-        <LinkMenuItem icon={iconTable} href={fk_table_link}>
-          Open {column.name}
+      {#if fkTableLink}
+        <LinkMenuItem icon={iconTable} href={fkTableLink}>
+          Open <Identifier>{tableName}</Identifier> Table
         </LinkMenuItem>
       {/if}
     </ContextMenu>

@@ -93,7 +93,7 @@
 <style>
   .linked-record {
     max-width: max-content;
-    display: grid;
+    display: inline;
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;

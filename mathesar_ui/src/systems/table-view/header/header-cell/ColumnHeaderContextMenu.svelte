@@ -15,6 +15,9 @@
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
+  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
+  import { getTableName } from '@mathesar/stores/tables';
+    import Identifier from '@mathesar/components/Identifier.svelte';
 
   export let processedColumn: ProcessedColumn;
 
@@ -34,9 +37,11 @@
   $: hasGrouping = $grouping.hasColumn(columnId);
   $: linkFk = processedColumn.linkFk;
   $: getTablePageUrl = $storeToGetTablePageUrl;
-  $: fk_table_link = linkFk
+  $: fkTableLink = linkFk
     ? getTablePageUrl({ tableId: linkFk.referent_table })
     : undefined;
+  $: tableName = linkFk?.referent_table ? getTableName(linkFk?.referent_table) : undefined;
+
   function removeSorting() {
     sorting.update((s) => s.without(columnId));
   }
@@ -56,12 +61,6 @@
 
   function removeGrouping() {
     grouping.update((g) => g.withoutColumns([columnId]));
-  }
-
-  function goToTable() {
-    if (fk_table_link) {
-      window.location.href = fk_table_link;
-    }
   }
 </script>
 
@@ -101,8 +100,8 @@
   </ButtonMenuItem>
 {/if}
 
-{#if fk_table_link}
-  <ButtonMenuItem icon={iconTable} on:click={goToTable}>
-    Open {processedColumn.column.name} Table
-  </ButtonMenuItem>
+{#if fkTableLink !== undefined}
+  <LinkMenuItem icon={iconTable} href={fkTableLink}>
+    Open <Identifier>{tableName}</Identifier> Table
+ </LinkMenuItem>
 {/if}
