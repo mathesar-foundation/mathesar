@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { TextInput } from '@mathesar-component-library';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import InsetPageSection from '@mathesar/components/InsetPageSection.svelte';
   import UserDetailsForm from '@mathesar/components/user-administration-forms/UserDetailsForm.svelte';
-  import { requiredField, Field } from '@mathesar/components/form';
+  import PasswordChangeForm from '@mathesar/components/user-administration-forms/PasswordChangeForm.svelte';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import type { UnsavedUser } from '@mathesar/api/users';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
@@ -12,7 +11,6 @@
   const userProfileStore = getUserProfileStoreFromContext();
 
   $: userDetails = $userProfileStore;
-  const password = requiredField('');
 
   async function updateProfile(request: Omit<UnsavedUser, 'password'>) {
     if (userDetails) {
@@ -44,13 +42,7 @@
         />
       </InsetPageSection>
       <InsetPageSection>
-        <div>
-          <Field
-            field={password}
-            input={{ component: TextInput }}
-            label="Password"
-          />
-        </div>
+        <PasswordChangeForm userId={userDetails.id} />
       </InsetPageSection>
       <!-- Do not show below for super user -->
       <InsetPageSection>
