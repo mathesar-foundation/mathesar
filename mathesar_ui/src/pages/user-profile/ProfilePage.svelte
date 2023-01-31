@@ -2,8 +2,10 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import InsetPageSection from '@mathesar/components/InsetPageSection.svelte';
-  import UserDetailsForm from '@mathesar/components/user-administration-forms/UserDetailsForm.svelte';
-  import PasswordChangeForm from '@mathesar/components/user-administration-forms/PasswordChangeForm.svelte';
+  import {
+    UserDetailsForm,
+    PasswordChangeForm,
+  } from '@mathesar/systems/users-and-permissions';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import type { UnsavedUser } from '@mathesar/api/users';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
