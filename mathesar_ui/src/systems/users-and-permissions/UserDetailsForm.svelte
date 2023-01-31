@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import { TextInput, hasProperty } from '@mathesar-component-library';
   import {
     optionalField,
@@ -6,19 +7,21 @@
     makeForm,
     FormSubmitWithCatch,
   } from '@mathesar/components/form';
-  import type { User, UnsavedUser } from '@mathesar/api/users';
+  import UserApi, { type User } from '@mathesar/api/users';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import SelectRole from './SelectRole.svelte';
   import UserFormInput from './UserFormInput.svelte';
 
-  export let userDetails: User | undefined = undefined;
-  export let saveUserDetails: (
-    props:
-      | { type: 'new'; request: UnsavedUser }
-      | { type: 'existing'; request: Omit<UnsavedUser, 'password'> },
-  ) => Promise<unknown>;
+  const dispatch = createEventDispatcher();
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: loggedInUserDetails = $userProfileStore;
 
+  export let userDetails: User | undefined = undefined;
+
+  $: isUserUpdatingThemselves =
+    loggedInUserDetails && loggedInUserDetails?.id === userDetails?.id;
   $: isNewUser = userDetails === undefined;
   $: fullname = optionalField(userDetails?.full_name ?? '');
   $: shortname = optionalField(userDetails?.short_name ?? '');
@@ -56,16 +59,29 @@
       username: formValues.username,
       email: formValues.email,
     };
+
     if (isNewUser && hasProperty(formValues, 'password')) {
-      await saveUserDetails({
-        type: 'new',
-        request: {
-          ...request,
-          password: formValues.password,
-        },
+      await UserApi.add({
+        ...request,
+        password: formValues.password,
       });
+      dispatch('create');
+      return;
     }
-    await saveUserDetails({ type: 'existing', request });
+
+    if (isUserUpdatingThemselves && loggedInUserDetails) {
+      await loggedInUserDetails.update(request);
+      dispatch('update');
+      return;
+    }
+
+    if (userDetails) {
+      await UserApi.update(userDetails.id, request);
+      dispatch('update');
+      return;
+    }
+
+    throw new Error('Unable to update user');
   }
 
   function getErrorMessages(e: unknown) {

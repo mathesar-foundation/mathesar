@@ -32,7 +32,9 @@ function list() {}
 
 function get(userId: User['id']) {}
 
-function add(user: UnsavedUser) {}
+function add(user: UnsavedUser) {
+  return postAPI<User>('/api/ui/v0/users/', user);
+}
 
 function deleteUser(userId: User['id']) {}
 

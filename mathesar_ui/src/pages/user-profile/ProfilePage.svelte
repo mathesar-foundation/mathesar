@@ -7,18 +7,11 @@
     PasswordChangeForm,
   } from '@mathesar/systems/users-and-permissions';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import type { UnsavedUser } from '@mathesar/api/users';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
 
   $: userDetails = $userProfileStore;
-
-  async function updateProfile(request: Omit<UnsavedUser, 'password'>) {
-    if (userDetails) {
-      await userDetails.update(request);
-    }
-  }
 </script>
 
 <svelte:head>
@@ -38,10 +31,7 @@
     {#if userDetails}
       <InsetPageSection>
         <h2 slot="header">Account Details</h2>
-        <UserDetailsForm
-          {userDetails}
-          saveUserDetails={(details) => updateProfile(details.request)}
-        />
+        <UserDetailsForm {userDetails} />
       </InsetPageSection>
       <InsetPageSection>
         <PasswordChangeForm userId={userDetails.id} />
