@@ -27,7 +27,7 @@
     <UserProfileRoute />
   </Route>
 
-  <Route path="/administration">
+  <Route path="/administration/*" firstmatch>
     <AdminRoute />
   </Route>
 

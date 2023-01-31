@@ -80,4 +80,6 @@ export function getRecordPageUrl(
 
 export const USER_PROFILE_URL = '/profile/';
 export const ADMIN_URL = '/administration/';
+export const ADMIN_GENERAL_PAGE_URL = `${ADMIN_URL}general/`;
+export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const LOGOUT_URL = '/auth/logout/';
