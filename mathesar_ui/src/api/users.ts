@@ -1,5 +1,10 @@
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-import { patchAPI, postAPI } from './utils/requestUtils';
+import {
+  getAPI,
+  patchAPI,
+  postAPI,
+  type PaginatedResponse,
+} from './utils/requestUtils';
 
 export interface UnsavedUser {
   full_name: string | null;
@@ -28,7 +33,9 @@ export interface User extends Omit<UnsavedUser, 'password'> {
   readonly schema_roles: [];
 }
 
-function list() {}
+function list() {
+  return getAPI<PaginatedResponse<User>>('/api/ui/v0/users/');
+}
 
 function get(userId: User['id']) {}
 
