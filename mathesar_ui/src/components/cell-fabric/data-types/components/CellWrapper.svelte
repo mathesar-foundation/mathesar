@@ -14,7 +14,7 @@
   export let valueComparisonOutcome: ValueComparisonOutcome | undefined =
     undefined;
   export let isIndependentOfSheet = false;
-
+  export let wrapConditionally = false;
   /**
    * This only affects the alignment of the displayed value while in
    * select-mode. It does not affect the alignment of the value within an input
@@ -41,7 +41,9 @@
   class:is-active={isActive}
   class:disabled
   class:is-edit-mode={mode === 'edit'}
-  class:truncate={multiLineTruncate && !isIndependentOfSheet}
+  class:truncate={multiLineTruncate &&
+    !isIndependentOfSheet &&
+    !wrapConditionally}
   class:h-align-right={horizontalAlignment === 'right' && !isIndependentOfSheet}
   class:has-padding={hasPadding && !isIndependentOfSheet}
   class:exact-match={valueComparisonOutcome === 'exactMatch'}

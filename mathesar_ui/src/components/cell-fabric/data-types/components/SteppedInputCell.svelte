@@ -29,6 +29,7 @@
   export let searchValue: unknown | undefined = undefined;
   export let isIndependentOfSheet = false;
   export let highlightSubstringMatches = true;
+  export let wrapConditionally = false;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
@@ -146,14 +147,18 @@
   {horizontalAlignment}
   {valueComparisonOutcome}
   {isIndependentOfSheet}
+  {wrapConditionally}
 >
   {#if isEditMode}
     <slot {handleInputBlur} {handleInputKeydown} />
   {:else}
     <div
       class="content"
-      class:nowrap={!isActive && !isIndependentOfSheet}
-      class:truncate={isActive && multiLineTruncate && !isIndependentOfSheet}
+      class:nowrap={!isActive && !isIndependentOfSheet && !wrapConditionally}
+      class:truncate={isActive &&
+        multiLineTruncate &&
+        !isIndependentOfSheet &&
+        !wrapConditionally}
     >
       <slot name="content" {value} {formatValue} {matchParts}>
         <CellValue value={formattedValue} {matchParts} />

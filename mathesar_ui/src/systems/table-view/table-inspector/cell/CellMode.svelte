@@ -43,6 +43,7 @@
             disabled={true}
             columnFabric={column}
             value={selectedCellValue}
+            wrapConditionally={true}
           />
         {/if}
       </div>

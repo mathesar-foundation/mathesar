@@ -21,7 +21,7 @@
   export let searchValue: unknown | undefined = undefined;
   export let isProcessing = false;
   export let isIndependentOfSheet = false;
-
+  export let wrapConditionally = false;
   $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
   $: props = cellComponentAndProps.props as Record<string, unknown>;
@@ -45,6 +45,7 @@
     {setRecordSummary}
     {searchValue}
     {isProcessing}
+    {wrapConditionally}
     bind:value
     on:movementKeyDown
     on:activate

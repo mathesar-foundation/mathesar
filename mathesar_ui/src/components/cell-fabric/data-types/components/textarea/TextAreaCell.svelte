@@ -12,7 +12,7 @@
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
-
+  export let wrapConditionally: $$Props['wrapConditionally'] = false;
   // Db options
   export let length: $$Props['length'] = undefined;
 
@@ -36,6 +36,7 @@
   {disabled}
   {searchValue}
   {isIndependentOfSheet}
+  {wrapConditionally}
   multiLineTruncate={true}
   let:handleInputBlur
   let:handleInputKeydown

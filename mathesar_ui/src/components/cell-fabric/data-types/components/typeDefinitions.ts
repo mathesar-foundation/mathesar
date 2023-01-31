@@ -18,6 +18,7 @@ export interface CellTypeProps<Value> {
   searchValue?: unknown;
   isProcessing: boolean;
   isIndependentOfSheet: boolean;
+  wrapConditonally: boolean;
 }
 
 // Primary key
