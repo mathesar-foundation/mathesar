@@ -1,6 +1,10 @@
-<script>
+<script lang="ts">
+  import type { ComponentProps } from 'svelte';
+
   import { iconError } from '@mathesar-component-library';
   import MessageBox from './MessageBox.svelte';
+
+  type $$Props = ComponentProps<MessageBox>;
 </script>
 
 <div class="error-box">
