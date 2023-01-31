@@ -1,6 +1,6 @@
 import { setContext, getContext } from 'svelte';
-import { writable, type Readable, type Writable } from 'svelte/store';
-import UserApi, { type User, type UnsavedUser } from '@mathesar/api/users';
+import { get, writable, type Readable, type Writable } from 'svelte/store';
+import UserApi, { type User } from '@mathesar/api/users';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 
@@ -11,14 +11,17 @@ interface UserListStore {
   users: Readable<User[]>;
   count: Readable<number>;
   fetchUsers: () => Promise<void>;
+  getUserDetails: (userId: number) => Promise<User | undefined>;
 }
 
 export class UsersList implements UserListStore {
-  requestStatus: Writable<RequestStatus | undefined> = writable();
+  readonly requestStatus: Writable<RequestStatus | undefined> = writable();
 
-  users: Writable<User[]> = writable([]);
+  readonly users: Writable<User[]> = writable([]);
 
-  count: Writable<number> = writable(0);
+  readonly count: Writable<number> = writable(0);
+
+  request: ReturnType<typeof UserApi.list> | undefined;
 
   constructor() {
     void this.fetchUsers();
@@ -29,7 +32,8 @@ export class UsersList implements UserListStore {
       this.requestStatus.set({
         state: 'processing',
       });
-      const response = await UserApi.list();
+      this.request = UserApi.list();
+      const response = await this.request;
       this.users.set(response.results);
       this.count.set(response.count);
       this.requestStatus.set({
@@ -41,6 +45,18 @@ export class UsersList implements UserListStore {
         errors: [getErrorMessage(e)],
       });
     }
+  }
+
+  async getUserDetails(userId: number) {
+    const requestStatus = get(this.requestStatus);
+    if (requestStatus?.state === 'success') {
+      return get(this.users).find((user) => user.id === userId);
+    }
+    if (requestStatus?.state === 'processing') {
+      const result = await this.request;
+      return result?.results.find((user) => user.id === userId);
+    }
+    return undefined;
   }
 }
 

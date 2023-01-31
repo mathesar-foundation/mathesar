@@ -14,6 +14,6 @@
 <Route path="/new">
   <NewUserPage />
 </Route>
-<Route path="/:userId">
-  <EditUserPage />
+<Route path="/:userId" let:meta>
+  <EditUserPage userId={parseInt(meta.params.userId, 10)} />
 </Route>
