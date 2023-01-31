@@ -3,7 +3,11 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconSettingsMajor } from '@mathesar-component-library';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import { ADMIN_URL, ADMIN_GENERAL_PAGE_URL, ADMIN_USERS_PAGE_URL } from './urls';
+  import {
+    ADMIN_URL,
+    ADMIN_GENERAL_PAGE_URL,
+    ADMIN_USERS_PAGE_URL,
+  } from './urls';
   import UsersRoute from './UsersRoute.svelte';
 </script>
 
@@ -31,6 +35,6 @@
 
   <Route path="/users/*" firstmatch>
     <h2>Users</h2>
-    <UsersRoute/>
+    <UsersRoute />
   </Route>
 </LayoutWithHeader>

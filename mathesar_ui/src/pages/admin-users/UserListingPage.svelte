@@ -16,7 +16,9 @@
 {:else if $requestStatus?.state === 'success'}
   <div>{$usersCount} users</div>
   <div>
-    <a class="btn btn-primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}> Add user </a>
+    <a class="btn btn-primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}>
+      Add user
+    </a>
   </div>
   <div>
     {#each $users ?? [] as user}
