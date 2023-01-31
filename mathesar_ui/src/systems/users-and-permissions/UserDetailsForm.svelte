@@ -1,5 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import type { UnionToIntersection } from 'type-fest';
+
   import {
     TextInput,
     PasswordInput,
@@ -10,6 +12,7 @@
     requiredField,
     makeForm,
     FormSubmitWithCatch,
+    type FieldStore,
   } from '@mathesar/components/form';
   import UserApi, { type User } from '@mathesar/api/users';
   import { iconSave, iconUndo } from '@mathesar/icons';
@@ -89,16 +92,20 @@
   }
 
   function getErrorMessages(e: unknown) {
-    type FieldKey = keyof typeof formFields;
+    type FieldKey = keyof UnionToIntersection<typeof formFields>;
     const { commonErrors, fieldSpecificErrors } =
       extractDetailedFieldBasedErrors<FieldKey>(e, {
         user_name: 'username',
         short_name: 'shortName',
         is_superuser: 'role',
       });
-    for (const [f, errors] of fieldSpecificErrors) {
-      if (form.fields[f]) {
-        form.fields[f].serverErrors.set(errors);
+    for (const [fieldKey, errors] of fieldSpecificErrors) {
+      const combinedFields = form.fields as Partial<
+        Record<FieldKey, FieldStore<unknown>>
+      >;
+      const field = combinedFields[fieldKey];
+      if (field) {
+        field.serverErrors.set(errors);
       } else {
         /**
          * Incase an error occurs when the server returned field

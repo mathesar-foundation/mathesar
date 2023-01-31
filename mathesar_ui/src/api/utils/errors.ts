@@ -114,7 +114,7 @@ export class ApiMultiError extends Error {
 
 export function extractDetailedFieldBasedErrors<T extends string = string>(
   e: unknown,
-  fieldNameMappings?: Record<string, string>,
+  fieldNameMappings?: Record<string, T>,
 ): SegregatedErrorMessages<T> {
   if (e instanceof ApiMultiError || e instanceof ApiError) {
     const { commonErrors, fieldSpecificErrors } = e.getSegregatedErrors();
@@ -123,7 +123,7 @@ export function extractDetailedFieldBasedErrors<T extends string = string>(
         commonErrors,
         fieldSpecificErrors: new ImmutableMap<T, string[]>(
           [...fieldSpecificErrors.entries()].map(([key, value]) => [
-            (fieldNameMappings[key] ?? key) as T,
+            fieldNameMappings[key] ?? key,
             value,
           ]),
         ),
