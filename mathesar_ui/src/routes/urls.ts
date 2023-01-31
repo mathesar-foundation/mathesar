@@ -82,4 +82,9 @@ export const USER_PROFILE_URL = '/profile/';
 export const ADMIN_URL = '/administration/';
 export const ADMIN_GENERAL_PAGE_URL = `${ADMIN_URL}general/`;
 export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
+export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
 export const LOGOUT_URL = '/auth/logout/';
+
+export function getEditUsersPageUrl(userId: number) {
+  return `${ADMIN_USERS_PAGE_URL}${userId}/`;
+}

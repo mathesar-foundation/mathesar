@@ -39,7 +39,8 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('profile/', views.profile, name='profile'),
     path('administration/', views.admin_home, name='admin_home'),
-    path('administration/users/', views.admin_home, name='admin_users'),
+    path('administration/users/', views.admin_home, name='admin_users_home'),
+    path('administration/users/<user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/general/', views.admin_home, name='admin_general'),
     path('<db_name>/', views.schemas, name='schemas'),
     re_path(

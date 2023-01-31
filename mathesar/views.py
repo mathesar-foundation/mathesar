@@ -150,7 +150,7 @@ def profile(request):
 
 
 @login_required
-def admin_home(request):
+def admin_home(request, **kwargs):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request)
     })
