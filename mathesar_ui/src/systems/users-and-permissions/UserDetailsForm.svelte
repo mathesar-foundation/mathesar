@@ -1,6 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { TextInput, hasProperty } from '@mathesar-component-library';
+  import {
+    TextInput,
+    PasswordInput,
+    hasProperty,
+  } from '@mathesar-component-library';
   import {
     optionalField,
     requiredField,
@@ -14,7 +18,7 @@
   import SelectRole from './SelectRole.svelte';
   import UserFormInput from './UserFormInput.svelte';
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
   $: loggedInUserDetails = $userProfileStore;
 
@@ -61,11 +65,11 @@
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
-      await UserApi.add({
+      const newUser = await UserApi.add({
         ...request,
         password: formValues.password,
       });
-      dispatch('create');
+      dispatch('create', newUser);
       return;
     }
 
@@ -133,7 +137,7 @@
     <UserFormInput
       label="Password *"
       field={password}
-      input={{ component: TextInput }}
+      input={{ component: PasswordInput }}
     />
   {/if}
 
