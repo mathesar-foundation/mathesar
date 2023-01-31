@@ -144,7 +144,10 @@
   <UserFormInput
     label="Role *"
     field={role}
-    input={{ component: SelectRole, props: { disabled: !isNewUser } }}
+    input={{
+      component: SelectRole,
+      props: { disabled: isUserUpdatingThemselves },
+    }}
   />
 </div>
 
