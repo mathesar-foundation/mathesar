@@ -1,4 +1,3 @@
-from functools import wraps
 from django.db import models
 from frozendict import frozendict
 
@@ -9,6 +8,7 @@ from db.transforms.operations.serialize import serialize_transformation
 from db.transforms.base import Summarize
 from db.functions.base import Count, ArrayAgg
 from db.functions.packed import DistinctArrayAgg
+from django.utils.deconstruct import deconstructible
 
 from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
 from mathesar.state.cached_property import cached_property
@@ -18,25 +18,37 @@ from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValu
 from mathesar.state import get_cached_metadata
 
 
-def _get_validator_for_list_of_dicts(field_name):
-    # NOTE `wraps` decorations needed to interop with Django's migrations
-    @wraps(_get_validator_for_list_of_dicts)
-    def _validator(value):
+@deconstructible
+class ListOfDictValidator:
+
+    def __init__(self, field_name):
+        if field_name is not None:
+            self.field_name = field_name
+
+    def __call__(self, value):
         if not isinstance(value, list):
             message = f"{value} should be a list."
-            raise InvalidValueType(message, field=field_name)
+            raise InvalidValueType(message, field=self.field_name)
         for subvalue in value:
             if not isinstance(subvalue, dict):
                 message = f"{value} should contain only dicts."
-                raise InvalidValueType(message, field=field_name)
-    return _validator
+                raise InvalidValueType(message, field=self.field_name)
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, ListOfDictValidator) and self.field_name == other.field_name
+        )
 
 
-def _get_validator_for_initial_columns(field_name):
-    # NOTE `wraps` decorations needed to interop with Django's migrations
-    @wraps(_get_validator_for_initial_columns)
-    def _validator(initial_cols):
-        for initial_col in initial_cols:
+@deconstructible
+class InitialColumnsValidator:
+
+    def __init__(self, field_name):
+        if field_name is not None:
+            self.field_name = field_name
+
+    def __call__(self, value):
+        for initial_col in value:
             keys = set(initial_col.keys())
             obligatory_keys = {
                 "id",
@@ -48,7 +60,7 @@ def _get_validator_for_initial_columns(field_name):
                     f"{initial_col} doesn't contain"
                     f" following obligatory keys: {missing_obligatory_keys}."
                 )
-                raise DictHasBadKeys(message, field=field_name)
+                raise DictHasBadKeys(message, field=self.field_name)
             optional_keys = {
                 "jp_path",
             }
@@ -59,29 +71,38 @@ def _get_validator_for_initial_columns(field_name):
             unexpected_keys = keys.difference(valid_keys)
             if unexpected_keys:
                 message = f"{initial_col} contains unexpected keys: {unexpected_keys}."
-                raise DictHasBadKeys(message, field=field_name)
+                raise DictHasBadKeys(message, field=self.field_name)
             jp_path = initial_col.get('jp_path')
-            _get_validator_for_jp_path(field_name)(jp_path)
-    return _validator
+            jp_path_validator = JpPathValidator(self.field_name)
+            jp_path_validator(jp_path)
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, InitialColumnsValidator) and self.field_name == other.field_name
+        )
 
 
-def _get_validator_for_jp_path(field_name):
-    # NOTE `wraps` decorations needed to interop with Django's migrations
-    @wraps(_get_validator_for_jp_path)
-    def _validator(jp_path):
-        if jp_path:
-            if not isinstance(jp_path, list):
-                message = f"jp_path must be a list, instead: {jp_path}."
+@deconstructible
+class JpPathValidator:
+
+    def __init__(self, field_name):
+        if field_name:
+            self.field_name = field_name
+
+    def __call__(self, value):
+        if value:
+            if not isinstance(value, list):
+                message = f"jp_path must be a list, instead: {value}."
                 raise InvalidValueType(
                     message,
-                    field=field_name,
+                    field=self.field_name,
                 )
-            for jp in jp_path:
+            for jp in value:
                 if not isinstance(jp, list):
                     message = f"jp_path elements must be 2-item lists, instead: {jp}."
                     raise InvalidValueType(
                         message,
-                        field=field_name,
+                        field=self.field_name,
                     )
                 for col_id in jp:
                     if not isinstance(col_id, int):
@@ -91,33 +112,53 @@ def _get_validator_for_jp_path(field_name):
                         )
                         raise InvalidValueType(
                             message,
-                            field=field_name,
+                            field=self.field_name,
                         )
-    return _validator
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, JpPathValidator) and self.field_name == other.field_name and self.jp_path == other.jp_path
+        )
 
 
-def _get_validator_for_transformations(field_name):
-    # NOTE `wraps` decorations needed to interop with Django's migrations
-    @wraps(_get_validator_for_transformations)
-    def _validator(transformations):
-        for transformation in transformations:
+@deconstructible
+class TransformationsValidator:
+
+    def __init__(self, field_name):
+        if field_name is not None:
+            self.field_name = field_name
+
+    def __call__(self, value):
+        for transformation in value:
             if "type" not in transformation:
                 message = "Each 'transformations' sub-dict must have a 'type' key."
-                raise DictHasBadKeys(message, field=field_name)
+                raise DictHasBadKeys(message, field=self.field_name)
             if "spec" not in transformation:
                 message = "Each 'transformations' sub-dict must have a 'spec' key."
-                raise DictHasBadKeys(message, field=field_name)
-    return _validator
+                raise DictHasBadKeys(message, field=self.field_name)
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, TransformationsValidator) and self.field_name == other.field_name
+        )
 
 
-def _get_validator_for_dict(field_name):
-    # NOTE `wraps` decorations needed to interop with Django's migrations
-    @wraps(_get_validator_for_dict)
-    def _validator(value):
+@deconstructible
+class DictValidator:
+
+    def __init__(self, field_name):
+        if field_name is not None:
+            self.field_name = field_name
+
+    def __call__(self, value):
         if not isinstance(value, dict):
             message = f"{value} should be a dict."
-            raise InvalidValueType(message, field=field_name)
-    return _validator
+            raise InvalidValueType(message, field=self.field_name)
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, TransformationsValidator) and self.field_name == other.field_name
+        )
 
 
 class UIQuery(BaseModel, Relation):
@@ -137,8 +178,8 @@ class UIQuery(BaseModel, Relation):
     # sequence of dicts
     initial_columns = models.JSONField(
         validators=[
-            _get_validator_for_list_of_dicts(field_name="initial_columns"),
-            _get_validator_for_initial_columns(field_name="initial_columns"),
+            ListOfDictValidator(field_name="initial_columns"),
+            InitialColumnsValidator(field_name="initial_columns"),
         ],
     )
 
@@ -147,8 +188,8 @@ class UIQuery(BaseModel, Relation):
         null=True,
         blank=True,
         validators=[
-            _get_validator_for_list_of_dicts(field_name="transformations"),
-            _get_validator_for_transformations(field_name="transformations"),
+            ListOfDictValidator(field_name="transformations"),
+            TransformationsValidator(field_name="transformations"),
         ],
     )
 
@@ -157,7 +198,7 @@ class UIQuery(BaseModel, Relation):
         null=True,
         blank=True,
         validators=[
-            _get_validator_for_dict(field_name="display_options"),
+            DictValidator(field_name="display_options"),
         ],
     )
 
@@ -166,7 +207,7 @@ class UIQuery(BaseModel, Relation):
         null=True,
         blank=True,
         validators=[
-            _get_validator_for_dict(field_name="display_names"),
+            DictValidator(field_name="display_names"),
         ],
     )
 
