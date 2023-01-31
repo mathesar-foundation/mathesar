@@ -9,7 +9,7 @@
     makeForm,
     FormSubmitWithCatch,
     optionalField,
-    invalidIf,
+    comboMustBeEqual,
   } from '@mathesar/components/form';
   import { iconSave } from '@mathesar/icons';
   import UserApi, { type User } from '@mathesar/api/users';
@@ -26,9 +26,7 @@
 
   const oldPassword = requiredField('');
   const password = requiredField('');
-  const confirmPassword = requiredField('', [
-    invalidIf((pw: string) => pw !== $password, 'Passwords do not match'),
-  ]);
+  const confirmPassword = requiredField('');
   const passwordPlaceholder = optionalField('***************');
   let showChangePasswordForm = false;
 
@@ -44,7 +42,9 @@
         }
       : fields;
   })();
-  $: form = makeForm(formFields);
+  $: form = makeForm(formFields, [
+    comboMustBeEqual([password, confirmPassword], 'Passwords do not match'),
+  ]);
 
   $: userId,
     (() => {
