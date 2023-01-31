@@ -27,8 +27,8 @@
   $: isUserUpdatingThemselves =
     loggedInUserDetails && loggedInUserDetails?.id === userDetails?.id;
   $: isNewUser = userDetails === undefined;
-  $: fullname = optionalField(userDetails?.full_name ?? '');
-  $: shortname = optionalField(userDetails?.short_name ?? '');
+  $: fullName = optionalField(userDetails?.full_name ?? '');
+  $: shortName = optionalField(userDetails?.short_name ?? '');
   $: username = requiredField(userDetails?.username ?? '');
   $: email = optionalField(userDetails?.email ?? '');
   $: role = requiredField<'user' | 'admin' | undefined>(
@@ -40,8 +40,8 @@
 
   $: formFields = (() => {
     const fields = {
-      fullname,
-      shortname,
+      fullName,
+      shortName,
       username,
       email,
     };
@@ -58,8 +58,8 @@
   async function saveUser() {
     const formValues = $form.values;
     const request = {
-      full_name: formValues.fullname,
-      short_name: formValues.shortname,
+      full_name: formValues.fullName,
+      short_name: formValues.shortName,
       username: formValues.username,
       email: formValues.email,
     };
@@ -93,7 +93,7 @@
     const { commonErrors, fieldSpecificErrors } =
       extractDetailedFieldBasedErrors<FieldKey>(e, {
         user_name: 'username',
-        short_name: 'shortname',
+        short_name: 'shortName',
         is_superuser: 'role',
       });
     for (const [f, errors] of fieldSpecificErrors) {
@@ -115,13 +115,13 @@
 <div class="user-details-form">
   <UserFormInput
     label="Full Name"
-    field={fullname}
+    field={fullName}
     input={{ component: TextInput }}
   />
 
   <UserFormInput
     label="Short Name"
-    field={shortname}
+    field={shortName}
     input={{ component: TextInput }}
   />
 
