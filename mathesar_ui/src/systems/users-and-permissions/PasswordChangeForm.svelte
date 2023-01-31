@@ -107,14 +107,20 @@
         <UserFormInput
           label="New Password *"
           field={password}
-          input={{ component: PasswordInput }}
+          input={{
+            component: PasswordInput,
+            props: { autocomplete: 'new-password' },
+          }}
           bypassRow
         />
 
         <UserFormInput
           label="Confirm Password *"
           field={confirmPassword}
-          input={{ component: PasswordInput }}
+          input={{
+            component: PasswordInput,
+            props: { autocomplete: 'new-password' },
+          }}
           bypassRow
         />
       </UserFormInputRow>

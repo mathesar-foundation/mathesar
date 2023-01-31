@@ -130,14 +130,20 @@
   <UserFormInput
     label="Username *"
     field={username}
-    input={{ component: TextInput }}
+    input={{
+      component: TextInput,
+      props: { autocomplete: isNewUser ? 'new-username' : 'on' },
+    }}
   />
 
   {#if isNewUser}
     <UserFormInput
       label="Password *"
       field={password}
-      input={{ component: PasswordInput }}
+      input={{
+        component: PasswordInput,
+        props: { autocomplete: isNewUser ? 'new-password' : 'on' },
+      }}
     />
   {/if}
 

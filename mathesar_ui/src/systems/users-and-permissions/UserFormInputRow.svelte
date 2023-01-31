@@ -14,4 +14,7 @@
   .input-row + :global(.input-row .cell) {
     margin-top: var(--size-large);
   }
+  .input-row :global(.right + .left) {
+    padding-left: var(--size-base);
+  }
 </style>
