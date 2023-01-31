@@ -23,13 +23,14 @@
           {...iconExpandDown}
           size="0.9rem"
           rotate={isOpen ? undefined : 270}
+          class="collapsible-header-icon"
         />
         <div class="collapsible-header-title">
           <slot name="header" />
         </div>
       </Button>
-      <slot name="trigger-aside" />
     </slot>
+    <slot name="trigger-aside" />
   </div>
 
   {#if isOpen}
