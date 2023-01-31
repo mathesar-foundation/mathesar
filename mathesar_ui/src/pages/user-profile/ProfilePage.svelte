@@ -36,14 +36,16 @@
       <InsetPageSection>
         <PasswordChangeForm userId={userDetails.id} />
       </InsetPageSection>
-      <!-- Do not show below for super user -->
-      <InsetPageSection>
-        <h2 slot="header">Delete Account</h2>
-        <div>
-          Please contact your administrator to request permanent deletion of
-          your account
-        </div>
-      </InsetPageSection>
+
+      {#if !userDetails.is_superuser}
+        <InsetPageSection>
+          <h2 slot="header">Delete Account</h2>
+          <div>
+            Please contact your administrator to request permanent deletion of
+            your account
+          </div>
+        </InsetPageSection>
+      {/if}
     {:else}
       <!-- This should never happen -->
       <ErrorBox>
