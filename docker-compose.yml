@@ -32,6 +32,8 @@ services:
     volumes:
       - static:/code/static
       - media:/code/media
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
   service:
     profiles: ["prod"]
     extends: service-without-db
@@ -41,6 +43,8 @@ services:
       - media:/code/media
     depends_on:
       - db
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
   test-service:
     profiles: [ "test" ]
     extends: service-without-db
@@ -104,6 +108,17 @@ services:
       - "8000:8000"
       - "3000:3000"
       - "6006:6006"
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --http-api-update --label-enable
+    environment:
+      - WATCHTOWER_HTTP_API_TOKEN=mytoken
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+    expose:
+      - "8000"
 volumes:
   postgresql_data:
   ui_node_modules:
