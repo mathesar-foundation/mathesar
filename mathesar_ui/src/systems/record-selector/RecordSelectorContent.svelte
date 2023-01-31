@@ -111,6 +111,13 @@
       {submitResult}
       {isHoveringCreate}
     />
+    <div class="footer">
+      {#if records.length == 10 && !hasSearchQueries}
+        <span class="message">
+          The first 10 records are shown. Filter to see more.
+          </span>
+      {/if}
+    </div>
   {/if}
 
   {#if isInitialized && !records.length}
@@ -145,6 +152,11 @@
         <Icon {...iconAddNew} />
         <span>Create Record From Search Criteria</span>
       </Button>
+      {#if records.length == 10}
+        <span class="message">
+          The 10 best matches are shown. Continue filtering to see more.
+        </span>
+      {/if}
     </div>
   {/if}
 </div>
@@ -190,5 +202,9 @@
 
   .footer {
     margin-top: 1rem;
+  }
+  .message {
+    color: var(--color-text-muted);
+    font-size: var(--text-size-small);
   }
 </style>
