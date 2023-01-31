@@ -7,7 +7,7 @@
     iconLoading,
   } from '@mathesar/component-library';
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
-    import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type {
     ColumnsDataStore,
@@ -23,7 +23,7 @@
   export let selection: TabularDataSelection;
   export let columnsDataStore: ColumnsDataStore;
 
-  let isDeleting = false;
+  const isDeleting = false;
 
   async function handleDeleteRecords() {
     void confirmDelete({
@@ -33,9 +33,9 @@
       onSuccess: () => {
         toast.success({
           title: 'Row deleted successfully!',
-        })
+        });
         selection.resetSelection();
-      }
+      },
     });
   }
 
