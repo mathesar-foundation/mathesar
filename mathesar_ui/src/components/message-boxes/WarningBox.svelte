@@ -4,7 +4,7 @@
 </script>
 
 <div class="warning-box">
-  <MessageBox icon={iconWarning}><slot /></MessageBox>
+  <MessageBox {...$$restProps} icon={iconWarning}><slot /></MessageBox>
 </div>
 
 <style>
