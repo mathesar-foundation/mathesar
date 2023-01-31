@@ -1,5 +1,6 @@
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import {
+  deleteAPI,
   getAPI,
   patchAPI,
   postAPI,
@@ -37,13 +38,17 @@ function list() {
   return getAPI<PaginatedResponse<User>>('/api/ui/v0/users/');
 }
 
-function get(userId: User['id']) {}
+function get(userId: User['id']) {
+  return getAPI<User>(`/api/ui/v0/users/${userId}/`);
+}
 
 function add(user: UnsavedUser) {
   return postAPI<User>('/api/ui/v0/users/', user);
 }
 
-function deleteUser(userId: User['id']) {}
+function deleteUser(userId: User['id']) {
+  return deleteAPI(`/api/ui/v0/users/${userId}/`);
+}
 
 function update(
   userId: User['id'],
