@@ -266,8 +266,7 @@ export default class SheetSelection<
            */
           this.selectionBounds = undefined;
           this.selectMultipleCells([[activeCellRow, activeCellColumn]]);
-        }
-        else{
+        } else {
           // We need to unselect the Selected cells
           // when navigating Placeholder cells
           this.resetSelection();
