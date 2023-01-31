@@ -37,10 +37,6 @@ def get_enriched_column_table(table, metadata, engine=None):
 def init_mathesar_table_column_list_with_defaults(column_list):
     default_columns = get_default_mathesar_column_list()
     given_columns = [MathesarColumn.from_column(c) for c in column_list if c.name != constants.ID]
-    if len(column_list) != len(given_columns):
-        for c in default_columns:
-            if c.name == constants.ID:
-                c.autoincrement = False
     return default_columns + given_columns
 
 
