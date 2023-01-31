@@ -43,7 +43,7 @@ export class UserProfile implements Readonly<User> {
     return this.username;
   }
 
-  /* @throws Error if unable to save */
+  /** @throws Error if unable to save */
   async update(
     userDetails: Partial<Omit<UnsavedUser, 'password'>>,
   ): Promise<UserProfile> {
