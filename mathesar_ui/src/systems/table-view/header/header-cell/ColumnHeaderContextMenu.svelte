@@ -17,7 +17,7 @@
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import { getTableName } from '@mathesar/stores/tables';
-    import Identifier from '@mathesar/components/Identifier.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
 
   export let processedColumn: ProcessedColumn;
 
@@ -40,7 +40,9 @@
   $: fkTableLink = linkFk
     ? getTablePageUrl({ tableId: linkFk.referent_table })
     : undefined;
-  $: tableName = linkFk?.referent_table ? getTableName(linkFk?.referent_table) : undefined;
+  $: tableName = linkFk?.referent_table
+    ? getTableName(linkFk?.referent_table)
+    : undefined;
 
   function removeSorting() {
     sorting.update((s) => s.without(columnId));
@@ -103,5 +105,5 @@
 {#if fkTableLink !== undefined}
   <LinkMenuItem icon={iconTable} href={fkTableLink}>
     Open <Identifier>{tableName}</Identifier> Table
- </LinkMenuItem>
+  </LinkMenuItem>
 {/if}
