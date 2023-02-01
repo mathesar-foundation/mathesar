@@ -43,7 +43,6 @@ class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.Mo
         ]
         extra_kwargs = {
             'password': {'write_only': True},
-            'is_superuser': {'read_only': True},
             'database_roles': {'read_only': True},
             'schema_roles': {'read_only': True}
         }
@@ -55,8 +54,8 @@ class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.Mo
         if kwargs:
             user_pk = kwargs.get('pk')
             if user_pk:
-                if request.user.id != int(user_pk) and request.user.is_superuser:
-                    fields["is_superuser"].read_only = False
+                if request.user.id == int(user_pk) or not request.user.is_superuser:
+                    fields["is_superuser"].read_only = True
         return fields
 
     def create(self, validated_data):
