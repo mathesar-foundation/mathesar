@@ -43,6 +43,8 @@
       }
     }
 
+    let locationOfFirstDraggedColumn: number | undefined = undefined;
+
     const selectedColumnIdsOrdered: number[] = [];
 
     // Remove selected column IDs and keep their order
@@ -50,18 +52,32 @@
     for (const id of columnOrder) {
       if (selectedColumnIds.includes(id)) {
         selectedColumnIdsOrdered.push(id);
+        if (!locationOfFirstDraggedColumn) {
+          locationOfFirstDraggedColumn = columnOrder.indexOf(id)
+        }
       } else {
         newColumnOrder.push(id);
       }
     }
 
     // Insert selected column IDs after the column where they are dropped
+    // if that column is to the right, else insert it before
     if (columnDroppedOn) {
-      newColumnOrder.splice(
-        columnOrder.indexOf(columnDroppedOn.id) + 1,
-        0,
-        ...selectedColumnIdsOrdered,
-      );
+      console.log(locationOfFirstDraggedColumn);
+      console.log(columnOrder.indexOf(columnDroppedOn.id))
+      if (locationOfFirstDraggedColumn && locationOfFirstDraggedColumn < columnOrder.indexOf(columnDroppedOn.id)) {
+        newColumnOrder.splice(
+          columnOrder.indexOf(columnDroppedOn.id) + 1,
+          0,
+          ...selectedColumnIdsOrdered,
+        );
+      } else {
+        newColumnOrder.splice(
+          columnOrder.indexOf(columnDroppedOn.id),
+          0,
+          ...selectedColumnIdsOrdered,
+        );
+      }
     } else {
       // If the column is dropped on the ID column, columnDroppedOn is undefined and we can insert at the beginning.
       newColumnOrder.splice(0, 0, ...selectedColumnIdsOrdered);
