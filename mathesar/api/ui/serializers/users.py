@@ -48,6 +48,17 @@ class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.Mo
             'schema_roles': {'read_only': True}
         }
 
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context.get("request", None)
+        kwargs = request.parser_context.get('kwargs')
+        if kwargs:
+            user_pk = kwargs.get('pk')
+            if user_pk:
+                if request.user.id != int(user_pk) and request.user.is_superuser:
+                    fields["is_superuser"].read_only = False
+        return fields
+
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = User(**validated_data)
