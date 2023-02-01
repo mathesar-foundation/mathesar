@@ -117,7 +117,7 @@ class JpPathValidator:
 
     def __eq__(self, other):
         return (
-            isinstance(other, JpPathValidator) and self.field_name == other.field_name and self.jp_path == other.jp_path
+            isinstance(other, JpPathValidator) and self.field_name == other.field_name
         )
 
 
