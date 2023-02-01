@@ -7,10 +7,10 @@
     getExplorationPageUrl,
     getRecordPageUrl,
     getSchemaPageUrl,
-    getTablePageUrl,
   } from '@mathesar/routes/urls';
   import { StringOrComponent } from '@mathesar/component-library';
   import { iconExploration, iconRecord } from '@mathesar/icons';
+  import { getLinkForTableItem } from '@mathesar/utils/tables';
   import BreadcrumbLink from './BreadcrumbLink.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
   import EntitySelector from './EntitySelector.svelte';
@@ -43,7 +43,7 @@
   <EntitySelector database={item.database} schema={item.schema} />
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
-      href={getTablePageUrl(item.database.name, item.schema.id, item.table.id)}
+      href={getLinkForTableItem(item.database.name, item.schema.id, item.table)}
     >
       <TableName table={item.table} />
     </BreadcrumbLink>
