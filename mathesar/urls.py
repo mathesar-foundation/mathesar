@@ -22,6 +22,7 @@ db_table_router.register(r'columns', db_viewsets.ColumnViewSet, basename='table-
 db_table_router.register(r'constraints', db_viewsets.ConstraintViewSet, basename='table-constraint')
 
 ui_router = routers.DefaultRouter()
+ui_router.register(r'upgrade', ui_viewsets.UpgradeViewSet, basename='upgrade')
 ui_router.register(r'version', ui_viewsets.VersionViewSet, basename='version')
 ui_router.register(r'databases', ui_viewsets.DatabaseViewSet, basename='database')
 ui_router.register(r'users', ui_viewsets.UserViewSet, basename='user')
