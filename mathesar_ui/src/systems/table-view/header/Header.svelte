@@ -35,6 +35,12 @@
   );
 
   function dropColumn(e: DragEvent, columnDroppedOn?: ProcessedColumn) {
+    // Early exit if a column is dropped in the same place.
+    // Should only be done for single column if non-continuous selection is allowed.
+    if (selectedColumnIds.length > 0 && columnDroppedOn && selectedColumnIds[0] == columnDroppedOn.id) {
+      return;
+    }
+
     columnOrder = columnOrder ?? [];
     // Keep only IDs for which the column exists
     for (const columnId of $processedColumns.keys()) {
