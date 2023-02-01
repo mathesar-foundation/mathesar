@@ -17,8 +17,6 @@ from mathesar.models.relation import Relation
 from mathesar.state import get_cached_metadata
 
 
-
-
 class UIQuery(BaseModel, Relation):
     name = models.CharField(
         max_length=128,

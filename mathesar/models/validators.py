@@ -1,6 +1,7 @@
 from django.utils.deconstruct import deconstructible
 from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidValueType, DictHasBadKeys
 
+
 @deconstructible
 class ListOfDictValidator:
 
