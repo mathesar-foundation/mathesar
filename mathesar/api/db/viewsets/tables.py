@@ -1,3 +1,4 @@
+import json
 from django_filters import rest_framework as filters
 from psycopg2.errors import CheckViolation, InvalidTextRepresentation
 from rest_access_policy import AccessViewSetMixin
@@ -93,7 +94,13 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
         table = self.get_object()
-        col_types = get_table_column_types(table)
+        columns_might_have_defaults = _get_boolean_query_param(
+            request, 'columns_might_have_defaults', True
+        )
+        col_types = get_table_column_types(
+            table,
+            columns_might_have_defaults=columns_might_have_defaults,
+        )
         return Response(col_types)
 
     @action(methods=['post'], detail=True)
@@ -248,3 +255,17 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
                 e,
                 status_code=status.HTTP_400_BAD_REQUEST
             )
+
+
+def _get_boolean_query_param(request, name, default):
+    """
+    Deserializes a query parameter from JSON into a boolean. A default is provided in case the
+    parameter is undefined.
+    """
+    value = request.query_params.get(name)
+    if value is not None:
+        value = json.loads(value)
+        value = bool(value)
+        return value
+    else:
+        return default
