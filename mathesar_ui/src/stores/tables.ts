@@ -377,10 +377,20 @@ export function getTableFromStoreOrApi(
   );
 }
 
+/**
+ * Note the optimizing query parameter. It asserts that the table will not have
+ * columns with default values (probably because it is currently being imported
+ * and a table produced by importing will not have column defaults). It
+ * follows, that this function cannot be used where columns might have defaults.
+ */
 export function getTypeSuggestionsForTable(
   id: TableEntry['id'],
 ): CancellablePromise<Record<string, string>> {
-  return getAPI(`/api/db/v0/tables/${id}/type_suggestions/`);
+
+  const optimizingQueryParam = 'columns_might_have_defaults=false'
+  return getAPI(
+    `/api/db/v0/tables/${id}/type_suggestions/?${optimizingQueryParam}`
+  );
 }
 
 export function generateTablePreview(
