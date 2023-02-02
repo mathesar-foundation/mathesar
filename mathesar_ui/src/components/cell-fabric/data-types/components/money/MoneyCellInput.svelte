@@ -25,12 +25,17 @@
     childValue = getNewChildValue(newParentValue);
   }
   $: handleParentValueChange(parentValue);
+  $: cssVariables = {
+    '--input-element-text-align': 'right',
+    ...($$restProps.cssVariables || {}),
+  };
 </script>
 
 <StringifiedNumberInput
   focusOnMount={true}
   {...$$restProps}
   value={childValue}
+  {cssVariables}
   on:blur
   on:focus
   on:keydown
@@ -39,5 +44,4 @@
   }}
   on:artificialInput
   on:artificialChange
-  --input-element-text-align="right"
 />
