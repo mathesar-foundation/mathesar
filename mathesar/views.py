@@ -31,15 +31,20 @@ def get_schema_list(request, database):
     return schema_serializer.data
 
 
-def get_database_list(request):
+def _get_permissible_db_queryset(request):
     qs = Database.objects.all()
     permission_restricted_qs = DatabaseAccessPolicy.scope_queryset(request, qs)
     schema_qs = Schema.objects.all()
     permitted_schemas = SchemaAccessPolicy.scope_queryset(request, schema_qs)
     databases_from_permitted_schema = Database.objects.filter(schemas__in=permitted_schemas)
     permission_restricted_qs = permission_restricted_qs.union(databases_from_permitted_schema)
+    return permission_restricted_qs
+
+
+def get_database_list(request):
+    permission_restricted_db_qs = _get_permissible_db_queryset(request)
     database_serializer = DatabaseSerializer(
-        permission_restricted_qs,
+        permission_restricted_db_qs,
         many=True,
         context={'request': request}
     )
@@ -109,8 +114,7 @@ def get_common_data(request, database, schema=None):
 
 def get_current_database(request, db_name):
     """Get database from passed name, with fall back behavior."""
-    base_qs = Database.objects.all()
-    permitted_databases = DatabaseAccessPolicy.scope_queryset(request, base_qs)
+    permitted_databases = _get_permissible_db_queryset(request)
     if db_name is not None:
         current_database = get_object_or_404(permitted_databases, name=db_name)
     else:
@@ -160,7 +164,7 @@ def reflect_all(_):
 def home(request):
     database = get_current_database(request, None)
     if database is None:
-        return Response(status=status.HTTP_200_OK)
+        return render(request, 'mathesar/no_db_access.html')
     return redirect('schemas', db_name=database.name)
 
 
