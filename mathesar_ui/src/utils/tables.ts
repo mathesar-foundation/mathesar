@@ -1,4 +1,8 @@
 import type { TableEntry } from '@mathesar/api/types/tables';
+import {
+  getImportPreviewPageUrl,
+  getTablePageUrl,
+} from '@mathesar/routes/urls';
 
 export function isTableImportConfirmationRequired(
   table: Partial<Pick<TableEntry, 'import_verified' | 'data_files'>>,
@@ -13,4 +17,15 @@ export function isTableImportConfirmationRequired(
     table.data_files !== undefined &&
     table.data_files.length > 0
   );
+}
+
+export function getLinkForTableItem(
+  databaseName: string,
+  schemaId: number,
+  table: Pick<TableEntry, 'import_verified' | 'data_files' | 'id'>,
+) {
+  if (isTableImportConfirmationRequired(table)) {
+    return getImportPreviewPageUrl(databaseName, schemaId, table.id);
+  }
+  return getTablePageUrl(databaseName, schemaId, table.id);
 }
