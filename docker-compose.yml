@@ -15,11 +15,7 @@ services:
       - postgresql_data:/var/lib/postgresql/data
   service-without-db:
     profiles: ["web-server"]
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PYTHON_REQUIREMENTS: requirements-prod.txt
+    image: mathesar/mathesar-prod:latest
     container_name: mathesar_service
     environment:
       - MODE=${MODE-PRODUCTION}
@@ -44,11 +40,7 @@ services:
   test-service:
     profiles: [ "test" ]
     extends: service-without-db
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PYTHON_REQUIREMENTS: requirements-dev.txt
+    image: mathesar/mathesar-testing:latest
     depends_on:
       - db
   demo-service:
@@ -59,31 +51,21 @@ services:
       - DEBUG=${DEBUG-False}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-demo.settings}
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PYTHON_REQUIREMENTS: requirements-demo.txt
+    image: mathesar/mathesar-demo:latest
     depends_on:
       - db
   caddy-reverse-proxy:
     profiles: ["prod"]
-    build:
-      context: .
-      dockerfile: caddy.Dockerfile
+    image: mathesar/mathesar-caddy:latest
     ports:
       - "80:80"
     volumes:
       - media:/mathesar/media
       - static:/mathesar/static
   dev-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PYTHON_REQUIREMENTS: requirements-dev.txt
     profiles: ["dev"]
     extends: service-without-db
+    image: mathesar/mathesar-dev:latest
     environment:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
