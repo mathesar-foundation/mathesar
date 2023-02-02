@@ -14,9 +14,15 @@ TABLE_NAME_TEMPLATE = 'Table'
 POSTGRES_NAME_LEN_CAP = 63
 
 
-def get_table_column_types(table):
+def get_table_column_types(table, columns_might_have_defaults=True):
     schema = table.schema
-    db_types = infer_table_column_types(schema.name, table.name, schema._sa_engine, get_cached_metadata())
+    db_types = infer_table_column_types(
+        schema.name,
+        table.name,
+        schema._sa_engine,
+        metadata=get_cached_metadata(),
+        columns_might_have_defaults=columns_might_have_defaults,
+    )
     col_types = {
         col.name: db_type.id
         for col, db_type in zip(table.sa_columns, db_types)
