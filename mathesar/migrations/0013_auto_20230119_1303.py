@@ -14,17 +14,17 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='uiquery',
             name='display_names',
-            field=models.JSONField(blank=True, null=True, validators=[mathesar.models.query._get_validator_for_dict]),
+            field=models.JSONField(blank=True, null=True, validators=[mathesar.models.query.DictValidator(field_name='display_names')]),
         ),
         migrations.AlterField(
             model_name='uiquery',
             name='display_options',
-            field=models.JSONField(blank=True, null=True, validators=[mathesar.models.query._get_validator_for_dict]),
+            field=models.JSONField(blank=True, null=True, validators=[mathesar.models.query.DictValidator(field_name='display_options')]),
         ),
         migrations.AlterField(
             model_name='uiquery',
             name='initial_columns',
-            field=models.JSONField(validators=[mathesar.models.query._get_validator_for_list_of_dicts, mathesar.models.query._get_validator_for_initial_columns]),
+            field=models.JSONField(validators=[mathesar.models.query.ListOfDictValidator(field_name='initial_columns'), mathesar.models.query.InitialColumnsValidator(field_name='initial_columns')]),
         ),
         migrations.AlterField(
             model_name='uiquery',
@@ -34,6 +34,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='uiquery',
             name='transformations',
-            field=models.JSONField(blank=True, null=True, validators=[mathesar.models.query._get_validator_for_list_of_dicts, mathesar.models.query._get_validator_for_transformations]),
+            field=models.JSONField(blank=True, null=True, validators=[mathesar.models.query.ListOfDictValidator(field_name='transformations'), mathesar.models.query.TransformationsValidator(field_name='transformations')]),
         ),
     ]
