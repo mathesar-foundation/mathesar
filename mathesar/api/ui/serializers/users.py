@@ -50,6 +50,8 @@ class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.Mo
     def get_fields(self):
         fields = super().get_fields()
         request = self.context.get("request", None)
+        if not hasattr(request, 'parser_context'):
+            return fields
         kwargs = request.parser_context.get('kwargs')
         if kwargs:
             user_pk = kwargs.get('pk')
