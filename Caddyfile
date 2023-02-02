@@ -11,14 +11,20 @@
 		header @downloads Content-disposition "attachment; filename={query.dl}"
 
 		file_server {
+                        precompressed br zstd gzip
+                        encode zstd gzip
 			root {$MEDIA_ROOT:/mathesar/media/}
 		}
 	}
 
 	handle_path /static/* {
 		file_server {
+                        precompressed br zstd gzip
+                        encode zstd gzip
 			root {$STATIC_ROOT:/mathesar/static/}
 		}
 	}
-	reverse_proxy mathesar_service:8000
+	reverse_proxy mathesar_service:8000 {
+                encode zstd gzip
+        }
 }
