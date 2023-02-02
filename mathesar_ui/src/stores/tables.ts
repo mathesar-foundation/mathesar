@@ -386,7 +386,6 @@ export function getTableFromStoreOrApi(
 export function getTypeSuggestionsForTable(
   id: TableEntry['id'],
 ): CancellablePromise<Record<string, string>> {
-
   const optimizingQueryParam = 'columns_might_have_defaults=false'
   return getAPI(
     `/api/db/v0/tables/${id}/type_suggestions/?${optimizingQueryParam}`
