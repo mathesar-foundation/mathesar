@@ -23,8 +23,6 @@
   export let selection: TabularDataSelection;
   export let columnsDataStore: ColumnsDataStore;
 
-  const isDeleting = false;
-
   async function handleDeleteRecords() {
     void confirmDelete({
       identifierType: 'Row',
@@ -76,7 +74,7 @@
     </AnchorButton>
   {/if}
   <Button appearance="outline-primary" on:click={handleDeleteRecords}>
-    <Icon {...isDeleting ? iconLoading : iconDeleteMajor} />
+    <Icon {...iconDeleteMajor} />
     <span>
       Delete {labeledCount(selectedRowIndices, 'records', {
         casing: 'title',
