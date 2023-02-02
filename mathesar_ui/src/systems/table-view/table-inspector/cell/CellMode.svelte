@@ -1,15 +1,13 @@
 <script lang="ts">
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/api/types/tables/columns';
 
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
-  $: ({ selection, recordsData } = $tabularData);
-  $: ({ getColumns } = selection);
+  $: ({ selection, recordsData, processedColumns } = $tabularData);
   $: ({ activeCell } = selection);
-  $: cell = $activeCell;
 
+  $: cell = $activeCell;
   $: selectedCellValue = (() => {
     if (cell) {
       const rows = recordsData.getRecordRows();
@@ -21,9 +19,7 @@
   })();
   $: column = (() => {
     if (cell) {
-      const processedColumn = getColumns().find(
-        (col: Column) => col.id === cell.columnId,
-      );
+      const processedColumn = $processedColumns.get(Number(cell.columnId));
       if (processedColumn) {
         return processedColumn;
       }
