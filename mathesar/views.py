@@ -164,7 +164,9 @@ def reflect_all(_):
 def home(request):
     database = get_current_database(request, None)
     if database is None:
-        return render(request, 'mathesar/no_db_access.html')
+        return render(request, 'mathesar/index.html', {
+            'common_data': get_common_data(request, database)
+        })
     return redirect('schemas', db_name=database.name)
 
 
