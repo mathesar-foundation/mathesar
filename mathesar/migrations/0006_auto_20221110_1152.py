@@ -14,16 +14,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='uiquery',
             name='display_options',
-            field=models.JSONField(blank=True, null=True, validators=[mathesar.models.query._get_validator_for_dict]),
+            field=models.JSONField(blank=True, null=True, validators=[mathesar.models.query.DictValidator]),
         ),
         migrations.AlterField(
             model_name='uiquery',
             name='initial_columns',
-            field=models.JSONField(validators=[mathesar.models.query._get_validator_for_list_of_dicts, mathesar.models.query._get_validator_for_initial_columns]),
+            field=models.JSONField(validators=[mathesar.models.query.ListOfDictValidator, mathesar.models.query.InitialColumnsValidator]),
         ),
         migrations.AlterField(
             model_name='uiquery',
             name='transformations',
-            field=models.JSONField(blank=True, null=True, validators=[mathesar.models.query._get_validator_for_list_of_dicts, mathesar.models.query._get_validator_for_transformations]),
+            field=models.JSONField(blank=True, null=True, validators=[mathesar.models.query.ListOfDictValidator, mathesar.models.query.TransformationsValidator]),
         ),
     ]
