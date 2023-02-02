@@ -4,17 +4,13 @@
   .collapsible-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     .collapsible-header-btn {
       display: flex;
       width: 100%;
       text-align: left;
       cursor: pointer;
       font-weight: inherit;
-
-      .collapsible-header-icon {
-        align-self: flex-start;
-        margin-top: 0.18rem;
-      }
       .collapsible-btn-title {
         flex-grow: 1;
         overflow: hidden;

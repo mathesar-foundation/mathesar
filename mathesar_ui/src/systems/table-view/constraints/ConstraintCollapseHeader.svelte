@@ -35,9 +35,11 @@
   .column-names {
     display: flex;
     flex-direction: row;
-    -webkit-flex-wrap: wrap;
     flex-wrap: wrap;
-    -ms-flex-wrap: wrap;
+    margin-bottom: calc(var(--size-super-ultra-small) * -1);
+    > :global(* + *) {
+      margin-left: 0.25rem;
+    }
   }
 
   .column-name-container {
@@ -45,6 +47,6 @@
     background-color: var(--slate-200);
     border-radius: var(--border-radius-xl);
     padding: 0.285rem 0.428rem;
-    margin: 0 0.285rem 0.285rem 0;
+    margin-bottom: var(--size-super-ultra-small);
   }
 </style>
