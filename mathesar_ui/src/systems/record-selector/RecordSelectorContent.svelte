@@ -134,8 +134,8 @@
     {/if}
   {/if}
 
-  {#if hasSearchQueries}
-    <div class="footer">
+  <div class="footer">
+    {#if hasSearchQueries}
       <Button
         size="small"
         appearance="secondary"
@@ -150,8 +150,15 @@
         <Icon {...iconAddNew} />
         <span>Create Record From Search Criteria</span>
       </Button>
-    </div>
-  {/if}
+    {/if}
+    {#if records.length === 10 && isInitialized}
+      <p>
+        {#if hasSearchQueries}
+          The 10 best matches are shown. Continue filtering to see more.
+        {:else}The first 10 records are shown. Filter to see more.{/if}
+      </p>
+    {/if}
+  </div>
 </div>
 
 <style>
@@ -195,5 +202,11 @@
 
   .footer {
     margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  .footer p {
+    font-size: var(--text-size-small);
+    color: var(--color-text-muted);
   }
 </style>
