@@ -31,7 +31,6 @@
     loggedInUserDetails && loggedInUserDetails?.id === userDetails?.id;
   $: isNewUser = userDetails === undefined;
   $: fullName = optionalField(userDetails?.full_name ?? '');
-  $: shortName = optionalField(userDetails?.short_name ?? '');
   $: username = requiredField(userDetails?.username ?? '');
   $: email = optionalField(userDetails?.email ?? '');
   $: role = requiredField<'user' | 'admin' | undefined>(
@@ -44,7 +43,6 @@
   $: formFields = (() => {
     const fields = {
       fullName,
-      shortName,
       username,
       email,
     };
@@ -62,7 +60,6 @@
     const formValues = $form.values;
     const request = {
       full_name: formValues.fullName,
-      short_name: formValues.shortName,
       username: formValues.username,
       email: formValues.email,
     };
@@ -93,7 +90,6 @@
     const { commonErrors, fieldSpecificErrors } =
       extractDetailedFieldBasedErrors<FieldKey>(e, {
         user_name: 'username',
-        short_name: 'shortName',
         is_superuser: 'role',
       });
     for (const [fieldKey, errors] of fieldSpecificErrors) {
@@ -120,12 +116,6 @@
   <UserFormInput
     label="Full Name"
     field={fullName}
-    input={{ component: TextInput }}
-  />
-
-  <UserFormInput
-    label="Short Name"
-    field={shortName}
     input={{ component: TextInput }}
   />
 

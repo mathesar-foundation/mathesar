@@ -9,7 +9,6 @@ import {
 
 export interface UnsavedUser {
   full_name: string | null;
-  short_name: string | null;
   email: string | null;
   username: string;
   password: string;

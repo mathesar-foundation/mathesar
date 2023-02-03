@@ -24,8 +24,6 @@ export class UserProfile implements Readonly<User> {
 
   readonly full_name;
 
-  readonly short_name;
-
   readonly email;
 
   readonly username;
@@ -36,7 +34,6 @@ export class UserProfile implements Readonly<User> {
     this.database_roles = userDetails.database_roles;
     this.schema_roles = userDetails.schema_roles;
     this.full_name = userDetails.full_name;
-    this.short_name = userDetails.short_name;
     this.email = userDetails.email;
     this.username = userDetails.username;
   }
@@ -46,9 +43,6 @@ export class UserProfile implements Readonly<User> {
   }
 
   getDisplayName(): string {
-    if (this.short_name) {
-      return this.short_name;
-    }
     return this.username;
   }
 
