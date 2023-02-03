@@ -40,6 +40,7 @@ services:
   test-service:
     profiles: [ "test" ]
     extends: service-without-db
+    container_name: mathesar_service_test
     build:
       context: .
       dockerfile: Dockerfile
@@ -50,6 +51,7 @@ services:
   demo-service:
     profiles: [ "demo" ]
     extends: service-without-db
+    container_name: mathesar_service_demo
     environment:
       - MODE=${MODE-PRODUCTION}
       - DEBUG=${DEBUG-False}
@@ -67,12 +69,13 @@ services:
       - media:/mathesar/media
       - static:/mathesar/static
   dev-service:
+    profiles: ["dev"]
+    container_name: mathesar_service_dev
     build:
       context: .
       dockerfile: Dockerfile
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
-    profiles: ["dev"]
     extends: service-without-db
     environment:
       - MODE=${MODE-DEVELOPMENT}
