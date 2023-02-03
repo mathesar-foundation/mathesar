@@ -18,11 +18,13 @@ export interface UnsavedUser {
 export type UserRole = 'viewer' | 'editor' | 'manager';
 
 export interface DatabaseRole {
+  id: number;
   database: Database['id'];
   role: UserRole;
 }
 
 export interface SchemaRole {
+  id: number;
   schema: SchemaEntry['id'];
   role: UserRole;
 }
@@ -31,7 +33,7 @@ export interface User extends Omit<UnsavedUser, 'password'> {
   readonly id: number;
   readonly is_superuser: boolean;
   readonly database_roles: DatabaseRole[];
-  readonly schema_roles: [];
+  readonly schema_roles: SchemaRole[];
 }
 
 function list() {
