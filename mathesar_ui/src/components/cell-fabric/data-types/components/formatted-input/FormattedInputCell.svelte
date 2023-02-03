@@ -14,8 +14,8 @@
   export let formatForDisplay: $$Props['formatForDisplay'];
 
   $: cssVariables = {
-    '--input-element-text-align': 'right',
     ...($$restProps.cssVariables || {}),
+    '--input-element-text-align': 'right',
   };
 </script>
 
