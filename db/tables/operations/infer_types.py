@@ -16,7 +16,7 @@ TEMP_SCHEMA = constants.INFERENCE_SCHEMA
 TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
 
 
-def update_table_column_types(schema, table_name, engine, metadata=None):
+def update_table_column_types(schema, table_name, engine, metadata=None, columns_might_have_defaults=True):
     metadata = metadata if metadata else get_empty_metadata()
     table = reflect_table(table_name, schema, engine, metadata=metadata)
     # we only want to infer (modify) the type of non-default columns
@@ -32,12 +32,13 @@ def update_table_column_types(schema, table_name, engine, metadata=None):
             table_name,
             column_name,
             engine,
-            metadata=metadata
+            metadata=metadata,
+            columns_might_have_defaults=columns_might_have_defaults,
         )
 
 
 # TODO consider returning a mapping of column identifiers to types
-def infer_table_column_types(schema, table_name, engine, metadata=None):
+def infer_table_column_types(schema, table_name, engine, metadata=None, columns_might_have_defaults=True):
     metadata = metadata if metadata else get_empty_metadata()
     table = reflect_table(table_name, schema, engine, metadata=metadata)
 
@@ -56,7 +57,11 @@ def infer_table_column_types(schema, table_name, engine, metadata=None):
 
     try:
         update_table_column_types(
-            TEMP_SCHEMA, temp_table.name, engine, metadata
+            TEMP_SCHEMA,
+            temp_table.name,
+            engine=engine,
+            metadata=metadata,
+            columns_might_have_defaults=columns_might_have_defaults,
         )
     except Exception as e:
         # Ensure the temp table is deleted
