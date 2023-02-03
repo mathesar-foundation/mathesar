@@ -51,7 +51,6 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
             elif type(e.orig) == CheckViolation:
                 raise database_api_exceptions.CheckViolationAPIException(
                     e,
-                    message="The requested update violates a check constraint",
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
             else:
@@ -79,7 +78,6 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
             elif type(e.orig) == CheckViolation:
                 raise database_api_exceptions.CheckViolationAPIException(
                     e,
-                    message="The requested insert violates a check constraint",
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
             else:

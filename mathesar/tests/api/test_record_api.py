@@ -1289,8 +1289,7 @@ def test_invalid_email_post_api_validation(empty_nasa_table, client):
     response_data = response.json()
     assert response.status_code == 400
     assert response_data[0]['code'] == ErrorCodes.CheckViolation.value
-    assert response_data[0]['message'] == 'The requested insert violates a check constraint'
-    assert response_data[0]['detail'] == 'value for domain mathesar_types.email violates check constraint \"email_check\"\n'
+    assert 'value for domain mathesar_types.email violates check constraint' in response_data[0]['message']
 
 
 def test_invalid_email_patch_api_validation(empty_nasa_table, client):
@@ -1309,8 +1308,7 @@ def test_invalid_email_patch_api_validation(empty_nasa_table, client):
     response_data = response.json()
     assert response.status_code == 400
     assert response_data[0]['code'] == ErrorCodes.CheckViolation.value
-    assert response_data[0]['message'] == 'The requested update violates a check constraint'
-    assert response_data[0]['detail'] == 'value for domain mathesar_types.email violates check constraint \"email_check\"\n'
+    assert 'value for domain mathesar_types.email violates check constraint' in response_data[0]['message']
 
 
 def test_record_patch_invalid_date(create_patents_table, client):

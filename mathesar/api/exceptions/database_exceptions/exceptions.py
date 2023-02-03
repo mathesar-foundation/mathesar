@@ -77,7 +77,8 @@ class CheckViolationAPIException(MathesarAPIException):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
         if details is None and exception.orig.diag.constraint_name == 'email_check':
-            details = exception.orig.args[0]
+            # TODO find a way to identify which column is actually causing the email violation
+            message = exception.orig.diag.message_primary
         super().__init__(exception, self.error_code, message, field, details, status_code)
 
 
