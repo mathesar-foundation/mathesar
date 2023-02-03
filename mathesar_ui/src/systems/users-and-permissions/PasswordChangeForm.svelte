@@ -12,7 +12,7 @@
     comboMustBeEqual,
   } from '@mathesar/components/form';
   import { iconSave } from '@mathesar/icons';
-  import UserApi, { type User } from '@mathesar/api/users';
+  import userApi, { type User } from '@mathesar/api/users';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import UserFormInput from './UserFormInput.svelte';
@@ -59,7 +59,7 @@
       hasProperty(formValues, 'oldPassword')
     ) {
       // logged in user is updating their own password
-      await UserApi.changePassword(formValues.oldPassword, formValues.password);
+      await userApi.changePassword(formValues.oldPassword, formValues.password);
       /**
        * Once password changes, the session gets invalided.
        * We reload the page so that the user can login again.
@@ -67,7 +67,7 @@
       window.location.reload();
     } else {
       // logged in user is updating someone else's password
-      await UserApi.resetPassword(userId, formValues.password);
+      await userApi.resetPassword(userId, formValues.password);
       showChangePasswordForm = false;
     }
   }

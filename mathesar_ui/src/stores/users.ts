@@ -1,6 +1,6 @@
 import { setContext, getContext } from 'svelte';
 import { get, writable, type Readable, type Writable } from 'svelte/store';
-import UserApi, { type User } from '@mathesar/api/users';
+import userApi, { type User } from '@mathesar/api/users';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 
@@ -21,7 +21,7 @@ export class UsersList implements UserListStore {
 
   readonly count: Writable<number> = writable(0);
 
-  request: ReturnType<typeof UserApi.list> | undefined;
+  request: ReturnType<typeof userApi.list> | undefined;
 
   constructor() {
     void this.fetchUsers();
@@ -32,7 +32,7 @@ export class UsersList implements UserListStore {
       this.requestStatus.set({
         state: 'processing',
       });
-      this.request = UserApi.list();
+      this.request = userApi.list();
       const response = await this.request;
       this.users.set(response.results);
       this.count.set(response.count);

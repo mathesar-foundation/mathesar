@@ -14,7 +14,7 @@
     FormSubmitWithCatch,
     type FieldStore,
   } from '@mathesar/components/form';
-  import UserApi, { type User } from '@mathesar/api/users';
+  import userApi, { type User } from '@mathesar/api/users';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
@@ -68,7 +68,7 @@
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
-      const newUser = await UserApi.add({
+      const newUser = await userApi.add({
         ...request,
         password: formValues.password,
       });
@@ -77,7 +77,7 @@
     }
 
     if (userDetails) {
-      await UserApi.update(userDetails.id, request);
+      await userApi.update(userDetails.id, request);
       if (isUserUpdatingThemselves && userProfileStore) {
         userProfileStore.update((details) => details.with(request));
       }
