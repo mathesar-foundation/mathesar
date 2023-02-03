@@ -18,6 +18,7 @@ import {
   faExternalLinkAlt,
   faFileAlt,
   faFilter,
+  faGear,
   faGlobe,
   faHammer,
   faHashtag,
@@ -128,6 +129,7 @@ export const iconOutcome: IconProps = { data: outcomeIcon };
 export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconRecord: IconProps = { data: faFileAlt };
 export const iconSchema: IconProps = { data: faProjectDiagram };
+export const iconSettingsMajor: IconProps = { data: faGear };
 export const iconShortcuts: IconProps = { data: faStar };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: tableIcon };

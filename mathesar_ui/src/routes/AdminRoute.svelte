@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Route } from 'tinro';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { iconSettingsMajor } from '@mathesar-component-library';
+  import { iconSettingsMajor } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import {
     ADMIN_URL,

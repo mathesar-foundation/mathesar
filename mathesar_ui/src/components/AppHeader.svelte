@@ -6,7 +6,6 @@
     LinkMenuItem,
     MenuHeading,
     MenuDivider,
-    iconSettingsMajor,
   } from '@mathesar-component-library';
   import { currentDatabase } from '@mathesar/stores/databases';
   import {
@@ -16,6 +15,7 @@
     iconUser,
     iconDatabase,
     iconLogout,
+    iconSettingsMajor,
   } from '@mathesar/icons';
   import {
     getDatabasePageUrl,
