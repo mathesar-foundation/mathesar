@@ -1,6 +1,15 @@
+/* eslint-disable max-classes-per-file */
+
 import { setContext, getContext } from 'svelte';
-import { writable, type Readable, type Writable } from 'svelte/store';
-import UserApi, { type User, type UnsavedUser } from '@mathesar/api/users';
+import {
+  get,
+  writable,
+  type Subscriber,
+  type Unsubscriber,
+  type Updater,
+  type Writable,
+} from 'svelte/store';
+import type { User, UnsavedUser } from '@mathesar/api/users';
 
 const contextKey = Symbol('userprofile store');
 
@@ -33,7 +42,7 @@ export class UserProfile implements Readonly<User> {
   }
 
   hasPermission() {
-    //
+    // To be implemented
   }
 
   getDisplayName(): string {
@@ -43,34 +52,47 @@ export class UserProfile implements Readonly<User> {
     return this.username;
   }
 
-  /** @throws Error if unable to save */
-  async update(
-    userDetails: Partial<Omit<UnsavedUser, 'password'>>,
-  ): Promise<UserProfile> {
-    await UserApi.update(this.id, userDetails);
-    const updatedUserProfile = new UserProfile({
+  with(userDetails: Partial<Omit<UnsavedUser, 'password'>>): UserProfile {
+    return new UserProfile({
       ...this,
       ...userDetails,
     });
-    const userProfileStore = getContext<Writable<UserProfile> | undefined>(
-      contextKey,
-    );
-    if (userProfileStore) {
-      userProfileStore.set(updatedUserProfile);
-    }
-    return updatedUserProfile;
   }
 }
 
-export function getUserProfileStoreFromContext():
-  | Readable<UserProfile>
-  | undefined {
-  return getContext<Readable<UserProfile>>(contextKey);
+export class UserProfileStore implements Writable<UserProfile> {
+  store: Writable<UserProfile>;
+
+  constructor(userProfile: UserProfile) {
+    this.store = writable(userProfile);
+  }
+
+  set(value: UserProfile): void {
+    this.store.set(value);
+  }
+
+  update(updater: Updater<UserProfile>): void {
+    this.store.update(updater);
+  }
+
+  subscribe(run: Subscriber<UserProfile>): Unsubscriber {
+    return this.store.subscribe(run);
+  }
+
+  get(): UserProfile {
+    return get(this.store);
+  }
+}
+
+/* eslint-enable max-classes-per-file */
+
+export function getUserProfileStoreFromContext(): UserProfileStore | undefined {
+  return getContext<UserProfileStore>(contextKey);
 }
 
 export function setUserProfileStoreContext(userDetails: User): void {
   if (getUserProfileStoreFromContext() !== undefined) {
     throw Error('User profile store context has already been set');
   }
-  setContext(contextKey, writable(new UserProfile(userDetails)));
+  setContext(contextKey, new UserProfileStore(new UserProfile(userDetails)));
 }

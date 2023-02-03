@@ -76,14 +76,11 @@
       return;
     }
 
-    if (isUserUpdatingThemselves && loggedInUserDetails) {
-      await loggedInUserDetails.update(request);
-      dispatch('update');
-      return;
-    }
-
     if (userDetails) {
       await UserApi.update(userDetails.id, request);
+      if (isUserUpdatingThemselves && userProfileStore) {
+        userProfileStore.update((details) => details.with(request));
+      }
       dispatch('update');
       return;
     }
