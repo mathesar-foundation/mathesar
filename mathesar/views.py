@@ -37,8 +37,8 @@ def _get_permissible_db_queryset(request):
     schema_qs = Schema.objects.all()
     permitted_schemas = SchemaAccessPolicy.scope_queryset(request, schema_qs)
     databases_from_permitted_schema = Database.objects.filter(schemas__in=permitted_schemas)
-    permission_restricted_qs = permission_restricted_qs.union(databases_from_permitted_schema)
-    return permission_restricted_qs
+    permission_restricted_qs = permission_restricted_qs | databases_from_permitted_schema
+    return permission_restricted_qs.distinct()
 
 
 def get_database_list(request):
