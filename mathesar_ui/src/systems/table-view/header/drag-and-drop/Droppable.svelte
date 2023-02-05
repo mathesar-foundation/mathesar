@@ -10,6 +10,10 @@
   function dragLeave() {
     isDraggedOverCounter -= 1;
   }
+
+  function dragDropped() {
+    isDraggedOverCounter = 0;
+  }
 </script>
 
 <div
@@ -28,6 +32,6 @@
     height: 100%;
   }
   .droppable.dragged_over > :global(div) {
-    border-right: 1px solid blue !important;
+    border-right: 0.3rem solid var(--sky-700) !important;
   }
 </style>
