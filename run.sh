@@ -21,6 +21,6 @@ else
   npm run build
 fi
 
-cd..
+cd ..
 python install.py --skip-confirm
 python manage.py runserver 0.0.0.0:8000 && fg
