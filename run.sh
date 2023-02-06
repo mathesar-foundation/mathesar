@@ -21,7 +21,5 @@ else
   npm run build
 fi
 
-cd ..
-python install.py
-python manage.py createsuperuser --no-input --username admin --email admin@example.com
+python install.py --skip-confirm
 python manage.py runserver 0.0.0.0:8000 && fg
