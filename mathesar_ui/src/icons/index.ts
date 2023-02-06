@@ -18,6 +18,7 @@ import {
   faExternalLinkAlt,
   faFileAlt,
   faFilter,
+  faGear,
   faGlobe,
   faHammer,
   faHashtag,
@@ -55,6 +56,7 @@ import {
   faStar,
   faPaste,
   faEllipsisV,
+  faArrowRightFromBracket,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -106,6 +108,7 @@ export const iconSortDescending: IconProps = { data: faSortAmountDown };
 export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
 export const iconPaste: IconProps = { data: faPaste };
+export const iconLogout: IconProps = { data: faArrowRightFromBracket };
 
 // THINGS
 //
@@ -126,6 +129,7 @@ export const iconOutcome: IconProps = { data: outcomeIcon };
 export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconRecord: IconProps = { data: faFileAlt };
 export const iconSchema: IconProps = { data: faProjectDiagram };
+export const iconSettingsMajor: IconProps = { data: faGear };
 export const iconShortcuts: IconProps = { data: faStar };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: tableIcon };
