@@ -15,8 +15,12 @@ services:
       - postgresql_data:/var/lib/postgresql/data
   service-without-db:
     profiles: ["web-server"]
-    image: mathesar/mathesar-prod:latest
     container_name: mathesar_service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_REQUIREMENTS: requirements-prod.txt
     environment:
       - MODE=${MODE-PRODUCTION}
       - DEBUG=${DEBUG-False}
@@ -31,6 +35,7 @@ services:
   service:
     profiles: ["prod"]
     extends: service-without-db
+    image: mathesar/mathesar-prod:latest
     # Volumes are not shared when extending
     volumes:
       - static:/code/static
