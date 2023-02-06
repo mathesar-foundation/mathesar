@@ -9,6 +9,7 @@ from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerialize
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
+from mathesar.api.ui.serializers.users import UserSerializer
 from mathesar.database.types import UIType
 from mathesar.models.base import Database, Schema, Table
 from mathesar.models.query import UIQuery
@@ -66,6 +67,15 @@ def get_ui_type_list(request, database):
     return type_serializer.data
 
 
+def get_user_data(request):
+    user_serializer = UserSerializer(
+        request.user,
+        many=False,
+        context={'request': request}
+    )
+    return user_serializer.data
+
+
 def get_common_data(request, database, schema=None):
     return {
         'current_db': database.name if database else None,
@@ -75,6 +85,7 @@ def get_common_data(request, database, schema=None):
         'tables': get_table_list(request, schema),
         'queries': get_queries_list(request, schema),
         'abstract_types': get_ui_type_list(request, database),
+        'user': get_user_data(request),
         'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
     }
 
