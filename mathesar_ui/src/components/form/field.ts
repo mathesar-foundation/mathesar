@@ -79,11 +79,16 @@ export function field<T>(props: OptionalFieldProps<T>): OptionalField<T>;
 export function field<T>(props: FieldProps<T>): FieldStore<T>;
 export function field<T>(props: FieldProps<T>): FieldStore<T> {
   const value = writable(props.initialValue);
+  const serverErrors = writable<string[]>([]);
   const hasChanges = derived(value, (v) => v !== props.initialValue);
-  const fieldErrors = derived(value, (v) => getErrors({ ...props, value: v }));
+  const fieldErrors = derived(value, (v) => {
+    // Whenever the value changes, we clear the server errors to provide for a
+    // clean UX while the user is fixing them.
+    serverErrors.set([]);
+    return getErrors({ ...props, value: v });
+  });
   const writableComboErrors = writable<string[]>([]);
   const comboErrors = derived(writableComboErrors, (e) => e);
-  const serverErrors = writable<string[]>([]);
   const errorStores = [fieldErrors, comboErrors, serverErrors];
   const errors = derived(errorStores, (a) => a.flat());
   const isValid = derived(errors, (e) => e.length === 0);

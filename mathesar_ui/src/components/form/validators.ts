@@ -166,3 +166,29 @@ export function comboInvalidIf<Fields extends FieldsTuple>(
 ): ComboValidator {
   return comboValidator(fields, invalidIf(fn, msg));
 }
+
+export function comboValidIf<Fields extends FieldsTuple>(
+  fields: Fields,
+  fn: SimpleComboValidatorFn<Fields>,
+  msg: string,
+): ComboValidator {
+  return comboValidator(fields, validIf(fn, msg));
+}
+
+function allArrayValuesAreEqual(values: unknown[]): boolean {
+  let previousValue = values[0];
+  for (const value of values) {
+    if (value !== previousValue) {
+      return false;
+    }
+    previousValue = value;
+  }
+  return true;
+}
+
+export function comboMustBeEqual<Fields extends FieldsTuple>(
+  fields: Fields,
+  msg: string,
+): ComboValidator {
+  return comboValidIf(fields, allArrayValuesAreEqual, msg);
+}

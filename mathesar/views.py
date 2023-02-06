@@ -98,7 +98,7 @@ def get_user_data(request):
     return user_serializer.data
 
 
-def get_common_data(request, database, schema=None):
+def get_common_data(request, database=None, schema=None):
     return {
         'current_db': database.name if database else None,
         'current_schema': schema.id if schema else None,
@@ -168,6 +168,20 @@ def home(request):
             'common_data': get_common_data(request, database)
         })
     return redirect('schemas', db_name=database.name)
+
+
+@login_required
+def profile(request):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
+
+
+@login_required
+def admin_home(request, **kwargs):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
 
 
 @login_required
