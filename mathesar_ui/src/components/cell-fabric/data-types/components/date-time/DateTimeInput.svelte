@@ -70,6 +70,12 @@
     dispatch('artificialInput', value);
     dispatch('artificialChange', value);
   }
+
+  function onKeydown(event: KeyboardEvent) {
+    if (event.key === 'Tab' || (event.key === 'Tab' && event.shiftKey)) {
+      close();
+    }
+  }
 </script>
 
 <FormattedInput
@@ -81,7 +87,7 @@
   on:focus={open}
   on:focus
   on:blur={checkAndBlur}
-  on:keydown
+  on:keydown={onKeydown}
   on:artificialInput
   on:artificialChange
 />
