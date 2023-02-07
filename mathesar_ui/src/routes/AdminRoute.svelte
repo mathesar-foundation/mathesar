@@ -9,6 +9,7 @@
     ADMIN_USERS_PAGE_URL,
   } from './urls';
   import UsersRoute from './UsersRoute.svelte';
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
 </script>
 
 <AppendBreadcrumb
@@ -22,8 +23,15 @@
 
 <Route path="/" redirect={ADMIN_GENERAL_PAGE_URL} />
 
-<LayoutWithHeader>
-  <h1>Administration route</h1>
+<LayoutWithHeader --max-layout-width="85rem">
+  <AppSecondaryHeader
+    slot="secondary-header"
+    theme="light"
+    pageTitleAndMetaProps={{
+      name: 'Administrator',
+      icon: iconSettingsMajor,
+    }}
+  />
   <div>
     <a href={ADMIN_GENERAL_PAGE_URL}>Goto general</a>
     <a href={ADMIN_USERS_PAGE_URL}>Goto users</a>

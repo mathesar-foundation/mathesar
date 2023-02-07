@@ -3,7 +3,7 @@
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
   export let icon: IconProps;
-  export let type: string;
+  export let type: string | undefined = undefined;
   export let name: string;
 </script>
 
@@ -15,7 +15,9 @@
           <Icon {...icon} size="2em" />
         </div>
         <div class="left-meta-container">
-          <span class="entity-type">{type}</span>
+          {#if type}
+            <span class="entity-type">{type}</span>
+          {/if}
           <span class="entity-name">{name}</span>
         </div>
       </div>
@@ -62,12 +64,14 @@
     display: flex;
     flex-direction: column;
     margin-left: 0.75rem;
-    padding-top: 0.5rem;
+
+    > :global(* + *) {
+      margin-top: -0.5rem;
+    }
   }
 
   .entity-type {
     font-size: var(--text-size-small);
-    line-height: 0.5rem;
     font-weight: 600;
     text-transform: uppercase;
   }
