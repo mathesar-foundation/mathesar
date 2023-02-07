@@ -12,6 +12,7 @@
 
   export let form: Form;
   export let onProceed: () => Promise<void> | void = () => {};
+  export let onCancel: () => void = () => {};
   export let getErrorMessages: (e: unknown) => string[] = (e) => [
     getErrorMessage(e),
   ];
@@ -35,7 +36,10 @@
   <FormSubmit
     {form}
     onProceed={proceed}
-    onCancel={() => form.reset()}
+    onCancel={() => {
+      form.reset();
+      onCancel();
+    }}
     {...$$restProps}
   />
   <div class="errors">

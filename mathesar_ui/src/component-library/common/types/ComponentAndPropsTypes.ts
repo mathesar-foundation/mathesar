@@ -1,6 +1,8 @@
-import type { SvelteComponent } from 'svelte';
+import type { ComponentProps, ComponentType, SvelteComponent } from 'svelte';
 
 /**
+ * @deprecated
+ *
  * Why `T = unknown` here?
  *
  * This was previously `T = Record<string, unknown>` which seemed to make more
@@ -16,9 +18,11 @@ export interface ComponentAndProps<T = unknown> {
   props?: T;
 }
 
-// TODO change to the following, when we have time to fix the type errors:
-//
-// export type ComponentAndProps<T extends SvelteComponent> = {
-//   component: ComponentType<T>;
-//   props: ComponentProps<T>;
-// };
+/**
+ * TODO: Remove ComponentAndProps and replace with ComponentWithProps,
+ * when we have time to fix the type errors
+ */
+export type ComponentWithProps<T extends SvelteComponent> = {
+  component: ComponentType<T>;
+  props?: ComponentProps<T>;
+};
