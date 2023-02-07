@@ -74,6 +74,14 @@ For sample table data, you can create a new table in the UI using the `patents.c
 
 It is recommended that you keep the Docker containers running while you make changes to the code. Any change to the code made locally will sync to the container and the version deployed at `http://localhost:8000` will always be the latest local version of the code.
 
+### Developing demo data sets and functionality
+
+For this, you should add an environment variable to `.env`:
+
+``` sh
+DJANGO_SETTINGS_MODULE=demo.settings
+```
+
 ### Developing in Windows
 
 Windows users who want to run the Mathesar Docker development environment in WSL are advised to clone the repository in a Linux filesystem. When the project resides in a Windows filesystem, WSL does not work well with hot module replacement (HMR), which is required for frontend development. Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues), and the [frontend development README file](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md#developing-in-windows) for more details.
