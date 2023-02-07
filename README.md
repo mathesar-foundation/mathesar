@@ -15,6 +15,7 @@ We started building Mathesar in March 2021 and are making steady progress toward
 - [Contributing](#contributing)
   - [Help with documentation](#help-with-documentation)
 - [Local Development](#local-development)
+  - [Developing demo data sets and functionality](#developing-demo-data-sets-and-functionality)
   - [Developing in Windows](#developing-in-windows)
   - [Configuration Options](#configuration-options)
   - [Frontend](#frontend)
