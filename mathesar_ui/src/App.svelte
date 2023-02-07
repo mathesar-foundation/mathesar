@@ -6,9 +6,16 @@
     setRecordSelectorControllerInContext,
   } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { confirmationController } from '@mathesar/stores/confirmation';
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import { setUserProfileStoreContext } from '@mathesar/stores/userProfile';
   import { modal } from './stores/modal';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import RootRoute from './routes/RootRoute.svelte';
+
+  const commonData = preloadCommonData();
+  if (commonData?.user) {
+    setUserProfileStoreContext(commonData.user);
+  }
 
   const recordSelectorModal = modal.spawnModalController();
   const recordSelectorController = new RecordSelectorController({
