@@ -38,14 +38,11 @@
     flex-basis: 18rem;
 
     border-right: 1px solid var(--slate-200);
-    // background-color: yellow;
   }
 
   main {
     flex-basis: 0;
     flex-grow: 999;
     min-inline-size: 50%;
-
-    // background-color: red;
   }
 </style>

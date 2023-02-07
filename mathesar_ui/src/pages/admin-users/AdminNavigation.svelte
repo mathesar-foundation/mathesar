@@ -9,13 +9,13 @@
 </script>
 
 <ul role="menu" class="admin-navigation-menu">
-  <li>
+  <li role="menuitem">
     <a href={ADMIN_GENERAL_PAGE_URL} use:active class="passthrough">
       <Icon {...iconSettingsMajor} />
       <span>General</span>
     </a>
   </li>
-  <li>
+  <li role="menuitem">
     <a href={ADMIN_USERS_PAGE_URL} use:active class="passthrough">
       <Icon {...iconUser} />
       <span>Users</span>
@@ -36,7 +36,7 @@
     a {
       display: flex;
       align-items: center;
-      padding: 0.57rem;
+      padding: 0.5rem;
       border-radius: var(--border-radius-m);
       font-size: var(--text-size-large);
       cursor: pointer;
