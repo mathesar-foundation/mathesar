@@ -5,6 +5,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from mathesar.api.db.permissions.database import DatabaseAccessPolicy
+from mathesar.api.db.permissions.query import QueryAccessPolicy
+from mathesar.api.db.permissions.schema import SchemaAccessPolicy
+from mathesar.api.db.permissions.table import TableAccessPolicy
 from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer
@@ -17,17 +21,30 @@ from mathesar.state import reset_reflection
 
 
 def get_schema_list(request, database):
+    qs = Schema.objects.filter(database=database)
+    permission_restricted_qs = SchemaAccessPolicy.scope_queryset(request, qs)
     schema_serializer = SchemaSerializer(
-        Schema.objects.filter(database=database),
+        permission_restricted_qs,
         many=True,
         context={'request': request}
     )
     return schema_serializer.data
 
 
+def _get_permissible_db_queryset(request):
+    qs = Database.objects.all()
+    permission_restricted_qs = DatabaseAccessPolicy.scope_queryset(request, qs)
+    schema_qs = Schema.objects.all()
+    permitted_schemas = SchemaAccessPolicy.scope_queryset(request, schema_qs)
+    databases_from_permitted_schema = Database.objects.filter(schemas__in=permitted_schemas)
+    permission_restricted_qs = permission_restricted_qs | databases_from_permitted_schema
+    return permission_restricted_qs.distinct()
+
+
 def get_database_list(request):
+    permission_restricted_db_qs = _get_permissible_db_queryset(request)
     database_serializer = DatabaseSerializer(
-        Database.objects.all(),
+        permission_restricted_db_qs,
         many=True,
         context={'request': request}
     )
@@ -37,8 +54,10 @@ def get_database_list(request):
 def get_table_list(request, schema):
     if schema is None:
         return []
+    qs = Table.objects.filter(schema=schema)
+    permission_restricted_qs = TableAccessPolicy.scope_queryset(request, qs)
     table_serializer = TableSerializer(
-        Table.objects.filter(schema=schema),
+        permission_restricted_qs,
         many=True,
         context={'request': request}
     )
@@ -48,8 +67,11 @@ def get_table_list(request, schema):
 def get_queries_list(request, schema):
     if schema is None:
         return []
+    qs = UIQuery.objects.filter(base_table__schema=schema)
+    permission_restricted_qs = QueryAccessPolicy.scope_queryset(request, qs)
+
     query_serializer = QuerySerializer(
-        UIQuery.objects.filter(base_table__schema=schema),
+        permission_restricted_qs,
         many=True,
         context={'request': request}
     )
@@ -76,7 +98,7 @@ def get_user_data(request):
     return user_serializer.data
 
 
-def get_common_data(request, database, schema=None):
+def get_common_data(request, database=None, schema=None):
     return {
         'current_db': database.name if database else None,
         'current_schema': schema.id if schema else None,
@@ -92,17 +114,18 @@ def get_common_data(request, database, schema=None):
 
 def get_current_database(request, db_name):
     """Get database from passed name, with fall back behavior."""
+    permitted_databases = _get_permissible_db_queryset(request)
     if db_name is not None:
-        current_database = get_object_or_404(Database, name=db_name)
+        current_database = get_object_or_404(permitted_databases, name=db_name)
     else:
         request_database_name = request.GET.get('database')
         try:
             if request_database_name is not None:
                 # Try to get the database named specified in the request
-                current_database = Database.objects.get(name=request_database_name)
+                current_database = permitted_databases.get(name=request_database_name)
             else:
                 # Try to get the first database available
-                current_database = Database.objects.order_by('id').first()
+                current_database = permitted_databases.order_by('id').first()
         except Database.DoesNotExist:
             current_database = None
     return current_database
@@ -111,7 +134,8 @@ def get_current_database(request, db_name):
 def get_current_schema(request, schema_id, database):
     # if there's a schema ID passed in, try to retrieve the schema, or return a 404 error.
     if schema_id is not None:
-        return get_object_or_404(Schema, id=schema_id)
+        permitted_schemas = SchemaAccessPolicy.scope_queryset(request, Schema.objects.all())
+        return get_object_or_404(permitted_schemas, id=schema_id)
     else:
         try:
             # Try to get the first schema in the DB
@@ -139,7 +163,25 @@ def reflect_all(_):
 @login_required
 def home(request):
     database = get_current_database(request, None)
+    if database is None:
+        return render(request, 'mathesar/index.html', {
+            'common_data': get_common_data(request, database)
+        })
     return redirect('schemas', db_name=database.name)
+
+
+@login_required
+def profile(request):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
+
+
+@login_required
+def admin_home(request, **kwargs):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
 
 
 @login_required
