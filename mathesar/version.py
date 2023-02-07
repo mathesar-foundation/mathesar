@@ -9,7 +9,8 @@ from mathesar.api.exceptions.generic_exceptions.base_exceptions import NetworkEx
 
 def get_cached_version_info():
     """
-    Like `block_for_version_info`, but only accesses the cache: does not block.
+    Like `_block_for_version_info`, but only accesses the cache: does not block. To be used in
+    `mathesar.views`, where we might want this information, but are not willing to block for it.
     """
     current_release_info = _get_cached_current_release_info()
     latest_release_info = _get_cached_latest_release_info()
@@ -17,10 +18,15 @@ def get_cached_version_info():
 
 
 def populate_version_info_cache():
-    block_for_version_info()
+    """
+    Populates and refreshes the version-info cache.
+
+    To be called by something like a cron-job to keep the cache up-to-date.
+    """
+    _block_for_version_info()
 
 
-def block_for_version_info():
+def _block_for_version_info():
     """
     Makes blocking HTTP calls to retrieve release information about the current
     and latest releases.
@@ -44,6 +50,10 @@ def block_for_version_info():
 
 
 def _build_version_info(current_release_info, latest_release_info):
+    """
+    This is meant to be provided to the frontend in the `mathesar.views.common_data` struct, so
+    that it can provide notifications about new releases in any view.
+    """
     is_update_available = _is_same_version(
         current_release_info,
         latest_release_info,
