@@ -1,6 +1,9 @@
 <script lang="ts">
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
-  import { makeStyleStringFromCssVariables } from '@mathesar/utils/styles';
+  import {
+    makeStyleStringFromCssVariables,
+    mergeStyleStrings,
+  } from '@mathesar/utils/styles';
   import type { TextInputProps } from './TextInputTypes';
 
   type $$Props = TextInputProps;
@@ -27,9 +30,7 @@
   $: styleStringFromCssVariables = cssVariables
     ? makeStyleStringFromCssVariables(cssVariables)
     : '';
-  $: style = $$restProps.style
-    ? styleStringFromCssVariables + $$restProps.style
-    : styleStringFromCssVariables;
+  $: style = mergeStyleStrings(styleStringFromCssVariables, $$restProps.style);
 </script>
 
 <BaseInput {...$$restProps} bind:id />
