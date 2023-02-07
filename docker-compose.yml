@@ -65,6 +65,10 @@ services:
     image: mathesar/mathesar-demo:latest
     depends_on:
       - db
+    ports:
+      - "8000:8000"
+      - "3000:3000"
+      - "6006:6006"
   caddy-reverse-proxy:
     profiles: ["prod"]
     image: mathesar/mathesar-caddy:latest
