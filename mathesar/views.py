@@ -115,6 +115,10 @@ def get_common_data(request, database=None, schema=None):
 
 
 def _get_version_info(request):
+    """
+    We want to give admin users information about current and latest releases. This only accesses
+    what we have cached, so might return nothing even if the user is an admin.
+    """
     if _is_admin(request):
         return get_cached_version_info()
 
