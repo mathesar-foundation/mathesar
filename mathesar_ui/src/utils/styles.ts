@@ -11,12 +11,14 @@ export function makeStyleStringFromCssVariables(cssVariables: CssVariablesObj) {
 }
 
 export function mergeStyleStrings(...args: (string | undefined)[]) {
-  return args.filter(truthy).map((styleString) => {
-    const trimmedStyleString = styleString.trim();
-    if (trimmedStyleString.endsWith(";")) {
-      return trimmedStyleString;
-    } else {
-      return trimmedStyleString + ";"
-    }
-  }).join("")
+  return args
+    .filter(truthy)
+    .map((styleString) => {
+      const trimmedStyleString = styleString.trim();
+      if (trimmedStyleString.endsWith(';')) {
+        return trimmedStyleString;
+      }
+        return `${trimmedStyleString};`;
+    })
+    .join('');
 }

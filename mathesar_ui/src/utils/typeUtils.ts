@@ -9,7 +9,6 @@ export function assertExhaustive(value: never): never {
   throw new MissingExhaustiveConditionError(value);
 }
 
-
 export function truthy<T>(value: T): value is Truthy<T> {
   return !!value;
 }
