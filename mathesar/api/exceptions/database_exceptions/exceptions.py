@@ -65,6 +65,23 @@ class UniqueViolationAPIException(MathesarAPIException):
         self.status_code = status_code
 
 
+class CheckViolationAPIException(MathesarAPIException):
+    error_code = ErrorCodes.CheckViolation.value
+
+    def __init__(
+            self,
+            exception,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        if details is None and exception.orig.diag.constraint_name == 'email_check':
+            # TODO find a way to identify which column is actually causing the email violation
+            message = exception.orig.diag.message_primary
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
 class DuplicateTableAPIException(ProgrammingAPIException):
     # Default message is not needed as the exception string provides enough details
     error_code = ErrorCodes.DuplicateTableError.value
