@@ -107,6 +107,7 @@
     }
     .tables {
       flex-basis: 65%;
+      padding-bottom: 20px;
     }
     .explorations {
       flex-basis: 35%;
