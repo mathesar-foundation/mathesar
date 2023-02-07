@@ -10,7 +10,7 @@
   export let schema: SchemaEntry;
 </script>
 
-<div class="container">
+<div class="container tables-list">
   {#each tables as table (table.id)}
     <TableCard {table} {database} {schema} />
   {:else}
@@ -26,6 +26,9 @@
     grid-gap: 1rem;
     --minimum-item-width: 18rem;
     // align all child items to the left
+  }
+  .tables-list {
+    padding-bottom: 20px;
   }
   @supports (width: min(var(--minimum-item-width), 100%)) {
     .container {
