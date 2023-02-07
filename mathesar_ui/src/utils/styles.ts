@@ -18,7 +18,7 @@ export function mergeStyleStrings(...args: (string | undefined)[]) {
       if (trimmedStyleString.endsWith(';')) {
         return trimmedStyleString;
       }
-        return `${trimmedStyleString};`;
+      return `${trimmedStyleString};`;
     })
     .join('');
 }
