@@ -1,13 +1,15 @@
 <script lang="ts">
   import AppHeader from '@mathesar/components/AppHeader.svelte';
   import LiveDemoBanner from '@mathesar/components/LiveDemoBanner.svelte';
-  import { createStyleString } from '@mathesar/utils/styles';
+  import { makeStyleStringFromCssVariables } from '@mathesar/utils/styles';
 
   export let fitViewport = false;
   export let restrictWidth = false;
   export let cssVariables: Record<string, string> | undefined = undefined;
 
-  $: style = cssVariables ? createStyleString(cssVariables) : undefined;
+  $: style = cssVariables
+    ? makeStyleStringFromCssVariables(cssVariables)
+    : undefined;
 </script>
 
 <div class="app-layout" class:fit-viewport={fitViewport} {style}>
