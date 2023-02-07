@@ -21,7 +21,7 @@ services:
     volumes:
       - media:/mathesar/media
       - static:/mathesar/static
-  service-without-db:
+  base-service:
     profiles: ["web-server"]
     container_name: mathesar_service
     build:
@@ -42,7 +42,7 @@ services:
       - media:/code/media
   service:
     profiles: ["prod"]
-    extends: service-without-db
+    extends: base-service
     image: mathesar/mathesar-prod:latest
     # Volumes are not shared when extending
     volumes:
@@ -52,7 +52,7 @@ services:
       - db
   test-service:
     profiles: [ "test" ]
-    extends: service-without-db
+    extends: base-service
     container_name: mathesar_service_test
     build:
       context: .
@@ -69,7 +69,7 @@ services:
       dockerfile: Dockerfile
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
-    extends: service-without-db
+    extends: base-service
     environment:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
