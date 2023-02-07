@@ -9,18 +9,21 @@
   // TODO: Update the icon
   $: userTypeIcon = user.is_superuser ? iconUser : iconUser;
   $: userTypeText = user.is_superuser ? 'Admin' : 'Custom';
+  $: showUserDetailedInfo = user.email || user.full_name;
 </script>
 
 <a class="user-row passthrough" href={getEditUsersPageUrl(user.id)}>
   <div class="user-info">
     <span>{user.username}</span>
-    <div class="user-detailed-info">
-      {#if user.full_name}
-        <span>{user.full_name}</span>
-        <span class="divider" />
-      {/if}
-      <span>{user.email}</span>
-    </div>
+    {#if showUserDetailedInfo}
+      <div class="user-detailed-info">
+        {#if user.full_name}
+          <span>{user.full_name}</span>
+          <span class="divider" />
+        {/if}
+        <span>{user.email}</span>
+      </div>
+    {/if}
   </div>
   <div class="user-type">
     <Icon class="icon" {...userTypeIcon} />

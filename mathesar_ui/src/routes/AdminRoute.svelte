@@ -3,11 +3,11 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconSettingsMajor } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import { ADMIN_URL, ADMIN_GENERAL_PAGE_URL } from './urls';
-  import UsersRoute from './UsersRoute.svelte';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import AdminPageLayout from '@mathesar/pages/admin-users/AdminPageLayout.svelte';
   import AdminNavigation from '@mathesar/pages/admin-users/AdminNavigation.svelte';
+  import UsersRoute from './UsersRoute.svelte';
+  import { ADMIN_URL, ADMIN_GENERAL_PAGE_URL } from './urls';
 
   const PAGE_MAX_WIDTH = '85rem';
 </script>

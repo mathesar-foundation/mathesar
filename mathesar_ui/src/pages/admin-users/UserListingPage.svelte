@@ -9,9 +9,9 @@
     TextInputWithPrefix,
   } from '@mathesar/component-library';
   import { iconAddNew } from '@mathesar/icons';
-  import UserRow from './UserRow.svelte';
   import type { User } from '@mathesar/api/users';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import UserRow from './UserRow.svelte';
 
   let filterQuery = '';
 
@@ -19,15 +19,12 @@
   $: requestStatus = $usersStore?.requestStatus;
   $: users = $usersStore?.users;
 
-  function filterUsers(users: User[], query: string) {
-    const isMatch = (user: User, q: string) => {
-      return (
-        user.username.toLowerCase().includes(q) ||
-        user.full_name?.toLowerCase().includes(q) ||
-        user.email?.toLowerCase().includes(q)
-      );
-    };
-    return users?.filter((user) => {
+  function filterUsers(_users: User[], query: string) {
+    const isMatch = (user: User, q: string) =>
+      user.username.toLowerCase().includes(q) ||
+      user.full_name?.toLowerCase().includes(q) ||
+      user.email?.toLowerCase().includes(q);
+    return _users?.filter((user) => {
       if (query) {
         const sanitizedQuery = query.trim().toLowerCase();
         return isMatch(user, sanitizedQuery);

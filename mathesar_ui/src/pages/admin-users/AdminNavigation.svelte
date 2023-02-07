@@ -27,6 +27,7 @@
   .admin-navigation-menu {
     list-style-type: none;
     padding-right: 1rem;
+    padding-left: 0;
 
     > :global(* + *) {
       margin-top: 0.15rem;
