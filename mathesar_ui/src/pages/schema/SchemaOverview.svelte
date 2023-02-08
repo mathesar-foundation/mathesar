@@ -30,7 +30,7 @@
       </slot>
     </OverviewHeader>
     {#if isTablesLoading}
-      <TableSkeleton num_tables={schema.num_tables}/>
+      <TableSkeleton numTables={schema.num_tables}/>
     {:else if tablesMap.size}
       <TablesList tables={[...tablesMap.values()]} {database} {schema} />
     {:else}
