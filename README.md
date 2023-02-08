@@ -15,6 +15,7 @@ We started building Mathesar in March 2021 and are making steady progress toward
 - [Contributing](#contributing)
   - [Help with documentation](#help-with-documentation)
 - [Local Development](#local-development)
+  - [Developing demo data sets and functionality](#developing-demo-data-sets-and-functionality)
   - [Developing in Windows](#developing-in-windows)
   - [Configuration Options](#configuration-options)
   - [Frontend](#frontend)
@@ -47,7 +48,7 @@ cp .env.example .env
 
 From the repository's root directory, run:
 ```
-docker-compose up
+docker-compose --profile dev up
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. 
@@ -73,6 +74,14 @@ If you'd prefer to develop using the Django Rest Framework browsable API, you ca
 For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 
 
 It is recommended that you keep the Docker containers running while you make changes to the code. Any change to the code made locally will sync to the container and the version deployed at `http://localhost:8000` will always be the latest local version of the code.
+
+### Developing demo data sets and functionality
+
+For this, you should add an environment variable to `.env`:
+
+``` sh
+DJANGO_SETTINGS_MODULE=demo.settings
+```
 
 ### Developing in Windows
 
