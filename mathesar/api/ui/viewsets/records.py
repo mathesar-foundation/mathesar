@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from sqlalchemy.exc import IntegrityError
 
-from mathesar.api.ui.permissions.ui_records import RecordAccessPolicy
+from mathesar.api.db.permissions.records import RecordAccessPolicy
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 
 from mathesar.api.utils import get_table_or_404
@@ -18,7 +18,7 @@ class RecordViewSet(AccessViewSetMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         return Table.objects.all().order_by('-created_at')
 
-    @action(methods=['delete'], detail=False)
+    @action(methods=['post'], detail=False)
     def delete(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
         pks = request.data.get("pks")

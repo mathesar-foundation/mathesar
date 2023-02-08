@@ -1158,7 +1158,7 @@ def test_record_bulk_delete(create_patents_table, client):
         'pks': record_ids
     }
 
-    response = client.delete(f'/api/ui/v0/tables/{table.id}/records/delete/', data=data)
+    response = client.post(f'/api/ui/v0/tables/{table.id}/records/delete/', data=data)
     assert response.status_code == 204
     assert len(table.get_records()) == original_num_records - len(record_ids)
 
@@ -1171,7 +1171,7 @@ def test_record_bulk_delete_fkey_violation(library_ma_tables, client):
         'pks': record_ids
     }
 
-    response = client.delete(f'/api/ui/v0/tables/{publications.id}/records/delete/', data=data)
+    response = client.post(f'/api/ui/v0/tables/{publications.id}/records/delete/', data=data)
     assert response.status_code == 400
     response_exception = response.json()[0]
     assert response_exception['code'] == ErrorCodes.ForeignKeyViolation.value
@@ -1196,7 +1196,7 @@ def test_record_bulk_delete_atomicity(library_ma_tables, client):
         'pks': record_ids
     }
 
-    response = client.delete(f'/api/ui/v0/tables/{publications.id}/records/delete/', data=data)
+    response = client.post(f'/api/ui/v0/tables/{publications.id}/records/delete/', data=data)
     assert response.status_code == 400
     response_exception = response.json()[0]
     assert response_exception['code'] == ErrorCodes.ForeignKeyViolation.value
