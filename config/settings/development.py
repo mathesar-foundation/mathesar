@@ -1,3 +1,3 @@
-from .common_settings import * # noqa
+from config.settings.common_settings import * # noqa
 
 # Override default settings
