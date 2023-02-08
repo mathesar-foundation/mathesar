@@ -1,3 +1,4 @@
+from config.settings.production import *  # noqa
 from config.settings import *  # noqa
 from decouple import config as decouple_config
 

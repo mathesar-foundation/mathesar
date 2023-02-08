@@ -1,3 +1,4 @@
+-r requirements-demo.txt
 flake8==3.9.0
 ipython==7.31.1
 pytest==6.2.3

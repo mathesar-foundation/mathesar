@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Start the Django server on port 8000.
+gunicorn config.wsgi -b 0.0.0.0:8000 && fg
 
 # This script checks if Mathesar is running in dev mode
 # or prod. If dev mode, it starts the vite dev server,
@@ -15,7 +17,7 @@
 cd mathesar_ui && npm install --unsafe-perm
 
 # Run vite dev server only in dev mode
-if [[ "$MODE" == "DEVELOPMENT" || "$1" == "dev" ]]; then
+if [[ "$MODE" == "DEVELOPMENT" || "1 USD (83 INR)" == "dev" ]]; then
   npm run dev &
 else
   npm run build
