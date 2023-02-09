@@ -1,25 +1,18 @@
 import { setContext, getContext } from 'svelte';
-import { get, writable, type Readable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import userApi, { type User } from '@mathesar/api/users';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
+import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
 const contextKey = Symbol('users list store');
 
-interface UserListStore {
-  requestStatus: Readable<RequestStatus | undefined>;
-  users: Readable<User[]>;
-  count: Readable<number>;
-  fetchUsers: () => Promise<void>;
-  getUserDetails: (userId: number) => Promise<User | undefined>;
-}
-
-export class UsersList implements UserListStore {
+class WritableUsersStore {
   readonly requestStatus: Writable<RequestStatus | undefined> = writable();
 
-  readonly users: Writable<User[]> = writable([]);
+  readonly users = writable<User[]>([]);
 
-  readonly count: Writable<number> = writable(0);
+  readonly count = writable(0);
 
   request: ReturnType<typeof userApi.list> | undefined;
 
@@ -60,15 +53,15 @@ export class UsersList implements UserListStore {
   }
 }
 
-export function getUsersStoreFromContext():
-  | Readable<UserListStore>
-  | undefined {
-  return getContext<Readable<UserListStore>>(contextKey);
+export type UsersStore = MakeWritablePropertiesReadable<WritableUsersStore>;
+
+export function getUsersStoreFromContext(): UsersStore | undefined {
+  return getContext<WritableUsersStore>(contextKey);
 }
 
-export function setUsersStoreContext(): void {
+export function setUsersStoreInContext(): void {
   if (getUsersStoreFromContext() !== undefined) {
-    throw Error('User profile store context has already been set');
+    throw Error('UsersStore context has already been set');
   }
-  setContext(contextKey, writable(new UsersList()));
+  setContext(contextKey, new WritableUsersStore());
 }
