@@ -7,11 +7,6 @@ import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
 const contextKey = Symbol('users list store');
 
-/**
- * This class is separate from the interface so that we can leverage TS to
- * enforce compile-time checks which ensure some properties are publicly
- * readable while privately writable.
- */
 class WritableUsersStore {
   readonly requestStatus: Writable<RequestStatus | undefined> = writable();
 
