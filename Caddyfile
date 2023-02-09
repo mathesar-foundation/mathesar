@@ -1,0 +1,24 @@
+:80 {
+    log {
+        output stdout
+    }
+	respond /caddy-health-check 200
+
+	handle_path /media/* {
+		@downloads {
+			query dl=*
+		}
+		header @downloads Content-disposition "attachment; filename={query.dl}"
+
+		file_server {
+			root {$MEDIA_ROOT:/mathesar/media/}
+		}
+	}
+
+	handle_path /static/* {
+		file_server {
+			root {$STATIC_ROOT:/mathesar/static/}
+		}
+	}
+	reverse_proxy mathesar_service:8000
+}

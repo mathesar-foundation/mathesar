@@ -22,6 +22,8 @@
 </script>
 
 <NameWithIcon icon={iconTable} {isLoading} {...$$restProps}>
-  {table.name}
+  <slot tableName={table.name}>
+    {table.name}
+  </slot>
   {#if isNotConfirmed}*{/if}
 </NameWithIcon>

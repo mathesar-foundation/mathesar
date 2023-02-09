@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   db:
+    profiles: ["dev", "prod", "test"]
     image: postgres:13
     container_name: mathesar_db
     environment:
@@ -12,30 +13,85 @@ services:
       - "5432:5432"
     volumes:
       - postgresql_data:/var/lib/postgresql/data
-  service:
+  caddy-reverse-proxy:
+    profiles: ["prod"]
+    image: mathesar/mathesar-caddy:latest
+    ports:
+      - "80:80"
+    volumes:
+      - media:/mathesar/media
+      - static:/mathesar/static
+  base-service:
+    profiles: ["web-server"]
+    container_name: mathesar_service
     build:
       context: .
-      dockerfile: ${DOCKERFILE}
-    container_name: mathesar_service
+      dockerfile: Dockerfile
+      args:
+        PYTHON_REQUIREMENTS: requirements-prod.txt
     environment:
       - MODE=${MODE-PRODUCTION}
+      - DEBUG=${DEBUG-False}
+      - DJANGO_ALLOW_ASYNC_UNSAFE=true
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.production}
+    command: ./run.sh
+    ports:
+      - "8000:8000"
+    volumes:
+      - static:/code/static
+      - media:/code/media
+  service:
+    profiles: ["prod"]
+    extends: base-service
+    image: mathesar/mathesar-prod:latest
+    # Volumes are not shared when extending
+    volumes:
+      - static:/code/static
+      - media:/code/media
+    depends_on:
+      - db
+  test-service:
+    profiles: [ "test" ]
+    extends: base-service
+    container_name: mathesar_service_test
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_REQUIREMENTS: requirements-dev.txt
+    depends_on:
+      - db
+  dev-service:
+    profiles: ["dev"]
+    container_name: mathesar_service_dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_REQUIREMENTS: requirements-dev.txt
+    extends: base-service
+    environment:
+      - MODE=${MODE-DEVELOPMENT}
+      - DEBUG=${DEBUG-True}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DISPLAY=${DISPLAY}
       - XAUTHORITY=/.Xauthority
       - DJANGO_SUPERUSER_PASSWORD=password
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings}
-    command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./run.sh
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
+    command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./dev-run.sh
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/.Xauthority
       - .:/code/
       - ui_node_modules:/code/mathesar_ui/node_modules/
+    depends_on:
+      - db
     ports:
       - "8000:8000"
       - "3000:3000"
       - "6006:6006"
-    depends_on:
-      - db
 volumes:
-  ui_node_modules:
   postgresql_data:
+  ui_node_modules:
+  media:
+  static:
