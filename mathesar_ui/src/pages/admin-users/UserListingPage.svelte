@@ -16,8 +16,8 @@
   let filterQuery = '';
 
   const usersStore = getUsersStoreFromContext();
-  $: requestStatus = $usersStore?.requestStatus;
-  $: users = $usersStore?.users;
+  $: requestStatus = usersStore?.requestStatus;
+  $: users = usersStore?.users;
 
   function filterUsers(_users: User[], query: string) {
     const isMatch = (user: User, q: string) =>

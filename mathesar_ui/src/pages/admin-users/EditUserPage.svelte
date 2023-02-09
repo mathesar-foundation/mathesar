@@ -9,12 +9,12 @@
 
   export let userId: number;
 
-  $: requestStatus = $usersStore?.requestStatus;
-  $: userDetailsPromise = $usersStore?.getUserDetails(userId);
+  $: requestStatus = usersStore?.requestStatus;
+  $: userDetailsPromise = usersStore?.getUserDetails(userId);
 
   async function onUserUpdate() {
-    await $usersStore?.fetchUsers();
-    userDetailsPromise = $usersStore?.getUserDetails(userId);
+    await usersStore?.fetchUsers();
+    userDetailsPromise = usersStore?.getUserDetails(userId);
   }
 </script>
 

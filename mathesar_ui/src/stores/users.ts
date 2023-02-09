@@ -65,13 +65,13 @@ class WritableUsersStore implements UsersStore {
   }
 }
 
-export function getUsersStoreFromContext(): Readable<UsersStore> | undefined {
-  return getContext<Readable<UsersStore>>(contextKey);
+export function getUsersStoreFromContext(): UsersStore | undefined {
+  return getContext<UsersStore>(contextKey);
 }
 
 export function setUsersStoreInContext(): void {
   if (getUsersStoreFromContext() !== undefined) {
     throw Error('UsersStore context has already been set');
   }
-  setContext(contextKey, writable(new WritableUsersStore()));
+  setContext(contextKey, new WritableUsersStore());
 }
