@@ -19,9 +19,13 @@
       <div class="user-detailed-info">
         {#if user.full_name}
           <span>{user.full_name}</span>
+        {/if}
+        {#if user.full_name && user.email}
           <span class="divider" />
         {/if}
-        <span>{user.email}</span>
+        {#if user.email}
+          <span>{user.email}</span>
+        {/if}
       </div>
     {/if}
   </div>
@@ -38,6 +42,7 @@
     justify-content: space-between;
     padding: var(--size-x-small);
     cursor: pointer;
+    min-height: 4.2rem;
   }
 
   .user-info {
