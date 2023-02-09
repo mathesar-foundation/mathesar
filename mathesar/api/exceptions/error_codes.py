@@ -17,6 +17,7 @@ class ErrorCodes(Enum):
     NetworkError = 4104
 
     # DB Error Codes
+    CheckViolation = 4215
     DuplicateTableError = 4205
     DuplicateColumnError = 4206
     ExclusionViolation = 4213
