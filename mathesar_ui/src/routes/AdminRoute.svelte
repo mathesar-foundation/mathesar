@@ -28,14 +28,14 @@
     slot="secondary-header"
     theme="light"
     pageTitleAndMetaProps={{
-      name: 'Administrator',
+      name: 'Administration',
       icon: iconSettingsMajor,
     }}
   />
   <AdminPageLayout cssVariables={{ '--max-layout-width': PAGE_MAX_WIDTH }}>
     <AdminNavigation slot="sidebar" />
     <Route path="/general">
-      <h2>General</h2>
+      <h1>General</h1>
     </Route>
 
     <Route path="/users/*" firstmatch>

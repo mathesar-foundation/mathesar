@@ -44,9 +44,9 @@
   {#if $requestStatus?.state === 'processing'}
     <p>Loading...</p>
   {:else if $requestStatus?.state === 'success'}
-    <h2>
+    <h1>
       Users ({filteredUsers.length})
-    </h2>
+    </h1>
     <div class="user-search-container">
       <div class="user-search">
         <div class="user-search-box">
@@ -106,7 +106,7 @@
     }
   }
 
-  h2 {
+  h1 {
     font-size: var(--text-size-ultra-large);
     font-weight: normal;
     margin: 0;
@@ -133,11 +133,12 @@
   .users-list {
     border: 1px solid var(--slate-200);
     border-radius: var(--border-radius-m);
-    padding: 0.5rem;
 
     hr {
       border: 0;
       border-top: 1px solid var(--slate-200);
+      display: block;
+      margin: 0 var(--size-xx-small);
     }
   }
 
