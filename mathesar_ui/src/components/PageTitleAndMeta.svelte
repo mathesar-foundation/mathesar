@@ -64,10 +64,6 @@
     display: flex;
     flex-direction: column;
     margin-left: 0.75rem;
-
-    > :global(* + *) {
-      margin-top: -0.5rem;
-    }
   }
 
   .entity-type {
@@ -79,5 +75,6 @@
   .entity-name {
     font-weight: 500;
     font-size: var(--text-size-ultra-large);
+    line-height: 1;
   }
 </style>
