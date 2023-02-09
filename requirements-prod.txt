@@ -1,2 +1,1 @@
 -r requirements.txt
-arxiv==1.4.2
