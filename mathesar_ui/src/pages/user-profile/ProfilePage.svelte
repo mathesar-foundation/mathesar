@@ -56,11 +56,6 @@
 </LayoutWithHeader>
 
 <style>
-  h1 {
-    font-weight: 500;
-    font-size: var(--size-xx-large);
-    margin: 0 0 1em 0;
-  }
   h2 {
     font-weight: 500;
     font-size: var(--size-large);
