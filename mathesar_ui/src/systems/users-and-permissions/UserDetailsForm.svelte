@@ -158,7 +158,8 @@
     proceedButton={{ label: 'Save', icon: iconSave }}
     cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
     {getErrorMessages}
-    initiallyHidden
+    initiallyHidden={!!user}
+    hasCancelButton={!!user}
   />
 </div>
 

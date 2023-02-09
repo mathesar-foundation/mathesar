@@ -1,9 +1,12 @@
 <script lang="ts">
+  import { Icon } from '@mathesar-component-library';
+  import { iconEdit } from '@mathesar/icons';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import {
-    UserDetailsForm,
     PasswordChangeForm,
+    UserDetailsForm,
   } from '@mathesar/systems/users-and-permissions';
+  import FormBox from './FormBox.svelte';
 
   const usersStore = getUsersStoreFromContext();
 
@@ -28,8 +31,15 @@
       User not found
     {/if}
   {:else}
-    <UserDetailsForm {user} on:update={onUserUpdate} />
-    <hr />
-    <PasswordChangeForm {userId} />
+    <h1>
+      <Icon {...iconEdit} />
+      Edit User: <strong>{user.username}</strong>
+    </h1>
+    <FormBox>
+      <UserDetailsForm {user} on:update={onUserUpdate} />
+    </FormBox>
+    <FormBox>
+      <PasswordChangeForm {userId} />
+    </FormBox>
   {/if}
 {/await}
