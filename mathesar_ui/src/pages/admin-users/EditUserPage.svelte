@@ -20,15 +20,15 @@
 
 {#await userDetailsPromise}
   Fetching user details
-{:then result}
-  {#if result === undefined}
+{:then user}
+  {#if user === undefined}
     {#if $requestStatus?.state === 'failure'}
       {$requestStatus.errors}
     {:else}
       User not found
     {/if}
   {:else}
-    <UserDetailsForm userDetails={result} on:update={onUserUpdate} />
+    <UserDetailsForm {user} on:update={onUserUpdate} />
     <hr />
     <PasswordChangeForm {userId} />
   {/if}

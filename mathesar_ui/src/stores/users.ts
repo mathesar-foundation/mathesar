@@ -6,7 +6,7 @@ import { getErrorMessage } from '@mathesar/utils/errors';
 
 const contextKey = Symbol('users list store');
 
-interface UserListStore {
+export interface UsersStore {
   requestStatus: Readable<RequestStatus | undefined>;
   users: Readable<User[]>;
   count: Readable<number>;
@@ -14,12 +14,17 @@ interface UserListStore {
   getUserDetails: (userId: number) => Promise<User | undefined>;
 }
 
-export class UsersList implements UserListStore {
+/**
+ * This class is separate from the interface so that we can leverage TS to
+ * enforce compile-time checks which ensure some properties are publicly
+ * readable while privately writable.
+ */
+class WritableUsersStore implements UsersStore {
   readonly requestStatus: Writable<RequestStatus | undefined> = writable();
 
-  readonly users: Writable<User[]> = writable([]);
+  readonly users = writable<User[]>([]);
 
-  readonly count: Writable<number> = writable(0);
+  readonly count = writable(0);
 
   request: ReturnType<typeof userApi.list> | undefined;
 
@@ -60,15 +65,13 @@ export class UsersList implements UserListStore {
   }
 }
 
-export function getUsersStoreFromContext():
-  | Readable<UserListStore>
-  | undefined {
-  return getContext<Readable<UserListStore>>(contextKey);
+export function getUsersStoreFromContext(): Readable<UsersStore> | undefined {
+  return getContext<Readable<UsersStore>>(contextKey);
 }
 
-export function setUsersStoreContext(): void {
+export function setUsersStoreInContext(): void {
   if (getUsersStoreFromContext() !== undefined) {
-    throw Error('User profile store context has already been set');
+    throw Error('UsersStore context has already been set');
   }
-  setContext(contextKey, writable(new UsersList()));
+  setContext(contextKey, writable(new WritableUsersStore()));
 }
