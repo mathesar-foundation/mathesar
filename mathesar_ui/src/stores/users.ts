@@ -56,6 +56,21 @@ class WritableUsersStore {
     }
     return undefined;
   }
+
+  async delete(userId: number) {
+    this.requestStatus.set({
+      state: 'processing',
+    });
+    await userApi.delete(userId);
+    this.users.update((users) => users.filter((user) => user.id !== userId));
+    this.count.update((count) => count - 1);
+    this.requestStatus.set({
+      state: 'success',
+    });
+    // Re-fetching the users isn't strictly necessary, but we do it anyway
+    // since it's a good opportunity to ensure the UI is up-to-date.
+    void this.fetchUsers();
+  }
 }
 
 export type UsersStore = MakeWritablePropertiesReadable<WritableUsersStore>;
