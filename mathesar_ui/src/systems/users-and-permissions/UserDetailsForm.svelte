@@ -114,7 +114,7 @@
 
 <div class="user-details-form">
   <UserFormInput
-    label="Full Name"
+    label="Display Name"
     field={fullName}
     input={{ component: TextInput }}
   />
