@@ -1,25 +1,18 @@
 import { setContext, getContext } from 'svelte';
-import { get, writable, type Readable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import userApi, { type User } from '@mathesar/api/users';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
+import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
 const contextKey = Symbol('users list store');
-
-export interface UsersStore {
-  requestStatus: Readable<RequestStatus | undefined>;
-  users: Readable<User[]>;
-  count: Readable<number>;
-  fetchUsers: () => Promise<void>;
-  getUserDetails: (userId: number) => Promise<User | undefined>;
-}
 
 /**
  * This class is separate from the interface so that we can leverage TS to
  * enforce compile-time checks which ensure some properties are publicly
  * readable while privately writable.
  */
-class WritableUsersStore implements UsersStore {
+class WritableUsersStore {
   readonly requestStatus: Writable<RequestStatus | undefined> = writable();
 
   readonly users = writable<User[]>([]);
@@ -65,8 +58,10 @@ class WritableUsersStore implements UsersStore {
   }
 }
 
+export type UsersStore = MakeWritablePropertiesReadable<WritableUsersStore>;
+
 export function getUsersStoreFromContext(): UsersStore | undefined {
-  return getContext<UsersStore>(contextKey);
+  return getContext<WritableUsersStore>(contextKey);
 }
 
 export function setUsersStoreInContext(): void {
