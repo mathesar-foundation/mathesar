@@ -1,17 +1,5 @@
-# Welcome to MkDocs
+# Mathesar Documentation
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+Mathesar is an open source and web-based interface that works on top of your database.
 
-## Commands
-
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
-
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+Perhaps you'd like to [install Mathesar](/installation/docker-compose/).
