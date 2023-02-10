@@ -10,14 +10,15 @@ services:
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
     ports:
-      - "5432:5432"
+      - ${dj_db_port}:5432
     volumes:
       - postgresql_data:/var/lib/postgresql/data
   caddy-reverse-proxy:
     profiles: ["prod"]
     image: mathesar/mathesar-caddy:latest
     ports:
-      - "80:80"
+      - ${http_port-80}:80
+      - ${https_port-443}:443
     volumes:
       - media:/mathesar/media
       - static:/mathesar/static
