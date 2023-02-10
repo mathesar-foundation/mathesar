@@ -34,7 +34,7 @@
   export let table: TableEntry;
   export let database: Database;
   export let schema: SchemaEntry;
-  export let allowModification = true;
+  export let allowModification: boolean;
 
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
@@ -111,20 +111,24 @@
       size="small"
     >
       {#if !isTableImportConfirmationNeeded}
-        <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
-          Edit Table
-        </ButtonMenuItem>
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
           Explore Table
         </LinkMenuItem>
+        {#if allowModification}
+          <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
+            Edit Table
+          </ButtonMenuItem>
+        {/if}
       {/if}
-      <ButtonMenuItem
-        on:click={handleDeleteTable}
-        danger
-        icon={iconDeleteMajor}
-      >
-        Delete Table
-      </ButtonMenuItem>
+      {#if allowModification}
+        <ButtonMenuItem
+          on:click={handleDeleteTable}
+          danger
+          icon={iconDeleteMajor}
+        >
+          Delete Table
+        </ButtonMenuItem>
+      {/if}
     </DropdownMenu>
   </div>
   {#if !isTableImportConfirmationNeeded}
