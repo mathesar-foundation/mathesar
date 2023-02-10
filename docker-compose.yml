@@ -10,7 +10,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
     ports:
-      - ${POSTGRES_HOST}:5432
+      - ${POSTGRES_HOST-5432}:5432
     volumes:
       - postgresql_data:/var/lib/postgresql/data
   caddy-reverse-proxy:
@@ -25,11 +25,7 @@ services:
   base-service:
     profiles: ["web-server"]
     container_name: mathesar_service
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PYTHON_REQUIREMENTS: requirements-prod.txt
+    image: mathesar/mathesar-prod:latest
     environment:
       - MODE=${MODE-PRODUCTION}
       - DEBUG=${DEBUG-False}
@@ -55,6 +51,7 @@ services:
     profiles: [ "test" ]
     extends: base-service
     container_name: mathesar_service_test
+    image: mathesar/mathesar-test:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -65,6 +62,7 @@ services:
   dev-service:
     profiles: ["dev"]
     container_name: mathesar_service_dev
+    image: mathesar/mathesar-dev:latest
     build:
       context: .
       dockerfile: Dockerfile
