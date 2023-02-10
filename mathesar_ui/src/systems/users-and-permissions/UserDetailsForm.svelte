@@ -41,18 +41,8 @@
   $: user, password.reset();
 
   $: formFields = (() => {
-    const fields = {
-      fullName,
-      username,
-      email,
-    };
-    return isNewUser
-      ? {
-          ...fields,
-          role,
-          password,
-        }
-      : fields;
+    const fields = { fullName, username, email, role };
+    return isNewUser ? { ...fields, password } : fields;
   })();
   $: form = makeForm(formFields);
 
@@ -62,6 +52,7 @@
       full_name: formValues.fullName,
       username: formValues.username,
       email: formValues.email,
+      is_superuser: formValues.role === 'admin',
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
