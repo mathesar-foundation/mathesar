@@ -14,6 +14,7 @@
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
   import { States } from '@mathesar/api/utils/requestUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
@@ -24,6 +25,18 @@
   export let database: Database;
   export let schema: SchemaEntry;
   export let section: string;
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: loggedInUserDetails = $userProfileStore;
+
+  $: userCanPerformCrud = loggedInUserDetails?.hasPermission(
+    { database, schema },
+    'performCrud',
+  );
+  $: userCanModifyData = loggedInUserDetails?.hasPermission(
+    { database, schema },
+    'modifyData',
+  );
 
   const addEditModal = modal.spawnModalController();
 
@@ -86,7 +99,7 @@
     }}
   >
     <svelte:fragment slot="action">
-      {#if !isDefault}
+      {#if !isDefault && userCanPerformCrud}
         <Button on:click={handleEditSchema} appearance="secondary">
           <Icon {...iconEdit} />
           <span>Edit Schema</span>
@@ -113,6 +126,8 @@
     {#if activeTab?.id === 'overview'}
       <div class="tab-container">
         <SchemaOverview
+          allowTableCrud={userCanPerformCrud}
+          allowExplorationCrud={userCanModifyData}
           {isTablesLoading}
           {isExplorationsLoading}
           {tablesMap}
@@ -126,7 +141,12 @@
         {#if isTablesLoading}
           <TableSkeleton />
         {:else}
-          <SchemaTables {tablesMap} {database} {schema} />
+          <SchemaTables
+            allowTableCrud={userCanPerformCrud}
+            {tablesMap}
+            {database}
+            {schema}
+          />
         {/if}
       </div>
     {:else if activeTab?.id === 'explorations'}
@@ -135,6 +155,7 @@
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations
+            allowExplorationCrud={userCanModifyData}
             hasTablesToExplore={!!tablesMap.size}
             {explorationsMap}
             {database}

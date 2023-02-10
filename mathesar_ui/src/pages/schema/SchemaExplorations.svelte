@@ -12,6 +12,10 @@
   export let schema: SchemaEntry;
   export let explorationsMap: Map<number, QueryInstance>;
   export let hasTablesToExplore: boolean;
+  export let allowExplorationCrud = true;
+
+  $: showTutorial =
+    explorationsMap.size === 0 && hasTablesToExplore && allowExplorationCrud;
 
   let explorationsSearchQuery = '';
 
@@ -39,20 +43,20 @@
   bind:searchQuery={explorationsSearchQuery}
   on:clear={clearQuery}
 >
-  <slot slot="action">
+  <svelte:fragment slot="action">
     <AnchorButton href={getDataExplorerPageUrl(database.name, schema.id)}>
       Open Data Explorer
     </AnchorButton>
-  </slot>
-  <slot slot="resultInfo">
+  </svelte:fragment>
+  <svelte:fragment slot="resultInfo">
     <p>
       {labeledCount(filteredExplorations, 'results')}
       for all explorations matching
       <strong>{explorationsSearchQuery}</strong>
     </p>
-  </slot>
-  <slot slot="content">
-    {#if !explorationsMap.size && hasTablesToExplore}
+  </svelte:fragment>
+  <svelte:fragment slot="content">
+    {#if showTutorial}
       <CreateNewExplorationTutorial {database} {schema} />
     {:else}
       <ExplorationsList
@@ -61,5 +65,5 @@
         {schema}
       />
     {/if}
-  </slot>
+  </svelte:fragment>
 </EntityLayout>

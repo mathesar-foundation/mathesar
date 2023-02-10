@@ -12,6 +12,10 @@
   export let database: Database;
   export let schema: SchemaEntry;
 
+  export let allowTableCrud = true;
+
+  $: showTutorial = tablesMap.size === 0 && allowTableCrud;
+
   let tableSearchQuery = '';
 
   function filterTables(
@@ -35,21 +39,23 @@
   bind:searchQuery={tableSearchQuery}
   on:clear={clearQuery}
 >
-  <slot slot="action">
-    <CreateNewTableButton {database} {schema} />
-  </slot>
-  <slot slot="resultInfo">
+  <svelte:fragment slot="action">
+    {#if allowTableCrud}
+      <CreateNewTableButton {database} {schema} />
+    {/if}
+  </svelte:fragment>
+  <svelte:fragment slot="resultInfo">
     <p>
       {labeledCount(filteredTables, 'results')}
       for all tables matching
       <strong>{tableSearchQuery}</strong>
     </p>
-  </slot>
-  <slot slot="content">
-    {#if tablesMap.size}
-      <TablesList tables={filteredTables} {database} {schema} />
-    {:else}
+  </svelte:fragment>
+  <svelte:fragment slot="content">
+    {#if showTutorial}
       <CreateNewTableTutorial {database} {schema} />
+    {:else}
+      <TablesList tables={filteredTables} {database} {schema} />
     {/if}
-  </slot>
+  </svelte:fragment>
 </EntityLayout>

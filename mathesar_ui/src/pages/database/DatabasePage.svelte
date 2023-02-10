@@ -99,14 +99,14 @@
       icon: iconDatabase,
     }}
   >
-    <div slot="action">
+    <svelte:fragment slot="action">
       {#if userCanPerformCrud}
         <Button on:click={addSchema} appearance="primary">
           <Icon {...iconAddNew} />
           <span>Create Schema</span>
         </Button>
       {/if}
-    </div>
+    </svelte:fragment>
   </AppSecondaryHeader>
 
   <div class="schema-list-wrapper">
