@@ -8,7 +8,7 @@
   const usersStore = getUsersStoreFromContext();
 
   function onUserCreate(user: User) {
-    void $usersStore?.fetchUsers();
+    void usersStore?.fetchUsers();
     router.goto(getEditUsersPageUrl(user.id), true);
   }
 </script>
