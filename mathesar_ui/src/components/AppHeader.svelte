@@ -37,6 +37,17 @@
 
   $: database = $currentDatabase;
   $: schema = $currentSchemaId;
+  $: allowTableCreation = (() => {
+    if (database && schema) {
+      return (
+        $userProfile?.hasPermission(
+          { database, schema: { id: schema } },
+          'performCrud',
+        ) ?? false
+      );
+    }
+    return false;
+  })();
 
   let isCreatingNewEmptyTable = false;
 
@@ -68,15 +79,17 @@
           <span class="icon"><Icon {...iconShortcuts} /></span>
           <span class="text">Shortcuts</span>
         </span>
-        <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
-          New Table from Scratch
-        </ButtonMenuItem>
-        <LinkMenuItem
-          icon={iconAddNew}
-          href={getImportPageUrl(database?.name, schema)}
-        >
-          New Table from Data Import
-        </LinkMenuItem>
+        {#if allowTableCreation}
+          <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
+            New Table from Scratch
+          </ButtonMenuItem>
+          <LinkMenuItem
+            icon={iconAddNew}
+            href={getImportPageUrl(database?.name, schema)}
+          >
+            New Table from Data Import
+          </LinkMenuItem>
+        {/if}
         <LinkMenuItem
           icon={iconExploration}
           href={getDataExplorerPageUrl(database?.name, schema)}
