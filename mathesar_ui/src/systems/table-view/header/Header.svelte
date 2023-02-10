@@ -34,13 +34,11 @@
     $columnsSelectedWhenTheTableIsEmpty,
   );
 
-  function dropColumn(e: DragEvent, columnDroppedOn?: ProcessedColumn) {
-    // Early exit if a column is dropped in the same place.
-    // Should only be done for single column if non-continuous selection is allowed.
-    if (selectedColumnIds.length > 0 && columnDroppedOn && selectedColumnIds[0] == columnDroppedOn.id) {
-      return;
-    }
+  let locationOfFirstDraggedColumn: number | undefined = undefined;
+  let selectedColumnIdsOrdered: number[] = [];
+  let newColumnOrder: number[] = [];
 
+  function dragColumn(e: DragEvent) {
     columnOrder = columnOrder ?? [];
     // Keep only IDs for which the column exists
     for (const columnId of $processedColumns.keys()) {
@@ -49,12 +47,7 @@
       }
     }
 
-    let locationOfFirstDraggedColumn: number | undefined = undefined;
-
-    const selectedColumnIdsOrdered: number[] = [];
-
     // Remove selected column IDs and keep their order
-    const newColumnOrder: number[] = [];
     for (const id of columnOrder) {
       if (selectedColumnIds.includes(id)) {
         selectedColumnIdsOrdered.push(id);
@@ -65,12 +58,18 @@
         newColumnOrder.push(id);
       }
     }
+  }
+
+  function dropColumn(e: DragEvent, columnDroppedOn?: ProcessedColumn) {
+    // Early exit if a column is dropped in the same place.
+    // Should only be done for single column if non-continuous selection is allowed.
+    if (selectedColumnIds.length > 0 && columnDroppedOn && selectedColumnIds[0] == columnDroppedOn.id) {
+      return;
+    }
 
     // Insert selected column IDs after the column where they are dropped
     // if that column is to the right, else insert it before
     if (columnDroppedOn) {
-      console.log(locationOfFirstDraggedColumn);
-      console.log(columnOrder.indexOf(columnDroppedOn.id))
       if (locationOfFirstDraggedColumn && locationOfFirstDraggedColumn < columnOrder.indexOf(columnDroppedOn.id)) {
         newColumnOrder.splice(
           columnOrder.indexOf(columnDroppedOn.id) + 1,
@@ -90,6 +89,12 @@
     }
 
     void saveColumnOrder(table, newColumnOrder);
+
+    // Reset draga information
+    locationOfFirstDraggedColumn = undefined;
+    selectedColumnIdsOrdered = [];
+    newColumnOrder = [];
+    console.log(locationOfFirstDraggedColumn);
   }
 </script>
 
@@ -104,6 +109,8 @@
     <Droppable
       on:drop={(e) => dropColumn(e)}
       on:dragover={(e) => e.preventDefault()}
+      locationOfFirstDraggedColumn={0}
+      columnLocation={-1}
     >
       <div {...htmlAttributes} {style} />
     </Droppable>
@@ -111,34 +118,42 @@
 
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
     <SheetCell columnIdentifierKey={columnId} let:htmlAttributes let:style>
-      <Draggable
-        isSelected={isColumnSelected(
-          $selectedCells,
-          $columnsSelectedWhenTheTableIsEmpty,
-          processedColumn,
-        )}
-        selectionInProgress={$selectionInProgress}
-      >
-        <Droppable on:drop={(e) => dropColumn(e, processedColumn)}>
-          <div {...htmlAttributes} {style}>
-            <HeaderCell
-              {processedColumn}
-              isSelected={isColumnSelected(
-                $selectedCells,
-                $columnsSelectedWhenTheTableIsEmpty,
-                processedColumn,
-              )}
-              on:mousedown={() =>
-                selection.onColumnSelectionStart(processedColumn)}
-              on:mouseenter={() =>
-                selection.onMouseEnterColumnHeaderWhileSelection(
+      <div>
+        <Draggable
+          on:dragstart={(e) => dragColumn(e)}
+          isSelected={isColumnSelected(
+            $selectedCells,
+            $columnsSelectedWhenTheTableIsEmpty,
+            processedColumn,
+          )}
+          selectionInProgress={$selectionInProgress}
+        >
+          <Droppable
+            on:drop={(e) => dropColumn(e, processedColumn)}
+            on:dragover={(e) => e.preventDefault()}
+            locationOfFirstDraggedColumn={locationOfFirstDraggedColumn}
+            columnLocation={columnOrder.indexOf(columnId)}
+            >
+            <div {...htmlAttributes} {style}>
+              <HeaderCell
+                {processedColumn}
+                isSelected={isColumnSelected(
+                  $selectedCells,
+                  $columnsSelectedWhenTheTableIsEmpty,
                   processedColumn,
                 )}
-            />
-            <SheetCellResizer columnIdentifierKey={columnId} />
-          </div>
-        </Droppable>
-      </Draggable>
+                on:mousedown={() =>
+                  selection.onColumnSelectionStart(processedColumn)}
+                on:mouseenter={() =>
+                  selection.onMouseEnterColumnHeaderWhileSelection(
+                    processedColumn,
+                  )}
+              />
+              <SheetCellResizer columnIdentifierKey={columnId} />
+            </div>
+          </Droppable>
+        </Draggable>
+      </div>
     </SheetCell>
   {/each}
 
