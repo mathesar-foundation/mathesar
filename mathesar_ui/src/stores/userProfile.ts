@@ -10,6 +10,10 @@ import {
   type Writable,
 } from 'svelte/store';
 import type { User, UnsavedUser } from '@mathesar/api/users';
+import {
+  roleAllowsOperation,
+  type AccessOperation,
+} from '@mathesar/utils/permissions';
 
 const contextKey = Symbol('UserProfileStore');
 
@@ -38,8 +42,28 @@ export class UserProfile implements Readonly<User> {
     this.username = userDetails.username;
   }
 
-  hasPermission() {
-    // To be implemented
+  hasPermission(
+    dbObject: { databaseId: number; schemaId?: number },
+    operation: AccessOperation,
+  ): boolean {
+    if (this.is_superuser) {
+      return true;
+    }
+    if (dbObject.schemaId) {
+      const schemaRole = this.schema_roles.find(
+        (role) => role.schema === dbObject.schemaId,
+      );
+      if (schemaRole) {
+        return roleAllowsOperation(schemaRole.role, operation);
+      }
+    }
+    const databaseRole = this.database_roles.find(
+      (role) => role.database === dbObject.databaseId,
+    );
+    if (databaseRole) {
+      return roleAllowsOperation(databaseRole.role, operation);
+    }
+    return false;
   }
 
   getDisplayName(): string {
