@@ -12,7 +12,7 @@
   export let schema: SchemaEntry;
   export let explorationsMap: Map<number, QueryInstance>;
   export let hasTablesToExplore: boolean;
-  export let allowExplorationCrud = true;
+  export let allowExplorationCrud: boolean;
 
   $: showTutorial =
     explorationsMap.size === 0 && hasTablesToExplore && allowExplorationCrud;

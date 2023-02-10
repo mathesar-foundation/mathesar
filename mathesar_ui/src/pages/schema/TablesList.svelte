@@ -2,17 +2,23 @@
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
+  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
   import EmptyEntity from './EmptyEntity.svelte';
   import TableCard from './TableCard.svelte';
 
   export let tables: TableEntry[];
   export let database: Database;
   export let schema: SchemaEntry;
+  export let allowModification: boolean;
+
+  $: visibleTables = allowModification
+    ? tables
+    : tables.filter((table) => !isTableImportConfirmationRequired(table));
 </script>
 
 <div class="container">
-  {#each tables as table (table.id)}
-    <TableCard {table} {database} {schema} />
+  {#each visibleTables as table (table.id)}
+    <TableCard {allowModification} {table} {database} {schema} />
   {:else}
     <EmptyEntity icon={iconTable}>
       <p>No Tables</p>

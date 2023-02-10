@@ -11,8 +11,7 @@
 
   export let database: Database;
   export let schema: SchemaEntry;
-
-  export let allowTableCrud = true;
+  export let allowTableCrud: boolean;
 
   $: showTutorial = tablesMap.size === 0 && allowTableCrud;
 
@@ -55,7 +54,12 @@
     {#if showTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
-      <TablesList tables={filteredTables} {database} {schema} />
+      <TablesList
+        allowModification={allowTableCrud}
+        tables={filteredTables}
+        {database}
+        {schema}
+      />
     {/if}
   </svelte:fragment>
 </EntityLayout>

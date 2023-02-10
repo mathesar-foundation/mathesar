@@ -34,6 +34,7 @@
   export let table: TableEntry;
   export let database: Database;
   export let schema: SchemaEntry;
+  export let allowModification = true;
 
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;

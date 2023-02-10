@@ -29,14 +29,12 @@
   const userProfileStore = getUserProfileStoreFromContext();
   $: loggedInUserDetails = $userProfileStore;
 
-  $: userCanPerformCrud = loggedInUserDetails?.hasPermission(
-    { database, schema },
-    'performCrud',
-  );
-  $: userCanModifyData = loggedInUserDetails?.hasPermission(
-    { database, schema },
-    'modifyData',
-  );
+  $: userCanPerformCrud =
+    loggedInUserDetails?.hasPermission({ database, schema }, 'performCrud') ??
+    false;
+  $: userCanModifyData =
+    loggedInUserDetails?.hasPermission({ database, schema }, 'modifyData') ??
+    false;
 
   const addEditModal = modal.spawnModalController();
 

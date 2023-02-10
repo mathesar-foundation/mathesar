@@ -18,8 +18,8 @@
   export let isTablesLoading = false;
   export let isExplorationsLoading = false;
 
-  export let allowTableCrud = true;
-  export let allowExplorationCrud = true;
+  export let allowTableCrud: boolean;
+  export let allowExplorationCrud: boolean;
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -48,7 +48,12 @@
     {:else if showTableCreationTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
-      <TablesList tables={[...tablesMap.values()]} {database} {schema} />
+      <TablesList
+        allowModification={allowTableCrud}
+        tables={[...tablesMap.values()]}
+        {database}
+        {schema}
+      />
     {/if}
   </div>
   <div class="vertical-container explorations">
