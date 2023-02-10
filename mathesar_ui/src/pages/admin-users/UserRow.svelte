@@ -19,9 +19,13 @@
       <div class="user-detailed-info">
         {#if user.full_name}
           <span>{user.full_name}</span>
+        {/if}
+        {#if user.full_name && user.email}
           <span class="divider" />
         {/if}
-        <span>{user.email}</span>
+        {#if user.email}
+          <span>{user.email}</span>
+        {/if}
       </div>
     {/if}
   </div>
@@ -36,9 +40,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    padding: 0.25rem 0;
+    padding: var(--size-x-small);
     cursor: pointer;
+    min-height: 4.2rem;
   }
 
   .user-info {
@@ -73,6 +77,7 @@
     background-color: var(--slate-200);
     padding: 0.25rem 0.5rem;
     border-radius: 1.17rem;
+    font-size: var(--text-size-small);
 
     :global(.icon) {
       font-size: 0.9em;
