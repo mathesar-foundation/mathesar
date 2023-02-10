@@ -39,6 +39,7 @@
   let newColumnOrder: number[] = [];
 
   function dragColumn(e: DragEvent) {
+    console.log("start dragging")
     columnOrder = columnOrder ?? [];
     // Keep only IDs for which the column exists
     for (const columnId of $processedColumns.keys()) {
