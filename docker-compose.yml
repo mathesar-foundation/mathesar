@@ -10,7 +10,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
     ports:
-      - ${dj_db_port}:5432
+      - ${POSTGRES_HOST}:5432
     volumes:
       - postgresql_data:/var/lib/postgresql/data
   caddy-reverse-proxy:
