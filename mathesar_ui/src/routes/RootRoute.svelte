@@ -4,12 +4,16 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { databases } from '@mathesar/stores/databases';
   import { setBreadcrumbItemsInContext } from '@mathesar/components/breadcrumb/breadcrumbUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
   import AdminRoute from './AdminRoute.svelte';
   import { getDatabasePageUrl } from './urls';
 
   setBreadcrumbItemsInContext([]);
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: loggedInUserDetails = $userProfileStore;
 
   $: firstDatabase = $databases.data?.[0];
 </script>
@@ -27,9 +31,11 @@
     <UserProfileRoute />
   </Route>
 
-  <Route path="/administration/*" firstmatch>
-    <AdminRoute />
-  </Route>
+  {#if loggedInUserDetails?.is_superuser}
+    <Route path="/administration/*" firstmatch>
+      <AdminRoute />
+    </Route>
+  {/if}
 
   <Route path="/:databaseName/*" let:meta firstmatch>
     <DatabaseRoute databaseName={meta.params.databaseName} />
