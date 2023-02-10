@@ -18,11 +18,15 @@
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import SchemaRow from './SchemaRow.svelte';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
 
   const addEditModal = modal.spawnModalController();
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: loggedInUserDetails = $userProfileStore;
 
   $: database = (() => {
     if (!$currentDatabase) {
@@ -32,6 +36,11 @@
   })();
 
   $: schemasMap = $schemasStore.data;
+
+  $: userCanPerformCrud = loggedInUserDetails?.hasPermission(
+    { database },
+    'performCrud',
+  );
 
   let filterQuery = '';
   let targetSchema: SchemaEntry | undefined;
@@ -90,10 +99,14 @@
       icon: iconDatabase,
     }}
   >
-    <Button slot="action" on:click={addSchema} appearance="primary">
-      <Icon {...iconAddNew} />
-      <span>Create Schema</span>
-    </Button>
+    <div slot="action">
+      {#if userCanPerformCrud}
+        <Button on:click={addSchema} appearance="primary">
+          <Icon {...iconAddNew} />
+          <span>Create Schema</span>
+        </Button>
+      {/if}
+    </div>
   </AppSecondaryHeader>
 
   <div class="schema-list-wrapper">
@@ -126,6 +139,7 @@
           <SchemaRow
             {database}
             {schema}
+            canModify={userCanPerformCrud}
             on:edit={() => editSchema(schema)}
             on:delete={() => deleteSchema(schema)}
           />

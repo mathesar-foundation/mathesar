@@ -14,6 +14,7 @@ import {
   roleAllowsOperation,
   type AccessOperation,
 } from '@mathesar/utils/permissions';
+import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 
 const contextKey = Symbol('UserProfileStore');
 
@@ -43,25 +44,29 @@ export class UserProfile implements Readonly<User> {
   }
 
   hasPermission(
-    dbObject: { databaseId: number; schemaId?: number },
+    dbObject: {
+      database: Pick<Database, 'id'>;
+      schema?: Pick<SchemaEntry, 'id'>;
+    },
     operation: AccessOperation,
   ): boolean {
     if (this.is_superuser) {
       return true;
     }
-    if (dbObject.schemaId) {
-      const schemaRole = this.schema_roles.find(
-        (role) => role.schema === dbObject.schemaId,
+    const { database, schema } = dbObject;
+    if (schema) {
+      const userSchemaRole = this.schema_roles.find(
+        (role) => role.schema === schema.id,
       );
-      if (schemaRole) {
-        return roleAllowsOperation(schemaRole.role, operation);
+      if (userSchemaRole) {
+        return roleAllowsOperation(userSchemaRole.role, operation);
       }
     }
-    const databaseRole = this.database_roles.find(
-      (role) => role.database === dbObject.databaseId,
+    const userDatabaseRole = this.database_roles.find(
+      (role) => role.database === database.id,
     );
-    if (databaseRole) {
-      return roleAllowsOperation(databaseRole.role, operation);
+    if (userDatabaseRole) {
+      return roleAllowsOperation(userDatabaseRole.role, operation);
     }
     return false;
   }
