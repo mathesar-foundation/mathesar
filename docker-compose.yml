@@ -98,13 +98,13 @@ services:
     image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --http-api-update --label-enable
+    command: --http-api-update --label-enable --debug
     environment:
       - WATCHTOWER_HTTP_API_TOKEN=mytoken
     labels:
       - "com.centurylinklabs.watchtower.enable=false"
     expose:
-      - "8000"
+      - "8080"
 volumes:
   postgresql_data:
   ui_node_modules:
