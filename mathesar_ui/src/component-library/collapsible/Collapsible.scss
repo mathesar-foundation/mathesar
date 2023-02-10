@@ -3,25 +3,29 @@
 
   .collapsible-header {
     display: flex;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
-    font-weight: inherit;
-
-    .collapsible-header-title {
-      flex-grow: 1;
-      overflow: hidden;
-      font-weight: 600;
-    }
-    svg {
-      flex-shrink: 0;
-      flex-grow: 0;
-    }
-    &:active,
-    &.active,
-    &:focus,
-    &.focus {
-      box-shadow: none;
+    justify-content: space-between;
+    align-items: center;
+    .collapsible-header-btn {
+      display: flex;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      font-weight: inherit;
+      .collapsible-btn-title {
+        flex-grow: 1;
+        overflow: hidden;
+        font-weight: 600;
+      }
+      svg {
+        flex-shrink: 0;
+        flex-grow: 0;
+      }
+      &:active,
+      &.active,
+      &:focus,
+      &.focus {
+        box-shadow: none;
+      }
     }
   }
   .collapsible-content {

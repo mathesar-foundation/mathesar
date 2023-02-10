@@ -4,9 +4,9 @@
     Button,
     Icon,
     iconExternalLink,
-    iconLoading,
   } from '@mathesar/component-library';
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type {
     ColumnsDataStore,
@@ -22,22 +22,18 @@
   export let selection: TabularDataSelection;
   export let columnsDataStore: ColumnsDataStore;
 
-  let isDeleting = false;
-
   async function handleDeleteRecords() {
-    if (!isDeleting) {
-      try {
-        isDeleting = true;
-        selection.freezeSelection = true;
-        await recordsData.deleteSelected(selectedRowIndices);
+    void confirmDelete({
+      identifierType: 'Row',
+      onProceed: () => recordsData.deleteSelected(selectedRowIndices),
+      onError: (e) => toast.fromError(e),
+      onSuccess: () => {
+        toast.success({
+          title: 'Row deleted successfully!',
+        });
         selection.resetSelection();
-      } catch (e) {
-        toast.fromError(e);
-      } finally {
-        selection.freezeSelection = false;
-        isDeleting = true;
-      }
-    }
+      },
+    });
   }
 
   $: ({ columns } = columnsDataStore);
@@ -77,7 +73,7 @@
     </AnchorButton>
   {/if}
   <Button appearance="outline-primary" on:click={handleDeleteRecords}>
-    <Icon {...isDeleting ? iconLoading : iconDeleteMajor} />
+    <Icon {...iconDeleteMajor} />
     <span>
       Delete {labeledCount(selectedRowIndices, 'records', {
         casing: 'title',

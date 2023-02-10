@@ -1,6 +1,6 @@
 import { derived, writable, get } from 'svelte/store';
 import { getAPI, States } from '@mathesar/api/utils/requestUtils';
-import { currentDBId } from '@mathesar/stores/databases';
+import { currentDatabase } from '@mathesar/stores/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
@@ -75,18 +75,17 @@ export async function refetchTypesForDb(
 let preload = true;
 
 function getTypesForDatabase(
-  databaseId: Database['id'],
+  database: Database,
 ): Writable<AbstractTypesSubstance> {
-  let store = databasesToAbstractTypesStoreMap.get(databaseId);
+  let store = databasesToAbstractTypesStoreMap.get(database.id);
   if (!store) {
     store = writable({
       state: States.Loading,
       data: new Map(),
     });
-    databasesToAbstractTypesStoreMap.set(databaseId, store);
+    databasesToAbstractTypesStoreMap.set(database.id, store);
 
-    if (preload) {
-      preload = false;
+    if (preload && commonData?.current_db === database.name) {
       store.update((currentData) => ({
         ...currentData,
         state: States.Done,
@@ -94,26 +93,27 @@ function getTypesForDatabase(
         data: constructAbstractTypeMapFromResponse(commonData.abstract_types),
       }));
     } else {
-      void refetchTypesForDb(databaseId);
+      void refetchTypesForDb(database.id);
     }
+    preload = false;
   } else if (get(store).error) {
-    void refetchTypesForDb(databaseId);
+    void refetchTypesForDb(database.id);
   }
   return store;
 }
 
 export const currentDbAbstractTypes: Readable<AbstractTypesSubstance> = derived(
-  currentDBId,
-  ($currentDBId, set) => {
+  currentDatabase,
+  ($currentDatabase, set) => {
     let unsubscribe: Unsubscriber;
 
-    if (!$currentDBId) {
+    if (!$currentDatabase) {
       set({
         state: States.Done,
         data: new Map(),
       });
     } else {
-      const store = getTypesForDatabase($currentDBId);
+      const store = getTypesForDatabase($currentDatabase);
       unsubscribe = store.subscribe((typesData) => {
         set(typesData);
       });

@@ -1,2 +1,2 @@
--r requirements-prod.txt
+-r requirements.txt
 arxiv==1.4.2

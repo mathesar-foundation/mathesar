@@ -41,7 +41,7 @@ TYPE_INFERENCE_DAG = {
 }
 
 
-def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=None, metadata=None):
+def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=None, metadata=None, columns_might_have_defaults=True):
     """
     Attempts to cast the column to the best type for it, given the mappings defined in TYPE_INFERENCE_DAG
     and _get_type_classes_mapped_to_dag_nodes. Returns the resulting column type's class.
@@ -79,7 +79,15 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
     for db_type in types_to_cast_to:
         try:
             with engine.begin() as conn:
-                alter_column_type(table_oid, column_name, engine, conn, db_type, metadata=metadata)
+                alter_column_type(
+                    table_oid,
+                    column_name,
+                    engine,
+                    conn,
+                    db_type,
+                    metadata=metadata,
+                    columns_might_have_defaults=columns_might_have_defaults,
+                )
             logger.info(f"Column {column_name} altered to type {db_type.id}")
             column_type_class = infer_column_type(
                 schema,
