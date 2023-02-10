@@ -11,7 +11,7 @@ import {
 } from 'svelte/store';
 import type { User, UnsavedUser } from '@mathesar/api/users';
 
-const contextKey = Symbol('userprofile store');
+const contextKey = Symbol('UserProfileStore');
 
 export class UserProfile implements Readonly<User> {
   readonly id;
@@ -84,9 +84,9 @@ export function getUserProfileStoreFromContext(): UserProfileStore | undefined {
   return getContext<UserProfileStore>(contextKey);
 }
 
-export function setUserProfileStoreContext(userDetails: User): void {
+export function setUserProfileStoreInContext(user: User): void {
   if (getUserProfileStoreFromContext() !== undefined) {
     throw Error('User profile store context has already been set');
   }
-  setContext(contextKey, new UserProfileStore(new UserProfile(userDetails)));
+  setContext(contextKey, new UserProfileStore(new UserProfile(user)));
 }

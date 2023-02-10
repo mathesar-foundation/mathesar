@@ -11,11 +11,11 @@
 
   const userProfileStore = getUserProfileStoreFromContext();
 
-  $: userDetails = $userProfileStore;
+  $: userProfile = $userProfileStore;
 </script>
 
 <svelte:head>
-  <title>{userDetails?.getDisplayName() ?? 'User profile'} | Mathesar</title>
+  <title>{userProfile?.getDisplayName() ?? 'User profile'} | Mathesar</title>
 </svelte:head>
 
 <LayoutWithHeader
@@ -28,16 +28,16 @@
 >
   <InsetPageLayout hasMultipleSections>
     <h1 slot="header">User Profile</h1>
-    {#if userDetails}
+    {#if userProfile}
       <InsetPageSection>
         <h2 slot="header">Account Details</h2>
-        <UserDetailsForm {userDetails} />
+        <UserDetailsForm user={userProfile} />
       </InsetPageSection>
       <InsetPageSection>
-        <PasswordChangeForm userId={userDetails.id} />
+        <PasswordChangeForm userId={userProfile.id} />
       </InsetPageSection>
 
-      {#if !userDetails.is_superuser}
+      {#if !userProfile.is_superuser}
         <InsetPageSection>
           <h2 slot="header">Delete Account</h2>
           <div>
