@@ -4,7 +4,6 @@
     Button,
     Icon,
     iconExternalLink,
-    iconLoading,
   } from '@mathesar/component-library';
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
