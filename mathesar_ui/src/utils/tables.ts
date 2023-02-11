@@ -58,6 +58,8 @@ export function orderProcessedColumns(
   });
 
   return orderedColumns;
+}
+
 export function getLinkForTableItem(
   databaseName: string,
   schemaId: number,
