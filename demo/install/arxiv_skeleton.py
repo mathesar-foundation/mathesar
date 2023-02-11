@@ -10,11 +10,7 @@ from pathlib import Path
 
 from django.conf import settings
 from sqlalchemy import text
-
-SCHEMA_DESCRIPTION = (
-    "Regularly updated by a script that gets the 50 most recent Computer"
-    " Science research papers from arXiv and inserts it into this schema."
-)
+from demo.install.base import ARXIV_SETUP_SQL
 
 
 def setup_and_register_schema_for_receiving_arxiv_data(
@@ -46,15 +42,18 @@ def get_arxiv_db_and_schema_log_path():
 
 
 def _setup_arxiv_schema(engine, schema_name):
+    schema_description = (
+        "Regularly updated by a script that gets the 50 most recent Computer"
+        " Science research papers from arXiv and inserts it into this schema."
+    )
     drop_schema_query = text(f'DROP SCHEMA IF EXISTS "{schema_name}" CASCADE;')
     create_schema_query = text(f'CREATE SCHEMA "{schema_name}";')
     set_search_path = text(f'SET search_path="{schema_name}";')
-    sql_setup_script = _get_sql_setup_script_path()
     set_schema_comment_query = text(
         f'COMMENT ON SCHEMA "{schema_name}"'
-        f'IS $escape_token${SCHEMA_DESCRIPTION}$escape_token$;'
+        f'IS $escape_token${schema_description}$escape_token$;'
     )
-    with engine.begin() as conn, open(sql_setup_script) as f:
+    with engine.begin() as conn, open(ARXIV_SETUP_SQL) as f:
         conn.execute(drop_schema_query)
         conn.execute(create_schema_query)
         conn.execute(set_search_path)
@@ -62,9 +61,3 @@ def _setup_arxiv_schema(engine, schema_name):
         conn.execute(set_schema_comment_query)
     db_name = engine.url.database
     return db_name, schema_name
-
-
-def _get_sql_setup_script_path():
-    current_dir = os.path.abspath(os.path.dirname(__file__))
-    resources = os.path.join(current_dir, 'resources')
-    return os.path.join(resources, 'arxiv_dataset_setup.sql')

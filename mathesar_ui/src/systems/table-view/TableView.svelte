@@ -15,10 +15,12 @@
   import StatusPane from './StatusPane.svelte';
   import TableInspector from './table-inspector/TableInspector.svelte';
 
+  type Context = 'page' | 'widget';
+
   const tabularData = getTabularDataStoreFromContext();
 
-  export let context: 'page' | 'widget' = 'page';
   export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+  export let context: Context = 'page';
 
   $: usesVirtualList = context === 'page';
   $: allowsDdlOperations = context === 'page';
@@ -60,8 +62,12 @@
   function selectAndActivateFirstCellOnTableLoad(
     _isLoading: boolean,
     _selection: TabularDataSelection,
+    _context: Context,
   ) {
-    if (!_isLoading) {
+    // We only activate the first cell on the page, not in the widget. Doing so
+    // on the widget causes the cell to focus and the page to scroll down to
+    // bring that element into view.
+    if (_context === 'page' && !_isLoading) {
       _selection.selectAndActivateFirstCellIfExists();
     }
   }
@@ -78,7 +84,7 @@
     }
   }
 
-  $: void selectAndActivateFirstCellOnTableLoad($isLoading, selection);
+  $: void selectAndActivateFirstCellOnTableLoad($isLoading, selection, context);
 </script>
 
 <div class="table-view">

@@ -5,14 +5,12 @@
     tables as tablesStore,
   } from '@mathesar/stores/tables';
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import {
-    getTablePageUrl,
-    getExplorationPageUrl,
-  } from '@mathesar/routes/urls';
+  import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import { queries as queriesStore } from '@mathesar/stores/queries';
   import type { QueryInstance } from '@mathesar/api/types/queries';
+  import { getLinkForTableItem } from '@mathesar/utils/tables';
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type {
     BreadcrumbSelectorEntry,
@@ -30,7 +28,7 @@
       type: 'table',
       table,
       label: table.name,
-      href: getTablePageUrl(database.name, schema.id, table.id),
+      href: getLinkForTableItem(database.name, schema.id, table),
       icon: iconTable,
       isActive() {
         return table.id === $currentTableId;

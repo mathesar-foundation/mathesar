@@ -1,0 +1,31 @@
+:80 {
+    log {
+        output stdout
+    }
+	respond /caddy-health-check 200
+
+	handle_path /media/* {
+		@downloads {
+			query dl=*
+		}
+		header @downloads Content-disposition "attachment; filename={query.dl}"
+
+		file_server {
+			root {$MEDIA_ROOT:/mathesar/media/}
+		}
+	}
+
+	handle_path /static/* {
+		file_server {
+			root {$STATIC_ROOT:/mathesar/static/}
+		}
+	}
+        # Rewrite and reverse proxy upgrade endpoint calls to Watchtower
+        handle_path /api/ui/v0/upgrade/ {
+                rewrite * /v1/update
+                reverse_proxy watchtower:8080 {
+                      header_up Authorization "Bearer mytoken"
+                }
+        }
+	reverse_proxy mathesar_service:8000
+}
