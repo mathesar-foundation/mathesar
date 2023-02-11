@@ -29,13 +29,11 @@ export function getColumnOrder(
       completeColumnOrder = columnOrder;
     }
   }
-
   allColumns.forEach((column) => {
     if (!completeColumnOrder.includes(column.id)) {
       completeColumnOrder.push(column.id);
     }
   });
-
   return completeColumnOrder;
 }
 

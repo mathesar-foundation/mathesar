@@ -22,6 +22,8 @@
   export let hasNewColumnButton = false;
   export let columnOrder: number[];
   export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+  
+  $: columnOrder = columnOrder ?? [];
 
   $: ({ selection, processedColumns } = $tabularData);
   $: ({
@@ -39,15 +41,13 @@
   let newColumnOrder: number[] = [];
 
   function dragColumn(e: DragEvent) {
-    console.log("start dragging")
-    columnOrder = columnOrder ?? [];
     // Keep only IDs for which the column exists
     for (const columnId of $processedColumns.keys()) {
       if (!columnOrder.includes(columnId)) {
-        columnOrder.push(columnId);
+        columnOrder = [...columnOrder, columnId];
       }
     }
-
+    columnOrder = columnOrder;
     // Remove selected column IDs and keep their order
     for (const id of columnOrder) {
       if (selectedColumnIds.includes(id)) {
@@ -65,6 +65,10 @@
     // Early exit if a column is dropped in the same place.
     // Should only be done for single column if non-continuous selection is allowed.
     if (selectedColumnIds.length > 0 && columnDroppedOn && selectedColumnIds[0] == columnDroppedOn.id) {
+      // Reset drag information
+      locationOfFirstDraggedColumn = undefined;
+      selectedColumnIdsOrdered = [];
+      newColumnOrder = [];
       return;
     }
 
@@ -91,11 +95,10 @@
 
     void saveColumnOrder(table, newColumnOrder);
 
-    // Reset draga information
+    // Reset drag information
     locationOfFirstDraggedColumn = undefined;
     selectedColumnIdsOrdered = [];
     newColumnOrder = [];
-    console.log(locationOfFirstDraggedColumn);
   }
 </script>
 

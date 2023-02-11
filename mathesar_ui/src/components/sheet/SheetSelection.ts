@@ -524,8 +524,6 @@ export default class SheetSelection<
   }
 
   onColumnSelectionStart(column: Column): boolean {
-    console.log("is completely selected")
-    console.log(this.isCompleteColumnSelected(column))
     if (!this.isCompleteColumnSelected(column)) {
       this.activateCell({ rowIndex: 0 }, { id: column.id });
       const rows = this.getRows();

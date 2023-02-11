@@ -2,7 +2,7 @@
   export let locationOfFirstDraggedColumn: number | undefined;
   export let columnLocation: number;
 
-  $: columnLocationDifference = (locationOfFirstDraggedColumn||-1)-columnLocation
+  $: columnLocationDifference = locationOfFirstDraggedColumn!==undefined?(locationOfFirstDraggedColumn-columnLocation):0
   $: draggedOverRight = columnLocationDifference<0
   $: draggedOverLeft = columnLocationDifference>0
   // Needs to be a counter because dragEnter and dragLeave are fired for child elements
