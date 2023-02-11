@@ -22,7 +22,7 @@
   });
 
   export let recordId: number;
-  export let table: Pick<TableEntry, 'id' | 'name' | 'settings' | 'schema'>;
+  export let table: TableEntry;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
@@ -31,6 +31,7 @@
     abstractTypesMap,
     meta,
     contextualFilters: new Map([[fkColumn.id, recordId]]),
+    table,
   });
   $: tabularDataStore.set(tabularData);
 </script>
