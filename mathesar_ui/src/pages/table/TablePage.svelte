@@ -33,6 +33,7 @@
     id: table.id,
     abstractTypesMap,
     meta,
+    table,
   });
   $: tabularDataStore.set(tabularData);
 

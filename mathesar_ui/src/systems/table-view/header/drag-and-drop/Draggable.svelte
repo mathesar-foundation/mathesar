@@ -9,7 +9,8 @@
   on:dragstart
   class="draggable"
   class:draggable_active={draggable}
-  draggable={draggable}>
+  {draggable}
+>
   <slot />
 </div>
 

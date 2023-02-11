@@ -12,7 +12,6 @@ import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/api/utils/requestUtils';
 import type { Column } from '@mathesar/api/types/tables/columns';
 import { SheetSelection } from '@mathesar/components/sheet';
-import { currentTable } from '@mathesar/stores/tables';
 import { getColumnOrder } from '@mathesar/utils/tables';
 import { Meta } from './meta';
 import { ColumnsDataStore } from './columns';
@@ -30,6 +29,7 @@ import { processColumn } from './processedColumns';
 export interface TabularDataProps {
   id: DBObjectEntry['id'];
   abstractTypesMap: AbstractTypesMap;
+  table: TableEntry;
   meta?: Meta;
   /**
    * Keys are columns ids. Values are cell values.
@@ -64,6 +64,8 @@ export class TabularData {
   isLoading: Readable<boolean>;
 
   selection: TabularDataSelection;
+
+  table: TableEntry;
 
   constructor(props: TabularDataProps) {
     const contextualFilters =
@@ -105,7 +107,7 @@ export class TabularData {
         ),
     );
 
-    const table = get(currentTable) as TableEntry;
+    this.table = props.table;
 
     this.selection = new SheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],

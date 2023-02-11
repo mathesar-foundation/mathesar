@@ -22,7 +22,7 @@
   export let hasNewColumnButton = false;
   export let columnOrder: number[];
   export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
-  
+
   $: columnOrder = columnOrder ?? [];
 
   $: ({ selection, processedColumns } = $tabularData);
@@ -40,7 +40,7 @@
   let selectedColumnIdsOrdered: number[] = [];
   let newColumnOrder: number[] = [];
 
-  function dragColumn(e: DragEvent) {
+  function dragColumn() {
     // Keep only IDs for which the column exists
     for (const columnId of $processedColumns.keys()) {
       if (!columnOrder.includes(columnId)) {
@@ -53,7 +53,7 @@
       if (selectedColumnIds.includes(id)) {
         selectedColumnIdsOrdered.push(id);
         if (!locationOfFirstDraggedColumn) {
-          locationOfFirstDraggedColumn = columnOrder.indexOf(id)
+          locationOfFirstDraggedColumn = columnOrder.indexOf(id);
         }
       } else {
         newColumnOrder.push(id);
@@ -61,10 +61,14 @@
     }
   }
 
-  function dropColumn(e: DragEvent, columnDroppedOn?: ProcessedColumn) {
+  function dropColumn(columnDroppedOn?: ProcessedColumn) {
     // Early exit if a column is dropped in the same place.
     // Should only be done for single column if non-continuous selection is allowed.
-    if (selectedColumnIds.length > 0 && columnDroppedOn && selectedColumnIds[0] == columnDroppedOn.id) {
+    if (
+      selectedColumnIds.length > 0 &&
+      columnDroppedOn &&
+      selectedColumnIds[0] === columnDroppedOn.id
+    ) {
       // Reset drag information
       locationOfFirstDraggedColumn = undefined;
       selectedColumnIdsOrdered = [];
@@ -75,7 +79,10 @@
     // Insert selected column IDs after the column where they are dropped
     // if that column is to the right, else insert it before
     if (columnDroppedOn) {
-      if (locationOfFirstDraggedColumn && locationOfFirstDraggedColumn < columnOrder.indexOf(columnDroppedOn.id)) {
+      if (
+        locationOfFirstDraggedColumn &&
+        locationOfFirstDraggedColumn < columnOrder.indexOf(columnDroppedOn.id)
+      ) {
         newColumnOrder.splice(
           columnOrder.indexOf(columnDroppedOn.id) + 1,
           0,
@@ -135,9 +142,9 @@
           <Droppable
             on:drop={(e) => dropColumn(e, processedColumn)}
             on:dragover={(e) => e.preventDefault()}
-            locationOfFirstDraggedColumn={locationOfFirstDraggedColumn}
+            {locationOfFirstDraggedColumn}
             columnLocation={columnOrder.indexOf(columnId)}
-            >
+          >
             <div {...htmlAttributes} {style}>
               <HeaderCell
                 {processedColumn}

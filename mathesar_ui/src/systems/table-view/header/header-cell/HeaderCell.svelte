@@ -36,7 +36,13 @@
 
 <div class="header-cell-root">
   <CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
-  <Button style="cursor: inherit;" appearance="ghost" on:click on:mousedown on:mouseenter>
+  <Button
+    style="cursor: inherit;"
+    appearance="ghost"
+    on:click
+    on:mousedown
+    on:mouseenter
+  >
     <ProcessedColumnName {processedColumn} />
     {#if sorter || hasFilter || grouped}
       <div class="indicator-icons">
@@ -54,7 +60,6 @@
       </div>
     {/if}
   </Button>
-  
 </div>
 
 <style lang="scss">

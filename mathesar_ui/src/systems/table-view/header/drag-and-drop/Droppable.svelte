@@ -2,11 +2,13 @@
   export let locationOfFirstDraggedColumn: number | undefined;
   export let columnLocation: number;
 
-  $: columnLocationDifference = locationOfFirstDraggedColumn!==undefined?(locationOfFirstDraggedColumn-columnLocation):0
-  $: draggedOverRight = columnLocationDifference<0
-  $: draggedOverLeft = columnLocationDifference>0
+  $: columnLocationDifference =
+    locationOfFirstDraggedColumn !== undefined
+      ? locationOfFirstDraggedColumn - columnLocation
+      : 0;
+  $: draggedOverRight = columnLocationDifference < 0;
+  $: draggedOverLeft = columnLocationDifference > 0;
   // Needs to be a counter because dragEnter and dragLeave are fired for child elements
-  $: isDraggedOverCounter = shouldReset(locationOfFirstDraggedColumn);
 
   function dragEnter(e: DragEvent) {
     e.preventDefault();
@@ -17,12 +19,16 @@
     isDraggedOverCounter -= 1;
   }
 
-  function shouldReset(locationOfFirstDraggedColumn: number | undefined): number {
-    if(locationOfFirstDraggedColumn === undefined) {
+  function shouldReset(
+    locationOfFirstDraggedColumn: number | undefined,
+  ): number {
+    if (locationOfFirstDraggedColumn === undefined) {
       return 0;
     }
     return isDraggedOverCounter;
   }
+
+  $: isDraggedOverCounter = shouldReset(locationOfFirstDraggedColumn);
 
 </script>
 
@@ -42,7 +48,7 @@
 <style lang="scss">
   .droppable {
     height: 100%;
-    width:100%;
+    width: 100%;
   }
   .droppable.dragged_over.dragged_over_left > :global(div) {
     border-left: 0.2rem solid var(--sky-700) !important;
