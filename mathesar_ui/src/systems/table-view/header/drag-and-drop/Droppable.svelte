@@ -29,7 +29,6 @@
   }
 
   $: isDraggedOverCounter = shouldReset(locationOfFirstDraggedColumn);
-
 </script>
 
 <div
