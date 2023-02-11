@@ -120,7 +120,7 @@
     let:style
   >
     <Droppable
-      on:drop={(e) => dropColumn(e)}
+      on:drop={() => dropColumn()}
       on:dragover={(e) => e.preventDefault()}
       locationOfFirstDraggedColumn={0}
       columnLocation={-1}
