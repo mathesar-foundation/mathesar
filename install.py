@@ -4,7 +4,14 @@ This script installs functions and types for Mathesar onto the configured DB.
 import getopt
 import sys
 
-from config.settings import DATABASES
+import getpass
+
+import django
+from decouple import UndefinedValueError, config as decouple_config
+from django.contrib.auth import get_user_model
+from django.core import management
+
+from django.conf import settings
 from db import install
 
 
@@ -14,50 +21,68 @@ def main():
     for (opt, value) in opts:
         if (opt == "-s") or (opt == "--skip-confirm"):
             skip_confirm = True
-    for database_key in [key for key in DATABASES if key != "default"]:
+    check_missing_dj_config()
+    django.setup()
+    management.call_command('migrate')
+    debug_mode = decouple_config('DEBUG', default=False, cast=bool)
+    #
+    if not debug_mode:
+        management.call_command('collectstatic', no_input='y')
+    if not superuser_exists():
+        print("------------Setting up Admin user------------")
+        print("Admin user does not exists. We need at least one admin")
+        create_superuser(skip_confirm)
+
+    print("------------Setting up User Databases------------")
+    user_databases = [key for key in settings.DATABASES if key != "default"]
+    for database_key in user_databases:
         install_on_db_with_key(database_key, skip_confirm)
 
 
-def install_on_db_with_key(database_key, skip_confirm):
-    if DATABASES[database_key]["HOST"] == "mathesar_db":
-        # if we're going to install on the docker-created Postgres, we'll
-        # create the DB
-        print("Creating Mathesar DB on docker-created PostgreSQL instance")
-        install.create_mathesar_database(
-            user_database=DATABASES[database_key]["NAME"],
-            username=DATABASES["default"]["USER"],
-            password=DATABASES["default"]["PASSWORD"],
-            hostname=DATABASES["default"]["HOST"],
-            root_database=DATABASES["default"]["NAME"],
-            port=DATABASES["default"]["PORT"],
-        )
+def superuser_exists():
+    return get_user_model().objects.filter(is_superuser=True).exists()
+
+
+def create_superuser(skip_confirm):
+    # TODO Replace argument name used for default admin user creation.
+    if not skip_confirm:
+        print("Please enter the details to create a new admin user ")
+        username = input("Username: ")
+        email = input("Email: ")
+        password = getpass.getpass('Password: ')
     else:
-        # if we're installing anywhere else, we require the DB to exist in
-        # advance.
-        username = DATABASES[database_key]["USER"]
-        password = DATABASES[database_key]["PASSWORD"]
-        host = DATABASES[database_key]["HOST"]
-        db_name = DATABASES[database_key]["NAME"]
-        port = DATABASES[database_key]["PORT"]
-        print(f"Installing Mathesar DB {db_name} on preexisting PostgreSQL instance at host {host}...")
-        if skip_confirm is True:
-            confirmation = "y"
-        else:
-            confirmation = input(
-                f"Mathesar will be installed on DB {db_name} at host {host}."
-                "Confirm? (y/n) >  "
-            )
-        if confirmation.lower() in ["y", "yes"]:
-            print("Installing...")
-            install.install_mathesar_on_preexisting_database(
-                username,
-                password,
-                host,
-                db_name,
-                port,
-            )
-        else:
-            print("Skipping DB with key {database_key}.")
+        username = "admin"
+        email = "admin@example.com"
+        password = "password"
+    get_user_model().objects.create_superuser(username, email, password)
+    print(f"Admin user with username {username} was created successfully")
+
+
+def check_missing_dj_config():
+    # TODO Add documentation link
+    documentation_link = ""
+    try:
+        decouple_config('ALLOWED_HOSTS')
+        decouple_config('SECRET_KEY')
+        decouple_config('DJANGO_DATABASE_KEY')
+        decouple_config('DJANGO_SETTINGS_MODULE')
+        decouple_config('DJANGO_DATABASE_URL')
+        decouple_config('MATHESAR_DATABASES')
+    except UndefinedValueError as e:
+        missing_config_key = e.args[0]
+        raise Exception(f"{missing_config_key} environment variable is missing."
+                        f" Please follow the documentation {documentation_link} to add the missing environment variable.")
+
+
+def install_on_db_with_key(database_key, skip_confirm):
+    install.install_mathesar(
+        database_name=settings.DATABASES[database_key]["NAME"],
+        username=settings.DATABASES[database_key]["USER"],
+        password=settings.DATABASES[database_key]["PASSWORD"],
+        hostname=settings.DATABASES[database_key]["HOST"],
+        port=settings.DATABASES[database_key]["PORT"],
+        skip_confirm=skip_confirm
+    )
 
 
 if __name__ == "__main__":

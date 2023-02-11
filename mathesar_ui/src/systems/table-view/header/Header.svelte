@@ -16,6 +16,8 @@
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
   import { Draggable, Droppable } from './drag-and-drop';
+  import { ContextMenu } from '@mathesar/component-library';
+  import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -131,7 +133,7 @@
     <SheetCell columnIdentifierKey={columnId} let:htmlAttributes let:style>
       <div>
         <Draggable
-          on:dragstart={(e) => dragColumn(e)}
+          on:dragstart={() => dragColumn()}
           isSelected={isColumnSelected(
             $selectedCells,
             $columnsSelectedWhenTheTableIsEmpty,
@@ -140,7 +142,7 @@
           selectionInProgress={$selectionInProgress}
         >
           <Droppable
-            on:drop={(e) => dropColumn(e, processedColumn)}
+            on:drop={() => dropColumn(processedColumn)}
             on:dragover={(e) => e.preventDefault()}
             {locationOfFirstDraggedColumn}
             columnLocation={columnOrder.indexOf(columnId)}
@@ -161,6 +163,9 @@
                   )}
               />
               <SheetCellResizer columnIdentifierKey={columnId} />
+              <ContextMenu>
+                <ColumnHeaderContextMenu {processedColumn} />
+              </ContextMenu>
             </div>
           </Droppable>
         </Draggable>

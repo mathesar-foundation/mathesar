@@ -1,5 +1,9 @@
 import type { TableEntry } from '@mathesar/api/types/tables';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import {
+  getImportPreviewPageUrl,
+  getTablePageUrl,
+} from '@mathesar/routes/urls';
 
 export function isTableImportConfirmationRequired(
   table: Partial<Pick<TableEntry, 'import_verified' | 'data_files'>>,
@@ -54,4 +58,13 @@ export function orderProcessedColumns(
   });
 
   return orderedColumns;
+export function getLinkForTableItem(
+  databaseName: string,
+  schemaId: number,
+  table: Pick<TableEntry, 'import_verified' | 'data_files' | 'id'>,
+) {
+  if (isTableImportConfirmationRequired(table)) {
+    return getImportPreviewPageUrl(databaseName, schemaId, table.id);
+  }
+  return getTablePageUrl(databaseName, schemaId, table.id);
 }

@@ -1,10 +1,13 @@
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.db.models import Q
+
 from rest_access_policy import PermittedPkRelatedField
 from rest_framework import serializers
 
 from mathesar.api.db.permissions.query_table import QueryTableAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.api.exceptions.validation_exceptions.exceptions import DuplicateUIQueryInSchemaAPIException
 from mathesar.models.base import Table
 from mathesar.models.query import UIQuery
 
@@ -29,7 +32,37 @@ class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer
         unexpected_fields = set(self.initial_data) - set(self.fields)
         if unexpected_fields:
             raise ValidationError(f"Unexpected field(s): {unexpected_fields}")
+        self._validate_uniqueness(attrs)
         return attrs
+
+    def _validate_uniqueness(self, attrs):
+        """
+        Uniqueness is only defined when both name and base_table are defined.
+
+        Would be nice to define this in terms of Django's UniqueConstraint, but that doesn't seem
+        possible, due to schema being a child property of base_table.
+        """
+        name = attrs.get('name')
+        if name:
+            base_table = attrs.get('base_table')
+            if base_table:
+                schema = base_table.schema
+                is_duplicate_q = self._get_is_duplicate_q(name, schema)
+                duplicates = UIQuery.objects.filter(is_duplicate_q)
+                if duplicates.exists():
+                    raise DuplicateUIQueryInSchemaAPIException(field='name')
+
+    def _get_is_duplicate_q(self, name, schema):
+        has_same_name_q = Q(name=name)
+        has_same_schema_q = Q(base_table__schema=schema)
+        is_duplicate_q = has_same_name_q & has_same_schema_q
+        is_update = self.instance is not None
+        if is_update:
+            # If this is an update, filter self out of found duplicates
+            id = self.instance.id
+            is_not_this_instance_q = ~Q(id=id)
+            is_duplicate_q = is_duplicate_q & is_not_this_instance_q
+        return is_duplicate_q
 
 
 class QuerySerializer(BaseQuerySerializer):

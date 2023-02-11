@@ -7,7 +7,8 @@ from mathesar.models.users import Role
 class QueryTableAccessPolicy(AccessPolicy):
 
     """
-    Used for scoping Table queryset when creating a query
+    Used for scoping Table queryset when creating a query.
+    We cannot use TableAccessPolicy as it restricts creation if a user does not have write access but a Query can be created by a Viewer too
     """
     @classmethod
     def scope_queryset(cls, request, qs):
