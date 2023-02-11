@@ -112,7 +112,7 @@ export class TabularData {
     this.selection = new SheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
       getColumnOrder: () =>
-        getColumnOrder([...get(this.processedColumns).values()], table),
+        getColumnOrder([...get(this.processedColumns).values()], this.table),
       getRows: () => this.recordsData.getRecordRows(),
       getMaxSelectionRowIndex: () => {
         const totalCount = get(this.recordsData.totalCount) ?? 0;

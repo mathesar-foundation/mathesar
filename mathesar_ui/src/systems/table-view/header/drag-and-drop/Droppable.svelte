@@ -20,9 +20,9 @@
   }
 
   function shouldReset(
-    locationOfFirstDraggedColumn: number | undefined,
+    locationOfFirstDraggedColumnParam: number | undefined,
   ): number {
-    if (locationOfFirstDraggedColumn === undefined) {
+    if (locationOfFirstDraggedColumnParam === undefined) {
       return 0;
     }
     return isDraggedOverCounter;
