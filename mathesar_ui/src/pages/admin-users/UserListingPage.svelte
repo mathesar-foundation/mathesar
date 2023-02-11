@@ -12,6 +12,9 @@
   import type { User } from '@mathesar/api/users';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import UserRow from './UserRow.svelte';
+    import EntityLayout from '../../components/EntityLayout.svelte';
+    import UserSkeleton from './UserSkeleton.svelte';
+    import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
 
   let filterQuery = '';
 
@@ -42,57 +45,46 @@
 
 <section class="users-list-container">
   {#if $requestStatus?.state === 'processing'}
-    <p>Loading...</p>
+    <UserSkeleton />
   {:else if $requestStatus?.state === 'success'}
     <h1>
       Users ({filteredUsers.length})
     </h1>
-    <div class="user-search-container">
-      <div class="user-search">
-        <div class="user-search-box">
-          <TextInputWithPrefix
-            placeholder="Search Users"
-            bind:value={filterQuery}
-            prefixIcon={iconSearch}
-          />
-        </div>
+    <EntityLayout
+    searchPlaceholder="Search Users"
+    bind:searchQuery={filterQuery}
+    on:clear={handleClearFilterQuery}>
+      <slot slot="action">
         <AnchorButton appearance="primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}>
           <Icon {...iconAddNew} />
           <span>Add user</span>
         </AnchorButton>
-      </div>
-
-      {#if filterQuery}
-        <div class="user-search-results-info">
-          <p>
-            {labeledCount(filteredUsers, 'results')}
-            for all users matching <strong>{filterQuery}</strong>
-          </p>
-          <Button
-            size="small"
-            appearance="secondary"
-            on:click={handleClearFilterQuery}
-          >
-            Clear
-          </Button>
-        </div>
-      {/if}
-    </div>
-
-    {#if filteredUsers.length}
-      <div class="users-list">
-        {#each filteredUsers as user, index (user.id)}
-          {#if index !== 0}
-            <hr />
-          {/if}
-          <UserRow {user} />
-        {/each}
-      </div>
-    {:else if !filterQuery}
-      <p class="no-users-found-text">No users found</p>
-    {/if}
+      </slot>
+      <slot slot="resultInfo">
+        <p>
+          {labeledCount(filteredUsers, 'results')}
+          for all users matching <strong>{filterQuery}</strong>
+        </p>
+      </slot>
+      <slot slot="content">
+        {#if filteredUsers.length}
+          <div class="users-list">
+            {#each filteredUsers as user, index (user.id)}
+              {#if index !== 0}
+                <hr />
+              {/if}
+              <UserRow {user} />
+            {/each}
+          </div>
+        {:else if filteredUsers.length == 0}
+          <p class="no-users-found-text">No users found</p>
+        {/if}
+      </slot>
+    </EntityLayout>
   {:else if $requestStatus?.state === 'failure'}
-    <p class="error-text">Error: {$requestStatus.errors}</p>
+    <ErrorBox>
+        <p>Error: {$requestStatus.errors}</p>
+    </ErrorBox>
   {/if}
 </section>
 
@@ -112,24 +104,6 @@
     margin: 0;
   }
 
-  .user-search {
-    display: flex;
-
-    > :global(* + *) {
-      margin-left: 1rem;
-    }
-
-    :global(.user-search-box) {
-      flex: 1;
-    }
-  }
-
-  .user-search-results-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
   .users-list {
     border: 1px solid var(--slate-200);
     border-radius: var(--border-radius-m);
@@ -142,7 +116,4 @@
     }
   }
 
-  .error-text {
-    color: var(--red-500);
-  }
 </style>

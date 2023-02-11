@@ -5,7 +5,7 @@
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import ExplorationsList from './ExplorationsList.svelte';
-  import EntityLayout from './EntityLayout.svelte';
+  import EntityLayout from '../../components/EntityLayout.svelte';
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
 
   export let database: Database;

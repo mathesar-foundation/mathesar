@@ -6,13 +6,24 @@
 
   export let user: User;
 
+  let hoveringTrigger = false;
+
   // TODO: Update the icon
   $: userTypeIcon = user.is_superuser ? iconUser : iconUser;
   $: userTypeText = user.is_superuser ? 'Admin' : 'Custom';
   $: showUserDetailedInfo = user.email || user.full_name;
 </script>
 
-<a class="user-row passthrough" href={getEditUsersPageUrl(user.id)}>
+<a class="user-row passthrough" 
+  href={getEditUsersPageUrl(user.id)}
+  class:hovering-trigger={hoveringTrigger}
+  on:mouseenter={() => {
+    hoveringTrigger = true;
+  }}
+  on:mouseleave={() => {
+    hoveringTrigger = false;
+  }}
+  >
   <div class="user-info">
     <span>{user.username}</span>
     {#if showUserDetailedInfo}
@@ -73,6 +84,10 @@
     border-radius: 50%;
   }
 
+  .hovering-trigger {
+    background: var(--slate-100);
+  }
+  
   .user-type {
     background-color: var(--slate-200);
     padding: 0.25rem 0.5rem;

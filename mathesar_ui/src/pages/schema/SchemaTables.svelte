@@ -3,7 +3,7 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import TablesList from './TablesList.svelte';
-  import EntityLayout from './EntityLayout.svelte';
+  import EntityLayout from '../../components/EntityLayout.svelte';
   import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
   import CreateNewTableButton from './CreateNewTableButton.svelte';
 
