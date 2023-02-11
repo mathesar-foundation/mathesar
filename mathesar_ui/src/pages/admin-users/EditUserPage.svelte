@@ -1,9 +1,11 @@
 <script lang="ts">
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import {
     UserDetailsForm,
     PasswordChangeForm,
   } from '@mathesar/systems/users-and-permissions';
+  import { getEditUsersPageUrl } from '../../routes/urls';
 
   const usersStore = getUsersStoreFromContext();
 
@@ -28,6 +30,13 @@
       User not found
     {/if}
   {:else}
+    <AppendBreadcrumb
+      item={{
+        type: 'simple',
+        href: getEditUsersPageUrl(userId),
+        label: user.username,
+      }}
+    />
     <UserDetailsForm {user} on:update={onUserUpdate} />
     <hr />
     <PasswordChangeForm {userId} />

@@ -35,6 +35,13 @@
   <AdminPageLayout cssVariables={{ '--max-layout-width': PAGE_MAX_WIDTH }}>
     <AdminNavigation slot="sidebar" />
     <Route path="/general">
+      <AppendBreadcrumb
+        item={{
+          type: 'simple',
+          href: ADMIN_GENERAL_PAGE_URL,
+          label: 'General',
+        }}
+      />
       <h1>General</h1>
     </Route>
 
