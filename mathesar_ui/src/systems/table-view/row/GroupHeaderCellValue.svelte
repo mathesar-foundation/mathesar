@@ -4,6 +4,7 @@
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import type { ResultValue } from '@mathesar/api/types/tables/records';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
   export let recordSummariesForSheet: RecordSummariesForSheet;
@@ -15,6 +16,10 @@
   $: recordSummary = recordSummariesForSheet
     .get(String(columnId))
     ?.get(recordId);
+  $: recordPageHref = $storeToGetRecordPageUrl({
+    tableId: processedColumnsMap?.get(columnId)?.linkFk?.referent_table,
+    recordId,
+  });
 </script>
 
 <span class="tag">
@@ -26,7 +31,7 @@
   </span>
   <span class="value">
     {#if recordSummary}
-      <LinkedRecord {recordSummary} {recordId} />
+      <LinkedRecord {recordSummary} {recordId} {recordPageHref} />
     {:else}
       <CellValue value={cellValue} />
     {/if}
