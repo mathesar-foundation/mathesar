@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Skeleton } from '@mathesar/component-library';
-  </script>
+</script>
   
   <div class="user-skeleton-container">
     <Skeleton loading={true} />

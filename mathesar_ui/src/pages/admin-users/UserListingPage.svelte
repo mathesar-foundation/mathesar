@@ -3,18 +3,15 @@
   import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
   import {
     AnchorButton,
-    Button,
-    Icon,
-    iconSearch,
-    TextInputWithPrefix,
+    Icon
   } from '@mathesar/component-library';
   import { iconAddNew } from '@mathesar/icons';
   import type { User } from '@mathesar/api/users';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import UserRow from './UserRow.svelte';
-    import EntityLayout from '../../components/EntityLayout.svelte';
-    import UserSkeleton from './UserSkeleton.svelte';
-    import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import EntityLayout from '../../components/EntityLayout.svelte';
+  import UserSkeleton from './UserSkeleton.svelte';
 
   let filterQuery = '';
 
@@ -76,7 +73,7 @@
               <UserRow {user} />
             {/each}
           </div>
-        {:else if filteredUsers.length == 0}
+        {:else if filteredUsers.length === 0}
           <p class="no-users-found-text">No users found</p>
         {/if}
       </slot>
