@@ -25,20 +25,20 @@
   const userProfileStore = getUserProfileStoreFromContext();
   $: loggedInUserDetails = $userProfileStore;
 
-  export let userDetails: User | undefined = undefined;
+  export let user: User | undefined = undefined;
 
   $: isUserUpdatingThemselves =
-    loggedInUserDetails && loggedInUserDetails?.id === userDetails?.id;
-  $: isNewUser = userDetails === undefined;
-  $: fullName = optionalField(userDetails?.full_name ?? '');
-  $: username = requiredField(userDetails?.username ?? '');
-  $: email = optionalField(userDetails?.email ?? '');
+    loggedInUserDetails && loggedInUserDetails?.id === user?.id;
+  $: isNewUser = user === undefined;
+  $: fullName = optionalField(user?.full_name ?? '');
+  $: username = requiredField(user?.username ?? '');
+  $: email = optionalField(user?.email ?? '');
   $: role = requiredField<'user' | 'admin' | undefined>(
-    userDetails?.is_superuser ? 'admin' : 'user',
+    user?.is_superuser ? 'admin' : 'user',
   );
 
   const password = requiredField('');
-  $: userDetails, password.reset();
+  $: user, password.reset();
 
   $: formFields = (() => {
     const fields = {
@@ -73,8 +73,8 @@
       return;
     }
 
-    if (userDetails) {
-      await userApi.update(userDetails.id, request);
+    if (user) {
+      await userApi.update(user.id, request);
       if (isUserUpdatingThemselves && userProfileStore) {
         userProfileStore.update((details) => details.with(request));
       }
