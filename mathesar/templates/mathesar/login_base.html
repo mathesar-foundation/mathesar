@@ -1,0 +1,151 @@
+{% extends 'mathesar/base.html' %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+
+{% block styles %}
+  {% if development_mode %}
+    <!--
+      In development mode, vite loads mathesar-component-library
+      styles, which takes a while. This leads to a flickering
+      effect where elements are shown without styles as soon
+      as they render.
+      This block hides them until vite loads the styles.
+      This is not a concern during production.
+    -->
+    <style type="text/css">
+      body {
+        visibility: hidden;
+      }
+    </style>
+  {% else %}
+    {% for css_file in manifest_data.module_css %}
+      <link rel="stylesheet" href="{% static css_file %}" />
+    {% endfor %}
+  {% endif %}
+
+  <style type="text/css">
+    body {
+      padding: 4rem 2rem;
+      background: var(--sand-200);
+      --login-page-spacing: var(--size-super-ultra-large);
+      color: var(--slate-800);
+      overflow: auto;
+      height: auto;
+    }
+    .align-center {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .logo img {
+      width: 13.25rem;
+      display: block;
+    }
+    .tutorial {
+      max-width: 48rem;
+      line-height: var(--size-xx-large);
+    }
+    .tutorial .body {
+      margin-top: var(--size-xx-small);
+    }
+    .login-card {
+      max-width: 28rem;
+      background-color: var(--white);
+      padding: var(--login-page-spacing);
+      border-radius: var(--border-radius-l);
+    }
+    .login-card h1 {
+      font-weight: 500;
+      font-size: var(--size-ultra-large);
+      margin: 0;
+      text-align: center;
+    }
+    .login-card .labeled-input + .labeled-input {
+      margin-top: var(--size-small);
+    }
+    .login-card .error-message,
+    .login-card .warning-message {
+      margin-top: var(--size-small);
+      border: 1px solid var(--red-200);
+      border-radius: var(--border-radius-m);
+      padding: var(--size-x-small);
+      display: flex;
+    }
+    .login-card .error-message .icon,
+    .login-card .warning-message .icon{
+      font-weight: bold;
+      margin-right: 0.5rem;
+      opacity: 0.7;
+    } 
+    .login-card .error-message {
+      background: var(--red-100);
+      border-color: var(--red-200);
+    }
+    .login-card .warning-message {
+      background: var(--yellow-100);
+      border-color: var(--red-200);
+    }
+    .login-card .labeled-input .help.error {
+      color: var(--red-600);
+    }
+    .login-card .footer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .tutorial, .login-card,
+    .login-card form, .login-card .footer {
+      margin-top: var(--login-page-spacing);
+    }
+  </style>
+{% endblock %}
+
+{% block scripts %}
+  {% if development_mode %}
+    <script type="module" src="{{ client_dev_url }}/@vite/client"></script>
+    <script type="module" src="{{ client_dev_url }}/src/component-library/styles.scss"></script>
+    <script type="module" defer>
+      (function () {
+        document.body.style.visibility = 'visible';
+      })();
+    </script>
+  {% endif %}
+
+  <script>
+    function showLoadingStatus(newText) {
+      const loginButton = document.querySelector('form button[type="submit"]');
+      loginButton.disabled = true;
+      loginButton.innerText = newText ?? 'Loading...';
+    }
+  </script>
+{% endblock %}
+
+{% block content %}
+  <div class="logo">
+    <img src="{% static '/images/red-logo-with-text.svg' %}" alt="Mathesar Logo" class="align-center"/>
+  </div>
+
+  {% if live_demo_mode %}
+    <div class="tutorial align-center">
+      <div class="header">
+        <strong>Live Demo Mode</strong>
+      </div>
+      <div class="body">
+        Mathesar's live demo is available to anyone to try out.
+        {% if live_demo_username and live_demo_password %}
+          Use the following credentials to login:
+          <ul>
+            <li>username: <strong>{{live_demo_username}}</strong></li>
+            <li>password: <strong>{{live_demo_password}}</strong></li>
+          </ul>
+        {% endif %}
+        Keep in mind that the data in the live demo is reset regularly.
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="login-card align-center">
+    <h1>{% block h1 %} {% endblock %}</h1>
+    {% block box_content %} {% endblock %}
+  </div>
+{% endblock %}
