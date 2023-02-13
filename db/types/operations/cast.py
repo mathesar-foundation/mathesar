@@ -12,6 +12,8 @@ from db.types import categories
 from db.types.custom.money import MONEY_ARR_FUNC_NAME
 
 NUMERIC_ARR_FUNC_NAME = "get_numeric_array"
+INTEGER_ARR_FUNC_NAME = "get_integer_array"
+DECIMAL_ARR_FUNC_NAME = "get_decimal_array"
 
 
 def get_column_cast_expression(column, target_type, engine, type_options=None):
@@ -89,10 +91,20 @@ def create_email_casts(engine):
 
 
 def create_integer_casts(engine):
+
     integer_types = categories.INTEGER_TYPES
     for db_type in integer_types:
         type_body_map = _get_integer_type_body_map(target_type=db_type)
         create_cast_functions(db_type, type_body_map, engine)
+
+
+    integer_array_create = _build_integer_array_function()
+    with engine.begin() as conn:
+        conn.execute(text(integer_array_create))
+    type_body_map = _get_integer_type_body_map()
+    create_cast_functions(PostgresType.INTEGER, type_body_map, engine)
+
+
 
 
 def create_interval_casts(engine):
@@ -1025,6 +1037,128 @@ def _build_numeric_array_function():
       END;
     $$ LANGUAGE plpgsql;
     """
+
+
+
+
+
+def _build_integer_array_function():
+    """
+    The main reason for this function to be separate is for testing. This
+    does have some performance impact; we should consider inlining later.
+    """
+    qualified_function_name = get_qualified_name(INTEGER_ARR_FUNC_NAME)
+
+    no_separator_big = r"[0-9]{4,}(?:([,.])[0-9]+)?"
+    no_separator_small = r"[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?"
+   
+    inner_number_tree = "|".join(
+        [
+            no_separator_big,
+            no_separator_small,
+            ])
+    integer_finding_regex = f"^(?:[+-]?({inner_number_tree}))$"
+
+    actual_number_indices = [1]
+    group_divider_indices = [4, 6, 8, 10, 12, 14, 16]
+    actual_numbers_str = ','.join([f'raw_arr[{idx}]' for idx in actual_number_indices])
+    group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
+    text_db_type_id = PostgresType.TEXT.id
+    return rf"""
+    CREATE OR REPLACE FUNCTION {qualified_function_name}({text_db_type_id}) RETURNS {text_db_type_id}[]
+    AS $$
+      DECLARE
+        raw_arr {text_db_type_id}[];
+        actual_number_arr {text_db_type_id}[];
+        group_divider_arr {text_db_type_id}[];
+       
+        actual_number {text_db_type_id};
+        group_divider {text_db_type_id};
+       
+      BEGIN
+        SELECT regexp_matches($1, '{integer_finding_regex}') INTO raw_arr;
+        IF raw_arr IS NULL THEN
+          RETURN NULL;
+        END IF;
+        SELECT array_remove(ARRAY[{actual_numbers_str}], null) INTO actual_number_arr;
+        SELECT array_remove(ARRAY[{group_dividers_str}], null) INTO group_divider_arr;
+        SELECT actual_number_arr[1] INTO actual_number;
+        SELECT group_divider_arr[1] INTO group_divider;
+        RETURN ARRAY[actual_number, group_divider];
+      END;
+    $$ LANGUAGE plpgsql;
+    """
+
+
+def _build_decimal_array_function():
+    """
+    The main reason for this function to be separate is for testing. This
+    does have some performance impact; we should consider inlining later.
+    """
+    qualified_function_name = get_qualified_name(DECIMAL_ARR_FUNC_NAME)
+
+    no_separator_big = r"[0-9]{4,}(?:([,.])[0-9]+)?"
+    no_separator_small = r"[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?"
+    comma_separator_req_decimal = r"[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+"
+    period_separator_req_decimal = r"[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+"
+    comma_separator_opt_decimal = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?"
+    period_separator_opt_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?"
+    space_separator_opt_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?"
+    comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?"
+    single_quote_separator_opt_decimal = r"[0-9]{1,3}(?:(\'')[0-9]{3})+(?:([.])[0-9]+)?"
+
+    inner_number_tree = "|".join(
+        [
+            no_separator_big,
+            no_separator_small,
+            comma_separator_req_decimal,
+            period_separator_req_decimal,
+            comma_separator_opt_decimal,
+            period_separator_opt_decimal,
+            space_separator_opt_decimal,
+            comma_separator_lakh_system,
+            single_quote_separator_opt_decimal
+        ])
+    decimal_finding_regex = f"^(?:[+-]?({inner_number_tree}))$"
+
+    actual_number_indices = [1]
+    group_divider_indices = [4, 6, 8, 10, 12, 14, 16]
+    decimal_point_indices = [2, 3, 5, 7, 9, 11, 13, 15, 17]
+    actual_numbers_str = ','.join([f'raw_arr[{idx}]' for idx in actual_number_indices])
+    group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
+    decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])
+    print(actual_numbers_str,group_dividers_str,decimal_points_str)
+
+    text_db_type_id = PostgresType.TEXT.id
+    return rf"""
+    CREATE OR REPLACE FUNCTION {qualified_function_name}({text_db_type_id}) RETURNS {text_db_type_id}[]
+    AS $$
+      DECLARE
+        raw_arr {text_db_type_id}[];
+        actual_number_arr {text_db_type_id}[];
+        group_divider_arr {text_db_type_id}[];
+        decimal_point_arr {text_db_type_id}[];
+        actual_number {text_db_type_id};
+        group_divider {text_db_type_id};
+        decimal_point {text_db_type_id};
+      BEGIN
+        SELECT regexp_matches($1, '{decimal_finding_regex}') INTO raw_arr;
+        IF raw_arr IS NULL THEN
+          RETURN NULL;
+        END IF;
+        SELECT array_remove(ARRAY[{actual_numbers_str}], null) INTO actual_number_arr;
+        SELECT array_remove(ARRAY[{group_dividers_str}], null) INTO group_divider_arr;
+        SELECT array_remove(ARRAY[{decimal_points_str}], null) INTO decimal_point_arr;
+        SELECT actual_number_arr[1] INTO actual_number;
+        SELECT group_divider_arr[1] INTO group_divider;
+        SELECT decimal_point_arr[1] INTO decimal_point;
+        RETURN ARRAY[actual_number, group_divider, decimal_point];
+      END;
+    $$ LANGUAGE plpgsql;
+    """
+
+
+
 
 
 def _get_default_type_body_map(source_types, target_type):
