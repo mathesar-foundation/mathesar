@@ -54,7 +54,7 @@ export class UserProfile {
 
   hasPermission(
     dbObject: {
-      database: Pick<Database, 'id'>;
+      database?: Pick<Database, 'id'>;
       schema?: Pick<SchemaEntry, 'id'>;
     },
     operation: AccessOperation,
@@ -69,9 +69,11 @@ export class UserProfile {
         return roleAllowsOperation(userSchemaRole.role, operation);
       }
     }
-    const userDatabaseRole = this.databaseRoles.get(database.id);
-    if (userDatabaseRole) {
-      return roleAllowsOperation(userDatabaseRole.role, operation);
+    if (database) {
+      const userDatabaseRole = this.databaseRoles.get(database.id);
+      if (userDatabaseRole) {
+        return roleAllowsOperation(userDatabaseRole.role, operation);
+      }
     }
     return false;
   }

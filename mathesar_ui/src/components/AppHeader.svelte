@@ -37,15 +37,10 @@
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
-  $: canExecuteDDL = (() => {
-    if (database && schema) {
-      return (
-        $userProfile?.hasPermission({ database, schema }, 'canExecuteDDL') ??
-        false
-      );
-    }
-    return false;
-  })();
+  $: canExecuteDDL = $userProfile?.hasPermission(
+    { database, schema },
+    'canExecuteDDL',
+  );
 
   let isCreatingNewEmptyTable = false;
 
