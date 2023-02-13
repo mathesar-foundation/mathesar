@@ -79,11 +79,11 @@ def create_json_casts(engine):
 
 
 def create_decimal_number_casts(engine):
-    decimal_number_types = categories.DECIMAL_TYPES
-    for db_type in decimal_number_types:
-        type_body_map = _get_decimal_number_type_body_map(target_type=db_type)
-        create_cast_functions(db_type, type_body_map, engine)
-
+    decimal_array_create = _build_decimal_array_function()
+    with engine.begin() as conn:
+        conn.execute(text(decimal_array_create))
+    type_body_map = _get_decimal_number_type_body_map()
+    create_cast_functions(PostgresType.DOUBLE_PRECISION, type_body_map, engine)
 
 def create_email_casts(engine):
     type_body_map = _get_email_type_body_map()
@@ -91,13 +91,6 @@ def create_email_casts(engine):
 
 
 def create_integer_casts(engine):
-
-    integer_types = categories.INTEGER_TYPES
-    for db_type in integer_types:
-        type_body_map = _get_integer_type_body_map(target_type=db_type)
-        create_cast_functions(db_type, type_body_map, engine)
-
-
     integer_array_create = _build_integer_array_function()
     with engine.begin() as conn:
         conn.execute(text(integer_array_create))
