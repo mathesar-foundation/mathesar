@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { queries } from '@mathesar/stores/queries';
-  import { tables as tablesStore } from '@mathesar/stores/tables';
+  import {
+    tables as tablesStore,
+    importVerifiedTables as importVerifiedTablesStore,
+  } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
@@ -46,7 +49,7 @@
     href: string;
   };
 
-  $: tablesMap = $tablesStore.data;
+  $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
   $: explorationsMap = $queries.data;
   $: isTablesLoading = $tablesStore.state === States.Loading;
   $: isExplorationsLoading = $queries.requestStatus.state === 'processing';

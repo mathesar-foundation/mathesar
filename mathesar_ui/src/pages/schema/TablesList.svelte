@@ -2,7 +2,6 @@
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
-  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
   import EmptyEntity from './EmptyEntity.svelte';
   import TableCard from './TableCard.svelte';
 
@@ -10,14 +9,10 @@
   export let database: Database;
   export let schema: SchemaEntry;
   export let canExecuteDDL: boolean;
-
-  $: visibleTables = canExecuteDDL
-    ? tables
-    : tables.filter((table) => !isTableImportConfirmationRequired(table));
 </script>
 
 <div class="container">
-  {#each visibleTables as table (table.id)}
+  {#each tables as table (table.id)}
     <TableCard {canExecuteDDL} {table} {database} {schema} />
   {:else}
     <EmptyEntity icon={iconTable}>
