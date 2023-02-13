@@ -26,7 +26,7 @@
     LOGOUT_URL,
     ADMIN_URL,
   } from '@mathesar/routes/urls';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import { createTable } from '@mathesar/stores/tables';
   import { router } from 'tinro';
   import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
@@ -36,14 +36,12 @@
   const userProfile = getUserProfileStoreFromContext();
 
   $: database = $currentDatabase;
-  $: schema = $currentSchemaId;
+  $: schema = $currentSchema;
   $: allowTableCreation = (() => {
     if (database && schema) {
       return (
-        $userProfile?.hasPermission(
-          { database, schema: { id: schema } },
-          'performCrud',
-        ) ?? false
+        $userProfile?.hasPermission({ database, schema }, 'performCrud') ??
+        false
       );
     }
     return false;
@@ -56,9 +54,9 @@
       return;
     }
     isCreatingNewEmptyTable = true;
-    const tableInfo = await createTable(schema, {});
+    const tableInfo = await createTable(schema.id, {});
     isCreatingNewEmptyTable = false;
-    router.goto(getTablePageUrl(database.name, schema, tableInfo.id), false);
+    router.goto(getTablePageUrl(database.name, schema.id, tableInfo.id), false);
   }
 </script>
 
@@ -85,14 +83,14 @@
           </ButtonMenuItem>
           <LinkMenuItem
             icon={iconAddNew}
-            href={getImportPageUrl(database?.name, schema)}
+            href={getImportPageUrl(database.name, schema.id)}
           >
             New Table from Data Import
           </LinkMenuItem>
         {/if}
         <LinkMenuItem
           icon={iconExploration}
-          href={getDataExplorerPageUrl(database?.name, schema)}
+          href={getDataExplorerPageUrl(database.name, schema.id)}
         >
           Open Data Explorer
         </LinkMenuItem>
