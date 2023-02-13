@@ -11,9 +11,9 @@
 
   export let database: Database;
   export let schema: SchemaEntry;
-  export let allowTableCrud: boolean;
+  export let canExecuteDDL: boolean;
 
-  $: showTutorial = tablesMap.size === 0 && allowTableCrud;
+  $: showTutorial = tablesMap.size === 0 && canExecuteDDL;
 
   let tableSearchQuery = '';
 
@@ -39,7 +39,7 @@
   on:clear={clearQuery}
 >
   <svelte:fragment slot="action">
-    {#if allowTableCrud}
+    {#if canExecuteDDL}
       <CreateNewTableButton {database} {schema} />
     {/if}
   </svelte:fragment>
@@ -54,12 +54,7 @@
     {#if showTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
-      <TablesList
-        allowModification={allowTableCrud}
-        tables={filteredTables}
-        {database}
-        {schema}
-      />
+      <TablesList {canExecuteDDL} tables={filteredTables} {database} {schema} />
     {/if}
   </svelte:fragment>
 </EntityLayout>

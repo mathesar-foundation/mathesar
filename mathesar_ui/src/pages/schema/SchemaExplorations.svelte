@@ -12,10 +12,10 @@
   export let schema: SchemaEntry;
   export let explorationsMap: Map<number, QueryInstance>;
   export let hasTablesToExplore: boolean;
-  export let allowExplorationCrud: boolean;
+  export let canEditMetadata: boolean;
 
   $: showTutorial =
-    explorationsMap.size === 0 && hasTablesToExplore && allowExplorationCrud;
+    explorationsMap.size === 0 && hasTablesToExplore && canEditMetadata;
 
   let explorationsSearchQuery = '';
 

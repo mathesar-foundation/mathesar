@@ -37,9 +37,9 @@
 
   $: schemasMap = $schemasStore.data;
 
-  $: userCanPerformCrud = loggedInUserDetails?.hasPermission(
+  $: canExecuteDDL = loggedInUserDetails?.hasPermission(
     { database },
-    'performCrud',
+    'canExecuteDDL',
   );
 
   let filterQuery = '';
@@ -100,7 +100,7 @@
     }}
   >
     <svelte:fragment slot="action">
-      {#if userCanPerformCrud}
+      {#if canExecuteDDL}
         <Button on:click={addSchema} appearance="primary">
           <Icon {...iconAddNew} />
           <span>Create Schema</span>
@@ -139,7 +139,7 @@
           <SchemaRow
             {database}
             {schema}
-            canModify={userCanPerformCrud}
+            {canExecuteDDL}
             on:edit={() => editSchema(schema)}
             on:delete={() => deleteSchema(schema)}
           />

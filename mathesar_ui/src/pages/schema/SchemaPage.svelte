@@ -29,12 +29,14 @@
   const userProfileStore = getUserProfileStoreFromContext();
   $: loggedInUserDetails = $userProfileStore;
 
-  $: userCanPerformCrud =
-    loggedInUserDetails?.hasPermission({ database, schema }, 'performCrud') ??
+  $: canExecuteDDL =
+    loggedInUserDetails?.hasPermission({ database, schema }, 'canExecuteDDL') ??
     false;
-  $: userCanModifyData =
-    loggedInUserDetails?.hasPermission({ database, schema }, 'modifyData') ??
-    false;
+  $: canEditMetadata =
+    loggedInUserDetails?.hasPermission(
+      { database, schema },
+      'canEditMetadata',
+    ) ?? false;
 
   const addEditModal = modal.spawnModalController();
 
@@ -97,7 +99,7 @@
     }}
   >
     <svelte:fragment slot="action">
-      {#if !isDefault && userCanPerformCrud}
+      {#if !isDefault && canExecuteDDL}
         <Button on:click={handleEditSchema} appearance="secondary">
           <Icon {...iconEdit} />
           <span>Edit Schema</span>
@@ -124,8 +126,8 @@
     {#if activeTab?.id === 'overview'}
       <div class="tab-container">
         <SchemaOverview
-          allowTableCrud={userCanPerformCrud}
-          allowExplorationCrud={userCanModifyData}
+          {canExecuteDDL}
+          {canEditMetadata}
           {isTablesLoading}
           {isExplorationsLoading}
           {tablesMap}
@@ -139,12 +141,7 @@
         {#if isTablesLoading}
           <TableSkeleton />
         {:else}
-          <SchemaTables
-            allowTableCrud={userCanPerformCrud}
-            {tablesMap}
-            {database}
-            {schema}
-          />
+          <SchemaTables {canExecuteDDL} {tablesMap} {database} {schema} />
         {/if}
       </div>
     {:else if activeTab?.id === 'explorations'}
@@ -153,7 +150,7 @@
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations
-            allowExplorationCrud={userCanModifyData}
+            {canEditMetadata}
             hasTablesToExplore={!!tablesMap.size}
             {explorationsMap}
             {database}

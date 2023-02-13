@@ -18,17 +18,16 @@
   export let isTablesLoading = false;
   export let isExplorationsLoading = false;
 
-  export let allowTableCrud: boolean;
-  export let allowExplorationCrud: boolean;
+  export let canExecuteDDL: boolean;
+  export let canEditMetadata: boolean;
 
   export let database: Database;
   export let schema: SchemaEntry;
 
   $: hasTables = tablesMap.size > 0;
   $: hasExplorations = explorationsMap.size > 0;
-  $: showTableCreationTutorial = !hasTables && allowTableCrud;
-  $: showExplorationTutorial =
-    hasTables && !hasExplorations && allowExplorationCrud;
+  $: showTableCreationTutorial = !hasTables && canExecuteDDL;
+  $: showExplorationTutorial = hasTables && !hasExplorations && canEditMetadata;
 
   // Viewers can explore, they cannot save explorations
   $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
@@ -38,7 +37,7 @@
   <div class="vertical-container tables">
     <OverviewHeader title="Tables">
       <svelte:fragment slot="action">
-        {#if allowTableCrud}
+        {#if canExecuteDDL}
           <CreateNewTableButton {database} {schema} />
         {/if}
       </svelte:fragment>
@@ -49,7 +48,7 @@
       <CreateNewTableTutorial {database} {schema} />
     {:else}
       <TablesList
-        allowModification={allowTableCrud}
+        {canExecuteDDL}
         tables={[...tablesMap.values()]}
         {database}
         {schema}

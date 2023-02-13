@@ -34,7 +34,7 @@
   export let table: TableEntry;
   export let database: Database;
   export let schema: SchemaEntry;
-  export let allowModification: boolean;
+  export let canExecuteDDL: boolean;
 
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
@@ -114,13 +114,13 @@
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
           Explore Table
         </LinkMenuItem>
-        {#if allowModification}
+        {#if canExecuteDDL}
           <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
             Edit Table
           </ButtonMenuItem>
         {/if}
       {/if}
-      {#if allowModification}
+      {#if canExecuteDDL}
         <ButtonMenuItem
           on:click={handleDeleteTable}
           danger

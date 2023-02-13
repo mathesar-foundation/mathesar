@@ -37,10 +37,10 @@
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
-  $: allowTableCreation = (() => {
+  $: canExecuteDDL = (() => {
     if (database && schema) {
       return (
-        $userProfile?.hasPermission({ database, schema }, 'performCrud') ??
+        $userProfile?.hasPermission({ database, schema }, 'canExecuteDDL') ??
         false
       );
     }
@@ -77,7 +77,7 @@
           <span class="icon"><Icon {...iconShortcuts} /></span>
           <span class="text">Shortcuts</span>
         </span>
-        {#if allowTableCreation}
+        {#if canExecuteDDL}
           <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
             New Table from Scratch
           </ButtonMenuItem>

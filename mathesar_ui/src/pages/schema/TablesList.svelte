@@ -9,16 +9,16 @@
   export let tables: TableEntry[];
   export let database: Database;
   export let schema: SchemaEntry;
-  export let allowModification: boolean;
+  export let canExecuteDDL: boolean;
 
-  $: visibleTables = allowModification
+  $: visibleTables = canExecuteDDL
     ? tables
     : tables.filter((table) => !isTableImportConfirmationRequired(table));
 </script>
 
 <div class="container">
   {#each visibleTables as table (table.id)}
-    <TableCard {allowModification} {table} {database} {schema} />
+    <TableCard {canExecuteDDL} {table} {database} {schema} />
   {:else}
     <EmptyEntity icon={iconTable}>
       <p>No Tables</p>
