@@ -122,9 +122,11 @@
         {$userProfile?.getDisplayName() ?? 'User profile'}
       </LinkMenuItem>
       <MenuDivider />
-      <LinkMenuItem icon={iconSettingsMajor} href={ADMIN_URL}>
-        Administration
-      </LinkMenuItem>
+      {#if $userProfile?.is_superuser}
+        <LinkMenuItem icon={iconSettingsMajor} href={ADMIN_URL}>
+          Administration
+        </LinkMenuItem>
+      {/if}
       <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
         Log Out
       </LinkMenuItem>
