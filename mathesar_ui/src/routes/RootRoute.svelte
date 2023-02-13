@@ -31,7 +31,7 @@
     <UserProfileRoute />
   </Route>
 
-  {#if loggedInUserDetails?.is_superuser}
+  {#if loggedInUserDetails?.isSuperUser}
     <Route path="/administration/*" firstmatch>
       <AdminRoute />
     </Route>

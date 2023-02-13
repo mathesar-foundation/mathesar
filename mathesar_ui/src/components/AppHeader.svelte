@@ -120,7 +120,7 @@
         {$userProfile?.getDisplayName() ?? 'User profile'}
       </LinkMenuItem>
       <MenuDivider />
-      {#if $userProfile?.is_superuser}
+      {#if $userProfile?.isSuperUser}
         <LinkMenuItem icon={iconSettingsMajor} href={ADMIN_URL}>
           Administration
         </LinkMenuItem>
