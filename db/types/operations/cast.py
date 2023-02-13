@@ -97,9 +97,9 @@ def create_integer_casts(engine):
     with engine.begin() as conn:
         conn.execute(text(integer_array_create))
     integer_number_types=categories.INTEGER_TYPES
-    for db_type in integer_number_types    
+    for db_type in integer_number_types:    
       type_body_map = _get_integer_type_body_map()
-      create_cast_functions(PostgresType.INTEGER, type_body_map, engine)
+      create_cast_functions(db_type, type_body_map, engine)
 
 
 
