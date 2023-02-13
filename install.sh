@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-mkdir mathesar
-cd mathesar || exit
-wget -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/master/docker-compose.yml
 echo "Generating Secret key..."
 secret_key=$(tr -dc 'a-z0-9!@#$%^&*(-_=+)' < /dev/urandom | head -c50)
 echo "Secret key generated successfully"
@@ -40,7 +37,7 @@ tee .env <<EOF
 POSTGRES_USER=$db_username
 POSTGRES_PASSWORD=$db_password
 POSTGRES_HOST=$db_port
-ALLOWED_HOSTS=["$allowed_hosts"]
+ALLOWED_HOSTS=$allowed_hosts
 SECRET_KEY=$secret_key
 DJANGO_DATABASE_KEY=default
 DJANGO_DATABASE_URL=postgres://$db_username:$db_password@mathesar_db:5432/mathesar_django
