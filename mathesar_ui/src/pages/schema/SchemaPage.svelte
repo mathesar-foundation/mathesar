@@ -27,16 +27,13 @@
   export let section: string;
 
   const userProfileStore = getUserProfileStoreFromContext();
-  $: loggedInUserDetails = $userProfileStore;
+  $: userProfile = $userProfileStore;
 
   $: canExecuteDDL =
-    loggedInUserDetails?.hasPermission({ database, schema }, 'canExecuteDDL') ??
-    false;
+    userProfile?.hasPermission({ database, schema }, 'canExecuteDDL') ?? false;
   $: canEditMetadata =
-    loggedInUserDetails?.hasPermission(
-      { database, schema },
-      'canEditMetadata',
-    ) ?? false;
+    userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
+    false;
 
   const addEditModal = modal.spawnModalController();
 

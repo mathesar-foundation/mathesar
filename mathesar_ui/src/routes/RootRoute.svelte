@@ -13,7 +13,7 @@
   setBreadcrumbItemsInContext([]);
 
   const userProfileStore = getUserProfileStoreFromContext();
-  $: loggedInUserDetails = $userProfileStore;
+  $: userProfile = $userProfileStore;
 
   $: firstDatabase = $databases.data?.[0];
 </script>
@@ -31,7 +31,7 @@
     <UserProfileRoute />
   </Route>
 
-  {#if loggedInUserDetails?.isSuperUser}
+  {#if userProfile?.isSuperUser}
     <Route path="/administration/*" firstmatch>
       <AdminRoute />
     </Route>

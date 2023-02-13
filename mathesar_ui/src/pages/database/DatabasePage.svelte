@@ -26,7 +26,7 @@
   const addEditModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
-  $: loggedInUserDetails = $userProfileStore;
+  $: userProfile = $userProfileStore;
 
   $: database = (() => {
     if (!$currentDatabase) {
@@ -37,10 +37,7 @@
 
   $: schemasMap = $schemasStore.data;
 
-  $: canExecuteDDL = loggedInUserDetails?.hasPermission(
-    { database },
-    'canExecuteDDL',
-  );
+  $: canExecuteDDL = userProfile?.hasPermission({ database }, 'canExecuteDDL');
 
   let filterQuery = '';
   let targetSchema: SchemaEntry | undefined;
