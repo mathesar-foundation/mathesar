@@ -114,7 +114,7 @@
 
 <div class="user-details-form">
   <UserFormInput
-    label="Full Name"
+    label="Display Name"
     field={fullName}
     input={{ component: TextInput }}
   />
@@ -158,7 +158,8 @@
     proceedButton={{ label: 'Save', icon: iconSave }}
     cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
     {getErrorMessages}
-    initiallyHidden
+    initiallyHidden={!!user}
+    hasCancelButton={!!user}
   />
 </div>
 

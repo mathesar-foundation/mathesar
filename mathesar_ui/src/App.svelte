@@ -144,7 +144,8 @@
 
   h1 {
     margin: 0 0 1rem 0;
-    font-size: 1.6rem;
+    font-size: var(--size-xx-large);
+    font-weight: 500;
   }
 
   .block {
