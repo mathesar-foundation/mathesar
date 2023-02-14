@@ -31,13 +31,13 @@
     {#if userProfile}
       <InsetPageSection>
         <h2 slot="header">Account Details</h2>
-        <UserDetailsForm user={userProfile} />
+        <UserDetailsForm user={userProfile.getUser()} />
       </InsetPageSection>
       <InsetPageSection>
         <PasswordChangeForm userId={userProfile.id} />
       </InsetPageSection>
 
-      {#if !userProfile.is_superuser}
+      {#if !userProfile.isSuperUser}
         <InsetPageSection>
           <h2 slot="header">Delete Account</h2>
           <div>
