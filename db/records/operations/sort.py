@@ -54,15 +54,14 @@ def _build_order_by_all_columns_clause(relation):
         {'field': col, 'direction': 'asc'}
         for col
         in relation.columns
-        if not _is_internal_column(col)
+        if _is_col_orderable(col) 
     ]
 
-
-def _is_internal_column(col):
-    """
-    Might not be exhaustive, take care.
-    """
-    return col.name == '__mathesar_group_metadata'
+def _is_col_orderable(col):
+    data_type = col.type
+    if hasattr(data_type, 'comparable'):
+        return data_type.comparable
+    else : return False
 
 
 def apply_relation_sorting(relation, sort_spec):
