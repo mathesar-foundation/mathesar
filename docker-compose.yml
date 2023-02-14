@@ -31,6 +31,11 @@ services:
       - DEBUG=${DEBUG-False}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.production}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
+      - SECRET_KEY=${SECRET_KEY}
+      - DJANGO_DATABASE_KEY=${DJANGO_DATABASE_KEY-default}
+      - DJANGO_DATABASE_URL=${DJANGO_DATABASE_URL-postgres://mathesar:mathesar@mathesar_db:5432/mathesar_django}
+      - MATHESAR_DATABASES=${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
     command: ./run.sh
     ports:
       - "8000:8000"
@@ -81,6 +86,7 @@ services:
       - XAUTHORITY=/.Xauthority
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
     command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./dev-run.sh
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
