@@ -1,44 +1,101 @@
 #!/usr/bin/env bash
-
+clear -x
 github_tag=${1-master}
-echo "Installing Mathesar version ${github_tag}..."
+printf "
+********************************************************************************
+
+Welcome to the Mathesar Installer for version ${github_tag}!
+
+********************************************************************************
+
+Let's begin.\n
+"
+
 config_location=$HOME/.config/mathesar
 mkdir -p $config_location
 cd $config_location
-wget -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/${github_tag}/docker-compose.yml
-echo "Generating Secret key..."
+printf "
+Downloading docker-compose.yml...
+"
+wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/${github_tag}/docker-compose.yml
+printf "
+Generating Secret key...
+"
 secret_key=$(tr -dc 'a-z0-9!@#$%^&*(-_=+)' < /dev/urandom | head -c50)
-echo "Secret key generated successfully"
-echo "Mathesar needs a Postgres database to store the metadata. We will be creating a database now"
-read -r -p "Please enter the username to use for the database: " db_username
-read -r -s -p "Please enter the password to use for the database: " db_password
+printf "\
+Secret key generated successfully.
+"
+printf "
+Now, we'll create credentials for a database where Mathesar can store metadata.
+This is different from the database where we'll store user tables.
+
+"
+read -r -p "Enter a username for the system database: " db_username
+read -rs -p "Enter a password for the user: " db_password
 printf "\n"
-read -r -p "Please enter the port the database should listen on: " db_port
-db_port=${db_port:-5432}
-read -r -p "Enter the domain name under which Mathesar will be hosted. Skip if you are planning to host it locally: " allowed_hosts
-read -r -p "Enter superuser username: " superuser_username
-read -r -p "Enter superuser email: " superuser_email
-read -r -s -p "Enter superuser password: " superuser_password
-printf "\n"
-echo "We will be creating databases to store your data "
-user_database_urls_lst=()
-while true;
-do
-    read -r -p "Do you want to create a new Database Yes or no? " response
-    if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]
-    then
-      read -r -p "Please enter the name of the database: " db_name
-      user_database_urls_lst+=("($db_name|postgresql://$db_username:$db_password@mathesar_db:5432/$db_name)")
-    else
-        break
-    fi
+read -rs -p "Repeat the password: " db_password_check
+while [ $db_password != $db_password_check ]; do
+  printf "\nPasswords do not match! Try again.\n"
+  read -rs -p "Enter a password for the user: " db_password
+  printf "\n"
+  read -rs -p "Repeat the password: " db_password_check
 done
-IFS=',' eval 'user_database_urls="${user_database_urls_lst[*]}"'
-read -r -p "Enter the http port for the Mathesar webserver to use [Defaults to port 80]: " http_port
-read -r -p "Enter the https port for the Mathesar webserver to use [Defaults to port 443]: " https_port
+
+printf "
+
+If you have a PostgreSQL database already running on this machine you may need
+to choose a custom port for Mathesar's database to avoid conflict.
+
+"
+read -r -p "Enter a port for the database [5432]: " db_port
+db_port=${db_port:-5432}
+
+printf "
+If you're planning to allow access to your Mathesar installation from the
+internet, we need to configure the domain where you'll host Mathesar.
+
+"
+read -r -p "Enter the domain, or press ENTER to skip: " allowed_hosts
 allowed_hosts=${allowed_hosts:-*}
+
+printf "
+Next, we need to set up an admin user for your Mathesar installation. This user
+will be able to create other, less-privileged users after the installation is
+complete. This could be different from the system database user, or you can use
+the same details.
+
+"
+read -r -p "Enter the admin username: " superuser_username
+superuser_email=$superuser_username@example.com
+read -r -s -p "Enter the admin password: " superuser_password
+printf "\n"
+read -r -s -p "Repeat the password: " superuser_password_check
+while [ ${superuser_password} != ${superuser_password_check} ]; do
+  printf "\nPasswords do not match! Try again.\n"
+  read -rs -p "Enter the admin password: " superuser_password
+  printf "\n"
+  read -rs -p "Repeat the password: " superuser_password_check
+done
+
+printf "
+
+Now, we need to configure a database to store your data.
+
+"
+read -r -p "Please enter a name for the database [mathesar]: " db_name
+db_name=${db_name:-mathesar}
+
+printf "
+
+Next, we configure some details of the webserver that lets your browser connect
+to Mathesar. If you're not sure, just use the defaults.
+
+"
+read -r -p "Enter the http port for the Mathesar webserver to use [80]: " http_port
 http_port=${http_port:-80}
+read -r -p "Enter the https port for the Mathesar webserver to use [443]: " https_port
 https_port=${https_port:-443}
+printf "\n\n"
 tee .env <<EOF
 POSTGRES_USER='$db_username'
 POSTGRES_PASSWORD='$db_password'
@@ -46,12 +103,32 @@ POSTGRES_HOST='$db_port'
 ALLOWED_HOSTS='$allowed_hosts'
 SECRET_KEY='$secret_key'
 DJANGO_DATABASE_KEY='default'
-DJANGO_DATABASE_URL='postgres://$db_username:$db_password@mathesar_db:5432/mathesar_django'
-MATHESAR_DATABASES='$user_database_urls'
+DJANGO_DATABASE_URL='postgresql://$db_username:$db_password@mathesar_db:${db_port}/mathesar_django'
+MATHESAR_DATABASES=(mathesar_tables|postgresql://$db_username:$db_password@mathesar_db:$db_port/$db_name)
 DJANGO_SUPERUSER_PASSWORD='$superuser_password'
 HTTP_PORT='$http_port'
 HTTPS_PORT='$https_port'
 EOF
+
+printf "
+Configuration created successfully with the above settings, and stored at:
+
+${config_location}/.env
+
+"
+
+printf "
+The next step is to pull the necessary Docker images from DockerHub. Depending
+on your connection speed, this may take awhile. We'll need to ask for your
+password so the installer can run the needed Docker commands.
+
+Pulling docker images...
+
+"
+sudo docker-compose --profile prod pull
+printf "
+Starting the docker containers...
+"
 sudo docker-compose --profile prod up -d
 container_name='mathesar_service'
 SECONDS=0
@@ -60,11 +137,18 @@ do
 
   if (( SECONDS > 900 ))
   then
-     echo "There seems to be an error as Docker container has not started for more than 15minutes. Please report the error."
+     printf "
+
+There seems to be an error as Docker container has not started for more than
+15minutes. Please report the error.
+
+"
      exit 1
   fi
 
-  echo "Docker container not up yet. Waiting..."
+  printf "
+Docker container not up yet. Waiting...
+"
   sleep 5
 done
 sleep 15
