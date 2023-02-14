@@ -54,14 +54,14 @@ def _build_order_by_all_columns_clause(relation):
         {'field': col, 'direction': 'asc'}
         for col
         in relation.columns
-        if _is_col_orderable(col) 
+        if _is_col_orderable(col)
     ]
+
 
 def _is_col_orderable(col):
     data_type = col.type
-    if hasattr(data_type, 'comparable'):
-        return data_type.comparable
-    else : return False
+    non_orderable_type = ['Binary', 'LargeBinary', 'PickleType', 'ARRAY', 'JSON', 'JSONB']
+    return str(data_type) not in non_orderable_type
 
 
 def apply_relation_sorting(relation, sort_spec):
