@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+github_tag=${1-master}
+echo "Installing Mathesar version ${github_tag}..."
+config_location=$HOME/.config/mathesar
+mkdir -p $config_location
+cd $config_location
+wget -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/${github_tag}/docker-compose.yml
 echo "Generating Secret key..."
 secret_key=$(tr -dc 'a-z0-9!@#$%^&*(-_=+)' < /dev/urandom | head -c50)
 echo "Secret key generated successfully"
@@ -34,22 +40,22 @@ allowed_hosts=${allowed_hosts:-*}
 http_port=${http_port:-80}
 https_port=${https_port:-443}
 tee .env <<EOF
-POSTGRES_USER=$db_username
-POSTGRES_PASSWORD=$db_password
-POSTGRES_HOST=$db_port
-ALLOWED_HOSTS=$allowed_hosts
-SECRET_KEY=$secret_key
-DJANGO_DATABASE_KEY=default
-DJANGO_DATABASE_URL=postgres://$db_username:$db_password@mathesar_db:5432/mathesar_django
-MATHESAR_DATABASES=$user_database_urls
-DJANGO_SUPERUSER_PASSWORD=$superuser_password
-HTTP_PORT=$http_port
-HTTPS_PORT=$https_port
+POSTGRES_USER='$db_username'
+POSTGRES_PASSWORD='$db_password'
+POSTGRES_HOST='$db_port'
+ALLOWED_HOSTS='$allowed_hosts'
+SECRET_KEY='$secret_key'
+DJANGO_DATABASE_KEY='default'
+DJANGO_DATABASE_URL='postgres://$db_username:$db_password@mathesar_db:5432/mathesar_django'
+MATHESAR_DATABASES='$user_database_urls'
+DJANGO_SUPERUSER_PASSWORD='$superuser_password'
+HTTP_PORT='$http_port'
+HTTPS_PORT='$https_port'
 EOF
-docker-compose --profile prod up
+sudo docker-compose --profile prod up -d
 container_name='mathesar_service'
 SECONDS=0
-until [ "$( docker container inspect -f '{{.State.Running}}' $container_name )" == "true" ];
+until [ "$(sudo docker container inspect -f '{{.State.Running}}' $container_name )" == "true" ];
 do
 
   if (( SECONDS > 900 ))
@@ -61,5 +67,6 @@ do
   echo "Docker container not up yet. Waiting..."
   sleep 5
 done
-docker exec mathesar_service python install.py
-docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
+sleep 15
+sudo docker exec mathesar_service python install.py --skip-confirm
+sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
