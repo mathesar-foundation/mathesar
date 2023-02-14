@@ -21,5 +21,12 @@
 			root {$STATIC_ROOT:/mathesar/static/}
 		}
 	}
+        # Rewrite and reverse proxy upgrade endpoint calls to Watchtower
+        handle_path /api/ui/v0/upgrade/ {
+                rewrite * /v1/update
+                reverse_proxy watchtower:8080 {
+                      header_up Authorization "Bearer mytoken"
+                }
+        }
 	reverse_proxy mathesar_service:8000
 }
