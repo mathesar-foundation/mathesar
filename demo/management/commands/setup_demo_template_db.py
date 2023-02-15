@@ -1,10 +1,11 @@
 from sqlalchemy import text
 
-from db.install import install_mathesar
-
 from django.conf import settings
 from django.core.management import BaseCommand
 
+from db.install import install_mathesar
+from demo.install.datasets import load_datasets
+from mathesar.database.base import create_mathesar_engine
 
 
 class Command(BaseCommand):
@@ -13,10 +14,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         _setup_demo_template_db(*args, **options)
 
+
 def _setup_demo_template_db():
     print("Initializing demo template database...")
-    from demo.install.datasets import load_datasets  # noqa
-    from mathesar.database.base import create_mathesar_engine  # noqa
 
     template_db_name = settings.MATHESAR_DEMO_TEMPLATE
     root_engine = create_mathesar_engine(settings.DATABASES["default"]["NAME"])
