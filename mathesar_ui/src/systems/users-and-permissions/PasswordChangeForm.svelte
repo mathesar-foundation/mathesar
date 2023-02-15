@@ -19,10 +19,10 @@
   import UserFormInputRow from './UserFormInputRow.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
-  $: loggedInUserDetails = $userProfileStore;
+  $: userProfile = $userProfileStore;
 
   export let userId: User['id'];
-  $: isUserUpdatingTheirOwnPassword = loggedInUserDetails?.id === userId;
+  $: isUserUpdatingTheirOwnPassword = userProfile?.id === userId;
 
   const oldPassword = requiredField('');
   const password = requiredField('');
