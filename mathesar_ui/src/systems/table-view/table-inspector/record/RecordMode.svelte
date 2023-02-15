@@ -1,18 +1,30 @@
 <script lang="ts">
   import { Collapsible } from '@mathesar-component-library';
   import { getSelectedRowIndex } from '@mathesar/components/sheet';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import RowActions from './RowActions.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
+  const userProfile = getUserProfileStoreFromContext();
+
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
   $: ({ selection, recordsData } = $tabularData);
   $: ({ selectedCells } = selection);
   $: selectedRowIndices = $selectedCells
     .valuesArray()
     .map((cell) => getSelectedRowIndex(cell));
   $: uniquelySelectedRowIndices = Array.from(new Set(selectedRowIndices));
+
+  $: canEditTableRecords = $userProfile?.hasPermission(
+    { database, schema },
+    'canEditTableRecords',
+  );
 </script>
 
 <div class="column-mode-container">
@@ -30,6 +42,7 @@
           {recordsData}
           {selection}
           columnsDataStore={$tabularData.columnsDataStore}
+          {canEditTableRecords}
         />
       </div>
     </Collapsible>
