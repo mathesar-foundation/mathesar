@@ -21,7 +21,7 @@ wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathe
 printf "
 Generating Secret key...
 "
-secret_key=$(tr -dc 'a-z0-9!@#$%^&*(-_=+)' < /dev/urandom | head -c50)
+secret_key=$(tr -dc 'a-z0-9!@#$%^&*(-_=+)\\' < /dev/urandom | head -c50)
 printf "\
 Secret key generated successfully.
 "
@@ -104,7 +104,7 @@ ALLOWED_HOSTS='$allowed_hosts'
 SECRET_KEY='$secret_key'
 DJANGO_DATABASE_KEY='default'
 DJANGO_DATABASE_URL='postgresql://$db_username:$db_password@mathesar_db:${db_port}/mathesar_django'
-MATHESAR_DATABASES=(mathesar_tables|postgresql://$db_username:$db_password@mathesar_db:$db_port/$db_name)
+MATHESAR_DATABASES='(mathesar_tables|postgresql://$db_username:$db_password@mathesar_db:$db_port/$db_name)'
 DJANGO_SUPERUSER_PASSWORD='$superuser_password'
 HTTP_PORT='$http_port'
 HTTPS_PORT='$https_port'
@@ -125,32 +125,31 @@ password so the installer can run the needed Docker commands.
 Pulling docker images...
 
 "
-sudo docker-compose --profile prod pull
+sudo docker compose --profile prod pull
 printf "
 Starting the docker containers...
 "
-sudo docker-compose --profile prod up -d
-container_name='mathesar_service'
-SECONDS=0
-until [ "$(sudo docker container inspect -f '{{.State.Running}}' $container_name )" == "true" ];
-do
+sudo docker compose --profile prod up -d --wait
+printf "
 
-  if (( SECONDS > 900 ))
-  then
-     printf "
-
-There seems to be an error as Docker container has not started for more than
-15minutes. Please report the error.
-
-"
-     exit 1
-  fi
-
-  printf "
-Docker container not up yet. Waiting...
-"
-  sleep 5
+Waiting for service container to be ready..."
+sudo docker compose --profile prod top service | grep -q gunicorn
+while [ $? -ne 0 ]; do
+  sleep 1
+  printf "."
+  sudo docker compose --profile prod top service | grep -q gunicorn
 done
-sleep 15
-sudo docker exec mathesar_service python install.py --skip-confirm
-sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
+sleep 1
+printf "
+Service is ready and healthy!
+
+Adding admin user to Django webservice now.
+"
+sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email" | grep -qi warn
+
+printf "
+Installation complete!
+
+If running locally, you can access Mathesar by navigating to http://localhost
+in your web browser.
+"
