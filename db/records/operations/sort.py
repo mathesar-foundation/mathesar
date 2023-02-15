@@ -54,8 +54,15 @@ def _build_order_by_all_columns_clause(relation):
         {'field': col, 'direction': 'asc'}
         for col
         in relation.columns
-        if _is_col_orderable(col)
+        if _is_col_orderable(col) and not _is_internal_column(col)
     ]
+
+
+def _is_internal_column(col):
+    """
+    Might not be exhaustive, take care.
+    """
+    return col.name == '__mathesar_group_metadata'
 
 
 def _is_col_orderable(col):
