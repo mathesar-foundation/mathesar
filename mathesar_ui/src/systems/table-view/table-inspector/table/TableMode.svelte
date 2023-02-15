@@ -43,7 +43,7 @@
   <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader slot="header" title="Links" isDbLevelConfiguration />
     <div slot="content" class="content-container">
-      <TableLinks />
+      <TableLinks {canExecuteDDL} />
     </div>
   </Collapsible>
 
