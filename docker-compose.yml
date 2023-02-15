@@ -45,11 +45,6 @@ services:
       - media:/code/media
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
-    healthcheck:
-      test: curl -f http://localhost:8000
-      interval: 10s
-      timeout: 5s
-
   service:
     profiles: ["prod"]
     extends: base-service
