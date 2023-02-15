@@ -118,16 +118,21 @@ ${config_location}/.env
 "
 
 printf "
-The next step is to pull the necessary Docker images from DockerHub. Depending
-on your connection speed, this may take awhile. We'll need to ask for your
-password so the installer can run the needed Docker commands.
+The next steps involve Docker. In order to run Docker commands, we need to use
+sudo (for elevated privileges). If your system sudoers policy allows the caching
+of sudo credentials, we'll do so. Otherwise, we'll ask for a password for each
+relevant Docker command.
 
+"
+sudo -v
+printf "
 Pulling docker images...
 
 "
 sudo docker compose --profile prod pull
 printf "
 Starting the docker containers...
+
 "
 sudo docker compose --profile prod up -d --wait
 printf "
@@ -135,11 +140,14 @@ Service is ready and healthy!
 
 Adding admin user to Django webservice now.
 "
-sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email" | grep -qi warn
-
+sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email" 2> >(grep -vi warn)
 printf "
 Installation complete!
 
 If running locally, you can access Mathesar by navigating to http://localhost
 in your web browser.
+
+Thank you for installing Mathesar!
+
+
 "
