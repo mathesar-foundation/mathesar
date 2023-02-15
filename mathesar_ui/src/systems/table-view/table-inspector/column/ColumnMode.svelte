@@ -44,6 +44,10 @@
     { database, schema },
     'canExecuteDDL',
   );
+  $: canEditMetadata = $userProfile?.hasPermission(
+    { database, schema },
+    'canEditMetadata',
+  );
 </script>
 
 <div class="column-mode-container">
@@ -113,7 +117,7 @@
       </Collapsible>
     {/if}
 
-    {#if column}
+    {#if column && canEditMetadata}
       <Collapsible triggerAppearance="plain">
         <CollapsibleHeader slot="header" title="Formatting" />
         <div slot="content" class="content-container">
