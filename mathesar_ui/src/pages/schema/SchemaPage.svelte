@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { queries } from '@mathesar/stores/queries';
-  import { tables as tablesStore } from '@mathesar/stores/tables';
+  import {
+    tables as tablesStore,
+    importVerifiedTables as importVerifiedTablesStore,
+  } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
@@ -14,6 +17,7 @@
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
   import { States } from '@mathesar/api/utils/requestUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
@@ -24,6 +28,15 @@
   export let database: Database;
   export let schema: SchemaEntry;
   export let section: string;
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: userProfile = $userProfileStore;
+
+  $: canExecuteDDL =
+    userProfile?.hasPermission({ database, schema }, 'canExecuteDDL') ?? false;
+  $: canEditMetadata =
+    userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
+    false;
 
   const addEditModal = modal.spawnModalController();
 
@@ -36,7 +49,7 @@
     href: string;
   };
 
-  $: tablesMap = $tablesStore.data;
+  $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
   $: explorationsMap = $queries.data;
   $: isTablesLoading = $tablesStore.state === States.Loading;
   $: isExplorationsLoading = $queries.requestStatus.state === 'processing';
@@ -86,7 +99,7 @@
     }}
   >
     <svelte:fragment slot="action">
-      {#if !isDefault}
+      {#if !isDefault && canExecuteDDL}
         <Button on:click={handleEditSchema} appearance="secondary">
           <Icon {...iconEdit} />
           <span>Edit Schema</span>
@@ -113,6 +126,8 @@
     {#if activeTab?.id === 'overview'}
       <div class="tab-container">
         <SchemaOverview
+          {canExecuteDDL}
+          {canEditMetadata}
           {isTablesLoading}
           {isExplorationsLoading}
           {tablesMap}
@@ -126,7 +141,7 @@
         {#if isTablesLoading}
           <TableSkeleton />
         {:else}
-          <SchemaTables {tablesMap} {database} {schema} />
+          <SchemaTables {canExecuteDDL} {tablesMap} {database} {schema} />
         {/if}
       </div>
     {:else if activeTab?.id === 'explorations'}
@@ -135,6 +150,7 @@
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations
+            {canEditMetadata}
             hasTablesToExplore={!!tablesMap.size}
             {explorationsMap}
             {database}

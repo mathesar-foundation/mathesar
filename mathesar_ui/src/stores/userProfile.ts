@@ -9,46 +9,94 @@ import {
   type Updater,
   type Writable,
 } from 'svelte/store';
-import type { User, UnsavedUser } from '@mathesar/api/users';
+import type {
+  User,
+  UnsavedUser,
+  DatabaseRole,
+  SchemaRole,
+} from '@mathesar/api/users';
+import {
+  roleAllowsOperation,
+  type AccessOperation,
+} from '@mathesar/utils/permissions';
+import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 
 const contextKey = Symbol('UserProfileStore');
 
-export class UserProfile implements Readonly<User> {
-  readonly id;
+export class UserProfile {
+  readonly id: User['id'];
 
-  readonly is_superuser;
+  readonly isSuperUser: User['is_superuser'];
 
-  readonly database_roles;
+  readonly full_name: User['full_name'];
 
-  readonly schema_roles;
+  readonly email: User['email'];
 
-  readonly full_name;
+  readonly username: User['username'];
 
-  readonly email;
+  private databaseRoles: Map<DatabaseRole['id'], DatabaseRole>;
 
-  readonly username;
+  private schemaRoles: Map<SchemaRole['id'], SchemaRole>;
 
   constructor(userDetails: User) {
     this.id = userDetails.id;
-    this.is_superuser = userDetails.is_superuser;
-    this.database_roles = userDetails.database_roles;
-    this.schema_roles = userDetails.schema_roles;
+    this.isSuperUser = userDetails.is_superuser;
+    this.databaseRoles = new Map(
+      userDetails.database_roles.map((role) => [role.id, role]),
+    );
+    this.schemaRoles = new Map(
+      userDetails.schema_roles.map((role) => [role.id, role]),
+    );
     this.full_name = userDetails.full_name;
     this.email = userDetails.email;
     this.username = userDetails.username;
   }
 
-  hasPermission() {
-    // To be implemented
+  hasPermission(
+    dbObject: {
+      database?: Pick<Database, 'id'>;
+      schema?: Pick<SchemaEntry, 'id'>;
+    },
+    operation: AccessOperation,
+  ): boolean {
+    if (this.isSuperUser) {
+      return true;
+    }
+    const { database, schema } = dbObject;
+    if (schema) {
+      const userSchemaRole = this.schemaRoles.get(schema.id);
+      if (userSchemaRole) {
+        return roleAllowsOperation(userSchemaRole.role, operation);
+      }
+    }
+    if (database) {
+      const userDatabaseRole = this.databaseRoles.get(database.id);
+      if (userDatabaseRole) {
+        return roleAllowsOperation(userDatabaseRole.role, operation);
+      }
+    }
+    return false;
   }
 
   getDisplayName(): string {
     return this.username;
   }
 
+  getUser(): User {
+    return {
+      id: this.id,
+      is_superuser: this.isSuperUser,
+      username: this.username,
+      database_roles: [...this.databaseRoles.values()],
+      schema_roles: [...this.schemaRoles.values()],
+      full_name: this.full_name,
+      email: this.email,
+    };
+  }
+
   with(userDetails: Partial<Omit<UnsavedUser, 'password'>>): UserProfile {
     return new UserProfile({
-      ...this,
+      ...this.getUser(),
       ...userDetails,
     });
   }
