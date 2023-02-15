@@ -5,6 +5,8 @@
   import type { Response as ApiRecordsResponse } from '@mathesar/api/types/tables/records';
   import { postAPI, States } from '@mathesar/api/utils/requestUtils';
   import { iconAddNew } from '@mathesar/icons';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { TabularData } from '@mathesar/stores/table-data';
   import {
@@ -22,8 +24,6 @@
     RecordSelectorResult,
   } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
 
   const userProfile = getUserProfileStoreFromContext();
 
