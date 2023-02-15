@@ -18,6 +18,7 @@ from mathesar.database.types import UIType
 from mathesar.models.base import Database, Schema, Table
 from mathesar.models.query import UIQuery
 from mathesar.state import reset_reflection
+from mathesar import __version__
 
 
 def get_schema_list(request, database):
@@ -109,6 +110,7 @@ def get_common_data(request, database=None, schema=None):
         'abstract_types': get_ui_type_list(request, database),
         'user': get_user_data(request),
         'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
+        'current_release_tag_name': __version__,
     }
 
 
