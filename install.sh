@@ -1,23 +1,25 @@
 #!/usr/bin/env bash
+set -e
 clear -x
 github_tag=${1-master}
 printf "
 ********************************************************************************
 
-Welcome to the Mathesar Installer for version ${github_tag}!
+Welcome to the Mathesar installer for version %s!
 
 ********************************************************************************
 
-Let's begin.\n
-"
+Let's begin.
+
+" "$github_tag"
 
 config_location=$HOME/.config/mathesar
-mkdir -p $config_location
-cd $config_location
+mkdir -p "$config_location"
+cd "$config_location"
 printf "
 Downloading docker-compose.yml...
 "
-wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/${github_tag}/docker-compose.yml
+wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
 printf "
 Generating Secret key...
 "
@@ -34,7 +36,7 @@ read -r -p "Enter a username for the system database: " db_username
 read -rs -p "Enter a password for the user: " db_password
 printf "\n"
 read -rs -p "Repeat the password: " db_password_check
-while [ $db_password != $db_password_check ]; do
+while [ "$db_password" != "$db_password_check" ]; do
   printf "\nPasswords do not match! Try again.\n"
   read -rs -p "Enter a password for the user: " db_password
   printf "\n"
@@ -70,7 +72,7 @@ superuser_email=$superuser_username@example.com
 read -r -s -p "Enter the admin password: " superuser_password
 printf "\n"
 read -r -s -p "Repeat the password: " superuser_password_check
-while [ ${superuser_password} != ${superuser_password_check} ]; do
+while [ "$superuser_password" != "$superuser_password_check" ]; do
   printf "\nPasswords do not match! Try again.\n"
   read -rs -p "Enter the admin password: " superuser_password
   printf "\n"
@@ -113,9 +115,9 @@ EOF
 printf "
 Configuration created successfully with the above settings, and stored at:
 
-${config_location}/.env
+%s/.env
 
-"
+" "$config_location"
 
 printf "
 The next steps involve Docker. In order to run Docker commands, we need to use
