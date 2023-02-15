@@ -13,8 +13,13 @@
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import { iconSetToNull } from '@mathesar/icons';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import type RecordStore from './RecordStore';
+
+  const userProfile = getUserProfileStoreFromContext();
 
   /**
    * This is used to determine whether to display a `NULL` overlay indicator.
@@ -42,11 +47,16 @@
   export let processedColumn: ProcessedColumn;
   export let field: FieldStore;
 
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
+  $: canEditTableRecords =
+    $userProfile?.hasPermission({ database, schema }, 'canEditTableRecords') ??
+    false;
   $: ({ recordSummaries } = record);
   $: ({ column, abstractType } = processedColumn);
   $: value = $field;
   $: ({ showsError } = field);
-  $: disabled = column.primary_key;
+  $: disabled = column.primary_key || !canEditTableRecords;
   $: shouldDisplayNullOverlay = !cellDataTypesThatUsePlaceholderText.has(
     abstractType.cellInfo.type,
   );
@@ -71,7 +81,7 @@
           <ButtonMenuItem
             icon={iconSetToNull}
             on:click={() => field.set(null)}
-            disabled={column.primary_key}
+            {disabled}
           >
             Set to <Null />
           </ButtonMenuItem>
