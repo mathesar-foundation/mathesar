@@ -39,4 +39,5 @@ class DemoConfig(AppConfig):
 
     def ready(self):
         """Perform initialization tasks."""
-        _initialize_template()
+        #_initialize_template()
+        pass
