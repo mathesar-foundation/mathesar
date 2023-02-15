@@ -23,12 +23,11 @@
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
-  $: loggedInUserDetails = $userProfileStore;
+  $: userProfile = $userProfileStore;
 
   export let user: User | undefined = undefined;
 
-  $: isUserUpdatingThemselves =
-    loggedInUserDetails && loggedInUserDetails?.id === user?.id;
+  $: isUserUpdatingThemselves = userProfile && userProfile.id === user?.id;
   $: isNewUser = user === undefined;
   $: fullName = optionalField(user?.full_name ?? '');
   $: username = requiredField(user?.username ?? '');
@@ -41,18 +40,8 @@
   $: user, password.reset();
 
   $: formFields = (() => {
-    const fields = {
-      fullName,
-      username,
-      email,
-    };
-    return isNewUser
-      ? {
-          ...fields,
-          role,
-          password,
-        }
-      : fields;
+    const fields = { fullName, username, email, role };
+    return isNewUser ? { ...fields, password } : fields;
   })();
   $: form = makeForm(formFields);
 
@@ -62,6 +51,7 @@
       full_name: formValues.fullName,
       username: formValues.username,
       email: formValues.email,
+      is_superuser: formValues.role === 'admin',
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
@@ -114,7 +104,7 @@
 
 <div class="user-details-form">
   <UserFormInput
-    label="Full Name"
+    label="Display Name"
     field={fullName}
     input={{ component: TextInput }}
   />
@@ -158,7 +148,8 @@
     proceedButton={{ label: 'Save', icon: iconSave }}
     cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
     {getErrorMessages}
-    initiallyHidden
+    initiallyHidden={!!user}
+    hasCancelButton={!!user}
   />
 </div>
 
