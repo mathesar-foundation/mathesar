@@ -9,6 +9,7 @@
   import { toast } from '@mathesar/stores/toast';
 
   export let column: ProcessedColumn;
+  export let canExecuteDDL: boolean;
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore, recordsData } = $tabularData);
@@ -60,6 +61,8 @@
       });
     }
   }
+
+  $: disabled = !canExecuteDDL || typeChangeState?.state === 'processing';
 </script>
 
 <div class="default-value-container">
@@ -67,7 +70,7 @@
   <DynamicInput
     componentAndProps={column.inputComponentAndProps}
     bind:value
-    disabled={typeChangeState?.state === 'processing'}
+    {disabled}
     {recordSummary}
     {setRecordSummary}
   />

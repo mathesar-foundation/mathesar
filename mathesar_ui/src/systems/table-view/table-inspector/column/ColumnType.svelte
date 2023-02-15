@@ -12,6 +12,7 @@
   $: ({ columnsDataStore } = $tabularData);
 
   export let column: ProcessedColumn;
+  export let canExecuteDDL: boolean;
 
   async function save(
     columnInfo: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
@@ -23,7 +24,8 @@
       default: null,
     });
   }
-  $: disallowDataTypeChange = column.column.primary_key || !!column.linkFk;
+  $: disallowDataTypeChange =
+    column.column.primary_key || !!column.linkFk || !canExecuteDDL;
   $: columnWithAbstractType = {
     ...column.column,
     abstractType: column.abstractType,

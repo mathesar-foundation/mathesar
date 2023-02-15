@@ -12,8 +12,15 @@
   import ColumnTypeSpecifierTag from './ColumnTypeSpecifierTag.svelte';
   import ColumnFormatting from './ColumnFormatting.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
 
   const tabularData = getTabularDataStoreFromContext();
+  const userProfile = getUserProfileStoreFromContext();
+
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
   $: ({ processedColumns, selection } = $tabularData);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
   $: selectedColumns = (() => {
@@ -32,6 +39,11 @@
   })();
   /** When only one column is selected */
   $: column = selectedColumns.length === 1 ? selectedColumns[0] : undefined;
+
+  $: canExecuteDDL = $userProfile?.hasPermission(
+    { database, schema },
+    'canExecuteDDL',
+  );
 </script>
 
 <div class="column-mode-container">
@@ -46,7 +58,8 @@
         {labeledCount(selectedColumns, 'columns')} selected
       </span>
     {/if}
-    {#if column}
+    <!-- TODO: Needs UX review in PR description -->
+    {#if column && canExecuteDDL}
       <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
@@ -82,7 +95,7 @@
           isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
-          <ColumnType {column} />
+          <ColumnType {column} {canExecuteDDL} />
         </div>
       </Collapsible>
     {/if}
@@ -95,7 +108,7 @@
           isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
-          <SetDefaultValue {column} />
+          <SetDefaultValue {column} {canExecuteDDL} />
         </div>
       </Collapsible>
     {/if}
@@ -127,12 +140,14 @@
       {/if}
     {/if}
 
-    <Collapsible isOpen triggerAppearance="plain">
-      <CollapsibleHeader slot="header" title="Actions" />
-      <div slot="content" class="content-container">
-        <ColumnActions columns={selectedColumns} />
-      </div>
-    </Collapsible>
+    {#if canExecuteDDL}
+      <Collapsible isOpen triggerAppearance="plain">
+        <CollapsibleHeader slot="header" title="Actions" />
+        <div slot="content" class="content-container">
+          <ColumnActions columns={selectedColumns} />
+        </div>
+      </Collapsible>
+    {/if}
   {/if}
 </div>
 
