@@ -131,16 +131,6 @@ Starting the docker containers...
 "
 sudo docker compose --profile prod up -d --wait
 printf "
-
-Waiting for service container to be ready..."
-sudo docker compose --profile prod top service | grep -q gunicorn
-while [ $? -ne 0 ]; do
-  sleep 1
-  printf "."
-  sudo docker compose --profile prod top service | grep -q gunicorn
-done
-sleep 1
-printf "
 Service is ready and healthy!
 
 Adding admin user to Django webservice now.

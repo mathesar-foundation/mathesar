@@ -13,6 +13,12 @@ services:
       - ${POSTGRES_HOST-5432}:5432
     volumes:
       - postgresql_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready
+      interval: 5s
+      timeout: 1s
+      retries: 30
+      start_period: 5s
   caddy-reverse-proxy:
     profiles: ["prod"]
     image: mathesar/mathesar-caddy:latest
@@ -54,9 +60,16 @@ services:
       - static:/code/static
       - media:/code/media
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+    healthcheck:
+      test: curl -f http://localhost:8000
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
   test-service:
     profiles: [ "test" ]
     extends: base-service
