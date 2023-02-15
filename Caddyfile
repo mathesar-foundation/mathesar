@@ -1,9 +1,9 @@
 :80 {
-    log {
-        output stdout
-    }
+	log {
+		output stdout
+	}
 	respond /caddy-health-check 200
-
+	encode zstd gzip
 	handle_path /media/* {
 		@downloads {
 			query dl=*
@@ -11,12 +11,13 @@
 		header @downloads Content-disposition "attachment; filename={query.dl}"
 
 		file_server {
+			precompressed br zstd gzip
 			root {$MEDIA_ROOT:/mathesar/media/}
 		}
 	}
-
 	handle_path /static/* {
 		file_server {
+			precompressed br zstd gzip
 			root {$STATIC_ROOT:/mathesar/static/}
 		}
 	}

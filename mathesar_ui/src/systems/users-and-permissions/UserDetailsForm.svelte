@@ -23,12 +23,11 @@
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
-  $: loggedInUserDetails = $userProfileStore;
+  $: userProfile = $userProfileStore;
 
   export let user: User | undefined = undefined;
 
-  $: isUserUpdatingThemselves =
-    loggedInUserDetails && loggedInUserDetails?.id === user?.id;
+  $: isUserUpdatingThemselves = userProfile && userProfile.id === user?.id;
   $: isNewUser = user === undefined;
   $: fullName = optionalField(user?.full_name ?? '');
   $: username = requiredField(user?.username ?? '');

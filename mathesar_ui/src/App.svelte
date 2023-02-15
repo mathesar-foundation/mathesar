@@ -15,6 +15,9 @@
   const commonData = preloadCommonData();
   if (commonData?.user) {
     setUserProfileStoreInContext(commonData.user);
+  } else {
+    // This should never occur
+    // TODO: Throw an application wide error
   }
 
   const recordSelectorModal = modal.spawnModalController();
