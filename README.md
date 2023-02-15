@@ -1,4 +1,5 @@
-<p align="center"><img src="https://user-images.githubusercontent.com/287034/157542413-29ceb24c-ddef-4cde-8511-ef99014bae74.png" width=400px alt="Mathesar logo"/></p>
+
+<p align="center"><img src="https://user-images.githubusercontent.com/845767/218793207-a84a8c9e-d147-40a8-839b-f2b5d8b1ccba.png" width=450px alt="Mathesar logo"/></p>
 <p align="center"><b>Web application providing an intuitive interface to databases.</b></p>
 <hr/>
 

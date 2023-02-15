@@ -57,6 +57,7 @@ import {
   faPaste,
   faEllipsisV,
   faArrowRightFromBracket,
+  faUserPlus,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -83,6 +84,7 @@ import {
 // (These names should all be verbs)
 
 export const iconAddNew: IconProps = { data: faPlus };
+export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconConfigure: IconProps = { data: faCogs };
 /** When you're deleting something significant or difficult to recover */
 export const iconDeleteMajor: IconProps = { data: faTrashAlt };
