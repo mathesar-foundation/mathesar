@@ -25,7 +25,7 @@ class TableAccessPolicy(AccessPolicy):
                 'ui_dependents',
                 'joinable_tables',
             ],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
         },
 
@@ -40,7 +40,7 @@ class TableAccessPolicy(AccessPolicy):
                 'existing_import',
                 'map_imported_columns'
             ],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_table_manager)']
         },
