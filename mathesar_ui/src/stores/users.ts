@@ -134,15 +134,22 @@ class WritableUsersStore {
     void this.fetchUsers();
   }
 
+  /**
+   * @throws Error
+   */
+  private async fetchUsersSilently() {
+    this.request = userApi.list();
+    const response = await this.request;
+    this.users.set(response.results.map((user) => new UserModel(user)));
+    this.count.set(response.count);
+  }
+
   async fetchUsers() {
     try {
       this.requestStatus.set({
         state: 'processing',
       });
-      this.request = userApi.list();
-      const response = await this.request;
-      this.users.set(response.results.map((user) => new UserModel(user)));
-      this.count.set(response.count);
+      await this.fetchUsersSilently();
       this.requestStatus.set({
         state: 'success',
       });
@@ -181,7 +188,7 @@ class WritableUsersStore {
     });
     // Re-fetching the users isn't strictly necessary, but we do it anyway
     // since it's a good opportunity to ensure the UI is up-to-date.
-    void this.fetchUsers();
+    void this.fetchUsersSilently();
   }
 
   getUsersWithAccessToDb(database: Pick<Database, 'id'>) {
