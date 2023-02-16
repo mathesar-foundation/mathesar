@@ -38,6 +38,7 @@
 <style lang="scss">
   .name-with-icon {
     text-decoration: inherit;
+    white-space: nowrap;
   }
   .name-with-icon.bold {
     font-weight: 500;
