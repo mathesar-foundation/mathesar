@@ -32,8 +32,8 @@
     {% block scripts %} {% endblock %}
 
     {% block content %} {% endblock %}
+    {% for template in scripts_extension_templates %}
+        {% include template %}
+    {% endfor %}
   </body>
-  {% for template in scripts_extension_templates %}
-    {% include template %}
-  {% endfor %}
 </html>
