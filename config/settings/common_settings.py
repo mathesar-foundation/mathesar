@@ -229,4 +229,5 @@ LOGOUT_REDIRECT_URL = LOGIN_URL
 DRF_ACCESS_POLICY = {
     'reusable_conditions': ['mathesar.api.permission_conditions']
 }
-BASE_TEMPLATE_SCRIPT_EXTENSION_TEMPLATES = []
+# Templates that contains additional script tags to be added to the base template
+BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
