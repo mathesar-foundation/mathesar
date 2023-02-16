@@ -16,11 +16,21 @@ bash <(curl -sL https://raw.githubusercontent.com/centerofci/mathesar/master/ins
 
 ## The Result
 
-Running the script via the above command results in a `docker compose` setup with the following
+Successfully running the script via the above command results in the following:
+
+### Docker containers
 
 - A container called `mathesar_service` running the main Mathesar webapp
 - A container called `mathesar_db` with PostgreSQL 13 installed.
 - A container called `mathesar-caddy-reverse-proxy-1` that helps route traffic to the `mathesar_service` container.
+- A container called `mathesar-watchtower-1` that helps update your Mathesar installation when the time comes.
+
+### Files
+
+- A file at `$HOME/.config/mathesar/.env`. This file defines the environment inside of the various Mathesar `docker` containers. It should be kept safe, since it has sensitive information about the passwords you set for Mathesar. If you've forgotten your admin username or password, look at this file.
+- A file at `$HOME/.config/mathesar/docker-compose.yml`. This is the main file defining the Mathesar containers listed above, and the connections between them.
+
+### A new Mathesar setup at localhost
 
 To access Mathesar, navigate to `localhost` in your web browser, and login using the admin user name and password you set during the installation.
 
