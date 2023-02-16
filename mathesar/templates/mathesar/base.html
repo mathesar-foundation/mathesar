@@ -33,4 +33,7 @@
 
     {% block content %} {% endblock %}
   </body>
+  {% for template in default_scripts_extensions %}
+    {% include template %}
+  {% endfor %}
 </html>

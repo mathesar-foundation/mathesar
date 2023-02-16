@@ -72,6 +72,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "mathesar.template_context_processors.default_templates.default_scripts"
             ],
         },
     },
@@ -228,3 +229,4 @@ LOGOUT_REDIRECT_URL = LOGIN_URL
 DRF_ACCESS_POLICY = {
     'reusable_conditions': ['mathesar.api.permission_conditions']
 }
+BASE_TEMPLATE_SCRIPT_EXTENSION_TEMPLATES = []
