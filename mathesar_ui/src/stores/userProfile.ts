@@ -34,18 +34,18 @@ export class UserProfile {
 
   readonly username: User['username'];
 
-  private databaseRoles: Map<DatabaseRole['id'], DatabaseRole>;
+  private databaseRoles: Map<DatabaseRole['database'], DatabaseRole>;
 
-  private schemaRoles: Map<SchemaRole['id'], SchemaRole>;
+  private schemaRoles: Map<SchemaRole['schema'], SchemaRole>;
 
   constructor(userDetails: User) {
     this.id = userDetails.id;
     this.isSuperUser = userDetails.is_superuser;
     this.databaseRoles = new Map(
-      userDetails.database_roles.map((role) => [role.id, role]),
+      userDetails.database_roles.map((role) => [role.database, role]),
     );
     this.schemaRoles = new Map(
-      userDetails.schema_roles.map((role) => [role.id, role]),
+      userDetails.schema_roles.map((role) => [role.schema, role]),
     );
     this.full_name = userDetails.full_name;
     this.email = userDetails.email;
