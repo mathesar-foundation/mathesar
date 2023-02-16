@@ -13,10 +13,22 @@
     type RecordRow,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
 
   export let row: RecordRow;
   export let recordId: number;
   export let recordsData: RecordsData;
+
+  const userProfile = getUserProfileStoreFromContext();
+
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
+  $: canEditTableRecords = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canEditTableRecords',
+  );
 
   async function handleDeleteRecords() {
     if (rowHasRecord(row)) {
@@ -39,6 +51,8 @@
 >
   Go to Record Page
 </LinkMenuItem>
-<ButtonMenuItem on:click={handleDeleteRecords} danger icon={iconDeleteMajor}>
-  Delete Record
-</ButtonMenuItem>
+{#if canEditTableRecords}
+  <ButtonMenuItem on:click={handleDeleteRecords} danger icon={iconDeleteMajor}>
+    Delete Record
+  </ButtonMenuItem>
+{/if}
