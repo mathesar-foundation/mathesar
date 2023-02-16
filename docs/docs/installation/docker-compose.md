@@ -1,4 +1,4 @@
-# Install using `docker compose`
+# Install Mathesar using `docker compose`
 
 ## Prerequisites
 
@@ -27,8 +27,8 @@ Successfully running the script via the above command results in the following:
 
 ### Files
 
-- A file at `$HOME/.config/mathesar/.env`. This file defines the environment inside of the various Mathesar `docker` containers. It should be kept safe, since it has sensitive information about the passwords you set for Mathesar. If you've forgotten your admin username or password, look at this file.
-- A file at `$HOME/.config/mathesar/docker-compose.yml`. This is the main file defining the Mathesar containers listed above, and the connections between them.
+- A file at `~/.config/mathesar/.env`. This file defines the environment inside of the various Mathesar `docker` containers. It should be kept safe, since it has sensitive information about the passwords you set for Mathesar. If you've forgotten your admin username or password, look at this file.
+- A file at `~/.config/mathesar/docker-compose.yml`. This is the main file defining the Mathesar containers listed above, and the connections between them.
 
 ### A new Mathesar setup at localhost
 
