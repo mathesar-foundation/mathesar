@@ -4,6 +4,9 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import RenameColumn from './RenameColumn.svelte';
   import ColumnActions from './ColumnActions.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
@@ -12,9 +15,6 @@
   import ColumnTypeSpecifierTag from './ColumnTypeSpecifierTag.svelte';
   import ColumnFormatting from './ColumnFormatting.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();

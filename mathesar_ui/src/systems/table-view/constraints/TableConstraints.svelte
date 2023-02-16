@@ -6,10 +6,10 @@
   } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/api/utils/requestUtils';
   import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
-  import ConstraintTypeSection from './ConstraintTypeSection.svelte';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import ConstraintTypeSection from './ConstraintTypeSection.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();
