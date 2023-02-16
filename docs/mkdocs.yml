@@ -23,3 +23,5 @@ nav:
   - Home: index.md
   - Installation:
       - Docker Compose: installation/docker-compose.md
+  - Administration:
+      - Docker Compose: administration/docker-compose.md
