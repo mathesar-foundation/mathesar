@@ -40,11 +40,11 @@
   /** When only one column is selected */
   $: column = selectedColumns.length === 1 ? selectedColumns[0] : undefined;
 
-  $: canExecuteDDL = $userProfile?.hasPermission(
+  $: canExecuteDDL = !!$userProfile?.hasPermission(
     { database, schema },
     'canExecuteDDL',
   );
-  $: canEditMetadata = $userProfile?.hasPermission(
+  $: canEditMetadata = !!$userProfile?.hasPermission(
     { database, schema },
     'canEditMetadata',
   );

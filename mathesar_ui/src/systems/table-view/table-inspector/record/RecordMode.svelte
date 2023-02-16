@@ -21,7 +21,7 @@
     .map((cell) => getSelectedRowIndex(cell));
   $: uniquelySelectedRowIndices = Array.from(new Set(selectedRowIndices));
 
-  $: canEditTableRecords = $userProfile?.hasPermission(
+  $: canEditTableRecords = !!$userProfile?.hasPermission(
     { database, schema },
     'canEditTableRecords',
   );
