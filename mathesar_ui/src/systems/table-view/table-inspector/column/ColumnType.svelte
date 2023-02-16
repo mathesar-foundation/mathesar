@@ -30,6 +30,15 @@
     ...column.column,
     abstractType: column.abstractType,
   };
+  $: infoAlertText = (() => {
+    if (column.column.primary_key) {
+      return 'The data type of the primary key column is restricted and cannot be changed.';
+    }
+    if (column.linkFk) {
+      return 'The data type of the foreign key column is restricted to the data type of the primary key column and cannot be changed.';
+    }
+    return '';
+  })();
 </script>
 
 {#if disallowDataTypeChange}
@@ -38,19 +47,13 @@
     column={columnWithAbstractType}
     disabled={true}
   />
-  <InfoBox>
-    {#if column.column.primary_key}
+  {#if infoAlertText}
+    <InfoBox>
       <span class="info-alert">
-        The data type of the primary key column is restricted and cannot be
-        changed.
+        {infoAlertText}
       </span>
-    {:else if !!column.linkFk}
-      <span class="info-alert">
-        The data type of the foreign key column is restricted to the data type
-        of the primary key column and cannot be changed.
-      </span>
-    {/if}
-  </InfoBox>
+    </InfoBox>
+  {/if}
 {:else}
   {#key columnWithAbstractType}
     <AbstractTypeControl column={columnWithAbstractType} {save} />
