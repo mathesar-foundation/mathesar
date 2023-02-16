@@ -18,11 +18,15 @@
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import SchemaRow from './SchemaRow.svelte';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
 
   const addEditModal = modal.spawnModalController();
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: userProfile = $userProfileStore;
 
   $: database = (() => {
     if (!$currentDatabase) {
@@ -32,6 +36,8 @@
   })();
 
   $: schemasMap = $schemasStore.data;
+
+  $: canExecuteDDL = userProfile?.hasPermission({ database }, 'canExecuteDDL');
 
   let filterQuery = '';
   let targetSchema: SchemaEntry | undefined;
@@ -90,10 +96,14 @@
       icon: iconDatabase,
     }}
   >
-    <Button slot="action" on:click={addSchema} appearance="primary">
-      <Icon {...iconAddNew} />
-      <span>Create Schema</span>
-    </Button>
+    <svelte:fragment slot="action">
+      {#if canExecuteDDL}
+        <Button on:click={addSchema} appearance="primary">
+          <Icon {...iconAddNew} />
+          <span>Create Schema</span>
+        </Button>
+      {/if}
+    </svelte:fragment>
   </AppSecondaryHeader>
 
   <div class="schema-list-wrapper">
@@ -126,6 +136,7 @@
           <SchemaRow
             {database}
             {schema}
+            {canExecuteDDL}
             on:edit={() => editSchema(schema)}
             on:delete={() => deleteSchema(schema)}
           />

@@ -7,14 +7,17 @@
   } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { confirmationController } from '@mathesar/stores/confirmation';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
-  import { setUserProfileStoreContext } from '@mathesar/stores/userProfile';
+  import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
   import { modal } from './stores/modal';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import RootRoute from './routes/RootRoute.svelte';
 
   const commonData = preloadCommonData();
   if (commonData?.user) {
-    setUserProfileStoreContext(commonData.user);
+    setUserProfileStoreInContext(commonData.user);
+  } else {
+    // This should never occur
+    // TODO: Throw an application wide error
   }
 
   const recordSelectorModal = modal.spawnModalController();
@@ -144,7 +147,8 @@
 
   h1 {
     margin: 0 0 1rem 0;
-    font-size: 1.6rem;
+    font-size: var(--size-xx-large);
+    font-weight: 500;
   }
 
   .block {

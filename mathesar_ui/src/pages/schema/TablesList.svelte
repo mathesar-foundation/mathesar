@@ -8,11 +8,12 @@
   export let tables: TableEntry[];
   export let database: Database;
   export let schema: SchemaEntry;
+  export let canExecuteDDL: boolean;
 </script>
 
 <div class="container">
   {#each tables as table (table.id)}
-    <TableCard {table} {database} {schema} />
+    <TableCard {canExecuteDDL} {table} {database} {schema} />
   {:else}
     <EmptyEntity icon={iconTable}>
       <p>No Tables</p>

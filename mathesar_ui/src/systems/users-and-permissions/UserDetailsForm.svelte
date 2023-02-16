@@ -23,36 +23,25 @@
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
-  $: loggedInUserDetails = $userProfileStore;
+  $: userProfile = $userProfileStore;
 
-  export let userDetails: User | undefined = undefined;
+  export let user: User | undefined = undefined;
 
-  $: isUserUpdatingThemselves =
-    loggedInUserDetails && loggedInUserDetails?.id === userDetails?.id;
-  $: isNewUser = userDetails === undefined;
-  $: fullName = optionalField(userDetails?.full_name ?? '');
-  $: username = requiredField(userDetails?.username ?? '');
-  $: email = optionalField(userDetails?.email ?? '');
+  $: isUserUpdatingThemselves = userProfile && userProfile.id === user?.id;
+  $: isNewUser = user === undefined;
+  $: fullName = optionalField(user?.full_name ?? '');
+  $: username = requiredField(user?.username ?? '');
+  $: email = optionalField(user?.email ?? '');
   $: role = requiredField<'user' | 'admin' | undefined>(
-    userDetails?.is_superuser ? 'admin' : 'user',
+    user?.is_superuser ? 'admin' : 'user',
   );
 
   const password = requiredField('');
-  $: userDetails, password.reset();
+  $: user, password.reset();
 
   $: formFields = (() => {
-    const fields = {
-      fullName,
-      username,
-      email,
-    };
-    return isNewUser
-      ? {
-          ...fields,
-          role,
-          password,
-        }
-      : fields;
+    const fields = { fullName, username, email, role };
+    return isNewUser ? { ...fields, password } : fields;
   })();
   $: form = makeForm(formFields);
 
@@ -62,6 +51,7 @@
       full_name: formValues.fullName,
       username: formValues.username,
       email: formValues.email,
+      is_superuser: formValues.role === 'admin',
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
@@ -73,8 +63,8 @@
       return;
     }
 
-    if (userDetails) {
-      await userApi.update(userDetails.id, request);
+    if (user) {
+      await userApi.update(user.id, request);
       if (isUserUpdatingThemselves && userProfileStore) {
         userProfileStore.update((details) => details.with(request));
       }
@@ -114,7 +104,7 @@
 
 <div class="user-details-form">
   <UserFormInput
-    label="Full Name"
+    label="Display Name"
     field={fullName}
     input={{ component: TextInput }}
   />
@@ -158,7 +148,8 @@
     proceedButton={{ label: 'Save', icon: iconSave }}
     cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
     {getErrorMessages}
-    initiallyHidden
+    initiallyHidden={!!user}
+    hasCancelButton={!!user}
   />
 </div>
 
