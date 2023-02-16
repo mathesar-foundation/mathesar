@@ -62,8 +62,7 @@
         {labeledCount(selectedColumns, 'columns')} selected
       </span>
     {/if}
-    <!-- TODO: Needs UX review in PR description -->
-    {#if column && canExecuteDDL}
+    {#if column}
       <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
@@ -74,6 +73,7 @@
           <RenameColumn
             {column}
             columnsDataStore={$tabularData.columnsDataStore}
+            {canExecuteDDL}
           />
           {#if column.column.primary_key}
             <ColumnTypeSpecifierTag {column} type="primaryKey" />
@@ -85,6 +85,7 @@
               {column}
               columnsDataStore={$tabularData.columnsDataStore}
               constraintsDataStore={$tabularData.constraintsDataStore}
+              {canExecuteDDL}
             />
           {/if}
         </div>
