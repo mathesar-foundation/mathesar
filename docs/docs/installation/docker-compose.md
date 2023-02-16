@@ -1,38 +1,62 @@
-# Install Mathesar using `docker compose`
+# Install with Docker Compose
 
-## Prerequisites
+Installation should only take a few minutes.
 
-- A working, POSIX-compliant shell (e.g., a `bash` prompt).
-- `bash` installed on your machine.
-- Working installations of relatively recent versions of `docker` and `docker-compose` (see Docker's [installation docs](https://docs.docker.com/engine/install/))
-- A user in the `sudoers` file (one that can run commands with `sudo`).
+## Requirements
+- You'll need to install or upgrade Docker and `docker compose` on your computer. Mathesar has been tested with Docker v23 and Docker Compose v2.10 (although v2.0 or higher should work).
+    - [Docker installation documentation](https://docs.docker.com/desktop/)
+    - [`docker-compose` installation documentation](https://docs.docker.com/compose/install/)
+- You need to be a user with root access to the machine you're trying to install Mathesar on.
 
-## Installation Process
-
+## Quickstart
 To install the newest version of Mathesar, cut-and-paste the below command into a terminal window and follow the instructions:
+
 ```sh
 bash <(curl -sL https://raw.githubusercontent.com/centerofci/mathesar/master/install.sh)
 ```
 
-## The Result
+To access Mathesar, navigate to `localhost` in your web browser, and login using the admin user name and password you set during the installation.
 
-Successfully running the script via the above command results in the following:
+## Administration
+
+### Starting and stopping Mathesar
+
+The command to stop all containers used for Mathesar, and release their ports, etc. is:
+```sh
+sudo docker compose -f ~/.config/mathesar/docker-compose.yml --profile prod down
+```
+
+The command to start Mathesar (say, after stopping it, or a reboot of the machine) is:
+```sh
+sudo docker compose -f ~/.config/mathesar/docker-compose.yml --profile prod up
+```
+
+### Upgrading Mathesar
+The command to manually upgrade Mathesar to the newest version is:
+
+```sh
+sudo docker exec mathesar-watchtower-1 /watchtower --run-once
+```
+
+## Under the Hood
+
+### Installation steps
+1. First, we create a directory on your system where we store Mathesar-related configuration. This contains your passwords and other secrets, so **it should be stored in a secure location**. By default, this is your `~/.config/mathesar/`, but you can change it.
+2. We download the main docker-compose config file from Mathesar's git repo. This file defines the different docker containers used by Mathesar, and how they're networked together. This file will live in the directory from Step 1.
+
+(Brent, please fill in the rest.)
 
 ### Docker containers
-
-- A container called `mathesar_service` running the main Mathesar webapp
-- A container called `mathesar_db` with PostgreSQL 13 installed.
-- A container called `mathesar-caddy-reverse-proxy-1` that helps route traffic to the `mathesar_service` container.
-- A container called `mathesar-watchtower-1` that helps update your Mathesar installation when the time comes.
+This installation process creates the following containers:
+- `mathesar_service`, which runs the main Mathesar application.
+- `mathesar_db`, which which runs the database (PostgreSQL 13).
+- `mathesar-caddy-reverse-proxy-1`, which helps route traffic to the `mathesar_service` container.
+- `mathesar-watchtower-1`, which helps upgrade Mathesar installation when new releases are available.
 
 ### Files
-
-- A file at `~/.config/mathesar/.env`. This file defines the environment inside of the various Mathesar `docker` containers. It should be kept safe, since it has sensitive information about the passwords you set for Mathesar. If you've forgotten your admin username or password, look at this file.
-- A file at `~/.config/mathesar/docker-compose.yml`. This is the main file defining the Mathesar containers listed above, and the connections between them.
-
-### A new Mathesar setup at localhost
-
-To access Mathesar, navigate to `localhost` in your web browser, and login using the admin user name and password you set during the installation.
+This installation process creates the following files in the Mathesar configuration directory:
+- `.env`. This file defines the environment inside of the various Mathesar `docker` containers. It should be kept safe, since it has sensitive information about the passwords you set for Mathesar. If you've forgotten your admin username or password, look at this file.
+- `docker-compose.yml`. This is the main file defining the Mathesar containers listed above, and the connections between them.
 
 ## Troubleshooting
 
@@ -55,4 +79,4 @@ If you have permissions issues when the script begins running `docker` commands,
 
 ## Getting more help
 
-If you're having an issue not covered by this documentation, please chat with us [on Matrix](https://matrix.to/#/#mathesar:matrix.mathesar.org).
+If you're having an issue not covered by this documentation, please open an issue [on GitHub](https://github.com/centerofci/mathesar/issues).
