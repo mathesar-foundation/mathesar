@@ -72,6 +72,29 @@ export class UserModel {
     return false;
   }
 
+  getRoleForDb(database: Pick<Database, 'id'>) {
+    return this.databaseRoles.get(database.id);
+  }
+
+  getRoleForSchema(schema: Pick<SchemaEntry, 'id'>) {
+    return this.schemaRoles.get(schema.id);
+  }
+
+  hasDbAccess(database: Pick<Database, 'id'>) {
+    return this.databaseRoles.has(database.id) || this.isSuperUser;
+  }
+
+  hasSchemaAccess(
+    database: Pick<Database, 'id'>,
+    schema: Pick<SchemaEntry, 'id'>,
+  ) {
+    return (
+      this.schemaRoles.has(schema.id) ||
+      this.databaseRoles.has(database.id) ||
+      this.isSuperUser
+    );
+  }
+
   getDisplayName(): string {
     return this.username;
   }
@@ -161,35 +184,26 @@ class WritableUsersStore {
     void this.fetchUsers();
   }
 
-  // getUsersWithAccessToDb(databaseId: Database['id']) {
-  //   return derived(this.users, ($users) =>
-  //     $users.filter(
-  //       (user) =>
-  //         user.database_roles.find(
-  //           (dbRoles) => dbRoles.database === databaseId,
-  //         ) || user.is_superuser,
-  //     ),
-  //   );
-  // }
+  getUsersWithAccessToDb(database: Pick<Database, 'id'>) {
+    return derived(this.users, ($users) =>
+      $users.filter((user) => user.hasDbAccess(database)),
+    );
+  }
 
-  // getUsersWithoutAccessToDb(databaseId: Database['id']) {
-  //   return derived(this.users, ($users) =>
-  //     $users.filter(
-  //       (user) =>
-  //         user.database_roles.find(
-  //           (dbRoles) => dbRoles.database !== databaseId,
-  //         ) && !user.is_superuser,
-  //     ),
-  //   );
-  // }
+  getUsersWithoutAccessToDb(database: Pick<Database, 'id'>) {
+    return derived(this.users, ($users) =>
+      $users.filter((user) => !user.hasDbAccess(database)),
+    );
+  }
 
-  // getUsersWithSchemaAccess(schemaId: SchemaEntry['id']) {
-  //   return derived(this.users, ($users) =>
-  //     $users.filter((user) =>
-  //       user.schema_roles.find((dbRoles) => dbRoles.schema === schemaId),
-  //     ),
-  //   );
-  // }
+  getUsersWithAccessToSchema(
+    database: Pick<Database, 'id'>,
+    schema: Pick<SchemaEntry, 'id'>,
+  ) {
+    return derived(this.users, ($users) =>
+      $users.filter((user) => user.hasSchemaAccess(database, schema)),
+    );
+  }
 }
 
 export type UsersStore = MakeWritablePropertiesReadable<WritableUsersStore>;
