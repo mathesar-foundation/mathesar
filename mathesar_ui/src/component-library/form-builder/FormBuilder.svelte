@@ -5,6 +5,7 @@
 
   const dispatch = createEventDispatcher();
 
+  export let disabled = false;
   export let form: FormBuildConfiguration;
   $: validationStore = form.validationStore;
 
@@ -22,6 +23,7 @@
       element={form.layout}
       customComponents={form.customComponents}
       validationResult={$validationStore}
+      {disabled}
     />
   </form>
 </div>

@@ -117,12 +117,12 @@
       </Collapsible>
     {/if}
 
-    {#if column && canEditMetadata}
+    {#if column}
       <Collapsible triggerAppearance="plain">
         <CollapsibleHeader slot="header" title="Formatting" />
         <div slot="content" class="content-container">
           {#key column}
-            <ColumnFormatting {column} />
+            <ColumnFormatting {column} {canEditMetadata} />
           {/key}
         </div>
       </Collapsible>
