@@ -8,6 +8,9 @@
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
@@ -16,11 +19,19 @@
   type Context = 'page' | 'widget';
 
   const tabularData = getTabularDataStoreFromContext();
+  const userProfile = getUserProfileStoreFromContext();
+
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
+  $: canExecuteDDL = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canExecuteDDL',
+  );
 
   export let context: Context = 'page';
 
   $: usesVirtualList = context === 'page';
-  $: allowsDdlOperations = context === 'page';
+  $: allowsDdlOperations = context === 'page' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection } = $tabularData);
   $: ({ activeCell } = selection);
@@ -32,7 +43,7 @@
    * to more easily displaying the Table Inspector even if DDL operations are
    * not supported.
    */
-  $: supportsTableInspector = allowsDdlOperations;
+  $: supportsTableInspector = context === 'page';
   $: sheetColumns = (() => {
     const columns = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
