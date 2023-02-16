@@ -60,7 +60,7 @@
       let:api
     >
       <ScrollAndResetHandler {api} />
-      {#each items as item (item.key)}
+      {#each items as item}
         {#if $displayableRecords[item.index]}
           <Row style={item.style} bind:row={$displayableRecords[item.index]} />
         {/if}
