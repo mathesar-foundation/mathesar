@@ -1,15 +1,15 @@
 <script lang="ts">
-  import type { User } from '@mathesar/api/users';
   import { Icon } from '@mathesar/component-library';
   import { iconUser } from '@mathesar/icons';
   import { getEditUsersPageUrl } from '@mathesar/routes/urls';
+  import type { UserModel } from '@mathesar/stores/users';
 
-  export let user: User;
+  export let user: UserModel;
 
   // TODO: Update the icon
-  $: userTypeIcon = user.is_superuser ? iconUser : iconUser;
-  $: userTypeText = user.is_superuser ? 'Admin' : 'Custom';
-  $: showUserDetailedInfo = user.email || user.full_name;
+  $: userTypeIcon = user.isSuperUser ? iconUser : iconUser;
+  $: userTypeText = user.isSuperUser ? 'Admin' : 'Custom';
+  $: showUserDetailedInfo = user.email || user.fullName;
 </script>
 
 <a class="user-row passthrough" href={getEditUsersPageUrl(user.id)}>
@@ -17,10 +17,10 @@
     <span>{user.username}</span>
     {#if showUserDetailedInfo}
       <div class="user-detailed-info">
-        {#if user.full_name}
-          <span>{user.full_name}</span>
+        {#if user.fullName}
+          <span>{user.fullName}</span>
         {/if}
-        {#if user.full_name && user.email}
+        {#if user.fullName && user.email}
           <span class="divider" />
         {/if}
         {#if user.email}

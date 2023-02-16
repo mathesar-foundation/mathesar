@@ -22,7 +22,7 @@ export class UserModel {
 
   readonly isSuperUser: User['is_superuser'];
 
-  readonly full_name: User['full_name'];
+  readonly fullName: User['full_name'];
 
   readonly email: User['email'];
 
@@ -41,7 +41,7 @@ export class UserModel {
     this.schemaRoles = new Map(
       userDetails.schema_roles.map((role) => [role.id, role]),
     );
-    this.full_name = userDetails.full_name;
+    this.fullName = userDetails.full_name;
     this.email = userDetails.email;
     this.username = userDetails.username;
   }
@@ -83,7 +83,7 @@ export class UserModel {
       username: this.username,
       database_roles: [...this.databaseRoles.values()],
       schema_roles: [...this.schemaRoles.values()],
-      full_name: this.full_name,
+      full_name: this.fullName,
       email: this.email,
     };
   }
@@ -101,7 +101,7 @@ const contextKey = Symbol('users list store');
 class WritableUsersStore {
   readonly requestStatus: Writable<RequestStatus | undefined> = writable();
 
-  readonly users = writable<User[]>([]);
+  readonly users = writable<UserModel[]>([]);
 
   readonly count = writable(0);
 
@@ -118,7 +118,7 @@ class WritableUsersStore {
       });
       this.request = userApi.list();
       const response = await this.request;
-      this.users.set(response.results);
+      this.users.set(response.results.map((user) => new UserModel(user)));
       this.count.set(response.count);
       this.requestStatus.set({
         state: 'success',
@@ -138,7 +138,10 @@ class WritableUsersStore {
     }
     if (requestStatus?.state === 'processing') {
       const result = await this.request;
-      return result?.results.find((user) => user.id === userId);
+      const user = result?.results.find((entry) => entry.id === userId);
+      if (user) {
+        return new UserModel(user);
+      }
     }
     return undefined;
   }
@@ -158,35 +161,35 @@ class WritableUsersStore {
     void this.fetchUsers();
   }
 
-  getUsersWithAccessToDb(databaseId: Database['id']) {
-    return derived(this.users, ($users) =>
-      $users.filter(
-        (user) =>
-          user.database_roles.find(
-            (dbRoles) => dbRoles.database === databaseId,
-          ) || user.is_superuser,
-      ),
-    );
-  }
+  // getUsersWithAccessToDb(databaseId: Database['id']) {
+  //   return derived(this.users, ($users) =>
+  //     $users.filter(
+  //       (user) =>
+  //         user.database_roles.find(
+  //           (dbRoles) => dbRoles.database === databaseId,
+  //         ) || user.is_superuser,
+  //     ),
+  //   );
+  // }
 
-  getUsersWithoutAccessToDb(databaseId: Database['id']) {
-    return derived(this.users, ($users) =>
-      $users.filter(
-        (user) =>
-          user.database_roles.find(
-            (dbRoles) => dbRoles.database !== databaseId,
-          ) && !user.is_superuser,
-      ),
-    );
-  }
+  // getUsersWithoutAccessToDb(databaseId: Database['id']) {
+  //   return derived(this.users, ($users) =>
+  //     $users.filter(
+  //       (user) =>
+  //         user.database_roles.find(
+  //           (dbRoles) => dbRoles.database !== databaseId,
+  //         ) && !user.is_superuser,
+  //     ),
+  //   );
+  // }
 
-  getUsersWithSchemaAccess(schemaId: SchemaEntry['id']) {
-    return derived(this.users, ($users) =>
-      $users.filter((user) =>
-        user.schema_roles.find((dbRoles) => dbRoles.schema === schemaId),
-      ),
-    );
-  }
+  // getUsersWithSchemaAccess(schemaId: SchemaEntry['id']) {
+  //   return derived(this.users, ($users) =>
+  //     $users.filter((user) =>
+  //       user.schema_roles.find((dbRoles) => dbRoles.schema === schemaId),
+  //     ),
+  //   );
+  // }
 }
 
 export type UsersStore = MakeWritablePropertiesReadable<WritableUsersStore>;
