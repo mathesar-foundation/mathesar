@@ -11,7 +11,7 @@
   } from '@mathesar/stores/users';
   import type { UserRole } from '@mathesar/api/users';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import DbAccessControlView from './DbAccessControlView.svelte';
+  import { AccessControlView } from '@mathesar/systems/users-and-permissions';
 
   export let controller: ModalController;
   export let database: Database;
@@ -41,7 +41,7 @@
   </svelte:fragment>
 
   {#if $requestStatus?.state === 'success'}
-    <DbAccessControlView
+    <AccessControlView
       {usersWithAccess}
       {usersWithoutAccess}
       {addAccessForUser}

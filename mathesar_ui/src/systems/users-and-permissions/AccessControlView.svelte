@@ -32,6 +32,7 @@
       try {
         isRequestInProcess = true;
         await addAccessForUser(user, role);
+        user = undefined;
       } finally {
         isRequestInProcess = false;
       }
