@@ -7,6 +7,7 @@ import userApi, {
   type UnsavedUser,
   type DatabaseRole,
   type SchemaRole,
+  type UserRole,
 } from '@mathesar/api/users';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
@@ -117,6 +118,22 @@ export class UserModel {
       ...userDetails,
     });
   }
+
+  withNewDatabaseRole(dbRole: DatabaseRole) {
+    return new UserModel({
+      ...this.getUser(),
+      database_roles: [...this.databaseRoles.values(), dbRole],
+    });
+  }
+
+  withoutDatabaseRole(dbRole: Pick<DatabaseRole, 'database'>) {
+    return new UserModel({
+      ...this.getUser(),
+      database_roles: [...this.databaseRoles.values()].filter(
+        (entry) => entry.database !== dbRole.database,
+      ),
+    });
+  }
 }
 
 const contextKey = Symbol('users list store');
@@ -190,6 +207,43 @@ class WritableUsersStore {
     // Re-fetching the users isn't strictly necessary, but we do it anyway
     // since it's a good opportunity to ensure the UI is up-to-date.
     void this.fetchUsersSilently();
+  }
+
+  async addDatabaseRoleForUser(
+    userId: number,
+    database: Pick<Database, 'id'>,
+    role: UserRole,
+  ) {
+    const dbRole = await userApi.addDatabaseRole(userId, database.id, role);
+    this.users.update((users) =>
+      users.map((user) => {
+        if (user.id === userId) {
+          return user.withNewDatabaseRole(dbRole);
+        }
+        return user;
+      }),
+    );
+    void this.fetchUsersSilently();
+  }
+
+  async removeDatabaseAccessForUser(
+    userId: number,
+    database: Pick<Database, 'id'>,
+  ) {
+    const user = get(this.users).find((entry) => entry.id === userId);
+    const dbRole = user?.getRoleForDb(database);
+    if (dbRole) {
+      await userApi.deleteDatabaseRole(dbRole.id);
+      this.users.update((users) =>
+        users.map((entry) => {
+          if (entry.id === userId) {
+            return entry.withoutDatabaseRole(dbRole);
+          }
+          return entry;
+        }),
+      );
+      void this.fetchUsersSilently();
+    }
   }
 
   getUsersWithAccessToDb(database: Pick<Database, 'id'>) {
