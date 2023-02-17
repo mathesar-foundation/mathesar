@@ -2,17 +2,15 @@
   import { Chip, Icon, SpinnerButton } from '@mathesar-component-library';
   import { iconUser, iconDeleteMajor } from '@mathesar/icons';
   import type { UserModel } from '@mathesar/stores/users';
-  import type { Database } from '@mathesar/AppTypes';
   import { getDisplayNameForRole } from '@mathesar/utils/permissions';
+  import type { UserRole } from '@mathesar/api/users';
 
-  export let database: Database;
   export let userModel: UserModel;
+  export let getUserRole: (user: UserModel) => UserRole | undefined;
   export let removeAccessForUser: (user: UserModel) => Promise<void>;
 
-  $: dbRole = userModel.getRoleForDb(database);
-  $: accessDisplayName = dbRole
-    ? getDisplayNameForRole(dbRole.role)
-    : undefined;
+  $: role = getUserRole(userModel);
+  $: accessDisplayName = role ? getDisplayNameForRole(role) : undefined;
 
   async function removeAccess() {
     await removeAccessForUser(userModel);
@@ -40,7 +38,7 @@
       <span>
         {#if userModel.isSuperUser}
           Admin
-        {:else if dbRole && accessDisplayName}
+        {:else if accessDisplayName}
           {accessDisplayName}
         {/if}
       </span>
