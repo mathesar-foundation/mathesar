@@ -71,6 +71,22 @@ function resetPassword(userId: User['id'], password: string) {
   });
 }
 
+function addDatabaseRole(
+  userId: User['id'],
+  databaseId: Database['id'],
+  role: UserRole,
+) {
+  return postAPI<DatabaseRole>('/api/ui/v0/database_roles/', {
+    user: userId,
+    database: databaseId,
+    role,
+  });
+}
+
+function deleteDatabaseRole(roleId: DatabaseRole['id']) {
+  return deleteAPI(`/api/ui/v0/database_roles/${roleId}/`);
+}
+
 export default {
   list,
   get,
@@ -79,4 +95,6 @@ export default {
   update,
   changePassword,
   resetPassword,
+  addDatabaseRole,
+  deleteDatabaseRole,
 };
