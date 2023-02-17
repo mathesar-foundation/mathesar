@@ -57,6 +57,7 @@ fi
 
 printf "
 Docker versions ok.
+
 "
 read -r -p "Press ENTER to continue. "
 clear -x
@@ -159,23 +160,29 @@ done
 
 printf "\n"
 clear -x
-config_location=$HOME/.config/mathesar
 printf "
 --------------------------------------------------------------------------------
 
-We'll store a file with the configurations you've defined at:
+CONFIGURATION DIRECTORY
 
-%s/.env
+Mathesar needs to create a configuration directory on your machine. Using the
+default is strongly recommended. If you choose a custom location, write it down.
+
+--------------------------------------------------------------------------------
+
+"
+read -r -p "Choose a configuration directory [/etc/mathesar]: " config_location
+config_location="${config_location:-/etc/mathesar}"
+
+printf "
+Installing environment file at %s/.env
 
 " "$config_location"
 
 read -r -p "Press ENTER to continue. "
-clear -x
-
-mkdir -p "$config_location"
+sudo mkdir -p "$config_location"
 cd "$config_location"
-
-cat > .env <<EOF
+sudo tee .env > /dev/null <<EOF
 POSTGRES_USER='$db_username'
 POSTGRES_PASSWORD='$db_password'
 POSTGRES_HOST='$db_port'
@@ -188,6 +195,8 @@ DJANGO_SUPERUSER_PASSWORD='$superuser_password'
 HTTP_PORT='$http_port'
 HTTPS_PORT='$https_port'
 EOF
+clear -x
+
 printf "
 --------------------------------------------------------------------------------
 
@@ -199,10 +208,9 @@ installation.
 --------------------------------------------------------------------------------
 
 "
-sudo -v
 printf "Downloading docker-compose.yml...
 "
-wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
+sudo wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
 printf "Success!"
 clear -x
 sudo docker compose --profile prod up -d --wait
@@ -225,8 +233,9 @@ printf "
 
 Installation complete!
 
-If running locally, you can login by navigating to http://localhost in your web
-browser. If you set up Mathesar on a server, you can login at the configured
+If running locally, you can login by navigating to http://localhost in your
+web browser. If you set up Mathesar on a server, double-check that the
+machine accepts traffic on the configured ports, and login at the configured
 domain%s.
 
 Thank you for installing Mathesar.
