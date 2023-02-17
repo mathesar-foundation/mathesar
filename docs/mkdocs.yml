@@ -1,10 +1,12 @@
 site_name: Mathesar Documentation
 site_url: https://docs.mathesar.org/
-repo_url: https://github.com/centerofci/mathesar/tree/master/docs
+repo_url: https://github.com/centerofci/mathesar/
+repo_name: centerofci/mathesar
 theme:
   name: material
   icon:
     repo: fontawesome/brands/github
+  favicon: assets/images/favicon.ico
 
 markdown_extensions:
   - admonition
@@ -22,6 +24,4 @@ plugins:
 nav:
   - Home: index.md
   - Installation:
-      - Docker Compose: installation/docker-compose.md
-  - Administration:
-      - Docker Compose: administration/docker-compose.md
+      - Install with Docker Compose: installation/docker-compose.md
