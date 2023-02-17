@@ -96,6 +96,7 @@ export const iconImportData: IconProps = { data: faUpload };
 export const iconMoreActions: IconProps = { data: faEllipsisV };
 export const iconMoveColumnsToNewLinkedTable = { data: faLink };
 export const iconMoveColumnsToExistingLinkedTable = { data: faLink };
+export const iconManageAccess = { data: faUser };
 /** Submit a selection with the record selector for data entry */
 export const iconPickRecord: IconProps = { data: faCheck };
 export const iconRedo: IconProps = { data: faRedo };
