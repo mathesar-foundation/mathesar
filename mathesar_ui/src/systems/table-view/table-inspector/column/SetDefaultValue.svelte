@@ -15,8 +15,33 @@
   $: ({ columnsDataStore, recordsData } = $tabularData);
   $: ({ recordSummaries } = recordsData);
 
-  $: value = column.column.default?.value;
-  $: actionButtonsVisible = value !== column.column.default?.value;
+  $: initialValue = column.column.default?.value;
+  $: value = initialValue;
+
+  /**
+   * `value` is being passed to different types
+   * of input components by the `DynamicInput` component.
+   * All components when passed `value={undefined}` let it be undefined
+   * but input and textarea change it to empty string
+   * which makes the check `value===initialValue` to fail
+   * hence the sanitization.
+   */
+  $: sanitizedValue = value === '' ? undefined : value;
+
+  /**
+   * Not using strict equality here since
+   * numbers are being sent as string to the backend
+   * but the initialValue from BE is always of the
+   * correct data type.
+   */
+  $: actionButtonsVisible = sanitizedValue != initialValue;
+
+  $: console.log({
+    sanitizedValue,
+    value,
+    initialValue,
+  });
+
   $: recordSummary = $recordSummaries
     .get(String(column.id))
     ?.get(String(value));
@@ -24,7 +49,7 @@
   let typeChangeState: RequestStatus;
 
   function resetValue() {
-    value = column.column.default?.value;
+    value = initialValue;
   }
 
   async function save() {
