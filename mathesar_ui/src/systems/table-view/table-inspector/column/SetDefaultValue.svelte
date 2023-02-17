@@ -36,12 +36,6 @@
    */
   $: actionButtonsVisible = sanitizedValue != initialValue;
 
-  $: console.log({
-    sanitizedValue,
-    value,
-    initialValue,
-  });
-
   $: recordSummary = $recordSummaries
     .get(String(column.id))
     ?.get(String(value));
