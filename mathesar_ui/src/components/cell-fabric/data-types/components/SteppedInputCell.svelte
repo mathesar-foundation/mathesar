@@ -86,6 +86,13 @@
           key: e.key,
         });
         break;
+      case 'Delete':
+        if (!isEditMode && e.shiftKey) {
+          dispatch('update', {
+            value: null,
+          });
+        }
+        break;
       case 'ArrowLeft':
       case 'ArrowRight':
       case 'ArrowDown':
@@ -113,6 +120,9 @@
       case 'Enter':
       case 'Escape':
       case 'Tab':
+        dispatchUpdate();
+        break;
+      case 'Delete':
         dispatchUpdate();
         break;
       default:
