@@ -1,7 +1,13 @@
 # Mathesar Documentation
 
-Mathesar is an open source and web-based interface that works on top of your database.
+![Mathesar header](assets/images/header.png)
 
-Perhaps you'd like to [install Mathesar](installation/docker-compose.md).
+Mathesar is a straightforward open source tool that provides a **spreadsheet-like interface** to a PostgreSQL **database**. Our web-based interface helps you and your collaborators work with data more independently and comfortably – **no technical skills needed**.
 
-If you're a developer, consider looking at the [git repo](https://github.com/centerofci/mathesar). The `README.md` there will get you started with helping us develop Mathesar.
+You can use Mathesar to build **data models**, **enter data**, and even **build reports**.
+
+## Installation
+You host Mathesar on your own server. Currently, we only support installing using Docker Compose, although we will support additional installation methods soon.
+
+- [Install with Docker Compose](installation/docker-compose.md).
+
