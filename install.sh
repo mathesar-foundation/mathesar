@@ -4,6 +4,7 @@ clear -x
 github_tag=${1-master}
 min_maj_docker_version=20
 min_maj_docker_compose_version=2
+min_min_docker_compose_version=7
 printf "
 --------------------------------------------------------------------------------
 
@@ -39,19 +40,32 @@ Your Docker version is %s.
 Your Docker Compose version is %s.
 " "$docker_version" "$docker_compose_version"
 
-if [ $(echo "$docker_version" | cut -d '.' -f 1) -lt "$min_maj_docker_version" ]; then
-  printf "
-Docker must be at least version %s! Please upgrade.
+docker_maj_version=$(echo "$docker_version" | tr -d '[:alpha:]' | cut -d '.' -f 1)
+docker_compose_maj_version=$(echo "$docker_compose_version" | tr -d '[:alpha:]' | cut -d '.' -f 1)
+docker_compose_min_version=$(echo "$docker_compose_version" | tr -d '[:alpha:]' | cut -d '.' -f 2)
 
-" "$min_maj_docker_version.0.0"
+if [ "$docker_maj_version" -lt "$min_maj_docker_version" ]; then
+  printf "
+Docker must be at least version %s.0.0 and
+Docker Compose must be at least version %s.%s.0!
+Please upgrade.
+
+" "$min_maj_docker_version" "$min_maj_docker_compose_version" "$min_min_docker_compose_version"
   exit 1
 fi
 
-if [ $(echo "$docker_compose_version" | cut -d '.' -f 1) -lt "$min_maj_docker_compose_version" ]; then
+if [ "$docker_compose_maj_version" -lt "$min_maj_docker_compose_version" ]; then
   printf "
-Docker Compose must be at least version %s! Please upgrade.
+Docker Compose must be at least version %s.%s.0! Please upgrade.
 
-" "$min_maj_docker_compose_version.0.0"
+" "$min_maj_docker_compose_version" "$min_min_docker_compose_version"
+  exit 1
+elif [ "$docker_compose_maj_version" -eq "$min_maj_docker_compose_version" ] &&
+[ "$docker_compose_min_version" -lt "$min_min_docker_compose_version" ]; then
+  printf "
+Docker Compose must be at least version %s.%s.0! Please upgrade.
+
+" "$min_maj_docker_compose_version" "$min_min_docker_compose_version"
   exit 1
 fi
 
