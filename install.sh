@@ -2,6 +2,8 @@
 set -e
 clear -x
 github_tag=${1-master}
+min_maj_docker_version=20
+min_maj_docker_compose_version=2
 printf "
 --------------------------------------------------------------------------------
 
@@ -16,6 +18,49 @@ https://docs.mathesar.org/installation/docker-compose/#installation-steps
 " "$github_tag"
 read -r -p "Press ENTER to begin. "
 clear -x
+
+printf "
+--------------------------------------------------------------------------------
+
+DOCKER VERSION CHECK
+
+We'll begin by making sure your Docker installation is up-to-date.  In order to
+run Docker commands, we need to use sudo for elevated privileges.
+
+--------------------------------------------------------------------------------
+
+"
+sudo -k
+sudo -v
+docker_version=$(sudo docker version -f '{{.Server.Version}}')
+docker_compose_version=$(sudo docker compose version --short)
+printf "
+Your Docker version is %s.
+Your Docker Compose version is %s.
+" "$docker_version" "$docker_compose_version"
+
+if [ $(echo "$docker_version" | cut -d '.' -f 1) -lt "$min_maj_docker_version" ]; then
+  printf "
+Docker must be at least version %s! Please upgrade.
+
+" "$min_maj_docker_version.0.0"
+  exit 1
+fi
+
+if [ $(echo "$docker_compose_version" | cut -d '.' -f 1) -lt "$min_maj_docker_compose_version" ]; then
+  printf "
+Docker Compose must be at least version %s! Please upgrade.
+
+" "$min_maj_docker_compose_version.0.0"
+  exit 1
+fi
+
+printf "
+Docker versions ok.
+"
+read -r -p "Press ENTER to continue. "
+clear -x
+
 printf "
 --------------------------------------------------------------------------------
 
@@ -150,8 +195,6 @@ DOCKER SETUP
 
 This step download and run all needed Docker images and start your Mathesar
 installation.
-
-In order to run Docker commands, we need to use sudo (for elevated privileges).
 
 --------------------------------------------------------------------------------
 
