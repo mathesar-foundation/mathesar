@@ -3,7 +3,7 @@ set -e
 clear -x
 github_tag=${1-master}
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 Welcome to the Mathesar installer for version %s!
 
@@ -11,18 +11,20 @@ For more information or explanation about the steps involved, please see:
 
 https://docs.mathesar.org/installation/docker-compose/#installation-steps
 
-********************************************************************************
+--------------------------------------------------------------------------------
 
 " "$github_tag"
 read -r -p "Press ENTER to begin. "
 clear -x
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 DATABASE CONFIGURATION
 
 Here, we configure the PostgreSQL database(s) for Mathesar. These credentials
 can be used to login directly using psql or another client.
+
+--------------------------------------------------------------------------------
 
 "
 read -r -p "Choose a database name [mathesar]: " db_name
@@ -55,11 +57,13 @@ db_port=${db_port:-5432}
 printf "\n"
 clear -x
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 WEBSERVER CONFIGURATION
 
 Here, we set up details of the Mathesar webserver.
+
+--------------------------------------------------------------------------------
 
 "
 
@@ -76,12 +80,14 @@ secret_key=$(base64 -w 0 /dev/urandom | head -c50)
 printf "\n"
 clear -x
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 ADMIN USER CONFIGURATION
 
 You'll use these credentials to login to Mathesar in the web interface for the
 first time.
+
+--------------------------------------------------------------------------------
 
 "
 
@@ -110,7 +116,7 @@ printf "\n"
 clear -x
 config_location=$HOME/.config/mathesar
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 We'll store a file with the configurations you've defined at:
 
@@ -138,46 +144,46 @@ HTTP_PORT='$http_port'
 HTTPS_PORT='$https_port'
 EOF
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 DOCKER SETUP
 
+This step download and run all needed Docker images and start your Mathesar
+installation.
+
 In order to run Docker commands, we need to use sudo (for elevated privileges).
+
+--------------------------------------------------------------------------------
 
 "
 sudo -v
 printf "Downloading docker-compose.yml...
 "
 wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
-printf "
-Pulling docker images...
-
-"
-sudo docker compose --profile prod pull
-printf "
-Starting the docker containers...
-
-"
+printf "Success!"
+clear -x
 sudo docker compose --profile prod up -d --wait
 clear -x
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 Service is ready and healthy!
 Adding admin user to Django webservice now.
 "
 sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email" 2> >(grep -vi warn)
-print "\n"
+read -r -p "Press ENTER to continue. "
+printf "\n"
 clear -x
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 Installation complete!
 
 If running locally, you can access Mathesar by navigating to http://localhost
 in your web browser.
 
-Thank you for installing Mathesar!
+Thank you for installing Mathesar.
+
 "
 read -r -p "Press ENTER to finish. "
 clear -x
