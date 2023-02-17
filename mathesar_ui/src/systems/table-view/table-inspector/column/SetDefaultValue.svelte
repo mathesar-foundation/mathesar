@@ -34,6 +34,7 @@
    * but the initialValue from BE is always of the
    * correct data type.
    */
+  // eslint-disable-next-line eqeqeq
   $: actionButtonsVisible = sanitizedValue != initialValue;
 
   $: recordSummary = $recordSummaries
