@@ -19,16 +19,18 @@ To access Mathesar, navigate to `localhost` in your web browser, and login using
 
 ## Administration
 
+For the commands below, you need to replace `$MATHESAR_CONFIG_DIR` with the actual value you set during the installation process. By default, this should be `/etc/mathesar`.
+
 ### Starting and stopping Mathesar
 
 The command to stop all containers used for Mathesar, and release their ports, etc. is:
 ```sh
-sudo docker compose -f ~/.config/mathesar/docker-compose.yml --profile prod down
+sudo docker compose -f $MATHESAR_CONFIG_DIR/docker-compose.yml --profile prod down
 ```
 
 The command to start Mathesar (say, after stopping it, or a reboot of the machine) is:
 ```sh
-sudo docker compose -f ~/.config/mathesar/docker-compose.yml --profile prod up
+sudo docker compose -f $MATHESAR_CONFIG_DIR/docker-compose.yml --profile prod up
 ```
 
 ### Upgrading Mathesar
