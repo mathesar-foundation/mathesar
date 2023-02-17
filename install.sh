@@ -174,16 +174,20 @@ sudo docker exec mathesar_service python manage.py createsuperuser --no-input --
 read -r -p "Press ENTER to continue. "
 printf "\n"
 clear -x
+if [ "$allowed_hosts" !=  '*' ]; then
+  padded_domain=" $allowed_hosts"
+fi
 printf "
 --------------------------------------------------------------------------------
 
 Installation complete!
 
-If running locally, you can access Mathesar by navigating to http://localhost
-in your web browser.
+If running locally, you can login by navigating to http://localhost in your web
+browser. If you set up Mathesar on a server, you can login at the configured
+domain%s.
 
 Thank you for installing Mathesar.
 
-"
+" "$padded_domain"
 read -r -p "Press ENTER to finish. "
 clear -x
