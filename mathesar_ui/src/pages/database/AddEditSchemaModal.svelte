@@ -11,7 +11,7 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { toast } from '@mathesar/stores/toast';
-  import {logEvent} from "@mathesar/utils/telemetry";
+  import { logEvent } from '@mathesar/utils/telemetry';
 
   export let database: Database;
   export let controller: ModalController;
@@ -43,7 +43,11 @@
       if (schema) {
         await updateSchema(database.name, { ...schema, name, description });
       } else {
-        logEvent('create_schema_clicked', { database_name: database.name, schema_name: name, page: 'schema' });
+        logEvent('create_schema_clicked', {
+          database_name: database.name,
+          schema_name: name,
+          page: 'schema',
+        });
         await createSchema(database.name, name, description);
       }
     } catch (err) {
