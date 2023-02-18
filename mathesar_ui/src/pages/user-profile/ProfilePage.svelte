@@ -30,7 +30,9 @@
     <h1 slot="header">User Profile</h1>
     {#if userProfile}
       <InsetPageSection>
-        <h2 class="large_header extra_bold_header" slot="header">Account Details</h2>
+        <h2 class="large_header extra_bold_header" slot="header">
+          Account Details
+        </h2>
         <UserDetailsForm user={userProfile.getUser()} />
       </InsetPageSection>
       <InsetPageSection>
@@ -39,7 +41,9 @@
 
       {#if !userProfile.isSuperUser}
         <InsetPageSection>
-          <h2 class="large_header extra_bold_header" slot="header">Delete Account</h2>
+          <h2 class="large_header extra_bold_header" slot="header">
+            Delete Account
+          </h2>
           <div>
             Please contact your administrator to request permanent deletion of
             your account

@@ -341,7 +341,9 @@
       {:else}
         <div class="table-properties">
           <LabeledInput layout="stacked">
-            <h2 class="large_header extra_bold_header" slot="label">Table Name</h2>
+            <h2 class="large_header extra_bold_header" slot="label">
+              Table Name
+            </h2>
             <TextInput bind:value={tableName} />
           </LabeledInput>
 
@@ -359,7 +361,9 @@
           </div>
 
           <div class="help-content">
-            <h2 class="large_header extra_bold_header">Column names and data types</h2>
+            <h2 class="large_header extra_bold_header">
+              Column names and data types
+            </h2>
             <p>
               Column names and data types are automatically detected, use the
               controls in the preview table to review and update them if
