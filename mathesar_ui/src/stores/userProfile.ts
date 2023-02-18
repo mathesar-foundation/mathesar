@@ -132,9 +132,11 @@ export function getUserProfileStoreFromContext(): UserProfileStore | undefined {
   return getContext<UserProfileStore>(contextKey);
 }
 
-export function setUserProfileStoreInContext(user: User): void {
+export function setUserProfileStoreInContext(user: User): UserProfileStore {
   if (getUserProfileStoreFromContext() !== undefined) {
     throw Error('User profile store context has already been set');
   }
-  setContext(contextKey, new UserProfileStore(new UserProfile(user)));
+  const userProfile = new UserProfileStore(new UserProfile(user));
+  setContext(contextKey, userProfile);
+  return userProfile;
 }
