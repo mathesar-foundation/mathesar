@@ -81,19 +81,16 @@ export class UserModel {
     return this.schemaRoles.get(schema.id);
   }
 
-  hasDbAccess(database: Pick<Database, 'id'>) {
-    return this.databaseRoles.has(database.id) || this.isSuperUser;
+  hasDirectDbAccess(database: Pick<Database, 'id'>) {
+    return this.databaseRoles.has(database.id);
   }
 
-  hasSchemaAccess(
-    database: Pick<Database, 'id'>,
-    schema: Pick<SchemaEntry, 'id'>,
-  ) {
-    return (
-      this.schemaRoles.has(schema.id) ||
-      this.databaseRoles.has(database.id) ||
-      this.isSuperUser
-    );
+  hasDbAccess(database: Pick<Database, 'id'>) {
+    return this.hasDirectDbAccess(database) || this.isSuperUser;
+  }
+
+  hasDirectSchemaAccess(schema: Pick<SchemaEntry, 'id'>) {
+    return this.schemaRoles.has(schema.id);
   }
 
   getDisplayName(): string {
@@ -131,6 +128,22 @@ export class UserModel {
       ...this.getUser(),
       database_roles: [...this.databaseRoles.values()].filter(
         (entry) => entry.database !== dbRole.database,
+      ),
+    });
+  }
+
+  withNewSchemaRole(schemaRole: SchemaRole) {
+    return new UserModel({
+      ...this.getUser(),
+      schema_roles: [...this.schemaRoles.values(), schemaRole],
+    });
+  }
+
+  withoutSchemaRole(schemaRole: Pick<SchemaRole, 'schema'>) {
+    return new UserModel({
+      ...this.getUser(),
+      schema_roles: [...this.schemaRoles.values()].filter(
+        (entry) => entry.schema !== schemaRole.schema,
       ),
     });
   }
@@ -246,6 +259,43 @@ class WritableUsersStore {
     }
   }
 
+  async addSchemaRoleForUser(
+    userId: number,
+    schema: Pick<SchemaEntry, 'id'>,
+    role: UserRole,
+  ) {
+    const schemaRole = await userApi.addSchemaRole(userId, schema.id, role);
+    this.users.update((users) =>
+      users.map((user) => {
+        if (user.id === userId) {
+          return user.withNewSchemaRole(schemaRole);
+        }
+        return user;
+      }),
+    );
+    void this.fetchUsersSilently();
+  }
+
+  async removeSchemaAccessForUser(
+    userId: number,
+    schema: Pick<SchemaEntry, 'id'>,
+  ) {
+    const user = get(this.users).find((entry) => entry.id === userId);
+    const schemaRole = user?.getRoleForSchema(schema);
+    if (schemaRole) {
+      await userApi.deleteSchemaRole(schemaRole.id);
+      this.users.update((users) =>
+        users.map((entry) => {
+          if (entry.id === userId) {
+            return entry.withoutSchemaRole(schemaRole);
+          }
+          return entry;
+        }),
+      );
+      void this.fetchUsersSilently();
+    }
+  }
+
   getUsersWithAccessToDb(database: Pick<Database, 'id'>) {
     return derived(this.users, ($users) =>
       $users.filter((user) => user.hasDbAccess(database)),
@@ -258,12 +308,19 @@ class WritableUsersStore {
     );
   }
 
-  getUsersWithAccessToSchema(
-    database: Pick<Database, 'id'>,
-    schema: Pick<SchemaEntry, 'id'>,
-  ) {
+  getNormalUsersWithDirectSchemaRole(schema: Pick<SchemaEntry, 'id'>) {
     return derived(this.users, ($users) =>
-      $users.filter((user) => user.hasSchemaAccess(database, schema)),
+      $users.filter(
+        (user) => !user.isSuperUser && user.hasDirectSchemaAccess(schema),
+      ),
+    );
+  }
+
+  getNormalUsersWithoutDirectSchemaRole(schema: Pick<SchemaEntry, 'id'>) {
+    return derived(this.users, ($users) =>
+      $users.filter(
+        (user) => !user.isSuperUser && !user.hasDirectSchemaAccess(schema),
+      ),
     );
   }
 }

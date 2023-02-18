@@ -87,6 +87,22 @@ function deleteDatabaseRole(roleId: DatabaseRole['id']) {
   return deleteAPI(`/api/ui/v0/database_roles/${roleId}/`);
 }
 
+function addSchemaRole(
+  userId: User['id'],
+  schemaId: SchemaEntry['id'],
+  role: UserRole,
+) {
+  return postAPI<SchemaRole>('/api/ui/v0/schema_roles/', {
+    user: userId,
+    schema: schemaId,
+    role,
+  });
+}
+
+function deleteSchemaRole(roleId: SchemaRole['id']) {
+  return deleteAPI(`/api/ui/v0/schema_roles/${roleId}/`);
+}
+
 export default {
   list,
   get,
@@ -97,4 +113,6 @@ export default {
   resetPassword,
   addDatabaseRole,
   deleteDatabaseRole,
+  addSchemaRole,
+  deleteSchemaRole,
 };
