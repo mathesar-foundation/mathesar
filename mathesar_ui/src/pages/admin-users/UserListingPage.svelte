@@ -44,7 +44,7 @@
   {#if $requestStatus?.state === 'processing'}
     <p>Loading...</p>
   {:else if $requestStatus?.state === 'success'}
-    <h1>
+    <h1 class="normal_bold_header ultra_large_header">
       Users ({filteredUsers.length})
     </h1>
     <div class="user-search-container">
@@ -107,8 +107,6 @@
   }
 
   h1 {
-    font-size: var(--text-size-ultra-large);
-    font-weight: normal;
     margin: 0;
   }
 
