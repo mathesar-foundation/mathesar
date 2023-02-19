@@ -1,12 +1,9 @@
 <script lang="ts">
-  import { router } from 'tinro';
-
   import {
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
   import { upgradeApi } from '@mathesar/api/upgrade';
-  import { ADMIN_UPDATE_PAGE_URL } from '@mathesar/routes/urls';
   import type { Release } from '@mathesar/stores/releases';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
@@ -45,7 +42,7 @@
     state = { status: 'processing' };
     try {
       await upgradeApi.upgrade();
-      router.goto(ADMIN_UPDATE_PAGE_URL);
+      window.location.reload();
     } catch (e) {
       state = { status: 'error', errorMsg: getErrorMessage(e) };
     }
