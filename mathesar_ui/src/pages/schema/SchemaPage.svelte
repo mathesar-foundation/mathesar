@@ -18,6 +18,8 @@
   } from '@mathesar/routes/urls';
   import { States } from '@mathesar/api/utils/requestUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { onMount } from 'svelte';
+  import { logEvent } from '@mathesar/utils/telemetry';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
@@ -81,6 +83,13 @@
   }
 
   $: isDefault = schema.name === 'public';
+  onMount(async () => {
+    logEvent('opened_schema', {
+      database_name: database.name,
+      schema_name: schema.name,
+      page: 'schema',
+    });
+  });
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
