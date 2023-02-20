@@ -1,5 +1,5 @@
 import django.db.models
-from django.db.models import Case, When, Value, F, Q, Count
+from django.db.models import Case, When, Value, Q
 from rest_access_policy import PermittedSlugRelatedField
 from rest_framework import serializers
 from mathesar.models.users import Role
