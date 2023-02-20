@@ -40,6 +40,10 @@
   $: schemasMap = $schemasStore.data;
 
   $: canExecuteDDL = userProfile?.hasPermission({ database }, 'canExecuteDDL');
+  $: canEditPermissions = userProfile?.hasPermission(
+    { database },
+    'canEditPermissions',
+  );
 
   let filterQuery = '';
   let targetSchema: SchemaEntry | undefined;
@@ -103,16 +107,20 @@
     }}
   >
     <svelte:fragment slot="action">
-      {#if canExecuteDDL}
+      {#if canExecuteDDL || canEditPermissions}
         <div>
-          <Button on:click={addSchema} appearance="primary">
-            <Icon {...iconAddNew} />
-            <span>Create Schema</span>
-          </Button>
-          <Button on:click={manageAccess} appearance="secondary">
-            <Icon {...iconManageAccess} />
-            <span>Manage Access</span>
-          </Button>
+          {#if canExecuteDDL}
+            <Button on:click={addSchema} appearance="primary">
+              <Icon {...iconAddNew} />
+              <span>Create Schema</span>
+            </Button>
+          {/if}
+          {#if canEditPermissions}
+            <Button on:click={manageAccess} appearance="secondary">
+              <Icon {...iconManageAccess} />
+              <span>Manage Access</span>
+            </Button>
+          {/if}
         </div>
       {/if}
     </svelte:fragment>

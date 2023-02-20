@@ -38,6 +38,10 @@
   $: canEditMetadata =
     userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
     false;
+  $: canEditPermissions = userProfile?.hasPermission(
+    { database, schema },
+    'canEditPermissions',
+  );
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
@@ -111,7 +115,7 @@
           <span>Edit Schema</span>
         </Button>
       {/if}
-      {#if canExecuteDDL}
+      {#if canEditPermissions}
         <Button on:click={manageAccess} appearance="secondary">
           <Icon {...iconManageAccess} />
           <span>Manage Access</span>
