@@ -70,6 +70,11 @@ export class UserModel {
         return roleAllowsOperation(userDatabaseRole.role, operation);
       }
     }
+    if (schema && !database) {
+      throw new Error(
+        'Schema needs to be accompanied by the database for permission checks',
+      );
+    }
     return false;
   }
 
