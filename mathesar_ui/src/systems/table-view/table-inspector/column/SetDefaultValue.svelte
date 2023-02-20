@@ -15,27 +15,14 @@
   $: ({ columnsDataStore, recordsData } = $tabularData);
   $: ({ recordSummaries } = recordsData);
 
-  $: initialValue = column.column.default?.value;
+  $: initialValue = column.column.default?.value ?? column.initialInputValue;
   $: value = initialValue;
-
-  /**
-   * `value` is being passed to different types
-   * of input components by the `DynamicInput` component.
-   * All components when passed `value={undefined}` let it be undefined
-   * but input and textarea change it to empty string
-   * which makes the check `value===initialValue` to fail
-   * hence the sanitization.
-   */
-  $: sanitizedValue = value === '' ? undefined : value;
-
-  /**
-   * Not using strict equality here since
-   * numbers are being sent as string to the backend
-   * but the initialValue from BE is always of the
-   * correct data type.
-   */
-  // eslint-disable-next-line eqeqeq
-  $: actionButtonsVisible = sanitizedValue != initialValue;
+  $: actionButtonsVisible = (() => {
+    if (typeof value === 'object') {
+      return JSON.stringify(value) !== JSON.stringify(initialValue);
+    }
+      return String(value) !== String(initialValue);
+  })();
 
   $: recordSummary = $recordSummaries
     .get(String(column.id))
