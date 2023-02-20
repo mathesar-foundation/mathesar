@@ -11,13 +11,13 @@ class SchemaRoleAccessPolicy(AccessPolicy):
     statements = [
         {
             'action': ['list', 'retrieve', 'create'],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
         },
         # Only superuser or schema/database manager can delete the role
         {
             'action': ['destroy', 'update', 'partial_update'],
-            'principal': ['*'],
+            'principal': ['authenticated'],
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_schema_manager)']
         },
@@ -25,7 +25,7 @@ class SchemaRoleAccessPolicy(AccessPolicy):
 
     @classmethod
     def scope_queryset(cls, request, qs):
-        if not request.user.is_superuser:
+        if not (request.user.is_superuser or request.user.is_anonymous):
             allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
             databases_with_view_access = Database.objects.filter(
                 Q(database_role__role__in=allowed_roles) & Q(database_role__user=request.user)
