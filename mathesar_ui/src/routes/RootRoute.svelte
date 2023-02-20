@@ -40,4 +40,8 @@
   <Route path="/:databaseName/*" let:meta firstmatch>
     <DatabaseRoute databaseName={meta.params.databaseName} />
   </Route>
+
+  <Route fallback>
+    <ErrorPage>404: Page not found</ErrorPage>
+  </Route>
 </Route>
