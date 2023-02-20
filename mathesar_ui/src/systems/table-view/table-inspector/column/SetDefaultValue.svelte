@@ -21,7 +21,7 @@
     if (typeof value === 'object') {
       return JSON.stringify(value) !== JSON.stringify(initialValue);
     }
-      return String(value) !== String(initialValue);
+    return String(value) !== String(initialValue);
   })();
 
   $: recordSummary = $recordSummaries
