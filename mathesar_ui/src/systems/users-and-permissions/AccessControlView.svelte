@@ -17,9 +17,13 @@
   import type { UserModel } from '@mathesar/stores/users';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import AccessControlRow from './AccessControlRow.svelte';
 
   const roles: UserRole[] = ['viewer', 'editor', 'manager'];
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: userProfile = $userProfileStore;
 
   export let usersWithAccess: Readable<UserModel[]>;
   export let usersWithoutAccess: Readable<UserModel[]>;
@@ -30,6 +34,10 @@
   export let removeAccessForUser: (user: UserModel) => Promise<void>;
   export let accessControlObject: 'database' | 'schema';
   export let getUserRoles: (user: UserModel) => ObjectRoleMap | undefined;
+
+  $: usersAllowedToBeAdded = $usersWithoutAccess.filter(
+    (user) => user.id !== userProfile?.id,
+  );
 
   let isRequestInProcess = false;
   let showAddForm = false;
@@ -74,7 +82,7 @@
         <LabeledInput label="User" layout="stacked">
           <Select
             autoSelect="none"
-            options={$usersWithoutAccess}
+            options={usersAllowedToBeAdded}
             bind:value={user}
             disabled={isRequestInProcess}
             let:option
@@ -126,6 +134,7 @@
   <div class="list">
     {#each $usersWithAccess as userWithAccess}
       <AccessControlRow
+        {userProfile}
         {getUserRoles}
         userModel={userWithAccess}
         {accessControlObject}
@@ -167,6 +176,9 @@
     }
     .list {
       margin-top: var(--size-base);
+      display: grid;
+      grid-template-columns: 6fr auto 2.1rem;
+      align-items: center;
     }
   }
   .no-users {
