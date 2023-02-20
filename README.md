@@ -54,18 +54,17 @@ docker-compose --profile dev up
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. 
 
-To access Mathesar, you'll need to create a superuser account. Run:
-```
-docker exec -it mathesar_service_dev python manage.py createsuperuser
-```
+To get the UI working, you need to login at
 
-You'll be prompted for the user details. Specify the username and password for the superuser. For eg.,
-```
-Username: admin
-Password: password
-```
+`http://localhost:8000/auth/login/`
 
-Now, navigate to `http://localhost:8000` on your browser, and login with the credentials of the newly created superuser.
+with username:
+
+`admin` 
+
+and password:
+
+`password` 
 
 If you'd prefer to develop using the Django Rest Framework browsable API, you can use the login functionality at the top right with the same username and password. If you prefer a non-browser tool for API development, you'll have to:
 - Use browser to execute one of the methods above, then
