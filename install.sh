@@ -2,150 +2,201 @@
 set -e
 clear -x
 github_tag=${1-master}
+min_maj_docker_version=20
+min_maj_docker_compose_version=2
+min_min_docker_compose_version=7
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 Welcome to the Mathesar installer for version %s!
+
+For more information or explanation about the steps involved, please see:
+
+https://docs.mathesar.org/installation/docker-compose/#installation-steps
+
+--------------------------------------------------------------------------------
+
 " "$github_tag"
-
-config_location=$HOME/.config/mathesar
+read -r -p "Press ENTER to begin. "
+clear -x
 
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
-We begin by creating a directory on your system where we can put some files for
-Mathesar to use.
+DOCKER VERSION CHECK
 
-Creating directory for Mathesar at %s...
-" "$config_location"
-mkdir -p "$config_location"
-cd "$config_location"
-printf "
-********************************************************************************
+We'll begin by making sure your Docker installation is up-to-date.  In order to
+run Docker commands, we need to use sudo for elevated privileges.
 
-We need to download the main docker-compose config file from Mathesar's git
-repo. This file defines the different docker containers used by Mathesar, and
-how they're networked together. This file will live at
-
-%s/docker-compose.yml.
-
-Downloading docker-compose.yml...
-" "$config_location"
-wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
-printf "
-********************************************************************************
-
-In order to keep Mathesar's web server secure, we'll randomly generate a secret
-key. It's not necessary for you to know this secret, since it's just for
-internal Mathesar use.
-
-Generating secret key...
-"
-secret_key=$(tr -dc 'a-z0-9!@#$%^&*(-_=+)\\' < /dev/urandom | head -c50)
-printf "\
-Secret key generated successfully.
-"
-printf "
-********************************************************************************
-
-Now, you'll create credentials for a database where Mathesar can store metadata.
-Metadata is for internal Mathesar use, and includes things like Table display
-options, user information, and so on. The credentials you create here can be
-used if you want to log directly into your database using psql or some other
-PostgreSQL client.
+--------------------------------------------------------------------------------
 
 "
-read -r -p "Enter a username for the system database: " db_username
-read -rs -p "Enter a password for the user: " db_password
+sudo -k
+sudo -v
+docker_version=$(sudo docker version -f '{{.Server.Version}}')
+docker_compose_version=$(sudo docker compose version --short)
+printf "
+Your Docker version is %s.
+Your Docker Compose version is %s.
+" "$docker_version" "$docker_compose_version"
+
+docker_maj_version=$(echo "$docker_version" | tr -d '[:alpha:]' | cut -d '.' -f 1)
+docker_compose_maj_version=$(echo "$docker_compose_version" | tr -d '[:alpha:]' | cut -d '.' -f 1)
+docker_compose_min_version=$(echo "$docker_compose_version" | tr -d '[:alpha:]' | cut -d '.' -f 2)
+
+if [ "$docker_maj_version" -lt "$min_maj_docker_version" ]; then
+  printf "
+Docker must be at least version %s.0.0 and
+Docker Compose must be at least version %s.%s.0!
+Please upgrade.
+
+" "$min_maj_docker_version" "$min_maj_docker_compose_version" "$min_min_docker_compose_version"
+  exit 1
+fi
+
+if [ "$docker_compose_maj_version" -lt "$min_maj_docker_compose_version" ]; then
+  printf "
+Docker Compose must be at least version %s.%s.0! Please upgrade.
+
+" "$min_maj_docker_compose_version" "$min_min_docker_compose_version"
+  exit 1
+elif [ "$docker_compose_maj_version" -eq "$min_maj_docker_compose_version" ] &&
+[ "$docker_compose_min_version" -lt "$min_min_docker_compose_version" ]; then
+  printf "
+Docker Compose must be at least version %s.%s.0! Please upgrade.
+
+" "$min_maj_docker_compose_version" "$min_min_docker_compose_version"
+  exit 1
+fi
+
+printf "
+Docker versions ok.
+
+"
+read -r -p "Press ENTER to continue. "
+clear -x
+
+printf "
+--------------------------------------------------------------------------------
+
+DATABASE CONFIGURATION
+
+Here, we configure the PostgreSQL database(s) for Mathesar. These credentials
+can be used to login directly using psql or another client.
+
+--------------------------------------------------------------------------------
+
+"
+read -r -p "Choose a database name [mathesar]: " db_name
+db_name=${db_name:-mathesar}
+
+read -r -p "Choose a username [mathesar]: " db_username
+db_username=${db_username:-mathesar}
+
+read -rs -p "Choose a password for the user: " db_password
+until [ -n "$db_password" ]; do
+  printf "\nThe password cannot be empty!\n"
+  read -rs -p "Choose a password for the user: " db_password
+done
 printf "\n"
 read -rs -p "Repeat the password: " db_password_check
 while [ "$db_password" != "$db_password_check" ]; do
   printf "\nPasswords do not match! Try again.\n"
-  read -rs -p "Enter a password for the user: " db_password
+  read -rs -p "Choose a password for the user: " db_password
+  until [ -n "$db_password" ]; do
+    printf "\nThe password cannot be empty!\n"
+    read -rs -p "Choose a password for the user: " db_password
+  done
   printf "\n"
   read -rs -p "Repeat the password: " db_password_check
 done
-
-printf "
-
-********************************************************************************
-
-If you have a PostgreSQL database already running on this machine you may need
-to choose a custom port for Mathesar's database to avoid conflict. If you're not
-sure, just press ENTER to use the default port of 5432.
-
-"
-read -r -p "Enter a port for the database [5432]: " db_port
+printf "\n"
+read -r -p "Choose a port for local database access [5432]: " db_port
 db_port=${db_port:-5432}
 
-printf "
-********************************************************************************
-
-If you're planning to allow access to your Mathesar installation from the
-internet, we need to configure the domain where you'll host Mathesar. This is
-not needed if you're running Mathesar on your local machine, or local network.
-
-"
-read -r -p "Enter the domain, or press ENTER to skip: " allowed_hosts
-allowed_hosts=${allowed_hosts:-*}
-
-printf "
-********************************************************************************
-
-Next, you'll set up an admin user for your Mathesar installation. This user will
-be able to create other, less-privileged users after the installation is
-complete. You'll use these credentials to login to Mathesar in the web interface
-for the first time. This username and password could be different from the
-system database user you created above, or you can use the same details.
-
-"
-read -r -p "Enter the admin username: " superuser_username
-superuser_email=$superuser_username@example.com
-read -r -s -p "Enter the admin password: " superuser_password
 printf "\n"
-read -r -s -p "Repeat the password: " superuser_password_check
+clear -x
+printf "
+--------------------------------------------------------------------------------
+
+WEBSERVER CONFIGURATION
+
+Here, we set up details of the Mathesar webserver.
+
+--------------------------------------------------------------------------------
+
+"
+
+read -r -p "Choose a domain for the webserver, or press ENTER to skip: " allowed_hosts
+allowed_hosts=${allowed_hosts:-*}
+read -r -p "Choose an http port for the webserver to use [80]: " http_port
+http_port=${http_port:-80}
+read -r -p "Choose an https port for the webserver to use [443]: " https_port
+https_port=${https_port:-443}
+printf "Generating Django secret key...
+"
+secret_key=$(base64 -w 0 /dev/urandom | head -c50)
+
+printf "\n"
+clear -x
+printf "
+--------------------------------------------------------------------------------
+
+ADMIN USER CONFIGURATION
+
+You'll use these credentials to login to Mathesar in the web interface for the
+first time.
+
+--------------------------------------------------------------------------------
+
+"
+
+read -r -p "Choose an admin username [mathesar]: " superuser_username
+superuser_username=${superuser_username:-mathesar}
+superuser_email=$superuser_username@example.com
+read -rs -p "Choose a password for the admin user: " superuser_password
+until [ -n "$superuser_password" ]; do
+  printf "\nThe password cannot be empty!\n"
+  read -rs -p "Choose a password for the admin user: " superuser_password
+done
+printf "\n"
+read -rs -p "Repeat the password: " superuser_password_check
 while [ "$superuser_password" != "$superuser_password_check" ]; do
   printf "\nPasswords do not match! Try again.\n"
-  read -rs -p "Enter the admin password: " superuser_password
+  read -rs -p "Choose a password for the admin user: " superuser_password
+  until [ -n "$superuser_password" ]; do
+    printf "\nThe password cannot be empty!\n"
+    read -rs -p "Choose a password for the admin user: " superuser_password
+  done
   printf "\n"
   read -rs -p "Repeat the password: " superuser_password_check
 done
 
+printf "\n"
+clear -x
 printf "
+--------------------------------------------------------------------------------
 
-********************************************************************************
+CONFIGURATION DIRECTORY
 
-Now, we need to configure a name for your new Mathesar database. This will let
-you identify which database is associated with Mathesar if you login to
-PostgreSQL using a different client (such as psql). N.B. This is different from
-the database you configured above, but uses the same username and password.
+Mathesar needs to create a configuration directory on your machine. Using the
+default is strongly recommended. If you choose a custom location, write it down.
+
+--------------------------------------------------------------------------------
 
 "
-read -r -p "Please enter a name for the database [mathesar]: " db_name
-db_name=${db_name:-mathesar}
-printf "
-
-********************************************************************************
-
-Next, we configure some details of the webserver that lets your browser connect
-to Mathesar. If you're not sure, just press ENTER to use the defaults.
-
-"
-read -r -p "Enter the http port for the Mathesar webserver to use [80]: " http_port
-http_port=${http_port:-80}
-read -r -p "Enter the https port for the Mathesar webserver to use [443]: " https_port
-https_port=${https_port:-443}
+read -r -p "Choose a configuration directory [/etc/mathesar]: " config_location
+config_location="${config_location:-/etc/mathesar}"
 
 printf "
+Installing environment file at %s/.env
 
-********************************************************************************
-
-We'll store a file with the configurations you've defined so far at:
-
-%s/.env
 " "$config_location"
 
-cat > .env <<EOF
+read -r -p "Press ENTER to continue. "
+sudo mkdir -p "$config_location"
+cd "$config_location"
+sudo tee .env > /dev/null <<EOF
 POSTGRES_USER='$db_username'
 POSTGRES_PASSWORD='$db_password'
 POSTGRES_HOST='$db_port'
@@ -158,47 +209,51 @@ DJANGO_SUPERUSER_PASSWORD='$superuser_password'
 HTTP_PORT='$http_port'
 HTTPS_PORT='$https_port'
 EOF
-printf "
-********************************************************************************
+clear -x
 
-The next steps involve Docker. In order to run Docker commands, we need to use
-sudo (for elevated privileges). If your system sudoers policy allows the caching
-of sudo credentials, we'll do so. Otherwise, we'll ask for a password for each
-relevant Docker command.
+printf "
+--------------------------------------------------------------------------------
+
+DOCKER SETUP
+
+This step download and run all needed Docker images and start your Mathesar
+installation.
+
+--------------------------------------------------------------------------------
 
 "
-sudo -v
-printf "
-Pulling docker images...
-
+printf "Downloading docker-compose.yml...
 "
-sudo docker compose --profile prod pull
-printf "
-Starting the docker containers...
-
-"
+sudo wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
+printf "Success!"
+clear -x
 sudo docker compose --profile prod up -d --wait
+clear -x
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 Service is ready and healthy!
-
-********************************************************************************
-
 Adding admin user to Django webservice now.
 "
 sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email" 2> >(grep -vi warn)
+read -r -p "Press ENTER to continue. "
+printf "\n"
+clear -x
+if [ "$allowed_hosts" !=  '*' ]; then
+  padded_domain=" $allowed_hosts"
+fi
 printf "
-********************************************************************************
+--------------------------------------------------------------------------------
 
 Installation complete!
 
-If running locally, you can access Mathesar by navigating to http://localhost
-in your web browser.
+If running locally, you can login by navigating to http://localhost in your
+web browser. If you set up Mathesar on a server, double-check that the
+machine accepts traffic on the configured ports, and login at the configured
+domain%s.
 
-Thank you for installing Mathesar!
+Thank you for installing Mathesar.
 
-********************************************************************************
-
-
-"
+" "$padded_domain"
+read -r -p "Press ENTER to finish. "
+clear -x
