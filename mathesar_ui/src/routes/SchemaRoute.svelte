@@ -8,16 +8,23 @@
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import DataExplorerRoute from './DataExplorerRoute.svelte';
   import TableRoute from './TableRoute.svelte';
   import ImportRoute from './ImportRoute.svelte';
   import ExplorationRoute from './ExplorationRoute.svelte';
+
+  const userProfile = getUserProfileStoreFromContext();
 
   export let database: Database;
   export let schemaId: number;
 
   $: $currentSchemaId = schemaId;
   $: schema = $schemas.data.get(schemaId);
+  $: canExecuteDDL = $userProfile?.hasPermission(
+    { database, schema },
+    'canExecuteDDL',
+  );
 
   function handleUnmount() {
     $currentSchemaId = undefined;
@@ -29,9 +36,11 @@
 {#if schema}
   <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
 
-  <Route path="/import/*" firstmatch>
-    <ImportRoute {database} {schema} />
-  </Route>
+  {#if canExecuteDDL}
+    <Route path="/import/*" firstmatch>
+      <ImportRoute {database} {schema} />
+    </Route>
+  {/if}
 
   <Route path="/tables/:tableId/*" let:meta firstmatch>
     <TableRoute
