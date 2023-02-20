@@ -43,7 +43,7 @@ def drop_all_stale_databases(force=False, max_days=3, *args, **kwargs):
         'template0',
         'template1'
     ]
-    stale_databases = Database.objects.filter(created_at__lt=now() - timedelta(minutes=max_days))
+    stale_databases = Database.objects.filter(created_at__lt=now() - timedelta(days=max_days))
     deleted_databases = []
     for database in stale_databases:
         if database.name not in excluded_databases and database.deleted is False:

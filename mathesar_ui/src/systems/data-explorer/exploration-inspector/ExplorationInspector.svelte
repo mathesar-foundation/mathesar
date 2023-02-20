@@ -62,7 +62,7 @@
     :global(.section-content .labeled-input .label) {
       font-weight: 590;
     }
-    :global(.collapsible > button.btn) {
+    :global(.collapsible > .collapsible-header > button.btn) {
       background-color: var(--sand-200);
 
       &:hover {
@@ -73,7 +73,10 @@
         background-color: var(--sand-400);
       }
     }
-    :global(.collapsible > button.btn .collapsible-header-title) {
+    :global(.collapsible
+        > .collapsible-header
+        > button.btn
+        .collapsible-header-title) {
       font-weight: 590;
     }
     :global(.collapsible .section-content.actions .delete-button) {

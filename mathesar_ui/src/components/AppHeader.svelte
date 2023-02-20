@@ -26,7 +26,7 @@
     LOGOUT_URL,
     ADMIN_URL,
   } from '@mathesar/routes/urls';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import { createTable } from '@mathesar/stores/tables';
   import { router } from 'tinro';
   import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
@@ -36,7 +36,11 @@
   const userProfile = getUserProfileStoreFromContext();
 
   $: database = $currentDatabase;
-  $: schema = $currentSchemaId;
+  $: schema = $currentSchema;
+  $: canExecuteDDL = $userProfile?.hasPermission(
+    { database, schema },
+    'canExecuteDDL',
+  );
 
   let isCreatingNewEmptyTable = false;
 
@@ -45,9 +49,9 @@
       return;
     }
     isCreatingNewEmptyTable = true;
-    const tableInfo = await createTable(schema, {});
+    const tableInfo = await createTable(schema.id, {});
     isCreatingNewEmptyTable = false;
-    router.goto(getTablePageUrl(database.name, schema, tableInfo.id), false);
+    router.goto(getTablePageUrl(database.name, schema.id, tableInfo.id), false);
   }
 </script>
 
@@ -68,18 +72,20 @@
           <span class="icon"><Icon {...iconShortcuts} /></span>
           <span class="text">Shortcuts</span>
         </span>
-        <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
-          New Table from Scratch
-        </ButtonMenuItem>
-        <LinkMenuItem
-          icon={iconAddNew}
-          href={getImportPageUrl(database?.name, schema)}
-        >
-          New Table from Data Import
-        </LinkMenuItem>
+        {#if canExecuteDDL}
+          <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
+            New Table from Scratch
+          </ButtonMenuItem>
+          <LinkMenuItem
+            icon={iconAddNew}
+            href={getImportPageUrl(database.name, schema.id)}
+          >
+            New Table from Data Import
+          </LinkMenuItem>
+        {/if}
         <LinkMenuItem
           icon={iconExploration}
-          href={getDataExplorerPageUrl(database?.name, schema)}
+          href={getDataExplorerPageUrl(database.name, schema.id)}
         >
           Open Data Explorer
         </LinkMenuItem>
@@ -109,9 +115,11 @@
         {$userProfile?.getDisplayName() ?? 'User profile'}
       </LinkMenuItem>
       <MenuDivider />
-      <LinkMenuItem icon={iconSettingsMajor} href={ADMIN_URL}>
-        Administration
-      </LinkMenuItem>
+      {#if $userProfile?.isSuperUser}
+        <LinkMenuItem icon={iconSettingsMajor} href={ADMIN_URL}>
+          Administration
+        </LinkMenuItem>
+      {/if}
       <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
         Log Out
       </LinkMenuItem>

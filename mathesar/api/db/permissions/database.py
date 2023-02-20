@@ -12,14 +12,14 @@ class DatabaseAccessPolicy(AccessPolicy):
     statements = [
         {
             'action': ['list', 'retrieve', 'types', 'functions'],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
         }
     ]
 
     @classmethod
     def scope_queryset(cls, request, qs):
-        if not request.user.is_superuser:
+        if not (request.user.is_superuser or request.user.is_anonymous):
             allowed_roles = (Role.MANAGER.value,)
             if request.method.lower() == 'get':
                 allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
