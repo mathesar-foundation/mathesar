@@ -50,9 +50,17 @@
     />
   </Route>
 
+  <Route path="/explorations/:queryId" let:meta firstmatch>
+    <ExplorationRoute
+      {database}
+      {schema}
+      queryId={parseInt(meta.params.queryId, 10)}
+    />
+  </Route>
+
   <MultiPathRoute
     paths={[
-      { name: 'edit-exploration', path: '/explorations/edit/:queryId' },
+      { name: 'edit-exploration', path: '/explorations/:queryId/edit/' },
       { name: 'new-exploration', path: '/data-explorer/' },
     ]}
     let:path
@@ -66,14 +74,6 @@
         : undefined}
     />
   </MultiPathRoute>
-
-  <Route path="/explorations/:queryId" let:meta firstmatch>
-    <ExplorationRoute
-      {database}
-      {schema}
-      queryId={parseInt(meta.params.queryId, 10)}
-    />
-  </Route>
 
   <MultiPathRoute
     paths={[
