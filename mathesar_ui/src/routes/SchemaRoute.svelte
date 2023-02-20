@@ -25,6 +25,15 @@
     { database, schema },
     'canExecuteDDL',
   );
+  $: canEditMetadata = $userProfile?.hasPermission(
+    { database, schema },
+    'canEditMetadata',
+  );
+
+  const newExplorationRoute = {
+    name: 'new-exploration',
+    path: '/data-explorer/',
+  };
 
   function handleUnmount() {
     $currentSchemaId = undefined;
@@ -59,10 +68,12 @@
   </Route>
 
   <MultiPathRoute
-    paths={[
-      { name: 'edit-exploration', path: '/explorations/:queryId/edit/' },
-      { name: 'new-exploration', path: '/data-explorer/' },
-    ]}
+    paths={canEditMetadata
+      ? [
+          { name: 'edit-exploration', path: '/explorations/:queryId/edit/' },
+          newExplorationRoute,
+        ]
+      : [newExplorationRoute]}
     let:path
     let:meta
   >
