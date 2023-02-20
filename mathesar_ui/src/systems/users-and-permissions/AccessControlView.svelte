@@ -6,6 +6,7 @@
     SpinnerButton,
     Button,
     Icon,
+    Help,
   } from '@mathesar-component-library';
   import { iconAddNew } from '@mathesar/icons';
   import type { UserRole } from '@mathesar/api/users';
@@ -113,7 +114,15 @@
   {/if}
 </div>
 <div class="users-with-access">
-  <div class="header">Users with access</div>
+  <div class="header">
+    <span>Users with access</span>
+    {#if accessControlObject === 'schema'}
+      <Help>
+        If a user has different access levels on the database and the schema,
+        the access level of schema will take precedence.
+      </Help>
+    {/if}
+  </div>
   <div class="list">
     {#each $usersWithAccess as userWithAccess}
       <AccessControlRow
