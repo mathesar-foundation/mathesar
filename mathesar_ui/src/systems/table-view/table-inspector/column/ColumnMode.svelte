@@ -4,6 +4,9 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import RenameColumn from './RenameColumn.svelte';
   import ColumnActions from './ColumnActions.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
@@ -14,6 +17,10 @@
   import SetDefaultValue from './SetDefaultValue.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
+  const userProfile = getUserProfileStoreFromContext();
+
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
   $: ({ processedColumns, selection } = $tabularData);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
   $: selectedColumns = (() => {
@@ -32,6 +39,15 @@
   })();
   /** When only one column is selected */
   $: column = selectedColumns.length === 1 ? selectedColumns[0] : undefined;
+
+  $: canExecuteDDL = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canExecuteDDL',
+  );
+  $: canEditMetadata = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canEditMetadata',
+  );
 </script>
 
 <div class="column-mode-container">
@@ -57,6 +73,7 @@
           <RenameColumn
             {column}
             columnsDataStore={$tabularData.columnsDataStore}
+            {canExecuteDDL}
           />
           {#if column.column.primary_key}
             <ColumnTypeSpecifierTag {column} type="primaryKey" />
@@ -68,6 +85,7 @@
               {column}
               columnsDataStore={$tabularData.columnsDataStore}
               constraintsDataStore={$tabularData.constraintsDataStore}
+              {canExecuteDDL}
             />
           {/if}
         </div>
@@ -82,7 +100,7 @@
           isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
-          <ColumnType {column} />
+          <ColumnType {column} {canExecuteDDL} />
         </div>
       </Collapsible>
     {/if}
@@ -95,7 +113,7 @@
           isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
-          <SetDefaultValue {column} />
+          <SetDefaultValue {column} {canExecuteDDL} />
         </div>
       </Collapsible>
     {/if}
@@ -105,7 +123,7 @@
         <CollapsibleHeader slot="header" title="Formatting" />
         <div slot="content" class="content-container">
           {#key column}
-            <ColumnFormatting {column} />
+            <ColumnFormatting {column} {canEditMetadata} />
           {/key}
         </div>
       </Collapsible>
@@ -127,12 +145,14 @@
       {/if}
     {/if}
 
-    <Collapsible isOpen triggerAppearance="plain">
-      <CollapsibleHeader slot="header" title="Actions" />
-      <div slot="content" class="content-container">
-        <ColumnActions columns={selectedColumns} />
-      </div>
-    </Collapsible>
+    {#if canExecuteDDL}
+      <Collapsible isOpen triggerAppearance="plain">
+        <CollapsibleHeader slot="header" title="Actions" />
+        <div slot="content" class="content-container">
+          <ColumnActions columns={selectedColumns} />
+        </div>
+      </Collapsible>
+    {/if}
   {/if}
 </div>
 

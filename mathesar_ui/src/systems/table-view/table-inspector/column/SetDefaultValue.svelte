@@ -9,13 +9,21 @@
   import { toast } from '@mathesar/stores/toast';
 
   export let column: ProcessedColumn;
+  export let canExecuteDDL: boolean;
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore, recordsData } = $tabularData);
   $: ({ recordSummaries } = recordsData);
 
-  $: value = column.column.default?.value;
-  $: actionButtonsVisible = value !== column.column.default?.value;
+  $: initialValue = column.column.default?.value ?? column.initialInputValue;
+  $: value = initialValue;
+  $: actionButtonsVisible = (() => {
+    if (typeof value === 'object') {
+      return JSON.stringify(value) !== JSON.stringify(initialValue);
+    }
+    return String(value) !== String(initialValue);
+  })();
+
   $: recordSummary = $recordSummaries
     .get(String(column.id))
     ?.get(String(value));
@@ -23,7 +31,7 @@
   let typeChangeState: RequestStatus;
 
   function resetValue() {
-    value = column.column.default?.value;
+    value = initialValue;
   }
 
   async function save() {
@@ -60,6 +68,8 @@
       });
     }
   }
+
+  $: disabled = !canExecuteDDL || typeChangeState?.state === 'processing';
 </script>
 
 <div class="default-value-container">
@@ -67,7 +77,7 @@
   <DynamicInput
     componentAndProps={column.inputComponentAndProps}
     bind:value
-    disabled={typeChangeState?.state === 'processing'}
+    {disabled}
     {recordSummary}
     {setRecordSummary}
   />

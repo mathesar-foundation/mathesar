@@ -7,7 +7,7 @@ import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
  *   - This includes column display options, record summary etc.,
  *   - This also includes all operations on Explorations.
  * - `canExecuteDDL`: DDL operations on objects stored directly on user database,
- *   including schemas, tables, columns, constraints etc.,
+ *   including schemas, tables, columns, links, constraints etc.,
  *   This also includes:
  *    - Descriptions for schemas and tables: Because these are stored
  *    in the user database.
