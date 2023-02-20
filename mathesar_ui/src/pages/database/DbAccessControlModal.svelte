@@ -12,6 +12,7 @@
   import type { UserRole } from '@mathesar/api/users';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { AccessControlView } from '@mathesar/systems/users-and-permissions';
+  import type { ObjectRoleMap } from '@mathesar/utils/permissions';
 
   export let controller: ModalController;
   export let database: Database;
@@ -30,8 +31,9 @@
     await usersStore.removeDatabaseAccessForUser(user.id, database);
   }
 
-  function getUserRole(user: UserModel): UserRole | undefined {
-    return user.getRoleForDb(database)?.role;
+  function getUserRoles(user: UserModel): ObjectRoleMap | undefined {
+    const dbRole = user.getRoleForDb(database);
+    return dbRole ? new Map([['database', dbRole.role]]) : undefined;
   }
 </script>
 
@@ -42,11 +44,12 @@
 
   {#if $requestStatus?.state === 'success'}
     <AccessControlView
+      accessControlObject="database"
       {usersWithAccess}
       {usersWithoutAccess}
       {addAccessForUser}
       {removeAccessForUser}
-      {getUserRole}
+      {getUserRoles}
     />
   {:else if $requestStatus?.state === 'processing'}
     <div>Loading</div>

@@ -93,6 +93,13 @@ export class UserModel {
     return this.schemaRoles.has(schema.id);
   }
 
+  hasSchemaAccess(
+    database: Pick<Database, 'id'>,
+    schema: Pick<SchemaEntry, 'id'>,
+  ) {
+    return this.hasDbAccess(database) || this.hasDirectSchemaAccess(schema);
+  }
+
   getDisplayName(): string {
     return this.username;
   }
@@ -321,6 +328,15 @@ class WritableUsersStore {
       $users.filter(
         (user) => !user.isSuperUser && !user.hasDirectSchemaAccess(schema),
       ),
+    );
+  }
+
+  getUsersWithAccessToSchema(
+    database: Pick<Database, 'id'>,
+    schema: Pick<SchemaEntry, 'id'>,
+  ) {
+    return derived(this.users, ($users) =>
+      $users.filter((user) => user.hasSchemaAccess(database, schema)),
     );
   }
 }

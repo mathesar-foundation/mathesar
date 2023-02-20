@@ -53,3 +53,5 @@ export function getDisplayNameForRole(userRole: UserRole): string {
       throw new MissingExhaustiveConditionError(userRole);
   }
 }
+
+export type ObjectRoleMap = Map<'database' | 'schema', UserRole>;

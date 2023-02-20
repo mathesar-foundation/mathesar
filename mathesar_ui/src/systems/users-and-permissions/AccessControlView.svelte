@@ -7,7 +7,10 @@
   } from '@mathesar-component-library';
   import { iconAddNew } from '@mathesar/icons';
   import type { UserRole } from '@mathesar/api/users';
-  import { getDisplayNameForRole } from '@mathesar/utils/permissions';
+  import {
+    getDisplayNameForRole,
+    type ObjectRoleMap,
+  } from '@mathesar/utils/permissions';
   import type { UserModel } from '@mathesar/stores/users';
   import AccessControlRow from './AccessControlRow.svelte';
 
@@ -20,7 +23,8 @@
     role: UserRole,
   ) => Promise<void>;
   export let removeAccessForUser: (user: UserModel) => Promise<void>;
-  export let getUserRole: (user: UserModel) => UserRole | undefined;
+  export let accessControlObject: 'database' | 'schema';
+  export let getUserRoles: (user: UserModel) => ObjectRoleMap | undefined;
 
   let isRequestInProcess = false;
 
@@ -74,8 +78,9 @@
   <div class="list">
     {#each $usersWithAccess as userWithAccess}
       <AccessControlRow
-        {getUserRole}
+        {getUserRoles}
         userModel={userWithAccess}
+        {accessControlObject}
         {removeAccessForUser}
       />
     {/each}

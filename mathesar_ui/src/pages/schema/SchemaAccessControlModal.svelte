@@ -12,6 +12,7 @@
   import type { UserRole } from '@mathesar/api/users';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { AccessControlView } from '@mathesar/systems/users-and-permissions';
+  import type { ObjectRoleMap } from '@mathesar/utils/permissions';
 
   export let controller: ModalController;
   export let database: Database;
@@ -22,10 +23,10 @@
 
   $: usersWithoutDirectAccessToSchema =
     usersStore.getNormalUsersWithoutDirectSchemaRole(schema);
-  $: usersWithDirectAccessToSchema =
-    usersStore.getNormalUsersWithDirectSchemaRole(schema);
-  $: usersWithoutAccessToDb = usersStore.getUsersWithoutAccessToDb(database);
-  $: usersWithAccessToDb = usersStore.getUsersWithAccessToDb(database);
+  $: usersWithDirectAccessToSchema = usersStore.getUsersWithAccessToSchema(
+    database,
+    schema,
+  );
 
   async function addAccessForUser(user: UserModel, role: UserRole) {
     await usersStore.addSchemaRoleForUser(user.id, schema, role);
@@ -35,8 +36,17 @@
     await usersStore.removeSchemaAccessForUser(user.id, schema);
   }
 
-  function getUserRole(user: UserModel): UserRole | undefined {
-    return user.getRoleForSchema(schema)?.role;
+  function getUserRoles(user: UserModel): ObjectRoleMap | undefined {
+    const objectRoleMap: ObjectRoleMap = new Map();
+    const dbRole = user.getRoleForDb(database);
+    if (dbRole) {
+      objectRoleMap.set('database', dbRole.role);
+    }
+    const schemaRole = user.getRoleForSchema(schema);
+    if (schemaRole) {
+      objectRoleMap.set('schema', schemaRole.role);
+    }
+    return objectRoleMap.size ? objectRoleMap : undefined;
   }
 </script>
 
@@ -47,11 +57,12 @@
 
   {#if $requestStatus?.state === 'success'}
     <AccessControlView
+      accessControlObject="schema"
       usersWithAccess={usersWithDirectAccessToSchema}
       usersWithoutAccess={usersWithoutDirectAccessToSchema}
       {addAccessForUser}
       {removeAccessForUser}
-      {getUserRole}
+      {getUserRoles}
     />
   {:else if $requestStatus?.state === 'processing'}
     <div>Loading</div>

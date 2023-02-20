@@ -1,16 +1,25 @@
 <script lang="ts">
   import { Chip, Icon, SpinnerButton } from '@mathesar-component-library';
-  import { iconUser, iconDeleteMajor } from '@mathesar/icons';
+  import {
+    iconUser,
+    iconDeleteMajor,
+    iconDatabase,
+    iconSchema,
+  } from '@mathesar/icons';
   import type { UserModel } from '@mathesar/stores/users';
-  import { getDisplayNameForRole } from '@mathesar/utils/permissions';
-  import type { UserRole } from '@mathesar/api/users';
+  import {
+    getDisplayNameForRole,
+    type ObjectRoleMap,
+  } from '@mathesar/utils/permissions';
 
   export let userModel: UserModel;
-  export let getUserRole: (user: UserModel) => UserRole | undefined;
+  export let accessControlObject: 'database' | 'schema';
+  export let getUserRoles: (user: UserModel) => ObjectRoleMap | undefined;
   export let removeAccessForUser: (user: UserModel) => Promise<void>;
 
-  $: role = getUserRole(userModel);
-  $: accessDisplayName = role ? getDisplayNameForRole(role) : undefined;
+  $: roleMap = getUserRoles(userModel);
+  $: roles = roleMap && roleMap.size > 0 ? [...roleMap.entries()] : undefined;
+  $: userRoleOfAccessControlObject = roleMap?.get(accessControlObject);
 
   async function removeAccess() {
     await removeAccessForUser(userModel);
@@ -33,18 +42,30 @@
     </div>
   </div>
   <div class="access-level">
-    <Chip background="var(--slate-200)" display="inline-flex">
-      <Icon {...iconUser} size="0.8em" />
-      <span>
-        {#if userModel.isSuperUser}
-          Admin
-        {:else if accessDisplayName}
-          {accessDisplayName}
-        {/if}
-      </span>
-    </Chip>
+    {#if userModel.isSuperUser}
+      <Chip background="var(--slate-200)" display="inline-flex">
+        <Icon {...iconUser} size="0.8em" />
+        <span>Admin</span>
+      </Chip>
+    {:else if roles}
+      {#each roles as [object, role]}
+        <Chip
+          background={accessControlObject !== object
+            ? 'transparent'
+            : 'var(--slate-200)'}
+          display="inline-flex"
+        >
+          {#if object === 'database'}
+            <Icon {...iconDatabase} size="0.8em" />
+          {:else if object === 'schema'}
+            <Icon {...iconSchema} size="0.8em" />
+          {/if}
+          <span>{getDisplayNameForRole(role)}</span>
+        </Chip>
+      {/each}
+    {/if}
   </div>
-  {#if !userModel.isSuperUser}
+  {#if !userModel.isSuperUser && userRoleOfAccessControlObject !== undefined}
     <div>
       <SpinnerButton
         onClick={removeAccess}
@@ -59,7 +80,7 @@
 <style lang="scss">
   .user-ac-row {
     display: grid;
-    grid-template-columns: 6fr 2fr 2.2rem;
+    grid-template-columns: 6fr auto 2.2rem;
     align-items: center;
 
     .name-and-info {
@@ -79,6 +100,18 @@
           border-radius: 50%;
           background: var(--slate-800);
         }
+      }
+    }
+    .access-level {
+      padding: 0 0.4rem;
+
+      :global(.chip) {
+        min-width: 4.15rem;
+        justify-content: center;
+      }
+
+      :global(.chip + .chip) {
+        margin-left: 0.2rem;
       }
     }
 
