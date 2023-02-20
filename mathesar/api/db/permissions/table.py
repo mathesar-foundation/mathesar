@@ -1,4 +1,3 @@
-import django
 from django.db.models import Q, Case, Value, When, CharField
 from rest_access_policy import AccessPolicy
 
