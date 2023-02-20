@@ -72,6 +72,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "mathesar.template_context_processors.base_template_extensions.script_extension_templates"
             ],
         },
     },
@@ -168,6 +169,7 @@ MEDIA_URL = "/media/"
 # Defaults: https://www.django-rest-framework.org/api-guide/settings/
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication'
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -228,3 +230,5 @@ LOGOUT_REDIRECT_URL = LOGIN_URL
 DRF_ACCESS_POLICY = {
     'reusable_conditions': ['mathesar.api.permission_conditions']
 }
+# List of Template names that contains additional script tags to be added to the base template
+BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
