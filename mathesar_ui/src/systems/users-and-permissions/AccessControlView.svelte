@@ -50,9 +50,16 @@
       autoSelect="none"
       options={$usersWithoutAccess}
       bind:value={user}
-      getLabel={(option) => option?.username ?? 'Select User'}
       disabled={isRequestInProcess}
-    />
+      let:option
+    >
+      {#if option}
+        {option.username}
+      {:else}
+        <span class="placeholder">Select User</span>
+      {/if}
+      <div class="no-users" slot="empty">No users found</div>
+    </Select>
   </LabeledInput>
   <LabeledInput label="Permission" layout="stacked">
     <Select
@@ -96,6 +103,10 @@
     border: 1px solid var(--slate-300);
     border-radius: var(--border-radius-m);
 
+    .placeholder {
+      color: var(--slate-600);
+    }
+
     .add-button {
       display: flex;
       flex-direction: column;
@@ -112,5 +123,8 @@
     .list {
       margin-top: var(--size-base);
     }
+  }
+  .no-users {
+    padding: var(--size-xx-small);
   }
 </style>
