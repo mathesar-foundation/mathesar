@@ -1,7 +1,7 @@
 <p align="center">
     <img src="https://user-images.githubusercontent.com/845767/218793207-a84a8c9e-d147-40a8-839b-f2b5d8b1ccba.png" width=450px alt="Mathesar logo"/>
 </p>
-<p align="center"><b>Mathesar is an open source web application that provides a spreadsheet-like interface to a PostgreSQL database. Our web-based interface helps you and your collaborators work with data more independently and comfortably – no technical skills needed.</b></p>
+<p align="center"><b>An intuitive UI for Postgres databases for users of all technical skill levels.</b></p>
 <p align="center">
     <img alt="License" src="https://img.shields.io/github/license/centerofci/mathesar">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/centerofci/mathesar">
@@ -10,13 +10,9 @@
 </p>
 <hr/>
 
+Mathesar is a straightforward open source tool that provides a **spreadsheet-like interface** to a PostgreSQL **database**. Our web-based interface helps you and your collaborators work with data more independently and comfortably – **no technical skills needed**.
 
-
-Mathesar is an open source software project to help users store, organize, visualize, and collaborate on data. Our goal is to provide an intuitive user experience for non-technical users. Mathesar directly operates on PostgreSQL databases, which gives it the flexibility to be interoperable with thousands of other existing tools and applications.
-
-Potential use cases for Mathesar include publishing and exploring public datasets, running business processes such inventory management and project tracking, providing a ready-made interface for speedy data entry and custom reporting, collecting and processing data from large groups of people, simple data cleaning and analysis, and automatic web API generation.
-
-We started building Mathesar in March 2021 and are making steady progress towards releasing an initial version of the project by early 2023. Please visit [our public wiki](https://wiki.mathesar.org/) to learn more about the project.
+You can use Mathesar to build **data models**, **enter data**, and even **build reports**. You host your own Mathesar installation, which gives you ownership, privacy, and control of your data.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
