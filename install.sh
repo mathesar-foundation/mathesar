@@ -127,8 +127,9 @@ Here, we set up details of the Mathesar webserver.
 
 "
 
-read -r -p "Choose a domain for the webserver, or press ENTER to skip: " allowed_hosts
-allowed_hosts=${allowed_hosts:-*}
+read -r -p "Choose a domain for the webserver, or press ENTER to skip: " domain_name
+domain_name=${domain_name:localhost}
+allowed_hosts=${domain_name:-*}
 read -r -p "Choose an http port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
 read -r -p "Choose an https port for the webserver to use [443]: " https_port
@@ -206,6 +207,7 @@ DJANGO_DATABASE_KEY='default'
 DJANGO_DATABASE_URL='postgresql://$db_username:$db_password@mathesar_db:${db_port}/mathesar_django'
 MATHESAR_DATABASES='(mathesar_tables|postgresql://$db_username:$db_password@mathesar_db:$db_port/$db_name)'
 DJANGO_SUPERUSER_PASSWORD='$superuser_password'
+DOMAIN_NAME='$domain_name'
 HTTP_PORT='$http_port'
 HTTPS_PORT='$https_port'
 EOF
