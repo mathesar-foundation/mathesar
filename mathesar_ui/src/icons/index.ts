@@ -59,6 +59,7 @@ import {
   faArrowRightFromBracket,
   faUserPlus,
   faUpRightFromSquare,
+  faCircleInfo,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -141,7 +142,7 @@ export const iconTable: IconProps = { data: tableIcon };
 export const iconInspector: IconProps = { data: faInfo };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
-export const iconUpgradeAvailable: IconProps = { data: outcomeIcon };
+export const iconUpgradeAvailable: IconProps = { data: faCircleInfo };
 export const iconCurrentlyInstalledVersion: IconProps = { data: faCheck };
 export const iconUser: IconProps = { data: faUser };
 export const iconLinksInThisTable: IconProps = { data: faCircleArrowRight };
