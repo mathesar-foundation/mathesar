@@ -45,8 +45,8 @@
   {#if $requestStatus?.state === 'success'}
     <AccessControlView
       accessControlObject="database"
-      {usersWithAccess}
-      {usersWithoutAccess}
+      usersWithAccess={$usersWithAccess}
+      usersWithoutAccess={$usersWithoutAccess}
       {addAccessForUser}
       {removeAccessForUser}
       {getUserRoles}

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
   import {
     LabeledInput,
     Select,
@@ -25,8 +24,8 @@
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
 
-  export let usersWithAccess: Readable<UserModel[]>;
-  export let usersWithoutAccess: Readable<UserModel[]>;
+  export let usersWithAccess: UserModel[];
+  export let usersWithoutAccess: UserModel[];
   export let addAccessForUser: (
     user: UserModel,
     role: UserRole,
@@ -35,7 +34,7 @@
   export let accessControlObject: 'database' | 'schema';
   export let getUserRoles: (user: UserModel) => ObjectRoleMap | undefined;
 
-  $: usersAllowedToBeAdded = $usersWithoutAccess.filter(
+  $: usersAllowedToBeAdded = usersWithoutAccess.filter(
     (user) => user.id !== userProfile?.id,
   );
 
@@ -132,7 +131,7 @@
     {/if}
   </div>
   <div class="list">
-    {#each $usersWithAccess as userWithAccess}
+    {#each usersWithAccess as userWithAccess}
       <AccessControlRow
         {userProfile}
         {getUserRoles}

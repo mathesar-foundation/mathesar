@@ -23,7 +23,7 @@
 
   $: usersWithoutDirectAccessToSchema =
     usersStore.getNormalUsersWithoutDirectSchemaRole(schema);
-  $: usersWithDirectAccessToSchema = usersStore.getUsersWithAccessToSchema(
+  $: usersWithAccessToSchema = usersStore.getUsersWithAccessToSchema(
     database,
     schema,
   );
@@ -58,8 +58,8 @@
   {#if $requestStatus?.state === 'success'}
     <AccessControlView
       accessControlObject="schema"
-      usersWithAccess={usersWithDirectAccessToSchema}
-      usersWithoutAccess={usersWithoutDirectAccessToSchema}
+      usersWithAccess={$usersWithAccessToSchema}
+      usersWithoutAccess={$usersWithoutDirectAccessToSchema}
       {addAccessForUser}
       {removeAccessForUser}
       {getUserRoles}
