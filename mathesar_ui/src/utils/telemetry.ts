@@ -3,7 +3,7 @@ export function logEvent(
   metadata: Record<string, string | number | boolean | Date>,
 ): void {
   window.dispatchEvent(
-    new CustomEvent('event', {
+    new CustomEvent('userAction', {
       detail: {
         eventName,
         metadata,
