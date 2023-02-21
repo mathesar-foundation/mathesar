@@ -86,7 +86,8 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
             elif (hasattr(err, 'message')):
                 err_message = err.message
             elif (hasattr(err, 'messages')):
-                err_message = err.messages[0]
+                if (len(err.messages) != 0):
+                    err_message = err.messages[0]
             return err_message == message
 
     @property
