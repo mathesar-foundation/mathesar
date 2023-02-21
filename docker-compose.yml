@@ -28,6 +28,8 @@ services:
     volumes:
       - media:/mathesar/media
       - static:/mathesar/static
+      - caddy_data:/data
+      - caddy_config:/config
   base-service:
     profiles: ["web-server"]
     container_name: mathesar_service
@@ -128,3 +130,5 @@ volumes:
   ui_node_modules:
   media:
   static:
+  caddy_data:
+  caddy_config:
