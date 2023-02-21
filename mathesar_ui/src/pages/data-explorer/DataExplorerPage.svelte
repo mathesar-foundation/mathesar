@@ -5,16 +5,22 @@
   import { DataExplorer } from '@mathesar/systems/data-explorer';
   import type { QueryManager } from '@mathesar/systems/data-explorer/types';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     getSchemaPageUrl,
     getExplorationPageUrl,
   } from '@mathesar/routes/urls';
+
+  const userProfile = getUserProfileStoreFromContext();
 
   export let database: Database;
   export let schema: SchemaEntry;
   export let queryManager: QueryManager;
 
   $: ({ query } = queryManager);
+  $: canEditMetadata =
+    $userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
+    false;
 
   function gotoSchemaPage() {
     router.goto(getSchemaPageUrl(database.name, schema.id));
@@ -34,6 +40,7 @@
 <LayoutWithHeader fitViewport>
   <DataExplorer
     {queryManager}
+    {canEditMetadata}
     on:close={gotoExplorationPage}
     on:delete={gotoSchemaPage}
   />
