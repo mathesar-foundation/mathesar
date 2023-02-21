@@ -25,3 +25,6 @@ nav:
   - Home: index.md
   - Installation:
       - Install with Docker Compose: installation/docker-compose.md
+  - Product:
+      - Introduction: product/introduction.md
+      - Users & Access Levels: product/users.md
