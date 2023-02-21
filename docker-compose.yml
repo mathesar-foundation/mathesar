@@ -71,7 +71,7 @@ services:
       retries: 30
       start_period: 5s
   test-service:
-    profiles: [ "test" ]
+    profiles: ["test"]
     extends: base-service
     container_name: mathesar_service_test
     image: mathesar/mathesar-test:latest
