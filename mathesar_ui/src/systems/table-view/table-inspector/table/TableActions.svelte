@@ -25,6 +25,8 @@
     createDataExplorerUrlToExploreATable,
   } from '@mathesar/systems/data-explorer';
 
+  export let canExecuteDDL: boolean;
+
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ id, columnsDataStore, meta } = $tabularData);
@@ -105,10 +107,12 @@
     {/if}
   {/if}
 
-  <Button appearance="outline-primary" on:click={handleDeleteTable}>
-    <Icon {...iconDeleteMajor} />
-    <span>Delete Table</span>
-  </Button>
+  {#if canExecuteDDL}
+    <Button appearance="outline-primary" on:click={handleDeleteTable}>
+      <Icon {...iconDeleteMajor} />
+      <span>Delete Table</span>
+    </Button>
+  {/if}
 </div>
 
 <style lang="scss">

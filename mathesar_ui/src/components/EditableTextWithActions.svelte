@@ -16,6 +16,7 @@
   export let onSubmit: (value: string) => Promise<void>;
   export let getValidationErrors: (value: string) => string[] = () => [];
   export let isLongText = false;
+  export let disabled = false;
 
   let isEditable = false;
   let value = '';
@@ -56,6 +57,7 @@
       this={inputElement}
       on:focus={makeEditable}
       value={initialValue}
+      {disabled}
     />
   {:else}
     <div class="input-container">
