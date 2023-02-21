@@ -1,14 +1,20 @@
 <p align="center">
     <img src="https://user-images.githubusercontent.com/845767/218793207-a84a8c9e-d147-40a8-839b-f2b5d8b1ccba.png" width=450px alt="Mathesar logo"/>
 </p>
-<p align="center"><b>An intuitive UI for Postgres databases for users of all technical skill levels.</b></p>
+<p align="center"><b>An intuitive UI for Postgres databases, for users of all technical skill levels.</b></p>
 <p align="center">
     <img alt="License" src="https://img.shields.io/github/license/centerofci/mathesar">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/centerofci/mathesar">
     <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/w/centerofci/mathesar">
     <img alt="Codecov" src="https://img.shields.io/codecov/c/github/centerofci/mathesar">
 </p>
-<hr/>
+
+<p align="center">
+  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://wiki.mathesar.org/" target="_blank">Wiki</a>
+</p>
+
+
+# Mathesar
 
 Mathesar is a straightforward open source tool that provides a **spreadsheet-like interface** to a PostgreSQL **database**. Our web-based interface helps you and your collaborators work with data more independently and comfortably – **no technical skills needed**.
 
