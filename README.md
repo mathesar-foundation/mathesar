@@ -1,7 +1,16 @@
-
-<p align="center"><img src="https://user-images.githubusercontent.com/845767/218793207-a84a8c9e-d147-40a8-839b-f2b5d8b1ccba.png" width=450px alt="Mathesar logo"/></p>
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/845767/218793207-a84a8c9e-d147-40a8-839b-f2b5d8b1ccba.png" width=450px alt="Mathesar logo"/>
+</p>
 <p align="center"><b>Web application providing an intuitive interface to databases.</b></p>
+<p align="center">
+    <img alt="License" src="https://img.shields.io/github/license/centerofci/mathesar">
+    <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/centerofci/mathesar">
+    <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/w/centerofci/mathesar">
+    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/centerofci/mathesar">
+</p>
 <hr/>
+
+
 
 Mathesar is an open source software project to help users store, organize, visualize, and collaborate on data. Our goal is to provide an intuitive user experience for non-technical users. Mathesar directly operates on PostgreSQL databases, which gives it the flexibility to be interoperable with thousands of other existing tools and applications.
 
