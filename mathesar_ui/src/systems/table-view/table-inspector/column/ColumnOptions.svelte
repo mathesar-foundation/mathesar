@@ -17,6 +17,7 @@
   export let column: ProcessedColumn;
   export let columnsDataStore: ColumnsDataStore;
   export let constraintsDataStore: ConstraintsDataStore;
+  export let canExecuteDDL: boolean;
 
   let isRequestingToggleAllowNull = false;
   let isRequestingToggleAllowDuplicates = false;
@@ -94,7 +95,7 @@
       <Icon class="opt" {...iconLoading} />
     {:else}
       <Checkbox
-        disabled={isRequestingToggleAllowDuplicates}
+        disabled={isRequestingToggleAllowDuplicates || !canExecuteDDL}
         checked={!allowsDuplicates}
         on:change={toggleAllowDuplicates}
       />
@@ -113,7 +114,7 @@
       <Icon class="opt" {...iconLoading} />
     {:else}
       <Checkbox
-        disabled={isRequestingToggleAllowNull}
+        disabled={isRequestingToggleAllowNull || !canExecuteDDL}
         checked={!allowsNull}
         on:change={toggleAllowNull}
       />

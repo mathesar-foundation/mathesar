@@ -21,6 +21,7 @@
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
   export let columnsDataStore: ColumnsDataStore;
+  export let canEditTableRecords: boolean;
 
   async function handleDeleteRecords() {
     void confirmDelete({
@@ -58,10 +59,14 @@
       }) || ''
     );
   })();
+
+  $: showOpenRecordLink = selectedRowIndices.length === 1 && recordPageLink;
+  $: showDeleteRecordButton = canEditTableRecords;
+  $: showNullStateText = !showDeleteRecordButton && !showOpenRecordLink;
 </script>
 
 <div class="actions-container">
-  {#if selectedRowIndices.length === 1 && recordPageLink}
+  {#if showOpenRecordLink}
     <AnchorButton href={recordPageLink}>
       <div class="action-item">
         <div>
@@ -72,15 +77,22 @@
       </div>
     </AnchorButton>
   {/if}
-  <Button appearance="outline-primary" on:click={handleDeleteRecords}>
-    <Icon {...iconDeleteMajor} />
-    <span>
-      Delete {labeledCount(selectedRowIndices, 'records', {
-        casing: 'title',
-        countWhenSingular: 'hidden',
-      })}
+  {#if showDeleteRecordButton}
+    <Button appearance="outline-primary" on:click={handleDeleteRecords}>
+      <Icon {...iconDeleteMajor} />
+      <span>
+        Delete {labeledCount(selectedRowIndices, 'records', {
+          casing: 'title',
+          countWhenSingular: 'hidden',
+        })}
+      </span>
+    </Button>
+  {/if}
+  {#if showNullStateText}
+    <span class="null-text">
+      There are no actions to perform on the selected record.
     </span>
-  </Button>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -98,5 +110,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .null-text {
+    color: var(--color-text-muted);
   }
 </style>

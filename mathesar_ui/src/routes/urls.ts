@@ -58,7 +58,7 @@ export function getExplorationEditorPageUrl(
   schemaId: number,
   queryId: number,
 ): string {
-  return `/${databaseName}/${schemaId}/explorations/edit/${queryId}/`;
+  return `/${databaseName}/${schemaId}/explorations/${queryId}/edit/`;
 }
 
 export function getTablePageUrl(

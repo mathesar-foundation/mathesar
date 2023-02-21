@@ -19,7 +19,7 @@
   } from '@mathesar/routes/urls';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconExploration } from '@mathesar/icons';
-  import { readable } from 'svelte/store';
+  import { readable, type Readable } from 'svelte/store';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -29,8 +29,7 @@
 
   let queryManager: QueryManager | undefined;
   let queryLoadPromise: CancellablePromise<QueryInstance>;
-
-  $: ({ query } = queryManager ?? { query: readable(undefined) });
+  let query: Readable<QueryModel | undefined> = readable(undefined);
 
   function createQueryManager(queryInstance: UnsavedQueryInstance) {
     queryManager?.destroy();
@@ -38,6 +37,7 @@
       new QueryModel(queryInstance),
       $currentDbAbstractTypes.data,
     );
+    query = queryManager.query;
     is404 = false;
     queryManager.on('save', async (instance) => {
       try {
@@ -56,6 +56,7 @@
   function removeQueryManager(): void {
     queryManager?.destroy();
     is404 = true;
+    query = readable(undefined);
     queryManager = undefined;
   }
 
