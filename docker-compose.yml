@@ -21,6 +21,7 @@ services:
       start_period: 5s
   caddy-reverse-proxy:
     profiles: ["prod"]
+    image: mathesar/mathesar-caddy:latest
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME-localhost}
     ports:
