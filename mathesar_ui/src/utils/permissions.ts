@@ -40,3 +40,18 @@ export function roleAllowsOperation(
       throw new MissingExhaustiveConditionError(userRole);
   }
 }
+
+export function getDisplayNameForRole(userRole: UserRole): string {
+  switch (userRole) {
+    case 'manager':
+      return 'Manager';
+    case 'editor':
+      return 'Editor';
+    case 'viewer':
+      return 'Viewer';
+    default:
+      throw new MissingExhaustiveConditionError(userRole);
+  }
+}
+
+export type ObjectRoleMap = Map<'database' | 'schema', UserRole>;

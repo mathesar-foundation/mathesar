@@ -8,7 +8,7 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import { iconSchema, iconEdit } from '@mathesar/icons';
+  import { iconSchema, iconEdit, iconManageAccess } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { Button, TabContainer, Icon } from '@mathesar-component-library';
   import {
@@ -18,7 +18,6 @@
   } from '@mathesar/routes/urls';
   import { States } from '@mathesar/api/utils/requestUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { onMount } from 'svelte';
   import { logEvent } from '@mathesar/utils/telemetry';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
@@ -26,6 +25,7 @@
   import SchemaExplorations from './SchemaExplorations.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
+  import SchemaAccessControlModal from './SchemaAccessControlModal.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -39,8 +39,13 @@
   $: canEditMetadata =
     userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
     false;
+  $: canEditPermissions = userProfile?.hasPermission(
+    { database, schema },
+    'canEditPermissions',
+  );
 
   const addEditModal = modal.spawnModalController();
+  const accessControlModal = modal.spawnModalController();
 
   // NOTE: This has to be same as the name key in the paths prop of Route component
   type TabsKey = 'overview' | 'tables' | 'explorations';
@@ -83,6 +88,11 @@
   }
 
   $: isDefault = schema.name === 'public';
+
+  function manageAccess() {
+    accessControlModal.open();
+  }
+
   logEvent('opened_schema', {
     database_name: database.name,
     schema_name: schema.name,
@@ -105,14 +115,20 @@
       icon: iconSchema,
     }}
   >
-    <svelte:fragment slot="action">
+    <div slot="action">
       {#if !isDefault && canExecuteDDL}
         <Button on:click={handleEditSchema} appearance="secondary">
           <Icon {...iconEdit} />
           <span>Edit Schema</span>
         </Button>
       {/if}
-    </svelte:fragment>
+      {#if canEditPermissions}
+        <Button on:click={manageAccess} appearance="secondary">
+          <Icon {...iconManageAccess} />
+          <span>Manage Access</span>
+        </Button>
+      {/if}
+    </div>
 
     <slot slot="bottom">
       {#if schema.description}
@@ -170,6 +186,7 @@
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={addEditModal} {database} {schema} />
+<SchemaAccessControlModal controller={accessControlModal} {database} {schema} />
 
 <style lang="scss">
   .tab-container {

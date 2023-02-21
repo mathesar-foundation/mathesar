@@ -20,4 +20,21 @@
   &.display-inline-block {
     display: inline-block;
   }
+
+  &.display-flex {
+    display: flex;
+  }
+
+  &.display-inline-flex {
+    display: inline-flex;
+  }
+
+  &.display-flex,
+  &.display-inline-flex {
+    align-items: center;
+
+    > * + * {
+      margin-left: 0.2rem;
+    }
+  }
 }
