@@ -83,12 +83,10 @@
   }
 
   $: isDefault = schema.name === 'public';
-  onMount(async () => {
-    logEvent('opened_schema', {
-      database_name: database.name,
-      schema_name: schema.name,
-      page: 'schema',
-    });
+  logEvent('opened_schema', {
+    database_name: database.name,
+    schema_name: schema.name,
+    source: 'schema_page',
   });
 </script>
 
