@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
+
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
   import { confirmationController } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
@@ -16,7 +18,7 @@
   const commonData = preloadCommonData();
   if (commonData?.user) {
     const userProfile = setUserProfileStoreInContext(commonData.user);
-    if (userProfile.get().isSuperUser) {
+    if (get(userProfile).isSuperUser) {
       // Toggle these lines to test with a mock tag name
       // setReleasesStoreInContext('1.75.0');
       setReleasesStoreInContext(commonData.current_release_tag_name);

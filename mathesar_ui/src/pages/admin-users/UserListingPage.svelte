@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { User } from '@mathesar/api/users';
   import {
     AnchorButton,
     Button,
@@ -10,6 +9,7 @@
   import { iconAddNew } from '@mathesar/icons';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
+  import type { UserModel } from '@mathesar/stores/users';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import UserRow from './UserRow.svelte';
@@ -20,10 +20,10 @@
   $: requestStatus = usersStore?.requestStatus;
   $: users = usersStore?.users;
 
-  function filterUsers(_users: User[], query: string) {
-    const isMatch = (user: User, q: string) =>
+  function filterUsers(_users: UserModel[], query: string) {
+    const isMatch = (user: UserModel, q: string) =>
       user.username.toLowerCase().includes(q) ||
-      user.full_name?.toLowerCase().includes(q) ||
+      user.fullName?.toLowerCase().includes(q) ||
       user.email?.toLowerCase().includes(q);
     return _users?.filter((user) => {
       if (query) {
