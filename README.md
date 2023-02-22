@@ -54,8 +54,6 @@ We are currently in Public Alpha.
 ## Join our community!
 The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list. 
 
-We actively encourage contribution! Read through [our contributing guidelines](https://wiki.mathesar.org/community/contributing) to get started.
-
 ## Screenshots
 *TBD*
 
@@ -75,6 +73,16 @@ Please see [our documentation](https://docs.mathesar.org/) for instructions on i
 
 ## Local development setup
 Please see [our guide in our documentation](http://docs.mathesar.org/contributing/local-dev/).
+
+## Our motivation
+Mathesar is a non-profit project. Our goal is to make understanding and working with data easy for everyone.
+
+Databases have been around for a long time and solve common data problems really well. But working with databases often requires custom software. Or complex tooling that people struggle to get their heads around.
+
+We want to make existing database functionality more accessible, for users of all technical skill levels.
+
+## Contributing
+We actively encourage contribution! Read through [our contributing guidelines](https://wiki.mathesar.org/community/contributing) to get started.
 
 ## License
 Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).
