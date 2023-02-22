@@ -7,7 +7,9 @@ theme:
   icon:
     repo: fontawesome/brands/github
   favicon: assets/images/favicon.ico
-
+extra_css:
+  - stylesheets/extra.css
+  
 markdown_extensions:
   - admonition
   - attr_list
