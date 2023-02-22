@@ -65,9 +65,12 @@ sudo chmod +x /usr/local/bin/docker-compose
 That is it.  Now the server is run Mathesar.
 
 ## Quickstart
-To install the newest version of Mathesar, cut-and-paste the below command into a terminal window and follow the instructions:
+
 #### Important
 Do not use 'admin' as your login username. Create a unique login username.
+
+
+To install the newest version of Mathesar, cut-and-paste the below command into a terminal window and follow the instructions:
 
 ```sh
 bash <(curl -sL https://raw.githubusercontent.com/centerofci/mathesar/master/install.sh)
