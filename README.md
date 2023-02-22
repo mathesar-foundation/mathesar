@@ -24,16 +24,19 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Contributing](#contributing)
-  - [Help with documentation](#help-with-documentation)
-- [Local Development](#local-development)
+- [Status](#status)
+- [Join our community!](#join-our-community)
+- [Screenshots](#screenshots)
+- [Features](#features)
+- [Self-hosting](#self-hosting)
+- [Local development setup](#local-development-setup)
   - [Developing demo data sets and functionality](#developing-demo-data-sets-and-functionality)
   - [Developing in Windows](#developing-in-windows)
   - [Configuration Options](#configuration-options)
   - [Frontend](#frontend)
+  - [Documentation](#documentation)
   - [Linting](#linting)
   - [Running tests](#running-tests)
-  - [E2E integration tests](#e2e-integration-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
   - [Troubleshooting](#troubleshooting)
 - [License](#license)
