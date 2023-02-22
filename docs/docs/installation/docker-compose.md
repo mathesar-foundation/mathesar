@@ -9,7 +9,7 @@ Installation should only take a few minutes.
 - You need to be a user with root access to the machine you're trying to install Mathesar on.
 
 ## Quickstart
-To install the newest version of Mathesar, cut-and-paste the below command into a terminal window and follow the instructions:
+To install the newest version of Mathesar, cut-and-paste the below command into a terminal and follow the instructions:
 
 ```sh
 bash <(curl -sL https://raw.githubusercontent.com/centerofci/mathesar/master/install.sh)
