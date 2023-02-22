@@ -42,7 +42,7 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 - [ ] **Public Beta**: Stable and feature-rich enough to implement in production
 - [ ] **Public**: Production-ready
 
-We are currently in Public Alpha.
+We are currently in the **pre-release** stage.
 
 ## Join our community!
 The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list. 
