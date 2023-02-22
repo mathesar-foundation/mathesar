@@ -10,4 +10,5 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 You host Mathesar on your own server. Currently, we only support installing using Docker Compose, although we will support additional installation methods soon.
 
 - [Install with Docker Compose](installation/docker-compose.md).
+- [Install with Docker Compose on Ubuntu](installation/ubuntu.md).
 
