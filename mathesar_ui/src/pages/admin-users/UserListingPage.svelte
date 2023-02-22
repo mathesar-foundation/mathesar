@@ -9,7 +9,7 @@
     TextInputWithPrefix,
   } from '@mathesar/component-library';
   import { iconAddNew } from '@mathesar/icons';
-  import type { User } from '@mathesar/api/users';
+  import type { UserModel } from '@mathesar/stores/users';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import UserRow from './UserRow.svelte';
 
@@ -19,10 +19,10 @@
   $: requestStatus = usersStore?.requestStatus;
   $: users = usersStore?.users;
 
-  function filterUsers(_users: User[], query: string) {
-    const isMatch = (user: User, q: string) =>
+  function filterUsers(_users: UserModel[], query: string) {
+    const isMatch = (user: UserModel, q: string) =>
       user.username.toLowerCase().includes(q) ||
-      user.full_name?.toLowerCase().includes(q) ||
+      user.fullName?.toLowerCase().includes(q) ||
       user.email?.toLowerCase().includes(q);
     return _users?.filter((user) => {
       if (query) {

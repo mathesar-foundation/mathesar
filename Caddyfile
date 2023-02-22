@@ -1,4 +1,4 @@
-:80 {
+{$DOMAIN_NAME} {
 	log {
 		output stdout
 	}
@@ -21,9 +21,15 @@
 			root {$STATIC_ROOT:/mathesar/static/}
 		}
 	}
-        # Rewrite and reverse proxy upgrade endpoint calls to Watchtower
-        handle_path /api/ui/v0/upgrade/ {
+        # Rewrite and reverse proxy upgrade endpoint calls to Watchtower;
+        # Accepts only POST requests, rewrites them to GET.
+        @upgrade_request {
+          path /api/ui/v0/upgrade/
+          method POST
+        }
+        handle @upgrade_request {
                 rewrite * /v1/update
+                method * GET
                 reverse_proxy watchtower:8080 {
                       header_up Authorization "Bearer mytoken"
                 }
