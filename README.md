@@ -30,6 +30,8 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 - [Features](#features)
 - [Self-hosting](#self-hosting)
 - [Local development setup](#local-development-setup)
+- [Our motivation](#our-motivation)
+- [Contributing](#contributing)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
