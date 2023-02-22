@@ -11,4 +11,6 @@ You host Mathesar on your own server. Currently, we only support installing usin
 
 - [Install with Docker Compose](installation/docker-compose.md).
 - [Install with Docker Compose on Ubuntu](installation/ubuntu.md).
+- [Install with Docker Compose on Debian](installation/debian.md).
+- [Install with Docker Compose on CentOS](installation/centos.md).
 
