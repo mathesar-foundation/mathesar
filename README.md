@@ -40,15 +40,37 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Contributing
+## Status
+- [x] **Pre-release**: Initial development, not yet ready for deployment.
+- [ ] **Public Alpha**: You can install and deploy Mathesar on your server. Go easy on us!
+- [ ] **Public Beta**: Stable and feature-rich enough to implement in production
+- [ ] **Public**: Production-ready
 
-We actively encourage contribution! [Join our community](https://wiki.mathesar.org/community) and read through [our contributing guidelines](https://wiki.mathesar.org/community/contributing).
+We are currently in Public Alpha.
 
-### Help with documentation
+## Join our community!
+The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list. 
 
-See the [README file in our docs/ subfolder](./docs/README.md).
+We actively encourage contribution! Read through [our contributing guidelines](https://wiki.mathesar.org/community/contributing) to get started.
 
-## Local Development
+## Screenshots
+*TBD*
+
+## Features
+- **Built on Postgres**: Connect to an existing Postgres database or set one up from scratch.
+- **Set up your data models**: Easily create and update Postgres schemas and tables.
+- **Data entry**: Use our spreadsheet-like interface to view, create, update, and delete table records.
+- **Filter, sort, and group**: Quickly slice your data in different ways.
+- **Query builder**: Use our Data Explorer to build queries without knowing anything about SQL or joins.
+- **Schema migrations**: Transfer data between tables in two clicks.
+- **Uses Postgres features**: Mathesar uses and manipulates Postgres schemas, primary keys, foreign keys, constraints and data types. e.g. "Links" in the UI are foreign keys in the database.
+- **Custom data types**: Custom data types for emails and URLs (more coming soon), validated at the database level.
+- **Basic access control**: Users can have Viewer (read-only), Editor (can only edit data, but not data structure), or Manager (can edit both data and its structure) roles.
+
+## Self-hosting
+Please see [our documentation](https://docs.mathesar.org/) for instructions on installing Mathesar on your own server.
+
+## Local development setup
 
 First, [ensure that you have Docker installed](https://docs.docker.com/get-docker/).
 
@@ -103,11 +125,13 @@ Windows users who want to run the Mathesar Docker development environment in WSL
 
 If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions by running `install.py` as described in the previous step. 
 
-**Please don't do this unless you have full confidence in what you're doing since Mathesar is not stable yet and may make unexpected changes to the database that you connect to it.**
-
 ### Frontend
 
 For more detailed information on Mathesar's frontend development, see [Mathesar UI](./mathesar_ui/README.md).
+
+### Documentation
+
+For more detailed information on working on Mathesar's documentation, see [Mathesar Docs README](./docs/README.md).
 
 ### Linting
 
@@ -140,10 +164,6 @@ Frontend tests:
 docker exec mathesar_service bash -c "cd mathesar_ui && npm test"
 ```
 
-### E2E integration tests
-
-See [Integration Tests](./mathesar/tests/integration/README.md)
-
 ### Opening a shell in the container
 
 If you need to do some work on the container that's running the code, here's how you access it:
@@ -160,5 +180,4 @@ docker exec -it mathesar_db psql -U mathesar
 Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues) for instruction on troubleshooting common issues while setting up and running Mathesar.
 
 ## License
-
 Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).
