@@ -54,7 +54,7 @@
     </div>
     <div class="right">
       <div class="date">Released {dateString}</div>
-      <a href={release.notesUrl} class="notes">
+      <a href={release.notesUrl} class="notes" target="_blank">
         Release Notes <Icon {...iconExternalHyperlink} />
       </a>
     </div>
