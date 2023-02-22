@@ -1,4 +1,75 @@
+# Install on CentOS 7+
 
+Installation should only take a few minutes.
+
+## What we will do:
+- Prepare our server to run Docker and Docker Compose. Mathesar has been tested with Docker v23 and Docker Compose v2.10 (although v2.0 or higher should work). 
+    - [Docker installation documentation](https://docs.docker.com/desktop/)
+    - [`docker-compose` installation documentation](https://docs.docker.com/compose/install/)
+- Run the install script to pull the required docker-compose.yaml file and start the installation.    
+- You need to be a user with root access to the machine you're trying to install Mathesar on.
+
+## Preparing our server.
+- Prerequisites
+    - CentOS 7
+    - Root privileges
+    - A domain name for your Mathesar installation, pointing to your server.  This is however not a necesity.
+
+### Step one
+First, we need to update the software repository and upgrade all packages using the apt command below.  SSH to your server and elevate to the `root` user.
+```sh
+yum update && yum upgrade
+```
+### Step two
+Clean the system of any potential pre-installed Docker packages.
+```sh
+sudo yum remove docker docker-engien docker.io
+```
+### Step three: Installing Docker
+We wil now install Docker on this system.
+Firstly, we have to install the required Docker dependencies on the system:
+```sh
+yum install -y yum-utils device-mapper-persistent-data lvm2 curl
+```
+The next step is to add the stable repo for Docker. 
+```sh
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+```
+We have to update the system:
+```sh
+yum update
+```
+We can now install Docker using the following command:
+```sh
+sudo yum install docker-ce docker-ce-cli
+```
+Once installation is completed, you can run the following commands to make sure that Docker is running, and that it will start with the system.
+```sh
+systemctl enable docker && systemctl start docker
+```
+
+### Step four : Install Docker-compose
+We will install Docker-compose next.  We will start by downloading the latest Docker-compose version.
+```sh
+sudo curl -L "https://github.com/docker/compose/releases/download/2.16.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+Once downloaded, we have to change the properties so that it is an executable:
+
+```sh
+sudo chmod +x /usr/local/bin/docker-compose
+```
+Lastly, we created the required link between the binaries:
+```sh
+ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+```
+That is it.  Now the server is run Mathesar.
+
+## Quickstart
+
+#### Important
+Do not use 'admin' as your login username. Create a unique login username.
+
+
+To install the newest version of Mathesar, cut-and-paste the below command into a terminal window and follow the instructions:
 
 ```sh
 bash <(curl -sL https://raw.githubusercontent.com/centerofci/mathesar/master/install.sh)
