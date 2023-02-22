@@ -7,6 +7,9 @@ theme:
   icon:
     repo: fontawesome/brands/github
   favicon: assets/images/favicon.ico
+  theme:
+    font:
+      text: Nunito Sans
 extra_css:
   - stylesheets/extra.css
   
