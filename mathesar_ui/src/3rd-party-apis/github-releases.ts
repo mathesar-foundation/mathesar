@@ -1,3 +1,5 @@
+import { getExternalApi } from '@mathesar/api/utils/requestUtils';
+
 /**
  * GitHub's REST API gives way more info than we have here. See [docs][1]. But
  * I've only included the bare minimum that we need.
@@ -23,14 +25,8 @@ const baseUrl = 'https://api.github.com/repos/centerofci/mathesar';
  * simplistic enough that the GitHub API won't change under us. We may need
  * to revisit this.
  */
-async function getOneRelease(
-  endpoint: string,
-): Promise<GitHubRelease | undefined> {
-  const response = await fetch(`${baseUrl}${endpoint}`, { mode: 'cors' });
-  if (response.status !== 200) {
-    return undefined;
-  }
-  return (await response.json()) as GitHubRelease;
+function getOneRelease(endpoint: string): Promise<GitHubRelease | undefined> {
+  return getExternalApi(`${baseUrl}${endpoint}`);
 }
 
 /**
