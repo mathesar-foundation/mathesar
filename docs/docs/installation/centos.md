@@ -52,6 +52,7 @@ systemctl enable docker && systemctl start docker
 We will install Docker-compose next.  We will start by downloading the latest Docker-compose version.
 ```sh
 sudo curl -L "https://github.com/docker/compose/releases/download/2.16.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
 Once downloaded, we have to change the properties so that it is an executable:
 
 ```sh
