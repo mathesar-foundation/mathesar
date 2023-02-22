@@ -62,7 +62,7 @@ Once downloaded, we have to change the properties so that it is an executable:
 ```sh
 sudo chmod +x /usr/local/bin/docker-compose
 ```
-That is it.  Now the server is run Mathesar.
+That is it.  We are now ready to run Mathesar.
 
 ## Quickstart
 
