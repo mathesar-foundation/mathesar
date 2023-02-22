@@ -128,7 +128,6 @@ Here, we set up details of the Mathesar webserver.
 "
 
 read -r -p "Choose a domain for the webserver, or press ENTER to skip: " domain_name
-domain_name=${domain_name:localhost}
 allowed_hosts=${domain_name:-*}
 read -r -p "Choose an http port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
