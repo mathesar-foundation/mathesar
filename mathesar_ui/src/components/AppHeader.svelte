@@ -1,39 +1,42 @@
 <script lang="ts">
+  import { router } from 'tinro';
+
   import {
     DropdownMenu,
     Icon,
     iconLoading,
     LinkMenuItem,
-    MenuHeading,
     MenuDivider,
+    MenuHeading,
   } from '@mathesar-component-library';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
   import {
     iconAddNew,
-    iconExploration,
-    iconShortcuts,
-    iconUser,
     iconDatabase,
+    iconExploration,
     iconLogout,
     iconSettingsMajor,
+    iconShortcuts,
+    iconUser,
   } from '@mathesar/icons';
   import {
+    ADMIN_URL,
     getDatabasePageUrl,
     getDataExplorerPageUrl,
     getImportPageUrl,
     getTablePageUrl,
-    USER_PROFILE_URL,
     LOGOUT_URL,
-    ADMIN_URL,
+    USER_PROFILE_URL,
   } from '@mathesar/routes/urls';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { createTable } from '@mathesar/stores/tables';
-  import { router } from 'tinro';
-  import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
 
   const userProfile = getUserProfileStoreFromContext();
+  const releaseDataStore = getReleaseDataStoreFromContext();
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -41,6 +44,7 @@
     { database, schema },
     'canExecuteDDL',
   );
+  $: upgradable = $releaseDataStore?.value?.upgradeStatus === 'upgradable';
 
   let isCreatingNewEmptyTable = false;
 
@@ -98,7 +102,7 @@
       menuStyle="--spacing-x: 0.3em;"
     >
       <div class="user-switcher" slot="trigger">
-        <Icon {...iconSettingsMajor} />
+        <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
       </div>
       {#if database}
         <MenuHeading>Database</MenuHeading>
@@ -116,7 +120,11 @@
       </LinkMenuItem>
       <MenuDivider />
       {#if $userProfile?.isSuperUser}
-        <LinkMenuItem icon={iconSettingsMajor} href={ADMIN_URL}>
+        <LinkMenuItem
+          icon={iconSettingsMajor}
+          href={ADMIN_URL}
+          hasNotificationDot={upgradable}
+        >
           Administration
         </LinkMenuItem>
       {/if}
