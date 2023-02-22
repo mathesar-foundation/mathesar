@@ -12,6 +12,8 @@ markdown_extensions:
   - admonition
   - attr_list
   - def_list
+  - pymdownx.details
+  - pymdownx.superfences
   - smarty
   - tables
   - toc:
@@ -25,3 +27,5 @@ nav:
   - Home: index.md
   - Installation:
       - Install with Docker Compose: installation/docker-compose.md
+  - Contributing:
+      - Local Development Setup: contributing/local-dev.md
