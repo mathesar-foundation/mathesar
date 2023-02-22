@@ -11,7 +11,7 @@ Installation should only take a few minutes.
 ## Quickstart
 To install the newest version of Mathesar, cut-and-paste the below command into a terminal window and follow the instructions:
 
-```bash
+```sh
 bash <(curl -sL https://raw.githubusercontent.com/centerofci/mathesar/master/install.sh)
 ```
 
