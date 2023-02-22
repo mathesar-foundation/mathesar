@@ -62,7 +62,7 @@ Lastly, we created the required link between the binaries:
 ```sh
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
-That is it.  Now the server is run Mathesar.
+That is it.  We are now ready to run Mathesar.
 
 ## Quickstart
 
