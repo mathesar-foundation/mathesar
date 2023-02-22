@@ -37,14 +37,14 @@
 
     aside {
       flex-grow: 1;
-      flex-basis: 18rem;
+      flex-basis: 14rem;
       margin-left: var(--gap);
     }
 
     main {
       flex-basis: 0;
       flex-grow: 999;
-      min-inline-size: 50%;
+      min-inline-size: 65%;
       margin-left: var(--gap);
     }
   }
