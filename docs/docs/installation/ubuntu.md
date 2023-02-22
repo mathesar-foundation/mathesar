@@ -26,7 +26,7 @@ Clean the system of any potential pre-installed Docker packages.
 apt-get remove docker docker-engien docker.io
 ```
 ### Step three: Installing Docker
-We wil now install Docker on this systme.
+We wil now install Docker on this system.
 Firstly, we have to install the required Docker dependencies on the system:
 ```sh
 sudo apt install apt-transport-https ca-certificates curl software-properties-common
