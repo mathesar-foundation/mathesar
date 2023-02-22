@@ -208,3 +208,11 @@ export function uploadFile<T>(
     },
   );
 }
+
+export async function getExternalApi<T>(url: string): Promise<T | undefined> {
+  const response = await fetch(url, { mode: 'cors' });
+  if (!response.ok) {
+    return undefined;
+  }
+  return (await response.json()) as T;
+}
