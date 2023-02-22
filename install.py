@@ -6,7 +6,7 @@ import sys
 
 import django
 from django.core import management
-
+from decouple import config as decouple_config
 from django.conf import settings
 from db import install
 
@@ -20,6 +20,10 @@ def main():
             skip_confirm = True
     django.setup()
     management.call_command('migrate')
+    debug_mode = decouple_config('DEBUG', default=False, cast=bool)
+    #
+    if not debug_mode:
+        management.call_command('collectstatic', no_input='y')
     print("------------Setting up User Databases------------")
     user_databases = [key for key in settings.DATABASES if key != "default"]
     for database_key in user_databases:
