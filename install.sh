@@ -247,24 +247,7 @@ first time.
 read -r -p "Choose an admin username [mathesar]: " superuser_username
 superuser_username=${superuser_username:-mathesar}
 superuser_email=$superuser_username@example.com
-read -rs -p "Choose a password for the admin user: " superuser_password
-until [ -n "$superuser_password" ]; do
-  printf "\nThe password cannot be empty!\n"
-  read -rs -p "Choose a password for the admin user: " superuser_password
-done
-printf "\n"
-read -rs -p "Repeat the password: " superuser_password_check
-while [ "$superuser_password" != "$superuser_password_check" ]; do
-  printf "\nPasswords do not match! Try again.\n"
-  read -rs -p "Choose a password for the admin user: " superuser_password
-  until [ -n "$superuser_password" ]; do
-    printf "\nThe password cannot be empty!\n"
-    read -rs -p "Choose a password for the admin user: " superuser_password
-  done
-  printf "\n"
-  read -rs -p "Repeat the password: " superuser_password_check
-done
-
+superuser_password=$(create_password)
 printf "\n"
 clear -x
 printf "
