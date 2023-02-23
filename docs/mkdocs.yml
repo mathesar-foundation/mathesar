@@ -56,7 +56,8 @@ nav:
   - Installation:
       - Install with Docker Compose: installation/docker-compose.md
   - Product:
-      - Introduction: product/introduction.md
+      - Introduction: product/intro.md
       - Users & Access Levels: product/users.md
   - Contributing:
+      - Welcome!: contributing/welcome.md
       - Local Development Setup: contributing/local-dev.md
