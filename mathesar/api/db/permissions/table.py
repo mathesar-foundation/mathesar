@@ -47,29 +47,41 @@ class TableAccessPolicy(AccessPolicy):
     ]
 
     @classmethod
-    def _scope_queryset(cls, request, qs, allowed_roles, confirmed_table_roles):
+    def _scope_queryset(cls, request, qs, allowed_roles):
         if not (request.user.is_superuser or request.user.is_anonymous):
-            permissible_database_role_filter = (
+            db_role_access_filter = (
                 Q(schema__database__database_role__role__in=allowed_roles)
                 & Q(schema__database__database_role__user=request.user)
             )
-            permissible_schema_roles_filter = (
-                Q(schema__schema_role__role__in=allowed_roles) & Q(schema__schema_role__user=request.user)
+            schema_role_access_filter = (
+                Q(schema__schema_role__role__in=allowed_roles)
+                & Q(schema__schema_role__user=request.user)
             )
 
-            # gets the tables for which the user has manager role in the schema_role/database_role respectively
-            is_schema_manager = (Q(schema__schema_role__role='manager') & Q(schema__schema_role__user=request.user))
-            is_database_manager = (Q(schema__database__database_role__role='manager') & Q(schema__database__database_role__user=request.user))
+            # Filters to check whether user is a db/schema manager
+            is_database_manager = (
+                Q(schema__database__database_role__role='manager')
+                & Q(schema__database__database_role__user=request.user)
+            )
+            is_schema_manager = (
+                Q(schema__schema_role__role='manager')
+                & Q(schema__schema_role__user=request.user)
+            )
 
-            # gets tables that are confirmed
+            # Filter for confirmed tables
             cnf_table_filter = (Q(import_verified=True) | Q(import_verified__isnull=True))
 
-            # basically a union of two sets, one set gets unconfirmed tables that belong to a schema/database and the other set gets confirmed tables from permissible tables for schema/database role.
-            cnf_table_schema_role_access_filter = (is_schema_manager & Q(import_verified=False) | cnf_table_filter & permissible_schema_roles_filter)
-            cnf_table_db_role_access_filter = (is_database_manager & Q(import_verified=False) | cnf_table_filter & permissible_database_role_filter)
+            # Filters for the purpose of including/removing unconfirmed tables based on user's role
+            permissible_database_role_filter = (
+                is_database_manager & Q(import_verified=False)
+                | cnf_table_filter & db_role_access_filter
+            )
+            permissible_schema_roles_filter = (
+                is_schema_manager & Q(import_verified=False)
+                | cnf_table_filter & schema_role_access_filter
+            )
 
-            # we again perform union of above two sets and use distinct() to filter out duplicates
-            qs = qs.filter(cnf_table_schema_role_access_filter | cnf_table_db_role_access_filter).distinct()
+            qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
         return qs
 
     @classmethod
@@ -94,7 +106,7 @@ class TableAccessPolicy(AccessPolicy):
         """
         allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
         confirmed_table_roles = (Role.EDITOR.value, Role.VIEWER.value,)
-        return TableAccessPolicy._scope_queryset(request, qs, allowed_roles, confirmed_table_roles)
+        return TableAccessPolicy._scope_queryset(request, qs, allowed_roles)
 
     def is_table_manager(self, request, view, action):
         # Table access control is based on Schema and Database Roles as of now

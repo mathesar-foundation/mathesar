@@ -35,7 +35,7 @@ class SchemaAccessPolicy(AccessPolicy):
             permissible_schema_roles_filter = (
                 Q(schema_role__role__in=allowed_roles) & Q(schema_role__user=request.user)
             )
-            qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter).distinct()
+            qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
         return qs
 
     @classmethod

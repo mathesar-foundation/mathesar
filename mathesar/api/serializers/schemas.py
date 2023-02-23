@@ -33,7 +33,7 @@ class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSe
 
     def get_num_tables(self, obj):
         qs = Table.objects.filter(schema=obj)
-        count = TableAccessPolicy.scope_queryset(self.context['request'], qs).distinct().count()
+        count = TableAccessPolicy.scope_queryset(self.context['request'], qs).count()
         return count
 
     def get_num_queries(self, obj):
