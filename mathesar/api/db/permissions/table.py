@@ -1,4 +1,4 @@
-from django.db.models import Q, Case, Value, When, CharField
+from django.db.models import Q
 from rest_access_policy import AccessPolicy
 
 from mathesar.models.users import DatabaseRole, Role, SchemaRole
@@ -56,24 +56,20 @@ class TableAccessPolicy(AccessPolicy):
             permissible_schema_roles_filter = (
                 Q(schema__schema_role__role__in=allowed_roles) & Q(schema__schema_role__user=request.user)
             )
-            permissible_schema_role_filter = Q(schema__schema_role__role__in=confirmed_table_roles)
-            permissible_table_view_filter = Q(import_verified=True) | Q(import_verified__isnull=True)
-            confirmed_table = "CONFIRMED"
-            unconfirmed_table = "UNCONFIRMED"
-            not_allowed = "NOT_ALLOWED"
 
-            qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
+            # gets the tables for which the user has manager role in the schema_role/database_role respectively
+            is_schema_manager = (Q(schema__schema_role__role='manager') & Q(schema__schema_role__user=request.user))
+            is_database_manager = (Q(schema__database__database_role__role='manager') & Q(schema__database__database_role__user=request.user))
 
-            qs = qs.annotate(
-                to_count=Case(
-                    When(permissible_schema_role_filter, then=Case(
-                        When(permissible_table_view_filter, then=Value(confirmed_table)),
-                        default=Value(unconfirmed_table)
-                    )),
-                    default=Value(not_allowed), output_field=CharField()
-                )
-            )
-            qs = qs.filter(Q(to_count=not_allowed) | Q(to_count=confirmed_table))
+            # gets tables that are confirmed
+            cnf_table_filter = (Q(import_verified=True) | Q(import_verified__isnull=True))
+
+            # basically a union of two sets, one set gets unconfirmed tables that belong to a schema/database and the other set gets confirmed tables from permissible tables for schema/database role.
+            cnf_table_schema_role_access_filter = (is_schema_manager & Q(import_verified=False) | cnf_table_filter & permissible_schema_roles_filter)
+            cnf_table_db_role_access_filter = (is_database_manager & Q(import_verified=False) | cnf_table_filter & permissible_database_role_filter)
+
+            # we again perform union of above two sets and use distinct() to filter out duplicates
+            qs = qs.filter(cnf_table_schema_role_access_filter | cnf_table_db_role_access_filter).distinct()
         return qs
 
     @classmethod
