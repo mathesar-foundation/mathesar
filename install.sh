@@ -5,6 +5,109 @@ github_tag=${1-master}
 min_maj_docker_version=20
 min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
+
+## Functions ##################################################
+standardize_yesno () {
+  read -r -p "${1} [yes/no]: " yn
+  if [[ "$yn" == [yY] ]] || [[ "$yn" == [yY][eE][sS] ]]; then
+    echo "Y"
+  elif [[ "$yn" == [nN] ]] || [[ "$yn" == [nN][oO] ]]; then
+    echo "N"
+  else
+    standardize_yesno "You must choose yes or no."
+  fi
+}
+
+get_nonempty () {
+  local ret_str="${2}"
+  local prompt="${1}: "
+  if [ -n "${ret_str}" ]; then
+    prompt="${1} [${2}]: "
+  fi
+  read -r -p "${prompt}"
+  ret_str=${REPLY:-$ret_str}
+  until [ -n "${ret_str}" ]; do
+    read -r -p "This cannot be empty!
+${prompt}" ret_str
+  done
+  echo "${ret_str}"
+}
+
+get_password () {
+  local password
+  local prompt="${1}: "
+  local retry_prompt="
+The password cannot be empty!
+${prompt}"
+  read -rs -p "${prompt}" password
+  until [ -n "${password}" ]; do
+    read -rs -p "${retry_prompt}" password
+  done
+  echo "${password}"
+}
+
+create_password () {
+  local password
+  local password_check
+  local prompt="${1}Choose a password"
+  local repeat_prompt="
+Repeat the password: "
+  local repeat_retry="
+Passwords do not match! Try again.
+"
+
+  password=$(get_password "${prompt}")
+  read -rs -p "${repeat_prompt}" password_check
+  if [ "${password}" != "${password_check}" ]; then
+    password=$(create_password "${repeat_retry}")
+  fi
+  echo "${password}"
+}
+
+configure_db_urls() {
+  local default_db
+  local db_host
+  local db_port
+  local db_username
+  local db_password
+  local prefix
+  if [ "${1}" == preexisting ]; then
+    prefix="Enter the"
+    db_host=$(get_nonempty "${prefix} database host")
+  else
+    prefix="Choose a"
+    default_db="mathesar"
+    db_host=mathesar_db
+  fi
+  db_port=$(get_nonempty "${prefix} database connection port" "5432")
+  if [ "${1}" != django_only ]; then
+    db_name=$(get_nonempty "${prefix} database name" "${default_db}")
+  fi
+  db_username=$(get_nonempty "${prefix} username for the database" "${default_db}")
+  if [ "${1}" == preexisting ]; then
+    db_password=$(get_password "${prefix} password")
+  else
+    db_password=$(create_password)
+  fi
+
+
+  if [ "${1}" == preexisting ]; then
+    mathesar_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/${db_name}"
+  elif [ "${1}" == django_only ]; then
+    django_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/mathesar_django"
+    django_db_username="${db_username}"
+    django_db_password="${db_password}"
+    django_db_port="${db_port}"
+  else
+    mathesar_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/${db_name}"
+    django_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/mathesar_django"
+    django_db_username="${db_username}"
+    django_db_password="${db_password}"
+    django_db_port="${db_port}"
+  fi
+}
+################################################################################
+
 printf "
 --------------------------------------------------------------------------------
 
@@ -87,33 +190,18 @@ can be used to login directly using psql or another client.
 --------------------------------------------------------------------------------
 
 "
-read -r -p "Choose a database name [mathesar]: " db_name
-db_name=${db_name:-mathesar}
 
-read -r -p "Choose a username [mathesar]: " db_username
-db_username=${db_username:-mathesar}
+existing=$(standardize_yesno "Do you have a preexisting PostgreSQL database to connect?")
 
-read -rs -p "Choose a password for the user: " db_password
-until [ -n "$db_password" ]; do
-  printf "\nThe password cannot be empty!\n"
-  read -rs -p "Choose a password for the user: " db_password
-done
-printf "\n"
-read -rs -p "Repeat the password: " db_password_check
-while [ "$db_password" != "$db_password_check" ]; do
-  printf "\nPasswords do not match! Try again.\n"
-  read -rs -p "Choose a password for the user: " db_password
-  until [ -n "$db_password" ]; do
-    printf "\nThe password cannot be empty!\n"
-    read -rs -p "Choose a password for the user: " db_password
-  done
-  printf "\n"
-  read -rs -p "Repeat the password: " db_password_check
-done
-printf "\n"
-read -r -p "Choose a port for local database access [5432]: " db_port
-db_port=${db_port:-5432}
-
+if [ "${existing}" == Y ]; then
+  configure_db_urls preexisting
+  printf "
+Now we need to configure another local DB where Mathesar can keep metadata.
+"
+  configure_db_urls django_only
+else
+  configure_db_urls
+fi
 printf "\n"
 clear -x
 printf "
@@ -198,14 +286,14 @@ read -r -p "Press ENTER to continue. "
 sudo mkdir -p "$config_location"
 cd "$config_location"
 sudo tee .env > /dev/null <<EOF
-POSTGRES_USER='$db_username'
-POSTGRES_PASSWORD='$db_password'
-POSTGRES_HOST='$db_port'
+POSTGRES_USER='$django_db_username'
+POSTGRES_PASSWORD='$django_db_password'
+POSTGRES_HOST='$django_db_port'
 ALLOWED_HOSTS='$allowed_hosts'
 SECRET_KEY='$secret_key'
 DJANGO_DATABASE_KEY='default'
-DJANGO_DATABASE_URL='postgresql://$db_username:$db_password@mathesar_db:${db_port}/mathesar_django'
-MATHESAR_DATABASES='(mathesar_tables|postgresql://$db_username:$db_password@mathesar_db:$db_port/$db_name)'
+DJANGO_DATABASE_URL='${django_database_url}'
+MATHESAR_DATABASES='(mathesar_tables|${mathesar_database_url})'
 DJANGO_SUPERUSER_PASSWORD='$superuser_password'
 DOMAIN_NAME='$domain_name'
 HTTP_PORT='$http_port'
