@@ -437,11 +437,11 @@ export function speculateColumnMetaData({
               {
                 alias: aggregation.outputAlias,
                 type:
-                  aggregation.function === 'aggregate_to_array'
+                  aggregation.function === 'distinct_aggregate_to_array'
                     ? '_array'
                     : 'integer',
                 type_options:
-                  aggregation.function === 'aggregate_to_array'
+                  aggregation.function === 'distinct_aggregate_to_array'
                     ? {
                         type:
                           updatedColumnsMetaData.get(aggregation.inputAlias)

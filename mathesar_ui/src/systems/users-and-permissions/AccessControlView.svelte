@@ -131,7 +131,7 @@
     {/if}
   </div>
   <div class="list">
-    {#each usersWithAccess as userWithAccess}
+    {#each usersWithAccess as userWithAccess (userWithAccess.id)}
       <AccessControlRow
         {userProfile}
         {getUserRoles}
