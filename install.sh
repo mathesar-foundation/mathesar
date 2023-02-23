@@ -194,6 +194,10 @@ can be used to login directly using psql or another client.
 existing=$(standardize_yesno "Do you have a preexisting PostgreSQL database to connect?")
 
 if [ "${existing}" == Y ]; then
+  printf "
+WARNING: This will add a schema to the database for Mathesar functions!
+
+"
   configure_db_urls preexisting
   printf "
 Now we need to configure another local DB where Mathesar can keep metadata.
