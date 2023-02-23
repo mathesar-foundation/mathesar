@@ -90,11 +90,10 @@ class TableAccessPolicy(AccessPolicy):
         Used for scoping the queryset of Serializer RelatedField which reference a Table
         """
         allowed_roles = (Role.MANAGER.value,)
-        confirmed_table_roles = (Role.EDITOR.value, Role.VIEWER.value,)
 
         if request.method.lower() == 'get':
             allowed_roles = allowed_roles + (Role.EDITOR.value, Role.VIEWER.value)
-        return TableAccessPolicy._scope_queryset(request, qs, allowed_roles, confirmed_table_roles)
+        return TableAccessPolicy._scope_queryset(request, qs, allowed_roles)
 
     @classmethod
     def scope_viewset_queryset(cls, request, qs):
@@ -105,7 +104,6 @@ class TableAccessPolicy(AccessPolicy):
         This helps us to throw correct error status code instead of a 404 error code
         """
         allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
-        confirmed_table_roles = (Role.EDITOR.value, Role.VIEWER.value,)
         return TableAccessPolicy._scope_queryset(request, qs, allowed_roles)
 
     def is_table_manager(self, request, view, action):
