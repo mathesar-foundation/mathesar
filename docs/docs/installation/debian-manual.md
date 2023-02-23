@@ -27,7 +27,7 @@ Now we need to add a new usergroup and allow passwordless login:
 # useradd deployer
 # usermod -a -G deployers deployer
 ```
-Now you need to edit the '/etc/sudoers' file with the 'visudo' command, and add this line:  'deployer ALL=(ALL) NOPASSWD: ALL' under the "# User privilege specification" section.
+Now you need to edit the `/etc/sudoers` file with the 'visudo' command, and add this line:  `deployer ALL=(ALL) NOPASSWD: ALL` under the `# User privilege specification` section.
 
 
 ### Step two
