@@ -11,7 +11,7 @@
 {#if liveDemo}
   <div class="demo-banner">
     <div class="side left">
-      <i>Mathesar is in live demo mode.</i>
+      <i>Mathesar is in demo mode.</i>
       <Help>
         Each session has its own copy of demo data. Data will be deleted
         regularly.
