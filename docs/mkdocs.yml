@@ -40,6 +40,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.details
   - smarty
   - tables
   - toc:
@@ -54,3 +55,5 @@ nav:
   - Home: index.md
   - Installation:
       - Install with Docker Compose: installation/docker-compose.md
+  - Contributing:
+      - Local Development Setup: contributing/local-dev.md
