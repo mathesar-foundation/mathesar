@@ -201,3 +201,9 @@ def schemas(request, db_name):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, None)
     })
+
+
+def page_not_found_view(request, exception):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request),
+    }, status=404)
