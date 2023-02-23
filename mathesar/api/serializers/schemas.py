@@ -1,12 +1,11 @@
-import django.db.models
-from django.db.models import Case, When, Value, Q
 from rest_access_policy import PermittedSlugRelatedField
 from rest_framework import serializers
-from mathesar.models.users import Role
+
+from mathesar.api.db.permissions.table import TableAccessPolicy
 
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.models.base import Database, Schema
+from mathesar.models.base import Database, Schema, Table
 
 
 class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
@@ -33,29 +32,8 @@ class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSe
         ]
 
     def get_num_tables(self, obj):
-        confirmed_table_roles = (Role.EDITOR.value, Role.VIEWER.value)
-        user = self.context['request'].user
-
-        confirmed_table = "CONFIRMED"
-        unconfirmed_table = "UNCONFIRMED"
-        not_allowed = "NOT_ALLOWED"
-
-        if not user.is_superuser:
-            permissible_schema_role_filter = Q(schema__schema_role__role__in=confirmed_table_roles)
-            permissible_table_view_filter = Q(import_verified=True) | Q(import_verified__isnull=True)
-
-            qs = obj.tables.filter(schema__schema_role__user=user).annotate(
-                to_count=Case(
-                    When(permissible_schema_role_filter, then=Case(
-                        When(permissible_table_view_filter, then=Value(confirmed_table)),
-                        default=Value(unconfirmed_table)
-                    )),
-                    default=Value(not_allowed), output_field=django.db.models.CharField()
-                )
-            )
-            count = qs.filter(Q(to_count=not_allowed) | Q(to_count=confirmed_table)).count()
-        else:
-            count = obj.tables.count()
+        qs = Table.objects.filter(schema=obj)
+        count = TableAccessPolicy.scope_queryset(self.context['request'], qs).distinct().count()
         return count
 
     def get_num_queries(self, obj):
