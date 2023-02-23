@@ -161,12 +161,12 @@ def check_create_table_response(
 
 
 list_clients_with_results_count = [
-    ('superuser_client_factory', 3),
-    ('db_manager_client_factory', 3),
-    ('db_editor_client_factory', 3),
-    ('schema_manager_client_factory', 2),
+    ('superuser_client_factory', 5),
+    ('db_manager_client_factory', 5),
+    ('db_editor_client_factory', 2),
+    ('schema_manager_client_factory', 4),
     ('schema_viewer_client_factory', 2),
-    ('db_viewer_schema_manager_client_factory', 3)
+    ('db_viewer_schema_manager_client_factory', 4)
 ]
 
 write_clients_with_status_code = [
@@ -242,6 +242,13 @@ def test_table_list_based_on_permissions(
     create_patents_table('Private Table', schema_name='Private Schema')
     create_patents_table("Patent Table 1")
     create_patents_table("Patent Table 2")
+    table3 = create_patents_table("Patent Table 3")
+    table3.import_verified = True
+    table3.save()
+    table4 = create_patents_table("Patent Table 4")
+    table4.import_verified = None
+    table4.save()
+
     client = request.getfixturevalue(client_name)(patent_schema)
 
     response = client.get('/api/db/v0/tables/')
