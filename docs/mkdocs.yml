@@ -4,6 +4,7 @@ repo_url: https://github.com/centerofci/mathesar/
 repo_name: centerofci/mathesar
 theme:
   name: material
+  logo: assets/images/logo.svg
   icon:
     repo: fontawesome/brands/github
   favicon: assets/images/favicon.ico
