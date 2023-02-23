@@ -12,6 +12,7 @@
     iconSchema,
   } from '@mathesar/icons';
   import type { UserModel } from '@mathesar/stores/users';
+  import type { UserRole } from '@mathesar/api/users';
   import {
     getDisplayNameForRole,
     type ObjectRoleMap,
@@ -24,100 +25,112 @@
   export let removeAccessForUser: (user: UserModel) => Promise<void>;
 
   $: roleMap = getUserRoles(userModel);
-  $: roles = roleMap && roleMap.size > 0 ? [...roleMap.entries()] : undefined;
-  $: userRoleOfAccessControlObject = roleMap?.get(accessControlObject);
+  $: roles = roleMap && roleMap.size > 0 ? [...roleMap.entries()] : [];
+  $: userRoleRows = (() => {
+    const rows: ['admin' | 'database' | 'schema', UserRole][] =
+      userModel.isSuperUser ? [['admin', 'manager']] : roles;
+    return rows;
+  })();
 
   async function removeAccess() {
     await removeAccessForUser(userModel);
   }
 </script>
 
-<div class="name-and-info">
-  <div class="name">{userModel.username}</div>
-  <div class="info">
-    {#if userModel.fullName}
-      <span>{userModel.fullName}</span>
-    {/if}
-    {#if userModel.fullName && userModel.email}
-      <span class="divider" />
-    {/if}
-    {#if userModel.email}
-      <span>{userModel.email}</span>
-    {/if}
-  </div>
-</div>
-<div class="access-level">
-  {#if userModel.isSuperUser}
-    <Chip background="var(--slate-200)" display="inline-flex">
-      <Icon {...iconUser} size="0.8em" />
-      <span>Admin</span>
-    </Chip>
-  {:else if roles}
-    {#each roles as [object, role]}
-      <Chip
-        background={accessControlObject !== object
-          ? 'var(--slate-100)'
-          : 'var(--slate-200)'}
-        display="inline-flex"
-      >
-        {#if object === 'database'}
-          <Icon {...iconDatabase} size="0.8em" />
-        {:else if object === 'schema'}
-          <Icon {...iconSchema} size="0.8em" />
+{#each userRoleRows as [level, role] (`${level}-${role}`)}
+  <div
+    class="wrapper"
+    class:disabled={userRoleRows.length > 1 && accessControlObject !== level}
+  >
+    <div class="name-and-info">
+      <div class="name">{userModel.username}</div>
+      <div class="info">
+        {#if userModel.fullName}
+          <span>{userModel.fullName}</span>
         {/if}
-        <span>{getDisplayNameForRole(role)}</span>
+        {#if userModel.fullName && userModel.email}
+          <span class="divider" />
+        {/if}
+        {#if userModel.email}
+          <span>{userModel.email}</span>
+        {/if}
+      </div>
+    </div>
+    <div class="access-level">
+      <Chip background="var(--slate-200)" display="inline-flex">
+        {#if level === 'admin'}
+          <Icon {...iconUser} size="0.8em" />
+          <span>Admin</span>
+        {:else}
+          {#if level === 'database'}
+            <Icon {...iconDatabase} size="0.8em" />
+          {:else if level === 'schema'}
+            <Icon {...iconSchema} size="0.8em" />
+          {/if}
+          <span>{getDisplayNameForRole(role)}</span>
+        {/if}
       </Chip>
-    {/each}
-  {/if}
-</div>
-<div>
-  {#if !userModel.isSuperUser && userRoleOfAccessControlObject !== undefined && userProfile?.id !== userModel.id}
-    <SpinnerButton
-      onClick={removeAccess}
-      label=""
-      icon={{ ...iconDeleteMajor, size: '0.75em' }}
-      appearance="outline-primary"
-    />
-  {:else}
-    <Button disabled>
-      <Icon {...iconDeleteMajor} size="0.75em" />
-    </Button>
-  {/if}
-</div>
+    </div>
+    <div>
+      {#if accessControlObject === level && userProfile?.id !== userModel.id}
+        <SpinnerButton
+          onClick={removeAccess}
+          label=""
+          icon={{ ...iconDeleteMajor, size: '0.75em' }}
+          appearance="outline-primary"
+        />
+      {:else}
+        <Button disabled>
+          <Icon {...iconDeleteMajor} size="0.75em" />
+        </Button>
+      {/if}
+    </div>
+  </div>
+{/each}
 
 <style lang="scss">
-  .name-and-info {
-    padding: var(--size-ultra-small) 0;
+  .wrapper {
+    --access-control-row-color: inherit;
+    display: contents;
+    color: var(--access-control-row-color);
 
-    .name {
-      font-weight: 500;
-    }
-    .info {
-      display: flex;
-      align-items: center;
-      color: var(--slate-500);
+    .name-and-info {
+      padding: var(--size-ultra-small) 0;
 
-      .divider {
-        display: inline-block;
-        margin: 0 0.4rem;
-        width: 0.25rem;
-        height: 0.25rem;
-        border-radius: 50%;
-        background: var(--slate-800);
+      .name {
+        font-weight: 500;
+      }
+      .info {
+        display: flex;
+        align-items: center;
+        color: var(--slate-500);
+
+        .divider {
+          display: inline-block;
+          margin: 0 0.4rem;
+          width: 0.25rem;
+          height: 0.25rem;
+          border-radius: 50%;
+          background: var(--slate-800);
+        }
       }
     }
-  }
-  .access-level {
-    padding: 0 0.4rem;
-    text-align: right;
+    .access-level {
+      padding: 0 0.4rem;
+      text-align: right;
 
-    :global(.chip) {
-      min-width: 4.15rem;
-      justify-content: center;
+      :global(.chip) {
+        min-width: 4.15rem;
+        justify-content: center;
+      }
+
+      :global(.chip + .chip) {
+        margin-left: 0.2rem;
+      }
     }
 
-    :global(.chip + .chip) {
-      margin-left: 0.2rem;
+    &.disabled {
+      --access-control-row-color: var(--color-text-muted);
     }
   }
 </style>

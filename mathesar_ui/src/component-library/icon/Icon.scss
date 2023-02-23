@@ -4,6 +4,10 @@
   vertical-align: -10%;
   fill: currentColor;
   flex-shrink: 0;
+
+  .notification-dot {
+    fill: var(--red-600);
+  }
 }
 .fa-flip-horizontal {
   transform: scale(-1, 1);
