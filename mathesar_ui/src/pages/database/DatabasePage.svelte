@@ -156,7 +156,10 @@
           <SchemaRow
             {database}
             {schema}
-            {canExecuteDDL}
+            canExecuteDDL={userProfile?.hasPermission(
+              { database, schema },
+              'canExecuteDDL',
+            )}
             on:edit={() => editSchema(schema)}
             on:delete={() => deleteSchema(schema)}
           />

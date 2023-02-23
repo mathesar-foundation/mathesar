@@ -5,6 +5,7 @@ repo_name: centerofci/mathesar
 
 theme:
   name: material
+  logo: assets/images/logo.svg
   favicon: assets/images/favicon.ico
   features:
       - content.code.copy
