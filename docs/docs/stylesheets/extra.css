@@ -52,6 +52,10 @@
   border-bottom: 2px solid var(--md-primary-fg-color);
 }
 
+.md-typeset h2 {
+  font-weight: 600;
+}
+
 [data-md-color-scheme="slate"] .md-typeset h1 {
   border-bottom: 2px solid var(--md-primary-fg-color--light);
   color: var(--md-primary-fg-color--light);
