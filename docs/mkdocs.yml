@@ -2,19 +2,48 @@ site_name: Mathesar Documentation
 site_url: https://docs.mathesar.org/
 repo_url: https://github.com/centerofci/mathesar/
 repo_name: centerofci/mathesar
+
 theme:
   name: material
+  logo: assets/images/logo.svg
+  favicon: assets/images/favicon.ico
+  features:
+      - content.code.copy
+  font:
+    text: Nunito Sans
+    code: Fira Code
   icon:
     repo: fontawesome/brands/github
-  favicon: assets/images/favicon.ico
+  palette: 
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+extra_css:
+  - stylesheets/extra.css
 
 markdown_extensions:
   - admonition
   - attr_list
   - def_list
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
   - smarty
   - tables
   - toc:
+      title: On this page
       permalink: true
 
 plugins:
