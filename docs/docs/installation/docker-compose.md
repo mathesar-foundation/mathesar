@@ -55,6 +55,10 @@ Mathesar actually uses two databases; one internal system database for metadata 
 
 The credentials created in this section are used to login directly to the database (i.e., not through the Mathesar UI).
 
+**Note on permissions**: If you choose to connect Mathesar to a preexisting PostgreSQL database, you need to make sure that the user you choose:
+- exists
+- Is a `SUPERUSER`. See [the PostgreSQL docs](https://www.postgresql.org/docs/13/sql-createrole.html) for info about that.
+
 #### Webserver Configuration
 
 This section lets you customize the details of the webserver that provides the Mathesar web UI, and API endpoints. Most of the customizations available here are only relevant if you're planning to expose your installation of Mathesar to the wider internet. You can configure the domain as well as the ports to use for http and https traffic, respectively.
