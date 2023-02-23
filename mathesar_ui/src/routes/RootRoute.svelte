@@ -42,6 +42,6 @@
   </Route>
 
   <Route fallback>
-    <ErrorPage>404: Page not found</ErrorPage>
+    <ErrorPage>This is the not the webpage you are looking for.</ErrorPage>
   </Route>
 </Route>
