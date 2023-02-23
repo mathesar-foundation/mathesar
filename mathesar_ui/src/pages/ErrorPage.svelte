@@ -12,7 +12,7 @@
       <slot />
     </div>
     {#if showGoToRoot}
-      <AnchorButton appearance="primary" href="/">Go to home</AnchorButton>
+      <AnchorButton appearance="primary" href="/">Go to homepage</AnchorButton>
     {/if}
   </div>
 </LayoutWithHeader>
