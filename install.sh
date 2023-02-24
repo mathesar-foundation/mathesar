@@ -220,7 +220,11 @@ Here, we set up details of the Mathesar webserver.
 "
 
 read -r -p "Choose a domain for the webserver, or press ENTER to skip: " domain_name
-allowed_hosts=${domain_name:-*}
+if [ -n "${domain_name}" ]; then
+  allowed_hosts="${domain_name}, .localhost, 127.0.0.1"
+else
+  allowed_hosts=".localhost, 127.0.0.1"
+fi
 domain_name=${domain_name:-':80'}
 read -r -p "Choose an http port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
@@ -316,8 +320,8 @@ sudo docker exec mathesar_service python manage.py createsuperuser --no-input --
 read -r -p "Press ENTER to continue. "
 printf "\n"
 clear -x
-if [ "$allowed_hosts" !=  '*' ]; then
-  padded_domain=" $allowed_hosts"
+if [ "${domain_name}" !=  ":80" ]; then
+  padded_domain=" ${domain_name}"
 fi
 printf "
 --------------------------------------------------------------------------------
