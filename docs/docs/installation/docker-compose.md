@@ -59,6 +59,7 @@ The credentials created in this section are used to login directly to the databa
 - exists
 - Is a `SUPERUSER`. See [the PostgreSQL docs](https://www.postgresql.org/docs/13/sql-createrole.html) for info about that.
 
+**Limitation**: Mathesar cannot currently connect to a PostgreSQL database running on `localhost` on the host machine underlying your Docker setup. We're working on adding this functionality.
 #### Webserver Configuration
 
 This section lets you customize the details of the webserver that provides the Mathesar web UI, and API endpoints. Most of the customizations available here are only relevant if you're planning to expose your installation of Mathesar to the wider internet. You can configure the domain as well as the ports to use for http and https traffic, respectively.
