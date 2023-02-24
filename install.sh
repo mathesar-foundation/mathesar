@@ -7,17 +7,6 @@ min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
 
 ## Functions ##################################################
-standardize_yesno () {
-  read -r -p "${1} [yes/no]: " yn
-  if [[ "$yn" == [yY] ]] || [[ "$yn" == [yY][eE][sS] ]]; then
-    echo "Y"
-  elif [[ "$yn" == [nN] ]] || [[ "$yn" == [nN][oO] ]]; then
-    echo "N"
-  else
-    standardize_yesno "You must choose yes or no."
-  fi
-}
-
 get_nonempty () {
   local ret_str="${2}"
   local prompt="${1}: "
@@ -191,21 +180,31 @@ can be used to login directly using psql or another client.
 
 "
 
-existing=$(standardize_yesno "Do you have a preexisting PostgreSQL database to connect?")
-
-if [ "${existing}" == Y ]; then
-  printf "
+printf "
+Would you like to connect an existing database or create a new database?
+"
+select CHOICE in "connect existing" "create new"; do
+  case $CHOICE in
+    "connect existing")
+      printf "
 WARNING: This will add a schema to the database for Mathesar functions!
 
 "
-  configure_db_urls preexisting
-  printf "
+      configure_db_urls preexisting
+      printf "
 Now we need to configure another local DB where Mathesar can keep metadata.
 "
-  configure_db_urls django_only
-else
-  configure_db_urls
-fi
+      configure_db_urls django_only
+      break
+      ;;
+    "create new")
+      configure_db_urls
+      break
+      ;;
+    *)
+      printf "\nInvalid choice.\n"
+  esac
+done
 printf "\n"
 clear -x
 printf "
