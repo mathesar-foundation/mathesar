@@ -23,7 +23,7 @@ def main():
     debug_mode = decouple_config('DEBUG', default=False, cast=bool)
     #
     if not debug_mode:
-        management.call_command('collectstatic', no_input='y')
+        management.call_command('collectstatic', '--noinput', '--clear')
     print("------------Setting up User Databases------------")
     user_databases = [key for key in settings.DATABASES if key != "default"]
     for database_key in user_databases:
