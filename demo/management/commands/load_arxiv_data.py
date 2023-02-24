@@ -1,6 +1,7 @@
 import re
 import arxiv
 import json
+import logging
 from sqlalchemy import text
 
 from django.core.management import BaseCommand
@@ -17,8 +18,15 @@ class Command(BaseCommand):
 
 
 def update_our_arxiv_dbs():
+    """
+    Will log an error if db-schema log is missing or cannot be deserialized.
+    """
     papers = download_arxiv_papers()
-    db_schema_pairs = _get_logged_db_schema_pairs()
+    try:
+        db_schema_pairs = _get_logged_db_schema_pairs()
+    except Exception as e:
+        logging.error(e, exc_info=True)
+        return
     for db_name, schema_name in db_schema_pairs:
         engine = create_mathesar_engine(db_name)
         update_arxiv_schema(engine, schema_name, papers)
@@ -279,17 +287,14 @@ def _get_logged_db_schema_pairs():
     Note, deduplicates the resulting pairs.
     """
     db_schema_log_path = get_arxiv_db_and_schema_log_path()
-    # Below will quietly not execute if db-schema log doesn't exist.
-    # We want this, because it's hard to guarantee that the log will be there.
-    if db_schema_log_path.is_file():
-        with open(db_schema_log_path, 'r') as lines:
-            return set(
-                tuple(
-                    json.loads(line)
-                )
-                for line
-                in lines
+    with open(db_schema_log_path, 'r') as lines:
+        return set(
+            tuple(
+                json.loads(line)
             )
+            for line
+            in lines
+        )
 
 
 _non_cs_arxiv_categories = {
