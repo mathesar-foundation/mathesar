@@ -1,18 +1,50 @@
 site_name: Mathesar Documentation
 site_url: https://docs.mathesar.org/
-repo_url: https://github.com/centerofci/mathesar/tree/master/docs
+repo_url: https://github.com/centerofci/mathesar/
+repo_name: centerofci/mathesar
+
 theme:
   name: material
+  logo: assets/images/logo.svg
+  favicon: assets/images/favicon.ico
+  features:
+      - content.code.copy
+  font:
+    text: Nunito Sans
+    code: Fira Code
   icon:
     repo: fontawesome/brands/github
+  palette: 
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+extra_css:
+  - stylesheets/extra.css
 
 markdown_extensions:
   - admonition
   - attr_list
   - def_list
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
   - smarty
   - tables
   - toc:
+      title: On this page
       permalink: true
 
 plugins:
@@ -22,6 +54,10 @@ plugins:
 nav:
   - Home: index.md
   - Installation:
-      - Docker Compose: installation/docker-compose.md
-  - Administration:
-      - Docker Compose: administration/docker-compose.md
+      - Install with Docker Compose: installation/docker-compose.md
+  - Product:
+      - Introduction: product/intro.md
+      - Users & Access Levels: product/users.md
+  - Contributing:
+      - Welcome!: contributing/welcome.md
+      - Local Development Setup: contributing/local-dev.md

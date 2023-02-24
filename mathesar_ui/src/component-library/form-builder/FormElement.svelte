@@ -15,6 +15,7 @@
   export let variables: FormBuildConfiguration['variables'];
   export let customComponents: FormBuildConfiguration['customComponents'];
   export let validationResult: FormValidationResult;
+  export let disabled = false;
 
   $: store = 'variable' in element ? stores.get(element.variable) : undefined;
   $: variableType =
@@ -29,6 +30,7 @@
       type={variableType}
       {store}
       validationErrors={validationResult.failedChecks[element.variable] || []}
+      {disabled}
     />
   {/if}
 {:else if element.type === 'static' && store}

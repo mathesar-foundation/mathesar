@@ -18,6 +18,7 @@ import {
 import {
   getCellCap,
   getDbTypeBasedInputCap,
+  getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import type { TableEntry } from '@mathesar/api/types/tables';
@@ -43,6 +44,7 @@ export interface ProcessedColumn extends CellColumnFabric {
    */
   linkFk: FkConstraint | undefined;
   abstractType: AbstractType;
+  initialInputValue: unknown;
   inputComponentAndProps: ComponentAndProps;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
@@ -93,6 +95,11 @@ export function processColumn({
     sharedConstraints,
     linkFk,
     abstractType,
+    initialInputValue: getInitialInputValue(
+      column,
+      undefined,
+      abstractType.cellInfo,
+    ),
     cellComponentAndProps: getCellCap({
       cellInfo: abstractType.cellInfo,
       column,

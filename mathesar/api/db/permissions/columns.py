@@ -15,12 +15,12 @@ class ColumnAccessPolicy(AccessPolicy):
     statements = [
         {
             'action': ['list', 'retrieve', 'dependents'],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
         },
         {
             'action': ['destroy', 'update', 'partial_update', 'create'],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_table_manager)']
         },
@@ -28,7 +28,7 @@ class ColumnAccessPolicy(AccessPolicy):
 
     @classmethod
     def scope_queryset(cls, request, qs):
-        if not request.user.is_superuser:
+        if not (request.user.is_superuser or request.user.is_anonymous):
             allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
             permissible_database_role_filter = (
                 Q(table__schema__database__database_role__role__in=allowed_roles)
