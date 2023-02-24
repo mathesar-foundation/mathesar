@@ -48,6 +48,7 @@ There are three levels of database roles:
 - Can view, add, edit, and remove any column in the database.
 - Can view, add, edit, and remove any constraint in the database.
 - Can view, add, edit, and remove any record in the database.
+- Can view, add, edit, and remove any exploration in the database.
 - Can perform "extract column" and "move column" actions
 
 ### Editor
@@ -57,6 +58,7 @@ There are three levels of database roles:
 - Can view any table in the database.
 - Can view any column in the database.
 - Can view any constraint in the database.
+- Can view, add, edit, and remove any exploration in the database.
 - Can view, add, edit, and remove any record in the database.
 
 ### Viewer
@@ -66,6 +68,7 @@ There are three levels of database roles:
 - Can view any table in the database.
 - Can view any column in the database.
 - Can view any constraint in the database.
+- Can view any exploration in the database.
 
 ## Managing Database Roles
 
@@ -91,6 +94,7 @@ There are three levels of schema roles:
 - Can view, add, edit, and remove any column in the schema.
 - Can view, add, edit, and remove any constraint in the schema.
 - Can view, add, edit, and remove any record in the schema.
+- Can view, add, edit, and remove any exploration in the schema.
 - Can perform "extract column" and "move column" actions
 
 ### Editor
@@ -99,12 +103,14 @@ There are three levels of schema roles:
 - Can view any column in the schema.
 - Can view any constraint in the schema.
 - Can view, add, edit, and remove any record in the schema.
+- Can view, add, edit, and remove any exploration in the schema.
 
 ### Viewer
 
 - Can view any table in the schema.
 - Can view any column in the schema.
 - Can view any constraint in the schema.
+- Can view any exploration in the schema.
 
 ## Managing Schema Roles
 
