@@ -12,7 +12,8 @@ from db import install
 
 
 def main():
-    # skip_confirm is temporarily enabled by default as we don't have any use for interactive prompts with docker only deployments
+    # skip_confirm is temporarily enabled by default as we don't have any use
+    # for interactive prompts with docker only deployments
     skip_confirm = True
     (opts, _) = getopt.getopt(sys.argv[1:], ":s", ["skip-confirm"])
     for (opt, value) in opts:
