@@ -127,13 +127,21 @@ Here, we set up details of the Mathesar webserver.
 
 "
 
-read -r -p "Choose a domain for the webserver, or press ENTER to skip: " domain_name
-if [ -n "${domain_name}" ]; then
-  allowed_hosts="${domain_name}, .localhost, 127.0.0.1"
-else
-  allowed_hosts=".localhost, 127.0.0.1"
+allowed_hosts=".localhost, 127.0.0.1"
+read -r -p "Enter the domain of the webserver, or press ENTER to skip: " domain_name
+if [ -z "${domain_name}" ]; then
+  read -r -p "Enter the external IP address of the webserver, or press ENTER to skip: " domain_name
 fi
-domain_name=${domain_name:-':80'}
+if [ -n "${domain_name}" ]; then
+  allowed_hosts="${domain_name}, ${allowed_hosts}"
+else
+  printf "
+No domain or external IP address configured.
+Only local connections will be allowed.
+"
+  read -r -p "Press ENTER to continue. "
+  domain_name=':80'
+fi
 read -r -p "Choose an http port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
 read -r -p "Choose an https port for the webserver to use [443]: " https_port
