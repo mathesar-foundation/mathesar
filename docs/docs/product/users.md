@@ -69,6 +69,7 @@ There are three levels of database roles:
 - Can view any column in the database.
 - Can view any constraint in the database.
 - Can view any exploration in the database.
+- Can use the **Data Explorer** to create ad-hoc explorations using data in the database, but cannot save them.
 
 ## Managing Database Roles
 
@@ -111,6 +112,7 @@ There are three levels of schema roles:
 - Can view any column in the schema.
 - Can view any constraint in the schema.
 - Can view any exploration in the schema.
+- Can use the **Data Explorer** to create ad-hoc explorations using data in the schema, but cannot save them.
 
 ## Managing Schema Roles
 
