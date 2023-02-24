@@ -66,7 +66,7 @@
     isVisible = false;
   }
 
-  function closeOnOutofBound(event : any) {
+  function closeOnOutofBound(event: Event) {
     event.preventDefault();
     isVisible = false;
   }
