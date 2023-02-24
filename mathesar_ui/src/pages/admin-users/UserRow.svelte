@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { Icon } from '@mathesar/component-library';
-  import { iconUser } from '@mathesar/icons';
+  import { Icon } from '@mathesar-component-library';
   import { getEditUsersPageUrl } from '@mathesar/routes/urls';
   import type { UserModel } from '@mathesar/stores/users';
+  import { getUserTypeInfoFromUserModel } from '@mathesar/systems/users-and-permissions';
 
   export let user: UserModel;
 
-  // TODO: Update the icon
-  $: userTypeIcon = user.isSuperUser ? iconUser : iconUser;
-  $: userTypeText = user.isSuperUser ? 'Admin' : 'Custom';
+  $: userTypeInfo = getUserTypeInfoFromUserModel(user);
   $: showUserDetailedInfo = user.email || user.fullName;
 </script>
 
@@ -30,8 +28,8 @@
     {/if}
   </div>
   <div class="user-type">
-    <Icon class="icon" {...userTypeIcon} />
-    <span>{userTypeText}</span>
+    <Icon class="icon" {...userTypeInfo.icon} />
+    <span>{userTypeInfo.displayName}</span>
   </div>
 </a>
 

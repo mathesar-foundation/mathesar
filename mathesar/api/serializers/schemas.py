@@ -1,9 +1,11 @@
 from rest_access_policy import PermittedSlugRelatedField
 from rest_framework import serializers
 
+from mathesar.api.db.permissions.table import TableAccessPolicy
+
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.models.base import Database, Schema
+from mathesar.models.base import Database, Schema, Table
 
 
 class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
@@ -30,7 +32,9 @@ class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSe
         ]
 
     def get_num_tables(self, obj):
-        return obj.tables.count()
+        qs = Table.objects.filter(schema=obj)
+        count = TableAccessPolicy.scope_queryset(self.context['request'], qs).count()
+        return count
 
     def get_num_queries(self, obj):
         return sum(t.queries.count() for t in obj.tables.all())

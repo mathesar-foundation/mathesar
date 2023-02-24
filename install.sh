@@ -219,13 +219,24 @@ Here, we set up details of the Mathesar webserver.
 
 "
 
-read -r -p "Choose a domain for the webserver, or press ENTER to skip: " domain_name
-if [ -n "${domain_name}" ]; then
-  allowed_hosts="${domain_name}, .localhost, 127.0.0.1"
-else
-  allowed_hosts=".localhost, 127.0.0.1"
+allowed_hosts=".localhost, 127.0.0.1"
+read -r -p "Enter the domain of the webserver, or press ENTER to skip: " domain_name
+if [ -z "${domain_name}" ]; then
+  read -r -p "Enter the external IP address of the webserver, or press ENTER to skip: " ip_address
+  domain_name=':80'
 fi
-domain_name=${domain_name:-':80'}
+if [ -n "${ip_address}" ]; then
+  allowed_hosts="${ip_address}, ${allowed_hosts}"
+elif [ "${domain_name}" != ':80' ]; then
+  allowed_hosts="${domain_name}, ${allowed_hosts}"
+else
+  printf "
+No domain or external IP address configured.
+Only local connections will be allowed.
+
+"
+  read -r -p "Press ENTER to continue. "
+fi
 read -r -p "Choose an http port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
 read -r -p "Choose an https port for the webserver to use [443]: " https_port
@@ -322,6 +333,8 @@ printf "\n"
 clear -x
 if [ "${domain_name}" !=  ":80" ]; then
   padded_domain=" ${domain_name}"
+elif [ -n "${ip_address}" ]; then
+  padded_domain=" ${ip_address}"
 fi
 printf "
 --------------------------------------------------------------------------------
@@ -331,7 +344,7 @@ Installation complete!
 If running locally, you can login by navigating to http://localhost in your
 web browser. If you set up Mathesar on a server, double-check that the
 machine accepts traffic on the configured ports, and login at the configured
-domain%s.
+address%s.
 
 Thank you for installing Mathesar.
 
