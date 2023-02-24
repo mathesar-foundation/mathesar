@@ -9,7 +9,7 @@ Installation should only take a few minutes.
 - You need to be a user with root access to the machine you're trying to install Mathesar on.
 
 ## Quickstart
-To install the newest version of Mathesar, cut-and-paste the below command into a terminal window and follow the instructions:
+To install the newest version of Mathesar, cut-and-paste the below command into a terminal and follow the instructions:
 
 ```sh
 bash <(curl -sL https://raw.githubusercontent.com/centerofci/mathesar/master/install.sh)
@@ -68,6 +68,7 @@ Here, the installer helps you create a user (separate from the database user) th
 We need to store all the details configured above, and we do so in a file in your configuration directory. Note that this contains your passwords and other secrets, so **it should be kept secure**. By default, this directory is `/etc/mathesar/`, but you can change it.
 
 We'll store two files under that directory:
+
 - `.env`: This file has the above-mentioned configurations.
 - `docker-compose.yml` This is a config file downloaded from Mathesar's git repo. It defines the different Docker containers used by Mathesar, and how they're networked together.
 
@@ -82,6 +83,7 @@ If everything has worked, then the installer prints a message letting you know t
 
 ### Docker containers
 This installation process creates the following containers:
+
 - `mathesar_service`, which runs the main Mathesar application.
 - `mathesar_db`, which which runs the database (PostgreSQL 13).
 - `mathesar-caddy-reverse-proxy-1`, which helps route traffic to the `mathesar_service` container.
@@ -89,6 +91,7 @@ This installation process creates the following containers:
 
 ### Files
 This installation process creates the following files in the Mathesar configuration directory:
+
 - `.env`. This file defines the environment inside of the various Mathesar `docker` containers. It should be kept safe, since it has sensitive information about the passwords you set for Mathesar. If you've forgotten your admin username or password, look at this file.
 - `docker-compose.yml`. This is the main file defining the Mathesar containers listed above, and the connections between them.
 
