@@ -134,14 +134,19 @@ list_clients_with_num_tables_count = [
 
 
 @pytest.mark.parametrize('client_name, expected_num_tables_count', list_clients_with_num_tables_count)
-def test_schema_num_tables_with_multiple_roles(request, create_table, create_patents_table, patent_schema, client_name,
-                                               expected_num_tables_count):
+def test_schema_num_tables_with_multiple_roles(
+        request,
+        create_patents_table,
+        patent_schema,
+        client_name,
+        expected_num_tables_count
+):
     create_patents_table("Patent Table 1")
     table_2 = create_patents_table("Patent Table 2")
-    table_2.import_verified = True
-    table_2.save()
     table_3 = create_patents_table("Patent Table 3")
+    table_2.import_verified = True
     table_3.import_verified = None
+    table_2.save()
     table_3.save()
     client = request.getfixturevalue(client_name)(patent_schema)
     response = client.get('/api/db/v0/schemas/')
