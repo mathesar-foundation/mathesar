@@ -131,18 +131,18 @@ allowed_hosts=".localhost, 127.0.0.1"
 read -r -p "Enter the domain of the webserver, or press ENTER to skip: " domain_name
 if [ -z "${domain_name}" ]; then
   read -r -p "Enter the external IP address of the webserver, or press ENTER to skip: " ip_address
+  domain_name=':80'
 fi
-if [ -n "${domain_name}" ]; then
-  allowed_hosts="${domain_name}, ${allowed_hosts}"
-elif [ -n "${ip_address}" ]; then
+if [ -n "${ip_address}" ]; then
   allowed_hosts="${ip_address}, ${allowed_hosts}"
+elif [ "${domain_name}" != ':80' ]; then
+  allowed_hosts="${domain_name}, ${allowed_hosts}"
 else
   printf "
 No domain or external IP address configured.
 Only local connections will be allowed.
 "
   read -r -p "Press ENTER to continue. "
-  domain_name=':80'
 fi
 read -r -p "Choose an http port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
