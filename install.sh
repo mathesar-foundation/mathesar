@@ -128,10 +128,10 @@ Here, we set up details of the Mathesar webserver.
 "
 
 read -r -p "Choose a domain for the webserver, or press ENTER to skip: " domain_name
-if [ -n ${domain_name} ]; then
-  allowed_hosts=".localhost, 127.0.0.1"
-else
+if [ -n "${domain_name}" ]; then
   allowed_hosts="${domain_name}, .localhost, 127.0.0.1"
+else
+  allowed_hosts=".localhost, 127.0.0.1"
 fi
 domain_name=${domain_name:-':80'}
 read -r -p "Choose an http port for the webserver to use [80]: " http_port
