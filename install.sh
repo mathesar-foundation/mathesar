@@ -187,7 +187,7 @@ select CHOICE in "connect existing" "create new"; do
   case $CHOICE in
     "connect existing")
       printf "
-WARNING: This will add a schema to the database for Mathesar functions!
+WARNING: This will create a PostgreSQL schema in the database for Mathesar!
 
 "
       configure_db_urls preexisting
