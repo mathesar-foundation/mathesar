@@ -17,18 +17,22 @@ class Command(BaseCommand):
 
 
 def update_our_arxiv_dbs():
-    papers = _download_arxiv_papers()
+    papers = download_arxiv_papers()
     db_schema_pairs = _get_logged_db_schema_pairs()
     for db_name, schema_name in db_schema_pairs:
         engine = create_mathesar_engine(db_name)
-        with engine.begin() as conn:
-            _set_search_path(conn, schema_name)
-            for paper in papers:
-                persist_paper(conn, paper)
+        update_arxiv_schema(engine, schema_name, papers)
         engine.dispose()
 
 
-def _download_arxiv_papers():
+def update_arxiv_schema(engine, schema_name, papers):
+    with engine.begin() as conn:
+        _set_search_path(conn, schema_name)
+        for paper in papers:
+            persist_paper(conn, paper)
+
+
+def download_arxiv_papers():
     query_expression = _construct_arxiv_search_query_expression()
     arxiv_search = arxiv.Search(
         query=query_expression,
@@ -275,14 +279,17 @@ def _get_logged_db_schema_pairs():
     Note, deduplicates the resulting pairs.
     """
     db_schema_log_path = get_arxiv_db_and_schema_log_path()
-    with open(db_schema_log_path, 'r') as lines:
-        return set(
-            tuple(
-                json.loads(line)
+    # Below will quietly not execute if db-schema log doesn't exist.
+    # We want this, because it's hard to guarantee that the log will be there.
+    if db_schema_log_path.is_file():
+        with open(db_schema_log_path, 'r') as lines:
+            return set(
+                tuple(
+                    json.loads(line)
+                )
+                for line
+                in lines
             )
-            for line
-            in lines
-        )
 
 
 _non_cs_arxiv_categories = {

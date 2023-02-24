@@ -1,14 +1,17 @@
 """This module contains functions to load datasets for the demo."""
 import bz2
+import logging
+import pickle
 
 from sqlalchemy import text
 
 from demo.install.arxiv_skeleton import setup_and_register_schema_for_receiving_arxiv_data
+from demo.management.commands.load_arxiv_data import update_arxiv_schema
 from demo.install.base import (
     LIBRARY_MANAGEMENT, LIBRARY_ONE, LIBRARY_TWO,
     MOVIE_COLLECTION, MOVIES_SQL_BZ2,
     MATHESAR_CON, DEVCON_DATASET,
-    ARXIV,
+    ARXIV, ARXIV_PAPERS_PICKLE,
 )
 
 
@@ -62,4 +65,21 @@ def _load_devcon_dataset(engine):
 
 
 def _load_arxiv_data_skeleton(engine):
-    setup_and_register_schema_for_receiving_arxiv_data(engine, schema_name=ARXIV)
+    schema_name = ARXIV
+    setup_and_register_schema_for_receiving_arxiv_data(engine, schema_name=schema_name)
+    _load_arxiv_dataset(engine, schema_name=schema_name)
+
+
+def _load_arxiv_dataset(engine, schema_name):
+    """
+    Defined separately, because this dataset does not need a dataset per-se; it's meant to be
+    updated via cron. We're preloading some data so that it doesn't start off empty.
+
+    Does not propogate if there's a failure.
+    """
+    try:
+        with open(ARXIV_PAPERS_PICKLE, 'rb') as f:
+            papers = pickle.load(f)
+            update_arxiv_schema(engine, schema_name, papers)
+    except Exception as e:
+        logging.error(e, exc_info=True)

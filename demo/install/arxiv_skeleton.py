@@ -4,7 +4,6 @@ model whenever a user starts a new demo, and then loading data into the data
 model via a cron job that runs a management command.
 """
 
-import os
 import json
 from pathlib import Path
 
@@ -17,7 +16,6 @@ def setup_and_register_schema_for_receiving_arxiv_data(
     engine, schema_name='Latest Papers from arXiv'
 ):
     db_name, schema_name = _setup_arxiv_schema(engine, schema_name)
-    _make_sure_parent_directories_present(get_arxiv_db_and_schema_log_path())
     append_db_and_arxiv_schema_to_log(db_name, schema_name)
 
 
@@ -29,6 +27,7 @@ def _make_sure_parent_directories_present(path_to_file):
 
 def append_db_and_arxiv_schema_to_log(db_name, schema_name):
     path = get_arxiv_db_and_schema_log_path()
+    _make_sure_parent_directories_present(path)
     if db_name == getattr(settings, 'MATHESAR_DEMO_TEMPLATE', None):
         return
     db_and_schema = [db_name, schema_name]
@@ -38,7 +37,7 @@ def append_db_and_arxiv_schema_to_log(db_name, schema_name):
 
 
 def get_arxiv_db_and_schema_log_path():
-    return os.path.abspath(settings.MATHESAR_DEMO_ARXIV_LOG_PATH)
+    return Path(settings.MATHESAR_DEMO_ARXIV_LOG_PATH).absolute()
 
 
 def _setup_arxiv_schema(engine, schema_name):
