@@ -161,12 +161,12 @@ def check_create_table_response(
 
 
 list_clients_with_results_count = [
-    ('superuser_client_factory', 3),
-    ('db_manager_client_factory', 3),
-    ('db_editor_client_factory', 3),
-    ('schema_manager_client_factory', 2),
+    ('superuser_client_factory', 5),
+    ('db_manager_client_factory', 5),
+    ('db_editor_client_factory', 2),
+    ('schema_manager_client_factory', 4),
     ('schema_viewer_client_factory', 2),
-    ('db_viewer_schema_manager_client_factory', 3)
+    ('db_viewer_schema_manager_client_factory', 4)
 ]
 
 write_clients_with_status_code = [
@@ -233,8 +233,8 @@ def test_table_list(create_patents_table, client):
 
 @pytest.mark.parametrize('client_name,expected_table_count', list_clients_with_results_count)
 def test_table_list_based_on_permissions(
-        create_patents_table, patent_schema,
-        create_table,
+        create_patents_table,
+        patent_schema,
         request,
         client_name,
         expected_table_count
@@ -242,6 +242,13 @@ def test_table_list_based_on_permissions(
     create_patents_table('Private Table', schema_name='Private Schema')
     create_patents_table("Patent Table 1")
     create_patents_table("Patent Table 2")
+    table3 = create_patents_table("Patent Table 3")
+    table4 = create_patents_table("Patent Table 4")
+    table3.import_verified = True
+    table4.import_verified = None
+    table3.save()
+    table4.save()
+
     client = request.getfixturevalue(client_name)(patent_schema)
 
     response = client.get('/api/db/v0/tables/')
@@ -814,6 +821,11 @@ def test_table_partial_update_by_different_roles(create_patents_table, request, 
     table_name = 'NASA Table Partial Update'
     new_table_name = 'NASA Table Partial Update New'
     table = create_patents_table(table_name)
+
+    # Editors and Viewers only have access to confirmed tables
+    table.import_verified = True
+    table.save()
+
     client = request.getfixturevalue(client_name)(table.schema)
     expect_comment = 'a super new test comment'
     body = {'name': new_table_name, 'description': expect_comment}
@@ -856,6 +868,13 @@ def test_table_delete_by_different_roles(
     different_schema_table = create_patents_table('Private Table', schema_name='Private Schema')
     table_name = 'NASA Table Delete'
     table = create_patents_table(table_name)
+
+    # Editors and Viewers only have access to confirmed tables
+    different_schema_table.import_verified = True
+    table.import_verified = True
+    different_schema_table.save()
+    table.save()
+
     client = request.getfixturevalue(client_name)(table.schema)
     response = client.delete(f'/api/db/v0/tables/{table.id}/')
     assert response.status_code == expected_status_code
@@ -1692,6 +1711,11 @@ split_table_client_with_different_roles = [
 def test_table_extract_columns_by_different_roles(create_patents_table, request, client_name, expected_status_code):
     table_name = 'Patents'
     table = create_patents_table(table_name)
+
+    # Editors and Viewers only have access to confirmed tables
+    table.import_verified = True
+    table.save()
+
     column_name_id_map = table.get_column_name_id_bidirectional_map()
     column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
