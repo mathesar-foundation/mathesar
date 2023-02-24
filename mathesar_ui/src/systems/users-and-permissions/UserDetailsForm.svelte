@@ -18,7 +18,7 @@
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import SelectRole from './SelectRole.svelte';
+  import SelectUserType from './SelectUserType.svelte';
   import UserFormInput from './UserFormInput.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
@@ -32,7 +32,7 @@
   $: fullName = optionalField(user?.full_name ?? '');
   $: username = requiredField(user?.username ?? '');
   $: email = optionalField(user?.email ?? '');
-  $: role = requiredField<'user' | 'admin' | undefined>(
+  $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );
 
@@ -40,7 +40,7 @@
   $: user, password.reset();
 
   $: formFields = (() => {
-    const fields = { fullName, username, email, role };
+    const fields = { fullName, username, email, userType };
     return isNewUser ? { ...fields, password } : fields;
   })();
   $: form = makeForm(formFields);
@@ -51,7 +51,7 @@
       full_name: formValues.fullName,
       username: formValues.username,
       email: formValues.email,
-      is_superuser: formValues.role === 'admin',
+      is_superuser: formValues.userType === 'admin',
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
@@ -80,7 +80,7 @@
     const { commonErrors, fieldSpecificErrors } =
       extractDetailedFieldBasedErrors<FieldKey>(e, {
         user_name: 'username',
-        is_superuser: 'role',
+        is_superuser: 'userType',
       });
     for (const [fieldKey, errors] of fieldSpecificErrors) {
       const combinedFields = form.fields as Partial<
@@ -133,9 +133,9 @@
 
   <UserFormInput
     label="Role *"
-    field={role}
+    field={userType}
     input={{
-      component: SelectRole,
+      component: SelectUserType,
       props: { disabled: isUserUpdatingThemselves },
     }}
   />
