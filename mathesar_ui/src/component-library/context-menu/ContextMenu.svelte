@@ -66,6 +66,11 @@
     isVisible = false;
   }
 
+  function closeOnOutofBound(event : any) {
+    event.preventDefault();
+    isVisible = false;
+  }
+
   function checkAndCloseOnInnerClick() {
     if (closeOnInnerClick) {
       close();
@@ -90,7 +95,7 @@
   {#if isVisible}
     <div
       class="context-menu dropdown content"
-      use:clickOffBounds={{ callback: close }}
+      use:clickOffBounds={{ callback: closeOnOutofBound }}
       use:popper={{ reference: getVirtualReferenceElement(mousePosition) }}
       use:portal
       on:click={checkAndCloseOnInnerClick}
