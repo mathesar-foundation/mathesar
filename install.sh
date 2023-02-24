@@ -130,10 +130,12 @@ Here, we set up details of the Mathesar webserver.
 allowed_hosts=".localhost, 127.0.0.1"
 read -r -p "Enter the domain of the webserver, or press ENTER to skip: " domain_name
 if [ -z "${domain_name}" ]; then
-  read -r -p "Enter the external IP address of the webserver, or press ENTER to skip: " domain_name
+  read -r -p "Enter the external IP address of the webserver, or press ENTER to skip: " ip_address
 fi
 if [ -n "${domain_name}" ]; then
   allowed_hosts="${domain_name}, ${allowed_hosts}"
+elif [ -n "${ip_address}" ]; then
+  allowed_hosts="${ip_address}, ${allowed_hosts}"
 else
   printf "
 No domain or external IP address configured.
