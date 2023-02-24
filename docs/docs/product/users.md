@@ -1,6 +1,6 @@
 # Users & Access Levels
 
-Mathesar allows you to set up users with different access levels. A user's access levels determine what they can do with the data in managed in Mathesar.
+Mathesar allows you to set up users with different access levels. A user's access levels determine what they can do with the data managed in Mathesar.
 
 Mathesar's installation process includes setting up the first user. This user is an **Admin**.
 
@@ -14,18 +14,21 @@ Mathesar's installation process includes setting up the first user. This user is
     - Mathesar does not send invitation emails to new users (yet). You'll need to send the user their username and password yourself.
     - The user will be prompted to change the password when they log in for the first time.
 
-
 ## User Types
+
 Users can be either **Admin** or **Standard** users.
 
 ### Admin users
+
 Admin users:
+
 - can manage other users (view, add, edit, delete)
 - have **Manager** permissions on all databases and schemas
 
 You cannot set granular permissions for an **Admin** user.
 
 ### Standard users
+
 By default, **Standard** users cannot see anything in Mathesar. They will need to be granted database or schema roles individually.
 
 ## Database Roles
@@ -37,6 +40,7 @@ There are three levels of database roles:
 - **Viewers** have read-only access to all data in the database. They cannot make any changes.
 
 ### Manager
+
 - Receives **Manager** permissions on all schemas in the database.
 - Can view, add, and remove other users' access to the database.
 - Can view, add, edit, and remove any schema in the database.
@@ -47,10 +51,21 @@ There are three levels of database roles:
 - Can perform "extract column" and "move column" actions
 
 ### Editor
-*TODO*
+
+- Receives **Editor** permissions on all schemas in the database.
+- Can view any schema in the database.
+- Can view any table in the database.
+- Can view any column in the database.
+- Can view any constraint in the database.
+- Can view, add, edit, and remove any record in the database.
 
 ### Viewer
-*TODO*
+
+- Receives **Viewer** permissions on all schemas in the database.
+- Can view any schema in the database.
+- Can view any table in the database.
+- Can view any column in the database.
+- Can view any constraint in the database.
 
 ## Managing Database Roles
 
@@ -69,6 +84,7 @@ There are three levels of schema roles:
 - **Viewers** have read-only access to all data in the schema. They cannot make any changes.
 
 ### Manager
+
 - Can view, add, and remove other users' access to the schema.
 - Can view, add, edit, and remove any schema in the schema.
 - Can view, add, edit, and remove any table in the schema.
@@ -78,10 +94,17 @@ There are three levels of schema roles:
 - Can perform "extract column" and "move column" actions
 
 ### Editor
-*TODO*
+
+- Can view any table in the schema.
+- Can view any column in the schema.
+- Can view any constraint in the schema.
+- Can view, add, edit, and remove any record in the schema.
 
 ### Viewer
-*TODO*
+
+- Can view any table in the schema.
+- Can view any column in the schema.
+- Can view any constraint in the schema.
 
 ## Managing Schema Roles
 
@@ -93,7 +116,8 @@ There are three levels of schema roles:
 3. Click on the **Manage Access** button.
 
 ## Order of Precedence
-!!! warning
+
+!!! warning 
     - The Mathesar UI currently has an issue where **schema roles** _always_ take precedence over **database roles**. This behavior will is not in line with the API and will be fixed in a future release.
 
 If a user has both a **Database Role** and a **Schema Role** for a schema within the same database, the **Schema Role** will only have an effect if it grants more permissions.
