@@ -15,7 +15,7 @@ To install the newest version of Mathesar, cut-and-paste the below command into 
 bash <(curl -sL https://raw.githubusercontent.com/centerofci/mathesar/master/install.sh)
 ```
 
-To access Mathesar, navigate to `localhost` in your web browser, and login using the admin user name and password you set during the installation.
+You'll set up the domain you'll access Mathesar using and an admin username and password during installation. To access Mathesar, navigate to the domain and login using the admin user name and password.
 
 ## Administration
 
