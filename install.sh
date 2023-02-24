@@ -141,6 +141,7 @@ else
   printf "
 No domain or external IP address configured.
 Only local connections will be allowed.
+
 "
   read -r -p "Press ENTER to continue. "
 fi
@@ -257,6 +258,8 @@ printf "\n"
 clear -x
 if [ "${domain_name}" !=  ":80" ]; then
   padded_domain=" ${domain_name}"
+elif [ -n "${ip_address}" ]; then
+  padded_domain=" ${ip_address}"
 fi
 printf "
 --------------------------------------------------------------------------------
@@ -266,7 +269,7 @@ Installation complete!
 If running locally, you can login by navigating to http://localhost in your
 web browser. If you set up Mathesar on a server, double-check that the
 machine accepts traffic on the configured ports, and login at the configured
-domain%s.
+address%s.
 
 Thank you for installing Mathesar.
 
