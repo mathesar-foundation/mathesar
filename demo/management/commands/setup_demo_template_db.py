@@ -12,7 +12,7 @@ class Command(BaseCommand):
     help = 'Initialize the demo template database.'
 
     def handle(self, *args, **options):
-        _setup_demo_template_db(*args, **options)
+        _setup_demo_template_db()
 
 
 def _setup_demo_template_db():

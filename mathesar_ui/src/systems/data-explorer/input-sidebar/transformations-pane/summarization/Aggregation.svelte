@@ -13,7 +13,7 @@
 
   function getAggregationTypeLabel(aggType?: string) {
     switch (aggType) {
-      case 'aggregate_to_array':
+      case 'distinct_aggregate_to_array':
         return 'List';
       case 'count':
         return 'Count';
@@ -37,7 +37,7 @@
   {/if}
   <span>as</span>
   <Select
-    options={['aggregate_to_array', 'count']}
+    options={['distinct_aggregate_to_array', 'count']}
     bind:value={aggregation.function}
     disabled={limitEditing}
     getLabel={getAggregationTypeLabel}
