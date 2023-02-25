@@ -39,6 +39,7 @@ class LiveDemoModeMiddleware:
             engine = create_mathesar_engine(db_name)
             customize_settings(engine)
             load_custom_explorations(engine)
+            engine.dispose()
 
         logger.debug(f"Using database {db_name} for sessionid {sessionid}")
         params = request.GET.copy()

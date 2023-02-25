@@ -32,11 +32,10 @@ def clear_dj_cache():
 
 
 def reflect_db_objects(metadata, db_name=None):
-    sync_databases_status()
     databases = models.Database.current_objects.all()
     if db_name is not None:
         databases = databases.filter(name=db_name)
-
+    sync_databases_status(databases)
     for database in databases:
         if database.deleted is False:
             reflect_schemas_from_database(database)
@@ -53,9 +52,9 @@ def reflect_db_objects(metadata, db_name=None):
             models.Schema.current_objects.filter(database=database).delete()
 
 
-def sync_databases_status():
+def sync_databases_status(databases):
     """Update status and check health for current Database Model instances."""
-    for db in models.Database.current_objects.all():
+    for db in databases:
         try:
             db._sa_engine.connect()
             db._sa_engine.dispose()
