@@ -81,7 +81,12 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                 args.append(field)
             validator(self.initial_data[field.field_name], *args)
         except (DjangoValidationError, RestValidationError) as err:
-            err_message = err.detail[0] if hasattr(err, 'detail') else err.message
+            if hasattr(err, 'detail'):
+                err_message = err.detail[0]
+            elif hasattr(err, 'message'):
+                err_message = err.message
+            elif hasattr(err, 'messages'):
+                err_message = err.messages[0]
             return err_message == message
 
     @property

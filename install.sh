@@ -7,17 +7,6 @@ min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
 
 ## Functions ##################################################
-standardize_yesno () {
-  read -r -p "${1} [yes/no]: " yn
-  if [[ "$yn" == [yY] ]] || [[ "$yn" == [yY][eE][sS] ]]; then
-    echo "Y"
-  elif [[ "$yn" == [nN] ]] || [[ "$yn" == [nN][oO] ]]; then
-    echo "N"
-  else
-    standardize_yesno "You must choose yes or no."
-  fi
-}
-
 get_nonempty () {
   local ret_str="${2}"
   local prompt="${1}: "
@@ -191,21 +180,31 @@ can be used to login directly using psql or another client.
 
 "
 
-existing=$(standardize_yesno "Do you have a preexisting PostgreSQL database to connect?")
-
-if [ "${existing}" == Y ]; then
-  printf "
-WARNING: This will add a schema to the database for Mathesar functions!
+printf "
+Would you like to connect an existing database or create a new database?
+"
+select CHOICE in "connect existing" "create new"; do
+  case $CHOICE in
+    "connect existing")
+      printf "
+WARNING: This will create a PostgreSQL schema in the database for Mathesar!
 
 "
-  configure_db_urls preexisting
-  printf "
+      configure_db_urls preexisting
+      printf "
 Now we need to configure another local DB where Mathesar can keep metadata.
 "
-  configure_db_urls django_only
-else
-  configure_db_urls
-fi
+      configure_db_urls django_only
+      break
+      ;;
+    "create new")
+      configure_db_urls
+      break
+      ;;
+    *)
+      printf "\nInvalid choice.\n"
+  esac
+done
 printf "\n"
 clear -x
 printf "
@@ -219,9 +218,24 @@ Here, we set up details of the Mathesar webserver.
 
 "
 
-read -r -p "Choose a domain for the webserver, or press ENTER to skip: " domain_name
-allowed_hosts=${domain_name:-*}
-domain_name=${domain_name:-':80'}
+allowed_hosts=".localhost, 127.0.0.1"
+read -r -p "Enter the domain of the webserver, or press ENTER to skip: " domain_name
+if [ -z "${domain_name}" ]; then
+  read -r -p "Enter the external IP address of the webserver, or press ENTER to skip: " ip_address
+  domain_name=':80'
+fi
+if [ -n "${ip_address}" ]; then
+  allowed_hosts="${ip_address}, ${allowed_hosts}"
+elif [ "${domain_name}" != ':80' ]; then
+  allowed_hosts="${domain_name}, ${allowed_hosts}"
+else
+  printf "
+No domain or external IP address configured.
+Only local connections will be allowed.
+
+"
+  read -r -p "Press ENTER to continue. "
+fi
 read -r -p "Choose an http port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
 read -r -p "Choose an https port for the webserver to use [443]: " https_port
@@ -321,8 +335,10 @@ done
 read -r -p "Press ENTER to continue. "
 printf "\n"
 clear -x
-if [ "$allowed_hosts" !=  '*' ]; then
-  padded_domain=" $allowed_hosts"
+if [ "${domain_name}" !=  ":80" ]; then
+  padded_domain=" ${domain_name}"
+elif [ -n "${ip_address}" ]; then
+  padded_domain=" ${ip_address}"
 fi
 printf "
 --------------------------------------------------------------------------------
@@ -332,7 +348,7 @@ Installation complete!
 If running locally, you can login by navigating to http://localhost in your
 web browser. If you set up Mathesar on a server, double-check that the
 machine accepts traffic on the configured ports, and login at the configured
-domain%s.
+address%s.
 
 Thank you for installing Mathesar.
 

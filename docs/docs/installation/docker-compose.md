@@ -9,13 +9,13 @@ Installation should only take a few minutes.
 - You need to be a user with root access to the machine you're trying to install Mathesar on.
 
 ## Quickstart
-To install the newest version of Mathesar, cut-and-paste the below command into a terminal window and follow the instructions:
+To install the newest version of Mathesar, cut-and-paste the below command into a terminal and follow the instructions:
 
 ```sh
 bash <(curl -sL https://raw.githubusercontent.com/centerofci/mathesar/master/install.sh)
 ```
 
-To access Mathesar, navigate to `localhost` in your web browser, and login using the admin user name and password you set during the installation.
+You'll set up the domain you'll access Mathesar using and an admin username and password during installation. To access Mathesar, navigate to the domain and login using the admin user name and password.
 
 ## Administration
 
@@ -59,6 +59,7 @@ The credentials created in this section are used to login directly to the databa
 - exists
 - Is a `SUPERUSER`. See [the PostgreSQL docs](https://www.postgresql.org/docs/13/sql-createrole.html) for info about that.
 
+**Limitation**: Mathesar cannot currently connect to a PostgreSQL database running on `localhost` on the host machine underlying your Docker setup. We're working on adding this functionality.
 #### Webserver Configuration
 
 This section lets you customize the details of the webserver that provides the Mathesar web UI, and API endpoints. Most of the customizations available here are only relevant if you're planning to expose your installation of Mathesar to the wider internet. You can configure the domain as well as the ports to use for http and https traffic, respectively.
@@ -72,6 +73,7 @@ Here, the installer helps you create a user (separate from the database user) th
 We need to store all the details configured above, and we do so in a file in your configuration directory. Note that this contains your passwords and other secrets, so **it should be kept secure**. By default, this directory is `/etc/mathesar/`, but you can change it.
 
 We'll store two files under that directory:
+
 - `.env`: This file has the above-mentioned configurations.
 - `docker-compose.yml` This is a config file downloaded from Mathesar's git repo. It defines the different Docker containers used by Mathesar, and how they're networked together.
 
@@ -86,6 +88,7 @@ If everything has worked, then the installer prints a message letting you know t
 
 ### Docker containers
 This installation process creates the following containers:
+
 - `mathesar_service`, which runs the main Mathesar application.
 - `mathesar_db`, which which runs the database (PostgreSQL 13).
 - `mathesar-caddy-reverse-proxy-1`, which helps route traffic to the `mathesar_service` container.
@@ -93,6 +96,7 @@ This installation process creates the following containers:
 
 ### Files
 This installation process creates the following files in the Mathesar configuration directory:
+
 - `.env`. This file defines the environment inside of the various Mathesar `docker` containers. It should be kept safe, since it has sensitive information about the passwords you set for Mathesar. If you've forgotten your admin username or password, look at this file.
 - `docker-compose.yml`. This is the main file defining the Mathesar containers listed above, and the connections between them.
 
