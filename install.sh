@@ -326,7 +326,7 @@ printf "
 Service is ready and healthy!
 Adding admin user to Django webservice now.
 "
-sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email" 2> >(grep -vi warn)
+sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
 read -r -p "Press ENTER to continue. "
 printf "\n"
 clear -x
