@@ -9,7 +9,7 @@ Installation should only take a few minutes.
 
 ## Preparing our server.
 - Prerequisites
-    - Debian 11
+    - Debian 11 with at least `60 GB` disk space and `4GB` of RAM.
     - Root privileges
     
 ### Step one: Prepare the server
