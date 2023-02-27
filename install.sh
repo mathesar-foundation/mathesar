@@ -5,6 +5,7 @@ github_tag=${1-master}
 min_maj_docker_version=20
 min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
+shopt -s expand_aliases
 
 ## Functions ##################################################
 get_nonempty () {
@@ -115,18 +116,42 @@ clear -x
 printf "
 --------------------------------------------------------------------------------
 
+OPERATING SYSTEM CHECK
+
+--------------------------------------------------------------------------------
+
+"
+if [ $(echo "${OSTYPE}" | head -c 5) == "linux" ]; then
+  printf "Installing Mathesar for GNU/Linux.
+"
+  alias docker='sudo docker'
+elif [ $(echo "${OSTYPE}" | head -c 6) == "darwin" ]; then
+  printf "Installing Mathesar for macOS.
+"
+else
+  printf "Operating System Unknown. Proceed at your own risk.
+"
+  alias docker='sudo docker'
+fi
+read -r -p "
+Press ENTER to continue, or CTRL+C to cancel. "
+clear -x
+
+printf "
+--------------------------------------------------------------------------------
+
 DOCKER VERSION CHECK
 
 We'll begin by making sure your Docker installation is up-to-date.  In order to
-run Docker commands, we need to use sudo for elevated privileges.
+run some necessary commands, we need to use sudo for elevated privileges.
 
 --------------------------------------------------------------------------------
 
 "
 sudo -k
 sudo -v
-docker_version=$(sudo docker version -f '{{.Server.Version}}')
-docker_compose_version=$(sudo docker compose version --short)
+docker_version=$(docker version -f '{{.Server.Version}}')
+docker_compose_version=$(docker compose version --short)
 printf "
 Your Docker version is %s.
 Your Docker Compose version is %s.
@@ -318,7 +343,7 @@ printf "Downloading docker-compose.yml...
 sudo wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
 printf "Success!"
 clear -x
-sudo docker compose --profile prod up -d --wait
+docker compose --profile prod up -d --wait
 clear -x
 printf "
 --------------------------------------------------------------------------------
@@ -326,7 +351,7 @@ printf "
 Service is ready and healthy!
 Adding admin user to Django webservice now.
 "
-sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
+docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
 read -r -p "Press ENTER to continue. "
 printf "\n"
 clear -x
