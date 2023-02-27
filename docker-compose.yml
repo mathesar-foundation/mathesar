@@ -14,7 +14,7 @@ services:
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     healthcheck:
-      test: pg_isready
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
       interval: 5s
       timeout: 1s
       retries: 30
