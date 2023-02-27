@@ -11,7 +11,7 @@ Installation should only take a few minutes.
 
 ## Preparing our server.
 - Prerequisites
-    - CentOS 7
+    - CentOS 7 with at least `60 GB` disk space and `4GB` of RAM.
     - Root privileges
     - A domain name for your Mathesar installation, pointing to your server.  This is however not a necesity.
 
