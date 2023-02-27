@@ -32,6 +32,12 @@
                 method * GET
                 reverse_proxy watchtower:8080 {
                       header_up Authorization "Bearer mytoken"
+                      transport http {
+                        # We want keepalive connections to stay open as long as a dockerhub pull
+                        # might take, because Watchtower responds to the upgrade request only when
+                        # it's finished upgrading.
+                        keepalive 0.5h
+                      }
                 }
         }
 	reverse_proxy mathesar_service:8000
