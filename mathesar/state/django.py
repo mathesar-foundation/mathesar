@@ -59,11 +59,20 @@ def sync_databases_status():
         try:
             db._sa_engine.connect()
             db._sa_engine.dispose()
-            db.deleted = False
+            _set_db_is_deleted(db, False)
         except (OperationalError, KeyError):
-            db.deleted = True
-        finally:
-            db.save()
+            _set_db_is_deleted(db, True)
+
+
+def _set_db_is_deleted(db, deleted):
+    """
+    Assures that a Django Database model's `deleted` field is equal to the `deleted`
+    parameter, updating if necessary. Takes care to `save()` only when an update has been performed,
+    to save on the noteworthy performance cost.
+    """
+    if db.deleted is not deleted:
+        db.deleted = deleted
+        db.save()
 
 
 # TODO pass in a cached engine instead of creating a new one

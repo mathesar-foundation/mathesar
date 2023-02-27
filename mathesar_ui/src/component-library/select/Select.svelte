@@ -175,6 +175,10 @@
       {:else}
         <ListBoxOptions id="{id}-select-options" />
       {/if}
+
+      {#if options.length === 0 && $$slots.empty}
+        <slot name="empty" />
+      {/if}
     </svelte:fragment>
   </Dropdown>
 </ListBox>

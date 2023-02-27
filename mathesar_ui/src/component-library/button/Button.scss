@@ -58,6 +58,7 @@
   &.btn-secondary {
     background: var(--slate-100);
     border-color: var(--slate-200);
+    color: var(--slate-800);
 
     &:not(:disabled) {
       &:hover,

@@ -15,12 +15,12 @@ class SchemaAccessPolicy(AccessPolicy):
         # As the permissions depend on the database object.
         {
             'action': ['list', 'retrieve', 'create', 'dependents'],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
         },
         {
             'action': ['destroy', 'update', 'partial_update'],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_schema_manager)']
         },
@@ -28,7 +28,7 @@ class SchemaAccessPolicy(AccessPolicy):
 
     @classmethod
     def _scope_queryset(cls, request, qs, allowed_roles):
-        if not request.user.is_superuser:
+        if not (request.user.is_superuser or request.user.is_anonymous):
             permissible_database_role_filter = (
                 Q(database__database_role__role__in=allowed_roles) & Q(database__database_role__user=request.user)
             )

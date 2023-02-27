@@ -72,7 +72,7 @@ export interface PaginatedResponse<T> {
 
 const NO_CONTENT = 204;
 const successStatusCodes = new Set([200, 201, NO_CONTENT]);
-const FORBIDDEN = 403;
+const UNAUTHORIZED = 401;
 
 function getResultFromRequest<T>(request: XMLHttpRequest): T | undefined {
   if (request.status === NO_CONTENT) {
@@ -113,7 +113,7 @@ function sendXHRRequest<T>(
         if (successStatusCodes.has(request.status)) {
           resolve(getResultFromRequest<T>(request));
         } else {
-          if (request.status === FORBIDDEN) {
+          if (request.status === UNAUTHORIZED) {
             window.location.reload();
             return;
           }
@@ -207,4 +207,12 @@ export function uploadFile<T>(
       request.abort();
     },
   );
+}
+
+export async function getExternalApi<T>(url: string): Promise<T | undefined> {
+  const response = await fetch(url, { mode: 'cors' });
+  if (!response.ok) {
+    return undefined;
+  }
+  return (await response.json()) as T;
 }

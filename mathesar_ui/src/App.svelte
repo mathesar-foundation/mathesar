@@ -1,20 +1,31 @@
 <script lang="ts">
-  import { ToastPresenter, Confirmation } from '@mathesar-component-library';
+  import { get } from 'svelte/store';
+
+  import { Confirmation, ToastPresenter } from '@mathesar-component-library';
+  import { confirmationController } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
+  import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
   import {
     RecordSelectorController,
     setRecordSelectorControllerInContext,
   } from '@mathesar/systems/record-selector/RecordSelectorController';
-  import { confirmationController } from '@mathesar/stores/confirmation';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
-  import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
-  import { modal } from './stores/modal';
-  import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import RootRoute from './routes/RootRoute.svelte';
+  import { modal } from './stores/modal';
+  import { setReleasesStoreInContext } from './stores/releases';
+  import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
 
   const commonData = preloadCommonData();
   if (commonData?.user) {
-    setUserProfileStoreInContext(commonData.user);
+    const userProfile = setUserProfileStoreInContext(commonData.user);
+    if (get(userProfile).isSuperUser) {
+      // Toggle these lines to test with a mock tag name
+      // setReleasesStoreInContext('1.75.0');
+      setReleasesStoreInContext(commonData.current_release_tag_name);
+    }
+  } else {
+    // This should never occur
+    // TODO: Throw an application wide error
   }
 
   const recordSelectorModal = modal.spawnModalController();
@@ -144,7 +155,8 @@
 
   h1 {
     margin: 0 0 1rem 0;
-    font-size: 1.6rem;
+    font-size: var(--size-xx-large);
+    font-weight: 500;
   }
 
   .block {

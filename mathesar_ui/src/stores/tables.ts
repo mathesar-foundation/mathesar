@@ -39,7 +39,7 @@ import {
   States,
 } from '@mathesar/api/utils/requestUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-
+import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
 import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
 import type { AtLeastOne } from '@mathesar/typeUtils';
 import { currentSchemaId } from './schemas';
@@ -423,6 +423,17 @@ export const tables: Readable<DBTablesStoreData> = derived(
     };
   },
 );
+
+export const importVerifiedTables: Readable<DBTablesStoreData['data']> =
+  derived(
+    tables,
+    ($tables) =>
+      new Map(
+        [...$tables.data.values()]
+          .filter((table) => !isTableImportConfirmationRequired(table))
+          .map((table) => [table.id, table]),
+      ),
+  );
 
 export const validateNewTableName = derived(tables, ($tables) => {
   const names = new Set([...$tables.data.values()].map((t) => t.name));

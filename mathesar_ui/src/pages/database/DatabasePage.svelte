@@ -13,16 +13,22 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import { iconDatabase, iconAddNew } from '@mathesar/icons';
+  import { iconDatabase, iconAddNew, iconManageAccess } from '@mathesar/icons';
   import { deleteSchema as deleteSchemaAPI } from '@mathesar/stores/schemas';
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import SchemaRow from './SchemaRow.svelte';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
+  import DbAccessControlModal from './DbAccessControlModal.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
 
   const addEditModal = modal.spawnModalController();
+  const accessControlModal = modal.spawnModalController();
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: userProfile = $userProfileStore;
 
   $: database = (() => {
     if (!$currentDatabase) {
@@ -32,6 +38,12 @@
   })();
 
   $: schemasMap = $schemasStore.data;
+
+  $: canExecuteDDL = userProfile?.hasPermission({ database }, 'canExecuteDDL');
+  $: canEditPermissions = userProfile?.hasPermission(
+    { database },
+    'canEditPermissions',
+  );
 
   let filterQuery = '';
   let targetSchema: SchemaEntry | undefined;
@@ -74,6 +86,10 @@
     });
   }
 
+  function manageAccess() {
+    accessControlModal.open();
+  }
+
   function handleClearFilterQuery() {
     filterQuery = '';
   }
@@ -90,10 +106,24 @@
       icon: iconDatabase,
     }}
   >
-    <Button slot="action" on:click={addSchema} appearance="primary">
-      <Icon {...iconAddNew} />
-      <span>Create Schema</span>
-    </Button>
+    <svelte:fragment slot="action">
+      {#if canExecuteDDL || canEditPermissions}
+        <div>
+          {#if canExecuteDDL}
+            <Button on:click={addSchema} appearance="primary">
+              <Icon {...iconAddNew} />
+              <span>Create Schema</span>
+            </Button>
+          {/if}
+          {#if canEditPermissions}
+            <Button on:click={manageAccess} appearance="secondary">
+              <Icon {...iconManageAccess} />
+              <span>Manage Access</span>
+            </Button>
+          {/if}
+        </div>
+      {/if}
+    </svelte:fragment>
   </AppSecondaryHeader>
 
   <div class="schema-list-wrapper">
@@ -126,6 +156,10 @@
           <SchemaRow
             {database}
             {schema}
+            canExecuteDDL={userProfile?.hasPermission(
+              { database, schema },
+              'canExecuteDDL',
+            )}
             on:edit={() => editSchema(schema)}
             on:delete={() => deleteSchema(schema)}
           />
@@ -140,6 +174,8 @@
   {database}
   schema={targetSchema}
 />
+
+<DbAccessControlModal controller={accessControlModal} {database} />
 
 <style lang="scss">
   .schema-list-wrapper {
