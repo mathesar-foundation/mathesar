@@ -340,7 +340,7 @@ installation.
 "
 printf "Downloading docker-compose.yml...
 "
-sudo wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
+sudo curl -sL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
 printf "Success!"
 clear -x
 docker compose --profile prod up -d --wait
