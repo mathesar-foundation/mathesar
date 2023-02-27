@@ -11,7 +11,7 @@ Installation should only take a few minutes.
 
 ## Preparing our server.
 - Prerequisites
-    - Ubuntu 20.04
+    - Ubuntu 20.04 with at least `60 GB` disk space.
     - Root privileges
     - A domain name for your Mathesar installation, pointing to your server.  This is however not a necesity.
 
