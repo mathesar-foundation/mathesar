@@ -187,7 +187,7 @@ Docker Compose must be at least version %s.%s.0! Please upgrade.
 fi
 
 printf "
-Docker versions ok.
+Docker versions OK.
 
 "
 read -r -p "Press ENTER to continue. "
@@ -212,12 +212,12 @@ select CHOICE in "connect existing" "create new"; do
   case $CHOICE in
     "connect existing")
       printf "
-WARNING: This will create a PostgreSQL schema in the database for Mathesar!
+WARNING: This will create a new PostgreSQL schema in the database for Mathesar's internal use.
 
 "
       configure_db_urls preexisting
       printf "
-Now we need to configure another local DB where Mathesar can keep metadata.
+Now we need to create a local database for Mathesar's internal use.
 "
       configure_db_urls django_only
       break
@@ -237,7 +237,7 @@ printf "
 
 WEBSERVER CONFIGURATION
 
-Here, we set up details of the Mathesar webserver.
+Here, we configure the webserver that hosts Mathesar.
 
 --------------------------------------------------------------------------------
 
@@ -261,9 +261,9 @@ Only local connections will be allowed.
 "
   read -r -p "Press ENTER to continue. "
 fi
-read -r -p "Choose an http port for the webserver to use [80]: " http_port
+read -r -p "Choose a HTTP port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
-read -r -p "Choose an https port for the webserver to use [443]: " https_port
+read -r -p "Choose a HTTP port for the webserver to use [443]: " https_port
 https_port=${https_port:-443}
 printf "Generating Django secret key...
 "
@@ -276,8 +276,7 @@ printf "
 
 ADMIN USER CONFIGURATION
 
-You'll use these credentials to login to Mathesar in the web interface for the
-first time.
+You'll use these credentials to login to Mathesar in the web interface.
 
 --------------------------------------------------------------------------------
 
@@ -332,7 +331,7 @@ printf "
 
 DOCKER SETUP
 
-This step download and run all needed Docker images and start your Mathesar
+This step downloads and runs all needed Docker images and starts your Mathesar
 installation.
 
 --------------------------------------------------------------------------------
