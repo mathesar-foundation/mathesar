@@ -282,8 +282,8 @@ You'll use these credentials to login to Mathesar in the web interface.
 
 "
 
-read -r -p "Choose an admin username [mathesar]: " superuser_username
-superuser_username=${superuser_username:-mathesar}
+read -r -p "Choose an admin username [admin]: " superuser_username
+superuser_username=${superuser_username:-admin}
 superuser_email=$superuser_username@example.com
 superuser_password=$(create_password)
 printf "\n"
@@ -342,7 +342,7 @@ printf "Downloading docker-compose.yml...
 sudo curl -sL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
 printf "Success!"
 clear -x
-docker compose --profile prod up -d --wait
+docker compose --profile prod up -d --wait || (docker compose --profile prod logs && exit 1)
 clear -x
 printf "
 --------------------------------------------------------------------------------
