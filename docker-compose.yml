@@ -32,6 +32,8 @@ services:
       - static:/mathesar/static
       - caddy_data:/data
       - caddy_config:/config
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
   base-service:
     profiles: ["web-server"]
     container_name: mathesar_service
