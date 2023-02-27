@@ -9,8 +9,9 @@ services:
       - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
+    # db container is exposed to the other containers, and the host.
     ports:
-      - ${POSTGRES_HOST-5432}:5432
+      - "${POSTGRES_HOST-5432}:5432"
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     healthcheck:
@@ -24,9 +25,10 @@ services:
     image: mathesar/mathesar-caddy:latest
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
+    # caddy container is exposed to the other containers, and the host.
     ports:
-      - ${HTTP_PORT-80}:80
-      - ${HTTPS_PORT-443}:443
+      - "${HTTP_PORT-80}:80"
+      - "${HTTPS_PORT-443}:443"
     volumes:
       - media:/mathesar/media
       - static:/mathesar/static
@@ -48,8 +50,6 @@ services:
       - MATHESAR_DATABASES=${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
       - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
     command: ./run.sh
-    ports:
-      - "8000:8000"
     volumes:
       - static:/code/static
       - media:/code/media
@@ -74,6 +74,9 @@ services:
       timeout: 5s
       retries: 30
       start_period: 5s
+    # On prod, the HTTP port is exposed to other containers, but not the host.
+    expose:
+      - "8000"
   test-service:
     profiles: ["test"]
     extends: base-service
@@ -86,6 +89,9 @@ services:
         PYTHON_REQUIREMENTS: requirements-dev.txt
     depends_on:
       - db
+    # On testing, the HTTP port is exposed to other containers, and the host.
+    ports:
+      - "8000:8000"
   dev-service:
     profiles: ["dev"]
     container_name: mathesar_service_dev
@@ -112,6 +118,7 @@ services:
       - ui_node_modules:/code/mathesar_ui/node_modules/
     depends_on:
       - db
+    # On dev, following ports are exposed to other containers, and the host.
     ports:
       - "8000:8000"
       - "3000:3000"
@@ -125,6 +132,7 @@ services:
       - WATCHTOWER_HTTP_API_TOKEN=mytoken
     labels:
       - "com.centurylinklabs.watchtower.enable=false"
+    # Watchtower HTTP API is exposed to other containers, but not the host.
     expose:
       - "8080"
 volumes:
