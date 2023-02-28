@@ -54,10 +54,11 @@ plugins:
 nav:
   - Home: index.md
   - Installation:
-      - Quickstart: installation/quickstart.md
-      - Administration: installation/administration.md
-      - Under the Hood: installation/under-the-hood.md
-      - Troubleshooting: installation/troubleshooting.md
+      - Quickstart: installation-dc/quickstart.md
+      - Administration: installation-dc/administration.md
+      - Under the Hood: installation-dc/under-the-hood.md
+      - Troubleshooting: installation-dc/troubleshooting.md
+      - Setup for Windows: installation-dc/windows.md
   - Product:
       - Introduction: product/intro.md
       - Users & Access Levels: product/users.md
