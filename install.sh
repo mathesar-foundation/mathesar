@@ -117,7 +117,7 @@ printf "
 
 DOCKER VERSION CHECK
 
-We'll begin by making sure your Docker installation is up-to-date.  In order to
+We'll begin by making sure your Docker installation is up-to-date. In order to
 run Docker commands, we need to use sudo for elevated privileges.
 
 --------------------------------------------------------------------------------
@@ -278,7 +278,7 @@ read -r -p "Choose a configuration directory [/etc/mathesar]: " config_location
 config_location="${config_location:-/etc/mathesar}"
 
 printf "
-Installing environment file at %s/.env
+The environment file will be installed at %s/.env
 
 " "$config_location"
 
