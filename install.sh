@@ -5,6 +5,7 @@ github_tag=${1-master}
 min_maj_docker_version=20
 min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
+shopt -s expand_aliases
 
 ## Functions ##################################################
 get_nonempty () {
@@ -115,18 +116,42 @@ clear -x
 printf "
 --------------------------------------------------------------------------------
 
+OPERATING SYSTEM CHECK
+
+--------------------------------------------------------------------------------
+
+"
+if [ $(echo "${OSTYPE}" | head -c 5) == "linux" ]; then
+  printf "Installing Mathesar for GNU/Linux.
+"
+  alias docker='sudo docker'
+elif [ $(echo "${OSTYPE}" | head -c 6) == "darwin" ]; then
+  printf "Installing Mathesar for macOS.
+"
+else
+  printf "Operating System Unknown. Proceed at your own risk.
+"
+  alias docker='sudo docker'
+fi
+read -r -p "
+Press ENTER to continue, or CTRL+C to cancel. "
+clear -x
+
+printf "
+--------------------------------------------------------------------------------
+
 DOCKER VERSION CHECK
 
 We'll begin by making sure your Docker installation is up-to-date.  In order to
-run Docker commands, we need to use sudo for elevated privileges.
+run some necessary commands, we need to use sudo for elevated privileges.
 
 --------------------------------------------------------------------------------
 
 "
 sudo -k
 sudo -v
-docker_version=$(sudo docker version -f '{{.Server.Version}}')
-docker_compose_version=$(sudo docker compose version --short)
+docker_version=$(docker version -f '{{.Server.Version}}')
+docker_compose_version=$(docker compose version --short)
 printf "
 Your Docker version is %s.
 Your Docker Compose version is %s.
@@ -162,7 +187,7 @@ Docker Compose must be at least version %s.%s.0! Please upgrade.
 fi
 
 printf "
-Docker versions ok.
+Docker versions OK.
 
 "
 read -r -p "Press ENTER to continue. "
@@ -187,12 +212,12 @@ select CHOICE in "connect existing" "create new"; do
   case $CHOICE in
     "connect existing")
       printf "
-WARNING: This will create a PostgreSQL schema in the database for Mathesar!
+WARNING: This will create a new PostgreSQL schema in the database for Mathesar's internal use.
 
 "
       configure_db_urls preexisting
       printf "
-Now we need to configure another local DB where Mathesar can keep metadata.
+Now we need to create a local database for Mathesar's internal use.
 "
       configure_db_urls django_only
       break
@@ -212,7 +237,7 @@ printf "
 
 WEBSERVER CONFIGURATION
 
-Here, we set up details of the Mathesar webserver.
+Here, we configure the webserver that hosts Mathesar.
 
 --------------------------------------------------------------------------------
 
@@ -236,13 +261,13 @@ Only local connections will be allowed.
 "
   read -r -p "Press ENTER to continue. "
 fi
-read -r -p "Choose an http port for the webserver to use [80]: " http_port
+read -r -p "Choose a HTTP port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
-read -r -p "Choose an https port for the webserver to use [443]: " https_port
+read -r -p "Choose a HTTP port for the webserver to use [443]: " https_port
 https_port=${https_port:-443}
 printf "Generating Django secret key...
 "
-secret_key=$(base64 -w 0 /dev/urandom | head -c50)
+secret_key=$(base64 /dev/urandom | head -c50)
 
 printf "\n"
 clear -x
@@ -251,15 +276,14 @@ printf "
 
 ADMIN USER CONFIGURATION
 
-You'll use these credentials to login to Mathesar in the web interface for the
-first time.
+You'll use these credentials to login to Mathesar in the web interface.
 
 --------------------------------------------------------------------------------
 
 "
 
-read -r -p "Choose an admin username [mathesar]: " superuser_username
-superuser_username=${superuser_username:-mathesar}
+read -r -p "Choose an admin username [admin]: " superuser_username
+superuser_username=${superuser_username:-admin}
 superuser_email=$superuser_username@example.com
 superuser_password=$(create_password)
 printf "\n"
@@ -307,7 +331,7 @@ printf "
 
 DOCKER SETUP
 
-This step download and run all needed Docker images and start your Mathesar
+This step downloads and runs all needed Docker images and starts your Mathesar
 installation.
 
 --------------------------------------------------------------------------------
@@ -315,10 +339,10 @@ installation.
 "
 printf "Downloading docker-compose.yml...
 "
-sudo wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
+sudo curl -sL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
 printf "Success!"
 clear -x
-sudo docker compose --profile prod up -d --wait
+docker compose --profile prod up -d --wait || (docker compose --profile prod logs && exit 1)
 clear -x
 printf "
 --------------------------------------------------------------------------------
@@ -326,7 +350,7 @@ printf "
 Service is ready and healthy!
 Adding admin user to Django webservice now.
 "
-sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email" 2> >(grep -vi warn)
+docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
 read -r -p "Press ENTER to continue. "
 printf "\n"
 clear -x
