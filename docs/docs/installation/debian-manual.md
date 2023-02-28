@@ -73,4 +73,19 @@ Once downloaded, we have to change the properties so that it is an executable:
 ```sh
 sudo chmod +x /usr/local/bin/docker-compose
 ```
-That is it.  
+That is it.  We can now move to the next step.
+### Step Three: Install Nginx with Letsencrypt and Gurnicorn3
+We will start off by installing Nginx on the system.  This will already be in the Debian repository so simply run the install command.
+
+```sh
+sudo apt install nginx
+```
+##### Letsencrypt
+We now will install certbot for Letsencrypt as well as gunicorn3.
+```sh
+sudo apt-get install certbot
+
+sudo apt-get install gunicorn3
+```
+
+
