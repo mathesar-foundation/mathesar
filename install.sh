@@ -74,7 +74,7 @@ Passwords do not match! Try again.
   echo "${password}"
 }
 
-configure_db_urls() {
+configure_db_urls () {
   local default_db
   local db_host
   local db_port
@@ -119,6 +119,7 @@ configure_db_urls() {
     django_db_port="${db_port}"
   fi
 }
+
 ################################################################################
 
 printf "
@@ -159,6 +160,28 @@ fi
 read -r -p "
 Press ENTER to continue, or CTRL+C to cancel. "
 clear -x
+
+installation_fail () {
+  docker compose --profile prod logs
+  read -r -p "
+Unfortunately, the installation has failed.
+
+We've printed some error logs above that will hopefully point you to the
+problem.
+
+A common issue is for there to be some networking issue outside of Mathesar's
+control. Please:
+- Make sure you can reach your preexisting DB from this machine, if relevant.
+- Make sure you have access to https://raw.githubusercontent.com/
+
+If you can't get things working, please raise an issue at
+https://github.com/centerofci/mathesar/issues/
+
+Press ENTER to the local docker environment. "
+  docker compose --profile prod down -v --rmi all
+  read -r -p "Press ENTER to exit the installer. "
+  exit 1
+}
 
 printf "
 --------------------------------------------------------------------------------
@@ -363,7 +386,7 @@ printf "Downloading docker-compose.yml...
 sudo curl -sL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
 printf "Success!"
 clear -x
-docker compose --profile prod up -d --wait || (docker compose --profile prod logs && exit 1)
+docker compose --profile prod up -d --wait || installation_fail
 clear -x
 printf "
 --------------------------------------------------------------------------------
