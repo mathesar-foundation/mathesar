@@ -6,22 +6,24 @@
     TextInputWithPrefix,
   } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/AppTypes';
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
+  import { iconAddNew, iconDatabase, iconManageAccess } from '@mathesar/icons';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
-  import { schemas as schemasStore } from '@mathesar/stores/schemas';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import { iconDatabase, iconAddNew, iconManageAccess } from '@mathesar/icons';
-  import { deleteSchema as deleteSchemaAPI } from '@mathesar/stores/schemas';
+  import {
+    deleteSchema as deleteSchemaAPI,
+    schemas as schemasStore,
+  } from '@mathesar/stores/schemas';
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
-  import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import SchemaRow from './SchemaRow.svelte';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
+  import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
 
   const addEditModal = modal.spawnModalController();
