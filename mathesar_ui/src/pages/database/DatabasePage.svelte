@@ -1,27 +1,38 @@
 <script lang="ts">
   import {
     Button,
+    Help,
     Icon,
     iconSearch,
+    SpinnerButton,
     TextInputWithPrefix,
   } from '@mathesar-component-library';
+  import { reflectApi } from '@mathesar/api/reflect';
   import type { SchemaEntry } from '@mathesar/AppTypes';
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
+  import {
+    iconAddNew,
+    iconDatabase,
+    iconManageAccess,
+    iconRefresh,
+  } from '@mathesar/icons';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
-  import { schemas as schemasStore } from '@mathesar/stores/schemas';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import { iconDatabase, iconAddNew, iconManageAccess } from '@mathesar/icons';
-  import { deleteSchema as deleteSchemaAPI } from '@mathesar/stores/schemas';
+  import {
+    deleteSchema as deleteSchemaAPI,
+    schemas as schemasStore,
+  } from '@mathesar/stores/schemas';
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
-  import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import SchemaRow from './SchemaRow.svelte';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
+  import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
 
   const addEditModal = modal.spawnModalController();
@@ -93,6 +104,15 @@
   function handleClearFilterQuery() {
     filterQuery = '';
   }
+
+  async function reflect() {
+    try {
+      await reflectApi.reflect();
+      window.location.reload();
+    } catch (e) {
+      toast.fromError(e);
+    }
+  }
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(database.name)}</title></svelte:head>
@@ -128,9 +148,29 @@
 
   <div class="schema-list-wrapper">
     <div class="schema-list-title-container">
-      <h2 class="schema-list-title">
-        Schemas ({schemasMap.size})
-      </h2>
+      <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
+      <div class="reflect">
+        <div class="button">
+          <SpinnerButton
+            onClick={reflect}
+            appearance="secondary"
+            label="Sync External Changes"
+            icon={iconRefresh}
+          />
+        </div>
+        <Help>
+          <p>
+            If you make structural changes to the database outside Mathesar
+            (e.g. using another tool to add a schema, table, or column), those
+            changes will not be reflected in Mathesar until you manually sync
+            them with this button.
+          </p>
+          <p>
+            External changes to data (e.g. adding or editing <em>rows</em>) will
+            be automatically reflected without clicking this button.
+          </p>
+        </Help>
+      </div>
     </div>
     <TextInputWithPrefix
       placeholder="Search Schemas"
@@ -182,6 +222,20 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+
+    .schema-list-title-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .reflect {
+      display: flex;
+      align-items: center;
+      .button {
+        margin-right: 0.5rem;
+        font-size: var(--text-size-small);
+      }
+    }
 
     .schema-list-title {
       font-size: var(--text-size-x-large);
