@@ -1,6 +1,8 @@
 # Setup using Ansible
 
-If you're installing Mathesar on Linux, here are some Ansible tasks for setting up the pre-requisites, written by one of our testers. After running these, you'll want to run the installation command found in the [quickstart guide](./quickstart.md). This will start a script that will download Mathesar and setup the required Docker containers as described in the prior pages.
+If you're installing Mathesar on Linux, here are some Ansible tasks for setting up the pre-requisites, written by one of our testers. 
+
+After running these, you'll want to SSH into the server and run the installation command found in the [quickstart guide](./quickstart.md). This will start a script that will download Mathesar and setup the required Docker containers as described in the prior pages. The installation script is interactive, so it cannot run using Ansible yet.
 
 ## Ubuntu
 ```
