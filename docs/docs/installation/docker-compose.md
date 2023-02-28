@@ -137,8 +137,9 @@ The most common problem we've encountered is users with out-of-date `docker` or 
 If you run `docker-compose --version` and see a relatively old version, try `docker compose version` and see whether it's different. The latter is the version that will be used in the script.
 
 ### Ports
+You may see errors about various ports being unavailable (or already being bound). In this case, please restart from a clean `docker` state, and choose non-default ports during the installation process for PostgreSQL, HTTP traffic, or HTTPS traffic as appropriate. 
 
-You may see errors about various ports being unavailable (or already being bound). In this case, please restart from a clean `docker` state, and choose non-default ports during the installation process for PostgreSQL, http traffic, or https traffic as appropriate.
+For instance, you could choose port `8080` for HTTP traffic if port `80` is unavailable.
 
 ### Permissions
 
