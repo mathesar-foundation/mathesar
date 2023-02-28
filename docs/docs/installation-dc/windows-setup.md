@@ -41,4 +41,4 @@ https://docs.docker.com/desktop/install/windows-install/
 !!!note
     In the first command (only), version is prefixed by two hyphen characters
 
-- In the same WSL/Ubuntu window, enter and run the command found in the [quickstart guide](./quickstart.md). This will start a script that will download Mathesar and setup the required Docker containers as described in the prior pages.
+- In the same WSL/Ubuntu window, enter and run the installation command found in the [quickstart guide](./quickstart.md). This will start a script that will download Mathesar and setup the required Docker containers as described in the prior pages.
