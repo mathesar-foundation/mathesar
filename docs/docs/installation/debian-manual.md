@@ -84,10 +84,11 @@ We have to remove default nginx config, so that we can install a nginx site for 
 ```sh
 rm -f /etc/nginx/sites-enabled/default
 ```
-Next we will create a new site: 
+Next we will create a new site. Begin by creating the http file in '/etc/nginx/sites-enabled'.
 ```sh
 touch /etc/nginx/sites-enabled/http
 ```
+Now, we can add our custom directives to the file.  You can copy/paste this in your terminal and run it.
 ```sh
 echo "server_tokens off;
 
@@ -105,7 +106,8 @@ server {
     }
 }" > /etc/nginx/sites-enabled/http
 ```
-Now we will install our system Nginx configuration:
+Now we will install our system Nginx configuration.  
+You can copy/paste this in your terminal and run it.
 ```sh
 echo "user www-data;
 worker_processes auto;
