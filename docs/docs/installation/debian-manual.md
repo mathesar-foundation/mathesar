@@ -105,7 +105,37 @@ server {
     }
 }" > /etc/nginx/sites-enabled/http
 ```
+Now we will install our system Nginx configuration:
+```sh
+echo "user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
 
+events {
+    worker_connections 768;
+}
+
+http {
+
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    gzip on;
+    gzip_comp_level    6;
+    gzip_disable "msie6";
+
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}" > /etc/nginx/nginx.conf
+```
 
 ##### Letsencrypt
 We now will install certbot for Letsencrypt as well as gunicorn3.
