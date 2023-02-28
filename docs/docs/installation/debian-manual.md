@@ -33,5 +33,5 @@ Now you need to edit the `/etc/sudoers` file with the 'visudo' command, and add 
 ### Step two
 Clean the system of any potential pre-installed Docker packages.
 ```sh
-apt-get remove docker docker-engien docker.io
+apt-get remove docker docker-engine docker.io
 ```
