@@ -76,8 +76,9 @@ The credentials created in this section are used to log in directly to the datab
 
 
 #### Webserver Configuration
+This section lets you customize the details of the web server (Caddy) that provides the Mathesar web UI and API endpoints.
 
-This section lets you customize the details of the webserver that provides the Mathesar web UI, and API endpoints. Most of the customizations available here are only relevant if you're planning to expose your installation of Mathesar to the wider internet. You can configure the domain as well as the ports to use for http and https traffic, respectively.
+Most of the customizations available here are only relevant if you're planning to expose your installation of Mathesar to the internet. You can configure the domain as well as the ports to use for HTTP and HTTPS traffic, respectively.
    
 #### Admin User Configuration
 
