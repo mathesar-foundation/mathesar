@@ -80,12 +80,43 @@ We will start off by installing Nginx on the system.  This will already be in th
 ```sh
 sudo apt install nginx
 ```
+We have to remove default nginx config, so that we can install a nginx site for letsencrypt requests
+```sh
+rm -f /etc/nginx/sites-enabled/default
+```
+Next we will create a new site: 
+```sh
+touch /etc/nginx/sites-enabled/http
+```
+```sh
+echo "server_tokens off;
+
+server {
+    listen 80 default_server;
+    server_name {{ main_domain_name }};
+
+    location /.well-known/acme-challenge {
+        root /var/www/letsencrypt;
+        try_files $uri $uri/ =404;
+    }
+
+    location / {
+        rewrite ^ https://{{ main_domain_name }}$request_uri? permanent;
+    }
+}" > /etc/nginx/sites-enabled/http
+```
+
+
 ##### Letsencrypt
 We now will install certbot for Letsencrypt as well as gunicorn3.
 ```sh
 sudo apt-get install certbot
 
 sudo apt-get install gunicorn3
+```
+Now we need to create a directory for Letsencrypt
+```sh
+mkdir /var/www/letsencrypt
 ```
 
 
