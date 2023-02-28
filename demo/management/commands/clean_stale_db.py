@@ -59,7 +59,7 @@ def drop_all_stale_databases(force=False, max_days=3, *args, **kwargs):
             if dropped:
                 deleted_databases.append(database.name)
                 database.delete()
-    reflect_db_objects(get_empty_metadata())
+                reflect_db_objects(get_empty_metadata(), db_name=database.name)
     return deleted_databases
 
 
