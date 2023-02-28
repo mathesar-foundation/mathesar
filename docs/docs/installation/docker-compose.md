@@ -51,20 +51,30 @@ sudo docker exec mathesar-watchtower-1 /watchtower --run-once
 These are the steps that the installation script performs, explained in more depth:
 
 #### Docker Version Check
-
 The installer double-checks your Docker and Docker Compose versions, making sure that `docker` is at least version 20.0.0, and `docker-compose` is at least version 2.0.0.
 
 #### Database Configuration
-   
-Mathesar actually uses two databases; one internal system database for metadata such as table display options, and a separate user database for your actual table data. The installer helps you set up credentials for both databases (a username and password), and also lets you customize the name of your user database. Finally, Mathesar helps you customize the port exposed to your host machine from the database container. This is useful, since you'll need to have an exposed port to login to the Mathesar database(s) using an alternate client such as `psql`, but there could be a conflict on the default port. 
+Mathesar uses two PostgreSQL databases:
 
-The credentials created in this section are used to login directly to the database (i.e., not through the Mathesar UI).
+- **an internal database**, used to store Mathesar related metadata such as display options
+- **the user database**, which stores your data. During installation, you can either set up a new database for this purpose or connect an existing PostgreSQL database.
 
-**Note on permissions**: If you choose to connect Mathesar to a preexisting PostgreSQL database, you need to make sure that the user you choose:
-- exists
-- Is a `SUPERUSER`. See [the PostgreSQL docs](https://www.postgresql.org/docs/13/sql-createrole.html) for info about that.
+The installer helps you set up credentials for both databases (a username and password), and also lets you customize the name of your user database (if you are setting it up from scratch). 
 
-**Limitation**: Mathesar cannot currently connect to a PostgreSQL database running on `localhost` on the host machine underlying your Docker setup. We're working on adding this functionality.
+Finally, Mathesar helps you customize the port exposed to your host machine from the database container. This is useful, since you'll need to have an exposed port to login to the Mathesar database(s) using an alternate client such as `psql`, but there could be a conflict on the default port (e.g. for the case that a PostgreSQL instance is running in the host OS).
+
+The credentials created in this section are used to log in directly to the database (i.e., not the Mathesar UI). You'll set up login credentials for the UI in a later step.
+
+!!! note
+    If you choose to connect Mathesar to a preexisting PostgreSQL database, you need to make sure that the user you choose:
+
+    - exists
+    - Is a `SUPERUSER`. See [the PostgreSQL docs](https://www.postgresql.org/docs/13/sql-createrole.html) for info about that.
+
+!!! warning
+    Mathesar cannot currently connect to a PostgreSQL database running on `localhost` on the host machine underlying your Docker setup. We will fix this in a future release.
+
+
 #### Webserver Configuration
 
 This section lets you customize the details of the webserver that provides the Mathesar web UI, and API endpoints. Most of the customizations available here are only relevant if you're planning to expose your installation of Mathesar to the wider internet. You can configure the domain as well as the ports to use for http and https traffic, respectively.
