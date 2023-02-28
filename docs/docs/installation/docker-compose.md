@@ -23,14 +23,14 @@ For the commands below, you need to replace `$MATHESAR_CONFIG_DIR` with the actu
 
 ### Starting and stopping Mathesar
 
-The command to stop all containers used for Mathesar, and release their ports, etc. is:
-```sh
-sudo docker compose -f $MATHESAR_CONFIG_DIR/docker-compose.yml --profile prod down
-```
-
 The command to start Mathesar (say, after stopping it, or a reboot of the machine) is:
 ```sh
 sudo docker compose -f $MATHESAR_CONFIG_DIR/docker-compose.yml --profile prod up -d
+```
+
+The command to stop all containers used for Mathesar, and release their ports, etc. is:
+```sh
+sudo docker compose -f $MATHESAR_CONFIG_DIR/docker-compose.yml --profile prod down
 ```
 
 ### Upgrading Mathesar
