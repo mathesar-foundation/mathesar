@@ -7,7 +7,27 @@ min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
 shopt -s expand_aliases
 
-## Functions ##################################################
+## Functions ###################################################################
+
+percent_encode_reserved () {
+  # We need to be able to percent-encode any characters which are reserved in
+  # the URI spec given by RFC-3986, as well as ' ' and '%'
+  # See https://datatracker.ietf.org/doc/html/rfc3986#section-2.2
+  local reserved=':/?#[]@!$&'"'"'()*+,;=% '
+  for (( i=0; i<${#1}; i++ )); do
+    local c="${1:$i:1}"
+    if [[ -z "${reserved##*$c*}"  ]]; then
+      # $c is in the reserved set, convert to hex Note that the '02' in the
+      # formatting is not technically needed, since all reserved characters are
+      # greater than 10 (greater than 20, actually). We'll leave it this way to
+      # avoid potential future problems.
+      printf '%%%02X' "'${c}"
+    else
+      printf "%s" "${c}"
+    fi
+  done
+}
+
 get_nonempty () {
   local ret_str="${2}"
   local prompt="${1}: "
@@ -63,7 +83,7 @@ configure_db_urls() {
   local prefix
   if [ "${1}" == preexisting ]; then
     prefix="Enter the"
-    db_host=$(get_nonempty "${prefix} database host")
+    db_host=$(percent_encode_reserved "$(get_nonempty "${prefix} database host")")
   else
     prefix="Choose a"
     default_db="mathesar"
@@ -71,15 +91,14 @@ configure_db_urls() {
   fi
   db_port=$(get_nonempty "${prefix} database connection port" "5432")
   if [ "${1}" != django_only ]; then
-    db_name=$(get_nonempty "${prefix} database name" "${default_db}")
+    db_name=$(percent_encode_reserved "$(get_nonempty "${prefix} database name" "${default_db}")")
   fi
-  db_username=$(get_nonempty "${prefix} username for the database" "${default_db}")
+  db_username=$(percent_encode_reserved "$(get_nonempty "${prefix} username for the database" "${default_db}")")
   if [ "${1}" == preexisting ]; then
-    db_password=$(get_password "${prefix} password")
+    db_password=$(percent_encode_reserved "$(get_password "${prefix} password")")
   else
-    db_password=$(create_password)
+    db_password=$(percent_encode_reserved "$(create_password)")
   fi
-
 
   if [ "${1}" == preexisting ]; then
     mathesar_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/${db_name}"
