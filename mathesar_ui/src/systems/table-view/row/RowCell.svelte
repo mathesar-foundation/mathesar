@@ -19,12 +19,18 @@
     scrollBasedOnActiveCell,
     isCellSelected,
   } from '@mathesar/components/sheet';
+  import { getSchemaPageUrl, getTablePageUrl } from '@mathesar/routes/urls';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import { States } from '@mathesar/api/utils/requestUtils';
   import { SheetCell } from '@mathesar/components/sheet';
-  import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
+  import {
+    iconLinkToRecordPage,
+    iconSetToNull,
+    iconRecord,
+    iconTable,
+  } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
@@ -126,6 +132,9 @@
   async function valueUpdated(e: CustomEvent<{ value: unknown }>) {
     await setValue(e.detail.value);
   }
+  function logTable() {
+    console.log({ database, schema, linkFk });
+  }
 </script>
 
 <SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
@@ -191,9 +200,25 @@
         Set to <Null />
       </ButtonMenuItem>
       {#if linkedRecordHref}
-        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-          Go To Linked Record
+        <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
+          Go To <span class="fk-identifier"
+            >{$recordSummaries.get(String(column.id))?.get(String(value)) ||
+              value}</span
+          >
         </LinkMenuItem>
+        <h1 on:click={logTable}>LOG</h1>
+        {#if linkFk}
+          <LinkMenuItem
+            icon={iconTable}
+            href={getTablePageUrl(
+              schema.database,
+              schema.id,
+              linkFk.referent_table,
+            )}
+          >
+            Open<span class="fk-identifier">{'as'}</span>Table
+          </LinkMenuItem>
+        {/if}
       {/if}
     </ContextMenu>
     {#if errors.length}
@@ -218,5 +243,13 @@
     &.is-processing {
       color: var(--cell-text-color-processing);
     }
+  }
+  .fk-identifier {
+    font-size: 80%;
+    padding: 0.02em 0.3em;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: bold;
   }
 </style>
