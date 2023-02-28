@@ -16,7 +16,7 @@ percent_encode_reserved () {
   local reserved=':/?#[]@!$&'"'"'()*+,;=% '
   for (( i=0; i<${#1}; i++ )); do
     local c="${1:$i:1}"
-    if [[ -z "${reserved##*$c*}"  ]]; then
+    if [[ -z "${reserved##*"$c"*}"  ]]; then
       # $c is in the reserved set, convert to hex Note that the '02' in the
       # formatting is not technically needed, since all reserved characters are
       # greater than 10 (greater than 20, actually). We'll leave it this way to
@@ -83,33 +83,37 @@ configure_db_urls() {
   local prefix
   if [ "${1}" == preexisting ]; then
     prefix="Enter the"
-    db_host=$(percent_encode_reserved "$(get_nonempty "${prefix} database host")")
+    db_host=$(get_nonempty "${prefix} database host")
+    enc_db_host=$(percent_encode_reserved "${db_host}")
   else
     prefix="Choose a"
     default_db="mathesar"
-    db_host=mathesar_db
+    enc_db_host=mathesar_db
   fi
   db_port=$(get_nonempty "${prefix} database connection port" "5432")
   if [ "${1}" != django_only ]; then
-    db_name=$(percent_encode_reserved "$(get_nonempty "${prefix} database name" "${default_db}")")
+    db_name=$(get_nonempty "${prefix} database name" "${default_db}")
+    enc_db_name=$(percent_encode_reserved "${db_name}")
   fi
-  db_username=$(percent_encode_reserved "$(get_nonempty "${prefix} username for the database" "${default_db}")")
+  db_username=$(get_nonempty "${prefix} username for the database" "${default_db}")
+  enc_db_username=$(percent_encode_reserved "${db_username}")
   if [ "${1}" == preexisting ]; then
-    db_password=$(percent_encode_reserved "$(get_password "${prefix} password")")
+    db_password=$(get_password "${prefix} password")
   else
-    db_password=$(percent_encode_reserved "$(create_password)")
+    db_password=$(create_password)
   fi
+  enc_db_password=$(percent_encode_reserved "${db_password}")
 
   if [ "${1}" == preexisting ]; then
-    mathesar_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/${db_name}"
+    mathesar_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:${db_port}/${enc_db_name}"
   elif [ "${1}" == django_only ]; then
-    django_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/mathesar_django"
+    django_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:${db_port}/mathesar_django"
     django_db_username="${db_username}"
     django_db_password="${db_password}"
     django_db_port="${db_port}"
   else
-    mathesar_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/${db_name}"
-    django_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/mathesar_django"
+    mathesar_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:${db_port}/${enc_db_name}"
+    django_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:${db_port}/mathesar_django"
     django_db_username="${db_username}"
     django_db_password="${db_password}"
     django_db_port="${db_port}"
@@ -140,11 +144,11 @@ OPERATING SYSTEM CHECK
 --------------------------------------------------------------------------------
 
 "
-if [ $(echo "${OSTYPE}" | head -c 5) == "linux" ]; then
+if [ "$(echo "${OSTYPE}" | head -c 5)" == "linux" ]; then
   printf "Installing Mathesar for GNU/Linux.
 "
   alias docker='sudo docker'
-elif [ $(echo "${OSTYPE}" | head -c 6) == "darwin" ]; then
+elif [ "$(echo "${OSTYPE}" | head -c 6)" == "darwin" ]; then
   printf "Installing Mathesar for macOS.
 "
 else
