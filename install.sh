@@ -105,15 +105,15 @@ configure_db_urls() {
   enc_db_password=$(percent_encode_reserved "${db_password}")
 
   if [ "${1}" == preexisting ]; then
-    mathesar_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:5432/${enc_db_name}"
+    mathesar_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:${db_port}/${enc_db_name}"
   elif [ "${1}" == django_only ]; then
     django_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:5432/mathesar_django"
     django_db_username="${db_username}"
     django_db_password="${db_password}"
     django_db_port="${db_port}"
   else
-    mathesar_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:${db_port}/${enc_db_name}"
-    django_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:${db_port}/mathesar_django"
+    mathesar_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:5432/${enc_db_name}"
+    django_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:5432/mathesar_django"
     django_db_username="${db_username}"
     django_db_password="${db_password}"
     django_db_port="${db_port}"
