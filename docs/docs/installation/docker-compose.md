@@ -79,7 +79,12 @@ The credentials created in this section are used to log in directly to the datab
 This section lets you customize the details of the web server (Caddy) that provides the Mathesar web UI and API endpoints.
 
 Most of the customizations available here are only relevant if you're planning to expose your installation of Mathesar to the internet. You can configure the domain as well as the ports to use for HTTP and HTTPS traffic, respectively.
-   
+
+##### Domain setup
+The domain specified here should be a valid, registered domain, whose DNS entry points to the IP address of the server on which Mathesar is installed. DNS configuration should be done ahead of time.
+
+If you don't use a domain, Mathesar can still be accessed from the internet using an IP address instead a domain name. Please note that HTTPS will not work without a domain name set up.
+
 #### Admin User Configuration
 
 Here, the installer helps you create a user (separate from the database user) that you will use to login to Mathesar through the main web UI. This section walks you through that process to create a username and password for that user. You're allowed to use the same details as the database user above, but it's not required, or particularly recommended. The user created in this section will have admin privileges in Mathesar, and be able to create other users after the installation is complete.
