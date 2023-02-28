@@ -92,7 +92,7 @@ If everything has worked, then the installer prints a message letting you know t
 This installation process creates the following containers:
 
 - `mathesar_service`, which runs the main Mathesar application.
-- `mathesar_db`, which which runs the database (PostgreSQL 13).
+- `mathesar_db`, which runs the database (PostgreSQL 13).
 - `mathesar-caddy-reverse-proxy-1`, which helps route traffic to the `mathesar_service` container.
 - `mathesar-watchtower-1`, which helps upgrade Mathesar installation when new releases are available.
 
