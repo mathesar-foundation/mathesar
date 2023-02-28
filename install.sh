@@ -11,9 +11,9 @@ shopt -s expand_aliases
 
 percent_encode_reserved () {
   # We need to be able to percent-encode any characters which are reserved in
-  # the URI spec given by RFC-3986, as well as ' ' and '%'
+  # the URI spec given by RFC-3986, as well as '|', ' ', and '%'
   # See https://datatracker.ietf.org/doc/html/rfc3986#section-2.2
-  local reserved=':/?#[]@!$&'"'"'()*+,;=% '
+  local reserved='|:/?#[]@!$&'"'"'()*+,;=% '
   for (( i=0; i<${#1}; i++ )); do
     local c="${1:$i:1}"
     if [[ -z "${reserved##*"$c"*}"  ]]; then
@@ -177,7 +177,7 @@ control. Please:
 If you can't get things working, please raise an issue at
 https://github.com/centerofci/mathesar/issues/
 
-Press ENTER to the local docker environment. "
+Press ENTER to reset the local docker environment. "
   docker compose --profile prod down -v --rmi all
   read -r -p "Press ENTER to exit the installer. "
   exit 1
