@@ -10,7 +10,8 @@ def install_mathesar(
 ):
     """Create database and install Mathesar on it."""
     user_db_engine = engine.create_future_engine(
-        username, password, hostname, database_name, port
+        username, password, hostname, database_name, port,
+        connect_args={"connect_timeout": 10}
     )
     try:
         user_db_engine.connect()
@@ -48,6 +49,7 @@ def _create_database(database_name, hostname, username, password, port, skip_con
         root_database = "postgres"
         root_db_engine = engine.create_future_engine(
             username, password, hostname, root_database, port,
+            connect_args={"connect_timeout": 10}
         )
         with root_db_engine.connect() as conn:
             conn.execution_options(isolation_level="AUTOCOMMIT")
