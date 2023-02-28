@@ -288,7 +288,7 @@ read -r -p "Choose a HTTP port for the webserver to use [443]: " https_port
 https_port=${https_port:-443}
 printf "Generating Django secret key...
 "
-secret_key=$(base64 /dev/urandom | head -c50)
+secret_key=$(xxd -ps -c0 -l30 /dev/urandom)
 
 printf "\n"
 clear -x
