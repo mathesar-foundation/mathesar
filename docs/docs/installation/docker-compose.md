@@ -30,7 +30,7 @@ sudo docker compose -f $MATHESAR_CONFIG_DIR/docker-compose.yml --profile prod do
 
 The command to start Mathesar (say, after stopping it, or a reboot of the machine) is:
 ```sh
-sudo docker compose -f $MATHESAR_CONFIG_DIR/docker-compose.yml --profile prod up
+sudo docker compose -f $MATHESAR_CONFIG_DIR/docker-compose.yml --profile prod up -d
 ```
 
 ### Upgrading Mathesar
