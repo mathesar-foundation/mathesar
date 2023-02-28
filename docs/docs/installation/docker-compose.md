@@ -98,6 +98,10 @@ We'll store two files under that directory:
 - `.env`: This file has the above-mentioned configurations.
 - `docker-compose.yml` This is a config file downloaded from Mathesar's git repo. It defines the different Docker containers used by Mathesar, and how they're networked together.
 
+Recommended permissions for the `.env` file are:
+
+`-rw------- 1 root root 449 Feb 22 13:39 /etc/mathesar/.env`
+
 #### Docker Setup
 
 - The installer downloads the `docker-compose.yml` file from Mathesar's repo.
