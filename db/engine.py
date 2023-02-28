@@ -1,12 +1,9 @@
 import copy
 
 from sqlalchemy import create_engine as sa_create_engine
+from sqlalchemy.engine import URL
 
 from db.types.custom.base import CUSTOM_DB_TYPE_TO_SA_CLASS
-
-
-def get_connection_string(username, password, hostname, database, port='5432'):
-    return f"postgresql://{username}:{password}@{hostname}:{port}/{database}"
 
 
 def create_future_engine_with_custom_types(
@@ -25,21 +22,26 @@ def create_future_engine_with_custom_types(
 def create_future_engine(
         username, password, hostname, database, port, *args, **kwargs
 ):
-    conn_str = get_connection_string(
-        username, password, hostname, database, port
+    conn_url = URL.create(
+        "postgresql",
+        username=username,
+        password=password,
+        host=hostname,
+        database=database,
+        port=port,
     )
     kwargs.update(future=True)
-    return create_engine(conn_str, *args, **kwargs)
+    return create_engine(conn_url, *args, **kwargs)
 
 
 # NOTE: used in testing, hence public
-def create_engine(conn_str, *args, **kwargs):
+def create_engine(conn_url, *args, **kwargs):
     """
     Wrapper over sqlalchemy.create_engine that stops SA from propagating changes to ischema_names
     across all engines. This is important for testing: without this intervention, fixtures become
     randomly corrupted.
     """
-    engine = sa_create_engine(conn_str, *args, **kwargs)
+    engine = sa_create_engine(conn_url, *args, **kwargs)
     _make_ischema_names_unique(engine)
     return engine
 
