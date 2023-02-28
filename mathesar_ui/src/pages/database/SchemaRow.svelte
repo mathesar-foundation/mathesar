@@ -27,53 +27,69 @@
   $: isLocked = schema.name === 'public';
 </script>
 
-<a {href} class="schema-details-link">
-  <div class="schema-row" class:is-locked={isLocked}>
-    <div class="title-and-meta">
-      <span class="name"><SchemaName {schema} iconHasBox /></span>
+<div class="schema-row-parent">
+  <a {href} class="schema-row-overlay" aria-label={schema.name} />
+  <div class="schema-details-link">
+    <div class="schema-row" class:is-locked={isLocked}>
+      <div class="title-and-meta">
+        <span class="name"><SchemaName {schema} iconHasBox /></span>
 
-      {#if isLocked}
-        <span class="lock"><Icon {...iconNotEditable} /></span>
-      {:else if canExecuteDDL}
-        <DropdownMenu
-          showArrow={false}
-          triggerAppearance="plain"
-          closeOnInnerClick={true}
-          label=""
-          icon={iconMoreActions}
-          menuStyle="--spacing-y:0.8em;"
-        >
-          <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}
-            >Edit Schema</ButtonMenuItem
+        {#if isLocked}
+          <span class="lock"><Icon {...iconNotEditable} /></span>
+        {:else if canExecuteDDL}
+          <DropdownMenu
+            showArrow={false}
+            triggerAppearance="plain"
+            closeOnInnerClick={true}
+            label=""
+            icon={iconMoreActions}
+            menuStyle="--spacing-y:0.8em;"
+            sytle="z-index: 1"
           >
-          <MenuDivider />
-          <ButtonMenuItem
-            danger
-            on:click={() => dispatch('delete')}
-            icon={iconDeleteMajor}>Delete Schema</ButtonMenuItem
-          >
-        </DropdownMenu>
+            <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}
+              >Edit Schema</ButtonMenuItem
+            >
+            <MenuDivider />
+            <ButtonMenuItem
+              danger
+              on:click={() => dispatch('delete')}
+              icon={iconDeleteMajor}>Delete Schema</ButtonMenuItem
+            >
+          </DropdownMenu>
+        {/if}
+      </div>
+
+      {#if schema.description}
+        <p class="description" title={schema.description}>
+          {schema.description}
+        </p>
+      {/if}
+
+      <SchemaConstituentCounts {schema} />
+
+      {#if isDefault}
+        <InfoBox>
+          Every PostgreSQL database includes the "public" schema. This protected
+          schema can be read by anybody who accesses the database.
+        </InfoBox>
       {/if}
     </div>
-
-    {#if schema.description}
-      <p class="description" title={schema.description}>
-        {schema.description}
-      </p>
-    {/if}
-
-    <SchemaConstituentCounts {schema} />
-
-    {#if isDefault}
-      <InfoBox>
-        Every PostgreSQL database includes the "public" schema. This protected
-        schema can be read by anybody who accesses the database.
-      </InfoBox>
-    {/if}
   </div>
-</a>
+</div>
 
 <style lang="scss">
+  .schema-row-parent {
+    position: relative;
+  }
+
+  .schema-row-overlay {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+  }
+
   .schema-details-link {
     text-decoration: none;
     color: inherit;

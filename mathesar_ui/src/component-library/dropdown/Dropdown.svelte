@@ -41,13 +41,12 @@
 
   function toggle(e: Event) {
     /**
-     * To make it work when wrapped with an anchor tag.
-     * Since the event is already not bubbling up
-     * and this component will always necessarily handle the click event,
-     * preventing the default behaviour should be fine
+     * If this Dropdown is used in a form we should
+     * prevent the default behaviour of submitting
+     * the form.
      */
     e.preventDefault();
-    e.stopPropagation();
+
     isOpen = !isOpen;
   }
 
