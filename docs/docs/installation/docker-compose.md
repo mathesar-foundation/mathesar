@@ -2,6 +2,9 @@
 
 Installation should only take a few minutes.
 
+!!! warning
+    We've tested this installation procedure on Windows, Mac, and a few Linux variants, but this is our first release so there might be unexpected issues. Please open a [GitHub issue](https://github.com/centerofci/mathesar/issues) if you run into any problems.
+
 ## Requirements
 - You'll need to install or upgrade Docker and `docker compose` on your computer. Mathesar has been tested with Docker v23 and Docker Compose v2.10 (although v2.0 or higher should work).
     - [Docker installation documentation](https://docs.docker.com/desktop/)
