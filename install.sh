@@ -105,9 +105,9 @@ configure_db_urls() {
   enc_db_password=$(percent_encode_reserved "${db_password}")
 
   if [ "${1}" == preexisting ]; then
-    mathesar_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:${db_port}/${enc_db_name}"
+    mathesar_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:5432/${enc_db_name}"
   elif [ "${1}" == django_only ]; then
-    django_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:${db_port}/mathesar_django"
+    django_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:5432/mathesar_django"
     django_db_username="${db_username}"
     django_db_password="${db_password}"
     django_db_port="${db_port}"
@@ -334,7 +334,7 @@ cd "${config_location}"
 sudo tee .env > /dev/null <<EOF
 POSTGRES_USER='${django_db_username}'
 POSTGRES_PASSWORD='${django_db_password}'
-POSTGRES_HOST='${django_db_port}'
+POSTGRES_PORT='${django_db_port}'
 ALLOWED_HOSTS='${allowed_hosts}'
 SECRET_KEY='${secret_key}'
 DJANGO_DATABASE_KEY='default'
