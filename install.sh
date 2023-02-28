@@ -219,7 +219,7 @@ Here, we configure the webserver that hosts Mathesar.
 "
 
 allowed_hosts=".localhost, 127.0.0.1"
-read -r -p "Enter the domain of the webserver, or press ENTER to skip: " domain_name
+read -r -p "Enter the domain name of the webserver, or press ENTER to skip: " domain_name
 if [ -z "${domain_name}" ]; then
   read -r -p "Enter the external IP address of the webserver, or press ENTER to skip: " ip_address
   domain_name=':80'
@@ -236,6 +236,7 @@ Only local connections will be allowed.
 "
   read -r -p "Press ENTER to continue. "
 fi
+printf "\n"
 read -r -p "Choose a HTTP port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
 read -r -p "Choose a HTTP port for the webserver to use [443]: " https_port
@@ -299,6 +300,7 @@ DOMAIN_NAME='$domain_name'
 HTTP_PORT='$http_port'
 HTTPS_PORT='$https_port'
 EOF
+sudo chmod 640 .env
 clear -x
 
 printf "
@@ -318,7 +320,7 @@ sudo wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/
 printf "Success!"
 clear -x
 sudo docker compose --profile prod up -d --wait
-clear -x
+printf "\n"
 printf "
 --------------------------------------------------------------------------------
 
