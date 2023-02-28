@@ -384,7 +384,11 @@ installation.
 printf "Downloading docker-compose.yml...
 "
 sudo curl -sL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
-printf "Success!"
+read -r -p "Success!
+
+Next, we'll download files and start the server, This may take a few minutes.
+
+Press ENTER to continue. "
 clear -x
 docker compose --profile prod up -d --wait || installation_fail
 clear -x
@@ -395,15 +399,20 @@ Service is ready and healthy!
 Adding admin user to Django webservice now.
 "
 docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
-read -r -p "Press ENTER to continue. "
+read -r -p "
+Press ENTER to continue. "
 printf "\n"
-clear -x
 if [ "${domain_name}" !=  ":80" ]; then
   padded_domain=" ${domain_name}"
 elif [ -n "${ip_address}" ]; then
   padded_domain=" ${ip_address}"
 fi
+clear -x
 printf "
+--------------------------------------------------------------------------------
+
+THANK YOU
+
 --------------------------------------------------------------------------------
 
 Installation complete!
