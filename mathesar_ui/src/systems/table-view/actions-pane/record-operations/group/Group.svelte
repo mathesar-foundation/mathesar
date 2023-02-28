@@ -67,6 +67,7 @@
       label="Add New Grouping"
       disabled={availableColumns.length === 0}
       triggerAppearance="secondary"
+      dropdownClass="group-table-dropdown"
     >
       {#each availableColumns as column (column.id)}
         <ButtonMenuItem on:click={() => addGroupColumn(column)}>
@@ -81,7 +82,6 @@
   .groups {
     min-width: 25rem;
     padding: 1rem;
-
     header {
       font-weight: bolder;
     }
@@ -103,6 +103,23 @@
 
     .muted {
       color: var(--slate-400);
+    }
+  }
+  :global{
+    .group-table-dropdown{
+      max-height: calc( 100vh - 19rem)!important;
+      scrollbar-width: thin;
+      scrollbar-color: #e8e8e8 transparent;
+      overflow-x: hidden;
+      &::-webkit-scrollbar-track {
+          background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background-color: #e8e8e8;
+      }
+      &::-webkit-scrollbar {
+        width: 0.5rem;
+      }
     }
   }
 </style>

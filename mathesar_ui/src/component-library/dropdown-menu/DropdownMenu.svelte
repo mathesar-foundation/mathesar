@@ -13,9 +13,10 @@
   export let icon: IconProps | undefined = undefined;
   export let closeOnInnerClick = true;
   export let menuStyle = '';
+  export let dropdownClass='';
 </script>
 
-<Dropdown {closeOnInnerClick} ariaLabel={ariaLabel ?? label} {...$$restProps}>
+<Dropdown {closeOnInnerClick} ariaLabel={ariaLabel ?? label} {...$$restProps} contentClass={dropdownClass}>
   <slot name="trigger" slot="trigger">
     <span class="dropdown-menu-trigger">
       {#if icon}
