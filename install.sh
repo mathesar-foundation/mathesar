@@ -154,9 +154,7 @@ docker_version=$(docker version -f '{{.Server.Version}}')
 docker_compose_version=$(docker compose version --short)
 printf "
 Your Docker version is %s.
-Your Docker Compose version is %s.
-" "$docker_version" "$docker_compose_version"
-
+Your Docker Compose version is %s. " "$docker_version" "$docker_compose_version"
 docker_maj_version=$(echo "$docker_version" | tr -d '[:alpha:]' | cut -d '.' -f 1)
 docker_compose_maj_version=$(echo "$docker_compose_version" | tr -d '[:alpha:]' | cut -d '.' -f 1)
 docker_compose_min_version=$(echo "$docker_compose_version" | tr -d '[:alpha:]' | cut -d '.' -f 2)
@@ -308,21 +306,21 @@ Installing environment file at %s/.env
 " "$config_location"
 
 read -r -p "Press ENTER to continue. "
-sudo mkdir -p "$config_location"
-cd "$config_location"
+sudo mkdir -p "${config_location}"
+cd "${config_location}"
 sudo tee .env > /dev/null <<EOF
-POSTGRES_USER='$django_db_username'
-POSTGRES_PASSWORD='$django_db_password'
-POSTGRES_HOST='$django_db_port'
-ALLOWED_HOSTS='$allowed_hosts'
-SECRET_KEY='$secret_key'
+POSTGRES_USER='${django_db_username}'
+POSTGRES_PASSWORD='${django_db_password}'
+POSTGRES_HOST='${django_db_port}'
+ALLOWED_HOSTS='${allowed_hosts}'
+SECRET_KEY='${secret_key}'
 DJANGO_DATABASE_KEY='default'
 DJANGO_DATABASE_URL='${django_database_url}'
 MATHESAR_DATABASES='(mathesar_tables|${mathesar_database_url})'
-DJANGO_SUPERUSER_PASSWORD='$superuser_password'
-DOMAIN_NAME='$domain_name'
-HTTP_PORT='$http_port'
-HTTPS_PORT='$https_port'
+DJANGO_SUPERUSER_PASSWORD='${superuser_password}'
+DOMAIN_NAME='${domain_name}'
+HTTP_PORT='${http_port}'
+HTTPS_PORT='${https_port}'
 EOF
 clear -x
 
