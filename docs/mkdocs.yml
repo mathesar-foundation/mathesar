@@ -54,7 +54,10 @@ plugins:
 nav:
   - Home: index.md
   - Installation:
-      - Install with Docker Compose: installation/docker-compose.md
+      - Quickstart: installation/quickstart.md
+      - Administration: installation/administration.md
+      - Under the Hood: installation/under-the-hood.md
+      - Troubleshooting: installation/troubleshooting.md
   - Product:
       - Introduction: product/intro.md
       - Users & Access Levels: product/users.md
