@@ -154,7 +154,7 @@
           <SpinnerButton
             onClick={reflect}
             appearance="secondary"
-            label="Refresh External Changes"
+            label="Sync External Changes"
             icon={iconRefresh}
           />
         </div>
