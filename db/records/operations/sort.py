@@ -44,25 +44,35 @@ def _build_order_by_all_columns_clause(relation):
     To be used when we have failed to find any other ordering criteria,
     since ordering by all columns is inherently inefficient.
 
-    Note the filtering out of internal columns. Before applying this fix, psycopg was throwing an error
-    like "could not identify an ordering operator for type json", because we were trying to
-    sort by an internal column like `__mathesar_group_metadata`, which has type `json`, which
-    requires special handling to be sorted. The problem is bypassed by not attempting to sort on
-    internal columns.
+    Note the filtering out some columns, namely internal columns and non-orderable columns. See
+    their docstrings for details.
     """
     return [
         {'field': col, 'direction': 'asc'}
         for col
         in relation.columns
-        if not _is_internal_column(col)
+        if _is_col_orderable(col) and not _is_internal_column(col)
     ]
 
 
 def _is_internal_column(col):
     """
+    Columns that Mathesar adds for its own devices and does not expose to the user. We don't want
+    to sort by these.
+
     Might not be exhaustive, take care.
     """
     return col.name == '__mathesar_group_metadata'
+
+
+def _is_col_orderable(col):
+    """
+    Some columns are not orderable (or at least don't have a non-ambiguous way to define order
+    without additional logic). We only want to order by orderably columns.
+    """
+    data_type = col.type
+    non_orderable_type = ['Binary', 'LargeBinary', 'PickleType', 'ARRAY', 'JSON', 'JSONB']
+    return str(data_type) not in non_orderable_type
 
 
 def apply_relation_sorting(relation, sort_spec):
