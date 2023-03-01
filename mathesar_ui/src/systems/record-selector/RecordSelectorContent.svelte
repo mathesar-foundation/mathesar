@@ -165,7 +165,9 @@
       <p>
         {#if hasSearchQueries}
           The 10 best matches are shown. Continue filtering to see more.
-        {:else}The first 10 records are shown. Filter to see more.{/if}
+        {:else}
+          The first 10 records are shown. Filter to see more.
+        {/if}
       </p>
     {/if}
   </div>
