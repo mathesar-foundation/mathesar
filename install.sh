@@ -192,6 +192,7 @@ WARNING: This will create a new PostgreSQL schema in the database for Mathesar's
 
 "
       configure_db_urls preexisting
+      printf "\n"
       printf "
 Now we need to create a local database for Mathesar's internal use.
 "
