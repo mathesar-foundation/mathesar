@@ -74,6 +74,7 @@ configure_db_urls() {
   if [ "${1}" != django_only ]; then
     db_name=$(get_nonempty "${prefix} database name" "${default_db}")
   fi
+  echo "Note: We will be using the same user credentials across all the databases created by Mathesar"
   db_username=$(get_nonempty "${prefix} username for the database" "${default_db}")
   if [ "${1}" == preexisting ]; then
     db_password=$(get_password "${prefix} password")
