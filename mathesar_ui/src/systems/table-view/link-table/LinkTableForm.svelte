@@ -25,6 +25,7 @@
   } from '@mathesar/stores/table-data';
   import {
     refetchTablesForSchema,
+    importVerifiedTables as importVerifiedTablesStore,
     tables as tablesDataStore,
     validateNewTableName,
   } from '@mathesar/stores/tables';
@@ -54,7 +55,8 @@
   // Prerequisite data
   // ===========================================================================
   $: singularBaseTableName = makeSingular(base.name);
-  $: tables = [...$tablesDataStore.data.values()];
+  $: importVerifiedTables = [...$importVerifiedTablesStore.values()];
+  $: allTables = [...$tablesDataStore.data.values()];
   $: ({ columnsDataStore } = $tabularData);
   $: baseColumns = columnsDataStore.columns;
   $: targetColumnsStore = target
@@ -86,7 +88,7 @@
     [columnNameIsAvailable($targetColumns)],
   );
   $: mappingTableName = requiredField(
-    suggestMappingTableName(base, target, tables),
+    suggestMappingTableName(base, target, allTables),
     [$validateNewTableName],
   );
   $: columnNameMappingToBase = (() => {
@@ -224,7 +226,10 @@
 
   <Field
     field={targetTable}
-    input={{ component: SelectTable, props: { tables, autoSelect: 'none' } }}
+    input={{
+      component: SelectTable,
+      props: { tables: importVerifiedTables, autoSelect: 'none' },
+    }}
   >
     <span slot="label">
       Link <Pill table={base} which="base" /> to

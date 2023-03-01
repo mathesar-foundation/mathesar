@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { getUsersStoreFromContext } from '@mathesar/stores/users';
-  import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
   import {
     AnchorButton,
     Button,
@@ -9,7 +7,10 @@
     TextInputWithPrefix,
   } from '@mathesar/component-library';
   import { iconAddNew } from '@mathesar/icons';
-  import type { User } from '@mathesar/api/users';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
+  import type { UserModel } from '@mathesar/stores/users';
+  import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import UserRow from './UserRow.svelte';
 
@@ -19,10 +20,10 @@
   $: requestStatus = usersStore?.requestStatus;
   $: users = usersStore?.users;
 
-  function filterUsers(_users: User[], query: string) {
-    const isMatch = (user: User, q: string) =>
+  function filterUsers(_users: UserModel[], query: string) {
+    const isMatch = (user: UserModel, q: string) =>
       user.username.toLowerCase().includes(q) ||
-      user.full_name?.toLowerCase().includes(q) ||
+      user.fullName?.toLowerCase().includes(q) ||
       user.email?.toLowerCase().includes(q);
     return _users?.filter((user) => {
       if (query) {
@@ -38,15 +39,17 @@
   }
 
   $: filteredUsers = filterUsers($users ?? [], filterQuery);
+  $: userCountText = filteredUsers.length ? `(${filteredUsers.length})` : '';
 </script>
+
+<svelte:head><title>{makeSimplePageTitle('Users')}</title></svelte:head>
+
+<h1>Users {userCountText}</h1>
 
 <section class="users-list-container">
   {#if $requestStatus?.state === 'processing'}
     <p>Loading...</p>
   {:else if $requestStatus?.state === 'success'}
-    <h1>
-      Users ({filteredUsers.length})
-    </h1>
     <div class="user-search-container">
       <div class="user-search">
         <div class="user-search-box">
@@ -109,7 +112,6 @@
   h1 {
     font-size: var(--text-size-ultra-large);
     font-weight: normal;
-    margin: 0;
   }
 
   .user-search {

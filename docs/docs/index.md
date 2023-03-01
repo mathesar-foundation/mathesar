@@ -1,17 +1,13 @@
-# Welcome to MkDocs
+# Mathesar Documentation
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+![Mathesar header](assets/images/header.png)
 
-## Commands
+Mathesar is a straightforward open source tool that provides a **spreadsheet-like interface** to a PostgreSQL **database**. Our web-based interface helps you and your collaborators work with data more independently and comfortably – **no technical skills needed**.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+You can use Mathesar to build **data models**, **enter data**, and even **build reports**.
 
-## Project layout
+## Installation
+You host Mathesar on your own server. Currently, we only support installing using Docker Compose, although we will support additional installation methods soon.
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+- [Install with Docker Compose](installation/docker-compose.md).
+
