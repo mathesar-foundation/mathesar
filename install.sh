@@ -5,8 +5,29 @@ github_tag=${1-master}
 min_maj_docker_version=20
 min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
+shopt -s expand_aliases
 
-## Functions ##################################################
+## Functions ###################################################################
+
+percent_encode_reserved () {
+  # We need to be able to percent-encode any characters which are reserved in
+  # the URI spec given by RFC-3986, as well as '|', ' ', and '%'
+  # See https://datatracker.ietf.org/doc/html/rfc3986#section-2.2
+  local reserved='|:/?#[]@!$&'"'"'()*+,;=% '
+  for (( i=0; i<${#1}; i++ )); do
+    local c="${1:$i:1}"
+    if [[ -z "${reserved##*"$c"*}"  ]]; then
+      # $c is in the reserved set, convert to hex Note that the '02' in the
+      # formatting is not technically needed, since all reserved characters are
+      # greater than 10 (greater than 20, actually). We'll leave it this way to
+      # avoid potential future problems.
+      printf '%%%02X' "'${c}"
+    else
+      printf "%s" "${c}"
+    fi
+  done
+}
+
 get_nonempty () {
   local ret_str="${2}"
   local prompt="${1}: "
@@ -53,7 +74,7 @@ Passwords do not match! Try again.
   echo "${password}"
 }
 
-configure_db_urls() {
+configure_db_urls () {
   local default_db
   local db_host
   local db_port
@@ -63,38 +84,42 @@ configure_db_urls() {
   if [ "${1}" == preexisting ]; then
     prefix="Enter the"
     db_host=$(get_nonempty "${prefix} database host")
+    enc_db_host=$(percent_encode_reserved "${db_host}")
   else
     prefix="Choose a"
     default_db="mathesar"
-    db_host=mathesar_db
+    enc_db_host=mathesar_db
   fi
   db_port=$(get_nonempty "${prefix} database connection port" "5432")
   if [ "${1}" != django_only ]; then
     db_name=$(get_nonempty "${prefix} database name" "${default_db}")
+    enc_db_name=$(percent_encode_reserved "${db_name}")
   fi
   db_username=$(get_nonempty "${prefix} username for the database" "${default_db}")
+  enc_db_username=$(percent_encode_reserved "${db_username}")
   if [ "${1}" == preexisting ]; then
     db_password=$(get_password "${prefix} password")
   else
     db_password=$(create_password)
   fi
-
+  enc_db_password=$(percent_encode_reserved "${db_password}")
 
   if [ "${1}" == preexisting ]; then
-    mathesar_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/${db_name}"
+    mathesar_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:${db_port}/${enc_db_name}"
   elif [ "${1}" == django_only ]; then
-    django_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/mathesar_django"
+    django_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:5432/mathesar_django"
     django_db_username="${db_username}"
     django_db_password="${db_password}"
     django_db_port="${db_port}"
   else
-    mathesar_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/${db_name}"
-    django_database_url="postgresql://${db_username}:${db_password}@${db_host}:${db_port}/mathesar_django"
+    mathesar_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:5432/${enc_db_name}"
+    django_database_url="postgresql://${enc_db_username}:${enc_db_password}@${enc_db_host}:5432/mathesar_django"
     django_db_username="${db_username}"
     django_db_password="${db_password}"
     django_db_port="${db_port}"
   fi
 }
+
 ################################################################################
 
 printf "
@@ -115,23 +140,67 @@ clear -x
 printf "
 --------------------------------------------------------------------------------
 
+OPERATING SYSTEM CHECK
+
+--------------------------------------------------------------------------------
+
+"
+if [ "$(echo "${OSTYPE}" | head -c 5)" == "linux" ]; then
+  printf "Installing Mathesar for GNU/Linux.
+"
+  alias docker='sudo docker'
+elif [ "$(echo "${OSTYPE}" | head -c 6)" == "darwin" ]; then
+  printf "Installing Mathesar for macOS.
+"
+else
+  printf "Operating System Unknown. Proceed at your own risk.
+"
+  alias docker='sudo docker'
+fi
+read -r -p "
+Press ENTER to continue, or CTRL+C to cancel. "
+clear -x
+
+installation_fail () {
+  docker compose --profile prod logs
+  read -r -p "
+Unfortunately, the installation has failed.
+
+We've printed some error logs above that will hopefully point you to the
+problem.
+
+A common issue is for there to be some networking issue outside of Mathesar's
+control. Please:
+- Make sure you can reach your preexisting DB from this machine, if relevant.
+- Make sure you have access to https://raw.githubusercontent.com/
+
+If you can't get things working, please raise an issue at
+https://github.com/centerofci/mathesar/issues/
+
+Press ENTER to reset the local docker environment. "
+  docker compose --profile prod down -v --rmi all
+  read -r -p "Press ENTER to exit the installer. "
+  exit 1
+}
+
+printf "
+--------------------------------------------------------------------------------
+
 DOCKER VERSION CHECK
 
 We'll begin by making sure your Docker installation is up-to-date.  In order to
-run Docker commands, we need to use sudo for elevated privileges.
+run some necessary commands, we need to use sudo for elevated privileges.
 
 --------------------------------------------------------------------------------
 
 "
 sudo -k
 sudo -v
-docker_version=$(sudo docker version -f '{{.Server.Version}}')
-docker_compose_version=$(sudo docker compose version --short)
+docker_version=$(docker version -f '{{.Server.Version}}')
+docker_compose_version=$(docker compose version --short)
 printf "
 Your Docker version is %s.
-Your Docker Compose version is %s.
-" "$docker_version" "$docker_compose_version"
-
+Your Docker Compose version is %s. " "$docker_version" "$docker_compose_version"
 docker_maj_version=$(echo "$docker_version" | tr -d '[:alpha:]' | cut -d '.' -f 1)
 docker_compose_maj_version=$(echo "$docker_compose_version" | tr -d '[:alpha:]' | cut -d '.' -f 1)
 docker_compose_min_version=$(echo "$docker_compose_version" | tr -d '[:alpha:]' | cut -d '.' -f 2)
@@ -242,7 +311,7 @@ read -r -p "Choose a HTTP port for the webserver to use [443]: " https_port
 https_port=${https_port:-443}
 printf "Generating Django secret key...
 "
-secret_key=$(base64 -w 0 /dev/urandom | head -c50)
+secret_key=$(xxd -ps -c0 -l30 /dev/urandom)
 
 printf "\n"
 clear -x
@@ -257,8 +326,8 @@ You'll use these credentials to login to Mathesar in the web interface.
 
 "
 
-read -r -p "Choose an admin username [mathesar]: " superuser_username
-superuser_username=${superuser_username:-mathesar}
+read -r -p "Choose an admin username [admin]: " superuser_username
+superuser_username=${superuser_username:-admin}
 superuser_email=$superuser_username@example.com
 superuser_password=$(create_password)
 printf "\n"
@@ -283,21 +352,21 @@ Installing environment file at %s/.env
 " "$config_location"
 
 read -r -p "Press ENTER to continue. "
-sudo mkdir -p "$config_location"
-cd "$config_location"
+sudo mkdir -p "${config_location}"
+cd "${config_location}"
 sudo tee .env > /dev/null <<EOF
-POSTGRES_USER='$django_db_username'
-POSTGRES_PASSWORD='$django_db_password'
-POSTGRES_HOST='$django_db_port'
-ALLOWED_HOSTS='$allowed_hosts'
-SECRET_KEY='$secret_key'
+POSTGRES_USER='${django_db_username}'
+POSTGRES_PASSWORD='${django_db_password}'
+POSTGRES_PORT='${django_db_port}'
+ALLOWED_HOSTS='${allowed_hosts}'
+SECRET_KEY='${secret_key}'
 DJANGO_DATABASE_KEY='default'
 DJANGO_DATABASE_URL='${django_database_url}'
 MATHESAR_DATABASES='(mathesar_tables|${mathesar_database_url})'
-DJANGO_SUPERUSER_PASSWORD='$superuser_password'
-DOMAIN_NAME='$domain_name'
-HTTP_PORT='$http_port'
-HTTPS_PORT='$https_port'
+DJANGO_SUPERUSER_PASSWORD='${superuser_password}'
+DOMAIN_NAME='${domain_name}'
+HTTP_PORT='${http_port}'
+HTTPS_PORT='${https_port}'
 EOF
 clear -x
 
@@ -314,10 +383,14 @@ installation.
 "
 printf "Downloading docker-compose.yml...
 "
-sudo wget -q -O docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
-printf "Success!"
+sudo curl -sL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
+read -r -p "Success!
+
+Next, we'll download files and start the server, This may take a few minutes.
+
+Press ENTER to continue. "
 clear -x
-sudo docker compose --profile prod up -d --wait
+docker compose --profile prod up -d --wait || installation_fail
 clear -x
 printf "
 --------------------------------------------------------------------------------
@@ -325,16 +398,21 @@ printf "
 Service is ready and healthy!
 Adding admin user to Django webservice now.
 "
-sudo docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
-read -r -p "Press ENTER to continue. "
+docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
+read -r -p "
+Press ENTER to continue. "
 printf "\n"
-clear -x
 if [ "${domain_name}" !=  ":80" ]; then
   padded_domain=" ${domain_name}"
 elif [ -n "${ip_address}" ]; then
   padded_domain=" ${ip_address}"
 fi
+clear -x
 printf "
+--------------------------------------------------------------------------------
+
+THANK YOU
+
 --------------------------------------------------------------------------------
 
 Installation complete!

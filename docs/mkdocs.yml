@@ -54,7 +54,12 @@ plugins:
 nav:
   - Home: index.md
   - Installation:
-      - Install with Docker Compose: installation/docker-compose.md
+      - Quickstart: installation-dc/quickstart.md
+      - Administration: installation-dc/administration.md
+      - Under the Hood: installation-dc/under-the-hood.md
+      - Troubleshooting: installation-dc/troubleshooting.md
+      - Setup for Windows: installation-dc/windows-setup.md
+      - Setup using Ansible: installation-dc/ansible-setup.md
   - Product:
       - Introduction: product/intro.md
       - Users & Access Levels: product/users.md
