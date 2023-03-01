@@ -26,13 +26,11 @@ get_password () {
   local password
   local prompt="${1}: "
   local retry_prompt="
-The password not be empty and must contain at least 1 uppercase, lowercase, number and special characters.
+The password must contain minimum of 8 characters!
 ${prompt}"
   read -rs -p "${prompt}" password
-  echo "$password" | grep "[A-Z]" | grep "[a-z]" | grep "[0-9]" | grep "[@#$%^&*]"
-  while [ -z "${password}" ] || [ $? -ne 0 ]; do
+  until [ ${#password} -ge 8 ]; do
     read -rs -p "${retry_prompt}" password
-    echo "$password" | grep "[A-Z]" | grep "[a-z]" | grep "[0-9]" | grep "[@#$%^&*]"
   done
   echo "${password}"
 }
@@ -263,7 +261,8 @@ You'll use these credentials to login to Mathesar in the web interface.
 
 read -r -p "Choose an admin username [mathesar]: " superuser_username
 superuser_username=${superuser_username:-mathesar}
-superuser_email=$superuser_username@example.com
+read -r -p "Choose an admin email [$superuser_username@example.com]: " superuser_email
+superuser_email=${superuser_email:-"$superuser_username@example.com"}
 superuser_password=$(create_password)
 printf "\n"
 clear -x
