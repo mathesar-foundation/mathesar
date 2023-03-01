@@ -3,7 +3,7 @@
 Uninstalling Mathesar should only take a few minutes.
 
 !!! info
-    We've tested this uninstallation procedure on Windows, Mac, and a few Linux variants, but this is our first release so there might be unexpected issues. Please open a [GitHub issue](https://github.com/centerofci/mathesar/issues) if you run into any problems.
+    We've tested this uninstallation procedure on Windows, and a few Linux variants, but this is our first release so there might be unexpected issues. Please open a [GitHub issue](https://github.com/centerofci/mathesar/issues) if you run into any problems.
 
 
 ## Uninstall Mathesar
@@ -28,17 +28,18 @@ sudo docker compose --profile prod down --rmi all
 cd .. && sudo rm -rf mathesar
 ```
 
-## Removing Mathesar Schema from databases
+## Remove Mathesar Schema from databases
 
-If you had connected Mathesar to an existing database, mathesar would have installed a Schema for its internal use. You can also remove those schemas from the databases by:
+If you had connected Mathesar to an existing database, mathesar would have installed a Schema for its internal use. You can remove those schemas from the databases by:
 
-#### Connecting to the database
+#### 1. Connecting to the database
 ```
 psql -h <DB HOSTNAME> -p <DB PORT> -U <DB_USER> <DB_NAME>
 ```
 
-#### Running the SQL command to delete the mathesar Schema
+#### 2. Running the SQL command to delete the mathesar Schema
+!!! Deleting Mathesar schema will also delete all the database objects that depend on it.
 
 ```postgresql
-DROP SCHEMA mathesar_types;
+DROP SCHEMA mathesar_types CASCADE ;
 ```

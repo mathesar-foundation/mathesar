@@ -60,6 +60,7 @@ nav:
       - Troubleshooting: installation-dc/troubleshooting.md
       - Setup for Windows: installation-dc/windows-setup.md
       - Setup using Ansible: installation-dc/ansible-setup.md
+  - Uninstalling Mathesar: uninstall/quickstart.md
   - Product:
       - Introduction: product/intro.md
       - Users & Access Levels: product/users.md
