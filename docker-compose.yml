@@ -10,7 +10,9 @@ services:
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
     ports:
-      - ${POSTGRES_HOST-5432}:5432
+      - ${POSTGRES_PORT-5432}:5432
+    expose:
+      - 5432
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     healthcheck:
