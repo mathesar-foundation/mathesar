@@ -58,9 +58,9 @@ nav:
       - Administration: installation-dc/administration.md
       - Under the Hood: installation-dc/under-the-hood.md
       - Troubleshooting: installation-dc/troubleshooting.md
+      - Uninstalling: installation-dc/uninstall.md
       - Setup for Windows: installation-dc/windows-setup.md
       - Setup using Ansible: installation-dc/ansible-setup.md
-  - Uninstalling Mathesar: uninstall/quickstart.md
   - Product:
       - Introduction: product/intro.md
       - Users & Access Levels: product/users.md
