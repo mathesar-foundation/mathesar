@@ -3,8 +3,11 @@
 ## Installation Steps
 These are the steps that the installation script performs, explained in more depth:
 
+### Operating System Check
+The installer attempts to determine what operating system you're installing Mathesar on. We've tested with some variants of macOS as well as a few distros of Linux. Some logic in the installer branches based on your operating system.
+
 ### Docker Version Check
-The installer double-checks your Docker and Docker Compose versions, making sure that `docker` is at least version 20.0.0, and `docker-compose` is at least version 2.0.0.
+The installer double-checks your Docker and Docker Compose versions, making sure that `docker` is at least version 20.0.0, and `docker-compose` is at least version 2.10.0.
 
 ### Database Configuration
 Mathesar uses two PostgreSQL databases:
