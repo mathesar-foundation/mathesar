@@ -20,6 +20,7 @@
 
   export let database: Database;
   export let schema: SchemaEntry;
+  export let canExecuteDDL = true;
 
   $: href = getSchemaPageUrl(database.name, schema.id);
   $: isDefault = schema.name === 'public';
@@ -33,7 +34,7 @@
 
       {#if isLocked}
         <span class="lock"><Icon {...iconNotEditable} /></span>
-      {:else}
+      {:else if canExecuteDDL}
         <DropdownMenu
           showArrow={false}
           triggerAppearance="plain"

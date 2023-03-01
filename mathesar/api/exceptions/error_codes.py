@@ -61,6 +61,3 @@ class ErrorCodes(Enum):
     IncorrectOldPassword = 4419
     EditingPublicSchema = 4421
     DuplicateUIQueryInSchema = 4422
-
-    # Version API errors
-    GithubReleasesAPIFailure = 4501

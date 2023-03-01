@@ -18,23 +18,41 @@
   export let isTablesLoading = false;
   export let isExplorationsLoading = false;
 
+  export let canExecuteDDL: boolean;
+  export let canEditMetadata: boolean;
+
   export let database: Database;
   export let schema: SchemaEntry;
+
+  $: hasTables = tablesMap.size > 0;
+  $: hasExplorations = explorationsMap.size > 0;
+  $: showTableCreationTutorial = !hasTables && canExecuteDDL;
+  $: showExplorationTutorial = hasTables && !hasExplorations && canEditMetadata;
+
+  // Viewers can explore, they cannot save explorations
+  $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
 </script>
 
 <div class="container">
   <div class="vertical-container tables">
     <OverviewHeader title="Tables">
-      <slot slot="action">
-        <CreateNewTableButton {database} {schema} />
-      </slot>
+      <svelte:fragment slot="action">
+        {#if canExecuteDDL}
+          <CreateNewTableButton {database} {schema} />
+        {/if}
+      </svelte:fragment>
     </OverviewHeader>
     {#if isTablesLoading}
       <TableSkeleton />
-    {:else if tablesMap.size}
-      <TablesList tables={[...tablesMap.values()]} {database} {schema} />
-    {:else}
+    {:else if showTableCreationTutorial}
       <CreateNewTableTutorial {database} {schema} />
+    {:else}
+      <TablesList
+        {canExecuteDDL}
+        tables={[...tablesMap.values()]}
+        {database}
+        {schema}
+      />
     {/if}
   </div>
   <div class="vertical-container explorations">
@@ -42,7 +60,7 @@
       <OverviewHeader title="Saved Explorations" />
       {#if isExplorationsLoading}
         <ExplorationSkeleton />
-      {:else if tablesMap.size && !explorationsMap.size}
+      {:else if showExplorationTutorial}
         <CreateNewExplorationTutorial {database} {schema} />
       {:else}
         <ExplorationsList
@@ -54,7 +72,7 @@
       {/if}
     </div>
 
-    {#if tablesMap.size && explorationsMap.size && !isExplorationsLoading}
+    {#if canExplore}
       <div class="vertical-container">
         <OverviewHeader title="Explore your Data" />
         <span>

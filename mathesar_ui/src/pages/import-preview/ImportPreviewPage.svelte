@@ -490,8 +490,6 @@
     position: relative;
 
     h1 {
-      font-weight: 500;
-      font-size: var(--size-xx-large);
       margin: 1em 0;
     }
 
