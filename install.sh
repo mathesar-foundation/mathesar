@@ -95,7 +95,12 @@ configure_db_urls () {
     db_name=$(get_nonempty "${prefix} database name" "${default_db}")
     enc_db_name=$(percent_encode_reserved "${db_name}")
   fi
-  echo "Note: We will be using the same user credentials across all the databases created by Mathesar"
+  if [ "${1}" != preexisting ] && [ "${1}" != django_only ]; then
+    printf "
+Note: We will use the same user credentials across all databases created by Mathesar.
+
+"
+  fi
   db_username=$(get_nonempty "${prefix} username for the database" "${default_db}")
   enc_db_username=$(percent_encode_reserved "${db_username}")
   if [ "${1}" == preexisting ]; then
