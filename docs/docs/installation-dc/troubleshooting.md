@@ -16,6 +16,10 @@ sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down --rm
 ```
 to restart from a clean `docker` state, and choose non-default ports during the installation process for PostgreSQL, HTTP traffic, or HTTPS traffic as appropriate, e.g., using `8080` for HTTP traffic if `80` is unavailable. Note that if you customized the configuration directory, you must replace `/etc/mathesar` with that custom directory in the command.
 
+## Connection problems
+
+In order for Mathesar to install properly, it needs to download some artifacts from `https://raw.githubusercontent.com`. We've received some reports that this domain is blocked for some internet providers in India. If this is the case for you, consider routing around that problem via a custom DNS server, or using a VPN.
+
 ## Permissions
 
 If you have permissions issues when the script begins running `docker` commands, please double-check that your user is in the `sudoers` file. Try running `sudo -v`. If that gives an error, your user lacks needed permissions and you should speak with the administrator of your system.
