@@ -47,10 +47,10 @@ get_password () {
   local password
   local prompt="${1}: "
   local retry_prompt="
-The password must contain minimum of 8 characters!
+The password cannot be empty!
 ${prompt}"
   read -rs -p "${prompt}" password
-  until [ ${#password} -ge 8 ]; do
+  until [ -n "${password}" ]; do
     read -rs -p "${retry_prompt}" password
   done
   echo "${password}"
