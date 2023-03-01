@@ -74,6 +74,16 @@ Passwords do not match! Try again.
   echo "${password}"
 }
 
+get_db_host () {
+  local prefix="${1}"
+  local db_host
+  db_host=$(get_nonempty "${prefix} database host")
+  while [ "${db_host:0:3}" == "127" ] || [ "${db_host}" == "localhost" ]; do
+    echo "Databases on localhost are not supported by this installation method." >&2
+    db_host=$(get_nonempty "${prefix} database host")
+  done
+}
+
 configure_db_urls () {
   local default_db
   local db_host
@@ -83,7 +93,7 @@ configure_db_urls () {
   local prefix
   if [ "${1}" == preexisting ]; then
     prefix="Enter the"
-    db_host=$(get_nonempty "${prefix} database host")
+    db_host=$(get_db_host "${prefix}")
     enc_db_host=$(percent_encode_reserved "${db_host}")
   else
     prefix="Choose a"
@@ -168,11 +178,10 @@ Press ENTER to continue, or CTRL+C to cancel. "
 clear -x
 
 installation_fail () {
-  docker compose --profile prod logs
-  read -r -p "
+  printf "
 Unfortunately, the installation has failed.
 
-We've printed some error logs above that will hopefully point you to the
+We'll print some error logs above that will hopefully point you to the
 problem.
 
 A common issue is for there to be some networking issue outside of Mathesar's
@@ -181,11 +190,18 @@ control. Please:
 - Make sure you have access to https://raw.githubusercontent.com/
 
 If you can't get things working, please raise an issue at
-https://github.com/centerofci/mathesar/issues/
 
-Press ENTER to reset the local docker environment. "
-  docker compose --profile prod down -v --rmi all
-  read -r -p "Press ENTER to exit the installer. "
+https://github.com/centerofci/mathesar/issues/
+" >&2
+
+  if [ "${1}" == "late" ]; then
+    read -r -p "
+    Press ENTER to print the logs and reset the local docker environment. "
+    docker compose --profile prod logs
+    docker compose --profile prod down -v --rmi all
+  fi
+  read -r -p "
+Press ENTER to exit the installer. "
   exit 1
 }
 
@@ -393,14 +409,14 @@ installation.
 "
 printf "Downloading docker-compose.yml...
 "
-sudo curl -sL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
+sudo curl -sfL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"${github_tag}"/docker-compose.yml || installation_fail early
 read -r -p "Success!
 
 Next, we'll download files and start the server, This may take a few minutes.
 
 Press ENTER to continue. "
 clear -x
-docker compose --profile prod up -d --wait || installation_fail
+docker compose --profile prod up -d --wait || installation_fail late
 printf "\n"
 printf "
 --------------------------------------------------------------------------------
