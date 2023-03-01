@@ -198,15 +198,25 @@ def reflect_constraints_from_database(database):
             constraint_obj = models.Constraint(oid=constraint_oid, table=table)
             constraint_objs_to_create.append(constraint_obj)
     models.Constraint.current_objects.bulk_create(constraint_objs_to_create, ignore_conflicts=True)
-
-    stale_constraint_ids = []
-    for constraint in models.Constraint.current_objects.all():
-        if constraint.oid not in [db_constraint['oid'] for db_constraint in db_constraints]:
-            stale_constraint_ids.append(constraint.id)
-    models.Constraint.current_objects.filter(
-        table__schema__database=database, id__in=stale_constraint_ids
-    ).delete()
+    _delete_stale_dj_constraints(db_constraints, database)
     engine.dispose()
+
+
+def _delete_stale_dj_constraints(known_db_constraints, database):
+    """
+    Deletes stale Constraint Django model instances in this database. A constraint is stale when it
+    is not in the provided `known_db_constraints` structure.
+    """
+    known_db_constraint_oids = set(
+        known_db_constraint['oid']
+        for known_db_constraint
+        in known_db_constraints
+    )
+    stale_dj_constraints = models.Constraint.current_objects.filter(
+        ~Q(oid__in=known_db_constraint_oids),
+        table__schema__database=database,
+    )
+    stale_dj_constraints.delete()
 
 
 # TODO pass in a cached engine instead of creating a new one
