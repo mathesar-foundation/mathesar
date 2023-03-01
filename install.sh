@@ -95,6 +95,12 @@ configure_db_urls () {
     db_name=$(get_nonempty "${prefix} database name" "${default_db}")
     enc_db_name=$(percent_encode_reserved "${db_name}")
   fi
+  if [ "${1}" != preexisting ] && [ "${1}" != django_only ]; then
+    printf "
+Note: We will use the same user credentials across all databases created by Mathesar.
+
+"
+  fi
   db_username=$(get_nonempty "${prefix} username for the database" "${default_db}")
   enc_db_username=$(percent_encode_reserved "${db_username}")
   if [ "${1}" == preexisting ]; then
@@ -188,7 +194,7 @@ printf "
 
 DOCKER VERSION CHECK
 
-We'll begin by making sure your Docker installation is up-to-date.  In order to
+We'll begin by making sure your Docker installation is up-to-date. In order to
 run some necessary commands, we need to use sudo for elevated privileges.
 
 --------------------------------------------------------------------------------
@@ -260,6 +266,7 @@ WARNING: This will create a new PostgreSQL schema in the database for Mathesar's
 
 "
       configure_db_urls preexisting
+      printf "\n"
       printf "
 Now we need to create a local database for Mathesar's internal use.
 "
@@ -288,7 +295,7 @@ Here, we configure the webserver that hosts Mathesar.
 "
 
 allowed_hosts=".localhost, 127.0.0.1"
-read -r -p "Enter the domain of the webserver, or press ENTER to skip: " domain_name
+read -r -p "Enter the domain name of the webserver, or press ENTER to skip: " domain_name
 if [ -z "${domain_name}" ]; then
   read -r -p "Enter the external IP address of the webserver, or press ENTER to skip: " ip_address
   domain_name=':80'
@@ -305,6 +312,7 @@ Only local connections will be allowed.
 "
   read -r -p "Press ENTER to continue. "
 fi
+printf "\n"
 read -r -p "Choose a HTTP port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
 read -r -p "Choose a HTTP port for the webserver to use [443]: " https_port
@@ -328,7 +336,8 @@ You'll use these credentials to login to Mathesar in the web interface.
 
 read -r -p "Choose an admin username [admin]: " superuser_username
 superuser_username=${superuser_username:-admin}
-superuser_email=$superuser_username@example.com
+read -r -p "Choose an admin email [$superuser_username@example.com]: " superuser_email
+superuser_email=${superuser_email:-"$superuser_username@example.com"}
 superuser_password=$(create_password)
 printf "\n"
 clear -x
@@ -347,7 +356,7 @@ read -r -p "Choose a configuration directory [/etc/mathesar]: " config_location
 config_location="${config_location:-/etc/mathesar}"
 
 printf "
-Installing environment file at %s/.env
+The environment file will be installed at %s/.env
 
 " "$config_location"
 
@@ -368,6 +377,7 @@ DOMAIN_NAME='${domain_name}'
 HTTP_PORT='${http_port}'
 HTTPS_PORT='${https_port}'
 EOF
+sudo chmod 640 .env
 clear -x
 
 printf "
@@ -391,7 +401,7 @@ Next, we'll download files and start the server, This may take a few minutes.
 Press ENTER to continue. "
 clear -x
 docker compose --profile prod up -d --wait || installation_fail
-clear -x
+printf "\n"
 printf "
 --------------------------------------------------------------------------------
 
