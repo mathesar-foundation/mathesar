@@ -26,11 +26,13 @@ get_password () {
   local password
   local prompt="${1}: "
   local retry_prompt="
-The password cannot be empty!
+The password not be empty and must contain at least 1 uppercase, lowercase, number and special characters.
 ${prompt}"
   read -rs -p "${prompt}" password
-  until [ -n "${password}" ]; do
+  echo "$password" | grep "[A-Z]" | grep "[a-z]" | grep "[0-9]" | grep "[@#$%^&*]"
+  while [ -z "${password}" ] || [ $? -ne 0 ]; do
     read -rs -p "${retry_prompt}" password
+    echo "$password" | grep "[A-Z]" | grep "[a-z]" | grep "[0-9]" | grep "[@#$%^&*]"
   done
   echo "${password}"
 }
