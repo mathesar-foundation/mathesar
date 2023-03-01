@@ -24,9 +24,7 @@ The credentials created in this section are used to log in directly to the datab
 Finally, Mathesar helps you customize the port exposed to your host machine from the database container. This is useful, since you'll need to have an exposed port to login to the Mathesar database(s) using an alternate client such as `psql`, but there could be a conflict on the default port (e.g. for the case that a PostgreSQL instance is running in the host OS).
 
 ### Webserver Configuration
-This section lets you customize the details of the web server (Caddy) that provides the Mathesar web UI and API endpoints.
-
-Most of the customizations available here are only relevant if you're planning to expose your installation of Mathesar to the internet. You can configure the domain as well as the ports to use for HTTP and HTTPS traffic, respectively.
+This section lets you configure the entrypoint (Caddy) for every request you send to Mathesar. You may need to customize the ports if you have other services using ports on your machine. Additionally, you need to configure either a domain or an external IP address if you plan to expose your installation of Mathesar to the internet. Setting up the domain also gets HTTPS working properly on your Mathesar installation.
 
 #### Domain setup
 The domain specified here should be a valid, registered domain, whose DNS entry points to the IP address of the server on which Mathesar is installed. DNS configuration should be done ahead of time.
