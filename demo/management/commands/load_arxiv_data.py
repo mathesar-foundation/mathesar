@@ -1,6 +1,7 @@
 import re
 import arxiv
 import json
+import logging
 from sqlalchemy import text
 
 from django.core.management import BaseCommand
@@ -17,18 +18,29 @@ class Command(BaseCommand):
 
 
 def update_our_arxiv_dbs():
-    papers = _download_arxiv_papers()
-    db_schema_pairs = _get_logged_db_schema_pairs()
+    """
+    Will log an error if db-schema log is missing or cannot be deserialized.
+    """
+    papers = download_arxiv_papers()
+    try:
+        db_schema_pairs = _get_logged_db_schema_pairs()
+    except Exception as e:
+        logging.error(e, exc_info=True)
+        return
     for db_name, schema_name in db_schema_pairs:
         engine = create_mathesar_engine(db_name)
-        with engine.begin() as conn:
-            _set_search_path(conn, schema_name)
-            for paper in papers:
-                persist_paper(conn, paper)
+        update_arxiv_schema(engine, schema_name, papers)
         engine.dispose()
 
 
-def _download_arxiv_papers():
+def update_arxiv_schema(engine, schema_name, papers):
+    with engine.begin() as conn:
+        _set_search_path(conn, schema_name)
+        for paper in papers:
+            persist_paper(conn, paper)
+
+
+def download_arxiv_papers():
     query_expression = _construct_arxiv_search_query_expression()
     arxiv_search = arxiv.Search(
         query=query_expression,

@@ -10,11 +10,13 @@ services:
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
     ports:
-      - ${POSTGRES_HOST-5432}:5432
+      - ${POSTGRES_PORT-5432}:5432
+    expose:
+      - 5432
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     healthcheck:
-      test: pg_isready
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
       interval: 5s
       timeout: 1s
       retries: 30
