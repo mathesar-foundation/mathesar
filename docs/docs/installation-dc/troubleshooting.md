@@ -1,5 +1,8 @@
 # Troubleshooting
 
+## Restarting installation
+If you need to re-start installation for any reason, please do not re-run the installation script! You'll need to run the [uninstall steps](./uninstall.md) before trying to run the installation script again.
+
 ## Docker versions
 
 The most common problem we've encountered is users with out-of-date `docker` or `docker-compose` versions.
