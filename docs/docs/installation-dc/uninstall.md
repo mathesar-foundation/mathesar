@@ -7,14 +7,14 @@ Please follow these steps to uninstall Mathesar.
 Here's the command to remove all the Docker images and containers set up during installation.
 
 === "Linux"
-```sh
-sudo docker compose --profile prod down --rmi all
-```
+    ```sh
+    sudo docker compose --profile prod down --rmi all
+    ```
 
 === "MacOS"
-```sh
-docker compose --profile prod down --rmi all
-```
+    ```sh
+    docker compose --profile prod down --rmi all
+    ```
 
 ## Remove configuration files
 
