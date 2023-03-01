@@ -70,7 +70,7 @@ Check out a [live demo of Mathesar here](https://demo.mathesar.org)!
 - **Data entry**: Use our spreadsheet-like interface to view, create, update, and delete table records.
 - **Filter, sort, and group**: Quickly slice your data in different ways.
 - **Query builder**: Use our Data Explorer to build queries without knowing anything about SQL or joins.
-- **Schema migrations**: Transfer data between tables in two clicks.
+- **Schema migrations**: Transfer columns between tables in two clicks.
 - **Uses Postgres features**: Mathesar uses and manipulates Postgres schemas, primary keys, foreign keys, constraints and data types. e.g. "Links" in the UI are foreign keys in the database.
 - **Custom data types**: Custom data types for emails and URLs (more coming soon), validated at the database level.
 - **Basic access control**: Users can have Viewer (read-only), Editor (can only edit data, but not data structure), or Manager (can edit both data and its structure) roles.
