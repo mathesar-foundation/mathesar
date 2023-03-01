@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://wiki.mathesar.org/" target="_blank">Wiki</a>
+  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme" target="_blank">Docs</a> • <a href="https://demo.mathesar.org?ref=github-readme" target="_blank">Live Demo</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://wiki.mathesar.org/" target="_blank">Wiki</a>
 </p>
 
 
@@ -61,8 +61,8 @@ The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) 
 
 ![db-page](https://user-images.githubusercontent.com/287034/220773522-8c1c1483-2389-4f5e-83b2-e54836983035.png)  
 
-## Demo
-Checkout the demo application [here](https://demo.mathesar.org)!
+## Live Demo
+Check out a [live demo of Mathesar here](https://demo.mathesar.org)!
 
 ## Features
 - **Built on Postgres**: Connect to an existing Postgres database or set one up from scratch.
