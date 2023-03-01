@@ -59,7 +59,10 @@ The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) 
 
 ![arxiv-schema](https://user-images.githubusercontent.com/287034/220773323-bd6ffb31-835b-4df5-981e-dae6341d42bb.png)
 
-![db-page](https://user-images.githubusercontent.com/287034/220773522-8c1c1483-2389-4f5e-83b2-e54836983035.png)
+![db-page](https://user-images.githubusercontent.com/287034/220773522-8c1c1483-2389-4f5e-83b2-e54836983035.png)  
+
+## Demo
+Checkout the demo application [here](https://demo.mathesar.org)!
 
 ## Features
 - **Built on Postgres**: Connect to an existing Postgres database or set one up from scratch.
