@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://wiki.mathesar.org/" target="_blank">Wiki</a>
+  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme" target="_blank">Docs</a> • <a href="https://demo.mathesar.org?ref=github-readme" target="_blank">Live Demo</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://wiki.mathesar.org/" target="_blank">Wiki</a>
 </p>
 
 
@@ -27,6 +27,7 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 - [Status](#status)
 - [Join our community!](#join-our-community)
 - [Screenshots](#screenshots)
+- [Live Demo](#live-demo)
 - [Features](#features)
 - [Self-hosting](#self-hosting)
 - [Local development setup](#local-development-setup)
@@ -59,7 +60,10 @@ The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) 
 
 ![arxiv-schema](https://user-images.githubusercontent.com/287034/220773323-bd6ffb31-835b-4df5-981e-dae6341d42bb.png)
 
-![db-page](https://user-images.githubusercontent.com/287034/220773522-8c1c1483-2389-4f5e-83b2-e54836983035.png)
+![db-page](https://user-images.githubusercontent.com/287034/220773522-8c1c1483-2389-4f5e-83b2-e54836983035.png)  
+
+## Live Demo
+Check out a [live demo of Mathesar here](https://demo.mathesar.org)!
 
 ## Features
 - **Built on Postgres**: Connect to an existing Postgres database or set one up from scratch.
