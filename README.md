@@ -27,6 +27,7 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 - [Status](#status)
 - [Join our community!](#join-our-community)
 - [Screenshots](#screenshots)
+- [Live Demo](#live-demo)
 - [Features](#features)
 - [Self-hosting](#self-hosting)
 - [Local development setup](#local-development-setup)
