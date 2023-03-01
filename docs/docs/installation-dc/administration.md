@@ -1,7 +1,5 @@
 # Administration
 
-For the commands below, you need to replace `$MATHESAR_CONFIG_DIR` with the actual value you set during the installation process. By default, this should be `/etc/mathesar`.
-
 ## Starting and stopping Mathesar
 
 The command to start Mathesar (say, after stopping it, or a reboot of the machine) is:
@@ -14,7 +12,7 @@ The command to stop all containers used for Mathesar, and release their ports, e
 sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down
 ```
 
-If you changed the Mathesar configuration directory during installation, you'll need to change `/etc/mathesar` in the comamnds above to your configuration directory.
+If you changed the Mathesar configuration directory during installation, you'll need to change `/etc/mathesar` in the commands above to your configuration directory.
 
 ## Upgrading Mathesar
 The command to manually upgrade Mathesar to the newest version is:
