@@ -62,6 +62,7 @@ nav:
       - Setup using Ansible: installation-dc/ansible-setup.md
   - Product:
       - Introduction: product/intro.md
+      - Syncing database changes: product/syncing-db.md
       - Users & Access Levels: product/users.md
   - Contributing:
       - Welcome!: contributing/welcome.md
