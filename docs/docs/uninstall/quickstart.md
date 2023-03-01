@@ -16,10 +16,16 @@ cd <installation directory location>
 
 
 ## Remove Mathesar webserver container and related image:
-
+=== "Linux"
 ```
 sudo docker compose --profile prod down --rmi all
 ```
+
+=== "MacOS"
+```
+docker compose --profile prod down --rmi all
+```
+
 
 
 ## Remove Mathesar config files:

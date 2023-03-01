@@ -41,6 +41,7 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.superfences
   - pymdownx.details
+  - pymdownx.tabbed
   - smarty
   - tables
   - toc:
