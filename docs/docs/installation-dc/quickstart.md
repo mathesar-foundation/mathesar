@@ -7,7 +7,7 @@ Installation should only take a few minutes.
 
 ## Requirements
 - You'll need a machine to install Mathesar on. You should have root access to the machine.
-- You'll need to install or upgrade Docker and `docker compose` on your computer. Mathesar has been tested with Docker v23 and Docker Compose v2.10 (although v2.0 or higher should work).
+- You'll need to install or upgrade Docker and `docker compose` on your computer. Mathesar has been tested with Docker v23 and Docker Compose v2.10.
     - [Docker installation documentation](https://docs.docker.com/desktop/)
     - [`docker-compose` installation documentation](https://docs.docker.com/compose/install/)
 
