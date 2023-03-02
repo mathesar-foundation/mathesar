@@ -30,7 +30,7 @@ Installation should only take a few minutes.
 To install the newest version of Mathesar, cut-and-paste the below command into a terminal and follow the instructions:
 
 ```sh
-bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/master/install.sh)
+bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/0.1.0/install.sh)
 ```
 
 You'll set up the domain you'll access Mathesar using and an admin username and password during installation. To access Mathesar, navigate to the domain and login using the admin user name and password.

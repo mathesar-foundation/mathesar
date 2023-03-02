@@ -8,12 +8,12 @@ Here's the command to remove all the Docker images and containers set up during 
 
 === "Linux"
     ```sh
-    sudo docker compose --profile prod down --rmi all
+    sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down --rmi all -v
     ```
 
 === "MacOS"
     ```sh
-    docker compose --profile prod down --rmi all
+    docker compose -f /etc/mathesar/docker-compose.yml --profile prod down --rmi all -v
     ```
 
 ## Remove configuration files
