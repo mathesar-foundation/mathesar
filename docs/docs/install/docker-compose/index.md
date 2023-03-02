@@ -24,24 +24,24 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 - **Start** Mathesar:
 
     === "Linux"
-        ```sh
+        ```
         sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod up -d
         ```
 
     === "MacOS"
-        ```sh
+        ```
         docker compose -f /etc/mathesar/docker-compose.yml --profile prod up -d
         ```
 
 - **Stop** Mathesar:
 
     === "Linux"
-        ```sh
+        ```
         sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down
         ```
 
     === "MacOS"
-        ```sh
+        ```
         docker compose -f /etc/mathesar/docker-compose.yml --profile prod down
         ```
 
@@ -54,9 +54,16 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 
 Manually upgrade Mathesar to the newest version:
 
-```
-sudo docker exec mathesar-watchtower-1 /watchtower --run-once
-```
+=== "Linux"
+    ```
+    sudo docker exec mathesar-watchtower-1 /watchtower --run-once
+    ```
+
+=== "MacOS"
+    ```
+    docker exec mathesar-watchtower-1 /watchtower --run-once
+    ```
+
 
 !!! tip "Upgrade from within Mathesar"
     You can also run the upgrade from within Mathesar by logging into as an admin user and navigating to "Administration" (in the top right menu) > "Software Update"
@@ -66,12 +73,12 @@ sudo docker exec mathesar-watchtower-1 /watchtower --run-once
 1. Remove all Mathesar Docker images and containers.
 
     === "Linux"
-        ```sh
+        ```
         sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down --rmi all -v
         ```
 
     === "MacOS"
-        ```sh
+        ```
         docker compose -f /etc/mathesar/docker-compose.yml --profile prod down --rmi all -v
         ```
 
