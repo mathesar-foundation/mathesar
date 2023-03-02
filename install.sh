@@ -165,13 +165,16 @@ if [ "$(echo "${OSTYPE}" | head -c 5)" == "linux" ]; then
   printf "Installing Mathesar for GNU/Linux.
 "
   alias docker='sudo docker'
+  INSTALL_OS='linux'
 elif [ "$(echo "${OSTYPE}" | head -c 6)" == "darwin" ]; then
   printf "Installing Mathesar for macOS.
 "
+  INSTALL_OS='macos'
 else
   printf "Operating System Unknown. Proceed at your own risk.
 "
   alias docker='sudo docker'
+  INSTALL_OS='unknown'
 fi
 read -r -p "
 Press ENTER to continue, or CTRL+C to cancel. "
@@ -394,6 +397,9 @@ HTTP_PORT='${http_port}'
 HTTPS_PORT='${https_port}'
 EOF
 sudo chmod 640 .env
+if [ "${INSTALL_OS}" == 'macos' ]; then
+  sudo chown "${USER}:${USER}" .env
+fi
 clear -x
 
 printf "
