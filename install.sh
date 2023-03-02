@@ -82,6 +82,7 @@ get_db_host () {
     echo "Databases on localhost are not supported by this installation method." >&2
     db_host=$(get_nonempty "${prefix} database host")
   done
+  echo "${db_host}"
 }
 
 configure_db_urls () {
