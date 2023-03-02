@@ -1,5 +1,5 @@
 import type { CssVariablesObj } from '@mathesar/types';
-import { truthy } from './typeUtils';
+import { isDefinedNonNullable } from './typeUtils';
 
 export function makeStyleStringFromCssVariables(cssVariables: CssVariablesObj) {
   const isCssVariable = (str: string) => str.indexOf('--') === 0;
@@ -12,7 +12,7 @@ export function makeStyleStringFromCssVariables(cssVariables: CssVariablesObj) {
 
 export function mergeStyleStrings(...args: (string | undefined)[]) {
   return args
-    .filter(truthy)
+    .filter(isDefinedNonNullable)
     .map((styleString) => {
       const trimmedStyleString = styleString.trim();
       if (trimmedStyleString.endsWith(';')) {

@@ -3,7 +3,7 @@
   import {
     makeStyleStringFromCssVariables,
     mergeStyleStrings,
-  } from '@mathesar/utils/styles';
+  } from '../common/utils/styleUtils';
   import type { TextInputProps } from './TextInputTypes';
 
   type $$Props = TextInputProps;

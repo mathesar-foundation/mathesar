@@ -1,6 +1,4 @@
-import type { Truthy } from '@mathesar/types';
 import type { Readable, Writable } from 'svelte/store';
-
 import { MissingExhaustiveConditionError } from './errors';
 
 /**
@@ -11,9 +9,6 @@ export function assertExhaustive(value: never): never {
   throw new MissingExhaustiveConditionError(value);
 }
 
-export function truthy<T>(value: T): value is Truthy<T> {
-  return !!value;
-}
 type ChangeWritableToReadable<T> = T extends Writable<infer U>
   ? Readable<U>
   : T;
