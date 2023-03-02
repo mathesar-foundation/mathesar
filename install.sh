@@ -331,7 +331,7 @@ fi
 printf "\n"
 read -r -p "Choose a HTTP port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
-read -r -p "Choose a HTTP port for the webserver to use [443]: " https_port
+read -r -p "Choose a HTTPS port for the webserver to use [443]: " https_port
 https_port=${https_port:-443}
 printf "Generating Django secret key...
 "
