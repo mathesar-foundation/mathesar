@@ -1,4 +1,4 @@
-import type { CssVariablesObj } from '@mathesar/types';
+import type { CssVariablesObj } from '@mathesar/component-library/types';
 import { isDefinedNonNullable } from './typeUtils';
 
 export function makeStyleStringFromCssVariables(cssVariables: CssVariablesObj) {
