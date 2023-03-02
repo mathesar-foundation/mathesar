@@ -110,7 +110,7 @@
       max-height: calc( 100vh - 19rem)!important;
       scrollbar-width: thin;
       scrollbar-color: #e8e8e8 transparent;
-      overflow-x: hidden;
+      overflow-x: hidden!important;
       &::-webkit-scrollbar-track {
           background: transparent;
       }

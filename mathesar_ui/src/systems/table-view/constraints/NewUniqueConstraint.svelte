@@ -126,6 +126,7 @@
           bind:values={constraintColumns}
           options={columnsInTable}
           autoClearInvalidValues={false}
+          contentClass="unique-constraints-dropdown"
           let:option
         >
           <ColumnName column={option.column} />
@@ -173,6 +174,11 @@
 
     > :global(* + *) {
       margin-top: 1rem;
+    }
+  }
+  :global{
+    .unique-constraints-dropdown{
+      max-height: 50vh!important;
     }
   }
 </style>

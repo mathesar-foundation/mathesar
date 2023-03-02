@@ -13,7 +13,7 @@
   }
 </script>
 
-<DropdownMenu label="Append Column" icon={iconAddNew}>
+<DropdownMenu label="Append Column" icon={iconAddNew} dropdownClass="append-column-dropdown">
   {#each columns as column (column.id)}
     <ButtonMenuItem
       label={column.name}
@@ -22,3 +22,23 @@
     />
   {/each}
 </DropdownMenu>
+
+<style lang="scss">
+  :global{
+    .append-column-dropdown{
+      max-height: calc( 50vh - 5rem)!important;
+      scrollbar-width: thin;
+      scrollbar-color: #e8e8e8 transparent;
+      overflow-x: hidden!important;
+      &::-webkit-scrollbar-track {
+          background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background-color: #e8e8e8;
+      }
+      &::-webkit-scrollbar {
+        width: 0.5rem;
+      }
+    }
+  }
+</style>
