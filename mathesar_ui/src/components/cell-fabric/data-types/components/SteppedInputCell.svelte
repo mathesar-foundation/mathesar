@@ -32,6 +32,8 @@
 
   let cellRef: HTMLElement;
   let isEditMode = false;
+  let isLastInputSaved = false;
+  let lastSavedInput: string;
 
   $: formattedValue = formatValue?.(value) ?? value;
   $: matchParts = (() => {
@@ -63,7 +65,20 @@
     isEditMode = false;
   }
 
+  function saveInput() {
+    lastSavedInput = value;
+    isLastInputSaved = true;
+  }
+
+  function revertEdit() {
+    value = lastSavedInput;
+    isLastInputSaved = false;
+  }
+
   function handleKeyDown(e: KeyboardEvent) {
+    if (!isLastInputSaved) {
+      saveInput();
+    }
     switch (e.key) {
       case 'Enter':
         if (isEditMode) {
@@ -75,9 +90,11 @@
         // not prevented, the textarea gets a new line break. Needs more digging
         // down.
         e.preventDefault();
+        saveInput();
         break;
       case 'Escape':
         resetEditMode();
+        revertEdit();
         break;
       case 'Tab':
         resetEditMode();
@@ -85,6 +102,7 @@
           originalEvent: e,
           key: e.key,
         });
+        saveInput();
         break;
       case 'ArrowLeft':
       case 'ArrowRight':
@@ -129,6 +147,7 @@
     if (!isActive) {
       dispatch('activate');
     }
+    saveInput();
   }
 </script>
 
