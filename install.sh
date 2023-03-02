@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 clear -x
-github_tag=${1-master}
+github_tag=${1-"0.1.0"}
 min_maj_docker_version=20
 min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
@@ -331,7 +331,7 @@ fi
 printf "\n"
 read -r -p "Choose a HTTP port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
-read -r -p "Choose a HTTP port for the webserver to use [443]: " https_port
+read -r -p "Choose a HTTPS port for the webserver to use [443]: " https_port
 https_port=${https_port:-443}
 printf "Generating Django secret key...
 "
