@@ -398,7 +398,7 @@ HTTPS_PORT='${https_port}'
 EOF
 sudo chmod 640 .env
 if [ "${INSTALL_OS}" == 'macos' ]; then
-  sudo chown "${USER}:${USER}" .env
+  sudo chown "${USER}" .env
 fi
 clear -x
 
