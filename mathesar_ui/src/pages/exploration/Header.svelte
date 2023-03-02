@@ -10,6 +10,7 @@
   export let schema: SchemaEntry;
   export let query: QueryInstance;
   export let isInspectorOpen = true;
+  export let canEditMetadata: boolean;
 </script>
 
 <EntityPageHeader
@@ -20,12 +21,14 @@
   }}
 >
   <svelte:fragment slot="actions-right">
-    <a
-      class="btn btn-primary"
-      href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}
-    >
-      <span>Edit in Data Explorer</span>
-    </a>
+    {#if canEditMetadata}
+      <a
+        class="btn btn-primary"
+        href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}
+      >
+        <span>Edit in Data Explorer</span>
+      </a>
+    {/if}
     <Button
       appearance="secondary"
       on:click={() => {

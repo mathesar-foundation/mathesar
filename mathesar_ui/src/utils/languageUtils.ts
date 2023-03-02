@@ -92,7 +92,7 @@ const wordMap = {
   matches: makePluralFormsFromEnglish('match', 'matches'),
   results: makePluralFormsFromEnglish('result', 'results'),
   values: makePluralFormsFromEnglish('value', 'values'),
-  times: makePluralFormsFromEnglish('instance', 'times'),
+  times: makePluralFormsFromEnglish('time', 'times'),
 } as const;
 
 type Word = keyof typeof wordMap;
@@ -226,19 +226,13 @@ export function labeledCount(
   return [countText, label].filter(Boolean).join(' ');
 }
 
-export function labeledCountWithoutUnit(
-  countable: Countable,
-  casing?: Casing,
-): string {
+export function numberOfTimes(countable: Countable, casing?: Casing): string {
   const count = getCount(countable);
   if (count === 1) {
     return 'once';
   }
   if (count === 2) {
     return 'twice';
-  }
-  if (count === 3) {
-    return 'thrice';
   }
   return labeledCount(countable, 'times', { casing });
 }

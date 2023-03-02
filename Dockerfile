@@ -1,5 +1,5 @@
 FROM python:3.9-buster
-
+ARG PYTHON_REQUIREMENTS=requirements.txt
 ENV PYTHONUNBUFFERED=1
 ENV DOCKERIZE_VERSION v0.6.1
 
@@ -16,16 +16,11 @@ RUN apt install -y sudo nodejs && rm -rf /var/lib/apt/lists/*
 # Change work directory
 WORKDIR /code/
 
-COPY requirements.txt .
-COPY requirements-dev.txt .
-COPY requirements-demo.txt .
-
-RUN pip install -r requirements.txt --force-reinstall sqlalchemy-filters
-RUN pip install -r requirements-dev.txt
-RUN pip install -r requirements-demo.txt
+# Copy all the requirements
+COPY requirements* ./
+RUN pip install --no-cache-dir -r ${PYTHON_REQUIREMENTS} --force-reinstall sqlalchemy-filters
 COPY . .
 
 RUN sudo npm install -g npm-force-resolutions
 RUN cd mathesar_ui && npm install --unsafe-perm && npm run build
-
 EXPOSE 8000 3000 6006

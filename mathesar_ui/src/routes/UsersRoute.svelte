@@ -3,9 +3,9 @@
   import UserListingPage from '@mathesar/pages/admin-users/UserListingPage.svelte';
   import NewUserPage from '@mathesar/pages/admin-users/NewUserPage.svelte';
   import EditUserPage from '@mathesar/pages/admin-users/EditUserPage.svelte';
-  import { setUsersStoreContext } from '@mathesar/stores/users';
+  import { setUsersStoreInContext } from '@mathesar/stores/users';
 
-  setUsersStoreContext();
+  setUsersStoreInContext();
 </script>
 
 <Route path="/">

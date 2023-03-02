@@ -13,8 +13,8 @@
 </script>
 
 <div class="app-layout" class:fit-viewport={fitViewport} {style}>
-  <LiveDemoBanner />
   <div class="app-layout-header">
+    <LiveDemoBanner />
     <AppHeader />
   </div>
   <slot name="secondary-header" />
