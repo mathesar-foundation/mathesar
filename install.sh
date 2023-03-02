@@ -56,12 +56,11 @@ ${prompt}"
   echo "${password}"
 }
 validate_password(){
-  #check if the password is 8 characters long
-  if [ ${#1} -lt 8 ]; then 
-  return 1
+  #check if the password is at least 8 characters long
+  if [ ${#1} -lt 8 ]; then
+    return 1
   fi
 }
-
 create_password () {
   local password
   local password_check
@@ -72,7 +71,7 @@ Repeat the password: "
 Passwords do not match! Try again.
 "
 local validation_prompt="
-Password must be at least 8 characters long !
+Password must be at least 8 characters long !.
 "
   password=$(get_password "${prompt}")
   #validate the password entered 
@@ -82,6 +81,7 @@ Password must be at least 8 characters long !
   if [ "${password}" != "${password_check}" ]; then
     password=$(create_password "${repeat_retry}")
   fi
+  done
   echo "${password}"
 }
 
