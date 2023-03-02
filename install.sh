@@ -145,7 +145,7 @@ Welcome to the Mathesar installer for version %s!
 
 For more information or explanation about the steps involved, please see:
 
-https://docs.mathesar.org/installation/docker-compose/#installation-steps
+https://docs.mathesar.org/installation-dc/under-the-hood/
 
 --------------------------------------------------------------------------------
 
