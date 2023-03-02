@@ -55,14 +55,14 @@ plugins:
 
 nav:
   - Home: index.md
-  - Installation:
-      - Quickstart: installation-dc/quickstart.md
-      - Administration: installation-dc/administration.md
-      - Under the Hood: installation-dc/under-the-hood.md
-      - Troubleshooting: installation-dc/troubleshooting.md
-      - Uninstalling: installation-dc/uninstall.md
-      - Setup for Windows: installation-dc/windows-setup.md
-      - Setup using Ansible: installation-dc/ansible-setup.md
+  - Install:
+      - Install Mathesar: install/index.md
+      - Via Docker Compose:
+          - Install via Docker Compose: install/docker-compose/index.md
+          - Requirements: install/docker-compose/requirements.md
+          - Troubleshooting: install/docker-compose/troubleshooting.md
+          - Setup Ansible: install/docker-compose/ansible.md
+          - Under the hood: install/docker-compose/under-the-hood.md
   - Product:
       - Introduction: product/intro.md
       - Syncing database changes: product/syncing-db.md
