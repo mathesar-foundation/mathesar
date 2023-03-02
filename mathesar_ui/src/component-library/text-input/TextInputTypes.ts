@@ -1,6 +1,8 @@
 import type { BaseInputProps } from '@mathesar-component-library-dir/common/base-components/BaseInputTypes';
-import type { SimplifiedInputProps } from '@mathesar-component-library-dir/commonTypes';
-import type { CssVariablesObj } from '@mathesar/types';
+import type {
+  CssVariablesObj,
+  SimplifiedInputProps,
+} from '@mathesar-component-library-dir/commonTypes';
 import type { IconProps } from '../types';
 
 export interface TextInputProps extends SimplifiedInputProps, BaseInputProps {
