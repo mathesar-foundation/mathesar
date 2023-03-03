@@ -40,18 +40,13 @@
 
 <style lang="scss">
   .tag {
-    overflow: hidden;
-    display: flex;
-    align-items: start;
-    flex-direction: column;
-    gap: 0.2rem;
-
     .name {
       font-size: var(--text-size-small);
       color: var(--color-text-muted);
       display: flex;
       align-items: center;
       gap: 0.14rem;
+      margin-bottom: 0.2rem;
 
       .preproc {
         font-size: var(--text-size-xx-small);
