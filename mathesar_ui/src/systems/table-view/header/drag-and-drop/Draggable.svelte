@@ -1,11 +1,17 @@
 <script lang="ts">
-  import type { ProcessedColumn, TabularDataSelection } from "@mathesar/stores/table-data";
+  import type {
+    ProcessedColumn,
+    TabularDataSelection,
+  } from '@mathesar/stores/table-data';
 
   export let selection: TabularDataSelection;
   export let selectionInProgress = true;
   export let column: ProcessedColumn;
 
-  $: draggable = !selectionInProgress && selection && selection.isCompleteColumnSelected(column);
+  $: draggable =
+    !selectionInProgress &&
+    selection &&
+    selection.isCompleteColumnSelected(column);
 </script>
 
 <div

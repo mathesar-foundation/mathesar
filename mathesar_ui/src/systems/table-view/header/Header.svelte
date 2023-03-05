@@ -122,40 +122,39 @@
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
     <SheetCell columnIdentifierKey={columnId} let:htmlAttributes let:style>
       <div>
-
         <div {...htmlAttributes} {style}>
           <Draggable
-          on:dragstart={() => dragColumn()}
-          column={processedColumn}
-          selection={selection}
-          selectionInProgress={$selectionInProgress}
-        >
-          <Droppable
-            on:drop={() => dropColumn(processedColumn)}
-            on:dragover={(e) => e.preventDefault()}
-            {locationOfFirstDraggedColumn}
-            columnLocation={columnOrder.indexOf(columnId)}
-            isSelected={isColumnSelected(
-              $selectedCells,
-              $columnsSelectedWhenTheTableIsEmpty,
-              processedColumn,
-            )}
+            on:dragstart={() => dragColumn()}
+            column={processedColumn}
+            {selection}
+            selectionInProgress={$selectionInProgress}
           >
-          <HeaderCell
-            {processedColumn}
-            isSelected={isColumnSelected(
-              $selectedCells,
-              $columnsSelectedWhenTheTableIsEmpty,
-              processedColumn,
-            )}
-            on:mousedown={() =>
-              selection.onColumnSelectionStart(processedColumn)}
-            on:mouseenter={() =>
-              selection.onMouseEnterColumnHeaderWhileSelection(
+            <Droppable
+              on:drop={() => dropColumn(processedColumn)}
+              on:dragover={(e) => e.preventDefault()}
+              {locationOfFirstDraggedColumn}
+              columnLocation={columnOrder.indexOf(columnId)}
+              isSelected={isColumnSelected(
+                $selectedCells,
+                $columnsSelectedWhenTheTableIsEmpty,
                 processedColumn,
               )}
-          />
-          </Droppable>
+            >
+              <HeaderCell
+                {processedColumn}
+                isSelected={isColumnSelected(
+                  $selectedCells,
+                  $columnsSelectedWhenTheTableIsEmpty,
+                  processedColumn,
+                )}
+                on:mousedown={() =>
+                  selection.onColumnSelectionStart(processedColumn)}
+                on:mouseenter={() =>
+                  selection.onMouseEnterColumnHeaderWhileSelection(
+                    processedColumn,
+                  )}
+              />
+            </Droppable>
           </Draggable>
           <SheetCellResizer columnIdentifierKey={columnId} />
           <ContextMenu>
