@@ -4,6 +4,7 @@ import type { DerivedOptions } from './options';
 type Cleaner = (input: string) => string;
 
 export function forceAsciiMinusSign(input: string): string {
+  // debugger
   const otherSigns = [
     '\u2010',
     '\u2011',
@@ -30,6 +31,17 @@ export function removeExtraneousMinusSigns(input: string): string {
   return `${isNegative ? '-' : ''}${cleanedInput}`;
 }
 
+/**
+ * Requires the following cleaners to be run first:
+ * - `forceAsciiMinusSign`
+ * - `removeInvalidCharacters`
+ * - `removeExtraneousMinusSigns`
+ */
+export function removeExtraneousScientificNotation(input: string): string {
+  const cleanedInput = input.replace(/^e/g, '').replace(/e{2,}/g, 'e');
+  return cleanedInput
+}
+
 export function convertCommasToDots(input: string): string {
   return input.replace(/,/g, '.');
 }
@@ -41,7 +53,7 @@ export function convertCommasToDots(input: string): string {
 export function factoryToRemoveInvalidCharacters(
   opts: Pick<
     DerivedOptions,
-    'allowNegative' | 'decimalSeparator' | 'allowFloat'
+    'allowNegative' | 'decimalSeparator' | 'allowFloat' | 'allowScientificNotation'
   >,
 ): Cleaner {
   const validCharacterPatterns = [
@@ -49,6 +61,8 @@ export function factoryToRemoveInvalidCharacters(
     String.raw`\d`,
     // Allow minus sign, only if permitted.
     ...(opts.allowNegative ? [escapeRegex('-')] : []),
+    // Allow ScientificNotation sign, only if permitted.
+    ...(opts.allowScientificNotation ? [escapeRegex('e')] : []),
     // Allow decimal separator, only if permitted.
     ...(opts.allowFloat ? [escapeRegex(opts.decimalSeparator)] : []),
   ];
@@ -147,13 +161,14 @@ function cleanInSequence(cleaners: Cleaner[]): Cleaner {
 export function factoryToSimplify(
   opts: Pick<
     DerivedOptions,
-    'allowNegative' | 'decimalSeparator' | 'allowFloat'
+    'allowNegative' | 'decimalSeparator' | 'allowFloat' | 'allowScientificNotation'
   >,
 ): (input: string) => string {
   return cleanInSequence([
     forceAsciiMinusSign,
     factoryToRemoveInvalidCharacters(opts),
     removeExtraneousMinusSigns,
+    removeExtraneousScientificNotation,
     factoryToRemoveExtraneousDecimalSeparators(opts),
     convertCommasToDots,
     factoryToPrependShorthandDecimalWithZero(opts),
@@ -174,7 +189,7 @@ export function factoryToSimplify(
 export function factoryToNormalize(
   opts: Pick<
     DerivedOptions,
-    'allowNegative' | 'decimalSeparator' | 'allowFloat'
+    'allowNegative' | 'decimalSeparator' | 'allowFloat' | 'allowScientificNotation'
   >,
 ): (input: string) => string {
   return cleanInSequence([

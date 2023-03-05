@@ -79,10 +79,11 @@ export function formatToNormalizedForm(value: number | bigint): string {
       locale: 'en-US',
       allowFloat: true,
       allowNegative: true,
+      allowScientificNotation: true,
       useGrouping: false,
       minimumFractionDigits: 0,
       maximumFractionDigits: 20,
-      forceTrailingDecimal: false,
+      forceTrailingDecimal: false
     }),
   )(value);
 }

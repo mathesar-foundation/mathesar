@@ -13,6 +13,7 @@
       },
       allowFloat: { control: 'boolean', defaultValue: false },
       allowNegative: { control: 'boolean', defaultValue: false },
+      allowScientificNotation: { control: 'boolean', defaultValue: false },
       locale: {
         type: { name: 'string', required: false },
         control: 'select',

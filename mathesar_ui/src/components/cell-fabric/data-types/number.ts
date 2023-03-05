@@ -70,12 +70,14 @@ function getFormatterOptions(
   const useGrouping = getUseGrouping(displayOptions?.use_grouping ?? 'false');
   const allowFloat = getAllowFloat(column, config?.floatAllowanceStrategy);
   const allowNegative = true;
+  const allowScientificNotation = true;
   const minimumFractionDigits =
     displayOptions?.minimum_fraction_digits ?? undefined;
   return {
     locale,
     allowFloat,
     allowNegative,
+    allowScientificNotation,
     useGrouping,
     minimumFractionDigits,
   };

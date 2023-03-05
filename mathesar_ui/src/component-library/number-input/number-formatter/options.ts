@@ -4,6 +4,7 @@ export interface Options {
   locale?: string;
   allowFloat: boolean;
   allowNegative: boolean;
+  allowScientificNotation: boolean;
   /**
    * Corresponds to the options of the [Intl.NumberFormat][1] API.
    *
@@ -27,6 +28,7 @@ export interface Options {
 export const defaultOptions: Options = {
   allowFloat: false,
   allowNegative: false,
+  allowScientificNotation: false,
   useGrouping: false,
   minimumFractionDigits: 0,
   maximumFractionDigits: 20,

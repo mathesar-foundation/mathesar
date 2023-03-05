@@ -8,8 +8,8 @@ export function getInputMode(
   opts: Partial<NumberFormatterOptions>,
 ): 'text' | 'numeric' | 'decimal' {
   const fullOpts = { ...defaultOptions, ...opts };
-  const { allowFloat, allowNegative } = fullOpts;
-  if (allowNegative) {
+  const { allowFloat, allowNegative, allowScientificNotation } = fullOpts;
+  if (allowNegative || allowScientificNotation) {
     // Because some devices may not have a minus sign
     return 'text';
   }
