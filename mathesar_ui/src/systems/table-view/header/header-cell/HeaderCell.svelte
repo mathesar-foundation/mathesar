@@ -65,11 +65,11 @@
 <style lang="scss">
   .header-cell-root {
     width: 100%;
+    height: 100%;
+    padding: 0.1rem 0rem;
     cursor: inherit;
-
     :global(button.btn) {
       width: 100%;
-      padding: 0.26rem 0.5rem;
       font-size: inherit;
       justify-content: space-between;
     }

@@ -1,6 +1,7 @@
 <script lang="ts">
   export let locationOfFirstDraggedColumn: number | undefined;
   export let columnLocation: number;
+  export let isSelected = false;
 
   $: columnLocationDifference =
     locationOfFirstDraggedColumn !== undefined
@@ -8,8 +9,8 @@
       : 0;
   $: draggedOverRight = columnLocationDifference < 0;
   $: draggedOverLeft = columnLocationDifference > 0;
-  // Needs to be a counter because dragEnter and dragLeave are fired for child elements
 
+  // Needs to be a counter because dragEnter and dragLeave are fired for child elements
   function dragEnter(e: DragEvent) {
     e.preventDefault();
     isDraggedOverCounter += 1;
@@ -33,6 +34,7 @@
 
 <div
   class="droppable"
+  class:is_selected={isSelected}
   class:dragged_over={isDraggedOverCounter}
   class:dragged_over_right={draggedOverRight}
   class:dragged_over_left={draggedOverLeft}
@@ -48,6 +50,12 @@
   .droppable {
     height: 100%;
     width: 100%;
+  }
+  .droppable > :global(div) {
+    border-left: 0.2rem solid transparent !important;
+  }
+  .droppable.is_selected > :global(div) {
+    border-left: 0.2rem solid var(--sky-100) !important;
   }
   .droppable.dragged_over.dragged_over_left > :global(div) {
     border-left: 0.2rem solid var(--sky-700) !important;

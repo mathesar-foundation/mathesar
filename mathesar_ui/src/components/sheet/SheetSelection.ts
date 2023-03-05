@@ -383,7 +383,7 @@ export default class SheetSelection<
     this.selectedCells.clear();
   }
 
-  private isCompleteColumnSelected(column: Pick<Column, 'id'>): boolean {
+  isCompleteColumnSelected(column: Pick<Column, 'id'>): boolean {
     if (this.getRows().length) {
       return (
         this.columnsSelectedWhenTheTableIsEmpty.getHas(column.id) ||

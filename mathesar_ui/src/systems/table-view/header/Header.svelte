@@ -45,6 +45,7 @@
   function dragColumn() {
     // Keep only IDs for which the column exists
     for (const columnId of $processedColumns.keys()) {
+      columnOrder = [...new Set(columnOrder)];
       if (!columnOrder.includes(columnId)) {
         columnOrder = [...columnOrder, columnId];
       }
@@ -81,22 +82,11 @@
     // Insert selected column IDs after the column where they are dropped
     // if that column is to the right, else insert it before
     if (columnDroppedOn) {
-      if (
-        locationOfFirstDraggedColumn &&
-        locationOfFirstDraggedColumn < columnOrder.indexOf(columnDroppedOn.id)
-      ) {
-        newColumnOrder.splice(
-          columnOrder.indexOf(columnDroppedOn.id) + 1,
-          0,
-          ...selectedColumnIdsOrdered,
-        );
-      } else {
-        newColumnOrder.splice(
-          columnOrder.indexOf(columnDroppedOn.id),
-          0,
-          ...selectedColumnIdsOrdered,
-        );
-      }
+      newColumnOrder.splice(
+        columnOrder.indexOf(columnDroppedOn.id),
+        0,
+        ...selectedColumnIdsOrdered,
+      );
     } else {
       // If the column is dropped on the ID column, columnDroppedOn is undefined and we can insert at the beginning.
       newColumnOrder.splice(0, 0, ...selectedColumnIdsOrdered);
@@ -132,13 +122,12 @@
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
     <SheetCell columnIdentifierKey={columnId} let:htmlAttributes let:style>
       <div>
-        <Draggable
+
+        <div {...htmlAttributes} {style}>
+          <Draggable
           on:dragstart={() => dragColumn()}
-          isSelected={isColumnSelected(
-            $selectedCells,
-            $columnsSelectedWhenTheTableIsEmpty,
-            processedColumn,
-          )}
+          column={processedColumn}
+          selection={selection}
           selectionInProgress={$selectionInProgress}
         >
           <Droppable
@@ -146,29 +135,33 @@
             on:dragover={(e) => e.preventDefault()}
             {locationOfFirstDraggedColumn}
             columnLocation={columnOrder.indexOf(columnId)}
+            isSelected={isColumnSelected(
+              $selectedCells,
+              $columnsSelectedWhenTheTableIsEmpty,
+              processedColumn,
+            )}
           >
-            <div {...htmlAttributes} {style}>
-              <HeaderCell
-                {processedColumn}
-                isSelected={isColumnSelected(
-                  $selectedCells,
-                  $columnsSelectedWhenTheTableIsEmpty,
-                  processedColumn,
-                )}
-                on:mousedown={() =>
-                  selection.onColumnSelectionStart(processedColumn)}
-                on:mouseenter={() =>
-                  selection.onMouseEnterColumnHeaderWhileSelection(
-                    processedColumn,
-                  )}
-              />
-              <SheetCellResizer columnIdentifierKey={columnId} />
-              <ContextMenu>
-                <ColumnHeaderContextMenu {processedColumn} />
-              </ContextMenu>
-            </div>
+          <HeaderCell
+            {processedColumn}
+            isSelected={isColumnSelected(
+              $selectedCells,
+              $columnsSelectedWhenTheTableIsEmpty,
+              processedColumn,
+            )}
+            on:mousedown={() =>
+              selection.onColumnSelectionStart(processedColumn)}
+            on:mouseenter={() =>
+              selection.onMouseEnterColumnHeaderWhileSelection(
+                processedColumn,
+              )}
+          />
           </Droppable>
-        </Draggable>
+          </Draggable>
+          <SheetCellResizer columnIdentifierKey={columnId} />
+          <ContextMenu>
+            <ColumnHeaderContextMenu {processedColumn} />
+          </ContextMenu>
+        </div>
       </div>
     </SheetCell>
   {/each}

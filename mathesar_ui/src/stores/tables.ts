@@ -489,6 +489,7 @@ export function saveColumnOrder(
   columnOrder: TableSettings['column_order'],
 ): Promise<void> {
   return saveTableSettings(table, {
-    column_order: columnOrder,
+    // Using the Set constructor to remove potential duplicates
+    column_order: [...new Set(columnOrder)],
   });
 }
