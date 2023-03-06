@@ -40,7 +40,7 @@ export interface QueryInstanceSummarizationTransformation {
     aggregation_expressions?: {
       input_alias: string;
       output_alias: string;
-      function: 'aggregate_to_array' | 'count';
+      function: 'distinct_aggregate_to_array' | 'count';
     }[];
   };
 }

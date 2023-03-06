@@ -58,7 +58,7 @@ export function getExplorationEditorPageUrl(
   schemaId: number,
   queryId: number,
 ): string {
-  return `/${databaseName}/${schemaId}/explorations/edit/${queryId}/`;
+  return `/${databaseName}/${schemaId}/explorations/${queryId}/edit/`;
 }
 
 export function getTablePageUrl(
@@ -80,7 +80,7 @@ export function getRecordPageUrl(
 
 export const USER_PROFILE_URL = '/profile/';
 export const ADMIN_URL = '/administration/';
-export const ADMIN_GENERAL_PAGE_URL = `${ADMIN_URL}general/`;
+export const ADMIN_UPDATE_PAGE_URL = `${ADMIN_URL}update/`;
 export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
 export const LOGOUT_URL = '/auth/logout/';
