@@ -15,6 +15,7 @@
   export let displayOptionsConfig: AbstractTypeDisplayConfig;
   export let displayForm: FormBuildConfiguration;
   export let displayFormValues: Readable<FormValues>;
+  export let disabled = false;
 
   let displayFormHasError = false;
 
@@ -48,7 +49,7 @@
 <div class="type-options">
   <div class="option-form display-opts">
     <div class="content">
-      <FormBuilder form={displayForm} />
+      <FormBuilder form={displayForm} {disabled} />
     </div>
   </div>
 </div>

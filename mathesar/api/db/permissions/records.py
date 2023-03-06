@@ -16,7 +16,7 @@ class RecordAccessPolicy(AccessPolicy):
     statements = [
         {
             'action': ['list', 'retrieve'],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_table_viewer)']
         },

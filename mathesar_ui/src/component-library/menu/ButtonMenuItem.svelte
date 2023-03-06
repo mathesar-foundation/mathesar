@@ -10,6 +10,7 @@
   export let disabled = false;
   /** Visually indicates that the action is destructive */
   export let danger = false;
+  export let hasNotificationDot = false;
 
   function handleClick() {
     if (disabled) {
@@ -23,7 +24,7 @@
   <div class="spacer cell" />
   <div class="control cell" />
   <div class="icon cell">
-    {#if icon}<Icon {...icon} />{/if}
+    {#if icon}<Icon {...icon} {hasNotificationDot} />{/if}
   </div>
   <!--
     Why not put the button higher up, enclosing everything?

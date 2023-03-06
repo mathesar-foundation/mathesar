@@ -23,6 +23,7 @@
   export let canCancel = true;
   export let isProcessing = false;
   export let size: Size | undefined = undefined;
+  export let hasCancelButton = true;
 
   let spinnerButtonProceed: () => Promise<void> = async () => {};
 
@@ -40,16 +41,21 @@
   $: fullProceedButton = { ...proceedButtonDefaults, ...proceedButton };
 </script>
 
-<div class="cancel-or-proceed-button-pair">
-  <Button
-    appearance="secondary"
-    on:click={onCancel}
-    disabled={isProcessing || !canCancel}
-    {size}
-  >
-    {#if fullCancelButton.icon}<Icon {...fullCancelButton.icon} />{/if}
-    <span>{fullCancelButton.label}</span>
-  </Button>
+<div
+  class="cancel-or-proceed-button-pair"
+  class:has-cancel-button={hasCancelButton}
+>
+  {#if hasCancelButton}
+    <Button
+      appearance="secondary"
+      on:click={onCancel}
+      disabled={isProcessing || !canCancel}
+      {size}
+    >
+      {#if fullCancelButton.icon}<Icon {...fullCancelButton.icon} />{/if}
+      <span>{fullCancelButton.label}</span>
+    </Button>
+  {/if}
   <SpinnerButton
     bind:isProcessing
     bind:proceed={spinnerButtonProceed}
