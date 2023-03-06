@@ -30,6 +30,7 @@
 </script>
 
 <div class="schema-row-parent" class:hover={isHovered}>
+  <!-- svelte-ignore a11y-missing-content -->
   <a
     {href}
     class="schema-row-overlay"
