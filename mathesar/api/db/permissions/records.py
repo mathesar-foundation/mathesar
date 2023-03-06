@@ -22,7 +22,7 @@ class RecordAccessPolicy(AccessPolicy):
         },
         {
             'action': ['destroy', 'update', 'partial_update', 'create', 'delete'],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_table_editor)']
         },
