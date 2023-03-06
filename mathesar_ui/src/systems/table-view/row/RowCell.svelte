@@ -28,6 +28,9 @@
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import CellErrors from './CellErrors.svelte';
 
   export let recordsData: RecordsData;
@@ -39,6 +42,15 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
+
+  const userProfile = getUserProfileStoreFromContext();
+
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
+  $: canEditTableRecords = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canEditTableRecords',
+  );
 
   $: recordsDataState = recordsData.state;
   $: ({ recordSummaries } = recordsData);
@@ -74,7 +86,7 @@
   $: canSetNull = column.nullable && value !== null;
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
-  $: isEditable = !column.primary_key;
+  $: isEditable = !column.primary_key && canEditTableRecords;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })

@@ -15,13 +15,13 @@ class DatabaseRoleAccessPolicy(AccessPolicy):
         # when creating the database role.
         {
             'action': ['list', 'retrieve', 'create'],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
         },
         # Only superuser or database manager can delete the database role
         {
             'action': ['destroy', 'update', 'partial_update'],
-            'principal': ['*'],
+            'principal': ['authenticated'],
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_db_manager)']
         },
@@ -29,7 +29,7 @@ class DatabaseRoleAccessPolicy(AccessPolicy):
 
     @classmethod
     def scope_queryset(cls, request, qs):
-        if not request.user.is_superuser:
+        if not (request.user.is_superuser or request.user.is_anonymous):
             # TODO Consider moving to more reusable place
             allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
             databases_with_view_access = Database.objects.filter(

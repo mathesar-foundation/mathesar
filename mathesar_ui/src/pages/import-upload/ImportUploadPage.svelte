@@ -158,8 +158,6 @@
 
 <style lang="scss">
   h1 {
-    font-weight: 500;
-    font-size: var(--size-xx-large);
     margin: 0.83em 0;
   }
 

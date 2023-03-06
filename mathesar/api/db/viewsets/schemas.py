@@ -35,7 +35,7 @@ class SchemaViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin,
             database_name,
             comment=serializer.validated_data.get('description')
         )
-        serializer = SchemaSerializer(schema)
+        serializer = SchemaSerializer(schema, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
