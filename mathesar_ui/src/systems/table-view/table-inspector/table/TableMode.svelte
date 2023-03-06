@@ -3,7 +3,10 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
   import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
-  import RenameTable from './TableName.svelte';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
+  import TableName from './TableName.svelte';
   import TableActions from './TableActions.svelte';
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import AdvancedActions from './AdvancedActions.svelte';
@@ -11,25 +14,36 @@
   import TableDescription from './TableDescription.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
+  const userProfile = getUserProfileStoreFromContext();
+
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
+
+  $: canExecuteDDL = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canExecuteDDL',
+  );
 </script>
 
 <div class="table-mode-container">
-  <Collapsible isOpen triggerAppearance="plain">
-    <CollapsibleHeader
-      slot="header"
-      title="Properties"
-      isDbLevelConfiguration
-    />
-    <div slot="content" class="content-container">
-      <RenameTable />
-      <TableDescription />
-    </div>
-  </Collapsible>
+  {#if canExecuteDDL}
+    <Collapsible isOpen triggerAppearance="plain">
+      <CollapsibleHeader
+        slot="header"
+        title="Properties"
+        isDbLevelConfiguration
+      />
+      <div slot="content" class="content-container">
+        <TableName />
+        <TableDescription />
+      </div>
+    </Collapsible>
+  {/if}
 
   <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader slot="header" title="Links" isDbLevelConfiguration />
     <div slot="content" class="content-container">
-      <TableLinks />
+      <TableLinks {canExecuteDDL} />
     </div>
   </Collapsible>
 
@@ -43,7 +57,7 @@
   <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader slot="header" title="Actions" />
     <div slot="content" class="content-container">
-      <TableActions />
+      <TableActions {canExecuteDDL} />
     </div>
   </Collapsible>
 

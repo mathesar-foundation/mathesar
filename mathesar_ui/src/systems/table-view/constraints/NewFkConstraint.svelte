@@ -18,7 +18,7 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import { tables as tablesStore } from '@mathesar/stores/tables';
+  import { importVerifiedTables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { getAvailableName } from '@mathesar/utils/db';
@@ -80,8 +80,8 @@
   $: existingConstraintNames = new Set(
     $constraintsDataStore.constraints.map((c) => c.name),
   );
-  $: tables = [...$tablesStore.data.values()];
-  $: baseTableName = $tablesStore.data.get($tabularData.id)?.name ?? '';
+  $: tables = [...$importVerifiedTables.values()];
+  $: baseTableName = $importVerifiedTables.get($tabularData.id)?.name ?? '';
   $: columnsDataStore = $tabularData.columnsDataStore;
   $: baseTableColumns = columnsDataStore.columns;
   $: targetTableColumnsStore = targetTable

@@ -36,6 +36,7 @@
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
   export let isInspectorOpen: boolean;
+  export let canEditMetadata: boolean;
 
   $: ({ query, state, queryHasUnsavedChanges } = queryManager);
   $: currentTable = $query.base_table
@@ -157,33 +158,37 @@
 
     <svelte:fragment slot="actions-right">
       {#if currentTable}
-        <InputGroup>
-          <!-- TODO: Change disabled condition to is_valid(query) -->
-          <SpinnerButton
-            label={querySaveRequestStatus === 'processing' ? 'Saving' : 'Save'}
-            disabled={!$query.base_table ||
-              hasNoColumns ||
-              querySaveRequestStatus === 'processing'}
-            onClick={saveExistingOrCreateNew}
-          />
-          {#if isSaved}
-            <DropdownMenu
-              triggerAppearance="primary"
-              placement="bottom-end"
-              closeOnInnerClick={true}
-              icon={{
-                ...iconExpandDown,
-                size: '0.8em',
-              }}
-              showArrow={false}
-            >
-              <ButtonMenuItem on:click={save}>Save</ButtonMenuItem>
-              <ButtonMenuItem on:click={saveAndClose}>
-                Save and Close
-              </ButtonMenuItem>
-            </DropdownMenu>
-          {/if}
-        </InputGroup>
+        {#if canEditMetadata}
+          <InputGroup>
+            <!-- TODO: Change disabled condition to is_valid(query) -->
+            <SpinnerButton
+              label={querySaveRequestStatus === 'processing'
+                ? 'Saving'
+                : 'Save'}
+              disabled={!$query.base_table ||
+                hasNoColumns ||
+                querySaveRequestStatus === 'processing'}
+              onClick={saveExistingOrCreateNew}
+            />
+            {#if isSaved}
+              <DropdownMenu
+                triggerAppearance="primary"
+                placement="bottom-end"
+                closeOnInnerClick={true}
+                icon={{
+                  ...iconExpandDown,
+                  size: '0.8em',
+                }}
+                showArrow={false}
+              >
+                <ButtonMenuItem on:click={save}>Save</ButtonMenuItem>
+                <ButtonMenuItem on:click={saveAndClose}>
+                  Save and Close
+                </ButtonMenuItem>
+              </DropdownMenu>
+            {/if}
+          </InputGroup>
+        {/if}
 
         <InputGroup>
           <Button
