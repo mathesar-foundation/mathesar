@@ -7,6 +7,7 @@
   import type { Release } from '@mathesar/stores/releases';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
+  import databaseApi from '@mathesar/api/databases';
   import UpgradeConfirm from './UpgradeConfirm.svelte';
   import UpgradeError from './UpgradeError.svelte';
   import UpgradeProcessing from './UpgradeProcessing.svelte';
@@ -25,6 +26,7 @@
   }
 
   let state: State = getInitialState();
+  let reloadTimeout: number | undefined;
 
   $: version = `Mathesar ${release.tagName}`;
   $: titleMap = ((): Record<Status, string> => ({
@@ -35,21 +37,41 @@
   $: title = titleMap[state.status];
 
   function init() {
-    state = getInitialState();
+    if (state.status !== 'processing') {
+      window.clearTimeout(reloadTimeout);
+      state = getInitialState();
+    }
+  }
+
+  async function reloadOnServerAvailability(): Promise<void> {
+    try {
+      await databaseApi.list();
+      window.location.reload();
+    } catch {
+      reloadTimeout = window.setTimeout(() => {
+        void reloadOnServerAvailability();
+      }, 2000);
+    }
   }
 
   async function performUpgrade() {
     state = { status: 'processing' };
     try {
       await upgradeApi.upgrade();
-      window.location.reload();
+      void reloadOnServerAvailability();
     } catch (e) {
       state = { status: 'error', errorMsg: getErrorMessage(e) };
     }
   }
 </script>
 
-<ControlledModal {controller} {title} on:open={init} size="large">
+<ControlledModal
+  {controller}
+  {title}
+  on:open={init}
+  size="large"
+  allowClose={state.status !== 'processing'}
+>
   {#if state.status === 'confirm'}
     <UpgradeConfirm
       {release}
