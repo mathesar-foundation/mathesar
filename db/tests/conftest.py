@@ -21,6 +21,7 @@ FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 MAGNITUDE_SQL = os.path.join(RESOURCES, "magnitude_testing_create.sql")
 ARRAY_SQL = os.path.join(RESOURCES, "array_create.sql")
 JSON_SQL = os.path.join(RESOURCES, "json_sort.sql")
+JSON_WITHOUT_PKEY_SQL = os.path.join(RESOURCES, "json_without_pkey.sql")
 BOOKS_FROM_SQL = os.path.join(RESOURCES, "books_import_from.sql")
 BOOKS_TARGET_SQL = os.path.join(RESOURCES, "books_import_target.sql")
 
@@ -29,6 +30,15 @@ BOOKS_TARGET_SQL = os.path.join(RESOURCES, "books_import_target.sql")
 def engine_with_roster(engine_with_schema):
     engine, schema = engine_with_schema
     with engine.begin() as conn, open(ROSTER_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+
+
+@pytest.fixture
+def engine_with_JSON_without_pkey(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(JSON_WITHOUT_PKEY_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
     yield engine, schema
@@ -121,6 +131,11 @@ def roster_table_name():
 
 
 @pytest.fixture(scope='session')
+def json_without_pkey_name():
+    return "json_without_pkey"
+
+
+@pytest.fixture(scope='session')
 def uris_table_name():
     return "uris"
 
@@ -209,6 +224,14 @@ def roster_table_obj(engine_with_roster, roster_table_name):
     engine, schema = engine_with_roster
     metadata = MetaData(bind=engine)
     table = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
+    return table, engine
+
+
+@pytest.fixture
+def json_without_pkey_table_obj(engine_with_JSON_without_pkey, json_without_pkey_name):
+    engine, schema = engine_with_JSON_without_pkey
+    metadata = MetaData(bind=engine)
+    table = Table(json_without_pkey_name, metadata, schema=schema, autoload_with=engine)
     return table, engine
 
 

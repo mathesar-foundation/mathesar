@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://wiki.mathesar.org/" target="_blank">Wiki</a>
+  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme" target="_blank">Docs</a> • <a href="https://demo.mathesar.org?ref=github-readme" target="_blank">Live Demo</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Wiki</a>
 </p>
 
 
@@ -27,6 +27,7 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 - [Status](#status)
 - [Join our community!](#join-our-community)
 - [Screenshots](#screenshots)
+- [Live Demo](#live-demo)
 - [Features](#features)
 - [Self-hosting](#self-hosting)
 - [Local development setup](#local-development-setup)
@@ -37,12 +38,11 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Status
-- [x] **Pre-release**: Initial development, not yet ready for deployment.
-- [ ] **Public Alpha**: You can install and deploy Mathesar on your server. Go easy on us!
+- [x] **Public Alpha**: You can install and deploy Mathesar on your server. Go easy on us!
 - [ ] **Public Beta**: Stable and feature-rich enough to implement in production
 - [ ] **Public**: Production-ready
 
-We are currently in the **pre-release** stage.
+We are currently in the **public alpha** stage.
 
 ## Join our community!
 The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list. 
@@ -59,7 +59,10 @@ The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) 
 
 ![arxiv-schema](https://user-images.githubusercontent.com/287034/220773323-bd6ffb31-835b-4df5-981e-dae6341d42bb.png)
 
-![db-page](https://user-images.githubusercontent.com/287034/220773522-8c1c1483-2389-4f5e-83b2-e54836983035.png)
+![db-page](https://user-images.githubusercontent.com/287034/220773522-8c1c1483-2389-4f5e-83b2-e54836983035.png)  
+
+## Live Demo
+Check out a [live demo of Mathesar here](https://demo.mathesar.org)!
 
 ## Features
 - **Built on Postgres**: Connect to an existing Postgres database or set one up from scratch.
@@ -67,7 +70,7 @@ The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) 
 - **Data entry**: Use our spreadsheet-like interface to view, create, update, and delete table records.
 - **Filter, sort, and group**: Quickly slice your data in different ways.
 - **Query builder**: Use our Data Explorer to build queries without knowing anything about SQL or joins.
-- **Schema migrations**: Transfer data between tables in two clicks.
+- **Schema migrations**: Transfer columns between tables in two clicks.
 - **Uses Postgres features**: Mathesar uses and manipulates Postgres schemas, primary keys, foreign keys, constraints and data types. e.g. "Links" in the UI are foreign keys in the database.
 - **Custom data types**: Custom data types for emails and URLs (more coming soon), validated at the database level.
 - **Basic access control**: Users can have Viewer (read-only), Editor (can only edit data, but not data structure), or Manager (can edit both data and its structure) roles.
