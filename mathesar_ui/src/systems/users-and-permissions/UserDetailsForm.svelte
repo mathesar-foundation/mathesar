@@ -12,6 +12,9 @@
     requiredField,
     makeForm,
     FormSubmitWithCatch,
+    validateUsernameLength,
+    validateUsernameCharacters,
+    validateEmail,
     type FieldStore,
   } from '@mathesar/components/form';
   import userApi, { type User } from '@mathesar/api/users';
@@ -30,8 +33,10 @@
   $: isUserUpdatingThemselves = userProfile && userProfile.id === user?.id;
   $: isNewUser = user === undefined;
   $: fullName = optionalField(user?.full_name ?? '');
-  $: username = requiredField(user?.username ?? '');
-  $: email = optionalField(user?.email ?? '');
+  $: username = requiredField(
+    user?.username ?? '',
+    [validateUsernameLength(), validateUsernameCharacters()]);
+  $: email = optionalField(user?.email ?? '', [validateEmail()]);
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );
