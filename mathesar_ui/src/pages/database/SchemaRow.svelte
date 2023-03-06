@@ -50,25 +50,26 @@
         {#if isLocked}
           <span class="lock"><Icon {...iconNotEditable} /></span>
         {:else if canExecuteDDL}
-          <DropdownMenu
-            showArrow={false}
-            triggerAppearance="plain"
-            closeOnInnerClick={true}
-            label=""
-            icon={iconMoreActions}
-            menuStyle="--spacing-y:0.8em;"
-            sytle="z-index: 1"
-          >
-            <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}
-              >Edit Schema</ButtonMenuItem
+          <div class="menu-trigger">
+            <DropdownMenu
+              showArrow={false}
+              triggerAppearance="plain"
+              closeOnInnerClick={true}
+              label=""
+              icon={iconMoreActions}
+              menuStyle="--spacing-y:0.8em;"
             >
-            <MenuDivider />
-            <ButtonMenuItem
-              danger
-              on:click={() => dispatch('delete')}
-              icon={iconDeleteMajor}>Delete Schema</ButtonMenuItem
-            >
-          </DropdownMenu>
+              <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}
+                >Edit Schema</ButtonMenuItem
+              >
+              <MenuDivider />
+              <ButtonMenuItem
+                danger
+                on:click={() => dispatch('delete')}
+                icon={iconDeleteMajor}>Delete Schema</ButtonMenuItem
+              >
+            </DropdownMenu>
+          </div>
         {/if}
       </div>
 
@@ -93,6 +94,9 @@
 <style lang="scss">
   .schema-row-parent {
     position: relative;
+    isolation: isolate;
+    --z-index-hyperlink-overlay: 1;
+    --z-index-menu-trigger: 2;
   }
 
   .schema-row-parent.hover .schema-row {
@@ -106,6 +110,11 @@
     width: 100%;
     top: 0;
     left: 0;
+    z-index: var(--z-index-hyperlink-overlay);
+  }
+
+  .menu-trigger {
+    z-index: var(--z-index-menu-trigger);
   }
 
   .schema-details-link {
