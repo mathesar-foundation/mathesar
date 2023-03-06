@@ -17,17 +17,17 @@ Installation should only take a few minutes.
 ### Step one: Prepare the server
 First, we need to update the software repository and upgrade all packages using the apt command below.  SSH to your server and elevate to the `root` user.
 ```sh
-# apt update && apt upgrade
+apt update && apt upgrade
 ```
 Next we will install the required packages.
 ```sh
-# apt install locales build-essential acl ntp git python3-pip ipython3
+apt install locales build-essential acl ntp git python3-pip ipython3
 ```
 Now we need to add a new usergroup and allow passwordless login:
 ```sh
-# sudo groupadd deployers
-# useradd deployer
-# usermod -a -G deployers deployer
+sudo groupadd deployers
+useradd deployer
+usermod -a -G deployers deployer
 ```
 Now you need to edit the `/etc/sudoers` file with the 'visudo' command, and add this line:  `deployer ALL=(ALL) NOPASSWD: ALL` under the `# User privilege specification` section.
 
