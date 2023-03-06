@@ -22,13 +22,25 @@
   export let schema: SchemaEntry;
   export let canExecuteDDL = true;
 
+  let isHovered = false;
+
   $: href = getSchemaPageUrl(database.name, schema.id);
   $: isDefault = schema.name === 'public';
   $: isLocked = schema.name === 'public';
 </script>
 
-<div class="schema-row-parent">
-  <a {href} class="schema-row-overlay" aria-label={schema.name} />
+<div class="schema-row-parent" class:hover={isHovered}>
+  <a
+    {href}
+    class="schema-row-overlay"
+    aria-label={schema.name}
+    on:mouseenter={() => {
+      isHovered = true;
+    }}
+    on:mouseleave={() => {
+      isHovered = false;
+    }}
+  />
   <div class="schema-details-link">
     <div class="schema-row" class:is-locked={isLocked}>
       <div class="title-and-meta">
@@ -82,6 +94,11 @@
     position: relative;
   }
 
+  .schema-row-parent.hover .schema-row {
+    border: solid 1px var(--slate-500);
+    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
+  }
+
   .schema-row-overlay {
     position: absolute;
     height: 100%;
@@ -112,15 +129,9 @@
     border: 1px solid var(--slate-300);
     display: flex;
     flex-direction: column;
-    transition: border-color 0.2s ease-in-out;
     > :global(* + *) {
       margin-top: 0.75rem;
     }
-  }
-
-  .schema-row:hover {
-    border-color: var(--slate-500);
-    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
   }
 
   .schema-row.is-locked {
