@@ -11,7 +11,7 @@
   export let canExecuteDDL: boolean;
 </script>
 
-<div class="container tables-list">
+<div class="container">
   {#each tables as table (table.id)}
     <TableCard {canExecuteDDL} {table} {database} {schema} />
   {:else}
@@ -27,9 +27,6 @@
     grid-gap: 1rem;
     --minimum-item-width: 18rem;
     // align all child items to the left
-  }
-  .tables-list {
-    padding-bottom: 20px;
   }
   @supports (width: min(var(--minimum-item-width), 100%)) {
     .container {
