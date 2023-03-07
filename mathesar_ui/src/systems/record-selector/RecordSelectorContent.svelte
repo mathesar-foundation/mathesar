@@ -144,24 +144,35 @@
     {/if}
   {/if}
 
-  {#if hasSearchQueries && canEditTableRecords}
-    <div class="footer">
-      <Button
-        size="small"
-        appearance="secondary"
-        on:click={submitNewRecord}
-        on:mouseenter={() => {
-          isHoveringCreate = true;
-        }}
-        on:mouseleave={() => {
-          isHoveringCreate = false;
-        }}
-      >
-        <Icon {...iconAddNew} />
-        <span>Create Record From Search Criteria</span>
-      </Button>
-    </div>
-  {/if}
+  <div class="footer">
+    {#if hasSearchQueries && canEditTableRecords}
+      <div class="button">
+        <Button
+          size="small"
+          appearance="secondary"
+          on:click={submitNewRecord}
+          on:mouseenter={() => {
+            isHoveringCreate = true;
+          }}
+          on:mouseleave={() => {
+            isHoveringCreate = false;
+          }}
+        >
+          <Icon {...iconAddNew} />
+          <span>Create Record From Search Criteria</span>
+        </Button>
+      </div>
+    {/if}
+    {#if records.length === 10 && isInitialized}
+      <div class="message">
+        {#if hasSearchQueries}
+          The 10 best matches are shown. Continue filtering to see more.
+        {:else}
+          The first 10 records are shown. Filter to see more.
+        {/if}
+      </div>
+    {/if}
+  </div>
 </div>
 
 <style>
@@ -204,6 +215,24 @@
   }
 
   .footer {
-    margin-top: 1rem;
+    --spacing: 0.5rem;
+    margin: calc(-1 * var(--spacing));
+    margin-top: var(--spacing);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .footer > :global(*) {
+    margin: var(--spacing);
+  }
+  .footer .button {
+    flex: 0 0 auto;
+  }
+  .footer .message {
+    flex: 1 0 10rem;
+    margin-left: 1rem;
+    font-size: var(--text-size-small);
+    color: var(--color-text-muted);
+    text-align: right;
   }
 </style>
