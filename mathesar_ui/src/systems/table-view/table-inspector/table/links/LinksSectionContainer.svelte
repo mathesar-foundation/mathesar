@@ -9,8 +9,10 @@
 
   export let linksInThisTable: TableLink[];
   export let linksFromOtherTables: TableLink[];
+  export let canExecuteDDL: boolean;
 
   const linkTableModal = modal.spawnModalController();
+  $: showNullState = !linksInThisTable.length && !linksFromOtherTables.length;
 </script>
 
 <div class="links-section">
@@ -20,13 +22,18 @@
   {#if linksFromOtherTables.length}
     <LinkSection type="from_other_tables" links={linksFromOtherTables} />
   {/if}
-  <div>
-    <Button on:click={() => linkTableModal.open()} appearance="secondary">
-      <Icon {...iconAddNew} />
-      <span>Create Link</span>
-    </Button>
-    <LinkTableModal controller={linkTableModal} />
-  </div>
+  {#if showNullState}
+    <span class="null-text">This table does not link to any other tables</span>
+  {/if}
+  {#if canExecuteDDL}
+    <div>
+      <Button on:click={() => linkTableModal.open()} appearance="secondary">
+        <Icon {...iconAddNew} />
+        <span>Create Link</span>
+      </Button>
+      <LinkTableModal controller={linkTableModal} />
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -37,5 +44,8 @@
     > :global(* + *) {
       margin-top: 1rem;
     }
+  }
+  .null-text {
+    color: var(--color-text-muted);
   }
 </style>

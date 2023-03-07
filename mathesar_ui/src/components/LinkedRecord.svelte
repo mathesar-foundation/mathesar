@@ -14,6 +14,7 @@
   export let recordPageHref: string | undefined = undefined;
   export let valueComparisonOutcome: ValueComparisonOutcome | undefined =
     undefined;
+  export let disabled = false;
 
   let isHoveringDelete = false;
   let isHoveringRecordPageLink = false;
@@ -39,6 +40,7 @@
   class:is-hovering-record-page-link={isHoveringRecordPageLink}
   class:exact-match={valueComparisonOutcome === 'exactMatch'}
   class:no-match={valueComparisonOutcome === 'noMatch'}
+  class:disabled
   on:click
 >
   {#if recordPageHref}
@@ -97,6 +99,9 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
+  }
+  .disabled {
+    color: var(--color-text-muted);
   }
   .background {
     position: absolute;

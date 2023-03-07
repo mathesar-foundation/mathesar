@@ -1,11 +1,14 @@
 <script lang="ts">
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { queries } from '@mathesar/stores/queries';
-  import { tables as tablesStore } from '@mathesar/stores/tables';
+  import {
+    tables as tablesStore,
+    importVerifiedTables as importVerifiedTablesStore,
+  } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import { iconSchema, iconEdit } from '@mathesar/icons';
+  import { iconSchema, iconEdit, iconManageAccess } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { Button, TabContainer, Icon } from '@mathesar-component-library';
   import {
@@ -14,18 +17,35 @@
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
   import { States } from '@mathesar/api/utils/requestUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { logEvent } from '@mathesar/utils/telemetry';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
+  import SchemaAccessControlModal from './SchemaAccessControlModal.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
   export let section: string;
 
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: userProfile = $userProfileStore;
+
+  $: canExecuteDDL =
+    userProfile?.hasPermission({ database, schema }, 'canExecuteDDL') ?? false;
+  $: canEditMetadata =
+    userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
+    false;
+  $: canEditPermissions = userProfile?.hasPermission(
+    { database, schema },
+    'canEditPermissions',
+  );
+
   const addEditModal = modal.spawnModalController();
+  const accessControlModal = modal.spawnModalController();
 
   // NOTE: This has to be same as the name key in the paths prop of Route component
   type TabsKey = 'overview' | 'tables' | 'explorations';
@@ -36,7 +56,7 @@
     href: string;
   };
 
-  $: tablesMap = $tablesStore.data;
+  $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
   $: explorationsMap = $queries.data;
   $: isTablesLoading = $tablesStore.state === States.Loading;
   $: isExplorationsLoading = $queries.requestStatus.state === 'processing';
@@ -68,6 +88,16 @@
   }
 
   $: isDefault = schema.name === 'public';
+
+  function manageAccess() {
+    accessControlModal.open();
+  }
+
+  logEvent('opened_schema', {
+    database_name: database.name,
+    schema_name: schema.name,
+    source: 'schema_page',
+  });
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
@@ -85,14 +115,20 @@
       icon: iconSchema,
     }}
   >
-    <svelte:fragment slot="action">
-      {#if !isDefault}
+    <div slot="action">
+      {#if !isDefault && canExecuteDDL}
         <Button on:click={handleEditSchema} appearance="secondary">
           <Icon {...iconEdit} />
           <span>Edit Schema</span>
         </Button>
       {/if}
-    </svelte:fragment>
+      {#if canEditPermissions}
+        <Button on:click={manageAccess} appearance="secondary">
+          <Icon {...iconManageAccess} />
+          <span>Manage Access</span>
+        </Button>
+      {/if}
+    </div>
 
     <slot slot="bottom">
       {#if schema.description}
@@ -113,6 +149,8 @@
     {#if activeTab?.id === 'overview'}
       <div class="tab-container">
         <SchemaOverview
+          {canExecuteDDL}
+          {canEditMetadata}
           {isTablesLoading}
           {isExplorationsLoading}
           {tablesMap}
@@ -126,7 +164,7 @@
         {#if isTablesLoading}
           <TableSkeleton />
         {:else}
-          <SchemaTables {tablesMap} {database} {schema} />
+          <SchemaTables {canExecuteDDL} {tablesMap} {database} {schema} />
         {/if}
       </div>
     {:else if activeTab?.id === 'explorations'}
@@ -135,6 +173,7 @@
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations
+            {canEditMetadata}
             hasTablesToExplore={!!tablesMap.size}
             {explorationsMap}
             {database}
@@ -147,6 +186,7 @@
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={addEditModal} {database} {schema} />
+<SchemaAccessControlModal controller={accessControlModal} {database} {schema} />
 
 <style lang="scss">
   .tab-container {

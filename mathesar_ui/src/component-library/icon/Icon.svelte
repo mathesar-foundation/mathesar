@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { IconProps } from './IconTypes';
   import IconPath from './IconPath.svelte';
+  import type { IconProps } from './IconTypes';
+  import { getDot, getPathStyle } from './iconUtils';
 
   // NOTE:
   // The type definition for the props here are duplicated in `Icon.d.ts` too.
@@ -37,6 +38,8 @@
   // Tooltip
   export let title: string | undefined = undefined;
 
+  export let hasNotificationDot = false;
+
   function concatClasses(
     _classes?: string,
     _flip?: IconProps['flip'],
@@ -57,6 +60,7 @@
 
   let faClasses: string;
   $: faClasses = concatClasses(classes, flip, rotate);
+  $: dot = hasNotificationDot ? getDot(viewBoxWidth, viewBoxHeight) : undefined;
 </script>
 
 <svg
@@ -76,9 +80,15 @@
   {/if}
   {#if Array.isArray(path)}
     {#each path as entry (entry)}
-      <IconPath path={entry} />
+      <IconPath
+        path={entry}
+        style={getPathStyle(viewBoxWidth, viewBoxHeight, dot)}
+      />
     {/each}
   {:else}
-    <IconPath {path} />
+    <IconPath {path} style={getPathStyle(viewBoxWidth, viewBoxHeight, dot)} />
+  {/if}
+  {#if dot}
+    <circle class="notification-dot" {...dot} />
   {/if}
 </svg>

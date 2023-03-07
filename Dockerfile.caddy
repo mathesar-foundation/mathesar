@@ -11,6 +11,9 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | t
 RUN apt-get update
 RUN apt install caddy
 
+ENV XDG_CONFIG_HOME /config
+ENV XDG_DATA_HOME /data
+
 EXPOSE 80
 EXPOSE 443
 EXPOSE 443/udp

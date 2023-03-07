@@ -25,7 +25,7 @@ class TableAccessPolicy(AccessPolicy):
                 'ui_dependents',
                 'joinable_tables',
             ],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
         },
 
@@ -40,7 +40,7 @@ class TableAccessPolicy(AccessPolicy):
                 'existing_import',
                 'map_imported_columns'
             ],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
             'condition_expression': ['(is_superuser or is_table_manager)']
         },
@@ -48,14 +48,39 @@ class TableAccessPolicy(AccessPolicy):
 
     @classmethod
     def _scope_queryset(cls, request, qs, allowed_roles):
-        if not request.user.is_superuser:
-            permissible_database_role_filter = (
+        if not (request.user.is_superuser or request.user.is_anonymous):
+            db_role_access_filter = (
                 Q(schema__database__database_role__role__in=allowed_roles)
                 & Q(schema__database__database_role__user=request.user)
             )
-            permissible_schema_roles_filter = (
-                Q(schema__schema_role__role__in=allowed_roles) & Q(schema__schema_role__user=request.user)
+            schema_role_access_filter = (
+                Q(schema__schema_role__role__in=allowed_roles)
+                & Q(schema__schema_role__user=request.user)
             )
+
+            # Filters to check whether user is a db/schema manager
+            is_database_manager = (
+                Q(schema__database__database_role__role='manager')
+                & Q(schema__database__database_role__user=request.user)
+            )
+            is_schema_manager = (
+                Q(schema__schema_role__role='manager')
+                & Q(schema__schema_role__user=request.user)
+            )
+
+            # Filter for confirmed tables
+            cnf_table_filter = (Q(import_verified=True) | Q(import_verified__isnull=True))
+
+            # Filters for the purpose of including/removing unconfirmed tables based on user's role
+            permissible_database_role_filter = (
+                is_database_manager & Q(import_verified=False)
+                | cnf_table_filter & db_role_access_filter
+            )
+            permissible_schema_roles_filter = (
+                is_schema_manager & Q(import_verified=False)
+                | cnf_table_filter & schema_role_access_filter
+            )
+
             qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
         return qs
 
