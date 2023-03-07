@@ -33,9 +33,10 @@
   $: isUserUpdatingThemselves = userProfile && userProfile.id === user?.id;
   $: isNewUser = user === undefined;
   $: fullName = optionalField(user?.full_name ?? '');
-  $: username = requiredField(
-    user?.username ?? '',
-    [validateUsernameLength(), validateUsernameCharacters()]);
+  $: username = requiredField(user?.username ?? '', [
+    validateUsernameLength(),
+    validateUsernameCharacters(),
+  ]);
   $: email = optionalField(user?.email ?? '', [validateEmail()]);
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',

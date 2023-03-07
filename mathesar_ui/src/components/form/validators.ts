@@ -90,7 +90,7 @@ function isUsernameInvalid(v: string): boolean {
 }
 
 export function validateUsernameCharacters(
-  msg = 'Username should not contain non-alphanumeric characters.'
+  msg = 'Username should not contain non-alphanumeric characters.',
 ): ValidationFn<string | undefined | null> {
   return (v) =>
     v === null || v === undefined || !isUsernameInvalid(v)
@@ -99,22 +99,22 @@ export function validateUsernameCharacters(
 }
 
 export function validateUsernameLength(
-  msg = 'Username should be less than or equal to 150 characters.'
+  msg = 'Username should be less than or equal to 150 characters.',
 ): ValidationFn<string | undefined | null> {
   return (v) =>
-    v === null || v === undefined || v.length <= 150
-      ? valid()
-      : invalid(msg);
+    v === null || v === undefined || v.length <= 150 ? valid() : invalid(msg);
 }
 
 function isEmailInvalid(v: string): boolean {
-  return !v.toLowerCase().match(
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  );
+  return !v
+    .toLowerCase()
+    .match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    );
 }
 
 export function validateEmail(
-  msg = 'Invalid email format.'
+  msg = 'Invalid email format.',
 ): ValidationFn<string | undefined | null> {
   return (v) =>
     v === null || v === undefined || !isEmailInvalid(v)
