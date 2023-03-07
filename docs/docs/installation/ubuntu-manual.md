@@ -5,8 +5,8 @@ Installation should only take a few minutes.
 ## What we will do:
 - Prepare the server
 - Install Docker & Docker-compose
-- Install Nginx webserver.
-- Install     
+- Install PostgreSQL
+- Install Nginx webserver    
 - You need to be a user with root access to the machine you're trying to install Mathesar on.
 
 ## Preparing our server.
@@ -19,6 +19,7 @@ First, we need to update the software repository and upgrade all packages using 
 ```sh
 apt update && apt upgrade
 ```
+Once the system has been updated, I recommend you perform a reboot to get the new kernel running incase it was updated.
 Next we will install the required packages.
 ```sh
 apt install locales build-essential acl ntp git python3-pip ipython3
@@ -74,7 +75,35 @@ Once downloaded, we have to change the properties so that it is an executable:
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 That is it.  We can now move to the next step.
-### Step Three: Install Nginx with Letsencrypt and Gurnicorn3
+
+### Step Three: Install PostGreSQL
+SSH to your server and run the following commands to update all the packages installed.
+```sh
+apt update && apt update
+```
+Now we will install the dependencies for PostGreSQL.  Note some of these may already be installed from a previous step.
+```sh
+apt install curl gpg gnupg2 software-properties-common apt-transport-https lsb-release ca-certificates
+```
+Now that we have updated and rebooted our system, let’s add the APT repository required to pull the packages form the PostgreSQL repository.
+```sh
+curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+```
+After importing GPG key, add repository contents to your Ubuntu 22.04|20.04|18.04 system:
+```sh
+echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
+```
+The repository added contains many different packages including third party addons. They include:
+
+   - postgresql-client
+   - postgresql
+   - libpq-dev
+   - postgresql-server-dev
+   - pgadmin packages
+
+
+
+### Step Four: Install Nginx with Letsencrypt and Gurnicorn3
 We will start off by installing Nginx on the system.  This will already be in the Debian repository so simply run the install command.
 
 ```sh
