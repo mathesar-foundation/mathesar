@@ -100,7 +100,14 @@ The repository added contains many different packages including third party addo
    - libpq-dev
    - postgresql-server-dev
    - pgadmin packages
-
+With the repository added we can install the PostgreSQL 13 packages on our Ubuntu 22.04|20.04|18.04 Linux server. But first update the package index for the version to be available at the OS level.
+```sh
+apt update
+```
+Now we can install PostGreSQL 13 on the system.
+```sh
+apt install postgresql-13 postgresql-client-13
+```
 
 
 ### Step Four: Install Nginx with Letsencrypt and Gurnicorn3
