@@ -5,7 +5,7 @@ Installation should only take a few minutes.
 ## What we will do:
 - Prepare the server
 - Install Docker & Docker-compose
-- Install PostgreSQL
+- Install PostgreSQL & Create Database
 - Install Nginx webserver
 - You need to be a user with root access to the machine you're trying to install Mathesar on.
 
@@ -106,6 +106,21 @@ Now we can install PostGreSQL 13 on the system.
 ```sh
 apt install postgresql-13 postgresql-client-13
 ```
+#### Create Database, Database user
+Before we start, we first need to secure our database as the root user's password is not set.
+```sh
+sudo su - postgres
+psql -c "alter user postgres with password 'StrongAdminP@ssw0rd'"
+```
+Now we can create our database, and user.  Replace `yourdbname`, `youruser` and `yourpass` with your own, secure variables.  Remember the `;` after each command.
+```sh
+sudo -u postgres psql #if you are not already in psql prompt
+CREATE DATABASE yourdbname;
+CREATE USER youruser WITH ENCRYPTED PASSWORD 'yourpass';
+GRANT ALL PRIVILEGES ON DATABASE yourdbname TO youruser;
+```
+
+
 ### Step Four: Install Nginx with Letsencrypt and Gurnicorn3
 We will start off by installing Nginx on the system.  This will already be in the Debian repository so simply run the install command.
 
