@@ -32,7 +32,7 @@ usermod -a -G deployers deployer
 Now you need to edit the `/etc/sudoers` file with the 'visudo' command, and add this line:  `deployer ALL=(ALL) NOPASSWD: ALL` under the `# User privilege specification` section.  If it fails to save, then edit again and move that to the last line of the file.  Remember to use TAB between the username and the first `ALL` section
 
 
-### Step two
+### Step two: Install Docker & Docker-compose
 Clean the system of any potential pre-installed Docker packages.
 ```sh
 apt-get remove docker docker-engine docker.io
@@ -74,7 +74,39 @@ Once downloaded, we have to change the properties so that it is an executable:
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 That is it.  We can now move to the next step.
-### Step Three: Install Nginx with Letsencrypt and Gurnicorn3
+### Step Three: Install PostGreSQL
+SSH to your server and run the following commands to update all the packages installed.
+```sh
+apt update && apt update
+```
+Now we will install the dependencies for PostGreSQL.  Note some of these may already be installed from a previous step.
+```sh
+apt install curl gpg gnupg2 software-properties-common apt-transport-https lsb-release ca-certificates
+```
+Now that we have updated and rebooted our system, let’s add the APT repository required to pull the packages form the PostgreSQL repository.
+```sh
+curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+```
+After importing GPG key, add repository contents to your Ubuntu 22.04|20.04|18.04 system:
+```sh
+echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
+```
+The repository added contains many different packages including third party addons. They include:
+
+   - postgresql-client
+   - postgresql
+   - libpq-dev
+   - postgresql-server-dev
+   - pgadmin packages
+With the repository added we can install the PostgreSQL 13 packages on our Ubuntu 22.04|20.04|18.04 Linux server. But first update the package index for the version to be available at the OS level.
+```sh
+apt update
+```
+Now we can install PostGreSQL 13 on the system.
+```sh
+apt install postgresql-13 postgresql-client-13
+```
+### Step Four: Install Nginx with Letsencrypt and Gurnicorn3
 We will start off by installing Nginx on the system.  This will already be in the Debian repository so simply run the install command.
 
 ```sh
