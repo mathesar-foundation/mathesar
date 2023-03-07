@@ -41,7 +41,7 @@
         item={{
           type: 'simple',
           href: ADMIN_UPDATE_PAGE_URL,
-          label: 'General',
+          label: 'Software Update',
         }}
       />
       <SoftwareUpdate />

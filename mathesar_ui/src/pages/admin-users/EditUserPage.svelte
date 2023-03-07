@@ -1,7 +1,7 @@
 <script lang="ts">
   import { router } from 'tinro';
   import { Icon, SpinnerButton } from '@mathesar-component-library';
-  import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
+  import { iconDeleteMajor, iconEditUser } from '@mathesar/icons';
   import {
     ADMIN_USERS_PAGE_URL,
     getEditUsersPageUrl,
@@ -60,10 +60,11 @@
         type: 'simple',
         href: getEditUsersPageUrl(userId),
         label: userModel.username,
+        icon: iconEditUser,
       }}
     />
     <h1>
-      <Icon {...iconEdit} />
+      <Icon {...iconEditUser} />
       Edit User: <strong>{userModel.username}</strong>
     </h1>
     <FormBox>

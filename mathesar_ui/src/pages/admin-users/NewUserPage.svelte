@@ -24,7 +24,8 @@
   item={{
     type: 'simple',
     href: ADMIN_USERS_PAGE_ADD_NEW_URL,
-    label: 'New',
+    label: 'New User',
+    icon: iconAddUser,
   }}
 />
 
