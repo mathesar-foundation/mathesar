@@ -2,7 +2,10 @@
   import { router } from 'tinro';
   import { Icon, SpinnerButton } from '@mathesar-component-library';
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
-  import { ADMIN_USERS_PAGE_URL } from '@mathesar/routes/urls';
+  import {
+    ADMIN_USERS_PAGE_URL,
+    getEditUsersPageUrl,
+  } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
@@ -14,7 +17,6 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import type { UserModel } from '@mathesar/stores/users';
   import FormBox from './FormBox.svelte';
-  import { getEditUsersPageUrl } from '../../routes/urls';
 
   const userProfileStore = getUserProfileStoreFromContext();
   const usersStore = getUsersStoreFromContext();

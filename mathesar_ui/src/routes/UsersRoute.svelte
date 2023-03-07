@@ -5,7 +5,7 @@
   import NewUserPage from '@mathesar/pages/admin-users/NewUserPage.svelte';
   import EditUserPage from '@mathesar/pages/admin-users/EditUserPage.svelte';
   import { setUsersStoreInContext } from '@mathesar/stores/users';
-  import { ADMIN_USERS_PAGE_URL } from './urls';
+  import { ADMIN_USERS_PAGE_URL } from '@mathesar/routes/urls';
 
   setUsersStoreInContext();
 </script>

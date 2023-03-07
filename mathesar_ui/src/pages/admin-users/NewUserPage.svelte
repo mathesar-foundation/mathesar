@@ -3,12 +3,14 @@
   import { Icon } from '@mathesar-component-library';
   import type { User } from '@mathesar/api/users';
   import { iconAddUser } from '@mathesar/icons';
-  import { getEditUsersPageUrl } from '@mathesar/routes/urls';
+  import {
+    getEditUsersPageUrl,
+    ADMIN_USERS_PAGE_ADD_NEW_URL,
+  } from '@mathesar/routes/urls';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import { UserDetailsForm } from '@mathesar/systems/users-and-permissions';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import FormBox from './FormBox.svelte';
-  import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '../../routes/urls';
 
   const usersStore = getUsersStoreFromContext();
 
