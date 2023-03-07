@@ -162,7 +162,7 @@
     {:else if activeTab?.id === 'tables'}
       <div class="tab-container">
         {#if isTablesLoading}
-          <TableSkeleton numTables={schema.num_tables}/>
+          <TableSkeleton numTables={schema.num_tables} />
         {:else}
           <SchemaTables {canExecuteDDL} {tablesMap} {database} {schema} />
         {/if}

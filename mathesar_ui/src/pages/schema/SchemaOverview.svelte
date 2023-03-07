@@ -43,7 +43,7 @@
       </svelte:fragment>
     </OverviewHeader>
     {#if isTablesLoading}
-      <TableSkeleton numTables={schema.num_tables}/>
+      <TableSkeleton numTables={schema.num_tables} />
     {:else if showTableCreationTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
