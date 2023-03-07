@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { makeStyleStringFromCssVariables } from '@mathesar-component-library';
   import AppHeader from '@mathesar/components/AppHeader.svelte';
   import LiveDemoBanner from '@mathesar/components/LiveDemoBanner.svelte';
 
@@ -7,10 +8,7 @@
   export let cssVariables: Record<string, string> | undefined = undefined;
 
   $: style = cssVariables
-    ? Object.entries(cssVariables)
-        .filter((val) => val[0].indexOf('--') === 0)
-        .map((entry) => `${entry[0]}: ${entry[1]}`)
-        .join(';')
+    ? makeStyleStringFromCssVariables(cssVariables)
     : undefined;
 </script>
 
