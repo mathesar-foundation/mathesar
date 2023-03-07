@@ -78,7 +78,7 @@
 
 1. Locate the newly installed WSL/Ubuntu “app” on the Windows Start menu or by searching for “Ubuntu” using Windows Search. Double-click to run it.
 
-1. In the WSL/Ubuntu window enter and run these commands to confirm that the Docker and Docker Compose versions are at least 23 and 2.0 as required for the Mathesar installation:
+1. In the WSL/Ubuntu window enter and run these commands to confirm that the Docker and Docker Compose versions are at least 23 and 2.10 as required for the Mathesar installation:
 
     ```
     docker --version
