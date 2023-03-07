@@ -13,6 +13,7 @@
 
   export let constraintType: ConstraintType;
   export let constraints: Constraint[];
+  export let canExecuteDDL: boolean;
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -63,6 +64,13 @@
       onProceed: () => constraintsDataStore.remove(constraint.id),
     });
   }
+
+  $: canAdd =
+    CONSTRAINT_TYPE_SUPPORTING_CAN_ADD.includes(constraintType) &&
+    canExecuteDDL;
+  $: canDrop =
+    CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType) &&
+    canExecuteDDL;
 </script>
 
 <div class="constraint-type-section">
@@ -71,7 +79,7 @@
       {titleMap[constraintType]}
       <Help>{helpMap[constraintType]}</Help>
     </span>
-    {#if CONSTRAINT_TYPE_SUPPORTING_CAN_ADD.includes(constraintType)}
+    {#if canAdd}
       <Button appearance="plain-primary" size="small" on:click={addConstraint}>
         Add
       </Button>
@@ -92,7 +100,7 @@
         <ConstraintCollapseHeader {constraint} />
       </span>
       <span slot="trigger-aside">
-        {#if CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType)}
+        {#if canDrop}
           <Button
             on:click={() => handleDrop(constraint)}
             size="small"

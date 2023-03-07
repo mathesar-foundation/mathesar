@@ -9,37 +9,56 @@ services:
       - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
+    # db container is exposed to the other containers, and the host.
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT-5432}:5432"
+    expose:
+      - "5432"
     volumes:
       - postgresql_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
+      interval: 5s
+      timeout: 1s
+      retries: 30
+      start_period: 5s
   caddy-reverse-proxy:
     profiles: ["prod"]
     image: mathesar/mathesar-caddy:latest
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    # caddy container is exposed to the other containers, and the host.
     ports:
-      - "80:80"
+      - "${HTTP_PORT-80}:80"
+      - "${HTTPS_PORT-443}:443"
     volumes:
       - media:/mathesar/media
       - static:/mathesar/static
+      - caddy_data:/data
+      - caddy_config:/config
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
   base-service:
     profiles: ["web-server"]
     container_name: mathesar_service
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PYTHON_REQUIREMENTS: requirements-prod.txt
+    image: mathesar/mathesar-prod:latest
     environment:
       - MODE=${MODE-PRODUCTION}
       - DEBUG=${DEBUG-False}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.production}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
+      - SECRET_KEY=${SECRET_KEY}
+      - DJANGO_DATABASE_KEY=${DJANGO_DATABASE_KEY-default}
+      - DJANGO_DATABASE_URL=${DJANGO_DATABASE_URL-postgres://mathesar:mathesar@mathesar_db:5432/mathesar_django}
+      - MATHESAR_DATABASES=${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
     command: ./run.sh
-    ports:
-      - "8000:8000"
     volumes:
       - static:/code/static
       - media:/code/media
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
   service:
     profiles: ["prod"]
     extends: base-service
@@ -49,11 +68,24 @@ services:
       - static:/code/static
       - media:/code/media
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    healthcheck:
+      test: curl -f http://localhost:8000
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    # On prod, the HTTP port is exposed to other containers, but not the host.
+    expose:
+      - "8000"
   test-service:
-    profiles: [ "test" ]
+    profiles: ["test"]
     extends: base-service
     container_name: mathesar_service_test
+    image: mathesar/mathesar-test:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -61,9 +93,13 @@ services:
         PYTHON_REQUIREMENTS: requirements-dev.txt
     depends_on:
       - db
+    # On testing, the HTTP port is exposed to other containers, and the host.
+    ports:
+      - "8000:8000"
   dev-service:
     profiles: ["dev"]
     container_name: mathesar_service_dev
+    image: mathesar/mathesar-dev:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -74,24 +110,35 @@ services:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
-      - DISPLAY=${DISPLAY}
-      - XAUTHORITY=/.Xauthority
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
     command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./dev-run.sh
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - ~/.Xauthority:/.Xauthority
       - .:/code/
       - ui_node_modules:/code/mathesar_ui/node_modules/
     depends_on:
       - db
+    # On dev, following ports are exposed to other containers, and the host.
     ports:
       - "8000:8000"
       - "3000:3000"
       - "6006:6006"
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --http-api-update --label-enable --debug
+    environment:
+      - WATCHTOWER_HTTP_API_TOKEN=mytoken
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+    # Watchtower HTTP API is exposed to other containers, but not the host.
+    expose:
+      - "8080"
 volumes:
   postgresql_data:
   ui_node_modules:
   media:
   static:
+  caddy_data:
+  caddy_config:

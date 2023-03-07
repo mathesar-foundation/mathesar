@@ -3,7 +3,10 @@
 
   import { Button, Icon, Spinner } from '@mathesar-component-library';
   import type { Response as ApiRecordsResponse } from '@mathesar/api/types/tables/records';
+  import { postAPI, States } from '@mathesar/api/utils/requestUtils';
   import { iconAddNew } from '@mathesar/icons';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { TabularData } from '@mathesar/stores/table-data';
   import {
@@ -11,16 +14,18 @@
     buildRecordSummariesForSheet,
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { tables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { postAPI, States } from '@mathesar/api/utils/requestUtils';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import type {
     RecordSelectorController,
     RecordSelectorResult,
   } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
+
+  const userProfile = getUserProfileStoreFromContext();
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -31,6 +36,11 @@
   /** true when the user is hover on the "Create new record" button. */
   let isHoveringCreate = false;
 
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
+  $: canEditTableRecords =
+    $userProfile?.hasPermission({ database, schema }, 'canEditTableRecords') ??
+    false;
   $: ({
     constraintsDataStore,
     meta,
@@ -134,24 +144,35 @@
     {/if}
   {/if}
 
-  {#if hasSearchQueries}
-    <div class="footer">
-      <Button
-        size="small"
-        appearance="secondary"
-        on:click={submitNewRecord}
-        on:mouseenter={() => {
-          isHoveringCreate = true;
-        }}
-        on:mouseleave={() => {
-          isHoveringCreate = false;
-        }}
-      >
-        <Icon {...iconAddNew} />
-        <span>Create Record From Search Criteria</span>
-      </Button>
-    </div>
-  {/if}
+  <div class="footer">
+    {#if hasSearchQueries && canEditTableRecords}
+      <div class="button">
+        <Button
+          size="small"
+          appearance="secondary"
+          on:click={submitNewRecord}
+          on:mouseenter={() => {
+            isHoveringCreate = true;
+          }}
+          on:mouseleave={() => {
+            isHoveringCreate = false;
+          }}
+        >
+          <Icon {...iconAddNew} />
+          <span>Create Record From Search Criteria</span>
+        </Button>
+      </div>
+    {/if}
+    {#if records.length === 10 && isInitialized}
+      <div class="message">
+        {#if hasSearchQueries}
+          The 10 best matches are shown. Continue filtering to see more.
+        {:else}
+          The first 10 records are shown. Filter to see more.
+        {/if}
+      </div>
+    {/if}
+  </div>
 </div>
 
 <style>
@@ -194,6 +215,24 @@
   }
 
   .footer {
-    margin-top: 1rem;
+    --spacing: 0.5rem;
+    margin: calc(-1 * var(--spacing));
+    margin-top: var(--spacing);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .footer > :global(*) {
+    margin: var(--spacing);
+  }
+  .footer .button {
+    flex: 0 0 auto;
+  }
+  .footer .message {
+    flex: 1 0 10rem;
+    margin-left: 1rem;
+    font-size: var(--text-size-small);
+    color: var(--color-text-muted);
+    text-align: right;
   }
 </style>

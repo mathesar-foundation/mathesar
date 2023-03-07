@@ -33,6 +33,6 @@
   </Route>
 {:else}
   <ErrorPage>
-    Database not found with name <Identifier>databaseName</Identifier>.
+    Database with name <Identifier>{databaseName}</Identifier> is not found.
   </ErrorPage>
 {/if}

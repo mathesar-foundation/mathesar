@@ -72,13 +72,13 @@ If you don't have your editor configured to auto-format your code, then you'll n
 - Format all front end files
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npm run format
+  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm run format
   ```
 
 - Format a specific file
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npx prettier --write src/App.svelte
+  docker exec -it -w /code/mathesar_ui mathesar_service_dev npx prettier --write src/App.svelte
   ```
 
 ## Linting
@@ -88,13 +88,13 @@ We use [ESLint](https://eslint.org/) to help spot more complex issues within cod
 - Lint all front end files:
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npm run lint
+  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm run lint
   ```
 
 - Lint a specific file:
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npx eslint src/App.svelte
+  docker exec -it -w /code/mathesar_ui mathesar_service_dev npx eslint src/App.svelte
   ```
 
 ## Testing
@@ -112,13 +112,13 @@ We use [Vitest](https://vitest.dev/) to run our unit tests, and we use [Testing 
 - Run all our tests:
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npm test
+  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm test
   ```
 
 - Re-run a specific test by name:
 
   ```
-  docker exec -it -w /code/mathesar_ui mathesar_service npm run test TextInput
+  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm run test TextInput
   ```
 
   This will run all test files with file names containing `TextInput`.
@@ -165,7 +165,7 @@ If you want to add or remove packages, or basically run any npm action, **always
 1. Connect to the container and open the ui folder:
 
    ```bash
-   docker exec -it mathesar_service /bin/bash
+   docker exec -it mathesar_service_dev /bin/bash
    cd mathesar_ui
    ```
 
@@ -207,13 +207,13 @@ We use [Storybook](https://storybook.js.org/) to develop and document our compon
 - **Start** Storybook in dev mode with:
 
   ```bash
-  docker exec -it -w /code/mathesar_ui mathesar_service npm run storybook
+  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm run storybook
   ```
 
 - **Build** Storybook with:
 
   ```bash
-  docker exec -it -w /code/mathesar_ui mathesar_service npm run build-storybook
+  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm run build-storybook
   ```
 
 ## Coding standards

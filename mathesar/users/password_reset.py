@@ -22,6 +22,7 @@ class MathesarPasswordResetConfirmView(PasswordResetConfirmView):
     form_class = MathesarSetPasswordForm
     template_name = 'users/password_reset_confirmation.html'
     title = _('Change Default Password')
+    success_url = "/auth/login"
 
     @method_decorator(sensitive_post_parameters())
     @method_decorator(never_cache)
