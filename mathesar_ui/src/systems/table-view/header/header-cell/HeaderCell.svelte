@@ -4,7 +4,7 @@
   using table inspector
  -->
 <script lang="ts">
-  import { Button, Icon } from '@mathesar-component-library';
+  import { Icon } from '@mathesar-component-library';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
@@ -36,9 +36,9 @@
 
 <div class="header-cell-root">
   <CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
-  <Button
+  <div
+    class="header-cell-btn btn btn-ghost size-medium "
     style="cursor: inherit;"
-    appearance="ghost"
     on:click
     on:mousedown
     on:mouseenter
@@ -59,10 +59,14 @@
         {/if}
       </div>
     {/if}
-  </Button>
+  </div>
 </div>
 
 <style lang="scss">
+  .header-cell-btn {
+    width: 100%;
+    height: 100%;
+  }
   .header-cell-root {
     width: 100%;
     height: 100%;

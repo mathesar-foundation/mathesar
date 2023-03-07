@@ -54,9 +54,6 @@
   .droppable > :global(div) {
     border-left: 0.2rem solid transparent !important;
   }
-  .droppable.is_selected > :global(div) {
-    border-left: 0.2rem solid var(--sky-100) !important;
-  }
   .droppable.dragged_over.dragged_over_left > :global(div) {
     border-left: 0.2rem solid var(--sky-700) !important;
   }
