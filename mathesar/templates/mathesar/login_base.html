@@ -97,6 +97,35 @@
     .login-card form, .login-card .footer {
       margin-top: var(--login-page-spacing);
     }
+    .unsupported-device {
+      display: none;
+      margin-top: var(--size-xx-large);
+      background: var(--red-100);
+      border: solid 1px var(--red-200);
+      border-radius: var(--border-radius-m);
+      padding: 0.5rem 1.5rem;
+    }
+    .unsupported-device .title {
+      margin-top: 0.5rem;
+      font-weight: bold;
+      font-size: var(--size-large);
+      text-align: center;
+    }
+    .unsupported-device .warning-icon {
+      margin-top: 0.5rem;
+      font-size: var(--size-xx-large);
+      text-align: center;
+    }
+    @media (max-width: 50rem) {
+      .unsupported-device {
+        display: block;
+      }
+    }
+    @media (max-height: 30rem) {
+      .unsupported-device {
+        display: block;
+      }
+    }
   </style>
 {% endblock %}
 
@@ -126,6 +155,23 @@
   </div>
 
   {% if live_demo_mode %}
+    <div class="unsupported-device">
+      <div class="warning-icon">⚠️</div>
+      <p class="title">Unsupported Screen Size</p>
+      <p>
+        Mathesar is a spreadsheet-like application with a rich UI that does not
+        yet function well on screens this small. Improved support for mobile
+        devices is on our
+        <a href="https://mathesar.org/roadmap.html" target="_blank">
+          roadmap
+        </a>.
+      </p>
+      <p>
+        You can still use this demo site, but some features may not work
+        correctly. We encourage you to try Mathesar on a device with a larger
+        screen.
+    </p>
+    </div>
     <div class="tutorial align-center">
       <div class="header">
         <strong>Live Demo Mode</strong>

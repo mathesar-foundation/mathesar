@@ -1,20 +1,19 @@
 <script lang="ts">
-  import type { User } from '@mathesar/api/users';
-  import { Icon } from '@mathesar/component-library';
-  import { iconUser } from '@mathesar/icons';
+  import { Icon } from '@mathesar-component-library';
   import { getEditUsersPageUrl } from '@mathesar/routes/urls';
+  import type { UserModel } from '@mathesar/stores/users';
+  import { getUserTypeInfoFromUserModel } from '@mathesar/systems/users-and-permissions';
 
-  export let user: User;
+  export let user: UserModel;
 
   let hoveringTrigger = false;
 
-  // TODO: Update the icon
-  $: userTypeIcon = user.is_superuser ? iconUser : iconUser;
-  $: userTypeText = user.is_superuser ? 'Admin' : 'Custom';
-  $: showUserDetailedInfo = user.email || user.full_name;
+  $: userTypeInfo = getUserTypeInfoFromUserModel(user);
+  $: showUserDetailedInfo = user.email || user.fullName;
 </script>
 
-<a class="user-row passthrough" 
+<a
+  class="user-row passthrough"
   href={getEditUsersPageUrl(user.id)}
   class:hovering-trigger={hoveringTrigger}
   on:mouseenter={() => {
@@ -23,15 +22,15 @@
   on:mouseleave={() => {
     hoveringTrigger = false;
   }}
-  >
+>
   <div class="user-info">
     <span>{user.username}</span>
     {#if showUserDetailedInfo}
       <div class="user-detailed-info">
-        {#if user.full_name}
-          <span>{user.full_name}</span>
+        {#if user.fullName}
+          <span>{user.fullName}</span>
         {/if}
-        {#if user.full_name && user.email}
+        {#if user.fullName && user.email}
           <span class="divider" />
         {/if}
         {#if user.email}
@@ -41,8 +40,8 @@
     {/if}
   </div>
   <div class="user-type">
-    <Icon class="icon" {...userTypeIcon} />
-    <span>{userTypeText}</span>
+    <Icon class="icon" {...userTypeInfo.icon} />
+    <span>{userTypeInfo.displayName}</span>
   </div>
 </a>
 
@@ -87,7 +86,7 @@
   .hovering-trigger {
     background: var(--slate-100);
   }
-  
+
   .user-type {
     background-color: var(--slate-200);
     padding: 0.25rem 0.5rem;

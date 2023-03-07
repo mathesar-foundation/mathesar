@@ -12,10 +12,13 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
   import { renderRecordSummaryForRow } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { saveRecordSummaryTemplate } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import {
     columnIsConformant,
@@ -27,6 +30,10 @@
   export let table: TableEntry;
   export let tabularData: TabularData;
 
+  const userProfile = getUserProfileStoreFromContext();
+
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
   $: ({ recordsData, columnsDataStore, isLoading } = tabularData);
   $: ({ columns } = columnsDataStore);
   $: ({ savedRecords, recordSummaries } = recordsData);
@@ -51,6 +58,14 @@
       transitiveData: $recordSummaries,
     });
   })();
+  $: canEditMetadata = $userProfile?.hasPermission(
+    {
+      database,
+      schema,
+    },
+    'canEditMetadata',
+  );
+  $: showNullState = !canEditMetadata && !previewRecordSummary;
 
   async function save() {
     try {
@@ -77,53 +92,59 @@
       </div>
     {/if}
 
-    <div class="heading">Template</div>
-    <div class="content">
-      <RadioGroup
-        options={[false, true]}
-        getRadioLabel={(v) => (v ? 'Custom' : 'Default')}
-        ariaLabel="Template type"
-        isInline
-        bind:value={$customized}
-      />
-
-      {#if $customized}
-        <Field
-          field={template}
-          input={{ component: TemplateInput, props: { columns: $columns } }}
+    {#if canEditMetadata}
+      <div class="heading">Template</div>
+      <div class="content">
+        <RadioGroup
+          options={[false, true]}
+          getRadioLabel={(v) => (v ? 'Custom' : 'Default')}
+          ariaLabel="Template type"
+          isInline
+          bind:value={$customized}
         />
 
-        {#if nonconformantColumns.length}
-          <InfoBox>
-            <div class="nonconformant-columns">
-              <p>
-                Because some column names contain curly braces, the following
-                numerical values are used in place of column names within the
-                above template:
-              </p>
-              <ul>
-                {#each nonconformantColumns as column}
-                  <li>
-                    <Identifier>{column.id}</Identifier>
-                    references the column
-                    <Identifier>{column.name}</Identifier>.
-                  </li>
-                {/each}
-              </ul>
-            </div>
-          </InfoBox>
-        {/if}
-      {/if}
+        {#if $customized}
+          <Field
+            field={template}
+            input={{ component: TemplateInput, props: { columns: $columns } }}
+          />
 
-      <FormSubmit
-        {form}
-        onProceed={save}
-        onCancel={form.reset}
-        proceedButton={{ label: 'Save' }}
-        initiallyHidden
-        size="small"
-      />
-    </div>
+          {#if nonconformantColumns.length}
+            <InfoBox>
+              <div class="nonconformant-columns">
+                <p>
+                  Because some column names contain curly braces, the following
+                  numerical values are used in place of column names within the
+                  above template:
+                </p>
+                <ul>
+                  {#each nonconformantColumns as column}
+                    <li>
+                      <Identifier>{column.id}</Identifier>
+                      references the column
+                      <Identifier>{column.name}</Identifier>.
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            </InfoBox>
+          {/if}
+        {/if}
+
+        <FormSubmit
+          {form}
+          onProceed={save}
+          onCancel={form.reset}
+          proceedButton={{ label: 'Save' }}
+          initiallyHidden
+          size="small"
+        />
+      </div>
+    {/if}
+
+    {#if showNullState}
+      <span class="null-text">No record summary available.</span>
+    {/if}
   {/if}
 </div>
 
@@ -149,5 +170,8 @@
   }
   .nonconformant-columns ul {
     padding-left: 1.5rem;
+  }
+  .null-text {
+    color: var(--color-text-muted);
   }
 </style>

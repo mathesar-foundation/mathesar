@@ -13,15 +13,20 @@
     iconExpandDown,
     type AccompanyingElements,
   } from '@mathesar-component-library';
-  import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
+  import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
   import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
+  import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
 
-  type $$Props = LinkedRecordCellProps & {
+  interface $$Props
+    extends Omit<
+      LinkedRecordCellProps,
+      'isActive' | 'isSelectedInRange' | 'isProcessing' | 'isIndependentOfSheet'
+    > {
     class?: string;
     id?: string;
     allowsHyperlinks?: boolean;
-  };
+  }
 
   const labelController = getLabelControllerFromContainingLabel();
   const recordSelector = getRecordSelectorFromContext();
@@ -38,6 +43,7 @@
   let classes: $$Props['class'] = '';
   export { classes as class };
   export let allowsHyperlinks = true;
+  export let disabled = false;
 
   let isAcquiringInput = false;
   let element: HTMLSpanElement | undefined;
@@ -76,6 +82,9 @@
   }
 
   async function launchRecordSelector() {
+    if (disabled) {
+      return;
+    }
     dispatch('recordSelectorOpen');
     isAcquiringInput = true;
     const recordSelectorPromise = recordSelector.acquireUserInput({ tableId });
@@ -118,12 +127,15 @@
   }
 </script>
 
+<BaseInput {disabled} {...$$restProps} bind:id />
+
 <span
   {id}
   class="input-element linked-record-input {classes}"
   class:has-value={hasValue}
+  class:disabled
   class:is-acquiring-input={isAcquiringInput}
-  tabindex={isAcquiringInput ? undefined : 0}
+  tabindex={isAcquiringInput || disabled ? undefined : 0}
   bind:this={element}
   on:click={launchRecordSelector}
   on:focus={handleFocus}
@@ -138,28 +150,31 @@
       <LinkedRecord
         recordId={value}
         {recordSummary}
-        hasDeleteButton
+        hasDeleteButton={!disabled}
         on:delete={clear}
         {recordPageHref}
+        {disabled}
       />
     {/if}
   </span>
-  <!--
-    Why is `.dropdown-button` not an actual `button` element? Because we need to
-    be able to nest this entire LinkedRecordInput inside a label and we don't
-    want to semantically associate the button with the label. There may be a
-    better way to do this from an a11y perspective.
-   -->
-  <span
-    class="dropdown-button"
-    on:click={launchRecordSelector}
-    role="button"
-    tabindex="-1"
-    aria-label="Pick a record"
-    title="Pick a record"
-  >
-    <Icon {...iconExpandDown} />
-  </span>
+  {#if !disabled}
+    <!--
+      Why is `.dropdown-button` not an actual `button` element? Because we need to
+      be able to nest this entire LinkedRecordInput inside a label and we don't
+      want to semantically associate the button with the label. There may be a
+      better way to do this from an a11y perspective.
+     -->
+    <span
+      class="dropdown-button"
+      on:click={launchRecordSelector}
+      role="button"
+      tabindex="-1"
+      aria-label="Pick a record"
+      title="Pick a record"
+    >
+      <Icon {...iconExpandDown} />
+    </span>
+  {/if}
 </span>
 
 <style>
@@ -177,6 +192,10 @@
     padding: 0;
     --padding: 0.5rem;
     cursor: default;
+  }
+  .disabled {
+    background: var(--slate-100);
+    border: solid 1px var(--slate-200);
   }
 
   .linked-record-input:focus {

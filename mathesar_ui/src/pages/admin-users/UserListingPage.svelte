@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { getUsersStoreFromContext } from '@mathesar/stores/users';
-  import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
-  import {
-    AnchorButton,
-    Icon
-  } from '@mathesar/component-library';
+  import { AnchorButton, Icon } from '@mathesar/component-library';
   import { iconAddNew } from '@mathesar/icons';
-  import type { User } from '@mathesar/api/users';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
+  import type { UserModel } from '@mathesar/stores/users';
+  import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import UserRow from './UserRow.svelte';
@@ -19,10 +17,10 @@
   $: requestStatus = usersStore?.requestStatus;
   $: users = usersStore?.users;
 
-  function filterUsers(_users: User[], query: string) {
-    const isMatch = (user: User, q: string) =>
+  function filterUsers(_users: UserModel[], query: string) {
+    const isMatch = (user: UserModel, q: string) =>
       user.username.toLowerCase().includes(q) ||
-      user.full_name?.toLowerCase().includes(q) ||
+      user.fullName?.toLowerCase().includes(q) ||
       user.email?.toLowerCase().includes(q);
     return _users?.filter((user) => {
       if (query) {
@@ -38,19 +36,22 @@
   }
 
   $: filteredUsers = filterUsers($users ?? [], filterQuery);
+  $: userCountText = filteredUsers.length ? `(${filteredUsers.length})` : '';
 </script>
+
+<svelte:head><title>{makeSimplePageTitle('Users')}</title></svelte:head>
+
+<h1>Users {userCountText}</h1>
 
 <section class="users-list-container">
   {#if $requestStatus?.state === 'processing'}
     <UserSkeleton />
   {:else if $requestStatus?.state === 'success'}
-    <h1>
-      Users ({filteredUsers.length})
-    </h1>
     <EntityLayout
-    searchPlaceholder="Search Users"
-    bind:searchQuery={filterQuery}
-    on:clear={handleClearFilterQuery}>
+      searchPlaceholder="Search Users"
+      bind:searchQuery={filterQuery}
+      on:clear={handleClearFilterQuery}
+    >
       <slot slot="action">
         <AnchorButton appearance="primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}>
           <Icon {...iconAddNew} />
@@ -80,7 +81,7 @@
     </EntityLayout>
   {:else if $requestStatus?.state === 'failure'}
     <ErrorBox>
-        <p>Error: {$requestStatus.errors}</p>
+      <p>Error: {$requestStatus.errors}</p>
     </ErrorBox>
   {/if}
 </section>
@@ -98,7 +99,6 @@
   h1 {
     font-size: var(--text-size-ultra-large);
     font-weight: normal;
-    margin: 0;
   }
 
   .users-list {
@@ -112,5 +112,4 @@
       margin: 0 var(--size-xx-small);
     }
   }
-
 </style>

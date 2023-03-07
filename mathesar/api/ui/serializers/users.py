@@ -69,7 +69,7 @@ class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.Mo
         return user
 
 
-class ChangePasswordSerializer(serializers.Serializer):
+class ChangePasswordSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     old_password = serializers.CharField(write_only=True, required=True)
 
