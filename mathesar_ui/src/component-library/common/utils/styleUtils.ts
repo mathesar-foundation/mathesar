@@ -1,9 +1,9 @@
-import type { CssVariablesObj } from '@mathesar/component-library/types';
+import type { CssVariablesObj } from '@mathesar-component-library-dir/types';
 import { isDefinedNonNullable } from './typeUtils';
 
-export function makeStyleStringFromCssVariables(cssVariables: CssVariablesObj) {
-  const isCssVariable = (str: string) => str.indexOf('--') === 0;
+const isCssVariable = (str: string) => str.indexOf('--') === 0;
 
+export function makeStyleStringFromCssVariables(cssVariables: CssVariablesObj) {
   return Object.entries(cssVariables)
     .filter((maybeCssVariable) => isCssVariable(maybeCssVariable[0]))
     .map((cssVariable) => `${cssVariable[0]}: ${cssVariable[1]};`)

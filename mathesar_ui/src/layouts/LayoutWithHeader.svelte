@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { makeStyleStringFromCssVariables } from '@mathesar/component-library';
+  import { makeStyleStringFromCssVariables } from '@mathesar-component-library';
   import AppHeader from '@mathesar/components/AppHeader.svelte';
   import LiveDemoBanner from '@mathesar/components/LiveDemoBanner.svelte';
 
