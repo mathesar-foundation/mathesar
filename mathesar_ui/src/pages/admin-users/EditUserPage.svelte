@@ -1,8 +1,11 @@
 <script lang="ts">
   import { router } from 'tinro';
   import { Icon, SpinnerButton } from '@mathesar-component-library';
-  import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
-  import { ADMIN_USERS_PAGE_URL } from '@mathesar/routes/urls';
+  import { iconDeleteMajor, iconEditUser } from '@mathesar/icons';
+  import {
+    ADMIN_USERS_PAGE_URL,
+    getEditUsersPageUrl,
+  } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
@@ -11,6 +14,7 @@
     PasswordChangeForm,
     UserDetailsForm,
   } from '@mathesar/systems/users-and-permissions';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import type { UserModel } from '@mathesar/stores/users';
   import FormBox from './FormBox.svelte';
 
@@ -51,8 +55,16 @@
       User not found
     {/if}
   {:else}
+    <AppendBreadcrumb
+      item={{
+        type: 'simple',
+        href: getEditUsersPageUrl(userId),
+        label: userModel.username,
+        icon: iconEditUser,
+      }}
+    />
     <h1>
-      <Icon {...iconEdit} />
+      <Icon {...iconEditUser} />
       Edit User: <strong>{userModel.username}</strong>
     </h1>
     <FormBox>
