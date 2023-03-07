@@ -33,7 +33,7 @@ usermod -a -G deployers deployer
 Now you need to edit the `/etc/sudoers` file with the 'visudo' command, and add this line:  `deployer ALL=(ALL) NOPASSWD: ALL` under the `# User privilege specification` section.  If it fails to save, then edit again and move that to the last line of the file.  Remember to use TAB between the username and the first `ALL` section
 
 
-### Step two
+### Step two: Install Docker & Docker-compose
 Clean the system of any potential pre-installed Docker packages.
 ```sh
 apt-get remove docker docker-engine docker.io
