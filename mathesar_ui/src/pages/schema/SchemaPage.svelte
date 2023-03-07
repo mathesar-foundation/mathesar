@@ -191,6 +191,7 @@
 <style lang="scss">
   .tab-container {
     padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 
   .tab-header-container {
