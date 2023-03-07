@@ -173,7 +173,7 @@
   }
   .column-header-cell :global(.record-selector-input:focus) {
     border: none;
-    outline: none;
+    outline: 0.2rem solid var(--outline-color);
     box-shadow: 0 0 0 0.2rem var(--outline-color);
   }
   .overlay {
