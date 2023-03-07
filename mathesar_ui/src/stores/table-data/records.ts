@@ -501,10 +501,10 @@ export class RecordsData {
       );
 
       if (failures.size > 0) {
-        if (successRowKeys.size == 0) {
-          throw Error("Unable to delete row!");
+        if (successRowKeys.size === 0) {
+          throw Error('Unable to delete row!');
         } else {
-          throw Error("Unable to delete some rows!");
+          throw Error('Unable to delete some rows!');
         }
       }
     }
