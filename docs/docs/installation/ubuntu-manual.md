@@ -199,9 +199,71 @@ Now we need to create a directory for Letsencrypt
 ```sh
 mkdir /var/www/letsencrypt
 ```
-We will also need a directory for our website itself.  In this case, we will use `mathesar.example.com` as noted earlier. We will also assign it to the `www-data` user and group.
+We will also need a directory for our website itself.  In this case, we will use `mathesar.example.com` as noted earlier. We will also assign it to the `www-data` user and group.  Then we will change the permissions of the folder to get it ready for a website.
 ```sh
 mkdir /var/www/mathesar.example.com
 chgrp www-data /var/www/mathesar.example.com/
 chown -R www-data:www-data /var/www/mathesar.example.com
+chmod 0755 /var/www/mathesar.example.com/
 ```
+Next, we will install the Nginx site for mathesar.example.com.
+
+```sh
+echo "# Gunicorn socket
+upstream app_server {
+  # fail_timeout=0 means we always retry an upstream even if it failed
+  # to return a good HTTP response
+
+  server unix:/run/gunicorn.sock fail_timeout=0;
+}
+
+# HTTPS server
+server {
+  listen 443 ssl default deferred;
+  server_name {{ main_domain_name }};
+
+  ssl_certificate         /etc/letsencrypt/live/mathesar.example.com/fullchain.pem;
+  ssl_certificate_key     /etc/letsencrypt/live/mathesar.example.com/privkey.pem;
+  ssl_trusted_certificate /etc/letsencrypt/live/mathesar.example.com/fullchain.pem;
+
+  ssl_session_cache shared:SSL:50m;
+  ssl_session_timeout 5m;
+  ssl_stapling on;
+  ssl_stapling_verify on;
+
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_ciphers "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4";
+
+  ssl_dhparam /etc/nginx/dhparams.pem;
+  ssl_prefer_server_ciphers on;
+
+  access_log /var/log/nginx/mathesar.example.com.access.log;
+  error_log /var/log/nginx/mathesar.example.com.error.log;
+
+  location / {
+    # checks for static file, if not found proxy to app
+    try_files $uri @proxy_to_app;
+  }
+
+  location /static/ {
+    alias {{ repo_path }}/static/;
+  }
+
+  location @proxy_to_app {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+
+    # note for the future:
+    #   turn buffering off if using websockets or long polling
+    #   also need to make sure gunicorn workers are running in async
+    #   class
+    # proxy_buffering off;
+
+    # we don't want nginx trying to do something clever with
+    # redirects, we set the Host: header above already.
+    proxy_redirect off;
+    proxy_pass http://app_server;
+  }
+}" > /etc/nginx/sites-enabled/mathesar.example.com
+
