@@ -6,23 +6,11 @@
 
   export let user: UserModel;
 
-  let hoveringTrigger = false;
-
   $: userTypeInfo = getUserTypeInfoFromUserModel(user);
   $: showUserDetailedInfo = user.email || user.fullName;
 </script>
 
-<a
-  class="user-row passthrough"
-  href={getEditUsersPageUrl(user.id)}
-  class:hovering-trigger={hoveringTrigger}
-  on:mouseenter={() => {
-    hoveringTrigger = true;
-  }}
-  on:mouseleave={() => {
-    hoveringTrigger = false;
-  }}
->
+<a class="user-row passthrough" href={getEditUsersPageUrl(user.id)}>
   <div class="user-info">
     <span>{user.username}</span>
     {#if showUserDetailedInfo}
@@ -53,6 +41,13 @@
     padding: var(--size-x-small);
     cursor: pointer;
     min-height: 4.2rem;
+
+    &:hover {
+      background: var(--slate-50);
+    }
+    &:focus {
+      background: var(--slate-100);
+    }
   }
 
   .user-info {
@@ -81,10 +76,6 @@
     height: 0.25rem;
     background-color: var(--slate-500);
     border-radius: 50%;
-  }
-
-  .hovering-trigger {
-    background: var(--slate-100);
   }
 
   .user-type {

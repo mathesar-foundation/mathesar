@@ -11,21 +11,12 @@
   export let database: Database;
   export let schema: SchemaEntry;
 
-  let hoveringTrigger = false;
-
   $: baseTable = $tablesStore.data.get(exploration.base_table);
 </script>
 
 <a
   class="link-container"
   href={getExplorationPageUrl(database.name, schema.id, exploration.id)}
-  class:hovering-trigger={hoveringTrigger}
-    on:mouseenter={() => {
-      hoveringTrigger = true;
-    }}
-    on:mouseleave={() => {
-      hoveringTrigger = false;
-    }}
 >
   <div class="container">
     <div class="horizontal-container name-and-icon">
@@ -49,10 +40,13 @@
     color: inherit;
     padding-left: 1rem;
     padding-right: 1rem;
-  }
 
-  .hovering-trigger {
-    background: var(--slate-100);
+    &:hover {
+      background: var(--slate-50);
+    }
+    &:focus {
+      background: var(--slate-100);
+    }
   }
 
   .container {
