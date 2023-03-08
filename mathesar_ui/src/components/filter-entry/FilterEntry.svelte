@@ -20,9 +20,9 @@
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
+  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
   import type { FilterEntryColumnLike } from './types';
   import { validateFilterEntry } from './utils';
-  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
 
   type T = $$Generic;
   type ColumnLikeType = FilterEntryColumnLike & T;

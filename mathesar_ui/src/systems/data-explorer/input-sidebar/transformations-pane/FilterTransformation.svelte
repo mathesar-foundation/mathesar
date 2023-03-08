@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type QueryFilterTransformationModel from '../../QueryFilterTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../../utils';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
 
   const dispatch = createEventDispatcher();
 
