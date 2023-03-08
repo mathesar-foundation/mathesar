@@ -1,18 +1,15 @@
 <script lang="ts">
-  import {
-    AnchorButton,
-    Button,
-    Icon,
-    iconSearch,
-    TextInputWithPrefix,
-  } from '@mathesar/component-library';
+  import { AnchorButton, Icon } from '@mathesar/component-library';
   import { iconAddNew } from '@mathesar/icons';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
   import type { UserModel } from '@mathesar/stores/users';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import UserRow from './UserRow.svelte';
+  import UserSkeleton from './UserSkeleton.svelte';
 
   let filterQuery = '';
 
@@ -48,54 +45,44 @@
 
 <section class="users-list-container">
   {#if $requestStatus?.state === 'processing'}
-    <p>Loading...</p>
+    <UserSkeleton />
   {:else if $requestStatus?.state === 'success'}
-    <div class="user-search-container">
-      <div class="user-search">
-        <div class="user-search-box">
-          <TextInputWithPrefix
-            placeholder="Search Users"
-            bind:value={filterQuery}
-            prefixIcon={iconSearch}
-          />
-        </div>
+    <EntityContainerWithFilterBar
+      searchPlaceholder="Search Users"
+      bind:searchQuery={filterQuery}
+      on:clear={handleClearFilterQuery}
+    >
+      <slot slot="action">
         <AnchorButton appearance="primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}>
           <Icon {...iconAddNew} />
           <span>Add user</span>
         </AnchorButton>
-      </div>
-
-      {#if filterQuery}
-        <div class="user-search-results-info">
-          <p>
-            {labeledCount(filteredUsers, 'results')}
-            for all users matching <strong>{filterQuery}</strong>
-          </p>
-          <Button
-            size="small"
-            appearance="secondary"
-            on:click={handleClearFilterQuery}
-          >
-            Clear
-          </Button>
-        </div>
-      {/if}
-    </div>
-
-    {#if filteredUsers.length}
-      <div class="users-list">
-        {#each filteredUsers as user, index (user.id)}
-          {#if index !== 0}
-            <hr />
-          {/if}
-          <UserRow {user} />
-        {/each}
-      </div>
-    {:else if !filterQuery}
-      <p class="no-users-found-text">No users found</p>
-    {/if}
+      </slot>
+      <slot slot="resultInfo">
+        <p>
+          {labeledCount(filteredUsers, 'results')}
+          for all users matching <strong>{filterQuery}</strong>
+        </p>
+      </slot>
+      <slot slot="content">
+        {#if filteredUsers.length}
+          <div class="users-list">
+            {#each filteredUsers as user, index (user.id)}
+              {#if index !== 0}
+                <hr />
+              {/if}
+              <UserRow {user} />
+            {/each}
+          </div>
+        {:else if filteredUsers.length === 0}
+          <p class="no-users-found-text">No users found</p>
+        {/if}
+      </slot>
+    </EntityContainerWithFilterBar>
   {:else if $requestStatus?.state === 'failure'}
-    <p class="error-text">Error: {$requestStatus.errors}</p>
+    <ErrorBox>
+      <p>Error: {$requestStatus.errors}</p>
+    </ErrorBox>
   {/if}
 </section>
 
@@ -114,24 +101,6 @@
     font-weight: normal;
   }
 
-  .user-search {
-    display: flex;
-
-    > :global(* + *) {
-      margin-left: 1rem;
-    }
-
-    :global(.user-search-box) {
-      flex: 1;
-    }
-  }
-
-  .user-search-results-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
   .users-list {
     border: 1px solid var(--slate-200);
     border-radius: var(--border-radius-m);
@@ -142,9 +111,5 @@
       display: block;
       margin: 0 var(--size-xx-small);
     }
-  }
-
-  .error-text {
-    color: var(--red-500);
   }
 </style>
