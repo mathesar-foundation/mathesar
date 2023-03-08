@@ -12,6 +12,7 @@
     id: table.id,
     abstractTypesMap,
     meta: new Meta({ pagination: new Pagination({ size: 1 }) }),
+    table,
   });
 </script>
 
