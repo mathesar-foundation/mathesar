@@ -22,6 +22,14 @@ def data_file(patents_csv_filepath):
 
 
 @pytest.fixture
+def long_column_data_file():
+    data_filepath = 'mathesar/tests/data/long_column_names.csv'
+    with open(data_filepath, "rb") as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+    return data_file
+
+
+@pytest.fixture
 def headerless_data_file(headerless_patents_csv_filepath):
     with open(headerless_patents_csv_filepath, "rb") as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file), header=False)
@@ -63,6 +71,35 @@ def check_csv_upload(table, table_name, schema, num_records, row, cols):
 def test_csv_upload(data_file, schema):
     table_name = "NASA 1"
     table = create_table_from_csv(data_file, table_name, schema)
+
+    num_records = 1393
+    expected_row = (
+        1,
+        "NASA Kennedy Space Center",
+        "Application",
+        "KSC-12871",
+        "0",
+        "13/033,085",
+        "Polyimide Wire Insulation Repair System",
+        None,
+    )
+    expected_cols = [
+        "Center",
+        "Status",
+        "Case Number",
+        "Patent Number",
+        "Application SN",
+        "Title",
+        "Patent Expiration Date",
+    ]
+    check_csv_upload(
+        table, table_name, schema, num_records, expected_row, expected_cols
+    )
+
+
+def test_csv_upload_long_columns(long_column_data_file, schema):
+    table_name = "long_cols"
+    table = create_table_from_csv(long_column_data_file, table_name, schema)
 
     num_records = 1393
     expected_row = (
