@@ -2,7 +2,28 @@
 
 ## Restarting installation
 
-If you need to re-start installation for any reason, do not re-run the installation script! You'll need to run the [uninstall steps](./index.md#uninstall) before trying to run the installation script again.
+If something has gone wrong with the installation, you may need to restart the script. Two cases are possible:
+
+1. The script has started the Docker environment for Mathesar. You can tell this happened if your terminal printed the message
+   ```
+   Next, we'll download files and start the server, This may take a few minutes.
+
+   Press ENTER to continue.
+   ```
+   and you subsequently pressed `ENTER`. In this case, you must run the command
+
+    === "Linux"
+        ```sh
+        sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down -v
+        ```
+
+    === "MacOS"
+        ```sh
+        docker compose -f /etc/mathesar/docker-compose.yml --profile prod down -v
+        ```
+   and then run the installation script again.
+
+2. The script hasn't yet started the Docker environment, i.e., you haven't seen the message printed above. In this case, you need only stop the script by pressing `CTRL+C`, and then run it again.
 
 ## Docker versions
 
