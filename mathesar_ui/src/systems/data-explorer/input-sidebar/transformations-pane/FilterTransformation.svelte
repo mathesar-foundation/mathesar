@@ -26,7 +26,8 @@
   {columns}
   getColumnLabel={(column) => columns.get(column.id)?.column.display_name ?? ''}
   getColumnConstraintType={(column) => {
-    const linkFkType = $processedColumns.get(parseInt(column.id))?.linkFk?.type;
+    const linkFkType = $processedColumns.get(parseInt(column.id, 10))?.linkFk
+      ?.type;
     return linkFkType ? [linkFkType] : undefined;
   }}
   disableColumnChange={limitEditing}
