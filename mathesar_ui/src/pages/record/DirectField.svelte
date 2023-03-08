@@ -17,8 +17,8 @@
   import { currentSchema } from '@mathesar/stores/schemas';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import type RecordStore from './RecordStore';
   import { disableInputs } from '@mathesar/components/form/field';
+  import type RecordStore from './RecordStore';
 
   const userProfile = getUserProfileStoreFromContext();
 

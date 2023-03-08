@@ -17,8 +17,8 @@
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import ColumnTypeSelector from './ColumnTypeSelector.svelte';
   import { disableInputs } from '@mathesar/components/form/field';
+  import ColumnTypeSelector from './ColumnTypeSelector.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);
