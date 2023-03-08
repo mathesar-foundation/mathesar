@@ -1,11 +1,12 @@
-# Setup using Ansible
+# Setup Ansible for Docker Compose installations
 
-If you're installing Mathesar on Linux, here are some Ansible tasks for setting up the pre-requisites, written by one of our testers. 
+If you're installing Mathesar on a Linux server, here are some Ansible tasks for setting up the pre-requisites, written by one of our testers.
 
-After running these, you'll want to SSH into the server and run the installation command found in the [quickstart guide](./quickstart.md). This will start a script that will download Mathesar and setup the required Docker containers as described in the prior pages. The installation script is interactive, so it cannot run using Ansible yet.
+After running these, you'll want to SSH into the server and [run the interactive installer](./index.md). This will start a script that will download Mathesar and setup the required Docker containers as described in the prior pages. The installation script is interactive, so it cannot run using Ansible yet.
 
 ## Ubuntu
-```
+
+```yaml
 ---
 - name: Install Docker CE and Docker Compose on Ubuntu 20.04
   hosts: all
@@ -51,7 +52,8 @@ After running these, you'll want to SSH into the server and run the installation
 ```
 
 ## CentOS
-```
+
+```yaml
 ---
 - name: Install Docker CE and Docker Compose on CentOS 7.1
   hosts: all
@@ -97,3 +99,4 @@ After running these, you'll want to SSH into the server and run the installation
       state: started
       enabled: yes
 ```
+
