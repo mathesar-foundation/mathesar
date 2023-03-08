@@ -18,6 +18,7 @@
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import type RecordStore from './RecordStore';
+  import { disableInputs } from '@mathesar/components/form/field';
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -56,7 +57,7 @@
   $: ({ column, abstractType } = processedColumn);
   $: value = $field;
   $: ({ showsError } = field);
-  $: disabled = column.primary_key || !canEditTableRecords;
+  $: disabled = column.primary_key || !canEditTableRecords || $disableInputs;
   $: shouldDisplayNullOverlay = !cellDataTypesThatUsePlaceholderText.has(
     abstractType.cellInfo.type,
   );

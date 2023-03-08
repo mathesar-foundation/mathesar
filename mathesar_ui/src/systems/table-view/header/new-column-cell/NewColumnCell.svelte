@@ -18,6 +18,7 @@
   import { getErrorMessage } from '@mathesar/utils/errors';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import ColumnTypeSelector from './ColumnTypeSelector.svelte';
+  import { disableInputs } from '@mathesar/components/form/field';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);
@@ -29,6 +30,7 @@
 
   let requestStatus: RequestStatus;
   $: isLoading = requestStatus?.state === 'processing';
+  $: disableInputs.set(isLoading);
 
   async function addColumn(closeDropdown: () => void) {
     const newColumn = {
@@ -68,13 +70,13 @@
   <div slot="content" class="new-column-dropdown" let:close>
     <Field
       field={columnName}
-      input={{ component: TextInput, props: { disabled: isLoading } }}
+      input={{ component: TextInput }}
       label="Column Name"
       layout="stacked"
     />
     <Field
       field={columnType}
-      input={{ component: ColumnTypeSelector, props: { disabled: isLoading } }}
+      input={{ component: ColumnTypeSelector }}
       label="Select Type"
       layout="stacked"
     />

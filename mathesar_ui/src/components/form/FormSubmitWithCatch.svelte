@@ -5,6 +5,7 @@
   import Errors from './Errors.svelte';
   import type { Form } from './form';
   import FormSubmit from './FormSubmit.svelte';
+  import { disableInputs } from './field';
 
   interface $$Props extends ComponentProps<FormSubmit> {
     getErrorMessages?: (e: unknown) => string[];
@@ -19,6 +20,7 @@
 
   $: ({ requestStatus } = form);
   $: errors = $requestStatus?.state === 'failure' ? $requestStatus.errors : [];
+  $: disableInputs.set($requestStatus?.state === 'processing');
 
   async function proceed() {
     try {

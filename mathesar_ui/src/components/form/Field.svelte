@@ -6,6 +6,7 @@
   import type { FieldStore } from './field';
   import FieldErrors from './FieldErrors.svelte';
   import FieldLayout from './FieldLayout.svelte';
+  import { disableInputs } from './field';
 
   type Layout = ComponentProps<LabeledInput>['layout'];
   type Value = $$Generic;
@@ -33,6 +34,7 @@
         bind:value={$field}
         hasError={$showsError}
         {...inputComponentProps}
+        disabled={$disableInputs}
       />
     </LabeledInput>
   {:else}
@@ -41,6 +43,7 @@
       bind:value={$field}
       hasError={$showsError}
       {...inputComponentProps}
+      disabled={$disableInputs}
     >
       <slot />
     </svelte:component>
