@@ -4,8 +4,8 @@
   import AnchorButton from '@mathesar/component-library/anchorButton/AnchorButton.svelte';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
-  import EntityLayout from '../../components/EntityLayout.svelte';
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
 
   export let database: Database;
@@ -38,7 +38,7 @@
   }
 </script>
 
-<EntityLayout
+<EntityContainerWithFilterBar
   searchPlaceholder="Search Explorations"
   bind:searchQuery={explorationsSearchQuery}
   on:clear={clearQuery}
@@ -66,4 +66,4 @@
       />
     {/if}
   </svelte:fragment>
-</EntityLayout>
+</EntityContainerWithFilterBar>

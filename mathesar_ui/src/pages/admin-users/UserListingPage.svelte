@@ -7,8 +7,8 @@
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import UserRow from './UserRow.svelte';
-  import EntityLayout from '../../components/EntityLayout.svelte';
   import UserSkeleton from './UserSkeleton.svelte';
 
   let filterQuery = '';
@@ -47,7 +47,7 @@
   {#if $requestStatus?.state === 'processing'}
     <UserSkeleton />
   {:else if $requestStatus?.state === 'success'}
-    <EntityLayout
+    <EntityContainerWithFilterBar
       searchPlaceholder="Search Users"
       bind:searchQuery={filterQuery}
       on:clear={handleClearFilterQuery}
@@ -78,7 +78,7 @@
           <p class="no-users-found-text">No users found</p>
         {/if}
       </slot>
-    </EntityLayout>
+    </EntityContainerWithFilterBar>
   {:else if $requestStatus?.state === 'failure'}
     <ErrorBox>
       <p>Error: {$requestStatus.errors}</p>
