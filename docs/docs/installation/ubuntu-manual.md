@@ -7,7 +7,7 @@ Installation should only take a few minutes.
 - Install Docker & Docker-compose
 - Install PostgreSQL
 - Install Nginx webserver    
-- You need to be a user with root access to the machine you're trying to install Mathesar on.
+- You need to be a user with root access to the machine you're trying to install Mathesar on.  We will use mathesar.example.com as the URL for our website.
 
 ## Preparing our server.
 - Prerequisites
@@ -143,7 +143,7 @@ echo "server_tokens off;
 
 server {
     listen 80 default_server;
-    server_name {{ main_domain_name }};
+    server_name mathesar.example.com;
 
     location /.well-known/acme-challenge {
         root /var/www/letsencrypt;
@@ -151,7 +151,7 @@ server {
     }
 
     location / {
-        rewrite ^ https://{{ main_domain_name }}$request_uri? permanent;
+        rewrite ^ https://mathesar.example.com$request_uri? permanent;
     }
 }" > /etc/nginx/sites-enabled/http
 ```
@@ -198,4 +198,10 @@ sudo apt-get install gunicorn3
 Now we need to create a directory for Letsencrypt
 ```sh
 mkdir /var/www/letsencrypt
+```
+We will also need a directory for our website itself.  In this case, we will use `mathesar.example.com` as noted earlier. We will also assign it to the `www-data` user and group.
+```sh
+mkdir /var/www/mathesar.example.com
+chgrp www-data /var/www/mathesar.example.com/
+chown -R www-data:www-data /var/www/mathesar.example.com
 ```
