@@ -28,6 +28,10 @@
     columns={$processedColumns}
     getColumnLabel={(column) =>
       $processedColumns.get(column.id)?.column.name ?? ''}
+    getColumnConstraintType={(column) => {
+      const linkFkType = $processedColumns.get(column.id)?.linkFk?.type;
+      return linkFkType ? [linkFkType] : undefined;
+    }}
     bind:columnIdentifier={entry.columnId}
     bind:conditionIdentifier={entry.conditionId}
     bind:value={entry.value}
