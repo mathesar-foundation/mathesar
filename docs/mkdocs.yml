@@ -41,6 +41,8 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.superfences
   - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
   - smarty
   - tables
   - toc:
@@ -50,13 +52,29 @@ markdown_extensions:
 plugins:
   - search:
       lang: en
+  - redirects:
+      redirect_maps:
+          'installation-dc/administration.md': 'install/docker-compose/index.md'
+          'installation-dc/ansible-setup.md': 'install/docker-compose/ansible.md'
+          'installation-dc/quickstart.md': 'install/docker-compose/index.md'
+          'installation-dc/troubleshooting.md': 'install/docker-compose/troubleshooting.md'
+          'installation-dc/under-the-hood.md': 'install/docker-compose/under-the-hood.md'
+          'installation-dc/uninstall.md': 'install/docker-compose/index.md'
+          'installation-dc/windows-setup.md': 'install/docker-compose/requirements.md'
 
 nav:
   - Home: index.md
-  - Installation:
-      - Install with Docker Compose: installation/docker-compose.md
+  - Install:
+      - Install Mathesar: install/index.md
+      - Via Docker Compose:
+          - Install via Docker Compose: install/docker-compose/index.md
+          - Requirements: install/docker-compose/requirements.md
+          - Troubleshooting: install/docker-compose/troubleshooting.md
+          - Setup Ansible: install/docker-compose/ansible.md
+          - Under the hood: install/docker-compose/under-the-hood.md
   - Product:
       - Introduction: product/intro.md
+      - Syncing database changes: product/syncing-db.md
       - Users & Access Levels: product/users.md
   - Contributing:
       - Welcome!: contributing/welcome.md
