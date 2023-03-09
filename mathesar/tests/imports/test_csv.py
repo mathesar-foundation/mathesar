@@ -65,7 +65,8 @@ def check_csv_upload(table, table_name, schema, num_records, row, cols):
     assert table.schema == schema
     assert table.sa_num_records() == num_records
     assert table.get_records()[0] == row
-    assert all([col in table.sa_column_names for col in cols])
+    for col in cols:
+        assert col in table.sa_column_names
 
 
 def test_csv_upload(data_file, schema):
@@ -101,25 +102,64 @@ def test_csv_upload_long_columns(long_column_data_file, schema):
     table_name = "long_cols"
     table = create_table_from_csv(long_column_data_file, table_name, schema)
 
-    num_records = 1393
+    num_records = 54
     expected_row = (
-        1,
-        "NASA Kennedy Space Center",
-        "Application",
-        "KSC-12871",
-        "0",
-        "13/033,085",
-        "Polyimide Wire Insulation Repair System",
-        None,
+        1, 'NATION', '8.6', '4.5', '8.5', '4.3', '8.3', '4.6', '78.6', '2.22',
+        '0.88', '0.66', '1.53', '3.75', '3.26', '0.45', '0.07', '53.9', '52.3',
+        '0.8', '0.38487', '3.15796', '2.3', '33247', '14.842144', '6.172333',
+        '47.158545', '1.698662', '2.345577', '7.882694', '0.145406', '3.395302',
+        '92.085375', '14.447634', '78.873848', '1.738571', '16.161024',
+        '19.436701', '8.145643', '94.937079', '74.115131', '75.601680',
+        '22.073834', '11.791045', '1.585233', '1.016932', '2023-02-01',
     )
     expected_cols = [
-        "Center",
-        "Status",
-        "Case Number",
-        "Patent Number",
-        "Application SN",
-        "Title",
-        "Patent Expiration Date",
+        'id',
+        'State or Nation',
+        'Cycle 1 Total Number of Health Deficiencies',
+        'Cycle 1 Total Number of Fire Safety Deficiencies',
+        'Cycle 2 Total Number of Health Deficiencies',
+        'Cycle 2 Total Number of Fire Safety Deficiencies',
+        'Cycle 3 Total Number of Health Deficiencies',
+        'Cycle 3 Total Number of Fire Safety Deficiencies',
+        'Average Number of Residents per Day',
+        'Reported Nurse Aide Staffing Hours per Resident per Day',
+        'Reported LPN Staffing Hours per Resident per Day',
+        'Reported RN Staffing Hours per Resident per Day',
+        'Reported Licensed Staffing Hours per Resident per Day',
+        'Reported Total Nurse Staffing Hours per Resident per Day',
+        'Total number of nurse staff hours per resident per day-8cd5ab5e',
+        'Registered Nurse hours per resident per day on the weekend',
+        'Reported Physical Therapist Staffing Hours per Resident Per Day',
+        'Total nursing staff turnover',
+        'Registered Nurse turnover',
+        'Number of administrators who have left the nursing home',
+        'Case-Mix RN Staffing Hours per Resident per Day',
+        'Case-Mix Total Nurse Staffing Hours per Resident per Day',
+        'Number of Fines',
+        'Fine Amount in Dollars',
+        'Percentage of long stay residents whose need for help-5c97c88f',
+        'Percentage of long stay residents who lose too much weight',
+        'Percentage of low risk long stay residents who lose co-fc6bc241',
+        'Percentage of long stay residents with a catheter inse-ce71f22a',
+        'Percentage of long stay residents with a urinary tract-f16fbec8',
+        'Percentage of long stay residents who have depressive symptoms',
+        'Percentage of long stay residents who were physically-f30de0aa',
+        'Percentage of long stay residents experiencing one or-9f9e8f36',
+        'Percentage of long stay residents assessed and appropr-84744861',
+        'Percentage of long stay residents who received an anti-20fe5d12',
+        'Percentage of short stay residents assessed and approp-3568770f',
+        'Percentage of short stay residents who newly received-e98612b4',
+        'Percentage of long stay residents whose ability to mov-66839cb4',
+        'Percentage of long stay residents who received an anti-868593e4',
+        'Percentage of high risk long stay residents with press-b624bbba',
+        'Percentage of long stay residents assessed and appropr-999c26ef',
+        'Percentage of short stay residents who made improvemen-ebe5c21e',
+        'Percentage of short stay residents who were assessed a-26e64965',
+        'Percentage of short stay residents who were rehospital-682a4dae',
+        'Percentage of short stay residents who had an outpatie-9403ec21',
+        'Number of hospitalizations per 1000 long-stay resident days',
+        'Number of outpatient emergency department visits per 1-f0fed7b5',
+        'Processing Date'
     ]
     check_csv_upload(
         table, table_name, schema, num_records, expected_row, expected_cols
