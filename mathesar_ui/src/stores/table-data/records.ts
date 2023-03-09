@@ -472,7 +472,6 @@ export class RecordsData {
           }),
       );
       await Promise.all(promises);
-      await this.fetch(true);
     }
 
     const savedRecords = get(this.savedRecords);
