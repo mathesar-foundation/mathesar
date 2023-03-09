@@ -67,7 +67,6 @@ nav:
   - Install:
       - Install Mathesar: install/index.md
       - Via Docker Compose:
-          - Requirements: install/docker-compose/requirements.md
           - Install via Docker Compose: install/docker-compose/index.md
           - Under the hood: install/docker-compose/under-the-hood.md
           - Troubleshooting: install/docker-compose/troubleshooting.md
