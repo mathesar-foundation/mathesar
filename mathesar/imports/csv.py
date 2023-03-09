@@ -195,7 +195,7 @@ def _truncate_if_necessary(identifier):
 
     Iteratively removes characters from the end of the identifier, until the resulting string, with
     the suffix hash of the identifier appended, is short enough that it doesn't need to be truncated
-    anymore. Whiteside is trimmed from the truncated identifier before appending the suffix.
+    anymore. Whitespace is trimmed from the truncated identifier before appending the suffix.
     """
     assert type(identifier) is str
     if not _is_truncation_necessary(identifier):
