@@ -344,38 +344,30 @@ export class RecordsData {
       });
   }
 
-  async fetch(
-    retainExistingRows = false,
-  ): Promise<TableRecordsData | undefined> {
+  async fetch(): Promise<TableRecordsData | undefined> {
     this.promise?.cancel();
     const { offset } = get(this.meta.pagination);
 
     this.savedRecordRowsWithGroupHeaders.update((existingData) => {
       let data = [...existingData];
       data.length = Math.min(data.length, get(this.meta.pagination).size);
-
       let index = -1;
-      data = data.map((entry) => {
+      data = data.map(() => {
         index += 1;
-        if (!retainExistingRows || !entry) {
-          return {
-            state: 'loading',
-            identifier: generateRowIdentifier('dummy', offset, index),
-            rowIndex: index,
-            record: {},
-          };
-        }
-        return entry;
+        return {
+          state: 'loading',
+          identifier: generateRowIdentifier('dummy', offset, index),
+          rowIndex: index,
+          record: {},
+        };
       });
-
       return data;
     });
+
     this.error.set(undefined);
-    if (!retainExistingRows) {
-      this.state.set(States.Loading);
-      this.newRecords.set([]);
-      this.meta.clearAllStatusesAndErrors();
-    }
+    this.state.set(States.Loading);
+    this.newRecords.set([]);
+    this.meta.clearAllStatusesAndErrors();
 
     try {
       const params = get(this.meta.recordsRequestParamsData);
