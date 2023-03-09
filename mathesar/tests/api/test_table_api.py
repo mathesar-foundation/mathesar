@@ -714,6 +714,18 @@ def test_table_create_with_same_name(client, schema):
     assert response_error[0]['message'] == f'Relation {table_name} already exists in schema {schema.id}'
 
 
+def test_table_create_with_too_long_name(client, schema):
+    very_long_string = ''.join(map(str, range(50)))
+    table_name = 'very_long_identifier_' + very_long_string
+    body = {
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/db/v0/tables/', body)
+    assert response.status_code == 400
+    assert response.json()[0]['code'] == ErrorCodes.IdentifierTooLong.value
+
+
 def test_table_create_with_existing_id_col(client, existing_id_col_table_datafile, schema, engine):
     table_name = "Table 1"
     response, response_table, table = _create_table(
