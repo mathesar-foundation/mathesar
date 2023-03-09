@@ -1,5 +1,6 @@
 import hashlib
 
+
 def truncate_if_necessary(identifier):
     """
     Takes an identifier and returns it, truncating it, if it is too long. The truncated version
