@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Skeleton } from '@mathesar/component-library';
 
-  export let numTables: number | undefined = 9;
+  export let numTables = 9;
 </script>
 
 <div class="table-skeleton-container">
