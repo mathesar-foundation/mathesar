@@ -54,4 +54,17 @@ export function getDisplayNameForRole(userRole: UserRole): string {
   }
 }
 
+export function getDescriptionForRole(userRole: UserRole): string {
+  switch (userRole) {
+    case 'manager':
+      return 'Manager Access';
+    case 'editor':
+      return 'Editor Access';
+    case 'viewer':
+      return 'Read-Only Access';
+    default:
+      throw new MissingExhaustiveConditionError(userRole);
+  }
+}
+
 export type ObjectRoleMap = Map<'database' | 'schema', UserRole>;

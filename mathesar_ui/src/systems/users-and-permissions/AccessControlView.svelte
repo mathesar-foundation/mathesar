@@ -176,8 +176,11 @@
     .list {
       margin-top: var(--size-base);
       display: grid;
-      grid-template-columns: 6fr auto 2.1rem;
+      grid-template-columns: 6fr 5fr 1fr 3rem;
       align-items: center;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--border-radius-m);
+      background: var(--white);
     }
   }
   .no-users {
