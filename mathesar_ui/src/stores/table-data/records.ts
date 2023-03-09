@@ -443,63 +443,65 @@ export class RecordsData {
     });
     const rowKeys = [...primaryKeysOfSavedRows, ...identifiersOfUnsavedRows];
 
-    if (rowKeys.length > 0) {
-      this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
+    if (rowKeys.length === 0) {
+      return;
+    }
 
-      const successRowKeys = new Set<RowKey>();
-      /** Values are error messages */
-      const failures = new Map<RowKey, string>();
+    this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
 
-      if (identifiersOfUnsavedRows.length > 0) {
-        identifiersOfUnsavedRows.forEach((identifier) =>
-          successRowKeys.add(identifier),
-        );
-      }
-      if (primaryKeysOfSavedRows.length > 0) {
-        // TODO: Convert this to single request
-        const promises = primaryKeysOfSavedRows.map((pk) =>
-          deleteAPI<RowKey>(`${this.url}${pk}/`)
-            .then(() => {
-              successRowKeys.add(pk);
-              return successRowKeys;
-            })
-            .catch((error: unknown) => {
-              failures.set(pk, getErrorMessage(error));
-              return failures;
-            }),
-        );
-        await Promise.all(promises);
-        await this.fetch(true);
-      }
+    const successRowKeys = new Set<RowKey>();
+    /** Values are error messages */
+    const failures = new Map<RowKey, string>();
 
-      const savedRecords = get(this.savedRecords);
-      const savedRecordsLength = savedRecords.length;
-      const savedRecordKeys = new Set(
-        savedRecords.map((row) => getRowKey(row, pkColumn?.id)),
-      );
-
-      this.newRecords.update((existing) => {
-        const retained = existing.filter((row) => {
-          const rowKey = getRowKey(row, pkColumn?.id);
-          return !successRowKeys.has(rowKey) && !savedRecordKeys.has(rowKey);
-        });
-        if (retained.length === existing.length) {
-          return existing;
-        }
-        return retained.map((row, index) => ({
-          ...row,
-          rowIndex: savedRecordsLength + index,
-        }));
-      });
-      this.meta.rowCreationStatus.delete([...savedRecordKeys]);
-      this.meta.clearAllStatusesAndErrorsForRows([...successRowKeys]);
-      this.meta.rowDeletionStatus.setEntries(
-        [...failures.entries()].map(([rowKey, errorMsg]) => [
-          rowKey,
-          { state: 'failure', errors: [errorMsg] },
-        ]),
+    if (identifiersOfUnsavedRows.length > 0) {
+      identifiersOfUnsavedRows.forEach((identifier) =>
+        successRowKeys.add(identifier),
       );
     }
+    if (primaryKeysOfSavedRows.length > 0) {
+      // TODO: Convert this to single request
+      const promises = primaryKeysOfSavedRows.map((pk) =>
+        deleteAPI<RowKey>(`${this.url}${pk}/`)
+          .then(() => {
+            successRowKeys.add(pk);
+            return successRowKeys;
+          })
+          .catch((error: unknown) => {
+            failures.set(pk, getErrorMessage(error));
+            return failures;
+          }),
+      );
+      await Promise.all(promises);
+      await this.fetch(true);
+    }
+
+    const savedRecords = get(this.savedRecords);
+    const savedRecordsLength = savedRecords.length;
+    const savedRecordKeys = new Set(
+      savedRecords.map((row) => getRowKey(row, pkColumn?.id)),
+    );
+
+    this.newRecords.update((existing) => {
+      const retained = existing.filter((row) => {
+        const rowKey = getRowKey(row, pkColumn?.id);
+        return !successRowKeys.has(rowKey) && !savedRecordKeys.has(rowKey);
+      });
+      if (retained.length === existing.length) {
+        return existing;
+      }
+      return retained.map((row, index) => ({
+        ...row,
+        rowIndex: savedRecordsLength + index,
+      }));
+    });
+    this.meta.rowCreationStatus.delete([...savedRecordKeys]);
+    this.meta.clearAllStatusesAndErrorsForRows([...successRowKeys]);
+    this.meta.rowDeletionStatus.setEntries(
+      [...failures.entries()].map(([rowKey, errorMsg]) => [
+        rowKey,
+        { state: 'failure', errors: [errorMsg] },
+      ]),
+    );
   }
 
   // TODO: It would be better to throw errors instead of silently failing
