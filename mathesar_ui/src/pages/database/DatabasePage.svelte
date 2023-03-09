@@ -45,10 +45,6 @@
     'canEditPermissions',
   );
 
-  setTimeout(() => {
-    console.log(schemasMap);
-  }, 5000);
-
   let filterQuery = '';
   let targetSchema: SchemaEntry | undefined;
 

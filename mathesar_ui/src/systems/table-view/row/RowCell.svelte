@@ -6,6 +6,7 @@
     LinkMenuItem,
     WritableMap,
   } from '@mathesar-component-library';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import {
     rowHasNewRecord,
     type RecordRow,
@@ -14,6 +15,7 @@
     type ProcessedColumn,
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
+  import { tables } from '@mathesar/stores/tables';
   import {
     isCellActive,
     scrollBasedOnActiveCell,
@@ -31,7 +33,10 @@
     iconRecord,
     iconTable,
   } from '@mathesar/icons';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import {
+    storeToGetRecordPageUrl,
+    storeToGetTablePageUrl,
+  } from '@mathesar/stores/storeBasedUrls';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
@@ -97,6 +102,8 @@
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
+  $: getTablePageUrl: $storeToGetTablePageUrl;
+  $: table = linkFk ? $tables.data.get(linkFk.referent_table) : null;
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -131,9 +138,6 @@
 
   async function valueUpdated(e: CustomEvent<{ value: unknown }>) {
     await setValue(e.detail.value);
-  }
-  function logTable() {
-    console.log({ database, schema, linkFk });
   }
 </script>
 
@@ -201,12 +205,11 @@
       </ButtonMenuItem>
       {#if linkedRecordHref}
         <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
-          Go To <span class="fk-identifier"
+          Open <Identifier
             >{$recordSummaries.get(String(column.id))?.get(String(value)) ||
-              value}</span
+              value}</Identifier
           >
         </LinkMenuItem>
-        <h1 on:click={logTable}>LOG</h1>
         {#if linkFk}
           <LinkMenuItem
             icon={iconTable}
@@ -216,7 +219,7 @@
               linkFk.referent_table,
             )}
           >
-            Open<span class="fk-identifier">{'as'}</span>Table
+            Open <Identifier>{table.name}</Identifier> Table
           </LinkMenuItem>
         {/if}
       {/if}
@@ -243,13 +246,5 @@
     &.is-processing {
       color: var(--cell-text-color-processing);
     }
-  }
-  .fk-identifier {
-    font-size: 80%;
-    padding: 0.02em 0.3em;
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
-    color: rgba(0, 0, 0, 0.6);
-    font-weight: bold;
   }
 </style>

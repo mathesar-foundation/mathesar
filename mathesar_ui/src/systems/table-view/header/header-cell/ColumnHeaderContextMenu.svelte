@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ButtonMenuItem } from '@mathesar/component-library';
+  import { ButtonMenuItem, LinkMenuItem } from '@mathesar/component-library';
   import {
     getSortingLabelForColumn,
     type SortDirection,
@@ -9,10 +9,15 @@
     iconSortAscending,
     iconSortDescending,
   } from '@mathesar/icons';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
+  import { tables } from '@mathesar/stores/tables';
+  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { getTablePageUrl } from '@mathesar/routes/urls';
+  import { currentSchema } from '@mathesar/stores/schemas';
 
   export let processedColumn: ProcessedColumn;
 
@@ -20,17 +25,19 @@
   $: ({
     meta: { sorting, grouping },
   } = $tabularData);
-
+  $: schema = $currentSchema;
   $: columnId = processedColumn.id;
-
   $: currentSorting = $sorting.get(processedColumn.id);
   $: sortingLabel = getSortingLabelForColumn(
     processedColumn.abstractType.cellInfo.type,
     !!processedColumn.linkFk,
   );
+  $: getTablePageUrl: $storeToGetTablePageUrl;
+  $: table = processedColumn.linkFk
+    ? $tables.data.get(processedColumn.linkFk.referent_table)
+    : null;
 
   $: hasGrouping = $grouping.hasColumn(columnId);
-
   function removeSorting() {
     sorting.update((s) => s.without(columnId));
   }
@@ -78,7 +85,14 @@
     Sort {sortingLabel.DESCENDING}
   </ButtonMenuItem>
 {/if}
-
+{#if processedColumn.linkFk}
+  <LinkMenuItem
+    icon={iconGrouping}
+    href={getTablePageUrl(schema.database, table.schema, table.id)}
+  >
+    Open <Identifier>{table.name}</Identifier> Table
+  </LinkMenuItem>
+{/if}
 {#if hasGrouping}
   <ButtonMenuItem icon={iconGrouping} on:click={removeGrouping}>
     Remove Grouping
