@@ -1,5 +1,8 @@
 # Troubleshooting Docker Compose Installation
 
+!!! info "We are still testing the install process"
+    We've tested this installation procedure on Windows, Mac, and a few Linux variants, but Mathesar is in its early stages so there might be unexpected issues. Please open a [GitHub issue](https://github.com/centerofci/mathesar/issues) if you run into any problems.
+
 ## Restarting installation
 
 If something has gone wrong with the installation, you may need to restart the script. Two cases are possible:
@@ -24,6 +27,15 @@ If something has gone wrong with the installation, you may need to restart the s
    and then run the installation script again.
 
 2. The script hasn't yet started the Docker environment, i.e., you haven't seen the message printed above. In this case, you need only stop the script by pressing `CTRL+C`, and then run it again.
+
+## When installing on Windows {:#windows}
+
+!!! warning
+    The process of installing and running has thus far been much better tested on MacOS and Linux than it has on Windows. Please [open issues](https://github.com/centerofci/mathesar/issues/new/choose) for any Windows-specific problems you encounter.
+
+- During installation, choose "WSL 2" instead of "Hyper-V". WSL is the Windows Sub System for Linux and is required to run Mathesar.
+- See [this tutorial](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers) for hints if you're having trouble getting Docker wired up properly.
+- Make sure you're use the WSL command prompt (rather than DOS or PowerShell) when running the installation script and other commands.
 
 ## Docker versions
 
