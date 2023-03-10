@@ -18,9 +18,7 @@ TYPE_INFERENCE_DAG = {
     PostgresType.BOOLEAN: [],
     MathesarCustomType.EMAIL: [],
     PostgresType.INTERVAL: [],
-    PostgresType.NUMERIC: [
-        PostgresType.BOOLEAN,
-    ],
+    PostgresType.NUMERIC: [],
     PostgresType.TEXT: [
         PostgresType.BOOLEAN,
         PostgresType.DATE,
@@ -74,6 +72,7 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
     # a DAG node will be a DatabaseType Enum
     dag_node = type_classes_to_dag_nodes.get(column_type_class)
     logger.debug(f"dag_node: {dag_node}")
+    print(f"\n\n\n\ndag_node: {dag_node}\n\n\n")
     types_to_cast_to = type_inference_dag.get(dag_node, [])
     table_oid = get_oid_from_table(table_name, schema, engine)
     for db_type in types_to_cast_to:
