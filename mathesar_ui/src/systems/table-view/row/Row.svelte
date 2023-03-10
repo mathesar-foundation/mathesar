@@ -54,6 +54,7 @@
   function checkAndCreateEmptyRow() {
     if (isPlaceholderRow(row)) {
       void recordsData.addEmptyRecord();
+      selection.selectAndActivateFirstCellAfterAddingNewRecord();
     }
   }
 

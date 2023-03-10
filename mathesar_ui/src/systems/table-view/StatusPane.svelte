@@ -26,8 +26,14 @@
 
   export let context: 'page' | 'widget' = 'page';
 
-  $: ({ recordsData, meta, isLoading, columnsDataStore, constraintsDataStore } =
-    $tabularData);
+  $: ({
+    recordsData,
+    meta,
+    isLoading,
+    columnsDataStore,
+    constraintsDataStore,
+    selection,
+  } = $tabularData);
   $: ({ pagination } = meta);
   $: ({ size: pageSize, leftBound, rightBound } = $pagination);
   $: ({ totalCount, state, newRecords } = recordsData);
@@ -67,7 +73,10 @@
         disabled={$isLoading}
         size="medium"
         appearance="primary"
-        on:click={() => recordsData.addEmptyRecord()}
+        on:click={() => {
+          recordsData.addEmptyRecord();
+          selection.selectAndActivateFirstCellAfterAddingNewRecord();
+        }}
       >
         <Icon {...iconAddNew} />
         <span>New Record</span>
