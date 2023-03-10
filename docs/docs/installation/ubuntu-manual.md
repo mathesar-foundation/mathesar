@@ -279,7 +279,7 @@ Wait three minutes, and then check whether your cron file edit is valid by runni
 ```sh
 grep cron /var/log/syslog | tail -10
 ```
-If you see ` (*system*) RELOAD (/etc/crontab)` without any error message attached, you did this correctly.
+If you see ` (*system*) RELOAD (/etc/crontab)` in the log output without any error message attached, you did this correctly.
 
 Lastly, we will also generate the dhparams for Nginx:
 ```sh
