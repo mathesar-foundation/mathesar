@@ -1,8 +1,41 @@
 # Troubleshooting Docker Compose Installation
 
+!!! info "We are still testing the install process"
+    We've tested this installation procedure on Windows, Mac, and a few Linux variants, but Mathesar is in its early stages so there might be unexpected issues. Please open a [GitHub issue](https://github.com/centerofci/mathesar/issues) if you run into any problems.
+
 ## Restarting installation
 
-If you need to re-start installation for any reason, do not re-run the installation script! You'll need to run the [uninstall steps](./index.md#uninstall) before trying to run the installation script again.
+If something has gone wrong with the installation, you may need to restart the script. Two cases are possible:
+
+1. The script has started the Docker environment for Mathesar. You can tell this happened if your terminal printed the message
+   ```
+   Next, we'll download files and start the server, This may take a few minutes.
+
+   Press ENTER to continue.
+   ```
+   and you subsequently pressed `ENTER`. In this case, you must run the command
+
+    === "Linux"
+        ```sh
+        sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down -v
+        ```
+
+    === "MacOS"
+        ```sh
+        docker compose -f /etc/mathesar/docker-compose.yml --profile prod down -v
+        ```
+   and then run the installation script again.
+
+2. The script hasn't yet started the Docker environment, i.e., you haven't seen the message printed above. In this case, you need only stop the script by pressing `CTRL+C`, and then run it again.
+
+## When installing on Windows {:#windows}
+
+!!! warning
+    The process of installing and running has thus far been much better tested on MacOS and Linux than it has on Windows. Please [open issues](https://github.com/centerofci/mathesar/issues/new/choose) for any Windows-specific problems you encounter.
+
+- During installation, choose "WSL 2" instead of "Hyper-V". WSL is the Windows Sub System for Linux and is required to run Mathesar.
+- See [this tutorial](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers) for hints if you're having trouble getting Docker wired up properly.
+- Make sure you're use the WSL command prompt (rather than DOS or PowerShell) when running the installation script and other commands.
 
 ## Docker versions
 
