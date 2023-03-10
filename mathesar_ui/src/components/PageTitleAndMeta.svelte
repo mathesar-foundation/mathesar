@@ -25,17 +25,24 @@
     <slot name="action" />
   </div>
   <slot name="bottom" />
+ 
+   
 </div>
+
 
 <style lang="scss">
   .container {
     display: flex;
     flex-direction: column;
+    padding-left: 2px;
+    padding-right: 15px;
 
     > :global(* + *) {
       margin-top: 1rem;
     }
   }
+
+
   .top {
     display: flex;
     flex-direction: row;
@@ -47,6 +54,8 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-left: 0.6rem;
+    
   }
 
   .entity-icon {
@@ -58,6 +67,8 @@
     align-items: center;
     border-radius: var(--border-radius-l);
     color: var(--white);
+    padding: 1rem;
+   
   }
 
   .left-meta-container {
@@ -70,11 +81,13 @@
     font-size: var(--text-size-small);
     font-weight: 600;
     text-transform: uppercase;
+    
   }
 
   .entity-name {
     font-weight: 500;
     font-size: var(--text-size-ultra-large);
     line-height: 1;
-  }
+  } 
+
 </style>
