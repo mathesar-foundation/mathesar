@@ -1,13 +1,11 @@
 name: Run Python tests
 on: 
   push:
-    paths-ignore:
-      - mathesar_ui/*
-      - docs/*
+    paths:
+      - '**.py'
   pull_request:
-    paths-ignore:
-      - mathesar_ui/*
-      - docs/*
+    paths:
+      - '**.py'
 
 
 jobs:
