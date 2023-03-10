@@ -246,7 +246,7 @@ server {
   }
 
   location /static/ {
-    alias {{ repo_path }}/static/;
+    alias mathesar.example.com/mathesar/static/;
   }
 
   location @proxy_to_app {
