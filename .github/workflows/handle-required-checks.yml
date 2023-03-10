@@ -3,6 +3,10 @@
 ## See https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
 name: handle-required-checks
 on:
+  push:
+    paths-ignore:
+      - mathesar_ui/*
+      - '**.py'
   pull_request:
     paths-ignore:
       - mathesar_ui/*
