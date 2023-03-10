@@ -273,7 +273,7 @@ letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m you@mathesar.exampl
 ```
 Now that the SSL certificate is installed, lets create a cron job so that it gets renewed once a week.  From the command you will see `0 0 * * FRI` and this means it will renew at 00:00 every Friday.
 ```sh
-echo "0 0 * * FRI     root    letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m marius@mathesar.cloudnation.co.za --agree-tos -d mathesar.cloudnation.co.za" >> /etc/crontab
+echo "0 0 * * FRI     root    letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m you@mathesar.example.com --agree-tos -d mathesar.example.com" >> /etc/crontab
 ```
 Wait three minutes, and then check whether your cron file edit is valid by running the following command:
 ```sh
