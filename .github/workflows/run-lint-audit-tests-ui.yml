@@ -1,6 +1,12 @@
 name: UI - Lint, Audit and Tests
 
-on: [push, pull_request]
+on: 
+  push:
+    paths:
+      - mathesar_ui/*
+  pull_request:
+    paths:
+      - mathesar_ui/*
 
 jobs:
   format:

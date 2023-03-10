@@ -1,5 +1,14 @@
 name: Run Python tests
-on: [push, pull_request]
+on: 
+  push:
+    paths-ignore:
+      - mathesar_ui/*
+      - docs/*
+  pull_request:
+    paths-ignore:
+      - mathesar_ui/*
+      - docs/*
+
 
 jobs:
   build:
