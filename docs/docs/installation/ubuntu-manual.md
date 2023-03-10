@@ -267,3 +267,23 @@ server {
   }
 }" > /etc/nginx/sites-enabled/mathesar.example.com
 
+With this in place, we can not install the SSL certificate for our domain.  You can run this command:
+```sh
+letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m you@mathesar.example.com --agree-tos -d mathesar.example.com
+```
+Now that the SSL certificate is installed, lets create a cron job so that it gets renewed once a week.  From the command you will see `0 0 * * FRI` and this means it will renew at 00:00 every Friday.
+```sh
+echo "0 0 * * FRI     root    letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m marius@mathesar.cloudnation.co.za --agree-tos -d mathesar.cloudnation.co.za" >> /etc/crontab
+```
+Wait three minutes, and then check whether your cron file edit is valid by running the following command:
+```sh
+grep cron /var/log/syslog | tail -10
+```
+If you see ` (*system*) RELOAD (/etc/crontab)` without any error message attached, you did this correctly.
+
+Lastly, we will also generate the dhparams for Nginx:
+```sh
+openssl dhparam -dsaparam -out /etc/nginx/dhparams.pem 2048
+```
+
+va
