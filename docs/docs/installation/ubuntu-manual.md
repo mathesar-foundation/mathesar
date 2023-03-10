@@ -4,8 +4,9 @@ Installation should only take a few minutes.
 
 ## What we will do:
 - Prepare the server
-- Install Docker & Docker-compose
-- Install PostgreSQL
+- ### Install Docker & Docker-compose
+- ### Database
+- - Install PostgreSQL
 - Install Nginx webserver    
 - You need to be a user with root access to the machine you're trying to install Mathesar on.  We will use mathesar.example.com as the URL for our website.
 
