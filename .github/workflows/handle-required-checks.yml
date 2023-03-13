@@ -5,11 +5,11 @@ name: handle-required-checks
 on:
   push:
     paths-ignore:
-      - mathesar_ui/*
+      - 'mathesar_ui/*'
       - '**.py'
   pull_request:
     paths-ignore:
-      - mathesar_ui/*
+      - 'mathesar_ui/*'
       - '**.py'
 jobs:
   lint:
