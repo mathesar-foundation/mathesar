@@ -1072,11 +1072,9 @@ def _build_integer_array_function():
         raw_arr {text_db_type_id}[];
         actual_number_arr {text_db_type_id}[];
         group_divider_arr {text_db_type_id}[];
-       
         actual_number {text_db_type_id};
         group_divider {text_db_type_id};
-       
-      BEGIN
+        BEGIN
         SELECT regexp_matches($1, '{integer_finding_regex}') INTO raw_arr;
         IF raw_arr IS NULL THEN
           RETURN NULL;
