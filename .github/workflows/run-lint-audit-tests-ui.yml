@@ -11,9 +11,6 @@ on:
 jobs:
   format:
     runs-on: ubuntu-latest
-    # We only want to run on external PRs, since internal PRs are covered by "push"
-    # This prevents this from running twice on internal PRs
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     defaults:
       run:
         working-directory: ./mathesar_ui
