@@ -41,6 +41,13 @@
     padding: var(--size-x-small);
     cursor: pointer;
     min-height: 4.2rem;
+
+    &:hover {
+      background: var(--slate-50);
+    }
+    &:focus {
+      background: var(--slate-100);
+    }
   }
 
   .user-info {
