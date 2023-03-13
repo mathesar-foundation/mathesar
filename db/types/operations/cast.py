@@ -1061,8 +1061,8 @@ def _build_integer_array_function():
          comma_separator ,
          period_separator,
          comma_separator_lakh_system,
-        single_quote_separator,
-        space_separator
+         single_quote_separator,
+         space_separator
 
          ])
     integer_finding_regex = f"^(?:[+-]?({inner_number_tree}))$"
