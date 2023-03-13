@@ -15,7 +15,6 @@ NUMERIC_ARR_FUNC_NAME = "get_numeric_array"
 INTEGER_ARR_FUNC_NAME = "get_integer_array"
 
 
-
 def get_column_cast_expression(column, target_type, engine, type_options=None):
     """
     Given a Column, we get the correct SQL selectable for selecting the
@@ -79,10 +78,11 @@ def create_json_casts(engine):
 
 
 def create_decimal_number_casts(engine):
-    decimal_number_types=categories.DECIMAL_TYPES
-    for db_type in decimal_number_types:    
-       type_body_map = _get_decimal_number_type_body_map(target_type=db_type)
-       create_cast_functions(db_type, type_body_map, engine)
+    decimal_number_types = categories.DECIMAL_TYPES
+    for db_type in decimal_number_types:
+        type_body_map = _get_decimal_number_type_body_map(target_type=db_type)
+        create_cast_functions(db_type, type_body_map, engine)
+
 
 def create_email_casts(engine):
     type_body_map = _get_email_type_body_map()
@@ -93,12 +93,10 @@ def create_integer_casts(engine):
     integer_array_create = _build_integer_array_function()
     with engine.begin() as conn:
         conn.execute(text(integer_array_create))
-    integer_number_types=categories.INTEGER_TYPES
-    for db_type in integer_number_types:    
-      type_body_map = _get_integer_type_body_map()
-      create_cast_functions(db_type, type_body_map, engine)
-
-
+    integer_number_types = categories.INTEGER_TYPES
+    for db_type in integer_number_types:
+        type_body_map = _get_integer_type_body_map()
+        create_cast_functions(db_type, type_body_map, engine)
 
 
 def create_interval_casts(engine):
@@ -156,10 +154,10 @@ def create_numeric_casts(engine):
     numeric_array_create = _build_numeric_array_function()
     with engine.begin() as conn:
         conn.execute(text(numeric_array_create))
-    numeric_number_types=categories.NUMERIC_TYPES   
-    for db_type in numeric_number_types: 
-       type_body_map = _get_numeric_type_body_map(target_type=db_type)
-       create_cast_functions(db_type, type_body_map, engine)
+    numeric_number_types = categories.NUMERIC_TYPES
+    for db_type in numeric_number_types:
+        type_body_map = _get_numeric_type_body_map(target_type=db_type)
+        create_cast_functions(db_type, type_body_map, engine)
 
 
 # TODO find more descriptive name
@@ -987,7 +985,7 @@ def _build_numeric_array_function(NUMERIC_ARR_FUNC_NAME):
 
     inner_number_tree = "|".join(
         [
-        
+
             no_separator_big,
             no_separator_small,
             comma_separator_req_decimal,
@@ -1036,9 +1034,6 @@ def _build_numeric_array_function(NUMERIC_ARR_FUNC_NAME):
     """
 
 
-
-
-
 def _build_integer_array_function():
     """
     The main reason for this function to be separate is for testing. This
@@ -1047,24 +1042,22 @@ def _build_integer_array_function():
     qualified_function_name = get_qualified_name(INTEGER_ARR_FUNC_NAME)
 
     no_separator = r"[0-9]{2,}(?:([,])[0-9]{1,2}|[0-9]{4,})?"
-    comma_separator= r"[0-9]{1,3}(?:(,)[0-9]{3}){2,})"
-    period_separator= r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,})"
+    comma_separator = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,})"
+    period_separator = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,})"
     comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3})?"
     single_quote_separator = r"[0-9]{1,3}(?:(\'')[0-9]{3})+"
     space_separator = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,])[0-9]+)?"
 
-    
-   
     inner_number_tree = "|".join(
         [
-         no_separator,
-         comma_separator ,
-         period_separator,
-         comma_separator_lakh_system,
-         single_quote_separator,
-         space_separator
+            no_separator,
+            comma_separator,
+            period_separator,
+            comma_separator_lakh_system,
+            single_quote_separator,
+            space_separator
 
-         ])
+        ])
     integer_finding_regex = f"^(?:[+-]?({inner_number_tree}))$"
 
     actual_number_indices = [1]
@@ -1096,9 +1089,6 @@ def _build_integer_array_function():
       END;
     $$ LANGUAGE plpgsql;
     """
-
-
-
 
 
 def _get_default_type_body_map(source_types, target_type):
