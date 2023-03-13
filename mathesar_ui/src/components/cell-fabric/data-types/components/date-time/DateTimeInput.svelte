@@ -65,16 +65,16 @@
     dispatch('blur');
   }
 
-  function onValueChange(newValue: string) {
-    value = formatter.parse(newValue).value;
-    dispatch('artificialInput', value);
-    dispatch('artificialChange', value);
-  }
-
   function onKeydown(event: KeyboardEvent) {
     if (event.key === 'Tab' || (event.key === 'Tab' && event.shiftKey)) {
       close();
     }
+  }
+
+  function onValueChange(newValue: string) {
+    value = formatter.parse(newValue).value;
+    dispatch('artificialInput', value);
+    dispatch('artificialChange', value);
   }
 </script>
 

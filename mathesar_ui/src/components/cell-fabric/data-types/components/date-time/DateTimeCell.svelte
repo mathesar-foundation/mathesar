@@ -27,7 +27,6 @@
   highlightSubstringMatches={false}
   {isIndependentOfSheet}
   let:handleInputBlur
-  let:handleInputKeydown
   formatValue={formatForDisplay}
   on:movementKeyDown
   on:activate
@@ -43,6 +42,5 @@
     {timeShow24Hr}
     {timeEnableSeconds}
     on:blur={handleInputBlur}
-    on:keydown={handleInputKeydown}
   />
 </SteppedInputCell>
