@@ -317,7 +317,15 @@ echo "deb-src [signed-by=$KEYRING] https://deb.nodesource.com/$VERSION $DISTRO m
 ```
 Now we can update our APT repositories and then install NodeJS.
 ```sh
-sudo apt update
+sudo apt update && apt upgrade
 apt install nodejs
 ```
-
+Now we will install further required packages on the system.
+```sh
+apt install python3-django python3-virtualenv libpq-dev
+```
+Next, we will create the gunicorn user and group on the system.
+```sh
+sudo groupadd gunicorn
+useradd gunicorn
+```
