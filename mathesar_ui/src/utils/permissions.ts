@@ -1,4 +1,4 @@
-import type { DatabaseRole, SchemaRole, UserRole } from '@mathesar/api/users';
+import type { UserRole } from '@mathesar/api/users';
 import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
 
 /**
