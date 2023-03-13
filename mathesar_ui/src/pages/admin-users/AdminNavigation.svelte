@@ -2,7 +2,7 @@
   import { active } from 'tinro';
 
   import { Icon } from '@mathesar-component-library';
-  import { iconSettingsMajor, iconUser } from '@mathesar/icons';
+  import { iconSettingsMajor, iconMultipleUsers } from '@mathesar/icons';
   import {
     ADMIN_UPDATE_PAGE_URL,
     ADMIN_USERS_PAGE_URL,
@@ -23,7 +23,7 @@
   </li>
   <li role="menuitem">
     <a href={ADMIN_USERS_PAGE_URL} use:active class="passthrough">
-      <Icon {...iconUser} />
+      <Icon {...iconMultipleUsers} />
       <span>Users</span>
     </a>
   </li>

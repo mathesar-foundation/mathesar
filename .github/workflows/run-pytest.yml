@@ -1,8 +1,15 @@
 name: Run Python tests
-on: [push, pull_request]
+on: 
+  push:
+    paths:
+      - '**.py'
+  pull_request:
+    paths:
+      - '**.py'
+
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
     # We only want to run on external PRs, since internal PRs are covered by "push"
     # This prevents this from running twice on internal PRs
