@@ -291,5 +291,33 @@ Lastly, we will also generate the dhparams for Nginx:
 ```sh
 openssl dhparam -dsaparam -out /etc/nginx/dhparams.pem 2048
 ```
+We are not finished with the Nginx & Letsencrypt section.
 
-va
+### Step Five: Install the Mathesar application
+##### Add the NodeJS key.
+Firstly, we will add the NodeJS apt key, as well as the APT repo.  
+```sh
+KEYRING=/usr/share/keyrings/nodesource.gpg
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor | sudo tee "$KEYRING" >/dev/null
+gpg --no-default-keyring --keyring "$KEYRING" --list-keys
+```
+You should see a key with ID `9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280` which will confirm this worked.
+Now you need to change the permissions on this key:
+```sh
+chmod a+r /usr/share/keyrings/nodesource.gpg
+```
+##### Add Repository from NodeSource
+Now we will add the desired NodeSource repository.
+```sh
+VERSION=node_16.x
+KEYRING=/usr/share/keyrings/nodesource.gpg
+DISTRO="$(lsb_release -s -c)"
+echo "deb [signed-by=$KEYRING] https://deb.nodesource.com/$VERSION $DISTRO main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+echo "deb-src [signed-by=$KEYRING] https://deb.nodesource.com/$VERSION $DISTRO main" | sudo tee -a /etc/apt/sources.list.d/nodesource.list
+```
+Now we can update our APT repositories and then install NodeJS.
+```sh
+sudo apt update
+apt install nodejs
+```
+
