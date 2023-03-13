@@ -1,11 +1,15 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-
+  import type {
+    ColumnsDataStore,
+    ProcessedColumn,
+  } from '@mathesar/stores/table-data';
   import {
     compareWholeValues,
     getValueComparisonOutcome,
     splitMatchParts,
   } from '@mathesar-component-library';
+  import { toast } from '@mathesar/stores/toast';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import type {
@@ -13,8 +17,6 @@
     HorizontalAlignment,
     CellValueFormatter,
   } from './typeDefinitions';
-
-  const dispatch = createEventDispatcher();
 
   type Value = $$Generic;
   type Props = CellTypeProps<Value>;
@@ -29,10 +31,15 @@
   export let searchValue: unknown | undefined = undefined;
   export let isIndependentOfSheet = false;
   export let highlightSubstringMatches = true;
+  export let column: ProcessedColumn;
+  export let columnsDataStore: ColumnsDataStore;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
 
+  const dispatch = createEventDispatcher();
+
+  $: allowsNull = column.column.nullable;
   $: formattedValue = formatValue?.(value) ?? value;
   $: matchParts = (() => {
     if (
@@ -63,7 +70,16 @@
     isEditMode = false;
   }
 
-  function handleKeyDown(e: KeyboardEvent) {
+  async function checkForNull() {
+    try {
+      await columnsDataStore.setNullabilityOfColumn(column.column, allowsNull);
+      dispatch('close');
+    } catch (error) {
+      toast.error(`"${column.column.name}" does not allow null.`);
+    }
+  }
+
+  async function handleKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
         if (isEditMode) {
@@ -88,6 +104,7 @@
         break;
       case 'Delete':
         if (!isEditMode && e.shiftKey) {
+          await checkForNull();
           dispatch('update', {
             value: null,
           });
