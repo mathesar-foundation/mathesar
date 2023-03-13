@@ -4,6 +4,8 @@
     Icon,
     SpinnerButton,
     Button,
+    Help,
+    Tooltip,
   } from '@mathesar-component-library';
   import {
     iconUser,
@@ -38,23 +40,58 @@
   $: objectWithHighestPrecedence = roleMap
     ? getObjectWithHighestPrecedenceByRoles(roleMap)
     : undefined;
+  $: isUserEditingTheirOwnAccess = userProfile?.id === userModel.id;
 
   async function removeAccess() {
     await removeAccessForUser(userModel);
   }
 
-  function getRoleStatus(
-    level: 'admin' | AccessControlObject,
-    disabled: boolean,
-  ) {
+  function isRoleInherited(aclObject: AccessControlObject): boolean {
+    return accessControlObject !== aclObject;
+  }
+
+  function getRoleStatusText(
+    aclObject: AccessControlObject,
+    isOverridden: boolean,
+  ): string {
     const status: string[] = [];
-    if (accessControlObject !== level) {
+    if (isRoleInherited(aclObject)) {
       status.push('Inherited');
     }
-    if (disabled) {
+    if (isOverridden) {
       status.push('Overridden');
     }
     return status.length > 0 ? `(${status.join(', ')})` : '';
+  }
+
+  function getRoleHelpText(
+    aclObject: AccessControlObject,
+    isOverridden: boolean,
+  ): string {
+    const isInherited = isRoleInherited(aclObject);
+    if (isInherited && isOverridden) {
+      return `This access level is inherited from the ${aclObject} permissions
+        and is overridden by the ${accessControlObject} permissions.`;
+    }
+    if (isInherited) {
+      return `This access level is inherited from the ${aclObject} permissions.`;
+    }
+    return `This access level is overridden by the ${accessControlObject} permissions.`;
+  }
+
+  function getDisabledDeleteHelpText(
+    level: 'admin' | AccessControlObject,
+  ): string {
+    if (level === 'admin') {
+      return 'Individual permissions cannot be modified for users with Admin access.';
+    }
+    if (isUserEditingTheirOwnAccess) {
+      return 'You cannot modify your own access levels. Please contact an administrator.';
+    }
+    if (isRoleInherited(level)) {
+      return 'This access level is inherited and cannot be removed from this panel.';
+    }
+    return 'This access level cannot be removed.';
   }
 </script>
 
@@ -76,27 +113,32 @@
     </div>
   </div>
   {#each userRoleRows as [level, role], index (`${level}-${role}`)}
-    {@const disabled =
+    {@const isOverridden =
       hasMultipleRoles && objectWithHighestPrecedence !== level}
     {@const hasBorder = (hasMultipleRoles && index === 0) || !hasMultipleRoles}
     <div class="access-wrapper">
       <div
         class="cell access-level"
-        class:disabled
+        class:disabled={isOverridden}
         class:has-border={hasBorder}
       >
-        {#if level === 'admin'}
-          Admin Access
-        {:else}
-          {getDescriptionForRole(role)}
-        {/if}
-        {#if hasMultipleRoles}
-          {getRoleStatus(level, disabled)}
-        {/if}
+        <div>
+          {#if level === 'admin'}
+            Admin Access
+          {:else}
+            {getDescriptionForRole(role)}
+          {/if}
+          {#if hasMultipleRoles && level !== 'admin'}
+            {getRoleStatusText(level, isOverridden)}
+            <Help>
+              {getRoleHelpText(level, isOverridden)}
+            </Help>
+          {/if}
+        </div>
       </div>
       <div
         class="cell access-level-chip"
-        class:disabled
+        class:disabled={isOverridden}
         class:has-border={hasBorder}
       >
         <Chip background="var(--slate-200)" display="inline-flex">
@@ -114,17 +156,22 @@
         </Chip>
       </div>
       <div class="cell" class:has-border={hasBorder}>
-        {#if accessControlObject === level && userProfile?.id !== userModel.id}
+        {#if level === 'admin' || isRoleInherited(level) || isUserEditingTheirOwnAccess}
+          <Tooltip>
+            <Button slot="trigger" disabled>
+              <Icon {...iconDeleteMajor} size="0.75em" />
+            </Button>
+            <span slot="content">
+              {getDisabledDeleteHelpText(level)}
+            </span>
+          </Tooltip>
+        {:else}
           <SpinnerButton
             onClick={removeAccess}
             label=""
             icon={{ ...iconDeleteMajor, size: '0.75em' }}
             appearance="outline-primary"
           />
-        {:else}
-          <Button disabled>
-            <Icon {...iconDeleteMajor} size="0.75em" />
-          </Button>
         {/if}
       </div>
     </div>
