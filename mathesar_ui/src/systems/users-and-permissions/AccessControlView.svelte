@@ -12,6 +12,7 @@
   import {
     getDisplayNameForRole,
     type ObjectRoleMap,
+    type AccessControlObject,
   } from '@mathesar/utils/permissions';
   import type { UserModel } from '@mathesar/stores/users';
   import { getErrorMessage } from '@mathesar/utils/errors';
@@ -31,7 +32,7 @@
     role: UserRole,
   ) => Promise<void>;
   export let removeAccessForUser: (user: UserModel) => Promise<void>;
-  export let accessControlObject: 'database' | 'schema';
+  export let accessControlObject: AccessControlObject;
   export let getUserRoles: (user: UserModel) => ObjectRoleMap | undefined;
 
   $: usersAllowedToBeAdded = usersWithoutAccess.filter(

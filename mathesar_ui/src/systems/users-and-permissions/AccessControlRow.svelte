@@ -16,30 +16,35 @@
   import {
     getDisplayNameForRole,
     getDescriptionForRole,
+    getObjectWithHighestPrecedenceByRoles,
     type ObjectRoleMap,
+    type AccessControlObject,
   } from '@mathesar/utils/permissions';
 
   export let userProfile: UserModel | undefined;
   export let userModel: UserModel;
-  export let accessControlObject: 'database' | 'schema';
+  export let accessControlObject: AccessControlObject;
   export let getUserRoles: (user: UserModel) => ObjectRoleMap | undefined;
   export let removeAccessForUser: (user: UserModel) => Promise<void>;
 
   $: roleMap = getUserRoles(userModel);
   $: roles = roleMap && roleMap.size > 0 ? [...roleMap.entries()] : [];
   $: userRoleRows = (() => {
-    const rows: ['admin' | 'database' | 'schema', UserRole][] =
+    const rows: ['admin' | AccessControlObject, UserRole][] =
       userModel.isSuperUser ? [['admin', 'manager']] : roles;
     return rows;
   })();
   $: hasMultipleRoles = userRoleRows.length > 1;
+  $: objectWithHighestPrecedence = roleMap
+    ? getObjectWithHighestPrecedenceByRoles(roleMap)
+    : undefined;
 
   async function removeAccess() {
     await removeAccessForUser(userModel);
   }
 
   function getRoleStatus(
-    level: 'admin' | 'database' | 'schema',
+    level: 'admin' | AccessControlObject,
     disabled: boolean,
   ) {
     const status: string[] = [];
@@ -71,7 +76,8 @@
     </div>
   </div>
   {#each userRoleRows as [level, role], index (`${level}-${role}`)}
-    {@const disabled = hasMultipleRoles && accessControlObject !== level}
+    {@const disabled =
+      hasMultipleRoles && objectWithHighestPrecedence !== level}
     {@const hasBorder = (hasMultipleRoles && index === 0) || !hasMultipleRoles}
     <div class="access-wrapper">
       <div
