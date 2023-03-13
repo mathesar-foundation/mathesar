@@ -37,6 +37,13 @@
   <AdminPageLayout cssVariables={{ '--max-layout-width': PAGE_MAX_WIDTH }}>
     <AdminNavigation slot="sidebar" />
     <Route path="/update">
+      <AppendBreadcrumb
+        item={{
+          type: 'simple',
+          href: ADMIN_UPDATE_PAGE_URL,
+          label: 'Software Update',
+        }}
+      />
       <SoftwareUpdate />
     </Route>
 

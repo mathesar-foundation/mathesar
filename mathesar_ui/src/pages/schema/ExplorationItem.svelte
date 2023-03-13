@@ -38,6 +38,15 @@
   .link-container {
     text-decoration: none;
     color: inherit;
+    padding-left: 1rem;
+    padding-right: 1rem;
+
+    &:hover {
+      background: var(--slate-50);
+    }
+    &:focus {
+      background: var(--slate-100);
+    }
   }
 
   .container {
