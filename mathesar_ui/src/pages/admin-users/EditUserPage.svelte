@@ -10,6 +10,7 @@
   import {
     PasswordChangeForm,
     UserDetailsForm,
+    UserPermissionForm,
   } from '@mathesar/systems/users-and-permissions';
   import type { UserModel } from '@mathesar/stores/users';
   import FormBox from './FormBox.svelte';
@@ -60,6 +61,9 @@
     </FormBox>
     <FormBox>
       <PasswordChangeForm {userId} />
+    </FormBox> 
+    <FormBox>
+      <UserPermissionForm {userId}/>
     </FormBox>
     {#if !userIsLoggedInUser}
       <FormBox>
