@@ -499,6 +499,14 @@ export class RecordsData {
           { state: 'failure', errors: [errorMsg] },
         ]),
       );
+
+      if (failures.size > 0) {
+        if (successRowKeys.size === 0) {
+          throw Error('Unable to delete row!');
+        } else {
+          throw Error('Unable to delete some rows!');
+        }
+      }
     }
   }
 
