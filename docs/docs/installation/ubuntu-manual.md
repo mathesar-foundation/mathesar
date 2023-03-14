@@ -295,6 +295,8 @@ openssl dhparam -dsaparam -out /etc/nginx/dhparams.pem 2048
 We are not finished with the Nginx & Letsencrypt section.
 
 ### Step Five: Install the Mathesar application
+#### Set up NodeJS
+
 ##### Add the NodeJS key.
 Firstly, we will add the NodeJS apt key, as well as the APT repo.  
 ```sh
@@ -321,6 +323,9 @@ Now we can update our APT repositories and then install NodeJS.
 sudo apt update && apt upgrade
 apt install nodejs
 ```
+#### Set up Gunicorn
+
+
 Now we will install further required packages on the system.
 ```sh
 apt install python3-django python3-virtualenv libpq-dev
