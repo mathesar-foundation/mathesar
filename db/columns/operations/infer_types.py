@@ -18,9 +18,7 @@ TYPE_INFERENCE_DAG = {
     PostgresType.BOOLEAN: [],
     MathesarCustomType.EMAIL: [],
     PostgresType.INTERVAL: [],
-    PostgresType.NUMERIC: [
-        PostgresType.BOOLEAN,
-    ],
+    PostgresType.NUMERIC: [],
     PostgresType.TEXT: [
         PostgresType.BOOLEAN,
         PostgresType.DATE,

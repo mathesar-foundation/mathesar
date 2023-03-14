@@ -1,13 +1,16 @@
 name: UI - Lint, Audit and Tests
 
-on: [push, pull_request]
+on: 
+  push:
+    paths:
+      - 'mathesar_ui/**'
+  pull_request:
+    paths:
+      - 'mathesar_ui/**'
 
 jobs:
   format:
     runs-on: ubuntu-latest
-    # We only want to run on external PRs, since internal PRs are covered by "push"
-    # This prevents this from running twice on internal PRs
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -30,9 +33,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    # We only want to run on external PRs, since internal PRs are covered by "push"
-    # This prevents this from running twice on internal PRs
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -55,9 +55,6 @@ jobs:
 
   typecheck:
     runs-on: ubuntu-latest
-    # We only want to run on external PRs, since internal PRs are covered by "push"
-    # This prevents this from running twice on internal PRs
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -80,9 +77,6 @@ jobs:
 
   audit:
     runs-on: ubuntu-latest
-    # We only want to run on external PRs, since internal PRs are covered by "push"
-    # This prevents this from running twice on internal PRs
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -114,9 +108,6 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
-    # We only want to run on external PRs, since internal PRs are covered by "push"
-    # This prevents this from running twice on internal PRs
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     defaults:
       run:
         working-directory: ./mathesar_ui

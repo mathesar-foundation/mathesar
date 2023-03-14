@@ -55,12 +55,11 @@ plugins:
   - redirects:
       redirect_maps:
           'installation-dc/administration.md': 'install/docker-compose/index.md'
-          'installation-dc/ansible-setup.md': 'install/docker-compose/ansible.md'
+          'installation-dc/ansible-setup.md': 'install/docker-compose/index.md'
           'installation-dc/quickstart.md': 'install/docker-compose/index.md'
           'installation-dc/troubleshooting.md': 'install/docker-compose/troubleshooting.md'
           'installation-dc/under-the-hood.md': 'install/docker-compose/under-the-hood.md'
           'installation-dc/uninstall.md': 'install/docker-compose/index.md'
-          'installation-dc/windows-setup.md': 'install/docker-compose/requirements.md'
 
 nav:
   - Home: index.md
@@ -68,10 +67,8 @@ nav:
       - Install Mathesar: install/index.md
       - Via Docker Compose:
           - Install via Docker Compose: install/docker-compose/index.md
-          - Requirements: install/docker-compose/requirements.md
-          - Troubleshooting: install/docker-compose/troubleshooting.md
-          - Setup Ansible: install/docker-compose/ansible.md
           - Under the hood: install/docker-compose/under-the-hood.md
+          - Troubleshooting: install/docker-compose/troubleshooting.md
   - Product:
       - Introduction: product/intro.md
       - Syncing database changes: product/syncing-db.md

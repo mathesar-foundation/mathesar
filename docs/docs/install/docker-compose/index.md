@@ -1,5 +1,31 @@
 # Install Mathesar via Docker Compose
 
+## Requirements
+
+- You need **[Docker](https://docs.docker.com/desktop/) and [Docker Compose](https://docs.docker.com/compose/install/)**.
+
+    We've tested with Docker v23 and Docker Compose v2.10. Older versions may not work.
+
+- You need **root access**.
+
+- If using a custom domain name
+
+    Have your domain name ready during the installation process and have your DNS pointing to your Mathesar server.
+
+- If connecting to an existing database
+
+    - Ensure the external database can accept network connections from your Mathesar server.
+    - Have the following information handy before installation:
+
+        - Database hostname _(cannot [yet](https://github.com/centerofci/mathesar/issues/2571) be `localhost`)_
+        - Database port
+        - Database name
+        - Database username _(should exist and be a `SUPERUSER` [more info](https://www.postgresql.org/docs/13/sql-createrole.html))_
+        - Database password
+
+- If installing on Windows, you need to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed first.
+
+
 ## Install
 
 1. Paste this command into your terminal to begin installing the latest version of Mathesar:
@@ -8,14 +34,12 @@
     bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/0.1.0/install.sh)
     ```
 
-    The installer will automatically verify that your system meets the [requirements](./requirements.md).
-
 1. Follow the interactive prompts to configure your Mathesar installation.
 
 1. When finished, the installer will display the URL where you can run Mathesar from your web browser.
 
 !!! info "Getting help"
-    If you run into any problems during installation, see the [requirements](./requirements.md) and [troubleshooting](./troubleshooting.md) pages, or [open a ticket describing your problem](https://github.com/centerofci/mathesar/issues/new/choose).
+    If you run into any problems during installation, see [troubleshooting](./troubleshooting.md) or [open a ticket describing your problem](https://github.com/centerofci/mathesar/issues/new/choose).
 
 ## Start/stop the server {:#start-stop}
 
