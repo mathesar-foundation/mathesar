@@ -333,13 +333,60 @@ apt install python3-django python3-virtualenv libpq-dev
 Next, we will create the gunicorn user and group on the system.
 ```sh
 sudo groupadd gunicorn
-useradd gunicorn
+useradd gunicorn -g gunicorn
 ```
-Next we will create the configuration file for Gunicorn on our site.  You can create the file here: ``/var/www/mathesar.example.com/gunicorn_conf.py`` and copy the following code into it.  Pay attention as you have to edit the code according to your FQDN / URL.
+Next we will create the configuration file for Gunicorn on our site.  You must create the file here: `/var/www/mathesar.example.com/gunicorn_conf.py` and copy the following code into it.  Pay attention as you have to edit the code according to your FQDN / URL.
 
 ```sh
 errorlog = '/var/log/gunicorn/mathesar.example.com-error.log'
 loglevel = 'info'
 accesslog = '/var/log/gunicorn/mathesar.example.com-access.log'
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
+```
+Next we will create the logging directory for Gunicorn and assign it to the gunicorn user & group.
+```sh
+sudo mkdir /var/log/gunicorn # Only if it does not exist already, but installation of Gunicorn should have created this and assigned to www-data user/group
+chmod 0755 /var/log/gunicorn
+chgroup gunicorn /var/log/gunicorn
+chown gunicorn /var/log/gunicorn
+```
+Next we will create the Gunicorn systemd service.  You must create the file here: `/lib/systemd/system/gunicorn.service` and copy the following code into it.  Pay attention as you have to edit the code according to your FQDN / URL.
+```sh
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+Type=notify
+User=gunicorn
+Group=gunicorn
+RuntimeDirectory=gunicorn
+WorkingDirectory=/var/www/mathesar.example.com/mathesar
+ExecStart=/bin/bash -c '/opt/virtualenvs/mathesar/bin/gunicorn -c /var/www/mathesar.example.com/gunicorn_conf.py config.wsgi:application'
+EnvironmentFile=/etc/gunicorn-env
+
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+Next we will create the Gunicorn systemd socker.  You must create the file here: `/lib/systemd/system/gunicorn.socket` and copy the following code into it.  Pay attention as you have to edit the code according to your FQDN / URL.
+
+```sh
+[Unit]
+Description=gunicorn socket
+
+[Socket]
+ListenStream=/run/gunicorn.sock
+# Our service won't need permissions for the socket, since it
+# inherits the file descriptor by socket activation
+# only the nginx daemon will need access to the socket
+SocketUser=www-data
+
+[Install]
+WantedBy=sockets.target
 ```
