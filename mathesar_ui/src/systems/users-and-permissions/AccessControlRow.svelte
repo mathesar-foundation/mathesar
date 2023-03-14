@@ -68,15 +68,19 @@
     aclObject: AccessControlObject,
     isOverridden: boolean,
   ): string {
+    const comparedAclObject = aclObject === 'database' ? 'schema' : 'database';
     const isInherited = isRoleInherited(aclObject);
     if (isInherited && isOverridden) {
       return `This access level is inherited from the ${aclObject} permissions
-        and is overridden by the ${accessControlObject} permissions.`;
+        and is overridden by the ${comparedAclObject} permissions.`;
     }
     if (isInherited) {
       return `This access level is inherited from the ${aclObject} permissions.`;
     }
-    return `This access level is overridden by the ${accessControlObject} permissions.`;
+    if (isOverridden) {
+      return `This access level is overridden by the ${comparedAclObject} permissions.`;
+    }
+    return `This access level overrides the ${comparedAclObject} permissions.`;
   }
 
   function getDisabledDeleteHelpText(
