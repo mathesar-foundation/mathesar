@@ -327,7 +327,7 @@ apt install nodejs
 
 Now we will install further required packages on the system.
 ```sh
-apt install python3-django python3-virtualenv libpq-dev
+apt install python3-django python3-virtualenv libpq-dev python3.10-venv
 ```
 Next, we will create the gunicorn user and group on the system.
 ```sh
@@ -400,3 +400,22 @@ Next we will create the Gunicorn environment file for the service.  You must cre
 {% endfor %}
 ```
 The permissions for the file must be 0400 so run this when you are done: `chmod 0400 /etc/gunicorn-env`
+
+We will now reload systemctl:
+```sh
+systemctl daemon-reload
+```
+#### Create the virtual environment
+
+We need to create a virtual environment for the Mathesar application.  Wew will do this by running the following command:
+```sh
+python3 -m venv /opt/virtualenvs/mathesar
+```
+
+#### Clone the Mathesar repo
+
+We can now clone the Mathesar repo into our working folder.
+```sh
+git clone https://github.com/centerofci/mathesar.git /var/www/mathesar.example.com/
+```
+
