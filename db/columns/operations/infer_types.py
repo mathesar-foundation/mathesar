@@ -55,18 +55,18 @@ def infer_column_type(
     Attempt to cast the column to the best type for it.
 
     Algorithm:
-        0. Check for any data in the column.
+        1. Check for any data in the column.
            - If the column is empty, return the column's current type
              class.
-        0. reflect the column's type class.
-        2. Use _get_type_classes_mapped_to_dag_nodes to map it to a
+        2. reflect the column's type class.
+        3. Use _get_type_classes_mapped_to_dag_nodes to map it to a
            TYPE_INFERENCE_DAG key.
-        3. Look up the sequence of types referred to by that key on the
+        4. Look up the sequence of types referred to by that key on the
            TYPE_INFERENCE_DAG.
            - If there's no such key on the TYPE_INFERENCE_DAG dict, or if
              its value is an empty list, return the current column's type
              class.
-        4. Iterate through that sequence of types trying to alter the
+        5. Iterate through that sequence of types trying to alter the
            column's type to them.
            - If the column's type is altered successfully, break
              iteration and return the output of running infer_column_type

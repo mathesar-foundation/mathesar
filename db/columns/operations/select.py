@@ -154,6 +154,9 @@ def get_column_default_dict(table_oid, attnum, engine, metadata, connection_to_u
 def determine_whether_column_contains_data(
         table_oid, column_name, engine, metadata, connection_to_use=None
 ):
+    """
+    Given a column, return True if it contains data, False otherwise.
+    """
     sa_table = reflect_table_from_oid(
         table_oid, engine, metadata=metadata, connection_to_use=connection_to_use,
     )
