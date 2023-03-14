@@ -418,4 +418,8 @@ We can now clone the Mathesar repo into our working folder.
 ```sh
 git clone https://github.com/centerofci/mathesar.git /var/www/mathesar.example.com/
 ```
-
+Now, we can update the requirements:
+```sh
+cd /var/www/mathesar.example.com
+pip install -r requirements.txt
+```
