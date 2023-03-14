@@ -12,7 +12,8 @@ Installation should only take a few minutes.
   - Install Nginx webserver 
   - Install Letsencrypt and Gurnicorn3  
 - ##### Install Mathesar
--  
+  - Set up NodeJS
+  - Set up Gunicorn  
 - You need to be a user with root access to the machine you're trying to install Mathesar on.  We will use mathesar.example.com as the URL for our website.
 
 ## Preparing our server.
