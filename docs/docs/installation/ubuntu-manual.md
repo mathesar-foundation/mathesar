@@ -325,7 +325,6 @@ apt install nodejs
 ```
 #### Set up Gunicorn
 
-
 Now we will install further required packages on the system.
 ```sh
 apt install python3-django python3-virtualenv libpq-dev
@@ -374,6 +373,8 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 ```
+The permissions for the file must be 0644 so run this when you are done: `chmod 0644 /lib/systemd/system/gunicorn.service`
+
 Next we will create the Gunicorn systemd socker.  You must create the file here: `/lib/systemd/system/gunicorn.socket` and copy the following code into it.  Pay attention as you have to edit the code according to your FQDN / URL.
 
 ```sh
@@ -390,3 +391,12 @@ SocketUser=www-data
 [Install]
 WantedBy=sockets.target
 ```
+The permissions for the file must be 0644 so run this when you are done: `chmod 0644 /lib/systemd/system/gunicorn.socket`
+
+Next we will create the Gunicorn environment file for the service.  You must create the file here: `/etc/gunicorn-env` and copy the following code into it.  Pay attention as you have to edit the code according to your FQDN / URL.
+```sh
+{% for k,v in django_settings.items() %}
+{{ k }}={{ v }}
+{% endfor %}
+```
+The permissions for the file must be 0400 so run this when you are done: `chmod 0400 /etc/gunicorn-env`
