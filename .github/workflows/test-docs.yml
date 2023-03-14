@@ -3,10 +3,10 @@ name: test-docs
 on: 
   push:
     paths:
-      - docs/*
+      - 'docs/**'
   pull_request:
     paths:
-      - docs/*
+      - 'docs/**'
 
 jobs:
   deploy:
