@@ -335,3 +335,11 @@ Next, we will create the gunicorn user and group on the system.
 sudo groupadd gunicorn
 useradd gunicorn
 ```
+Next we will create the configuration file for Gunicorn on our site.  You can create the file here: ``/var/www/mathesar.example.com/gunicorn_conf.py`` and copy the following code into it.  Pay attention as you have to edit the code according to your FQDN / URL.
+
+```sh
+errorlog = '/var/log/gunicorn/mathesar.example.com-error.log'
+loglevel = 'info'
+accesslog = '/var/log/gunicorn/mathesar.example.com-access.log'
+access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
+```
