@@ -4,6 +4,8 @@
     Icon,
     SpinnerButton,
     Button,
+    Help,
+    Tooltip,
   } from '@mathesar-component-library';
   import {
     iconUser,
@@ -15,33 +17,90 @@
   import type { UserRole } from '@mathesar/api/users';
   import {
     getDisplayNameForRole,
+    getDescriptionForRole,
+    getObjectWithHighestPrecedenceByRoles,
     type ObjectRoleMap,
+    type AccessControlObject,
   } from '@mathesar/utils/permissions';
 
   export let userProfile: UserModel | undefined;
   export let userModel: UserModel;
-  export let accessControlObject: 'database' | 'schema';
+  export let accessControlObject: AccessControlObject;
   export let getUserRoles: (user: UserModel) => ObjectRoleMap | undefined;
   export let removeAccessForUser: (user: UserModel) => Promise<void>;
 
   $: roleMap = getUserRoles(userModel);
   $: roles = roleMap && roleMap.size > 0 ? [...roleMap.entries()] : [];
   $: userRoleRows = (() => {
-    const rows: ['admin' | 'database' | 'schema', UserRole][] =
+    const rows: ['admin' | AccessControlObject, UserRole][] =
       userModel.isSuperUser ? [['admin', 'manager']] : roles;
     return rows;
   })();
+  $: hasMultipleRoles = userRoleRows.length > 1;
+  $: objectWithHighestPrecedence = roleMap
+    ? getObjectWithHighestPrecedenceByRoles(roleMap)
+    : undefined;
+  $: isUserEditingTheirOwnAccess = userProfile?.id === userModel.id;
 
   async function removeAccess() {
     await removeAccessForUser(userModel);
   }
+
+  function isRoleInherited(aclObject: AccessControlObject): boolean {
+    return accessControlObject !== aclObject;
+  }
+
+  function getRoleStatusText(
+    aclObject: AccessControlObject,
+    isOverridden: boolean,
+  ): string {
+    const status: string[] = [];
+    if (isRoleInherited(aclObject)) {
+      status.push('Inherited');
+    }
+    if (isOverridden) {
+      status.push('Overridden');
+    }
+    return status.length > 0 ? `(${status.join(', ')})` : '';
+  }
+
+  function getRoleHelpText(
+    aclObject: AccessControlObject,
+    isOverridden: boolean,
+  ): string {
+    const comparedAclObject = aclObject === 'database' ? 'schema' : 'database';
+    const isInherited = isRoleInherited(aclObject);
+    if (isInherited && isOverridden) {
+      return `This access level is inherited from the ${aclObject} permissions
+        and is overridden by the ${comparedAclObject} permissions.`;
+    }
+    if (isInherited) {
+      return `This access level is inherited from the ${aclObject} permissions.`;
+    }
+    if (isOverridden) {
+      return `This access level is overridden by the ${comparedAclObject} permissions.`;
+    }
+    return `This access level overrides the ${comparedAclObject} permissions.`;
+  }
+
+  function getDisabledDeleteHelpText(
+    level: 'admin' | AccessControlObject,
+  ): string {
+    if (level === 'admin') {
+      return 'Individual permissions cannot be modified for users with Admin access.';
+    }
+    if (isUserEditingTheirOwnAccess) {
+      return 'You cannot modify your own access levels. Please contact an administrator.';
+    }
+    if (isRoleInherited(level)) {
+      return 'This access level is inherited and cannot be removed from this panel.';
+    }
+    return 'This access level cannot be removed.';
+  }
 </script>
 
-{#each userRoleRows as [level, role] (`${level}-${role}`)}
-  <div
-    class="wrapper"
-    class:disabled={userRoleRows.length > 1 && accessControlObject !== level}
-  >
+<div class="wrapper">
+  <div class="cell has-border" style:grid-row="span {userRoleRows.length}">
     <div class="name-and-info">
       <div class="name">{userModel.username}</div>
       <div class="info">
@@ -56,46 +115,94 @@
         {/if}
       </div>
     </div>
-    <div class="access-level">
-      <Chip background="var(--slate-200)" display="inline-flex">
-        {#if level === 'admin'}
-          <Icon {...iconUser} size="0.8em" />
-          <span>Admin</span>
-        {:else}
-          {#if level === 'database'}
-            <Icon {...iconDatabase} size="0.8em" />
-          {:else if level === 'schema'}
-            <Icon {...iconSchema} size="0.8em" />
-          {/if}
-          <span>{getDisplayNameForRole(role)}</span>
-        {/if}
-      </Chip>
-    </div>
-    <div>
-      {#if accessControlObject === level && userProfile?.id !== userModel.id}
-        <SpinnerButton
-          onClick={removeAccess}
-          label=""
-          icon={{ ...iconDeleteMajor, size: '0.75em' }}
-          appearance="outline-primary"
-        />
-      {:else}
-        <Button disabled>
-          <Icon {...iconDeleteMajor} size="0.75em" />
-        </Button>
-      {/if}
-    </div>
   </div>
-{/each}
+  {#each userRoleRows as [level, role], index (`${level}-${role}`)}
+    {@const isOverridden =
+      hasMultipleRoles && objectWithHighestPrecedence !== level}
+    {@const hasBorder = (hasMultipleRoles && index === 0) || !hasMultipleRoles}
+    <div class="access-wrapper">
+      <div
+        class="cell access-level"
+        class:disabled={isOverridden}
+        class:has-border={hasBorder}
+      >
+        <div>
+          {#if level === 'admin'}
+            Admin Access
+          {:else}
+            {getDescriptionForRole(role)}
+          {/if}
+          {#if hasMultipleRoles && level !== 'admin'}
+            {getRoleStatusText(level, isOverridden)}
+            <Help>
+              {getRoleHelpText(level, isOverridden)}
+            </Help>
+          {/if}
+        </div>
+      </div>
+      <div
+        class="cell access-level-chip"
+        class:disabled={isOverridden}
+        class:has-border={hasBorder}
+      >
+        <Chip background="var(--slate-200)" display="inline-flex">
+          {#if level === 'admin'}
+            <Icon {...iconUser} size="0.8em" />
+            <span>Admin</span>
+          {:else}
+            {#if level === 'database'}
+              <Icon {...iconDatabase} size="0.8em" />
+            {:else if level === 'schema'}
+              <Icon {...iconSchema} size="0.8em" />
+            {/if}
+            <span>{getDisplayNameForRole(role)}</span>
+          {/if}
+        </Chip>
+      </div>
+      <div class="cell" class:has-border={hasBorder}>
+        {#if level === 'admin' || isRoleInherited(level) || isUserEditingTheirOwnAccess}
+          <Tooltip>
+            <Button slot="trigger" disabled>
+              <Icon {...iconDeleteMajor} size="0.75em" />
+            </Button>
+            <span slot="content">
+              {getDisabledDeleteHelpText(level)}
+            </span>
+          </Tooltip>
+        {:else}
+          <SpinnerButton
+            onClick={removeAccess}
+            label=""
+            icon={{ ...iconDeleteMajor, size: '0.75em' }}
+            appearance="outline-primary"
+          />
+        {/if}
+      </div>
+    </div>
+  {/each}
+</div>
 
 <style lang="scss">
   .wrapper {
-    --access-control-row-color: inherit;
     display: contents;
-    color: var(--access-control-row-color);
+
+    & + :global(.wrapper .cell.has-border) {
+      border-top: 1px solid var(--slate-200);
+    }
+
+    .cell {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding: var(--size-xx-small);
+
+      &.disabled {
+        color: var(--color-text-muted);
+      }
+    }
 
     .name-and-info {
-      padding: var(--size-ultra-small) 0;
+      align-self: start;
 
       .name {
         font-weight: 500;
@@ -115,9 +222,8 @@
         }
       }
     }
-    .access-level {
-      padding: 0 0.4rem;
-      text-align: right;
+    .access-level-chip {
+      justify-content: end;
 
       :global(.chip) {
         min-width: 4.15rem;
@@ -128,9 +234,12 @@
         margin-left: 0.2rem;
       }
     }
+    .access-wrapper {
+      display: contents;
 
-    &.disabled {
-      --access-control-row-color: var(--color-text-muted);
+      & + :global(.access-wrapper .cell) {
+        padding-top: 0;
+      }
     }
   }
 </style>
