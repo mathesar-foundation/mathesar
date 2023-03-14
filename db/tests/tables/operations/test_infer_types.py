@@ -28,7 +28,28 @@ type_data_list = [
             "-7,53,00,00,000.0",
             "-140'004'453.0"
         ],
-        PostgresType.NUMERIC),
+        PostgresType.NUMERIC
+    ),
+    (
+        PostgresType.TEXT,
+        ["1.0"],
+        PostgresType.NUMERIC
+    ),
+    (
+        PostgresType.TEXT,
+        ["1"],
+        PostgresType.BOOLEAN
+    ),
+    (
+        PostgresType.TEXT,
+        ["0"],
+        PostgresType.BOOLEAN
+    ),
+    (
+        PostgresType.TEXT,
+        ["1", "0"],
+        PostgresType.BOOLEAN
+    ),
     (
         PostgresType.NUMERIC,
         [0, 2, 1, 0],
@@ -37,7 +58,7 @@ type_data_list = [
     (
         PostgresType.NUMERIC,
         [0, 1, 1, 0],
-        PostgresType.BOOLEAN
+        PostgresType.NUMERIC,
     ),
     (
         PostgresType.TEXT,
