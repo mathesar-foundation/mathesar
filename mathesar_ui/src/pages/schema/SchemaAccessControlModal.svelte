@@ -50,7 +50,11 @@
   }
 </script>
 
-<ControlledModal {controller} closeOn={['button', 'esc', 'overlay']}>
+<ControlledModal
+  {controller}
+  size="medium"
+  closeOn={['button', 'esc', 'overlay']}
+>
   <svelte:fragment slot="title">
     Manage <Identifier>{schema.name}</Identifier> Schema Access
   </svelte:fragment>
