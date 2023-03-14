@@ -36,6 +36,21 @@ type_data_list = [
         PostgresType.NUMERIC
     ),
     (
+        PostgresType.TEXT,
+        ["1"],
+        PostgresType.BOOLEAN
+    ),
+    (
+        PostgresType.TEXT,
+        ["0"],
+        PostgresType.BOOLEAN
+    ),
+    (
+        PostgresType.TEXT,
+        ["1", "0"],
+        PostgresType.BOOLEAN
+    ),
+    (
         PostgresType.NUMERIC,
         [0, 2, 1, 0],
         PostgresType.NUMERIC
