@@ -125,9 +125,6 @@ There are three levels of schema roles:
 
 ## Order of Precedence
 
-!!! warning 
-    - The Mathesar UI currently has an issue where **schema roles** _always_ take precedence over **database roles**. This behavior will is not in line with the API and will be fixed in a future release.
-
 If a user has both a **Database Role** and a **Schema Role** for a schema within the same database, the **Schema Role** will only have an effect if it grants more permissions.
 
 Examples:

@@ -20,3 +20,4 @@ MATHESAR_DEMO_ARXIV_LOG_PATH = decouple_config(
     default='/var/lib/mathesar/demo/arxiv_db_schema_log'
 )
 BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES += ['demo/analytics.html'] # noqa
+ROOT_URLCONF = "demo.urls"
