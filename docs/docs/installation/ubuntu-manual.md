@@ -14,12 +14,12 @@ Installation should only take a few minutes.
 - ##### Install Mathesar
   - Set up NodeJS
   - Set up Gunicorn  
-- You need to be a user with root access to the machine you're trying to install Mathesar on.  We will use mathesar.example.com as the URL for our website.
-
+- You need to be a user with root access to the machine you're trying to install Mathesar on. 
 ## Preparing our server.
 - Prerequisites
     - Ubntu 22 with at least `60 GB` disk space and `4GB` of RAM.
     - Root privileges
+    - FQDN (fully qualified domain name) for your installation.  We will use `mathesar.example.com` as the FQDN for our website
     
 ### Step one: Prepare the server
 First, we need to update the software repository and upgrade all packages using the apt command below.  SSH to your server and elevate to the `root` user.
