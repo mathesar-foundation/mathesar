@@ -236,7 +236,7 @@ upstream app_server {
 # HTTPS server
 server {
   listen 443 ssl default deferred;
-  server_name {{ main_domain_name }};
+  server_name mathesar.example.com;
 
   ssl_certificate         /etc/letsencrypt/live/mathesar.example.com/fullchain.pem;
   ssl_certificate_key     /etc/letsencrypt/live/mathesar.example.com/privkey.pem;
