@@ -33,8 +33,8 @@
      */
     const marginOfError = 3;
     return (
-      el.scrollHeight - el.clientHeight > marginOfError ||
-      el.scrollWidth - el.clientWidth > 0
+      (el.scrollHeight - el.clientHeight > marginOfError) ||
+      (el.scrollWidth - el.clientWidth > 0)
     );
   }
 
@@ -48,17 +48,17 @@
 {#if passthrough}
   <slot />
 {:else}
-  <span
-    bind:this={element}
-    class="truncate"
-    class:multiline
-    {style}
-    on:mouseenter={handleHover}
-    on:mouseleave={() => {
-      dropdownIsOpen = false;
-    }}
+<span
+bind:this={element}
+class="truncate"
+class:multiline
+{style}
+on:mouseenter={handleHover}
+on:mouseleave={() => {
+  dropdownIsOpen = false;
+}}
   >
-    <slot />
+  <slot />
   </span>
   <AttachableDropdown
     isOpen={dropdownIsOpen}
@@ -66,6 +66,6 @@
     placements={popoverPlacements}
     class="truncation-content"
   >
-    <slot />
-  </AttachableDropdown>
+  <slot />
+</AttachableDropdown>
 {/if}

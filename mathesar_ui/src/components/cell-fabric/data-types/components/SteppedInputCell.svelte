@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
-
+  import { Truncate } from '@mathesar-component-library';
   import {
     compareWholeValues,
     getValueComparisonOutcome,
@@ -29,6 +29,7 @@
   export let searchValue: unknown | undefined = undefined;
   export let isIndependentOfSheet = false;
   export let highlightSubstringMatches = true;
+  export let truncate = true;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
@@ -168,15 +169,17 @@
   {#if isEditMode}
     <slot {handleInputBlur} {handleInputKeydown} />
   {:else}
-    <div
-      class="content"
-      class:nowrap={!isActive && !isIndependentOfSheet}
-      class:truncate={isActive && multiLineTruncate && !isIndependentOfSheet}
-    >
-      <slot name="content" {value} {formatValue} {matchParts}>
-        <CellValue value={formattedValue} {matchParts} />
-      </slot>
-    </div>
+    <Truncate passthrough={!truncate}>
+      <span
+        class="content"
+        class:nowrap={!isActive && !isIndependentOfSheet}
+        class:truncate={isActive && multiLineTruncate && !isIndependentOfSheet}
+      >
+        <slot name="content" {value} {formatValue} {matchParts}>
+          <CellValue value={formattedValue} {matchParts} />
+        </slot>
+      </span>
+    </Truncate>
   {/if}
 </CellWrapper>
 
