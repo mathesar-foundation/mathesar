@@ -53,7 +53,7 @@ def infer_column_type(
 ):
     """
     Attempt to cast the column to the best type for it.
-    
+
     Returns the resulting column type's class.
 
     Algorithm:
