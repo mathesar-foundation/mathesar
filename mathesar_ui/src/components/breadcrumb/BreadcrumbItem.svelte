@@ -9,7 +9,7 @@
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
   import { StringOrComponent } from '@mathesar/component-library';
-  import { iconExploration, iconRecord } from '@mathesar/icons';
+  import { iconExploration, iconRecord, iconEdit } from '@mathesar/icons';
   import { getLinkForTableItem } from '@mathesar/utils/tables';
   import BreadcrumbLink from './BreadcrumbLink.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
@@ -82,7 +82,7 @@
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink href={item.href}>
       {#if item.icon}
-        <NameWithIcon icon={item.icon}>
+        <NameWithIcon icon={iconEdit}>
           <StringOrComponent arg={item.label} />
         </NameWithIcon>
       {:else}
