@@ -42,7 +42,7 @@ You can test it with the following command:
 ```sh 
 visudo -c
 ```
-The output should look like this: `/etc/sudoers: parsed OK`.
+The output should look like this: `/etc/sudoers: parsed OK`. 
 
 
 ### Step two: Install Docker & Docker-compose
