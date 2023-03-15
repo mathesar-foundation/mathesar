@@ -38,6 +38,11 @@ useradd deployer \
 usermod -a -G deployers deployer
 ```
 Now you need to edit the `/etc/sudoers` file with the 'visudo' command, and add this line:  `deployer ALL=(ALL) NOPASSWD: ALL` under the `# User privilege specification` section.  If it fails to save, then edit again and move that to the last line of the file.  Remember to use TAB between the username and the first `ALL` section
+You can test it with the following command:
+```sh 
+visudo -c
+```
+The output should look like this: `/etc/sudoers: parsed OK`.
 
 
 ### Step two: Install Docker & Docker-compose
