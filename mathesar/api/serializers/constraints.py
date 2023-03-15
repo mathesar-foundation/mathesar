@@ -1,7 +1,10 @@
 from psycopg2.errors import DuplicateTable, UniqueViolation
 from rest_framework import serializers, status
 from sqlalchemy.exc import IntegrityError, ProgrammingError
+
 from db.constraints import utils as constraint_utils
+from db.identifiers import is_identifier_too_long
+from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
@@ -9,7 +12,6 @@ from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ConstraintColumnEmptyAPIException, UnsupportedConstraintAPIException,
     InvalidTableName
 )
-from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
     ReadWritePolymorphicSerializerMappingMixin,
@@ -69,6 +71,11 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
             else:
                 raise base_api_exceptions.MathesarAPIException(e)
         return constraint
+
+    def validate_name(self, name):
+        if is_identifier_too_long(name):
+            raise database_api_exceptions.IdentifierTooLong(field='name')
+        return name
 
 
 class ForeignKeyConstraintSerializer(BaseConstraintSerializer):
