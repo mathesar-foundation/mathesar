@@ -279,7 +279,7 @@ server {
   }
 }" > /etc/nginx/sites-enabled/mathesar.example.com
 
-With this in place, we can not install the SSL certificate for our domain.  You can run this command:
+With this in place, we can now install the SSL certificate for our domain.  You can run this command:
 ```sh
 letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m you@mathesar.example.com --agree-tos -d mathesar.example.com
 ```
