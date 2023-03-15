@@ -199,6 +199,10 @@ http {
     include /etc/nginx/sites-enabled/*;
 }" > /etc/nginx/nginx.conf
 ```
+Now we will install Gunicorn using Python PIP.
+```sh
+pip3 install gunicorn
+```
 
 ##### Letsencrypt
 We now will install certbot for Letsencrypt as well as gunicorn3.
