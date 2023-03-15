@@ -149,9 +149,9 @@ Next we will create a new site. Begin by creating the http file in '/etc/nginx/s
 ```sh
 touch /etc/nginx/sites-enabled/http
 ```
-Now, we can add our custom directives to the file.  You can copy/paste this in your terminal and run it.
+Now, we can add our custom directives to the file.  You can edit the file and add the following code to it.
 ```sh
-echo "server_tokens off;
+server_tokens off;
 
 server {
     listen 80 default_server;
@@ -165,7 +165,7 @@ server {
     location / {
         rewrite ^ https://mathesar.example.com$request_uri? permanent;
     }
-}" > /etc/nginx/sites-enabled/http
+}
 ```
 Now we will install our system Nginx configuration.  
 You can copy/paste this in your terminal and run it.
