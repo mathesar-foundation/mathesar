@@ -45,6 +45,31 @@ visudo -c
 ```
 The output should look like this: `/etc/sudoers: parsed OK`. 
 
+##### Install Python 3.9
+
+We already installed the required dependencies in the previous step, so in the next step, we will download the Official Python 3.9 setup file using the “wget” command:
+
+```sh
+ wget https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tgz
+ ```
+ Now we will unpack it, then change to the folder and run the configure script:
+ ```sh
+ tar -xvf Python-3.9.7.tgz
+ cd Python-3.9.7/
+ ./configure --enable-optimizations
+ ```
+ Next, utilize the “make” command to compile and build the configurations:
+ ```sh
+ make
+ ```
+ Finally, use the below-provided command to install Python 3 binaries on the Ubuntu 22.04 system:
+ ```sh
+ sudo make altinstall
+ ```
+ Confirm the Python successful installation by checking its version:
+```sh
+python3.9 --version
+```
 
 ### Step Two: Install PostGreSQL
 SSH to your server and run the following commands to update all the packages installed.
