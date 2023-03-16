@@ -30,7 +30,7 @@ apt update && apt upgrade
 Once the system has been updated, I recommend you perform a reboot to get the new kernel running incase it was updated.
 Next we will install the required packages.
 ```sh
-apt install locales build-essential acl ntp git python3-pip ipython3 build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev -y
+apt install locales build-essential acl ntp git python3-pip ipython3 zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev -y
 ```
 Now we need to add a new usergroup and allow passwordless login:
 ```sh
@@ -46,50 +46,7 @@ visudo -c
 The output should look like this: `/etc/sudoers: parsed OK`. 
 
 
-### Step two: Install Docker & Docker-compose
-Clean the system of any potential pre-installed Docker packages.
-```sh
-apt-get remove docker docker-engine docker.io
-```
-Now that we are sure there is no pre-configured or installed Docker on the system, we can begin the installation.
-Firstly, we have to install the required Docker dependencies on the system:
-```sh
-sudo apt -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common
-```
-The next step is to add Docker's official GPG key to the keyring.  This is to ensure the validity of downloaded Docker packages from it's repository.
-```sh
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-```
-Now that the key is added, we can add the stable repo for Docker. 
-```sh
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-```
-We have to update the system:
-```sh
-apt update
-```
-We can now install Docker using the following command:
-```sh
-apt-get install docker-ce docker-ce-cli containerd.io
-```
-Once installation is completed, you can run the following commands to make sure that Docker is running, and that it will start with the system.
-```sh
-systemctl enable docker && systemctl start docker
-```
-
-##### Install Docker-compose
-We will install Docker-compose next.  We will start by downloading the latest Docker-compose version.
-```sh
-sudo curl -L "https://github.com/docker/compose/releases/download/2.16.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-```
-Once downloaded, we have to change the properties so that it is an executable:
-
-```sh
-sudo chmod +x /usr/local/bin/docker-compose
-```
-That is it.  We can now move to the next step.
-
-### Step Three: Install PostGreSQL
+### Step Two: Install PostGreSQL
 SSH to your server and run the following commands to update all the packages installed.
 ```sh
 apt update && apt update
@@ -136,7 +93,7 @@ GRANT ALL PRIVILEGES ON DATABASE yourdbname TO youruser;
 ```
 
 
-### Step Four: Install Nginx with Letsencrypt and Gurnicorn3
+### Step Three: Install Nginx with Letsencrypt and Gurnicorn3
 We will start off by installing Nginx on the system.  This will already be in the Debian repository so simply run the install command.
 
 ```sh
@@ -304,7 +261,7 @@ openssl dhparam -dsaparam -out /etc/nginx/dhparams.pem 2048
 ```
 We are not finished with the Nginx & Letsencrypt section.
 
-### Step Five: Install the Mathesar application
+### Step Four: Install the Mathesar application
 #### Set up NodeJS
 
 ##### Add the NodeJS key.
@@ -426,6 +383,7 @@ python3 -m venv /opt/virtualenvs/mathesar
 
 We can now clone the Mathesar repo into our working folder.
 ```sh
-git clone https://github.com/centerofci/mathesar.git /var/www/mathesar.example.com/
+cd /var/www/mathesar.example.com/
+git clone https://github.com/centerofci/mathesar.git
 ```
-
+Once this is installed we will install from requirements.txt 
