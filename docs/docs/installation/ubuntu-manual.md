@@ -191,8 +191,6 @@ pip3 install gunicorn
 We now will install certbot for Letsencrypt as well as gunicorn3.
 ```sh
 sudo apt-get install certbot
-
-sudo apt-get install gunicorn3
 ```
 Now we need to create a directory for Letsencrypt
 ```sh
