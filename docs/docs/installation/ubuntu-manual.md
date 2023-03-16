@@ -4,7 +4,7 @@ Installation should only take a few minutes.
 
 ## What we will do:
 - Prepare the server
-- ###### Install Docker & Docker-compose
+
 - ###### Database
   - Install PostgreSQL
   - Create Database, Database user
