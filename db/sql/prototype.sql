@@ -1,6 +1,9 @@
-/*
-Functions for testing feasibility of moving different Mathesar pieces to the database.
-*/
+-- Functions for testing feasibility of moving different Mathesar pieces to the
+-- database. These are part of the 'remove SQLAlchemy' project.
+
+
+-- Initial setup. This defines a general DDL execution function, as well as our
+-- internal schema for holding all this functionality, 'mathesar_internal'.
 
 CREATE SCHEMA IF NOT EXISTS mathesar_internal;
 
@@ -26,9 +29,7 @@ $$
 LANGUAGE plpgsql VOLATILE;
 
 
-/*
-db.tables.operations.alter
-*/
+-- db.tables.operations.alter
 
 -- Rename table
 
@@ -59,7 +60,6 @@ CREATE OR REPLACE FUNCTION mathesar_internal.change_table_name(text, text, text)
     END;
 $$
 LANGUAGE plpgsql VOLATILE;
-
 
 -- Comment on Table
 
@@ -133,21 +133,66 @@ $$
 LANGUAGE plpgsql VOLATILE;
 
 
--- This function will create a Mathesar view: for use in event trigger
+-- This section sets up an event trigger to make a Mathesar view: for use in event trigger
 
 CREATE OR REPLACE FUNCTION mathesar_internal.create_mathesar_view(oid) RETURNS TEXT
   AS $$
     DECLARE viewname TEXT;
     DECLARE viewcols TEXT;
     BEGIN
-      viewname := format('mathesar_internal.mv_%s', $1);
-      SELECT string_agg(format('%s AS col%s', quote_ident(attname), attnum), ', ')
+      viewname := format('mathesar_internal.mv%s', $1);
+      SELECT string_agg(format('%s AS c%s', quote_ident(attname), attnum), ', ')
         FROM pg_attribute
         WHERE attrelid=$1 AND attnum>0
       INTO viewcols;
       RETURN mathesar_internal.execute_ddl(
         'CREATE VIEW %s AS SELECT %s FROM %s', viewname, viewcols, $1::regclass::text
       );
+    END;
+$$
+LANGUAGE plpgsql VOLATILE;
+
+CREATE OR REPLACE FUNCTION mathesar_internal.create_mathesar_view()
+  RETURNS event_trigger
+  AS $$
+  DECLARE dc record;
+  BEGIN
+    FOR dc IN SELECT * FROM pg_event_trigger_ddl_commands()
+      LOOP
+        IF dc.object_type='table' AND upper(dc.command_tag)<>'DROP TABLE'
+        THEN
+          PERFORM mathesar_internal.create_mathesar_view(dc.objid);
+        END IF;
+      END LOOP;
+  END;
+$$ LANGUAGE plpgsql;
+
+DROP EVENT TRIGGER IF EXISTS create_mathesar_view;
+
+CREATE EVENT TRIGGER create_mathesar_view ON ddl_command_end
+  EXECUTE FUNCTION mathesar_internal.create_mathesar_view();
+
+-- This section sets up a function to delete a Mathesar view before dropping its
+-- underlying table.  Has to be called from the app layer, since it's not
+-- possible (without a C extension) to get the info about an object in an event
+-- trigger context before actually attempting to drop it.
+
+CREATE OR REPLACE FUNCTION mathesar_internal.drop_mathesar_view(oid) RETURNS TEXT
+  AS $$
+    DECLARE viewname TEXT;
+    BEGIN
+      viewname := format('mathesar_internal.mv%s', $1);
+      RETURN mathesar_internal.execute_ddl('DROP VIEW IF EXISTS %s', viewname);
+    END;
+$$
+LANGUAGE plpgsql VOLATILE;
+
+CREATE OR REPLACE FUNCTION mathesar_internal.drop_mathesar_view(text, text) RETURNS TEXT
+  AS $$
+    DECLARE tableid oid;
+    BEGIN
+      tableid := format('%s.%s', quote_ident($1), quote_ident($2))::regclass::oid;
+      RETURN mathesar_internal.drop_mathesar_view(tableid);
     END;
 $$
 LANGUAGE plpgsql VOLATILE;
