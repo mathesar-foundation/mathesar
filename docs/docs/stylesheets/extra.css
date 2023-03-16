@@ -45,16 +45,38 @@
 .md-nav__link--active {
   font-weight: 700;
 }
+/* set text decoration for links */
+.md-typeset a {
+  text-decoration: none;
+  color: var(--md-primary-fg-color);
+  border-bottom: 2px solid var(--md-primary-fg-color);
+}
 
+/* set font weight for active nav link */
+.md-nav__link--active {
+  font-weight: 700;
+}
+
+/* set styles for h1 headings */
 .md-typeset h1 {
   font-weight: 600;
   color: var(--md-primary-fg-color);
   border-bottom: 2px solid var(--md-primary-fg-color);
 }
 
+/* set styles for h2 headings */
 .md-typeset h2 {
   font-weight: 600;
+  color: var(--md-primary-fg-color--light);
 }
+
+/* set styles for h1 headings in slate color scheme */
+[data-md-color-scheme="slate"] .md-typeset h1 {
+  border-bottom: 2px solid var(--md-primary-fg-color--light);
+  color: var(--md-primary-fg-color--light);
+}
+
+
 
 [data-md-color-scheme="slate"] .md-typeset h1 {
   border-bottom: 2px solid var(--md-primary-fg-color--light);
