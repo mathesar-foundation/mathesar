@@ -1,4 +1,4 @@
-from psycopg2.errors import NotNullViolation, UniqueViolation
+from psycopg2.errors import NotNullViolation, UniqueViolation, CheckViolation
 from rest_framework import serializers
 from rest_framework import status
 from sqlalchemy.exc import IntegrityError
@@ -48,6 +48,11 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
                     table=table,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
+            elif type(e.orig) == CheckViolation:
+                raise database_api_exceptions.CheckViolationAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
             else:
                 raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         return record
@@ -69,6 +74,11 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
                     message="The requested insert violates a uniqueness constraint",
                     table=table,
                     status_code=status.HTTP_400_BAD_REQUEST,
+                )
+            elif type(e.orig) == CheckViolation:
+                raise database_api_exceptions.CheckViolationAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST
                 )
             else:
                 raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)

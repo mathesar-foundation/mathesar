@@ -4,14 +4,18 @@
   import AnchorButton from '@mathesar/component-library/anchorButton/AnchorButton.svelte';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
-  import EntityLayout from './EntityLayout.svelte';
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
   export let explorationsMap: Map<number, QueryInstance>;
   export let hasTablesToExplore: boolean;
+  export let canEditMetadata: boolean;
+
+  $: showTutorial =
+    explorationsMap.size === 0 && hasTablesToExplore && canEditMetadata;
 
   let explorationsSearchQuery = '';
 
@@ -34,25 +38,25 @@
   }
 </script>
 
-<EntityLayout
+<EntityContainerWithFilterBar
   searchPlaceholder="Search Explorations"
   bind:searchQuery={explorationsSearchQuery}
   on:clear={clearQuery}
 >
-  <slot slot="action">
+  <svelte:fragment slot="action">
     <AnchorButton href={getDataExplorerPageUrl(database.name, schema.id)}>
       Open Data Explorer
     </AnchorButton>
-  </slot>
-  <slot slot="resultInfo">
+  </svelte:fragment>
+  <svelte:fragment slot="resultInfo">
     <p>
       {labeledCount(filteredExplorations, 'results')}
       for all explorations matching
       <strong>{explorationsSearchQuery}</strong>
     </p>
-  </slot>
-  <slot slot="content">
-    {#if !explorationsMap.size && hasTablesToExplore}
+  </svelte:fragment>
+  <svelte:fragment slot="content">
+    {#if showTutorial}
       <CreateNewExplorationTutorial {database} {schema} />
     {:else}
       <ExplorationsList
@@ -61,5 +65,5 @@
         {schema}
       />
     {/if}
-  </slot>
-</EntityLayout>
+  </svelte:fragment>
+</EntityContainerWithFilterBar>

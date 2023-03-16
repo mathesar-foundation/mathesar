@@ -1,8 +1,15 @@
 name: Run Python tests
-on: [push, pull_request]
+on: 
+  push:
+    paths:
+      - '**.py'
+  pull_request:
+    paths:
+      - '**.py'
+
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
     # We only want to run on external PRs, since internal PRs are covered by "push"
     # This prevents this from running twice on internal PRs
@@ -19,13 +26,13 @@ jobs:
         run: sudo chown -R 1000:1000 .
 
       - name: Build the stack
-        run: docker-compose up --build -d
+        run: docker-compose --profile test up --build -d
 
       - name: Create coverage directory
-        run: docker exec mathesar_service mkdir coverage_report
+        run: docker exec mathesar_service_test mkdir coverage_report
 
       - name: Run tests with pytest
-        run: docker exec mathesar_service pytest --exitfirst --ignore=mathesar/tests/integration/ --cov-report=xml:coverage_report/coverage.xml
+        run: docker exec mathesar_service_test pytest --exitfirst --ignore=mathesar/tests/integration/ --cov-report=xml:coverage_report/coverage.xml
 
       - name: Save the coverage report
         uses: codecov/codecov-action@v2

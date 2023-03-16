@@ -17,7 +17,7 @@
   export let closeOnInnerClick = false;
   export let ariaLabel: string | undefined = undefined;
   export let ariaControls: string | undefined = undefined;
-  export let placement: Placement = 'bottom-start';
+  export let placements: Placement[] | undefined = undefined;
   export let showArrow = true;
   export let size: Size = 'medium';
 
@@ -41,13 +41,10 @@
 
   function toggle(e: Event) {
     /**
-     * To make it work when wrapped with an anchor tag.
-     * Since the event is already not bubbling up
-     * and this component will always necessarily handle the click event,
-     * preventing the default behaviour should be fine
+     * If this Dropdown is used in a form we should prevent the default
+     * behavior of submitting the form.
      */
     e.preventDefault();
-    e.stopPropagation();
     isOpen = !isOpen;
   }
 
@@ -84,7 +81,7 @@
 <AttachableDropdown
   trigger={triggerElement}
   {isOpen}
-  {placement}
+  {placements}
   class={contentClass}
   {closeOnInnerClick}
   on:close={close}

@@ -5,6 +5,7 @@ from sqlalchemy.exc import DatabaseError
 
 from db.columns.exceptions import DagCycleError
 from db.columns.operations.alter import alter_column_type
+from db.columns.operations.select import determine_whether_column_contains_data
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.types.base import PostgresType, MathesarCustomType, get_available_known_db_types
 from db.metadata import get_empty_metadata
@@ -18,9 +19,7 @@ TYPE_INFERENCE_DAG = {
     PostgresType.BOOLEAN: [],
     MathesarCustomType.EMAIL: [],
     PostgresType.INTERVAL: [],
-    PostgresType.NUMERIC: [
-        PostgresType.BOOLEAN,
-    ],
+    PostgresType.NUMERIC: [],
     PostgresType.TEXT: [
         PostgresType.BOOLEAN,
         PostgresType.DATE,
@@ -28,9 +27,10 @@ TYPE_INFERENCE_DAG = {
         MathesarCustomType.MATHESAR_MONEY,
         PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
-        # We only infer to TIME_WITHOUT_TIME_ZONE as time zones don't make much sense
-        # without additional date information. See postgres documentation for further
-        # details: https://www.postgresql.org/docs/13/datatype-datetime.html
+        # We only infer to TIME_WITHOUT_TIME_ZONE as time zones don't make much
+        # sense without additional date information. See postgres documentation
+        # for further details:
+        # https://www.postgresql.org/docs/13/datatype-datetime.html
         PostgresType.TIME_WITHOUT_TIME_ZONE,
         PostgresType.INTERVAL,
         MathesarCustomType.EMAIL,
@@ -41,26 +41,45 @@ TYPE_INFERENCE_DAG = {
 }
 
 
-def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=None, metadata=None, columns_might_have_defaults=True):
+def infer_column_type(
+        schema,
+        table_name,
+        column_name,
+        engine,
+        depth=0,
+        type_inference_dag=None,
+        metadata=None,
+        columns_might_have_defaults=True,
+):
     """
-    Attempts to cast the column to the best type for it, given the mappings defined in TYPE_INFERENCE_DAG
-    and _get_type_classes_mapped_to_dag_nodes. Returns the resulting column type's class.
+    Attempt to cast the column to the best type for it.
+
+    Returns the resulting column type's class.
 
     Algorithm:
-        1. reflect the column's type class;
-        2. use _get_type_classes_mapped_to_dag_nodes to map it to a TYPE_INFERENCE_DAG key;
-        3. look up the sequence of types referred to by that key on the TYPE_INFERENCE_DAG;
-            - if there's no such key on the TYPE_INFERENCE_DAG dict, or if its value is an empty
-            list, return the current column type's class;
-        4. iterate through that sequence of types trying to alter the column's type to them;
-            - if the column's type is altered successfully, break iteration and return the output
-            of running infer_column_type again (trigger tail recursion);
-            - if none of the column type alterations succeed, return the current column type's
-            class.
+        1. Check for any data in the column.
+           - If the column is empty, return the column's current type
+             class.
+        2. reflect the column's type class.
+        3. Use _get_type_classes_mapped_to_dag_nodes to map it to a
+           TYPE_INFERENCE_DAG key.
+        4. Look up the sequence of types referred to by that key on the
+           TYPE_INFERENCE_DAG.
+           - If there's no such key on the TYPE_INFERENCE_DAG dict, or if
+             its value is an empty list, return the current column's type
+             class.
+        5. Iterate through that sequence of types trying to alter the
+           column's type to them.
+           - If the column's type is altered successfully, break
+             iteration and return the output of running infer_column_type
+             again (trigger tail recursion).
+           - If none of the column type alterations succeed, return the
+             current column's type class.
     """
+    metadata = metadata if metadata else get_empty_metadata()
+
     if type_inference_dag is None:
         type_inference_dag = TYPE_INFERENCE_DAG
-    metadata = metadata if metadata else get_empty_metadata()
     if depth > MAX_INFERENCE_DAG_DEPTH:
         raise DagCycleError("The type_inference_dag likely has a cycle")
     type_classes_to_dag_nodes = _get_type_classes_mapped_to_dag_nodes(engine)
@@ -71,11 +90,18 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
         column_name=column_name,
         metadata=metadata,
     )
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    column_contains_data = determine_whether_column_contains_data(
+        table_oid, column_name, engine, metadata
+    )
+    # We short-circuit in this case since we can't infer type without data.
+    if not column_contains_data:
+        return column_type_class
+
     # a DAG node will be a DatabaseType Enum
     dag_node = type_classes_to_dag_nodes.get(column_type_class)
     logger.debug(f"dag_node: {dag_node}")
     types_to_cast_to = type_inference_dag.get(dag_node, [])
-    table_oid = get_oid_from_table(table_name, schema, engine)
     for db_type in types_to_cast_to:
         try:
             with engine.begin() as conn:

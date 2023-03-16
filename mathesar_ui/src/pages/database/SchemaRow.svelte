@@ -20,20 +20,23 @@
 
   export let database: Database;
   export let schema: SchemaEntry;
+  export let canExecuteDDL = true;
+
+  let isHovered = false;
 
   $: href = getSchemaPageUrl(database.name, schema.id);
   $: isDefault = schema.name === 'public';
   $: isLocked = schema.name === 'public';
 </script>
 
-<a {href} class="schema-details-link">
-  <div class="schema-row" class:is-locked={isLocked}>
-    <div class="title-and-meta">
-      <span class="name"><SchemaName {schema} iconHasBox /></span>
+<div class="schema-row" class:hover={isHovered} class:is-locked={isLocked}>
+  <div class="title-and-meta">
+    <div class="name"><SchemaName {schema} iconHasBox /></div>
 
-      {#if isLocked}
-        <span class="lock"><Icon {...iconNotEditable} /></span>
-      {:else}
+    {#if isLocked}
+      <div class="lock"><Icon {...iconNotEditable} /></div>
+    {:else if canExecuteDDL}
+      <div class="menu-trigger">
         <DropdownMenu
           showArrow={false}
           triggerAppearance="plain"
@@ -42,72 +45,99 @@
           icon={iconMoreActions}
           menuStyle="--spacing-y:0.8em;"
         >
-          <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}
-            >Edit Schema</ButtonMenuItem
-          >
+          <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}>
+            Edit Schema
+          </ButtonMenuItem>
           <MenuDivider />
           <ButtonMenuItem
             danger
             on:click={() => dispatch('delete')}
-            icon={iconDeleteMajor}>Delete Schema</ButtonMenuItem
+            icon={iconDeleteMajor}
           >
+            Delete Schema
+          </ButtonMenuItem>
         </DropdownMenu>
-      {/if}
-    </div>
-
-    {#if schema.description}
-      <p class="description" title={schema.description}>
-        {schema.description}
-      </p>
-    {/if}
-
-    <SchemaConstituentCounts {schema} />
-
-    {#if isDefault}
-      <InfoBox>
-        Every PostgreSQL database includes the "public" schema. This protected
-        schema can be read by anybody who accesses the database.
-      </InfoBox>
+      </div>
     {/if}
   </div>
-</a>
 
-<style lang="scss">
-  .schema-details-link {
-    text-decoration: none;
-    color: inherit;
+  {#if schema.description}
+    <p class="description" title={schema.description}>
+      {schema.description}
+    </p>
+  {/if}
+
+  <SchemaConstituentCounts {schema} />
+
+  {#if isDefault}
+    <InfoBox>
+      Every PostgreSQL database includes the "public" schema. This protected
+      schema can be read by anybody who accesses the database.
+    </InfoBox>
+  {/if}
+
+  <!-- svelte-ignore a11y-missing-content -->
+  <a
+    {href}
+    class="hyperlink-overlay"
+    aria-label={schema.name}
+    on:mouseenter={() => {
+      isHovered = true;
+    }}
+    on:mouseleave={() => {
+      isHovered = false;
+    }}
+  />
+</div>
+
+<style>
+  .schema-row {
+    position: relative;
+    isolation: isolate;
+    --z-index-hyperlink-overlay: 1;
+    --z-index-menu-trigger: 2;
+    border-radius: var(--border-radius-l);
+    border: 1px solid var(--slate-300);
+    padding: 1.142em;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .schema-row > :global(* + *) {
+    margin-top: 0.75rem;
+  }
+
+  .schema-row.is-locked {
+    background-color: var(--slate-100);
+  }
+
+  .schema-row.hover {
+    border: solid 1px var(--slate-500);
+    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .hyperlink-overlay {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: var(--z-index-hyperlink-overlay);
+  }
+
+  .menu-trigger {
+    z-index: var(--z-index-menu-trigger);
   }
 
   .description {
     font-weight: 400;
     font-size: var(--text-size-large);
     color: var(--slate-700);
-    margin: 0;
+    margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
-  }
-
-  .schema-row {
-    border-radius: var(--border-radius-l);
-    padding: 1.142em;
-    border: 1px solid var(--slate-300);
-    display: flex;
-    flex-direction: column;
-    transition: border-color 0.2s ease-in-out;
-    > :global(* + *) {
-      margin-top: 0.75rem;
-    }
-  }
-
-  .schema-row:hover {
-    border-color: var(--slate-500);
-    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
-  }
-
-  .schema-row.is-locked {
-    background-color: var(--slate-100);
   }
 
   .title-and-meta {

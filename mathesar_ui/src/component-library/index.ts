@@ -30,6 +30,7 @@ export {
   StringifiedNumberFormatter,
 } from './number-input';
 export { default as MultiSelect } from './multi-select/MultiSelect.svelte';
+export { default as PasswordInput } from './password-input/PasswordInput.svelte';
 export { default as Progress } from './progress/Progress.svelte';
 export { default as Radio } from './radio/Radio.svelte';
 export { default as RadioGroup } from './radio-group/RadioGroup.svelte';

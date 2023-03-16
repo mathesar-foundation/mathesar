@@ -1,7 +1,7 @@
 name: Update project on PR label change
 on:
   pull_request_target:
-    types: [labeled]
+    types: [opened, labeled]
 
 jobs:
   update_project_on_pr_label_change:

@@ -2,8 +2,8 @@
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import TablesList from './TablesList.svelte';
-  import EntityLayout from './EntityLayout.svelte';
   import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
   import CreateNewTableButton from './CreateNewTableButton.svelte';
 
@@ -11,6 +11,9 @@
 
   export let database: Database;
   export let schema: SchemaEntry;
+  export let canExecuteDDL: boolean;
+
+  $: showTutorial = tablesMap.size === 0 && canExecuteDDL;
 
   let tableSearchQuery = '';
 
@@ -30,26 +33,28 @@
   }
 </script>
 
-<EntityLayout
+<EntityContainerWithFilterBar
   searchPlaceholder="Search Tables"
   bind:searchQuery={tableSearchQuery}
   on:clear={clearQuery}
 >
-  <slot slot="action">
-    <CreateNewTableButton {database} {schema} />
-  </slot>
-  <slot slot="resultInfo">
+  <svelte:fragment slot="action">
+    {#if canExecuteDDL}
+      <CreateNewTableButton {database} {schema} />
+    {/if}
+  </svelte:fragment>
+  <svelte:fragment slot="resultInfo">
     <p>
       {labeledCount(filteredTables, 'results')}
       for all tables matching
       <strong>{tableSearchQuery}</strong>
     </p>
-  </slot>
-  <slot slot="content">
-    {#if tablesMap.size}
-      <TablesList tables={filteredTables} {database} {schema} />
-    {:else}
+  </svelte:fragment>
+  <svelte:fragment slot="content">
+    {#if showTutorial}
       <CreateNewTableTutorial {database} {schema} />
+    {:else}
+      <TablesList {canExecuteDDL} tables={filteredTables} {database} {schema} />
     {/if}
-  </slot>
-</EntityLayout>
+  </svelte:fragment>
+</EntityContainerWithFilterBar>

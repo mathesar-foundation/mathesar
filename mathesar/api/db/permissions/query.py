@@ -23,14 +23,14 @@ class QueryAccessPolicy(AccessPolicy):
                 'records',
 
             ],
-            'principal': '*',
+            'principal': 'authenticated',
             'effect': 'allow',
         },
     ]
 
     @classmethod
     def scope_queryset(cls, request, qs):
-        if not request.user.is_superuser:
+        if not (request.user.is_superuser or request.user.is_anonymous):
             allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
             permissible_database_role_filter = (
                 Q(base_table__schema__database__database_role__role__in=allowed_roles)

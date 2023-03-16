@@ -165,13 +165,12 @@ export function getSchemasStoreForDB(
       data: new Map(),
     });
     dbSchemaStoreMap.set(database, store);
-
-    if (preload) {
-      preload = false;
+    if (preload && commonData?.current_db === database) {
       store = setDBSchemaStore(database, commonData?.schemas || []);
     } else {
       void refetchSchemasForDB(database);
     }
+    preload = false;
   } else if (get(store).error) {
     void refetchSchemasForDB(database);
   }

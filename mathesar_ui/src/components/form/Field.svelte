@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type { ComponentProps, ComponentType, SvelteComponent } from 'svelte';
+  import type { ComponentProps, SvelteComponent } from 'svelte';
 
   import { LabeledInput, TextInput } from '@mathesar-component-library';
+  import type { ComponentWithProps } from '@mathesar-component-library/types';
   import type { FieldStore } from './field';
   import FieldErrors from './FieldErrors.svelte';
   import FieldLayout from './FieldLayout.svelte';
@@ -10,15 +11,8 @@
   type Value = $$Generic;
   type InputType = $$Generic<SvelteComponent>;
 
-  // TODO replace this with the shared version of `ComponentAndProps` once we
-  // refactor that type to be generic.
-  type ComponentAndProps<T extends SvelteComponent> = {
-    component: ComponentType<T>;
-    props?: ComponentProps<T>;
-  };
-
   export let field: FieldStore<Value>;
-  export let input: ComponentAndProps<InputType> | undefined = undefined;
+  export let input: ComponentWithProps<InputType> | undefined = undefined;
   export let label: string | undefined = undefined;
   export let help: string | undefined = undefined;
   export let layout: Layout | undefined = undefined;

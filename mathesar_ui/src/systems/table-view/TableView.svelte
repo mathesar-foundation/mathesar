@@ -8,6 +8,11 @@
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
+  import { orderProcessedColumns } from '@mathesar/utils/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
@@ -16,27 +21,42 @@
   type Context = 'page' | 'widget';
 
   const tabularData = getTabularDataStoreFromContext();
+  const userProfile = getUserProfileStoreFromContext();
+
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
+  $: canExecuteDDL = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canExecuteDDL',
+  );
 
   export let context: Context = 'page';
+  export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
 
   $: usesVirtualList = context === 'page';
-  $: allowsDdlOperations = context === 'page';
+  $: allowsDdlOperations = context === 'page' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection } = $tabularData);
   $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
+  $: ({ settings } = table);
+  $: ({ column_order: columnOrder } = settings);
   $: hasNewColumnButton = allowsDdlOperations;
   /**
    * These are separate variables for readability and also to keep the door open
    * to more easily displaying the Table Inspector even if DDL operations are
    * not supported.
    */
-  $: supportsTableInspector = allowsDdlOperations;
+  $: supportsTableInspector = context === 'page';
   $: sheetColumns = (() => {
+    const orderedProcessedColumns = orderProcessedColumns(
+      $processedColumns,
+      table,
+    );
     const columns = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...$processedColumns.values(),
+      ...orderedProcessedColumns.values(),
     ];
     if (hasNewColumnButton) {
       columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });
@@ -92,7 +112,7 @@
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
         >
-          <Header {hasNewColumnButton} />
+          <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
         </Sheet>
       {/if}

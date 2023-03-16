@@ -4,13 +4,14 @@
 
   export let icon: IconProps | undefined = undefined;
   export let href: string;
+  export let hasNotificationDot = false;
 </script>
 
 <a {href} class="menu-item menu-item-link" {...$$restProps}>
   <div class="spacer cell" />
   <div class="control cell" />
   <div class="icon cell">
-    {#if icon}<Icon {...icon} />{/if}
+    {#if icon}<Icon {...icon} {hasNotificationDot} />{/if}
   </div>
   <div class="label cell"><slot /></div>
   <div class="spacer cell" />

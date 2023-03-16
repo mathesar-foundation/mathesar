@@ -328,7 +328,7 @@
   cssVariables={{
     '--max-layout-width': '65.357rem',
     '--layout-background-color': 'var(--sand-200)',
-    '--inset-page-padding': 'var(--size-xx-large)',
+    '--inset-page-section-padding': 'var(--size-xx-large)',
     '--inset-layout-padding': '0',
   }}
 >
@@ -490,8 +490,6 @@
     position: relative;
 
     h1 {
-      font-weight: 500;
-      font-size: var(--size-xx-large);
       margin: 1em 0;
     }
 
@@ -532,12 +530,12 @@
         border-top: solid 1px var(--slate-300);
 
         h2 {
-          padding: var(--size-small) var(--inset-page-padding);
+          padding: var(--size-small) var(--inset-page-section-padding);
           border-bottom: 1px solid var(--slate-200);
         }
 
         .content {
-          padding: var(--inset-page-padding);
+          padding: var(--inset-page-section-padding);
           background: var(--slate-50);
           margin-bottom: 5rem;
         }

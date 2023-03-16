@@ -12,6 +12,7 @@
   import { toast } from '@mathesar/stores/toast';
 
   export let column: ProcessedColumn;
+  export let canEditMetadata: boolean;
 
   let actionButtonsVisible = false;
 
@@ -64,6 +65,8 @@
   }
 
   $: isFkOrPk = column.column.primary_key || !!column.linkFk;
+  $: isFormDisabled =
+    typeChangeState?.state === 'processing' || !canEditMetadata;
 </script>
 
 {#if displayOptionsConfig && displayForm && !isFkOrPk}
@@ -73,6 +76,7 @@
       {displayOptionsConfig}
       {displayForm}
       {displayFormValues}
+      disabled={isFormDisabled}
     />
 
     {#if actionButtonsVisible}

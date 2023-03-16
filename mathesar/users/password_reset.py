@@ -10,7 +10,7 @@ class MathesarSetPasswordForm(SetPasswordForm):
     def save(self, commit=True):
         password = self.cleaned_data["new_password1"]
         self.user.set_password(password)
-        # Default password is replaced with a password is set by the user, so change the status
+        # Default password is replaced with a password which is set by the user, so change the status
         self.user.password_change_needed = False
         if commit:
             self.user.save()
@@ -22,6 +22,7 @@ class MathesarPasswordResetConfirmView(PasswordResetConfirmView):
     form_class = MathesarSetPasswordForm
     template_name = 'users/password_reset_confirmation.html'
     title = _('Change Default Password')
+    success_url = "/auth/login"
 
     @method_decorator(sensitive_post_parameters())
     @method_decorator(never_cache)

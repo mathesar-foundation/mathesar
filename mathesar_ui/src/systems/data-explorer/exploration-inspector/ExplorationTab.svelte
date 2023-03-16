@@ -25,6 +25,7 @@
   export let queryHandler: QueryRunner | QueryManager;
   export let name: string | undefined;
   export let description: string | undefined;
+  export let canEditMetadata: boolean;
 
   $: ({ query } = queryHandler);
   $: hasManager = queryHandler instanceof QueryManager;
@@ -105,6 +106,7 @@
             aria-label="name"
             on:change={handleNameChange}
             on:input={setHasChangesToTrue}
+            disabled={!canEditMetadata}
           />
         </LabeledInput>
       </FormField>
@@ -115,11 +117,12 @@
             aria-label="description"
             on:change={handleDescriptionChange}
             on:input={setHasChangesToTrue}
+            disabled={!canEditMetadata}
           />
         </LabeledInput>
       </FormField>
 
-      {#if !hasManager && hasChanges}
+      {#if !hasManager && hasChanges && canEditMetadata}
         <FormField>
           <CancelOrProceedButtonPair
             cancelButton={{ icon: undefined }}
@@ -133,16 +136,18 @@
   </div>
 </Collapsible>
 
-<Collapsible isOpen triggerAppearance="plain">
-  <span slot="header">Actions</span>
-  <div slot="content" class="section-content actions">
-    <Button
-      class="delete-button"
-      appearance="outline-primary"
-      on:click={handleDeleteExploration}
-    >
-      <Icon {...iconDeleteMajor} />
-      <span>Delete Exploration</span>
-    </Button>
-  </div>
-</Collapsible>
+{#if canEditMetadata}
+  <Collapsible isOpen triggerAppearance="plain">
+    <span slot="header">Actions</span>
+    <div slot="content" class="section-content actions">
+      <Button
+        class="delete-button"
+        appearance="outline-primary"
+        on:click={handleDeleteExploration}
+      >
+        <Icon {...iconDeleteMajor} />
+        <span>Delete Exploration</span>
+      </Button>
+    </div>
+  </Collapsible>
+{/if}

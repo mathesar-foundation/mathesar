@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
 
   import {
     compareWholeValues,
@@ -33,6 +33,7 @@
 
   let cellRef: HTMLElement;
   let isEditMode = false;
+  let lastSavedValue: Value | undefined | null = undefined;
 
   $: formattedValue = formatValue?.(value) ?? value;
   $: matchParts = (() => {
@@ -64,6 +65,14 @@
     isEditMode = false;
   }
 
+  function revertValue() {
+    value = lastSavedValue;
+  }
+
+  function initLastSavedValue() {
+    lastSavedValue = value;
+  }
+
   function handleKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
@@ -78,6 +87,7 @@
         e.preventDefault();
         break;
       case 'Escape':
+        revertValue();
         resetEditMode();
         break;
       case 'Tab':
@@ -104,6 +114,10 @@
   }
 
   function dispatchUpdate() {
+    if (value === lastSavedValue) {
+      return;
+    }
+    initLastSavedValue();
     dispatch('update', {
       value,
     });
@@ -111,8 +125,10 @@
 
   function handleInputKeydown(e: KeyboardEvent) {
     switch (e.key) {
-      case 'Enter':
       case 'Escape':
+        revertValue();
+        break;
+      case 'Enter':
       case 'Tab':
         dispatchUpdate();
         break;
@@ -131,6 +147,8 @@
       dispatch('activate');
     }
   }
+
+  onMount(initLastSavedValue);
 </script>
 
 <CellWrapper
