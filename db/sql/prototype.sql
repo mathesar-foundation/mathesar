@@ -2,7 +2,16 @@
 Functions for testing feasibility of moving different Mathesar pieces to the database.
 */
 
-CREATE SCHEMA mathesar_internal;
+CREATE SCHEMA IF NOT EXISTS mathesar_internal;
+
+CREATE OR REPLACE FUNCTION mathesar_internal.execute_ddl(text) RETURNS TEXT
+  AS $$
+    BEGIN
+      EXECUTE $1;
+      RETURN $1;
+    END;
+$$
+LANGUAGE plpgsql VOLATILE;
 
 CREATE OR REPLACE FUNCTION mathesar_internal.execute_ddl(text, variadic anyarray) RETURNS TEXT
   AS $$
@@ -119,6 +128,26 @@ CREATE OR REPLACE FUNCTION mathesar_internal.update_pk_sequence_to_latest(text, 
     BEGIN
       qualified_table_name := format('%s.%s', quote_ident($1), quote_ident($2));
       RETURN mathesar_internal.update_pk_sequence_to_latest_internal(qualified_table_name, quote_ident($3));
+    END;
+$$
+LANGUAGE plpgsql VOLATILE;
+
+
+-- This function will create a Mathesar view: for use in event trigger
+
+CREATE OR REPLACE FUNCTION mathesar_internal.create_mathesar_view(oid) RETURNS TEXT
+  AS $$
+    DECLARE viewname TEXT;
+    DECLARE viewcols TEXT;
+    BEGIN
+      viewname := format('mathesar_internal.mv_%s', $1);
+      SELECT string_agg(format('%s AS col%s', quote_ident(attname), attnum), ', ')
+        FROM pg_attribute
+        WHERE attrelid=$1 AND attnum>0
+      INTO viewcols;
+      RETURN mathesar_internal.execute_ddl(
+        'CREATE VIEW %s AS SELECT %s FROM %s', viewname, viewcols, $1::regclass::text
+      );
     END;
 $$
 LANGUAGE plpgsql VOLATILE;
