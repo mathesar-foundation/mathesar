@@ -24,7 +24,7 @@
 <AttachableDropdown
   {trigger}
   isOpen={isContentShown}
-  placement="top"
+  placements={['top', 'right', 'bottom', 'left']}
   class="tooltip {tooltipClass}"
 >
   <slot name="content" />
