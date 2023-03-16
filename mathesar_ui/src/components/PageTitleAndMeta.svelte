@@ -7,6 +7,7 @@
   export let name: string;
 </script>
 
+<div class = "wrapper">
 <div class="container">
   <div class="top">
     <div class="left">
@@ -28,14 +29,22 @@
  
    
 </div>
-
+</div>
 
 <style lang="scss">
-  .container {
+ .wrapper {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0.125rem;
+  padding-right: 0.9375rem ; 
+  padding-top: 4px;
+}
+ 
+ .container {
     display: flex;
     flex-direction: column;
-    padding-left: 2px;
-    padding-right: 15px;
+  
+   
 
     > :global(* + *) {
       margin-top: 1rem;
@@ -55,7 +64,6 @@
     flex-direction: row;
     align-items: center;
     margin-left: 0.6rem;
-    
   }
 
   .entity-icon {
