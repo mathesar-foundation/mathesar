@@ -397,7 +397,7 @@ systemctl daemon-reload
 ```
 #### Create the virtual environment
 
-We need to create a virtual environment for the Mathesar application.  Wew will do this by running the following command:
+We need to create a virtual environment for the Mathesar application.  We will do this by running the following command:
 ```sh
 python3 -m venv /opt/virtualenvs/mathesar
 ```
