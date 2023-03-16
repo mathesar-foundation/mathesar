@@ -318,7 +318,7 @@ BEGIN
     FROM pg_attribute
     WHERE attrelid=table_id AND attnum>0 AND NOT attisdropped
   INTO viewcols;
-  RETURN mathesar_internal.exec_ddl(
+  RETURN __msar.exec_ddl(
     'CREATE OR REPLACE VIEW %s AS SELECT %s FROM %s',
     viewname, viewcols, __msar.get_table_name(table_id)
   );
@@ -335,7 +335,7 @@ BEGIN
     LOOP
       IF ddl_command.object_type='table' AND upper(ddl_command.command_tag)<>'DROP TABLE'
       THEN
-        PERFORM mathesar_internal.create_mathesar_view(ddl_command.objid);
+        PERFORM msar.create_mathesar_view(ddl_command.objid);
       END IF;
     END LOOP;
 END;
@@ -356,7 +356,7 @@ Args:
 DECLARE viewname text;
 BEGIN
   viewname := msar.get_mathesar_view_name(table_id)
-  RETURN mathesar_internal.exec_ddl('DROP VIEW IF EXISTS %s', viewname);
+  RETURN __msar.exec_ddl('DROP VIEW IF EXISTS %s', viewname);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -371,6 +371,6 @@ Args:
 DECLARE table_id oid;
 BEGIN
   table_id := format('%s.%s', quote_ident($1), quote_ident($2))::regclass::oid;
-  RETURN mathesar_internal.drop_mathesar_view(table_id);
+  RETURN msar.drop_mathesar_view(table_id);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
