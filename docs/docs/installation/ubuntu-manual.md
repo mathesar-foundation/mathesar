@@ -336,7 +336,7 @@ Next we will create the logging directory for Gunicorn and assign it to the guni
 ```sh
 sudo mkdir /var/log/gunicorn # Only if it does not exist already, but installation of Gunicorn should have created this and assigned to www-data user/group
 chmod 0755 /var/log/gunicorn
-chgroup gunicorn /var/log/gunicorn
+chgrp gunicorn /var/log/gunicorn
 chown gunicorn /var/log/gunicorn
 ```
 Next we will create the Gunicorn systemd service.  You must create the file here: `/lib/systemd/system/gunicorn.service` and copy the following code into it.  Pay attention as you have to edit the code according to your FQDN / URL.
