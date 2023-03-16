@@ -99,6 +99,20 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.get_table_oid(schema_ text, name_ text) RETURNS text AS $$/*
+Return the OID for a given table.
+
+Args:
+  schema_: The schema of the table, unquoted.
+  name_:   The name of the table, unqualified and unquoted.
+*/
+BEGIN
+  RETURN msar.get_fq_table_name(schema_, name_)::regclass::oid;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_column_name(table_id oid, col_attnum integer) RETURNS text AS $$/*
 Return the name for a given table, qualified or quoted as appropriate.
 
@@ -283,7 +297,6 @@ Args:
   table_id: The OID of the table whose primary key sequence we'll update.
   col_attnum: The attnum of the primary key column.
 */
-*/
 DECLARE qualified_table_name text;
 BEGIN
   qualified_table_name := msar.get_fq_table_name(schema_, table_name);
@@ -347,7 +360,8 @@ CREATE EVENT TRIGGER create_mathesar_view ON ddl_command_end
   EXECUTE FUNCTION __msar.create_mathesar_view();
 
 
-CREATE OR REPLACE FUNCTION msar.drop_mathesar_view(table_id oid) RETURNS text AS $$/*
+CREATE OR REPLACE FUNCTION
+msar.drop_mathesar_view(table_id oid) RETURNS text AS $$/*
 Drop the Mathesar view tracking the given table.
 
 Args:
@@ -355,13 +369,14 @@ Args:
 */
 DECLARE viewname text;
 BEGIN
-  viewname := msar.get_mathesar_view_name(table_id)
+  viewname := msar.get_mathesar_view_name(table_id);
   RETURN __msar.exec_ddl('DROP VIEW IF EXISTS %s', viewname);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.drop_mathesar_view(text, text) RETURNS text AS $$/*
+CREATE OR REPLACE FUNCTION
+msar.drop_mathesar_view(schema_ text, table_name text) RETURNS text AS $$/*
 Drop the Mathesar view tracking the given table.
 
 Args:
@@ -370,7 +385,7 @@ Args:
 */
 DECLARE table_id oid;
 BEGIN
-  table_id := format('%s.%s', quote_ident($1), quote_ident($2))::regclass::oid;
+  table_id := msar.get_table_oid(schema_, table_name);
   RETURN msar.drop_mathesar_view(table_id);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
