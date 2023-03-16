@@ -20,6 +20,7 @@ Installation should only take a few minutes.
     - Ubntu 22 with at least `60 GB` disk space and `4GB` of RAM.
     - Root privileges
     - Domain name, or subdomain, for your installation.  We will use `mathesar.example.com` as the domain for our website
+    - Python 3.9  
     
 ### Step one: Prepare the server
 First, we need to update the software repository and upgrade all packages using the apt command below.  SSH to your server and elevate to the `root` user.
@@ -29,7 +30,7 @@ apt update && apt upgrade
 Once the system has been updated, I recommend you perform a reboot to get the new kernel running incase it was updated.
 Next we will install the required packages.
 ```sh
-apt install locales build-essential acl ntp git python3-pip ipython3
+apt install locales build-essential acl ntp git python3-pip ipython3 build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev -y
 ```
 Now we need to add a new usergroup and allow passwordless login:
 ```sh
