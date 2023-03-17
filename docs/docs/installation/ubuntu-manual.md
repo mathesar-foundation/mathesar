@@ -70,6 +70,17 @@ We already installed the required dependencies in the previous step, so in the n
 ```sh
 python3.9 --version
 ```
+##### Switch python version
+Now that we have multiple Python versions installed, we need to add the symbolic links for every Python version separately.  This will allow us to switch versions as needed on our system.  Run the following commands:
+```sh
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
+sudo update-alternatives --install /usr/bin/python python /usr/local/bin/python3.9 2
+```
+This will create the necessary links.  You can now select which version of Python you want to use with the following command.  (You will select 2 here as we want Python 3.9)
+```sh
+sudo update-alternatives --config python
+```
+
 
 ### Step Two: Install PostGreSQL
 SSH to your server and run the following commands to update all the packages installed.
@@ -399,7 +410,7 @@ systemctl daemon-reload
 
 We need to create a virtual environment for the Mathesar application.  We will do this by running the following command:
 ```sh
-python3 -m venv /opt/virtualenvs/mathesar
+python3.9 -m venv /opt/virtualenvs/mathesar
 ```
 
 #### Clone the Mathesar repo
@@ -411,5 +422,5 @@ git clone https://github.com/centerofci/mathesar.git
 ```
 Once this is installed we will install from requirements.txt 
 ```sh
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
