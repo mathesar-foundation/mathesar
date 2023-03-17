@@ -75,7 +75,7 @@
         appearance="primary"
         on:click={() => {
           recordsData.addEmptyRecord();
-          selection.selectAndActivateFirstCellAfterAddingNewRecord();
+          selection.selectAndActivateFirstDataEntryCellInLastRow();
         }}
       >
         <Icon {...iconAddNew} />

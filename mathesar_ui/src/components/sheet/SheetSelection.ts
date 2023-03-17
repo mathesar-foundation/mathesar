@@ -339,7 +339,7 @@ export default class SheetSelection<
     }
   }
 
-  selectAndActivateFirstCellAfterAddingNewRecord(): void {
+  selectAndActivateFirstDataEntryCellInLastRow(): void {
     const currentRows = this.getRows();
     const currentColumns = this.getColumns();
     if (currentRows.length > 0 && currentColumns.length > 1) {
