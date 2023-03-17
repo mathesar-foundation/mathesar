@@ -61,3 +61,4 @@ class ErrorCodes(Enum):
     IncorrectOldPassword = 4419
     EditingPublicSchema = 4421
     DuplicateUIQueryInSchema = 4422
+    IdentifierTooLong = 4423
