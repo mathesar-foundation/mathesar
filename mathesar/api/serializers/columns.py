@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty, SerializerMethodField
 from rest_framework.settings import api_settings
 
+from db.identifiers import is_identifier_too_long
 from db.columns.exceptions import InvalidTypeError
 from db.columns.exceptions import InvalidTypeOptionError
 from db.types.base import PostgresType, MathesarCustomType
@@ -109,6 +110,11 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
             db_type = get_db_type_enum_from_id(db_type_id) if db_type_id else None
         self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = db_type
         return super().to_internal_value(data)
+
+    def validate_name(self, name):
+        if is_identifier_too_long(name):
+            raise database_api_exceptions.IdentifierTooLong(field='name')
+        return name
 
 
 def _force_canonical_type(representation, db_type):
