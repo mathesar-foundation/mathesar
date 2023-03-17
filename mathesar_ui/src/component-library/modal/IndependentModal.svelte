@@ -11,7 +11,7 @@
 
   export let isOpen = false;
   export let title: string | undefined = undefined;
-  export let size: ModalWidth = 'medium';
+  export let size: ModalWidth = 'regular';
   export let allowClose = true;
   export let hasOverlay = true;
   export let closeOn: ModalCloseAction[] = ['button'];
@@ -59,6 +59,7 @@
     {/if}
     <div
       class="window-positioner"
+      class:width-regular={size === 'regular'}
       class:width-medium={size === 'medium'}
       class:width-large={size === 'large'}
       in:fly={{ y: 20, duration: 150 }}
