@@ -425,3 +425,19 @@ class ColumnMappingsNotFound(MathesarAPIException):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
         super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class IdentifierTooLong(MathesarAPIException):
+    error_code = ErrorCodes.IdentifierTooLong.value
+
+    def __init__(
+            self,
+            exception=None,
+            message="Identifier is longer than Postgres' limit of 63 bytes.",
+            field=None,
+            details=None,
+            status_code=status.HTTP_400_BAD_REQUEST
+    ):
+        if exception is None:
+            exception = Exception(message)
+        super().__init__(exception, self.error_code, message, field, details, status_code)

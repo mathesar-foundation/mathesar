@@ -32,6 +32,11 @@ type_data_list = [
     ),
     (
         PostgresType.TEXT,
+        [],
+        PostgresType.TEXT,
+    ),
+    (
+        PostgresType.TEXT,
         ["1.0"],
         PostgresType.NUMERIC
     ),
