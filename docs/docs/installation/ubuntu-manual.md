@@ -410,3 +410,6 @@ cd /var/www/mathesar.example.com/
 git clone https://github.com/centerofci/mathesar.git
 ```
 Once this is installed we will install from requirements.txt 
+```sh
+pip3 install -r requirements.txt
+```
