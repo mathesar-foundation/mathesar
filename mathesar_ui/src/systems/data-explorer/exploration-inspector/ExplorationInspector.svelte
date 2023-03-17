@@ -7,6 +7,7 @@
   import CellTab from './CellTab.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
+  export let canEditMetadata: boolean;
 
   $: ({ inspector, query } = queryHandler);
   $: ({ tabs, activeTab } = inspector);
@@ -25,6 +26,7 @@
         {queryHandler}
         name={$query.name}
         description={$query.description}
+        {canEditMetadata}
         on:delete
       />
     {:else if $activeTab?.id === 'inspect-column'}
@@ -62,7 +64,7 @@
     :global(.section-content .labeled-input .label) {
       font-weight: 590;
     }
-    :global(.collapsible > button.btn) {
+    :global(.collapsible > .collapsible-header > button.btn) {
       background-color: var(--sand-200);
 
       &:hover {
@@ -73,7 +75,10 @@
         background-color: var(--sand-400);
       }
     }
-    :global(.collapsible > button.btn .collapsible-header-title) {
+    :global(.collapsible
+        > .collapsible-header
+        > button.btn
+        .collapsible-header-title) {
       font-weight: 590;
     }
     :global(.collapsible .section-content.actions .delete-button) {

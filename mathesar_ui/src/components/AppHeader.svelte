@@ -1,34 +1,50 @@
 <script lang="ts">
+  import { router } from 'tinro';
+
   import {
     DropdownMenu,
     Icon,
     iconLoading,
     LinkMenuItem,
+    MenuDivider,
     MenuHeading,
   } from '@mathesar-component-library';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
   import {
     iconAddNew,
+    iconDatabase,
     iconExploration,
+    iconLogout,
+    iconSettingsMajor,
     iconShortcuts,
     iconUser,
   } from '@mathesar/icons';
   import {
+    ADMIN_URL,
     getDatabasePageUrl,
     getDataExplorerPageUrl,
     getImportPageUrl,
     getTablePageUrl,
     LOGOUT_URL,
+    USER_PROFILE_URL,
   } from '@mathesar/routes/urls';
-  import DatabaseName from '@mathesar/components/DatabaseName.svelte';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import { createTable } from '@mathesar/stores/tables';
-  import { router } from 'tinro';
-  import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
 
+  const userProfile = getUserProfileStoreFromContext();
+  const releaseDataStore = getReleaseDataStoreFromContext();
+
   $: database = $currentDatabase;
-  $: schema = $currentSchemaId;
+  $: schema = $currentSchema;
+  $: canExecuteDDL = $userProfile?.hasPermission(
+    { database, schema },
+    'canExecuteDDL',
+  );
+  $: upgradable = $releaseDataStore?.value?.upgradeStatus === 'upgradable';
 
   let isCreatingNewEmptyTable = false;
 
@@ -37,9 +53,9 @@
       return;
     }
     isCreatingNewEmptyTable = true;
-    const tableInfo = await createTable(schema, {});
+    const tableInfo = await createTable(schema.id, {});
     isCreatingNewEmptyTable = false;
-    router.goto(getTablePageUrl(database.name, schema, tableInfo.id), false);
+    router.goto(getTablePageUrl(database.name, schema.id, tableInfo.id), false);
   }
 </script>
 
@@ -60,18 +76,20 @@
           <span class="icon"><Icon {...iconShortcuts} /></span>
           <span class="text">Shortcuts</span>
         </span>
-        <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
-          New Table from Scratch
-        </ButtonMenuItem>
-        <LinkMenuItem
-          icon={iconAddNew}
-          href={getImportPageUrl(database?.name, schema)}
-        >
-          New Table from Data Import
-        </LinkMenuItem>
+        {#if canExecuteDDL}
+          <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
+            New Table from Scratch
+          </ButtonMenuItem>
+          <LinkMenuItem
+            icon={iconAddNew}
+            href={getImportPageUrl(database.name, schema.id)}
+          >
+            New Table from Data Import
+          </LinkMenuItem>
+        {/if}
         <LinkMenuItem
           icon={iconExploration}
-          href={getDataExplorerPageUrl(database?.name, schema)}
+          href={getDataExplorerPageUrl(database.name, schema.id)}
         >
           Open Data Explorer
         </LinkMenuItem>
@@ -81,19 +99,38 @@
       triggerAppearance="ghost"
       size="small"
       closeOnInnerClick={true}
-      label=""
-      icon={iconUser}
+      menuStyle="--spacing-x: 0.3em;"
     >
       <div class="user-switcher" slot="trigger">
-        <Icon {...iconUser} />
+        <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
       </div>
       {#if database}
         <MenuHeading>Database</MenuHeading>
-        <LinkMenuItem href={getDatabasePageUrl(database.name)}>
-          <DatabaseName {database} />
+        <LinkMenuItem
+          icon={iconDatabase}
+          href={getDatabasePageUrl(database.name)}
+        >
+          {database.name}
         </LinkMenuItem>
-        <LinkMenuItem href={LOGOUT_URL} tinro-ignore>Log Out</LinkMenuItem>
+        <MenuDivider />
       {/if}
+      <MenuHeading>Signed in as</MenuHeading>
+      <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
+        {$userProfile?.getDisplayName() ?? 'User profile'}
+      </LinkMenuItem>
+      <MenuDivider />
+      {#if $userProfile?.isSuperUser}
+        <LinkMenuItem
+          icon={iconSettingsMajor}
+          href={ADMIN_URL}
+          hasNotificationDot={upgradable}
+        >
+          Administration
+        </LinkMenuItem>
+      {/if}
+      <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
+        Log Out
+      </LinkMenuItem>
     </DropdownMenu>
   </div>
 </header>

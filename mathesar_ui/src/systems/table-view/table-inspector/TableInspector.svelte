@@ -73,7 +73,7 @@
     background-color: var(--sand-100);
     isolation: isolate;
 
-    :global(.collapsible > button.btn) {
+    :global(.collapsible > .collapsible-header > button.btn) {
       background-color: var(--sand-200);
 
       &:hover {

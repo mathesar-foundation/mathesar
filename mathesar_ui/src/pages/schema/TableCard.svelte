@@ -34,6 +34,7 @@
   export let table: TableEntry;
   export let database: Database;
   export let schema: SchemaEntry;
+  export let canExecuteDDL: boolean;
 
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
@@ -81,7 +82,12 @@
     </div>
     <div class="description">
       {#if description}
-        <Truncate lines={2} popoverPlacement="bottom">{description}</Truncate>
+        <Truncate
+          lines={2}
+          popoverPlacements={['bottom', 'left', 'top', 'right']}
+        >
+          {description}
+        </Truncate>
       {/if}
     </div>
     <div class="bottom">
@@ -104,26 +110,31 @@
       triggerAppearance="ghost"
       triggerClass="dropdown-menu-button"
       closeOnInnerClick={true}
+      placements={['bottom-end', 'right-start', 'left-start']}
       trigger
       label=""
       icon={iconMoreActions}
       size="small"
     >
       {#if !isTableImportConfirmationNeeded}
-        <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
-          Edit Table
-        </ButtonMenuItem>
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
           Explore Table
         </LinkMenuItem>
+        {#if canExecuteDDL}
+          <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
+            Edit Table
+          </ButtonMenuItem>
+        {/if}
       {/if}
-      <ButtonMenuItem
-        on:click={handleDeleteTable}
-        danger
-        icon={iconDeleteMajor}
-      >
-        Delete Table
-      </ButtonMenuItem>
+      {#if canExecuteDDL}
+        <ButtonMenuItem
+          on:click={handleDeleteTable}
+          danger
+          icon={iconDeleteMajor}
+        >
+          Delete Table
+        </ButtonMenuItem>
+      {/if}
     </DropdownMenu>
   </div>
   {#if !isTableImportConfirmationNeeded}

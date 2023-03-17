@@ -1,11 +1,11 @@
 <script lang="ts">
   import { Skeleton } from '@mathesar/component-library';
 
-  $: skeletalTables = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  export let numTables = 9;
 </script>
 
 <div class="table-skeleton-container">
-  {#each skeletalTables as skeletalTable}
+  {#each Array(numTables) as _, index (index)}
     <div class="table-skeleton">
       <Skeleton loading={true} />
     </div>

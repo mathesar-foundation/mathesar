@@ -156,6 +156,59 @@ def test_user_create_no_superuser(client_bob):
     assert response.json()[0]['code'] == 4004
 
 
+def test_superuser_create_superuser(client):
+    data = {
+        'username': 'alice_admin',
+        'email': 'alice_admin@example.com',
+        'password': 'password',
+        'short_name': 'Alice',
+        'full_name': 'Alice Jones',
+        'is_superuser': True
+    }
+    response = client.post('/api/ui/v0/users/', data)
+    response_data = response.json()
+
+    assert response.status_code == 201
+    assert 'id' in response_data
+    assert response_data['username'] == data['username']
+    assert response_data['email'] == data['email']
+    assert 'password' not in response_data
+    assert response_data['short_name'] == data['short_name']
+    assert response_data['full_name'] == data['full_name']
+    assert response_data['is_superuser'] is True
+    created_user = User.objects.get(id=response_data['id'])
+    assert created_user.password_change_needed is True
+    # clean up
+    created_user.delete()
+
+
+def test_superuser_patch_different_user_admin_privileges(client, user_alice):
+    data = {'is_superuser': True}
+    response = client.patch(f'/api/ui/v0/users/{user_alice.id}/', data)
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['is_superuser'] is True
+
+
+def test_superuser_patch_self_admin_privileges(client, admin_user):
+    data = {'is_superuser': False}
+    response = client.patch(f'/api/ui/v0/users/{admin_user.id}/', data)
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['is_superuser'] is True
+
+
+def test_user_patch_self_admin_privileges(client_bob, user_bob):
+    data = {'is_superuser': True}
+    response = client_bob.patch(f'/api/ui/v0/users/{user_bob.id}/', data)
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['is_superuser'] is False
+
+
 def test_user_delete(client, user_bob):
     # Ensure we can access the user via API
     initial_response = client.get(f'/api/ui/v0/users/{user_bob.id}/')

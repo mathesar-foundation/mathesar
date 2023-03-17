@@ -5,6 +5,7 @@
     isHelpTextRow,
     type Row as RowType,
     getRowKey,
+    isPlaceholderRow,
   } from '@mathesar/stores/table-data';
   import { SheetVirtualRows } from '@mathesar/components/sheet';
   import {
@@ -12,10 +13,21 @@
     helpTextRowHeightPx,
     groupHeaderRowHeightPx,
   } from '@mathesar/geometry';
-  import Row from './row/Row.svelte';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
+  import Row from './row/Row.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
+  const userProfile = getUserProfileStoreFromContext();
+
+  $: database = $currentDatabase;
+  $: schema = $currentSchema;
+  $: canEditTableRecords = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canEditTableRecords',
+  );
 
   export let usesVirtualList = false;
 
@@ -61,7 +73,7 @@
     >
       <ScrollAndResetHandler {api} />
       {#each items as item (item.key)}
-        {#if $displayableRecords[item.index]}
+        {#if $displayableRecords[item.index] && !(isPlaceholderRow($displayableRecords[item.index]) && !canEditTableRecords)}
           <Row style={item.style} bind:row={$displayableRecords[item.index]} />
         {/if}
       {/each}
