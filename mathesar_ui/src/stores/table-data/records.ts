@@ -457,16 +457,9 @@ export class RecordsData {
       identifiersOfUnsavedRows.forEach((identifier) =>
         successRowKeys.add(identifier),
       );
-
-      if (failures.size > 0) {
-        if (successRowKeys.size === 0) {
-          throw Error('Unable to delete row!');
-        } else {
-          throw Error('Unable to delete some rows!');
-        }
-      }
     }
-    let shouldReFetchRecords = false;
+
+    let shouldReFetchRecords = successRowKeys.size > 0;
     if (primaryKeysOfSavedRows.length > 0) {
       // TODO: Convert this to single request
       const promises = primaryKeysOfSavedRows.map((pk) =>
@@ -521,6 +514,14 @@ export class RecordsData {
         { state: 'failure', errors: [errorMsg] },
       ]),
     );
+
+    if (failures.size > 0) {
+      if (failures.size === 1) {
+        throw Error('Unable to delete row!');
+      } else {
+        throw Error('Unable to delete some rows!');
+      }
+    }
   }
 
   // TODO: It would be better to throw errors instead of silently failing
