@@ -24,6 +24,7 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
+- [Sponsors](#sponsors)
 - [Status](#status)
 - [Join our community!](#join-our-community)
 - [Screenshots](#screenshots)
