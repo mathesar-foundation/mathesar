@@ -293,6 +293,23 @@ def test_schema_create_by_superuser(client, FUN_create_dj_db, MOD_engine_cache):
     )
 
 
+def test_schema_create_by_superuser_too_long_name(client, FUN_create_dj_db):
+    db_name = "some_db1"
+    FUN_create_dj_db(db_name)
+    schema_count_before = Schema.objects.count()
+    very_long_string = ''.join(map(str, range(50)))
+    schema_name = 'very_long_identifier_' + very_long_string
+    data = {
+        'name': schema_name,
+        'database': db_name
+    }
+    response = client.post('/api/db/v0/schemas/', data=data)
+    assert response.status_code == 400
+    assert response.json()[0]['code'] == ErrorCodes.IdentifierTooLong.value
+    schema_count_after = Schema.objects.count()
+    assert schema_count_after == schema_count_before
+
+
 def test_schema_create_by_db_manager(client_bob, user_bob, FUN_create_dj_db, get_uid):
     db_name = get_uid()
     role = "manager"
