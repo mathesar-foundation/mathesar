@@ -553,7 +553,7 @@ export default class SheetSelection<
       return true;
     }
 
-    this.onMouseEnterCellWhileSelection(rows[rows.length - 1], column);
+    this.onMouseEnterCellWhileSelection(rows[0], column);
     return true;
   }
 
@@ -580,7 +580,7 @@ export default class SheetSelection<
       // Not possible to have tables without columns
     }
 
-    const endColumn = columns[columns.length - 1];
+    const endColumn = columns[0];
     this.onMouseEnterCellWhileSelection(row, endColumn);
     return true;
   }
