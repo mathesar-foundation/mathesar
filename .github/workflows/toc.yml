@@ -1,4 +1,7 @@
-on: push
+on:
+  push:
+    paths:
+      - '**.md'
 name: README ToC Generator
 jobs:
   generateTOC:

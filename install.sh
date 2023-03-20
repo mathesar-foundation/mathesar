@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 clear -x
-github_tag=${1-master}
+github_tag=${1-"0.1.0"}
 min_maj_docker_version=20
 min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
@@ -94,6 +94,7 @@ get_db_host () {
     echo "Databases on localhost are not supported by this installation method." >&2
     db_host=$(get_nonempty "${prefix} database host")
   done
+  echo "${db_host}"
 }
 
 configure_db_urls () {
@@ -157,7 +158,7 @@ Welcome to the Mathesar installer for version %s!
 
 For more information or explanation about the steps involved, please see:
 
-https://docs.mathesar.org/installation/docker-compose/#installation-steps
+https://docs.mathesar.org/installation-dc/under-the-hood/
 
 --------------------------------------------------------------------------------
 
@@ -177,13 +178,16 @@ if [ "$(echo "${OSTYPE}" | head -c 5)" == "linux" ]; then
   printf "Installing Mathesar for GNU/Linux.
 "
   alias docker='sudo docker'
+  INSTALL_OS='linux'
 elif [ "$(echo "${OSTYPE}" | head -c 6)" == "darwin" ]; then
   printf "Installing Mathesar for macOS.
 "
+  INSTALL_OS='macos'
 else
   printf "Operating System Unknown. Proceed at your own risk.
 "
   alias docker='sudo docker'
+  INSTALL_OS='unknown'
 fi
 read -r -p "
 Press ENTER to continue, or CTRL+C to cancel. "
@@ -343,7 +347,7 @@ fi
 printf "\n"
 read -r -p "Choose a HTTP port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
-read -r -p "Choose a HTTP port for the webserver to use [443]: " https_port
+read -r -p "Choose a HTTPS port for the webserver to use [443]: " https_port
 https_port=${https_port:-443}
 printf "Generating Django secret key...
 "
@@ -406,6 +410,9 @@ HTTP_PORT='${http_port}'
 HTTPS_PORT='${https_port}'
 EOF
 sudo chmod 640 .env
+if [ "${INSTALL_OS}" == 'macos' ]; then
+  sudo chown "${USER}" .env
+fi
 clear -x
 
 printf "

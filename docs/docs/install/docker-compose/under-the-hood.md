@@ -1,4 +1,4 @@
-# Under the Hood
+# Docker Compose Installation, Under the Hood
 
 ## Installation Steps
 These are the steps that the installation script performs, explained in more depth:

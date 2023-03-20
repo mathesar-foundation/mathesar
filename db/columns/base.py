@@ -138,6 +138,10 @@ class MathesarColumn(Column):
     @property
     def is_default(self):
         default_def = DEFAULT_COLUMNS.get(self.name, False)
+        try:
+            self.type.python_type
+        except NotImplementedError:
+            return False
         return (
             default_def
             and self.type.python_type == default_def[TYPE]().python_type

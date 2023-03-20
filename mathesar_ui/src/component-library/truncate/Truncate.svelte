@@ -9,7 +9,13 @@
    * true.
    */
   export let passthrough = false;
-  export let popoverPlacement: Placement = 'top';
+  /** @see the `placements` prop in AttachableDropdown */
+  export let popoverPlacements: Placement[] = [
+    'top',
+    'right',
+    'left',
+    'bottom',
+  ];
 
   let element: HTMLSpanElement;
   let dropdownIsOpen = false;
@@ -57,7 +63,7 @@
   <AttachableDropdown
     isOpen={dropdownIsOpen}
     trigger={element}
-    placement={popoverPlacement}
+    placements={popoverPlacements}
     class="truncation-content"
   >
     <slot />
