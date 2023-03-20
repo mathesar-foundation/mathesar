@@ -192,7 +192,6 @@
       on:activate={() => {
         selection.activateCell(row, processedColumn);
         // let rId = row.record[1];
-        console.log(rId);
         // Activate event initaites the selection process
         selection.onStartSelection(row, processedColumn);
       }}
