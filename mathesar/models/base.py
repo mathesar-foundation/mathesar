@@ -25,7 +25,7 @@ from db.constraints.operations.select import (
 from db.constraints import utils as constraint_utils
 from db.dependents.dependents_utils import get_dependents_graph, has_dependents
 from db.metadata import get_empty_metadata
-from db.records.operations.delete import delete_record
+from db.records.operations.delete import bulk_delete_records, delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
 from db.records.operations.select import get_records
@@ -525,6 +525,9 @@ class Table(DatabaseObject, Relation):
 
     def delete_record(self, id_value):
         return delete_record(self._sa_table, self.schema._sa_engine, id_value)
+
+    def bulk_delete_records(self, id_values):
+        return bulk_delete_records(self._sa_table, self.schema._sa_engine, id_values)
 
     def add_constraint(self, constraint_obj):
         create_constraint(

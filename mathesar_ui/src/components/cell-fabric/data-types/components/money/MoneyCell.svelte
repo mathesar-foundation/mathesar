@@ -16,7 +16,7 @@
 </script>
 
 <SteppedInputCell
-  {value}
+  bind:value
   {isActive}
   {isSelectedInRange}
   {disabled}

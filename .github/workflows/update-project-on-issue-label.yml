@@ -1,7 +1,7 @@
 name: Update project on issue label change
 on:
   issues:
-    types: [labeled]
+    types: [opened, labeled]
 
 jobs:
   update_project_on_issue_label_change:

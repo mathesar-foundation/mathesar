@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import (
     INTEGER, ForeignKey, VARCHAR, CHAR, NUMERIC, ARRAY, JSON
 )
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql.sqltypes import NullType
 
 from db.columns.base import MathesarColumn
@@ -112,6 +113,11 @@ def test_MC_inits_with_engine_empty(column_builder):
 def test_MC_is_default_when_true():
     for default_col in get_default_mathesar_column_list():
         assert default_col.is_default
+
+
+def test_MC_is_default_with_uuid_col():
+    col = MathesarColumn('id', UUID, primary_key=True, nullable=False)
+    assert not col.is_default
 
 
 def test_MC_is_default_when_false_for_name():
