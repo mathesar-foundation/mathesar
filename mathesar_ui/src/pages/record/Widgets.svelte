@@ -7,7 +7,7 @@
   import { currentTable } from '@mathesar/stores/tables';
   import TableWidget from './TableWidget.svelte';
 
-  export let recordId: number;
+  export let recordPk: string;
   export let recordSummary: string;
   export let joinableTablesResult: JoinableTablesResult;
 
@@ -56,7 +56,7 @@
     <div class="widgets">
       {#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
         <section class="table-widget-positioner">
-          <TableWidget {recordId} table={currTable} {fkColumn} />
+          <TableWidget {recordPk} table={currTable} {fkColumn} />
         </section>
       {/each}
     </div>
