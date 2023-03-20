@@ -30,7 +30,7 @@ def truncate_if_necessary(identifier):
 
 
 def is_identifier_too_long(identifier):
-    postgres_identifier_size_limit = 63
+    postgres_identifier_size_limit = 48
     size = _get_size_of_identifier_in_bytes(identifier)
     return size > postgres_identifier_size_limit
 
