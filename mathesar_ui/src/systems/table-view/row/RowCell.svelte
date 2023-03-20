@@ -63,8 +63,7 @@
   $: columnId = column.id;
   $: ({ activeCell, selectedCells } = selection);
   $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
-  $: ({1: rId} = row.record);
-
+  $: ({ 1: rId } = row.record);
 
   /**
    * The name indicates that this boolean is only true when more than one cell
