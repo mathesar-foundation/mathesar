@@ -34,7 +34,6 @@
     } catch (error) {
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       onError(error);
-      modal.close();
     } finally {
       allowClose = true;
     }
