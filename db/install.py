@@ -53,7 +53,7 @@ def _create_database(database_name, hostname, username, password, port, skip_con
         )
         with root_db_engine.connect() as conn:
             conn.execution_options(isolation_level="AUTOCOMMIT")
-            conn.execute(text(f"CREATE DATABASE {database_name}"))
+            conn.execute(text(f'CREATE DATABASE "{database_name}"'))
         root_db_engine.dispose()
         print(f"Created DB is {database_name}.")
         return True
