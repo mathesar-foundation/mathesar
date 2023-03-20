@@ -7,6 +7,7 @@
     WritableMap,
   } from '@mathesar-component-library';
   import {
+    rowHasRecord,
     rowHasNewRecord,
     type RecordRow,
     type RecordsData,
@@ -32,6 +33,10 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import CellErrors from './CellErrors.svelte';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { toast } from '@mathesar/stores/toast';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
@@ -58,6 +63,7 @@
   $: columnId = column.id;
   $: ({ activeCell, selectedCells } = selection);
   $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
+  $: rId = row.record[1];
 
   /**
    * The name indicates that this boolean is only true when more than one cell
@@ -126,6 +132,20 @@
   async function valueUpdated(e: CustomEvent<{ value: unknown }>) {
     await setValue(e.detail.value);
   }
+
+  async function handleDeleteRecords() {
+    if (rowHasRecord(row)) {
+      void confirmDelete({
+        identifierType: 'Row',
+        onProceed: () => recordsData.deleteSelected([Number(row.rowIndex)]),
+        onError: (e) => toast.fromError(e),
+        onSuccess: () =>
+          toast.success({
+            title: 'Row deleted successfully!',
+          }),
+      });
+    }
+  }
 </script>
 
 <SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
@@ -171,6 +191,8 @@
       on:movementKeyDown={moveThroughCells}
       on:activate={() => {
         selection.activateCell(row, processedColumn);
+        // let rId = row.record[1];
+        console.log(rId);
         // Activate event initaites the selection process
         selection.onStartSelection(row, processedColumn);
       }}
@@ -190,6 +212,27 @@
       >
         Set to <Null />
       </ButtonMenuItem>
+      <!-- Column Attributes -->
+      <ColumnHeaderContextMenu {processedColumn} />
+      <!-- Column Attributes end -->
+      <!-- Row -->
+      <LinkMenuItem
+        icon={iconLinkToRecordPage}
+        href={$storeToGetRecordPageUrl({ recordId: rId }) || ''}
+      >
+        Go To Linked Record
+      </LinkMenuItem>
+      {#if canEditTableRecords}
+        <ButtonMenuItem
+          on:click={handleDeleteRecords}
+          danger
+          icon={iconDeleteMajor}
+        >
+          Delete Record
+        </ButtonMenuItem>
+      {/if}
+      <!-- Row end -->
+
       {#if linkedRecordHref}
         <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
           Go To Linked Record
