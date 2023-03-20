@@ -32,10 +32,10 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import CellErrors from './CellErrors.svelte';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import { iconDeleteMajor } from '@mathesar/icons';
+  import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
 
   export let recordsData: RecordsData;
@@ -63,7 +63,8 @@
   $: columnId = column.id;
   $: ({ activeCell, selectedCells } = selection);
   $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
-  $: rId = row.record[1];
+  $: ({1: rId} = row.record);
+
 
   /**
    * The name indicates that this boolean is only true when more than one cell
