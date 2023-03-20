@@ -82,7 +82,12 @@
     </div>
     <div class="description">
       {#if description}
-        <Truncate lines={2} popoverPlacement="bottom">{description}</Truncate>
+        <Truncate
+          lines={2}
+          popoverPlacements={['bottom', 'left', 'top', 'right']}
+        >
+          {description}
+        </Truncate>
       {/if}
     </div>
     <div class="bottom">
@@ -105,6 +110,7 @@
       triggerAppearance="ghost"
       triggerClass="dropdown-menu-button"
       closeOnInnerClick={true}
+      placements={['bottom-end', 'right-start', 'left-start']}
       trigger
       label=""
       icon={iconMoreActions}

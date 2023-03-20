@@ -1,7 +1,7 @@
 import warnings
 
 from pglast import Node, parse_sql
-from sqlalchemy import and_, asc, cast, select, text
+from sqlalchemy import and_, asc, cast, select, text, exists
 
 from db.columns.exceptions import DynamicDefaultWarning
 from db.tables.operations.select import reflect_table_from_oid
@@ -149,6 +149,20 @@ def get_column_default_dict(table_oid, attnum, engine, metadata, connection_to_u
         ).scalar()
 
     return {"value": default_value, "is_dynamic": is_dynamic}
+
+
+def determine_whether_column_contains_data(
+        table_oid, column_name, engine, metadata, connection_to_use=None
+):
+    """
+    Given a column, return True if it contains data, False otherwise.
+    """
+    sa_table = reflect_table_from_oid(
+        table_oid, engine, metadata=metadata, connection_to_use=connection_to_use,
+    )
+    sel = select(exists(1).where(sa_table.columns[column_name] != None))  # noqa
+    contains_data = execute_statement(engine, sel, connection_to_use).scalar()
+    return contains_data
 
 
 def get_column_from_oid_and_attnum(table_oid, attnum, engine, metadata, connection_to_use=None):
