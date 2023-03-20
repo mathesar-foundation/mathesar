@@ -45,6 +45,7 @@ import {
   faUnlink,
   faUpload,
   faUser,
+  faUsers,
   faSave,
   faTimes,
   faCircleExclamation,
@@ -57,6 +58,7 @@ import {
   faPaste,
   faEllipsisV,
   faArrowRightFromBracket,
+  faUserEdit,
   faUserPlus,
   faUpRightFromSquare,
   faCircleInfo,
@@ -94,6 +96,7 @@ export const iconDeleteMajor: IconProps = { data: faTrashAlt };
 /** When you're deleting something smaller or more ephemeral */
 export const iconDeleteMinor: IconProps = { data: faTimes };
 export const iconEdit: IconProps = { data: faPencilAlt };
+export const iconEditUser: IconProps = { data: faUserEdit };
 export const iconExpandRight: IconProps = { data: faChevronRight };
 export const iconGoToMarketingSite: IconProps = { data: faGlobe };
 export const iconImportData: IconProps = { data: faUpload };
@@ -149,6 +152,7 @@ export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconUpgradeAvailable: IconProps = { data: faCircleInfo };
 export const iconCurrentlyInstalledVersion: IconProps = { data: faCheck };
 export const iconUser: IconProps = { data: faUser };
+export const iconMultipleUsers: IconProps = { data: faUsers };
 export const iconAdminUser: IconProps = { data: faUserGear };
 export const iconLinksInThisTable: IconProps = { data: faCircleArrowRight };
 export const iconLinksFromOtherTables: IconProps = { data: faCircleArrowLeft };

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 clear -x
-github_tag=${1-master}
+github_tag=${1-"0.1.0"}
 min_maj_docker_version=20
 min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
@@ -74,6 +74,17 @@ Passwords do not match! Try again.
   echo "${password}"
 }
 
+get_db_host () {
+  local prefix="${1}"
+  local db_host
+  db_host=$(get_nonempty "${prefix} database host")
+  while [ "${db_host:0:3}" == "127" ] || [ "${db_host}" == "localhost" ]; do
+    echo "Databases on localhost are not supported by this installation method." >&2
+    db_host=$(get_nonempty "${prefix} database host")
+  done
+  echo "${db_host}"
+}
+
 configure_db_urls () {
   local default_db
   local db_host
@@ -83,7 +94,7 @@ configure_db_urls () {
   local prefix
   if [ "${1}" == preexisting ]; then
     prefix="Enter the"
-    db_host=$(get_nonempty "${prefix} database host")
+    db_host=$(get_db_host "${prefix}")
     enc_db_host=$(percent_encode_reserved "${db_host}")
   else
     prefix="Choose a"
@@ -94,6 +105,12 @@ configure_db_urls () {
   if [ "${1}" != django_only ]; then
     db_name=$(get_nonempty "${prefix} database name" "${default_db}")
     enc_db_name=$(percent_encode_reserved "${db_name}")
+  fi
+  if [ "${1}" != preexisting ] && [ "${1}" != django_only ]; then
+    printf "
+Note: We will use the same user credentials across all databases created by Mathesar.
+
+"
   fi
   db_username=$(get_nonempty "${prefix} username for the database" "${default_db}")
   enc_db_username=$(percent_encode_reserved "${db_username}")
@@ -129,7 +146,7 @@ Welcome to the Mathesar installer for version %s!
 
 For more information or explanation about the steps involved, please see:
 
-https://docs.mathesar.org/installation/docker-compose/#installation-steps
+https://docs.mathesar.org/installation-dc/under-the-hood/
 
 --------------------------------------------------------------------------------
 
@@ -149,24 +166,26 @@ if [ "$(echo "${OSTYPE}" | head -c 5)" == "linux" ]; then
   printf "Installing Mathesar for GNU/Linux.
 "
   alias docker='sudo docker'
+  INSTALL_OS='linux'
 elif [ "$(echo "${OSTYPE}" | head -c 6)" == "darwin" ]; then
   printf "Installing Mathesar for macOS.
 "
+  INSTALL_OS='macos'
 else
   printf "Operating System Unknown. Proceed at your own risk.
 "
   alias docker='sudo docker'
+  INSTALL_OS='unknown'
 fi
 read -r -p "
 Press ENTER to continue, or CTRL+C to cancel. "
 clear -x
 
 installation_fail () {
-  docker compose --profile prod logs
-  read -r -p "
+  printf "
 Unfortunately, the installation has failed.
 
-We've printed some error logs above that will hopefully point you to the
+We'll print some error logs above that will hopefully point you to the
 problem.
 
 A common issue is for there to be some networking issue outside of Mathesar's
@@ -175,11 +194,18 @@ control. Please:
 - Make sure you have access to https://raw.githubusercontent.com/
 
 If you can't get things working, please raise an issue at
-https://github.com/centerofci/mathesar/issues/
 
-Press ENTER to reset the local docker environment. "
-  docker compose --profile prod down -v --rmi all
-  read -r -p "Press ENTER to exit the installer. "
+https://github.com/centerofci/mathesar/issues/
+" >&2
+
+  if [ "${1}" == "late" ]; then
+    read -r -p "
+    Press ENTER to print the logs and reset the local docker environment. "
+    docker compose --profile prod logs
+    docker compose --profile prod down -v --rmi all
+  fi
+  read -r -p "
+Press ENTER to exit the installer. "
   exit 1
 }
 
@@ -188,7 +214,7 @@ printf "
 
 DOCKER VERSION CHECK
 
-We'll begin by making sure your Docker installation is up-to-date.  In order to
+We'll begin by making sure your Docker installation is up-to-date. In order to
 run some necessary commands, we need to use sudo for elevated privileges.
 
 --------------------------------------------------------------------------------
@@ -260,6 +286,7 @@ WARNING: This will create a new PostgreSQL schema in the database for Mathesar's
 
 "
       configure_db_urls preexisting
+      printf "\n"
       printf "
 Now we need to create a local database for Mathesar's internal use.
 "
@@ -288,7 +315,7 @@ Here, we configure the webserver that hosts Mathesar.
 "
 
 allowed_hosts=".localhost, 127.0.0.1"
-read -r -p "Enter the domain of the webserver, or press ENTER to skip: " domain_name
+read -r -p "Enter the domain name of the webserver, or press ENTER to skip: " domain_name
 if [ -z "${domain_name}" ]; then
   read -r -p "Enter the external IP address of the webserver, or press ENTER to skip: " ip_address
   domain_name=':80'
@@ -305,9 +332,10 @@ Only local connections will be allowed.
 "
   read -r -p "Press ENTER to continue. "
 fi
+printf "\n"
 read -r -p "Choose a HTTP port for the webserver to use [80]: " http_port
 http_port=${http_port:-80}
-read -r -p "Choose a HTTP port for the webserver to use [443]: " https_port
+read -r -p "Choose a HTTPS port for the webserver to use [443]: " https_port
 https_port=${https_port:-443}
 printf "Generating Django secret key...
 "
@@ -328,7 +356,8 @@ You'll use these credentials to login to Mathesar in the web interface.
 
 read -r -p "Choose an admin username [admin]: " superuser_username
 superuser_username=${superuser_username:-admin}
-superuser_email=$superuser_username@example.com
+read -r -p "Choose an admin email [$superuser_username@example.com]: " superuser_email
+superuser_email=${superuser_email:-"$superuser_username@example.com"}
 superuser_password=$(create_password)
 printf "\n"
 clear -x
@@ -347,7 +376,7 @@ read -r -p "Choose a configuration directory [/etc/mathesar]: " config_location
 config_location="${config_location:-/etc/mathesar}"
 
 printf "
-Installing environment file at %s/.env
+The environment file will be installed at %s/.env
 
 " "$config_location"
 
@@ -368,6 +397,10 @@ DOMAIN_NAME='${domain_name}'
 HTTP_PORT='${http_port}'
 HTTPS_PORT='${https_port}'
 EOF
+sudo chmod 640 .env
+if [ "${INSTALL_OS}" == 'macos' ]; then
+  sudo chown "${USER}" .env
+fi
 clear -x
 
 printf "
@@ -383,15 +416,15 @@ installation.
 "
 printf "Downloading docker-compose.yml...
 "
-sudo curl -sL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"$github_tag"/docker-compose.yml
+sudo curl -sfL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"${github_tag}"/docker-compose.yml || installation_fail early
 read -r -p "Success!
 
 Next, we'll download files and start the server, This may take a few minutes.
 
 Press ENTER to continue. "
 clear -x
-docker compose --profile prod up -d --wait || installation_fail
-clear -x
+docker compose --profile prod up -d --wait || installation_fail late
+printf "\n"
 printf "
 --------------------------------------------------------------------------------
 

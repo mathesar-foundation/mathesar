@@ -31,8 +31,11 @@
     justify-content: center;
     overflow: hidden;
 
-    &.width-medium {
+    &.width-regular {
       --window-width: calc(min(500px, 100%));
+    }
+    &.width-medium {
+      --window-width: calc(min(650px, 100%));
     }
     &.width-large {
       --window-width: calc(min(800px, 100%));
