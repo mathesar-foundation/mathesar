@@ -13,6 +13,10 @@ From the repository's root directory, run:
 ```
 docker-compose --profile dev up
 ```
+or use 
+```
+docker compose --profile dev up
+```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. 
 
