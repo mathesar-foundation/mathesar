@@ -443,69 +443,83 @@ export class RecordsData {
     });
     const rowKeys = [...primaryKeysOfSavedRows, ...identifiersOfUnsavedRows];
 
-    if (rowKeys.length > 0) {
-      this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
+    if (rowKeys.length === 0) {
+      return;
+    }
 
-      const successRowKeys = new Set<RowKey>();
-      /** Values are error messages */
-      const failures = new Map<RowKey, string>();
+    this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
 
-      if (identifiersOfUnsavedRows.length > 0) {
-        identifiersOfUnsavedRows.forEach((identifier) =>
-          successRowKeys.add(identifier),
-        );
-      }
-      if (primaryKeysOfSavedRows.length > 0) {
-        // TODO: Convert this to single request
-        const promises = primaryKeysOfSavedRows.map((pk) =>
-          deleteAPI<RowKey>(`${this.url}${pk}/`)
-            .then(() => {
-              successRowKeys.add(pk);
-              return successRowKeys;
-            })
-            .catch((error: unknown) => {
-              failures.set(pk, getErrorMessage(error));
-              return failures;
-            }),
-        );
-        await Promise.all(promises);
-        await this.fetch(true);
-      }
+    const successRowKeys = new Set<RowKey>();
+    /** Values are error messages */
+    const failures = new Map<RowKey, string>();
 
-      const savedRecords = get(this.savedRecords);
-      const savedRecordsLength = savedRecords.length;
-      const savedRecordKeys = new Set(
-        savedRecords.map((row) => getRowKey(row, pkColumn?.id)),
+    if (identifiersOfUnsavedRows.length > 0) {
+      identifiersOfUnsavedRows.forEach((identifier) =>
+        successRowKeys.add(identifier),
       );
+    }
 
-      this.newRecords.update((existing) => {
-        const retained = existing.filter((row) => {
-          const rowKey = getRowKey(row, pkColumn?.id);
-          return !successRowKeys.has(rowKey) && !savedRecordKeys.has(rowKey);
-        });
-        if (retained.length === existing.length) {
-          return existing;
-        }
-        return retained.map((row, index) => ({
-          ...row,
-          rowIndex: savedRecordsLength + index,
-        }));
-      });
-      this.meta.rowCreationStatus.delete([...savedRecordKeys]);
-      this.meta.clearAllStatusesAndErrorsForRows([...successRowKeys]);
-      this.meta.rowDeletionStatus.setEntries(
-        [...failures.entries()].map(([rowKey, errorMsg]) => [
-          rowKey,
-          { state: 'failure', errors: [errorMsg] },
-        ]),
+    let shouldReFetchRecords = successRowKeys.size > 0;
+    if (primaryKeysOfSavedRows.length > 0) {
+      // TODO: Convert this to single request
+      const promises = primaryKeysOfSavedRows.map((pk) =>
+        deleteAPI<RowKey>(`${this.url}${pk}/`)
+          .then(() => {
+            successRowKeys.add(pk);
+            return successRowKeys;
+          })
+          .catch((error: unknown) => {
+            failures.set(pk, getErrorMessage(error));
+            return failures;
+          }),
       );
+      await Promise.all(promises);
+      shouldReFetchRecords = true;
+    }
 
-      if (failures.size > 0) {
-        if (successRowKeys.size === 0) {
-          throw Error('Unable to delete row!');
-        } else {
-          throw Error('Unable to delete some rows!');
-        }
+    const savedRecords = get(this.savedRecords);
+    const savedRecordKeys = new Set(
+      savedRecords.map((row) => getRowKey(row, pkColumn?.id)),
+    );
+
+    // We clear all records from the new records section because we expect that
+    // those records will be re-fetched and end up in the main table area. This
+    // expectation doesn't always hold though. Sometimes the new record section
+    // contains records that haven't yet been saved (e.g. when a record has a
+    // NOT NULL constraint). In that case we delete the unsaved records anyway,
+    // just because that's simpler. We have some opportunity for UX improvement
+    // here, and we should discuss the subtleties of our desired behavior when
+    // deleting records.
+    this.newRecords.set([]);
+
+    // It's important that we update `newRecords` before we re-fetch, otherwise
+    // we could end up with duplicate records that cause JS errors due to
+    // svelte's keyed each block. Duplicates can occur if the user creates two
+    // records and then deletes one of them, leaving a new records in the
+    // `newRecords` array that also gets re-fetched. It's also important that we
+    // update `newRecords` regardless of wether we had any _saved_ records to
+    // delete, because sometimes the user is just deleting an unsaved record.
+    // These reasons together are why we're using this `shouldReFetchRecords`
+    // flag instead of just re-fetching the records immediately after deleting
+    // the saved records.
+    if (shouldReFetchRecords) {
+      await this.fetch(true);
+    }
+
+    this.meta.rowCreationStatus.delete([...savedRecordKeys]);
+    this.meta.clearAllStatusesAndErrorsForRows([...successRowKeys]);
+    this.meta.rowDeletionStatus.setEntries(
+      [...failures.entries()].map(([rowKey, errorMsg]) => [
+        rowKey,
+        { state: 'failure', errors: [errorMsg] },
+      ]),
+    );
+
+    if (failures.size > 0) {
+      if (failures.size === 1) {
+        throw Error('Unable to delete row!');
+      } else {
+        throw Error('Unable to delete some rows!');
       }
     }
   }

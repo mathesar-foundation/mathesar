@@ -43,7 +43,23 @@ It is recommended that you keep the Docker containers running while you make cha
 
 ## Developing in Windows
 
-Windows users who want to run the Mathesar Docker development environment in WSL are advised to clone the repository in a Linux filesystem. When the project resides in a Windows filesystem, WSL does not work well with hot module replacement (HMR), which is required for frontend development. Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues), and the [frontend development README file](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md#developing-in-windows) for more details.
+1. Install [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) and do all of your development work within it.
+1. Make sure you **clone the Mathesar git repository _within WSL_** so that the development files reside in a Linux filesystem.
+
+    !!! tip
+        If you happen to clone the git repository outside of WSL, then you fix it by running these commands from within WSL.
+
+        ```
+        git config --global core.autocrlf input
+        sudo apt-get install -y dos2unix
+        sudo find . -type f -exec dos2unix {} \;
+        ```
+
+        These commands install the `dos2unix` utility, which converts text files from the DOS/Microsoft Windows format (with CRLF line endings) to the Unix/Linux format (with LF line endings). Next, the find utility is used to locate all files (-type f) in the current directory (.) and its subdirectories, and the dos2unix command is then executed on each of them (-exec dos2unix ;).
+
+1. Execute the `docker compose` command inside of WSL to begin local development
+
+Refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues), and the [frontend development README file](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md#developing-in-windows) for more details.
 
 ## Configuration Options
 
