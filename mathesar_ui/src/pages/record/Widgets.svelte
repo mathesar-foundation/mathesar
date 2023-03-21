@@ -1,17 +1,14 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/types/tables';
   import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
   import { Help } from '@mathesar-component-library';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { iconRecord } from '@mathesar/icons';
-  import { currentTable } from '@mathesar/stores/tables';
   import TableWidget from './TableWidget.svelte';
 
   export let recordPk: string;
   export let recordSummary: string;
   export let joinableTablesResult: JoinableTablesResult;
 
-  $: currTable = $currentTable as TableEntry;
   $: tableNameMap = new Map(
     Object.entries(joinableTablesResult.tables).map(([tableId, table]) => [
       parseInt(tableId, 10),
@@ -56,7 +53,7 @@
     <div class="widgets">
       {#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
         <section class="table-widget-positioner">
-          <TableWidget {recordPk} table={currTable} {fkColumn} />
+          <TableWidget {table} {fkColumn} {recordPk} />
         </section>
       {/each}
     </div>

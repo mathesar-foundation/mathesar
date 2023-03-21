@@ -3,6 +3,7 @@ import { get, writable, type Unsubscriber, type Writable } from 'svelte/store';
 
 interface SelectionColumn {
   id: number | string;
+  columnIndex: number;
 }
 
 interface SelectionRow {
@@ -132,8 +133,8 @@ export function scrollBasedOnSelection(): void {
 type SelectionBounds = {
   startRowIndex: number;
   endRowIndex: number;
-  startColumnId: string | number;
-  endColumnId: string | number;
+  startColumnIndex: number;
+  endColumnIndex: number;
 };
 
 type Cell<Row extends SelectionRow, Column extends SelectionColumn> = [
@@ -194,8 +195,6 @@ export default class SheetSelection<
 > {
   private getColumns: () => Column[];
 
-  private getColumnOrder: () => number[];
-
   private getRows: () => Row[];
 
   // max index is inclusive
@@ -222,22 +221,17 @@ export default class SheetSelection<
 
   freezeSelection: boolean;
 
-  selectionInProgress: Writable<boolean>;
-
   constructor(args: {
     getColumns: () => Column[];
-    getColumnOrder: () => number[];
     getRows: () => Row[];
     getMaxSelectionRowIndex: () => number;
   }) {
     this.selectedCells = new WritableSet<string>();
     this.columnsSelectedWhenTheTableIsEmpty = new WritableSet<Column['id']>();
     this.getColumns = args.getColumns;
-    this.getColumnOrder = args.getColumnOrder;
     this.getRows = args.getRows;
     this.getMaxSelectionRowIndex = args.getMaxSelectionRowIndex;
     this.freezeSelection = false;
-    this.selectionInProgress = writable<boolean>(false);
     this.activeCell = writable<ActiveCell | undefined>(undefined);
 
     /**
@@ -287,12 +281,10 @@ export default class SheetSelection<
     if (this.freezeSelection) {
       return;
     }
-
-    this.selectionInProgress.set(true);
     // Initialize the bounds of the selection
     this.selectionBounds = {
-      startColumnId: column.id,
-      endColumnId: column.id,
+      startColumnIndex: column.columnIndex,
+      endColumnIndex: column.columnIndex,
       startRowIndex: row.rowIndex,
       endRowIndex: row.rowIndex,
     };
@@ -306,7 +298,7 @@ export default class SheetSelection<
     column: SelectionColumn,
   ): void {
     const { rowIndex } = row;
-    const { id } = column;
+    const { columnIndex } = column;
 
     // If there is no selection start cell,
     // this means the selection was never initiated
@@ -315,7 +307,7 @@ export default class SheetSelection<
     }
 
     this.selectionBounds.endRowIndex = rowIndex;
-    this.selectionBounds.endColumnId = id;
+    this.selectionBounds.endColumnIndex = columnIndex;
 
     const cells = this.getIncludedCells(this.selectionBounds);
     this.selectMultipleCells(cells);
@@ -327,7 +319,6 @@ export default class SheetSelection<
       this.selectMultipleCells(cells);
       this.selectionBounds = undefined;
     }
-    this.selectionInProgress.set(false);
   }
 
   selectAndActivateFirstCellIfExists(): void {
@@ -340,32 +331,22 @@ export default class SheetSelection<
   }
 
   getIncludedCells(selectionBounds: SelectionBounds): Cell<Row, Column>[] {
-    const { startRowIndex, endRowIndex, startColumnId, endColumnId } =
+    const { startRowIndex, endRowIndex, startColumnIndex, endColumnIndex } =
       selectionBounds;
     const minRowIndex = Math.min(startRowIndex, endRowIndex);
     const maxRowIndex = Math.max(startRowIndex, endRowIndex);
-
-    const columnOrder = this.getColumnOrder();
-
-    const startOrderIndex = columnOrder.indexOf(Number(startColumnId));
-    const endOrderIndex = columnOrder.indexOf(Number(endColumnId));
-
-    const minColumnPosition = Math.min(startOrderIndex, endOrderIndex);
-    const maxColumnPosition = Math.max(startOrderIndex, endOrderIndex);
-    const columnOrderSelected = columnOrder.slice(
-      minColumnPosition,
-      maxColumnPosition + 1,
-    );
-
-    const columns = this.getColumns();
+    const minColumnIndex = Math.min(startColumnIndex, endColumnIndex);
+    const maxColumnIndex = Math.max(startColumnIndex, endColumnIndex);
 
     const cells: Cell<Row, Column>[] = [];
     this.getRows().forEach((row) => {
       const { rowIndex } = row;
       if (rowIndex >= minRowIndex && rowIndex <= maxRowIndex) {
-        columnOrderSelected.forEach((columnId) => {
-          const column = columns.find((c) => c.id === columnId);
-          if (column) {
+        this.getColumns().forEach((column) => {
+          if (
+            column.columnIndex >= minColumnIndex &&
+            column.columnIndex <= maxColumnIndex
+          ) {
             cells.push([row, column]);
           }
         });
@@ -387,7 +368,7 @@ export default class SheetSelection<
     this.selectedCells.clear();
   }
 
-  isCompleteColumnSelected(column: Pick<Column, 'id'>): boolean {
+  private isCompleteColumnSelected(column: Pick<Column, 'id'>): boolean {
     if (this.getRows().length) {
       return (
         this.columnsSelectedWhenTheTableIsEmpty.getHas(column.id) ||
@@ -528,19 +509,17 @@ export default class SheetSelection<
   }
 
   onColumnSelectionStart(column: Column): boolean {
-    if (!this.isCompleteColumnSelected(column)) {
-      this.activateCell({ rowIndex: 0 }, { id: column.id });
-      const rows = this.getRows();
+    this.activateCell({ rowIndex: 0 }, { id: column.id });
+    const rows = this.getRows();
 
-      if (rows.length === 0) {
-        this.resetSelection();
-        this.columnsSelectedWhenTheTableIsEmpty.add(column.id);
-        return true;
-      }
-
-      this.onStartSelection(rows[0], column);
-      this.onMouseEnterCellWhileSelection(rows[rows.length - 1], column);
+    if (rows.length === 0) {
+      this.resetSelection();
+      this.columnsSelectedWhenTheTableIsEmpty.add(column.id);
+      return true;
     }
+
+    this.onStartSelection(rows[0], column);
+    this.onMouseEnterCellWhileSelection(rows[rows.length - 1], column);
     return true;
   }
 

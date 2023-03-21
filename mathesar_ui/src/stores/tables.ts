@@ -483,13 +483,3 @@ export function saveRecordSummaryTemplate(
     preview_settings: customized ? previewSettings : { customized },
   });
 }
-
-export function saveColumnOrder(
-  table: Pick<TableEntry, 'id' | 'settings' | 'schema'>,
-  columnOrder: TableSettings['column_order'],
-): Promise<void> {
-  return saveTableSettings(table, {
-    // Using the Set constructor to remove potential duplicates
-    column_order: [...new Set(columnOrder)],
-  });
-}
