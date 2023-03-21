@@ -11,10 +11,6 @@ cp .env.example .env
 
 From the repository's root directory, run:
 ```
-docker-compose --profile dev up
-```
-or use 
-```
 docker compose --profile dev up
 ```
 
