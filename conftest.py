@@ -18,6 +18,8 @@ from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 
 from fixtures.utils import create_scoped_fixtures
 
+PROTOTYPE_FILE = os.path.join('db', 'sql', 'prototype.sql')
+
 
 def engine_cache(request):
     import logging
@@ -74,6 +76,8 @@ def create_db(request, SES_engine_cache):
         created_dbs.add(db_name)
         # Our default testing database has our types and functions preinstalled.
         install.install_mathesar_on_database(engine)
+        with open(PROTOTYPE_FILE) as f, engine.begin() as conn:
+            conn.execute(text(f.read()))
         engine.dispose()
         return db_name
     yield __create_db

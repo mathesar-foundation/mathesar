@@ -1,8 +1,11 @@
+import os
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from db import engine
 from db.types import install
+
+PROTOTYPE_FILE = os.path.join('sql', 'prototype.sql')
 
 
 def install_mathesar(
@@ -17,6 +20,8 @@ def install_mathesar(
         user_db_engine.connect()
         print(f"Installing Mathesar on preexisting PostgreSQL database {database_name} at host {hostname}...")
         install.install_mathesar_on_database(user_db_engine)
+        with open(PROTOTYPE_FILE) as f, engine.begin() as conn:
+            conn.execute(text(f.read()))
         user_db_engine.dispose()
     except OperationalError:
         database_created = _create_database(
@@ -30,6 +35,8 @@ def install_mathesar(
         if database_created:
             print(f"Installing Mathesar on PostgreSQL database {database_name} at host {hostname}...")
             install.install_mathesar_on_database(user_db_engine)
+            with open(PROTOTYPE_FILE) as f, engine.begin() as conn:
+                conn.execute(text(f.read()))
             user_db_engine.dispose()
         else:
             print(f"Skipping installing on DB with key {database_name}.")
