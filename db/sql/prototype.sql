@@ -153,7 +153,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Rename table ------------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.change_table_name(old_name text, new_name text) RETURNS text AS $$/*
+__msar.rename_table(old_name text, new_name text) RETURNS text AS $$/*
 Change a table's name, returning the command executed.
 
 Args:
@@ -169,7 +169,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.change_table_name(table_id oid, new_name text) RETURNS text AS $$/*
+msar.rename_table(table_id oid, new_name text) RETURNS text AS $$/*
 Change a table's name, returning the command executed.
 
 Args:
@@ -177,24 +177,24 @@ Args:
   new_name:  unquoted, unqualified table name
 */
 BEGIN
-  RETURN __msar.change_table_name(__msar.get_table_name(table_id), quote_ident(new_name));
+  RETURN __msar.rename_table(__msar.get_table_name(table_id), quote_ident(new_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.change_table_name(schema_ text, old_name text, new_name text) RETURNS text AS $$/*
+msar.rename_table(schema_ text, old_name text, new_name text) RETURNS text AS $$/*
 Change a table's name, returning the command executed.
 
 Args:
-  schem: unquoted schema name where the table lives
+  schema_: unquoted schema name where the table lives
   old_name:  unquoted, unqualified original table name
   new_name:  unquoted, unqualified new table name
 */
 DECLARE fullname text;
 BEGIN
   fullname := msar.get_fq_table_name(schema_, old_name);
-  RETURN __msar.change_table_name(fullname, quote_ident(new_name));
+  RETURN __msar.rename_table(fullname, quote_ident(new_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -307,6 +307,78 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
+-- MATHESAR DROP FUNCTION
+--
+-- Drop a table and its dependent view
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+-- Drop table --------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.drop_table(name_ text, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
+Drop a table.
+
+Args:
+  name_: The qualified, quoted name of the table we will drop.
+  cascade_: Whether to add CASCADE.
+  if_exists_: Whether to ignore an error if the table doesn't exist
+*/
+DECLARE
+  cmd_template TEXT;
+BEGIN
+  IF if_exists
+  THEN
+    cmd_template := 'DROP TABLE IF EXISTS %s';
+  ELSE
+    cmd_template := 'DROP TABLE %s';
+  END IF;
+  IF cascade_
+  THEN
+    cmd_template = cmd_template || ' CASCADE';
+  END IF;
+  RETURN __msar.exec_ddl(cmd_template, name_);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_table(table_id oid, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
+Drop a table, first dropping its dependent mathesar view.
+
+Args:
+  table_id: The OID of the table to drop
+  cascade_: Whether to drop dependent objects.
+  if_exists_: Whether to ignore an error if the table doesn't exist
+*/
+BEGIN
+-- PERFORM msar.drop_mathesar_view(table_id);
+  RETURN __msar.drop_table(__msar.get_table_name(table_id), cascade_, if_exists);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_table(schema_ text, name_ text, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
+Change the description of a table, returning command executed.
+
+Args:
+  schema_: The schema of the table to drop.
+  name_: The name of the table to drop.
+  cascade_: Whether to drop dependent objects.
+  if_exists_: Whether to ignore an error if the table doesn't exist
+*/
+DECLARE qualified_name text;
+BEGIN
+-- PERFORM msar.drop_mathesar_view(schema_, name_);
+  qualified_name := msar.get_fq_table_name(schema_, name_);
+  RETURN __msar.drop_table(qualified_name, cascade_, if_exists);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 -- MATHESAR VIEW FUNCTIONS
 --
 -- Functions and triggers in this section are used to create a view that tracks any created or
@@ -314,81 +386,83 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- table or drop such a view.
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
-
-CREATE OR REPLACE FUNCTION
-msar.create_mathesar_view(table_id oid) RETURNS text AS $$/*
-Create a view of named mv<table_id> tracking the table with OID <table_id>.
-
-Args:
-  table_id: This is the OID of the table we want to track.
-
-*/
-DECLARE viewname text;
-DECLARE viewcols text;
-BEGIN
-  viewname := msar.get_msar_view_name(table_id);
-  SELECT string_agg(format('%s AS c%s', quote_ident(attname), attnum), ', ')
-    FROM pg_attribute
-    WHERE attrelid=table_id AND attnum>0 AND NOT attisdropped
-  INTO viewcols;
-  RETURN __msar.exec_ddl(
-    'CREATE OR REPLACE VIEW %s AS SELECT %s FROM %s',
-    viewname, viewcols, __msar.get_table_name(table_id)
-  );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION
-__msar.create_mathesar_view() RETURNS event_trigger AS $$/*
-This function should not be called directly.
-*/
-DECLARE ddl_command record;
-BEGIN
-  FOR ddl_command IN SELECT * FROM pg_event_trigger_ddl_commands()
-    LOOP
-      IF ddl_command.object_type='table' AND upper(ddl_command.command_tag)<>'DROP TABLE'
-      THEN
-        PERFORM msar.create_mathesar_view(ddl_command.objid);
-      END IF;
-    END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
-DROP EVENT TRIGGER IF EXISTS create_mathesar_view;
-
-CREATE EVENT TRIGGER create_mathesar_view ON ddl_command_end
-  EXECUTE FUNCTION __msar.create_mathesar_view();
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_mathesar_view(table_id oid) RETURNS text AS $$/*
-Drop the Mathesar view tracking the given table.
-
-Args:
-  table_id: This is the OID of the table being tracked by the view we'll drop.
-*/
-DECLARE viewname text;
-BEGIN
-  viewname := msar.get_mathesar_view_name(table_id);
-  RETURN __msar.exec_ddl('DROP VIEW IF EXISTS %s', viewname);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_mathesar_view(schema_ text, table_name text) RETURNS text AS $$/*
-Drop the Mathesar view tracking the given table.
-
-Args:
-  schema_: This is the schema of the table being tracked by the view we'll drop.
-  table_name: This is the name of the table being tracked by the view we'll drop.
-*/
-DECLARE table_id oid;
-BEGIN
-  table_id := msar.get_table_oid(schema_, table_name);
-  RETURN msar.drop_mathesar_view(table_id);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+--
+-- CREATE OR REPLACE FUNCTION
+-- msar.create_mathesar_view(table_id oid) RETURNS text AS $$/*
+-- Create a view of named mv<table_id> tracking the table with OID <table_id>.
+--
+-- Args:
+--   table_id: This is the OID of the table we want to track.
+--
+-- */
+-- DECLARE viewname text;
+-- DECLARE viewcols text;
+-- BEGIN
+--   viewname := msar.get_mathesar_view_name(table_id);
+--   SELECT string_agg(format('%s AS c%s', quote_ident(attname), attnum), ', ')
+--     FROM pg_attribute
+--     WHERE attrelid=table_id AND attnum>0 AND NOT attisdropped
+--   INTO viewcols;
+--   RETURN __msar.exec_ddl(
+--     'CREATE OR REPLACE VIEW %s AS SELECT %s FROM %s',
+--     viewname, viewcols, __msar.get_table_name(table_id)
+--   );
+-- END;
+-- $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+--
+-- CREATE OR REPLACE FUNCTION
+-- __msar.create_mathesar_view() RETURNS event_trigger AS $$/*
+-- This function should not be called directly.
+-- */
+-- DECLARE ddl_command record;
+-- BEGIN
+--   FOR ddl_command IN SELECT * FROM pg_event_trigger_ddl_commands()
+--     LOOP
+--       IF ddl_command.object_type='table' AND upper(ddl_command.command_tag)<>'DROP TABLE'
+--       THEN
+--         PERFORM msar.create_mathesar_view(ddl_command.objid);
+--       END IF;
+--     END LOOP;
+-- END;
+-- $$ LANGUAGE plpgsql;
+--
+-- DROP EVENT TRIGGER IF EXISTS create_mathesar_view;
+--
+-- CREATE EVENT TRIGGER create_mathesar_view ON ddl_command_end
+--   EXECUTE FUNCTION __msar.create_mathesar_view();
+--
+--
+-- CREATE OR REPLACE FUNCTION
+-- msar.drop_mathesar_view(table_id oid) RETURNS text AS $$/*
+-- Drop the Mathesar view tracking the given table.
+--
+-- Args:
+--   table_id: This is the OID of the table being tracked by the view we'll drop.
+-- */
+-- DECLARE viewname text;
+-- BEGIN
+--   viewname := msar.get_mathesar_view_name(table_id);
+--   RETURN __msar.exec_ddl('DROP VIEW IF EXISTS %s', viewname);
+-- END;
+-- $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+--
+--
+-- CREATE OR REPLACE FUNCTION
+-- msar.drop_mathesar_view(schema_ text, table_name text) RETURNS text AS $$/*
+-- Drop the Mathesar view tracking the given table.
+--
+-- Args:
+--   schema_: This is the schema of the table being tracked by the view we'll drop.
+--   table_name: This is the name of the table being tracked by the view we'll drop.
+-- */
+-- DECLARE table_id oid;
+-- BEGIN
+--   table_id := msar.get_table_oid(schema_, table_name);
+--   RETURN msar.drop_mathesar_view(table_id);
+-- EXCEPTION WHEN undefined_table THEN
+--   RETURN 'NO SUCH TABLE';
+-- END;
+-- $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE TYPE mathesar_types.joinable_tables AS (
