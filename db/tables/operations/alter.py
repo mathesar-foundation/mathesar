@@ -1,5 +1,6 @@
+"""The functions in this module wrap SQL functions that use `ALTER TABLE`."""
 from db import constants
-from db.connection import execute_msar_func_with_engine
+from db import connection as db_conn
 from db.columns.operations.alter import batch_update_columns
 
 SUPPORTED_TABLE_ALTER_ARGS = {'name', 'columns', 'description'}
@@ -18,7 +19,7 @@ def rename_table(name, schema, engine, rename_to):
     if name == rename_to:
         result = None
     else:
-        result = execute_msar_func_with_engine(
+        result = db_conn.execute_msar_func_with_engine(
             engine, 'rename_table', schema, name, rename_to
         ).fetchone()[0]
     return result
@@ -35,7 +36,7 @@ def comment_on_table(name, schema, engine, comment):
         comment: The new comment. Any quotes or special characters must
                  be escaped.
     """
-    return execute_msar_func_with_engine(
+    return db_conn.execute_msar_func_with_engine(
         engine, 'comment_on_table', schema, name, comment
     ).fetchone()[0]
 
@@ -64,6 +65,11 @@ def update_pk_sequence_to_latest(engine, table, connection=None):
     schema = table.schema or 'public'
     name = table.name
     column = table.c[constants.ID].name
-    return execute_msar_func_with_engine(
-        engine, 'update_pk_sequence_to_latest', schema, name, column
-    ).fetchone()[0]
+    if connection is not None:
+        db_conn.execute_msar_func_with_psycopg2_conn(
+            connection, 'update_pk_sequence_to_latest', schema, name, column
+        ).fetchone()[0]
+    else:
+        db_conn.execute_msar_func_with_engine(
+            engine, 'update_pk_sequence_to_latest', schema, name, column
+        ).fetchone()[0]

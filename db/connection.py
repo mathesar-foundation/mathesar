@@ -1,3 +1,4 @@
+from sqlalchemy import text
 import psycopg
 
 
@@ -8,7 +9,7 @@ def execute_msar_func_with_engine(engine, func_name, *args):
     This is temporary scaffolding.
 
     Args:
-        engine: and SQLAlchemy engine for connecting to a DB
+        engine: an SQLAlchemy engine for connecting to a DB
         func_name: The unqualified msar function name (danger; not sanitized)
         *args: The list of parameters to pass
     """
@@ -19,3 +20,21 @@ def execute_msar_func_with_engine(engine, func_name, *args):
             f"SELECT msar.{func_name}({','.join(['%s']*len(args))})",
             args
         )
+
+
+def execute_msar_func_with_psycopg2_conn(conn, func_name, *args):
+    """
+    Execute an msar function using an SQLAlchemy engine.
+
+    This is *extremely* temporary scaffolding.
+
+    Args:
+        conn: a psycopg2 connection (from an SQLAlchemy engine)
+        func_name: The unqualified msar function name (danger; not sanitized)
+        *args: The list of parameters to pass
+    """
+    args_str = "', '".join(args)
+    args_str = f"'{args_str}'"
+    stmt = text(f"SELECT msar.{func_name}({args_str})")
+    # Returns a cursor
+    return conn.execute(stmt)
