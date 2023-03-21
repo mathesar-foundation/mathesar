@@ -17,7 +17,6 @@
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import { disableInputs } from '@mathesar/components/form/field';
   import ColumnTypeSelector from './ColumnTypeSelector.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -27,6 +26,7 @@
   $: columnName = requiredField('', [columnNameIsAvailable($columns)]);
   const columnType = requiredField<string | undefined>(undefined);
   $: form = makeForm({ columnName, columnType });
+  $: ({ disableInputs } = form);
 
   let requestStatus: RequestStatus;
   $: isLoading = requestStatus?.state === 'processing';
@@ -70,13 +70,13 @@
   <div slot="content" class="new-column-dropdown" let:close>
     <Field
       field={columnName}
-      input={{ component: TextInput }}
+      input={{ component: TextInput, props: { disabled: $disableInputs } }}
       label="Column Name"
       layout="stacked"
     />
     <Field
       field={columnType}
-      input={{ component: ColumnTypeSelector }}
+      input={{ component: ColumnTypeSelector, props: { disabled: $disableInputs } }}
       label="Select Type"
       layout="stacked"
     />

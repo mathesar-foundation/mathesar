@@ -161,5 +161,3 @@ export interface ValuedField<T = unknown> {
   field: FieldStore<T>;
   value: T;
 }
-
-export const disableInputs = writable(false);

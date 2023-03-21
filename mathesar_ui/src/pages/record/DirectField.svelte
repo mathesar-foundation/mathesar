@@ -17,7 +17,6 @@
   import { currentSchema } from '@mathesar/stores/schemas';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { disableInputs } from '@mathesar/components/form/field';
   import type RecordStore from './RecordStore';
 
   const userProfile = getUserProfileStoreFromContext();
@@ -47,6 +46,7 @@
   export let record: RecordStore;
   export let processedColumn: ProcessedColumn;
   export let field: FieldStore;
+  export let disabledInputs: Boolean;
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -57,7 +57,7 @@
   $: ({ column, abstractType } = processedColumn);
   $: value = $field;
   $: ({ showsError } = field);
-  $: disabled = column.primary_key || !canEditTableRecords || $disableInputs;
+  $: disabled = column.primary_key || !canEditTableRecords || disabledInputs;
   $: shouldDisplayNullOverlay = !cellDataTypesThatUsePlaceholderText.has(
     abstractType.cellInfo.type,
   );

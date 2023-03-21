@@ -35,6 +35,7 @@
     fieldPropsObjects.map((o) => [o.processedColumn.id, o.field]),
   );
   $: form = makeForm(formFields);
+  $: ({ disableInputs } = form);
 
   function getJoinableTablesResult(tableId: number) {
     return getAPI<JoinableTablesResult>(
@@ -59,7 +60,7 @@
     </div>
     <div class="fields">
       {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
-        <DirectField {record} {processedColumn} {field} />
+        <DirectField {record} {processedColumn} {field} disabledInputs={$disableInputs} />
       {/each}
     </div>
     <div class="submit">
