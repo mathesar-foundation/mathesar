@@ -20,3 +20,4 @@ Mathesar should be pretty intuitive to use. More documentation is coming soon, b
 We welcome contributions! Please read through our [contribution guide on our wiki](https://wiki.mathesar.org/en/community/contributing) to get started.
 
 - [Local Development Setup](contributing/local-dev.md)
+- [Getting started with the frontend codebase](contributing/getting-started-with-frontend-codebase.md)
