@@ -22,7 +22,7 @@
   });
 
   export let recordPk: string;
-  export let table: TableEntry;
+  export let table: Pick<TableEntry, 'id' | 'name'>;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
@@ -31,7 +31,6 @@
     abstractTypesMap,
     meta,
     contextualFilters: new Map([[fkColumn.id, recordPk]]),
-    table,
   });
   $: tabularDataStore.set(tabularData);
 </script>
@@ -43,7 +42,7 @@
   </div>
 
   <div class="results">
-    <TableView context="widget" {table} />
+    <TableView context="widget" />
   </div>
 </div>
 
