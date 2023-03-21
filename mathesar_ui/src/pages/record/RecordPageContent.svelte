@@ -60,7 +60,12 @@
     </div>
     <div class="fields">
       {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
-        <DirectField {record} {processedColumn} {field} disabledInputs={$disableInputs} />
+        <DirectField
+          {record}
+          {processedColumn}
+          {field}
+          disabledInputs={$disableInputs}
+        />
       {/each}
     </div>
     <div class="submit">

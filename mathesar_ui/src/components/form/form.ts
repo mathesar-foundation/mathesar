@@ -48,7 +48,7 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
   });
 
   const requestStatus = writable<RequestStatus | undefined>(undefined);
-  const disableInputs = writable(false)
+  const disableInputs = writable(false);
 
   const isValid = derived(
     unite(Object.values(fields).map((f) => f.isValid)),
@@ -87,7 +87,14 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
     }),
   );
 
-  return { ...store, fields, reset, clearServerErrors, requestStatus, disableInputs };
+  return {
+    ...store,
+    fields,
+    reset,
+    clearServerErrors,
+    requestStatus,
+    disableInputs,
+  };
 }
 
 export type Form<FieldsObj extends GenericFieldsObj = GenericFieldsObj> =

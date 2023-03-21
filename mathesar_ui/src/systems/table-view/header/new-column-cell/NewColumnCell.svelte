@@ -76,7 +76,10 @@
     />
     <Field
       field={columnType}
-      input={{ component: ColumnTypeSelector, props: { disabled: $disableInputs } }}
+      input={{
+        component: ColumnTypeSelector,
+        props: { disabled: $disableInputs },
+      }}
       label="Select Type"
       layout="stacked"
     />

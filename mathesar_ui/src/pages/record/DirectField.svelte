@@ -46,7 +46,7 @@
   export let record: RecordStore;
   export let processedColumn: ProcessedColumn;
   export let field: FieldStore;
-  export let disabledInputs: Boolean;
+  export let disabledInputs: boolean;
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
