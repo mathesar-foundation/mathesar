@@ -96,6 +96,60 @@
   }
 
   $: void selectAndActivateFirstCellOnTableLoad($isLoading, selection, context);
+
+  let isResizing = false;
+  let startingPointerX: number | undefined;
+  let startingColumnWidth: number | undefined;
+  let minInspectorwidth: 80;
+
+  function isTouchEvent(e: MouseEvent | TouchEvent): e is TouchEvent {
+    return 'touches' in e;
+  }
+
+  function getPointerX(e: MouseEvent | TouchEvent) {
+    const singularEvent = isTouchEvent(e) ? e.touches[0] : e;
+    return singularEvent.clientX;
+  }
+
+  function resize(e: MouseEvent | TouchEvent) {
+    const pointerMovement = getPointerX(e) - (startingPointerX ?? 0);
+    const newColumnWidth = Math.max(
+      (startingColumnWidth ?? 0) + pointerMovement,
+      minInspectorwidth,
+    );
+    // Update the width of the sidebar
+    const container = document.querySelector('.table-inspector-container') as HTMLElement;
+    container.style.width = `${newColumnWidth}px`;
+  }
+
+  function stopColumnResize() {
+    isResizing = false;
+    startingPointerX = undefined;
+    startingColumnWidth = undefined;
+    window.removeEventListener('mousemove', resize, true);
+    window.removeEventListener('touchmove', resize, true);
+    window.removeEventListener('mouseup', stopColumnResize, true);
+    window.removeEventListener('touchend', stopColumnResize, true);
+    window.removeEventListener('touchcancel', stopColumnResize, true);
+    // Remove the class that indicates that the user is resizing the sidebar
+    const resizer = document.querySelector('.inspector-resizer') as HTMLElement;
+    resizer.classList.remove('is-resizing');
+  }
+
+  function startColumnResize(e: MouseEvent | TouchEvent) {
+    isResizing = true;
+    startingColumnWidth = undefined;
+    startingPointerX = getPointerX(e);
+    window.addEventListener('mousemove', resize, true);
+    window.addEventListener('touchmove', resize, true);
+    window.addEventListener('mouseup', stopColumnResize, true);
+    window.addEventListener('touchend', stopColumnResize, true);
+    window.addEventListener('touchcancel', stopColumnResize, true);
+    // Add the class that indicates that the user is resizing the sidebar
+    const resizer = document.querySelector('.inspector-resizer') as HTMLElement;
+    resizer.classList.add('is-resizing');
+  }
+  
 </script>
 
 <div class="table-view">
@@ -118,7 +172,15 @@
       {/if}
     </div>
     {#if showTableInspector}
-      <TableInspector />
+      <div
+        class="inspector-resizer" 
+        class:is-resizing={isResizing}
+        on:dragstart
+        on:mousedown={startColumnResize}
+        on:touchstart|nonpassive={startColumnResize}
+      >
+        <TableInspector />
+      </div> 
     {/if}
   </div>
   <StatusPane {context} />
@@ -140,5 +202,15 @@
     position: relative;
     overflow-x: auto;
     flex: 1;
+  }
+  .inspector-resizer {
+    --width: 800px;
+    position: absolute;
+    width: var(--width);
+    right: calc(-1 * var(--width) / 2);
+    z-index: var(--z-index__sheet__column-resizer);
+    cursor: e-resize;
+    display: flex;
+    justify-content: center;
   }
 </style>
