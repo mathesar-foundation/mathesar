@@ -17,7 +17,7 @@ Installation should only take a few minutes.
 - You need to be a user with root access to the machine you're trying to install Mathesar on. 
 ## Preparing our server.
 - Prerequisites
-    - Ubntu 22 with at least `60 GB` disk space and `4GB` of RAM.
+    - Ubuntu 22 with at least `60 GB` disk space and `4GB` of RAM.
     - Root privileges
     - Domain name, or subdomain, for your installation.  We will use `mathesar.example.com` as the domain for our website
     - Python 3.9  
