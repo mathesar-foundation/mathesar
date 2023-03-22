@@ -38,3 +38,10 @@ def execute_msar_func_with_psycopg2_conn(conn, func_name, *args):
     stmt = text(f"SELECT msar.{func_name}({args_str})")
     # Returns a cursor
     return conn.execute(stmt)
+
+
+def load_file_with_engine(engine, file_handle):
+    """Run an SQL script from a file, using psycopg."""
+    conn_str = str(engine.url)
+    with psycopg.connect(conn_str) as conn:
+        conn.execute(file_handle.read())
