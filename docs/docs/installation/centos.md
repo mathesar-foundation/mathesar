@@ -23,7 +23,7 @@ yum update && yum upgrade
 ### Step two
 Clean the system of any potential pre-installed Docker packages.
 ```sh
-sudo yum remove docker docker-engien docker.io
+sudo yum remove docker docker-engine docker.io
 ```
 ### Step three: Installing Docker
 We wil now install Docker on this system.
