@@ -1,5 +1,4 @@
 import os
-import psycopg
 from db.connection import load_file_with_engine
 
 MSAR_SQL = os.path.abspath('0_msar.sql')
