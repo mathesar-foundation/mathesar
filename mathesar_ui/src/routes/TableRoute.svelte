@@ -30,12 +30,12 @@
     <TablePage {table} />
   </Route>
 
-  <Route path="/:recordId" let:meta>
+  <Route path="/:recordPk" let:meta>
     <RecordPageRoute
       {database}
       {schema}
       {table}
-      recordId={parseInt(meta.params.recordId, 10)}
+      recordPk={String(meta.params.recordPk)}
     />
   </Route>
 {:else}
