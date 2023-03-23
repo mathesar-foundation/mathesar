@@ -130,18 +130,27 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.get_column_name(table_id oid, col_attnum integer) RETURNS text AS $$/*
-Return the name for a given table, qualified or quoted as appropriate.
-
-In cases where the table is already included in the search path, the returned name will not be
-fully-qualified.
+Return the name for a given column in a given table.
 
 Args:
-  table_id:   The OID of the table.
+  table_id:  The OID of the table.
+  column_attnum:   The attnum of the column in the table.
 */
 BEGIN
-  RETURN attname::text FROM pg_attribute WHERE attrelid=table_id AND attnum=col_attnum;
+  RETURN quote_ident(attname::text) FROM pg_attribute WHERE attrelid=table_id AND attnum=col_attnum;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.is_pkey_col(table_id oid, col_attnum integer) RETURNS boolean AS $$/*
+Return whether the given column is in the primary key of the given table.
+*/
+BEGIN
+  RETURN ARRAY[col_attnum::smallint] <@ conkey FROM pg_constraint WHERE conrelid=table_id;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 
 
 ----------------------------------------------------------------------------------------------------
@@ -308,9 +317,48 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+-- Drop columns from table -------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.drop_columns(table_name text, columns variadic text[]) RETURNS text AS $$/*
+Drop the given columns from the given table.
+
+Args:
+  table_name: fully-qualified, quoted table name.
+  columns: The column names to be dropped, quoted.
+*/
+DECLARE column_drops text;
+BEGIN
+  SELECT string_agg(format('DROP COLUMN %s', col), ', ')
+  FROM unnest(columns) as col
+  INTO column_drops;
+  RETURN __msar.exec_ddl('ALTER TABLE %s %s', table_name, column_drops);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_columns(table_id oid, attnums variadic integer[]) RETURNS text AS $$/*
+Drop the given columns from the given table.
+
+Args:
+  table_id: OID of the table whose columns we'll drop.
+  attnums: The attnums of the columns to drop.
+*/
+DECLARE columns text[];
+BEGIN
+  SELECT array_agg(quote_ident(attname))
+  FROM pg_attribute
+  WHERE attrelid=table_id AND ARRAY[attnum::integer] <@ attnums
+  INTO columns;
+  RETURN __msar.drop_columns(__msar.get_table_name(table_id), variadic columns);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
--- MATHESAR DROP FUNCTION
+-- MATHESAR DROP TABLE FUNCTIONS
 --
 -- Drop a table.
 ----------------------------------------------------------------------------------------------------
