@@ -28,14 +28,14 @@ export default class RecordStore {
 
   table: TableEntry;
 
-  recordId: number;
+  recordPk: string;
 
   private url: string;
 
-  constructor({ table, recordId }: { table: TableEntry; recordId: number }) {
+  constructor({ table, recordPk }: { table: TableEntry; recordPk: string }) {
     this.table = table;
-    this.recordId = recordId;
-    this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordId}/`;
+    this.recordPk = recordPk;
+    this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordPk}/`;
     const { template } = this.table.settings.preview_settings;
     this.summary = derived(
       [this.fieldValues, this.recordSummaries],
