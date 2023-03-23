@@ -130,7 +130,7 @@ GRANT ALL PRIVILEGES ON DATABASE yourdbname TO youruser;
 ```
 #### Create .env file for Django
 
-`
+```sh
 ALLOWED_HOSTS: "*"
       DEBUG: "True"
       MODE: "PRODUCTION"
@@ -139,7 +139,7 @@ ALLOWED_HOSTS: "*"
       DJANGO_DATABASE_URL: "postgres://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ DJANGO_DATABASE_NAME }}"
       MATHESAR_DATABASES: "({{ user_database_key }}|postgresql://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ MATHESAR_DATABASE_NAME }})"
       DJANGO_SUPERUSER_PASSWORD: "{{ DJANGO_SUPERUSER_PASSWORD }}"
-      `
+```
 
 
 ### Step Three: Install Nginx with Letsencrypt and Gurnicorn3
