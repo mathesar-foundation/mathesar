@@ -51,6 +51,10 @@
         columns={$processedColumns}
         columnsAllowedForSelection={availableColumns.map((entry) => entry.id)}
         getColumnLabel={(processedColumn) => processedColumn?.column.name ?? ''}
+        getColumnConstraintType={(column) => {
+          const linkFkType = $processedColumns.get(column.id)?.linkFk?.type;
+          return linkFkType ? [linkFkType] : undefined;
+        }}
         columnIdentifier={groupEntry.columnId}
         preprocFunctionIdentifier={groupEntry.preprocFnId}
         on:update={(e) => updateGrouping(index, e.detail)}
