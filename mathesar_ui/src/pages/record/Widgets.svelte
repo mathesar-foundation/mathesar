@@ -5,7 +5,7 @@
   import { iconRecord } from '@mathesar/icons';
   import TableWidget from './TableWidget.svelte';
 
-  export let recordId: number;
+  export let recordPk: string;
   export let recordSummary: string;
   export let joinableTablesResult: JoinableTablesResult;
 
@@ -53,7 +53,7 @@
     <div class="widgets">
       {#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
         <section class="table-widget-positioner">
-          <TableWidget {table} {fkColumn} {recordId} />
+          <TableWidget {table} {fkColumn} {recordPk} />
         </section>
       {/each}
     </div>
