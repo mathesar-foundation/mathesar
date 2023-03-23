@@ -8,6 +8,7 @@ Installation should only take a few minutes.
 - ###### Database
   - Install PostgreSQL
   - Create Database, Database user
+  - Create .env file for Django
 - ###### Web Server
   - Install Nginx webserver 
   - Install Letsencrypt and Gurnicorn3  
@@ -127,6 +128,18 @@ CREATE DATABASE yourdbname;
 CREATE USER youruser WITH ENCRYPTED PASSWORD 'yourpass';
 GRANT ALL PRIVILEGES ON DATABASE yourdbname TO youruser;
 ```
+#### Create .env file for Django
+
+`
+ALLOWED_HOSTS: "*"
+      DEBUG: "True"
+      MODE: "PRODUCTION"
+      SECRET_KEY: "{{ SECRET_KEY }}"
+      DJANGO_DATABASE_KEY: "default"
+      DJANGO_DATABASE_URL: "postgres://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ DJANGO_DATABASE_NAME }}"
+      MATHESAR_DATABASES: "({{ user_database_key }}|postgresql://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ MATHESAR_DATABASE_NAME }})"
+      DJANGO_SUPERUSER_PASSWORD: "{{ DJANGO_SUPERUSER_PASSWORD }}"
+      `
 
 
 ### Step Three: Install Nginx with Letsencrypt and Gurnicorn3
