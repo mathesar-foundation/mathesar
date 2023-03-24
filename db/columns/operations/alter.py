@@ -317,8 +317,6 @@ def batch_update_columns(table_oid, engine, column_data_list):
         metadata=get_empty_metadata(),
     )
     _validate_columns_for_batch_update(table, column_data_list)
-    print(type(table_oid))
-    print(column_data_list)
     with engine.begin() as conn:
         _batch_update_column_types(table_oid, column_data_list, conn, engine)
         _batch_alter_table_rename_columns(table_oid, column_data_list, conn, engine)
