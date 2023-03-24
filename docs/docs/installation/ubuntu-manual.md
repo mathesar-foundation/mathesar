@@ -115,7 +115,7 @@ Now we can install PostGreSQL 13 on the system.
 ```sh
 apt install postgresql-13 postgresql-client-13
 ```
-#### Create Database, Database user
+#### Mathesar: Create Database, Database user
 Before we start, we first need to secure our database as the root user's password is not set.
 ```sh
 sudo su - postgres
@@ -127,6 +127,14 @@ sudo -u postgres psql #if you are not already in psql prompt
 CREATE DATABASE yourdbname;
 CREATE USER youruser WITH ENCRYPTED PASSWORD 'yourpass';
 GRANT ALL PRIVILEGES ON DATABASE yourdbname TO youruser;
+```
+### Django: Create Database
+
+Next we have to create a database for our Django app.  This database will use the same database user & password as the Mathesar database.  So once we create the database, we can simply add the same user to it.
+```sh
+sudo -u postgres psql #if you are not already in psql prompt
+CREATE DATABASE djangodb;
+GRANT ALL PRIVILEGES ON DATABASE djangodb TO youruser;
 ```
 #### Create .env file for Django
 
