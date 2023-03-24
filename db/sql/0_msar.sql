@@ -330,7 +330,7 @@ Args:
 DECLARE column_drops text;
 BEGIN
   SELECT string_agg(format('DROP COLUMN %s', col), ', ')
-  FROM unnest(columns) as col
+  FROM unnest(columns) AS col
   INTO column_drops;
   RETURN __msar.exec_ddl('ALTER TABLE %s %s', table_name, column_drops);
 END;
@@ -352,6 +352,41 @@ BEGIN
   WHERE attrelid=table_id AND ARRAY[attnum::integer] <@ attnums
   INTO columns;
   RETURN __msar.drop_columns(__msar.get_table_name(table_id), variadic columns);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_columns(table_id oid, attnums variadic integer[]) RETURNS text AS $$/*
+Drop the given columns from the given table.
+
+Args:
+  table_id: OID of the table whose columns we'll drop.
+  attnums: The attnums of the columns to drop.
+*/
+DECLARE columns text[];
+BEGIN
+  SELECT array_agg(quote_ident(attname))
+  FROM pg_attribute
+  WHERE attrelid=table_id AND ARRAY[attnum::integer] <@ attnums
+  INTO columns;
+  RETURN __msar.drop_columns(__msar.get_table_name(table_id), variadic columns);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_columns(schema_ text, table_ text, columns variadic text[]) RETURNS text AS $$/*
+Drop the given columns from the given table.
+
+Args:
+  table_id: OID of the table whose columns we'll drop.
+  attnums: The attnums of the columns to drop.
+*/
+DECLARE prepared_columns text[];
+BEGIN
+  SELECT array_agg(quote_ident(col)) FROM unnest(columns) AS col INTO prepared_columns;
+  RETURN __msar.drop_columns(msar.get_fq_table_name(schema_, table_), variadic prepared_columns);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
