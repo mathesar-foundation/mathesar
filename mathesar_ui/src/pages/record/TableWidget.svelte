@@ -21,8 +21,8 @@
     pagination: new Pagination({ size: 10 }),
   });
 
-  export let recordId: number;
-  export let table: TableEntry;
+  export let recordPk: string;
+  export let table: Pick<TableEntry, 'id' | 'name'>;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
@@ -30,8 +30,7 @@
     id: table.id,
     abstractTypesMap,
     meta,
-    contextualFilters: new Map([[fkColumn.id, recordId]]),
-    table,
+    contextualFilters: new Map([[fkColumn.id, recordPk]]),
   });
   $: tabularDataStore.set(tabularData);
 </script>
@@ -43,7 +42,7 @@
   </div>
 
   <div class="results">
-    <TableView context="widget" {table} />
+    <TableView context="widget" />
   </div>
 </div>
 
