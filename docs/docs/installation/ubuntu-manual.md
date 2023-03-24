@@ -140,28 +140,16 @@ GRANT ALL PRIVILEGES ON DATABASE djangodb TO youruser;
 
 From the previous step, you will need your to fill in the following variables for Django:
 `
-DATABASE_USER
-DATABASE_PASSWORD
-DJANGO_DATABASE_NAME
-DJANGO_SUPERUSER_PASSWORD
-`
-As well as these for Mathesar
-`
-DATABASE_USER
-DATABASE_PASSWORD
-MATHESAR_DATABASE_NAME
+You can generate the secret key here: https://djecrety.ir/cat /v
 
 ```sh
 ALLOWED_HOSTS: "*"
-DEBUG: "True"
-MODE: "PRODUCTION"
-SECRET_KEY: "{{ SECRET_KEY }}"
-DJANGO_DATABASE_KEY: "default"
-DJANGO_DATABASE_URL: "postgres://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ DJANGO_DATABASE_NAME }}"
-MATHESAR_DATABASES: "({{ user_database_key }}|postgresql://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ MATHESAR_DATABASE_NAME }})"
-DJANGO_SUPERUSER_PASSWORD: "{{ DJANGO_SUPERUSER_PASSWORD }}"
+SECRET_KEY=
+DJANGO_DATABASE_KEY=default
+DJANGO_DATABASE_URL=postgres://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ DJANGO_DATABASE_NAME }}"
+MATHESAR_DATABASES=(mathesar_tables|postgresql://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ MATHESAR_DATABASE_NAME }})
 ```
-This file can be placed in /var/www/
+This file can be placed in /var/www/mathesar.examplecom/mathesar
 
 ### Step Three: Install Nginx with Letsencrypt and Gurnicorn3
 We will start off by installing Nginx on the system.  This will already be in the Debian repository so simply run the install command.
@@ -458,13 +446,16 @@ Once this is installed we will install from requirements.txt
 ```sh
 pip install -r requirements.txt
 ```
-We will call the Django Settings, and then apply the migration:
-```sh
-
-
-```
 Next we will activate our virtual environment with the following command:
 ```sh
 . /opt/virtualenvs/mathesar/bin/activate
 ```
+
+We will call the Django Settings, and then apply the migration:
+```sh
+$(sudo cat /var/www/mathesar.examplecom/mathesar/.env)
+python3.9 /var/www/mathesar.example.com/manage.py migrate
+
+```
+
 
