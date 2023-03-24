@@ -146,8 +146,8 @@ def _invalidate_columns_with_incorrect_display_options(tables):
             )
             if not serializer.is_valid(False):
                 columns_with_invalid_display_option.append(column.id)
-    if columns_with_invalid_display_option:
-        models.Column.current_objects.filter(id__in=columns_with_invalid_display_option).update(display_options=None)
+    
+    models.Column.current_objects.filter(id__in=columns_with_invalid_display_option).update(display_options=None)
 
 
 def _create_reflected_columns(attnum_tuples, tables):
