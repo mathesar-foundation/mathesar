@@ -1,5 +1,4 @@
 import type { TableEntry } from '@mathesar/api/types/tables';
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import {
   getImportPreviewPageUrl,
   getTablePageUrl,
@@ -18,46 +17,6 @@ export function isTableImportConfirmationRequired(
     table.data_files !== undefined &&
     table.data_files.length > 0
   );
-}
-
-export function getColumnOrder(
-  processedColumns: ProcessedColumn[],
-  table: Partial<Pick<TableEntry, 'settings'>>,
-) {
-  const allColumns = [...processedColumns.values()];
-  let completeColumnOrder: number[] = [];
-  const { settings } = table;
-  if (settings) {
-    const { column_order: columnOrder } = settings;
-    if (columnOrder) {
-      completeColumnOrder = columnOrder;
-    }
-  }
-  allColumns.forEach((column) => {
-    if (!completeColumnOrder.includes(column.id)) {
-      completeColumnOrder.push(column.id);
-    }
-  });
-  return completeColumnOrder;
-}
-
-export function orderProcessedColumns(
-  processedColumns: Map<number, ProcessedColumn>,
-  table: Partial<Pick<TableEntry, 'settings'>>,
-): Map<number, ProcessedColumn> {
-  const columns = [...processedColumns.values()];
-  const orderedColumns = new Map<number, ProcessedColumn>();
-
-  const columnOrder = getColumnOrder(columns, table);
-  columnOrder.forEach((id) => {
-    const index = columns.map((column) => column.id).indexOf(id);
-    if (index !== -1) {
-      const orderColumn = columns.splice(index, 1)[0];
-      orderedColumns.set(orderColumn.id, orderColumn);
-    }
-  });
-
-  return orderedColumns;
 }
 
 export function getLinkForTableItem(
