@@ -175,7 +175,7 @@ def _delete_stale_columns(attnum_tuples, tables):
         operator.or_,
         stale_columns_conditions
     )
-    models.Column.objects.exclude(stale_columns_query).delete()
+    models.Column.objects.filter(stale_columns_query).delete()
 
 
 # TODO pass in a cached engine instead of creating a new one
