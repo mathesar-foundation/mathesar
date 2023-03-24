@@ -152,6 +152,29 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_cast_function_name(target_type regtype) RETURNS text AS $$/*
+Return a string giving the appropriate name of the casting function for the target_type.
+
+Args:
+  target_type: This should be a type that exists.
+*/
+DECLARE target_type_prepped text;
+BEGIN
+  WITH unqualifier AS (
+    SELECT x[array_upper(x, 1)] unqualified_type
+    FROM regexp_split_to_array(target_type::text, '\.') x
+  ), unspacer AS(
+    SELECT replace(unqualified_type, ' ', '_') unspaced_type
+    FROM unqualifier
+  )
+  SELECT replace(unspaced_type, '"', '_double_quote_')
+  FROM unspacer
+  INTO target_type_prepped;
+  RETURN format('mathesar_types.cast_to_%s', target_type_prepped);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -260,6 +283,14 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Alter Table: LEFT IN PYTHON (for now) -----------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- ALTER TABLE FUNCTIONS: Column operations
+--
+-- Functions in this section should always involve 'ALTER TABLE', and one or more columns
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
 -- Update table primary key sequence to latest -----------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
@@ -333,25 +364,6 @@ BEGIN
   FROM unnest(columns) AS col
   INTO column_drops;
   RETURN __msar.exec_ddl('ALTER TABLE %s %s', table_name, column_drops);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_columns(table_id oid, attnums variadic integer[]) RETURNS text AS $$/*
-Drop the given columns from the given table.
-
-Args:
-  table_id: OID of the table whose columns we'll drop.
-  attnums: The attnums of the columns to drop.
-*/
-DECLARE columns text[];
-BEGIN
-  SELECT array_agg(quote_ident(attname))
-  FROM pg_attribute
-  WHERE attrelid=table_id AND ARRAY[attnum::integer] <@ attnums
-  INTO columns;
-  RETURN __msar.drop_columns(__msar.get_table_name(table_id), variadic columns);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
