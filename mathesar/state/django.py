@@ -121,9 +121,8 @@ def reflect_tables_from_schemas(schemas, metadata):
 def reflect_columns_from_tables(tables, metadata):
     if len(tables) < 1:
         return
-    engine = tables[0]._sa_engine
     table_oids = [table.oid for table in tables]
-    attnum_tuples = get_column_attnums_from_tables(table_oids, engine, metadata=metadata)
+    attnum_tuples = get_column_attnums_from_tables(table_oids, tables[0]._sa_engine, metadata=metadata)
 
     _create_reflected_columns(attnum_tuples, tables)
 
@@ -147,7 +146,7 @@ def _invalidate_columns_with_incorrect_display_options(tables):
             )
             if not serializer.is_valid(False):
                 columns_with_invalid_display_option.append(column.id)
-    if len(columns_with_invalid_display_option) > 0:
+    if columns_with_invalid_display_option:
         models.Column.current_objects.filter(id__in=columns_with_invalid_display_option).update(display_options=None)
 
 
@@ -176,7 +175,7 @@ def _delete_stale_columns(attnum_tuples, tables):
         operator.or_,
         stale_columns_conditions
     )
-    models.Column.objects.filter(stale_columns_query).delete()
+    models.Column.objects.exclude(stale_columns_query).delete()
 
 
 # TODO pass in a cached engine instead of creating a new one

@@ -898,10 +898,9 @@ def _create_table_settings(tables):
 
 
 def _set_default_preview_template(table):
-    if not table.settings.preview_settings.customized:
-        preview_template = compute_default_preview_template(table)
-        preview_settings = table.settings.preview_settings
-        preview_settings.template = preview_template
+    preview_settings = table.settings.preview_settings
+    if not preview_settings.customized:
+        preview_settings.template = compute_default_preview_template(table)
         preview_settings.save()
 
 
