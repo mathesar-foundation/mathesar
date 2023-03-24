@@ -1,3 +1,4 @@
+"""The function in this module wraps SQL functions that drop columns."""
 from db import connection as db_conn
 
 
