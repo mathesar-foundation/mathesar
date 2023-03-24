@@ -4,6 +4,7 @@ from sqlalchemy import DefaultClause, text, DDL, select
 from sqlalchemy.exc import DataError, InternalError, ProgrammingError
 from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue, StringDataRightTruncation, RaiseException, SyntaxError
 
+from db import connection as db_conn
 from db.columns.defaults import NAME, NULLABLE
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
 from db.columns.operations.select import (
@@ -283,21 +284,29 @@ def _batch_alter_table_rename_columns(table_oid, column_data_list, connection, e
 
 
 def batch_alter_table_drop_columns(table_oid, column_data_list, connection, engine):
-    table = reflect_table_from_oid(
-        table_oid,
-        engine,
-        connection_to_use=connection,
-        # TODO reuse metadata
-        metadata=get_empty_metadata(),
-    )
-    ctx = MigrationContext.configure(connection)
-    op = Operations(ctx)
-    with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
-        for column_data in column_data_list:
-            column_attnum = column_data.get('attnum')
-            if column_attnum is not None and column_data.get('delete') is not None:
-                name = get_column_name_from_attnum(table_oid, column_attnum, engine=engine, metadata=get_empty_metadata(), connection_to_use=connection)
-                batch_op.drop_column(name)
+    """
+    Drop the given columns from the given table.
+
+    Args:
+        table_oid: OID of the table whose columns we'll drop.
+        column_data_list: The attnums of the columns to drop.
+
+    Returns:
+        A string of the command that was executed.
+    """
+    columns_to_drop = [
+        int(col['attnum']) for col in column_data_list
+        if col.get('attnum') is not None and col.get('delete') is not None
+    ]
+
+    if connection is not None and columns_to_drop:
+        return db_conn.execute_msar_func_with_psycopg2_conn(
+            connection, 'drop_columns', int(table_oid), *columns_to_drop
+        )
+    elif columns_to_drop:
+        return db_conn.execute_msar_func_with_engine(
+            engine, 'drop_columns', int(table_oid), *columns_to_drop
+        )
 
 
 def batch_update_columns(table_oid, engine, column_data_list):
@@ -308,6 +317,8 @@ def batch_update_columns(table_oid, engine, column_data_list):
         metadata=get_empty_metadata(),
     )
     _validate_columns_for_batch_update(table, column_data_list)
+    print(type(table_oid))
+    print(column_data_list)
     with engine.begin() as conn:
         _batch_update_column_types(table_oid, column_data_list, conn, engine)
         _batch_alter_table_rename_columns(table_oid, column_data_list, conn, engine)
