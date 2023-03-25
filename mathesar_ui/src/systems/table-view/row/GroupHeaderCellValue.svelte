@@ -22,24 +22,39 @@
   });
 </script>
 
-<span class="tag">
-  <span class="name">
-    {processedColumnsMap.get(columnId)?.column.name ?? ''}
-    {#if preprocName}
-      <span class="preproc">{preprocName}</span>
-    {/if}
+<div class="group-item truncate">
+  <span class="tag">
+    <span class="name">
+      {processedColumnsMap.get(columnId)?.column.name ?? ''}
+      {#if preprocName}
+        <span class="preproc">{preprocName}</span>
+      {/if}
+    </span>
+    <span class="value">
+      {#if recordSummary}
+        <LinkedRecord {recordSummary} {recordId} {recordPageHref} />
+      {:else}
+        <CellValue value={cellValue} />
+      {/if}
+    </span>
   </span>
-  <span class="value">
-    {#if recordSummary}
-      <LinkedRecord {recordSummary} {recordId} {recordPageHref} />
-    {:else}
-      <CellValue value={cellValue} />
-    {/if}
-  </span>
-</span>
+</div>
 
 <style lang="scss">
+  .group-item {
+    flex-shrink: 0;
+    align-items: center;
+    overflow: hidden;
+
+    &.truncate {
+      // Apply the same truncating logic with BreadcrumbItem.
+      flex: 1 0 0;
+      max-width: max-content;
+    }
+  }
   .tag {
+    display: block;
+    overflow: hidden;
     .name {
       font-size: var(--text-size-small);
       color: var(--color-text-muted);
@@ -57,6 +72,10 @@
     }
     .value {
       font-size: var(--text-size-large);
+      display: block;
+      max-width: 100%;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
   }
 </style>

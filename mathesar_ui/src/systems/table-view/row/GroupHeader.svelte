@@ -59,6 +59,9 @@
 
 <style lang="scss">
   .group-header {
+    display: flex;
+    align-items: start;
+    overflow: hidden;
     padding: 0.5rem 1.5rem;
     z-index: var(--z-index__sheet_group-header);
 
@@ -66,6 +69,7 @@
       align-items: start;
       display: flex;
       gap: 1rem;
+      overflow: hidden;
     }
 
     .count-container {
