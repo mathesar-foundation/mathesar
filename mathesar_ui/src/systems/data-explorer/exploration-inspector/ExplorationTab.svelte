@@ -17,6 +17,7 @@
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import { toast } from '@mathesar/stores/toast';
+  import { isSchemaCountChanged } from '@mathesar/stores/schemas';
   import type QueryRunner from '../QueryRunner';
   import QueryManager from '../QueryManager';
 
@@ -87,6 +88,7 @@
       void confirmDelete({
         identifierType: 'Exploration',
         onProceed: async () => {
+          isSchemaCountChanged.set(true);
           await deleteQuery(queryId);
           dispatch('delete');
         },

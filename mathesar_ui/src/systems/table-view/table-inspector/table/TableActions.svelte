@@ -24,6 +24,7 @@
     constructDataExplorerUrlToSummarizeFromGroup,
     createDataExplorerUrlToExploreATable,
   } from '@mathesar/systems/data-explorer';
+  import { isSchemaCountChanged } from '@mathesar/stores/schemas';
 
   export let canExecuteDDL: boolean;
 
@@ -62,6 +63,7 @@
     void confirmDelete({
       identifierType: 'Table',
       onProceed: async () => {
+        isSchemaCountChanged.set(true);
         await deleteTable($tabularData.id);
         // TODO handle error when deleting
         // TODO: Get db and schema from prop or context

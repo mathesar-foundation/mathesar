@@ -1,5 +1,21 @@
 <script lang="ts">
+  import { isSchemaCountChanged } from '@mathesar/stores/schemas';
+  import { refetchSchemasForDB } from '@mathesar/stores/schemas';
   import Logo from '../Logo.svelte';
+
+  let isReloadNecessary = false;
+  isSchemaCountChanged.subscribe((value: boolean) => {
+    isReloadNecessary = value;
+  });
+  const getDatabaseNamefromURL = (str: string): string => {
+    const strTokens = str.split('/');
+    for (let i = 0; i < strTokens.length; i += 1) {
+      if (strTokens[i].length) {
+        return strTokens[i];
+      }
+    }
+    return '/';
+  };
 
   export let hasResponsiveAbridgement = false;
   export let href: string;
@@ -7,6 +23,12 @@
 
 <a
   {href}
+  on:click={async () => {
+    if (isReloadNecessary) {
+      await refetchSchemasForDB(getDatabaseNamefromURL(href));
+      isSchemaCountChanged.set(false);
+    }
+  }}
   class="home-link"
   class:has-responsive-abridgement={hasResponsiveAbridgement}
 >

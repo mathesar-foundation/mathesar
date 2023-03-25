@@ -20,6 +20,7 @@
     getImportPreviewPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
+  import { isSchemaCountChanged } from '@mathesar/stores/schemas';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
@@ -54,6 +55,7 @@
     void confirmDelete({
       identifierType: 'Table',
       onProceed: async () => {
+        isSchemaCountChanged.set(true);
         await deleteTable(table.id);
         await refetchTablesForSchema(schema.id);
       },

@@ -26,6 +26,7 @@
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
   import { queries } from '@mathesar/stores/queries';
+  import { isSchemaCountChanged } from '@mathesar/stores/schemas';
   import type QueryManager from './QueryManager';
   import type { ColumnWithLink } from './utils';
 
@@ -97,6 +98,7 @@
   }
 
   async function saveExistingOrCreateNew() {
+    isSchemaCountChanged.set(true);
     if ($query.isSaved()) {
       await save();
     } else {

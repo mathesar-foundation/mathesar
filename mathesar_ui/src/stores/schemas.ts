@@ -18,6 +18,8 @@ import { currentDBName } from './databases';
 
 const commonData = preloadCommonData();
 
+export const isSchemaCountChanged = writable(false);
+
 export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
   writable(commonData?.current_schema ?? undefined);
 
@@ -115,6 +117,7 @@ export async function refetchSchemasForDB(
     dbSchemasRequestMap.set(database, schemaRequest);
     const response = await schemaRequest;
     const schemas = response?.results || [];
+    schemas.sort((a, b) => a.id - b.id);
 
     const dbSchemasStore = setDBSchemaStore(database, schemas);
 
