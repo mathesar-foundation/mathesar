@@ -13,6 +13,7 @@ export interface TableSettings {
     customized: boolean;
     template: string;
   };
+  column_order: number[];
 }
 
 /**
