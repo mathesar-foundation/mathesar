@@ -7,20 +7,60 @@ import Url64 from '@mathesar/utils/Url64';
 import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/types/queries';
 
 type TerseSummarizedColumn = Pick<Column, 'id' | 'name'>;
+type BaseTable = Pick<TableEntry, 'id' | 'name'>;
 
-export interface TerseSummarization {
-  baseTable: Pick<TableEntry, 'id' | 'name'>;
+interface TerseSummarization {
+  baseTable: BaseTable;
   columns: TerseSummarizedColumn[];
   terseGrouping: TerseGrouping;
+}
+
+/**
+ * These streamline methods exist so that we don't end up serializing big
+ * objects like `TableEntry` which would pass the type-check but have lots of
+ * fields that are not needed at runtime.
+ */
+class Streamline {
+  static baseTable(t: BaseTable): BaseTable {
+    return {
+      id: t.id,
+      name: t.name,
+    };
+  }
+
+  static terseSummarizedColumn(
+    t: TerseSummarizedColumn,
+  ): TerseSummarizedColumn {
+    return {
+      id: t.id,
+      name: t.name,
+    };
+  }
+
+  static terseSummarization(t: TerseSummarization): TerseSummarization {
+    return {
+      baseTable: Streamline.baseTable(t.baseTable),
+      columns: t.columns.map((c) => Streamline.terseSummarizedColumn(c)),
+      terseGrouping: t.terseGrouping,
+    };
+  }
+}
+
+function buildTableInformationHash(t: TerseSummarization): string {
+  return Url64.encode(JSON.stringify(Streamline.terseSummarization(t)));
 }
 
 export function createDataExplorerUrlToExploreATable(
   databaseName: string,
   schemaId: number,
-  baseTable: TerseSummarization['baseTable'],
+  baseTable: BaseTable,
 ) {
   const dataExplorerRouteUrl = getDataExplorerPageUrl(databaseName, schemaId);
-  const tableInformationHash = Url64.encode(JSON.stringify({ baseTable }));
+  const tableInformationHash = buildTableInformationHash({
+    baseTable,
+    columns: [],
+    terseGrouping: [],
+  });
   return `${dataExplorerRouteUrl}#${tableInformationHash}`;
 }
 
@@ -38,9 +78,7 @@ export function constructDataExplorerUrlToSummarizeFromGroup(
      * This method is currently only used to transfer temporary grouping
      * data to the data explorer route.
      */
-    const groupInformationHash = Url64.encode(
-      JSON.stringify(terseSummarization),
-    );
+    const groupInformationHash = buildTableInformationHash(terseSummarization);
     return `${dataExplorerRouteUrl}#${groupInformationHash}`;
   }
   return undefined;
