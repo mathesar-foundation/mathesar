@@ -457,5 +457,10 @@ $(sudo cat /var/www/mathesar.examplecom/mathesar/.env)
 python3.9 /var/www/mathesar.example.com/manage.py migrate
 
 ```
+Once the migration is done, we need to build the static files.
+Firstly, go to the mathesar_ui folder and run `npm i`:
+```sh
+cd /var/www/mathesar.example.com/mathesar_ui && npm i
+```
 
 
