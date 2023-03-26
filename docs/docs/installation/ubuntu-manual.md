@@ -453,7 +453,7 @@ Next we will activate our virtual environment with the following command:
 
 We will call the Django Settings, and then apply the migration:
 ```sh
-$(sudo cat /var/www/mathesar.examplecom/mathesar/.env)
+$(sudo cat /var/www/mathesar.example.com/mathesar/.env)
 python3.9 /var/www/mathesar.example.com/manage.py migrate
 
 ```
