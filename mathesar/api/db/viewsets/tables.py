@@ -1,4 +1,5 @@
 import json
+from django.http import JsonResponse
 from django_filters import rest_framework as filters
 from psycopg2.errors import CheckViolation, InvalidTextRepresentation
 from rest_access_policy import AccessViewSetMixin
@@ -247,9 +248,13 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
     @action(methods=['post'], detail=True)
     def map_imported_columns(self, request, pk=None):
         temp_table = self.get_object()
-        target_table = request.get('import_target', None)
+        target_table_id = request.data.get('import_target', None)
+        target_table = get_table_or_404(target_table_id)
         try:
-            temp_table.suggest_col_mappings_for_import(target_table)
+            # safe=False is required to serialise arrays,
+            # which is the expected return type of suggest_col_mappings_for_import
+            mappings = temp_table.suggest_col_mappings_for_import(target_table)
+            return JsonResponse(mappings, safe=False)
         except ColumnMappingsNotFound as e:
             raise database_api_exceptions.ColumnMappingsNotFound(
                 e,
