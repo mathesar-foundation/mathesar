@@ -462,5 +462,9 @@ Firstly, go to the mathesar_ui folder and run `npm i`:
 ```sh
 cd /var/www/mathesar.example.com/mathesar_ui && npm i
 ```
+You may be required to update / install additional packages and you can go ahead and to that.  Once this is done we can build our static files:
+```sh
+npm run build --max_old_space_size=4096
+```
 
 
