@@ -149,7 +149,7 @@ DJANGO_DATABASE_KEY=default
 DJANGO_DATABASE_URL=postgres://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ DJANGO_DATABASE_NAME }}"
 MATHESAR_DATABASES=(mathesar_tables|postgresql://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ MATHESAR_DATABASE_NAME }})
 ```
-This file can be placed in /var/www/mathesar.examplecom/mathesar
+This file can be placed in /var/www/mathesar.example.com/mathesar
 
 ### Step Three: Install Nginx with Letsencrypt and Gurnicorn3
 We will start off by installing Nginx on the system.  This will already be in the Debian repository so simply run the install command.
