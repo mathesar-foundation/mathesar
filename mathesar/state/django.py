@@ -122,7 +122,8 @@ def reflect_columns_from_tables(tables, metadata):
     if len(tables) < 1:
         return
     table_oids = [table.oid for table in tables]
-    attnum_tuples = get_column_attnums_from_tables(table_oids, tables[0]._sa_engine, metadata=metadata)
+    engine = tables[0]._sa_engine
+    attnum_tuples = get_column_attnums_from_tables(table_oids, engine, metadata=metadata)
 
     _create_reflected_columns(attnum_tuples, tables)
 
@@ -146,7 +147,8 @@ def _invalidate_columns_with_incorrect_display_options(tables):
             )
             if not serializer.is_valid(False):
                 columns_with_invalid_display_option.append(column.id)
-    models.Column.current_objects.filter(id__in=columns_with_invalid_display_option).update(display_options=None)
+    if len(columns_with_invalid_display_option) > 0:
+        models.Column.current_objects.filter(id__in=columns_with_invalid_display_option).update(display_options=None)
 
 
 def _create_reflected_columns(attnum_tuples, tables):
