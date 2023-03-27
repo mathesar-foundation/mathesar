@@ -76,6 +76,7 @@
         on:click={() => {
           recordsData.addEmptyRecord();
           selection.selectAndActivateFirstDataEntryCellInLastRow();
+          window.scrollTo(0, document.body.scrollHeight - 1000);
         }}
       >
         <Icon {...iconAddNew} />
