@@ -966,7 +966,7 @@ def _get_text_to_numeric_cast():
     """
 
 
-def _build_numeric_array_function(NUMERIC_ARR_FUNC_NAME):
+def _build_numeric_array_function():
     """
     The main reason for this function to be separate is for testing. This
     does have some performance impact; we should consider inlining later.
