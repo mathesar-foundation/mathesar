@@ -34,6 +34,7 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 - [Local development setup](#local-development-setup)
 - [Our motivation](#our-motivation)
 - [Contributing](#contributing)
+- [Bugs and troubleshooting](#bugs-and-troubleshooting)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
