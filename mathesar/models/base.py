@@ -696,7 +696,22 @@ class Table(DatabaseObject, Relation):
     def suggest_col_mappings_for_import(self, existing_table):
         temp_table_col_list = self.get_column_name_type_map()
         target_table_col_list = existing_table.get_column_name_type_map()
-        return column_utils.find_match(temp_table_col_list, target_table_col_list, self._sa_engine)
+        temp_table_name_id_map = self.get_column_name_id_bidirectional_map()
+        target_table_name_id_map = existing_table.get_column_name_id_bidirectional_map()
+        column_mappings = column_utils.find_match(temp_table_col_list, target_table_col_list, self._sa_engine)
+
+        # Convert python list indices to django ids.
+        mappings = [
+            (
+                temp_table_name_id_map[
+                    temp_table_col_list[from_col][0]  # from_column name
+                ],
+                target_table_name_id_map[
+                    target_table_col_list[target_col][0]  # target_column name
+                ]
+            ) for from_col, target_col in column_mappings
+        ]
+        return mappings
 
 
 class Column(ReflectionManagerMixin, BaseModel):
