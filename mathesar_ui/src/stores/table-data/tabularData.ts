@@ -7,12 +7,10 @@ import {
   type Writable,
 } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/types/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/api/utils/requestUtils';
 import type { Column } from '@mathesar/api/types/tables/columns';
 import { SheetSelection } from '@mathesar/components/sheet';
-import { getColumnOrder } from '@mathesar/utils/tables';
 import { Meta } from './meta';
 import { ColumnsDataStore } from './columns';
 import type { RecordRow, TableRecordsData } from './records';
@@ -29,7 +27,6 @@ import { processColumn } from './processedColumns';
 export interface TabularDataProps {
   id: DBObjectEntry['id'];
   abstractTypesMap: AbstractTypesMap;
-  table: TableEntry;
   meta?: Meta;
   /**
    * Keys are columns ids. Values are cell values.
@@ -64,8 +61,6 @@ export class TabularData {
   isLoading: Readable<boolean>;
 
   selection: TabularDataSelection;
-
-  table: TableEntry;
 
   constructor(props: TabularDataProps) {
     const contextualFilters =
@@ -107,12 +102,8 @@ export class TabularData {
         ),
     );
 
-    this.table = props.table;
-
     this.selection = new SheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
-      getColumnOrder: () =>
-        getColumnOrder([...get(this.processedColumns).values()], this.table),
       getRows: () => this.recordsData.getRecordRows(),
       getMaxSelectionRowIndex: () => {
         const totalCount = get(this.recordsData.totalCount) ?? 0;
