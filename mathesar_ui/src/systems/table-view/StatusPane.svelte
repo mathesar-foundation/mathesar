@@ -76,7 +76,10 @@
         on:click={() => {
           recordsData.addEmptyRecord();
           selection.selectAndActivateFirstDataEntryCellInLastRow();
-          window.scrollTo(0, document.body.scrollHeight - 1000);
+          window.scrollTo(
+            0,
+            document.querySelector('.table-page')?.scrollHeight ?? 0,
+          );
         }}
       >
         <Icon {...iconAddNew} />
