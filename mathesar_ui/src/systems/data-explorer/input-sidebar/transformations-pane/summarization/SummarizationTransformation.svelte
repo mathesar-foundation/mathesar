@@ -5,6 +5,7 @@
     MultiSelect,
     LabeledInput,
   } from '@mathesar-component-library';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type QuerySummarizationTransformationModel from '../../../QuerySummarizationTransformationModel';
@@ -13,6 +14,8 @@
   import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
 
   const dispatch = createEventDispatcher();
+  const tabularData = getTabularDataStoreFromContext();
+  $: ({ processedColumns } = $tabularData);
 
   export let columns: ProcessedQueryResultColumnMap;
   export let model: QuerySummarizationTransformationModel;
@@ -84,6 +87,11 @@
     {columns}
     getColumnLabel={(column) =>
       (column && columns.get(column.id)?.column.display_name) ?? ''}
+    getColumnConstraintType={(column) => {
+      const linkFkType = $processedColumns.get(parseInt(column.id, 10))?.linkFk
+        ?.type;
+      return linkFkType ? [linkFkType] : undefined;
+    }}
     disableColumnChange={limitEditing}
     columnIdentifier={model.columnIdentifier}
     preprocFunctionIdentifier={model.preprocFunctionIdentifier}
