@@ -84,25 +84,24 @@ export function max(
       : invalid(msg ?? `Value must be at most ${upperBound}.`);
 }
 
-function isUsernameInvalid(v: string): boolean {
-  // Usernames may contain alphanumeric, @, _, ., + and - characters.
-  return !v.match(/^[@_.+-0-9a-z]+$/);
-}
-
-export function validateUsernameCharacters(
-  msg = 'Username should not contain non-alphanumeric characters.',
+export function matchRegexAllowNullUndefined(
+  regex: RegExp,
+  msg = 'The specified value is invalid.',
 ): ValidationFn<string | undefined | null> {
   return (v) =>
-    v === null || v === undefined || !isUsernameInvalid(v)
+    v === null || v === undefined || v.match(regex) ? valid() : invalid(msg);
+}
+
+export function validateLength(
+  maxInclusive: number,
+  msg: string | undefined = undefined,
+): ValidationFn<string | undefined | null> {
+  return (v) =>
+    v === null || v === undefined || v.length <= maxInclusive
       ? valid()
-      : invalid(msg);
-}
-
-export function validateUsernameLength(
-  msg = 'Username should be less than or equal to 150 characters.',
-): ValidationFn<string | undefined | null> {
-  return (v) =>
-    v === null || v === undefined || v.length <= 150 ? valid() : invalid(msg);
+      : invalid(
+          msg ?? `Length must be equal to or lesser than ${maxInclusive}.`,
+        );
 }
 
 function isEmailInvalid(v: string): boolean {
@@ -113,11 +112,11 @@ function isEmailInvalid(v: string): boolean {
     );
 }
 
-export function validateEmail(
-  msg = 'Invalid email format.',
+export function validateEmailAllowEmpty(
+  msg = 'The email address is invalid.',
 ): ValidationFn<string | undefined | null> {
   return (v) =>
-    v === null || v === undefined || !isEmailInvalid(v)
+    v === null || v === undefined || v === '' || !isEmailInvalid(v)
       ? valid()
       : invalid(msg);
 }
