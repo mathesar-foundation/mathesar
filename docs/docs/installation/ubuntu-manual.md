@@ -140,7 +140,7 @@ GRANT ALL PRIVILEGES ON DATABASE djangodb TO youruser;
 
 From the previous step, you will need your to fill in the following variables for Django:
 `
-You can generate the secret key here: https://djecrety.ir/cat /v
+You can generate the secret key here: https://djecrety.ir/cat
 
 ```sh
 ALLOWED_HOSTS: "*"
