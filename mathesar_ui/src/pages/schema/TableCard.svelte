@@ -111,7 +111,6 @@
       triggerClass="dropdown-menu-button"
       closeOnInnerClick={true}
       placements={['bottom-end', 'right-start', 'left-start']}
-      trigger
       label=""
       icon={iconMoreActions}
       size="small"
