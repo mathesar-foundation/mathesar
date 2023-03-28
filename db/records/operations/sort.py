@@ -76,7 +76,7 @@ def _is_col_orderable(col):
         e = "Column type in not orederable"
         raise InvalidGroupType(e)
     else:
-        return True 
+        return True
 
 
 def apply_relation_sorting(relation, sort_spec):
