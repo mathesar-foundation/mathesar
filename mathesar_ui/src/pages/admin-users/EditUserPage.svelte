@@ -13,6 +13,7 @@
   import {
     PasswordChangeForm,
     UserDetailsForm,
+    UserPermissionForm,
   } from '@mathesar/systems/users-and-permissions';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import type { UserModel } from '@mathesar/stores/users';
@@ -72,6 +73,9 @@
     </FormBox>
     <FormBox>
       <PasswordChangeForm {userId} />
+    </FormBox> 
+    <FormBox>
+      <UserPermissionForm {userId}/>
     </FormBox>
     {#if !userIsLoggedInUser}
       <FormBox>
