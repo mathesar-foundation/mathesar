@@ -11,7 +11,7 @@
     optionalField,
     requiredField,
     makeForm,
-    FormSubmitWithCatch,
+    FormSubmit,
     validateLength,
     matchRegexAllowNullUndefined,
     validateEmailAllowEmpty,
@@ -154,8 +154,9 @@
 </div>
 
 <div class="submit-section">
-  <FormSubmitWithCatch
+  <FormSubmit
     {form}
+    catchErrors
     onProceed={saveUser}
     proceedButton={{ label: 'Save', icon: iconSave }}
     cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
