@@ -1785,6 +1785,39 @@ def test_table_ui_dependency(client, create_patents_table, get_uid):
     assert response_data == expected_response
 
 
+@pytest.mark.parametrize(
+    'before_truncation, after_truncation',
+    [
+        [
+            "bbbbbbbbbbbbbb",
+            "bbbbbbbbbbbbbb",
+        ],
+        [
+            "cccccccccccccccccccccc",
+            "cccccccccccccccccccccc",
+        ],
+        [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        ],
+        [
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "ffffffffffffffffffffffffffffffffffffffffffffffff-7e43d30e",
+        ],
+        [
+            "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-d0ccef3c",
+        ],
+        [
+            "ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+            "gggggggggggggggggggggggggggggggggggggggggggggggg-2910cecf",
+        ],
+    ]
+)
+def test_truncate_if_necessary(before_truncation, after_truncation):
+    assert truncate_if_necessary(before_truncation) == after_truncation
+
+
 def test_create_table_long_name_data_file(client, long_column_data_file, schema):
     table_name = 'My Long column name datafile'
     # response, response_table, table = _create_table(
@@ -1848,6 +1881,15 @@ def test_create_table_long_name_data_file(client, long_column_data_file, schema)
         "Number of outpatient emergency department visits per 1000 long-stay resident days",
         "Processing Date"
     ]
+    # Make sure at least some column names require truncation;
+    # 63 is the hard Postgres limit; we're also experiencing problems with ids
+    # as short as 58 characters, but I'll leave this at 63 so that it doesn't
+    # have to be updated once that's fixed.
+    assert any(
+        len(column_name) >= 63
+        for column_name
+        in column_names
+    )
     processed_column_names = [truncate_if_necessary(col) for col in column_names]
     table = check_create_table_response(
         client, table_name, expt_name, long_column_data_file, schema, first_row,
