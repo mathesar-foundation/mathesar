@@ -17,12 +17,10 @@
   }
 </script>
 
-<!-- TODO: Implement getColumnConstraintType -->
 <FilterEntryComponent
   allowDelete={false}
   {columns}
   getColumnLabel={(column) => columns.get(column.id)?.column.display_name ?? ''}
-  getColumnConstraintType={() => undefined}
   disableColumnChange={limitEditing}
   layout="vertical"
   bind:columnIdentifier={model.columnIdentifier}

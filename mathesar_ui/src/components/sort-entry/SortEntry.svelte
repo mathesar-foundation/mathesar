@@ -32,7 +32,7 @@
   export let getColumnLabel: (column?: ColumnLikeType) => string;
   export let getColumnConstraintType: (
     column: ColumnLikeType,
-  ) => ConstraintType[] | undefined;
+  ) => ConstraintType[] | undefined = () => undefined;
   export let columnsAllowedForSelection: ColumnLikeType['id'][] | undefined =
     undefined;
   export let columnIdentifier: ColumnLikeType['id'];

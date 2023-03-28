@@ -79,13 +79,11 @@
 </script>
 
 <div class="summarization">
-  <!-- TODO: Implement getColumnConstraintType -->
   <GroupEntryComponent
     allowDelete={false}
     {columns}
     getColumnLabel={(column) =>
       (column && columns.get(column.id)?.column.display_name) ?? ''}
-    getColumnConstraintType={() => undefined}
     disableColumnChange={limitEditing}
     columnIdentifier={model.columnIdentifier}
     preprocFunctionIdentifier={model.preprocFunctionIdentifier}

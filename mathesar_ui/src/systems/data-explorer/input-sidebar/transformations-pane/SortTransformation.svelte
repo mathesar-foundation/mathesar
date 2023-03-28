@@ -10,14 +10,12 @@
   export let limitEditing = false;
 </script>
 
-<!-- TODO: Implement getColumnConstraintType -->
 <SortEntryComponent
   allowDelete={false}
   {columns}
   {columnsAllowedForSelection}
   getColumnLabel={(column) =>
     (column && columns.get(column.id)?.column.display_name) ?? ''}
-  getColumnConstraintType={() => undefined}
   disableColumnChange={limitEditing}
   bind:columnIdentifier={model.columnIdentifier}
   bind:sortDirection={model.sortDirection}
