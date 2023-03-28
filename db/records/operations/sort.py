@@ -1,7 +1,7 @@
 from collections import namedtuple
 from sqlalchemy import select
 from db.columns import utils as col_utils
-from db.records.exceptions import BadSortFormat, SortFieldNotFound
+from db.records.exceptions import BadSortFormat, SortFieldNotFound, InvalidGroupType
 
 
 def make_order_by_deterministic(relation, order_by=None):
@@ -72,7 +72,11 @@ def _is_col_orderable(col):
     """
     data_type = col.type
     non_orderable_type = ['Binary', 'LargeBinary', 'PickleType', 'ARRAY', 'JSON', 'JSONB']
-    return str(data_type) not in non_orderable_type
+    if str(data_type) not in non_orderable_type:
+        e = "Column type in not orederable"
+        raise InvalidGroupType(e)
+    else:
+        return True 
 
 
 def apply_relation_sorting(relation, sort_spec):
