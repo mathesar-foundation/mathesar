@@ -84,6 +84,43 @@ export function max(
       : invalid(msg ?? `Value must be at most ${upperBound}.`);
 }
 
+export function matchRegexAllowNullUndefined(
+  regex: RegExp,
+  msg = 'The specified value is invalid.',
+): ValidationFn<string | undefined | null> {
+  return (v) =>
+    v === null || v === undefined || v.match(regex) ? valid() : invalid(msg);
+}
+
+export function validateLength(
+  maxInclusive: number,
+  msg: string | undefined = undefined,
+): ValidationFn<string | undefined | null> {
+  return (v) =>
+    v === null || v === undefined || v.length <= maxInclusive
+      ? valid()
+      : invalid(
+          msg ?? `Length must be equal to or lesser than ${maxInclusive}.`,
+        );
+}
+
+function isEmailInvalid(v: string): boolean {
+  return !v
+    .toLowerCase()
+    .match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    );
+}
+
+export function validateEmailAllowEmpty(
+  msg = 'The email address is invalid.',
+): ValidationFn<string | undefined | null> {
+  return (v) =>
+    v === null || v === undefined || v === '' || !isEmailInvalid(v)
+      ? valid()
+      : invalid(msg);
+}
+
 export function getErrors<T>({
   value,
   isRequired,

@@ -8,9 +8,9 @@
   export let database: Database;
   export let schema: SchemaEntry;
   export let table: TableEntry;
-  export let recordId: number;
+  export let recordPk: string;
 
-  $: record = new RecordStore({ table, recordId });
+  $: record = new RecordStore({ table, recordPk });
   $: ({ summary, fetchRequest } = record);
 </script>
 
@@ -22,7 +22,7 @@
       schema,
       table,
       record: {
-        id: recordId,
+        pk: recordPk,
         summary: $summary,
       },
     }}
