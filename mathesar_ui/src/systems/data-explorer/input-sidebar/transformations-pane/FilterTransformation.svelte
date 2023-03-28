@@ -1,7 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type QueryFilterTransformationModel from '../../QueryFilterTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../../utils';
 
@@ -13,23 +12,17 @@
 
   export let limitEditing = false;
 
-  const tabularData = getTabularDataStoreFromContext();
-  $: ({ processedColumns } = $tabularData);
-
   function updateFilter() {
     dispatch('update');
   }
 </script>
 
+<!-- TODO: Implement getColumnConstraintType -->
 <FilterEntryComponent
   allowDelete={false}
   {columns}
   getColumnLabel={(column) => columns.get(column.id)?.column.display_name ?? ''}
-  getColumnConstraintType={(column) => {
-    const linkFkType = $processedColumns.get(parseInt(column.id, 10))?.linkFk
-      ?.type;
-    return linkFkType ? [linkFkType] : undefined;
-  }}
+  getColumnConstraintType={() => undefined}
   disableColumnChange={limitEditing}
   layout="vertical"
   bind:columnIdentifier={model.columnIdentifier}
