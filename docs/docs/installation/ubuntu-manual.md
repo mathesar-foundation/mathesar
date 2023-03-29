@@ -86,7 +86,7 @@ sudo update-alternatives --config python
 ### Step Two: Install PostGreSQL
 SSH to your server and run the following commands to update all the packages installed.
 ```sh
-apt update && apt update
+apt update && apt upgrade
 ```
 Now we will install the dependencies for PostGreSQL.  Note some of these may already be installed from a previous step.
 ```sh
