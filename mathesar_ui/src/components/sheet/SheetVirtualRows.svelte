@@ -14,12 +14,12 @@
   export let viewWidth: number | undefined;
 </script>
 
-<div 
-  data-sheet-element="body" 
-  tabindex="-1" 
+<div
+  data-sheet-element="body"
+  tabindex="-1"
   bind:clientWidth={viewWidth}
   style="--view-width: {viewWidth}px"
-  >
+>
   <Resizer let:height>
     <VirtualList
       horizontalScrollOffset={$horizontalScrollOffset}
