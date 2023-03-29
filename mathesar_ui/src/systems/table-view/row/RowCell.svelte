@@ -5,6 +5,7 @@
     ButtonMenuItem,
     LinkMenuItem,
     WritableMap,
+    MenuDivider,
   } from '@mathesar-component-library';
   import {
     rowHasRecord,
@@ -37,6 +38,7 @@
   import { iconDeleteMajor } from '@mathesar/icons';
   import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+  import RowContextOptions from './RowContextOptions.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
@@ -191,7 +193,6 @@
       on:movementKeyDown={moveThroughCells}
       on:activate={() => {
         selection.activateCell(row, processedColumn);
-        // let rId = row.record[1];
         // Activate event initaites the selection process
         selection.onStartSelection(row, processedColumn);
       }}
@@ -211,25 +212,13 @@
       >
         Set to <Null />
       </ButtonMenuItem>
+      <MenuDivider/>
       <!-- Column Attributes -->
       <ColumnHeaderContextMenu {processedColumn} />
       <!-- Column Attributes end -->
+      <MenuDivider/>
       <!-- Row -->
-      <LinkMenuItem
-        icon={iconLinkToRecordPage}
-        href={$storeToGetRecordPageUrl({ recordId: rId }) || ''}
-      >
-        Go To Linked Record
-      </LinkMenuItem>
-      {#if canEditTableRecords}
-        <ButtonMenuItem
-          on:click={handleDeleteRecords}
-          danger
-          icon={iconDeleteMajor}
-        >
-          Delete Record
-        </ButtonMenuItem>
-      {/if}
+      <RowContextOptions recordId={Number(rId)} {recordsData} {row} />
       <!-- Row end -->
 
       {#if linkedRecordHref}
