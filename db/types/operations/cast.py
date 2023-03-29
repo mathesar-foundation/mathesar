@@ -652,7 +652,7 @@ def _build_mathesar_money_array_function():
     period_separator_opt_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?"
     space_separator_opt_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?"
     comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?"
-
+    apostrophe_separator_swiss_system = r"[0-9]{1,3}(?:('')[0-9]{3})+(?:(\.)[0-9]+)?"
     inner_number_tree = "|".join(
         [
             no_separator_big,
@@ -663,6 +663,7 @@ def _build_mathesar_money_array_function():
             period_separator_opt_decimal,
             space_separator_opt_decimal,
             comma_separator_lakh_system,
+            apostrophe_separator_swiss_system,
         ]
     )
     inner_number_group = f"({inner_number_tree})"
