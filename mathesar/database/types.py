@@ -98,20 +98,20 @@ class UIType(Enum):
             MathesarCustomType.URI,
         }
     )
-    JSON_ARRAY = (
-        'jsonlist',
-        'JSON List',
-        {
-            MathesarCustomType.MATHESAR_JSON_ARRAY,
-        }
-    )
-    JSON_OBJECT = (
-        'map',
-        'Map',
-        {
-            MathesarCustomType.MATHESAR_JSON_OBJECT,
-        }
-    )
+    # JSON_ARRAY = (
+    #     'jsonlist',
+    #     'JSON List',
+    #     {
+    #         MathesarCustomType.MATHESAR_JSON_ARRAY,
+    #     }
+    # )
+    # JSON_OBJECT = (
+    #     'map',
+    #     'Map',
+    #     {
+    #         MathesarCustomType.MATHESAR_JSON_OBJECT,
+    #     }
+    # )
     ARRAY = (
         'array',
         'Array',
