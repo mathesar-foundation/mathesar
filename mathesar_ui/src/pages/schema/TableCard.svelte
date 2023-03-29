@@ -23,6 +23,7 @@
   import { isSchemaCountChanged } from '@mathesar/stores/schemas';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
+  import { refetchSchema } from '@mathesar/stores/schemas';
   import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
@@ -58,6 +59,7 @@
         isSchemaCountChanged.set(true);
         await deleteTable(table.id);
         await refetchTablesForSchema(schema.id);
+        await refetchSchema(database.name, schema.id);
       },
     });
   }

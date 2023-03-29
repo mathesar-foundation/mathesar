@@ -23,6 +23,9 @@
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { refetchSchema } from '@mathesar/stores/schemas';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
   import { queries } from '@mathesar/stores/queries';
@@ -72,6 +75,9 @@
   async function save() {
     try {
       await queryManager.save();
+      if ($currentDatabase && $currentSchemaId) {
+        await refetchSchema($currentDatabase.name, $currentSchemaId);
+      }
       return { success: true };
     } catch (err) {
       toast.fromError(err);
@@ -82,6 +88,9 @@
   async function saveAndClose() {
     const { success } = await save();
     if (success) {
+      if ($currentDatabase && $currentSchemaId) {
+        await refetchSchema($currentDatabase.name, $currentSchemaId);
+      }
       dispatch('close');
     }
   }
@@ -103,6 +112,9 @@
       await save();
     } else {
       saveModalController.open();
+    }
+    if ($currentDatabase && $currentSchemaId) {
+      await refetchSchema($currentDatabase.name, $currentSchemaId);
     }
   }
 </script>
