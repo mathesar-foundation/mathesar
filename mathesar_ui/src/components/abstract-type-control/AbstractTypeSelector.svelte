@@ -21,11 +21,12 @@
   export let selectedAbstractType: AbstractType;
   export let disabled = false;
 
+  // jsonlist and map are not allowed as target untill there UI is ready
   $: allowedTypeConversions = getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
     column.type,
     column.valid_target_types ?? [],
     $currentDbAbstractTypes.data,
-  );
+  ).filter((item) => item.identifier !== 'jsonlist' && item.identifier !== 'map');;
 
   function selectAbstractType(
     newAbstractType: ColumnWithAbstractType['abstractType'] | undefined,
