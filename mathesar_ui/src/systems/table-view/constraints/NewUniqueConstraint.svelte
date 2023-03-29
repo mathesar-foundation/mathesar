@@ -56,6 +56,11 @@
     return [];
   }
 
+  function getColumnConstraintTypeByColumnId(columnId: number) {
+    const linkFkType = $processedColumns.get(columnId)?.linkFk?.type;
+    return linkFkType ? [linkFkType] : undefined;
+  }
+
   let constraintColumns: ProcessedColumn[] = [];
   let namingStrategy: NamingStrategy = 'auto';
   let constraintName: string | undefined;
@@ -128,7 +133,14 @@
           autoClearInvalidValues={false}
           let:option
         >
-          <ColumnName column={option.column} />
+          <ColumnName
+            column={{
+              ...option.column,
+              constraintsType: getColumnConstraintTypeByColumnId(
+                option.column.id,
+              ),
+            }}
+          />
         </MultiSelect>
       </LabeledInput>
     </FormField>
