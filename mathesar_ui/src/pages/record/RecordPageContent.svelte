@@ -26,7 +26,7 @@
 
   $: table = $currentTable as TableEntry;
   $: ({ processedColumns } = tableStructure);
-  $: ({ recordId, summary, fieldValues } = record);
+  $: ({ recordPk, summary, fieldValues } = record);
   $: fieldPropsObjects = [...$processedColumns.values()].map((c) => ({
     processedColumn: c,
     field: optionalField($fieldValues.get(c.id)),
@@ -83,7 +83,7 @@
   {#await getJoinableTablesResult(table.id)}
     <RecordPageLoadingSpinner />
   {:then joinableTablesResult}
-    <Widgets {joinableTablesResult} {recordId} recordSummary={$summary} />
+    <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
   {/await}
 </div>
 

@@ -32,8 +32,6 @@
     &.bordered {
       border: 1px solid var(--slate-200);
       border-radius: var(--border-radius-l);
-      padding-left: 1rem;
-      padding-right: 1rem;
     }
   }
 
