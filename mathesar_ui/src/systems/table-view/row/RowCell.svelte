@@ -212,11 +212,11 @@
       >
         Set to <Null />
       </ButtonMenuItem>
-      <MenuDivider/>
+      <MenuDivider />
       <!-- Column Attributes -->
       <ColumnHeaderContextMenu {processedColumn} />
       <!-- Column Attributes end -->
-      <MenuDivider/>
+      <MenuDivider />
       <!-- Row -->
       <RowContextOptions recordId={Number(rId)} {recordsData} {row} />
       <!-- Row end -->
