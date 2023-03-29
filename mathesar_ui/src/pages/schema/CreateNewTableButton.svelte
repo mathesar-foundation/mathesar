@@ -17,10 +17,8 @@
   export let schema: SchemaEntry;
 
   let isCreatingNewTable = false;
-  import { isSchemaCountChanged } from '@mathesar/stores/schemas';
 
   async function handleCreateEmptyTable() {
-    isSchemaCountChanged.set(true);
     isCreatingNewTable = true;
     const tableInfo = await createTable(schema.id, {});
     await refetchSchema(database.name, schema.id);

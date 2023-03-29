@@ -18,8 +18,6 @@ import { currentDBName } from './databases';
 
 const commonData = preloadCommonData();
 
-export const isSchemaCountChanged = writable(false);
-
 export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
   writable(commonData?.current_schema ?? undefined);
 
