@@ -57,6 +57,7 @@ from mathesar.api.exceptions.database_exceptions.base_exceptions import Programm
 
 
 NAME_CACHE_INTERVAL = 60 * 5
+CACHED_PREVIEW_FOR_TABLES = {}
 
 
 class BaseModel(models.Model):
@@ -921,6 +922,11 @@ def _set_default_preview_template(table):
 
 
 def compute_default_preview_template(table):
+    if table.id in CACHED_PREVIEW_FOR_TABLES:
+        cached_preview_column = CACHED_PREVIEW_FOR_TABLES[table.id]
+        if Column.current_objects.filter(id=cached_preview_column):
+            preview_template = f"{{{cached_preview_column}}}"
+            return preview_template
     columns = Column.current_objects.filter(table=table).prefetch_related(
         'table',
         'table__schema',
@@ -938,6 +944,7 @@ def compute_default_preview_template(table):
         preview_column = primary_key_column
 
     if preview_column:
+        CACHED_PREVIEW_FOR_TABLES[table.id] = preview_column.id
         preview_template = f"{{{preview_column.id}}}"
     else:
         # The table does not contain any column, show blank in such scenario.
