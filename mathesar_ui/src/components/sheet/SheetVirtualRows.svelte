@@ -11,9 +11,15 @@
   export let itemSize: VirtualListProps['itemSize'];
   export let paddingBottom = 0;
   export let itemKey: VirtualListProps['itemKey'] | undefined = undefined;
+  export let viewWidth: number | undefined;
 </script>
 
-<div data-sheet-element="body" tabindex="-1">
+<div 
+  data-sheet-element="body" 
+  tabindex="-1" 
+  bind:clientWidth={viewWidth}
+  style="--view-width: {viewWidth}px"
+  >
   <Resizer let:height>
     <VirtualList
       horizontalScrollOffset={$horizontalScrollOffset}

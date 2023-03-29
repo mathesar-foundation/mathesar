@@ -78,5 +78,9 @@
       --badge-background-color: var(--slate-100);
       height: 100%;
     }
+
+    > :global(* + *) {
+      width: var(--view-width);
+    }
   }
 </style>
