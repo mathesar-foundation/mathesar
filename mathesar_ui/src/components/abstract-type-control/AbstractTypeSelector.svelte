@@ -26,7 +26,7 @@
     column.type,
     column.valid_target_types ?? [],
     $currentDbAbstractTypes.data,
-  ).filter((item) => item.identifier !== 'jsonlist' && item.identifier !== 'map');;
+  ).filter((item) => item.identifier !== 'jsonlist' && item.identifier !== 'map');
 
   function selectAbstractType(
     newAbstractType: ColumnWithAbstractType['abstractType'] | undefined,
