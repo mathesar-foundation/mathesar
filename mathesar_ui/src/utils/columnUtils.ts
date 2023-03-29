@@ -53,7 +53,10 @@ export function columnNameIsAvailable(
   );
 }
 
-export function getColumnConstraintTypeByColumnId(columnId: number, processedColumns: Map<number, ProcessedColumn>) {
+export function getColumnConstraintTypeByColumnId(
+  columnId: number,
+  processedColumns: Map<number, ProcessedColumn>,
+) {
   const linkFkType = processedColumns.get(columnId)?.linkFk?.type;
   return linkFkType ? [linkFkType] : undefined;
 }
