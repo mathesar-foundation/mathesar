@@ -12,6 +12,7 @@
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentDatabase } from '@mathesar/stores/databases';
+  import { refetchSchema } from '@mathesar/stores/schemas';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
@@ -67,6 +68,7 @@
         // TODO: Get db and schema from prop or context
         if ($currentDatabase && $currentSchemaId) {
           await refetchTablesForSchema($currentSchemaId);
+          await refetchSchema($currentDatabase.name, $currentSchemaId);
           router.goto(
             getSchemaPageUrl($currentDatabase.name, $currentSchemaId),
             true,
