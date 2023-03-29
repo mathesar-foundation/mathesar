@@ -18,7 +18,7 @@
     getExplorationEditorPageUrl,
   } from '@mathesar/routes/urls';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { iconExploration } from '@mathesar/icons';
+  import { iconEdit, iconExploration } from '@mathesar/icons';
   import { readable, type Readable } from 'svelte/store';
 
   export let database: Database;
@@ -134,7 +134,7 @@
         type: 'simple',
         href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
         label: 'Edit',
-        icon: iconExploration,
+        icon: iconEdit,
       }}
     />
   {:else}
