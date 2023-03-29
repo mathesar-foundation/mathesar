@@ -2,8 +2,8 @@
   import { Select } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import ColumnName from './column/ColumnName.svelte';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import ColumnName from './column/ColumnName.svelte';
 
   // Additional classes
   let classes = '';
