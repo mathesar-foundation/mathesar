@@ -3,6 +3,7 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/types/tables/columns';
   import ColumnName from './column/ColumnName.svelte';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
 
   // Additional classes
   let classes = '';
@@ -14,11 +15,6 @@
   export let columns: Column[];
   export let column: Column | undefined;
   export let disabled = false;
-
-  function getColumnConstraintTypeByColumnId(columnId: number) {
-    const linkFkType = $processedColumns.get(columnId)?.linkFk?.type;
-    return linkFkType ? [linkFkType] : undefined;
-  }
 </script>
 
 <Select
@@ -35,7 +31,10 @@
     <ColumnName
       column={{
         ...option,
-        constraintsType: getColumnConstraintTypeByColumnId(option.id),
+        constraintsType: getColumnConstraintTypeByColumnId(
+          option.id,
+          $processedColumns,
+        ),
       }}
     />
   {/if}

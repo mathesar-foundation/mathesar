@@ -16,6 +16,7 @@
     if (linkFkType) {
       return true;
     }
+    return false;
   }
 
   function getIcon(column: Column) {

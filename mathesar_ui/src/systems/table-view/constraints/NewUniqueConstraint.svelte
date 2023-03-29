@@ -17,6 +17,7 @@
   import { getAvailableName } from '@mathesar/utils/db';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
 
   export let onClose: (() => void) | undefined = undefined;
 
@@ -54,11 +55,6 @@
       return ['A constraint with that name already exists'];
     }
     return [];
-  }
-
-  function getColumnConstraintTypeByColumnId(columnId: number) {
-    const linkFkType = $processedColumns.get(columnId)?.linkFk?.type;
-    return linkFkType ? [linkFkType] : undefined;
   }
 
   let constraintColumns: ProcessedColumn[] = [];
@@ -138,6 +134,7 @@
               ...option.column,
               constraintsType: getColumnConstraintTypeByColumnId(
                 option.column.id,
+                $processedColumns,
               ),
             }}
           />

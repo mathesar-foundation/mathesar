@@ -10,6 +10,7 @@ import {
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
 import { getAvailableName } from '@mathesar/utils/db';
+import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import { makeSingular } from './languageUtils';
 
 export function getColumnIconProps(
@@ -50,4 +51,9 @@ export function columnNameIsAvailable(
     columns.map((c) => c.name),
     msg,
   );
+}
+
+export function getColumnConstraintTypeByColumnId(columnId: number, processedColumns: Map<number, ProcessedColumn>) {
+  const linkFkType = processedColumns.get(columnId)?.linkFk?.type;
+  return linkFkType ? [linkFkType] : undefined;
 }
