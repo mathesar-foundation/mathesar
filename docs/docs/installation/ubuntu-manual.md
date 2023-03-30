@@ -444,14 +444,16 @@ We can now clone the Mathesar repo into our working folder.
 cd /var/www/mathesar.example.com/
 git clone https://github.com/centerofci/mathesar.git
 ```
-Once this is installed we will install from requirements.txt 
-```sh
-pip install -r requirements.txt
-```
 Next we will activate our virtual environment with the following command:
 ```sh
 . /opt/virtualenvs/mathesar/bin/activate
 ```
+
+Once this is installed we will install from requirements.txt 
+```sh
+pip install -r requirements.txt
+```
+
 
 We will call the Django Settings, and then apply the migration:
 ```sh
