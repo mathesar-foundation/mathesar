@@ -468,5 +468,23 @@ You may be required to update / install additional packages and you can go ahead
 ```sh
 npm run build --max_old_space_size=4096
 ```
+Collect the static files
+```sh
+python /var/www/manathesar.exmaple.com/mathesear/manage.py collectstatic
+```
+Create media directory and set permissions to be writable by gunicorn
+```sh
+mkdir /var/www/mathesar.example.com/.media
+chgrp gunicorn /var/www/mathesar.example.com/.media
+chown -R gunicorn /var/www/mathesar.examplecom/.media
+chmod 0744 /var/www/mathesar.example.com/.media
+```
+Install the NPM packages:
+```sh
+/var/www/mathesar.example.com/mathesar/mathesar_ui/npm install
+```
+Now we will run install:
+```sh
+cd /var/www/mathesar.example.com/mathesar && install.py --skip-confirm >> /tmp/install.py.log
 
 
