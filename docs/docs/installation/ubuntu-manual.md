@@ -20,8 +20,8 @@ Installation should only take a few minutes.
 - Prerequisites
     - Ubuntu 22 with at least `60 GB` disk space and `4GB` of RAM.
     - Root privileges
-    - Domain name, or subdomain, for your installation.  We will use `mathesar.example.com` as the domain for our website
-    - Python 3.9  
+    - Domain name, or subdomain, for your installation.  We will use `mathesar.example.com` as the domain for our website. `IMPORTANT! Pay close attention to all commands / blocks of code as your FQDN/URL will be used in quite a few places.  It is important you change it everywhere.`
+    - Python 3.9 (We will install this. 
     
 ### Step one: Prepare the server
 First, we need to update the software repository and upgrade all packages using the apt command below.  SSH to your server and elevate to the `root` user.
