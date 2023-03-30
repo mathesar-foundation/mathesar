@@ -16,6 +16,14 @@
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
 
+  
+  import { queries } from '@mathesar/stores/queries';
+  import {
+    tables as tablesStore,
+    importVerifiedTables as importVerifiedTablesStore,
+  } from '@mathesar/stores/tables';
+  
+
   const dispatch = createEventDispatcher();
 
   export let database: Database;
@@ -27,6 +35,12 @@
   $: href = getSchemaPageUrl(database.name, schema.id);
   $: isDefault = schema.name === 'public';
   $: isLocked = schema.name === 'public';
+
+  
+  $: tablesMap = $tablesStore.data;
+  $: explorationsMap = $queries.data;
+  $: schema.num_tables = tablesMap.size;
+  $: schema.num_queries = explorationsMap.size;
 </script>
 
 <div class="schema-row" class:hover={isHovered} class:is-locked={isLocked}>
