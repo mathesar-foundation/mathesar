@@ -456,13 +456,13 @@ pip3 install -r requirements.txt
 We will call the Django Settings, and then apply the migration:
 ```sh
 $(sudo cat /var/www/mathesar.example.com/mathesar/.env)
-python /var/www/mathesar.example.com/manage.py migrate
+python /var/www/mathesar.example.com/mathesar/manage.py migrate
 
 ```
 Once the migration is done, we need to build the static files.
 Firstly, go to the mathesar_ui folder and run `npm i`:
 ```sh
-cd /var/www/mathesar.example.com/mathesar_ui && npm i
+cd /var/www/mathesar.example.com/mathesar/mathesar_ui && npm i
 ```
 You may be required to update / install additional packages and you can go ahead and to that.  Once this is done we can build our static files:
 ```sh
