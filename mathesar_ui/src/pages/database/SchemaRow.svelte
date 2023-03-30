@@ -18,10 +18,7 @@
 
   
   import { queries } from '@mathesar/stores/queries';
-  import {
-    tables as tablesStore,
-    importVerifiedTables as importVerifiedTablesStore,
-  } from '@mathesar/stores/tables';
+  import { tables } from '@mathesar/stores/tables';
   
 
   const dispatch = createEventDispatcher();
@@ -37,7 +34,7 @@
   $: isLocked = schema.name === 'public';
 
   
-  $: tablesMap = $tablesStore.data;
+  $: tablesMap = $tables.data;
   $: explorationsMap = $queries.data;
   $: schema.num_tables = tablesMap.size;
   $: schema.num_queries = explorationsMap.size;
