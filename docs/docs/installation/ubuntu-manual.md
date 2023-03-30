@@ -400,7 +400,7 @@ WantedBy=multi-user.target
 ```
 The permissions for the file must be 0644 so run this when you are done: `chmod 0644 /lib/systemd/system/gunicorn.service`
 
-Next we will create the Gunicorn systemd socker.  You must create the file here: `/lib/systemd/system/gunicorn.socket` and copy the following code into it.  Pay attention as you have to edit the code according to your FQDN / URL.
+Next we will create the Gunicorn systemd socker.  You must create the file here: `/lib/systemd/system/gunicorn.socket` and copy the following code into it.  
 
 ```sh
 [Unit]
@@ -418,7 +418,7 @@ WantedBy=sockets.target
 ```
 The permissions for the file must be 0644 so run this when you are done: `chmod 0644 /lib/systemd/system/gunicorn.socket`
 
-Next we will create the Gunicorn environment file for the service.  You must create the file here: `/etc/gunicorn-env` and copy the following code into it.  Pay attention as you have to edit the code according to your FQDN / URL.
+Next we will create the Gunicorn environment file for the service.  You must create the file here: `/etc/gunicorn-env` and copy the following code into it.  
 ```sh
 {% for k,v in django_settings.items() %}
 {{ k }}={{ v }}
