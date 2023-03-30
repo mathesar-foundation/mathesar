@@ -456,7 +456,7 @@ pip3 install -r requirements.txt
 We will call the Django Settings, and then apply the migration:
 ```sh
 $(sudo cat /var/www/mathesar.example.com/mathesar/.env)
-python3.9 /var/www/mathesar.example.com/manage.py migrate
+python /var/www/mathesar.example.com/manage.py migrate
 
 ```
 Once the migration is done, we need to build the static files.
