@@ -63,6 +63,7 @@ import {
   faUpRightFromSquare,
   faCircleInfo,
   faUserGear,
+  faPaintBrush,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -91,6 +92,8 @@ import {
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconConfigure: IconProps = { data: faCogs };
+export const iconCopyRawContent: IconProps = { data: faCopy };
+export const iconCopyFormattedContent: IconProps = { data: faPaintBrush };
 /** When you're deleting something significant or difficult to recover */
 export const iconDeleteMajor: IconProps = { data: faTrashAlt };
 /** When you're deleting something smaller or more ephemeral */

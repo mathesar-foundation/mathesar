@@ -4,6 +4,7 @@
   This component is meant to be common for tables, queries, and for import preview
 -->
 <script lang="ts">
+  import { getClipboardControllerStoreFromContext } from '@mathesar/stores/clipboard';
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';
 
@@ -22,9 +23,24 @@
   export let isProcessing = false;
   export let isIndependentOfSheet = false;
 
+  const clipboardControllerStore = getClipboardControllerStoreFromContext();
+
   $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
   $: props = cellComponentAndProps.props as Record<string, unknown>;
+  $: clipboardController = $clipboardControllerStore;
+
+  function handleKeyDown(e: KeyboardEvent) {
+    if (!clipboardController) {
+      return;
+    }
+    if (e.altKey && e.key === 'c') {
+      clipboardController.copy('formatted');
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+      clipboardController.copy('raw');
+    }
+  }
 </script>
 
 <div
@@ -32,6 +48,7 @@
   data-column-identifier={columnFabric.id}
   class:show-as-skeleton={showAsSkeleton}
   class:is-independent={isIndependentOfSheet}
+  on:keydown={handleKeyDown}
 >
   <svelte:component
     this={component}
