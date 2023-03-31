@@ -1,16 +1,20 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
+
   import { ImmutableMap } from '@mathesar-component-library';
   import { Sheet } from '@mathesar/components/sheet';
+  import { SheetClipboardController } from '@mathesar/components/sheet/SheetClipboardController';
+  import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { setNewClipboardControllerStoreInContext } from '@mathesar/stores/clipboard';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import {
     getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
-  import { rowHeaderWidthPx } from '@mathesar/geometry';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
@@ -20,6 +24,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();
+  const clipboardControllerStore = setNewClipboardControllerStoreInContext();
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -33,7 +38,19 @@
   $: usesVirtualList = context === 'page';
   $: allowsDdlOperations = context === 'page' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
-  $: ({ processedColumns, display, isLoading, selection } = $tabularData);
+  $: ({ processedColumns, display, isLoading, selection, recordsData } =
+    $tabularData);
+  $: clipboardControllerStore.set(
+    new SheetClipboardController({
+      selection,
+      getRows: () => [
+        ...get(recordsData.savedRecords),
+        ...get(recordsData.newRecords),
+      ],
+      getColumnsMap: () => get(processedColumns),
+      getRecordSummaries: () => get(recordsData.recordSummaries),
+    }),
+  );
   $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);

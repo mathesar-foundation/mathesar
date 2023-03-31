@@ -1,22 +1,28 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
+
   import { ImmutableMap } from '@mathesar-component-library';
-  import {
-    Sheet,
-    SheetHeader,
-    SheetVirtualRows,
-    SheetRow,
-    SheetCell,
-    isColumnSelected,
-  } from '@mathesar/components/sheet';
-  import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
+  import {
+    isColumnSelected,
+    Sheet,
+    SheetCell,
+    SheetHeader,
+    SheetRow,
+    SheetVirtualRows,
+  } from '@mathesar/components/sheet';
+  import { SheetClipboardController } from '@mathesar/components/sheet/SheetClipboardController';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
-  import type QueryRunner from '../QueryRunner';
+  import { setNewClipboardControllerStoreInContext } from '@mathesar/stores/clipboard';
   import type QueryManager from '../QueryManager';
-  import ResultHeaderCell from './ResultHeaderCell.svelte';
-  import ResultRowCell from './ResultRowCell.svelte';
+  import type QueryRunner from '../QueryRunner';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
   import QueryRunErrors from './QueryRunErrors.svelte';
+  import ResultHeaderCell from './ResultHeaderCell.svelte';
+  import ResultRowCell from './ResultRowCell.svelte';
+
+  const clipboardController = setNewClipboardControllerStoreInContext();
 
   export let queryHandler: QueryRunner | QueryManager;
   export let isExplorationPage = false;
@@ -33,6 +39,14 @@
     inspector,
   } = queryHandler);
   $: ({ initial_columns } = $query);
+  $: clipboardController.set(
+    new SheetClipboardController({
+      selection,
+      getRows: () => get(rowsData).rows,
+      getColumnsMap: () => get(processedColumns),
+      getRecordSummaries: () => new ImmutableMap(),
+    }),
+  );
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
 
   $: recordRunState = $runState?.state;
