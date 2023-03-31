@@ -137,11 +137,11 @@ export interface DateTimeCellProps
 // Array
 
 export interface ArrayCellExternalProps {
-  formatElementForDisplay: CellValueFormatter<never>;
+  formatElementForDisplay: CellValueFormatter<unknown>;
 }
 
 export interface ArrayCellProps
-  extends CellTypeProps<never[]>,
+  extends CellTypeProps<unknown[]>,
     ArrayCellExternalProps {}
 
 // Common
