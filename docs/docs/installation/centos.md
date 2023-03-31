@@ -39,9 +39,8 @@ Firstly, we have to install the required Docker dependencies on the system:
 ```sh
 yum install -y yum-utils device-mapper-persistent-data lvm2 curl
 ```
-Install the yum-utils package (which provides the yum-config-manager utility) and set up the repository. 
+Now we will set up the Docker repository: 
 ```sh
-sudo yum install -y yum-utils
 sudo yum-config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
