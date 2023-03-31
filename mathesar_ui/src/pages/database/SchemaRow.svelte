@@ -14,12 +14,9 @@
     iconNotEditable,
   } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
-
-  
   import { queries } from '@mathesar/stores/queries';
   import { tables } from '@mathesar/stores/tables';
-  
+  import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -33,7 +30,6 @@
   $: isDefault = schema.name === 'public';
   $: isLocked = schema.name === 'public';
 
-  
   $: tablesMap = $tables.data;
   $: explorationsMap = $queries.data;
   $: schema.num_tables = tablesMap.size;
