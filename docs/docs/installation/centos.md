@@ -1,4 +1,4 @@
-# Install on CentOS 7+
+# Install on CentOS Stream 9
 
 Installation should only take a few minutes.
 
@@ -11,19 +11,27 @@ Installation should only take a few minutes.
 
 ## Preparing our server.
 - Prerequisites
-    - CentOS 7 with at least `60 GB` disk space and `4GB` of RAM.
+    - CentOS Stream 9 with at least `60 GB` disk space and `4GB` of RAM.
     - Root privileges
-    - A domain name for your Mathesar installation, pointing to your server.  This is however not a necesity.
+    - A domain name for your Mathesar installation, pointing to your server.  This is however not a necesity, as you can use a IP address as well.
 
 ### Step one
-First, we need to update the software repository and upgrade all packages using the apt command below.  SSH to your server and elevate to the `root` user.
+First, we need to update the software repository and upgrade all packages using the apt command below.  Then we will install the `centos-extras` (EPEL) repository.   SSH to your server and elevate to the `root` user.
 ```sh
 yum update && yum upgrade
+sudo yum install epel-release
 ```
 ### Step two
 Clean the system of any potential pre-installed Docker packages.
 ```sh
-sudo yum remove docker docker-engine docker.io
+sudo yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
 ```
 ### Step three: Installing Docker
 We wil now install Docker on this system.
@@ -31,9 +39,12 @@ Firstly, we have to install the required Docker dependencies on the system:
 ```sh
 yum install -y yum-utils device-mapper-persistent-data lvm2 curl
 ```
-The next step is to add the stable repo for Docker. 
+Install the yum-utils package (which provides the yum-config-manager utility) and set up the repository. 
 ```sh
-yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum install -y yum-utils
+sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
 ```
 We have to update the system:
 ```sh
@@ -41,7 +52,7 @@ yum update
 ```
 We can now install Docker using the following command:
 ```sh
-sudo yum install docker-ce docker-ce-cli
+sudo yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 Once installation is completed, you can run the following commands to make sure that Docker is running, and that it will start with the system.
 ```sh
