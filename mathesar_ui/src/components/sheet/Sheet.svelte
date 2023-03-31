@@ -1,14 +1,18 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
+
   import { ImmutableMap } from '@mathesar-component-library/types';
+  import { getClipboardControllerStoreFromContext } from '@mathesar/stores/clipboard';
   import {
-    setSheetContext,
     calculateColumnStyleMapAndRowWidth,
     DEFAULT_COLUMN_WIDTH,
+    setSheetContext,
   } from './utils';
 
   type SheetColumnType = $$Generic;
   type SheetColumnIdentifierKey = $$Generic;
+
+  const clipboardControllerStore = getClipboardControllerStoreFromContext();
 
   export let columns: SheetColumnType[];
   export let usesVirtualList = false;
@@ -27,6 +31,7 @@
   export let columnWidths: ImmutableMap<SheetColumnIdentifierKey, number> =
     new ImmutableMap();
 
+  $: clipboardController = $clipboardControllerStore;
   $: ({ columnStyleMap, rowWidth } = calculateColumnStyleMapAndRowWidth(
     columns,
     getColumnIdentifier,
@@ -84,6 +89,10 @@
   setSheetContext({ stores, api });
 
   $: style = restrictWidthToRowWidth ? `width:${rowWidth}px;` : undefined;
+
+  function handleCopy() {
+    clipboardController?.copy('formatted');
+  }
 </script>
 
 <div
@@ -93,6 +102,7 @@
   class:set-to-row-width={restrictWidthToRowWidth}
   {style}
   on:click
+  on:copy={handleCopy}
 >
   {#if columns.length}
     <slot />

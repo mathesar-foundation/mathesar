@@ -205,18 +205,18 @@
         </LinkMenuItem>
       {/if}
       <ButtonMenuItem
+        icon={iconCopyFormattedContent}
+        disabled={!clipboardController}
+        on:click={() => clipboardController?.copy('formatted')}
+      >
+        Copy
+      </ButtonMenuItem>
+      <ButtonMenuItem
         icon={iconCopyRawContent}
         disabled={!clipboardController}
         on:click={() => clipboardController?.copy('raw')}
       >
         Copy as Raw Values
-      </ButtonMenuItem>
-      <ButtonMenuItem
-        icon={iconCopyFormattedContent}
-        disabled={!clipboardController}
-        on:click={() => clipboardController?.copy('formatted')}
-      >
-        Copy as Formatted Values
       </ButtonMenuItem>
     </ContextMenu>
     {#if errors.length}
