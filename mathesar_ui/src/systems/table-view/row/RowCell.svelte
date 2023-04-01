@@ -19,13 +19,7 @@
     scrollBasedOnActiveCell,
     SheetCell,
   } from '@mathesar/components/sheet';
-  import {
-    iconCopyFormattedContent,
-    iconCopyRawContent,
-    iconLinkToRecordPage,
-    iconSetToNull,
-  } from '@mathesar/icons';
-  import { getClipboardControllerStoreFromContext } from '@mathesar/stores/clipboard';
+  import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -39,8 +33,6 @@
   } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import CellErrors from './CellErrors.svelte';
-
-  const clipboardControllerStore = getClipboardControllerStoreFromContext();
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
@@ -60,7 +52,6 @@
     { database, schema },
     'canEditTableRecords',
   );
-  $: clipboardController = $clipboardControllerStore;
   $: recordsDataState = recordsData.state;
   $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
@@ -204,20 +195,6 @@
           Go To Linked Record
         </LinkMenuItem>
       {/if}
-      <ButtonMenuItem
-        icon={iconCopyFormattedContent}
-        disabled={!clipboardController}
-        on:click={() => clipboardController?.copy('formatted')}
-      >
-        Copy
-      </ButtonMenuItem>
-      <ButtonMenuItem
-        icon={iconCopyRawContent}
-        disabled={!clipboardController}
-        on:click={() => clipboardController?.copy('raw')}
-      >
-        Copy as Raw Values
-      </ButtonMenuItem>
     </ContextMenu>
     {#if errors.length}
       <CellErrors {errors} forceShowErrors={isActive} />
