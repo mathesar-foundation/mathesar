@@ -28,6 +28,7 @@ from mathesar.api.serializers.tables import (
     MoveTableRequestSerializer
 )
 from mathesar.models.base import Table
+from mathesar.state.base import remove_tableId_from_cache
 from mathesar.utils.tables import get_table_column_types
 from mathesar.utils.joins import get_processed_joinable_tables
 
@@ -61,6 +62,7 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
 
     def destroy(self, request, pk=None):
         table = self.get_object()
+        remove_tableId_from_cache(tableId=table.id)
         table.delete_sa_table()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
