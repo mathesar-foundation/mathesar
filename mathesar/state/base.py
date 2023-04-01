@@ -2,6 +2,25 @@ from mathesar.state.django import reflect_db_objects, clear_dj_cache
 from mathesar.state.metadata import reset_cached_metadata, get_cached_metadata
 from mathesar.state.cached_property import clear_cached_property_cache
 
+CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID = {}
+GET_TABLE_ID_FROM_PREVIEW_COLUMN_ID = {}
+
+
+def get_preview_columnId_for_tableId(tableId):
+    if tableId in CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID:
+        return CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID[tableId]
+    else:
+        return None
+
+
+def set_preview_columnId_for_tableId(tableId, columnId):
+    CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID[tableId] = columnId
+
+
+def clear_preview_cache():
+    CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID.clear()
+    GET_TABLE_ID_FROM_PREVIEW_COLUMN_ID.clear()
+
 
 def make_sure_initial_reflection_happened():
     if not _has_initial_reflection_happened():
