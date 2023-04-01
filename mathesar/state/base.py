@@ -25,6 +25,13 @@ def remove_preview_columnId_from_cache(columnId):
         CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID.pop(tableId, None)
 
 
+def remove_tableId_from_cache(tableId):
+    if tableId in CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID:
+        columnId = CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID[tableId]
+        GET_TABLE_ID_FROM_PREVIEW_COLUMN_ID.pop(columnId, None)
+        CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID.pop(tableId, None)
+
+
 def clear_preview_cache():
     CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID.clear()
     GET_TABLE_ID_FROM_PREVIEW_COLUMN_ID.clear()
