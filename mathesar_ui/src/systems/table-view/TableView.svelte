@@ -14,6 +14,7 @@
     ID_ROW_CONTROL_COLUMN,
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
+  import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
@@ -43,6 +44,7 @@
   $: clipboardHandlerStore.set(
     new SheetClipboardHandler({
       selection,
+      toast,
       getRows: () => [
         ...get(recordsData.savedRecords),
         ...get(recordsData.newRecords),

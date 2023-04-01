@@ -15,6 +15,7 @@
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
   import { setNewClipboardHandlerStoreInContext } from '@mathesar/stores/clipboard';
+  import { toast } from '@mathesar/stores/toast';
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
@@ -42,6 +43,7 @@
   $: clipboardHandlerStore.set(
     new SheetClipboardHandler({
       selection,
+      toast,
       getRows: () => get(rowsData).rows,
       getColumnsMap: () => get(processedColumns),
       getRecordSummaries: () => new ImmutableMap(),

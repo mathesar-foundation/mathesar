@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 
-import { ImmutableSet } from '@mathesar/component-library';
+import { ImmutableSet, type MakeToast } from '@mathesar-component-library';
 import SheetSelection, {
   isCellSelected,
 } from '@mathesar/components/sheet/SheetSelection';
@@ -13,6 +13,7 @@ import type {
 import type { QueryRow } from '@mathesar/systems/data-explorer/QueryRunner';
 import type { ProcessedQueryOutputColumn } from '@mathesar/systems/data-explorer/utils';
 import type { ReadableMapLike } from '@mathesar/typeUtils';
+import { labeledCount } from '@mathesar/utils/languageUtils';
 
 const MIME_PLAIN_TEXT = 'text/plain';
 const MIME_MATHESAR_SHEET_CLIPBOARD =
@@ -59,11 +60,16 @@ function getCellText<
   return formattedValue;
 }
 
+export interface SheetClipboardStats {
+  cellCount: number;
+}
+
 interface SheetClipboardHandlerDeps<
   Row extends QueryRow | RecordRow,
   Column extends ProcessedQueryOutputColumn | ProcessedColumn,
 > {
   selection: SheetSelection<Row, Column>;
+  toast: MakeToast;
   getRows(): Row[];
   getColumnsMap(): ReadableMapLike<Column['id'], Column>;
   getRecordSummaries(): RecordSummariesForSheet;
@@ -121,6 +127,7 @@ export class SheetClipboardHandler<
       }
       result += '\n';
     }
+    this.deps.toast.info(`Copied ${labeledCount(cells.size, 'cells')}.`);
     return result;
   }
 
