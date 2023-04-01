@@ -51,13 +51,12 @@ from mathesar.utils import models as model_utils
 from mathesar.utils.prefetch import PrefetchManager, Prefetcher
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
-from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
+from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection, get_preview_columnId_for_tableId, set_preview_columnId_for_tableId
 from mathesar.state.cached_property import cached_property
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 
 
 NAME_CACHE_INTERVAL = 60 * 5
-CACHED_PREVIEW_FOR_TABLES = {}
 
 
 class BaseModel(models.Model):
@@ -922,31 +921,30 @@ def _set_default_preview_template(table):
 
 
 def compute_default_preview_template(table):
-    if table.id in CACHED_PREVIEW_FOR_TABLES:
-        cached_preview_column = CACHED_PREVIEW_FOR_TABLES[table.id]
-        if Column.current_objects.filter(id=cached_preview_column):
-            preview_template = f"{{{cached_preview_column}}}"
-            return preview_template
-    columns = Column.current_objects.filter(table=table).prefetch_related(
-        'table',
-        'table__schema',
-        'table__schema__database'
-    ).order_by('attnum')
-    preview_column = None
-    primary_key_column = None
-    for column in columns:
-        if column.primary_key:
-            primary_key_column = column
-        else:
-            preview_column = column
-            break
-    if preview_column is None:
-        preview_column = primary_key_column
+    preview_column_id = get_preview_columnId_for_tableId(tableId=table.id)
+    if preview_column_id is None:
+        columns = Column.current_objects.filter(table=table).prefetch_related(
+            'table',
+            'table__schema',
+            'table__schema__database'
+        ).order_by('attnum')
+        preview_column = None
+        primary_key_column = None
+        for column in columns:
+            if column.primary_key:
+                primary_key_column = column
+            else:
+                preview_column = column
+                break
+        if preview_column is None:
+            preview_column = primary_key_column
 
-    if preview_column:
-        CACHED_PREVIEW_FOR_TABLES[table.id] = preview_column.id
-        preview_template = f"{{{preview_column.id}}}"
-    else:
-        # The table does not contain any column, show blank in such scenario.
-        preview_template = ""
+        if preview_column:
+            set_preview_columnId_for_tableId(tableId=table.id, previewColumnId=preview_column.id)
+            preview_column_id = preview_column.id
+
+    preview_template = ""
+    if preview_column_id:
+        preview_template = f"{{{preview_column_id}}}"
+    # Else the table does not contain any column, show blank in such scenario.
     return preview_template
