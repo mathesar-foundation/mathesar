@@ -25,6 +25,7 @@ from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models.base import Column
 from mathesar.state import get_cached_metadata
+from mathesar.state.base import remove_preview_columnId_from_cache
 
 
 class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
@@ -207,6 +208,7 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 
     def destroy(self, request, pk=None, table_pk=None):
         column_instance = self.get_object()
+        remove_preview_columnId_from_cache(columnId=column_instance.id)
         table = column_instance.table
         try:
             table.drop_column(column_instance.attnum)
