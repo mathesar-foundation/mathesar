@@ -4,14 +4,13 @@
   import { Help } from '@mathesar-component-library';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { iconRecord } from '@mathesar/icons';
-  import { currentTable } from '@mathesar/stores/tables';
+  import { tables } from '@mathesar/stores/tables';
   import TableWidget from './TableWidget.svelte';
 
   export let recordPk: string;
   export let recordSummary: string;
   export let joinableTablesResult: JoinableTablesResult;
 
-  $: currTable = $currentTable as TableEntry;
   $: tableNameMap = new Map(
     Object.entries(joinableTablesResult.tables).map(([tableId, table]) => [
       parseInt(tableId, 10),
@@ -30,6 +29,7 @@
       table: {
         id: joinableTable.target,
         name: tableNameMap.get(joinableTable.target) ?? '(unknown table)',
+        entry: $tables.data.get(joinableTable.target)
       },
       fkColumn: {
         id: joinableTable.jp_path[0].slice(-1)[0],
@@ -55,9 +55,11 @@
     </h2>
     <div class="widgets">
       {#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
-        <section class="table-widget-positioner">
-          <TableWidget {recordPk} table={currTable} {fkColumn} />
-        </section>
+        {#if table.entry}
+          <section class="table-widget-positioner">
+            <TableWidget {recordPk} table={table.entry} {fkColumn} />
+          </section>
+        {/if}
       {/each}
     </div>
   </div>

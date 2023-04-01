@@ -22,7 +22,7 @@
   });
 
   export let recordPk: string;
-  export let table: TableEntry;
+  export let table: TableEntry | undefined;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
