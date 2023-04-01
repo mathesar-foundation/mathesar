@@ -12,9 +12,9 @@
     SheetRow,
     SheetVirtualRows,
   } from '@mathesar/components/sheet';
-  import { SheetClipboardController } from '@mathesar/components/sheet/SheetClipboardController';
+  import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
-  import { setNewClipboardControllerStoreInContext } from '@mathesar/stores/clipboard';
+  import { setNewClipboardHandlerStoreInContext } from '@mathesar/stores/clipboard';
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
@@ -22,7 +22,7 @@
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
 
-  const clipboardController = setNewClipboardControllerStoreInContext();
+  const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
 
   export let queryHandler: QueryRunner | QueryManager;
   export let isExplorationPage = false;
@@ -39,8 +39,8 @@
     inspector,
   } = queryHandler);
   $: ({ initial_columns } = $query);
-  $: clipboardController.set(
-    new SheetClipboardController({
+  $: clipboardHandlerStore.set(
+    new SheetClipboardHandler({
       selection,
       getRows: () => get(rowsData).rows,
       getColumnsMap: () => get(processedColumns),

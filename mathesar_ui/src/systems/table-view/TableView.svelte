@@ -3,9 +3,9 @@
 
   import { ImmutableMap } from '@mathesar-component-library';
   import { Sheet } from '@mathesar/components/sheet';
-  import { SheetClipboardController } from '@mathesar/components/sheet/SheetClipboardController';
+  import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
-  import { setNewClipboardControllerStoreInContext } from '@mathesar/stores/clipboard';
+  import { setNewClipboardHandlerStoreInContext } from '@mathesar/stores/clipboard';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import {
@@ -24,7 +24,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();
-  const clipboardControllerStore = setNewClipboardControllerStoreInContext();
+  const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -40,8 +40,8 @@
   $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
-  $: clipboardControllerStore.set(
-    new SheetClipboardController({
+  $: clipboardHandlerStore.set(
+    new SheetClipboardHandler({
       selection,
       getRows: () => [
         ...get(recordsData.savedRecords),

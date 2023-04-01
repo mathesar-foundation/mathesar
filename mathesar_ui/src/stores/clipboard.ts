@@ -3,26 +3,24 @@ import { writable, type Readable, type Writable } from 'svelte/store';
 
 import { ensureReadable } from '@mathesar/component-library';
 
-export type CopyingStrategy = 'raw' | 'formatted';
-
-export interface ClipboardController {
-  copy: (strategy: CopyingStrategy) => Promise<void>;
+export interface ClipboardHandler {
+  handleCopy: (event: ClipboardEvent) => void;
 }
 
-const contextKey = Symbol('ClipboardController');
+const contextKey = Symbol('ClipboardHandlerStore');
 
-export function setNewClipboardControllerStoreInContext(): Writable<
-  ClipboardController | undefined
+export function setNewClipboardHandlerStoreInContext(): Writable<
+  ClipboardHandler | undefined
 > {
-  const controller = writable<ClipboardController | undefined>(undefined);
+  const controller = writable<ClipboardHandler | undefined>(undefined);
   setContext(contextKey, controller);
   return controller;
 }
 
-export function getClipboardControllerStoreFromContext(): Readable<
-  ClipboardController | undefined
+export function getClipboardHandlerStoreFromContext(): Readable<
+  ClipboardHandler | undefined
 > {
   return ensureReadable(
-    getContext<Readable<ClipboardController> | undefined>(contextKey),
+    getContext<Readable<ClipboardHandler> | undefined>(contextKey),
   );
 }
