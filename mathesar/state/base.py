@@ -13,8 +13,16 @@ def get_preview_columnId_for_tableId(tableId):
         return None
 
 
-def set_preview_columnId_for_tableId(tableId, columnId):
-    CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID[tableId] = columnId
+def set_preview_columnId_for_tableId(tableId, previewColumnId):
+    CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID[tableId] = previewColumnId
+    GET_TABLE_ID_FROM_PREVIEW_COLUMN_ID[previewColumnId] = tableId
+
+
+def remove_preview_columnId_from_cache(columnId):
+    if columnId in GET_TABLE_ID_FROM_PREVIEW_COLUMN_ID:
+        tableId = GET_TABLE_ID_FROM_PREVIEW_COLUMN_ID[columnId]
+        GET_TABLE_ID_FROM_PREVIEW_COLUMN_ID.pop(columnId, None)
+        CACHED_PREVIEW_COLUMN_ID_FOR_TABLE_ID.pop(tableId, None)
 
 
 def clear_preview_cache():
@@ -39,6 +47,7 @@ def reset_reflection(db_name=None):
 
     Note, this causes immediate calls to Postgres.
     """
+    # clear_preview_cache()
     clear_dj_cache()
     clear_cached_property_cache()
     set_initial_reflection_happened()
