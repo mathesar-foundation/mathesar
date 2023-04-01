@@ -102,7 +102,11 @@ export class SheetClipboardHandler<
     const processedColumns = this.deps.getColumnsMap();
     const recordSummaries = this.deps.getRecordSummaries();
     for (const rowId of this.getRowIds(cells)) {
+      let isFirstColumn = true;
       for (const columnId of this.getColumnIds(cells)) {
+        if (!isFirstColumn) {
+          result += '\t';
+        }
         if (isCellSelected(cells, { rowIndex: rowId }, { id: columnId })) {
           result += getCellText(
             indexedRecords,
@@ -113,7 +117,7 @@ export class SheetClipboardHandler<
             recordSummaries,
           );
         }
-        result += '\t';
+        isFirstColumn = false;
       }
       result += '\n';
     }
