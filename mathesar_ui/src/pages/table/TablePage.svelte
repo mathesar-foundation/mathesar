@@ -30,7 +30,6 @@
     id: table.id,
     abstractTypesMap,
     meta,
-    table,
   });
   $: tabularDataStore.set(tabularData);
 
@@ -46,7 +45,7 @@
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
     <ActionsPane {table} />
-    <TableView {table} />
+    <TableView />
   </div>
 </LayoutWithHeader>
 
