@@ -5,6 +5,7 @@
     compareWholeValues,
     getValueComparisonOutcome,
     splitMatchParts,
+    Truncate,
   } from '@mathesar-component-library';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import CellWrapper from './CellWrapper.svelte';
@@ -170,12 +171,15 @@
   {:else}
     <div
       class="content"
-      class:nowrap={!isActive && !isIndependentOfSheet}
-      class:truncate={isActive && multiLineTruncate && !isIndependentOfSheet}
     >
+    <Truncate 
+      lines = {isActive && multiLineTruncate ? 2 : 1}
+      passthrough = {isIndependentOfSheet}
+      >
       <slot name="content" {value} {formatValue} {matchParts}>
         <CellValue value={formattedValue} {matchParts} />
       </slot>
+    </Truncate>
     </div>
   {/if}
 </CellWrapper>
