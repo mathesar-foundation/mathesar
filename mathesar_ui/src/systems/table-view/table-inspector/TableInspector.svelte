@@ -4,6 +4,7 @@
   import type { ComponentType } from 'svelte';
   import ColumnMode from './column/ColumnMode.svelte';
   import RecordMode from './record/RecordMode.svelte';
+  import CellMode from './cell/CellMode.svelte';
 
   import TableMode from './table/TableMode.svelte';
 
@@ -23,6 +24,11 @@
       label: 'Record',
       component: RecordMode,
       id: 3,
+    },
+    {
+      label: 'Cell',
+      component: CellMode,
+      id: 4,
     },
   ];
 
