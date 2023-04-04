@@ -1,4 +1,4 @@
-from mathesar.models.base import Column, Constraint
+from mathesar.models.base import Constraint
 from mathesar.api.serializers.constraints import ConstraintSerializer
 
 
