@@ -169,17 +169,15 @@
   {#if isEditMode}
     <slot {handleInputBlur} {handleInputKeydown} />
   {:else}
-    <div
-      class="content"
-    >
-    <Truncate 
-      lines = {isActive && multiLineTruncate ? 2 : 1}
-      passthrough = {isIndependentOfSheet}
+    <div class="content">
+      <Truncate
+        lines={isActive && multiLineTruncate ? 2 : 1}
+        passthrough={isIndependentOfSheet}
       >
-      <slot name="content" {value} {formatValue} {matchParts}>
-        <CellValue value={formattedValue} {matchParts} />
-      </slot>
-    </Truncate>
+        <slot name="content" {value} {formatValue} {matchParts}>
+          <CellValue value={formattedValue} {matchParts} />
+        </slot>
+      </Truncate>
     </div>
   {/if}
 </CellWrapper>
