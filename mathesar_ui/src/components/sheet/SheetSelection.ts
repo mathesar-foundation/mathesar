@@ -616,6 +616,9 @@ export default class SheetSelection<
     activeCell: ActiveCell,
     direction: Direction,
   ): ActiveCell | undefined {
+
+    const columnOrder = this.getColumnOrder();
+
     const rowIndex = (() => {
       const delta = getVerticalDelta(direction);
       if (delta === 0) {
@@ -638,10 +641,9 @@ export default class SheetSelection<
       if (delta === 0) {
         return activeCell.columnId;
       }
-      const columns = this.getColumns();
-      const index = columns.findIndex((c) => c.id === activeCell.columnId);
-      const target = columns[index + delta] as Column | undefined;
-      return target?.id;
+      const index = columnOrder.indexOf(Number(activeCell.columnId));
+      const target_id = columnOrder[index + delta] as number; //CHANGE THIS
+      return target_id;
     })();
     if (columnId === undefined) {
       return undefined;
