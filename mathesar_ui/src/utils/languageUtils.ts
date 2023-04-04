@@ -84,15 +84,15 @@ function makePluralFormsFromEnglish(one: string, many: string): PluralForms {
 }
 
 const wordMap = {
+  columns: makePluralFormsFromEnglish('column', 'columns'),
+  explorations: makePluralFormsFromEnglish('exploration', 'explorations'),
+  matches: makePluralFormsFromEnglish('match', 'matches'),
+  records: makePluralFormsFromEnglish('record', 'records'),
+  results: makePluralFormsFromEnglish('result', 'results'),
   schemas: makePluralFormsFromEnglish('schema', 'schemas'),
   tables: makePluralFormsFromEnglish('table', 'tables'),
-  explorations: makePluralFormsFromEnglish('exploration', 'explorations'),
-  columns: makePluralFormsFromEnglish('column', 'columns'),
-  records: makePluralFormsFromEnglish('record', 'records'),
-  matches: makePluralFormsFromEnglish('match', 'matches'),
-  results: makePluralFormsFromEnglish('result', 'results'),
-  values: makePluralFormsFromEnglish('value', 'values'),
   times: makePluralFormsFromEnglish('time', 'times'),
+  values: makePluralFormsFromEnglish('value', 'values'),
 } as const;
 
 type Word = keyof typeof wordMap;
