@@ -123,7 +123,7 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             try:
                 dynamic_default = request.data["default"]["is_dynamic"]
                 if dynamic_default is False:
-                    return Response("Can not assign default value for column with unique constraint", status=405)
+                    return Response("Can not assign default value for column with unique or primary constraint", status=405)
             except KeyError:
                 pass
         serializer = ColumnSerializer(instance=column_instance, data=request.data, partial=True)
