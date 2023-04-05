@@ -86,6 +86,7 @@ function makePluralFormsFromEnglish(one: string, many: string): PluralForms {
 const wordMap = {
   columns: makePluralFormsFromEnglish('column', 'columns'),
   explorations: makePluralFormsFromEnglish('exploration', 'explorations'),
+  filters: makePluralFormsFromEnglish('filter', 'filters'),
   matches: makePluralFormsFromEnglish('match', 'matches'),
   records: makePluralFormsFromEnglish('record', 'records'),
   results: makePluralFormsFromEnglish('result', 'results'),

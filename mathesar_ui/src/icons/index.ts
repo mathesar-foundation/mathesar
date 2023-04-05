@@ -63,6 +63,7 @@ import {
   faUpRightFromSquare,
   faCircleInfo,
   faUserGear,
+  faFilterCircleXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -88,6 +89,7 @@ import {
 //
 // (These names should all be verbs)
 
+export const iconAddFilter: IconProps = { data: faFilter };
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconConfigure: IconProps = { data: faCogs };
@@ -110,6 +112,7 @@ export const iconNextStep = { data: faArrowRight };
 export const iconPickRecord: IconProps = { data: faCheck };
 export const iconRedo: IconProps = { data: faRedo };
 export const iconRefresh: IconProps = { data: faSync };
+export const iconRemoveFilter: IconProps = { data: faFilterCircleXmark };
 export const iconRename: IconProps = { data: faICursor };
 export const iconSave: IconProps = { data: faSave };
 /** Open the record selector */
