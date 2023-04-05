@@ -23,7 +23,7 @@ apt update && apt upgrade
 ### Step two
 Clean the system of any potential pre-installed Docker packages.
 ```sh
-apt-get remove docker docker-engien docker.io
+apt-get remove docker docker-engine docker.io
 ```
 ### Step three: Installing Docker
 We wil now install Docker on this system.
