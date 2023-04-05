@@ -72,8 +72,8 @@ def _is_col_orderable(col):
     """
     data_type = col.type
     non_orderable_type = ['Binary', 'LargeBinary', 'PickleType', 'ARRAY', 'JSON', 'JSONB']
-    if str(data_type) not in non_orderable_type:
-        e = "Column type is not orederable"
+    if str(data_type) in non_orderable_type:
+        e = "Column type is not orderable"
         raise InvalidGroupType(e)
     else:
         return True
