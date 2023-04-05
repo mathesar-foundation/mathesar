@@ -23,21 +23,29 @@ apt update && apt upgrade
 ### Step two
 Clean the system of any potential pre-installed Docker packages.
 ```sh
-apt-get remove docker docker-engine docker.io
+sudo apt-get remove docker docker-engine docker.io containerd runc
 ```
 ### Step three: Installing Docker
 We wil now install Docker on this system.
 Firstly, we have to install the required Docker dependencies on the system:
 ```sh
-sudo apt -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+sudo apt-get update
+sudo apt-get install \
+    ca-certificates \
+    curl \
+    gnupg
 ```
 The next step is to add Docker's official GPG key to the keyring.  This is to ensure the validity of downloaded Docker packages from it's repository.
 ```sh
-curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+sudo mkdir -m 0755 -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 ```
 Now that the key is added, we can add the stable repo for Docker. 
 ```sh
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 ```
 We have to update the system:
 ```sh
@@ -45,7 +53,7 @@ apt update
 ```
 We can now install Docker using the following command:
 ```sh
-apt-get install docker-ce docker-ce-cli containerd.io
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 Once installation is completed, you can run the following commands to make sure that Docker is running, and that it will start with the system.
 ```sh
