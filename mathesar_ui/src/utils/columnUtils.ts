@@ -57,6 +57,16 @@ export function getColumnConstraintTypeByColumnId(
   columnId: number,
   processedColumns: Map<number, ProcessedColumn>,
 ) {
-  const linkFkType = processedColumns.get(columnId)?.linkFk?.type;
-  return linkFkType ? [linkFkType] : undefined;
+  const processedColumn = processedColumns.get(columnId);
+  const constraintsType = Array.from(
+    new Set(
+      [
+        ...(processedColumn?.exclusiveConstraints ?? []),
+        ...(processedColumn?.sharedConstraints ?? []),
+      ]
+        .filter((constraintType) => !!constraintType)
+        .map((constraintType) => constraintType.type),
+    ),
+  );
+  return constraintsType;
 }

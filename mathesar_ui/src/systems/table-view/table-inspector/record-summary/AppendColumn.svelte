@@ -2,8 +2,11 @@
   import { ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import { iconAddNew, iconTableLink } from '@mathesar/icons';
-  import { getColumnIconProps } from '@mathesar/utils/columnUtils';
+  import { iconAddNew, iconConstraint, iconTableLink } from '@mathesar/icons';
+  import {
+    getColumnIconProps,
+    getColumnConstraintTypeByColumnId,
+  } from '@mathesar/utils/columnUtils';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ processedColumns } = $tabularData);
@@ -11,19 +14,18 @@
   export let columns: Column[];
   export let onSelect: (column: Column) => void;
 
-  function checkForForeignKey(column: Column) {
-    const linkFkType = $processedColumns.get(column.id)?.linkFk?.type;
-    if (linkFkType) {
-      return true;
-    }
-    return false;
-  }
-
   function getIcon(column: Column) {
-    const isForeignKey = checkForForeignKey(column);
-    if (isForeignKey) {
+    const constraintsType = getColumnConstraintTypeByColumnId(
+      column.id,
+      $processedColumns,
+    );
+    if (constraintsType?.includes('primary')) {
+      return iconConstraint;
+    }
+    if (constraintsType?.includes('foreignkey')) {
       return iconTableLink;
     }
+
     const icon = getColumnIconProps(column);
     return Array.isArray(icon) ? icon[0] : icon;
   }
