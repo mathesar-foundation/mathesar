@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, getContext, tick } from 'svelte';
+  import { createEventDispatcher, getContext, onMount, tick } from 'svelte';
 
   // TODO remove dependency cycle
   // eslint-disable-next-line import/no-cycle
@@ -17,6 +17,7 @@
   import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import type { LinkedRecordInputElement } from './LinkedRecordUtils';
 
   interface $$Props
     extends Omit<
@@ -46,7 +47,7 @@
   export let disabled = false;
 
   let isAcquiringInput = false;
-  let element: HTMLSpanElement | undefined;
+  let element: HTMLSpanElement;
 
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
@@ -62,7 +63,7 @@
     // If the value is cleared via a button, the focus may shift to that button.
     // We'd like to shift it back to the input element to that the user can
     // press `Enter` to launch the record selector.
-    element?.focus();
+    element.focus();
   }
 
   /**
@@ -103,7 +104,7 @@
       dispatch('artificialInput', value);
     }
     await tick();
-    element?.focus();
+    element.focus();
   }
 
   function handleKeydown(e: KeyboardEvent) {
@@ -125,6 +126,11 @@
   function handleBlur() {
     window.removeEventListener('keydown', handleKeydown);
   }
+
+  onMount(() => {
+    (element as LinkedRecordInputElement).launchRecordSelector =
+      launchRecordSelector;
+  });
 </script>
 
 <BaseInput {disabled} {...$$restProps} bind:id />
