@@ -29,11 +29,11 @@ apt-get remove docker docker-engine docker.io
 We wil now install Docker on this system.
 Firstly, we have to install the required Docker dependencies on the system:
 ```sh
-udo apt -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+sudo apt -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common
 ```
 The next step is to add Docker's official GPG key to the keyring.  This is to ensure the validity of downloaded Docker packages from it's repository.
 ```sh
-ccurl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 ```
 Now that the key is added, we can add the stable repo for Docker. 
 ```sh
