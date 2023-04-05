@@ -134,20 +134,6 @@
   async function valueUpdated(e: CustomEvent<{ value: unknown }>) {
     await setValue(e.detail.value);
   }
-
-  async function handleDeleteRecords() {
-    if (rowHasRecord(row)) {
-      void confirmDelete({
-        identifierType: 'Row',
-        onProceed: () => recordsData.deleteSelected([Number(row.rowIndex)]),
-        onError: (e) => toast.fromError(e),
-        onSuccess: () =>
-          toast.success({
-            title: 'Row deleted successfully!',
-          }),
-      });
-    }
-  }
 </script>
 
 <SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
