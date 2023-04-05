@@ -1,0 +1,27 @@
+.with-panel {
+  display: grid;
+
+  &.top {
+    grid-template-areas: 'panel' 'main';
+    grid-template-rows: auto 1fr;
+  }
+  &.bottom {
+    grid-template-areas: 'main' 'panel';
+    grid-template-rows: 1fr auto;
+  }
+  &.left {
+    grid-template-areas: 'panel main';
+    grid-template-columns: auto 1fr;
+  }
+  &.right {
+    grid-template-areas: 'main panel';
+    grid-template-columns: 1fr auto;
+  }
+
+  .main {
+    grid-area: main;
+  }
+  .panel {
+    grid-area: panel;
+  }
+}

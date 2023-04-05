@@ -45,6 +45,7 @@ export { default as TextInput } from './text-input/TextInput.svelte';
 export { default as TextInputWithPrefix } from './text-input/TextInputWithPrefix.svelte';
 export { default as Truncate } from './truncate/Truncate.svelte';
 export { default as Tooltip } from './tooltip/Tooltip.svelte';
+export { default as WithPanel } from './with-panel/WithPanel.svelte';
 
 // Compound Components (Ordered)
 export { DatePicker, InlineDateTimePicker } from './date-time-picker';
