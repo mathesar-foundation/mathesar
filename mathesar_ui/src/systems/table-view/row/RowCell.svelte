@@ -179,7 +179,7 @@
       }}
       on:onMouseEnterCellWhileSelection={() => {
         // This enables the click + drag to
-            // select multiple cells
+        // select multiple cells
         selection.onMouseEnterCellWhileSelection(row, processedColumn);
       }}
     />
