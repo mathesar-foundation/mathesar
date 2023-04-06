@@ -1,4 +1,5 @@
-from psycopg2.errors import DependentObjectsStillExist
+from psycopg.errors import DependentObjectsStillExist
+from psycopg.errors import UndefinedTable
 import pytest
 from sqlalchemy.exc import NoSuchTableError
 
@@ -27,7 +28,7 @@ def test_drop_table_no_table_if_exists_true(engine_with_schema):
 
 def test_drop_table_no_table_if_exists_false(engine_with_schema):
     engine, schema = engine_with_schema
-    with pytest.raises(NoSuchTableError):
+    with pytest.raises(UndefinedTable):
         drop_table("test_drop_table", schema, engine, if_exists=False)
 
 

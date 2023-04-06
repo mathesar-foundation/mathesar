@@ -7,7 +7,17 @@ from db.metadata import get_empty_metadata
 
 TYPES_SCHEMA = types.base.SCHEMA
 TEMP_INFER_SCHEMA = constants.INFERENCE_SCHEMA
-EXCLUDED_SCHEMATA = [TYPES_SCHEMA, TEMP_INFER_SCHEMA, "information_schema"]
+MSAR_PUBLIC = constants.MSAR_PUBLIC
+MSAR_PRIVAT = constants.MSAR_PRIVAT
+MSAR_VIEWS = constants.MSAR_VIEWS
+EXCLUDED_SCHEMATA = [
+    "information_schema",
+    MSAR_PRIVAT,
+    MSAR_PUBLIC,
+    MSAR_VIEWS,
+    TEMP_INFER_SCHEMA,
+    TYPES_SCHEMA,
+]
 
 
 def reflect_schema(engine, name=None, oid=None, metadata=None):
