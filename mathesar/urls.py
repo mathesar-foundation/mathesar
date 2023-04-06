@@ -46,9 +46,9 @@ urlpatterns = [
     path('administration/users/', views.admin_home, name='admin_users_home'),
     path('administration/users/<user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/update/', views.admin_home, name='admin_update'),
-    path('<db_name>/', views.schemas, name='schemas'),
+    path('db/<db_name>/', views.schemas, name='schemas'),
     re_path(
-        r'^(?P<db_name>\w+)/(?P<schema_id>\w+)/',
+        r'^db/(?P<db_name>\w+)/(?P<schema_id>\w+)/',
         views.schema_home,
         name='schema_home'
     ),
