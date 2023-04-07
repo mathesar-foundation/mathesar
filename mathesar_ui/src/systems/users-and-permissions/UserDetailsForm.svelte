@@ -12,9 +12,9 @@
     requiredField,
     makeForm,
     FormSubmitWithCatch,
-    validateLength,
-    matchRegexAllowNullUndefined,
-    validateEmailAllowEmpty,
+    maxLength,
+    matchRegex,
+    isEmail,
     type FieldStore,
   } from '@mathesar/components/form';
   import userApi, { type User } from '@mathesar/api/users';
@@ -34,16 +34,13 @@
   $: isNewUser = user === undefined;
   $: fullName = optionalField(user?.full_name ?? '');
   $: username = requiredField(user?.username ?? '', [
-    validateLength(
-      150,
-      'Username should be lesser than or equal to 150 characters.',
-    ),
-    matchRegexAllowNullUndefined(
+    maxLength(150, 'Username cannot be longer than 150 characters.'),
+    matchRegex(
       /^[A-Za-z0-9_@.+-]*$/,
       'Username can only contain alphanumeric characters, _, @, +, ., and -.',
     ),
   ]);
-  $: email = optionalField(user?.email ?? '', [validateEmailAllowEmpty()]);
+  $: email = optionalField(user?.email ?? '', [isEmail()]);
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );

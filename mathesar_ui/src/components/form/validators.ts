@@ -54,71 +54,51 @@ type FilledFieldValue<F> = FieldValue<F> extends infer T | undefined | null
 export function required(
   msg = 'Value cannot be empty.',
 ): ValidationFn<unknown> {
-  return (v) => (valueIsFilled(v) ? valid() : invalid(msg));
+  return validIf((v) => valueIsFilled(v), msg);
 }
 
 export function uniqueWith<T>(
   values: T[],
   msg = 'This value already exists.',
 ): ValidationFn<T> {
-  return (v) => (values.includes(v) ? invalid(msg) : valid());
+  return invalidIf((v) => values.includes(v), msg);
 }
 
-export function min(
-  lowerBound: number,
-  msg: string | undefined = undefined,
-): ValidationFn<number | null | undefined> {
-  return (v) =>
-    v === null || v === undefined || v >= lowerBound
-      ? valid()
-      : invalid(msg ?? `Value must be at least ${lowerBound}.`);
+export function min(lowerBound: number, msg?: string): ValidationFn<number> {
+  return validIf(
+    (v) => v >= lowerBound,
+    msg ?? `Value must be at least ${lowerBound}.`,
+  );
 }
 
-export function max(
-  upperBound: number,
-  msg: string | undefined = undefined,
-): ValidationFn<number | null | undefined> {
-  return (v) =>
-    v === null || v === undefined || v <= upperBound
-      ? valid()
-      : invalid(msg ?? `Value must be at most ${upperBound}.`);
+export function max(upperBound: number, msg?: string): ValidationFn<number> {
+  return validIf(
+    (v) => v <= upperBound,
+    msg ?? `Value must be at most ${upperBound}.`,
+  );
 }
 
-export function matchRegexAllowNullUndefined(
-  regex: RegExp,
-  msg = 'The specified value is invalid.',
-): ValidationFn<string | undefined | null> {
-  return (v) =>
-    v === null || v === undefined || v.match(regex) ? valid() : invalid(msg);
+export function matchRegex(regex: RegExp, msg: string): ValidationFn<string> {
+  return validIf((v) => !!v.match(regex), msg);
 }
 
-export function validateLength(
-  maxInclusive: number,
-  msg: string | undefined = undefined,
-): ValidationFn<string | undefined | null> {
-  return (v) =>
-    v === null || v === undefined || v.length <= maxInclusive
-      ? valid()
-      : invalid(
-          msg ?? `Length must be equal to or lesser than ${maxInclusive}.`,
-        );
+export function maxLength(limit: number, msg?: string): ValidationFn<string> {
+  return validIf(
+    (v) => v.length <= limit,
+    msg ?? `Value cannot be longer than ${limit} characters.`,
+  );
 }
 
-function isEmailInvalid(v: string): boolean {
-  return !v
-    .toLowerCase()
-    .match(
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-    );
-}
+/**
+ * From https://stackoverflow.com/a/46181/895563
+ */
+const EMAIL_PATTERN =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-export function validateEmailAllowEmpty(
+export function isEmail(
   msg = 'The email address is invalid.',
-): ValidationFn<string | undefined | null> {
-  return (v) =>
-    v === null || v === undefined || v === '' || !isEmailInvalid(v)
-      ? valid()
-      : invalid(msg);
+): ValidationFn<string> {
+  return validIf((v) => !!v.toLowerCase().match(EMAIL_PATTERN), msg);
 }
 
 export function getErrors<T>({
