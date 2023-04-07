@@ -1,5 +1,8 @@
 .with-panel {
   display: grid;
+  --resizer-size: var(--WithPanel__resizer-size, 0.3rem);
+  --resizer-color: var(--WithPanel__resizer-color, var(--sky-700));
+  --resizer-half-size: calc(var(--resizer-size) / 2);
 
   &.top {
     grid-template-areas: 'panel' 'main';
@@ -18,10 +21,46 @@
     grid-template-columns: 1fr auto;
   }
 
-  .main {
+  > .main {
     grid-area: main;
   }
-  .panel {
+  > .panel {
     grid-area: panel;
+    position: relative;
+    isolation: isolate;
+    > .resizer {
+      position: absolute;
+      z-index: 1;
+    }
+  }
+
+  &.is-resizing > .panel > .resizer,
+  > .panel > .resizer:hover {
+    background-color: var(--resizer-color);
+  }
+
+  &.top > .panel > .resizer,
+  &.bottom > .panel > .resizer {
+    height: var(--resizer-size);
+    width: 100%;
+    cursor: row-resize;
+  }
+  &.left > .panel > .resizer,
+  &.right > .panel > .resizer {
+    width: var(--resizer-size);
+    height: 100%;
+    cursor: col-resize;
+  }
+  &.top > .panel > .resizer {
+    bottom: calc(-1 * var(--resizer-half-size));
+  }
+  &.bottom > .panel > .resizer {
+    top: calc(-1 * var(--resizer-half-size));
+  }
+  &.left > .panel > .resizer {
+    right: calc(-1 * var(--resizer-half-size));
+  }
+  &.right > .panel > .resizer {
+    left: calc(-1 * var(--resizer-half-size));
   }
 }

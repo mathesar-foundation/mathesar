@@ -1,8 +1,13 @@
 <script lang="ts">
+  import { slider } from '@mathesar-component-library';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
 
   export let placement: 'top' | 'bottom' | 'left' | 'right' = 'right';
   export let sizePx = 300;
+  export let minSizePx = 50;
+  export let showPanel = true;
+
+  let isResizing = false;
 
   $: sizingDimension = (() => {
     switch (placement) {
@@ -21,6 +26,7 @@
 
 <div
   class="with-panel"
+  class:is-resizing={isResizing}
   class:top={placement === 'top'}
   class:bottom={placement === 'bottom'}
   class:left={placement === 'left'}
@@ -29,8 +35,27 @@
   <div class="main">
     <slot />
   </div>
-
-  <div class="panel" {style}>
-    <slot name="panel" />
-  </div>
+  {#if showPanel}
+    <div class="panel" {style}>
+      <div
+        class="resizer"
+        use:slider={{
+          getStartingValue: () => sizePx,
+          onMove: (value) => {
+            sizePx = value;
+          },
+          onStart: () => {
+            isResizing = true;
+          },
+          onStop: () => {
+            isResizing = false;
+          },
+          min: minSizePx,
+          axis: sizingDimension === 'width' ? 'x' : 'y',
+          invert: placement === 'right' || placement === 'bottom',
+        }}
+      />
+      <slot name="panel" />
+    </div>
+  {/if}
 </div>
