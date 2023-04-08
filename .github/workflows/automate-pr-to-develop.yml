@@ -1,0 +1,19 @@
+name: Create Pull Request to 'develop' branch on merge to 'master' branch
+
+on:
+  push:
+    branches:
+      -  master
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: pull-request
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "develop"
+          pr_label: "auto-pr"
+
+          
