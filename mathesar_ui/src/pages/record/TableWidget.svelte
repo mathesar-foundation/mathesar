@@ -37,7 +37,7 @@
 
 <div class="table-widget">
   <div class="top">
-    <h3 class="bold_header"><TableName {table} /></h3>
+    <h3 class="bold-header"><TableName {table} /></h3>
     <MiniActionsPane />
   </div>
 

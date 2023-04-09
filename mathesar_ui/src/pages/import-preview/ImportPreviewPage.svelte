@@ -341,7 +341,7 @@
       {:else}
         <div class="table-properties">
           <LabeledInput layout="stacked">
-            <h2 class="large_header extra_bold_header" slot="label">
+            <h2 class="large-bold-header" slot="label">
               Table Name
             </h2>
             <TextInput bind:value={tableName} />
@@ -361,7 +361,7 @@
           </div>
 
           <div class="help-content">
-            <h2 class="large_header extra_bold_header">
+            <h2 class="large-bold-header">
               Column names and data types
             </h2>
             <p>
@@ -400,7 +400,7 @@
       {#if processedColumns.length > 0}
         <div class="table-preview-content">
           <div class="preview">
-            <h2 class="large_header extra_bold_header">Table Preview</h2>
+            <h2 class="large-bold-header">Table Preview</h2>
             <div class="content">
               <div class="sheet-holder">
                 <Sheet
