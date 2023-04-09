@@ -1,17 +1,15 @@
 <script lang="ts">
-  import { getUsersStoreFromContext } from '@mathesar/stores/users';
-  import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
-  import {
-    AnchorButton,
-    Button,
-    Icon,
-    iconSearch,
-    TextInputWithPrefix,
-  } from '@mathesar/component-library';
+  import { AnchorButton, Icon } from '@mathesar/component-library';
   import { iconAddNew } from '@mathesar/icons';
-  import type { User } from '@mathesar/api/users';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
+  import type { UserModel } from '@mathesar/stores/users';
+  import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import UserRow from './UserRow.svelte';
+  import UserSkeleton from './UserSkeleton.svelte';
 
   let filterQuery = '';
 
@@ -19,10 +17,10 @@
   $: requestStatus = usersStore?.requestStatus;
   $: users = usersStore?.users;
 
-  function filterUsers(_users: User[], query: string) {
-    const isMatch = (user: User, q: string) =>
+  function filterUsers(_users: UserModel[], query: string) {
+    const isMatch = (user: UserModel, q: string) =>
       user.username.toLowerCase().includes(q) ||
-      user.full_name?.toLowerCase().includes(q) ||
+      user.fullName?.toLowerCase().includes(q) ||
       user.email?.toLowerCase().includes(q);
     return _users?.filter((user) => {
       if (query) {
@@ -38,61 +36,53 @@
   }
 
   $: filteredUsers = filterUsers($users ?? [], filterQuery);
+  $: userCountText = filteredUsers.length ? `(${filteredUsers.length})` : '';
 </script>
+
+<svelte:head><title>{makeSimplePageTitle('Users')}</title></svelte:head>
+
+<h1>Users {userCountText}</h1>
 
 <section class="users-list-container">
   {#if $requestStatus?.state === 'processing'}
-    <p>Loading...</p>
+    <UserSkeleton />
   {:else if $requestStatus?.state === 'success'}
-    <h1 class="normal_bold_header ultra_large_header">
-      Users ({filteredUsers.length})
-    </h1>
-    <div class="user-search-container">
-      <div class="user-search">
-        <div class="user-search-box">
-          <TextInputWithPrefix
-            placeholder="Search Users"
-            bind:value={filterQuery}
-            prefixIcon={iconSearch}
-          />
-        </div>
+    <EntityContainerWithFilterBar
+      searchPlaceholder="Search Users"
+      bind:searchQuery={filterQuery}
+      on:clear={handleClearFilterQuery}
+    >
+      <slot slot="action">
         <AnchorButton appearance="primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}>
           <Icon {...iconAddNew} />
           <span>Add user</span>
         </AnchorButton>
-      </div>
-
-      {#if filterQuery}
-        <div class="user-search-results-info">
-          <p>
-            {labeledCount(filteredUsers, 'results')}
-            for all users matching <strong>{filterQuery}</strong>
-          </p>
-          <Button
-            size="small"
-            appearance="secondary"
-            on:click={handleClearFilterQuery}
-          >
-            Clear
-          </Button>
-        </div>
-      {/if}
-    </div>
-
-    {#if filteredUsers.length}
-      <div class="users-list">
-        {#each filteredUsers as user, index (user.id)}
-          {#if index !== 0}
-            <hr />
-          {/if}
-          <UserRow {user} />
-        {/each}
-      </div>
-    {:else if !filterQuery}
-      <p class="no-users-found-text">No users found</p>
-    {/if}
+      </slot>
+      <slot slot="resultInfo">
+        <p>
+          {labeledCount(filteredUsers, 'results')}
+          for all users matching <strong>{filterQuery}</strong>
+        </p>
+      </slot>
+      <slot slot="content">
+        {#if filteredUsers.length}
+          <div class="users-list">
+            {#each filteredUsers as user, index (user.id)}
+              {#if index !== 0}
+                <hr />
+              {/if}
+              <UserRow {user} />
+            {/each}
+          </div>
+        {:else if filteredUsers.length === 0}
+          <p class="no-users-found-text">No users found</p>
+        {/if}
+      </slot>
+    </EntityContainerWithFilterBar>
   {:else if $requestStatus?.state === 'failure'}
-    <p class="error-text">Error: {$requestStatus.errors}</p>
+    <ErrorBox>
+      <p>Error: {$requestStatus.errors}</p>
+    </ErrorBox>
   {/if}
 </section>
 
@@ -107,25 +97,8 @@
   }
 
   h1 {
-    margin: 0;
-  }
-
-  .user-search {
-    display: flex;
-
-    > :global(* + *) {
-      margin-left: 1rem;
-    }
-
-    :global(.user-search-box) {
-      flex: 1;
-    }
-  }
-
-  .user-search-results-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    font-size: var(--text-size-ultra-large);
+    font-weight: normal;
   }
 
   .users-list {
@@ -138,9 +111,5 @@
       display: block;
       margin: 0 var(--size-xx-small);
     }
-  }
-
-  .error-text {
-    color: var(--red-500);
   }
 </style>

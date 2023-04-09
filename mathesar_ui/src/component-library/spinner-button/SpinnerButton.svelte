@@ -7,8 +7,9 @@
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import type { Appearance } from '../commonTypes';
 
+  /** TODO: Improve typing to ensure there's either a label or an icon */
   interface $$Props extends ComponentProps<Button> {
-    label: string;
+    label?: string;
     icon?: IconProps;
     onClick?: () => Promise<void> | void;
     confirm?: () => Promise<boolean>;
@@ -60,5 +61,7 @@
   {:else if icon}
     <Icon {...icon} />
   {/if}
-  <span>{label}</span>
+  {#if label}
+    <span>{label}</span>
+  {/if}
 </Button>

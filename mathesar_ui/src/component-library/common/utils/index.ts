@@ -19,3 +19,4 @@ export * from './inputUtils';
 export * from './typeUtils';
 export * from './stringUtils';
 export * from './miscUtils';
+export * from './styleUtils';

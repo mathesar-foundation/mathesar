@@ -47,7 +47,7 @@
         newAggregations = newAggregations.with(pcAlias, {
           inputAlias: pcAlias,
           outputAlias: `${pcAlias}_agged`,
-          function: 'aggregate_to_array',
+          function: 'distinct_aggregate_to_array',
         });
       }
     });

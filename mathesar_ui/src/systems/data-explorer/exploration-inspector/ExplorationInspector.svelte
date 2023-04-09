@@ -7,6 +7,7 @@
   import CellTab from './CellTab.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
+  export let canEditMetadata: boolean;
 
   $: ({ inspector, query } = queryHandler);
   $: ({ tabs, activeTab } = inspector);
@@ -25,6 +26,7 @@
         {queryHandler}
         name={$query.name}
         description={$query.description}
+        {canEditMetadata}
         on:delete
       />
     {:else if $activeTab?.id === 'inspect-column'}

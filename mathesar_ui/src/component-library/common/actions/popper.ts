@@ -13,6 +13,63 @@ interface Parameters {
   options?: Partial<Options>;
 }
 
+/**
+ * Merge the default modifiers with the supplied modifiers, ensuring that there
+ * are no duplicates, by modifier name. When a modifier with the same name
+ * occurs, use the supplied modifier instead of the default modifier.
+ */
+function buildModifiers(
+  suppliedModifiers: Options['modifiers'],
+): Options['modifiers'] {
+  const defaultModifiers: Options['modifiers'] = [
+    {
+      name: 'flip',
+    },
+    {
+      name: 'preventOverflow',
+      options: {
+        altAxis: true,
+      },
+    },
+    {
+      name: 'offset',
+      options: {
+        offset: [0, 0],
+      },
+    },
+  ];
+  const customModifiers: Options['modifiers'] = [
+    {
+      name: 'setMinWidth',
+      enabled: true,
+      phase: 'beforeWrite',
+      requires: ['computeStyles'],
+      fn: (obj: ModifierArguments<Record<string, unknown>>): void => {
+        // TODO: Make the default value configurable
+        const widthToSet = Math.min(250, obj.state.rects.reference.width);
+        // eslint-disable-next-line no-param-reassign
+        obj.state.styles.popper.minWidth = `${widthToSet}px`;
+      },
+      effect: (obj: ModifierArguments<Record<string, unknown>>): void => {
+        const width = (obj.state.elements.reference as HTMLElement).offsetWidth;
+        const widthToSet = Math.min(250, width);
+        // eslint-disable-next-line no-param-reassign
+        obj.state.elements.popper.style.minWidth = `${widthToSet}px`;
+      },
+    },
+  ];
+  const modifiers = [...defaultModifiers, ...customModifiers];
+  suppliedModifiers.forEach((modifier) => {
+    const index = modifiers.findIndex((m) => m.name === modifier.name);
+    if (index === -1) {
+      modifiers.push(modifier);
+    } else {
+      modifiers[index] = modifier;
+    }
+  });
+  return modifiers;
+}
+
 export default function popper(
   node: HTMLElement,
   actionOpts: Parameters,
@@ -27,38 +84,7 @@ export default function popper(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     popperInstance = createPopper(reference, node, {
       placement: options?.placement || 'bottom-start',
-      modifiers: [
-        {
-          name: 'setMinWidth',
-          enabled: true,
-          phase: 'beforeWrite',
-          requires: ['computeStyles'],
-          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-          fn: (obj: ModifierArguments<unknown>): void => {
-            // TODO: Make the default value configurable
-            const widthToSet = Math.min(250, obj.state.rects.reference.width);
-            // eslint-disable-next-line no-param-reassign
-            obj.state.styles.popper.minWidth = `${widthToSet}px`;
-          },
-          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-          effect: (obj: ModifierArguments<unknown>): void => {
-            const width = (obj.state.elements.reference as HTMLElement)
-              .offsetWidth;
-            const widthToSet = Math.min(250, width);
-            // eslint-disable-next-line no-param-reassign
-            obj.state.elements.popper.style.minWidth = `${widthToSet}px`;
-          },
-        },
-        {
-          name: 'flip',
-        },
-        {
-          name: 'offset',
-          options: {
-            offset: [0, 0],
-          },
-        },
-      ],
+      modifiers: buildModifiers(options?.modifiers ?? []),
     }) as Instance;
   }
 

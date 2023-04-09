@@ -45,6 +45,7 @@ import {
   faUnlink,
   faUpload,
   faUser,
+  faUsers,
   faSave,
   faTimes,
   faCircleExclamation,
@@ -57,7 +58,11 @@ import {
   faPaste,
   faEllipsisV,
   faArrowRightFromBracket,
+  faUserEdit,
   faUserPlus,
+  faUpRightFromSquare,
+  faCircleInfo,
+  faUserGear,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -91,11 +96,16 @@ export const iconDeleteMajor: IconProps = { data: faTrashAlt };
 /** When you're deleting something smaller or more ephemeral */
 export const iconDeleteMinor: IconProps = { data: faTimes };
 export const iconEdit: IconProps = { data: faPencilAlt };
+export const iconEditUser: IconProps = { data: faUserEdit };
 export const iconExpandRight: IconProps = { data: faChevronRight };
+export const iconGoToMarketingSite: IconProps = { data: faGlobe };
 export const iconImportData: IconProps = { data: faUpload };
+export const iconJoinEmailList: IconProps = { data: faEnvelope };
 export const iconMoreActions: IconProps = { data: faEllipsisV };
 export const iconMoveColumnsToNewLinkedTable = { data: faLink };
 export const iconMoveColumnsToExistingLinkedTable = { data: faLink };
+export const iconManageAccess = { data: faUser };
+export const iconNextStep = { data: faArrowRight };
 /** Submit a selection with the record selector for data entry */
 export const iconPickRecord: IconProps = { data: faCheck };
 export const iconRedo: IconProps = { data: faRedo };
@@ -122,6 +132,7 @@ export const iconDatabase: IconProps = { data: faDatabase };
 export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
 export const iconExploration: IconProps = { data: explorationIcon };
+export const iconExternalHyperlink: IconProps = { data: faUpRightFromSquare };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faListUl };
 export const iconInwardLink: IconProps = { data: faArrowRight };
@@ -138,7 +149,11 @@ export const iconTable: IconProps = { data: tableIcon };
 export const iconInspector: IconProps = { data: faInfo };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
+export const iconUpgradeAvailable: IconProps = { data: faCircleInfo };
+export const iconCurrentlyInstalledVersion: IconProps = { data: faCheck };
 export const iconUser: IconProps = { data: faUser };
+export const iconMultipleUsers: IconProps = { data: faUsers };
+export const iconAdminUser: IconProps = { data: faUserGear };
 export const iconLinksInThisTable: IconProps = { data: faCircleArrowRight };
 export const iconLinksFromOtherTables: IconProps = { data: faCircleArrowLeft };
 export const iconForwardSeparator: IconProps = { data: faSlash };

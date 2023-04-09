@@ -6,13 +6,14 @@ import sys
 
 import django
 from django.core import management
-
+from decouple import config as decouple_config
 from django.conf import settings
 from db import install
 
 
 def main():
-    # skip_confirm is temporarily enabled by default as we don't have any use for interactive prompts with docker only deployments
+    # skip_confirm is temporarily enabled by default as we don't have any use
+    # for interactive prompts with docker only deployments
     skip_confirm = True
     (opts, _) = getopt.getopt(sys.argv[1:], ":s", ["skip-confirm"])
     for (opt, value) in opts:
@@ -20,6 +21,10 @@ def main():
             skip_confirm = True
     django.setup()
     management.call_command('migrate')
+    debug_mode = decouple_config('DEBUG', default=False, cast=bool)
+    #
+    if not debug_mode:
+        management.call_command('collectstatic', '--noinput', '--clear')
     print("------------Setting up User Databases------------")
     user_databases = [key for key in settings.DATABASES if key != "default"]
     for database_key in user_databases:

@@ -1,10 +1,11 @@
 <script lang="ts">
   import { router } from 'tinro';
-
   import { Icon, SpinnerButton } from '@mathesar-component-library';
-  import type { User } from '@mathesar/api/users';
-  import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
-  import { ADMIN_USERS_PAGE_URL } from '@mathesar/routes/urls';
+  import { iconDeleteMajor, iconEditUser } from '@mathesar/icons';
+  import {
+    ADMIN_USERS_PAGE_URL,
+    getEditUsersPageUrl,
+  } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
@@ -13,6 +14,8 @@
     PasswordChangeForm,
     UserDetailsForm,
   } from '@mathesar/systems/users-and-permissions';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import type { UserModel } from '@mathesar/stores/users';
   import FormBox from './FormBox.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
@@ -29,7 +32,7 @@
     userDetailsPromise = usersStore?.getUserDetails(userId);
   }
 
-  async function deleteUser(user: User) {
+  async function deleteUser(user: UserModel) {
     if (!usersStore) {
       return;
     }
@@ -44,20 +47,28 @@
 
 {#await userDetailsPromise}
   Fetching user details
-{:then user}
-  {#if user === undefined}
+{:then userModel}
+  {#if userModel === undefined}
     {#if $requestStatus?.state === 'failure'}
       {$requestStatus.errors}
     {:else}
       User not found
     {/if}
   {:else}
+    <AppendBreadcrumb
+      item={{
+        type: 'simple',
+        href: getEditUsersPageUrl(userId),
+        label: userModel.username,
+        icon: iconEditUser,
+      }}
+    />
     <h1>
-      <Icon {...iconEdit} />
-      Edit User: <strong>{user.username}</strong>
+      <Icon {...iconEditUser} />
+      Edit User: <strong>{userModel.username}</strong>
     </h1>
     <FormBox>
-      <UserDetailsForm {user} on:update={onUserUpdate} />
+      <UserDetailsForm user={userModel.getUser()} on:update={onUserUpdate} />
     </FormBox>
     <FormBox>
       <PasswordChangeForm {userId} />
@@ -67,10 +78,10 @@
         <SpinnerButton
           confirm={() =>
             confirmDelete({
-              identifierName: user.username,
+              identifierName: userModel.username,
               identifierType: 'user',
             })}
-          onClick={() => deleteUser(user)}
+          onClick={() => deleteUser(userModel)}
           icon={iconDeleteMajor}
           danger
           label="Delete User"
