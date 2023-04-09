@@ -455,7 +455,7 @@ pip3 install -r requirements.txt
 
 We will call the Django Settings, and then apply the migration:
 ```sh
-$(sudo cat /var/www/mathesar.example.com/mathesar/.env)
+export $(sudo cat /var/www/mathesar.example.com/mathesar/.env)
 python /var/www/mathesar.example.com/mathesar/manage.py migrate
 
 ```
