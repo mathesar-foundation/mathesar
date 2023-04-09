@@ -229,7 +229,7 @@ From the previous step, you will need your to fill in the following variables fo
 You can generate the secret key here: https://djecrety.ir/
 
 ```sh
-ALLOWED_HOSTS: "*"
+ALLOWED_HOSTS='127.0.0.1'
 SECRET_KEY=
 DJANGO_DATABASE_KEY=default
 DJANGO_DATABASE_URL=postgres://{{ DATABASE_USER }}:{{ DATABASE_PASSWORD }}@127.0.0.1:5432/{{ DJANGO_DATABASE_NAME }}"
