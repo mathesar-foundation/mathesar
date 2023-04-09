@@ -198,13 +198,12 @@
     font-weight: bold;
   }
 
-  .large-bold-header{
+  .large-bold-header {
     font-size: var(--size-large);
     font-weight: 600;
   }
 
-  .bold-header{
+  .bold-header {
     font-weight: 500;
   }
-
 </style>
