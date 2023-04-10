@@ -36,9 +36,6 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { toast } from '@mathesar/stores/toast';
-  import { iconDeleteMajor } from '@mathesar/icons';
   import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
@@ -74,7 +71,6 @@
   $: ({ pkColumn } = columnsDataStore);
   $: primaryKeyColumnId = $pkColumn?.id;
   $: rowKey = getRowKey(row, primaryKeyColumnId);
-  $: ({ 1: rId } = row.record);
 
   /**
    * The name indicates that this boolean is only true when more than one cell
