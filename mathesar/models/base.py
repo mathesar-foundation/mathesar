@@ -25,7 +25,7 @@ from db.constraints.operations.select import (
 from db.constraints import utils as constraint_utils
 from db.dependents.dependents_utils import get_dependents_graph, has_dependents
 from db.metadata import get_empty_metadata
-from db.records.operations.delete import delete_record
+from db.records.operations.delete import bulk_delete_records, delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
 from db.records.operations.select import get_records
@@ -526,6 +526,9 @@ class Table(DatabaseObject, Relation):
     def delete_record(self, id_value):
         return delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
+    def bulk_delete_records(self, id_values):
+        return bulk_delete_records(self._sa_table, self.schema._sa_engine, id_values)
+
     def add_constraint(self, constraint_obj):
         create_constraint(
             self._sa_table.schema,
@@ -693,7 +696,22 @@ class Table(DatabaseObject, Relation):
     def suggest_col_mappings_for_import(self, existing_table):
         temp_table_col_list = self.get_column_name_type_map()
         target_table_col_list = existing_table.get_column_name_type_map()
-        return column_utils.find_match(temp_table_col_list, target_table_col_list, self._sa_engine)
+        temp_table_name_id_map = self.get_column_name_id_bidirectional_map()
+        target_table_name_id_map = existing_table.get_column_name_id_bidirectional_map()
+        column_mappings = column_utils.find_match(temp_table_col_list, target_table_col_list, self._sa_engine)
+
+        # Convert python list indices to django ids.
+        mappings = [
+            (
+                temp_table_name_id_map[
+                    temp_table_col_list[from_col][0]  # from_column name
+                ],
+                target_table_name_id_map[
+                    target_table_col_list[target_col][0]  # target_column name
+                ]
+            ) for from_col, target_col in column_mappings
+        ]
+        return mappings
 
 
 class Column(ReflectionManagerMixin, BaseModel):

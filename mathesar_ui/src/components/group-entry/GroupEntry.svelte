@@ -9,6 +9,7 @@
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
   import type { GroupEntryColumnLike } from './types';
 
   type T = $$Generic;
@@ -24,9 +25,11 @@
 
   export let columns: ReadableMapLike<ColumnLikeType['id'], ColumnLikeType>;
   export let getColumnLabel: (column?: ColumnLikeType) => string;
+  export let getColumnConstraintType: (
+    column: ColumnLikeType,
+  ) => ConstraintType[] | undefined = () => undefined;
   export let columnsAllowedForSelection: ColumnLikeType['id'][] | undefined =
     undefined;
-
   export let columnIdentifier: ColumnLikeType['id'];
   export let preprocFunctionIdentifier: string | undefined = undefined;
   export let disableColumnChange = false;
@@ -42,6 +45,16 @@
       allowedColumns = [_columnIdentifier, ...allowedColumns];
     }
     return allowedColumns;
+  }
+
+  function getColumnConstraintTypeByColumnId(_columnId?: ColumnLikeType['id']) {
+    if (_columnId) {
+      const column = columns.get(_columnId);
+      if (column) {
+        return getColumnConstraintType(column);
+      }
+    }
+    return undefined;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -105,6 +118,7 @@
         type: columnInfo?.column.type ?? 'unknown',
         type_options: columnInfo?.column.type_options ?? null,
         display_options: columnInfo?.column.display_options ?? null,
+        constraintsType: getColumnConstraintTypeByColumnId(option),
       }}
     />
   </Select>

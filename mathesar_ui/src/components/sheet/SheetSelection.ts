@@ -330,6 +330,14 @@ export default class SheetSelection<
     }
   }
 
+  selectAndActivateFirstDataEntryCellInLastRow(): void {
+    const currentRows = this.getRows();
+    const currentColumns = this.getColumns();
+    if (currentRows.length > 0 && currentColumns.length > 1) {
+      this.activateCell(currentRows[currentRows.length - 1], currentColumns[1]);
+    }
+  }
+
   getIncludedCells(selectionBounds: SelectionBounds): Cell<Row, Column>[] {
     const { startRowIndex, endRowIndex, startColumnIndex, endColumnIndex } =
       selectionBounds;

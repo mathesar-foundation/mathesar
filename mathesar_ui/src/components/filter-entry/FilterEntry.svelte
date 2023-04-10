@@ -20,6 +20,7 @@
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
+  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
   import type { FilterEntryColumnLike } from './types';
   import { validateFilterEntry } from './utils';
 
@@ -30,6 +31,9 @@
 
   export let columns: ReadableMapLike<ColumnLikeType['id'], ColumnLikeType>;
   export let getColumnLabel: (column: ColumnLikeType) => string;
+  export let getColumnConstraintType: (
+    column: ColumnLikeType,
+  ) => ConstraintType[] | undefined = () => undefined;
 
   export let columnIdentifier: ColumnLikeType['id'] | undefined;
   export let conditionIdentifier: string | undefined;
@@ -87,6 +91,16 @@
       }
     }
     return '';
+  }
+
+  function getColumnConstraintTypeByColumnId(_columnId?: ColumnLikeType['id']) {
+    if (_columnId) {
+      const column = columns.get(_columnId);
+      if (column) {
+        return getColumnConstraintType(column);
+      }
+    }
+    return undefined;
   }
 
   function getConditionName(_conditionId?: string) {
@@ -203,6 +217,7 @@
           type: columnInfo?.column.type ?? 'unknown',
           type_options: columnInfo?.column.type_options ?? null,
           display_options: columnInfo?.column.display_options ?? null,
+          constraintsType: getColumnConstraintTypeByColumnId(option),
         }}
       />
     </Select>

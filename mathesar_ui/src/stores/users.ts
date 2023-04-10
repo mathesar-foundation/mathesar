@@ -14,7 +14,7 @@ import { getErrorMessage } from '@mathesar/utils/errors';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import {
-  roleAllowsOperation,
+  rolesAllowOperation,
   type AccessOperation,
 } from '@mathesar/utils/permissions';
 
@@ -58,24 +58,25 @@ export class UserModel {
       return true;
     }
     const { database, schema } = dbObject;
-    if (schema) {
-      const userSchemaRole = this.schemaRoles.get(schema.id);
-      if (userSchemaRole) {
-        return roleAllowsOperation(userSchemaRole.role, operation);
-      }
-    }
-    if (database) {
-      const userDatabaseRole = this.databaseRoles.get(database.id);
-      if (userDatabaseRole) {
-        return roleAllowsOperation(userDatabaseRole.role, operation);
-      }
-    }
     if (schema && !database) {
       throw new Error(
         'Schema needs to be accompanied by the database for permission checks',
       );
     }
-    return false;
+    const roles: UserRole[] = [];
+    if (schema) {
+      const userSchemaRole = this.schemaRoles.get(schema.id);
+      if (userSchemaRole) {
+        roles.push(userSchemaRole.role);
+      }
+    }
+    if (database) {
+      const userDatabaseRole = this.databaseRoles.get(database.id);
+      if (userDatabaseRole) {
+        roles.push(userDatabaseRole.role);
+      }
+    }
+    return rolesAllowOperation(operation, roles);
   }
 
   getRoleForDb(database: Pick<Database, 'id'>) {

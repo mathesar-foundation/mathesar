@@ -52,17 +52,23 @@ markdown_extensions:
 plugins:
   - search:
       lang: en
+  - redirects:
+      redirect_maps:
+          'installation-dc/administration.md': 'install/docker-compose/index.md'
+          'installation-dc/ansible-setup.md': 'install/docker-compose/index.md'
+          'installation-dc/quickstart.md': 'install/docker-compose/index.md'
+          'installation-dc/troubleshooting.md': 'install/docker-compose/troubleshooting.md'
+          'installation-dc/under-the-hood.md': 'install/docker-compose/under-the-hood.md'
+          'installation-dc/uninstall.md': 'install/docker-compose/index.md'
 
 nav:
   - Home: index.md
-  - Installation:
-      - Quickstart: installation-dc/quickstart.md
-      - Administration: installation-dc/administration.md
-      - Under the Hood: installation-dc/under-the-hood.md
-      - Troubleshooting: installation-dc/troubleshooting.md
-      - Uninstalling: installation-dc/uninstall.md
-      - Setup for Windows: installation-dc/windows-setup.md
-      - Setup using Ansible: installation-dc/ansible-setup.md
+  - Install:
+      - Install Mathesar: install/index.md
+      - Via Docker Compose:
+          - Install via Docker Compose: install/docker-compose/index.md
+          - Under the hood: install/docker-compose/under-the-hood.md
+          - Troubleshooting: install/docker-compose/troubleshooting.md
   - Product:
       - Introduction: product/intro.md
       - Syncing database changes: product/syncing-db.md

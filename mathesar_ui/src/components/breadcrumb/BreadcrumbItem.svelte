@@ -56,7 +56,7 @@
         item.database.name,
         item.schema.id,
         item.table.id,
-        item.record.id,
+        item.record.pk,
       )}
     >
       <NameWithIcon icon={iconRecord}>

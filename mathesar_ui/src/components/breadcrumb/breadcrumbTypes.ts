@@ -37,7 +37,7 @@ export interface BreadcrumbItemRecord {
   schema: SchemaEntry;
   table: TableEntry;
   record: {
-    id: number;
+    pk: string;
     summary: string;
   };
 }
