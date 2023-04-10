@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/types/tables';
   import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
   import { Help } from '@mathesar-component-library';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
@@ -29,7 +28,7 @@
       table: {
         id: joinableTable.target,
         name: tableNameMap.get(joinableTable.target) ?? '(unknown table)',
-        entry: $tables.data.get(joinableTable.target)
+        entry: $tables.data.get(joinableTable.target),
       },
       fkColumn: {
         id: joinableTable.jp_path[0].slice(-1)[0],

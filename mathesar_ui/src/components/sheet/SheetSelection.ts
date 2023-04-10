@@ -352,7 +352,9 @@ export default class SheetSelection<
     const minRowIndex = Math.min(startRowIndex, endRowIndex);
     const maxRowIndex = Math.max(startRowIndex, endRowIndex);
 
-    const columnOrder: string[] = [...this.getColumnOrder().map(c => c.toString())];
+    const columnOrder: string[] = [
+      ...this.getColumnOrder().map((c) => c.toString()),
+    ];
     const startOrderIndex = columnOrder.indexOf(startColumnId);
     const endOrderIndex = columnOrder.indexOf(endColumnId);
 
@@ -615,8 +617,9 @@ export default class SheetSelection<
     activeCell: ActiveCell,
     direction: Direction,
   ): ActiveCell | undefined {
-
-    const columnOrder = this.getColumnOrder().map(column => column.toString());
+    const columnOrder = this.getColumnOrder().map((column) =>
+      column.toString(),
+    );
 
     const rowIndex = (() => {
       const delta = getVerticalDelta(direction);
@@ -641,8 +644,8 @@ export default class SheetSelection<
         return activeCell.columnId;
       }
       const index = columnOrder.indexOf(activeCell.columnId.toString());
-      const target_id = columnOrder[index + delta];
-      return target_id;
+      const targetId = columnOrder[index + delta];
+      return targetId;
     })();
     if (columnId === undefined) {
       return undefined;
