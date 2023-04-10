@@ -179,12 +179,13 @@
       on:movementKeyDown={moveThroughCells}
       on:activate={() => {
         selection.activateCell(row, processedColumn);
-        // Activate event initaites the selection process
-        selection.onStartSelection(row, processedColumn);
       }}
       on:update={valueUpdated}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
-      on:mouseenter={() => {
+      on:onSelectionStart={() => {
+        selection.onStartSelection(row, processedColumn);
+      }}
+      on:onMouseEnterCellWhileSelection={() => {
         // This enables the click + drag to
         // select multiple cells
         selection.onMouseEnterCellWhileSelection(row, processedColumn);
