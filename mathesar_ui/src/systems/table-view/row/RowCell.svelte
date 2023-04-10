@@ -5,8 +5,10 @@
     ButtonMenuItem,
     LinkMenuItem,
     WritableMap,
+    MenuDivider,
   } from '@mathesar-component-library';
   import {
+    rowHasRecord,
     rowHasNewRecord,
     type RecordRow,
     type RecordsData,
@@ -31,7 +33,12 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { toast } from '@mathesar/stores/toast';
+  import { iconDeleteMajor } from '@mathesar/icons';
   import CellErrors from './CellErrors.svelte';
+  import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+  import RowContextOptions from './RowContextOptions.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
@@ -58,6 +65,7 @@
   $: columnId = column.id;
   $: ({ activeCell, selectedCells } = selection);
   $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
+  $: ({ 1: rId } = row.record);
 
   /**
    * The name indicates that this boolean is only true when more than one cell
@@ -191,6 +199,15 @@
       >
         Set to <Null />
       </ButtonMenuItem>
+      <MenuDivider />
+      <!-- Column Attributes -->
+      <ColumnHeaderContextMenu {processedColumn} />
+      <!-- Column Attributes end -->
+      <MenuDivider />
+      <!-- Row -->
+      <RowContextOptions recordId={Number(rId)} {recordsData} {row} />
+      <!-- Row end -->
+
       {#if linkedRecordHref}
         <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
           Go To Linked Record
