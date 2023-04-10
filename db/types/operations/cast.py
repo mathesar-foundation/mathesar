@@ -95,7 +95,7 @@ def create_integer_casts(engine):
         conn.execute(text(integer_array_create))
     integer_number_types = categories.INTEGER_TYPES
     for db_type in integer_number_types:
-        type_body_map = _get_integer_type_body_map()
+        type_body_map = _get_integer_type_body_map(target_type=db_type)
         create_cast_functions(db_type, type_body_map, engine)
 
 
@@ -154,10 +154,8 @@ def create_numeric_casts(engine):
     numeric_array_create = _build_numeric_array_function()
     with engine.begin() as conn:
         conn.execute(text(numeric_array_create))
-    numeric_number_types = categories.NUMERIC_TYPES
-    for db_type in numeric_number_types:
-        type_body_map = _get_numeric_type_body_map(target_type=db_type)
-        create_cast_functions(db_type, type_body_map, engine)
+    type_body_map = _get_numeric_type_body_map()
+    create_cast_functions(PostgresType.NUMERIC, type_body_map, engine)
 
 
 # TODO find more descriptive name
@@ -421,8 +419,9 @@ def _get_integer_type_body_map(target_type=PostgresType.INTEGER):
     We specifically disallow rounding or truncating when casting from numerics,
     etc.
     """
-    default_behavior_source_types = categories.INTEGER_TYPES | categories.STRING_TYPES
+    default_behavior_source_types = categories.INTEGER_TYPES
     no_rounding_source_types = categories.DECIMAL_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES | frozenset([PostgresType.NUMERIC])
+    text_source_types = categories.STRING_TYPES
     target_type_str = target_type.id
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
@@ -449,6 +448,12 @@ def _get_integer_type_body_map(target_type=PostgresType.INTEGER):
             for type_name in no_rounding_source_types
         }
     )
+    type_body_map.update(
+        {
+            text_type: _get_text_to_integer_cast()
+            for text_type in text_source_types
+        }
+    )
     type_body_map.update({PostgresType.BOOLEAN: _get_boolean_to_number_cast(target_type)})
     return type_body_map
 
@@ -464,7 +469,7 @@ def _get_decimal_number_type_body_map(target_type=PostgresType.NUMERIC):
     """
 
     default_behavior_source_types = (
-        categories.NUMERIC_TYPES | categories.STRING_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES
+        categories.NUMERIC_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES | categories.STRING_TYPES
     )
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type,
@@ -915,9 +920,32 @@ def _get_numeric_type_body_map(target_type=PostgresType.NUMERIC):
     """
     default_behavior_source_types = categories.NUMERIC_TYPES | frozenset([PostgresType.MONEY])
     text_source_types = categories.STRING_TYPES
+    no_rounding_source_types = categories.DECIMAL_TYPES
+    target_type_str = target_type.id
+    cast_loss_exception_str = (
+        f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
+    )
+
+    def _get_no_rounding_cast_to_numeric():
+        return f"""
+        DECLARE numeric_res {target_type_str};
+        BEGIN
+          SELECT $1::{target_type_str} INTO numeric_res;
+          IF numeric_res = $1 THEN
+            RETURN numeric_res;
+          END IF;
+          {cast_loss_exception_str}
+        END;
+        """
 
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type
+    )
+    type_body_map.update(
+        {
+            type_name: _get_no_rounding_cast_to_numeric()
+            for type_name in no_rounding_source_types
+        }
     )
     type_body_map.update(
         {
@@ -1034,6 +1062,38 @@ def _build_numeric_array_function():
     """
 
 
+def _get_text_to_integer_cast():
+    text_db_type_id = PostgresType.TEXT.id
+    integer_db_type_id = PostgresType.BIGINT.id
+
+    integer_array_function = get_qualified_name(INTEGER_ARR_FUNC_NAME)
+    cast_exception_str = (
+        f"RAISE EXCEPTION '% cannot be cast to {PostgresType.BIGINT}', $1;"
+    )
+    return rf"""
+    DECLARE is_negative {PostgresType.BOOLEAN.id};
+    DECLARE integer_arr {text_db_type_id}[];
+    DECLARE integer {text_db_type_id};
+    BEGIN
+        SELECT {integer_array_function}($1::{text_db_type_id}) INTO integer_arr;
+        IF integer_arr IS NULL THEN
+            {cast_exception_str}
+        END IF;
+
+        SELECT integer_arr[1] INTO integer;
+        SELECT $1::text ~ '^-.*$' INTO is_negative;
+
+        IF integer_arr[2] IS NOT NULL THEN
+            SELECT regexp_replace(integer, integer_arr[2], '', 'gq') INTO integer;
+        END IF;
+        IF is_negative THEN
+            RETURN ('-' || integer)::{integer_db_type_id};
+        END IF;
+        RETURN integer::{integer_db_type_id};
+    END;
+    """
+
+
 def _build_integer_array_function():
     """
     The main reason for this function to be separate is for testing. This
@@ -1041,15 +1101,17 @@ def _build_integer_array_function():
     """
     qualified_function_name = get_qualified_name(INTEGER_ARR_FUNC_NAME)
 
+    single_digit = r"^[0-9]$"
     no_separator = r"[0-9]{2,}(?:([,])[0-9]{1,2}|[0-9]{4,})?"
-    comma_separator = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,})"
-    period_separator = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,})"
-    comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3})?"
+    comma_separator = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,}"
+    period_separator = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}"
+    comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}?"
     single_quote_separator = r"[0-9]{1,3}(?:(\'')[0-9]{3})+"
     space_separator = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,])[0-9]+)?"
 
     inner_number_tree = "|".join(
         [
+            single_digit,
             no_separator,
             comma_separator,
             period_separator,
