@@ -136,7 +136,7 @@
           bind:value={row.record[columnId]}
           {processedColumn}
           {recordsData}
-          primaryKeyColumnId={primaryKeyColumnId}
+          {primaryKeyColumnId}
         />
       {/each}
     {/if}
@@ -156,10 +156,12 @@
     &.is-add-placeholder {
       cursor: pointer;
 
-      :global([data-sheet-element='cell']:not(.is-active)
-          .cell-fabric
-          .cell-wrapper
-          > *) {
+      :global(
+          [data-sheet-element='cell']:not(.is-active)
+            .cell-fabric
+            .cell-wrapper
+            > *
+        ) {
         visibility: hidden;
       }
     }

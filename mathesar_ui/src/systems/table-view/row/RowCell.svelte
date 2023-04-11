@@ -8,7 +8,6 @@
     MenuDivider,
   } from '@mathesar-component-library';
   import {
-    rowHasRecord,
     rowHasNewRecord,
     type RecordRow,
     type RecordsData,
@@ -16,7 +15,6 @@
     type ProcessedColumn,
     type TabularDataSelection,
     getRowKey,
-    type Row,
   } from '@mathesar/stores/table-data';
   import {
     isCellActive,
