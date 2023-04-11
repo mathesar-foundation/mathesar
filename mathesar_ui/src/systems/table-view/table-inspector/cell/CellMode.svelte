@@ -1,7 +1,9 @@
 <script lang="ts">
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+
   const tabularData = getTabularDataStoreFromContext();
+
   $: ({ selection, recordsData, processedColumns } = $tabularData);
   $: ({ activeCell } = selection);
   $: cell = $activeCell;
