@@ -29,6 +29,10 @@
   import type QueryManager from './QueryManager';
   import type { ColumnWithLink } from './utils';
 
+  import {currentDatabase} from '@mathesar/stores/databases';
+  import {currentSchemaId} from '@mathesar/stores/schemas';
+  import {refetchSchema} from '@mathesar/stores/schemas';
+
   const dispatch = createEventDispatcher();
   const saveModalController = modal.spawnModalController();
 
@@ -71,6 +75,9 @@
   async function save() {
     try {
       await queryManager.save();
+      if($currentDatabase && $currentSchemaId){
+        await refetchSchema($currentDatabase.name,$currentSchemaId);
+      }
       return { success: true };
     } catch (err) {
       toast.fromError(err);
@@ -81,6 +88,9 @@
   async function saveAndClose() {
     const { success } = await save();
     if (success) {
+      if($currentDatabase && $currentSchemaId){
+        await refetchSchema($currentDatabase.name,$currentSchemaId);
+      }
       dispatch('close');
     }
   }
@@ -102,6 +112,9 @@
     } else {
       saveModalController.open();
     }
+    if($currentDatabase && $currentSchemaId){
+        await refetchSchema($currentDatabase.name,$currentSchemaId);
+      }
   }
 </script>
 

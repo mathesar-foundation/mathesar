@@ -20,6 +20,10 @@
   import type QueryRunner from '../QueryRunner';
   import QueryManager from '../QueryManager';
 
+  import {currentDatabase} from '@mathesar/stores/databases';
+  import {currentSchemaId} from '@mathesar/stores/schemas';
+  import {refetchSchema} from '@mathesar/stores/schemas';
+
   const dispatch = createEventDispatcher();
 
   export let queryHandler: QueryRunner | QueryManager;
@@ -89,6 +93,9 @@
         onProceed: async () => {
           await deleteQuery(queryId);
           dispatch('delete');
+          if($currentDatabase && $currentSchemaId){
+        await refetchSchema($currentDatabase.name,$currentSchemaId);
+      }
         },
       });
     }

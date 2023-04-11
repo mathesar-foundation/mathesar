@@ -27,6 +27,8 @@
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
   import EditTable from './EditTable.svelte';
+  
+  import {refetchSchema} from '@mathesar/stores/schemas';
 
   const recordSelector = getRecordSelectorFromContext();
   const editTableModalController = modal.spawnModalController();
@@ -56,6 +58,7 @@
       onProceed: async () => {
         await deleteTable(table.id);
         await refetchTablesForSchema(schema.id);
+        await refetchSchema(database.name,schema.id);
       },
     });
   }

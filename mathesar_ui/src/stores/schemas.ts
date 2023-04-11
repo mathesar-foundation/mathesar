@@ -115,6 +115,7 @@ export async function refetchSchemasForDB(
     dbSchemasRequestMap.set(database, schemaRequest);
     const response = await schemaRequest;
     const schemas = response?.results || [];
+    schemas.sort((a,b)=> a.id - b.id);
 
     const dbSchemasStore = setDBSchemaStore(database, schemas);
 
