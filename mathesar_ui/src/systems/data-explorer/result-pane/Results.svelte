@@ -14,7 +14,6 @@
   } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
-  import { setNewClipboardHandlerStoreInContext } from '@mathesar/stores/clipboard';
   import { toast } from '@mathesar/stores/toast';
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
@@ -23,12 +22,13 @@
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
 
-  const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
-
   export let queryHandler: QueryRunner | QueryManager;
   export let isExplorationPage = false;
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
+  const columnWidths = new ImmutableMap([
+    [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
+  ]);
 
   $: ({
     query,
@@ -40,17 +40,14 @@
     inspector,
   } = queryHandler);
   $: ({ initial_columns } = $query);
-  $: clipboardHandlerStore.set(
-    new SheetClipboardHandler({
-      selection,
-      toast,
-      getRows: () => get(rowsData).rows,
-      getColumnsMap: () => get(processedColumns),
-      getRecordSummaries: () => new ImmutableMap(),
-    }),
-  );
+  $: clipboardHandler = new SheetClipboardHandler({
+    selection,
+    toast,
+    getRows: () => get(rowsData).rows,
+    getColumnsMap: () => get(processedColumns),
+    getRecordSummaries: () => new ImmutableMap(),
+  });
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
-
   $: recordRunState = $runState?.state;
   $: errors = $runState?.state === 'failure' ? $runState.errors : undefined;
   $: columnList = [...$processedColumns.values()];
@@ -64,10 +61,6 @@
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
-
-  const columnWidths = new ImmutableMap([
-    [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
-  ]);
 </script>
 
 <div data-identifier="query-run-result">
@@ -85,6 +78,7 @@
       columns={sheetColumns}
       getColumnIdentifier={(c) => c.id}
       {columnWidths}
+      {clipboardHandler}
       usesVirtualList
     >
       <SheetHeader>

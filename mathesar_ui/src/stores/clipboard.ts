@@ -1,7 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import { writable, type Readable, type Writable } from 'svelte/store';
-
-import { ensureReadable } from '@mathesar/component-library';
+import { writable, type Writable } from 'svelte/store';
 
 export interface ClipboardHandler {
   handleCopy: (event: ClipboardEvent) => void;
@@ -17,10 +15,8 @@ export function setNewClipboardHandlerStoreInContext(): Writable<
   return controller;
 }
 
-export function getClipboardHandlerStoreFromContext(): Readable<
-  ClipboardHandler | undefined
-> {
-  return ensureReadable(
-    getContext<Readable<ClipboardHandler> | undefined>(contextKey),
-  );
+export function getClipboardHandlerStoreFromContext():
+  | Writable<ClipboardHandler | undefined>
+  | undefined {
+  return getContext(contextKey);
 }

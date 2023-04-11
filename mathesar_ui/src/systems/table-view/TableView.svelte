@@ -5,7 +5,6 @@
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
-  import { setNewClipboardHandlerStoreInContext } from '@mathesar/stores/clipboard';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import {
@@ -25,7 +24,6 @@
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();
-  const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -41,18 +39,16 @@
   $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
-  $: clipboardHandlerStore.set(
-    new SheetClipboardHandler({
-      selection,
-      toast,
-      getRows: () => [
-        ...get(recordsData.savedRecords),
-        ...get(recordsData.newRecords),
-      ],
-      getColumnsMap: () => get(processedColumns),
-      getRecordSummaries: () => get(recordsData.recordSummaries),
-    }),
-  );
+  $: clipboardHandler = new SheetClipboardHandler({
+    selection,
+    toast,
+    getRows: () => [
+      ...get(recordsData.savedRecords),
+      ...get(recordsData.newRecords),
+    ],
+    getColumnsMap: () => get(processedColumns),
+    getRecordSummaries: () => get(recordsData.recordSummaries),
+  });
   $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
@@ -117,6 +113,7 @@
           getColumnIdentifier={(entry) => entry.column.id}
           {usesVirtualList}
           {columnWidths}
+          {clipboardHandler}
           hasBorder={sheetHasBorder}
           restrictWidthToRowWidth={!usesVirtualList}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
