@@ -486,5 +486,10 @@ Install the NPM packages:
 Now we will run install:
 ```sh
 cd /var/www/mathesar.example.com/mathesar && python3 install.py --skip-confirm >> /tmp/install.py.log
-
+```
+The last step, is to create our admin/superuser login:
+```sh
+python manage.py createsuperuser
+```
+Run this command, and complete the steps to create your login.
 
