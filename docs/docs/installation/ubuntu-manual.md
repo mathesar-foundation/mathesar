@@ -278,7 +278,7 @@ server {
   }
 
   location /static/ {
-    alias mathesar.example.com/mathesar/static/;
+    alias /var/www/mathesar.example.com/mathesar/static/;
   }
 
   location @proxy_to_app {
