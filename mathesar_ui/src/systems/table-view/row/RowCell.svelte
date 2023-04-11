@@ -16,7 +16,6 @@
     type ProcessedColumn,
     type TabularDataSelection,
     getRowKey,
-    getTabularDataStoreFromContext,
     type Row,
   } from '@mathesar/stores/table-data';
   import {
@@ -49,11 +48,9 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
+  export let primaryKeyColumnId: number;
 
   const userProfile = getUserProfileStoreFromContext();
-  const tabularData = getTabularDataStoreFromContext();
-
-  $: ({ columnsDataStore } = $tabularData);
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -68,8 +65,6 @@
   $: columnId = column.id;
   $: ({ activeCell, selectedCells } = selection);
   $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
-  $: ({ pkColumn } = columnsDataStore);
-  $: primaryKeyColumnId = $pkColumn?.id;
   $: rowKey = getRowKey(row, primaryKeyColumnId);
 
   /**
@@ -210,7 +205,7 @@
       <!-- Column Attributes end -->
       <MenuDivider />
       <!-- Row -->
-      <RowContextOptions recordId={Number(rowKey)} {recordsData} {row} />
+      <RowContextOptions recordId={String(rowKey)} {recordsData} {row} />
       <!-- Row end -->
 
       {#if linkedRecordHref}

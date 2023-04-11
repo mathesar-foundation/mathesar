@@ -18,7 +18,7 @@
   import { currentSchema } from '@mathesar/stores/schemas';
 
   export let row: RecordRow;
-  export let recordId: number;
+  export let recordId: String;
   export let recordsData: RecordsData;
 
   const userProfile = getUserProfileStoreFromContext();

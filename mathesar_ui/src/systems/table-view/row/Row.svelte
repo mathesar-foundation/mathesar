@@ -108,7 +108,7 @@
             hasErrors={hasAnyErrors}
           />
           <ContextMenu>
-            <RowContextOptions recordId={Number(rowKey)} {recordsData} {row} />
+            <RowContextOptions recordId={String(rowKey)} {recordsData} {row} />
           </ContextMenu>
         {/if}
       </div>
@@ -136,6 +136,7 @@
           bind:value={row.record[columnId]}
           {processedColumn}
           {recordsData}
+          primaryKeyColumnId={primaryKeyColumnId}
         />
       {/each}
     {/if}
