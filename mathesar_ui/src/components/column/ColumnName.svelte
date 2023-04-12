@@ -15,5 +15,13 @@
 </script>
 
 <NameWithIcon on:click {icon} {...$$restProps}>
-  {column.name}
+  <span class="column-name">{column.name}</span>
 </NameWithIcon>
+
+<style lang="scss">
+  .column-name{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
