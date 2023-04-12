@@ -1,11 +1,12 @@
-from mathesar.models.base import Constraint
+from mathesar.models.base import Constraint, Table
 from mathesar.api.serializers.constraints import ConstraintSerializer
 
 
-def uniqueness_constraint_column(column_id, table):
+def is_primary_column(column_id, table_id):
+    table = Table.objects.get(id=table_id)
     constraints = Constraint.objects.filter(table=table)
     for constraint in constraints:
         constraint_serializer_data = ConstraintSerializer(constraint).data
-        if column_id in constraint_serializer_data['columns'] and constraint_serializer_data['type'] in ['unique', 'primary']:
+        if column_id in constraint_serializer_data['columns'] and constraint_serializer_data['type'] == 'primary':
             return True
     return False
