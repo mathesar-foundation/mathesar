@@ -224,11 +224,15 @@ chmod 0755 /var/www/mathesar.example.com/
 ```
 #### Create .env file for Django
 
-From the previous step, you will need your to fill in the following variables for Django:
+From the previous step, you will need your to fill in the following variables for Django. For 'ALLOWED_HOSTS' you need to put your FQDN or IP address.
 `
 You can generate the secret key here: https://djecrety.ir/
 
 ```sh
+MODE=PRODUCTION
+DEBUG=False
+DJANGO_ALLOW_ASYNC_UNSAFE=true
+DJANGO_SETTINGS_MODULE=config.settings.production
 ALLOWED_HOSTS='127.0.0.1'
 SECRET_KEY=
 DJANGO_DATABASE_KEY=default
