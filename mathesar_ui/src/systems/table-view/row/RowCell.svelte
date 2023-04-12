@@ -5,6 +5,7 @@
     ButtonMenuItem,
     LinkMenuItem,
     WritableMap,
+    MenuDivider,
   } from '@mathesar-component-library';
   import {
     rowHasNewRecord,
@@ -13,6 +14,7 @@
     type CellKey,
     type ProcessedColumn,
     type TabularDataSelection,
+    getRowKey,
   } from '@mathesar/stores/table-data';
   import {
     isCellActive,
@@ -32,7 +34,8 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import CellErrors from './CellErrors.svelte';
-
+  import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+  import RowContextOptions from './RowContextOptions.svelte';
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
   export let row: RecordRow;
@@ -42,23 +45,22 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
+  export let primaryKeyColumnId: number | undefined;
 
   const userProfile = getUserProfileStoreFromContext();
-
   $: database = $currentDatabase;
   $: schema = $currentSchema;
   $: canEditTableRecords = !!$userProfile?.hasPermission(
     { database, schema },
     'canEditTableRecords',
   );
-
   $: recordsDataState = recordsData.state;
   $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
   $: columnId = column.id;
   $: ({ activeCell, selectedCells } = selection);
   $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
-
+  $: rowKey = getRowKey(row, primaryKeyColumnId);
   /**
    * The name indicates that this boolean is only true when more than one cell
    * is selected. However, because of the bug that [the active cell and selected
@@ -91,14 +93,12 @@
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
-
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
       await tick();
       scrollBasedOnActiveCell();
     }
   }
-
   async function moveThroughCells(
     event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
   ) {
@@ -107,11 +107,9 @@
     if (type) {
       originalEvent.stopPropagation();
       originalEvent.preventDefault();
-
       await checkTypeAndScroll(type);
     }
   }
-
   async function setValue(newValue: unknown) {
     if (newValue === value) {
       return;
@@ -122,12 +120,10 @@
       : await recordsData.updateCell(row, column);
     value = updatedRow.record?.[column.id] ?? value;
   }
-
   async function valueUpdated(e: CustomEvent<{ value: unknown }>) {
     await setValue(e.detail.value);
   }
 </script>
-
 <SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
   <div
     class="cell editable-cell"
@@ -150,7 +146,6 @@
     -->
       <RowCellBackgrounds hasErrors={rowHasErrors} />
     {/if}
-
     <CellFabric
       columnFabric={processedColumn}
       {isActive}
@@ -191,6 +186,15 @@
       >
         Set to <Null />
       </ButtonMenuItem>
+      <MenuDivider />
+      <!-- Column Attributes -->
+      <ColumnHeaderContextMenu {processedColumn} />
+      <!-- Column Attributes end -->
+      <MenuDivider />
+      <!-- Row -->
+      <RowContextOptions recordId={String(rowKey)} {recordsData} {row} />
+      <!-- Row end -->
+
       {#if linkedRecordHref}
         <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
           Go To Linked Record
@@ -202,19 +206,16 @@
     {/if}
   </div>
 </SheetCell>
-
 <style lang="scss">
   .editable-cell.cell {
     user-select: none;
     background: var(--cell-bg-color-base);
-
     &.is-active {
       z-index: var(--z-index__sheet__active-cell);
       border-color: transparent;
       min-height: 100%;
       height: auto !important;
     }
-
     &.error,
     &.is-processing {
       color: var(--cell-text-color-processing);
