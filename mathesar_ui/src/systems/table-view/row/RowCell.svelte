@@ -8,6 +8,7 @@
     MenuDivider,
   } from '@mathesar-component-library';
   import {
+    rowHasRecord,
     rowHasNewRecord,
     type RecordRow,
     type RecordsData,
@@ -15,6 +16,7 @@
     type ProcessedColumn,
     type TabularDataSelection,
     getRowKey,
+    type Row,
   } from '@mathesar/stores/table-data';
   import {
     isCellActive,
@@ -34,7 +36,8 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import CellErrors from './CellErrors.svelte';
-
+  import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+  import RowContextOptions from './RowContextOptions.svelte';
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
   export let row: RecordRow;
@@ -44,7 +47,7 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
-
+  export let primaryKeyColumnId: number | undefined;
   const userProfile = getUserProfileStoreFromContext();
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -58,7 +61,7 @@
   $: columnId = column.id;
   $: ({ activeCell, selectedCells } = selection);
   $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
-
+  $: rowKey = getRowKey(row, primaryKeyColumnId);
   /**
    * The name indicates that this boolean is only true when more than one cell
    * is selected. However, because of the bug that [the active cell and selected
@@ -192,7 +195,6 @@
       <!-- Row -->
       <RowContextOptions recordId={String(rowKey)} {recordsData} {row} />
       <!-- Row end -->
-
       {#if linkedRecordHref}
         <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
           Go To Linked Record
