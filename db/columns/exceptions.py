@@ -20,6 +20,11 @@ class DynamicDefaultWarning(Warning):
     pass
 
 
+class DynamicDefaultModificationError(Exception):
+    def __init__(self, column_name=None):
+        self.column_name = column_name
+
+
 class NotNullError(Exception):
     pass
 
