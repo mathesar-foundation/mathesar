@@ -19,7 +19,7 @@
 </NameWithIcon>
 
 <style lang="scss">
-  .column-name{
+  .column-name {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
