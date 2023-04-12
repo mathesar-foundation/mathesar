@@ -34,8 +34,7 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import CellErrors from './CellErrors.svelte';
-  import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
-  import RowContextOptions from './RowContextOptions.svelte';
+
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
   export let row: RecordRow;
@@ -45,7 +44,6 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
-  export let primaryKeyColumnId: number | undefined;
 
   const userProfile = getUserProfileStoreFromContext();
   $: database = $currentDatabase;
@@ -60,7 +58,7 @@
   $: columnId = column.id;
   $: ({ activeCell, selectedCells } = selection);
   $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
-  $: rowKey = getRowKey(row, primaryKeyColumnId);
+
   /**
    * The name indicates that this boolean is only true when more than one cell
    * is selected. However, because of the bug that [the active cell and selected
