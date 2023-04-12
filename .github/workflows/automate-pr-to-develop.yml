@@ -1,0 +1,17 @@
+name: Create PR to 'develop' branch when 'master' branch is updated.
+
+on:
+  push:
+    branches:
+      -  master
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: pull-request
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "develop"
+          pr_label: "work: release"
