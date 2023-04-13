@@ -175,7 +175,6 @@ class ColumnSerializer(SimpleColumnSerializer):
             if column_has_primary_key_constraint:
                 raise database_api_exceptions.DynamicDefaultAPIException(
                     DynamicDefaultModificationError(self.instance),
-                    message="Dynamic Default can not be altered",
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
         if TYPE_KEY in data and self.instance:
