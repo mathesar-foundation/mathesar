@@ -116,7 +116,7 @@
       await checkTypeAndScroll(type);
     }
   }
-  
+
   async function setValue(newValue: unknown) {
     if (newValue === value) {
       return;
