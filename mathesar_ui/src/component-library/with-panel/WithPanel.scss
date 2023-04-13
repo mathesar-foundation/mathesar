@@ -1,6 +1,7 @@
 .with-panel {
   display: grid;
   height: 100%;
+  width: 100%;
   --resizer-size: var(--WithPanel__resizer-size, 0.3rem);
   --resizer-color: var(--WithPanel__resizer-color, var(--sky-700));
   --resizer-half-size: calc(var(--resizer-size) / 2);

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Tutorial } from '@mathesar-component-library';
   import { queries } from '@mathesar/stores/queries';
-  import type QueryManager from './QueryManager';
-  import InputSidebar from './input-sidebar/InputSidebar.svelte';
-  import ResultPane from './result-pane/ResultPane.svelte';
-  import ExplorationInspector from './exploration-inspector/ExplorationInspector.svelte';
-  import type { ColumnWithLink } from './utils';
   import ActionsPane from './ActionsPane.svelte';
+  import type QueryManager from './QueryManager';
+  import { WithExplorationInspector } from './exploration-inspector';
+  import WithInputSidebar from './input-sidebar/WithInputSidebar.svelte';
+  import ResultPane from './result-pane/ResultPane.svelte';
+  import type { ColumnWithLink } from './utils';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
@@ -49,19 +49,22 @@
     </div>
   {:else}
     <div class="content-pane">
-      <InputSidebar {queryManager} {linkCollapsibleOpenState} />
-      {#if hasNoColumns}
-        <div class="help-text">Get started by adding columns from the left</div>
-      {:else}
-        <ResultPane queryHandler={queryManager} />
-        {#if isInspectorOpen}
-          <ExplorationInspector
+      <WithInputSidebar {queryManager} {linkCollapsibleOpenState}>
+        {#if hasNoColumns}
+          <div class="help-text">
+            Get started by adding columns from the left
+          </div>
+        {:else}
+          <WithExplorationInspector
+            {isInspectorOpen}
             queryHandler={queryManager}
             {canEditMetadata}
             on:delete
-          />
+          >
+            <ResultPane queryHandler={queryManager} />
+          </WithExplorationInspector>
         {/if}
-      {/if}
+      </WithInputSidebar>
     </div>
   {/if}
 </div>
@@ -73,9 +76,8 @@
     height: 100%;
 
     .help-text {
-      display: inline-block;
-      margin-left: auto;
-      margin-right: auto;
+      padding: 0 1rem;
+      text-align: center;
       font-size: var(--text-size-x-large);
       color: var(--slate-500);
     }
@@ -103,9 +105,6 @@
       display: flex;
       overflow: hidden;
       overflow-x: auto;
-      --input-pane-width: 25.8rem;
-      --exploration-inspector-width: 22.9rem;
-
       .help-text {
         margin-top: 10rem;
       }
