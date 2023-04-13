@@ -408,30 +408,33 @@ def test_column_update_typeget_all_columns(column_test_table_with_service_layer_
 def test_column_update_default(column_test_table, client):
     expt_default = 5
     data = {"default": {"value": expt_default}}  # Ensure we pass a int and not a str
-    column = column_test_table.get_columns_by_name(['mycolumn0'])[0]
-    if is_primary_column(column_id=column.id, table=column_test_table):
-        assert True
-        return
-    response = client.patch(
-        f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
-        data=json.dumps(data),
-        content_type="application/json",
-    )
-    assert response.json()["default"]["value"] == expt_default
+    column_list = column_test_table.get_columns_by_name(['mycolumn0'])
+    for column in column_list:
+        response = client.patch(
+            f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
+            data=json.dumps(data),
+            content_type="application/json",
+        )
+        if is_primary_column(column_id=column.id, table=column_test_table):
+            assert response.json()[0]["code"] == 4207
+        else:
+            assert response.json()["default"]["value"] == expt_default
 
 
 def test_column_update_delete_default(column_test_table, client):
     expt_default = None
     data = {"default": None}
-    column = column_test_table.get_columns_by_name(['mycolumn0'])[0]
-    if is_primary_column(column_id=column.id, table=column_test_table):
-        assert True
-        return
-    response = client.patch(
-        f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
-        data=data,
-    )
-    assert response.json()["default"] == expt_default
+    column_list = column_test_table.get_columns_by_name(['mycolumn0'])
+    for column in column_list:
+        response = client.patch(
+            f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
+            data=json.dumps(data),
+            content_type="application/json",
+        )
+        if is_primary_column(column_id=column.id, table=column_test_table):
+            assert response.json()[0]["code"] == 4207
+        else:
+            assert response.json()["default"]["value"] == expt_default
 
 
 def test_column_update_default_invalid_cast(column_test_table, client):
