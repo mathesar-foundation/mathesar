@@ -169,14 +169,15 @@ class ColumnSerializer(SimpleColumnSerializer):
 
     def validate(self, data):
         data = super().validate(data)
+        # print(self.instance)
         # Reevaluate column display options based on the new column type.
         if 'column_default_dict' in data:
             column_has_primary_key_constraint = is_primary_column(column_id=self.instance.id, table_id=self.instance.table.id)
             if column_has_primary_key_constraint:
                 raise database_api_exceptions.DynamicDefaultAPIException(
-                    DynamicDefaultModificationError,
+                    DynamicDefaultModificationError(self.instance),
                     message="Dynamic Default can not be altered",
-                    status_code=status.HTTP_400_BAD_REQUEST
+                    status_code=status.HTTP_400_BAD_REQUEST,
                 )
         if TYPE_KEY in data and self.instance:
             db_type = get_db_type_enum_from_id(data[TYPE_KEY].lower())
