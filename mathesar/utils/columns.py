@@ -2,8 +2,7 @@ from mathesar.models.base import Constraint, Table
 from mathesar.api.serializers.constraints import ConstraintSerializer
 
 
-def is_primary_column(column_id, table_id):
-    table = Table.objects.get(id=table_id)
+def is_primary_column(column_id, table):
     constraints = Constraint.objects.filter(table=table)
     for constraint in constraints:
         constraint_serializer_data = ConstraintSerializer(constraint).data

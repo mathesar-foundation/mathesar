@@ -180,7 +180,7 @@ class DynamicDefaultAPIException(MathesarAPIException):
     @staticmethod
     def err_msg(exception):
         if type(exception) is DynamicDefaultModificationError and exception.column:
-            return f'Dynamic Default of {exception.column} can not be altered.'
+            return f'Dynamic Default of {exception.column.name} column can not be altered.'
         return 'Invalid Dynamic Default modification requested.'
 
 
