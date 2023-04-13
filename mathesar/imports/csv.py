@@ -16,7 +16,7 @@ from psycopg2.errors import IntegrityError, DataError
 
 from mathesar.state import reset_reflection
 
-ALLOWED_DELIMITERS = ",\t:|"
+ALLOWED_DELIMITERS = ",\t:|;"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
