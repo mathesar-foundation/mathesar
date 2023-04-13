@@ -170,8 +170,8 @@ class ColumnSerializer(SimpleColumnSerializer):
     def validate(self, data):
         data = super().validate(data)
         # Reevaluate column display options based on the new column type.
-        if 'column_default_dict' in data:
-            column_has_primary_key_constraint = is_primary_column(column_id=self.instance.id, table_id=self.instance.table.id)
+        if self.partial and 'column_default_dict' in data:
+            column_has_primary_key_constraint = is_primary_column(column_id=self.instance.id, table=self.instance.table)
             if column_has_primary_key_constraint:
                 raise database_api_exceptions.DynamicDefaultAPIException(
                     DynamicDefaultModificationError(self.instance),
