@@ -175,7 +175,7 @@ class DynamicDefaultAPIException(MathesarAPIException):
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
-        super().__init__(exception, self.error_code, self.err_msg, field, details, status_code)
+        super().__init__(exception, self.error_code, self.err_msg(exception), field, details, status_code)
 
     @staticmethod
     def err_msg(exception):
