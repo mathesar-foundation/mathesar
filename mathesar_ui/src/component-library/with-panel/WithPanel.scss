@@ -1,5 +1,6 @@
 .with-panel {
   display: grid;
+  height: 100%;
   --resizer-size: var(--WithPanel__resizer-size, 0.3rem);
   --resizer-color: var(--WithPanel__resizer-color, var(--sky-700));
   --resizer-half-size: calc(var(--resizer-size) / 2);
@@ -32,6 +33,12 @@
       position: absolute;
       z-index: 1;
     }
+  }
+
+  &.horizontal > .main,
+  &.horizontal > .panel {
+    height: 0;
+    min-height: 100%;
   }
 
   &.is-resizing > .panel > .resizer,

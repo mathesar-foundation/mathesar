@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ImmutableMap } from '@mathesar-component-library';
+  import { ImmutableMap, WithPanel } from '@mathesar-component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import {
     getTabularDataStoreFromContext,
@@ -90,7 +90,12 @@
 </script>
 
 <div class="table-view">
-  <div class="table-inspector-view">
+  <WithPanel
+    showPanel={showTableInspector}
+    sizePx={350}
+    minSizePx={200}
+    maxSizePx={600}
+  >
     <div class="sheet-area" on:click={checkAndReinstateFocusOnActiveCell}>
       {#if $processedColumns.size}
         <Sheet
@@ -108,10 +113,8 @@
         </Sheet>
       {/if}
     </div>
-    {#if showTableInspector}
-      <TableInspector />
-    {/if}
-  </div>
+    <TableInspector slot="panel" />
+  </WithPanel>
   <StatusPane {context} />
 </div>
 
@@ -122,14 +125,8 @@
     height: 100%;
     overflow: hidden;
   }
-  .table-inspector-view {
-    display: flex;
-    flex-direction: row;
-    overflow: hidden;
-  }
   .sheet-area {
     position: relative;
-    overflow-x: auto;
-    flex: 1;
+    height: 100%;
   }
 </style>

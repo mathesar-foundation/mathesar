@@ -4,8 +4,10 @@
 
   export let placement: 'top' | 'bottom' | 'left' | 'right' = 'right';
   export let sizePx = 300;
-  export let minSizePx = 50;
+  export let minSizePx = 0;
+  export let maxSizePx = Infinity;
   export let showPanel = true;
+  export let onResizeComplete: (sizePx: number) => void = () => {};
 
   let isResizing = false;
 
@@ -31,6 +33,8 @@
   class:bottom={placement === 'bottom'}
   class:left={placement === 'left'}
   class:right={placement === 'right'}
+  class:horizontal={sizingDimension === 'width'}
+  class:vertical={sizingDimension === 'height'}
 >
   <div class="main">
     <slot />
@@ -47,10 +51,12 @@
           onStart: () => {
             isResizing = true;
           },
-          onStop: () => {
+          onStop: (v) => {
             isResizing = false;
+            onResizeComplete(v);
           },
           min: minSizePx,
+          max: maxSizePx,
           axis: sizingDimension === 'width' ? 'x' : 'y',
           invert: placement === 'right' || placement === 'bottom',
         }}
