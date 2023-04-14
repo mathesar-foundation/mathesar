@@ -118,7 +118,7 @@ for running a particular test,
 docker exec mathesar_service_dev pytest -k "test_name"
 ```
 
-For more options to run the pytest, please refer to the [pytest documentation](https://docs.pytest.org/en/7.1.x/how-to/usage.html#specifying-which-tests-to-run).
+For more options to run the pytest, please refer to the [pytest documentation](https://docs.pytest.org/en/latest/how-to/usage.html).
 
 Frontend tests:
 
