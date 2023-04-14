@@ -26,7 +26,7 @@ jobs:
         run: sudo chown -R 1000:1000 .
 
       - name: Build the stack
-        run: docker-compose --profile test up --build -d
+        run: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d test-service
 
       - name: Create coverage directory
         run: docker exec mathesar_service_test mkdir coverage_report
