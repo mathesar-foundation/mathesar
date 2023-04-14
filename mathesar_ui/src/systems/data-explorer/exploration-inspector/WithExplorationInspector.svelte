@@ -1,5 +1,6 @@
 <script lang="ts">
   import { WithPanel } from '@mathesar-component-library';
+  import { dataExplorerRightSidebarWidth } from '@mathesar/stores/localStorage';
   import type QueryManager from '@mathesar/systems/data-explorer/QueryManager';
   import type QueryRunner from '@mathesar/systems/data-explorer/QueryRunner';
   import ExplorationInspector from './ExplorationInspector.svelte';
@@ -11,7 +12,7 @@
 
 <WithPanel
   showPanel={isInspectorOpen}
-  sizePx={350}
+  bind:sizePx={$dataExplorerRightSidebarWidth}
   minSizePx={250}
   maxSizePx={600}
 >

@@ -1,15 +1,21 @@
 <script lang="ts">
   import { WithPanel } from '@mathesar-component-library';
+  import { dataExplorerLeftSidebarWidth } from '@mathesar/stores/localStorage';
+  import type QueryManager from '@mathesar/systems/data-explorer/QueryManager';
+  import type { ColumnWithLink } from '@mathesar/systems/data-explorer/utils';
   import InputSidebar from './InputSidebar.svelte';
-  import type QueryManager from '../QueryManager';
-  import type { ColumnWithLink } from '../utils';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
 </script>
 
-<WithPanel placement="left" sizePx={400} minSizePx={300} maxSizePx={700}>
+<WithPanel
+  placement="left"
+  bind:sizePx={$dataExplorerLeftSidebarWidth}
+  minSizePx={250}
+  maxSizePx={700}
+>
   <InputSidebar slot="panel" {queryManager} {linkCollapsibleOpenState} />
   <slot />
 </WithPanel>

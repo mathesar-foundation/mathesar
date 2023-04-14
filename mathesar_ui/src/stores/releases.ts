@@ -5,6 +5,7 @@ import {
   type GitHubRelease,
 } from '@mathesar/3rd-party-apis/github-releases';
 import { CachedFetchStore } from '@mathesar/utils/cachedFetchStore';
+import { LOCAL_STORAGE_KEYS } from './localStorage';
 
 export interface Release {
   id: number;
@@ -112,7 +113,7 @@ export type ReleaseDataStore = CachedFetchStore<ReleaseData>;
 function makeReleaseDataStore(currentTagName: string) {
   return new CachedFetchStore({
     inputHash: currentTagName,
-    cacheKey: 'mathesar-release-data',
+    cacheKey: LOCAL_STORAGE_KEYS.releaseData,
     timeToLiveMs: 1000 * 60 * 60 * 24, // 1 day
     fetch: () => fetchReleaseData(currentTagName),
     serialize: (rd) => rd.serialize(),

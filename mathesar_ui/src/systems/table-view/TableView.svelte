@@ -1,20 +1,20 @@
 <script lang="ts">
-  import { ImmutableMap, WithPanel } from '@mathesar-component-library';
+  import { ImmutableMap } from '@mathesar-component-library';
   import { Sheet } from '@mathesar/components/sheet';
+  import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import {
     getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
-  import { rowHeaderWidthPx } from '@mathesar/geometry';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
-  import TableInspector from './table-inspector/TableInspector.svelte';
+  import WithTableInspector from './table-inspector/WithTableInspector.svelte';
 
   type Context = 'page' | 'widget';
 
@@ -90,12 +90,7 @@
 </script>
 
 <div class="table-view">
-  <WithPanel
-    showPanel={showTableInspector}
-    sizePx={350}
-    minSizePx={200}
-    maxSizePx={600}
-  >
+  <WithTableInspector {showTableInspector}>
     <div class="sheet-area" on:click={checkAndReinstateFocusOnActiveCell}>
       {#if $processedColumns.size}
         <Sheet
@@ -113,8 +108,7 @@
         </Sheet>
       {/if}
     </div>
-    <TableInspector slot="panel" />
-  </WithPanel>
+  </WithTableInspector>
   <StatusPane {context} />
 </div>
 
