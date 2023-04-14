@@ -1802,15 +1802,15 @@ def test_table_ui_dependency(client, create_patents_table, get_uid):
         ],
         [
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-            "ffffffffffffffffffffffffffffffffffffffffffffffff-7e43d30e",
+            "fffffffffffffffffffffffffffffffffffffff-7e43d30e"
         ],
         [
             "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-            "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-d0ccef3c",
+            "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-d0ccef3c",
         ],
         [
             "ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
-            "gggggggggggggggggggggggggggggggggggggggggggggggg-2910cecf",
+            "ggggggggggggggggggggggggggggggggggggggg-2910cecf",
         ],
     ]
 )
