@@ -49,24 +49,24 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 
     === "Linux"
         ```
-        sudo docker compose -f /etc/mathesar/docker-compose.yml  up -d
+        sudo docker compose -f /etc/mathesar/docker-compose.yml up -d
         ```
 
     === "MacOS"
         ```
-        docker compose -f /etc/mathesar/docker-compose.yml  up -d
+        docker compose -f /etc/mathesar/docker-compose.yml up -d
         ```
 
 - **Stop** Mathesar:
 
     === "Linux"
         ```
-        sudo docker compose -f /etc/mathesar/docker-compose.yml  down
+        sudo docker compose -f /etc/mathesar/docker-compose.yml down
         ```
 
     === "MacOS"
         ```
-        docker compose -f /etc/mathesar/docker-compose.yml  down
+        docker compose -f /etc/mathesar/docker-compose.yml down
         ```
 
     This stops all Mathesar Docker containers and releases their ports.
@@ -98,12 +98,12 @@ Manually upgrade Mathesar to the newest version:
 
     === "Linux"
         ```
-        sudo docker compose -f /etc/mathesar/docker-compose.yml  down --rmi all -v
+        sudo docker compose -f /etc/mathesar/docker-compose.yml down --rmi all -v
         ```
 
     === "MacOS"
         ```
-        docker compose -f /etc/mathesar/docker-compose.yml  down --rmi all -v
+        docker compose -f /etc/mathesar/docker-compose.yml down --rmi all -v
         ```
 
 1. Remove configuration files.

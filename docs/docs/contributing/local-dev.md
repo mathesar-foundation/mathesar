@@ -13,7 +13,7 @@ cp .env.example .env
 From the repository's root directory, run:
 
 ```
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application.

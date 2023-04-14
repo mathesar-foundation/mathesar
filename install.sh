@@ -213,8 +213,8 @@ https://github.com/centerofci/mathesar/issues/
   if [ "${1}" == "late" ]; then
     read -r -p "
     Press ENTER to print the logs and reset the local docker environment. "
-    docker compose  logs
-    docker compose  down -v --rmi all
+    docker compose logs
+    docker compose down -v --rmi all
   fi
   read -r -p "
 Press ENTER to exit the installer. "
@@ -435,7 +435,7 @@ Next, we'll download files and start the server, This may take a few minutes.
 
 Press ENTER to continue. "
 clear -x
-docker compose  up -d --wait || installation_fail late
+docker compose up -d --wait || installation_fail late
 printf "\n"
 printf "
 --------------------------------------------------------------------------------
