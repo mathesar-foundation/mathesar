@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  test-service:
+    extends:
+      file: docker-compose.common.yml
+      service: base-service
+    container_name: mathesar_service_test
+    image: mathesar/mathesar-test:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_REQUIREMENTS: requirements-dev.txt
+    depends_on:
+      - db
+    # On testing, the HTTP port is exposed to other containers, and the host.
+    ports:
+      - "8000:8000"
+  dev-service:
+    container_name: mathesar_service_dev
+    image: mathesar/mathesar-dev:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_REQUIREMENTS: requirements-dev.txt
+    extends:
+      file: docker-compose.common.yml
+      service: base-service
+    environment:
+      - MODE=${MODE-DEVELOPMENT}
+      - DEBUG=${DEBUG-True}
+      - DJANGO_ALLOW_ASYNC_UNSAFE=true
+      - DJANGO_SUPERUSER_PASSWORD=password
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
+    command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./dev-run.sh
+    volumes:
+      - .:/code/
+      - ui_node_modules:/code/mathesar_ui/node_modules/
+    depends_on:
+      - db
+    # On dev, following ports are exposed to other containers, and the host.
+    ports:
+      - "8000:8000"
+      - "3000:3000"
+      - "6006:6006"
+volumes:
+  ui_node_modules:
