@@ -92,6 +92,52 @@ function removeSchemaInDBSchemaStore(
   }
 }
 
+export function modifySchemaCountOfTable(
+  database: Database['name'],
+  schemaId: SchemaEntry['id'],
+  count: number,
+) {
+  const store = dbSchemaStoreMap.get(database);
+  if (store) {
+    store.update((value) => {
+      if (value.data.has(schemaId)) {
+        const schemaToModify = value.data?.get(schemaId);
+        if (schemaToModify) {
+          schemaToModify.num_tables += count;
+          value.data?.set(schemaId, schemaToModify);
+        }
+      }
+      return {
+        ...value,
+        data: new Map(value.data),
+      };
+    });
+  }
+}
+
+export function modifySchemaCountOfExploration(
+  database: Database['name'],
+  schemaId: SchemaEntry['id'],
+  count: number,
+) {
+  const store = dbSchemaStoreMap.get(database);
+  if (store) {
+    store.update((value) => {
+      if (value.data.has(schemaId)) {
+        const schemaToModify = value.data?.get(schemaId);
+        if (schemaToModify) {
+          schemaToModify.num_queries += count;
+          value.data?.set(schemaId, schemaToModify);
+        }
+      }
+      return {
+        ...value,
+        data: new Map(value.data),
+      };
+    });
+  }
+}
+
 export async function refetchSchemasForDB(
   database: Database['name'],
 ): Promise<DBSchemaStoreData | undefined> {
@@ -115,7 +161,6 @@ export async function refetchSchemasForDB(
     dbSchemasRequestMap.set(database, schemaRequest);
     const response = await schemaRequest;
     const schemas = response?.results || [];
-    schemas.sort((a, b) => a.id - b.id);
 
     const dbSchemasStore = setDBSchemaStore(database, schemas);
 
