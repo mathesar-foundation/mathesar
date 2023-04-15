@@ -12,9 +12,6 @@
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import { queries, putQuery, deleteQuery } from '@mathesar/stores/queries';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
-  import { refetchSchema } from '@mathesar/stores/schemas';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getAvailableName } from '@mathesar/utils/db';
   import Form from '@mathesar/components/Form.svelte';
@@ -92,9 +89,6 @@
         onProceed: async () => {
           await deleteQuery(queryId);
           dispatch('delete');
-          if ($currentDatabase && $currentSchemaId) {
-            await refetchSchema($currentDatabase.name, $currentSchemaId);
-          }
         },
       });
     }
