@@ -42,7 +42,8 @@ import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
 import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
 import type { AtLeastOne } from '@mathesar/typeUtils';
-import { currentSchemaId } from './schemas';
+import { currentSchemaId, modifySchemaCountOfTable } from './schemas';
+import { currentDBName } from './databases';
 
 const commonData = preloadCommonData();
 
@@ -193,6 +194,11 @@ export function deleteTable(id: number): CancellablePromise<TableEntry> {
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
+        const databaseName = get(currentDBName);
+        const schemaId = get(currentSchemaId);
+        if (databaseName && schemaId) {
+          modifySchemaCountOfTable(databaseName, schemaId, -1);
+        }
         findSchemaStoreForTable(id)?.update((tableStoreData) => {
           tableStoreData.data.delete(id);
           return {
@@ -245,6 +251,10 @@ export function createTable(
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
+        const databaseName = get(currentDBName);
+        if (databaseName) {
+          modifySchemaCountOfTable(databaseName, schema, 1);
+        }
         schemaTablesStoreMap.get(value.schema)?.update((existing) => {
           const tableEntryMap: DBTablesStoreData['data'] = new Map();
           sortedTableEntries([...existing.data.values(), value]).forEach(

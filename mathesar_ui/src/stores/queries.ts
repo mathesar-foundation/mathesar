@@ -45,7 +45,8 @@ import type {
 } from '@mathesar/api/types/queries';
 import { CancellablePromise } from '@mathesar-component-library';
 
-import { currentSchemaId } from './schemas';
+import { currentSchemaId, modifySchemaCountOfExploration } from './schemas';
+import { currentDBName } from './databases';
 
 const commonData = preloadCommonData();
 
@@ -197,6 +198,11 @@ export function createQuery(
 ): CancellablePromise<QueryGetResponse> {
   const promise = postAPI<QueryGetResponse>('/api/db/v0/queries/', newQuery);
   void promise.then((instance) => {
+    const databaseName = get(currentDBName);
+    const schemaId = get(currentSchemaId);
+    if (databaseName && schemaId) {
+      modifySchemaCountOfExploration(databaseName, schemaId, 1);
+    }
     void refetchQueriesForSchema(instance.schema);
     return undefined;
   });
@@ -269,6 +275,11 @@ export function deleteQuery(queryId: number): CancellablePromise<void> {
   const promise = deleteAPI<void>(`/api/db/v0/queries/${queryId}/`);
 
   void promise.then(() => {
+    const databaseName = get(currentDBName);
+    const schemaId = get(currentSchemaId);
+    if (databaseName && schemaId) {
+      modifySchemaCountOfExploration(databaseName, schemaId, -1);
+    }
     findSchemaStoreForTable(queryId)?.update((storeData) => {
       storeData.data.delete(queryId);
       return { ...storeData, data: new Map(storeData.data) };
