@@ -677,8 +677,22 @@ MASTER_DB_TYPE_MAP_SPEC = {
     PostgresType.TEXT: {
         TARGET_DICT: {
             PostgresType.BIGINT: {
-                VALID: [("432", 432), ("1234123412341234", 1234123412341234)],
-                INVALID: ["1.2234"]
+                VALID: [("432", 432),
+                        ("1234123412341234", 1234123412341234),
+                        ("3", (3)),
+                        ("123,456", (123456)),
+                        ("123.456", (123456)),
+                        ("123 456", (123456)),
+                        ("1,23,456", (123456)),
+                        ("123'456", (123456)),
+                        ("-3", (-3)),
+                        ("-123,456", (-123456)),
+                        ("-123.456", (-123456)),
+                        ("-123 456", (-123456)),
+                        ("-1,23,456", (-123456)),
+                        ("-123'456", (-123456)),
+                        ],
+                INVALID: ["1.2234"],
             },
             PostgresType.BOOLEAN: {
                 VALID: [
@@ -842,7 +856,23 @@ MASTER_DB_TYPE_MAP_SPEC = {
     PostgresType.CHARACTER_VARYING: {
         TARGET_DICT: {
             PostgresType.BIGINT: {
-                VALID: [("432", 432), ("1234123412341234", 1234123412341234)],
+                VALID: [("432", 432),
+                        ("1234123412341234", 1234123412341234),
+                        ("432", 432),
+                        ("1234123412341234", 1234123412341234),
+                        ("3", (3)),
+                        ("123,456", (123456)),
+                        ("123.456", (123456)),
+                        ("123 456", (123456)),
+                        ("1,23,456", (123456)),
+                        ("123'456", (123456)),
+                        ("-3", (-3)),
+                        ("-123,456", (-123456)),
+                        ("-123.456", (-123456)),
+                        ("-123 456", (-123456)),
+                        ("-1,23,456", (-123456)),
+                        ("-123'456", (-123456)),
+                        ],
                 INVALID: ["1.2234"]
             },
             PostgresType.BOOLEAN: {
@@ -1554,6 +1584,33 @@ def test_numeric_array_sql(engine_with_schema, source_str, expect_arr):
         res = conn.execute(
             select(
                 text(f"mathesar_types.get_numeric_array('{source_str}'::text)")
+            )
+        ).scalar()
+    assert res == expect_arr
+
+
+integer_array_examples = [
+    ('3', ['3', None]),
+    ('331,209', ['331,209', ',']),
+    ('1,234,567', ['1,234,567', ',']),
+    ('-1,234,567', ['1,234,567', ',']),
+    ('331.293', ['331.293', '.']),
+    ('1.234.567', ['1.234.567', '.']),
+    ('331 293', ['331 293', ' ']),
+    ('1 234 567', ['1 234 567', ' ']),
+    ('-1 234 567', ['1 234 567', ' ']),
+    ('1,23,45,678', ['1,23,45,678', ',']),
+    ('1\'\'234\'\'567', ['1\'234\'567', '\'']),
+]
+
+
+@pytest.mark.parametrize("source_str,expect_arr", integer_array_examples)
+def test_integer_array_sql(engine_with_schema, source_str, expect_arr):
+    engine, _ = engine_with_schema
+    with engine.begin() as conn:
+        res = conn.execute(
+            select(
+                text(f"mathesar_types.get_integer_array('{source_str}'::text)")
             )
         ).scalar()
     assert res == expect_arr
