@@ -22,7 +22,7 @@
   const tabularData = getTabularDataStoreFromContext();
 
   export let hasNewColumnButton = false;
-  export let columnOrder: number[];
+  export let columnOrder: string[];
   export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
 
   $: columnOrder = columnOrder ?? [];
@@ -39,21 +39,22 @@
   );
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
-  let selectedColumnIdsOrdered: number[] = [];
-  let newColumnOrder: number[] = [];
+  let selectedColumnIdsOrdered: string[] = [];
+  let newColumnOrder: string[] = [];
 
   function dragColumn() {
     // Keep only IDs for which the column exists
     for (const columnId of $processedColumns.keys()) {
-      columnOrder = [...new Set(columnOrder)];
-      if (!columnOrder.includes(columnId)) {
-        columnOrder = [...columnOrder, columnId];
+      const columnIdString = columnId.toString();
+      columnOrder = [...new Set(columnOrder.map(String))];
+      if (!columnOrder.includes(columnIdString)) {
+        columnOrder = [...columnOrder, columnIdString];
       }
     }
     columnOrder = columnOrder;
     // Remove selected column IDs and keep their order
     for (const id of columnOrder) {
-      if (selectedColumnIds.includes(id)) {
+      if (selectedColumnIds.map(String).includes(id)) {
         selectedColumnIdsOrdered.push(id);
         if (!locationOfFirstDraggedColumn) {
           locationOfFirstDraggedColumn = columnOrder.indexOf(id);
@@ -83,7 +84,7 @@
     // if that column is to the right, else insert it before
     if (columnDroppedOn) {
       newColumnOrder.splice(
-        columnOrder.indexOf(columnDroppedOn.id),
+        columnOrder.indexOf(columnDroppedOn.id.toString()),
         0,
         ...selectedColumnIdsOrdered,
       );
@@ -92,7 +93,7 @@
       newColumnOrder.splice(0, 0, ...selectedColumnIdsOrdered);
     }
 
-    void saveColumnOrder(table, newColumnOrder);
+    void saveColumnOrder(table, newColumnOrder.map(Number));
 
     // Reset drag information
     locationOfFirstDraggedColumn = undefined;
@@ -133,7 +134,7 @@
               on:drop={() => dropColumn(processedColumn)}
               on:dragover={(e) => e.preventDefault()}
               {locationOfFirstDraggedColumn}
-              columnLocation={columnOrder.indexOf(columnId)}
+              columnLocation={columnOrder.indexOf(columnId.toString())}
               isSelected={isColumnSelected(
                 $selectedCells,
                 $columnsSelectedWhenTheTableIsEmpty,
