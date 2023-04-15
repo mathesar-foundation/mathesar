@@ -640,15 +640,17 @@ export default class SheetSelection<
 
     const columnId = (() => {
       const delta = getHorizontalDelta(direction);
-      console.log(delta);
       if (delta === 0) {
         return activeCell.columnId;
       }
       const index = columnOrder.indexOf(activeCell.columnId.toString());
-      console.log(index);
-      const targetId = columnOrder[index + delta];
-      console.log(targetId);
-      return parseInt(targetId);
+      const targetId = parseInt(columnOrder[index + delta], 10);
+
+      if (Number.isNaN(targetId)) {
+        return undefined;
+      }
+
+      return targetId;
     })();
     if (columnId === undefined) {
       return undefined;
