@@ -1101,20 +1101,17 @@ def _build_integer_array_function():
     """
     qualified_function_name = get_qualified_name(INTEGER_ARR_FUNC_NAME)
 
-    single_digit = r"^[0-9]$"
-    no_separator = r"[0-9]{2,}(?:([,])[0-9]{1,2}|[0-9]{4,})?"
-    comma_separator = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,}"
-    period_separator = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}"
-    comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}?"
-    single_quote_separator = r"[0-9]{1,3}(?:(\'')[0-9]{3})+"
-    space_separator = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,])[0-9]+)?"
+    no_separator = r"\d+"
+    comma_or_period_separator = r"([0-9]|[0-9]{3})(([,.])[0-9]{3})+"
+    comma_separator_lakh_system = r"([0-9]{1,2}(?:(,)[0-9]{2})+),[0-9]{3}"
+    space_separator = r"[0-9]{1,3}(?:( )[0-9]{3})+"
+    single_quote_separator = r"([0-9]{1,3})(?:(\'')[0-9]{3})+(?:(\'')?[0-9]*)?"
 
     inner_number_tree = "|".join(
         [
-            single_digit,
             no_separator,
-            comma_separator,
-            period_separator,
+            # comma_separator,
+            comma_or_period_separator,
             comma_separator_lakh_system,
             single_quote_separator,
             space_separator
