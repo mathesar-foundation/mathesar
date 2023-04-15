@@ -640,12 +640,15 @@ export default class SheetSelection<
 
     const columnId = (() => {
       const delta = getHorizontalDelta(direction);
+      console.log(delta);
       if (delta === 0) {
         return activeCell.columnId;
       }
       const index = columnOrder.indexOf(activeCell.columnId.toString());
+      console.log(index);
       const targetId = columnOrder[index + delta];
-      return targetId;
+      console.log(targetId);
+      return parseInt(targetId);
     })();
     if (columnId === undefined) {
       return undefined;

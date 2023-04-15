@@ -25,7 +25,8 @@
   export let columnOrder: number[];
   export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
 
-  $: columnOrderString = columnOrder.map(String) ?? [];
+  $: columnOrder = columnOrder ?? [];
+  $: columnOrderString = columnOrder.map(String);
 
   $: ({ selection, processedColumns } = $tabularData);
   $: ({
