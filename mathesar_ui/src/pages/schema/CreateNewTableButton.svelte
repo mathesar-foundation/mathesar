@@ -11,7 +11,6 @@
   import { iconAddNew } from '@mathesar/icons';
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
-  import { refetchSchema } from '@mathesar/stores/schemas';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -21,7 +20,6 @@
   async function handleCreateEmptyTable() {
     isCreatingNewTable = true;
     const tableInfo = await createTable(schema.id, {});
-    await refetchSchema(database.name, schema.id);
     isCreatingNewTable = false;
     router.goto(getTablePageUrl(database.name, schema.id, tableInfo.id), false);
   }
