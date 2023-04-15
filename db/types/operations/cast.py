@@ -1110,7 +1110,6 @@ def _build_integer_array_function():
     inner_number_tree = "|".join(
         [
             no_separator,
-            # comma_separator,
             comma_or_period_separator,
             comma_separator_lakh_system,
             single_quote_separator,
