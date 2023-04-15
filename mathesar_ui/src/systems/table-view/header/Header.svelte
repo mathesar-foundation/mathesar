@@ -22,10 +22,10 @@
   const tabularData = getTabularDataStoreFromContext();
 
   export let hasNewColumnButton = false;
-  export let columnOrder: string[];
+  export let columnOrder: number[];
   export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
 
-  $: columnOrder = columnOrder ?? [];
+  $: columnOrderString = columnOrder.map(String) ?? [];
 
   $: ({ selection, processedColumns } = $tabularData);
   $: ({
@@ -46,18 +46,18 @@
     // Keep only IDs for which the column exists
     for (const columnId of $processedColumns.keys()) {
       const columnIdString = columnId.toString();
-      columnOrder = [...new Set(columnOrder.map(String))];
-      if (!columnOrder.includes(columnIdString)) {
-        columnOrder = [...columnOrder, columnIdString];
+      columnOrderString = [...new Set(columnOrderString.map(String))];
+      if (!columnOrderString.includes(columnIdString)) {
+        columnOrderString = [...columnOrderString, columnIdString];
       }
     }
-    columnOrder = columnOrder;
+    columnOrderString = columnOrderString;
     // Remove selected column IDs and keep their order
-    for (const id of columnOrder) {
+    for (const id of columnOrderString) {
       if (selectedColumnIds.map(String).includes(id)) {
         selectedColumnIdsOrdered.push(id);
         if (!locationOfFirstDraggedColumn) {
-          locationOfFirstDraggedColumn = columnOrder.indexOf(id);
+          locationOfFirstDraggedColumn = columnOrderString.indexOf(id);
         }
       } else {
         newColumnOrder.push(id);
@@ -84,7 +84,7 @@
     // if that column is to the right, else insert it before
     if (columnDroppedOn) {
       newColumnOrder.splice(
-        columnOrder.indexOf(columnDroppedOn.id.toString()),
+        columnOrderString.indexOf(columnDroppedOn.id.toString()),
         0,
         ...selectedColumnIdsOrdered,
       );
@@ -134,7 +134,7 @@
               on:drop={() => dropColumn(processedColumn)}
               on:dragover={(e) => e.preventDefault()}
               {locationOfFirstDraggedColumn}
-              columnLocation={columnOrder.indexOf(columnId.toString())}
+              columnLocation={columnOrderString.indexOf(columnId.toString())}
               isSelected={isColumnSelected(
                 $selectedCells,
                 $columnsSelectedWhenTheTableIsEmpty,
