@@ -194,6 +194,11 @@
       >
         Set to <Null />
       </ButtonMenuItem>
+      {#if linkedRecordHref}
+        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
+          Go To Linked Record
+        </LinkMenuItem>
+      {/if}
       <MenuDivider />
       <!-- Column Attributes -->
       <ColumnHeaderContextMenu {processedColumn} />
@@ -202,11 +207,6 @@
       <!-- Row -->
       <RowContextOptions recordId={rowKey} {recordsData} {row} />
       <!-- Row end -->
-      {#if linkedRecordHref}
-        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-          Go To Linked Record
-        </LinkMenuItem>
-      {/if}
     </ContextMenu>
     {#if errors.length}
       <CellErrors {errors} forceShowErrors={isActive} />
