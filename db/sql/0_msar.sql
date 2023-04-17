@@ -156,6 +156,13 @@ CREATE OR REPLACE FUNCTION
 msar.get_cast_function_name(target_type regtype) RETURNS text AS $$/*
 Return a string giving the appropriate name of the casting function for the target_type.
 
+Currently set up to duplicate the logic in our python casting function builder. This will be
+changed. Given a qualified, potentially capitalized type name, we
+- Remove the namespace (schema),
+- Replace any white space in the type name with underscores,
+- Replace double quotes in the type name (e.g., the "char" type) with '_double_quote_'
+- Use the prepped type name in the name `mathesar_types.cast_to_%s`.
+
 Args:
   target_type: This should be a type that exists.
 */
