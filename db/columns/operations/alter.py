@@ -289,7 +289,9 @@ def batch_alter_table_drop_columns(table_oid, column_data_list, connection, engi
 
     Args:
         table_oid: OID of the table whose columns we'll drop.
-        column_data_list: The attnums of the columns to drop.
+        column_data_list: List of dictionaries describing columns to alter.
+        connection: the connection (if any) to use with the database.
+        engine: the SQLAlchemy engine to use with the database.
 
     Returns:
         A string of the command that was executed.
