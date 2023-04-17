@@ -205,7 +205,7 @@
       <!-- Column Attributes end -->
       <MenuDivider />
       <!-- Row -->
-      <RowContextOptions recordId={rowKey} {recordsData} {row} />
+      <RowContextOptions recordPk={rowKey} {recordsData} {row} />
       <!-- Row end -->
     </ContextMenu>
     {#if errors.length}

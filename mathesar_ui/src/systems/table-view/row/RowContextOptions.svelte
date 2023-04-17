@@ -18,7 +18,7 @@
   import { currentSchema } from '@mathesar/stores/schemas';
 
   export let row: RecordRow;
-  export let recordId: string;
+  export let recordPk: string;
   export let recordsData: RecordsData;
 
   const userProfile = getUserProfileStoreFromContext();
@@ -46,7 +46,7 @@
 </script>
 
 <LinkMenuItem
-  href={$storeToGetRecordPageUrl({ recordId }) || ''}
+  href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
   icon={iconExternalLink}
 >
   Go to Record Page

@@ -108,7 +108,7 @@
             hasErrors={hasAnyErrors}
           />
           <ContextMenu>
-            <RowContextOptions recordId={rowKey} {recordsData} {row} />
+            <RowContextOptions recordPk={rowKey} {recordsData} {row} />
           </ContextMenu>
         {/if}
       </div>
