@@ -14,7 +14,6 @@
     type CellKey,
     type ProcessedColumn,
     type TabularDataSelection,
-    getRowKey,
   } from '@mathesar/stores/table-data';
   import {
     isCellActive,
@@ -46,7 +45,7 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
-  export let primaryKeyColumnId: number | undefined;
+  export let rowKey: string;
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -63,7 +62,6 @@
   $: columnId = column.id;
   $: ({ activeCell, selectedCells } = selection);
   $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
-  $: rowKey = getRowKey(row, primaryKeyColumnId);
 
   /**
    * The name indicates that this boolean is only true when more than one cell
@@ -202,7 +200,7 @@
       <!-- Column Attributes end -->
       <MenuDivider />
       <!-- Row -->
-      <RowContextOptions recordId={String(rowKey)} {recordsData} {row} />
+      <RowContextOptions recordId={rowKey} {recordsData} {row} />
       <!-- Row end -->
       {#if linkedRecordHref}
         <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
