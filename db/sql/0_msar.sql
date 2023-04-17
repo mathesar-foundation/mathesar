@@ -161,6 +161,7 @@ Args:
 */
 DECLARE target_type_prepped text;
 BEGIN
+  -- TODO: Come up with a way to build these names that is more robust against collisions.
   WITH unqualifier AS (
     SELECT x[array_upper(x, 1)] unqualified_type
     FROM regexp_split_to_array(target_type::text, '\.') x
