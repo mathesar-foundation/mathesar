@@ -38,6 +38,9 @@
 
 1. When finished, the installer will display the URL where you can run Mathesar from your web browser.
 
+!!! note "Connecting to a local database"
+    Once you have successfully installed Mathesar, if you wish to connect it to an existing database that is running locally on the host machine, you can refer to the following [guide](./connecting-local-db.md).
+
 !!! info "Getting help"
     If you run into any problems during installation, see [troubleshooting](./troubleshooting.md) or [open a ticket describing your problem](https://github.com/centerofci/mathesar/issues/new/choose).
 

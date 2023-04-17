@@ -67,7 +67,6 @@ nav:
       - Install Mathesar: install/index.md
       - Via Docker Compose:
           - Install via Docker Compose: install/docker-compose/index.md
-          - Connect local DB: install/docker-compose/connecting-local-db.md
           - Under the hood: install/docker-compose/under-the-hood.md
           - Troubleshooting: install/docker-compose/troubleshooting.md
   - Product:
