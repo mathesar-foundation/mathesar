@@ -334,12 +334,12 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Update table primary key sequence to latest -----------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.update_pk_sequence_to_latest(table_name text, column_ text) RETURNS text AS $$/*
+__msar.update_pk_sequence_to_latest(tab_name text, col_name text) RETURNS text AS $$/*
 Update the primary key sequence to the maximum of the primary key column, plus one.
 
 Args:
-  table_name: fully-qualified, quoted table name
-  column_: The column name of the primary key.
+  tab_name: Fully-qualified, quoted table name
+  col_name: The column name of the primary key.
 */
 BEGIN
   RETURN __msar.exec_ddl(
@@ -348,42 +348,43 @@ BEGIN
       || 'pg_get_serial_sequence(''%1$s'', ''%2$s''), coalesce(max(%2$s) + 1, 1), false'
       || ') '
       || 'FROM %1$s',
-    table_name, column_
+    tab_name, col_name
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.update_pk_sequence_to_latest(table_id oid, col_attnum integer) RETURNS text AS $$/*
+msar.update_pk_sequence_to_latest(tab_id oid, col_id integer) RETURNS text AS $$/*
 Update the primary key sequence to the maximum of the primary key column, plus one.
 
 Args:
-  table_id: The OID of the table whose primary key sequence we'll update.
-  col_attnum: The attnum of the primary key column.
+  tab_id: The OID of the table whose primary key sequence we'll update.
+  col_id: The attnum of the primary key column.
 */
-DECLARE table_name text;
-DECLARE colname text;
+DECLARE tab_name text;
+DECLARE col_name text;
 BEGIN
-  table_name :=  __msar.get_relation_name(table_id);
-  colname := msar.get_column_name(table_id, col_attnum);
-  RETURN __msar.update_pk_sequence_to_latest(qualified_table_name, colname);
+  tab_name :=  __msar.get_relation_name(tab_id);
+  col_name := msar.get_column_name(tab_id, col_id);
+  RETURN __msar.update_pk_sequence_to_latest(tab_name, col_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.update_pk_sequence_to_latest(schema_ text, table_name text, column_ text) RETURNS text AS $$/*
+msar.update_pk_sequence_to_latest(sch_name text, tab_name text, col_name text) RETURNS text AS $$/*
 Update the primary key sequence to the maximum of the primary key column, plus one.
 
 Args:
-  table_id: The OID of the table whose primary key sequence we'll update.
-  col_attnum: The attnum of the primary key column.
+  sch_name: The schema where the table whose primary key sequence we'll update lives.
+  tab_name: The table whose primary key sequence we'll update.
+  col_name: The name of the primary key column.
 */
-DECLARE qualified_table_name text;
+DECLARE qualified_tab_name text;
 BEGIN
-  qualified_table_name := msar.get_fully_qualified_object_name(schema_, table_name);
-  RETURN __msar.update_pk_sequence_to_latest(qualified_table_name, quote_ident(column_));
+  qualified_tab_name := msar.get_fully_qualified_object_name(sch_name, tab_name);
+  RETURN __msar.update_pk_sequence_to_latest(qualified_tab_name, quote_ident(col_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -391,56 +392,57 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Drop columns from table -------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.drop_columns(table_name text, columns variadic text[]) RETURNS text AS $$/*
+__msar.drop_columns(tab_name text, col_names variadic text[]) RETURNS text AS $$/*
 Drop the given columns from the given table.
 
 Args:
-  table_name: fully-qualified, quoted table name.
-  columns: The column names to be dropped, quoted.
+  tab_name: Fully-qualified, quoted table name.
+  col_names: The column names to be dropped, quoted.
 */
 DECLARE column_drops text;
 BEGIN
   SELECT string_agg(format('DROP COLUMN %s', col), ', ')
-  FROM unnest(columns) AS col
+  FROM unnest(col_names) AS col
   INTO column_drops;
-  RETURN __msar.exec_ddl('ALTER TABLE %s %s', table_name, column_drops);
+  RETURN __msar.exec_ddl('ALTER TABLE %s %s', tab_name, column_drops);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_columns(table_id oid, attnums variadic integer[]) RETURNS text AS $$/*
+msar.drop_columns(tab_id oid, col_ids variadic integer[]) RETURNS text AS $$/*
 Drop the given columns from the given table.
 
 Args:
-  table_id: OID of the table whose columns we'll drop.
-  attnums: The attnums of the columns to drop.
+  tab_id: OID of the table whose columns we'll drop.
+  col_ids: The attnums of the columns to drop.
 */
-DECLARE columns text[];
+DECLARE col_names text[];
 BEGIN
   SELECT array_agg(quote_ident(attname))
   FROM pg_attribute
   WHERE attrelid=table_id AND ARRAY[attnum::integer] <@ attnums
-  INTO columns;
-  RETURN __msar.drop_columns(__msar.get_relation_name(table_id), variadic columns);
+  INTO col_names;
+  RETURN __msar.drop_columns(__msar.get_relation_name(table_id), variadic col_names);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_columns(schema_ text, table_ text, columns variadic text[]) RETURNS text AS $$/*
+msar.drop_columns(sch_name text, tab_name text, col_names variadic text[]) RETURNS text AS $$/*
 Drop the given columns from the given table.
 
 Args:
-  table_id: OID of the table whose columns we'll drop.
-  attnums: The attnums of the columns to drop.
+  sch_name: The schema where the table whose columns we'll drop lives, unquoted.
+  tab_name: The table whose columns we'll drop, unquoted and unqualified.
+  col_names: The columns to drop, unquoted.
 */
-DECLARE prepared_columns text[];
-DECLARE fully_qualified_table_name text;
+DECLARE prepared_col_names text[];
+DECLARE fully_qualified_tab_name text;
 BEGIN
-  SELECT array_agg(quote_ident(col)) FROM unnest(columns) AS col INTO prepared_columns;
-  fully_qualified_table_name := msar.get_fully_qualified_object_name(schema_, table_);
-  RETURN __msar.drop_columns(fully_qualified_table_name, variadic prepared_columns);
+  SELECT array_agg(quote_ident(col)) FROM unnest(col_names) AS col INTO prepared_col_names;
+  fully_qualified_tab_name := msar.get_fully_qualified_object_name(sch_name, tab_name);
+  RETURN __msar.drop_columns(fully_qualified_tab_name, variadic prepared_col_names);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -456,11 +458,11 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Drop table --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.drop_table(name_ text, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
+__msar.drop_table(tab_name text, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
 Drop a table, returning the command executed.
 
 Args:
-  name_: The qualified, quoted name of the table we will drop.
+  tab_name: The qualified, quoted name of the table we will drop.
   cascade_: Whether to add CASCADE.
   if_exists_: Whether to ignore an error if the table doesn't exist
 */
@@ -477,39 +479,40 @@ BEGIN
   THEN
     cmd_template = cmd_template || ' CASCADE';
   END IF;
-  RETURN __msar.exec_ddl(cmd_template, name_);
+  RETURN __msar.exec_ddl(cmd_template, tab_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_table(table_id oid, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
+msar.drop_table(tab_id oid, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
 Drop a table, returning the command executed.
 
 Args:
-  table_id: The OID of the table to drop
+  tab_id: The OID of the table to drop
   cascade_: Whether to drop dependent objects.
   if_exists_: Whether to ignore an error if the table doesn't exist
 */
 BEGIN
-  RETURN __msar.drop_table(__msar.get_relation_name(table_id), cascade_, if_exists);
+  RETURN __msar.drop_table(__msar.get_relation_name(tab_id), cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_table(schema_ text, name_ text, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
+msar.drop_table(sch_name text, tab_name text, cascade_ boolean, if_exists boolean)
+  RETURNS text AS $$/*
 Drop a table, returning the command executed.
 
 Args:
-  schema_: The schema of the table to drop.
-  name_: The name of the table to drop.
+  sch_name: The schema of the table to drop.
+  tab_name: The name of the table to drop.
   cascade_: Whether to drop dependent objects.
   if_exists_: Whether to ignore an error if the table doesn't exist
 */
-DECLARE qualified_name text;
+DECLARE qualified_tab_name text;
 BEGIN
-  qualified_name := msar.get_fully_qualified_object_name(schema_, name_);
+  qualified_tab_name := msar.get_fully_qualified_object_name(sch_name, tab_name);
   RETURN __msar.drop_table(qualified_name, cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
