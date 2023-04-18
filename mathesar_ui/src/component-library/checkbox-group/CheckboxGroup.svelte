@@ -25,6 +25,7 @@
     optionToCompare: Option | undefined,
     selectedOption: Option | undefined,
   ) => boolean = (a, b) => a === b;
+  export let disabled = false;
 
   function handleChange(option: Option, checked: boolean) {
     if (checked) {
@@ -39,6 +40,7 @@
   {isInline}
   {options}
   {label}
+  {disabled}
   let:option
   let:disabled
   on:change
