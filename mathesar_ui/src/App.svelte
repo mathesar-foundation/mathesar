@@ -197,4 +197,13 @@
     color: rgba(0, 0, 0, 0.6);
     font-weight: bold;
   }
+
+  .large-bold-header {
+    font-size: var(--size-large);
+    font-weight: 600;
+  }
+
+  .bold-header {
+    font-weight: 500;
+  }
 </style>

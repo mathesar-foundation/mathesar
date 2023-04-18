@@ -13,7 +13,7 @@ cp .env.example .env
 From the repository's root directory, run:
 
 ```
-docker-compose --profile dev up
+docker compose --profile dev up
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application.
@@ -112,6 +112,13 @@ Backend tests:
 ```
 docker exec mathesar_service_dev pytest mathesar/ db/
 ```
+
+for running a particular test,
+```
+docker exec mathesar_service_dev pytest -k "test_name"
+```
+
+For more options to run the pytest, please refer to the [pytest documentation](https://docs.pytest.org/en/latest/how-to/usage.html).
 
 Frontend tests:
 

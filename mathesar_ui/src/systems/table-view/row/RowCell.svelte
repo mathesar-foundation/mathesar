@@ -5,6 +5,7 @@
     ButtonMenuItem,
     LinkMenuItem,
     WritableMap,
+    MenuDivider,
   } from '@mathesar-component-library';
   import {
     rowHasNewRecord,
@@ -32,6 +33,8 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import CellErrors from './CellErrors.svelte';
+  import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+  import RowContextOptions from './RowContextOptions.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
@@ -42,6 +45,7 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
+  export let rowKey: string;
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -107,7 +111,6 @@
     if (type) {
       originalEvent.stopPropagation();
       originalEvent.preventDefault();
-
       await checkTypeAndScroll(type);
     }
   }
@@ -171,12 +174,13 @@
       on:movementKeyDown={moveThroughCells}
       on:activate={() => {
         selection.activateCell(row, processedColumn);
-        // Activate event initaites the selection process
-        selection.onStartSelection(row, processedColumn);
       }}
       on:update={valueUpdated}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
-      on:mouseenter={() => {
+      on:onSelectionStart={() => {
+        selection.onStartSelection(row, processedColumn);
+      }}
+      on:onMouseEnterCellWhileSelection={() => {
         // This enables the click + drag to
         // select multiple cells
         selection.onMouseEnterCellWhileSelection(row, processedColumn);
@@ -195,6 +199,14 @@
           Go To Linked Record
         </LinkMenuItem>
       {/if}
+      <MenuDivider />
+      <!-- Column Attributes -->
+      <ColumnHeaderContextMenu {processedColumn} />
+      <!-- Column Attributes end -->
+      <MenuDivider />
+      <!-- Row -->
+      <RowContextOptions recordPk={rowKey} {recordsData} {row} />
+      <!-- Row end -->
     </ContextMenu>
     {#if errors.length}
       <CellErrors {errors} forceShowErrors={isActive} />
@@ -206,14 +218,12 @@
   .editable-cell.cell {
     user-select: none;
     background: var(--cell-bg-color-base);
-
     &.is-active {
       z-index: var(--z-index__sheet__active-cell);
       border-color: transparent;
       min-height: 100%;
       height: auto !important;
     }
-
     &.error,
     &.is-processing {
       color: var(--cell-text-color-processing);

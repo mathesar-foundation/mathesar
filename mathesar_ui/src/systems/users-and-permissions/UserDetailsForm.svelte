@@ -3,23 +3,23 @@
   import type { UnionToIntersection } from 'type-fest';
 
   import {
-    TextInput,
     PasswordInput,
+    TextInput,
     hasProperty,
   } from '@mathesar-component-library';
+  import userApi, { type User } from '@mathesar/api/users';
+  import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import {
+    FormSubmit,
+    isEmail,
+    makeForm,
+    matchRegex,
+    maxLength,
     optionalField,
     requiredField,
-    makeForm,
-    FormSubmitWithCatch,
-    maxLength,
-    matchRegex,
-    isEmail,
     type FieldStore,
   } from '@mathesar/components/form';
-  import userApi, { type User } from '@mathesar/api/users';
   import { iconSave, iconUndo } from '@mathesar/icons';
-  import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import SelectUserType from './SelectUserType.svelte';
   import UserFormInput from './UserFormInput.svelte';
@@ -151,8 +151,9 @@
 </div>
 
 <div class="submit-section">
-  <FormSubmitWithCatch
+  <FormSubmit
     {form}
+    catchErrors
     onProceed={saveUser}
     proceedButton={{ label: 'Save', icon: iconSave }}
     cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
