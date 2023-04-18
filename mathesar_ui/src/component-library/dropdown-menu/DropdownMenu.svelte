@@ -1,12 +1,16 @@
 <script lang="ts">
+  import type { ComponentProps } from 'svelte';
+
   import Dropdown from '@mathesar-component-library-dir/dropdown/Dropdown.svelte';
   import Menu from '@mathesar-component-library-dir/menu/Menu.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
-  // TODO: Find some way to provide better typings
-  // for the inherited props from the Dropdown component
-  // interface $$RestProps extends ComponentProps<Dropdown> {};
+  interface $$Props extends ComponentProps<Dropdown> {
+    label?: string;
+    icon?: IconProps;
+    menuStyle?: string;
+  }
 
   export let label = '';
   export let ariaLabel: string | undefined = undefined;
