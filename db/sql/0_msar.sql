@@ -228,48 +228,48 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Rename table ------------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.rename_table(old_name text, new_name text) RETURNS text AS $$/*
+__msar.rename_table(old_tab_name text, new_tab_name text) RETURNS text AS $$/*
 Change a table's name, returning the command executed.
 
 Args:
-  old_name:  properly quoted, qualified table name
-  new_name:  properly quoted, unqualified table name
+  old_tab_name: properly quoted, qualified table name
+  new_tab_name: properly quoted, unqualified table name
 */
 BEGIN
   RETURN __msar.exec_ddl(
-    'ALTER TABLE %s RENAME TO %s', old_name, new_name
+    'ALTER TABLE %s RENAME TO %s', old_tab_name, new_tab_name
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.rename_table(table_id oid, new_name text) RETURNS text AS $$/*
+msar.rename_table(tab_id oid, new_tab_name text) RETURNS text AS $$/*
 Change a table's name, returning the command executed.
 
 Args:
-  table_id:  the OID of the table whose name we want to change
-  new_name:  unquoted, unqualified table name
+  tab_id: the OID of the table whose name we want to change
+  new_tab_name: unquoted, unqualified table name
 */
 BEGIN
-  RETURN __msar.rename_table(__msar.get_relation_name(table_id), quote_ident(new_name));
+  RETURN __msar.rename_table(__msar.get_relation_name(tab_id), quote_ident(new_tab_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.rename_table(schema_ text, old_name text, new_name text) RETURNS text AS $$/*
+msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS text AS $$/*
 Change a table's name, returning the command executed.
 
 Args:
-  schema_: unquoted schema name where the table lives
-  old_name:  unquoted, unqualified original table name
-  new_name:  unquoted, unqualified new table name
+  sch_name: unquoted schema name where the table lives
+  old_tab_name: unquoted, unqualified original table name
+  new_tab_name: unquoted, unqualified new table name
 */
 DECLARE fullname text;
 BEGIN
-  fullname := msar.get_fully_qualified_object_name(schema_, old_name);
-  RETURN __msar.rename_table(fullname, quote_ident(new_name));
+  fullname := msar.get_fully_qualified_object_name(sch_name, old_tab_name);
+  RETURN __msar.rename_table(fullname, quote_ident(new_tab_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -277,45 +277,45 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Comment on table --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.comment_on_table(name_ text, comment_ text) RETURNS text AS $$/*
+__msar.comment_on_table(tab_name text, comment_ text) RETURNS text AS $$/*
 Change the description of a table, returning command executed.
 
 Args:
-  name_: The qualified, quoted name of the table whose comment we will change.
+  tab_name: The qualified, quoted name of the table whose comment we will change.
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
 BEGIN
-  RETURN __msar.exec_ddl('COMMENT ON TABLE %s IS ''%s''', name_, comment_);
+  RETURN __msar.exec_ddl('COMMENT ON TABLE %s IS ''%s''', tab_name, comment_);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.comment_on_table(table_id oid, comment_ text) RETURNS text AS $$/*
+msar.comment_on_table(tab_id oid, comment_ text) RETURNS text AS $$/*
 Change the description of a table, returning command executed.
 
 Args:
-  table_id: The OID of the table whose comment we will change.
+  tab_id: The OID of the table whose comment we will change.
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
 BEGIN
-  RETURN __msar.comment_on_table(__msar.get_relation_name(table_id), comment_);
+  RETURN __msar.comment_on_table(__msar.get_relation_name(tab_id), comment_);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.comment_on_table(schema_ text, name_ text, comment_ text) RETURNS text AS $$/*
+msar.comment_on_table(sch_name text, tab_name text, comment_ text) RETURNS text AS $$/*
 Change the description of a table, returning command executed.
 
 Args:
-  schema_: The schema of the table whose comment we will change.
-  name_: The name of the table whose comment we will change.
+  sch_name: The schema of the table whose comment we will change.
+  tab_name: The name of the table whose comment we will change.
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
 DECLARE qualified_name text;
 BEGIN
-  qualified_name := msar.get_fully_qualified_object_name(schema_, name_);
+  qualified_name := msar.get_fully_qualified_object_name(sch_name, tab_name);
   RETURN __msar.comment_on_table(qualified_name, comment_);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
