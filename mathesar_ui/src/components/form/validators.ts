@@ -51,8 +51,10 @@ type FilledFieldValue<F> = FieldValue<F> extends infer T | undefined | null
   ? T
   : never;
 
+const REQUIRED_VALIDATION_MSG = 'Value cannot be empty.';
+
 export function required(
-  msg = 'Value cannot be empty.',
+  msg = REQUIRED_VALIDATION_MSG,
 ): ValidationFn<unknown> {
   return validIf((v) => valueIsFilled(v), msg);
 }
@@ -110,17 +112,14 @@ export function getErrors<T>({
   isRequired: boolean;
   validators?: (ValidationFn<T> | ValidationFn<Filled<T>>)[];
 }): string[] {
-  if (isRequired) {
-    const outcome = required()(value);
-    if (outcome.type === 'invalid') {
-      return [outcome.errorMsg];
-    }
+  if (!valueIsFilled(value)) {
+    return isRequired ? [REQUIRED_VALIDATION_MSG] : [];
   }
   if (!validators) {
     return [];
   }
-  // We know value will be filled here because we already returned if the
-  // `required` validator failed.
+  // We know value will be filled here because we already returned if
+  // `valueIsFilled` gave false.
   const filledValue = value as Filled<T>;
   return validators
     .map((fn) => fn(filledValue))
