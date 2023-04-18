@@ -28,6 +28,27 @@ well as its name identifer(s).
 
 Note that these identification schemes apply to the public-facing functions in the `msar` namespace,
 not necessarily the internal `__msar` functions.
+
+NAMING CONVENTIONS
+
+Because function signatures are used informationally in command-generated tables, horizontal space
+needs to be conserved. As a compromise between readability and terseness, we use the following
+conventions in variable naming:
+
+schema   -> sch
+table   ->  tab
+column   -> col
+object   -> obj
+relation -> rel
+
+Textual names will have the suffix _name, and numeric identifiers will have the suffix _id.
+
+So, the OID of a table will be tbl_id and the name of a column will be col_name. The attnum of a
+column will be col_id.
+
+Generally, we'll use snake_case for legibility and to avoid collisions with internal PostgreSQL
+naming conventions.
+
 */
 
 CREATE SCHEMA IF NOT EXISTS __msar;
@@ -85,69 +106,80 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-msar.get_fq_table_name(schema_ text, name_ text) RETURNS text AS $$/*
-Return the fully-qualified, properly quoted, name for a given table.
+msar.get_fully_qualified_object_name(sch_name text, obj_name text) RETURNS text AS $$/*
+Return the fully-qualified, properly quoted, name for a given database object (e.g., table).
 
 Args:
-  schema_: The schema of the table, unquoted.
-  name_:   The name of the table, unqualified and unquoted.
+  sch_name: The schema of the object, unquoted.
+  obj_name: The name of the object, unqualified and unquoted.
 */
 BEGIN
-  RETURN format('%s.%s', quote_ident(schema_), quote_ident(name_));
+  RETURN format('%s.%s', quote_ident(sch_name), quote_ident(obj_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.get_table_name(table_id oid) RETURNS text AS $$/*
-Return the name for a given table, qualified or quoted as appropriate.
+__msar.get_relation_name(rel_id oid) RETURNS text AS $$/*
+Return the name for a given relation (e.g., table), qualified or quoted as appropriate.
 
-In cases where the table is already included in the search path, the returned name will not be
+In cases where the relation is already included in the search path, the returned name will not be
 fully-qualified.
 
+The relation *must* be in the pg_class table to use this function.
+
 Args:
-  table_id:   The OID of the table.
+  rel_id: The OID of the relation.
 */
 BEGIN
-  RETURN table_id::regclass::text;
+  RETURN rel_id::regclass::text;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_table_oid(schema_ text, name_ text) RETURNS text AS $$/*
-Return the OID for a given table.
+msar.get_relation_oid(sch_name text, rel_name text) RETURNS text AS $$/*
+Return the OID for a given relation (e.g., table).
+
+The relation *must* be in the pg_class table to use this function.
 
 Args:
-  schema_: The schema of the table, unquoted.
-  name_:   The name of the table, unqualified and unquoted.
+  sch_name: The schema of the relation, unquoted.
+  rel_name: The name of the relation, unqualified and unquoted.
 */
 BEGIN
-  RETURN msar.get_fq_table_name(schema_, name_)::regclass::oid;
+  RETURN msar.get_fully_qualified_object_name(sch_name, rel_name)::regclass::oid;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_column_name(table_id oid, col_attnum integer) RETURNS text AS $$/*
-Return the name for a given column in a given table.
+msar.get_column_name(rel_id oid, col_id integer) RETURNS text AS $$/*
+Return the name for a given column in a given relation (e.g., table).
+
+More precisely, this function returns the name of attributes of any relation appearing in the
+pg_class catalog table (so you could find attributes of indices with this function).
 
 Args:
-  table_id:  The OID of the table.
-  column_attnum:   The attnum of the column in the table.
+  rel_id:  The OID of the relation.
+  col_id:  The attnum of the column in the relation.
 */
 BEGIN
-  RETURN quote_ident(attname::text) FROM pg_attribute WHERE attrelid=table_id AND attnum=col_attnum;
+  RETURN quote_ident(attname::text) FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.is_pkey_col(table_id oid, col_attnum integer) RETURNS boolean AS $$/*
-Return whether the given column is in the primary key of the given table.
+msar.is_pkey_col(rel_id oid, col_id integer) RETURNS boolean AS $$/*
+Return whether the given column is in the primary key of the given relation (e.g., table).
+
+Args:
+  rel_id:  The OID of the relation.
+  col_id:  The attnum of the column in the relation.
 */
 BEGIN
-  RETURN ARRAY[col_attnum::smallint] <@ conkey FROM pg_constraint WHERE conrelid=table_id;
+  RETURN ARRAY[col_attnum::smallint] <@ conkey FROM pg_constraint WHERE conrelid=rel_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -220,7 +252,7 @@ Args:
   new_name:  unquoted, unqualified table name
 */
 BEGIN
-  RETURN __msar.rename_table(__msar.get_table_name(table_id), quote_ident(new_name));
+  RETURN __msar.rename_table(__msar.get_relation_name(table_id), quote_ident(new_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -236,7 +268,7 @@ Args:
 */
 DECLARE fullname text;
 BEGIN
-  fullname := msar.get_fq_table_name(schema_, old_name);
+  fullname := msar.get_fully_qualified_object_name(schema_, old_name);
   RETURN __msar.rename_table(fullname, quote_ident(new_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -267,7 +299,7 @@ Args:
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
 BEGIN
-  RETURN __msar.comment_on_table(__msar.get_table_name(table_id), comment_);
+  RETURN __msar.comment_on_table(__msar.get_relation_name(table_id), comment_);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -283,7 +315,7 @@ Args:
 */
 DECLARE qualified_name text;
 BEGIN
-  qualified_name := msar.get_fq_table_name(schema_, name_);
+  qualified_name := msar.get_fully_qualified_object_name(schema_, name_);
   RETURN __msar.comment_on_table(qualified_name, comment_);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -333,7 +365,7 @@ Args:
 DECLARE table_name text;
 DECLARE colname text;
 BEGIN
-  table_name :=  __msar.get_table_name(table_id);
+  table_name :=  __msar.get_relation_name(table_id);
   colname := msar.get_column_name(table_id, col_attnum);
   RETURN __msar.update_pk_sequence_to_latest(qualified_table_name, colname);
 END;
@@ -350,7 +382,7 @@ Args:
 */
 DECLARE qualified_table_name text;
 BEGIN
-  qualified_table_name := msar.get_fq_table_name(schema_, table_name);
+  qualified_table_name := msar.get_fully_qualified_object_name(schema_, table_name);
   RETURN __msar.update_pk_sequence_to_latest(qualified_table_name, quote_ident(column_));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -390,7 +422,7 @@ BEGIN
   FROM pg_attribute
   WHERE attrelid=table_id AND ARRAY[attnum::integer] <@ attnums
   INTO columns;
-  RETURN __msar.drop_columns(__msar.get_table_name(table_id), variadic columns);
+  RETURN __msar.drop_columns(__msar.get_relation_name(table_id), variadic columns);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -404,9 +436,11 @@ Args:
   attnums: The attnums of the columns to drop.
 */
 DECLARE prepared_columns text[];
+DECLARE fully_qualified_table_name text;
 BEGIN
   SELECT array_agg(quote_ident(col)) FROM unnest(columns) AS col INTO prepared_columns;
-  RETURN __msar.drop_columns(msar.get_fq_table_name(schema_, table_), variadic prepared_columns);
+  fully_qualified_table_name := msar.get_fully_qualified_object_name(schema_, table_);
+  RETURN __msar.drop_columns(fully_qualified_table_name, variadic prepared_columns);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -458,7 +492,7 @@ Args:
   if_exists_: Whether to ignore an error if the table doesn't exist
 */
 BEGIN
-  RETURN __msar.drop_table(__msar.get_table_name(table_id), cascade_, if_exists);
+  RETURN __msar.drop_table(__msar.get_relation_name(table_id), cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -475,7 +509,7 @@ Args:
 */
 DECLARE qualified_name text;
 BEGIN
-  qualified_name := msar.get_fq_table_name(schema_, name_);
+  qualified_name := msar.get_fully_qualified_object_name(schema_, name_);
   RETURN __msar.drop_table(qualified_name, cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

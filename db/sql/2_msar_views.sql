@@ -30,7 +30,7 @@ Args:
   table_id: The OID of the table whose associated view we want to name.
 */
 BEGIN
-  RETURN msar.get_fq_table_name('msar_views', format('mv%s', table_id));
+  RETURN msar.get_fully_qualified_object_name('msar_views', format('mv%s', table_id));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -54,7 +54,7 @@ BEGIN
   INTO viewcols;
   RETURN __msar.exec_ddl(
     'CREATE OR REPLACE VIEW %s AS SELECT %s FROM %s',
-    viewname, viewcols, __msar.get_table_name(table_id)
+    viewname, viewcols, __msar.get_relation_name(table_id)
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -106,7 +106,7 @@ Args:
 */
 DECLARE table_id oid;
 BEGIN
-  table_id := msar.get_table_oid(schema_, table_name);
+  table_id := msar.get_relation_oid(schema_, table_name);
   RETURN msar.drop_mathesar_view(table_id);
 EXCEPTION WHEN undefined_table THEN
   RETURN 'NO SUCH TABLE';
