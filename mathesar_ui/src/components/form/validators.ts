@@ -53,9 +53,7 @@ type FilledFieldValue<F> = FieldValue<F> extends infer T | undefined | null
 
 const REQUIRED_VALIDATION_MSG = 'Value cannot be empty.';
 
-export function required(
-  msg = REQUIRED_VALIDATION_MSG,
-): ValidationFn<unknown> {
+export function required(msg = REQUIRED_VALIDATION_MSG): ValidationFn<unknown> {
   return validIf((v) => valueIsFilled(v), msg);
 }
 
