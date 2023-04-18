@@ -1,29 +1,31 @@
-import type { Readable } from 'svelte/store';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type { Column } from '@mathesar/api/types/tables/columns';
 import type {
   Constraint,
   FkConstraint,
 } from '@mathesar/api/types/tables/constraints';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type {
-  AbstractType,
-  AbstractTypesMap,
-  AbstractTypePreprocFunctionDefinition,
-} from '@mathesar/stores/abstract-types/types';
-import {
-  getFiltersForAbstractType,
-  getAbstractTypeForDbType,
-  getPreprocFunctionsForAbstractType,
-} from '@mathesar/stores/abstract-types';
+import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
   getDbTypeBasedInputCap,
+  getDisplayFormatter,
   getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
-import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
-import type { TableEntry } from '@mathesar/api/types/tables';
 import { retrieveFilters } from '@mathesar/components/filter-entry/utils';
+import {
+  getAbstractTypeForDbType,
+  getFiltersForAbstractType,
+  getPreprocFunctionsForAbstractType,
+} from '@mathesar/stores/abstract-types';
+import type {
+  AbstractType,
+  AbstractTypePreprocFunctionDefinition,
+  AbstractTypesMap,
+} from '@mathesar/stores/abstract-types/types';
+import type { Readable } from 'svelte/store';
 import { findFkConstraintsForColumn } from './constraintsUtils';
+import type { RecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
 
 export interface ProcessedColumn extends CellColumnFabric {
   /**
@@ -48,6 +50,10 @@ export interface ProcessedColumn extends CellColumnFabric {
   inputComponentAndProps: ComponentAndProps;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
+  formatCellValue: (
+    cellValue: unknown,
+    recordSummaries?: RecordSummariesForSheet,
+  ) => string | null | undefined;
 }
 
 /** Maps column ids to processed columns */
@@ -87,6 +93,7 @@ export function processColumn({
   );
   const linkFk = findFkConstraintsForColumn(exclusiveConstraints, column.id)[0];
   const isPk = (hasEnhancedPrimaryKeyCell ?? true) && column.primary_key;
+  const fkTargetTableId = linkFk ? linkFk.referent_table : undefined;
   return {
     id: column.id,
     column,
@@ -103,17 +110,18 @@ export function processColumn({
     cellComponentAndProps: getCellCap({
       cellInfo: abstractType.cellInfo,
       column,
-      fkTargetTableId: linkFk ? linkFk.referent_table : undefined,
+      fkTargetTableId,
       pkTargetTableId: isPk ? tableId : undefined,
     }),
     inputComponentAndProps: getDbTypeBasedInputCap(
       column,
-      linkFk ? linkFk.referent_table : undefined,
+      fkTargetTableId,
       abstractType.cellInfo,
     ),
     allowedFiltersMap: retrieveFilters(abstractType.identifier, linkFk),
     preprocFunctions: getPreprocFunctionsForAbstractType(
       abstractType.identifier,
     ),
+    formatCellValue: getDisplayFormatter(column, column.id),
   };
 }
