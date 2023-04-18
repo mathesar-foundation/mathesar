@@ -19,12 +19,6 @@ to set these environment variables.
 | DJANGO_SETTINGS_MODULE | ***Internal*** Relative path to the django settings file                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `config.settings.production` |
 | MODE                   | ***Internal*** The mode under which the Frontend files will be served. The values can be either be `DEVELOPMENT` or `PRODUCTION`. Running under `DEVELOPMENT` mode will run a Svelte server and enable hot reloading of the files, while running under `PRODUCTION` mode will serve the static assets from the `/static/` url                                                                                                                                                                                                                       | `PRODUCTION`                 |
 
-
-### Database Configuration
-| Name          | Description                               | Defaults |
-|---------------|-------------------------------------------|----------|
-| POSTGRES_PORT | The port the postgres database listens on | `5432`   |
-
 ### Caddy Reverse Proxy Configuration
 | Name        | Description                                                                                                                                                                                                                                                                                                                                                             | Defaults |
 |-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -32,4 +26,7 @@ to set these environment variables.
 | HTTP_PORT   | The HTTP port used by caddy to listen for requests. It is recommended to use the default port `80` as features like automatic SSL [rely on it](https://caddyserver.com/docs/automatic-https#acme-challenges)                                                                                                                                                            | 80       |
 | HTTPS_PORT  | The HTTPS port used by caddy to listen for requests. It is highly recommended to use the default port `443` as features like automatic SSL, HTTPS redirection [rely on it](https://caddyserver.com/docs/automatic-https#acme-challenges).                                                                                                                               | 443      |
 
-
+### Database Configuration
+| Name          | Description                               | Defaults |
+|---------------|-------------------------------------------|----------|
+| POSTGRES_PORT | The port the postgres database listens on | `5432`   |
