@@ -2,6 +2,8 @@
 
 - [Install via Docker Compose](./docker-compose/index.md)
 
-
 !!! info "More installation methods coming soon"
     We [plan to support additional installation methods](https://github.com/centerofci/mathesar/issues/2509) in the near future, allowing you to run Mathesar without Docker.
+
+# Configuring Mathesar
+- [Using Environment Variables](./configuration.md)
