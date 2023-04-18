@@ -9,10 +9,7 @@ import type {
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import MoneyCell from './components/money/MoneyCell.svelte';
 import MoneyCellInput from './components/money/MoneyCellInput.svelte';
-import type {
-  MoneyCellExternalProps,
-  CellValueFormatter,
-} from './components/typeDefinitions';
+import type { MoneyCellExternalProps } from './components/typeDefinitions';
 import type { CellComponentFactory } from './typeDefinitions';
 import { getUseGrouping } from './number';
 
@@ -99,8 +96,8 @@ const moneyType: CellComponentFactory = {
     };
   },
 
-  getDisplayFormatter(column: MoneyColumn): CellValueFormatter<string> {
-    return getProps(column).formatForDisplay;
+  getDisplayFormatter(column: MoneyColumn) {
+    return (v) => getProps(column).formatForDisplay(String(v));
   },
 };
 
