@@ -24,7 +24,7 @@
           <Icon {...icon} size="min(1em, 0.75em + 0.25rem)" />
         {/each}
       {/if}
-    </span>&nbsp;<span class="name" style="white-space: normal">
+    </span>&nbsp;<span class="name">
       {#if name}
         {name}
       {:else}
