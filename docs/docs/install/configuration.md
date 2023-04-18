@@ -20,6 +20,11 @@ to set these environment variables.
 | MODE                   | ***Internal*** The mode under which the Frontend files will be served. The values can be either be `DEVELOPMENT` or `PRODUCTION`. Running under `DEVELOPMENT` mode will run a Svelte server and enable hot reloading of the files, while running under `PRODUCTION` mode will serve the static assets from the `/static/` url                                                                                                                                                                                                                       | `PRODUCTION`                 |
 
 
+### Database Configuration
+| Name          | Description                               | Defaults |
+|---------------|-------------------------------------------|----------|
+| POSTGRES_PORT | The port the postgres database listens on | `5432`   |
+
 ### Caddy Reverse Proxy Configuration
 | Name        | Description                                                                                                                                                                                                                                                                                                                                                             | Defaults |
 |-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
