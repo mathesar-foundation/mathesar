@@ -6,6 +6,7 @@
 
   export let columns: Column[];
   export let onSelect: (column: Column) => void;
+  export let disabled = false;
 
   function getIcon(column: Column) {
     const icon = getColumnIconProps(column);
@@ -13,7 +14,7 @@
   }
 </script>
 
-<DropdownMenu label="Append Column" icon={iconAddNew}>
+<DropdownMenu label="Append Column" icon={iconAddNew} {disabled}>
   {#each columns as column (column.id)}
     <ButtonMenuItem
       label={column.name}

@@ -3,6 +3,7 @@ import { derived, writable, type Readable, type Writable } from 'svelte/store';
 import { getErrors, type Filled, type ValidationFn } from './validators';
 
 export const comboErrorsKey = Symbol('comboErrors');
+export const disabledKey = Symbol('disabled');
 
 export interface BaseField<T> extends Writable<T> {
   initialValue: T;
@@ -22,6 +23,18 @@ export interface BaseField<T> extends Writable<T> {
    * want to allow the form to write to it.
    */
   [comboErrorsKey]: Writable<string[]>;
+  /**
+   * This property allows the form to set the disabled state of the field (so
+   * that fields can be disabled while submitting).
+   *
+   * It's a Symbol because we don't want to allow public access to it, but we do
+   * want to allow the form to write to it.
+   */
+  [disabledKey]: Writable<boolean>;
+  /**
+   * True when the form is submitting.
+   */
+  disabled: Readable<boolean>;
   /**
    * Only includes the client-side errors generated from combo validators.
    */
@@ -88,6 +101,7 @@ export function field<T>(props: FieldProps<T>): FieldStore<T> {
     return getErrors({ ...props, value: v });
   });
   const writableComboErrors = writable<string[]>([]);
+  const disabled = writable(false);
   const comboErrors = derived(writableComboErrors, (e) => e);
   const errorStores = [fieldErrors, comboErrors, serverErrors];
   const errors = derived(errorStores, (a) => a.flat());
@@ -119,6 +133,8 @@ export function field<T>(props: FieldProps<T>): FieldStore<T> {
     hasChanges,
     fieldErrors,
     [comboErrorsKey]: writableComboErrors,
+    [disabledKey]: disabled,
+    disabled: disabled as Readable<boolean>,
     comboErrors,
     serverErrors,
     errors,
