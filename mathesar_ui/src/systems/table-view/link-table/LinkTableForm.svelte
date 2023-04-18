@@ -11,9 +11,9 @@
     Field,
     makeForm,
     requiredField,
+    FieldLayout,
+    FormSubmit,
   } from '@mathesar/components/form';
-  import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
-  import FormSubmitWithCatch from '@mathesar/components/form/FormSubmitWithCatch.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import OutcomeBox from '@mathesar/components/message-boxes/OutcomeBox.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
@@ -298,8 +298,9 @@
 </div>
 
 <div use:portalToWindowFooter>
-  <FormSubmitWithCatch
+  <FormSubmit
     {form}
+    catchErrors
     {canProceed}
     onCancel={close}
     proceedButton={{ label: 'Create Link', icon: iconTableLink }}

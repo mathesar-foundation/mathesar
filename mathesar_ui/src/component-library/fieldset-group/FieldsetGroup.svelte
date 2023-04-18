@@ -10,7 +10,7 @@
   export let options: Option[] = [];
   export let label: string | undefined = undefined;
   export let ariaLabel: string | undefined = undefined;
-
+  export let disabled = false;
   export let labelKey = 'label';
   export let getLabel: LabelGetter<Option> = (o: Option) =>
     defaultGetLabel(o, labelKey);
@@ -38,7 +38,7 @@
           <svelte:fragment slot="label">
             <StringOrComponent arg={getLabel(option)} />
           </svelte:fragment>
-          <slot {option} disabled={getDisabled(option)} />
+          <slot {option} disabled={getDisabled(option) || disabled} />
         </LabeledInput>
       </li>
     {/each}
