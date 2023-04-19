@@ -71,10 +71,10 @@ Services needed for Mathesar
       ```
     - Start the database server
           ```
-          docker compose -f docker-compose.yml -f docker-compose.common.yml up db
+          docker compose -f docker-compose.yml up db
           ```
 
-3. Start the Mathesar web service
+3. Start the Mathesar web server
     - Open the `.env` file in your favourite text editor.
     - Add the Mathesar server configuration environment variables to the `.env` file. Refer to the [Backend Documentation](../configuration.md#backend-configuration) for information on the environment variables.
     - If you created a database server from the previous step. Your `.env` file should look something like this
@@ -91,7 +91,7 @@ Services needed for Mathesar
       ```
     - Start the mathesar web server
           ```
-          docker compose -f docker-compose.yml -f docker-compose.common.yml up mathesar_service
+          docker compose -f docker-compose.yml up mathesar_service
           ```
 4. Start the Caddy reverse proxy
     - Open the `.env` file in your favourite text editor.
@@ -150,7 +150,7 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 
 ## Upgrade
 
-Manually upgrade Mathesar to the newest version:
+Manually upgrade Mathesar to the newest version using watch tower:
 
 === "Linux"
     ```
@@ -160,6 +160,18 @@ Manually upgrade Mathesar to the newest version:
 === "MacOS"
     ```
     docker exec mathesar-watchtower-1 /watchtower --run-once
+    ```
+
+Manually upgrade Mathesar to the newest version without using watch tower:
+
+=== "Linux"
+    ```
+    sudo docker docker-compose.yml up --force-recreate --build mathesar_service
+    ```
+
+=== "MacOS"
+    ```
+    sudo docker docker-compose.yml up --force-recreate --build mathesar_service
     ```
 
 
