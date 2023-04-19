@@ -1,3 +1,13 @@
+<!--
+  @component
+
+  TODO:
+  - Refactor to use form validation system.
+  - Make `baseColumn` and `targetColumn` use `ProcessedColumn` instead of
+    `Column`. Then refactor `SelectColumn.svelte` (which is only used here) into
+    `SelectProcessedColumn.svelte`. This way it can use the correct icon for the
+    column, taking into account links.
+-->
 <script lang="ts">
   import {
     CancelOrProceedButtonPair,

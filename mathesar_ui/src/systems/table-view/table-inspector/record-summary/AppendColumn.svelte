@@ -1,14 +1,32 @@
 <script lang="ts">
   import { ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import { iconAddNew } from '@mathesar/icons';
-  import { getColumnIconProps } from '@mathesar/utils/columnUtils';
+  import { iconAddNew, iconConstraint, iconTableLink } from '@mathesar/icons';
+  import {
+    getColumnIconProps,
+    getColumnConstraintTypeByColumnId,
+  } from '@mathesar/utils/columnUtils';
+
+  const tabularData = getTabularDataStoreFromContext();
+  $: ({ processedColumns } = $tabularData);
 
   export let columns: Column[];
   export let onSelect: (column: Column) => void;
   export let disabled = false;
 
   function getIcon(column: Column) {
+    const constraintsType = getColumnConstraintTypeByColumnId(
+      column.id,
+      $processedColumns,
+    );
+    if (constraintsType?.includes('primary')) {
+      return iconConstraint;
+    }
+    if (constraintsType?.includes('foreignkey')) {
+      return iconTableLink;
+    }
+
     const icon = getColumnIconProps(column);
     return Array.isArray(icon) ? icon[0] : icon;
   }
