@@ -1,12 +1,3 @@
-<!--
-  @component
-
-  TODO:
-  - Make `baseColumn` and `targetColumn` use `ProcessedColumn` instead of
-    `Column`. Then refactor `SelectColumn.svelte` (which is only used here) into
-    `SelectProcessedColumn.svelte`. This way it can use the correct icon for the
-    column, taking into account links.
--->
 <script lang="ts">
   import {
     ensureReadable,
@@ -14,7 +5,6 @@
     Spinner,
   } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Column } from '@mathesar/api/types/tables/columns';
   import {
     FormSubmit,
     makeForm,
@@ -24,12 +14,14 @@
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
-  import SelectColumn from '@mathesar/components/SelectColumn.svelte';
+  import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
-    ColumnsDataStore,
     getTabularDataStoreFromContext,
+    TableStructure,
+    type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import { importVerifiedTables } from '@mathesar/stores/tables';
   import { getAvailableName } from '@mathesar/utils/db';
@@ -48,10 +40,10 @@
 
   function getSuggestedName(
     _tableName: string,
-    _column: Column | undefined,
+    _column: ProcessedColumn | undefined,
     reservedNames: Set<string>,
   ): string {
-    const desiredName = `FK_${_tableName}_${_column?.name ?? ''}`;
+    const desiredName = `FK_${_tableName}_${_column?.column.name ?? ''}`;
     return getAvailableName(desiredName, reservedNames);
   }
 
@@ -60,9 +52,9 @@
     $constraintsDataStore.constraints.map((c) => c.name),
   );
 
-  $: baseColumn = requiredField<Column | undefined>(undefined);
+  $: baseColumn = requiredField<ProcessedColumn | undefined>(undefined);
   $: targetTable = requiredField<TableEntry | undefined>(undefined);
-  $: targetColumn = requiredField<Column | undefined>(undefined);
+  $: targetColumn = requiredField<ProcessedColumn | undefined>(undefined);
   $: namingStrategy = requiredField<NamingStrategy>('auto');
   $: constraintName = requiredField<string | undefined>(undefined, [
     uniqueWith(existingConstraintNames),
@@ -77,19 +69,24 @@
 
   $: tables = [...$importVerifiedTables.values()];
   $: baseTableName = $importVerifiedTables.get($tabularData.id)?.name ?? '';
-  $: columnsDataStore = $tabularData.columnsDataStore;
-  $: baseTableColumns = columnsDataStore.columns;
-  $: targetTableColumnsStore = $targetTable
-    ? new ColumnsDataStore({ parentId: $targetTable.id })
+  $: ({ processedColumns } = $tabularData);
+  $: baseTableColumns = [...$processedColumns.values()];
+
+  $: targetTableStructure = $targetTable
+    ? new TableStructure({
+        id: $targetTable.id,
+        abstractTypesMap: $currentDbAbstractTypes.data,
+      })
     : undefined;
-  $: targetTableColumnsStatus = ensureReadable(
-    targetTableColumnsStore?.fetchStatus,
+  $: targetTableStructureIsLoading = ensureReadable(
+    targetTableStructure?.isLoading,
   );
-  $: targetTableColumnsAreLoading =
-    $targetTableColumnsStatus?.state === 'processing';
-  $: targetTableColumns = ensureReadable(
-    targetTableColumnsStore?.columns ?? [],
+  $: targetTableColumnsStore = ensureReadable(
+    targetTableStructure?.processedColumns,
   );
+  $: targetTableColumnsMap =
+    $targetTableColumnsStore ?? new Map<number, ProcessedColumn>();
+  $: targetTableColumns = [...targetTableColumnsMap.values()];
 
   function handleNamingStrategyChange() {
     // Begin with a suggested name as the starting value, but only do it when
@@ -122,7 +119,10 @@
 
   <Field
     field={baseColumn}
-    input={{ component: SelectColumn, props: { columns: $baseTableColumns } }}
+    input={{
+      component: SelectProcessedColumn,
+      props: { columns: baseTableColumns },
+    }}
     layout="stacked"
     label="Column in this table which references the target table"
   />
@@ -135,14 +135,14 @@
   />
 
   {#if $targetTable}
-    {#if targetTableColumnsAreLoading}
+    {#if $targetTableStructureIsLoading}
       <FieldLayout><Spinner /></FieldLayout>
     {:else}
       <Field
         field={targetColumn}
         input={{
-          component: SelectColumn,
-          props: { columns: $targetTableColumns },
+          component: SelectProcessedColumn,
+          props: { columns: targetTableColumns },
         }}
         layout="stacked"
       >
