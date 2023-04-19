@@ -9,9 +9,10 @@ import {
   comboErrorsKey,
   disabledKey,
   type FieldStore,
+  type RequiredField,
   type ValuedField,
 } from './field';
-import { isValid as outcomeIsValid, type ComboValidator } from './validators';
+import { isValid as outcomeIsValid, type ComboValidator, type Filled } from './validators';
 
 type GenericFieldsObj = Record<string, FieldStore>;
 type Values<FieldsObj extends GenericFieldsObj> = {
@@ -139,3 +140,16 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
 
 export type Form<FieldsObj extends GenericFieldsObj = GenericFieldsObj> =
   ReturnType<typeof makeForm<FieldsObj>>;
+
+type GetFieldsObj<F> = F extends Form<infer FieldsObj> ? FieldsObj : never;
+
+type FilledFieldValue<F> = F extends RequiredField<infer T>
+  ? Filled<T>
+  : F extends FieldStore<infer T>
+    ? T : never;
+
+type FilledFieldValues<FieldsObj extends GenericFieldsObj> = {
+  [K in keyof FieldsObj]: FilledFieldValue<FieldsObj[K]>;
+};
+
+export type FilledFormValues<F> = FilledFieldValues<GetFieldsObj<F>>;
