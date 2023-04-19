@@ -428,7 +428,9 @@ installation.
 "
 printf "Downloading docker-compose.yml...
 "
+sudo curl -sfL -o docker-compose.common.yml https://raw.githubusercontent.com/centerofci/mathesar/"${github_tag}"/docker-compose.common.yml || installation_fail early
 sudo curl -sfL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"${github_tag}"/docker-compose.yml || installation_fail early
+
 read -r -p "Success!
 
 Next, we'll download files and start the server, This may take a few minutes.
