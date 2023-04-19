@@ -4,7 +4,7 @@ from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import DropConstraint
 
 from db.records.operations.select import get_records
-from db.records.operations.sort import BadSortFormat, SortFieldNotFound
+from db.records.operations.sort import BadSortFormat, SortFieldNotFound, TypeNotOrderable
 
 
 def test_get_records_gets_ordered_records_str_col_name(roster_table_obj):
@@ -254,3 +254,16 @@ def test_get_records_orders_exceptions(filter_sort_table_obj, order_list, except
     filter_sort, engine = filter_sort_table_obj
     with pytest.raises(exception):
         get_records(filter_sort, engine, order_by=order_list)
+
+
+## TODO
+def sort_unorderable_colums(json_table_obj):
+    table, engine = json_table_obj
+    order_list = [{"field": "json_object", "direction": "asc"}]
+    records = get_records(table, engine, fallback_to_default_ordering=True)
+
+def test_sort_unorderable_colums(json_table_obj):
+        with pytest.raises(TypeNotOrderable):
+            sort_unorderable_colums(json_table_obj)
+
+

@@ -32,3 +32,7 @@ class BadSortFormat(Exception):
 
 class SortFieldNotFound(Exception):
     pass
+
+
+class TypeNotOrderable(Exception):
+    pass
