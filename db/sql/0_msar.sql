@@ -376,3 +376,42 @@ BEGIN
   RETURN __msar.drop_table(qualified_name, cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION __msar.get_schema_name(schema_id oid) RETURNS TEXT AS $$
+BEGIN
+	RETURN schema_id::regclass::text;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+__msar.drop_schema(schema_name text, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$
+DECLARE
+  cmd_template TEXT;
+BEGIN
+  IF if_exists
+  THEN
+    cmd_template := 'DROP SCHEMA IF EXISTS %s';
+  ELSE
+    cmd_template := 'DROP SCHEMA %s';
+  END IF;
+  IF cascade_
+  THEN
+    cmd_template = cmd_template || ' CASCADE';
+  END IF;
+  RETURN __msar.exec_ddl(cmd_template, schema_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+msar.drop_schema(schema_id oid, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$
+BEGIN
+	RETURN __msar.drop_schema(__msar.get_schema_name(schema_id), cascade_, if_exists);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+msar.drop_schema(schema_name text, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$
+BEGIN
+	RETURN __msar.drop_schema(schema_name, cascade_, if_exists);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
