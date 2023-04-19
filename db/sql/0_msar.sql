@@ -412,7 +412,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.drop_schema(schema_name text, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$
 BEGIN
-	RETURN __msar.drop_schema(schema_name, cascade_, if_exists);
+	RETURN __msar.drop_schema(quote_ident(schema_name), cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -434,6 +434,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.create_schema(schema_name text, if_not_exists boolean) RETURNS TEXT AS $$
 BEGIN
-	RETURN __msar.create_schema(schema_name, if_not_exists);
+	RETURN __msar.create_schema(quote_ident(schema_name), if_not_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
