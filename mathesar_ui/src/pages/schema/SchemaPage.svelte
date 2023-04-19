@@ -59,7 +59,9 @@
   $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
   $: explorationsMap = $queries.data;
   $: isTablesLoading = $tablesStore.state === States.Loading;
+  $: isTablesUnfetchable = $tablesStore.state === States.Error;
   $: isExplorationsLoading = $queries.requestStatus.state === 'processing';
+  $: isExplorationsUnfetchable = $queries.requestStatus.state === 'failure';
 
   $: tabs = [
     {
@@ -152,7 +154,9 @@
           {canExecuteDDL}
           {canEditMetadata}
           {isTablesLoading}
+          {isTablesUnfetchable}
           {isExplorationsLoading}
+          {isExplorationsUnfetchable}
           {tablesMap}
           {explorationsMap}
           {database}
