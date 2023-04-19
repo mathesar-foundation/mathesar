@@ -415,3 +415,25 @@ BEGIN
 	RETURN __msar.drop_schema(schema_name, cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+__msar.create_schema(schema_name text, if_not_exists boolean) RETURNS TEXT AS $$
+DECLARE
+  cmd_template TEXT;
+BEGIN
+  IF if_not_exists
+  THEN
+    cmd_template := 'CREATE SCHEMA IF NOT EXISTS %s';
+  ELSE
+    cmd_template := 'CREATE SCHEMA %s';
+  END IF;
+	RETURN __msar.exec_ddl(cmd_template, schema_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+msar.create_schema(schema_name text, if_not_exists boolean) RETURNS TEXT AS $$
+BEGIN
+	RETURN __msar.create_schema(schema_name, if_not_exists);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
