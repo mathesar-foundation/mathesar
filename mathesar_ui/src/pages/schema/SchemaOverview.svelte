@@ -4,6 +4,9 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { AnchorButton } from '@mathesar-component-library';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import { refetchQueriesForSchema } from '@mathesar/stores/queries';
+  import { refetchTablesForSchema } from '@mathesar/stores/tables';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
   import OverviewHeader from './OverviewHeader.svelte';
   import TablesList from './TablesList.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
@@ -16,7 +19,9 @@
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
   export let isTablesLoading = false;
+  export let isTablesUnfetchable = false;
   export let isExplorationsLoading = false;
+  export let isExplorationsUnfetchable = false;
 
   export let canExecuteDDL: boolean;
   export let canEditMetadata: boolean;
@@ -44,6 +49,16 @@
     </OverviewHeader>
     {#if isTablesLoading}
       <TableSkeleton numTables={schema.num_tables} />
+    {:else if isTablesUnfetchable}
+      <span> There was an error while fetching the tables. </span>
+      <button
+        on:click={() => {
+          if ($currentSchemaId) {
+            refetchTablesForSchema($currentSchemaId);
+          }
+        }}>Retry</button
+      >
+      <a class="btn" href="/">Go to database</a>
     {:else if showTableCreationTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
@@ -60,6 +75,16 @@
       <OverviewHeader title="Saved Explorations" />
       {#if isExplorationsLoading}
         <ExplorationSkeleton />
+      {:else if isExplorationsUnfetchable}
+        <span> There was an error while fetching the explorations. </span>
+        <button
+          on:click={() => {
+            if ($currentSchemaId) {
+              refetchQueriesForSchema($currentSchemaId);
+            }
+          }}>Retry</button
+        >
+        <a class="btn" href="/">Go to database</a>
       {:else if showExplorationTutorial}
         <CreateNewExplorationTutorial {database} {schema} />
       {:else}
