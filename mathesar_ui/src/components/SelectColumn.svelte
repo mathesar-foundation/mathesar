@@ -8,7 +8,7 @@
   export { classes as class };
 
   export let columns: Column[];
-  export let column: Column | undefined;
+  export let value: Column | undefined = undefined;
   export let disabled = false;
 </script>
 
@@ -16,7 +16,7 @@
   options={columns}
   labelKey="name"
   valuesAreEqual={(a, b) => a?.id === b?.id}
-  bind:value={column}
+  bind:value
   {disabled}
   class={classes}
   on:change
