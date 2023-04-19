@@ -54,7 +54,7 @@
       <button
         on:click={() => {
           if ($currentSchemaId) {
-            refetchTablesForSchema($currentSchemaId);
+            void refetchTablesForSchema($currentSchemaId);
           }
         }}>Retry</button
       >
@@ -80,7 +80,7 @@
         <button
           on:click={() => {
             if ($currentSchemaId) {
-              refetchQueriesForSchema($currentSchemaId);
+              void refetchQueriesForSchema($currentSchemaId);
             }
           }}>Retry</button
         >
