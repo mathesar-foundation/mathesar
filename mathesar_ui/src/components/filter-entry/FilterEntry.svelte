@@ -93,7 +93,9 @@
     return '';
   }
 
-  function getColumnConstraintTypeByColumnId(_columnId?: ColumnLikeType['id']) {
+  function getColumnConstraintTypeFromColumnId(
+    _columnId?: ColumnLikeType['id'],
+  ) {
     if (_columnId) {
       const column = columns.get(_columnId);
       if (column) {
@@ -217,7 +219,7 @@
           type: columnInfo?.column.type ?? 'unknown',
           type_options: columnInfo?.column.type_options ?? null,
           display_options: columnInfo?.column.display_options ?? null,
-          constraintsType: getColumnConstraintTypeByColumnId(option),
+          constraintsType: getColumnConstraintTypeFromColumnId(option),
         }}
       />
     </Select>
