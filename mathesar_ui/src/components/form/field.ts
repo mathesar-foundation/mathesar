@@ -83,7 +83,7 @@ export interface RequiredFieldProps<T> extends BaseFieldProps<T> {
 }
 export interface OptionalFieldProps<T> extends BaseFieldProps<T> {
   isRequired: false;
-  validators?: ValidationFn<T>[];
+  validators?: ValidationFn<Filled<T>>[];
 }
 export type FieldProps<T> = RequiredFieldProps<T> | OptionalFieldProps<T>;
 
