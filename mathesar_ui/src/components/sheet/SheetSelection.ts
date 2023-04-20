@@ -132,8 +132,8 @@ export function scrollBasedOnSelection(): void {
 type SelectionBounds = {
   startRowIndex: number;
   endRowIndex: number;
-  startColumnId: string;
-  endColumnId: string;
+  startColumnId: number | string;
+  endColumnId: number | string;
 };
 
 type Cell<Row extends SelectionRow, Column extends SelectionColumn> = [
@@ -181,7 +181,7 @@ function getSelectedColumnId(selectedCell: string): SelectionColumn['id'] {
   if (Number.isNaN(numericalColumnId)) {
     return columnId;
   }
-  return numericalColumnId.toString();
+  return numericalColumnId;
 }
 
 export function getSelectedRowIndex(selectedCell: string): number {
@@ -291,8 +291,8 @@ export default class SheetSelection<
     this.selectionInProgress.set(true);
     // Initialize the bounds of the selection
     this.selectionBounds = {
-      startColumnId: column.id.toString(),
-      endColumnId: column.id.toString(),
+      startColumnId: column.id,
+      endColumnId: column.id,
       startRowIndex: row.rowIndex,
       endRowIndex: row.rowIndex,
     };
@@ -315,7 +315,7 @@ export default class SheetSelection<
     }
 
     this.selectionBounds.endRowIndex = rowIndex;
-    this.selectionBounds.endColumnId = id.toString();
+    this.selectionBounds.endColumnId = id;
     const cells = this.getIncludedCells(this.selectionBounds);
     this.selectMultipleCells(cells);
   }
@@ -352,11 +352,10 @@ export default class SheetSelection<
     const minRowIndex = Math.min(startRowIndex, endRowIndex);
     const maxRowIndex = Math.max(startRowIndex, endRowIndex);
 
-    const columnOrder: string[] = [
-      ...this.getColumnOrder().map((c) => c.toString()),
-    ];
-    const startOrderIndex = columnOrder.indexOf(startColumnId);
-    const endOrderIndex = columnOrder.indexOf(endColumnId);
+    const columnOrder = this.getColumnOrder();
+
+    const startOrderIndex = columnOrder.findIndex((id) => id === startColumnId);
+    const endOrderIndex = columnOrder.findIndex((id) => id === endColumnId);
 
     const minColumnPosition = Math.min(startOrderIndex, endOrderIndex);
     const maxColumnPosition = Math.max(startOrderIndex, endOrderIndex);
@@ -577,9 +576,9 @@ export default class SheetSelection<
 
     const startColumnId = columnOrder[0];
     const endColumnId = columnOrder[columnOrder.length - 1];
-    const startColumn = columns.find((c) => c.id.toString() === startColumnId)
-    const endColumn = columns.find((c) => c.id.toString() === endColumnId)
-    
+    const startColumn = columns.find((c) => c.id.toString() === startColumnId);
+    const endColumn = columns.find((c) => c.id.toString() === endColumnId);
+
     if (startColumn && endColumn) {
       this.activateCell(row, startColumn);
       this.onStartSelection(row, startColumn);
@@ -624,9 +623,7 @@ export default class SheetSelection<
     activeCell: ActiveCell,
     direction: Direction,
   ): ActiveCell | undefined {
-    const columnOrder = this.getColumnOrder().map((column) =>
-      column.toString(),
-    );
+    const columnOrder = this.getColumnOrder();
 
     const rowIndex = (() => {
       const delta = getVerticalDelta(direction);
@@ -650,19 +647,13 @@ export default class SheetSelection<
       if (delta === 0) {
         return activeCell.columnId;
       }
-      const index = columnOrder.indexOf(activeCell.columnId.toString());
-      const targetId = parseInt(columnOrder[index + delta], 10);
-
-      if (Number.isNaN(targetId)) {
-        return undefined;
+      if (activeCell.columnId) {
+        const index = columnOrder.findIndex((id) => id === activeCell.columnId);
+        const targetId = columnOrder[index + delta];
+        return targetId;
       }
-
-      return targetId;
+      return '';
     })();
-    if (columnId === undefined) {
-      return undefined;
-    }
-
     return { rowIndex, columnId };
   }
 
