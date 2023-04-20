@@ -1,11 +1,11 @@
 import { ImmutableSet, WritableSet } from '@mathesar-component-library';
 import { get, writable, type Unsubscriber, type Writable } from 'svelte/store';
 
-interface SelectionColumn {
+export interface SelectionColumn {
   id: number | string;
 }
 
-interface SelectionRow {
+export interface SelectionRow {
   rowIndex: number;
 }
 

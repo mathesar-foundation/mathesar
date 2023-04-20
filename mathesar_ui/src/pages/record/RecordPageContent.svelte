@@ -4,7 +4,7 @@
   import { getDetailedRecordsErrors } from '@mathesar/api/utils/recordUtils';
   import { getAPI } from '@mathesar/api/utils/requestUtils';
   import {
-    FormSubmitWithCatch,
+    FormSubmit,
     makeForm,
     optionalField,
   } from '@mathesar/components/form';
@@ -63,8 +63,9 @@
       {/each}
     </div>
     <div class="submit">
-      <FormSubmitWithCatch
+      <FormSubmit
         {form}
+        catchErrors
         proceedButton={{ label: 'Save', icon: iconSave }}
         cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
         onProceed={() => record.patch($form.values)}

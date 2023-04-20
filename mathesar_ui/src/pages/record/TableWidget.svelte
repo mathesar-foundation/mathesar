@@ -38,7 +38,7 @@
 
 <div class="table-widget">
   <div class="top">
-    <h3><TableName {table} /></h3>
+    <h3 class="bold-header"><TableName {table} /></h3>
     <MiniActionsPane />
   </div>
 
@@ -56,9 +56,6 @@
     align-items: center;
 
     overflow: hidden;
-    > h3 {
-      font-weight: 500;
-    }
   }
   .top > :global(*) {
     overflow: hidden;

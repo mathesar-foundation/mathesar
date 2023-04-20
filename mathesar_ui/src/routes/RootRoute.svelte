@@ -37,7 +37,7 @@
     </Route>
   {/if}
 
-  <Route path="/:databaseName/*" let:meta firstmatch>
+  <Route path="/db/:databaseName/*" let:meta firstmatch>
     <DatabaseRoute databaseName={meta.params.databaseName} />
   </Route>
 

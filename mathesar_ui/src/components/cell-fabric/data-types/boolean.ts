@@ -9,7 +9,6 @@ import SingleSelectCell from './components/select/SingleSelectCell.svelte';
 import type {
   CheckBoxCellExternalProps,
   SingleSelectCellExternalProps,
-  CellValueFormatter,
 } from './components/typeDefinitions';
 import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
 
@@ -66,10 +65,14 @@ const booleanType: CellComponentFactory = {
     component: Select,
     props: getProps(column),
   }),
-  getDisplayFormatter(column: BooleanLikeColumn): CellValueFormatter<boolean> {
+  getDisplayFormatter(column: BooleanLikeColumn) {
     const labels = getLabels(column.display_options);
-    return (value: boolean | null | undefined) =>
-      getFormattedValue(labels, value);
+    return (value: unknown) => {
+      if (value === null || value === undefined || typeof value === 'boolean') {
+        return getFormattedValue(labels, value);
+      }
+      return '';
+    };
   },
 };
 

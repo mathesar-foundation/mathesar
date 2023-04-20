@@ -41,6 +41,7 @@
   $: initialCustomized = table.settings.preview_settings.customized ?? false;
   $: initialTemplate = table.settings.preview_settings.template ?? '';
   $: customized = requiredField(initialCustomized);
+  $: customizedDisabled = customized.disabled;
   $: template = optionalField(initialTemplate, [hasColumnReferences($columns)]);
   $: form = makeForm({ customized, template });
   $: columnsInTemplate = getColumnsInTemplate($columns, $template);
@@ -101,6 +102,7 @@
           ariaLabel="Template type"
           isInline
           bind:value={$customized}
+          disabled={$customizedDisabled}
         />
 
         {#if $customized}

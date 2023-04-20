@@ -1,16 +1,20 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
+
   import { ImmutableMap } from '@mathesar-component-library';
   import { Sheet } from '@mathesar/components/sheet';
+  import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
+  import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import {
     getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
-  import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { orderProcessedColumns } from '@mathesar/utils/tables';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import Body from './Body.svelte';
@@ -36,7 +40,18 @@
   $: usesVirtualList = context === 'page';
   $: allowsDdlOperations = context === 'page' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
-  $: ({ processedColumns, display, isLoading, selection } = $tabularData);
+  $: ({ processedColumns, display, isLoading, selection, recordsData } =
+    $tabularData);
+  $: clipboardHandler = new SheetClipboardHandler({
+    selection,
+    toast,
+    getRows: () => [
+      ...get(recordsData.savedRecords),
+      ...get(recordsData.newRecords),
+    ],
+    getColumnsMap: () => get(processedColumns),
+    getRecordSummaries: () => get(recordsData.recordSummaries),
+  });
   $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
@@ -107,6 +122,7 @@
           getColumnIdentifier={(entry) => entry.column.id}
           {usesVirtualList}
           {columnWidths}
+          {clipboardHandler}
           hasBorder={sheetHasBorder}
           restrictWidthToRowWidth={!usesVirtualList}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
