@@ -33,8 +33,8 @@ def execute_msar_func_with_psycopg2_conn(conn, func_name, *args):
         func_name: The unqualified msar function name (danger; not sanitized)
         *args: The list of parameters to pass
     """
-    args_str = "', '".join(args)
-    args_str = f"'{args_str}'"
+    args_str = ", ".join([str(arg) for arg in args])
+    args_str = f"{args_str}"
     stmt = text(f"SELECT msar.{func_name}({args_str})")
     # Returns a cursor
     return conn.execute(stmt)
