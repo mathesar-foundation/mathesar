@@ -9,6 +9,10 @@ from db.tables.operations.create import DuplicateTable
 from db.columns.exceptions import InvalidTypeError
 from mathesar.api.db.permissions.schema import SchemaAccessPolicy
 from mathesar.api.db.permissions.table import TableAccessPolicy
+from db.identifiers import is_identifier_too_long
+from mathesar.api.exceptions.database_exceptions import (
+    exceptions as database_api_exceptions
+)
 
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
@@ -175,6 +179,11 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
             except ValueError as e:
                 raise base_api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         return instance
+
+    def validate_name(self, name):
+        if is_identifier_too_long(name):
+            raise database_api_exceptions.IdentifierTooLong(field='name')
+        return name
 
     def validate(self, data):
         if self.partial:

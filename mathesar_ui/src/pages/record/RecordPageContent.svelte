@@ -4,7 +4,7 @@
   import { getDetailedRecordsErrors } from '@mathesar/api/utils/recordUtils';
   import { getAPI } from '@mathesar/api/utils/requestUtils';
   import {
-    FormSubmitWithCatch,
+    FormSubmit,
     makeForm,
     optionalField,
   } from '@mathesar/components/form';
@@ -26,7 +26,7 @@
 
   $: table = $currentTable as TableEntry;
   $: ({ processedColumns } = tableStructure);
-  $: ({ recordId, summary, fieldValues } = record);
+  $: ({ recordPk, summary, fieldValues } = record);
   $: fieldPropsObjects = [...$processedColumns.values()].map((c) => ({
     processedColumn: c,
     field: optionalField($fieldValues.get(c.id)),
@@ -63,8 +63,9 @@
       {/each}
     </div>
     <div class="submit">
-      <FormSubmitWithCatch
+      <FormSubmit
         {form}
+        catchErrors
         proceedButton={{ label: 'Save', icon: iconSave }}
         cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
         onProceed={() => record.patch($form.values)}
@@ -83,7 +84,7 @@
   {#await getJoinableTablesResult(table.id)}
     <RecordPageLoadingSpinner />
   {:then joinableTablesResult}
-    <Widgets {joinableTablesResult} {recordId} recordSummary={$summary} />
+    <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
   {/await}
 </div>
 

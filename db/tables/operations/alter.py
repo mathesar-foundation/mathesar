@@ -1,33 +1,44 @@
-from alembic.migration import MigrationContext
-from alembic.operations import Operations
-from sqlalchemy import func, select, text
-
+"""The functions in this module wrap SQL functions that use `ALTER TABLE`."""
 from db import constants
+from db import connection as db_conn
 from db.columns.operations.alter import batch_update_columns
-from db.tables.operations.select import reflect_table
-from db.metadata import get_empty_metadata
-from db.utils import execute_statement
 
 SUPPORTED_TABLE_ALTER_ARGS = {'name', 'columns', 'description'}
 
 
 def rename_table(name, schema, engine, rename_to):
-    # TODO reuse metadata
-    table = reflect_table(name, schema, engine, metadata=get_empty_metadata())
-    if rename_to == table.name:
-        return
-    with engine.begin() as conn:
-        ctx = MigrationContext.configure(conn)
-        op = Operations(ctx)
-        op.rename_table(table.name, rename_to, schema=table.schema)
+    """
+    Change a table's name, returning the command executed.
+
+    Args:
+        name:  original table name
+        schema: schema where the table lives
+        engine: SQLAlchemy engine object for connecting.
+        rename_to:  new table name
+    """
+    if name == rename_to:
+        result = None
+    else:
+        result = db_conn.execute_msar_func_with_engine(
+            engine, 'rename_table', schema, name, rename_to
+        ).fetchone()[0]
+    return result
 
 
 def comment_on_table(name, schema, engine, comment):
-    # Not using the DDLElement since the examples from the docs are
-    # vulnerable to SQL injection attacks.
-    comment_command = text(f'COMMENT ON TABLE "{schema}"."{name}" IS :c')
-    with engine.begin() as conn:
-        conn.execute(comment_command, {'c': comment})
+    """
+    Change the description of a table, returning command executed.
+
+    Args:
+        name: The name of the table whose comment we will change.
+        schema: The schema of the table whose comment we will change.
+        engine: SQLAlchemy engine object for connecting.
+        comment: The new comment. Any quotes or special characters must
+                 be escaped.
+    """
+    return db_conn.execute_msar_func_with_engine(
+        engine, 'comment_on_table', schema, name, comment
+    ).fetchone()[0]
 
 
 def alter_table(table_name, table_oid, schema, engine, update_data):
@@ -40,23 +51,31 @@ def alter_table(table_name, table_oid, schema, engine, update_data):
 
 
 def update_pk_sequence_to_latest(engine, table, connection=None):
-    _preparer = engine.dialect.identifier_preparer
-    quoted_table_name = _preparer.quote(table.schema) + "." + _preparer.quote(table.name)
-    update_pk_sequence_stmt = func.setval(
-        # `pg_get_serial_sequence needs a string of the Table name
-        func.pg_get_serial_sequence(
-            quoted_table_name,
-            table.c[constants.ID].name
-        ),
-        # If the table can be empty, start from 1 instead of using Null
-        func.coalesce(
-            func.max(table.c[constants.ID]) + 1,
-            1
-        ),
-        # Set the sequence to use the last value of the sequence
-        # Setting is_called field to false, meaning that the next nextval will not advance the sequence before returning a value.
-        # We need to do it as our default coalesce value is 1 instead of 0
-        # Refer the postgres docs https://www.postgresql.org/docs/current/functions-sequence.html
-        False
-    )
-    execute_statement(engine, select(update_pk_sequence_stmt), connection_to_use=connection)
+    """
+    Update the primary key sequence to the current maximum.
+
+    This way, the next value inserted will use the next value in the
+    sequence, avoiding collisions.
+
+    Args:
+        table_id: The OID of the table whose primary key sequence we'll
+                  update.
+        col_attnum: The attnum of the primary key column.
+    """
+    schema = table.schema or 'public'
+    name = table.name
+    column = table.c[constants.ID].name
+    if connection is not None:
+        # The quote wrangling here is temporary; due to SQLAlchemy's query
+        # builder.
+        db_conn.execute_msar_func_with_psycopg2_conn(
+            connection,
+            'update_pk_sequence_to_latest',
+            f"'{schema}'",
+            f"'{name}'",
+            f"'{column}'",
+        ).fetchone()[0]
+    else:
+        db_conn.execute_msar_func_with_engine(
+            engine, 'update_pk_sequence_to_latest', schema, name, column
+        ).fetchone()[0]

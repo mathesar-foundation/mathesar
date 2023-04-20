@@ -41,6 +41,13 @@ export function roleAllowsOperation(
   }
 }
 
+export function rolesAllowOperation(
+  accessOperation: AccessOperation,
+  roles: UserRole[],
+): boolean {
+  return roles.some((role) => roleAllowsOperation(role, accessOperation));
+}
+
 export function getDisplayNameForRole(userRole: UserRole): string {
   switch (userRole) {
     case 'manager':
@@ -54,4 +61,53 @@ export function getDisplayNameForRole(userRole: UserRole): string {
   }
 }
 
-export type ObjectRoleMap = Map<'database' | 'schema', UserRole>;
+export function getDescriptionForRole(userRole: UserRole): string {
+  switch (userRole) {
+    case 'manager':
+      return 'Manager Access';
+    case 'editor':
+      return 'Editor Access';
+    case 'viewer':
+      return 'Read-Only Access';
+    default:
+      throw new MissingExhaustiveConditionError(userRole);
+  }
+}
+
+export type AccessControlObject = 'database' | 'schema';
+
+export type ObjectRoleMap = Map<AccessControlObject, UserRole>;
+
+/**
+ * Orders roles for numerical comparison. Highest number means higher
+ * access levels.
+ */
+const userRoleToLevelInInteger = {
+  viewer: 1,
+  editor: 2,
+  manager: 3,
+};
+
+export function getObjectWithHighestPrecedenceByRoles(
+  objectRoleMap: ObjectRoleMap,
+): AccessControlObject {
+  const schemaRole = objectRoleMap.get('schema');
+  const databaseRole = objectRoleMap.get('database');
+  if (schemaRole && databaseRole) {
+    if (
+      userRoleToLevelInInteger[schemaRole] >
+      userRoleToLevelInInteger[databaseRole]
+    ) {
+      return 'schema';
+    }
+    return 'database';
+  }
+  if (schemaRole) {
+    return 'schema';
+  }
+  if (databaseRole) {
+    return 'database';
+  }
+  // Defaults to database when both roles are undefined
+  return 'database';
+}

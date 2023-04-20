@@ -57,7 +57,6 @@
 <div
   class="column-resizer"
   class:is-resizing={isResizing}
-  on:dragstart
   on:mousedown={startColumnResize}
   on:touchstart|nonpassive={startColumnResize}
   on:dblclick={() => api.resetColumnWidth(columnIdentifierKey)}

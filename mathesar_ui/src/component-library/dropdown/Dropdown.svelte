@@ -17,9 +17,10 @@
   export let closeOnInnerClick = false;
   export let ariaLabel: string | undefined = undefined;
   export let ariaControls: string | undefined = undefined;
-  export let placement: Placement = 'bottom-start';
+  export let placements: Placement[] | undefined = undefined;
   export let showArrow = true;
   export let size: Size = 'medium';
+  export let disabled = false;
 
   let triggerElement: HTMLElement | undefined;
 
@@ -41,12 +42,10 @@
 
   function toggle(e: Event) {
     /**
-     * If this Dropdown is used in a form we should
-     * prevent the default behaviour of submitting
-     * the form.
+     * If this Dropdown is used in a form we should prevent the default
+     * behavior of submitting the form.
      */
     e.preventDefault();
-
     isOpen = !isOpen;
   }
 
@@ -65,6 +64,7 @@
   aria-label={ariaLabel}
   title={ariaLabel}
   {size}
+  {disabled}
   on:keydown
   on:focus
   on:blur
@@ -83,7 +83,7 @@
 <AttachableDropdown
   trigger={triggerElement}
   {isOpen}
-  {placement}
+  {placements}
   class={contentClass}
   {closeOnInnerClick}
   on:close={close}

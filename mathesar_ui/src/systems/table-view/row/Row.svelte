@@ -54,6 +54,7 @@
   function checkAndCreateEmptyRow() {
     if (isPlaceholderRow(row)) {
       void recordsData.addEmptyRecord();
+      selection.selectAndActivateFirstDataEntryCellInLastRow();
     }
   }
 
@@ -107,7 +108,7 @@
             hasErrors={hasAnyErrors}
           />
           <ContextMenu>
-            <RowContextOptions recordId={Number(rowKey)} {recordsData} {row} />
+            <RowContextOptions recordPk={rowKey} {recordsData} {row} />
           </ContextMenu>
         {/if}
       </div>
@@ -135,6 +136,7 @@
           bind:value={row.record[columnId]}
           {processedColumn}
           {recordsData}
+          {rowKey}
         />
       {/each}
     {/if}

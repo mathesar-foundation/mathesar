@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 clear -x
-github_tag=${1-"0.1.0"}
+github_tag=${1-"0.1.1"}
 min_maj_docker_version=20
 min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
@@ -55,7 +55,11 @@ ${prompt}"
   done
   echo "${password}"
 }
-
+validate_password(){
+  if [ ${#1} -lt 8 ]; then
+    return 1
+  fi
+}
 create_password () {
   local password
   local password_check
@@ -65,11 +69,19 @@ Repeat the password: "
   local repeat_retry="
 Passwords do not match! Try again.
 "
-
+local validation_prompt="
+Password must be at least 8 characters long!
+"
   password=$(get_password "${prompt}")
-  read -rs -p "${repeat_prompt}" password_check
-  if [ "${password}" != "${password_check}" ]; then
-    password=$(create_password "${repeat_retry}")
+  #check if the password is at least 8 characters long
+
+  if  validate_password "${password}"; then
+    read -rs -p "${repeat_prompt}" password_check
+    if [ "${password}" != "${password_check}" ]; then
+      password=$(create_password "${repeat_retry}")
+    fi
+  else
+    password=$(create_password "${validation_prompt}")
   fi
   echo "${password}"
 }

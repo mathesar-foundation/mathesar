@@ -11,7 +11,10 @@
     optionalField,
     requiredField,
     makeForm,
-    FormSubmitWithCatch,
+    FormSubmit,
+    validateLength,
+    matchRegexAllowNullUndefined,
+    validateEmailAllowEmpty,
     type FieldStore,
   } from '@mathesar/components/form';
   import userApi, { type User } from '@mathesar/api/users';
@@ -30,8 +33,17 @@
   $: isUserUpdatingThemselves = userProfile && userProfile.id === user?.id;
   $: isNewUser = user === undefined;
   $: fullName = optionalField(user?.full_name ?? '');
-  $: username = requiredField(user?.username ?? '');
-  $: email = optionalField(user?.email ?? '');
+  $: username = requiredField(user?.username ?? '', [
+    validateLength(
+      150,
+      'Username should be lesser than or equal to 150 characters.',
+    ),
+    matchRegexAllowNullUndefined(
+      /^[A-Za-z0-9_@.+-]*$/,
+      'Username can only contain alphanumeric characters, _, @, +, ., and -.',
+    ),
+  ]);
+  $: email = optionalField(user?.email ?? '', [validateEmailAllowEmpty()]);
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );
@@ -142,8 +154,9 @@
 </div>
 
 <div class="submit-section">
-  <FormSubmitWithCatch
+  <FormSubmit
     {form}
+    catchErrors
     onProceed={saveUser}
     proceedButton={{ label: 'Save', icon: iconSave }}
     cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
