@@ -371,7 +371,7 @@ export default class SheetSelection<
       const { rowIndex } = row;
       if (rowIndex >= minRowIndex && rowIndex <= maxRowIndex) {
         columnOrderSelected.forEach((columnId) => {
-          const column = columns.find((c) => c.id.toString() === columnId);
+          const column = columns.find((c) => c.id === columnId);
           if (column) {
             cells.push([row, column]);
           }
@@ -567,17 +567,16 @@ export default class SheetSelection<
 
   onRowSelectionStart(row: Row): boolean {
     const columns = this.getColumns();
-    const columnOrder: string[] = [
-      ...this.getColumnOrder().map((c) => c.toString()),
-    ];
+    const columnOrder = this.getColumnOrder();
+
     if (!columns.length) {
       // Not possible to have tables without columns
     }
 
     const startColumnId = columnOrder[0];
     const endColumnId = columnOrder[columnOrder.length - 1];
-    const startColumn = columns.find((c) => c.id.toString() === startColumnId);
-    const endColumn = columns.find((c) => c.id.toString() === endColumnId);
+    const startColumn = columns.find((c) => c.id === startColumnId);
+    const endColumn = columns.find((c) => c.id === endColumnId);
 
     if (startColumn && endColumn) {
       this.activateCell(row, startColumn);
@@ -654,6 +653,9 @@ export default class SheetSelection<
       }
       return '';
     })();
+    if (!columnId) {
+      return undefined;
+    }
     return { rowIndex, columnId };
   }
 

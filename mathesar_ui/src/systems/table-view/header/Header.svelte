@@ -47,7 +47,7 @@
     // Keep only IDs for which the column exists
     for (const columnId of $processedColumns.keys()) {
       const columnIdString = columnId.toString();
-      columnOrderString = [...new Set(columnOrderString.map(String))];
+      columnOrderString = [...new Set(columnOrderString)];
       if (!columnOrderString.includes(columnIdString)) {
         columnOrderString = [...columnOrderString, columnIdString];
       }
