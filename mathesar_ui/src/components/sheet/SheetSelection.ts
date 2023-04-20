@@ -568,17 +568,24 @@ export default class SheetSelection<
 
   onRowSelectionStart(row: Row): boolean {
     const columns = this.getColumns();
-
+    const columnOrder: string[] = [
+      ...this.getColumnOrder().map((c) => c.toString()),
+    ];
     if (!columns.length) {
       // Not possible to have tables without columns
     }
 
-    const startColumn = columns[0];
-    const endColumn = columns[columns.length - 1];
-    this.activateCell(row, startColumn);
+    const startColumnId = columnOrder[0];
+    const endColumnId = columnOrder[columnOrder.length - 1];
+    const startColumn = columns.find((c) => c.id.toString() === startColumnId)
+    const endColumn = columns.find((c) => c.id.toString() === endColumnId)
+    
+    if (startColumn && endColumn) {
+      this.activateCell(row, startColumn);
+      this.onStartSelection(row, startColumn);
+      this.onMouseEnterCellWhileSelection(row, endColumn);
+    }
 
-    this.onStartSelection(row, startColumn);
-    this.onMouseEnterCellWhileSelection(row, endColumn);
     return true;
   }
 
