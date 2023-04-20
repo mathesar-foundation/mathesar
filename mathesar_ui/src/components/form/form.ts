@@ -12,7 +12,11 @@ import {
   type RequiredField,
   type ValuedField,
 } from './field';
-import { isValid as outcomeIsValid, type ComboValidator, type Filled } from './validators';
+import {
+  isValid as outcomeIsValid,
+  type ComboValidator,
+  type Filled,
+} from './validators';
 
 type GenericFieldsObj = Record<string, FieldStore>;
 type Values<FieldsObj extends GenericFieldsObj> = {
@@ -146,7 +150,8 @@ type GetFieldsObj<F> = F extends Form<infer FieldsObj> ? FieldsObj : never;
 type FilledFieldValue<F> = F extends RequiredField<infer T>
   ? Filled<T>
   : F extends FieldStore<infer T>
-    ? T : never;
+  ? T
+  : never;
 
 type FilledFieldValues<FieldsObj extends GenericFieldsObj> = {
   [K in keyof FieldsObj]: FilledFieldValue<FieldsObj[K]>;
