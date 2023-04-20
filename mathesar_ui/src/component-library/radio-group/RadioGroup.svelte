@@ -12,6 +12,7 @@
   export let ariaLabel: string | undefined = undefined;
   export let radioLabelKey: string | undefined = undefined;
   export let getRadioLabel: LabelGetter<Option> | undefined = undefined;
+  export let disabled = false;
 
   /**
    * By default, options will be compared by equality. If you're using objects as
@@ -34,6 +35,7 @@
   {options}
   {label}
   {ariaLabel}
+  {disabled}
   let:option
   let:disabled
   on:change
