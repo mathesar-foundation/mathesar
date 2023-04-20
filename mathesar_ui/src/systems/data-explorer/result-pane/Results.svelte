@@ -175,10 +175,9 @@
 
 <style lang="scss">
   [data-identifier='query-run-result'] {
+    height: 100%;
     position: relative;
-    flex-grow: 1;
     overflow: hidden;
-    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     --status-bar-height: 3rem;

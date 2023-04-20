@@ -39,12 +39,9 @@
 
 <style lang="scss">
   .exploration-inspector {
-    width: var(--exploration-inspector-width);
-    flex-basis: var(--exploration-inspector-width);
+    height: 100%;
     border-left: 1px solid var(--slate-300);
     background: var(--sand-100);
-    flex-shrink: 0;
-    flex-grow: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
