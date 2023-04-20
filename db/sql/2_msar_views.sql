@@ -17,44 +17,46 @@
 -- such a view.
 --
 -- This file creates a schema `msar_views` where internal mathesar views will be stored.
+--
+-- For naming conventions, see 0_msar.sql
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS msar_views;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_mathesar_view_name(table_id oid) RETURNS text AS $$/*
+msar.get_mathesar_view_name(tab_id oid) RETURNS text AS $$/*
 Given a table OID, return the name of the special Mathesar view tracking it.
 
 Args:
-  table_id: The OID of the table whose associated view we want to name.
+  tab_id: The OID of the table whose associated view we want to name.
 */
 BEGIN
-  RETURN msar.get_fq_table_name('msar_views', format('mv%s', table_id));
+  RETURN msar.get_fully_qualified_object_name('msar_views', format('mv%s', tab_id));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 
 CREATE OR REPLACE FUNCTION
-msar.create_mathesar_view(table_id oid) RETURNS text AS $$/*
-Create a view of named mv<table_id> tracking the table with OID <table_id>.
+msar.create_mathesar_view(tab_id oid) RETURNS text AS $$/*
+Create a view of named mv<tab_id> tracking the table with OID <tab_id>.
 
 Args:
-  table_id: This is the OID of the table we want to track.
+  tab_id: This is the OID of the table we want to track.
 
 */
-DECLARE viewname text;
-DECLARE viewcols text;
+DECLARE view_name text;
+DECLARE view_cols text;
 BEGIN
-  viewname := msar.get_mathesar_view_name(table_id);
+  view_name := msar.get_mathesar_view_name(tab_id);
   SELECT string_agg(format('%s AS c%s', quote_ident(attname), attnum), ', ')
     FROM pg_attribute
-    WHERE attrelid=table_id AND attnum>0 AND NOT attisdropped
-  INTO viewcols;
+    WHERE attrelid=tab_id AND attnum>0 AND NOT attisdropped
+  INTO view_cols;
   RETURN __msar.exec_ddl(
     'CREATE OR REPLACE VIEW %s AS SELECT %s FROM %s',
-    viewname, viewcols, __msar.get_table_name(table_id)
+    view_name, view_cols, __msar.get_relation_name(tab_id)
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -82,32 +84,32 @@ CREATE EVENT TRIGGER create_mathesar_view ON ddl_command_end
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_mathesar_view(table_id oid) RETURNS text AS $$/*
+msar.drop_mathesar_view(tab_id oid) RETURNS text AS $$/*
 Drop the Mathesar view tracking the given table.
 
 Args:
-  table_id: This is the OID of the table being tracked by the view we'll drop.
+  tab_id: This is the OID of the table being tracked by the view we'll drop.
 */
-DECLARE viewname text;
+DECLARE view_name text;
 BEGIN
-  viewname := msar.get_mathesar_view_name(table_id);
-  RETURN __msar.exec_ddl('DROP VIEW IF EXISTS %s', viewname);
+  view_name := msar.get_mathesar_view_name(tab_id);
+  RETURN __msar.exec_ddl('DROP VIEW IF EXISTS %s', view_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_mathesar_view(schema_ text, table_name text) RETURNS text AS $$/*
+msar.drop_mathesar_view(sch_name text, tab_name text) RETURNS text AS $$/*
 Drop the Mathesar view tracking the given table.
 
 Args:
-  schema_: This is the schema of the table being tracked by the view we'll drop.
-  table_name: This is the name of the table being tracked by the view we'll drop.
+  sch_name: This is the schema of the table being tracked by the view we'll drop.
+  tab_name: This is the name of the table being tracked by the view we'll drop.
 */
-DECLARE table_id oid;
+DECLARE tab_id oid;
 BEGIN
-  table_id := msar.get_table_oid(schema_, table_name);
-  RETURN msar.drop_mathesar_view(table_id);
+  tab_id := msar.get_relation_oid(sch_name, tab_name);
+  RETURN msar.drop_mathesar_view(tab_id);
 EXCEPTION WHEN undefined_table THEN
   RETURN 'NO SUCH TABLE';
 END;
