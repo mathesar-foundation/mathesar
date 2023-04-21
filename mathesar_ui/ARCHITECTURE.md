@@ -1,12 +1,4 @@
----
-title: Getting Started with Frontend Codebase
-description:
-published: true
-date: 2023-03-23T17:00:00.166Z
-tags:
-editor: markdown
-dateCreated: 2023-03-23T17:00:00.166Z
----
+# Front end code architecture
 
 ## Introduction
 
@@ -145,7 +137,7 @@ src
 ```
 
 1. Run the storybook: https://github.com/centerofci/mathesar/tree/develop/mathesar_ui#storybook
-2. See the [Components README](https://github.com/centerofci/mathesar/blob/develop/mathesar_ui/src/component-library/README.md) for more details.
+2. See the [Components README](./src/component-library/README.md) for more details.
 
 ## Form library
 

@@ -1,23 +1,16 @@
----
-title: Contributing to Mathesar
-description: 
-published: true
-date: 2023-03-21T13:07:48.773Z
-tags: 
-editor: markdown
-dateCreated: 2021-06-03T13:18:27.111Z
----
+# Contribution Guidelines
 
 Mathesar's development happens on [GitHub](https://github.com/centerofci/mathesar). We welcome contributions of all kinds!
 
 ## Joining the Community
-We highly recommend joining our [Matrix community](/en/community/matrix) and our [developer mailing list](/en/community/mailing-lists) before making contributions. This is where most of the core team's conversations about building Mathesar happen.
+
+We highly recommend joining our [Matrix community](https://wiki.mathesar.org/en/community/matrix) and our [developer mailing list](https://wiki.mathesar.org/en/community/mailing-lists) before making contributions. This is where most of the core team's conversations about building Mathesar happen.
 
 ## Contributing code
 
-1. **Get Mathesar [running locally](https://docs.mathesar.org/contributing/local-dev/).**
+1. **Get Mathesar [running locally](./LOCAL_DEVELOPMENT.md).**
 
-    Make sure to **do this before moving on**. If you need help, ask in [Matrix](/community/matrix.md), taking care to form *specific* questions that people can answer asynchronously.
+    Make sure to **do this before moving on**. If you need help, ask in [Matrix](https://wiki.mathesar.org/en/community/matrix), taking care to form *specific* questions that people can answer asynchronously.
 
 1. **Find an [issue](https://github.com/centerofci/mathesar/issues) to work on.**
 
@@ -29,7 +22,7 @@ We highly recommend joining our [Matrix community](/en/community/matrix) and our
         - labeled with any `status: ...` label other than `status: ready`
     - ⚠️ Some issues fall into a middle ground, not being labeled "help wanted" or "restricted". These tickets are more challenging and are only appropriate for community contributors who are familiar with our codebase.
 
-    If you want to work on something for which there is no GitHub issue open yet, create an issue and propose your change there. A Mathesar [team member](/team.md) will evaluate your issue and decide whether we'll accept a pull request for the issue.
+    If you want to work on something for which there is no GitHub issue open yet, create an issue and propose your change there. A Mathesar [team member](https://wiki.mathesar.org/en/team) will evaluate your issue and decide whether we'll accept a pull request for the issue.
 
 1. ***(Optionally)* Claim the issue.**
 
@@ -47,8 +40,8 @@ We highly recommend joining our [Matrix community](/en/community/matrix) and our
 
 1. **Begin making your changes.**
 
-    - Make sure to follow our [code standards](/engineering/standards.md).
-    - If you are not familiar with GitHub or pull requests, please follow [GitHub's "Hello World" guide](https://guides.github.com/activities/hello-world/) first. Make sure to commit your changes on a new git branch named after the ticket you claimed (instead of on `master`).
+    - Make sure to follow our [front end code standards](./mathesar_ui/STANDARDS.md) and [API standards](./mathesar/api/STANDARDS.md) where applicable.
+    - If you are not familiar with GitHub or pull requests, please follow [GitHub's "Hello World" guide](https://guides.github.com/activities/hello-world/) first. Make sure to commit your changes on a new git branch named after the ticket you claimed. Base that new branch on our `develop` branch.
     - Commit early, commit often. Write good commit messages. Try to keep pull requests small if possible, since it makes review easier.
     - If you expect your work to last longer than 1 week, open a draft pull request for your in-progress work.
 
@@ -63,13 +56,17 @@ We highly recommend joining our [Matrix community](/en/community/matrix) and our
 
 ## Contributing PR reviews
 
-We encourage and appreciate code review by contributors. Feel free to review any open pull requests. Follow our [code review guidelines](/engineering/code-review.md).
+We encourage and appreciate code review by contributors. Feel free to review any open pull requests. Follow our [code review guidelines](https://wiki.mathesar.org/en/engineering/code-review).
 
+## Contributing documentation
+
+- Help improve our user and administrator documentation (published to https://docs.mathesar.org/) by editing the markdown files in the `/docs` directory of this repo. See our [Documentation guide](./docs/README.md) for more info.
+
+- Developer-focused documentation lives in other markdown files throughout this repo, and we welcome PRs to improve this content. All PRs should target the `develop` branch.
 
 ## Contributing to UX and graphic design
 
-> Due to limited capacity, we are currently unable to accept design volunteers. Please return to this page for updates.
-{.is-warning}
+Due to limited capacity, we are currently unable to accept design volunteers. Please return to this page for updates.
 
-Please read through our [Design](/design.md) section to learn more about our design process.
+Please read through our [Design](https://wiki.mathesar.org/en/design) section to learn more about our design process.
 

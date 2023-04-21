@@ -38,7 +38,7 @@ Running integration tests requires a separate Docker setup using a much beefier 
 1. Run this command to build the front end files.
 
     ```
-    docker exec -w /code/mathesar_ui mathesar_service npx vite build
+    docker exec -w /code/mathesar_ui mathesar_service_dev npx vite build
     ```
 
 ### 4. Allow X11 socket forwarding for GUI tools
@@ -57,13 +57,13 @@ Running integration tests requires a separate Docker setup using a much beefier 
 - Run a single test, using the name of its defining function:
 
     ```
-    docker exec mathesar_service pytest --no-cov -k test_page_shows_welcome_text
+    docker exec mathesar_service_dev pytest --no-cov -k test_page_shows_welcome_text
     ```
 
 - Run all E2E tests:
 
     ```
-    docker exec mathesar_service pytest --no-cov mathesar/tests/integration
+    docker exec mathesar_service_dev pytest --no-cov mathesar/tests/integration
     ```
 
     This might take a while, and you shouldn't need to do it yourself on a regular basis because our GitHub CI workflow does it automatically for every PR.
@@ -85,7 +85,7 @@ The [Playwright inspector](https://playwright.dev/python/docs/inspector) allows 
 1. Run your test with `--headed` passed to `pytest`
 
     ```
-    docker exec mathesar_service pytest --headed --no-cov -k test_page_shows_welcome_text
+    docker exec mathesar_service_dev pytest --headed --no-cov -k test_page_shows_welcome_text
     ```
 
 1. Within the Inspector, you can press "Step Over" to move through your test one statement at a time, or "Resume" to run the test until the next `pause` call.
