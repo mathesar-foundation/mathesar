@@ -1,6 +1,9 @@
 import hashlib
 
 
+POSTGRES_IDENTIFIER_SIZE_LIMIT = 63
+
+
 def truncate_if_necessary(identifier):
     """
     Takes an identifier and returns it, truncating it, if it is too long. The truncated version
@@ -30,9 +33,13 @@ def truncate_if_necessary(identifier):
 
 
 def is_identifier_too_long(identifier):
-    postgres_identifier_size_limit = 63
+    # TODO we should support POSTGRES_IDENTIFIER_SIZE_LIMIT here;
+    # Our current limit due to an unknown bug that manifests at least
+    # when importing CSVs seems to be 57 bytes. Here we're setting it even
+    # lower just in case.
+    our_temporary_identifier_size_limit = 48
     size = _get_size_of_identifier_in_bytes(identifier)
-    return size > postgres_identifier_size_limit
+    return size > our_temporary_identifier_size_limit
 
 
 def _get_truncation_hash(identifier):
