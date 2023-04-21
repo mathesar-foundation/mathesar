@@ -128,8 +128,7 @@
 
 <style lang="scss">
   aside.input-sidebar {
-    width: var(--input-pane-width);
-    flex-basis: var(--input-pane-width);
+    height: 100%;
     border-right: 1px solid var(--slate-300);
     flex-shrink: 0;
     flex-grow: 0;
