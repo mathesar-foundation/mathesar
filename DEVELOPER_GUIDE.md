@@ -1,4 +1,4 @@
-# Local Development
+# Developer Guide
 
 ## Stack
 
@@ -11,7 +11,7 @@ Mathesar is built using:
 - [Django REST Framework](https://www.django-rest-framework.org/) for the API 
 - [Svelte](https://svelte.dev/) and [TypeScript](https://www.typescriptlang.org/) for the frontend
 
-## Setup
+## Local development setup
 
 > **Note:** If you are developing on Windows, first install [WSL](https://learn.microsoft.com/en-us/windows/wsl/install). Then do all of your development work from within the WSL shell, including running commands like `git clone` and `docker compose`.
 
@@ -41,6 +41,10 @@ Mathesar is built using:
     - password: `password`
 
 1. Keep Docker running while making your code changes. The app will update automatically with your new code.
+
+## Contribution guidelines
+
+Before getting started with your code changes, read our [Contributor guide](./CONTRIBUTING.md) to understand our processes for handling issues and and PRs.
 
 ## Loading sample data
 

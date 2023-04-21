@@ -20,6 +20,6 @@ Mathesar should be pretty intuitive to use. More documentation is coming soon, b
 
 As an open source project, we actively encourage contribution!
 
-- Get started by reading our [Contribution Guidelines](https://github.com/centerofci/mathesar/blob/develop/CONTRIBUTING.md) and [Local Development Setup](https://github.com/centerofci/mathesar/blob/develop/LOCAL_DEVELOPMENT.md).
+- Get started by reading our [Contributor Guide](https://github.com/centerofci/mathesar/blob/develop/CONTRIBUTING.md).
 
 - You can also contribute by **sponsoring us** on [GitHub](https://github.com/sponsors/centerofci) or [Open Collective](https://opencollective.com/mathesar)

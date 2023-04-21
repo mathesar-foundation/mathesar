@@ -1,4 +1,4 @@
-# Contribution Guidelines
+# Contributor Guide
 
 Mathesar's development happens on [GitHub](https://github.com/centerofci/mathesar). We welcome contributions of all kinds!
 
@@ -8,7 +8,7 @@ We highly recommend joining our [Matrix community](https://wiki.mathesar.org/en/
 
 ## Contributing code
 
-1. **Get Mathesar [running locally](./LOCAL_DEVELOPMENT.md).**
+1. **Get Mathesar [running locally](./DEVELOPER_GUIDE.md#local-development-setup).**
 
     Make sure to **do this before moving on**. If you need help, ask in [Matrix](https://wiki.mathesar.org/en/community/matrix), taking care to form *specific* questions that people can answer asynchronously.
 
@@ -40,6 +40,7 @@ We highly recommend joining our [Matrix community](https://wiki.mathesar.org/en/
 
 1. **Begin making your changes.**
 
+    - Refer to our **[Developer Guide](./DEVELOPER_GUIDE.md)** for questions about the code.
     - Make sure to follow our [front end code standards](./mathesar_ui/STANDARDS.md) and [API standards](./mathesar/api/STANDARDS.md) where applicable.
     - If you are not familiar with GitHub or pull requests, please follow [GitHub's "Hello World" guide](https://guides.github.com/activities/hello-world/) first. Make sure to commit your changes on a new git branch named after the ticket you claimed. Base that new branch on our `develop` branch.
     - Commit early, commit often. Write good commit messages. Try to keep pull requests small if possible, since it makes review easier.

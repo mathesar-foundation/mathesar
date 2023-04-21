@@ -85,7 +85,7 @@ Databases have been around for a long time and solve common data problems really
 We want to make existing database functionality more accessible, for users of all technical skill levels.
 
 ## Contributing
-We actively encourage contribution! Get started by reading our [Contribution Guidelines](./CONTRIBUTING.md) and [Local Development Setup](./LOCAL_DEVELOPMENT.md).
+We actively encourage contribution! Get started by reading our [Contributor Guide](./CONTRIBUTING.md).
 
 ## License
 Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).

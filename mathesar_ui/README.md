@@ -4,7 +4,7 @@ This directory contains the frontend code for Mathesar. However, part of the fro
 
 ## Development setup
 
-First make sure you [have Mathesar running locally](../LOCAL_DEVELOPMENT.md).
+First make sure you [have Mathesar running locally](../DEVELOPER_GUIDE.md#local-development-setup).
 
 ### Option 1: Setup with containers (recommended)
 
