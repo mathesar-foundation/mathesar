@@ -50,7 +50,7 @@ For sample table data, you can create a new table in the UI using the `patents.c
 
 ## API
 
-If you'd prefer to develop using the Django Rest Framework browsable API, you can use the login functionality at the top right with the same username and password. If you prefer a non-browser tool for API development, you'll have to: - Use browser to execute one of the methods above, then - Extract the key, value pair for the cookie named `sessionid` using dev tools. - submit that cookie with each request until it expires. - Repeat as necessary (e.g., when the cookie expires).
+See our [API guide](./mathesar/api/README.md) for more information on API usage and development.
 
 ## Back end development
 
