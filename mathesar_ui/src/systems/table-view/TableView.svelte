@@ -18,7 +18,7 @@
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
-  import TableInspector from './table-inspector/TableInspector.svelte';
+  import WithTableInspector from './table-inspector/WithTableInspector.svelte';
 
   type Context = 'page' | 'widget';
 
@@ -105,7 +105,7 @@
 </script>
 
 <div class="table-view">
-  <div class="table-inspector-view">
+  <WithTableInspector {showTableInspector}>
     <div class="sheet-area" on:click={checkAndReinstateFocusOnActiveCell}>
       {#if $processedColumns.size}
         <Sheet
@@ -124,10 +124,7 @@
         </Sheet>
       {/if}
     </div>
-    {#if showTableInspector}
-      <TableInspector />
-    {/if}
-  </div>
+  </WithTableInspector>
   <StatusPane {context} />
 </div>
 
@@ -138,14 +135,8 @@
     height: 100%;
     overflow: hidden;
   }
-  .table-inspector-view {
-    display: flex;
-    flex-direction: row;
-    overflow: hidden;
-  }
   .sheet-area {
     position: relative;
-    overflow-x: auto;
-    flex: 1;
+    height: 100%;
   }
 </style>

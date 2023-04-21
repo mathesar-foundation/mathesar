@@ -6,6 +6,7 @@ export { getPageCount as getPaginationPageCount } from './pagination/paginationU
 export { default as clickOffBounds } from './common/actions/clickOffBounds';
 export { default as popper } from './common/actions/popper';
 export { default as portal } from './common/actions/portal';
+export { default as slider } from './common/actions/slider';
 
 // Simple Components
 export { default as AnchorButton } from './anchorButton/AnchorButton.svelte';
@@ -45,6 +46,7 @@ export { default as TextInput } from './text-input/TextInput.svelte';
 export { default as TextInputWithPrefix } from './text-input/TextInputWithPrefix.svelte';
 export { default as Truncate } from './truncate/Truncate.svelte';
 export { default as Tooltip } from './tooltip/Tooltip.svelte';
+export { default as WithPanel } from './with-panel/WithPanel.svelte';
 
 // Compound Components (Ordered)
 export { DatePicker, InlineDateTimePicker } from './date-time-picker';
