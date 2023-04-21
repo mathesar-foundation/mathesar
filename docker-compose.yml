@@ -45,15 +45,25 @@ services:
   # It depends on the `db` service
   # and will start the `db` service automatically before starting itself.
   service:
-    extends:
-      file: docker-compose.common.yml
-      service: base-service
+    container_name: mathesar_service
     image: mathesar/mathesar-prod:latest
-    # Volumes are not shared when extending
+    environment:
+      - MODE=${MODE-PRODUCTION}
+      - DEBUG=${DEBUG-False}
+      - DJANGO_ALLOW_ASYNC_UNSAFE=true
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.production}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
+      - SECRET_KEY=${SECRET_KEY}
+      - DJANGO_DATABASE_KEY=${DJANGO_DATABASE_KEY-default}
+      - DJANGO_DATABASE_URL=${DJANGO_DATABASE_URL-postgres://mathesar:mathesar@mathesar_db:5432/mathesar_django}
+      - MATHESAR_DATABASES=${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+    command: ./run.sh
     volumes:
       - static:/code/static
       - media:/code/media
     depends_on:
+      # Comment the below field to disable starting the database service automatically
       db:
         condition: service_healthy
     labels:

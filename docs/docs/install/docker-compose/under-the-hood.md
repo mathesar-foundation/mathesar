@@ -42,7 +42,6 @@ We need to store all the details configured above, and we do so in a file in you
 We'll store two files under that directory:
 
 - `.env`: This file has the above-mentioned configurations.
-- `docker-compose.common.yml` This is a config file downloaded from Mathesar's git repo. It defines dependency Docker containers used by `docker-compose.yml`
 - `docker-compose.yml` This is a config file downloaded from Mathesar's git repo. It defines the different Docker containers used by Mathesar, and how they're networked together.
 
 Recommended permissions for the `.env` file are:
@@ -51,7 +50,7 @@ Recommended permissions for the `.env` file are:
 
 ### Docker Setup
 
-- The installer downloads the `docker-compose.yml` and `docker-compose.common.yml` file from Mathesar's repo.
+- The installer downloads the `docker-compose.yml` file from Mathesar's repo.
 - The installer pulls all Docker images needed for Mathesar to run properly, and starts the various services in sequence.
 
 ### Final Steps
@@ -70,5 +69,4 @@ This installation process creates the following containers:
 This installation process creates the following files in the Mathesar configuration directory:
 
 - `.env`. This file defines the environment inside of the various Mathesar `docker` containers. It should be kept safe, since it has sensitive information about the passwords you set for Mathesar. If you've forgotten your admin username or password, look at this file.
-- `docker-compose.common.yml`. This file contains the dependency services used by `docker-compose.yml`.
 - `docker-compose.yml`. This is the main file defining the Mathesar containers listed above, and the connections between them.

@@ -6,8 +6,8 @@ services:
   # It is used to run automated test cases to verify if the app works as intended
   test-service:
     extends:
-      file: docker-compose.common.yml
-      service: base-service
+      file: docker-compose.yml
+      service: service
     container_name: mathesar_service_test
     image: mathesar/mathesar-test:latest
     build:
@@ -32,8 +32,8 @@ services:
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
     extends:
-      file: docker-compose.common.yml
-      service: base-service
+      file: docker-compose.yml
+      service: service
     environment:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
