@@ -2,6 +2,7 @@ from db.connection import execute_msar_func_with_engine
 
 SUPPORTED_SCHEMA_ALTER_ARGS = {'name', 'description'}
 
+
 def rename_schema(schema, engine, rename_to):
     """
     This method renames a Postgres schema.
