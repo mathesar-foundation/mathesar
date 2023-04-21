@@ -379,14 +379,14 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION __msar.get_schema_name(schema_id oid) RETURNS TEXT AS $$
 BEGIN
-	RETURN schema_id::regclass::text;
+	RETURN schema_id::regnamespace::text;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 __msar.drop_schema(schema_name text, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$
 DECLARE
-  cmd_template TEXT;
+  cmd_template text;
 BEGIN
   IF if_exists
   THEN
@@ -419,7 +419,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 __msar.create_schema(schema_name text, if_not_exists boolean) RETURNS TEXT AS $$
 DECLARE
-  cmd_template TEXT;
+  cmd_template text;
 BEGIN
   IF if_not_exists
   THEN
@@ -435,5 +435,47 @@ CREATE OR REPLACE FUNCTION
 msar.create_schema(schema_name text, if_not_exists boolean) RETURNS TEXT AS $$
 BEGIN
 	RETURN __msar.create_schema(quote_ident(schema_name), if_not_exists);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION __msar.rename_schema(old_name text, new_name text) RETURNS TEXT AS $$
+DECLARE
+	cmd_template text;
+BEGIN
+	cmd_template := 'ALTER SCHEMA %s RENAME TO %s';
+	RETURN __msar.exec_ddl(cmd_template, old_name, new_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.rename_schema(old_name text, new_name text) RETURNS TEXT AS $$
+BEGIN
+	RETURN __msar.rename_schema(quote_ident(old_name), quote_ident(new_name));
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.rename_schema(schema_id oid, new_name text) RETURNS TEXT AS $$
+BEGIN
+	RETURN __msar.rename_schema(__msar.get_schema_name(schema_id), quote_ident(new_name));
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION __msar.comment_on_schema(schema_name text, comment text) RETURNS TEXT AS $$
+DECLARE
+	cmd_template text;
+BEGIN
+	cmd_template := 'COMMENT ON SCHEMA %s IS %s';
+	RETURN __msar.exec_ddl(cmd_template, schema_name, comment);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.comment_on_schema(schema_name text, comment text) RETURNS TEXT AS $$
+BEGIN
+	RETURN __msar.comment_on_schema(quote_ident(schema_name), quote_literal(comment));
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.comment_on_schema(schema_id oid, comment text) RETURNS TEXT AS $$
+BEGIN
+	RETURN __msar.comment_on_schema(__msar.get_schema_name(schema_id), quote_literal(comment));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

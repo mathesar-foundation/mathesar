@@ -1,23 +1,24 @@
-from sqlalchemy import text
+""" from sqlalchemy import text
 from sqlalchemy.schema import DDLElement
-from sqlalchemy.ext import compiler
-
+from sqlalchemy.ext import compiler """
+from db.connection import execute_msar_func_with_engine
 
 SUPPORTED_SCHEMA_ALTER_ARGS = {'name', 'description'}
 
 
-class RenameSchema(DDLElement):
+""" class RenameSchema(DDLElement):
     def __init__(self, schema, rename_to):
         self.schema = schema
         self.rename_to = rename_to
 
 
-@compiler.compiles(RenameSchema)
-def compile_rename_schema(element, compiler, **_):
+@compiler.compiles(RenameSchema) """
+""" def compile_rename_schema(element, compiler, **_):
+    #return execute_msar_func_with_engine
     return 'ALTER SCHEMA "%s" RENAME TO "%s"' % (
         element.schema,
         element.rename_to
-    )
+    ) """
 
 
 def rename_schema(schema, engine, rename_to):
@@ -26,16 +27,18 @@ def rename_schema(schema, engine, rename_to):
     """
     if rename_to == schema:
         return
-    with engine.begin() as connection:
-        connection.execute(RenameSchema(schema, rename_to))
+    execute_msar_func_with_engine(engine, 'rename_schema', schema, rename_to)
+    """ with engine.begin() as connection:
+        connection.execute(RenameSchema(schema, rename_to)) """
 
 
 def comment_on_schema(schema, engine, comment):
     # Not using the DDLElement since the examples from the docs are
     # vulnerable to SQL injection attacks.
-    comment_command = text(f'COMMENT ON SCHEMA "{schema}" IS :c')
+    execute_msar_func_with_engine(engine, 'comment_on_schema', schema, comment)
+    """ comment_command = text(f'COMMENT ON SCHEMA "{schema}" IS :c')
     with engine.begin() as conn:
-        conn.execute(comment_command, {'c': comment})
+        conn.execute(comment_command, {'c': comment}) """
 
 
 def alter_schema(name, engine, update_data):
