@@ -4,79 +4,87 @@
 
 ### Naming conventions
 
-* File names for Components, Classes and Stylesheets should be in PascalCase. Examples:
-    
-    ```txt
-    App.svelte
-    CancellablePromise.ts
-    App.scss
-    ```
+- File names for Components, Classes and Stylesheets should be in PascalCase. Examples:
 
-* Typescript file names should be in lowerCamelCase. Examples:
-    
-    ```txt
-    index.ts
-    utilityFunctions.ts
-    ```
+  ```txt
+  App.svelte
+  CancellablePromise.ts
+  App.scss
+  ```
 
-* All variables and constants should be in lowerCamelCase. Examples:
-    
-    ```javascript
-    export let randomVariable;
-    let aNewVariable = 'new variable';
-    const someValue = 'constant value';
-    ```
+- Typescript file names should be in lowerCamelCase. Examples:
 
-* All function names should be in lowerCamelCase. Examples:
-    
-    ```javascript
-    function someFunction() { /* ... */ }
-    let someOtherFn = () => { /* ... */ };
-    const someConstFn = () => { /* ... */ };
-    ```
+  ```txt
+  index.ts
+  utilityFunctions.ts
+  ```
 
-* All CSS class names should be in kebab-case. Examples:
+- All variables and constants should be in lowerCamelCase. Examples:
+
+  ```javascript
+  export let randomVariable;
+  let aNewVariable = 'new variable';
+  const someValue = 'constant value';
+  ```
+
+- All function names should be in lowerCamelCase. Examples:
+
+  ```javascript
+  function someFunction() {
+    /* ... */
+  }
+  let someOtherFn = () => {
+    /* ... */
+  };
+  const someConstFn = () => {
+    /* ... */
+  };
+  ```
+
+- All CSS class names should be in kebab-case. Examples:
 
   ```html
   <div class="cell-fabric"></div>
   <span class="editable-cell"></span>
   ```
 
-* All directory names should be in kebab-case (hyphen-delimited). Examples:
-    
-    ```txt
-    /components/text-input/
-    /components/combo-boxes/multi-select/
-    ```
+- All directory names should be in kebab-case (hyphen-delimited). Examples:
 
-* Acronyms within PascalCase and camelCase should be treated as words. Examples:
+  ```txt
+  /components/text-input/
+  /components/combo-boxes/multi-select/
+  ```
 
-    ```txt
-    UrlInput.svelte
-    ```
+- Acronyms within PascalCase and camelCase should be treated as words. Examples:
 
-    ```ts
-    function getApiUrl() { /* ... */ }
-    let currentDbName;
-    ```
+  ```txt
+  UrlInput.svelte
+  ```
 
-    - [discussion](https://github.com/centerofci/mathesar/discussions/908)
-    - Not all code conforms to this standard yet, and bringing existing code into conformance is a low priority.
+  ```ts
+  function getApiUrl() {
+    /* ... */
+  }
+  let currentDbName;
+  ```
 
-* Use American English spelling instead of British English spelling. Examples:
+  - [discussion](https://github.com/centerofci/mathesar/discussions/908)
+  - Not all code conforms to this standard yet, and bringing existing code into conformance is a low priority.
 
-    ```txt
-    LabeledInput.svelte
-    ColorSelector.svelte
-    ```
+- Use American English spelling instead of British English spelling. Examples:
 
-    - [discussion](https://github.com/centerofci/mathesar/discussions/891)
+  ```txt
+  LabeledInput.svelte
+  ColorSelector.svelte
+  ```
 
-* If a TypeScript file contains _only_ type definitions (without any values or implementation), then use the file extension `.d.ts` instead of `.ts`. If you use `enum` or `const` you'll need make the file a `.ts` file. If you only use `type` and `interface`, then make the file a `.d.ts` file.
+  - [discussion](https://github.com/centerofci/mathesar/discussions/891)
 
-* Prefer the term "delete" in code and UI over similar terms like "remove" and "drop".
+- If a TypeScript file contains _only_ type definitions (without any values or implementation), then use the file extension `.d.ts` instead of `.ts`. If you use `enum` or `const` you'll need make the file a `.ts` file. If you only use `type` and `interface`, then make the file a `.d.ts` file.
 
-    - [discussion](https://github.com/centerofci/mathesar/discussions/872)
+- Prefer the term "delete" in code and UI over similar terms like "remove" and "drop".
+
+  - [discussion](https://github.com/centerofci/mathesar/discussions/872)
 
 ## HTML
 
@@ -84,49 +92,49 @@
 
 When working inside a component that _might_ be placed where [phrasing content](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_categories#phrasing_content) is required, be sure to only use phrasing content elements (like `span`) instead of _not_-phrasing content elements (like `div`).
 
--  ✅ Good
+- ✅ Good
 
-    `FancyCheckbox.svelte`
+  `FancyCheckbox.svelte`
 
-    ```ts
-    <span class="make-it-fancy">
-      <input type="checkbox" />
-    </span>
-    ```
+  ```ts
+  <span class="make-it-fancy">
+    <input type="checkbox" />
+  </span>
+  ```
 
 - ❌ Bad because it uses `div` instead of `span`
 
-    `FancyCheckbox.svelte`
+  `FancyCheckbox.svelte`
 
-    ```ts
-    <div class="make-it-fancy">
-      <input type="checkbox" />
-    </div>
-    ```
+  ```ts
+  <div class="make-it-fancy">
+    <input type="checkbox" />
+  </div>
+  ```
 
 Rationale:
 
 - For example, let's build on the "Bad" example above and write the following Svelte code:
 
-    ```svelte
-    <label>
-      <FancyCheckbox />
-      Foo
-    </label>
-    ```
+  ```svelte
+  <label>
+    <FancyCheckbox />
+    Foo
+  </label>
+  ```
 
-    That Svelte code will render:
+  That Svelte code will render:
 
-    ```html
-    <label>
-      <div class="make-it-fancy">
-        <input type="checkbox" />
-      </div>
-      Foo
-    </label>
-    ```
+  ```html
+  <label>
+    <div class="make-it-fancy">
+      <input type="checkbox" />
+    </div>
+    Foo
+  </label>
+  ```
 
-    That markup has invalid DOM nesting because a `label` element can only contain phrasing content -- but a `div` is _not_ phrasing content.
+  That markup has invalid DOM nesting because a `label` element can only contain phrasing content -- but a `div` is _not_ phrasing content.
 
 Tips:
 
@@ -142,9 +150,9 @@ Notes:
 
 - Don't use `px` — use `rem` or `em` instead.
 
-    Exceptional cases where `px` is okay:
+  Exceptional cases where `px` is okay:
 
-    - when setting the root `font-size`
+  - when setting the root `font-size`
 
 Note: some of our older code still does not conform to this standard.
 
@@ -155,26 +163,27 @@ To preserve modularity and encapsulation, components should not define their own
 - **margin**: The component's root element should not set any margin.
 - **padding**: If the component's root element has border, it's fine to set padding because the border will serve as the outer-most visual edge. But if there's no border, then there should be no padding.
 - **z-index**:
-    - The component's root element should not set any z-index.
-    - It's fine for child elements _within the component_ to set a z-index, but in such cases the component's root element must establish its own [stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context). It's best to use `isolation: isolate;` to establish the stacking context because it clearly communicates intent and works without setting z-index. Once your component has its own stacking context, then you're free to set the z-index values within the component without thinking about anything outside the component. You can use simple values like `1` and `2` within the component because everything is encapsulated.
-    - If you want to render a child component with a specific z-index, then prefer to nest the child component inside a DOM element, setting the z-index on the DOM element (not the component).
-    - If you absolutely must pass a z-index value _into_ a component, then do so using CSS variables as follows:
-        1. Within the parent component (that establishes a stacking context), define one CSS variable for each "layer" within that stacking context.
-        1. Follow this naming convention to scope your CSS variables:
 
-            ```css
-            .record-selector-window {
-              --z-index__record_selector__row-header: 1;
-              --z-index__record_selector__thead: 2;
-              --z-index__record_selector__thead-row-header: 3;
-              --z-index__record_selector__shadow-inset: 4;
-              --z-index__record_selector__overlay: 5;
-              --z-index__record_selector__above-overlay: 6;
-            }
-            ```
+  - The component's root element should not set any z-index.
+  - It's fine for child elements _within the component_ to set a z-index, but in such cases the component's root element must establish its own [stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context). It's best to use `isolation: isolate;` to establish the stacking context because it clearly communicates intent and works without setting z-index. Once your component has its own stacking context, then you're free to set the z-index values within the component without thinking about anything outside the component. You can use simple values like `1` and `2` within the component because everything is encapsulated.
+  - If you want to render a child component with a specific z-index, then prefer to nest the child component inside a DOM element, setting the z-index on the DOM element (not the component).
+  - If you absolutely must pass a z-index value _into_ a component, then do so using CSS variables as follows:
 
-            Here, the name of each variable begins with `z-index`, then has a name to represent the stacking context (in this case `record-selector`), then has a name to represent the layer within that stacking context (e.g. `row-header`). Double underscores delimit those three pieces of the variable.
+    1. Within the parent component (that establishes a stacking context), define one CSS variable for each "layer" within that stacking context.
+    1. Follow this naming convention to scope your CSS variables:
 
+       ```css
+       .record-selector-window {
+         --z-index__record_selector__row-header: 1;
+         --z-index__record_selector__thead: 2;
+         --z-index__record_selector__thead-row-header: 3;
+         --z-index__record_selector__shadow-inset: 4;
+         --z-index__record_selector__overlay: 5;
+         --z-index__record_selector__above-overlay: 6;
+       }
+       ```
+
+       Here, the name of each variable begins with `z-index`, then has a name to represent the stacking context (in this case `record-selector`), then has a name to represent the layer within that stacking context (e.g. `row-header`). Double underscores delimit those three pieces of the variable.
 
 ## JavaScript
 
@@ -182,72 +191,71 @@ To preserve modularity and encapsulation, components should not define their own
 
 Prefer `await` over `.then` when possible.
 
--  ✅ Good
+- ✅ Good
 
-    ```ts
-    async function handleSave() {
-      isLoading = true;
-      try {
-        await save(value);
-      } catch (e: unknown) {
-        error = getErrorMessage(e);
-      } finally {
-        isLoading = false;
-      }
+  ```ts
+  async function handleSave() {
+    isLoading = true;
+    try {
+      await save(value);
+    } catch (e: unknown) {
+      error = getErrorMessage(e);
+    } finally {
+      isLoading = false;
     }
-    ```
+  }
+  ```
 
 - ❌ Bad
 
-    ```ts
-    function handleSave() {
-      isLoading = true;
-      save(value)
-        .then(() => {
-          isLoading = false;
-          return true;
-        })
-        .catch((e: unknown) => {
-          error = getErrorMessage(e);
-          isLoading = false;
-        });
-    }
-    ```
+  ```ts
+  function handleSave() {
+    isLoading = true;
+    save(value)
+      .then(() => {
+        isLoading = false;
+        return true;
+      })
+      .catch((e: unknown) => {
+        error = getErrorMessage(e);
+        isLoading = false;
+      });
+  }
+  ```
 
 ### `function` vs `const`
 
 Prefer `function` over `const`
 
--  ✅ Good
+- ✅ Good
 
-    ```ts
-    function withFoo(s: string) {
-      return `${s} foo`;
-    }
-    ```
+  ```ts
+  function withFoo(s: string) {
+    return `${s} foo`;
+  }
+  ```
 
 - ❌ Bad
 
-    ```ts
-    const withFoo = (s: string) => {
-      return `${s} foo`;
-    }
-    ```
+  ```ts
+  const withFoo = (s: string) => {
+    return `${s} foo`;
+  };
+  ```
 
-Rationale: 
+Rationale:
 
 - The `function` syntax is more concise, with less likelihood of line wrapping.
 
 - With TypeScript, adding explicit return type annotations becomes significantly more verbose when using the `const` approach. For example,
 
-    ```ts
-    export const withFoo: (s: string) => string = (s: string) => {
-      return `${s} foo`;
-    }
-    ```
+  ```ts
+  export const withFoo: (s: string) => string = (s: string) => {
+    return `${s} foo`;
+  };
+  ```
 
-    We don't require explicit return types everywhere, but we do use the [explicit-module-boundary-types](https://github.com/typescript-eslint/typescript-eslint/blob/v4.33.0/packages/eslint-plugin/docs/rules/explicit-module-boundary-types.md) linting rule to require them for _exported_ functions. This makes TS errors appear closer to the code that should be fixed and also provides some small performance gains with `tsc`.
-
+  We don't require explicit return types everywhere, but we do use the [explicit-module-boundary-types](https://github.com/typescript-eslint/typescript-eslint/blob/v4.33.0/packages/eslint-plugin/docs/rules/explicit-module-boundary-types.md) linting rule to require them for _exported_ functions. This makes TS errors appear closer to the code that should be fixed and also provides some small performance gains with `tsc`.
 
 ## TypeScript
 
@@ -260,51 +268,51 @@ Rationale:
 
 Prefer using `undefined` over `null` where possible.
 
--  ✅ Good
+- ✅ Good
 
-    ```ts
-    const name = writable<string | undefined>(undefined);
-    ```
+  ```ts
+  const name = writable<string | undefined>(undefined);
+  ```
 
 - ❌ Bad because it uses `null` when it could use `undefined`
 
-    ```ts
-    const name = writable<string | null>(null);
-    ```
+  ```ts
+  const name = writable<string | null>(null);
+  ```
 
 - ❌ Bad because it uses an empty string to represent an empty value when it probably should be using `undefined` for greater code clarity.
 
-    ```ts
-    const name = writable<string>('');
-    ```
+  ```ts
+  const name = writable<string>('');
+  ```
 
 - ❌ Bad because it mixes `null` and `undefined` into the same type.
 
-    ```ts
-    const name = writable<string | undefined | null>(null);
-    ```
+  ```ts
+  const name = writable<string | undefined | null>(null);
+  ```
 
--  ✅ Acceptable use of `null` because it's necessary for data that will be serialized to JSON. (Using `undefined` here would result in that key/value pair being removed from the JSON string).
+- ✅ Acceptable use of `null` because it's necessary for data that will be serialized to JSON. (Using `undefined` here would result in that key/value pair being removed from the JSON string).
 
-    ```ts
-    await patchApi(url, { name: null });
-    ```
+  ```ts
+  await patchApi(url, { name: null });
+  ```
 
--  ✅ Acceptable use of `null` because the `Checkbox` component is designed to accept a `null` value to place the checkbox into an indeterminate state.
+- ✅ Acceptable use of `null` because the `Checkbox` component is designed to accept a `null` value to place the checkbox into an indeterminate state.
 
-    ```svelte
-    <Checkbox value={null} />
-    ```
+  ```svelte
+  <Checkbox value={null} />
+  ```
 
 Considerations:
 
 - In some cases you may need to coalesce a `null` value to `undefined`. For example:
 
-    ```ts
-    function firstCapitalLetter(s: string): string | undefined {
-    return s.match(/[A-Z]/)?.[0] ?? undefined
-    }
-    ```
+  ```ts
+  function firstCapitalLetter(s: string): string | undefined {
+    return s.match(/[A-Z]/)?.[0] ?? undefined;
+  }
+  ```
 
 Additional context:
 
@@ -322,94 +330,92 @@ TypeScript types (including interfaces) which describe API requests and response
 
 - ✅ Good because only one `cost` store is created.
 
-    ```ts
-    function getCost(toppings: Readable<string[]>) {
-      return derived(this.toppings, t => 10 + t.length * 2);
-    }
+  ```ts
+  function getCost(toppings: Readable<string[]>) {
+    return derived(this.toppings, (t) => 10 + t.length * 2);
+  }
 
-    class PizzaOrder {
-      toppings: string[];
-      cost: Readable<number>;
+  class PizzaOrder {
+    toppings: string[];
+    cost: Readable<number>;
 
-      constructor() {
-        this.toppings = [];
-        this.cost = getCost(this.toppings);
-      }
+    constructor() {
+      this.toppings = [];
+      this.cost = getCost(this.toppings);
     }
-    ```
+  }
+  ```
 
 - ❌ Bad because separate calls to `cost` will create separate stores which may lead to more subscribe and unsubscribe events in some cases, risking performance problems.
 
-    ```ts
-    class PizzaOrder {
-      toppings: string[];
+  ```ts
+  class PizzaOrder {
+    toppings: string[];
 
-      constructor() {
-        this.toppings = [];
-      }
-
-      get cost(): Readable<boolean> {
-        return derived(this.toppings, t => 10 + t.length * 2);
-      }
+    constructor() {
+      this.toppings = [];
     }
-    ```
+
+    get cost(): Readable<boolean> {
+      return derived(this.toppings, (t) => 10 + t.length * 2);
+    }
+  }
+  ```
 
 Additional context:
 
 - [Discussion](https://github.com/centerofci/mathesar/pull/776#issuecomment-963831424)
 
-
-
 ### When using `{...$$restProps}`, define a `$$Props` type
 
 - Example:
 
-    - `Child.svelte`
+  - `Child.svelte`
 
-        ```svelte
-        <script lang="ts>
-          export let word: string;
-        </script>
+    ```svelte
+    <script lang="ts>
+      export let word: string;
+    </script>
 
-        <span class="child">{word}</span>
-        ```
+    <span class="child">{word}</span>
+    ```
 
-        `Child` explicitly accepts a `word` prop.
+    `Child` explicitly accepts a `word` prop.
 
-    - `Parent.svelte`
+  - `Parent.svelte`
 
-        ```svelte
-        <script lang="ts>
-          import type { ComponentProps } from 'svelte';
+    ```svelte
+    <script lang="ts>
+      import type { ComponentProps } from 'svelte';
 
-          import Child from './Child.svelte`;
+      import Child from './Child.svelte`;
 
-          type $$Props = ComponentProps<MessageBox>;
-        </script>
+      type $$Props = ComponentProps<MessageBox>;
+    </script>
 
-        <Child {...$$restProps} />
-        ```
+    <Child {...$$restProps} />
+    ```
 
-        TypeScript knows that `Parent` accepts a `word` prop too because we have defined `$$Props` as such.
+    TypeScript knows that `Parent` accepts a `word` prop too because we have defined `$$Props` as such.
 
-    - `Grandparent.svelte`
+  - `Grandparent.svelte`
 
-        ```svelte
-        <script lang="ts>
-          import Parent from './Parent.svelte`;
-        </script>
+    ```svelte
+    <script lang="ts>
+      import Parent from './Parent.svelte`;
+    </script>
 
-        <Parent word="foo" />
-        ```
+    <Parent word="foo" />
+    ```
 
-        Passing `"foo"` to the `word` prop here is type-safe.
+    Passing `"foo"` to the `word` prop here is type-safe.
 
 - If you want to alter the props, you can define `$$Props` like this:
 
-    ```ts
-    interface $$Props extends Omit<ComponentProps<Child>, 'notThatOne'> {
-      addThisOne: string;
-    }
-    ```
+  ```ts
+  interface $$Props extends Omit<ComponentProps<Child>, 'notThatOne'> {
+    addThisOne: string;
+  }
+  ```
 
-    You can search our codebase for `$$Props` to see the various ways we're using it.
+  You can search our codebase for `$$Props` to see the various ways we're using it.
