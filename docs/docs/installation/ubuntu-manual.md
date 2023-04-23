@@ -454,6 +454,7 @@ git clone https://github.com/centerofci/mathesar.git
 
 Once this is installed we will install from requirements.txt 
 ```sh
+cd mathesar/
 pip3 install -r requirements.txt
 ```
 
