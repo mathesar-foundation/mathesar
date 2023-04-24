@@ -1,51 +1,40 @@
 <script lang="ts">
+  import { makeStyleStringFromCssVariables } from '@mathesar-component-library';
+
   export let cssVariables: Record<string, string> | undefined = undefined;
 
-  // TODO: Refactor this once #2409 is merged
   $: style = cssVariables
-    ? Object.entries(cssVariables)
-        .filter((val) => val[0].indexOf('--') === 0)
-        .map((entry) => `${entry[0]}: ${entry[1]}`)
-        .join(';')
+    ? makeStyleStringFromCssVariables(cssVariables)
     : undefined;
 </script>
 
-<div class="admin-layout-container" {style}>
-  <div class="admin-layout">
-    <aside>
-      <slot name="sidebar" />
-    </aside>
-    <main>
-      <slot />
-    </main>
-  </div>
+<div class="page-sidebar-layout" {style}>
+  <aside>
+    <slot name="sidebar" />
+  </aside>
+  <main>
+    <slot />
+  </main>
 </div>
 
 <style lang="scss">
-  .admin-layout-container {
-    max-width: var(--max-layout-width, 85rem);
-    margin-left: auto;
-    margin-right: auto;
-    padding: 1rem 0;
-  }
-
-  .admin-layout {
-    --gap: 1rem;
+  .page-sidebar-layout {
+    --PageLayoutWithSidebar__gap: 1rem;
     display: flex;
     flex-wrap: wrap;
-    margin-left: calc(-1 * var(--gap));
+    margin-left: calc(-1 * var(--PageLayoutWithSidebar__gap));
 
     aside {
       flex-grow: 1;
-      flex-basis: 14rem;
-      margin-left: var(--gap);
+      flex-basis: var(--PageLayoutWithSidebar__sidebar-width, 14rem);
+      margin-left: var(--PageLayoutWithSidebar__gap);
     }
 
     main {
       flex-basis: 0;
       flex-grow: 999;
       min-inline-size: 65%;
-      margin-left: var(--gap);
+      margin-left: var(--PageLayoutWithSidebar__gap);
     }
   }
 </style>
