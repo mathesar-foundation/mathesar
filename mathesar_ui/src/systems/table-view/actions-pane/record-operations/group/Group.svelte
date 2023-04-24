@@ -8,6 +8,7 @@
   } from '@mathesar/stores/table-data';
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -42,11 +43,6 @@
       }),
     );
   }
-
-  function getColumnConstraintTypeByColumnId(columnId: number) {
-    const linkFkType = $processedColumns.get(columnId)?.linkFk?.type;
-    return linkFkType ? [linkFkType] : undefined;
-  }
 </script>
 
 <div class="groups" class:grouped={$grouping.entries.length > 0}>
@@ -58,7 +54,7 @@
         columnsAllowedForSelection={availableColumns.map((entry) => entry.id)}
         getColumnLabel={(processedColumn) => processedColumn?.column.name ?? ''}
         getColumnConstraintType={(column) =>
-          getColumnConstraintTypeByColumnId(column.id)}
+          getColumnConstraintTypeByColumnId(column.id, $processedColumns)}
         columnIdentifier={groupEntry.columnId}
         preprocFunctionIdentifier={groupEntry.preprocFnId}
         on:update={(e) => updateGrouping(index, e.detail)}
@@ -87,7 +83,10 @@
               display_options:
                 $processedColumns.get(column.id)?.column.display_options ??
                 null,
-              constraintsType: getColumnConstraintTypeByColumnId(column.id),
+              constraintsType: getColumnConstraintTypeByColumnId(
+                column.id,
+                $processedColumns,
+              ),
             }}
           />
         </ButtonMenuItem>

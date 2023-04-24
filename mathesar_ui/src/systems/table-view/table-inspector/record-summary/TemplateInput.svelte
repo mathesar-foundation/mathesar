@@ -1,11 +1,19 @@
 <script lang="ts">
+  import type { ComponentProps } from 'svelte';
+
+  import { FormattedInput } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import { FormattedInput } from '@mathesar/component-library';
   import TemplateInputFormatter from './TemplateInputFormatter';
   import AppendColumn from './AppendColumn.svelte';
 
-  export let value: string | undefined = undefined;
+  interface $$Props
+    extends Omit<ComponentProps<FormattedInput<string>>, 'formatter'> {
+    columns: Column[];
+  }
+
+  export let value: string | null | undefined = undefined;
   export let columns: Column[];
+  export let disabled = false;
 
   $: formatter = new TemplateInputFormatter(columns);
 
@@ -14,9 +22,9 @@
   }
 </script>
 
-<FormattedInput {formatter} bind:value />
+<FormattedInput {formatter} bind:value {disabled} {...$$restProps} />
 <span class="column-insert">
-  <AppendColumn {columns} onSelect={insertColumn} />
+  <AppendColumn {columns} onSelect={insertColumn} {disabled} />
 </span>
 
 <style>

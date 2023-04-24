@@ -8,6 +8,7 @@
   import { iconAddNew } from '@mathesar/icons';
   import SortEntry from '@mathesar/components/sort-entry/SortEntry.svelte';
   import type { SortDirection } from '@mathesar/components/sort-entry/utils';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -56,10 +57,8 @@
         columns={$processedColumns}
         columnsAllowedForSelection={availableColumnIds}
         getColumnLabel={(processedColumn) => processedColumn?.column.name ?? ''}
-        getColumnConstraintType={(column) => {
-          const linkFkType = $processedColumns.get(column.id)?.linkFk?.type;
-          return linkFkType ? [linkFkType] : undefined;
-        }}
+        getColumnConstraintType={(column) =>
+          getColumnConstraintTypeByColumnId(column.id, $processedColumns)}
         columnIdentifier={columnId}
         {sortDirection}
         on:remove={() => removeSortColumn(columnId)}

@@ -44,6 +44,7 @@ const stringType: CellComponentFactory = {
       },
     };
   },
+  getDisplayFormatter: () => String,
 };
 
 export default stringType;
