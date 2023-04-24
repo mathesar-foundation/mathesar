@@ -1,4 +1,9 @@
+# Install Mathesar via Docker
+
+
 ## Prerequisites
+!!! warning
+  This installation procedure is intended for users who want to run a bare-bones version of the Mathesar Webserver. It is assumed you already have services like a reverse proxy needed for running a production server. Please look at [Docker Compose Installation Documentation](../docker-compose/index.md) for running services needed for a proper production server 
 
 - You need [Docker](https://docs.docker.com/get-docker/)
   - We have tested with Docker v23. Older versions may not work.
