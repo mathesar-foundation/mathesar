@@ -105,14 +105,16 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION __msar.get_sch_name(sch_id oid) RETURNS TEXT AS $$/*
+CREATE OR REPLACE FUNCTION __msar.get_schema_name(sch_id oid) RETURNS TEXT AS $$/*
 Return the name for a given schema, quoted as appropriate.
+
+The schema *must* be in the pg_namespace table to use this function.
 
 Args:
   sch_id: The OID of the schema.
 */
 BEGIN
-	RETURN sch_id::regnamespace::text;
+  RETURN sch_id::regnamespace::text;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -248,10 +250,10 @@ Args:
   new_sch_name: A properly quoted new schema name
 */
 DECLARE
-	cmd_template text;
+  cmd_template text;
 BEGIN
-	cmd_template := 'ALTER SCHEMA %s RENAME TO %s';
-	RETURN __msar.exec_ddl(cmd_template, old_sch_name, new_sch_name);
+  cmd_template := 'ALTER SCHEMA %s RENAME TO %s';
+  RETURN __msar.exec_ddl(cmd_template, old_sch_name, new_sch_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -265,7 +267,7 @@ Args:
   new_sch_name: An unquoted new schema name
 */
 BEGIN
-	RETURN __msar.rename_schema(quote_ident(old_sch_name), quote_ident(new_sch_name));
+  RETURN __msar.rename_schema(quote_ident(old_sch_name), quote_ident(new_sch_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -278,7 +280,7 @@ Args:
   new_sch_name: An unquoted new schema name
 */
 BEGIN
-	RETURN __msar.rename_schema(__msar.get_sch_name(sch_id), quote_ident(new_sch_name));
+  RETURN __msar.rename_schema(__msar.get_sch_name(sch_id), quote_ident(new_sch_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -294,10 +296,10 @@ Args:
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
 DECLARE
-	cmd_template text;
+  cmd_template text;
 BEGIN
-	cmd_template := 'COMMENT ON SCHEMA %s IS %s';
-	RETURN __msar.exec_ddl(cmd_template, sch_name, comment_);
+  cmd_template := 'COMMENT ON SCHEMA %s IS %s';
+  RETURN __msar.exec_ddl(cmd_template, sch_name, comment_);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -311,7 +313,7 @@ Args:
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
 BEGIN
-	RETURN __msar.comment_on_schema(quote_ident(sch_name), quote_literal(comment_));
+  RETURN __msar.comment_on_schema(quote_ident(sch_name), quote_literal(comment_));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -324,7 +326,7 @@ Args:
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
 BEGIN
-	RETURN __msar.comment_on_schema(__msar.get_sch_name(sch_id), quote_literal(comment_));
+  RETURN __msar.comment_on_schema(__msar.get_sch_name(sch_id), quote_literal(comment_));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -357,7 +359,7 @@ BEGIN
   ELSE
     cmd_template := 'CREATE SCHEMA %s';
   END IF;
-	RETURN __msar.exec_ddl(cmd_template, sch_name);
+  RETURN __msar.exec_ddl(cmd_template, sch_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -371,7 +373,7 @@ Args:
   if_not_exists: Whether to ignore an error if the schema does exist
 */
 BEGIN
-	RETURN __msar.create_schema(quote_ident(sch_name), if_not_exists);
+  RETURN __msar.create_schema(quote_ident(sch_name), if_not_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -424,7 +426,7 @@ Args:
   if_exists: Whether to ignore an error if the schema doesn't exist
 */
 BEGIN
-	RETURN __msar.drop_schema(__msar.get_sch_name(sch_id), cascade_, if_exists);
+  RETURN __msar.drop_schema(__msar.get_sch_name(sch_id), cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -439,7 +441,7 @@ Args:
   if_exists: Whether to ignore an error if the schema doesn't exist
 */
 BEGIN
-	RETURN __msar.drop_schema(quote_ident(sch_name), cascade_, if_exists);
+  RETURN __msar.drop_schema(quote_ident(sch_name), cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
