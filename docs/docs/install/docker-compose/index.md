@@ -51,7 +51,6 @@
 
 ## Manual Install
 
-### Steps
 1. Open the Mathesar configuration directory where you'd like to install Mathesar. By convention, we do it within `/etc/mathesar`
 
 2. Download necessary files into the configuration directory
@@ -138,8 +137,9 @@
         docker compose -f docker-compose.yml up watchtower -d
         ```
 
+## Frequently Asked Questions
 
-## Start Mathesar Server without the Database Server
+#### Start Mathesar Server without the Database Server
 
 - In the `docker-compose.yml` file you downloaded, remove the dependency of the `db` service from the `depends_on` field of the `service`.
 
@@ -158,7 +158,7 @@
 Starting the container using `docker compose -f docker-compose.yml up service -d` won't start the `db` service automatically.
 
 
-## Run Mathesar on a non-standard HTTP port
+#### Run Mathesar on a non-standard HTTP port
 !!! warning ""
 
     Caddy won't be able to verify the SSL certificate when running on a non-standard port,
@@ -186,7 +186,7 @@ Starting the container using `docker compose -f docker-compose.yml up service -d
         docker compose -f docker-compose.yml up caddy-reverse-proxy -d
         ```
 
-## Start/stop the server {:#start-stop}
+#### Start/stop the server {:#start-stop}
 
 The Mathesar server needs to be running for you to use Mathesar. If you restart your machine, you'll need to start the server again.
 
@@ -219,7 +219,10 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 !!! note
     If you customized the Mathesar configuration directory during installation, you'll need to change `/etc/mathesar` to your configuration directory.
 
-## Upgrade
+#### Upgrade
+
+!!! tip "Upgrade from within Mathesar"
+    You can also run the upgrade from within Mathesar by logging into as an admin user and navigating to "Administration" (in the top right menu) > "Software Update"
 
 Manually upgrade Mathesar to the newest version using watch tower:
 
@@ -245,11 +248,7 @@ Manually upgrade Mathesar to the newest version without using watch tower:
     docker compose -f docker-compose.yml up --force-recreate --build service
     ```
 
-
-!!! tip "Upgrade from within Mathesar"
-    You can also run the upgrade from within Mathesar by logging into as an admin user and navigating to "Administration" (in the top right menu) > "Software Update"
-
-## Uninstall
+#### Uninstall
 
 1. Remove all Mathesar Docker images and containers.
 
