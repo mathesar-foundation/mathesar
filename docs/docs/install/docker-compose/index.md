@@ -162,7 +162,7 @@ Starting the container using `docker compose -f docker-compose.yml up mathesar_s
     Running on a non-standard port will disable automatic SSL certificate generation,
     so make sure you already have a reverse proxy that handles SSL
 
-1. Make the following changes to your `.env` file
+1. Make the following changes to your `.env` file to run the Mathesar service in the localhost on a non standard http port
 
 ```diff
         ALLOWED_HOSTS='https://<your_domain_name>, .localhost, 127.0.0.1'
@@ -172,7 +172,17 @@ Starting the container using `docker compose -f docker-compose.yml up mathesar_s
 +       HTTPS_PORT='<different_port_number>' # For example `:8005`
 ```
 
-Start the container again using `docker compose up caddy-reverse-proxy`
+2. Start the container again using 
+
+    === "Linux"
+        ```
+        sudo docker compose -f docker-compose.yml up caddy-reverse-proxy -d
+        ```
+
+    === "MacOS"
+        ```
+        docker compose -f docker-compose.yml up caddy-reverse-proxy -d
+        ```
 
 ## Start/stop the server {:#start-stop}
 
