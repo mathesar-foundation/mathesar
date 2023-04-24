@@ -26,7 +26,7 @@
 - If installing on Windows, you need to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed first and [Turn on wsl-2 in docker desktop](https://docs.docker.com/desktop/windows/wsl/#turn-on-docker-desktop-wsl-2)
 
 
-## Install using interactive script
+## Install using the interactive script
 
 !!! info "Installation Script Overview"
     The interactive script will set up a database server, the Mathesar webserver, an upgrade server for upgrading using the UI and a reverse proxy. If you want to customise the setup process, please look at the [Manual Install section](#manual-install)
