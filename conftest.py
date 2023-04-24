@@ -210,7 +210,7 @@ def create_db_schema(SES_engine_cache):
         if schema_mustnt_exist:
             assert schema_name not in created_schemas
         logger.debug(f'creating {schema_name}')
-        create_sa_schema(schema_name, engine)
+        create_sa_schema(schema_name, engine, if_not_exists=True)
         schema_oid = get_schema_oid_from_name(schema_name, engine)
         db_name = engine.url.database
         created_schemas_in_this_engine = created_schemas.setdefault(db_name, {})
