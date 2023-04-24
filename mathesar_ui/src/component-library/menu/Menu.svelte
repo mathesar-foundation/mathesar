@@ -2,6 +2,6 @@
   export let style: string | undefined = undefined;
 </script>
 
-<div class="menu" {style}>
+<div class="menu" role="menu" {style}>
   <slot />
 </div>

@@ -55,7 +55,7 @@
       color: var(--red-500);
     }
     &:not(.disabled):hover .cell {
-      background-color: var(--slate-100);
+      background-color: var(--MenuCellHover, var(--slate-100));
     }
     &.disabled {
       color: var(--slate-300);
@@ -69,6 +69,20 @@
     }
     > .label {
       grid-column: label;
+
+      > .passthrough-button {
+        background: inherit;
+        border-radius: inherit;
+        border: inherit;
+        color: inherit;
+        cursor: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        text-align: inherit;
+        margin: 0;
+        padding: 0;
+      }
     }
     > .cell:not(:empty) {
       padding: var(--spacing-y, var(--spacing-y-default))
@@ -81,18 +95,6 @@
     }
     > .cell.control {
       --checkbox-margin-bottom: 0;
-    }
-    > .passthrough-button {
-      background: inherit;
-      border-radius: inherit;
-      border: inherit;
-      color: inherit;
-      cursor: inherit;
-      font-family: inherit;
-      font-size: inherit;
-      font-weight: inherit;
-      text-align: inherit;
-      margin: 0;
     }
   }
 }
