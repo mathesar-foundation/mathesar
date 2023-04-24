@@ -48,6 +48,10 @@
     { database, schema },
     'canEditMetadata',
   );
+  $: ({ uniqueColumns } = $tabularData.constraintsDataStore);
+  $: canSetDefault = !(
+    column && $uniqueColumns.has(column.id)
+  );
 </script>
 
 <div class="column-mode-container">
@@ -105,7 +109,7 @@
       </Collapsible>
     {/if}
 
-    {#if column && !column.column.default?.is_dynamic}
+    {#if column && !column.column.default?.is_dynamic && canSetDefault}
       <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
