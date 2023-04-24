@@ -6,7 +6,7 @@ from db.constraints.operations.select import (
     get_constraint_oid_by_name_and_table_oid,
     get_fkey_constraint_oid_by_name_and_referent_table_oid,
 )
-from db.columns.exceptions import InvalidTypeError
+from db.columns.exceptions import InvalidTypeError, DefaultAssignmentToUniqueError
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
@@ -124,7 +124,15 @@ class InvalidDefaultAPIException(MathesarAPIException):
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
-        super().__init__(exception, self.error_code, message, field, details, status_code)
+        super().__init__(exception, self.error_code, self.err_msg(exception, message), field, details, status_code)
+
+    @staticmethod
+    def err_msg(exception, message):
+        if type(exception) is DefaultAssignmentToUniqueError and exception.column:
+            return f'column "{exception.column.name}" can not have default value as it is restricted to unique'
+        if message:
+            return message
+        return 'Invalid default assignment requested.'
 
 
 class InvalidTypeOptionAPIException(MathesarAPIException):
