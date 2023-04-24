@@ -169,7 +169,7 @@ Starting the container using `docker compose -f docker-compose.yml up service -d
     ```diff
             ALLOWED_HOSTS='https://<your_domain_name>, .localhost, 127.0.0.1'
     -       DOMAIN_NAME='https://<your_domain_name>'
-    +       DOMAIN_NAME='http://<your_domain_name>:<port_number>' # For example `http://localhost:8004` or http://192.158.1.38:8004. Make sure to add the `http` suffix before the localhost  
+    +       DOMAIN_NAME='http://<your_domain_name>:<port_number>' # For example `http://localhost:8004` or http://192.158.1.38:8004. Make sure to add the `http` suffix before the localhost to disable automatic SSL handling by caddy 
     +       HTTP_PORT='<port_number>'
     +       HTTPS_PORT='<different_port_number>' # For example `:8005`
     ```
