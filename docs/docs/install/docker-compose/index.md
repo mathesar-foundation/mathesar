@@ -167,7 +167,7 @@ Starting the container using `docker compose -f docker-compose.yml up mathesar_s
 ```diff
         ALLOWED_HOSTS='https://<your_domain_name>, .localhost, 127.0.0.1'
 -       DOMAIN_NAME='https://<your_domain_name>'
-+       DOMAIN_NAME=':<port_number>' # For example `:8004`
++       DOMAIN_NAME='http://<your_domain_name>:<port_number>' # For example `localhost:8004`
 +       HTTP_PORT='<port_number>'
 +       HTTPS_PORT='<different_port_number>' # For example `:8005`
 ```
