@@ -1,0 +1,74 @@
+.with-panel {
+  display: grid;
+  height: 100%;
+  width: 100%;
+  --resizer-size: var(--WithPanel__resizer-size, 0.3rem);
+  --resizer-color: var(--WithPanel__resizer-color, var(--sky-700));
+  --resizer-half-size: calc(var(--resizer-size) / 2);
+
+  &.top {
+    grid-template-areas: 'panel' 'main';
+    grid-template-rows: auto 1fr;
+  }
+  &.bottom {
+    grid-template-areas: 'main' 'panel';
+    grid-template-rows: 1fr auto;
+  }
+  &.left {
+    grid-template-areas: 'panel main';
+    grid-template-columns: auto 1fr;
+  }
+  &.right {
+    grid-template-areas: 'main panel';
+    grid-template-columns: 1fr auto;
+  }
+
+  > .main {
+    grid-area: main;
+  }
+  > .panel {
+    grid-area: panel;
+    position: relative;
+    isolation: isolate;
+    > .resizer {
+      position: absolute;
+      z-index: 1;
+    }
+  }
+
+  &.horizontal > .main,
+  &.horizontal > .panel {
+    height: 0;
+    min-height: 100%;
+  }
+
+  &.is-resizing > .panel > .resizer,
+  > .panel > .resizer:hover {
+    background-color: var(--resizer-color);
+  }
+
+  &.top > .panel > .resizer,
+  &.bottom > .panel > .resizer {
+    height: var(--resizer-size);
+    width: 100%;
+    cursor: row-resize;
+  }
+  &.left > .panel > .resizer,
+  &.right > .panel > .resizer {
+    width: var(--resizer-size);
+    height: 100%;
+    cursor: col-resize;
+  }
+  &.top > .panel > .resizer {
+    bottom: calc(-1 * var(--resizer-half-size));
+  }
+  &.bottom > .panel > .resizer {
+    top: calc(-1 * var(--resizer-half-size));
+  }
+  &.left > .panel > .resizer {
+    right: calc(-1 * var(--resizer-half-size));
+  }
+  &.right > .panel > .resizer {
+    left: calc(-1 * var(--resizer-half-size));
+  }
+}
