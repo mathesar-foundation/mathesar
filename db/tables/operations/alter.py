@@ -66,8 +66,14 @@ def update_pk_sequence_to_latest(engine, table, connection=None):
     name = table.name
     column = table.c[constants.ID].name
     if connection is not None:
+        # The quote wrangling here is temporary; due to SQLAlchemy's query
+        # builder.
         db_conn.execute_msar_func_with_psycopg2_conn(
-            connection, 'update_pk_sequence_to_latest', schema, name, column
+            connection,
+            'update_pk_sequence_to_latest',
+            f"'{schema}'",
+            f"'{name}'",
+            f"'{column}'",
         ).fetchone()[0]
     else:
         db_conn.execute_msar_func_with_engine(

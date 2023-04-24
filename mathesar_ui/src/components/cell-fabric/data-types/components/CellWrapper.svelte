@@ -34,6 +34,18 @@
   }
 
   $: void focusCell(isActive, mode);
+
+  function handleCopy(e: ClipboardEvent) {
+    if (e.target !== element) {
+      // When the user copies text _within_ a cell (e.g. from within an input
+      // element) we need to stop propagation so that the copy event doesn't
+      // reach the sheet where it is handled by the SheetClipboardHandler to
+      // copy _cells_. If we don't stop propagation, the entire cell value will
+      // be copied instead of copying only the text within the input that the
+      // user selected.
+      e.stopPropagation();
+    }
+  }
 </script>
 
 <div
@@ -53,6 +65,7 @@
   on:mousedown
   on:mouseenter
   on:keydown
+  on:copy={handleCopy}
   tabindex={-1}
   {...$$restProps}
 >

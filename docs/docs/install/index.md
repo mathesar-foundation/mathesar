@@ -5,5 +5,5 @@
 !!! info "More installation methods coming soon"
     We [plan to support additional installation methods](https://github.com/centerofci/mathesar/issues/2509) in the near future, allowing you to run Mathesar without Docker.
 
-# Configuring Mathesar
+## Configuration
 - [Using Environment Variables](./configuration.md)
