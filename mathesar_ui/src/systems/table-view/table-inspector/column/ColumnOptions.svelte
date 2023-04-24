@@ -62,14 +62,18 @@
       const newAllowsDuplicates = !allowsDuplicates;
       const promises = [];
       if (!newAllowsDuplicates) {
-        promises.push(await columnsDataStore.patch(column.id, {
-          default: null,
-        }));
+        promises.push(
+          await columnsDataStore.patch(column.id, {
+            default: null,
+          }),
+        );
       }
-      promises.push(await constraintsDataStore.setUniquenessOfColumn(
-        column.column,
-        !newAllowsDuplicates,
-      ));
+      promises.push(
+        await constraintsDataStore.setUniquenessOfColumn(
+          column.column,
+          !newAllowsDuplicates,
+        ),
+      );
       await Promise.all(promises);
       const message = `Column "${column.column.name}" will ${
         newAllowsDuplicates ? '' : 'no longer '
