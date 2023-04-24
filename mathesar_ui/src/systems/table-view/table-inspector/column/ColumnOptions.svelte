@@ -62,7 +62,7 @@
       const newAllowsDuplicates = !allowsDuplicates;
       if (!newAllowsDuplicates) {
         await columnsDataStore.patch(column.id, {
-          default: null
+          default: null,
         });
       }
       await constraintsDataStore.setUniquenessOfColumn(

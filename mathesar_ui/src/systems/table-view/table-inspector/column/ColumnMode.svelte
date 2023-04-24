@@ -49,9 +49,7 @@
     'canEditMetadata',
   );
   $: ({ uniqueColumns } = $tabularData.constraintsDataStore);
-  $: canSetDefault = !(
-    column && $uniqueColumns.has(column.id)
-  );
+  $: canSetDefault = !(column && $uniqueColumns.has(column.id));
 </script>
 
 <div class="column-mode-container">
