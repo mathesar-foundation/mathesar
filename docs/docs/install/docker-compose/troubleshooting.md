@@ -17,12 +17,12 @@ If something has gone wrong with the installation, you may need to restart the s
 
     === "Linux"
         ```sh
-        sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down -v
+        sudo docker compose -f /etc/mathesar/docker-compose.yml down -v
         ```
 
     === "MacOS"
         ```sh
-        docker compose -f /etc/mathesar/docker-compose.yml --profile prod down -v
+        docker compose -f /etc/mathesar/docker-compose.yml down -v
         ```
    and then run the installation script again.
 
