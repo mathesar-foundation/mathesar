@@ -60,6 +60,11 @@
     isRequestingToggleAllowDuplicates = true;
     try {
       const newAllowsDuplicates = !allowsDuplicates;
+      if (!newAllowsDuplicates) {
+        await columnsDataStore.patch(column.id, {
+          default: null
+        });
+      }
       await constraintsDataStore.setUniquenessOfColumn(
         column.column,
         !newAllowsDuplicates,
