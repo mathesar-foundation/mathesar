@@ -6,10 +6,10 @@ def drop_schema(schema_name, engine, cascade=False, if_exists=False):
     Drop a schema.
 
     Args:
-        schema_name: Name of the schema to drop. 
+        schema_name: Name of the schema to drop.
         engine: SQLAlchemy engine object for connecting.
         cascade: Whether to drop the dependent objects.
-        if_exists: Whether to ignore an error if the schema doesn't 
+        if_exists: Whether to ignore an error if the schema doesn't
                    exist.
 
     Returns:

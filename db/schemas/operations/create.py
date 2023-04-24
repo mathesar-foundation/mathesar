@@ -11,7 +11,7 @@ def create_schema(schema_name, engine, comment=None, if_not_exists=False):
         engine: SQLAlchemy engine object for connecting.
         comment: The new comment. Any quotes or special characters must
                  be escaped.
-        if_not_exists: Whether to ignore an error if the schema does 
+        if_not_exists: Whether to ignore an error if the schema does
                        exist.
 
     Returns:
