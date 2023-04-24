@@ -95,7 +95,7 @@
 4. Start the Caddy reverse proxy
 
     - Open the `.env` file in your favourite text editor.
-    - Add the Caddy reverse proxy configuration environment variables to the `.env` file. Refer to the [Caddy Reverse Proxy Documentation](../configuration.md#mathesar-caddy-reverse-proxy-1-configuration) for information on the environment variables.
+    - Add the Caddy reverse proxy configuration environment variables to the `.env` file. Refer to the [Caddy Reverse Proxy Documentation](../configuration.md#caddy-reverse-proxy-configuration) for information on the environment variables.
     - (Optional) Caddy creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation) if the `DOMAIN_NAME` has a `https` suffix and by default uses port 80 for `http` and 443 for `https`. These ports are needed to get an SSL certificate. If you wish to change the ports used by caddy, see [Run Mathesar on a non standart port](#run-mathesar-on-a-non-standard-http-port)
     - Your `.env` file should look something like this
       
@@ -118,24 +118,24 @@
 
         === "Linux"
             ```
-            sudo docker compose -f docker-compose.yml up mathesar-caddy-reverse-proxy-1 -d
+            sudo docker compose -f docker-compose.yml up caddy-reverse-proxy -d
             ```
 
         === "MacOS"
             ```
-            docker compose -f docker-compose.yml up mathesar-caddy-reverse-proxy-1 -d
+            docker compose -f docker-compose.yml up caddy-reverse-proxy -d
             ```
 
 5. (Optional) Start the Upgrade server to enable upgrading the docker image using the Mathesar UI.
 
     === "Linux"
         ```
-        sudo docker compose -f docker-compose.yml up mathesar-watchtower-1 -d
+        sudo docker compose -f docker-compose.yml up watchtower -d
         ```
 
     === "MacOS"
         ```
-        docker compose -f docker-compose.yml up mathesar-watchtower-1 -d
+        docker compose -f docker-compose.yml up watchtower -d
         ```
 
 
@@ -176,12 +176,12 @@ Starting the container using `docker compose -f docker-compose.yml up mathesar_s
 
     === "Linux"
         ```
-        sudo docker compose -f docker-compose.yml up mathesar-caddy-reverse-proxy-1 -d
+        sudo docker compose -f docker-compose.yml up caddy-reverse-proxy -d
         ```
 
     === "MacOS"
         ```
-        docker compose -f docker-compose.yml up mathesar-caddy-reverse-proxy-1 -d
+        docker compose -f docker-compose.yml up caddy-reverse-proxy -d
         ```
 
 ## Start/stop the server {:#start-stop}
