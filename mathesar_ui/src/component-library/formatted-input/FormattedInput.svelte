@@ -97,6 +97,10 @@
       });
       await tick();
       element?.setSelectionRange(newCursorPosition, newCursorPosition);
+      if (element) {
+        const { scrollWidth } = element;
+        element.scrollLeft = scrollWidth;
+      }
     } catch (error) {
       onParseError({ userInput, error });
     }
