@@ -60,15 +60,17 @@
     isRequestingToggleAllowDuplicates = true;
     try {
       const newAllowsDuplicates = !allowsDuplicates;
+      const promises = [];
       if (!newAllowsDuplicates) {
-        await columnsDataStore.patch(column.id, {
+        promises.push(await columnsDataStore.patch(column.id, {
           default: null,
-        });
+        }));
       }
-      await constraintsDataStore.setUniquenessOfColumn(
+      promises.push(await constraintsDataStore.setUniquenessOfColumn(
         column.column,
         !newAllowsDuplicates,
-      );
+      ));
+      await Promise.all(promises);
       const message = `Column "${column.column.name}" will ${
         newAllowsDuplicates ? '' : 'no longer '
       }allow duplicates.`;
