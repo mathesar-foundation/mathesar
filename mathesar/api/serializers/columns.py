@@ -6,6 +6,7 @@ from rest_framework.settings import api_settings
 from db.identifiers import is_identifier_too_long
 from db.columns.exceptions import InvalidTypeError
 from db.columns.exceptions import InvalidTypeOptionError
+from db.columns.exceptions import DefaultAssignmentToUniqueError
 from db.types.base import PostgresType, MathesarCustomType
 from db.types.operations.convert import get_db_type_enum_from_id
 from mathesar.api.exceptions.database_exceptions import (
@@ -17,6 +18,7 @@ from mathesar.api.serializers.shared_serializers import (
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
 )
 from mathesar.models.base import Column
+from mathesar.utils.columns import is_unique_column
 
 
 class InputValueField(serializers.CharField):
@@ -169,6 +171,15 @@ class ColumnSerializer(SimpleColumnSerializer):
     def validate(self, data):
         data = super().validate(data)
         # Reevaluate column display options based on the new column type.
+        if self.partial and 'column_default_dict' in data:
+            if data['column_default_dict'] is not None:
+                column_has_unique_key_constraint = is_unique_column(
+                    column_id=self.instance.id, table=self.instance.table)
+                if column_has_unique_key_constraint:
+                    raise database_api_exceptions.InvalidDefaultAPIException(
+                        DefaultAssignmentToUniqueError(self.instance),
+                        status_code=status.HTTP_400_BAD_REQUEST
+                    )
         if TYPE_KEY in data and self.instance:
             db_type = get_db_type_enum_from_id(data[TYPE_KEY].lower())
             target_types = self.instance.valid_target_types
