@@ -161,7 +161,7 @@ Starting the container using `docker compose -f docker-compose.yml up service -d
 ## Run Mathesar on a non-standard HTTP port
 !!! warning ""
 
-    Running on a non-standard port will disable automatic SSL certificate generation,
+    Caddy won't be able to verify the SSL certificate when running on a non-standard port,
     so make sure you already have a reverse proxy that handles SSL.
 
 1. Make the following changes to your `.env` file to run the Mathesar service in the localhost on a non standard http port
@@ -169,7 +169,7 @@ Starting the container using `docker compose -f docker-compose.yml up service -d
     ```diff
             ALLOWED_HOSTS='https://<your_domain_name>, .localhost, 127.0.0.1'
     -       DOMAIN_NAME='https://<your_domain_name>'
-    +       DOMAIN_NAME='http://<your_domain_name>:<port_number>' # For example `http://localhost:8004` or http://192.158.1.38:8004. Make sure to add the `http` suffix before the localhost to disable automatic SSL handling by caddy 
+    +       DOMAIN_NAME='http://<your_domain_name>:<port_number>' # For example `http://localhost:8004` or http://192.158.1.38:8004. Make sure to add the `http` suffix before the localhost to disable automatic https redirection by caddy
     +       HTTP_PORT='<port_number>'
     +       HTTPS_PORT='<different_port_number>' # For example `:8005`
     ```
