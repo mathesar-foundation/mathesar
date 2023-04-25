@@ -145,6 +145,9 @@
 
 <style lang="scss">
   .row {
+    user-select: none;
+    -webkit-user-select: none;
+
     &.processing {
       pointer-events: none;
     }

@@ -69,6 +69,7 @@ nav:
           - Install via Docker Compose: install/docker-compose/index.md
           - Under the hood: install/docker-compose/under-the-hood.md
           - Troubleshooting: install/docker-compose/troubleshooting.md
+      - Configure Mathesar: install/configuration.md
   - Product:
       - Introduction: product/intro.md
       - Syncing database changes: product/syncing-db.md
