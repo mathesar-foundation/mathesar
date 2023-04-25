@@ -159,9 +159,19 @@
     --cell-border-horizontal: 1px solid var(--slate-200);
     --cell-border-vertical: 1px solid var(--slate-200);
 
-    --page-padding: 1em;
+    --page-padding-x: 1em;
+    --page-padding-y: 1em;
+    --page-padding: var(--page-padding-x) var(--page-padding-y);
+
+    --outer-page-padding-for-inset-page: 0;
+    --inset-page-padding: var(--size-xx-large) var(--page-padding-x);
 
     --max-layout-width: 54rem;
+    // For database page, schema page, and admin pages
+    --max-layout-width-console-pages: 72rem;
+    // For import upload, import preview pages
+    --max-layout-width-data-pages: 67.357rem;
+
     // Setting the header height here
     // since when the header is fixed
     // we can use this variable to add margin-top

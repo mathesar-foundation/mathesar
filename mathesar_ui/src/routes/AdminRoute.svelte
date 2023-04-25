@@ -10,8 +10,6 @@
   import PageLayoutWithSidebar from '@mathesar/layouts/PageLayoutWithSidebar.svelte';
   import { ADMIN_UPDATE_PAGE_URL, ADMIN_URL } from './urls';
   import UsersRoute from './UsersRoute.svelte';
-
-  const PAGE_MAX_WIDTH = '85rem';
 </script>
 
 <AppendBreadcrumb
@@ -26,7 +24,9 @@
 <Route path="/" redirect={ADMIN_UPDATE_PAGE_URL} />
 
 <LayoutWithHeader
-  cssVariables={{ '--max-layout-width': PAGE_MAX_WIDTH }}
+  cssVariables={{
+    '--max-layout-width': 'var(--max-layout-width-console-pages)',
+  }}
   restrictWidth
 >
   <AppSecondaryHeader

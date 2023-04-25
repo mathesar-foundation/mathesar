@@ -5,7 +5,6 @@
   export let pageTitleAndMetaProps: ComponentProps<PageTitleAndMeta>;
   export let restrictWidth = true;
   export let theme: 'dark' | 'light' = 'dark';
-  // export let showTutorial: boolean = false;
 </script>
 
 <div
@@ -20,18 +19,10 @@
         <slot slot="bottom" name="bottom" />
       </PageTitleAndMeta>
     </div>
-    <!-- {#if showTutorial}
-      <div class="tutorial-contianer">
-        <slot name="tutorial" />
-      </div>
-    {/if} -->
   </div>
 </div>
 
 <style>
-  .container {
-    padding: 1.5rem 1rem;
-  }
   .theme-dark {
     background-color: var(--slate-500);
     color: var(--white);
@@ -39,12 +30,12 @@
   .theme-light {
     background-color: var(--sand-200);
   }
+  .content {
+    padding: var(--size-x-large) var(--page-padding-x);
+  }
   .content.restrict-width {
-    max-width: var(--max-layout-width, 54rem);
+    max-width: var(--max-layout-width);
     margin-left: auto;
     margin-right: auto;
   }
-  /* .tutorial-contianer {
-    margin-top: 2rem;
-  } */
 </style>
