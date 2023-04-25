@@ -19,6 +19,7 @@
       outline: none;
       position: relative;
       user-select: none;
+      -webkit-user-select: none; /* Safari */
       list-style: none;
       overflow: hidden;
       border-radius: 2px 2px 0px 0px;
