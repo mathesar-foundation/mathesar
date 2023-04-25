@@ -9,7 +9,13 @@
   export let disabled = false;
 </script>
 
-<MenuItemWrapper tag="a" {href} {disabled} {...$$restProps}>
+<MenuItemWrapper
+  tag="a"
+  class="menu-item-link"
+  {href}
+  {disabled}
+  {...$$restProps}
+>
   <MenuItemContents {icon} {hasNotificationDot}>
     <slot />
   </MenuItemContents>

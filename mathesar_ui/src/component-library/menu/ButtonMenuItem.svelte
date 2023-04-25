@@ -21,24 +21,19 @@
   }
 </script>
 
-<MenuItemWrapper on:click={handleClick} {disabled} {danger} {...$$restProps}>
+<MenuItemWrapper
+  tag="button"
+  class="menu-item-button"
+  on:click={handleClick}
+  {disabled}
+  {danger}
+  {...$$restProps}
+>
   <MenuItemContents {icon} {hasNotificationDot}>
-    <!--
-      Why not put the button higher up, enclosing everything?
-
-      Because we need for `.menu-item` to be `display: contents` to make the grid
-      cells line up. We lose the semantic value of a button if we set `display:
-      contents` on it. Putting it here retains a11y by keeping the label text
-      within the button, and also because the click handler is set higher up the
-      user can still click anywhere. I'm not sure this is perfectly sound. Open
-      to better solutions.
-    -->
-    <button class="passthrough-button">
-      {#if label}
-        {label}
-      {:else}
-        <slot />
-      {/if}
-    </button>
+    {#if label}
+      {label}
+    {:else}
+      <slot />
+    {/if}
   </MenuItemContents>
 </MenuItemWrapper>
