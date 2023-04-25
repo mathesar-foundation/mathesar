@@ -29,7 +29,7 @@
 ## Install using the interactive script
 
 !!! info "Installation Script Overview"
-    The interactive script will set up a database server, the Mathesar webserver, an upgrade server for upgrading using the UI and a reverse proxy. If you want to customise the setup process, please look at the [Manual Install section](#manual-install)
+    The interactive script will set up a database server, the Mathesar web server, an upgrade server for upgrading using the UI, and a reverse proxy. If you want to customize the setup process, please look at the [Manual Install section](#manual-install)
 
 
 1. Paste this command into your terminal to begin installing the latest version of Mathesar:
@@ -53,7 +53,7 @@
 
 1. Open the Mathesar configuration directory where you'd like to install Mathesar. By convention, we do it within `/etc/mathesar`
 
-2. Download necessary files into the configuration directory
+2. Download the necessary files into the configuration directory
 
     - Download the `docker-compose.yml` file from [https://github.com/centerofci/mathesar/raw/master/docker-compose.yml](https://github.com/centerofci/mathesar/raw/master/docker-compose.yml)
      - Download the example `.env.example` file used for setting the [configuration variables](../configuration.md) from [https://github.com/centerofci/mathesar/raw/master/.env.example](https://github.com/centerofci/mathesar/raw/master/.env.example)
@@ -61,11 +61,11 @@
      - Download the `Caddyfile` from [https://github.com/centerofci/mathesar/raw/master/Caddyfile](https://github.com/centerofci/mathesar/raw/master/Caddyfile).
 
 3. Start the Mathesar web server
-    - Open the `.env` file in your favourite text editor.
+    - Open the `.env` file in your favorite text editor.
     - Add the **Database server configuration** environment variables to the `.env` file. Refer to the [Database Configuration Documentation](../configuration.md#database-configuration) and for information on the environment variables.
     - Add the **Mathesar server configuration** environment variables to the `.env` file. Refer to the [Backend Documentation](../configuration.md#backend-configuration) and for information on the environment variables.
     - Your `.env` file should look something like this
-      ``` bash
+      ``` 
       .env
       ===================================================================
         POSTGRES_USER='mathesar'
@@ -78,7 +78,7 @@
         MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)'
         DJANGO_SUPERUSER_PASSWORD='password'
       ```
-    - (Optional) The next step will start a Postgres database container called ` mathesar_db` automatically, this database won't be necessary if you already have a database and you plan on using it. Refer to [Start Mathesar Server without the Database Server](#start-mathesar-server-without-the-database-server) for starting the web server without the additional db dependency.
+    - (Optional) The next step will start a Postgres database container called ` mathesar_db` automatically, this database won't be necessary if you already have a database, and you plan on using it. Refer to [Start Mathesar Server without the Database Server](#start-mathesar-server-without-the-database-server) for starting the web server without the additional db dependency.
     - Start the Mathesar web server
 
         === "Linux"
@@ -93,9 +93,9 @@
 
 4. Start the Caddy reverse proxy
 
-    - Open the `.env` file in your favourite text editor.
+    - Open the `.env` file in your favorite text editor.
     - Add the Caddy reverse proxy configuration environment variables to the `.env` file. Refer to the [Caddy Reverse Proxy Documentation](../configuration.md#caddy-reverse-proxy-configuration) for information on the environment variables.
-    - (Optional) Caddy creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation) if the `DOMAIN_NAME` has a `https` suffix and by default uses port 80 for `http` and 443 for `https` for the SSL certificate verification. If you wish to change the ports used by caddy, see [Run Mathesar on a non standart port](#run-mathesar-on-a-non-standard-http-port)
+    - (Optional) Caddy creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation) if the `DOMAIN_NAME` has a `https` suffix and by default uses port 80 for `http` and 443 for `https` for the SSL certificate verification. If you wish to change the ports used by a caddy, see [Run Mathesar on a non-standard port](#run-mathesar-on-a-non-standard-http-port)
     - Your `.env` file should look something like this
       
      ``` diff
@@ -164,7 +164,7 @@ Starting the container using `docker compose -f docker-compose.yml up service -d
     Caddy won't be able to verify the SSL certificate when running on a non-standard port,
     so make sure you already have a reverse proxy that handles SSL.
 
-1. Make the following changes to your `.env` file to run the Mathesar service in the localhost on a non standard http port
+1. Make the following changes to your `.env` file to run the Mathesar service on a non-standard HTTP port
 
     ```diff
             ALLOWED_HOSTS='https://<your_domain_name>, .localhost, 127.0.0.1'
@@ -222,7 +222,7 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 #### Upgrade
 
 !!! tip "Upgrade from within Mathesar"
-    You can also run the upgrade from within Mathesar by logging into as an admin user and navigating to "Administration" (in the top right menu) > "Software Update"
+    You can also run the upgrade from within Mathesar by logging in as an admin user and navigating to "Administration" (in the top right menu) > "Software Update"
 
 Manually upgrade Mathesar to the newest version using watch tower:
 
