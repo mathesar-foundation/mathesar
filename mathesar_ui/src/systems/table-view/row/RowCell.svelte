@@ -217,6 +217,7 @@
 <style lang="scss">
   .editable-cell.cell {
     user-select: none;
+    -webkit-user-select: none; /* Safari */
     background: var(--cell-bg-color-base);
     &.is-active {
       z-index: var(--z-index__sheet__active-cell);
