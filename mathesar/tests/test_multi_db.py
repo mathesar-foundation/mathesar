@@ -16,6 +16,9 @@ def multi_db_engine(multi_db_test_db, MOD_engine_cache):
     return MOD_engine_cache(multi_db_test_db)
 
 
+# NOTE this test might result in false failures, because the way we define user
+# databases might not support runtime changes in certain edge cases (and such changes are
+# performed in this tests' fixtures). Talk to Brent or Dom in case of problems.
 def test_multi_db_schema(engine, multi_db_engine, client, create_db_schema):
     test_schemas = ["test_schema_1", "test_schema_2"]
     for schema_name in test_schemas:
@@ -35,6 +38,9 @@ def test_multi_db_schema(engine, multi_db_engine, client, create_db_schema):
     assert set(response_schemas) == set(expected_schemas)
 
 
+# NOTE this test might result in false failures, because the way we define user
+# databases might not support runtime changes in certain edge cases (and such changes are
+# performed in this tests' fixtures). Talk to Brent or Dom in case of problems.
 def test_multi_db_tables(engine, multi_db_engine, client, create_mathesar_table):
     schema_name = "test_multi_db_tables_schema"
     test_tables = ["test_table_1", "test_table_2"]
