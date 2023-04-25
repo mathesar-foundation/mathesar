@@ -38,18 +38,18 @@
     ```
       The above command creates a docker container containing the Mathesar server running on the `localhost`,
      listening on port `8000` and additionally
-     - Passes configuration options as environment variables to the docker container. Refer to [Configuring Mathesar webserver](../configuration.md#backend-configuration) for setting the correct value to these configuration options and for additional configuration option. The configuration options used in the above command are
+     - Passes configuration options as environment variables to the docker container. Refer to [Configuring Mathesar webserver](../configuration.md#backend-configuration) for setting the correct value to these configuration options and for additional configuration options. The configuration options used in the above command are
        - DJANGO_DATABASE_URL
        - DJANGO_DATABASE_KEY
        - MATHESAR_DATABASES
        - SECRET_KEY
        - Creates two [named docker volumes](https://docs.docker.com/storage/volumes/)
           ```
-               - static # For storing static assets like css, js files
-               - media # For storing user uploaded media files
+               - static # For storing static assets like CSS, js files
+               - media # For storing user-uploaded media files
           ```
-       - Sets the container name as `mathesar_service` using the `--name` parameter, runs the container in a detached mode using `--detach` parameter and exposes the port `8000` to the `localhost`. Refer to [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/#options) for additional configuration options.
-       - Finally, sets the container entrypoint to run the script `run.sh` which starts a gunicorn server on the port `8000`
+       - Sets the container name as `mathesar_service` using the `--name` parameter, runs the container in a detached mode using the `--detach` parameter, and exposes the port `8000` to the `localhost`. Refer to [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/#options) for additional configuration options.
+       - Finally, sets the container entrypoint to run the script `run.sh` which starts a gunicorn server on port `8000`
 
 2. Verify if the Mathesar Server is running successfully:
     ```bash
@@ -58,7 +58,7 @@
 
 3. Run Mathesar Installation script
     ```bash
-    # Install Mathesar types and casting function on the databases specified using the `MATHESAR_DATABASES` env variable in the previous step, run database migrations on the Django meta database,  store the static files in the `static` volumes.
+    # Install Mathesar types and casting function on the databases specified using the `MATHESAR_DATABASES` env variable in the previous step, run database migrations on the Django meta database, and store the static files in the `static` volumes.
     docker exec mathesar_service python install.py --skip-confirm
     ```
 
