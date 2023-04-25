@@ -119,7 +119,14 @@
     docker rmi mathesar_service
     ```
 
-3. Remove Mathesar internal schemas.
+3. Remove volumes related to Mathesar
+
+    ```bash
+    docker volume rm static &&
+    docker volume rm media
+    ```
+
+4. Remove Mathesar internal schemas.
 
     **If you connected Mathesar to a database**, the installation process would have created a new schema for Mathesar's use. You can remove this schema from that database as follows:
 
