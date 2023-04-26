@@ -17,7 +17,9 @@ def rename_schema(schema_name, engine, rename_to):
     """
     if rename_to == schema_name:
         return
-    execute_msar_func_with_engine(engine, 'rename_schema', schema_name, rename_to)
+    return execute_msar_func_with_engine(
+        engine, 'rename_schema', schema_name, rename_to
+    ).fetchone()[0]
 
 
 def comment_on_schema(schema_name, engine, comment):
@@ -34,7 +36,9 @@ def comment_on_schema(schema_name, engine, comment):
     Returns:
         Returns a string giving the command that was run.
     """
-    execute_msar_func_with_engine(engine, 'comment_on_schema', schema_name, comment)
+    return execute_msar_func_with_engine(
+        engine, 'comment_on_schema', schema_name, comment
+    ).fetchone()[0]
 
 
 def alter_schema(name, engine, update_data):

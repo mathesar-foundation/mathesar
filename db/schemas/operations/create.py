@@ -17,6 +17,10 @@ def create_schema(schema_name, engine, comment=None, if_not_exists=False):
     Returns:
         Returns a string giving the command that was run.
     """
-    execute_msar_func_with_engine(engine, 'create_schema', schema_name, if_not_exists)
+    result = execute_msar_func_with_engine(
+        engine, 'create_schema', schema_name, if_not_exists
+    ).fetchone()[0]
+
     if comment:
         comment_on_schema(schema_name, engine, comment)
+    return result

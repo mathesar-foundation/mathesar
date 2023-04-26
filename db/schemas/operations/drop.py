@@ -15,4 +15,6 @@ def drop_schema(schema_name, engine, cascade=False, if_exists=False):
     Returns:
         Returns a string giving the command that was run.
     """
-    execute_msar_func_with_engine(engine, 'drop_schema', schema_name, cascade, if_exists)
+    return execute_msar_func_with_engine(
+        engine, 'drop_schema', schema_name, cascade, if_exists
+    ).fetchone()[0]
