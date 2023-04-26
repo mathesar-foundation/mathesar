@@ -47,6 +47,7 @@
     --Menu__item-hover-background: var(--sand-200);
     --Menu__item-active-background: var(--sand-300);
     --Menu__item-active-hover-background: var(--sand-300);
+    --Menu__item-focus-outline-color: var(--sand-400);
   }
   .title {
     font-weight: 500;

@@ -73,6 +73,9 @@
         );
       }
     }
+    &:focus {
+      outline: 2px solid var(--Menu__item-focus-outline-color, transparent);
+    }
   }
 
   &.has-icon {

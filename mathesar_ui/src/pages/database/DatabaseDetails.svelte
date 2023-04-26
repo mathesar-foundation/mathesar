@@ -229,6 +229,7 @@
     .schema-list-title {
       font-size: var(--text-size-x-large);
       font-weight: 500;
+      margin-top: var(--size-super-ultra-small);
     }
 
     .schema-list {
@@ -237,8 +238,10 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      * + * {
-        margin-top: 0.714rem;
+      margin-top: var(--size-x-large);
+
+      .schema-list-item + .schema-list-item {
+        margin-top: var(--size-base);
       }
     }
   }
