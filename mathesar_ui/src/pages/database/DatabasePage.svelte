@@ -17,6 +17,7 @@
     iconRefresh,
   } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import PageLayoutWithSidebar from '@mathesar/layouts/PageLayoutWithSidebar.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentDatabase } from '@mathesar/stores/databases';
@@ -30,6 +31,7 @@
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import DatabaseNavigationList from './DatabaseNavigationList.svelte';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
@@ -117,96 +119,106 @@
 
 <svelte:head><title>{makeSimplePageTitle(database.name)}</title></svelte:head>
 
-<LayoutWithHeader restrictWidth={true}>
-  <AppSecondaryHeader
-    slot="secondary-header"
-    pageTitleAndMetaProps={{
-      name: database.name,
-      type: 'database',
-      icon: iconDatabase,
-    }}
-  >
-    <svelte:fragment slot="action">
-      {#if canExecuteDDL || canEditPermissions}
-        <div>
-          {#if canExecuteDDL}
-            <Button on:click={addSchema} appearance="primary">
-              <Icon {...iconAddNew} />
-              <span>Create Schema</span>
-            </Button>
-          {/if}
-          {#if canEditPermissions}
-            <Button on:click={manageAccess} appearance="secondary">
-              <Icon {...iconManageAccess} />
-              <span>Manage Access</span>
-            </Button>
-          {/if}
+<LayoutWithHeader
+  restrictWidth={true}
+  cssVariables={{
+    '--layout-background-color': 'var(--sand-100)',
+    '--max-layout-width': 'var(--max-layout-width-console-pages)',
+    '--PageLayoutWithSidebar__gap': 'var(--size-ultra-large)',
+    '--AppSecondaryHeader__padding': 'var(--size-x-large) 0',
+  }}
+>
+  <PageLayoutWithSidebar>
+    <DatabaseNavigationList slot="sidebar" />
+    <AppSecondaryHeader
+      pageTitleAndMetaProps={{
+        name: database.name,
+        type: 'database',
+        icon: iconDatabase,
+      }}
+    >
+      <svelte:fragment slot="action">
+        {#if canExecuteDDL || canEditPermissions}
+          <div>
+            {#if canExecuteDDL}
+              <Button on:click={addSchema} appearance="primary">
+                <Icon {...iconAddNew} />
+                <span>Create Schema</span>
+              </Button>
+            {/if}
+            {#if canEditPermissions}
+              <Button on:click={manageAccess} appearance="secondary">
+                <Icon {...iconManageAccess} />
+                <span>Manage Access</span>
+              </Button>
+            {/if}
+          </div>
+        {/if}
+      </svelte:fragment>
+    </AppSecondaryHeader>
+
+    <div class="schema-list-wrapper">
+      <div class="schema-list-title-container">
+        <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
+        <div class="reflect">
+          <div class="button">
+            <SpinnerButton
+              onClick={reflect}
+              appearance="secondary"
+              label="Sync External Changes"
+              icon={iconRefresh}
+            />
+          </div>
+          <Help>
+            <p>
+              If you make structural changes to the database outside Mathesar
+              (e.g. using another tool to add a schema, table, or column), those
+              changes will not be reflected in Mathesar until you manually sync
+              them with this button.
+            </p>
+            <p>
+              External changes to data (e.g. adding or editing <em>rows</em>)
+              will be automatically reflected without clicking this button.
+            </p>
+          </Help>
+        </div>
+      </div>
+      <TextInputWithPrefix
+        placeholder="Search Schemas"
+        bind:value={filterQuery}
+        prefixIcon={iconSearch}
+      />
+
+      {#if filterQuery}
+        <div class="search-results-info">
+          <p>
+            {labeledCount(displayList, 'results')}
+            for all schemas matching <strong>{filterQuery}</strong>
+          </p>
+          <Button appearance="secondary" on:click={handleClearFilterQuery}>
+            Clear
+          </Button>
         </div>
       {/if}
-    </svelte:fragment>
-  </AppSecondaryHeader>
 
-  <div class="schema-list-wrapper">
-    <div class="schema-list-title-container">
-      <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
-      <div class="reflect">
-        <div class="button">
-          <SpinnerButton
-            onClick={reflect}
-            appearance="secondary"
-            label="Sync External Changes"
-            icon={iconRefresh}
-          />
-        </div>
-        <Help>
-          <p>
-            If you make structural changes to the database outside Mathesar
-            (e.g. using another tool to add a schema, table, or column), those
-            changes will not be reflected in Mathesar until you manually sync
-            them with this button.
-          </p>
-          <p>
-            External changes to data (e.g. adding or editing <em>rows</em>) will
-            be automatically reflected without clicking this button.
-          </p>
-        </Help>
-      </div>
+      <ul class="schema-list">
+        {#each displayList as schema (schema.id)}
+          <li class="schema-list-item">
+            <SchemaRow
+              {database}
+              {schema}
+              canExecuteDDL={userProfile?.hasPermission(
+                { database, schema },
+                'canExecuteDDL',
+              )}
+              on:edit={() => editSchema(schema)}
+              on:delete={() => deleteSchema(schema)}
+            />
+          </li>
+        {/each}
+      </ul>
     </div>
-    <TextInputWithPrefix
-      placeholder="Search Schemas"
-      bind:value={filterQuery}
-      prefixIcon={iconSearch}
-    />
-
-    {#if filterQuery}
-      <div class="search-results-info">
-        <p>
-          {labeledCount(displayList, 'results')}
-          for all schemas matching <strong>{filterQuery}</strong>
-        </p>
-        <Button appearance="secondary" on:click={handleClearFilterQuery}>
-          Clear
-        </Button>
-      </div>
-    {/if}
-
-    <ul class="schema-list">
-      {#each displayList as schema (schema.id)}
-        <li class="schema-list-item">
-          <SchemaRow
-            {database}
-            {schema}
-            canExecuteDDL={userProfile?.hasPermission(
-              { database, schema },
-              'canExecuteDDL',
-            )}
-            on:edit={() => editSchema(schema)}
-            on:delete={() => deleteSchema(schema)}
-          />
-        </li>
-      {/each}
-    </ul>
-  </div>
+  </PageLayoutWithSidebar>
 </LayoutWithHeader>
 
 <AddEditSchemaModal

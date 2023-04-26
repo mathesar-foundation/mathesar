@@ -4,7 +4,7 @@
 
   export let pageTitleAndMetaProps: ComponentProps<PageTitleAndMeta>;
   export let restrictWidth = true;
-  export let theme: 'dark' | 'light' = 'dark';
+  export let theme: 'dark' | 'light' | undefined = undefined;
 </script>
 
 <div
@@ -31,7 +31,10 @@
     background-color: var(--sand-200);
   }
   .content {
-    padding: var(--size-x-large) var(--page-padding-x);
+    padding: var(
+      --AppSecondaryHeader__padding,
+      var(--size-x-large) var(--page-padding-x)
+    );
   }
   .content.restrict-width {
     max-width: var(--max-layout-width);
