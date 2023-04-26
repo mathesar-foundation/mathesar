@@ -40,8 +40,7 @@
         <DropdownMenu
           showArrow={false}
           triggerAppearance="plain"
-          closeOnInnerClick={true}
-          label=""
+          preferredPlacement="bottom-end"
           icon={iconMoreActions}
           menuStyle="--spacing-y:0.8em;"
         >
