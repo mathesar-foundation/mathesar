@@ -23,6 +23,7 @@
     align-items: center;
     background-color: var(--Menu__item-background, transparent);
     padding: 0 var(--spacing-x, $spacing-x-default);
+    border-radius: var(--Menu__item-border-radius, 0);
 
     &.menu-item-link {
       text-decoration: none;
@@ -62,6 +63,15 @@
     }
     > .control {
       --checkbox-margin-bottom: 0;
+    }
+    &.active {
+      background-color: var(--Menu__item-active-background, transparent);
+      &:hover {
+        background-color: var(
+          --Menu__item-active-hover-background,
+          var(--slate-100)
+        );
+      }
     }
   }
 

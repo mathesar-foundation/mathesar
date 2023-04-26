@@ -129,7 +129,7 @@
   }}
 >
   <PageLayoutWithSidebar>
-    <DatabaseNavigationList slot="sidebar" />
+    <DatabaseNavigationList {database} slot="sidebar" />
     <AppSecondaryHeader
       pageTitleAndMetaProps={{
         name: database.name,

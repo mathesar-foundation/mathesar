@@ -13,37 +13,39 @@
   $: upgradable = $releaseDataStore?.value?.upgradeStatus === 'upgradable';
 </script>
 
-<Menu style="--min-width:100%;font-size: var(--text-size-large);">
-  <a
-    role="menuitem"
-    href={ADMIN_UPDATE_PAGE_URL}
-    class="menu-item menu-item-link"
-    use:active
-  >
-    <MenuItemContents icon={iconSettingsMajor} hasNotificationDot={upgradable}>
-      Update
-    </MenuItemContents>
-  </a>
-  <a
-    role="menuitem"
-    href={ADMIN_USERS_PAGE_URL}
-    class="menu-item menu-item-link"
-    use:active
-  >
-    <MenuItemContents icon={iconMultipleUsers}>Users</MenuItemContents>
-  </a>
-</Menu>
+<div class="admin-navigation">
+  <Menu>
+    <a
+      role="menuitem"
+      href={ADMIN_UPDATE_PAGE_URL}
+      class="menu-item menu-item-link"
+      use:active
+    >
+      <MenuItemContents
+        icon={iconSettingsMajor}
+        hasNotificationDot={upgradable}
+      >
+        Update
+      </MenuItemContents>
+    </a>
+    <a
+      role="menuitem"
+      href={ADMIN_USERS_PAGE_URL}
+      class="menu-item menu-item-link"
+      use:active
+    >
+      <MenuItemContents icon={iconMultipleUsers}>Users</MenuItemContents>
+    </a>
+  </Menu>
+</div>
 
 <style lang="scss">
-  a {
-    border-radius: var(--border-radius-m);
-
-    &:global(.active) {
-      --Menu__item-background: var(--sand-200);
-      --Menu__item-hover-background: var(--sand-200);
-    }
-    &:global(:not(.active)) {
-      --Menu__item-hover-background: var(--sand-100);
-    }
+  .admin-navigation {
+    font-size: var(--text-size-large);
+    --min-width: 100%;
+    --Menu__item-border-radius: var(--border-radius-m);
+    --Menu__item-hover-background: var(--sand-100);
+    --Menu__item-active-background: var(--sand-200);
+    --Menu__item-active-hover-background: var(--sand-200);
   }
 </style>

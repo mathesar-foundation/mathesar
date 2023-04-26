@@ -7,11 +7,14 @@
   export let href: string;
   export let hasNotificationDot = false;
   export let disabled = false;
+
+  let classes = '';
+  export { classes as class };
 </script>
 
 <MenuItemWrapper
   tag="a"
-  class="menu-item-link"
+  class="menu-item-link {classes}"
   {href}
   {disabled}
   {...$$restProps}
