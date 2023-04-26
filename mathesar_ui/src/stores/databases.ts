@@ -17,7 +17,7 @@ export const currentDBName: Writable<Database['name'] | undefined> = writable(
 export interface DatabaseStoreData {
   preload?: boolean;
   state: States;
-  data?: Database[];
+  data: Database[];
   error?: string;
 }
 
@@ -73,6 +73,7 @@ export async function reloadDatabases(): Promise<
     return response;
   } catch (err) {
     databases.set({
+      data: [],
       state: States.Error,
       error: err instanceof Error ? err.message : undefined,
     });
