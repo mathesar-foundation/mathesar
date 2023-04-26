@@ -3,7 +3,7 @@ import { preloadCommonData } from '@mathesar/utils/preloadData';
 import databaseApi from '@mathesar/api/databases';
 import { States } from '@mathesar/api/utils/requestUtils';
 
-import type { Writable, Readable } from 'svelte/store';
+import type { Writable } from 'svelte/store';
 import type { Database } from '@mathesar/AppTypes';
 import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
 import type { CancellablePromise } from '@mathesar-component-library';
@@ -26,18 +26,6 @@ export const databases = writable<DatabaseStoreData>({
   state: States.Loading,
   data: commonData?.databases ?? [],
 });
-
-export const currentDBId: Readable<Database['id'] | undefined> = derived(
-  [currentDBName, databases],
-  ([_currentDBName, databasesStore]) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const _databases = databasesStore.data;
-    if (!_databases?.length) {
-      return undefined;
-    }
-    return _databases?.find((database) => database.name === _currentDBName)?.id;
-  },
-);
 
 export const currentDatabase = derived(
   [currentDBName, databases],
