@@ -5,10 +5,7 @@ import {
   DateTimeFormatter,
   DateTimeSpecification,
 } from '@mathesar/utils/date-time';
-import type {
-  DateTimeCellExternalProps,
-  CellValueFormatter,
-} from './components/typeDefinitions';
+import type { DateTimeCellExternalProps } from './components/typeDefinitions';
 import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
 import DateTimeCell from './components/date-time/DateTimeCell.svelte';
 import DateTimeInput from './components/date-time/DateTimeInput.svelte';
@@ -58,8 +55,8 @@ const stringType: CellComponentFactory = {
       allowRelativePresets: true,
     },
   }),
-  getDisplayFormatter(column: DateLikeColumn): CellValueFormatter<string> {
-    return getProps(column).formatForDisplay;
+  getDisplayFormatter(column: DateLikeColumn) {
+    return (v) => getProps(column).formatForDisplay(String(v));
   },
 };
 

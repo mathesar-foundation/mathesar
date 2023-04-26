@@ -57,6 +57,7 @@
     flex-shrink: 0;
     border-bottom: 1px solid var(--slate-200);
     user-select: none;
+    -webkit-user-select: none; /* Safari */
     overflow: hidden;
 
     > div {

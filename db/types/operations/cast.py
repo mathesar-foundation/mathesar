@@ -244,6 +244,7 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
     """
 
 
+# TODO Replace with SQL version (msar.get_cast_function_name) when refactoring.
 def get_cast_function_name(target_type):
     """
     Some casting functions change postgres config parameters  for the

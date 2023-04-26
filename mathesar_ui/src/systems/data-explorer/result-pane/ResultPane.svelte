@@ -19,10 +19,9 @@
 
 <style lang="scss">
   section {
+    height: 100%;
     position: relative;
-    flex-grow: 1;
     overflow: hidden;
-    flex-shrink: 0;
     display: flex;
     flex-direction: column;
 

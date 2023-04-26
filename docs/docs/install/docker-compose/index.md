@@ -38,6 +38,9 @@
 
 1. When finished, the installer will display the URL where you can run Mathesar from your web browser.
 
+!!! note "Connecting to a local database"
+    Once you have successfully installed Mathesar, if you wish to connect it to an existing database that is running locally on the host machine, you can refer to the following [guide](./connecting-local-db.md).
+
 !!! info "Getting help"
     If you run into any problems during installation, see [troubleshooting](./troubleshooting.md) or [open a ticket describing your problem](https://github.com/centerofci/mathesar/issues/new/choose).
 
@@ -49,24 +52,24 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 
     === "Linux"
         ```
-        sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod up -d
+        sudo docker compose -f /etc/mathesar/docker-compose.yml up -d
         ```
 
     === "MacOS"
         ```
-        docker compose -f /etc/mathesar/docker-compose.yml --profile prod up -d
+        docker compose -f /etc/mathesar/docker-compose.yml up -d
         ```
 
 - **Stop** Mathesar:
 
     === "Linux"
         ```
-        sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down
+        sudo docker compose -f /etc/mathesar/docker-compose.yml down
         ```
 
     === "MacOS"
         ```
-        docker compose -f /etc/mathesar/docker-compose.yml --profile prod down
+        docker compose -f /etc/mathesar/docker-compose.yml down
         ```
 
     This stops all Mathesar Docker containers and releases their ports.
@@ -98,12 +101,12 @@ Manually upgrade Mathesar to the newest version:
 
     === "Linux"
         ```
-        sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down --rmi all -v
+        sudo docker compose -f /etc/mathesar/docker-compose.yml down --rmi all -v
         ```
 
     === "MacOS"
         ```
-        docker compose -f /etc/mathesar/docker-compose.yml --profile prod down --rmi all -v
+        docker compose -f /etc/mathesar/docker-compose.yml down --rmi all -v
         ```
 
 1. Remove configuration files.
