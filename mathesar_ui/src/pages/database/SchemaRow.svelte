@@ -103,7 +103,7 @@
     flex-direction: column;
   }
 
-  .schema-row > :global(* + *) {
+  .schema-row > :global(* + *:not(.hyperlink-overlay)) {
     margin-top: 0.75rem;
   }
 
