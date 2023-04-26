@@ -19,7 +19,7 @@
 
 <style lang="scss">
   .page-sidebar-layout {
-    --PageLayoutWithSidebar__gap: 1rem;
+    --PageLayoutWithSidebar__gap: var(--page-padding-x);
     display: flex;
     flex-wrap: wrap;
     margin-left: calc(-1 * var(--PageLayoutWithSidebar__gap));
@@ -28,6 +28,7 @@
       flex-grow: 1;
       flex-basis: var(--PageLayoutWithSidebar__sidebar-width, 14rem);
       margin-left: var(--PageLayoutWithSidebar__gap);
+      margin-bottom: var(--PageLayoutWithSidebar__gap);
     }
 
     main {
