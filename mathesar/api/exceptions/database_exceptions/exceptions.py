@@ -175,13 +175,27 @@ class DynamicDefaultAPIException(MathesarAPIException):
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
-        super().__init__(exception, self.error_code, self.err_msg(exception), field, details, status_code)
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class StaticDefaultAssignmentToDynamicDefaultException(Exception):
+    error_code = ErrorCodes.DynamicDefaultAlterationToStaticDefault.value
+
+    def __init__(
+            self,
+            exception,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        super().__init__(exception, self.error_code, self.err_msg(exception,message), field, details, status_code)
 
     @staticmethod
-    def err_msg(exception):
+    def err_msg(exception, message):
         if type(exception) is DynamicDefaultModificationError and exception.column:
             return f'Dynamic Default of {exception.column.name} column can not be altered.'
-        return 'Invalid Dynamic Default modification requested.'
+        return message
 
 
 class UnsupportedTypeAPIException(MathesarAPIException):
