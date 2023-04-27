@@ -178,8 +178,6 @@ class ColumnSerializer(SimpleColumnSerializer):
                             DynamicDefaultModificationError(self.instance),
                             status_code=status.HTTP_400_BAD_REQUEST
                         )
-                    else:
-                        raise Exception
         if TYPE_KEY in data and self.instance:
             db_type = get_db_type_enum_from_id(data[TYPE_KEY].lower())
             target_types = self.instance.valid_target_types
