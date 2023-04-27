@@ -174,7 +174,7 @@ class ColumnSerializer(SimpleColumnSerializer):
             instance_serializer = ColumnSerializer(self.instance)
             if 'default' in instance_serializer.data and 'is_dyanmic' in instance_serializer.data['default']:
                 if instance_serializer.data['default']['is_dynamic'] is True:
-                    raise database_api_exceptions.DynamicDefaultAPIException(
+                    raise database_api_exceptions.StaticDefaultAssignmentToDynamicDefaultException(
                         DynamicDefaultModificationError(self.instance),
                         status_code=status.HTTP_400_BAD_REQUEST
                     )
