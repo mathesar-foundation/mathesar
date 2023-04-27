@@ -17,7 +17,6 @@ from mathesar.api.serializers.shared_serializers import (
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
 )
 from mathesar.models.base import Column
-from mathesar.utils.columns import is_primary_column
 
 
 class InputValueField(serializers.CharField):
