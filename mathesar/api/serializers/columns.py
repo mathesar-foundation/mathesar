@@ -171,12 +171,15 @@ class ColumnSerializer(SimpleColumnSerializer):
         # Reevaluate column display options based on the new column type.
         if self.partial and 'column_default_dict' in data:
             instance_serializer = ColumnSerializer(self.instance)
-            if 'default' in instance_serializer.data and 'is_dynamic' in instance_serializer.data['default']:
-                if instance_serializer.data['default']['is_dynamic'] is True:
-                    raise database_api_exceptions.StaticDefaultAssignmentToDynamicDefaultException(
-                        DynamicDefaultModificationError(self.instance),
-                        status_code=status.HTTP_400_BAD_REQUEST
-                    )
+            if instance_serializer.data is not None and 'default' in instance_serializer.data:
+                if instance_serializer.data['default'] is not None and 'is_dynamic' in instance_serializer.data['default']:
+                    if instance_serializer.data['default']['is_dynamic'] is True:
+                        raise database_api_exceptions.StaticDefaultAssignmentToDynamicDefaultException(
+                            DynamicDefaultModificationError(self.instance),
+                            status_code=status.HTTP_400_BAD_REQUEST
+                        )
+                    else:
+                        raise Exception
         if TYPE_KEY in data and self.instance:
             db_type = get_db_type_enum_from_id(data[TYPE_KEY].lower())
             target_types = self.instance.valid_target_types
