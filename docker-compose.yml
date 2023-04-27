@@ -74,7 +74,8 @@ services:
       timeout: 5s
       retries: 30
       start_period: 5s
-    # On prod, the HTTP port is exposed to other containers, but not the host.
+    # On prod, the HTTP port is exposed to other containers, but not the host to prevent any unnecessary conflicts with external services.
+    # Do not make any changes to this port
     expose:
       - "8000"
   # A webserver responsible for
