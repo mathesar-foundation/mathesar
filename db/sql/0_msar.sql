@@ -746,3 +746,45 @@ BEGIN
   RETURN __msar.drop_table(qualified_tab_name, cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.drop_constraint(tbl_name text, cst_name text) RETURNS TEXT AS $$
+BEGIN
+  RETURN __msar.exec_ddl(
+    'ALTER TABLE %s DROP CONSTRAINT %s', tbl_name, cst_name
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+msar.drop_constraint(sch_name text, tbl_name text, cst_name text) RETURNS TEXT AS $$
+BEGIN
+  RETURN __msar.drop_constraint(
+    msar.get_fully_qualified_object_name(sch_name, tbl_name), quote_ident(cst_name)
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+msar.drop_constraint(tab_id oid, cst_name text) RETURNS TEXT AS $$
+BEGIN
+  RETURN __msar.drop_constraint(
+    __msar.get_relation_name(tab_id), quote_ident(cst_name)
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+/* CREATE OR REPLACE FUNCTION
+msar.get_constraint_name(tbl_id oid, col_id integer) RETURNS TEXT AS $$
+BEGIN
+  RETURN quote_ident(conname::text) FROM pg_constraint WHERE conrelid=tbl_id AND conkey <@ col_id;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT; */
+
+CREATE OR REPLACE FUNCTION
+msar.get_constraint_name(cst_id oid) RETURNS TEXT AS $$
+BEGIN
+  RETURN quote_ident(conname::text) FROM pg_constraint WHERE pg_constraint.oid = cst_id;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
