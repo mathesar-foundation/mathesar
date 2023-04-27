@@ -178,7 +178,7 @@ class DynamicDefaultAPIException(MathesarAPIException):
         super().__init__(exception, self.error_code, message, field, details, status_code)
 
 
-class StaticDefaultAssignmentToDynamicDefaultException(Exception):
+class StaticDefaultAssignmentToDynamicDefaultException(MathesarAPIException):
     error_code = ErrorCodes.DynamicDefaultAlterationToStaticDefault.value
 
     def __init__(
