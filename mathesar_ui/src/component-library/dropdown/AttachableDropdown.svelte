@@ -130,6 +130,8 @@
       references: clickOffBoundsReferences,
     }}
     on:click={checkAndCloseOnInnerClick}
+    on:mouseenter
+    on:mouseleave
   >
     {#if $$slots.default}
       <slot {close} />

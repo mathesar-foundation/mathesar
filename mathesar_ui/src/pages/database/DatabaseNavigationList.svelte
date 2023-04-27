@@ -8,6 +8,7 @@
   import { databases } from '@mathesar/stores/databases';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import DatabaseName from '@mathesar/components/DatabaseName.svelte';
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
   import type { Database } from '@mathesar/AppTypes';
 
   export let database: Database;
@@ -21,8 +22,11 @@
       <span class="title">All Databases ({$databases.data.length})</span>
       <span class="help">
         <Help>
-          To add or remove databases, please update the configuration file and
-          restart Mathesar. Refer Mathesar documentation for more information.
+          To add or remove databases, modify the
+          <DocsLink path="/install/configuration/#mathesar_databases">
+            <code>MATHESAR_DATABASES</code> variable
+          </DocsLink>
+          in your configuration file and restart Mathesar.
         </Help>
       </span>
     </MenuHeading>

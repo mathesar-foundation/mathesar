@@ -198,6 +198,18 @@
     font-weight: 500;
   }
 
+  a {
+    color: inherit;
+  }
+
+  code {
+    font-family: monospace;
+    font-size: 85%;
+    background: rgba(127, 127, 127, 0.5);
+    padding: 0.2em 0.3em;
+    border-radius: 0.2em;
+  }
+
   .block {
     display: block;
   }
