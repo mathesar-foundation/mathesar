@@ -101,9 +101,23 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 -- INFO FUNCTIONS
 --
--- Functions in this section get information about a given table or column.
+-- Functions in this section get information about a given schema, table or column.
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __msar.get_schema_name(sch_id oid) RETURNS TEXT AS $$/*
+Return the name for a given schema, quoted as appropriate.
+
+The schema *must* be in the pg_namespace table to use this function.
+
+Args:
+  sch_id: The OID of the schema.
+*/
+BEGIN
+  RETURN sch_id::regnamespace::text;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 
 CREATE OR REPLACE FUNCTION
 msar.get_fully_qualified_object_name(sch_name text, obj_name text) RETURNS text AS $$/*
@@ -212,6 +226,222 @@ BEGIN
   FROM unspacer
   INTO target_type_prepped;
   RETURN format('mathesar_types.cast_to_%s', target_type_prepped);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- ALTER SCHEMA FUNCTIONS
+--
+-- Functions in this section should always involve 'ALTER SCHEMA'.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+-- Rename schema -----------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.rename_schema(old_sch_name text, new_sch_name text) RETURNS TEXT AS $$/*
+Change a schema's name, returning the command executed.
+
+Args:
+  old_sch_name: A properly quoted original schema name
+  new_sch_name: A properly quoted new schema name
+*/
+DECLARE
+  cmd_template text;
+BEGIN
+  cmd_template := 'ALTER SCHEMA %s RENAME TO %s';
+  RETURN __msar.exec_ddl(cmd_template, old_sch_name, new_sch_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.rename_schema(old_sch_name text, new_sch_name text) RETURNS TEXT AS $$/*
+Change a schema's name, returning the command executed.
+
+Args:
+  old_sch_name: An unquoted original schema name
+  new_sch_name: An unquoted new schema name
+*/
+BEGIN
+  RETURN __msar.rename_schema(quote_ident(old_sch_name), quote_ident(new_sch_name));
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.rename_schema(sch_id oid, new_sch_name text) RETURNS TEXT AS $$/*
+Change a schema's name, returning the command executed.
+
+Args:
+  sch_id: The OID of the original schema
+  new_sch_name: An unquoted new schema name
+*/
+BEGIN
+  RETURN __msar.rename_schema(__msar.get_sch_name(sch_id), quote_ident(new_sch_name));
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+-- Comment on schema -------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.comment_on_schema(sch_name text, comment_ text) RETURNS TEXT AS $$/*
+Change the description of a schema, returning command executed.
+
+Args:
+  sch_name: The quoted name of the schema whose comment we will change.
+  comment_: The new comment. Any quotes or special characters must be escaped.
+*/
+DECLARE
+  cmd_template text;
+BEGIN
+  cmd_template := 'COMMENT ON SCHEMA %s IS %s';
+  RETURN __msar.exec_ddl(cmd_template, sch_name, comment_);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.comment_on_schema(sch_name text, comment_ text) RETURNS TEXT AS $$/*
+Change the description of a schema, returning command executed.
+
+Args:
+  sch_name: The quoted name of the schema whose comment we will change.
+  comment_: The new comment. Any quotes or special characters must be escaped.
+*/
+BEGIN
+  RETURN __msar.comment_on_schema(quote_ident(sch_name), quote_literal(comment_));
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.comment_on_schema(sch_id oid, comment_ text) RETURNS TEXT AS $$/*
+Change the description of a schema, returning command executed.
+
+Args:
+  sch_id: The OID of the schema.
+  comment_: The new comment. Any quotes or special characters must be escaped.
+*/
+BEGIN
+  RETURN __msar.comment_on_schema(__msar.get_sch_name(sch_id), quote_literal(comment_));
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- CREATE SCHEMA FUNCTIONS
+--
+-- Create a schema.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+-- Create schema -----------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.create_schema(sch_name text, if_not_exists boolean) RETURNS TEXT AS $$/*
+Create a schema, returning the command executed.
+
+Args:
+  sch_name: A properly quoted name of the schema to be created
+  if_not_exists: Whether to ignore an error if the schema does exist
+*/
+DECLARE
+  cmd_template text;
+BEGIN
+  IF if_not_exists
+  THEN
+    cmd_template := 'CREATE SCHEMA IF NOT EXISTS %s';
+  ELSE
+    cmd_template := 'CREATE SCHEMA %s';
+  END IF;
+  RETURN __msar.exec_ddl(cmd_template, sch_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.create_schema(sch_name text, if_not_exists boolean) RETURNS TEXT AS $$/*
+Create a schema, returning the command executed.
+
+Args:
+  sch_name: An unquoted name of the schema to be created
+  if_not_exists: Whether to ignore an error if the schema does exist
+*/
+BEGIN
+  RETURN __msar.create_schema(quote_ident(sch_name), if_not_exists);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- DROP SCHEMA FUNCTIONS
+--
+-- Drop a schema.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+-- Drop schema -------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.drop_schema(sch_name text, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$/*
+Drop a schema, returning the command executed.
+
+Args:
+  sch_name: A properly quoted name of the schema to be dropped
+  cascade_: Whether to drop dependent objects.
+  if_exists: Whether to ignore an error if the schema doesn't exist
+*/
+DECLARE
+  cmd_template text;
+BEGIN
+  IF if_exists
+  THEN
+    cmd_template := 'DROP SCHEMA IF EXISTS %s';
+  ELSE
+    cmd_template := 'DROP SCHEMA %s';
+  END IF;
+  IF cascade_
+  THEN
+    cmd_template = cmd_template || ' CASCADE';
+  END IF;
+  RETURN __msar.exec_ddl(cmd_template, sch_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_schema(sch_id oid, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$/*
+Drop a schema, returning the command executed.
+
+Args:
+  sch_id: The OID of the schema to drop
+  cascade_: Whether to drop dependent objects.
+  if_exists: Whether to ignore an error if the schema doesn't exist
+*/
+BEGIN
+  RETURN __msar.drop_schema(__msar.get_sch_name(sch_id), cascade_, if_exists);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_schema(sch_name text, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$/*
+Drop a schema, returning the command executed.
+
+Args:
+  sch_name: An unqoted name of the schema to be dropped
+  cascade_: Whether to drop dependent objects.
+  if_exists: Whether to ignore an error if the schema doesn't exist
+*/
+BEGIN
+  RETURN __msar.drop_schema(quote_ident(sch_name), cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
