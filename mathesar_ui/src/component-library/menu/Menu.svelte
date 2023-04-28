@@ -4,7 +4,10 @@
     mergeStyleStrings,
   } from '@mathesar-component-library-dir/common/utils/styleUtils';
   import type { CssVariablesObj } from '@mathesar-component-library-dir/types';
-  import { setMenuAlignmentStoresInContext } from './utils';
+  import { setNewMenuControllerInContext } from './MenuController';
+
+  const controller = setNewMenuControllerInContext();
+  const { hasControlColumn, hasIconColumn } = controller;
 
   export let style: string | undefined = undefined;
   export let iconWidth = '1em';
@@ -22,16 +25,13 @@
     styleStringFromCssVariables,
     style,
   );
-
-  const menuAlignmentStores = setMenuAlignmentStoresInContext();
-  $: ({ hasIcon, hasControl } = menuAlignmentStores);
 </script>
 
 <div
   class="menu"
   role="menu"
-  class:has-icon={$hasIcon}
-  class:has-control={$hasControl}
+  class:has-icon={$hasIconColumn}
+  class:has-control={$hasControlColumn}
   style={styleString}
 >
   <slot />

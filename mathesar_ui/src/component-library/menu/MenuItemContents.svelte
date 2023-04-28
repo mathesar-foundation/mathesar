@@ -1,21 +1,23 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
-  import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
+  import { onMount } from 'svelte';
+  import { writable } from 'svelte/store';
+
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
-  import { registerMenuItem, deregisterMenuItem } from './utils';
+  import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
+  import { getMenuControllerFromContext } from './MenuController';
+
+  const menu = getMenuControllerFromContext();
+  const hasIconCell = writable(false);
 
   export let icon: IconProps | undefined = undefined;
   export let hasNotificationDot = false;
 
-  const id = getGloballyUniqueId();
-  const hasControlSlot = !!$$slots.control;
+  $: $hasIconCell = !!icon;
 
-  $: registerMenuItem(id, () => ({
-    hasIcon: !!icon,
-    hasControl: hasControlSlot,
-  }));
-  onDestroy(() => deregisterMenuItem(id));
+  if (menu) {
+    onMount(() => menu.hasControlColumn.registerInput($$slots.control));
+    onMount(() => menu.hasIconColumn.registerInput(hasIconCell));
+  }
 </script>
 
 <div class="control cell">
