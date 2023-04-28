@@ -5,6 +5,7 @@
   import type { ArtificialEvents } from '@mathesar/component-library/common/types/ArtificialEvents';
   import type { ParseResult, FormattedInputProps } from './FormattedInputTypes';
   import { getCursorPositionAfterReformat } from './formattedInputUtils';
+  import { getCaretCoordinates } from './utils';
 
   type T = $$Generic;
   type $$Props = FormattedInputProps<T>;
@@ -97,9 +98,13 @@
       });
       await tick();
       element?.setSelectionRange(newCursorPosition, newCursorPosition);
-      if (element) {
-        const { scrollWidth } = element;
-        element.scrollLeft = scrollWidth;
+
+      if (!element) return;
+      // scroll input left
+      const coordinates = getCaretCoordinates(element, newCursorPosition);
+
+      if (coordinates.diff > 0) {
+        element.scrollLeft = coordinates.diff + 8;
       }
     } catch (error) {
       onParseError({ userInput, error });
