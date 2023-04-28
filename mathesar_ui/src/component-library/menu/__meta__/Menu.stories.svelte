@@ -9,15 +9,15 @@
     faShip,
     faVideo,
   } from '@fortawesome/free-solid-svg-icons';
+  import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
+  import Checkbox from '@mathesar/component-library/checkbox/Checkbox.svelte';
   import { Meta, Story } from '@storybook/addon-svelte-csf';
-  import Menu from '../Menu.svelte';
   import ButtonMenuItem from '../ButtonMenuItem.svelte';
   import CheckboxMenuItem from '../CheckboxMenuItem.svelte';
   import LinkMenuItem from '../LinkMenuItem.svelte';
+  import Menu from '../Menu.svelte';
   import MenuDivider from '../MenuDivider.svelte';
   import MenuHeading from '../MenuHeading.svelte';
-  import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
-  import Checkbox from '@mathesar/component-library/checkbox/Checkbox.svelte';
 
   const meta = {
     title: 'Components/Menu',
