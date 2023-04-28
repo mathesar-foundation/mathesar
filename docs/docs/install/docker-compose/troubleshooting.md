@@ -1,4 +1,4 @@
-# Troubleshooting Docker Compose Installation
+# Troubleshooting Docker Compose Installation Script
 
 !!! info "We are still testing the install process"
     We've tested this installation procedure on Windows, Mac, and a few Linux variants, but Mathesar is in its early stages so there might be unexpected issues. Please open a [GitHub issue](https://github.com/centerofci/mathesar/issues) if you run into any problems.

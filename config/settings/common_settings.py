@@ -93,7 +93,7 @@ DATABASES = {
     db_key: db_url(url_string)
     for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
 }
-DATABASES[decouple_config('DJANGO_DATABASE_KEY')] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
+DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
 
 for db_key, db_dict in DATABASES.items():
     # Engine can be '.postgresql' or '.postgresql_psycopg2'
