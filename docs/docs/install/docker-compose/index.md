@@ -90,7 +90,6 @@
             POSTGRES_PORT='5432'
             ALLOWED_HOSTS='https://<your_domain_name>'
             SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
-            DJANGO_DATABASE_KEY='default'
             DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@mathesar_db:5432/mathesar_django'
             MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)'
             DJANGO_SUPERUSER_PASSWORD='password'
