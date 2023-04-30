@@ -22,6 +22,7 @@
         - Database name
         - Database username _(should exist and be a `SUPERUSER` [more info](https://www.postgresql.org/docs/13/sql-createrole.html))_
         - Database password
+        - Mathesar needs a database to store its own metadata like User setings. Have an empty database for storing data related to Mathesar.
 
 - If installing on Windows, you need to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed first and [Turn on wsl-2 in docker desktop](https://docs.docker.com/desktop/windows/wsl/#turn-on-docker-desktop-wsl-2)
 
@@ -75,7 +76,7 @@
 
 1. Set up the web server.
     !!! info "Database Configuration" 
-         By default, a Docker container named as `mathesar_db` running a Postgres server on internal port `5432` is created(it is not bound to the host, so it won't conflict with other services running on port `5432`). Additionally, it comes with a default database and a superuser. The credentials for the Default database is
+         By default, a Docker container named as `mathesar_db` running a Postgres server on internal port `5432` is created(it is not bound to the host, so it won't conflict with other services running on port `5432`). Additionally, it comes with a default database and a superuser; this database can come in handy for storing Mathesar's metadata[http://localhost:9000/install/configuration/#django_database_url]. The credentials for the Default database is
            ```
            DATABASE_NAME
            USER='mathesar'
@@ -250,7 +251,7 @@ Manually upgrade Mathesar to the newest version without using watch tower:
 
 ### Start Mathesar without the database server {#disable-db-service}
 
-The default `docker-compose.yml` has a `db` service which automatically starts a Postgres database server container called `mathesar_db`. This service allows you to immediately start using Mathesar to store data in a Postgres database without administering a separate Postgres server outside of Mathesar. But if you only plan to use Mathesar to connect to other Postgres servers, then you may disable Mathesar's inbuilt Postgres service if you like.
+The default `docker-compose.yml` has a `db` service which automatically starts a Postgres database server container called `mathesar_db`. This service allows you to immediately start using Mathesar to store data in a Postgres database without administering a separate Postgres server outside of Mathesar. But if you plan on using a different Database server, then you may disable Mathesar's inbuilt Postgres service if you like.
 
 In the `docker-compose.yml` file, comment out the `db` service from the `depends_on` field of the `service`.
 

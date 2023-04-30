@@ -22,7 +22,7 @@ The table below shows all available environment variables supported by Mathesar.
 
 - _**Required**_
 - A Postgres connection string of the database which will be used for storing metadata related to Mathesar. 
-- The database should **already exist**
+- The database should **already exist** and won't be created automatically.
 - It should be in the following format:
 
     ```
