@@ -20,6 +20,7 @@ import type {
 import {
   getCellCap,
   getDbTypeBasedInputCap,
+  getDisplayFormatter,
   getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
@@ -45,6 +46,7 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
   source: ProcessedQueryResultColumnSource;
+  formatCellValue: (cellValue: unknown) => string | null | undefined;
 }
 
 export interface ProcessedQueryOutputColumn extends ProcessedQueryResultColumn {
@@ -332,6 +334,7 @@ function processColumn(
       abstractType.identifier,
     ),
     source,
+    formatCellValue: getDisplayFormatter(column),
   };
 }
 

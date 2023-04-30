@@ -1,19 +1,25 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
+
   import { ImmutableMap } from '@mathesar-component-library/types';
+  import type { ClipboardHandler } from '@mathesar/stores/clipboard';
+  import { getClipboardHandlerStoreFromContext } from '@mathesar/stores/clipboard';
   import {
-    setSheetContext,
-    calculateColumnStyleMapAndRowWidth,
     DEFAULT_COLUMN_WIDTH,
+    calculateColumnStyleMapAndRowWidth,
+    setSheetContext,
   } from './utils';
 
   type SheetColumnType = $$Generic;
   type SheetColumnIdentifierKey = $$Generic;
 
+  const clipboardHandlerStore = getClipboardHandlerStoreFromContext();
+
   export let columns: SheetColumnType[];
   export let usesVirtualList = false;
   export let restrictWidthToRowWidth = false;
   export let hasBorder = false;
+  export let clipboardHandler: ClipboardHandler | undefined = undefined;
 
   export let getColumnIdentifier: (
     c: SheetColumnType,
@@ -84,6 +90,29 @@
   setSheetContext({ stores, api });
 
   $: style = restrictWidthToRowWidth ? `width:${rowWidth}px;` : undefined;
+
+  // What is this enable/disable clipboard stuff about, and why is it here?
+  //
+  // When a cell within this sheet is focused, we tell the global
+  // `clipboardHandlerStore` that we want the user's copy/paste keyboard
+  // shortcuts to operate on the cells in this sheet. Then, when a cell is
+  // blurred, we reset that store to `undefined`, removing that custom behavior.
+  // If the user changes focus from one cell within this sheet to another, the
+  // DOM will fire the `focusout` event before firing the `focusin` event. That
+  // leads to a momentary period where the global `clipboardHandlerStore` is set
+  // to `undefined`, but that seems to be okay.
+  //
+  // Some pages may even have multiple sheets (e.g. Record Page), so it's
+  // important that the global clipboard handler store follows the focus from
+  // one sheet to another.
+
+  function enableClipboard() {
+    clipboardHandlerStore?.set(clipboardHandler);
+  }
+
+  function disableClipboard() {
+    clipboardHandlerStore?.set(undefined);
+  }
 </script>
 
 <div
@@ -93,6 +122,8 @@
   class:set-to-row-width={restrictWidthToRowWidth}
   {style}
   on:click
+  on:focusin={enableClipboard}
+  on:focusout={disableClipboard}
 >
   {#if columns.length}
     <slot />

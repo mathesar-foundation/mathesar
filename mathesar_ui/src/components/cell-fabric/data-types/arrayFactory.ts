@@ -17,45 +17,60 @@ export interface ArrayLikeColumn extends CellColumnLike {
   display_options: Record<string, never> | null;
 }
 
-const arrayType: (
-  simpleDataTypeComponentFactories: Record<
-    SimpleCellDataTypes,
-    CellComponentFactory
-  >,
-) => CellComponentFactory = (simpleDataTypeComponentFactories) => ({
-  get: (column: ArrayLikeColumn): ComponentAndProps<ArrayCellExternalProps> => {
-    const itemDbType = column.type_options?.item_type ?? 'string';
-    const cellInfo = getCellInfo(itemDbType);
-    const config = getCellConfiguration(itemDbType, cellInfo);
-    const elementDataType =
-      !cellInfo || cellInfo.type === 'array' ? 'string' : cellInfo.type;
-    const elementCellFactory =
-      simpleDataTypeComponentFactories[elementDataType];
-    return {
+type ComponentFactoryMap = Record<SimpleCellDataTypes, CellComponentFactory>;
+
+function makeDisplayFormatter(
+  componentFactoryMap: ComponentFactoryMap,
+  column: ArrayLikeColumn,
+) {
+  const itemDbType = column.type_options?.item_type ?? 'string';
+  const cellInfo = getCellInfo(itemDbType);
+  const config = getCellConfiguration(itemDbType, cellInfo);
+  const elementDataType =
+    !cellInfo || cellInfo.type === 'array' ? 'string' : cellInfo.type;
+  const elementCellFactory = componentFactoryMap[elementDataType];
+  return (cellValue: unknown) => {
+    if (!isDefinedNonNullable(cellValue)) {
+      return String(cellValue);
+    }
+    if (elementCellFactory.getDisplayFormatter) {
+      return elementCellFactory.getDisplayFormatter(
+        {
+          type: itemDbType,
+          type_options: null,
+          display_options: column.display_options,
+        },
+        config,
+      )(cellValue);
+    }
+    return String(cellValue);
+  };
+}
+
+export default function arrayType(
+  componentFactoryMap: ComponentFactoryMap,
+): CellComponentFactory {
+  return {
+    get: (
+      column: ArrayLikeColumn,
+    ): ComponentAndProps<ArrayCellExternalProps> => ({
       component: ArrayCell,
       props: {
-        formatElementForDisplay: (
-          v: never | null | undefined,
-        ): string | null | undefined => {
-          if (!isDefinedNonNullable(v)) {
-            return v;
-          }
-          if (elementCellFactory.getDisplayFormatter) {
-            return elementCellFactory.getDisplayFormatter(
-              {
-                type: itemDbType,
-                type_options: null,
-                display_options: column.display_options,
-              },
-              config,
-            )(v);
-          }
-          return String(v);
-        },
+        formatElementForDisplay: makeDisplayFormatter(
+          componentFactoryMap,
+          column,
+        ),
       },
-    };
-  },
-  getInput: (): ComponentAndProps => ({ component: TextInput }),
-});
-
-export default arrayType;
+    }),
+    getInput: (): ComponentAndProps => ({ component: TextInput }),
+    getDisplayFormatter: (column: ArrayLikeColumn) => {
+      const formatOneValue = makeDisplayFormatter(componentFactoryMap, column);
+      return (cellValue: unknown) => {
+        if (Array.isArray(cellValue)) {
+          return cellValue.map(formatOneValue).join(', ');
+        }
+        return formatOneValue(cellValue);
+      };
+    },
+  };
+}
