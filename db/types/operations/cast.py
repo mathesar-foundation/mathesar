@@ -1102,7 +1102,7 @@ def _build_integer_array_function():
     qualified_function_name = get_qualified_name(INTEGER_ARR_FUNC_NAME)
 
     no_separator = r"\d+"
-    comma_or_period_separator = r"([0-9]|[0-9]{3})(([,.])[0-9]{3})+"
+    comma_or_period_separator = r"([0-9][.,][0-9]{3}|[0-9]{3})(([,.])[0-9]{3})+"
     comma_separator_lakh_system = r"([0-9]{1,2}(?:(,)[0-9]{2})+),[0-9]{3}"
     space_separator = r"[0-9]{1,3}(?:( )[0-9]{3})+"
     single_quote_separator = r"([0-9]{1,3})(?:(\'')[0-9]{3})+(?:(\'')?[0-9]*)?"
