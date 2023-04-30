@@ -75,13 +75,16 @@
     Your custom `.env` file will be used for setting [configuration variables](../configuration.md).
 
 1. Set up the web server.
+
     !!! info "Database Configuration" 
-         By default, a Docker container named as `mathesar_db` running a Postgres server on internal port `5432` is created(it is not bound to the host, so it won't conflict with other services running on port `5432`). Additionally, it comes with a default database and a superuser; this database can come in handy for storing Mathesar's metadata[http://localhost:9000/install/configuration/#django_database_url]. The credentials for the Default database is
+         By default, a Docker container named as `mathesar_db` running a Postgres server on internal port `5432` is created(it is not bound to the host, so it won't conflict with other services running on port `5432`).
+         Additionally, it comes with a default database and a superuser; this database can come in handy for storing Mathesar's [metadata](http://localhost:9000/install/configuration/#django_database_url).
+          The credentials for the Default database is
            ```
            DATABASE_NAME
            USER='mathesar'
            PASSWORD='mathesar'
-            ```
+           ```
         If you only plan to use Mathesar to connect to other preexisting Postgres database servers, then you may choose to [disable Mathesar's inbuilt Postgres database service](#disable-db-service) if you like.
 
     1. Edit your `.env` file, making the following changes:
