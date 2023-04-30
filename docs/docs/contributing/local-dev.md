@@ -13,7 +13,7 @@ cp .env.example .env
 From the repository's root directory, run:
 
 ```
-docker-compose --profile dev up
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application.
@@ -73,6 +73,11 @@ For more detailed information on Mathesar's frontend development, see [the READM
 
 For more detailed information on working on Mathesar's documentation, see [the README in the `docs` folder](https://github.com/centerofci/mathesar/blob/master/docs/README.md).
 
+## Development Notes
+- It is recommended to rebuild Docker images when code changes are pulled from the remote server or when switching branches using the command:
+  - `sudo docker compose --profile dev up --force-recreate --build dev-service`
+
+
 ## Demo mode
 
 Mathesar can be run in "live demo mode". This creates a new database for every user session, adds a banner to the UI, and enables analytics, sent to the Mathesar team.
@@ -112,6 +117,13 @@ Backend tests:
 ```
 docker exec mathesar_service_dev pytest mathesar/ db/
 ```
+
+for running a particular test,
+```
+docker exec mathesar_service_dev pytest -k "test_name"
+```
+
+For more options to run the pytest, please refer to the [pytest documentation](https://docs.pytest.org/en/latest/how-to/usage.html).
 
 Frontend tests:
 

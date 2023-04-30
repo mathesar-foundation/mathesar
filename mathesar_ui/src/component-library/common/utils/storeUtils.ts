@@ -1,5 +1,10 @@
-import type { Readable } from 'svelte/store';
-import { readable, derived } from 'svelte/store';
+import {
+  type Readable,
+  type Subscriber,
+  type Unsubscriber,
+  readable,
+  derived,
+} from 'svelte/store';
 
 export function isReadable<T>(v: Readable<T> | T): v is Readable<T> {
   return (
@@ -54,4 +59,49 @@ export function unite<T>(stores: Readable<T>[]): Readable<T[]> {
     // unsubscribing from all the inner stores.
     return () => unsubscribers.forEach((unsubscriber) => unsubscriber());
   });
+}
+
+type StoreValue<S> = S extends Readable<infer T> ? T : never;
+
+/**
+ * This utility function allows you to set up `subscribe` functions on _other_
+ * stores while ensuring that the corresponding unsubscriber functions will be
+ * automatically run when all subscribers unsubscribe from the store returned
+ * from this function. The use case for this function is rather esoteric, but it
+ * helps avoid memory leaks when working with stores at a low level outside
+ * Svelte components.
+ */
+export function withSideChannelSubscriptions<Store extends Readable<unknown>>(
+  store: Store,
+  subscriptionCreators: (() => Unsubscriber)[],
+): Store {
+  let childSubscriberCount = 0;
+  let sideChannelUnsubscribers: Unsubscriber[] = [];
+
+  function subscribe(subscriber: Subscriber<StoreValue<Store>>) {
+    const unsubscribeFromParent = store.subscribe(
+      subscriber as Subscriber<unknown>,
+    );
+    childSubscriberCount += 1;
+    if (childSubscriberCount === 1) {
+      // The first subscriber has subscribed, so we need to subscribe to the
+      // side channel subscriptions.
+      sideChannelUnsubscribers = subscriptionCreators.map((h) => h());
+    }
+    return () => {
+      unsubscribeFromParent();
+      childSubscriberCount -= 1;
+      if (childSubscriberCount === 0) {
+        // The last subscriber has unsubscribed, so we need to unsubscribe from
+        // the side channel subscriptions.
+        sideChannelUnsubscribers.forEach((u) => u());
+        sideChannelUnsubscribers = [];
+      }
+    };
+  }
+
+  return {
+    ...store,
+    subscribe,
+  };
 }

@@ -1,4 +1,4 @@
-# Troubleshooting Docker Compose Installation
+# Troubleshooting Docker Compose Installation Script
 
 !!! info "We are still testing the install process"
     We've tested this installation procedure on Windows, Mac, and a few Linux variants, but Mathesar is in its early stages so there might be unexpected issues. Please open a [GitHub issue](https://github.com/centerofci/mathesar/issues) if you run into any problems.
@@ -17,12 +17,12 @@ If something has gone wrong with the installation, you may need to restart the s
 
     === "Linux"
         ```sh
-        sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down -v
+        sudo docker compose -f /etc/mathesar/docker-compose.yml down -v
         ```
 
     === "MacOS"
         ```sh
-        docker compose -f /etc/mathesar/docker-compose.yml --profile prod down -v
+        docker compose -f /etc/mathesar/docker-compose.yml down -v
         ```
    and then run the installation script again.
 
