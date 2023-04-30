@@ -74,29 +74,30 @@
     Your custom `.env` file will be used for setting [configuration variables](../configuration.md).
 
 1. Set up the web server.
+    !!! info "Database Configuration" 
+         By default, a Docker container named as `mathesar_db` running a Postgres server on internal port `5432` is created(it is not bound to the host, so it won't conflict with other services running on port `5432`). Additionally, it comes with a default database and a superuser. The credentials for the Default database is
+           ```
+           DATABASE_NAME
+           USER='mathesar'
+           PASSWORD='mathesar'
+            ```
+        If you only plan to use Mathesar to connect to other preexisting Postgres database servers, then you may choose to [disable Mathesar's inbuilt Postgres database service](#disable-db-service) if you like.
 
     1. Edit your `.env` file, making the following changes:
 
         - Add the [**Backend Configuration** environment variables](../configuration.md#backend)
-        - Add the [**Database Configuration** environment variables](../configuration.md#database)
         - Customize the values of the environment variables to suit your needs.
 
         !!! example
             Your `.env` file should look something like this
             
             ``` bash
-            POSTGRES_USER='mathesar'
-            POSTGRES_PASSWORD='mathesar'
-            POSTGRES_PORT='5432'
             ALLOWED_HOSTS='https://<your_domain_name>'
             SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
-            DJANGO_DATABASE_KEY='default'
+            # For illustrative purposes, we will be using the credentials of the default database that is created automatically when the server starts.
             DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@mathesar_db:5432/mathesar_django'
             MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)'
-            DJANGO_SUPERUSER_PASSWORD='password'
             ```
-
-    1. If you only plan to use Mathesar to connect to other preexisting Postgres database servers, then you may choose to [disable Mathesar's inbuilt Postgres database service](#disable-db-service) if you like. (Skip this step if you want to use Mathesar's Postgres database service.)
 
     1. Start the Mathesar web server.
 
