@@ -5,12 +5,13 @@ services:
     image: postgres:13
     container_name: mathesar_db
     environment:
+    # These environment variables are used to create a database and superuser
+    # if they don't exist when the `db` service starts.
+    # Refer to https://hub.docker.com/_/postgres for more information on these variables.
       - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
     # db container is exposed to the other containers, and the host.
-    ports:
-      - "${POSTGRES_PORT-5432}:5432"
     expose:
       - "5432"
     volumes:
@@ -57,7 +58,6 @@ services:
       - DJANGO_DATABASE_KEY=${DJANGO_DATABASE_KEY-default}
       - DJANGO_DATABASE_URL=${DJANGO_DATABASE_URL-postgres://mathesar:mathesar@mathesar_db:5432/mathesar_django}
       - MATHESAR_DATABASES=${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
-      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
     command: ./run.sh
     volumes:
       - static:/code/static
