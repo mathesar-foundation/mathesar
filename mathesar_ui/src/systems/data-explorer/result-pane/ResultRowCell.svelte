@@ -105,6 +105,7 @@
 <style lang="scss">
   .cell {
     user-select: none;
+    -webkit-user-select: none; /* Safari */
     background: var(--cell-bg-color-base);
 
     &.is-active {
