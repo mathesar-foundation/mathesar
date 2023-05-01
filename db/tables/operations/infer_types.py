@@ -43,7 +43,7 @@ def infer_table_column_types(schema, table_name, engine, metadata=None, columns_
     table = reflect_table(table_name, schema, engine, metadata=metadata)
 
     temp_name = TEMP_TABLE % (int(time()))
-    create_schema(TEMP_SCHEMA, engine)
+    create_schema(TEMP_SCHEMA, engine, if_not_exists=True)
     with engine.begin() as conn:
         while engine.dialect.has_table(conn, temp_name, schema=TEMP_SCHEMA):
             temp_name = TEMP_TABLE.format(int(time()))

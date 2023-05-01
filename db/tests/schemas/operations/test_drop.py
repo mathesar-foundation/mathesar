@@ -1,6 +1,6 @@
 import pytest
-from sqlalchemy.exc import NoSuchTableError, ProgrammingError
-from psycopg2.errors import DependentObjectsStillExist
+from sqlalchemy.exc import NoSuchTableError
+from psycopg.errors import InvalidSchemaName, DependentObjectsStillExist
 
 from db.schemas.operations.create import create_schema
 from db.schemas.operations.drop import drop_schema
@@ -30,7 +30,7 @@ def test_drop_schema_missing_if_exists_true(engine):
 
 
 def test_drop_schema_missing_if_exists_false(engine):
-    with pytest.raises(ProgrammingError):
+    with pytest.raises(InvalidSchemaName):
         drop_schema("test_drop_schema_missing", engine, if_exists=False)
 
 
