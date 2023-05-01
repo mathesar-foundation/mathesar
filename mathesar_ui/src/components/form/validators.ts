@@ -57,11 +57,15 @@ export function required(msg = REQUIRED_VALIDATION_MSG): ValidationFn<unknown> {
   return validIf((v) => valueIsFilled(v), msg);
 }
 
+function collectionContainsValue<T>(c: Array<T> | Set<T>, v: T) {
+  return Array.isArray(c) ? c.includes(v) : c.has(v);
+}
+
 export function uniqueWith<T>(
-  values: T[],
+  collection: Array<T> | Set<T>,
   msg = 'This value already exists.',
 ): ValidationFn<T> {
-  return invalidIf((v) => values.includes(v), msg);
+  return invalidIf((v) => collectionContainsValue(collection, v), msg);
 }
 
 export function min(lowerBound: number, msg?: string): ValidationFn<number> {
