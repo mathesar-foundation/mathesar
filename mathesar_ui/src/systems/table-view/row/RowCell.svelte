@@ -7,6 +7,7 @@
     LinkMenuItem,
     WritableMap,
     MenuDivider,
+    MenuHeading,
   } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import { States } from '@mathesar/api/utils/requestUtils';
@@ -187,6 +188,7 @@
       }}
     />
     <ContextMenu>
+      <MenuHeading>Cell</MenuHeading>
       <ButtonMenuItem
         icon={iconSetToNull}
         disabled={!canSetNull}
@@ -200,13 +202,15 @@
         </LinkMenuItem>
       {/if}
       <MenuDivider />
+
       <!-- Column Attributes -->
+      <MenuHeading>Column</MenuHeading>
       <ColumnHeaderContextMenu {processedColumn} />
-      <!-- Column Attributes end -->
       <MenuDivider />
+
       <!-- Row -->
+      <MenuHeading>Row</MenuHeading>
       <RowContextOptions recordPk={rowKey} {recordsData} {row} />
-      <!-- Row end -->
     </ContextMenu>
     {#if errors.length}
       <CellErrors {errors} forceShowErrors={isActive} />
@@ -217,6 +221,7 @@
 <style lang="scss">
   .editable-cell.cell {
     user-select: none;
+    -webkit-user-select: none; /* Safari */
     background: var(--cell-bg-color-base);
     &.is-active {
       z-index: var(--z-index__sheet__active-cell);

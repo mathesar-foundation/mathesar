@@ -50,7 +50,6 @@
   }
   .name-with-icon.boxed .icon {
     display: inline-flex;
-    height: 1.2em;
     border-radius: 0.25em;
     padding: 0.2em;
     background: var(--icon-color, currentcolor);
