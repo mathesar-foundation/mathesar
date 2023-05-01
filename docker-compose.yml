@@ -5,8 +5,7 @@ services:
     image: postgres:13
     container_name: mathesar_db
     environment:
-    # These environment variables are used to create a database and superuser
-    # if they don't exist when the `db` service starts.
+    # These environment variables are used to create a database and superuse when the `db` service starts.
     # Refer to https://hub.docker.com/_/postgres for more information on these variables.
       - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
