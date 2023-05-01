@@ -1,6 +1,9 @@
 <script lang="ts">
-  import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
-  import { Help } from '@mathesar-component-library';
+  import { Help, isDefinedNonNullable } from '@mathesar-component-library';
+  import type {
+    JoinableTable,
+    JoinableTablesResult,
+  } from '@mathesar/api/types/tables/joinable_tables';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { iconRecord } from '@mathesar/icons';
   import { tables } from '@mathesar/stores/tables';
@@ -10,33 +13,25 @@
   export let recordSummary: string;
   export let joinableTablesResult: JoinableTablesResult;
 
-  $: tableNameMap = new Map(
-    Object.entries(joinableTablesResult.tables).map(([tableId, table]) => [
-      parseInt(tableId, 10),
-      table.name,
-    ]),
-  );
   $: columnNameMap = new Map(
     Object.entries(joinableTablesResult.columns).map(([columnId, column]) => [
       parseInt(columnId, 10),
       column.name,
     ]),
   );
+
+  function buildWidgetInput(joinableTable: JoinableTable) {
+    const table = $tables.data.get(joinableTable.target);
+    if (!table) return undefined;
+    const id = joinableTable.jp_path[0].slice(-1)[0];
+    const name = columnNameMap.get(id) ?? '(unknown column)';
+    return { table, fkColumn: { id, name } };
+  }
+
   $: tableWidgetInputs = joinableTablesResult.joinable_tables
     .filter((joinableTable) => joinableTable.multiple_results)
-    .map((joinableTable) => ({
-      table: {
-        id: joinableTable.target,
-        name: tableNameMap.get(joinableTable.target) ?? '(unknown table)',
-        entry: $tables.data.get(joinableTable.target),
-      },
-      fkColumn: {
-        id: joinableTable.jp_path[0].slice(-1)[0],
-        name:
-          columnNameMap.get(joinableTable.jp_path[0].slice(-1)[0]) ??
-          '(unknown column)',
-      },
-    }))
+    .map(buildWidgetInput)
+    .filter(isDefinedNonNullable)
     .sort((a, b) => a.table.name.localeCompare(b.table.name));
 </script>
 
@@ -54,11 +49,9 @@
     </h2>
     <div class="widgets">
       {#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
-        {#if table.entry}
-          <section class="table-widget-positioner">
-            <TableWidget {recordPk} table={table.entry} {fkColumn} />
-          </section>
-        {/if}
+        <section class="table-widget-positioner">
+          <TableWidget {recordPk} {table} {fkColumn} />
+        </section>
       {/each}
     </div>
   </div>
