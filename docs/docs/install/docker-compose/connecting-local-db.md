@@ -62,12 +62,6 @@
     MATHESAR_DATABASES=(mathesar_tables|postgresql://<user_name>:<password>@host.docker.internal:<port-no>/<host_db_name>)
     ```
 
-    If the host db is running on port 5432 you would need to add the following in the `.env` file:
-
-    ```
-    POSTGRES_PORT=<unused-port-on-host(e.g. 5555)> 
-    ```
-
 5. Restart postgres:
     
     === "Linux"
