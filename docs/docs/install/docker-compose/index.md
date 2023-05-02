@@ -75,7 +75,7 @@
 
 1. Set up the database
     - You can use the default database server that starts along with the Mathesar Webserver. Please refer [Default Database](#default-db) for information of the default database server. 
-    - (Alternatively) You can use an existing database server. If you plan on using an existing database server, please see look at the [instructions for disabling the default database](#disable-db-service).
+    - (Alternatively) You can use an existing database server. If you plan on using an existing database server, please see look at the [instructions for disabling the default database](#external-db-service).
 
 1. Set up the web server.
 
@@ -249,7 +249,7 @@ Manually upgrade Mathesar to the newest version without using watch tower:
 
 The `db` service runs on the [internal docker compose port](https://docs.docker.com/compose/compose-file/compose-file-v3/#expose) `5432`. The internal port is not bound to the host, to prevent conflict with other services running on port `5432`.
 
- Additionally, it comes with a default database and a superuser; this database can come in handy for storing Mathesar's [metadata](http://localhost:9000/install/configuration/#django_database_url). 
+ Additionally, it comes with a default database and a superuser; this database can come in handy for storing Mathesar's [metadata](../configuration/#django_database_url). 
   The credentials for the Default database are
    ```
    DATABASE_NAME='mathesar_django'
@@ -258,6 +258,17 @@ The `db` service runs on the [internal docker compose port](https://docs.docker.
    ```
            
 ## Customization
+
+
+### Connect Mathesar with an existing Database Server {#external-db-service}
+
+- Create a [new database](https://www.postgresql.org/docs/current/sql-createdatabase.html) which will be used for storing [Mathesar metadata](../configuration/#django_database_url)
+     ```bash
+      psql -c 'create database mathesar_django;'
+     ```
+
+- (Optionally) Disable the default database server by following the [instructions](#disable-db-service).
+
 
 ### Start Mathesar without the default database server {#disable-db-service}
 
