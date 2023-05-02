@@ -259,7 +259,7 @@ The `db` service runs on the [internal docker compose port](https://docs.docker.
            
 ## Customization
 
-### Start Mathesar without the database server {#disable-db-service}
+### Start Mathesar without the default database server {#disable-db-service}
 
 The default `docker-compose.yml` which automatically starts a [Postgres database server container](#default-db). . But if you plan on using a different Database server, then you may disable Mathesar's inbuilt Postgres service if you like.
 
