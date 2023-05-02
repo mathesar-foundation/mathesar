@@ -25,7 +25,8 @@
 
   async function handleDeleteRecords() {
     void confirmDelete({
-      identifierType: 'Row',
+      identifierType: 'Record',
+      body: 'Deleting this record will remove the entire row. Are you sure you want to proceed?',
       onProceed: () => recordsData.deleteSelected(selectedRowIndices),
       onError: (e) => toast.fromError(e),
       onSuccess: () => {
@@ -78,7 +79,7 @@
     </AnchorButton>
   {/if}
   {#if showDeleteRecordButton}
-    <Button appearance="outline-primary" on:click={handleDeleteRecords}>
+    <Button on:click={handleDeleteRecords}>
       <Icon {...iconDeleteMajor} />
       <span>
         Delete {labeledCount(selectedRowIndices, 'records', {
