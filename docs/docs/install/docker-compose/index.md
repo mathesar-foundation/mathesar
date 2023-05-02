@@ -22,7 +22,6 @@
         - Database name
         - Database username _(should exist and be a `SUPERUSER` [more info](https://www.postgresql.org/docs/13/sql-createrole.html))_
         - Database password
-        - Mathesar needs a database to store its own metadata like User setings. Have an empty database for storing data related to Mathesar.
 
 - If installing on Windows, you need to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed first and [Turn on wsl-2 in docker desktop](https://docs.docker.com/desktop/windows/wsl/#turn-on-docker-desktop-wsl-2)
 
@@ -74,18 +73,11 @@
 
     Your custom `.env` file will be used for setting [configuration variables](../configuration.md).
 
-1. Set up the web server.
+1. Set up the database
+    - You can use the default database server that starts along with the Mathesar Webserver. Please refer [Default Database](#default-db) for information of the default database server. 
+    - (Alternatively) You can use an existing database server. If you plan on using an existing database server, please see look at the [instructions for disabling the default database](#disable-db-service).
 
-    !!! info "Database Configuration" 
-         By default, a Docker container named as `mathesar_db` running a Postgres server on internal port `5432` is created(it is not bound to the host, so it won't conflict with other services running on port `5432`).
-         Additionally, it comes with a default database and a superuser; this database can come in handy for storing Mathesar's [metadata](http://localhost:9000/install/configuration/#django_database_url).
-          The credentials for the Default database is
-           ```
-           DATABASE_NAME
-           USER='mathesar'
-           PASSWORD='mathesar'
-           ```
-        If you only plan to use Mathesar to connect to other preexisting Postgres database servers, then you may choose to [disable Mathesar's inbuilt Postgres database service](#disable-db-service) if you like.
+1. Set up the web server.
 
     1. Edit your `.env` file, making the following changes:
 
@@ -93,12 +85,11 @@
         - Customize the values of the environment variables to suit your needs.
 
         !!! example
-            Your `.env` file should look something like this
+            If you are using the [default database container](#default-db). Your `.env` file should look something like this
             
             ``` bash
             ALLOWED_HOSTS='https://<your_domain_name>'
             SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
-            # For illustrative purposes, we will be using the credentials of the default database that is created automatically when the server starts.
             DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@mathesar_db:5432/mathesar_django'
             MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)'
             ```
@@ -250,11 +241,27 @@ Manually upgrade Mathesar to the newest version without using watch tower:
         !!! danger 
             Deleting this schema will also delete any database objects that depend on it. This should not be an issue if you don't have any data using Mathesar's custom data types.
 
+
+## Additional Information
+
+### Default Database Container {#default-db}
+ The default `docker-compose.yml` has a `db` service which automatically starts a Postgres database server container called `mathesar_db`. This service allows you to immediately start using Mathesar to store data in a Postgres database without administering a separate Postgres server outside Mathesar.
+
+The `db` service runs on the [internal docker compose port](https://docs.docker.com/compose/compose-file/compose-file-v3/#expose) `5432`. The internal port is not bound to the host, to prevent conflict with other services running on port `5432`.
+
+ Additionally, it comes with a default database and a superuser; this database can come in handy for storing Mathesar's [metadata](http://localhost:9000/install/configuration/#django_database_url). 
+  The credentials for the Default database are
+   ```
+   DATABASE_NAME='mathesar_django'
+   USER='mathesar'
+   PASSWORD='mathesar'
+   ```
+           
 ## Customization
 
 ### Start Mathesar without the database server {#disable-db-service}
 
-The default `docker-compose.yml` has a `db` service which automatically starts a Postgres database server container called `mathesar_db`. This service allows you to immediately start using Mathesar to store data in a Postgres database without administering a separate Postgres server outside of Mathesar. But if you plan on using a different Database server, then you may disable Mathesar's inbuilt Postgres service if you like.
+The default `docker-compose.yml` which automatically starts a [Postgres database server container](#default-db). . But if you plan on using a different Database server, then you may disable Mathesar's inbuilt Postgres service if you like.
 
 In the `docker-compose.yml` file, comment out the `db` service from the `depends_on` field of the `service`.
 
