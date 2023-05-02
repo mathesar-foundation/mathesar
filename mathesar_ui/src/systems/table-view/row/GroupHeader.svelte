@@ -70,6 +70,8 @@
       display: flex;
       gap: 1rem;
       overflow: hidden;
+      width: var(--view-width);
+      padding-right: 3rem; // twice padding as group-heading
     }
 
     .count-container {
@@ -77,10 +79,6 @@
       --badge-text-color: var(--slate-800);
       --badge-background-color: var(--slate-100);
       height: 100%;
-    }
-
-    > :global(* + *) {
-      width: var(--view-width);
     }
   }
 </style>

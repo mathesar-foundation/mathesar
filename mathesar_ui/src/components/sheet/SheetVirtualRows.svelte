@@ -11,7 +11,7 @@
   export let itemSize: VirtualListProps['itemSize'];
   export let paddingBottom = 0;
   export let itemKey: VirtualListProps['itemKey'] | undefined = undefined;
-  export let viewWidth: number | undefined;
+  let viewWidth: number | undefined;
 </script>
 
 <div

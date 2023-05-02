@@ -5,6 +5,7 @@
   import type { ResultValue } from '@mathesar/api/types/tables/records';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import Truncate from '@mathesar/component-library/truncate/Truncate.svelte';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
   export let recordSummariesForSheet: RecordSummariesForSheet;
@@ -34,7 +35,9 @@
       {#if recordSummary}
         <LinkedRecord {recordSummary} {recordId} {recordPageHref} />
       {:else}
-        <CellValue value={cellValue} />
+        <Truncate>
+          <CellValue value={cellValue} />
+        </Truncate>
       {/if}
     </span>
   </span>
@@ -72,10 +75,6 @@
     }
     .value {
       font-size: var(--text-size-large);
-      display: block;
-      max-width: 100%;
-      white-space: nowrap;
-      text-overflow: ellipsis;
     }
   }
 </style>
