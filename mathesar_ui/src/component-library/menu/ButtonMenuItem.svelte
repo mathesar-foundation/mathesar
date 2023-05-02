@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
-  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { createEventDispatcher } from 'svelte';
+  import MenuItemWrapper from './MenuItemWrapper.svelte';
+  import MenuItemContents from './MenuItemContents.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -20,28 +21,19 @@
   }
 </script>
 
-<div class="menu-item" on:click={handleClick} class:disabled class:danger>
-  <div class="spacer cell" />
-  <div class="control cell" />
-  <div class="icon cell">
-    {#if icon}<Icon {...icon} {hasNotificationDot} />{/if}
-  </div>
-  <!--
-    Why not put the button higher up, enclosing everything?
-
-    Because we need for `.menu-item` to be `display: contents` to make the grid
-    cells line up. We lose the semantic value of a button if we set `display:
-    contents` on it. Putting it here retains a11y by keeping the label text
-    within the button, and also because the click handler is set higher up the
-    user can still click anywhere. I'm not sure this is perfectly sound. Open
-    to better solutions.
-  -->
-  <button class="label cell passthrough-button">
+<MenuItemWrapper
+  tag="button"
+  class="menu-item-button"
+  on:click={handleClick}
+  {disabled}
+  {danger}
+  {...$$restProps}
+>
+  <MenuItemContents {icon} {hasNotificationDot}>
     {#if label}
       {label}
     {:else}
       <slot />
     {/if}
-  </button>
-  <div class="spacer cell" />
-</div>
+  </MenuItemContents>
+</MenuItemWrapper>
