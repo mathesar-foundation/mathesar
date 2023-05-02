@@ -26,10 +26,10 @@
 - If installing on Windows, you need to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed first and [Turn on wsl-2 in docker desktop](https://docs.docker.com/desktop/windows/wsl/#turn-on-docker-desktop-wsl-2)
 
 
-## Install using the interactive script
+## Install using the interactive script {#guided}
 
 !!! info "Installation Script Overview"
-    The interactive script will set up a database server, the Mathesar webserver, an upgrade server for upgrading using the UI and a reverse proxy. If you want to customise the setup process, please look at the [Manual Install section](#manual-install)
+    The interactive script will set up a database server, the Mathesar web server, an upgrade server for upgrading using the UI, and a reverse proxy. If you want to customize the setup process, please look at the [Manual Install section](#manual)
 
 
 1. Paste this command into your terminal to begin installing the latest version of Mathesar:
@@ -49,37 +49,55 @@
     If you run into any problems during installation, see [troubleshooting](./troubleshooting.md) or [open a ticket describing your problem](https://github.com/centerofci/mathesar/issues/new/choose).
 
 
-## Manual Install
+## Manual Install {#manual}
 
-1. Open the Mathesar configuration directory where you'd like to install Mathesar. By convention, we do it within `/etc/mathesar`
+1. Navigate to a directory where you'd like to store your Mathesar configuration. By convention, we do it within `/etc/mathesar`, but it can be a different directory if you like.
 
-2. Download necessary files into the configuration directory
+    ```
+    sudo mkdir -p /etc/mathesar
+    cd /etc/mathesar
+    ```
 
-    - Download the `docker-compose.yml` file from [https://github.com/centerofci/mathesar/raw/master/docker-compose.yml](https://github.com/centerofci/mathesar/raw/master/docker-compose.yml)
-     - Download the example `.env.example` file used for setting the [configuration variables](../configuration.md) from [https://github.com/centerofci/mathesar/raw/master/.env.example](https://github.com/centerofci/mathesar/raw/master/.env.example)
-     - Rename the downloaded `.env.example` to `.env`
-     - Download the `Caddyfile` from [https://github.com/centerofci/mathesar/raw/master/Caddyfile](https://github.com/centerofci/mathesar/raw/master/Caddyfile).
+1. Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/master/docker-compose.yml), and [.env.example](https://github.com/centerofci/mathesar/raw/master/.env.example) files to your configuration directory.
 
-3. Start the Mathesar web server
-    - Open the `.env` file in your favourite text editor.
-    - Add the **Database server configuration** environment variables to the `.env` file. Refer to the [Database Configuration Documentation](../configuration.md#database-configuration) and for information on the environment variables.
-    - Add the **Mathesar server configuration** environment variables to the `.env` file. Refer to the [Backend Documentation](../configuration.md#backend-configuration) and for information on the environment variables.
-    - Your `.env` file should look something like this
-      ``` bash
-      .env
-      ===================================================================
-        POSTGRES_USER='mathesar'
-        POSTGRES_PASSWORD='mathesar'
-        POSTGRES_PORT='5432'
-        ALLOWED_HOSTS='https://<your_domain_name>'
-        SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
-        DJANGO_DATABASE_KEY='default'
-        DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@mathesar_db:5432/mathesar_django'
-        MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)'
-        DJANGO_SUPERUSER_PASSWORD='password'
-      ```
-    - (Optional) The next step will start a Postgres database container called ` mathesar_db` automatically, this database won't be necessary if you already have a database and you plan on using it. Refer to [Start Mathesar Server without the Database Server](#start-mathesar-server-without-the-database-server) for starting the web server without the additional db dependency.
-    - Start the Mathesar web server
+    ```
+    wget https://github.com/centerofci/mathesar/raw/master/docker-compose.yml
+    wget https://github.com/centerofci/mathesar/raw/master/.env.example
+    ```
+
+1. Rename `.env.example` to `.env`
+
+    ```
+    mv .env.example .env
+    ```
+
+    Your custom `.env` file will be used for setting [configuration variables](../configuration.md).
+
+1. Set up the web server.
+
+    1. Edit your `.env` file, making the following changes:
+
+        - Add the [**Backend Configuration** environment variables](../configuration.md#backend)
+        - Add the [**Database Configuration** environment variables](../configuration.md#database)
+        - Customize the values of the environment variables to suit your needs.
+
+        !!! example
+            Your `.env` file should look something like this
+            
+            ``` bash
+            POSTGRES_USER='mathesar'
+            POSTGRES_PASSWORD='mathesar'
+            POSTGRES_PORT='5432'
+            ALLOWED_HOSTS='https://<your_domain_name>'
+            SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
+            DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@mathesar_db:5432/mathesar_django'
+            MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)'
+            DJANGO_SUPERUSER_PASSWORD='password'
+            ```
+
+    1. If you only plan to use Mathesar to connect to other preexisting Postgres database servers, then you may choose to [disable Mathesar's inbuilt Postgres database service](#disable-db-service) if you like. (Skip this step if you want to use Mathesar's Postgres database service.)
+
+    1. Start the Mathesar web server.
 
         === "Linux"
             ```
@@ -91,29 +109,11 @@
             docker compose -f docker-compose.yml up service -d
             ```
 
-4. Start the Caddy reverse proxy
+1. Set up the Caddy reverse proxy.
 
-    - Open the `.env` file in your favourite text editor.
-    - Add the Caddy reverse proxy configuration environment variables to the `.env` file. Refer to the [Caddy Reverse Proxy Documentation](../configuration.md#caddy-reverse-proxy-configuration) for information on the environment variables.
-    - (Optional) Caddy creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation) if the `DOMAIN_NAME` has a `https` suffix and by default uses port 80 for `http` and 443 for `https` for the SSL certificate verification. If you wish to change the ports used by caddy, see [Run Mathesar on a non standart port](#run-mathesar-on-a-non-standard-http-port)
-    - Your `.env` file should look something like this
-      
-     ``` diff
-     .env
-     ===================================================================
-     POSTGRES_USER='mathesar'
-     POSTGRES_PASSWORD='mathesar'
-     POSTGRES_PORT='5432'
-     ALLOWED_HOSTS='https://<your_domain_name>, .localhost, 127.0.0.1'
-     SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
-     DJANGO_DATABASE_KEY='default'
-     DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@mathesar_db:5432/mathesar_django'
-     MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)'
-     DJANGO_SUPERUSER_PASSWORD='password'
-     + DOMAIN_NAME='https://<your_domain_name>'
-     ```
-
-    - Start the Caddy reverse proxy
+    1. Edit your `.env` file, adding the [**Caddy Reverse Proxy** environment variables](../configuration.md#caddy).
+    
+    1. Start the Caddy reverse proxy
 
         === "Linux"
             ```
@@ -125,7 +125,7 @@
             docker compose -f docker-compose.yml up caddy-reverse-proxy -d
             ```
 
-5. (Optional) Start the Upgrade server to enable upgrading the docker image using the Mathesar UI.
+1. (Optional) Start the Upgrade server to enable upgrading the docker image using the Mathesar UI.
 
     === "Linux"
         ```
@@ -137,56 +137,10 @@
         docker compose -f docker-compose.yml up watchtower -d
         ```
 
-## Frequently Asked Questions
 
-#### Start Mathesar Server without the Database Server
+## Administration
 
-- In the `docker-compose.yml` file you downloaded, remove the dependency of the `db` service from the `depends_on` field of the `service`.
-
-  ``` diff
-  docker-compose.yml
-  ===================================================================
-  service:
-      ...
-      volumes:
-          - static:/code/static
-          - media:/code/media
-  -   depends_on:
-  -        db:
-  -         condition: service_healthy
-  ```
-Starting the container using `docker compose -f docker-compose.yml up service -d` won't start the `db` service automatically.
-
-
-#### Run Mathesar on a non-standard HTTP port
-!!! warning ""
-
-    Caddy won't be able to verify the SSL certificate when running on a non-standard port,
-    so make sure you already have a reverse proxy that handles SSL.
-
-1. Make the following changes to your `.env` file to run the Mathesar service in the localhost on a non standard http port
-
-    ```diff
-            ALLOWED_HOSTS='https://<your_domain_name>, .localhost, 127.0.0.1'
-    -       DOMAIN_NAME='https://<your_domain_name>'
-    +       DOMAIN_NAME='http://<your_domain_name>:<port_number>' # For example `http://localhost:8004` or http://192.158.1.38:8004. Make sure to add the `http` suffix before the localhost to disable automatic https redirection by caddy
-    +       HTTP_PORT='<port_number>'
-    +       HTTPS_PORT='<different_port_number>' # For example `:8005`
-    ```
-
-2. Start the container again using 
-
-    === "Linux"
-        ```
-        sudo docker compose -f docker-compose.yml up caddy-reverse-proxy -d
-        ```
-
-    === "MacOS"
-        ```
-        docker compose -f docker-compose.yml up caddy-reverse-proxy -d
-        ```
-
-#### Start/stop the server {:#start-stop}
+### Start/stop the server {:#start-stop}
 
 The Mathesar server needs to be running for you to use Mathesar. If you restart your machine, you'll need to start the server again.
 
@@ -219,10 +173,10 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 !!! note
     If you customized the Mathesar configuration directory during installation, you'll need to change `/etc/mathesar` to your configuration directory.
 
-#### Upgrade
+### Upgrade
 
 !!! tip "Upgrade from within Mathesar"
-    You can also run the upgrade from within Mathesar by logging into as an admin user and navigating to "Administration" (in the top right menu) > "Software Update"
+    You can also run the upgrade from within Mathesar by logging in as an admin user and navigating to "Administration" (in the top right menu) > "Software Update"
 
 Manually upgrade Mathesar to the newest version using watch tower:
 
@@ -248,7 +202,7 @@ Manually upgrade Mathesar to the newest version without using watch tower:
     docker compose -f docker-compose.yml up --force-recreate --build service
     ```
 
-#### Uninstall
+### Uninstall
 
 1. Remove all Mathesar Docker images and containers.
 
@@ -289,3 +243,61 @@ Manually upgrade Mathesar to the newest version without using watch tower:
 
         !!! danger 
             Deleting this schema will also delete any database objects that depend on it. This should not be an issue if you don't have any data using Mathesar's custom data types.
+
+## Customization
+
+### Start Mathesar without the database server {#disable-db-service}
+
+The default `docker-compose.yml` has a `db` service which automatically starts a Postgres database server container called `mathesar_db`. This service allows you to immediately start using Mathesar to store data in a Postgres database without administering a separate Postgres server outside of Mathesar. But if you only plan to use Mathesar to connect to other Postgres servers, then you may disable Mathesar's inbuilt Postgres service if you like.
+
+In the `docker-compose.yml` file, comment out the `db` service from the `depends_on` field of the `service`.
+
+```yaml hl_lines="10 11"
+services:
+  # ...
+  service:
+    # ...
+    volumes:
+      - static:/code/static
+      - media:/code/media
+    depends_on:
+      # Comment the below field to disable starting the database service automatically
+      # db:
+      #  condition: service_healthy
+```
+
+After this change, Mathesar will no longer start the `db` service automatically.
+
+### Run Mathesar on a non-standard HTTP port {#non-standard-port}
+
+By default, Caddy serves the Mathesar web application on a port as determined by the protocol within your [`DOMAIN_NAME` environment variable](../configuration.md#domain_name).
+
+- For `http` domain names it uses  port `80`.
+- For `https` domain names (as is the default, if not specified) it uses port `443`. In this case Caddy also creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation).
+
+    !!! warning
+        Caddy won't be able to verify the SSL certificate when running on a non-standard port, so make sure you already have a reverse proxy that handles SSL.
+
+To use a non-standard port:
+
+1. Edit your `.env` file and set either the [`HTTP_PORT`](../configuration.md#http_port) or the [`HTTPS_PORT`](../configuration.md#https_port) environment variable (depending on the protocol you're using).
+
+    !!! example
+        To serve Mathesar at `http://localhost:9000`, include the following in your `.env` file:
+
+        ```bash
+        DOMAIN_NAME='http://localhost'
+        HTTP_PORT=9000
+        ```
+
+1. Restart the container 
+
+    === "Linux"
+        ```
+        sudo docker compose -f docker-compose.yml up caddy-reverse-proxy -d
+        ```
+
+    === "MacOS"
+        ```
+        docker compose -f docker-compose.yml up caddy-reverse-proxy -d
+        ```

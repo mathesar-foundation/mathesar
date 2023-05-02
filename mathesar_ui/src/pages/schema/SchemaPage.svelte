@@ -104,7 +104,9 @@
 
 <LayoutWithHeader
   restrictWidth
-  cssVariables={{ '--max-layout-width': '72rem' }}
+  cssVariables={{
+    '--max-layout-width': 'var(--max-layout-width-console-pages)',
+  }}
 >
   <AppSecondaryHeader
     slot="secondary-header"
