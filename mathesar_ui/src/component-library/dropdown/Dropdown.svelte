@@ -18,6 +18,7 @@
   export let ariaLabel: string | undefined = undefined;
   export let ariaControls: string | undefined = undefined;
   export let placements: Placement[] | undefined = undefined;
+  export let preferredPlacement: Placement | undefined = undefined;
   export let showArrow = true;
   export let size: Size = 'medium';
   export let disabled = false;
@@ -84,6 +85,7 @@
   trigger={triggerElement}
   {isOpen}
   {placements}
+  {preferredPlacement}
   class={contentClass}
   {closeOnInnerClick}
   on:close={close}

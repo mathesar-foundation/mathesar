@@ -7,7 +7,7 @@ import type {
 import { writable, get, derived } from 'svelte/store';
 import ImmutableSet from './ImmutableSet';
 
-export default class WritableSet<Value extends string | number | boolean | null>
+export default class WritableSet<Value>
   implements Readable<ImmutableSet<Value>>
 {
   values: Writable<ImmutableSet<Value>>;
