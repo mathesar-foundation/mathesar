@@ -10,7 +10,6 @@ services:
       - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
-    # db container is exposed to the other containers, and the host.
     expose:
       - "5432"
     volumes:
@@ -56,7 +55,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - DJANGO_DATABASE_URL=${DJANGO_DATABASE_URL-postgres://mathesar:mathesar@mathesar_db:5432/mathesar_django}
       - MATHESAR_DATABASES=${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
-    command: ./run.sh
+    entrypoint: ./run.sh
     volumes:
       - static:/code/static
       - media:/code/media
