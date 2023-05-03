@@ -122,6 +122,14 @@
             docker compose -f docker-compose.yml up caddy-reverse-proxy -d
             ```
 
+1. Create a superuser
+    ```bash
+    # Run the Django `createsuperuser` command. Refer https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser
+    docker exec -it mathesar_service python manage.py createsuperuser
+    ```
+    A prompt will appear to ask for the superuser details, fill in the details to create a superuser. At least one superuser is necessary for accessing Mathesar.
+
+
 1. (Optional) Start the Upgrade server to enable upgrading the docker image using the Mathesar UI.
 
     === "Linux"
@@ -133,8 +141,6 @@
         ```
         docker compose -f docker-compose.yml up watchtower -d
         ```
-
-
 ## Administration
 
 ### Start/stop the server {:#start-stop}
