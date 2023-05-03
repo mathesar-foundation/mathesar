@@ -29,15 +29,15 @@
 ## Install using the interactive script {#guided}
 
 !!! info "Installation Script Overview"
-    The interactive script is a convenient script to help you set up mathesar. But it is highly opinionated.
-    Although it provides certain configuration options, it might not be suitable if you are planning to modify the services installed or want control over your setup. Please look at the [Manual Install section](#manual) if you want to customise the setup process.
+    The interactive script is a convenient script to help you set up Mathesar. But it is highly opinionated and needs `sudo` privileges(admin access).
+    Although it provides certain configuration options, it might not be suitable if you are planning to modify the services installed or want control over the setup process. Please look at the [Manual Install section](#manual) if you want to customise the setup process.
     
     The installation script will set up
 
-    - A database server to store the metadata, it can also be used for the user data
-    - The Mathesar webserver - Runs the Mathesar APP
-    - A reverse proxy - Sets up the SSL certificate needed for `https`, serves the static js, css files. 
-    - An upgrade server for upgrading using the UI - A convinence service to allow updating the Mathesar APP using the UI
+    - A database server - Postgres Database server for storing the data;
+    - The Mathesar webserver - Runs the Mathesar App;
+    - A reverse proxy - Sets up the SSL certificate needed for `https`, serves the static js, css files; 
+    - An upgrade server for upgrading using the UI - A convinence service to allow updating the Mathesar APP using the UI;
 
 1. Paste this command into your terminal to begin installing the latest version of Mathesar:
 
