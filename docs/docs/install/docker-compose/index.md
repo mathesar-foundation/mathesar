@@ -74,7 +74,7 @@
     Your custom `.env` file will be used for setting [configuration variables](../configuration.md).
 
 1. Set up the database
-    - You can use the default database server that starts along with the Mathesar Webserver. Please refer [Default Database](#default-db) for information of the default database server. 
+    - You can use the default database server that starts along with the Mathesar Webserver. Please refer [Default Database section](#default-db) for information on the default database server. 
     - (Alternatively) You can use an existing database server. If you plan on using an existing database server, please see look at the [instructions for disabling the default database](#external-db-service).
 
 1. Set up the web server.
@@ -251,9 +251,12 @@ Manually upgrade Mathesar to the newest version without using watch tower:
 ## Additional Information
 
 ### Default Database Container {#default-db}
- The default `docker-compose.yml` has a `db` service which automatically starts a Postgres database server container called `mathesar_db`. This service allows you to immediately start using Mathesar to store data in a Postgres database without administering a separate Postgres server outside Mathesar.
+ The default `docker-compose.yml` includes a `db` service
+ that automatically starts a Postgres database server container called `mathesar_db`.
+ This service allows you to  start using Mathesar immediately to store data in a Postgres database
+ without administering a separate Postgres server outside Mathesar.
 
-The `db` service runs on the [internal docker compose port](https://docs.docker.com/compose/compose-file/compose-file-v3/#expose) `5432`. The internal port is not bound to the host, to prevent conflict with other services running on port `5432`.
+The `db` service runs on the [internal docker compose port](https://docs.docker.com/compose/compose-file/compose-file-v3/#expose) `5432`. The internal port is not bound to the hostto avoid conflicts with other services running on port `5432`.
 
  Additionally, it comes with a default database and a superuser; this database can come in handy for storing Mathesar's [metadata](../configuration/#django_database_url). 
   The credentials for the Default database are
