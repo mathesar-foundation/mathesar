@@ -14,7 +14,7 @@ def create_mathesar_table(name, schema, columns, engine, metadata=None, comment=
     table.
     """
     columns = init_mathesar_table_column_list_with_defaults(columns)
-    create_schema(schema, engine)
+    create_schema(schema, engine, if_not_exists=True)
     # We need this so that we can create multiple mathesar tables in the
     # same MetaData, enabling them to reference each other in the
     # SQLAlchemy context (e.g., for creating a ForeignKey relationship)
