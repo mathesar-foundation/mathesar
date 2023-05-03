@@ -21,7 +21,7 @@
     pagination: new Pagination({ size: 10 }),
   });
 
-  export let recordId: number;
+  export let recordPk: string;
   export let table: Pick<TableEntry, 'id' | 'name'>;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
@@ -30,14 +30,14 @@
     id: table.id,
     abstractTypesMap,
     meta,
-    contextualFilters: new Map([[fkColumn.id, recordId]]),
+    contextualFilters: new Map([[fkColumn.id, recordPk]]),
   });
   $: tabularDataStore.set(tabularData);
 </script>
 
 <div class="table-widget">
   <div class="top">
-    <h3><TableName {table} /></h3>
+    <h3 class="bold-header"><TableName {table} /></h3>
     <MiniActionsPane />
   </div>
 
@@ -55,9 +55,6 @@
     align-items: center;
 
     overflow: hidden;
-    > h3 {
-      font-weight: 500;
-    }
   }
   .top > :global(*) {
     overflow: hidden;

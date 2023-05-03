@@ -25,12 +25,18 @@ button.dropdown.trigger {
 }
 
 .dropdown.content {
-  box-shadow: #000 0 0 0 0, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
-    rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+  box-shadow: var(
+    --Dropdown__box-shadow,
+    #000 0 0 0 0,
+    rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px
+  );
+  border: var(--Dropdown__border, none);
   border-radius: var(--border-radius-m);
-  background: var(--dropdown-background, var(--white));
+  background: var(--Dropdown__background, var(--white));
   z-index: var(--dropdown-z-index, 100);
-  max-height: calc(100vh - 5em);
+  max-height: calc(100vh - 0.5rem);
   overflow: auto;
 
   &[data-popper-placement='top-start'] {

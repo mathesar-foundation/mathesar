@@ -1,57 +1,52 @@
-<script>
-  import { Icon } from '@mathesar/component-library';
-  import { iconSettingsMajor, iconUser } from '@mathesar/icons';
+<script lang="ts">
   import { active } from 'tinro';
+  import { Menu, MenuItemContents } from '@mathesar-component-library';
+  import { iconSettingsMajor, iconMultipleUsers } from '@mathesar/icons';
   import {
-    ADMIN_GENERAL_PAGE_URL,
+    ADMIN_UPDATE_PAGE_URL,
     ADMIN_USERS_PAGE_URL,
   } from '@mathesar/routes/urls';
+  import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
+
+  const releaseDataStore = getReleaseDataStoreFromContext();
+
+  $: upgradable = $releaseDataStore?.value?.upgradeStatus === 'upgradable';
 </script>
 
-<ul role="menu" class="admin-navigation-menu">
-  <li role="menuitem">
-    <a href={ADMIN_GENERAL_PAGE_URL} use:active class="passthrough">
-      <Icon {...iconSettingsMajor} />
-      <span>General</span>
+<div class="admin-navigation">
+  <Menu>
+    <a
+      role="menuitem"
+      href={ADMIN_UPDATE_PAGE_URL}
+      class="menu-item menu-item-link"
+      use:active
+    >
+      <MenuItemContents
+        icon={iconSettingsMajor}
+        hasNotificationDot={upgradable}
+      >
+        Update
+      </MenuItemContents>
     </a>
-  </li>
-  <li role="menuitem">
-    <a href={ADMIN_USERS_PAGE_URL} use:active class="passthrough">
-      <Icon {...iconUser} />
-      <span>Users</span>
+    <a
+      role="menuitem"
+      href={ADMIN_USERS_PAGE_URL}
+      class="menu-item menu-item-link"
+      use:active
+    >
+      <MenuItemContents icon={iconMultipleUsers}>Users</MenuItemContents>
     </a>
-  </li>
-</ul>
+  </Menu>
+</div>
 
 <style lang="scss">
-  .admin-navigation-menu {
-    list-style-type: none;
-    padding-right: 1rem;
-    padding-left: 0;
-
-    > :global(* + *) {
-      margin-top: 0.15rem;
-    }
-
-    a {
-      display: flex;
-      align-items: center;
-      padding: 0.5rem;
-      border-radius: var(--border-radius-m);
-      font-size: var(--text-size-large);
-      cursor: pointer;
-
-      > :global(* + *) {
-        margin-left: 0.5rem;
-      }
-
-      &:hover {
-        background-color: var(--sand-200);
-      }
-
-      &:global(.active) {
-        background-color: var(--sand-200);
-      }
-    }
+  .admin-navigation {
+    font-size: var(--text-size-large);
+    --min-width: 100%;
+    --Menu__item-border-radius: var(--border-radius-m);
+    --Menu__item-hover-background: var(--sand-100);
+    --Menu__item-active-background: var(--sand-200);
+    --Menu__item-active-hover-background: var(--sand-200);
+    --Menu__item-focus-outline-color: var(--sand-300);
   }
 </style>

@@ -12,6 +12,7 @@ from sqlalchemy_utils import database_exists, create_database, drop_database
 
 from db.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
 from db.types import install
+from db.sql import install as sql_install
 from db.schemas.operations.drop import drop_schema as drop_sa_schema
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
@@ -73,6 +74,7 @@ def create_db(request, SES_engine_cache):
         create_database(engine.url)
         created_dbs.add(db_name)
         # Our default testing database has our types and functions preinstalled.
+        sql_install.install(engine)
         install.install_mathesar_on_database(engine)
         engine.dispose()
         return db_name
@@ -208,7 +210,7 @@ def create_db_schema(SES_engine_cache):
         if schema_mustnt_exist:
             assert schema_name not in created_schemas
         logger.debug(f'creating {schema_name}')
-        create_sa_schema(schema_name, engine)
+        create_sa_schema(schema_name, engine, if_not_exists=True)
         schema_oid = get_schema_oid_from_name(schema_name, engine)
         db_name = engine.url.database
         created_schemas_in_this_engine = created_schemas.setdefault(db_name, {})

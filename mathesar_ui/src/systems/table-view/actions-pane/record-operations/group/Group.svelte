@@ -7,6 +7,8 @@
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -51,6 +53,8 @@
         columns={$processedColumns}
         columnsAllowedForSelection={availableColumns.map((entry) => entry.id)}
         getColumnLabel={(processedColumn) => processedColumn?.column.name ?? ''}
+        getColumnConstraintType={(column) =>
+          getColumnConstraintTypeByColumnId(column.id, $processedColumns)}
         columnIdentifier={groupEntry.columnId}
         preprocFunctionIdentifier={groupEntry.preprocFnId}
         on:update={(e) => updateGrouping(index, e.detail)}
@@ -70,7 +74,21 @@
     >
       {#each availableColumns as column (column.id)}
         <ButtonMenuItem on:click={() => addGroupColumn(column)}>
-          {$processedColumns.get(column.id)?.column.name}
+          <ColumnName
+            column={{
+              name: $processedColumns.get(column.id)?.column.name ?? '',
+              type: $processedColumns.get(column.id)?.column.type ?? '',
+              type_options:
+                $processedColumns.get(column.id)?.column.type_options ?? null,
+              display_options:
+                $processedColumns.get(column.id)?.column.display_options ??
+                null,
+              constraintsType: getColumnConstraintTypeByColumnId(
+                column.id,
+                $processedColumns,
+              ),
+            }}
+          />
         </ButtonMenuItem>
       {/each}
     </DropdownMenu>

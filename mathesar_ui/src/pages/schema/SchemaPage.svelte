@@ -104,7 +104,9 @@
 
 <LayoutWithHeader
   restrictWidth
-  cssVariables={{ '--max-layout-width': '72rem' }}
+  cssVariables={{
+    '--max-layout-width': 'var(--max-layout-width-console-pages)',
+  }}
 >
   <AppSecondaryHeader
     slot="secondary-header"
@@ -162,7 +164,7 @@
     {:else if activeTab?.id === 'tables'}
       <div class="tab-container">
         {#if isTablesLoading}
-          <TableSkeleton />
+          <TableSkeleton numTables={schema.num_tables} />
         {:else}
           <SchemaTables {canExecuteDDL} {tablesMap} {database} {schema} />
         {/if}
@@ -191,6 +193,7 @@
 <style lang="scss">
   .tab-container {
     padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 
   .tab-header-container {

@@ -2,6 +2,7 @@ from io import TextIOWrapper
 
 import clevercsv as csv
 
+from db.identifiers import truncate_if_necessary
 from db.tables.operations.alter import update_pk_sequence_to_latest
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Table
@@ -15,7 +16,7 @@ from psycopg2.errors import IntegrityError, DataError
 
 from mathesar.state import reset_reflection
 
-ALLOWED_DELIMITERS = ",\t:|"
+ALLOWED_DELIMITERS = ",\t:|;"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
@@ -118,15 +119,7 @@ def create_db_table_from_data_file(data_file, name, schema, comment=None):
     encoding = get_file_encoding(data_file.file)
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
-        column_names = [column_name.strip() for column_name in sv_reader.fieldnames]
-        column_names = [
-            f"{COLUMN_NAME_TEMPLATE}{i}" if name == '' else name
-            for i, name in enumerate(column_names)
-        ]
-        column_names_alt = [
-            fieldname if fieldname != ID else ID_ORIGINAL
-            for fieldname in column_names
-        ]
+        column_names = _process_column_names(sv_reader.fieldnames)
         table = create_string_column_table(
             name=name,
             schema=schema.name,
@@ -149,6 +142,10 @@ def create_db_table_from_data_file(data_file, name, schema, comment=None):
         update_pk_sequence_to_latest(engine, table)
     except (IntegrityError, DataError):
         drop_table(name=name, schema=schema.name, engine=engine)
+        column_names_alt = [
+            column_name if column_name != ID else ID_ORIGINAL
+            for column_name in column_names
+        ]
         table = create_string_column_table(
             name=name,
             schema=schema.name,
@@ -169,6 +166,25 @@ def create_db_table_from_data_file(data_file, name, schema, comment=None):
         )
     reset_reflection(db_name=db_name)
     return table
+
+
+def _process_column_names(column_names):
+    column_names = (
+        column_name.strip()
+        for column_name
+        in column_names
+    )
+    column_names = (
+        truncate_if_necessary(column_name)
+        for column_name
+        in column_names
+    )
+    column_names = (
+        f"{COLUMN_NAME_TEMPLATE}{i}" if name == '' else name
+        for i, name
+        in enumerate(column_names)
+    )
+    return list(column_names)
 
 
 def create_table_from_csv(data_file, name, schema, comment=None):

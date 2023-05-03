@@ -1,4 +1,5 @@
 <script lang="ts">
+  import DatabaseName from '@mathesar/components/DatabaseName.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
@@ -13,6 +14,7 @@
   import { getLinkForTableItem } from '@mathesar/utils/tables';
   import BreadcrumbLink from './BreadcrumbLink.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
+  import DatabaseSelector from './DatabaseSelector.svelte';
   import EntitySelector from './EntitySelector.svelte';
   import SchemaSelector from './SchemaSelector.svelte';
   import LogoAndNameWithLink from './LogoAndNameWithLink.svelte';
@@ -31,6 +33,12 @@
       href={getDatabasePageUrl(item.database.name)}
       {hasResponsiveAbridgement}
     />
+  </div>
+  <DatabaseSelector />
+  <div class="breadcrumb-item truncate">
+    <BreadcrumbLink href={getDatabasePageUrl(item.database.name)}>
+      <DatabaseName database={item.database} />
+    </BreadcrumbLink>
   </div>
 {:else if item.type === 'schema'}
   <SchemaSelector database={item.database} />
@@ -56,7 +64,7 @@
         item.database.name,
         item.schema.id,
         item.table.id,
-        item.record.id,
+        item.record.pk,
       )}
     >
       <NameWithIcon icon={iconRecord}>

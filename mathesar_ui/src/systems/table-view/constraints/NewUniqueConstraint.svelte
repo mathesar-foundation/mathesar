@@ -16,6 +16,7 @@
   import Form from '@mathesar/components/Form.svelte';
   import { getAvailableName } from '@mathesar/utils/db';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;
@@ -128,7 +129,15 @@
           autoClearInvalidValues={false}
           let:option
         >
-          <ColumnName column={option.column} />
+          <ColumnName
+            column={{
+              ...option.column,
+              constraintsType: getColumnConstraintTypeByColumnId(
+                option.column.id,
+                $processedColumns,
+              ),
+            }}
+          />
         </MultiSelect>
       </LabeledInput>
     </FormField>

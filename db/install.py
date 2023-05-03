@@ -2,7 +2,8 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from db import engine
-from db.types import install
+from db.sql import install as sql_install
+from db.types import install as types_install
 
 
 def install_mathesar(
@@ -10,12 +11,14 @@ def install_mathesar(
 ):
     """Create database and install Mathesar on it."""
     user_db_engine = engine.create_future_engine(
-        username, password, hostname, database_name, port
+        username, password, hostname, database_name, port,
+        connect_args={"connect_timeout": 10}
     )
     try:
         user_db_engine.connect()
         print(f"Installing Mathesar on preexisting PostgreSQL database {database_name} at host {hostname}...")
-        install.install_mathesar_on_database(user_db_engine)
+        sql_install.install(user_db_engine)
+        types_install.install_mathesar_on_database(user_db_engine)
         user_db_engine.dispose()
     except OperationalError:
         database_created = _create_database(
@@ -28,7 +31,8 @@ def install_mathesar(
         )
         if database_created:
             print(f"Installing Mathesar on PostgreSQL database {database_name} at host {hostname}...")
-            install.install_mathesar_on_database(user_db_engine)
+            sql_install.install(user_db_engine)
+            types_install.install_mathesar_on_database(user_db_engine)
             user_db_engine.dispose()
         else:
             print(f"Skipping installing on DB with key {database_name}.")
@@ -48,10 +52,11 @@ def _create_database(database_name, hostname, username, password, port, skip_con
         root_database = "postgres"
         root_db_engine = engine.create_future_engine(
             username, password, hostname, root_database, port,
+            connect_args={"connect_timeout": 10}
         )
         with root_db_engine.connect() as conn:
             conn.execution_options(isolation_level="AUTOCOMMIT")
-            conn.execute(text(f"CREATE DATABASE {database_name}"))
+            conn.execute(text(f'CREATE DATABASE "{database_name}"'))
         root_db_engine.dispose()
         print(f"Created DB is {database_name}.")
         return True

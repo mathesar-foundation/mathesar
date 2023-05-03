@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { makeStyleStringFromCssVariables } from '@mathesar-component-library';
   import AppHeader from '@mathesar/components/AppHeader.svelte';
   import LiveDemoBanner from '@mathesar/components/LiveDemoBanner.svelte';
 
@@ -7,16 +8,13 @@
   export let cssVariables: Record<string, string> | undefined = undefined;
 
   $: style = cssVariables
-    ? Object.entries(cssVariables)
-        .filter((val) => val[0].indexOf('--') === 0)
-        .map((entry) => `${entry[0]}: ${entry[1]}`)
-        .join(';')
+    ? makeStyleStringFromCssVariables(cssVariables)
     : undefined;
 </script>
 
 <div class="app-layout" class:fit-viewport={fitViewport} {style}>
-  <LiveDemoBanner />
   <div class="app-layout-header">
+    <LiveDemoBanner />
     <AppHeader />
   </div>
   <slot name="secondary-header" />
@@ -43,7 +41,7 @@
       flex-grow: 1;
 
       &.restrict-width {
-        max-width: var(--max-layout-width, 54rem);
+        max-width: var(--max-layout-width);
         margin-left: auto;
         margin-right: auto;
         width: 100%;
@@ -62,8 +60,7 @@
     }
   }
 
-  // TODO: Remove default styling properties on layout components
   .app-layout:not(.fit-viewport) .app-layout-content {
-    padding: 0 var(--page-padding);
+    padding: var(--page-padding);
   }
 </style>

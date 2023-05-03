@@ -1,12 +1,12 @@
 import { ImmutableSet, WritableSet } from '@mathesar-component-library';
 import { get, writable, type Unsubscriber, type Writable } from 'svelte/store';
 
-interface SelectionColumn {
+export interface SelectionColumn {
   id: number | string;
   columnIndex: number;
 }
 
-interface SelectionRow {
+export interface SelectionRow {
   rowIndex: number;
 }
 
@@ -266,6 +266,10 @@ export default class SheetSelection<
            */
           this.selectionBounds = undefined;
           this.selectMultipleCells([[activeCellRow, activeCellColumn]]);
+        } else {
+          // We need to unselect the Selected cells
+          // when navigating Placeholder cells
+          this.resetSelection();
         }
       } else {
         this.resetSelection();
@@ -323,6 +327,14 @@ export default class SheetSelection<
     if (firstRow && firstColumn) {
       this.selectMultipleCells([[firstRow, firstColumn]]);
       this.activateCell(firstRow, firstColumn);
+    }
+  }
+
+  selectAndActivateFirstDataEntryCellInLastRow(): void {
+    const currentRows = this.getRows();
+    const currentColumns = this.getColumns();
+    if (currentRows.length > 0 && currentColumns.length > 1) {
+      this.activateCell(currentRows[currentRows.length - 1], currentColumns[1]);
     }
   }
 

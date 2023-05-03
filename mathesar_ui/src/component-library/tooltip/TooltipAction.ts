@@ -11,7 +11,7 @@ export default function tooltip(
   const tooltipComponent = new AttachableDropdown({
     props: {
       trigger: node,
-      placement: 'top',
+      placements: ['top', 'right', 'bottom', 'left'],
       content,
       class: 'tooltip',
     },

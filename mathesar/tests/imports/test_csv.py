@@ -57,7 +57,8 @@ def check_csv_upload(table, table_name, schema, num_records, row, cols):
     assert table.schema == schema
     assert table.sa_num_records() == num_records
     assert table.get_records()[0] == row
-    assert all([col in table.sa_column_names for col in cols])
+    for col in cols:
+        assert col in table.sa_column_names
 
 
 def test_csv_upload(data_file, schema):

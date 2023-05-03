@@ -37,11 +37,11 @@
     </Route>
   {/if}
 
-  <Route path="/:databaseName/*" let:meta firstmatch>
+  <Route path="/db/:databaseName/*" let:meta firstmatch>
     <DatabaseRoute databaseName={meta.params.databaseName} />
   </Route>
 
   <Route fallback>
-    <ErrorPage>404: Page not found</ErrorPage>
+    <ErrorPage>This is the not the webpage you are looking for.</ErrorPage>
   </Route>
 </Route>

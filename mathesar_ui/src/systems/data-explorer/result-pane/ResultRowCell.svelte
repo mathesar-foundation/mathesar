@@ -82,12 +82,15 @@
         on:activate={() => {
           if (row) {
             selection.activateCell(row, processedQueryColumn);
-            // Activate event initaites the selection process
-            selection.onStartSelection(row, processedQueryColumn);
             inspector.selectCellTab();
           }
         }}
-        on:mouseenter={() => {
+        on:onSelectionStart={() => {
+          if (row) {
+            selection.onStartSelection(row, processedQueryColumn);
+          }
+        }}
+        on:onMouseEnterCellWhileSelection={() => {
           if (row) {
             // This enables the click + drag to
             // select multiple cells
@@ -102,6 +105,7 @@
 <style lang="scss">
   .cell {
     user-select: none;
+    -webkit-user-select: none; /* Safari */
     background: var(--cell-bg-color-base);
 
     &.is-active {

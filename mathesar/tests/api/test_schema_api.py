@@ -123,6 +123,40 @@ def test_schema_list_filter(client, create_db_schema, FUN_create_dj_db, MOD_engi
             )
 
 
+list_clients_with_num_tables_count = [
+    ('superuser_client_factory', 3),
+    ('db_manager_client_factory', 3),
+    ('db_editor_client_factory', 2),
+    ('schema_manager_client_factory', 3),
+    ('schema_viewer_client_factory', 2),
+    ('db_viewer_schema_manager_client_factory', 3)
+]
+
+
+@pytest.mark.parametrize('client_name, expected_num_tables_count', list_clients_with_num_tables_count)
+def test_schema_num_tables_with_multiple_roles(
+        request,
+        create_patents_table,
+        patent_schema,
+        client_name,
+        expected_num_tables_count
+):
+    create_patents_table("Patent Table 1")
+    table_2 = create_patents_table("Patent Table 2")
+    table_3 = create_patents_table("Patent Table 3")
+    table_2.import_verified = True
+    table_3.import_verified = None
+    table_2.save()
+    table_3.save()
+    client = request.getfixturevalue(client_name)(patent_schema)
+    response = client.get('/api/db/v0/schemas/')
+    assert response.status_code == 200
+    response_data = response.json()
+    response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
+    for someschema in response_schemas:
+        assert someschema['num_tables'] == expected_num_tables_count
+
+
 def test_schema_detail(create_patents_table, client, test_db_name, MOD_engine_cache):
     """
     Desired format:
@@ -257,6 +291,23 @@ def test_schema_create_by_superuser(client, FUN_create_dj_db, MOD_engine_cache):
         db_name,
         check_schema_objects=0
     )
+
+
+def test_schema_create_by_superuser_too_long_name(client, FUN_create_dj_db):
+    db_name = "some_db1"
+    FUN_create_dj_db(db_name)
+    schema_count_before = Schema.objects.count()
+    very_long_string = ''.join(map(str, range(50)))
+    schema_name = 'very_long_identifier_' + very_long_string
+    data = {
+        'name': schema_name,
+        'database': db_name
+    }
+    response = client.post('/api/db/v0/schemas/', data=data)
+    assert response.status_code == 400
+    assert response.json()[0]['code'] == ErrorCodes.IdentifierTooLong.value
+    schema_count_after = Schema.objects.count()
+    assert schema_count_after == schema_count_before
 
 
 def test_schema_create_by_db_manager(client_bob, user_bob, FUN_create_dj_db, get_uid):

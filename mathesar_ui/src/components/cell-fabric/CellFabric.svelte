@@ -4,8 +4,15 @@
   This component is meant to be common for tables, queries, and for import preview
 -->
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';
+
+  type CustomEvents = {
+    onSelectionStart: { e: MouseEvent };
+    onMouseEnterCellWhileSelection: { e: MouseEvent };
+  };
+  const dispatch = createEventDispatcher<CustomEvents>();
 
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
@@ -25,6 +32,14 @@
   $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
   $: props = cellComponentAndProps.props as Record<string, unknown>;
+
+  function handleMouseDown(e: MouseEvent) {
+    dispatch('onSelectionStart', { e });
+  }
+
+  function handleMouseEnter(e: MouseEvent) {
+    dispatch('onMouseEnterCellWhileSelection', { e });
+  }
 </script>
 
 <div
@@ -32,6 +47,8 @@
   data-column-identifier={columnFabric.id}
   class:show-as-skeleton={showAsSkeleton}
   class:is-independent={isIndependentOfSheet}
+  on:mousedown={handleMouseDown}
+  on:mouseenter={handleMouseEnter}
 >
   <svelte:component
     this={component}
