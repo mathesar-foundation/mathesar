@@ -3,7 +3,7 @@
 The table below shows all available environment variables supported by Mathesar. See the specific installation guides for the applicable environment variables and instructions on how to set them.
 
 
-## Backend Configuration
+## Backend Configuration {#backend}
 
 ### `SECRET_KEY`
 
@@ -59,29 +59,37 @@ The table below shows all available environment variables supported by Mathesar.
 - Each database must have a unique id and a connection string.
 
 
-## Caddy Reverse Proxy Configuration
+## Caddy Reverse Proxy Configuration {#caddy}
 
 ### `DOMAIN_NAME`
 
 - _**Required**_
-- The [public URL](https://caddyserver.com/docs/caddyfile/concepts#addresses) that will be used to access Mathesar. If a `https://` url is provided, the Caddy reverse proxy will attempt to [automatically setup HTTPS](https://caddyserver.com/docs/automatic-https) with [lets encrypt](https://letsencrypt.org/) for you.
+- The [public URL](https://caddyserver.com/docs/caddyfile/concepts#addresses) that will be used to access Mathesar.
+- Example values:
+    - `https://example.com`
+    - `localhost`
+    - `http://localhost`
+- If the protocol is `http`, then Caddy will serve traffic via HTTP only.
+- If the protocol is `https` or is not specified, then Caddy will serve traffic via HTTPS (and will redirect all HTTP traffic to HTTPS). In this case Caddy will also attempt to [automatically setup HTTPS](https://caddyserver.com/docs/automatic-https) with [lets encrypt](https://letsencrypt.org/) for you.
 - Set this to `localhost` if you wish Mathesar to be available on localhost only.
-- Set the prefix to `http` if you don't want caddy to automatically handle the SSL, for example `http://example.com`
+- Set the protocol to `http` if you don't want caddy to automatically handle the SSL, for example `http://example.com`
 
 ### `HTTP_PORT`
 
 - _Optional_. Defaults to `80`
-- The HTTP port used by caddy to listen for requests. It is recommended to use the default port `80` as features like automatic SSL [rely on it](https://caddyserver.com/docs/automatic-https#acme-challenges).
+- Configures the port that Caddy will use when `DOMAIN_NAME` specifies a `http` protocol.
+- It is recommended to use the default port `80` as features like automatic SSL [rely on it](https://caddyserver.com/docs/automatic-https#acme-challenges).
 - If you already have a reverse proxy handling the SSL on the same system or if you are running on a non-root system, you can change it to a different port number to avoid conflicts or permission.
 
 ### `HTTPS_PORT`
 
 - _Optional_. Defaults to `443`
-- The HTTPS port is used by Caddy to listen to requests. If you want Caddy to handle the SSL certificate it is highly recommended to use the default port `443` as features like automatic SSL, and HTTPS redirection [rely on it](https://caddyserver.com/docs/automatic-https#acme-challenges).
+- Configures the port that Caddy will use when `DOMAIN_NAME` specifies a `https` protocol or does not specify a protocol.
+- If you want Caddy to handle the SSL certificate it is highly recommended to use the default port `443` as features like automatic SSL, and HTTPS redirection [rely on it](https://caddyserver.com/docs/automatic-https#acme-challenges).
 - If you already have a reverse proxy handling the SSL on the same system or if you are running on a non-root system, you can change it to a different port number to avoid conflicts or permission errors.
 
 
-## Database Configuration
+## Database Configuration {#database}
 
 ### `POSTGRES_PORT`
 
