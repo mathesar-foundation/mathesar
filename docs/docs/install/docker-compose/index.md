@@ -37,7 +37,7 @@
     - A database server - Postgres Database server for storing the data;
     - The Mathesar webserver - Runs the Mathesar App;
     - A reverse proxy - Sets up the SSL certificate needed for `https`, serves the static js, css files; 
-    - An upgrade server for upgrading using the UI - A convinence service to allow updating the Mathesar APP using the UI;
+    - An upgrade server for upgrading using the UI - A convenience service to allow updating the Mathesar APP using the UI;
 
 1. Paste this command into your terminal to begin installing the latest version of Mathesar:
 
