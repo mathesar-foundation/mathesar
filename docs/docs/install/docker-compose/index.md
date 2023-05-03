@@ -306,10 +306,12 @@ After this change, Mathesar will no longer start the `db` service automatically.
 By default, Caddy serves the Mathesar web application on a port as determined by the protocol within your [`DOMAIN_NAME` environment variable](../configuration.md#domain_name).
 
 - For `http` domain names it uses  port `80`.
-- For `https` domain names (as is the default, if not specified) it uses port `443`. In this case Caddy also creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation).
+- For `https` domain names (as is the default, if not specified) it uses port `443` and redirects any traffic pointed at `http` to `https`. In this case, Caddy also creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation).
 
     !!! warning
-        Caddy won't be able to verify the SSL certificate when running on a non-standard port, so make sure you already have a reverse proxy that handles SSL.
+          If you don't have access to port `443`, avoid using `https` domain names on a non-standard port. Due to the following reasons
+          - Caddy won't be able to verify the SSL certificate when running on a non-standard port.
+          — Browsers automatically redirect traffic sent to the `http` domain to the standard `https` port (443), rather than to any non-standard `HTTPS_PORT` port that you may have configured.  
 
 To use a non-standard port:
 
