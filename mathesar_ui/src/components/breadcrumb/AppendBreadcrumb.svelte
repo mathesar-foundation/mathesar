@@ -15,7 +15,7 @@
   }
 
   function removePreviousItem() {
-    // $items = $items.filter((i) => i !== previousItem);
+    $items = $items.filter((i) => i !== previousItem);
   }
 
   function handleItemChange(i: BreadcrumbItem) {
