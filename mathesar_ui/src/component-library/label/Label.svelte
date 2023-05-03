@@ -31,6 +31,7 @@
 -->
 <label
   for={$inputId}
+  {...$$restProps}
   {style}
   class="label-component"
   class:disabled={$disabled}
