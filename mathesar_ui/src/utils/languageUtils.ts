@@ -18,7 +18,11 @@ export function makeTitleCase(text: string): string {
   return text.split(' ').map(makeSentenceCase).join(' ');
 }
 
-type Countable = number | Array<unknown> | { size: number } | Iterable<unknown>;
+export type Countable =
+  | number
+  | Array<unknown>
+  | { size: number }
+  | Iterable<unknown>;
 
 function getCount(countable: Countable): number {
   if (typeof countable === 'number') {
@@ -89,6 +93,7 @@ const wordMap = {
   explorations: makePluralFormsFromEnglish('exploration', 'explorations'),
   matches: makePluralFormsFromEnglish('match', 'matches'),
   records: makePluralFormsFromEnglish('record', 'records'),
+  rows: makePluralFormsFromEnglish('row', 'rows'),
   results: makePluralFormsFromEnglish('result', 'results'),
   schemas: makePluralFormsFromEnglish('schema', 'schemas'),
   tables: makePluralFormsFromEnglish('table', 'tables'),
@@ -236,4 +241,9 @@ export function numberOfTimes(countable: Countable, casing?: Casing): string {
     return 'twice';
   }
   return labeledCount(countable, 'times', { casing });
+}
+
+export function pluralizeThisPronoun(countable: Countable) {
+  const count = getCount(countable);
+  return count > 1 ? 'these' : 'this';
 }

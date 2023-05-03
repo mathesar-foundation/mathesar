@@ -6,7 +6,7 @@
     iconExternalLink,
   } from '@mathesar/component-library';
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
-  import { recordDeleteProps } from '@mathesar/pages/record/recordHelp';
+  import { getRecordDeleteMessage } from '@mathesar/pages/record/recordHelp';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type {
@@ -26,8 +26,8 @@
 
   async function handleDeleteRecords() {
     void confirmDelete({
-      identifierType: recordDeleteProps.identifierType,
-      body: recordDeleteProps.body,
+      identifierType: 'Record',
+      body: getRecordDeleteMessage(selectedRowIndices),
       onProceed: () => recordsData.deleteSelected(selectedRowIndices),
       onError: (e) => toast.fromError(e),
       onSuccess: () => {
