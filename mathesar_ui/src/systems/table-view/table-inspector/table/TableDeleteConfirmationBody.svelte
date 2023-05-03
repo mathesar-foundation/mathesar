@@ -7,7 +7,7 @@
 
   let value = '';
 
-  let canProceed = confirmationController.canProceed;
+  let { canProceed } = confirmationController;
   $: $canProceed = value.trim().toLowerCase() === tableName.toLowerCase();
 </script>
 
