@@ -52,7 +52,7 @@
   Go to Record Page
 </LinkMenuItem>
 {#if canEditTableRecords}
-  <ButtonMenuItem on:click={handleDeleteRecords} danger icon={iconDeleteMajor}>
+  <ButtonMenuItem on:click={handleDeleteRecords} icon={iconDeleteMajor}>
     Delete Record
   </ButtonMenuItem>
 {/if}

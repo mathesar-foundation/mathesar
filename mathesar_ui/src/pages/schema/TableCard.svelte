@@ -27,6 +27,7 @@
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
   import EditTable from './EditTable.svelte';
+  import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
 
   const recordSelector = getRecordSelectorFromContext();
   const editTableModalController = modal.spawnModalController();
@@ -53,6 +54,12 @@
   function handleDeleteTable() {
     void confirmDelete({
       identifierType: 'Table',
+      body: {
+        component: TableDeleteConfirmationBody,
+        props: {
+          tableName: table.name,
+        },
+      },
       onProceed: async () => {
         await deleteTable(table.id);
         await refetchTablesForSchema(schema.id);
