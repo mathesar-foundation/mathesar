@@ -16,6 +16,7 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
+  import { recordDeleteProps } from '@mathesar/pages/record/recordHelp';
 
   export let row: RecordRow;
   export let recordPk: string;
@@ -33,12 +34,13 @@
   async function handleDeleteRecords() {
     if (rowHasRecord(row)) {
       void confirmDelete({
-        identifierType: 'Row',
+        identifierType: recordDeleteProps.identifierType,
+        body: recordDeleteProps.body,
         onProceed: () => recordsData.deleteSelected([Number(row.rowIndex)]),
         onError: (e) => toast.fromError(e),
         onSuccess: () =>
           toast.success({
-            title: 'Row deleted successfully!',
+            title: 'Record deleted successfully!',
           }),
       });
     }

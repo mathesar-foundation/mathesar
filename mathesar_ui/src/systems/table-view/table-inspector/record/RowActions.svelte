@@ -6,6 +6,7 @@
     iconExternalLink,
   } from '@mathesar/component-library';
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
+  import { recordDeleteProps } from '@mathesar/pages/record/recordHelp';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type {
@@ -25,13 +26,15 @@
 
   async function handleDeleteRecords() {
     void confirmDelete({
-      identifierType: 'Record',
-      body: 'Deleting this record will remove the entire row. Are you sure you want to proceed?',
+      identifierType: recordDeleteProps.identifierType,
+      body: recordDeleteProps.body,
       onProceed: () => recordsData.deleteSelected(selectedRowIndices),
       onError: (e) => toast.fromError(e),
       onSuccess: () => {
         toast.success({
-          title: 'Row deleted successfully!',
+          title: `${labeledCount(selectedRowIndices, 'records', {
+            casing: 'title',
+          })} deleted successfully!`,
         });
         selection.resetSelection();
       },
