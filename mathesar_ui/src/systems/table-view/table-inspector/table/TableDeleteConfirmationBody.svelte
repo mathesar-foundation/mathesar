@@ -16,7 +16,7 @@
     To confirm the deletion of the <strong>{tableName}</strong> table, please enter
     the table name into the input field below.
   </p>
-  <TextInput bind:value />
+  <TextInput autofocus bind:value />
   <WarningBox>
     Warning: This action is permanent and once deleted, the table cannot be
     recovered
