@@ -40,6 +40,8 @@ export class ConfirmationController {
 
   resolve = writable<(isConfirmed: boolean) => void>(() => {});
 
+  canProceed = writable(true);
+
   constructor(
     modalController: ModalController,
     initialConfirmationProps: ConfirmationProps,
