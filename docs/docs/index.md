@@ -17,6 +17,9 @@ Mathesar should be pretty intuitive to use. More documentation is coming soon, b
 - [Users & Access Levels](product/syncing-db.md)
 
 ## Contributing
-We welcome contributions! Please read through our [contribution guide on our wiki](https://wiki.mathesar.org/en/community/contributing) to get started.
 
-- [Local Development Setup](contributing/local-dev.md)
+As an open source project, we actively encourage contribution!
+
+- Get started by reading our [Contributor Guide](https://github.com/centerofci/mathesar/blob/develop/CONTRIBUTING.md).
+
+- You can also contribute by **sponsoring us** on [GitHub](https://github.com/sponsors/centerofci) or [Open Collective](https://opencollective.com/mathesar)
