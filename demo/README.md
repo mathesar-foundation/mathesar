@@ -1,8 +1,14 @@
-# Live Demo mode
+# Demo mode
 
-This folder includes code related to enabling "live demo mode" for Mathesar.
+This folder includes code related to enabling "demo mode" for Mathesar.
 
-To run Mathesar in "live demo mode" locally, add the following to your local `.env` file:
+When Mathesar is in demo mode it has the following special behavior:
+
+- A new database is created for every user session
+- A banner displays atop the UI
+- Analytics are enabled, sending data to the Mathesar team
+
+To run Mathesar in demo mode locally, add the following to your local `.env` file:
 
 ```
 DJANGO_SETTINGS_MODULE=demo.settings
