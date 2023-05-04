@@ -74,8 +74,8 @@
     Your custom `.env` file will be used for setting [configuration variables](../configuration.md).
 
 1. Set up the database
-    - You can use the default database server that starts along with the Mathesar Webserver. Please refer [Default Database section](#default-db) for information on the default database server. 
-    - (Alternatively) You can use an existing database server. If you plan on using an existing database server, please see look at the [instructions for disabling the default database](#external-db-service).
+    - To use the [default database server](#default-db) bundled with Mathesar, no additional steps are necessary. The database service will start along with the Mathesar web server.
+    - Alternatively, you can [disable the default database server](#external-db-service) if you plan on using an existing database server.
 
 1. Set up the web server.
 
@@ -123,12 +123,14 @@
             ```
 
 1. Create a superuser
+
     ```bash
-    # Run the Django `createsuperuser` command. Refer https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser
     docker exec -it mathesar_service python manage.py createsuperuser
     ```
-    A prompt will appear to ask for the superuser details, fill in the details to create a superuser. At least one superuser is necessary for accessing Mathesar.
 
+    A prompt will appear to ask for the superuser details. Fill in the details to create a superuser. At least one superuser is necessary for accessing Mathesar.
+    
+    See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
 
 1. (Optional) Start the Upgrade server to enable upgrading the docker image using the Mathesar UI.
 
@@ -141,6 +143,7 @@
         ```
         docker compose -f docker-compose.yml up watchtower -d
         ```
+
 ## Administration
 
 ### Start/stop the server {:#start-stop}
@@ -250,38 +253,39 @@ Manually upgrade Mathesar to the newest version without using watch tower:
 
 ## Additional Information
 
-### Default Database Container {#default-db}
- The default `docker-compose.yml` includes a `db` service
- that automatically starts a Postgres database server container called `mathesar_db`.
- This service allows you to  start using Mathesar immediately to store data in a Postgres database
- without administering a separate Postgres server outside Mathesar.
+### Default database server {#default-db}
 
-The `db` service runs on the [internal docker compose port](https://docs.docker.com/compose/compose-file/compose-file-v3/#expose) `5432`. The internal port is not bound to the hostto avoid conflicts with other services running on port `5432`.
+The default `docker-compose.yml` includes a `db` service that automatically starts a Postgres database server container called `mathesar_db`. This service allows you to  start using Mathesar immediately to store data in a Postgres database without administering a separate Postgres server outside Mathesar.
 
- Additionally, it comes with a default database and a superuser; this database can come in handy for storing Mathesar's [metadata](../configuration/#django_database_url). 
-  The credentials for the Default database are
-   ```
-   DATABASE_NAME='mathesar_django'
-   USER='mathesar'
-   PASSWORD='mathesar'
-   ```
+The `db` service runs on the [internal docker compose port](https://docs.docker.com/compose/compose-file/compose-file-v3/#expose) `5432`. The internal port is not bound to the host to avoid conflicts with other services running on port `5432`.
+
+Additionally, it comes with a default database and a superuser. This database can come in handy for storing Mathesar's [metadata](../configuration.md#django_database_url). The credentials for the Default database are:
+
+```
+DATABASE_NAME='mathesar_django'
+USER='mathesar'
+PASSWORD='mathesar'
+```
+
+you can [disable the default database server](#external-db-service) if you plan on using an existing database server.
            
 ## Customization
 
+### Connect Mathesar to an existing database server {#external-db-service}
 
-### Connect Mathesar with an existing Database Server {#external-db-service}
+1. On the existing database server, [create a new database](https://www.postgresql.org/docs/current/sql-createdatabase.html) for Mathesar to store its metadata.
 
-- Create a [new database](https://www.postgresql.org/docs/current/sql-createdatabase.html) which will be used for storing [Mathesar metadata](../configuration/#django_database_url)
-     ```bash
-      psql -c 'create database mathesar_django;'
-     ```
+    ```bash
+    psql -c 'create database mathesar_django;'
+    ```
 
-- (Optionally) Disable the default database server by following the [instructions](#disable-db-service).
+1. Within your `.env` settings, configure the [`DJANGO_DATABASE_URL` setting](../configuration.md#django_database_url) to point to the database you just created.
 
+1. (Optional) At this point, you may [disable Mathesar's default database server](#disable-db-service) if you like.
 
-### Start Mathesar without the default database server {#disable-db-service}
+### Disable the default database server {#disable-db-service}
 
-The default `docker-compose.yml` which automatically starts a [Postgres database server container](#default-db). . But if you plan on using a different Database server, then you may disable Mathesar's inbuilt Postgres service if you like.
+The default `docker-compose.yml` automatically starts a [Postgres database server container](#default-db). You may disable it if you plan on using a different Database server.
 
 In the `docker-compose.yml` file, comment out the `db` service from the `depends_on` field of the `service`.
 
@@ -309,9 +313,10 @@ By default, Caddy serves the Mathesar web application on a port as determined by
 - For `https` domain names (as is the default, if not specified) it uses port `443` and redirects any traffic pointed at `http` to `https`. In this case, Caddy also creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation).
 
     !!! warning
-          If you don't have access to port `443`, avoid using `https` domain names on a non-standard port. Due to the following reasons
+          If you don't have access to port `443`, avoid using `https` domain names on a non-standard port. Due to the following reasons:
+
           - Caddy won't be able to verify the SSL certificate when running on a non-standard port.
-          — Browsers automatically redirect traffic sent to the `http` domain to the standard `https` port (443), rather than to any non-standard `HTTPS_PORT` port that you may have configured.  
+          - Browsers automatically redirect traffic sent to the `http` domain to the standard `https` port (443), rather than to any non-standard `HTTPS_PORT` port that you may have configured.
 
 To use a non-standard port:
 
