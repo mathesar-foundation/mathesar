@@ -35,15 +35,16 @@ Because function signatures are used informationally in command-generated tables
 needs to be conserved. As a compromise between readability and terseness, we use the following
 conventions in variable naming:
 
-schema   -> sch
-table   ->  tab
-column   -> col
-object   -> obj
-relation -> rel
+schema     -> sch
+table      -> tab
+column     -> col
+constraint -> con
+object     -> obj
+relation   -> rel
 
 Textual names will have the suffix _name, and numeric identifiers will have the suffix _id.
 
-So, the OID of a table will be tbl_id and the name of a column will be col_name. The attnum of a
+So, the OID of a table will be tab_id and the name of a column will be col_name. The attnum of a
 column will be col_id.
 
 Generally, we'll use snake_case for legibility and to avoid collisions with internal PostgreSQL
@@ -226,6 +227,19 @@ BEGIN
   FROM unspacer
   INTO target_type_prepped;
   RETURN format('mathesar_types.cast_to_%s', target_type_prepped);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_constraint_name(con_id oid) RETURNS text AS $$/*
+Return the quoted constraint name of the correponding constraint oid.
+
+Args:
+  con_id: The OID of the constraint.
+*/
+BEGIN
+  RETURN quote_ident(conname::text) FROM pg_constraint WHERE pg_constraint.oid = con_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -748,43 +762,61 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- MATHESAR DROP CONSTRAINT FUNCTIONS
+--
+-- Drop a constraint.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+-- Drop constraint ---------------------------------------------------------------------------------
+
+
 CREATE OR REPLACE FUNCTION
-__msar.drop_constraint(tbl_name text, cst_name text) RETURNS TEXT AS $$
+__msar.drop_constraint(tab_name text, con_name text) RETURNS text AS $$/*
+Drop a constraint, returning the command executed.
+
+Args:
+  tab_name: A qualified & quoted name of the table that has the constraint to be dropped.
+  con_name: Name of the constraint to drop, properly quoted.
+*/
 BEGIN
   RETURN __msar.exec_ddl(
-    'ALTER TABLE %s DROP CONSTRAINT %s', tbl_name, cst_name
+    'ALTER TABLE %s DROP CONSTRAINT %s', tab_name, con_name
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
+
 CREATE OR REPLACE FUNCTION
-msar.drop_constraint(sch_name text, tbl_name text, cst_name text) RETURNS TEXT AS $$
+msar.drop_constraint(sch_name text, tab_name text, con_name text) RETURNS text AS $$/*
+Drop a constraint, returning the command executed.
+
+Args:
+  sch_name: The name of the schema where the table with constraint to be dropped resides, unquoted.
+  tab_name: The name of the table that has the constraint to be dropped, unquoted.
+  con_name: Name of the constraint to drop, unquoted.
+*/
 BEGIN
   RETURN __msar.drop_constraint(
-    msar.get_fully_qualified_object_name(sch_name, tbl_name), quote_ident(cst_name)
+    msar.get_fully_qualified_object_name(sch_name, tab_name), quote_ident(con_name)
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
+
 CREATE OR REPLACE FUNCTION
-msar.drop_constraint(tab_id oid, cst_name text) RETURNS TEXT AS $$
+msar.drop_constraint(tab_id oid, con_id oid) RETURNS TEXT AS $$/*
+Drop a constraint, returning the command executed.
+
+Args:
+  tab_id: OID of the table that has the constraint to be dropped.
+  con_id: OID of the constraint to be dropped.
+*/
 BEGIN
   RETURN __msar.drop_constraint(
-    __msar.get_relation_name(tab_id), quote_ident(cst_name)
+    __msar.get_relation_name(tab_id), msar.get_constraint_name(con_id)
   );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-/* CREATE OR REPLACE FUNCTION
-msar.get_constraint_name(tbl_id oid, col_id integer) RETURNS TEXT AS $$
-BEGIN
-  RETURN quote_ident(conname::text) FROM pg_constraint WHERE conrelid=tbl_id AND conkey <@ col_id;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT; */
-
-CREATE OR REPLACE FUNCTION
-msar.get_constraint_name(cst_id oid) RETURNS TEXT AS $$
-BEGIN
-  RETURN quote_ident(conname::text) FROM pg_constraint WHERE pg_constraint.oid = cst_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
