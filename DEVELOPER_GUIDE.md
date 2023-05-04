@@ -163,17 +163,17 @@ Hot module replacement for front end code does not work when the project is pres
 
 ### PostgreSQL server is running on your host machine
 
-* If you you see the following error after running `docker-compose up`, then the port used by Postgres is already in use.
+If you you see the following error after attempting to start Docker, then the port used by Postgres is already in use on your host machine.
 
-    > ERROR: for db Cannot start server db: driver failed programming external connectivity on endpoint mathesar_db (70c521f468cf2bd54014f089f0051ba28e2514667): Error starting userland proxy: listen tcp4 0.0.0.0:5432: bind: address already in use.
+> ERROR: for db Cannot start server db: driver failed programming external connectivity on endpoint mathesar_db (70c521f468cf2bd54014f089f0051ba28e2514667): Error starting userland proxy: listen tcp4 0.0.0.0:5432: bind: address already in use.
 
-* Try stopping Postgres with:
+1. First stop Postgres on your host machine.
 
-  ```
-  sudo service postgresql stop
-  ```
+    ```
+    sudo service postgresql stop
+    ```
 
- - Then run `docker-compose up` again.
+1. Then try starting Mathesar via Docker again.
 
 Note that you'll need to manually start your Postgres server on your host machine again if you want to continue working on other projects which rely on that. And the next time you restart your machine, you'll probably need to stop Postgres again before you can begin working on Mathesar.
 
