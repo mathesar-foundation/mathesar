@@ -1,37 +1,30 @@
-import MessageBus from '@mathesar/utils/MessageBus';
 import { getContext, setContext, tick } from 'svelte';
 
-export default class ImperativeFilterController {
-  private openDropdown: MessageBus<void>;
+import { EventHandler } from '@mathesar-component-library';
 
-  private addFilter: MessageBus<number>;
-
-  private activateLastFilterInput: MessageBus<void>;
-
-  constructor() {
-    this.openDropdown = new MessageBus();
-    this.addFilter = new MessageBus();
-    this.activateLastFilterInput = new MessageBus();
-  }
-
+export default class ImperativeFilterController extends EventHandler<{
+  openDropdown: void;
+  addFilter: number;
+  activateLastFilterInput: void;
+}> {
   async beginAddingNewFilteringEntry(columnId: number) {
-    this.openDropdown.send();
+    await this.dispatch('openDropdown');
     await tick();
-    this.addFilter.send(columnId);
+    await this.dispatch('addFilter', columnId);
     await tick();
-    this.activateLastFilterInput.send();
+    await this.dispatch('activateLastFilterInput');
   }
 
   onOpenDropdown(fn: () => void): () => void {
-    return this.openDropdown.listen(fn);
+    return this.on('openDropdown', fn);
   }
 
   onAddFilter(fn: (columnId: number) => void): () => void {
-    return this.addFilter.listen(fn);
+    return this.on('addFilter', fn);
   }
 
   onActivateLastFilterInput(fn: () => void): () => void {
-    return this.activateLastFilterInput.listen(fn);
+    return this.on('activateLastFilterInput', fn);
   }
 }
 
