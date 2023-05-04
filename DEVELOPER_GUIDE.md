@@ -177,3 +177,11 @@ Hot module replacement for front end code does not work when the project is pres
 
 Note that you'll need to manually start your Postgres server on your host machine again if you want to continue working on other projects which rely on that. And the next time you restart your machine, you'll probably need to stop Postgres again before you can begin working on Mathesar.
 
+### Invalid function definition SQL errors
+
+Upon starting Mathesar, you may notice errors similar to:
+```
+mathesar_service_dev  | psycopg.errors.InvalidFunctionDefinition: cannot change name of input parameter "tab_id"
+mathesar_service_dev  | HINT:  Use DROP FUNCTION msar.drop_table(oid,boolean,boolean) first.
+```
+In this case, it's probable that a function parameter name was changed in the `develop` branch at some point. To fix this, you must drop the `msar` and `__msar` schemas from the PostgreSQL database you're using for development using either `psql` or a different client. After doing this, simply stop and start Mathesar using the appropriate `docker compose` commands.
