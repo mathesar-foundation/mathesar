@@ -70,6 +70,8 @@ nav:
           - Install via Docker Compose: install/docker-compose/index.md
           - Under the hood: install/docker-compose/under-the-hood.md
           - Troubleshooting: install/docker-compose/troubleshooting.md
+      - Install on Debian: installation/debian-manual.md
+      - Install on Ubuntu: installation/ubuntu-manual.md
       - Configure Mathesar: install/configuration.md
   - Product:
       - Introduction: product/intro.md
