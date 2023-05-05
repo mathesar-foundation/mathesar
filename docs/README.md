@@ -1,6 +1,8 @@
-# Contributing to documentation
+# Mathesar's Documentation
 
-## Edit documentation locally
+This directory contains the source code for Mathesar's user and administrator documentation published to https://docs.mathesar.org/
+
+## Preview your documentation edits locally
 
 1. Install requirements
 
@@ -13,6 +15,22 @@
     ```
     mkdocs serve -a localhost:9000
     ```
+
+1. Preview the docs at http://localhost:9000
+
+1. Keep mkdocs running while you edit and your local preview will refresh automatically.
+
+## Contribution process
+
+- For small documentation improvements, we welcome PRs without any prior issues. For larger edits, please [open an issue](https://github.com/centerofci/mathesar/issues/new/choose) first to discuss your changes and get approval from the team before proceeding.
+
+- Take care when choosing the git branch on which to base your edits
+    - **Target `master`** if you have an important fix which needs to be published for the _currently-released_ version of Mathesar.
+    - **Target `develop`** if you are adding/updating documentation along with yet-to-be-released changes to the product.
+
+    The docs site is published from the `master` branch. This is important because we want to ensure that it reflects the latest *released* version of Mathesar so that docs readers who are installing or using Mathesar don't see content before it's actually applicable.
+
+See our [Contribution guidelines](../CONTRIBUTING.md) for more information about our pull-request workflow.
 
 ## Reference
 
