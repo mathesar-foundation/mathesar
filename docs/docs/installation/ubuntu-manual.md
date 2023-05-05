@@ -2,6 +2,16 @@
 
 Installation should only take a few minutes.
 
+
+- Prerequisites
+    - Ubuntu 22 with at least `60 GB` disk space and `4GB` of RAM.
+    - Root privileges
+    - Domain name, or subdomain, for your installation.  We will use `mathesar.example.com` as the domain for our website. 
+  
+    !!! tip ""
+  
+         Pay close attention to all commands / blocks of code as your FQDN/URL will be used in quite a few places.  It is important you change it everywhere.
+
 ## What we will do:
 - Prepare the server
 
@@ -17,35 +27,56 @@ Installation should only take a few minutes.
   - Set up Gunicorn 
 - You need to be a user with root access to the machine you're trying to install Mathesar on. 
 ## Preparing our server.
-- Prerequisites
-    - Ubuntu 22 with at least `60 GB` disk space and `4GB` of RAM.
-    - Root privileges
-    - Domain name, or subdomain, for your installation.  We will use `mathesar.example.com` as the domain for our website. 
-`IMPORTANT! Pay close attention to all commands / blocks of code as your FQDN/URL will be used in quite a few places.  It is important you change it everywhere.`
-    - Python 3.9 (We will install this.) 
+
     
 ### Step one: Prepare the server
-First, we need to update the software repository and upgrade all packages using the apt command below.  SSH to your server and elevate to the `root` user.
+
+#### Update software repository
+First, we need to update the software repository and upgrade all packages using the apt command below. SSH to your server as the `root` user.
+
 ```sh
 apt update && apt upgrade
 ```
-Once the system has been updated, I recommend you perform a reboot to get the new kernel running incase it was updated.
+Once the system has been updated, I recommend you perform a reboot to get the new kernel running in case it was updated.
+
+#### Install required packages
 Next we will install the required packages.
 ```sh
 apt install locales build-essential acl ntp git python3-pip ipython3 zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev -y
 ```
-Now we need to add a new usergroup and allow passwordless login:
+
+### Step Two: Install PostGreSQL
+SSH to your server and run the following commands to update all the packages installed.
 ```sh
-sudo groupadd deployers
-useradd deployer
-usermod -a -G deployers deployer
+apt update && apt upgrade
 ```
-Now you need to edit the `/etc/sudoers` file with the 'visudo' command, and add this line:  `deployer ALL=(ALL) NOPASSWD: ALL` under the `# User privilege specification` section.  If it fails to save, then edit again and move that to the last line of the file.  Remember to use TAB between the username and the first `ALL` section
-You can test it with the following command:
-```sh 
-visudo -c
+Now we will install the dependencies for PostGreSQL.  Note some of these may already be installed from a previous step.
+```sh
+apt install curl gpg gnupg2 software-properties-common apt-transport-https lsb-release ca-certificates
 ```
-The output should look like this: `/etc/sudoers: parsed OK`. 
+Now that we have updated and rebooted our system, let’s add the APT repository required to pull the packages form the PostgreSQL repository.
+```sh
+curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+```
+After importing GPG key, add repository contents to your Ubuntu 22.04|20.04|18.04 system:
+```sh
+echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
+```
+The repository added contains many different packages including third party addons. They include:
+
+   - postgresql-client
+   - postgresql
+   - libpq-dev
+   - postgresql-server-dev
+   - pgadmin packages
+With the repository added we can install the PostgreSQL 13 packages on our Ubuntu 22.04|20.04|18.04 Linux server. But first update the package index for the version to be available at the OS level.
+```sh
+apt update
+```
+Now we can install PostGreSQL 13 on the system.
+```sh
+apt install postgresql-13 postgresql-client-13
+```
 
 ##### Install Python 3.9
 
@@ -83,39 +114,6 @@ This will create the necessary links.  You can now select which version of Pytho
 sudo update-alternatives --config python
 ```
 
-
-### Step Two: Install PostGreSQL
-SSH to your server and run the following commands to update all the packages installed.
-```sh
-apt update && apt upgrade
-```
-Now we will install the dependencies for PostGreSQL.  Note some of these may already be installed from a previous step.
-```sh
-apt install curl gpg gnupg2 software-properties-common apt-transport-https lsb-release ca-certificates
-```
-Now that we have updated and rebooted our system, let’s add the APT repository required to pull the packages form the PostgreSQL repository.
-```sh
-curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
-```
-After importing GPG key, add repository contents to your Ubuntu 22.04|20.04|18.04 system:
-```sh
-echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
-```
-The repository added contains many different packages including third party addons. They include:
-
-   - postgresql-client
-   - postgresql
-   - libpq-dev
-   - postgresql-server-dev
-   - pgadmin packages
-With the repository added we can install the PostgreSQL 13 packages on our Ubuntu 22.04|20.04|18.04 Linux server. But first update the package index for the version to be available at the OS level.
-```sh
-apt update
-```
-Now we can install PostGreSQL 13 on the system.
-```sh
-apt install postgresql-13 postgresql-client-13
-```
 #### Mathesar: Create Database, Database user
 Before we start, we first need to secure our database as the root user's password is not set.
 ```sh
