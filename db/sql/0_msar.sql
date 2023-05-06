@@ -746,3 +746,99 @@ BEGIN
   RETURN __msar.drop_table(qualified_tab_name, cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.add_constraints(con_queue variadic con_type[]) RETURNS TEXT AS $$
+DECLARE
+  rec const;
+  ck_cmd text;
+  nn_cmd text;
+  uq_cmd text;
+  pk_cmd text;
+  fk_cmd text;
+  ex_cmd text;
+  cmd text;
+BEGIN
+  FOREACH rec IN ARRAY con_queue
+  LOOP
+    IF rec.conntype = 'u'::char
+    THEN
+      uq_cmd := construct_unique_constraint(rec.con_name, variadic rec.col_names);
+    ELSIF rec.conntype = 'p'::char
+    THEN
+      pk_cmd := construct_pk_constraint(variadic rec.col_names);
+    ELSIF rec.conntype = 'n'::char
+    THEN
+      nn_cmd := construct_not_null_constraint(variadic rec.col_names);
+    ELSE
+      RAISE NOTICE 'nay';
+    END IF;
+  END LOOP;
+  cmd := concat_ws(', ', ck_cmd, nn_cmd, uq_cmd, pk_cmd, fk_cmd, ex_cmd);
+  RETURN __msar.exec_ddl('ALTER TABLE %s %s', rec.tab_name, cmd);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.construct_unique_constraint(con_name text, col_names variadic text[]) RETURNS TEXT AS $$
+DECLARE
+  con_cols text;
+BEGIN
+  SELECT string_agg(quote_ident(col), ', ')
+  FROM unnest(col_names)
+  AS col
+  INTO con_cols;
+  RETURN format('ADD CONSTRAINT %s UNIQUE (%s)', con_name, con_cols);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.construct_pk_constraint(col_names variadic text[]) RETURNS TEXT AS $$
+DECLARE
+  con_cols text;
+BEGIN
+  SELECT string_agg(quote_ident(col), ', ')
+  FROM unnest(col_names)
+  AS col
+  INTO con_cols;
+  RETURN format('ADD PRIMARY KEY (%s)', con_cols);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.construct_not_null_constraint(col_names variadic text[]) RETURNS TEXT AS $$
+DECLARE
+  cmd text;
+BEGIN
+  SELECT string_agg(format('ALTER COLUMN %s SET NOT NULL', quote_ident(col)), ', ')
+  FROM unnest(col_names)
+  AS col
+  INTO cmd;
+  RETURN cmd;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- SCRIPT FOR TESTING
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+/* DROP TABLE IF EXISTS __msar.example;
+CREATE TABLE __msar.example (a integer, b integer, c integer);
+
+DROP TYPE IF EXISTS __msar.con_type;
+CREATE TYPE __msar.con_type AS (tab_name text, sch_name text, con_name text, conntype char, col_names variadic text[]);
+
+CREATE TABLE IF NOT EXISTS __msar.constraint_queue(con_queue __msar.con_type);
+
+INSERT INTO __msar.constraint_queue VALUES (
+  ('example', '__msar', 'uq_con_0', 'u', ARRAY['a', 'b']),
+  ('example', '__msar', 'uq_con_1', 'u', ARRAY['c']),
+  ('example', '__msar', 'pk_con_0', 'p', ARRAY['a', 'b']));
+
+SELECT add_constraints(variadic ARRAY(SELECT * FROM __msar.constraint_queue)); */
