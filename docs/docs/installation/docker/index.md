@@ -37,7 +37,7 @@
     
     The above command creates a docker container containing the Mathesar server running on the `localhost` and listening on port `8000`. It also:
 
-    - Passes configuration options as environment variables to the docker container. Refer to [Configuring Mathesar web server](../env-variables.md#backend) for setting the correct value to these configuration options and for additional configuration options. The configuration options used in the above command are:
+    - Passes configuration options as environment variables to the docker container. Refer to [Configuring Mathesar web server](../../configuration/env-variables.md#backend) for setting the correct value to these configuration options and for additional configuration options. The configuration options used in the above command are:
         - `DJANGO_DATABASE_URL`
         - `DJANGO_DATABASE_KEY`
         - `MATHESAR_DATABASES`
