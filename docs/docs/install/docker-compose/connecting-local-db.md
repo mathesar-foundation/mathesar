@@ -15,10 +15,11 @@
     ```
 
 2. Find the appropriate IP addresses of the `docker0` interface and the `mathesar_default` interface. This can be found by exectuting the following in the host's terminal.
-
+    {% raw %}
     ```
     docker network inspect -f "docker0 IP: {{range .IPAM.Config}}{{.Gateway}}{{end}}" bridge && docker network inspect -f "mathesar_default IP: {{range .IPAM.Config}}{{.Subnet}}{{end}}" mathesar_default
     ```
+    {% endraw %}
 
 3. Locate the `docker-compose.yml` & `.env` file on the host machine, by default it is located at `/etc/mathesar`.
 

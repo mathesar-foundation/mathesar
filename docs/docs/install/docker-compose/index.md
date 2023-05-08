@@ -26,7 +26,7 @@
 - If installing on Windows, you need to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed first and [Turn on wsl-2 in docker desktop](https://docs.docker.com/desktop/windows/wsl/#turn-on-docker-desktop-wsl-2)
 
 
-## Install using the interactive script {#guided}
+## Install using the interactive script {: #guided}
 
 !!! info "Installation Script Overview"
     The interactive script is a convenient way to install Mathesar, but it is highly opinionated and needs `sudo` privileges (admin access). Although it provides certain configuration options, it might not be suitable if you want to modify the installed services or customize your installation. Use the [Manual Install](#manual) method if you want more control.
@@ -55,7 +55,7 @@
     If you run into any problems during installation, see [troubleshooting](./troubleshooting.md) or [open a ticket describing your problem](https://github.com/centerofci/mathesar/issues/new/choose).
 
 
-## Manual Install {#manual}
+## Manual Install {: #manual}
 
 1. Navigate to a directory where you'd like to store your Mathesar configuration. By convention, we do it within `/etc/mathesar`, but it can be a different directory if you like.
 
@@ -259,7 +259,7 @@ Manually upgrade Mathesar to the newest version without using watch tower:
 
 ## Additional Information
 
-### Default database server {#default-db}
+### Default database server {: #default-db}
 
 The default `docker-compose.yml` includes a `db` service that automatically starts a Postgres database server container called `mathesar_db`. This service allows you to  start using Mathesar immediately to store data in a Postgres database without administering a separate Postgres server outside Mathesar.
 
@@ -277,7 +277,7 @@ you can [disable the default database server](#external-db-service) if you plan 
            
 ## Customization
 
-### Connect Mathesar to an existing database server {#external-db-service}
+### Connect Mathesar to an existing database server {: #external-db-service}
 
 1. On the existing database server, [create a new database](https://www.postgresql.org/docs/current/sql-createdatabase.html) for Mathesar to store its metadata.
 
@@ -289,7 +289,7 @@ you can [disable the default database server](#external-db-service) if you plan 
 
 1. (Optional) At this point, you may [disable Mathesar's default database server](#disable-db-service) if you like.
 
-### Disable the default database server {#disable-db-service}
+### Disable the default database server {: #disable-db-service}
 
 The default `docker-compose.yml` automatically starts a [Postgres database server container](#default-db). You may disable it if you plan on using a different Database server.
 
@@ -311,7 +311,7 @@ services:
 
 After this change, Mathesar will no longer start the `db` service automatically.
 
-### Run Mathesar on a non-standard HTTP port {#non-standard-port}
+### Run Mathesar on a non-standard HTTP port {: #non-standard-port}
 
 By default, Caddy serves the Mathesar web application on a port as determined by the protocol within your [`DOMAIN_NAME` environment variable](../configuration.md#domain_name).
 

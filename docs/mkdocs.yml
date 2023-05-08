@@ -61,6 +61,7 @@ plugins:
           'installation-dc/troubleshooting.md': 'install/docker-compose/troubleshooting.md'
           'installation-dc/under-the-hood.md': 'install/docker-compose/under-the-hood.md'
           'installation-dc/uninstall.md': 'install/docker-compose/index.md'
+  - macros
 
 nav:
   - Home: index.md
