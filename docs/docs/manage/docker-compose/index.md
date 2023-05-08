@@ -77,7 +77,7 @@
     mv .env.example .env
     ```
 
-    Your custom `.env` file will be used for setting [configuration variables](../configuration.md).
+    Your custom `.env` file will be used for setting [configuration variables](../env-variables.md).
 
 1. Set up the database
     - To use the [default database server](#default-db) bundled with Mathesar, no additional steps are necessary. The database service will start along with the Mathesar web server.
@@ -87,7 +87,7 @@
 
     1. Edit your `.env` file, making the following changes:
 
-        - Add the [**Backend Configuration** environment variables](../configuration.md#backend)
+        - Add the [**Backend Configuration** environment variables](../env-variables.md#backend)
         - Customize the values of the environment variables to suit your needs.
 
         !!! example
@@ -114,7 +114,7 @@
 
 1. Set up the Caddy reverse proxy.
 
-    1. Edit your `.env` file, adding the [**Caddy Reverse Proxy** environment variables](../configuration.md#caddy).
+    1. Edit your `.env` file, adding the [**Caddy Reverse Proxy** environment variables](../env-variables.md#caddy).
     
     1. Start the Caddy reverse proxy
 
@@ -265,7 +265,7 @@ The default `docker-compose.yml` includes a `db` service that automatically star
 
 The `db` service runs on the [internal docker compose port](https://docs.docker.com/compose/compose-file/compose-file-v3/#expose) `5432`. The internal port is not bound to the host to avoid conflicts with other services running on port `5432`.
 
-Additionally, it comes with a default database and a superuser. This database can come in handy for storing Mathesar's [metadata](../configuration.md#django_database_url). The credentials for the Default database are:
+Additionally, it comes with a default database and a superuser. This database can come in handy for storing Mathesar's [metadata](../env-variables.md#django_database_url). The credentials for the Default database are:
 
 ```
 DATABASE_NAME='mathesar_django'
@@ -285,7 +285,7 @@ you can [disable the default database server](#external-db-service) if you plan 
     psql -c 'create database mathesar_django;'
     ```
 
-1. Within your `.env` settings, configure the [`DJANGO_DATABASE_URL` setting](../configuration.md#django_database_url) to point to the database you just created.
+1. Within your `.env` settings, configure the [`DJANGO_DATABASE_URL` setting](../env-variables.md#django_database_url) to point to the database you just created.
 
 1. (Optional) At this point, you may [disable Mathesar's default database server](#disable-db-service) if you like.
 
@@ -313,7 +313,7 @@ After this change, Mathesar will no longer start the `db` service automatically.
 
 ### Run Mathesar on a non-standard HTTP port {: #non-standard-port}
 
-By default, Caddy serves the Mathesar web application on a port as determined by the protocol within your [`DOMAIN_NAME` environment variable](../configuration.md#domain_name).
+By default, Caddy serves the Mathesar web application on a port as determined by the protocol within your [`DOMAIN_NAME` environment variable](../env-variables.md#domain_name).
 
 - For `http` domain names it uses  port `80`.
 - For `https` domain names (as is the default, if not specified) it uses port `443` and redirects any traffic pointed at `http` to `https`. In this case, Caddy also creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation).
@@ -326,7 +326,7 @@ By default, Caddy serves the Mathesar web application on a port as determined by
 
 To use a non-standard port:
 
-1. Edit your `.env` file and set either the [`HTTP_PORT`](../configuration.md#http_port) or the [`HTTPS_PORT`](../configuration.md#https_port) environment variable (depending on the protocol you're using).
+1. Edit your `.env` file and set either the [`HTTP_PORT`](../env-variables.md#http_port) or the [`HTTPS_PORT`](../env-variables.md#https_port) environment variable (depending on the protocol you're using).
 
     !!! example
         To serve Mathesar at `http://localhost:9000`, include the following in your `.env` file:

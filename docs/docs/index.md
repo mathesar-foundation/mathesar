@@ -8,7 +8,7 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 
 ## Installation
 
-[Install Mathesar](install/index.md)
+[Install Mathesar](manage/install.md)
 
 ## Product
 Mathesar should be pretty intuitive to use. More documentation is coming soon, but for now, we've written some documentation for some things that could be tricky.

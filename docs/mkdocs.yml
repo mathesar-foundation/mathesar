@@ -55,25 +55,28 @@ plugins:
       lang: en
   - redirects:
       redirect_maps:
-          'installation-dc/administration.md': 'install/docker-compose/index.md'
-          'installation-dc/ansible-setup.md': 'install/docker-compose/index.md'
-          'installation-dc/quickstart.md': 'install/docker-compose/index.md'
-          'installation-dc/troubleshooting.md': 'install/docker-compose/troubleshooting.md'
-          'installation-dc/under-the-hood.md': 'install/docker-compose/under-the-hood.md'
-          'installation-dc/uninstall.md': 'install/docker-compose/index.md'
+          'installation-dc/administration.md': 'manage/docker-compose/index.md'
+          'installation-dc/ansible-setup.md': 'manage/docker-compose/index.md'
+          'installation-dc/quickstart.md': 'manage/docker-compose/index.md'
+          'installation-dc/troubleshooting.md': 'manage/docker-compose/troubleshooting.md'
+          'installation-dc/under-the-hood.md': 'manage/docker-compose/under-the-hood.md'
+          'installation-dc/uninstall.md': 'manage/docker-compose/index.md'
   - macros
 
 nav:
   - Home: index.md
-  - Install:
-      - Install Mathesar: install/index.md
-      - Via Docker Compose:
-          - Install via Docker Compose: install/docker-compose/index.md
-          - Under the hood: install/docker-compose/under-the-hood.md
-          - Troubleshooting: install/docker-compose/troubleshooting.md
-      - Via Docker:
-          - Install via Docker: install/docker/index.md
-      - Configure Mathesar: install/configuration.md
+  - Installation:
+      - Install Mathesar: manage/install.md
+      - Guided install: manage/install.md
+      - Docker Compose: manage/docker-compose/index.md
+      - Docker: manage/docker/index.md
+      - Build from source: manage/build-from-source/index.md
+  - Configuration:
+      - Environment Variables: manage/env-variables.md
+  - Administration:
+      - Start/Stop Mathesar: manage/start-stop.md
+      - Upgrade Mathesar: manage/upgrade.md
+      - Uninstall Mathesar: manage/uninstall.md
   - Product:
       - Introduction: product/intro.md
       - Syncing database changes: product/syncing-db.md
