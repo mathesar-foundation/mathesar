@@ -16,14 +16,14 @@
 1. Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/master/docker-compose.yml), and [.env.example](https://github.com/centerofci/mathesar/raw/master/.env.example) files to your configuration directory.
 
     ```
-    wget https://github.com/centerofci/mathesar/raw/master/docker-compose.yml
-    wget https://github.com/centerofci/mathesar/raw/master/.env.example
+    sudo wget https://github.com/centerofci/mathesar/raw/master/docker-compose.yml
+    sudo wget https://github.com/centerofci/mathesar/raw/master/.env.example
     ```
 
 1. Rename `.env.example` to `.env`
 
     ```
-    mv .env.example .env
+    sudo mv .env.example .env
     ```
 
     Your custom `.env` file will be used for setting [configuration variables](../../configuration/env-variables.md).

@@ -3,28 +3,40 @@
 This page contains instructions to install Mathesar on various platforms.
 
 ## Guided installation using our interactive script
-- Use our interactive script to automically download the required docker-compose.yml file and setup environment variables via a series of prompts.
+- Use our interactive script to guide you install Mathesar via a series of prompts:
     ```sh
     bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/0.1.1/install.sh)
     ```
+- The script sets up Mathesar using Docker Compose and configures the admin user [under the hood](./guided-install/under-the-hood.md).
 - !!! warning "Limitations"
-    This is a fast and convenient way to install Mathesar. However, it requires `sudo` privileges (admin access), and provides a limited set of configuration options. Use the Manual Install option to exert more control.
+    This is a convenient way to install Mathesar. However, it requires `sudo` privileges (admin access), and sets up a limited set of configuration options. Use the [Docker Compose installation](./docker-compose/index.md) option to exert more control.
 - [Read detailed instructions](./guided-install/index.md)
 
-## Docker compose 
-- Download our docker-compose.yml file, and configure environment variables on your own.
+## Docker Compose 
+- Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/master/docker-compose.yml) file.
     ```sh
     wget https://github.com/centerofci/mathesar/raw/master/docker-compose.yml
+    ```
+- Configure [environment variables](../configuration/env-variables.md).
+    ```sh
+    # Sample .env file
+    wget https://github.com/centerofci/mathesar/raw/master/.env.example
+    mv .env.example .env
+    ```
+- Start Mathesar and create the super user.
+    ```sh
+    docker compose -f docker-compose.yml up -d
+    docker exec -it mathesar_service python manage.py createsuperuser
     ```
 - [Read detailed instructions](./docker-compose/index.md)
 
 ## Docker
-- You can use our official Docker image hosted on Docker Hub to run Mathesar: `mathesar/mathesar-prod:latest`.
-- [Run Mathesar on Docker](./docker/index.md)
+- Use our [official Docker image](https://dockerhub.com/mathesar): `mathesar/mathesar-prod:latest` hosted on Docker Hub to run Mathesar.
+- [Instructions to run Mathesar on Docker](./docker/index.md)
 
 ## Build from source for Linux platforms
 - You can install Mathesar on Linux platforms by building it from source.  
-- [Build from source]()
+- [Instructions to build and run from source](./build-from-source/index.md)
 
 ---
 

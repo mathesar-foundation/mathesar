@@ -1,4 +1,4 @@
-# Install BareBones Mathesar Webserver via Docker
+# Install Mathesar Webserver via Docker
 
 
 ## Prerequisites

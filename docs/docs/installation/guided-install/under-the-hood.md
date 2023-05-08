@@ -1,7 +1,7 @@
-# Docker Compose Installation Script, Under the Hood
+# Guided Installation Script, Under the Hood
 
-## Installation Steps
-These are the steps that the installation script performs, explained in more depth:
+## What does the script do?
+Our guided installation script performs the following steps.
 
 ### Operating System Check
 The installer attempts to determine what operating system you're installing Mathesar on. We've tested with some variants of macOS as well as a few distros of Linux. Some logic in the installer branches based on your operating system.
