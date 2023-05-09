@@ -29,7 +29,7 @@
     Your custom `.env` file will be used for setting [configuration variables](../../configuration/env-variables.md).
 
 1. Set up the database
-    - To use the [default database server](#default-db) bundled with Mathesar, no additional steps are necessary. The database service will start along with the Mathesar web server.
+    - To use the [default database server](../../configuration/customize-docker-compose#default-db) bundled with Mathesar, no additional steps are necessary. The database service will start along with the Mathesar web server.
     - Alternatively, you can [disable the default database server](../../configuration/customize-docker-compose.md#disable-db-service) if you plan on using an [existing database server](../../configuration/connect-to-existing-db.md).
 
 1. Set up the web server.
@@ -40,7 +40,7 @@
         - Customize the values of the environment variables to suit your needs.
 
         !!! example
-            If you are using the [default database container](#default-db). Your `.env` file should look something like this
+            If you are using the [default database container](../../configuration/customize-docker-compose#default-db). Your `.env` file should look something like this
             
             ``` bash
             ALLOWED_HOSTS='https://<your_domain_name>'

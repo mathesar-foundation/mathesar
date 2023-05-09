@@ -31,7 +31,7 @@ This page contains instructions to install Mathesar on various platforms.
 - [Read detailed instructions](./docker-compose/index.md)
 
 ## Docker
-- Use our [official Docker image](https://dockerhub.com/mathesar): `mathesar/mathesar-prod:latest` hosted on Docker Hub to run Mathesar.
+- Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/tags): `mathesar/mathesar-prod:latest` hosted on Docker Hub to run Mathesar.
 - [Instructions to run Mathesar on Docker](./docker/index.md)
 
 ## Build from source for Linux platforms
