@@ -1,4 +1,4 @@
-# Install Mathesar via Docker Compose
+# Guided Installation using our Install Script
 
 ## Requirements
 
@@ -6,15 +6,17 @@
 
 ## Installation Steps {: #steps}
 
-!!! info "Installation Script Overview"
-    The interactive script is a convenient way to install Mathesar, but it is highly opinionated and needs `sudo` privileges (admin access). Although it provides certain configuration options, it might not be suitable if you want to modify the installed services or customize your installation. Use the [Docker compose installation](../docker-compose/index.md) method if you want more control.
+!!! info "Install Script Overview"
+    This is a convenient way to install Mathesar, but it is highly opinionated and needs `sudo` privileges (admin access). Although it provides certain configuration options, it might not be suitable if you want to modify the installed services or customize your installation. Use the [Docker Compose installation](../docker-compose/index.md) method if you'd like more control.
     
-    The installation script will set up
+    The installation script will set up:
 
     - A Postgres database server to store data
     - A web server to run the Mathesar application
     - A reverse proxy server to serve static files and set up SSL certificates
     - An upgrade server to handle upgrading Mathesar via the web interface
+
+    If you'd like to know the steps performed by the install script in more detail, you can read our [Guided Installation Script, Under the Hood](./under-the-hood.md) document.
 
 1. Paste this command into your terminal to begin installing the latest version of Mathesar:
 

@@ -67,12 +67,13 @@ nav:
   - Home: index.md
   - Installation:
       - Install Mathesar: installation/index.md
-      - Guided install: installation/guided-install/index.md
+      - Guided Installation: installation/guided-install/index.md
       - Docker Compose: installation/docker-compose/index.md
       - Docker: installation/docker/index.md
       - Build from source: installation/build-from-source/index.md
   - Configuration:
       - Environment Variables: configuration/env-variables.md
+      - Connecting to a host database: configuration/connecting-local-db.md
   - Administration:
       - Start/Stop Mathesar: administration/start-stop.md
       - Upgrade Mathesar: administration/upgrade.md
@@ -81,3 +82,6 @@ nav:
       - Introduction: product/intro.md
       - Syncing database changes: product/syncing-db.md
       - Users & Access Levels: product/users.md
+  - Miscellaneous:
+      - Guided Installation Script, Under the Hood: installation/guided-install/under-the-hood.md
+      - Troubleshooting Guided Installation: installation/guided-install/troubleshooting.md
