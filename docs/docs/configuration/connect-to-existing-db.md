@@ -44,7 +44,7 @@ You can try using `host.docker.internal` instead of `localhost`. Below are detai
 3. Stop Mathesar if already running.
 
 
-## Steps
+### Steps
 
 1. Edit the `postgresql.conf` file and add the IP of `docker0` interface in the `listen_addresses` setting. Uncomment this line if it's conmmented out.
 

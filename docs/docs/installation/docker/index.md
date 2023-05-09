@@ -60,9 +60,7 @@
 
     See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
 
-## Administration
-
-#### Upgrade
+## Upgrade
 
 1. Stop your existing Mathesar container:
 
@@ -86,8 +84,7 @@
       mathesar/mathesar-prod:latest
     ```
 
-
-#### Uninstall
+## Uninstall
 
 1. Remove the Mathesar container.
 
