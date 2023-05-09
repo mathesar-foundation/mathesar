@@ -1,10 +1,11 @@
-# Build Mathesar from source on Ubuntu 22
+# Build Mathesar from source on Linux OS
 
 Installation should only take a few minutes.
 
 ## Prerequisites
 
-- Ubuntu 22 with at least `60 GB` disk space and `4GB` of RAM.
+- Any Linux distro with at least `60 GB` disk space and `4GB` of RAM.
+  - We've tested it on Ubuntu. But it should work on other distros too.
 - Root privileges
 - [Python v3.9](https://www.python.org/downloads/)
 - [NodeJS v14.x](https://nodejs.org/en/download)
