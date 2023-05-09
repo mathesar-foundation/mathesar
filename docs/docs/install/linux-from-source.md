@@ -15,9 +15,6 @@ Installation should only take a few minutes.
 
 - Domain name, or subdomain, for your installation. We will use `mathesar.example.com` as the domain for our website.
 
-!!! tip ""
-
-       Pay close attention to all commands / blocks of code as your FQDN/URL will be used in quite a few places.  It is important you change it everywhere.
 
 ## Set up the Database
 
@@ -131,7 +128,7 @@ cd /<working-directory>/mathesar && python3 install.py --skip-confirm >> /tmp/in
     
     See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
 
-1. Create media directory for storing user uploaded media
+1. Create a media directory for storing user-uploaded media
     ```sh
     mkdir /<working-directory>/.media
     ```
@@ -140,7 +137,7 @@ cd /<working-directory>/mathesar && python3 install.py --skip-confirm >> /tmp/in
 !!! info ""
     We will use `systemd` to run the `gunicorn` service as it lets you use easily start and manage the service.
 
-1. Create a user for running gunicorn
+1. Create a user for running Gunicorn
 ```sh
 sudo groupadd gunicorn
 useradd gunicorn -g gunicorn
@@ -243,4 +240,4 @@ systemctl daemon-reload && systemctl start gunicorn.socket
     caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
     ```
 
-Now you can start using the Mathesar app by visiting the url `https://mathesar.example.com`
+Now you can start using the Mathesar app by visiting the URL `https://mathesar.example.com`
