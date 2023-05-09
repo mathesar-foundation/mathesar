@@ -1,5 +1,8 @@
 # Connecting Mathesar to a host database
 
+!!! info ""
+    This document is related to Mathesar running in Docker related environments. This is applicable for the [Guided Installation method](../installation/guided-install/index.md), [Docker Compose Installation method](../installation/docker-compose/index.md), and [Docker Installation method](../installation/docker/index.md).
+
 ## Prerequisites
 
 1. Locate `postgresql.conf` & `pg_hba.conf` file on the host machine. This can be located using `psql` shell by executing the following respectively.
@@ -21,19 +24,7 @@
     ```
     {% endraw %}
 
-3. Locate the `docker-compose.yml` & `.env` file on the host machine, by default it is located at `/etc/mathesar`.
-
-4. Stop Mathesar if already running:
-
-    === "Linux"
-        ```
-        sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod down
-        ```
-
-    === "MacOS"
-        ```
-        docker compose -f /etc/mathesar/docker-compose.yml --profile prod down
-        ```
+3. Stop Mathesar if already running.
 
 
 ## Steps
@@ -44,26 +35,13 @@
     listen_addresses = 'localhost, <your-docker0-ip>'
     ```
 
-2. Modify the `pg_hba.conf` file and grant access to the `mathesar_default` interface. Add the following line at the bottom of the file:
+1. Modify the `pg_hba.conf` file and grant access to the `mathesar_default` interface. Add the following line at the bottom of the file:
 
     ```
     host    all             all             <your-mathesar_default-ip>           scram-sha-256
     ```
 
-3. Add an extra host for the prod container in the `docker-compose.yml` file:
-
-    ```
-    extra_hosts:
-          - "host.docker.internal:<your-docker0-ip>"
-    ```
-
-4. Set the appropriate environment variables in the `.env` file to establish the connection to the host database. Replace the `MATHESAR_DATABASES` env variable to the following:
-
-    ```
-    MATHESAR_DATABASES=(mathesar_tables|postgresql://<user_name>:<password>@host.docker.internal:<port-no>/<host_db_name>)
-    ```
-
-5. Restart postgres:
+1. Restart postgres:
     
     === "Linux"
         ```
@@ -74,16 +52,19 @@
         sudo brew services restart postgresql
         ```
 
-6. Start Mathesar:
+1. Set the value of [`MATHESAR_DATABASES` environment variable](./env-variables.md#mathesar_databases) to the following:
 
-    === "Linux"
-        ```
-        sudo docker compose -f /etc/mathesar/docker-compose.yml --profile prod up -d
-        ```
+    ```
+    MATHESAR_DATABASES=(mathesar_tables|postgresql://<user_name>:<password>@host.docker.internal:<port-no>/<host_db_name>)
+    ```
 
-    === "MacOS"
-        ```
-        docker compose -f /etc/mathesar/docker-compose.yml --profile prod up -d
-        ```
+1. If you've installed Mathesar using the Guided Installation script or the Docker Compose installation method, add an extra host for the prod container in the `docker-compose.yml` file:
+
+    ```
+    extra_hosts:
+          - "host.docker.internal:<your-docker0-ip>"
+    ```
+
+1. Start Mathesar.
 
 You should have a successful connection to the host database now!
