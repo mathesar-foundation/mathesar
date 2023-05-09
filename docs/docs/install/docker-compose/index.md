@@ -29,8 +29,14 @@
 ## Install using the interactive script {#guided}
 
 !!! info "Installation Script Overview"
-    The interactive script will set up a database server, the Mathesar web server, an upgrade server for upgrading using the UI, and a reverse proxy. If you want to customize the setup process, please look at the [Manual Install section](#manual)
+    The interactive script is a convenient way to install Mathesar, but it is highly opinionated and needs `sudo` privileges (admin access). Although it provides certain configuration options, it might not be suitable if you want to modify the installed services or customize your installation. Use the [Manual Install](#manual) method if you want more control.
+    
+    The installation script will set up
 
+    - A Postgres database server to store data
+    - A web server to run the Mathesar application
+    - A reverse proxy server to serve static files and set up SSL certificates
+    - An upgrade server to handle upgrading Mathesar via the web interface
 
 1. Paste this command into your terminal to begin installing the latest version of Mathesar:
 
@@ -73,29 +79,26 @@
 
     Your custom `.env` file will be used for setting [configuration variables](../configuration.md).
 
+1. Set up the database
+    - To use the [default database server](#default-db) bundled with Mathesar, no additional steps are necessary. The database service will start along with the Mathesar web server.
+    - Alternatively, you can [disable the default database server](#external-db-service) if you plan on using an existing database server.
+
 1. Set up the web server.
 
     1. Edit your `.env` file, making the following changes:
 
         - Add the [**Backend Configuration** environment variables](../configuration.md#backend)
-        - Add the [**Database Configuration** environment variables](../configuration.md#database)
         - Customize the values of the environment variables to suit your needs.
 
         !!! example
-            Your `.env` file should look something like this
+            If you are using the [default database container](#default-db). Your `.env` file should look something like this
             
             ``` bash
-            POSTGRES_USER='mathesar'
-            POSTGRES_PASSWORD='mathesar'
-            POSTGRES_PORT='5432'
             ALLOWED_HOSTS='https://<your_domain_name>'
             SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
             DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@mathesar_db:5432/mathesar_django'
             MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)'
-            DJANGO_SUPERUSER_PASSWORD='password'
             ```
-
-    1. If you only plan to use Mathesar to connect to other preexisting Postgres database servers, then you may choose to [disable Mathesar's inbuilt Postgres database service](#disable-db-service) if you like. (Skip this step if you want to use Mathesar's Postgres database service.)
 
     1. Start the Mathesar web server.
 
@@ -125,6 +128,16 @@
             docker compose -f docker-compose.yml up caddy-reverse-proxy -d
             ```
 
+1. Create a superuser
+
+    ```bash
+    docker exec -it mathesar_service python manage.py createsuperuser
+    ```
+
+    A prompt will appear to ask for the superuser details. Fill in the details to create a superuser. At least one superuser is necessary for accessing Mathesar.
+    
+    See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
+
 1. (Optional) Start the Upgrade server to enable upgrading the docker image using the Mathesar UI.
 
     === "Linux"
@@ -136,7 +149,6 @@
         ```
         docker compose -f docker-compose.yml up watchtower -d
         ```
-
 
 ## Administration
 
@@ -244,11 +256,42 @@ Manually upgrade Mathesar to the newest version without using watch tower:
         !!! danger 
             Deleting this schema will also delete any database objects that depend on it. This should not be an issue if you don't have any data using Mathesar's custom data types.
 
+
+## Additional Information
+
+### Default database server {#default-db}
+
+The default `docker-compose.yml` includes a `db` service that automatically starts a Postgres database server container called `mathesar_db`. This service allows you to  start using Mathesar immediately to store data in a Postgres database without administering a separate Postgres server outside Mathesar.
+
+The `db` service runs on the [internal docker compose port](https://docs.docker.com/compose/compose-file/compose-file-v3/#expose) `5432`. The internal port is not bound to the host to avoid conflicts with other services running on port `5432`.
+
+Additionally, it comes with a default database and a superuser. This database can come in handy for storing Mathesar's [metadata](../configuration.md#django_database_url). The credentials for the Default database are:
+
+```
+DATABASE_NAME='mathesar_django'
+USER='mathesar'
+PASSWORD='mathesar'
+```
+
+you can [disable the default database server](#external-db-service) if you plan on using an existing database server.
+           
 ## Customization
 
-### Start Mathesar without the database server {#disable-db-service}
+### Connect Mathesar to an existing database server {#external-db-service}
 
-The default `docker-compose.yml` has a `db` service which automatically starts a Postgres database server container called `mathesar_db`. This service allows you to immediately start using Mathesar to store data in a Postgres database without administering a separate Postgres server outside of Mathesar. But if you only plan to use Mathesar to connect to other Postgres servers, then you may disable Mathesar's inbuilt Postgres service if you like.
+1. On the existing database server, [create a new database](https://www.postgresql.org/docs/current/sql-createdatabase.html) for Mathesar to store its metadata.
+
+    ```bash
+    psql -c 'create database mathesar_django;'
+    ```
+
+1. Within your `.env` settings, configure the [`DJANGO_DATABASE_URL` setting](../configuration.md#django_database_url) to point to the database you just created.
+
+1. (Optional) At this point, you may [disable Mathesar's default database server](#disable-db-service) if you like.
+
+### Disable the default database server {#disable-db-service}
+
+The default `docker-compose.yml` automatically starts a [Postgres database server container](#default-db). You may disable it if you plan on using a different Database server.
 
 In the `docker-compose.yml` file, comment out the `db` service from the `depends_on` field of the `service`.
 
@@ -273,10 +316,13 @@ After this change, Mathesar will no longer start the `db` service automatically.
 By default, Caddy serves the Mathesar web application on a port as determined by the protocol within your [`DOMAIN_NAME` environment variable](../configuration.md#domain_name).
 
 - For `http` domain names it uses  port `80`.
-- For `https` domain names (as is the default, if not specified) it uses port `443`. In this case Caddy also creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation).
+- For `https` domain names (as is the default, if not specified) it uses port `443` and redirects any traffic pointed at `http` to `https`. In this case, Caddy also creates an SSL certificate [automatically](https://caddyserver.com/docs/automatic-https#activation).
 
     !!! warning
-        Caddy won't be able to verify the SSL certificate when running on a non-standard port, so make sure you already have a reverse proxy that handles SSL.
+          If you don't have access to port `443`, avoid using `https` domain names on a non-standard port. Due to the following reasons:
+
+          - Caddy won't be able to verify the SSL certificate when running on a non-standard port.
+          - Browsers automatically redirect traffic sent to the `http` domain to the standard `https` port (443), rather than to any non-standard `HTTPS_PORT` port that you may have configured.
 
 To use a non-standard port:
 
