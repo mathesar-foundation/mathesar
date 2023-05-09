@@ -1,4 +1,4 @@
-# Troubleshooting Guided Installation
+# Troubleshoot Guided Installation
 
 !!! info ""
     This document is related to the [Guided Installation method](./index.md).

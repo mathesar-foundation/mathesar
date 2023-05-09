@@ -6,7 +6,7 @@
     psql -c 'create database mathesar_django;'
     ```
 
-1. Configure the [`DJANGO_DATABASE_URL` environment variable](../../configuration/env-variables.md#django_database_url) to point to the database you just created.
+1. Configure the [`DJANGO_DATABASE_URL` environment variable](./env-variables.md#django_database_url) to point to the database you just created.
 
 1. (Optional) For Docker Compose related installations, you may [disable Mathesar's default database server](./customize-docker-compose.md#disable-db-service) if you like.
 

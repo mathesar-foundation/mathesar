@@ -74,6 +74,7 @@ nav:
   - Configuration:
       - Environment Variables: configuration/env-variables.md
       - Connect to an existing Database server: configuration/connect-to-existing-db.md
+      - Customize Docker Compose related Installations: configuration/customize-docker-compose.md
   - Administration:
       - Start/Stop Mathesar: administration/start-stop.md
       - Upgrade Mathesar: administration/upgrade.md
