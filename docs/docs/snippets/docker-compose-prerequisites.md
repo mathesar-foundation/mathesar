@@ -13,7 +13,7 @@
     - Ensure the external database can accept network connections from your Mathesar server.
     - Have the following information handy before installation:
 
-        - Database hostname _(refer [connecting-local-db](/configuration/connecting-local-db) to connect to the database running on the localhost)_
+        - Database hostname _(refer [Connect to existing Database server](/configuration/connect-to-existing-db) document to find instructions to connect to an existing database)_
         - Database port
         - Database name
         - Database username _(should exist and be a `SUPERUSER` [more info](https://www.postgresql.org/docs/13/sql-createrole.html))_

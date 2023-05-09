@@ -73,7 +73,7 @@ nav:
       - Build from source: installation/build-from-source/index.md
   - Configuration:
       - Environment Variables: configuration/env-variables.md
-      - Connecting to a host database: configuration/connecting-local-db.md
+      - Connect to an existing Database server: configuration/connect-to-existing-db.md
   - Administration:
       - Start/Stop Mathesar: administration/start-stop.md
       - Upgrade Mathesar: administration/upgrade.md
@@ -84,4 +84,4 @@ nav:
       - Users & Access Levels: product/users.md
   - Miscellaneous:
       - Guided Installation Script, Under the Hood: installation/guided-install/under-the-hood.md
-      - Troubleshooting Guided Installation: installation/guided-install/troubleshooting.md
+      - Troubleshoot Guided Installation: installation/guided-install/troubleshooting.md
