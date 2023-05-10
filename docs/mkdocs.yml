@@ -21,10 +21,10 @@ nav:
   - Administration:
       - Upgrade Mathesar: administration/upgrade.md
       - Uninstall Mathesar: administration/uninstall.md
-  - Product:
-      - Introduction: product/intro.md
-      - Syncing database changes: product/syncing-db.md
-      - Users & Access Levels: product/users.md
+  - Using Mathesar:
+      - Introduction: user-guide/index.md
+      - Syncing database changes: user-guide/syncing-db.md
+      - Users & Access Levels: user-guide/users.md
 
 plugins:
   - search:
@@ -37,6 +37,9 @@ plugins:
           'installation-dc/troubleshooting.md': 'installation/guided-install/troubleshooting.md'
           'installation-dc/under-the-hood.md': 'installation/guided-install/under-the-hood.md'
           'installation-dc/uninstall.md': 'installation/guided-install/index.md#uninstall'
+          'product/intro.md': 'user-guide/index.md'
+          'product/syncing-db.md': 'user-guide/syncing-db.md'
+          'product/users.md': 'user-guide/users.md'
   - macros
 
 theme:

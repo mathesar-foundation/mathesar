@@ -14,8 +14,8 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 ## Product
 Mathesar should be pretty intuitive to use. More documentation is coming soon, but for now, we've written some documentation for some things that could be tricky.
 
-- [Syncing Database Changes](product/syncing-db.md)
-- [Users & Access Levels](product/users.md)
+- [Syncing Database Changes](./user-guide/syncing-db.md)
+- [Users & Access Levels](./user-guide/users.md)
 
 ## Contributing
 
