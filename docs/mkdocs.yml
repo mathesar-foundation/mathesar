@@ -40,6 +40,13 @@ plugins:
           'product/intro.md': 'user-guide/index.md'
           'product/syncing-db.md': 'user-guide/syncing-db.md'
           'product/users.md': 'user-guide/users.md'
+          'install/index.md': 'installation/index.md'
+          'install/guided-install/index.md': 'installation/guided-install/index.md'
+          'install/docker-compose/index.md': 'installation/docker-compose/index.md'
+          'install/docker-compose/under-the-hood.md': 'installation/guided-install/under-the-hood.md'
+          'install/docker-compose/troubleshooting.md': 'installation/guided-install/troubleshooting.md'
+          'install/docker/index.md': 'installation/docker/index.md'
+          'install/build-from-source/index.md': 'installation/build-from-source/index.md'
   - macros
 
 theme:
