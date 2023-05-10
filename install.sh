@@ -158,7 +158,7 @@ Welcome to the Mathesar installer for version %s!
 
 For more information or explanation about the steps involved, please see:
 
-https://docs.mathesar.org/installation-dc/under-the-hood/
+https://docs.mathesar.org/installation/guided-install/under-the-hood/
 
 --------------------------------------------------------------------------------
 
