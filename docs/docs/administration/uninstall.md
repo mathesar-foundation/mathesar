@@ -1,10 +1,8 @@
 # Uninstall Mathesar
 
-This page contains links to un-installation instructions for each installation type. 
+The uninstall instructions vary depending on the [installation method](../installation/index.md) you chose. Select your installation method below to proceed.
 
-Click on the links below to uninstall Mathesar installed via:
-
-- [Guided installation using our install script](../installation/guided-install/index.md#uninstall)
-- [Docker Compose](../installation/docker-compose/index.md#uninstall)
-- [Docker](../installation/docker/index.md#uninstall)
-- [Build from source](../installation/build-from-source/index.md#uninstall)
+- [Uninstall a **guided** installation of Mathesar](../installation/guided-install/index.md#uninstall)
+- [Uninstall a **Docker compose** installation of Mathesar](../installation/docker-compose/index.md#uninstall)
+- [Uninstall a **Docker** installation of Mathesar](../installation/docker/index.md#uninstall)
+- [Uninstall a **source-built** installation of Mathesar](../installation/build-from-source/index.md#uninstall)
