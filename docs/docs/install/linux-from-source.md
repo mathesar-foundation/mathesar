@@ -5,7 +5,7 @@ Installation should only take a few minutes.
 ## Prerequisites
 
 - Any Linux distro with at least `60 GB` disk space and `4GB` of RAM.
-  - We've tested it on Ubuntu. But it should work on other distros too.
+    - We've tested it on Ubuntu. But it should work on other Linux distros too.
 - Root privileges
 - [Python v3.9](https://www.python.org/downloads/)
 - [NodeJS v14.x](https://nodejs.org/en/download)
@@ -192,7 +192,7 @@ and copy the following code into `gunicorn.socket` file
 
 1. Reload the systemctl and Start the Gunicorn socket
 ```sh
-systemctl daemon-reload && systemctl start gunicorn.socket
+systemctl daemon-reload && systemctl start gunicorn.socket && systemctl enable gunicorn.socket
 ```
 
 ### Set up the Caddy Reverse Proxy
@@ -236,8 +236,58 @@ systemctl daemon-reload && systemctl start gunicorn.socket
 
 1. Start the caddy service
 
-    ```
+    ```sh 
     caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
     ```
 
 Now you can start using the Mathesar app by visiting the URL `https://mathesar.example.com`
+
+
+
+## Administration
+
+### Upgrade
+1. Go to the working directory
+```sh
+cd mathesar/
+```
+1. Pull the latest version from the repository
+```sh
+git pull https://github.com/centerofci/mathesar.git
+```
+
+1. Update Python dependencies
+```sh
+
+pip3 install -r requirements.txt
+```
+
+1. Add the environment variables to the shell before running Django commands
+
+      ```sh
+      export $(sudo cat /<working-directory>/mathesar/.env)
+      ```
+
+1. Run the latest Django migrations
+    ```sh
+    python /<working-directory>/mathesar/manage.py migrate
+    ```
+1. Update the frontend dependencies
+  ```sh
+  cd /<working-directory>/mathesar/mathesar_ui && npm install
+  ```
+      
+1. Compile the Mathesar Frontend App
+   ```sh
+   npm run build --max_old_space_size=4096
+   ```
+
+1. Update Mathesar functions on the database:
+    ```sh
+    cd /<working-directory>/mathesar && python3 install.py --skip-confirm >> /tmp/install.py.log
+    ```
+
+1. Restart the gunicorn server
+    ```sh
+    systemctl restart gunicorn
+    ```
