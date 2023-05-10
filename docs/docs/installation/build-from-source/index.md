@@ -330,7 +330,6 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
     ```
       
 1. Compile the Mathesar Frontend App
-
    ```sh
    npm run build --max_old_space_size=4096
    ```
