@@ -16,57 +16,66 @@
 
 ## Set up the Database
 
-1. Open up Psql
-```sh
-sudo -u postgres psql
-```
+1. Open a `psql` shell.
+
+    ```sh
+    sudo -u postgres psql
+    ```
 
 1. Mathesar needs a superuser to function correctly. Let's create a superuser.
-```postgresql
--- Run the command in the psql prompt
-CREATE USER mathesar WITH SUPERUSER ENCRYPTED PASSWORD 'mathesar';
-```
+
+    ```postgresql
+    CREATE USER mathesar WITH SUPERUSER ENCRYPTED PASSWORD 'mathesar';
+    ```
 
 1. Next, we have to create a database for storing Mathesar metadata.
-```postgresql
--- Run the command in the psql prompt
-CREATE DATABASE mathesar_django;
-```
+
+    ```postgresql
+    CREATE DATABASE mathesar_django;
+    ```
 
 1. Now we let us create a database for storing your data.
-```postgresql
--- Run the command in the psql prompt
-CREATE DATABASE your_db_name;
-```
+
+    ```postgresql
+    CREATE DATABASE your_db_name;
+    ```
+
+1. Press <kbd>Ctrl</kbd>+<kbd>D</kbd> to exit the `psql` shell.
 
 ### Set up the Environment
+
 1. We need to create a python virtual environment for the Mathesar application.
-```sh
-python3.9 -m venv /<virtual-env-directory>/mathesar
-```
+
+    ```sh
+    python3.9 -m venv /<virtual-env-directory>/mathesar
+    ```
 
 1. Next we will activate our virtual environment:
-```sh
-. /<virtual-env-directory>/mathesar/bin/activate
-```
+
+    ```sh
+    . /<virtual-env-directory>/mathesar/bin/activate
+    ```
 
 1. Clone the Mathesar repo
-```sh
-cd /<working-directory>/
-git clone https://github.com/centerofci/mathesar.git
-```
+
+    ```sh
+    cd /<working-directory>/
+    git clone https://github.com/centerofci/mathesar.git
+    ```
 
 ### Install the Mathesar application
 
 1. Install Python dependencies
-```sh
-cd mathesar/
-pip3 install -r requirements.txt
-```
+
+    ```sh
+    cd mathesar/
+    pip3 install -r requirements.txt
+    ```
 
 1. Set the environment variables
 
     1. Create .env file
+
         ```sh
         touch .env
         ```
@@ -99,25 +108,31 @@ pip3 install -r requirements.txt
             You need to export the environment variables each time you restart the shell as they don't persist across sessions.
 
 1. Run Django migrations
+
     ```sh
     python /<working-directory>/mathesar/manage.py migrate
     ```
+
 1. Install the frontend dependencies
-  ```sh
-  cd /<working-directory>/mathesar/mathesar_ui && npm install
-  ```
+
+    ```sh
+    cd /<working-directory>/mathesar/mathesar_ui && npm install
+    ```
       
 1. Compile the Mathesar Frontend App
+
    ```sh
    npm run build --max_old_space_size=4096
    ```
 
 1. Install Mathesar functions on the database:
-```sh
-cd /<working-directory>/mathesar && python3 install.py --skip-confirm >> /tmp/install.py.log
-```
+
+    ```sh
+    cd /<working-directory>/mathesar && python3 install.py --skip-confirm >> /tmp/install.py.log
+    ```
 
 1. Create a Mathesar admin/superuser:
+
     ```sh
     python manage.py createsuperuser
     ```
@@ -127,27 +142,32 @@ cd /<working-directory>/mathesar && python3 install.py --skip-confirm >> /tmp/in
     See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
 
 1. Create a media directory for storing user-uploaded media
+
     ```sh
     mkdir /<working-directory>/.media
     ```
 
 ### Set up Gunicorn
+
 !!! info ""
     We will use `systemd` to run the `gunicorn` service as it lets you use easily start and manage the service.
 
 1. Create a user for running Gunicorn
-```sh
-sudo groupadd gunicorn
-useradd gunicorn -g gunicorn
-```
+
+    ```sh
+    sudo groupadd gunicorn
+    useradd gunicorn -g gunicorn
+    ```
 
 1. Create the Gunicorn systemd service file.
+
     ```sh
     touch /lib/systemd/system/gunicorn.service
     ```
-and copy the following code into it.
 
-    ```sh
+    and copy the following code into it.
+
+    ```text
     [Unit]
     Description=gunicorn daemon
     Requires=gunicorn.socket
@@ -171,9 +191,10 @@ and copy the following code into it.
     ```sh
     touch /lib/systemd/system/gunicorn.socket
     ```
-and copy the following code into `gunicorn.socket` file
 
-    ```sh
+    and copy the following code into `gunicorn.socket` file
+
+    ```text
     [Unit]
     Description=gunicorn socket
     
@@ -189,9 +210,12 @@ and copy the following code into `gunicorn.socket` file
     ```
 
 1. Reload the systemctl and Start the Gunicorn socket
-```sh
-systemctl daemon-reload && systemctl start gunicorn.socket && systemctl enable gunicorn.socket
-```
+
+    ```sh
+    systemctl daemon-reload && \
+    systemctl start gunicorn.socket && \
+    systemctl enable gunicorn.socket
+    ```
 
 ### Set up the Caddy Reverse Proxy
 
@@ -199,12 +223,14 @@ systemctl daemon-reload && systemctl start gunicorn.socket && systemctl enable g
     We will be using the Caddy Reverse proxy to serve the static files and set up SSL certificates
 
 1. Create the CaddyFile
+
     ```sh
     touch /etc/caddy/Caddyfile
     ```
 
 2. Add the configuration details to the CaddyFile
-    ```sh
+
+    ```text
     mathesar.example.com {
         log {
             output stdout
@@ -241,51 +267,61 @@ systemctl daemon-reload && systemctl start gunicorn.socket && systemctl enable g
 Now you can start using the Mathesar app by visiting the URL `https://mathesar.example.com`
 
 
-
 ## Administration
 
 ### Upgrade
+
 1. Go to the working directory
-```sh
-cd mathesar/
-```
+
+    ```sh
+    cd mathesar/
+    ```
+
 1. Pull the latest version from the repository
-```sh
-git pull https://github.com/centerofci/mathesar.git
-```
+
+    ```sh
+    git pull https://github.com/centerofci/mathesar.git
+    ```
 
 1. Update Python dependencies
-```sh
 
-pip3 install -r requirements.txt
-```
+    ```sh
+    pip3 install -r requirements.txt
+    ```
 
 1. Add the environment variables to the shell before running Django commands
 
-      ```sh
-      export $(sudo cat /<working-directory>/mathesar/.env)
-      ```
+    ```sh
+    export $(sudo cat /<working-directory>/mathesar/.env)
+    ```
 
 1. Run the latest Django migrations
+
     ```sh
     python /<working-directory>/mathesar/manage.py migrate
     ```
+
 1. Update the frontend dependencies
-  ```sh
-  cd /<working-directory>/mathesar/mathesar_ui && npm install
-  ```
+
+    ```sh
+    cd /<working-directory>/mathesar/mathesar_ui && npm install
+    ```
       
 1. Compile the Mathesar Frontend App
+
    ```sh
    npm run build --max_old_space_size=4096
    ```
 
 1. Update Mathesar functions on the database:
+
     ```sh
-    cd /<working-directory>/mathesar && python3 install.py --skip-confirm >> /tmp/install.py.log
+    cd /<working-directory>/mathesar && \
+      python3 install.py --skip-confirm >> /tmp/install.py.log
     ```
 
 1. Restart the gunicorn server
+
     ```sh
     systemctl restart gunicorn
     ```
