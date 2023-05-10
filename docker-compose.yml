@@ -1,5 +1,5 @@
 version: "3.9"
-# Please refer the documentation located at https://docs.mathesar.org/install/docker-compose/ for the setting up Mathesar using this docker-compose.yml.
+# Please refer the documentation located at https://docs.mathesar.org/installation/docker-compose/ for the setting up Mathesar using this docker-compose.yml.
 services:
   db:
     image: postgres:13

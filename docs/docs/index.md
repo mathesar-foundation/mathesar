@@ -6,15 +6,16 @@ Mathesar is a straightforward open source tool that provides a **spreadsheet-lik
 
 You can use Mathesar to build **data models**, **enter data**, and even **build reports**.
 
-## Installation
+## Get started
 
-[Install Mathesar](install/index.md)
+- [Install Mathesar](installation/index.md)
+- [Configure Environment Variables](configuration/env-variables.md)
 
 ## Product
 Mathesar should be pretty intuitive to use. More documentation is coming soon, but for now, we've written some documentation for some things that could be tricky.
 
-- [Syncing Database Changes](product/syncing-db.md)
-- [Users & Access Levels](product/syncing-db.md)
+- [Syncing Database Changes](./user-guide/syncing-db.md)
+- [Users & Access Levels](./user-guide/users.md)
 
 ## Contributing
 
