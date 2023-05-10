@@ -174,8 +174,8 @@
     ```text
     [Unit]
     Description=gunicorn daemon
-    Requires=gunicorn.socket
-    After=network.target
+    After=network.target network-online.target
+    Requires=network-online.target
     
     [Service]
     Type=notify
@@ -190,41 +190,18 @@
     WantedBy=multi-user.target
     ```
 
-1. Create a Gunicorn socket
-
-    ```sh
-    touch /lib/systemd/system/gunicorn.socket
-    ```
-
-    and copy the following code into `gunicorn.socket` file
-
-    ```text
-    [Unit]
-    Description=gunicorn socket
-    
-    [Socket]
-    ListenStream=/run/gunicorn.sock
-    # Our service won't need permissions for the socket, since it
-    # inherits the file descriptor by socket activation
-    # only the nginx daemon will need access to the socket
-    SocketUser=www-data
-    
-    [Install]
-    WantedBy=sockets.target
-    ```
-
 1. Reload the systemctl and Start the Gunicorn socket
 
     ```sh
     systemctl daemon-reload && \
-    systemctl start gunicorn.socket && \
-    systemctl enable gunicorn.socket
+    systemctl start gunicorn.service && \
+    systemctl enable gunicorn.service
     ```
 
 ### Set up the Caddy Reverse Proxy
 
 !!! info ""
-    We will be using the Caddy Reverse proxy to serve the static files and set up SSL certificates
+    We will be using the Caddy Reverse proxy to serve the static files and set up SSL certificates.
 
 1. Create the CaddyFile
 
@@ -262,10 +239,52 @@
     }
     ```
 
-1. Start the caddy service
+1. Create a user for running Caddy
 
-    ```sh 
-    caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    ```sh
+    sudo groupadd caddy
+    useradd caddy -g caddy
+    ```
+
+1. Create the Caddy systemd service file.
+
+    ```sh
+    touch /lib/systemd/system/caddy.service
+    ```
+
+    and copy the following code into it.
+
+    ```text
+    [Unit]
+    Description=Caddy
+    Documentation=https://caddyserver.com/docs/
+    After=network.target network-online.target
+    Requires=network-online.target
+    
+    [Service]
+    Type=notify
+    User=caddy
+    Group=caddy
+    ExecStart=/usr/bin/caddy run --config /etc/caddy/Caddyfile
+    ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile --force
+    TimeoutStopSec=5s
+    LimitNOFILE=1048576
+    LimitNPROC=512
+    PrivateTmp=true
+    ProtectSystem=full
+    AmbientCapabilities=CAP_NET_BIND_SERVICE
+    
+    [Install]
+    WantedBy=multi-user.target
+    ```
+
+
+1. Reload the systemctl and Start the Caddy socket
+
+    ```sh
+    systemctl daemon-reload && \
+    systemctl start caddy.service && \
+    systemctl enable caddy.service
     ```
 
 Now you can start using the Mathesar app by visiting the URL `https://mathesar.example.com`
@@ -329,3 +348,65 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
     ```sh
     systemctl restart gunicorn
     ```
+
+
+### Uninstall
+
+1. Stop Caddy service
+    ```sh
+    systemctl disable caddy.service && systemctl stop caddy.service
+    ```
+
+1. Remove Caddy service file and Caddyfile
+    ```sh
+    rm /lib/systemd/system/caddy.service && rm /etc/caddy/Caddyfile
+    ```
+
+1. Stop Gunicorn
+    ```sh
+    systemctl disable gunicorn.service && systemctl stop gunicorn.service
+    ```
+
+1. Remove Gunicorn service file
+    ```sh
+    rm /lib/systemd/system/gunicorn.service
+    ```
+
+1. Remove Mathesar directory
+    ```sh
+   rm -r ~/mathesar/
+    ```
+
+1. Remove Django database
+    1. Connect to the django database.
+
+        ```
+        psql -h <DB HOSTNAME> -p <DB PORT> -U <DB_USER> <DB_NAME>
+        ```
+    
+    2. Drop the Django database.
+
+        ```postgresql
+        DROP DATABASE mathesar_django;
+        ```
+
+
+1. Remove Mathesar internal schemas.
+
+    **If you connected Mathesar to a database**, the installation process would have created a new schema for Mathesar's use. You can remove this schema from that database as follows:
+
+    1. Connect to the database.
+
+        ```
+        psql -h <DB HOSTNAME> -p <DB PORT> -U <DB_USER> <DB_NAME>
+        ```
+
+    2. Delete the schema.
+
+        ```postgresql
+        DROP SCHEMA mathesar_types CASCADE;
+        ```
+
+        !!! danger 
+            Deleting this schema will also delete any database objects that depend on it. This should not be an issue if you don't have any data using Mathesar's custom data types.
+
