@@ -3,6 +3,42 @@ site_url: https://docs.mathesar.org/
 repo_url: https://github.com/centerofci/mathesar/
 repo_name: centerofci/mathesar
 
+nav:
+  - Home: index.md
+  - Installation:
+      - Install Mathesar: installation/index.md
+      - Guided Installation: installation/guided-install/index.md
+      - Docker Compose: installation/docker-compose/index.md
+      - Docker: installation/docker/index.md
+      - Build from source: installation/build-from-source/index.md
+  - Configuration:
+      - Environment Variables: configuration/env-variables.md
+      - Connect to an existing Database server: configuration/connect-to-existing-db.md
+      - Customize Docker Compose related Installations: configuration/customize-docker-compose.md
+  - Administration:
+      - Upgrade Mathesar: administration/upgrade.md
+      - Uninstall Mathesar: administration/uninstall.md
+  - Product:
+      - Introduction: product/intro.md
+      - Syncing database changes: product/syncing-db.md
+      - Users & Access Levels: product/users.md
+  - Miscellaneous:
+      - Guided Installation Script, Under the Hood: installation/guided-install/under-the-hood.md
+      - Troubleshoot Guided Installation: installation/guided-install/troubleshooting.md
+
+plugins:
+  - search:
+      lang: en
+  - redirects:
+      redirect_maps:
+          'installation-dc/administration.md': 'installation/guided-install/index.md#start-stop'
+          'installation-dc/ansible-setup.md': 'installation/docker-compose/index.md'
+          'installation-dc/quickstart.md': 'installation/guided-install/index.md'
+          'installation-dc/troubleshooting.md': 'installation/guided-install/troubleshooting.md'
+          'installation-dc/under-the-hood.md': 'installation/guided-install/under-the-hood.md'
+          'installation-dc/uninstall.md': 'installation/guided-install/index.md#uninstall'
+  - macros
+
 theme:
   name: material
   logo: assets/images/logo.svg
@@ -49,39 +85,3 @@ markdown_extensions:
   - toc:
       title: On this page
       permalink: true
-
-plugins:
-  - search:
-      lang: en
-  - redirects:
-      redirect_maps:
-          'installation-dc/administration.md': 'installation/guided-install/index.md#start-stop'
-          'installation-dc/ansible-setup.md': 'installation/docker-compose/index.md'
-          'installation-dc/quickstart.md': 'installation/guided-install/index.md'
-          'installation-dc/troubleshooting.md': 'installation/guided-install/troubleshooting.md'
-          'installation-dc/under-the-hood.md': 'installation/guided-install/under-the-hood.md'
-          'installation-dc/uninstall.md': 'installation/guided-install/index.md#uninstall'
-  - macros
-
-nav:
-  - Home: index.md
-  - Installation:
-      - Install Mathesar: installation/index.md
-      - Guided Installation: installation/guided-install/index.md
-      - Docker Compose: installation/docker-compose/index.md
-      - Docker: installation/docker/index.md
-      - Build from source: installation/build-from-source/index.md
-  - Configuration:
-      - Environment Variables: configuration/env-variables.md
-      - Connect to an existing Database server: configuration/connect-to-existing-db.md
-      - Customize Docker Compose related Installations: configuration/customize-docker-compose.md
-  - Administration:
-      - Upgrade Mathesar: administration/upgrade.md
-      - Uninstall Mathesar: administration/uninstall.md
-  - Product:
-      - Introduction: product/intro.md
-      - Syncing database changes: product/syncing-db.md
-      - Users & Access Levels: product/users.md
-  - Miscellaneous:
-      - Guided Installation Script, Under the Hood: installation/guided-install/under-the-hood.md
-      - Troubleshoot Guided Installation: installation/guided-install/troubleshooting.md
