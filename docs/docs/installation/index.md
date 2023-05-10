@@ -3,7 +3,7 @@
 This page contains instructions to install Mathesar on various platforms.
 
 ## Guided installation using our install script
-- Use our install script to guide you install Mathesar via a series of prompts:
+- Our install script guides you through a series of prompts to install Mathesar:
     ```sh
     bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/0.1.1/install.sh)
     ```
