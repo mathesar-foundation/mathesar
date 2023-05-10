@@ -1,7 +1,5 @@
 # Build Mathesar from source on Linux OS
 
-Installation should only take a few minutes.
-
 ## Prerequisites
 
 - Any Linux distro with at least `60 GB` disk space and `4GB` of RAM.
