@@ -20,14 +20,14 @@
 <style lang="scss">
   .inset-page-layout {
     background: var(--sand-200);
-    padding: var(--inset-layout-padding, 1.5rem 1rem);
+    padding: var(--inset-page-padding);
 
     :global(.inset-page-section + .inset-page-section) {
       margin-top: 1.4rem;
     }
   }
   .restrict-width {
-    max-width: var(--max-layout-width, 54rem);
+    max-width: var(--max-layout-width);
     margin-left: auto;
     margin-right: auto;
     width: 100%;

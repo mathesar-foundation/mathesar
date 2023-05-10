@@ -114,7 +114,7 @@
 </script>
 
 <div class="table-view">
-  <WithTableInspector {showTableInspector}>
+  <WithTableInspector {context} {showTableInspector}>
     <div class="sheet-area" on:click={checkAndReinstateFocusOnActiveCell}>
       {#if $processedColumns.size}
         <Sheet
