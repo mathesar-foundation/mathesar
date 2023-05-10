@@ -8,7 +8,6 @@
 - [Python v3.9](https://www.python.org/downloads/)
 - [NodeJS v14.x](https://nodejs.org/en/download)
 - [Postgres v13](https://www.postgresql.org/download/linux/)
-- [Gunicorn3](https://docs.gunicorn.org/en/stable/install.html)
 - [Caddy](https://caddyserver.com/docs/install)
 
 - Domain name, or subdomain, for your installation. We will use `mathesar.example.com` as the domain for our website.
@@ -47,13 +46,13 @@
 1. We need to create a python virtual environment for the Mathesar application.
 
     ```sh
-    python3.9 -m venv /<virtual-env-directory>/mathesar
+    python3.9 -m venv /<working-directory>/mathesar-venv
     ```
 
 1. Next we will activate our virtual environment:
 
     ```sh
-    . /<virtual-env-directory>/mathesar/bin/activate
+    . /<working-directory>/mathesar-venv/bin/activate
     ```
 
 1. Clone the Mathesar repo
@@ -179,7 +178,7 @@
     Group=gunicorn
     RuntimeDirectory=gunicorn
     WorkingDirectory=/<working-directory>/mathesar
-    ExecStart=/bin/bash -c '/<virtual-env-directory>/mathesar/bin/gunicorn config.wsgi:application'
+    ExecStart=/bin/bash -c '/<working-directory>/mathesar-venv/bin/gunicorn config.wsgi:application'
     EnvironmentFile=/<working-directory>/mathesar/.env
     
     [Install]
