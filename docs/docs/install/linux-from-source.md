@@ -41,25 +41,30 @@
 
 1. Press <kbd>Ctrl</kbd>+<kbd>D</kbd> to exit the `psql` shell.
 
+
+!!! note "Default Directory"
+    We will be using the home directory(accessed by `~/`) as the default working directory. 
+
 ### Set up the Environment
+
+1. Clone the Mathesar repo.
+
+    ```sh
+    cd ~/
+    git clone https://github.com/centerofci/mathesar.git
+    ```
+
 
 1. We need to create a python virtual environment for the Mathesar application.
 
     ```sh
-    python3.9 -m venv /<working-directory>/mathesar-venv
+    python3.9 -m venv ~/mathesar/mathesar-venv
     ```
 
 1. Next we will activate our virtual environment:
 
     ```sh
-    . /<working-directory>/mathesar-venv/bin/activate
-    ```
-
-1. Clone the Mathesar repo
-
-    ```sh
-    cd /<working-directory>/
-    git clone https://github.com/centerofci/mathesar.git
+    . ~/mathesar/mathesar-venv/bin/activate
     ```
 
 ### Install the Mathesar application
@@ -67,7 +72,7 @@
 1. Install Python dependencies
 
     ```sh
-    cd mathesar/
+    cd ~/mathesar/
     pip3 install -r requirements.txt
     ```
 
@@ -100,7 +105,7 @@
         You need to `export` the environment variables listed in the `.env` file to your shell. The easiest way would be to run the below command.
     
           ```sh
-          export $(sudo cat /<working-directory>/mathesar/.env)
+          export $(sudo cat ~/mathesar/.env)
           ```
        
         !!! info ""
@@ -109,13 +114,13 @@
 1. Run Django migrations
 
     ```sh
-    python /<working-directory>/mathesar/manage.py migrate
+    python ~/mathesar/manage.py migrate
     ```
 
 1. Install the frontend dependencies
 
     ```sh
-    cd /<working-directory>/mathesar/mathesar_ui && npm install
+    cd ~/mathesar/mathesar_ui && npm install
     ```
       
 1. Compile the Mathesar Frontend App
@@ -127,7 +132,7 @@
 1. Install Mathesar functions on the database:
 
     ```sh
-    cd /<working-directory>/mathesar && python3 install.py --skip-confirm >> /tmp/install.py.log
+    cd ~/mathesar && python3 install.py --skip-confirm >> /tmp/install.py.log
     ```
 
 1. Create a Mathesar admin/superuser:
@@ -143,7 +148,7 @@
 1. Create a media directory for storing user-uploaded media
 
     ```sh
-    mkdir /<working-directory>/.media
+    mkdir ~/mathesar/.media
     ```
 
 ### Set up Gunicorn
@@ -177,9 +182,9 @@
     User=gunicorn
     Group=gunicorn
     RuntimeDirectory=gunicorn
-    WorkingDirectory=/<working-directory>/mathesar
-    ExecStart=/bin/bash -c '/<working-directory>/mathesar-venv/bin/gunicorn config.wsgi:application'
-    EnvironmentFile=/<working-directory>/mathesar/.env
+    WorkingDirectory=~/mathesar
+    ExecStart=/bin/bash -c '~/mathesar/mathesar-venv/bin/gunicorn config.wsgi:application'
+    EnvironmentFile=~/mathesar/.env
     
     [Install]
     WantedBy=multi-user.target
@@ -244,13 +249,13 @@
     
             file_server {
                 precompressed br zstd gzip
-                root {$MEDIA_ROOT:/<working-directory>/mathesar/media/}
+                root {$MEDIA_ROOT:~/mathesar/media/}
             }
         }
         handle_path /static/* {
             file_server {
                 precompressed br zstd gzip
-                root {$STATIC_ROOT:/<working-directory>/mathesar/static/}
+                root {$STATIC_ROOT:~/mathesar/static/}
             }
         }
         reverse_proxy localhost:8000
@@ -291,19 +296,19 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
 1. Add the environment variables to the shell before running Django commands
 
     ```sh
-    export $(sudo cat /<working-directory>/mathesar/.env)
+    export $(sudo cat ~/mathesar/.env)
     ```
 
 1. Run the latest Django migrations
 
     ```sh
-    python /<working-directory>/mathesar/manage.py migrate
+    python ~/mathesar/manage.py migrate
     ```
 
 1. Update the frontend dependencies
 
     ```sh
-    cd /<working-directory>/mathesar/mathesar_ui && npm install
+    cd ~/mathesar/mathesar_ui && npm install
     ```
       
 1. Compile the Mathesar Frontend App
@@ -315,7 +320,7 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
 1. Update Mathesar functions on the database:
 
     ```sh
-    cd /<working-directory>/mathesar && \
+    cd ~/mathesar && \
       python3 install.py --skip-confirm >> /tmp/install.py.log
     ```
 
