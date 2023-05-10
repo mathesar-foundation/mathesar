@@ -8,9 +8,9 @@ This page contains instructions to install Mathesar on various platforms.
     bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/0.1.1/install.sh)
     ```
 - The script sets up Mathesar using Docker Compose and configures the admin user [under the hood](./guided-install/under-the-hood.md).
+- [Detailed Guided Installation Instructions](./guided-install/index.md).
 - !!! warning "Limitations"
-    This is a convenient way to install Mathesar. However, it requires `sudo` privileges (admin access), and sets up a limited set of configuration options. Use the [Docker Compose installation](./docker-compose/index.md) option to exert more control.
-- [Read detailed instructions](./guided-install/index.md)
+    This is a convenient way to install Mathesar. However, it requires `sudo` privileges (admin access), and sets up a limited set of configuration options. Use the Docker Compose installation option below to exert more control.
 
 ## Docker Compose 
 - Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/master/docker-compose.yml) file.
@@ -28,7 +28,7 @@ This page contains instructions to install Mathesar on various platforms.
     docker compose -f docker-compose.yml up -d
     docker exec -it mathesar_service python manage.py createsuperuser
     ```
-- [Read detailed instructions](./docker-compose/index.md)
+- [Detailed Docker Compose Instructions](./docker-compose/index.md).
 
 ## Docker
 - Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/tags): `mathesar/mathesar-prod:latest` hosted on Docker Hub to run Mathesar.
