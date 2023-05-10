@@ -11,6 +11,9 @@ nav:
       - Docker Compose: installation/docker-compose/index.md
       - Docker: installation/docker/index.md
       - Build from source: installation/build-from-source/index.md
+      - Appendix:
+          - Guided Installation Script, Under the Hood: installation/guided-install/under-the-hood.md
+          - Troubleshoot Guided Installation: installation/guided-install/troubleshooting.md
   - Configuration:
       - Environment Variables: configuration/env-variables.md
       - Connect to an existing Database server: configuration/connect-to-existing-db.md
@@ -22,9 +25,6 @@ nav:
       - Introduction: product/intro.md
       - Syncing database changes: product/syncing-db.md
       - Users & Access Levels: product/users.md
-  - Miscellaneous:
-      - Guided Installation Script, Under the Hood: installation/guided-install/under-the-hood.md
-      - Troubleshoot Guided Installation: installation/guided-install/troubleshooting.md
 
 plugins:
   - search:
