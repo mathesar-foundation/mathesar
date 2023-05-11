@@ -691,6 +691,47 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+-- Column creation definition type -----------------------------------------------------------------
+
+CREATE TYPE __msar.col_create_def AS (
+  name_ text, -- The name of the column to create, quoted.
+  type_ text, -- The type of the column to create, fully specced with arguments.
+  not_null boolean, -- A boolean to describe whether the column is nullable or not.
+  default_ text -- Text SQL giving the default value for the column.
+);
+
+
+-- Add columns to table ----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.add_columns(tab_name text, col_defs variadic __msar.col_create_def[]) RETURNS text AS $$/*
+Add the given columns to the given table.
+
+Args:
+  tab_name: Fully-qualified, quoted table name.
+  col_defs: The columns to be added.
+*/
+DECLARE col_additions text := '';
+DECLARE col_add text;
+BEGIN
+  SELECT string_agg(
+      CASE
+        WHEN col.not_null AND col.default_ IS NULL THEN
+          format('ADD COLUMN %s %s NOT NULL', col.name_, col.type_)
+        WHEN col.not_null AND col.default_ IS NOT NULL THEN
+          format('ADD COLUMN %s %s NOT NULL DEFAULT %s', col.name_, col.type_, col.default_)
+        WHEN col.default_ IS NOT NULL THEN
+          format('ADD COLUMN %s %s DEFAULT %s', col.name_, col.type_, col.default_)
+        ELSE
+          format('ADD COLUMN %s %s', col.name_, col.type_)
+      END,
+      ', '
+    )
+    FROM unnest(col_defs) as col INTO col_additions;
+  RETURN __msar.exec_ddl('ALTER TABLE %s %s', tab_name, col_additions);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- MATHESAR DROP TABLE FUNCTIONS
@@ -699,7 +740,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
--- Drop table --------------------------------------------------------------------------------
+-- Drop table --------------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
 __msar.drop_table(tab_name text, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
