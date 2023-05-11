@@ -86,8 +86,7 @@
 
     1. Edit your `.env` file, making the following changes:
 
-        - Add the [**Backend Configuration** environment variables](./configuration.md#backend)
-        - Add the [**Database Configuration** environment variables](./configuration.md#database)
+        - Add the [**Backend Configuration** environment variables](../../configuration/env-variables.md#backend)
         - Customize the values of the environment variables to suit your needs.
 
         !!! example
