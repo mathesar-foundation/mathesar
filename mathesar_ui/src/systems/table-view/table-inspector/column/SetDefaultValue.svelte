@@ -19,13 +19,12 @@
 
   $: initialValue = column.column.default?.value ?? column.initialInputValue;
   $: value = initialValue;
-  $: isDefaultNull = column.column.default == null;
+  $: isDefaultNull = column.column.default === null;
   $: actionButtonsVisible = (() => {
     if (isDefaultNull) {
       if (typeof value === 'object') {
         JSON.stringify(initialValue) !== '';
-      }
-      else return String(initialValue) !== '';
+      } else return String(initialValue) !== '';
     }
     if (typeof value === 'object') {
       return JSON.stringify(value) !== JSON.stringify(initialValue);
@@ -91,22 +90,12 @@
 
 <div class="default-value-container">
   <LabeledInput layout="inline-input-first">
-    <span slot="label">
-      No Default Value
-    </span>
-    <Radio
-      checked={isDefaultNull}
-      on:change={toggleNoDefault}
-    />
+    <span slot="label"> No Default Value </span>
+    <Radio checked={isDefaultNull} on:change={toggleNoDefault} />
   </LabeledInput>
   <LabeledInput layout="inline-input-first">
-    <span slot="label">
-      Custom default
-    </span>
-    <Radio    
-      checked={!isDefaultNull}  
-      on:change={toggleNoDefault}
-    />
+    <span slot="label"> Custom default </span>
+    <Radio checked={!isDefaultNull} on:change={toggleNoDefault} />
   </LabeledInput>
   {#if !isDefaultNull}
     <DynamicInput
@@ -116,7 +105,7 @@
       {recordSummary}
       {setRecordSummary}
     />
-  {/if}  
+  {/if}
   {#if actionButtonsVisible}
     <CancelOrProceedButtonPair
       onProceed={save}
