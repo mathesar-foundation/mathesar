@@ -40,5 +40,7 @@ See our [Contribution guidelines](../CONTRIBUTING.md) for more information about
 
 - For page redirects, we use [`mkdocs-redirects`](https://github.com/mkdocs/mkdocs-redirects).
 
+- We use the [`macros`](https://mkdocs-macros-plugin.readthedocs.io/en/latest/) plugin to show the same content in different places, and we generally put such content in the `snippets` directory.
+
 - For docs content, we adhere to [CiviCRM's Documentation Style Guide](https://docs.civicrm.org/dev/en/latest/documentation/style-guide/).
 
