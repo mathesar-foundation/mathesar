@@ -380,7 +380,7 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
 1. Add the environment variables to the shell before running Django commands
 
     ```sh
-    export $(sudo cat.env)
+    export $(sudo cat .env)
     ```
 
 1. Run the latest Django migrations
