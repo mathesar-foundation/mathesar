@@ -123,13 +123,13 @@
 1. We need to create a python virtual environment for the Mathesar application.
 
     ```sh
-    python -m venv ./mathesar-venv
+    python -m venv mathesar-venv
     ```
 
 1. Next we will activate our virtual environment:
 
     ```sh
-    source ./mathesar-venv/bin/activate
+    source mathesar-venv/bin/activate
     ```
 
 ### Install the Mathesar application
@@ -194,7 +194,7 @@
 1. Install Mathesar functions on the database:
 
     ```sh
-    python install.py --skip-confirm >> /tmp/install.py.log
+    python install.py --skip-confirm | tee /tmp/install.py.log
     ```
 
 1. Create a Mathesar admin/superuser:
@@ -363,7 +363,7 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
     ```
 
     !!! note
-        Your installation directory may be different from above if you have customized it.
+        Your installation directory may be different from above if you used a different directory when installing Mathesar.
 
 1. Pull the latest version from the repository
 
