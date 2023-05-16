@@ -1,7 +1,7 @@
-# Troubleshooting Docker Compose Installation
+# Troubleshoot Guided Installation
 
-!!! info "We are still testing the install process"
-    We've tested this installation procedure on Windows, Mac, and a few Linux variants, but Mathesar is in its early stages so there might be unexpected issues. Please open a [GitHub issue](https://github.com/centerofci/mathesar/issues) if you run into any problems.
+!!! info ""
+    This document is related to the [Guided Installation method](./index.md).
 
 ## Restarting installation
 

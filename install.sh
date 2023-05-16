@@ -158,7 +158,7 @@ Welcome to the Mathesar installer for version %s!
 
 For more information or explanation about the steps involved, please see:
 
-https://docs.mathesar.org/installation-dc/under-the-hood/
+https://docs.mathesar.org/installation/guided-install/under-the-hood/
 
 --------------------------------------------------------------------------------
 
@@ -401,7 +401,6 @@ POSTGRES_PASSWORD='${django_db_password}'
 POSTGRES_PORT='${django_db_port}'
 ALLOWED_HOSTS='${allowed_hosts}'
 SECRET_KEY='${secret_key}'
-DJANGO_DATABASE_KEY='default'
 DJANGO_DATABASE_URL='${django_database_url}'
 MATHESAR_DATABASES='(mathesar_tables|${mathesar_database_url})'
 DJANGO_SUPERUSER_PASSWORD='${superuser_password}'

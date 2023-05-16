@@ -1,11 +1,7 @@
 import pytest
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 
 from mathesar.models.base import Table, Schema, Database
-from mathesar.state.django import reflect_db_objects
-
-from db.metadata import get_empty_metadata
 
 
 @pytest.fixture(autouse=True)
@@ -20,14 +16,15 @@ def multi_db_engine(multi_db_test_db, MOD_engine_cache):
     return MOD_engine_cache(multi_db_test_db)
 
 
-@pytest.mark.skip("Faulty DB handling assumptions; invalid")
+# NOTE this test might result in false failures, because the way we define user
+# databases might not support runtime changes in certain edge cases (and such changes are
+# performed in this tests' fixtures). Talk to Brent or Dom in case of problems.
 def test_multi_db_schema(engine, multi_db_engine, client, create_db_schema):
     test_schemas = ["test_schema_1", "test_schema_2"]
     for schema_name in test_schemas:
         create_db_schema(schema_name, engine)
         create_db_schema("multi_db_" + schema_name, multi_db_engine)
 
-    cache.clear()
     response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     response_schemas = [
@@ -41,7 +38,9 @@ def test_multi_db_schema(engine, multi_db_engine, client, create_db_schema):
     assert set(response_schemas) == set(expected_schemas)
 
 
-@pytest.mark.skip("Faulty DB handling assumptions; invalid")
+# NOTE this test might result in false failures, because the way we define user
+# databases might not support runtime changes in certain edge cases (and such changes are
+# performed in this tests' fixtures). Talk to Brent or Dom in case of problems.
 def test_multi_db_tables(engine, multi_db_engine, client, create_mathesar_table):
     schema_name = "test_multi_db_tables_schema"
     test_tables = ["test_table_1", "test_table_2"]
@@ -51,7 +50,6 @@ def test_multi_db_tables(engine, multi_db_engine, client, create_mathesar_table)
             "multi_db_" + table_name, schema_name, [], multi_db_engine
         )
 
-    cache.clear()
     response = client.get('/api/db/v0/tables/')
 
     assert response.status_code == 200
@@ -66,16 +64,16 @@ def test_multi_db_oid_unique():
     """
     Ensure the same OID is allowed for different dbs
     """
-    reflect_db_objects(metadata=get_empty_metadata())
     schema_oid = 5000
     table_oid = 5001
-    for db in Database.objects.all():
+    all_dbs = Database.objects.all()
+    assert len(all_dbs) > 1
+    for db in all_dbs:
         schema = Schema.objects.create(oid=schema_oid, database=db)
         Table.objects.create(oid=table_oid, schema=schema)
 
 
 def test_single_db_oid_unique_exception():
-    reflect_db_objects(metadata=get_empty_metadata())
     table_oid = 5001
     dbs = Database.objects.all()
     assert len(dbs) > 0
