@@ -144,7 +144,7 @@
 1. Next we will activate our virtual environment:
 
     ```sh
-    source mathesar-venv/bin/activate
+    source ./mathesar-venv/bin/activate
     ```
 
 ### Install the Mathesar application
@@ -395,7 +395,7 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
 1. Next we will activate our virtual environment:
 
     ```sh
-    source mathesar-venv/bin/activate
+    source ./mathesar-venv/bin/activate
     ```
 
 1. Add the environment variables to the shell before running Django commands
