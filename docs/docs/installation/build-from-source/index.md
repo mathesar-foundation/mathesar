@@ -1,5 +1,12 @@
 # Install Mathesar from source on Linux
 
+
+    !!! warning "Difficulty"
+        To follow this guide you need to have a good knowledge of Linux server administration, and be familiar with using the command line interface and some common utilities.
+
+
+
+
 ## Requirements
 
 - We've tested this on **Ubuntu**, but we expect it work on other Linux distros too.
