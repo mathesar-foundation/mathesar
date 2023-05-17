@@ -6,7 +6,7 @@
 - You'll need **root** privileges.
 - You'll need to install the following system packages before installing Mathesar:
 
-    - [Python](https://www.python.org/downloads/) 3.9 (Verify with `python --version`)
+    - [Python](https://www.python.org/downloads/) 3.9
 
         !!! note "Python version"
             Python _older_ than 3.9 will not run Mathesar.
@@ -123,7 +123,8 @@
 1. We need to create a python virtual environment for the Mathesar application.
 
     ```sh
-    python -m venv mathesar-venv
+    <path-to-python-binary> -m venv mathesar-venv
+    # /usr/bin/python3.9 -m venv mathesar-venv
     ```
 
 1. Next we will activate our virtual environment:
