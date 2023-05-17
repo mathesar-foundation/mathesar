@@ -693,6 +693,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Column creation definition type -----------------------------------------------------------------
 
+DROP TYPE IF EXISTS __msar.col_create_def CASCADE;
 CREATE TYPE __msar.col_create_def AS (
   name_ text, -- The name of the column to create, quoted.
   type_ text, -- The type of the column to create, fully specced with arguments.
@@ -700,8 +701,84 @@ CREATE TYPE __msar.col_create_def AS (
   default_ text -- Text SQL giving the default value for the column.
 );
 
+-- Column creation raw definition type -------------------------------------------------------------
+
+DROP TYPE IF EXISTS __msar.type_options CASCADE;
+CREATE TYPE __msar.type_options AS (
+  len integer,
+  pre integer,
+  sca integer,
+
+  not_null boolean, -- A boolean to describe whether the column is nullable or not.
+  default_ text -- Text SQL giving the default value for the column.
+);
+
 
 -- Add columns to table ----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+msar.build_type_text(typ_jsonb jsonb) RETURNS text AS $$/*
+Turns the given type-describing JSON into a proper string defining a type with arguments
+
+The input JSON should be of the form
+  {
+    "id": <integer>
+    "schema": <str>,
+    "name": <str>,
+    "options": {
+      "length": <integer>,
+      "precision": <integer>,
+      "scale": <integer>
+      "fields": <str>,
+      "dimensions": <integer>
+    }
+    "arguments": <array>  -- handles custom types
+  }
+*/
+DECLARE
+  type_string text;
+BEGIN
+  SELECT COALESCE(
+    typ.id::regtype::text,
+    msar.get_fully_qualified_object_name(typ.schema, typ.name)::regtype::text,
+    quote_ident(typ.name)::regtype::text
+  )::regtype::text || COALESCE(
+    '(' || topts.length || ')',
+    ' ' || topts.fields || ' (' || topts.precision || ')',
+    '(' || topts.precision || ', ' || topts.scale || ')',
+    '(' || topts.precision || ')',
+    ''
+  ) || COALESCE (
+    REPEAT('[]', topts.dimensions),
+    ''
+  )
+  FROM
+    jsonb_to_record(typ_jsonb) AS typ(id oid, schema text, name text, options jsonb),
+    jsonb_to_record(typ_jsonb -> 'options')
+      AS topts(length integer, precision integer, scale integer, fields text, dimensions integer)
+  INTO type_string;
+  RETURN type_string;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.process_column_create_jsonb(col_create_jsonb jsonb) RETURNS __msar.col_create_def AS $$/*
+Create a __msar.col_create_def from a column creation defining JSON blob.
+
+Args:
+  col_create_jsonb: A jsonb object defining a column creation (must have "name"
+                    and "type" keys; "not_null" and "default" keys optional).
+*/
+BEGIN
+  RETURN (
+    quote_ident(col_create_jsonb ->> 'name'),
+    msar.build_type_text(col_create_jsonb -> 'type'),
+    col_create_jsonb ->> 'not_null',
+    col_create_jsonb ->> 'default'
+  )::__msar.col_create_def;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 __msar.add_columns(tab_name text, col_defs variadic __msar.col_create_def[]) RETURNS text AS $$/*
