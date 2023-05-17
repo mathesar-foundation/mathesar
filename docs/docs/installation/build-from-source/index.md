@@ -31,7 +31,14 @@
     - [git](https://git-scm.com/downloads) (Verify with `git --version`)
 
 - We recommend having at least 60 GB disk space and 4 GB of RAM.
-- You'll need a domain name or subdomain for your installation. We will use `mathesar.example.com` in this guide.
+- You'll need a domain name or subdomain for your installation.
+    Type your domain name into the box below.
+
+    <input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
+
+    Then press <kbd>Enter</kbd> to customize this guide with your domain name.
+
+
 
 ## Install
 
@@ -165,7 +172,7 @@
             Your `.env` file should look something like this
             
             ``` bash
-            ALLOWED_HOSTS='https://mathesar.example.com'
+            ALLOWED_HOSTS='xDOMAIN_NAMEx'
             SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
             DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@localhost:5432/mathesar_django'
             MATHESAR_DATABASES='(your_db_name|postgresql://mathesar:mathesar@localhost:5432/your_db_name)'
@@ -282,7 +289,7 @@
 2. Add the configuration details to the CaddyFile
 
     ```text
-    mathesar.example.com {
+    xDOMAIN_NAMEx {
         log {
             output stdout
         }
