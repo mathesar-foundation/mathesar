@@ -23,7 +23,7 @@
       <span class="help">
         <Help>
           To add or remove databases, modify the
-          <DocsLink path="/install/configuration/#mathesar_databases">
+          <DocsLink path="/configuration/env-variables/#mathesar_databases">
             <code>MATHESAR_DATABASES</code> variable
           </DocsLink>
           in your configuration file and restart Mathesar.

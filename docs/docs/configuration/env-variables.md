@@ -1,9 +1,9 @@
-# Configuring Mathesar
+# Environment Variables
 
-The table below shows all available environment variables supported by Mathesar. See the specific installation guides for the applicable environment variables and instructions on how to set them.
+This page contains all available environment variables supported by Mathesar. See the specific installation guides for the applicable environment variables and instructions on how to set them.
 
 
-## Backend Configuration {#backend}
+## Backend Configuration {: #backend}
 
 ### `SECRET_KEY`
 
@@ -14,7 +14,7 @@ The table below shows all available environment variables supported by Mathesar.
 
 ### `ALLOWED_HOSTS`
 
-- _Optional_. Defaults to `*`
+- _**Required**_
 - A comma-separated list of hostnames that can serve Mathesar. It will be added to Django [ALLOWED_HOSTS](https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts) settings.
 - Add `localhost` if you want Mathesar to be accessible from localhost too.
 
@@ -60,7 +60,7 @@ The table below shows all available environment variables supported by Mathesar.
 - Each database must have a unique id and a connection string.
 
 
-## Caddy Reverse Proxy Configuration {#caddy}
+## Caddy Reverse Proxy Configuration {: #caddy}
 
 ### `DOMAIN_NAME`
 
