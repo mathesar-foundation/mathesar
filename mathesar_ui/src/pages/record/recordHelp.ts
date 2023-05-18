@@ -1,14 +1,7 @@
-import {
-  type Countable,
-  pluralizeThisPronoun,
-  pluralize,
-} from '@mathesar/utils/languageUtils';
+import { type Countable, pluralize } from '@mathesar/utils/languageUtils';
 
 export const getRecordDeleteMessage = (countable: Countable) =>
-  `Deleting ${pluralizeThisPronoun(countable)} ${pluralize(
+  `Once deleted, the ${pluralize(
     countable,
     'records',
-  )} will remove the entire ${pluralize(
-    countable,
-    'rows',
-  )}. Are you sure you want to proceed?`;
+  )} cannot be recovered. Are you sure you want to proceed?`;

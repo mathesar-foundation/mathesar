@@ -26,8 +26,7 @@ export function confirmDelete(
   const deletePhrase = `Delete${type ? ' ' : ''}${type}`;
 
   function getTitle() {
-    // Notice the prefix white space
-    const post = ' Confirmation';
+    const post = '?';
     if (props.identifierName) {
       return {
         component: PhraseContainingIdentifier,

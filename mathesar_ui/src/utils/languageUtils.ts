@@ -242,8 +242,3 @@ export function numberOfTimes(countable: Countable, casing?: Casing): string {
   }
   return labeledCount(countable, 'times', { casing });
 }
-
-export function pluralizeThisPronoun(countable: Countable) {
-  const count = getCount(countable);
-  return count > 1 ? 'these' : 'this';
-}

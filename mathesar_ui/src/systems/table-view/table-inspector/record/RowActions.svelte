@@ -25,16 +25,18 @@
   export let canEditTableRecords: boolean;
 
   async function handleDeleteRecords() {
+    const confirmationTitle = labeledCount(selectedRowIndices, 'records', {
+      countWhenSingular: 'hidden',
+      casing: 'title',
+    });
     void confirmDelete({
-      identifierType: 'Record',
+      identifierType: confirmationTitle,
       body: getRecordDeleteMessage(selectedRowIndices),
       onProceed: () => recordsData.deleteSelected(selectedRowIndices),
       onError: (e) => toast.fromError(e),
       onSuccess: () => {
         toast.success({
-          title: `${labeledCount(selectedRowIndices, 'records', {
-            casing: 'title',
-          })} deleted successfully!`,
+          title: `${confirmationTitle} deleted successfully!`,
         });
         selection.resetSelection();
       },

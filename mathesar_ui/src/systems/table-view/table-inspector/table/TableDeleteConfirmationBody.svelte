@@ -19,7 +19,7 @@
   <TextInput autofocus bind:value />
   <WarningBox>
     Warning: This action is permanent and once deleted, the table cannot be
-    recovered
+    recovered.
   </WarningBox>
 </div>
 
