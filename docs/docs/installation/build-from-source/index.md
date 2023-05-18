@@ -1,8 +1,8 @@
 # Install Mathesar from source on Linux
 
 
-    !!! warning ""
-        To follow this guide you need to have a good knowledge of Linux server administration, and be familiar with using the command line interface and some common utilities.
+!!! warning ""
+    To follow this guide you need to have a good knowledge of Linux server administration, and be familiar with using the command line interface and some common utilities.
 
 
 
@@ -505,7 +505,7 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
             Deleting this schema will also delete any database objects that depend on it. This should not be an issue if you don't have any data using Mathesar's custom data types.
 
 
-    3. Delete the functions.
+    3. Delete the functions schema.
 
         ```postgresql
         DROP SCHEMA msar CASCADE;
