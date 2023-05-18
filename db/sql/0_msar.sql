@@ -800,6 +800,20 @@ SELECT __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.add_columns(sch_name text, tab_name text, col_defs jsonb) RETURNS text AS $$/*
+TODO
+*/
+WITH cols_cte AS (
+  SELECT array_agg(msar.process_column_create_jsonb(col)) AS col_create_defs
+  FROM jsonb_array_elements(col_defs) AS col
+)
+SELECT __msar.add_columns(
+  msar.get_fully_qualified_object_name(sch_name, tab_name), variadic col_create_defs
+)
+FROM cols_cte;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- MATHESAR DROP TABLE FUNCTIONS
