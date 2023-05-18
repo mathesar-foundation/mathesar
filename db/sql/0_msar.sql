@@ -153,7 +153,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_relation_oid(sch_name text, rel_name text) RETURNS text AS $$/*
+msar.get_relation_oid(sch_name text, rel_name text) RETURNS oid AS $$/*
 Return the OID for a given relation (e.g., table).
 
 The relation *must* be in the pg_class table to use this function.
@@ -705,6 +705,22 @@ CREATE TYPE __msar.col_create_def AS (
 -- Add columns to table ----------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
+msar.generate_column_name(tab_id oid, base_name text) returns text AS $$/*
+TODO
+*/
+SELECT base_name || (MAX(attnum) + 1) FROM pg_attribute WHERE attrelid=tab_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+msar.generate_column_name(tab_id oid, modifier integer) returns text AS $$/*
+TODO
+*/
+SELECT msar.generate_column_name(tab_id, 'Column ');
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+
+CREATE OR REPLACE FUNCTION
 msar.build_type_text(typ_jsonb jsonb) RETURNS text AS $$/*
 Turns the given type-describing JSON into a proper string defining a type with arguments
 
@@ -745,20 +761,31 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.process_column_create_jsonb(col_create_jsonb jsonb) RETURNS __msar.col_create_def AS $$/*
+msar.process_col_create_arr(tab_id oid, col_create_arr jsonb) RETURNS __msar.col_create_def[] AS $$/*
 Create a __msar.col_create_def from a column creation defining JSON blob.
 
 Args:
-  col_create_jsonb: A jsonb object defining a column creation (must have "name"
-                    and "type" keys; "not_null" and "default" keys optional).
+  tab_id: The OID of the table where we'll create the columns
+  col_create_arr: A jsonb array defining a column creation (must have "name" and "type" keys;
+                    "not_null" and "default" keys optional).
 */
-SELECT (
-  quote_ident(col_create_jsonb ->> 'name'),
-  msar.build_type_text(col_create_jsonb -> 'type'),
-  col_create_jsonb ->> 'not_null',
-  col_create_jsonb ->> 'default'
-)::__msar.col_create_def;
+WITH attnum_cte AS (
+  SELECT MAX(attnum) AS m_attnum FROM pg_attribute WHERE attrelid=tab_id
+), col_create_cte AS (
+  SELECT (
+    COALESCE(
+      quote_ident(col_create_obj ->> 'name'),
+      quote_ident('Column ' || (attnum_cte.m_attnum + ROW_NUMBER() OVER ()))
+    ),
+    msar.build_type_text(col_create_obj -> 'type'),
+    col_create_obj ->> 'not_null',
+    col_create_obj ->> 'default'
+  )::__msar.col_create_def AS col_create_defs
+  FROM attnum_cte, jsonb_array_elements(col_create_arr) as col_create_obj
+)
+SELECT array_agg(col_create_defs) FROM col_create_cte;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
 
 CREATE OR REPLACE FUNCTION
 __msar.add_columns(tab_name text, col_defs variadic __msar.col_create_def[]) RETURNS text AS $$/*
@@ -792,11 +819,9 @@ CREATE OR REPLACE FUNCTION
 msar.add_columns(tab_id oid, col_defs jsonb) RETURNS text AS $$/*
 TODO
 */
-WITH cols_cte AS (
-  SELECT array_agg(msar.process_column_create_jsonb(col)) AS col_create_defs
-  FROM jsonb_array_elements(col_defs) AS col
-)
-SELECT __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs) FROM cols_cte;
+SELECT __msar.add_columns(
+  __msar.get_relation_name(tab_id), variadic msar.process_col_create_arr(tab_id, col_defs)
+);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -804,14 +829,7 @@ CREATE OR REPLACE FUNCTION
 msar.add_columns(sch_name text, tab_name text, col_defs jsonb) RETURNS text AS $$/*
 TODO
 */
-WITH cols_cte AS (
-  SELECT array_agg(msar.process_column_create_jsonb(col)) AS col_create_defs
-  FROM jsonb_array_elements(col_defs) AS col
-)
-SELECT __msar.add_columns(
-  msar.get_fully_qualified_object_name(sch_name, tab_name), variadic col_create_defs
-)
-FROM cols_cte;
+SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 ----------------------------------------------------------------------------------------------------
