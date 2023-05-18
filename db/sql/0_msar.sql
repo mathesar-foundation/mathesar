@@ -701,18 +701,6 @@ CREATE TYPE __msar.col_create_def AS (
   default_ text -- Text SQL giving the default value for the column.
 );
 
--- Column creation raw definition type -------------------------------------------------------------
-
-DROP TYPE IF EXISTS __msar.type_options CASCADE;
-CREATE TYPE __msar.type_options AS (
-  len integer,
-  pre integer,
-  sca integer,
-
-  not_null boolean, -- A boolean to describe whether the column is nullable or not.
-  default_ text -- Text SQL giving the default value for the column.
-);
-
 
 -- Add columns to table ----------------------------------------------------------------------------
 
@@ -735,31 +723,25 @@ The input JSON should be of the form
     "arguments": <array>  -- handles custom types
   }
 */
-DECLARE
-  type_string text;
-BEGIN
-  SELECT COALESCE(
-    typ.id::regtype::text,
-    msar.get_fully_qualified_object_name(typ.schema, typ.name)::regtype::text,
-    quote_ident(typ.name)::regtype::text
-  )::regtype::text || COALESCE(
-    '(' || topts.length || ')',
-    ' ' || topts.fields || ' (' || topts.precision || ')',
-    '(' || topts.precision || ', ' || topts.scale || ')',
-    '(' || topts.precision || ')',
-    ''
-  ) || COALESCE (
-    REPEAT('[]', topts.dimensions),
-    ''
-  )
-  FROM
-    jsonb_to_record(typ_jsonb) AS typ(id oid, schema text, name text, options jsonb),
-    jsonb_to_record(typ_jsonb -> 'options')
-      AS topts(length integer, precision integer, scale integer, fields text, dimensions integer)
-  INTO type_string;
-  RETURN type_string;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+SELECT COALESCE(
+  typ.id::regtype::text,
+  msar.get_fully_qualified_object_name(typ.schema, typ.name)::regtype::text,
+  typ.name::regtype::text
+)::regtype::text || COALESCE(
+  '(' || topts.length || ')',
+  ' ' || topts.fields || ' (' || topts.precision || ')',
+  '(' || topts.precision || ', ' || topts.scale || ')',
+  '(' || topts.precision || ')',
+  ''
+) || COALESCE (
+  REPEAT('[]', topts.dimensions),
+  ''
+)
+FROM
+  jsonb_to_record(typ_jsonb) AS typ(id oid, schema text, name text, options jsonb),
+  jsonb_to_record(typ_jsonb -> 'options')
+    AS topts(length integer, precision integer, scale integer, fields text, dimensions integer);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -770,15 +752,13 @@ Args:
   col_create_jsonb: A jsonb object defining a column creation (must have "name"
                     and "type" keys; "not_null" and "default" keys optional).
 */
-BEGIN
-  RETURN (
-    quote_ident(col_create_jsonb ->> 'name'),
-    msar.build_type_text(col_create_jsonb -> 'type'),
-    col_create_jsonb ->> 'not_null',
-    col_create_jsonb ->> 'default'
-  )::__msar.col_create_def;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+SELECT (
+  quote_ident(col_create_jsonb ->> 'name'),
+  msar.build_type_text(col_create_jsonb -> 'type'),
+  col_create_jsonb ->> 'not_null',
+  col_create_jsonb ->> 'default'
+)::__msar.col_create_def;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 __msar.add_columns(tab_name text, col_defs variadic __msar.col_create_def[]) RETURNS text AS $$/*
@@ -788,9 +768,7 @@ Args:
   tab_name: Fully-qualified, quoted table name.
   col_defs: The columns to be added.
 */
-DECLARE col_additions text := '';
-DECLARE col_add text;
-BEGIN
+WITH ca_cte AS (
   SELECT string_agg(
       CASE
         WHEN col.not_null AND col.default_ IS NULL THEN
@@ -803,11 +781,24 @@ BEGIN
           format('ADD COLUMN %s %s', col.name_, col.type_)
       END,
       ', '
-    )
-    FROM unnest(col_defs) as col INTO col_additions;
-  RETURN __msar.exec_ddl('ALTER TABLE %s %s', tab_name, col_additions);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+    ) AS col_additions
+  FROM unnest(col_defs) AS col
+)
+SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, col_additions) FROM ca_cte;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.add_columns(tab_id oid, col_defs jsonb) RETURNS text AS $$/*
+TODO
+*/
+WITH cols_cte AS (
+  SELECT array_agg(msar.process_column_create_jsonb(col)) AS col_create_defs
+  FROM jsonb_array_elements(col_defs) AS col
+)
+SELECT __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs) FROM cols_cte;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
