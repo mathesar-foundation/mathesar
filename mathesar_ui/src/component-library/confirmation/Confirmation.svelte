@@ -6,7 +6,7 @@
 
   export let controller: ConfirmationController;
 
-  $: ({ modal, confirmationProps, resolve } = controller);
+  $: ({ modal, confirmationProps, resolve, canProceed } = controller);
   $: ({
     title,
     body,
@@ -67,5 +67,6 @@
     {proceedButton}
     onCancel={handleCancelButton}
     onProceed={handleProceedButton}
+    canProceed={$canProceed}
   />
 </ControlledModal>
