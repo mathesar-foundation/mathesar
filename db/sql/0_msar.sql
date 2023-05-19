@@ -736,7 +736,6 @@ The input JSON should be of the form
       "fields": <str>,
       "dimensions": <integer>
     }
-    "arguments": <array>  -- handles custom types
   }
 */
 SELECT COALESCE(
