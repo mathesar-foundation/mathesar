@@ -27,7 +27,7 @@ services:
   caddy-reverse-proxy:
     image: mathesar/mathesar-caddy:latest
     environment:
-      - DOMAIN_NAME=${DOMAIN_NAME}
+      - DOMAIN_NAME=${DOMAIN_NAME-http://localhost}
     # caddy container is exposed to the other containers, and the host.
     ports:
       - "${HTTP_PORT-80}:80"
