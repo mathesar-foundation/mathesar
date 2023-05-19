@@ -359,7 +359,7 @@
     sudo systemctl enable caddy.service
     ```
 
-Now you can start using the Mathesar app by visiting the URL `https://mathesar.example.com`
+Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
 
 
 ## Administration
