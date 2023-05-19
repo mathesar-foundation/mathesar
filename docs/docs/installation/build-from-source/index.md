@@ -499,8 +499,7 @@ Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
         !!! danger ""
             Deleting this schema will also delete any database objects that depend on it. This should not be an issue if you don't have any data using Mathesar's custom data types.
 
-
-    3. Delete the functions schema.
+    3. Delete the function schemas.
 
         ```postgresql
         DROP SCHEMA msar CASCADE;
