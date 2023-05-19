@@ -822,35 +822,72 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- MATHESAR ADD CONSTRAINT FUNCTIONS
+--
+-- Add a constraint.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+-- Add constraint ----------------------------------------------------------------------------------
+
+
+DROP TYPE IF EXISTS __msar.con_type CASCADE;
+CREATE TYPE __msar.con_type AS (
+  con_name text,
+  conntype char,
+  col_names text[]
+);
+
+
 CREATE OR REPLACE FUNCTION
-__msar.add_constraints(con_queue variadic con_type[]) RETURNS TEXT AS $$
+msar.add_constraints(tab_name text, sch_name text, con_queue jsonb[]) RETURNS TEXT AS $$
 DECLARE
-  rec const;
-  ck_cmd text;
-  nn_cmd text;
-  uq_cmd text;
-  pk_cmd text;
+ rec __msar.con_type[];
+BEGIN
+  rec:= array_agg(col) FROM jsonb_populate_recordset(null::__msar.con_type, con_queue) AS col;
+  RETURN __msar.add_constraints(
+    __msar.get_fully_qualified_object_name(sch_name, tab_name), variadic rec
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT; 
+
+
+/* CREATE OR REPLACE FUNCTION
+public.test() RETURNS TEXT AS $$
+DECLARE
+ rec tt[];
+BEGIN
+  rec := array_agg(col) FROM jsonb_populate_recordset(null::tt, '[{"a":1,"b":2},{"a":3,"d":1}]') AS col;
+  RAISE NOTICE '%', rec;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;  */
+--  select string_agg(case when col.a = 1 then 'boo' else 'foo' end, ', ') from jsonb_populate_recordset(null::tt, '[{"a":1,"b":2},{"a":3,"d":1}]') as col;
+--  select string_agg(case when (col).a = 1 then 'boo' else 'foo' end, ', ') from (select unnest(array_agg(c2)) as col from jsonb_populate_recordset(null::tt, '[{"a":1,"b":2},{"a":3,"d":1}]') as c2) as cc;
+--  select (col).a, (col).b from (select unnest(array_agg(c2)) as col from jsonb_populate_recordset(null::tt, '[{"a":1,"b":2},{"a":3,"d":1}]') as c2) as c;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.add_constraints(tab_name text, con_queue variadic __msar.con_type[]) RETURNS TEXT AS $$
+-- TODO: Add support for check and exclusion constraints.
+DECLARE
   fk_cmd text;
-  ex_cmd text;
   cmd text;
 BEGIN
-  FOREACH rec IN ARRAY con_queue
-  LOOP
-    IF rec.conntype = 'u'::char
-    THEN
-      uq_cmd := construct_unique_constraint(rec.con_name, variadic rec.col_names);
-    ELSIF rec.conntype = 'p'::char
-    THEN
-      pk_cmd := construct_pk_constraint(variadic rec.col_names);
-    ELSIF rec.conntype = 'n'::char
-    THEN
-      nn_cmd := construct_not_null_constraint(variadic rec.col_names);
-    ELSE
-      RAISE NOTICE 'nay';
-    END IF;
-  END LOOP;
-  cmd := concat_ws(', ', ck_cmd, nn_cmd, uq_cmd, pk_cmd, fk_cmd, ex_cmd);
-  RETURN __msar.exec_ddl('ALTER TABLE %s %s', rec.tab_name, cmd);
+  SELECT string_agg(
+    CASE
+      WHEN con.conntype = 'u' THEN
+        construct_unique_constraint(con.con_name, variadic con.col_names)
+      WHEN con.conntype = 'p' THEN
+        construct_pk_constraint(variadic con.col_names)
+      WHEN con.conntype = 'n' THEN
+        construct_not_null_constraint(variadic con.col_names)
+    END,
+    ', '
+  ) FROM unnest(con_queue) AS con INTO cmd;
+  RAISE NOTICE '%', cmd;
+  RETURN __msar.exec_ddl('ALTER TABLE %s %s', tab_name, cmd);  -- tab_name should be fully quoted
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -895,6 +932,7 @@ BEGIN
   RETURN cmd;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------

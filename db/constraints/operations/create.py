@@ -1,7 +1,9 @@
 from alembic.migration import MigrationContext
+import json
+import psycopg
 from alembic.operations import Operations
 from sqlalchemy import MetaData
-
+from db.connection import execute_msar_func_with_engine
 from db.columns.operations.select import get_column_names_from_attnums
 from db.constraints.utils import get_constraint_type_from_char, ConstraintType, naming_convention
 from db.tables.operations.select import reflect_table_from_oid
@@ -36,3 +38,19 @@ def copy_constraint(table_oid, engine, constraint, from_column_attnum, to_column
         create_unique_constraint(table.name, table.schema, engine, columns)
     else:
         raise NotImplementedError
+
+def test_d(engine):
+    d = [{'con_name': 'uq_1', 'conntype': 'u', 'col_names': ['a', 'b']},
+         {'con_name': 'uq_2', 'conntype': 'u', 'col_names': ['c']},
+         {'conntype': 'p', 'col_names': ['a', 'c']},
+         {'conntype': 'n', 'col_names': ['d', 'e']}]
+
+    #x = execute_msar_func_with_engine(engine, 'add_constraints', 'test', 'public', json.dumps(d)).fetchone()
+    conn_str = str(engine.url)
+    with psycopg.connect(conn_str) as conn:
+        # Returns a cursor
+        x = conn.execute(
+            f"SELECT msar.add_constraints('test', 'public', '{json.dumps(d)}'::jsonb)",
+        ).fetchone()
+    print(x)
+    return x
