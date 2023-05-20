@@ -833,9 +833,9 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Add constraint ----------------------------------------------------------------------------------
 
 
-DROP TYPE IF EXISTS __msar._constraint CASCADE;
-CREATE TYPE __msar._constraint AS (
-  con_type char,
+DROP TYPE IF EXISTS __msar.con_type CASCADE;
+CREATE TYPE __msar.con_type AS (
+  conntype char,
   con_name text,
   col_names text[],
   frel_schema text,
@@ -844,12 +844,23 @@ CREATE TYPE __msar._constraint AS (
 );
 
 
+/* DROP TYPE IF EXISTS __msar._constraint_with_oid CASCADE;
+CREATE TYPE __msar._constraint_with_oid AS (
+  con_type char,
+  con_name text,
+  col_ids integer[],
+  frel_tab_id oid,
+  frel_col_ids integer[]
+);
+
+ */
 CREATE OR REPLACE FUNCTION
 msar.add_constraints(tab_name text, sch_name text, con_queue jsonb) RETURNS TEXT AS $$
 DECLARE
-  rec __msar._constraint[];
+  rec __msar.con_type[];
 BEGIN
-  rec:= array_agg(col) FROM jsonb_populate_recordset(null::__msar._constraint, con_queue) AS col;
+  rec:= array_agg(col) FROM jsonb_populate_recordset(null::__msar.con_type, con_queue) AS col;
+  RAISE NOTICE '%', rec;
   RETURN __msar.add_constraints(
     msar.get_fully_qualified_object_name(sch_name, tab_name), variadic rec
   );
@@ -857,21 +868,34 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+/* CREATE OR REPLACE FUNCTION
+msar.add_constraints(tab_id oid, con_queue jsonb) RETURNS TEXT AS $$
+DECLARE
+  rec __msar._constraint_with_oid[];
+BEGIN
+  rec:= array_agg(col) FROM jsonb_populate_recordset(null::__msar._constraint_with_oid, con_queue) AS col;
+  RETURN __msar.process_constraints_with_oid(
+    tab_id, variadic rec
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+ */
 CREATE OR REPLACE FUNCTION
-__msar.add_constraints(tab_name text, con_queue variadic __msar._constraint[]) RETURNS TEXT AS $$
+__msar.add_constraints(tab_name text, con_queue variadic __msar.con_type[]) RETURNS TEXT AS $$
 -- TODO: Add support for check and exclusion constraints.
 DECLARE
   cmd text;
 BEGIN
   SELECT string_agg(
     CASE
-      WHEN con.con_type = 'u' THEN
+      WHEN con.conntype = 'u' THEN
         msar.construct_unique_constraint(con.con_name, variadic con.col_names)
-      WHEN con.con_type = 'p' THEN
+      WHEN con.conntype = 'p' THEN
         msar.construct_pk_constraint(variadic con.col_names)
-      WHEN con.con_type = 'n' THEN
+      WHEN con.conntype = 'n' THEN
         msar.construct_not_null_constraint(variadic con.col_names)
-      WHEN con.con_type = 'f' THEN
+      WHEN con.conntype = 'f' THEN
         msar.construct_fk_constraint(
           con.con_name, 
           con.col_names,
@@ -882,9 +906,25 @@ BEGIN
     END,
     ', '
   ) FROM unnest(con_queue) AS con INTO cmd;
-  RETURN __msar.exec_ddl('ALTER TABLE %s %s', tab_name, cmd);  -- tab_name should be fully quoted
+  RAISE NOTICE '%', array_agg(col) from unnest(con_queue) as col;
+  RETURN __msar.exec_ddl('ALTER TABLE %s %s', tab_name, cmd);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+/* CREATE OR REPLACE FUNCTION
+msar.process_constraints_with_oid(tab_id oid, con_queue variadic __msar._constraint_with_oid[]) RETURNS TEXT AS $$
+-- TODO: Add support for check and exclusion constraints.
+DECLARE
+  cmd text;
+BEGIN
+  SELECT array_agg(
+    CASE
+      WHEN con.col_ids IS NOT NULL THEN
+        msar.get_column_name(tab_id, )
+  ) FROM unnest(con_queue) AS con INTO cmd;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT; */
 
 
 CREATE OR REPLACE FUNCTION
