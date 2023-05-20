@@ -834,17 +834,20 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 DROP TYPE IF EXISTS __msar._constraint CASCADE;
-CREATE TYPE __msar._constraint AS ( 
+CREATE TYPE __msar._constraint AS (
+  con_type char,
   con_name text,
-  conntype char,
-  col_names text[]
+  col_names text[],
+  frel_schema text,
+  frel_table text,
+  frel_cols text[]
 );
 
 
 CREATE OR REPLACE FUNCTION
 msar.add_constraints(tab_name text, sch_name text, con_queue jsonb) RETURNS TEXT AS $$
 DECLARE
- rec __msar._constraint[];
+  rec __msar._constraint[];
 BEGIN
   rec:= array_agg(col) FROM jsonb_populate_recordset(null::__msar._constraint, con_queue) AS col;
   RETURN __msar.add_constraints(
@@ -852,20 +855,6 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-/* CREATE OR REPLACE FUNCTION
-public.test() RETURNS TEXT AS $$
-DECLARE
- rec tt[];
-BEGIN
-  rec := array_agg(col) FROM jsonb_populate_recordset(null::tt, '[{"a":1,"b":2},{"a":3,"d":1}]') AS col;
-  RAISE NOTICE '%', rec;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;  */
---  select string_agg(case when col.a = 1 then 'boo' else 'foo' end, ', ') from jsonb_populate_recordset(null::tt, '[{"a":1,"b":2},{"a":3,"d":1}]') as col;
---  select string_agg(case when (col).a = 1 then 'boo' else 'foo' end, ', ') from (select unnest(array_agg(c2)) as col from jsonb_populate_recordset(null::tt, '[{"a":1,"b":2},{"a":3,"d":1}]') as c2) as cc;
---  select (col).a, (col).b from (select unnest(array_agg(c2)) as col from jsonb_populate_recordset(null::tt, '[{"a":1,"b":2},{"a":3,"d":1}]') as c2) as c;
 
 
 CREATE OR REPLACE FUNCTION
@@ -876,12 +865,20 @@ DECLARE
 BEGIN
   SELECT string_agg(
     CASE
-      WHEN con.conntype = 'u' THEN
+      WHEN con.con_type = 'u' THEN
         msar.construct_unique_constraint(con.con_name, variadic con.col_names)
-      WHEN con.conntype = 'p' THEN
+      WHEN con.con_type = 'p' THEN
         msar.construct_pk_constraint(variadic con.col_names)
-      WHEN con.conntype = 'n' THEN
+      WHEN con.con_type = 'n' THEN
         msar.construct_not_null_constraint(variadic con.col_names)
+      WHEN con.con_type = 'f' THEN
+        msar.construct_fk_constraint(
+          con.con_name, 
+          con.col_names,
+          con.frel_schema,
+          con.frel_table,
+          con.frel_cols
+        )
     END,
     ', '
   ) FROM unnest(con_queue) AS con INTO cmd;
@@ -928,6 +925,39 @@ BEGIN
   AS col
   INTO cmd;
   RETURN cmd;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.construct_fk_constraint(
+  con_name text,
+  col_names text[],
+  frel_schema text,
+  frel_table text,
+  frel_cols text[]
+) RETURNS TEXT AS $$
+DECLARE
+  fk_child_cols text;
+  fk_parent_cols text;
+BEGIN
+  SELECT string_agg(quote_ident(col), ', ')
+  FROM unnest(col_names)
+  AS col
+  INTO fk_child_cols;
+
+  SELECT string_agg(quote_ident(col), ', ')
+  FROM unnest(frel_cols)
+  AS col
+  INTO fk_parent_cols;
+
+  RETURN format(
+    'ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)',
+    con_name, 
+    fk_child_cols,
+    msar.get_fully_qualified_object_name(frel_schema, frel_table),
+    fk_parent_cols
+  );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
