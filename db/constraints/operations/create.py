@@ -1,6 +1,5 @@
 from alembic.migration import MigrationContext
-import json
-import psycopg
+from psycopg.types.json import Jsonb
 from alembic.operations import Operations
 from sqlalchemy import MetaData
 from db.connection import execute_msar_func_with_engine
@@ -44,13 +43,4 @@ def test_d(engine):
          {'con_name': 'uq_2', 'conntype': 'u', 'col_names': ['c']},
          {'conntype': 'p', 'col_names': ['a', 'c']},
          {'conntype': 'n', 'col_names': ['d', 'e']}]
-
-    #x = execute_msar_func_with_engine(engine, 'add_constraints', 'test', 'public', json.dumps(d)).fetchone()
-    conn_str = str(engine.url)
-    with psycopg.connect(conn_str) as conn:
-        # Returns a cursor
-        x = conn.execute(
-            f"SELECT msar.add_constraints('test', 'public', '{json.dumps(d)}'::jsonb)",
-        ).fetchone()
-    print(x)
-    return x
+    return execute_msar_func_with_engine(engine, 'add_constraints', 'test', 'public', Jsonb(d)).fetchone()
