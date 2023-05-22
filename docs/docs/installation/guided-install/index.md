@@ -21,7 +21,7 @@
 1. Paste this command into your terminal to begin installing the latest version of Mathesar:
 
     ```sh
-    bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/0.1.1/install.sh)
+    bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/0.1.2/install.sh)
     ```
 
 1. Follow the interactive prompts to configure your Mathesar installation.
