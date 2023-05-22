@@ -1,12 +1,4 @@
----
-title: Getting Started with Frontend Codebase
-description:
-published: true
-date: 2023-03-23T17:00:00.166Z
-tags:
-editor: markdown
-dateCreated: 2023-03-23T17:00:00.166Z
----
+# Front end code architecture
 
 ## Introduction
 
@@ -35,7 +27,7 @@ A writable Svelte store holds an instance of a custom immutable class.
 - **Updating the store**:
 
   ```typescript
-  pizza.update((p) => p.withTopping("mushrooms"));
+  pizza.update((p) => p.withTopping('mushrooms'));
   ```
 
 - **Benefits**:
@@ -53,7 +45,7 @@ A custom class has a property which holds an instance of a writable Svelte store
 - **Updating the store**:
 
   ```typescript
-  pizza.addTopping("mushrooms");
+  pizza.addTopping('mushrooms');
   ```
 
 - **Benefits**:
@@ -126,8 +118,7 @@ In the majority of the codebase, the API calls are being tightly coupled with th
 But with the recent [proposal](https://github.com/centerofci/mathesar-wiki/blob/fe-rfc-users-permissions/engineering/specs/usersandpermissions.md#proposal) the API calls are being separate out in `src/api`.
 
 1. There is a directory `src/api/` that contains `src/api/types` and `src/api/utils`. The new files will be placed within `src/api/`.
-2. Each utility file will export its related types.
-   A good example will be to look at: `src/api/users.ts`.
+2. Each utility file will export its related types. A good example will be to look at: `src/api/users.ts`.
 
 ## Component library
 
@@ -145,12 +136,11 @@ src
 ```
 
 1. Run the storybook: https://github.com/centerofci/mathesar/tree/develop/mathesar_ui#storybook
-2. See the [Components README](https://github.com/centerofci/mathesar/blob/develop/mathesar_ui/src/component-library/README.md) for more details.
+2. See the [Components README](./src/component-library/README.md) for more details.
 
 ## Form library
 
-Mathesar uses its own custom form creation and validation library. It lives in `src/components/form`.
-You can read more about this library here: https://github.com/centerofci/mathesar/pull/1932 under the following headings in the PR description
+Mathesar uses its own custom form creation and validation library. It lives in `src/components/form`. You can read more about this library here: https://github.com/centerofci/mathesar/pull/1932 under the following headings in the PR description
 
 1. An example form
 2. How it works
@@ -170,5 +160,4 @@ More on icon naming here: https://github.com/centerofci/mathesar/issues/1187
 
 ### Custom Icons
 
-There are a few cases where custom icons or non-font-awesome icons are being the user. The svg data of these icons are stored here: `src/icons/customIcons.ts`.
-Custom icon data is stored so that it can again be rendered using the `Icons` component.
+There are a few cases where custom icons or non-font-awesome icons are being the user. The svg data of these icons are stored here: `src/icons/customIcons.ts`. Custom icon data is stored so that it can again be rendered using the `Icons` component.
