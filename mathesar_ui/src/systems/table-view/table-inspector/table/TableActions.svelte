@@ -24,6 +24,7 @@
     constructDataExplorerUrlToSummarizeFromGroup,
     createDataExplorerUrlToExploreATable,
   } from '@mathesar/systems/data-explorer';
+  import TableDeleteConfirmationBody from './TableDeleteConfirmationBody.svelte';
 
   export let canExecuteDDL: boolean;
 
@@ -61,6 +62,12 @@
   function handleDeleteTable() {
     void confirmDelete({
       identifierType: 'Table',
+      body: {
+        component: TableDeleteConfirmationBody,
+        props: {
+          tableName: $currentTable?.name,
+        },
+      },
       onProceed: async () => {
         await deleteTable($tabularData.id);
         // TODO handle error when deleting
