@@ -94,12 +94,7 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-        column_attnum = get_column_attnum_from_name(
-            table.oid,
-            column.name,
-            table.schema._sa_engine,
-            metadata=get_cached_metadata(),
-        )
+        column_attnum = column['col_id']
         # The created column's Django model was automatically reflected. It can be reflected.
         dj_column = Column.objects.get(
             table=table,
