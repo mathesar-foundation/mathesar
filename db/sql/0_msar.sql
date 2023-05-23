@@ -745,6 +745,7 @@ SELECT COALESCE(
 )::regtype::text || COALESCE(
   '(' || topts.length || ')',
   ' ' || topts.fields || ' (' || topts.precision || ')',
+  ' ' || topts.fields,
   '(' || topts.precision || ', ' || topts.scale || ')',
   '(' || topts.precision || ')',
   ''
@@ -800,9 +801,9 @@ WITH ca_cte AS (
         WHEN col.not_null AND col.default_ IS NULL THEN
           format('ADD COLUMN %s %s NOT NULL', col.name_, col.type_)
         WHEN col.not_null AND col.default_ IS NOT NULL THEN
-          format('ADD COLUMN %s %s NOT NULL DEFAULT %s', col.name_, col.type_, col.default_)
+          format('ADD COLUMN %s %s NOT NULL DEFAULT ''%s''', col.name_, col.type_, col.default_)
         WHEN col.default_ IS NOT NULL THEN
-          format('ADD COLUMN %s %s DEFAULT %s', col.name_, col.type_, col.default_)
+          format('ADD COLUMN %s %s DEFAULT ''%s''', col.name_, col.type_, col.default_)
         ELSE
           format('ADD COLUMN %s %s', col.name_, col.type_)
       END,
@@ -815,17 +816,23 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_columns(tab_id oid, col_defs jsonb) RETURNS text AS $$/*
+msar.add_columns(tab_id oid, col_defs jsonb) RETURNS jsonb AS $$/*
 TODO
 */
-SELECT __msar.add_columns(
-  __msar.get_relation_name(tab_id), variadic msar.process_col_create_arr(tab_id, col_defs)
-);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+DECLARE
+  sql_query text;
+BEGIN
+  sql_query := __msar.add_columns(
+    __msar.get_relation_name(tab_id), variadic msar.process_col_create_arr(tab_id, col_defs)
+  );
+  RETURN jsonb_agg(jsonb_build_object('col_name', attname, 'tab_id', attrelid, 'col_id', attnum))
+  FROM pg_attribute WHERE attrelid=tab_id AND sql_query LIKE '% ' || attname || ' %';
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_columns(sch_name text, tab_name text, col_defs jsonb) RETURNS text AS $$/*
+msar.add_columns(sch_name text, tab_name text, col_defs jsonb) RETURNS jsonb AS $$/*
 TODO
 */
 SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs);
