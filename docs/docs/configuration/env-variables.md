@@ -16,7 +16,19 @@ This page contains all available environment variables supported by Mathesar. Se
 
 - _**Required**_
 - A comma-separated list of hostnames that can serve Mathesar. It will be added to Django [ALLOWED_HOSTS](https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts) settings.
+- The hostnames should not contain the `http` protocol or trailing slashes.
 - Add `localhost` if you want Mathesar to be accessible from localhost too.
+
+    !!! success "Valid values"
+        - `mathesar.example.com, localhost`
+        - `.localhost, mathesar.example.com, 35.188.184.125`
+
+    !!! failure "Invalid values"
+        - `http://mathesar.example.com/` # Contains http protocol and a trailing slash
+        - `https://mathesar.example.com` # Contains http protocol
+        - `localhost/, 35.188.184.125` # Contains trailing slashes, so `localhost` will be invalid.
+
+
 
 ### `DJANGO_DATABASE_URL`
 
