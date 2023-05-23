@@ -91,6 +91,7 @@ const wordMap = {
   cells: makePluralFormsFromEnglish('cell', 'cells'),
   columns: makePluralFormsFromEnglish('column', 'columns'),
   explorations: makePluralFormsFromEnglish('exploration', 'explorations'),
+  filters: makePluralFormsFromEnglish('filter', 'filters'),
   matches: makePluralFormsFromEnglish('match', 'matches'),
   records: makePluralFormsFromEnglish('record', 'records'),
   rows: makePluralFormsFromEnglish('row', 'rows'),
