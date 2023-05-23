@@ -1,16 +1,18 @@
 <script lang="ts">
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
-  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import {
     LabelController,
     setLabelControllerInContext,
   } from '@mathesar-component-library-dir/label/LabelController';
-  import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
   import Label from '@mathesar-component-library-dir/label/Label.svelte';
+  import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
+  import MenuItemWrapper from './MenuItemWrapper.svelte';
+  import MenuItemContents from './MenuItemContents.svelte';
 
   export let icon: IconProps | undefined = undefined;
   export let checked: boolean | null = false;
   export let disabled = false;
+  export let hasNotificationDot = false;
 
   const labelController = new LabelController();
   setLabelControllerInContext(labelController);
@@ -18,28 +20,27 @@
     labelController.disabled.set(disabled);
   }
 
-  function handleClick() {
+  function handleClick(e: MouseEvent) {
     if (disabled) {
+      return;
+    }
+    if ((e.target as HTMLElement).hasAttribute('data-menu-control')) {
       return;
     }
     checked = !checked;
   }
 </script>
 
-<div class="menu-item" on:click={handleClick} class:disabled>
-  <Label
-    controller={labelController}
-    on:click
-    style="--Label__display:contents;"
-  >
-    <span class="spacer cell" />
-    <span class="control cell">
-      <Checkbox bind:checked {labelController} {disabled} />
-    </span>
-    <span class="icon cell">
-      {#if icon}<Icon {...icon} />{/if}
-    </span>
-    <span class="label cell"><slot /></span>
-    <span class="spacer cell" />
-  </Label>
-</div>
+<MenuItemWrapper
+  on:click={handleClick}
+  {disabled}
+  {labelController}
+  {...$$restProps}
+>
+  <MenuItemContents {icon} {hasNotificationDot}>
+    <Checkbox slot="control" bind:checked {disabled} data-menu-control />
+    <Label data-menu-control controller={labelController}>
+      <slot />
+    </Label>
+  </MenuItemContents>
+</MenuItemWrapper>
