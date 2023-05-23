@@ -32,7 +32,7 @@
 
 - We recommend having at least 60 GB disk space and 4 GB of RAM.
 - You'll need a domain name or subdomain for your installation.
-    Type your domain name into the box below.
+    Type your domain name into the box below. Do not include a trailing slash.
 
     <input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
 
@@ -174,8 +174,8 @@
             ``` bash
             ALLOWED_HOSTS='xDOMAIN_NAMEx'
             SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
-            DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@localhost:5432/mathesar_django'
-            MATHESAR_DATABASES='(your_db_name|postgresql://mathesar:mathesar@localhost:5432/your_db_name)'
+            DJANGO_DATABASE_URL=postgresql://mathesar:1234@localhost:5432/mathesar_django
+            MATHESAR_DATABASES=(your_db_name|postgresql://mathesar:1234@localhost:5432/your_db_name)
             ```
 
     1. Add the environment variables to the shell
@@ -189,11 +189,6 @@
         !!! info ""
             You need to export the environment variables each time you restart the shell as they don't persist across sessions.
 
-1. Run Django migrations
-
-    ```sh
-    python manage.py migrate
-    ```
 
 1. Install the frontend dependencies
 
@@ -237,13 +232,13 @@
 
     ```sh
     sudo groupadd gunicorn && \
-    useradd gunicorn -g gunicorn
+    sudo useradd gunicorn -g gunicorn
     ```
 
 1. Create the Gunicorn systemd service file.
 
     ```sh
-    touch /lib/systemd/system/gunicorn.service
+    sudo touch /lib/systemd/system/gunicorn.service
     ```
 
     and copy the following code into it.
@@ -270,9 +265,9 @@
 1. Reload the systemctl and Start the Gunicorn socket
 
     ```sh
-    systemctl daemon-reload && \
-    systemctl start gunicorn.service && \
-    systemctl enable gunicorn.service
+    sudo systemctl daemon-reload && \
+    sudo systemctl start gunicorn.service && \
+    sudo systemctl enable gunicorn.service
     ```
 
 ### Set up the Caddy reverse proxy
@@ -283,13 +278,13 @@
 1. Create the CaddyFile
 
     ```sh
-    touch /etc/caddy/Caddyfile
+    sudo touch /etc/caddy/Caddyfile
     ```
 
 2. Add the configuration details to the CaddyFile
 
     ```text
-    xDOMAIN_NAMEx {
+    https://xDOMAIN_NAMEx {
         log {
             output stdout
         }
@@ -320,13 +315,13 @@
 
     ```sh
     sudo groupadd caddy && \
-    useradd caddy -g caddy
+    sudo useradd caddy -g caddy
     ```
 
 1. Create the Caddy systemd service file.
 
     ```sh
-    touch /lib/systemd/system/caddy.service
+    sudo touch /lib/systemd/system/caddy.service
     ```
 
     and copy the following code into it.
@@ -359,12 +354,12 @@
 1. Reload the systemctl and Start the Caddy socket
 
     ```sh
-    systemctl daemon-reload && \
-    systemctl start caddy.service && \
-    systemctl enable caddy.service
+    sudo systemctl daemon-reload && \
+    sudo systemctl start caddy.service && \
+    sudo systemctl enable caddy.service
     ```
 
-Now you can start using the Mathesar app by visiting the URL `https://mathesar.example.com`
+Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
 
 
 ## Administration
@@ -431,7 +426,7 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
 1. Restart the gunicorn server
 
     ```sh
-    systemctl restart gunicorn
+    sudo systemctl restart gunicorn
     ```
 
 
@@ -440,31 +435,31 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
 1. Stop Caddy service
 
     ```sh
-    systemctl disable caddy.service && systemctl stop caddy.service
+    sudo systemctl disable caddy.service && sudo systemctl stop caddy.service
     ```
 
 1. Remove Caddy service file and Caddyfile
 
     ```sh
-    rm /lib/systemd/system/caddy.service && rm /etc/caddy/Caddyfile
+    sudo rm /lib/systemd/system/caddy.service && sudo rm /etc/caddy/Caddyfile
     ```
 
 1. Stop Gunicorn
 
     ```sh
-    systemctl disable gunicorn.service && systemctl stop gunicorn.service
+    sudo systemctl disable gunicorn.service && sudo systemctl stop gunicorn.service
     ```
 
 1. Remove Gunicorn service file
 
     ```sh
-    rm /lib/systemd/system/gunicorn.service
+    sudo rm /lib/systemd/system/gunicorn.service
     ```
 
 1. Remove your Mathesar installation directory
 
     ```sh
-    rm -r xMATHESAR_INSTALLATION_DIRx
+    sudo rm -r xMATHESAR_INSTALLATION_DIRx
     ```
 
     !!! warning "Your installation directory might be customized"
@@ -501,11 +496,10 @@ Now you can start using the Mathesar app by visiting the URL `https://mathesar.e
         DROP SCHEMA mathesar_types CASCADE;
         ```
 
-        !!! danger 
+        !!! danger ""
             Deleting this schema will also delete any database objects that depend on it. This should not be an issue if you don't have any data using Mathesar's custom data types.
 
-
-    3. Delete the functions schema.
+    3. Delete the function schemas.
 
         ```postgresql
         DROP SCHEMA msar CASCADE;
