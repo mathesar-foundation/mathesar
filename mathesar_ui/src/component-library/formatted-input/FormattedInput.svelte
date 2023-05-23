@@ -1,11 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
-  import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
+
   import { getOutcomeOfBeforeInputEvent } from '@mathesar-component-library-dir/common/utils';
+  import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import type { ArtificialEvents } from '@mathesar/component-library/common/types/ArtificialEvents';
-  import type { ParseResult, FormattedInputProps } from './FormattedInputTypes';
+  import type { FormattedInputProps, ParseResult } from './FormattedInputTypes';
   import { getCursorPositionAfterReformat } from './formattedInputUtils';
-  import { getCaretCoordinates } from './utils';
+  import { scrollCaretIntoView } from './scrollCaretIntoView';
 
   type T = $$Generic;
   type $$Props = FormattedInputProps<T>;
@@ -98,14 +99,8 @@
       });
       await tick();
       element?.setSelectionRange(newCursorPosition, newCursorPosition);
-
       if (!element) return;
-      // scroll input left
-      const coordinates = getCaretCoordinates(element, newCursorPosition);
-
-      if (coordinates.diff > 0) {
-        element.scrollLeft = coordinates.diff + 8;
-      }
+      scrollCaretIntoView(element);
     } catch (error) {
       onParseError({ userInput, error });
     }
