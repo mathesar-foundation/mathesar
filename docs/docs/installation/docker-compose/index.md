@@ -13,11 +13,11 @@
     cd /etc/mathesar
     ```
 
-1. Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/master/docker-compose.yml), and [.env.example](https://github.com/centerofci/mathesar/raw/master/.env.example) files to your configuration directory.
+1. Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml), and [.env.example](https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/.env.example) files to your configuration directory.
 
     ```
-    sudo wget https://github.com/centerofci/mathesar/raw/master/docker-compose.yml
-    sudo wget https://github.com/centerofci/mathesar/raw/master/.env.example
+    sudo wget https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml
+    sudo wget https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/.env.example
     ```
 
 1. Rename `.env.example` to `.env`

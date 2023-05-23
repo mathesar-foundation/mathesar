@@ -116,23 +116,23 @@
 
 ### Set up the environment
 
-1. Clone the git repo into a directory where you will install Mathesar, and `cd` into that directory.
+1. Clone the git repo into the installation directory.
 
     ```sh
     git clone https://github.com/centerofci/mathesar.git .
     ```
 
-1. Switch to the `master` branch to install the latest stable release.
+1. Checkout the tag of the latest stable release, `{{mathesar_version}}`.
 
     ```
-    git checkout master
+    git checkout {{mathesar_version}}
     ```
 
     !!! warning "Important"
         If you don't run the above command you'll end up installing the latest _development_ version of Mathesar, which will be less stable.
 
     !!! tip
-        You can install a specific Mathesar release by running commands like `git checkout 0.1.2` (to install version 0.1.2, for example). You can see all available versions by running `git tag`.
+        You can install a specific Mathesar release by running commands like `git checkout 0.1.1` (to install version 0.1.1, for example). You can see all available versions by running `git tag`.
 
 1. We need to create a python virtual environment for the Mathesar application.
 

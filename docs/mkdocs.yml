@@ -96,3 +96,6 @@ markdown_extensions:
   - toc:
       title: On this page
       permalink: true
+
+extra:
+  mathesar_version: 0.1.2

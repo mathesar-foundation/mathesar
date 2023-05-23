@@ -5,7 +5,7 @@ This page contains instructions to install Mathesar on various platforms.
 ## Guided installation using our install script
 - Our install script guides you through a series of prompts to install Mathesar:
     ```sh
-    bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/0.1.2/install.sh)
+    bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/{{mathesar_version}}/install.sh)
     ```
 - The script sets up Mathesar using Docker Compose and configures the admin user [under the hood](./guided-install/under-the-hood.md).
 - [Detailed Guided Installation Instructions](./guided-install/index.md).
@@ -13,14 +13,14 @@ This page contains instructions to install Mathesar on various platforms.
     This is a convenient way to install Mathesar. However, it requires `sudo` privileges (admin access), and sets up a limited set of configuration options. Use the Docker Compose installation option below to exert more control.
 
 ## Docker Compose 
-- Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/master/docker-compose.yml) file.
+- Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file.
     ```sh
-    wget https://github.com/centerofci/mathesar/raw/master/docker-compose.yml
+    wget https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml
     ```
 - Configure [environment variables](../configuration/env-variables.md).
     ```sh
     # Sample .env file
-    wget https://github.com/centerofci/mathesar/raw/master/.env.example
+    wget https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/.env.example
     mv .env.example .env
     ```
 - Start Mathesar and create the super user.
