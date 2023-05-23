@@ -8,7 +8,7 @@ The `scrollCaretIntoView` function is necessary to work around a browser issue t
 
 - However, in **Chrome** and **Safari**, the browser doesn't perform any scrolling, which can sometimes leave the caret out of view.
 
-    For example, in our `FormattedInput` component, we use the `beforeInput` event to intercept key presses and programmatically alter the content of the input as well as the text caret position. If we don't use `scrollCaretIntoView`, then we have a [problem](https://github.com/centerofci/mathesar/issues/2758) where entering enough text into the input to fill it results in the caret being positioned beyond the scroll overflow of the text content within the input.
+  For example, in our `FormattedInput` component, we use the `beforeInput` event to intercept key presses and programmatically alter the content of the input as well as the text caret position. If we don't use `scrollCaretIntoView`, then we have a [problem](https://github.com/centerofci/mathesar/issues/2758) where entering enough text into the input to fill it results in the caret being positioned beyond the scroll overflow of the text content within the input.
 
 ## How
 
@@ -20,9 +20,9 @@ The `scrollCaretIntoView` function is necessary to work around a browser issue t
 
 1. (D) If we're still not done (and this case should be somewhat rare), then we copy the content of the text before the caret and insert it into a new hidden DOM element in order to measure its width.
 
-    Having determined the width of the text before the input, then we proceed as described in the following diagram:
+   Having determined the width of the text before the input, then we proceed as described in the following diagram:
 
-    <img src="./README.svg" width="500px" />
+   <img src="./README.svg" width="500px" />
 
 ## Future work
 
@@ -31,4 +31,3 @@ The `scrollCaretIntoView` function is necessary to work around a browser issue t
 ## Credit
 
 Some implementation strategies were inspired by [textarea-caret-position](https://github.com/component/textarea-caret-position). (MIT license)
-
