@@ -821,12 +821,23 @@ TODO
 */
 DECLARE
   sql_query text;
+  col_create_defs __msar.col_create_def[];
+  col_names text[];
 BEGIN
-  sql_query := __msar.add_columns(
-    __msar.get_relation_name(tab_id), variadic msar.process_col_create_arr(tab_id, col_defs)
-  );
-  RETURN jsonb_agg(jsonb_build_object('col_name', attname, 'tab_id', attrelid, 'col_id', attnum))
-  FROM pg_attribute WHERE attrelid=tab_id AND sql_query LIKE '% ' || attname || ' %';
+  col_create_defs := msar.process_col_create_arr(tab_id, col_defs);
+  col_names := array_agg(cd.name_) FROM unnest(col_create_defs) AS cd;
+  sql_query := __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
+  RETURN jsonb_agg(
+    jsonb_build_object(
+      'tab_id', attrelid,
+      'col_id', attnum,
+      'col_name', attname,
+      'col_type', format_type(atttypid, atttypmod)
+    )
+  )
+    FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
+    INNER JOIN unnest(col_create_defs) R
+    ON quote_ident(L.attname) = R.name_;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
