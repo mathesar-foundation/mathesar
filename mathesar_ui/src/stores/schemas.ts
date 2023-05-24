@@ -92,20 +92,18 @@ function removeSchemaInDBSchemaStore(
   }
 }
 
-export function modifySchemaCountOfTable(
-  database: Database['name'],
-  schemaId: SchemaEntry['id'],
+export function addCountToSchemaNumTables(
+  database: Database,
+  schema: SchemaEntry,
   count: number,
 ) {
-  const store = dbSchemaStoreMap.get(database);
+  const store = dbSchemaStoreMap.get(database.name);
   if (store) {
     store.update((value) => {
-      if (value.data.has(schemaId)) {
-        const schemaToModify = value.data?.get(schemaId);
-        if (schemaToModify) {
-          schemaToModify.num_tables += count;
-          value.data?.set(schemaId, schemaToModify);
-        }
+      const schemaToModify = value.data.get(schema.id);
+      if (schemaToModify) {
+        schemaToModify.num_tables += count;
+        value.data.set(schema.id, schemaToModify);
       }
       return {
         ...value,

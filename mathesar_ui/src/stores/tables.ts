@@ -28,7 +28,7 @@ import type {
   SplitTableRequest,
   SplitTableResponse,
 } from '@mathesar/api/types/tables/split_table';
-import type { DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
+import type { DBObjectEntry, Database, SchemaEntry } from '@mathesar/AppTypes';
 import { invalidIf } from '@mathesar/components/form';
 import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
 import {
@@ -42,8 +42,7 @@ import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
 import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
 import type { AtLeastOne } from '@mathesar/typeUtils';
-import { currentSchemaId, modifySchemaCountOfTable } from './schemas';
-import { currentDBName } from './databases';
+import { currentSchemaId, addCountToSchemaNumTables } from './schemas';
 
 const commonData = preloadCommonData();
 
@@ -189,18 +188,18 @@ function findAndUpdateTableStore(id: TableEntry['id'], tableEntry: TableEntry) {
   });
 }
 
-export function deleteTable(id: number): CancellablePromise<TableEntry> {
-  const promise = deleteAPI<TableEntry>(`/api/db/v0/tables/${id}/`);
+export function deleteTable(
+  database: Database,
+  schema: SchemaEntry,
+  tableId: TableEntry['id'],
+): CancellablePromise<TableEntry> {
+  const promise = deleteAPI<TableEntry>(`/api/db/v0/tables/${tableId}/`);
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
-        const databaseName = get(currentDBName);
-        const schemaId = get(currentSchemaId);
-        if (databaseName && schemaId) {
-          modifySchemaCountOfTable(databaseName, schemaId, -1);
-        }
-        findSchemaStoreForTable(id)?.update((tableStoreData) => {
-          tableStoreData.data.delete(id);
+        addCountToSchemaNumTables(database, schema, -1);
+        schemaTablesStoreMap.get(schema.id)?.update((tableStoreData) => {
+          tableStoreData.data.delete(tableId);
           return {
             ...tableStoreData,
             data: new Map(tableStoreData.data),
@@ -237,25 +236,23 @@ export function updateTableMetaData(
 }
 
 export function createTable(
-  schema: SchemaEntry['id'],
+  database: Database,
+  schema: SchemaEntry,
   tableArgs: {
     name?: string;
     dataFiles?: [number, ...number[]];
   },
 ): CancellablePromise<TableEntry> {
   const promise = postAPI<TableEntry>('/api/db/v0/tables/', {
-    schema,
+    schema: schema.id,
     name: tableArgs.name,
     data_files: tableArgs.dataFiles,
   });
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
-        const databaseName = get(currentDBName);
-        if (databaseName) {
-          modifySchemaCountOfTable(databaseName, schema, 1);
-        }
-        schemaTablesStoreMap.get(value.schema)?.update((existing) => {
+        addCountToSchemaNumTables(database, schema, 1);
+        schemaTablesStoreMap.get(schema.id)?.update((existing) => {
           const tableEntryMap: DBTablesStoreData['data'] = new Map();
           sortedTableEntries([...existing.data.values(), value]).forEach(
             (entry) => {

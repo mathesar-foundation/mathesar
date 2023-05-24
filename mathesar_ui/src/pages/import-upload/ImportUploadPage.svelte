@@ -58,7 +58,7 @@
     const { dataFileId } = uploadInfo;
     try {
       tableCreationProgress = { state: 'processing' };
-      const table = await createTable(schema.id, {
+      const table = await createTable(database, schema, {
         dataFiles: [dataFileId],
       });
       router.goto(getImportPreviewPageUrl(database.name, schema.id, table.id));
