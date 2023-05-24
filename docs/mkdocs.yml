@@ -48,6 +48,7 @@ plugins:
           'install/docker/index.md': 'installation/docker/index.md'
           'install/build-from-source/index.md': 'installation/build-from-source/index.md'
   - macros
+  - placeholder
 
 theme:
   name: material
