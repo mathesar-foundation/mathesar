@@ -1,9 +1,22 @@
 import { derived, get, writable, type Readable } from 'svelte/store';
 
-import { unite } from '@mathesar-component-library';
+import {
+  unite,
+  withSideChannelSubscriptions,
+} from '@mathesar-component-library';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-import { comboErrorsKey, type FieldStore, type ValuedField } from './field';
-import { isValid as outcomeIsValid, type ComboValidator } from './validators';
+import {
+  comboErrorsKey,
+  disabledKey,
+  type FieldStore,
+  type RequiredField,
+  type ValuedField,
+} from './field';
+import {
+  isValid as outcomeIsValid,
+  type ComboValidator,
+  type Filled,
+} from './validators';
 
 type GenericFieldsObj = Record<string, FieldStore>;
 type Values<FieldsObj extends GenericFieldsObj> = {
@@ -49,6 +62,11 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
 
   const requestStatus = writable<RequestStatus | undefined>(undefined);
 
+  const isSubmitting = derived(
+    requestStatus,
+    (status) => status?.state === 'processing',
+  );
+
   const isValid = derived(
     unite(Object.values(fields).map((f) => f.isValid)),
     (a) => a.every((i) => i),
@@ -86,8 +104,57 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
     }),
   );
 
-  return { ...store, fields, reset, clearServerErrors, requestStatus };
+  /**
+   * Why do we need this "side channel subscription thing"?
+   *
+   * When `requestStatus` changes, we want to update the `disabled` state of all
+   * fields. The call to `requestStatus.subscribe` handles this reactivity. We
+   * wrap that code in this side-channel-subscription mechanism so as to
+   * properly handle the _unsubscriptions_ and avoid memory leaks. When the last
+   * subscriber unsubscribes from the form store, then the `requestStatus`
+   * subscription will be unsubscribed as well. This approach ties the
+   * reactivity of the `disabled` fields to the `requestStatus` store, while
+   * tieing the lifetime of that reactivity to the lifetime of the form store.
+   * We can't perform the reactive updates within a store derived directly from
+   * `requestStatus`, because the reactive updates would fail to execute if the
+   * derived store had no subscribers. The approach here works because we're
+   * certain enough that the form store will have at least one subscriber.
+   */
+  const storeWithSideChannelSubscriptions = withSideChannelSubscriptions(
+    store,
+    [
+      () =>
+        requestStatus.subscribe((status) => {
+          Object.values(fields).forEach((field) => {
+            field[disabledKey].set(status?.state === 'processing');
+          });
+        }),
+    ],
+  );
+
+  return {
+    ...storeWithSideChannelSubscriptions,
+    fields,
+    reset,
+    clearServerErrors,
+    requestStatus,
+    isSubmitting,
+  };
 }
 
 export type Form<FieldsObj extends GenericFieldsObj = GenericFieldsObj> =
   ReturnType<typeof makeForm<FieldsObj>>;
+
+type GetFieldsObj<F> = F extends Form<infer FieldsObj> ? FieldsObj : never;
+
+type FilledFieldValue<F> = F extends RequiredField<infer T>
+  ? Filled<T>
+  : F extends FieldStore<infer T>
+  ? T
+  : never;
+
+type FilledFieldValues<FieldsObj extends GenericFieldsObj> = {
+  [K in keyof FieldsObj]: FilledFieldValue<FieldsObj[K]>;
+};
+
+export type FilledFormValues<F> = FilledFieldValues<GetFieldsObj<F>>;

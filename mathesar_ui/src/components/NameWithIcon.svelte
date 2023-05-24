@@ -16,7 +16,7 @@
 
 <Truncate passthrough={!truncate}>
   <span class="name-with-icon" on:click class:boxed={iconHasBox} class:bold>
-    <span class="icon">
+    <span class="icon" style="white-space: nowrap">
       {#if isLoading}
         <Spinner />
       {:else}
@@ -24,8 +24,7 @@
           <Icon {...icon} size="min(1em, 0.75em + 0.25rem)" />
         {/each}
       {/if}
-    </span>
-    <span class="name">
+    </span>&nbsp;<span class="name">
       {#if name}
         {name}
       {:else}
@@ -51,7 +50,6 @@
   }
   .name-with-icon.boxed .icon {
     display: inline-flex;
-    height: 1.2em;
     border-radius: 0.25em;
     padding: 0.2em;
     background: var(--icon-color, currentcolor);

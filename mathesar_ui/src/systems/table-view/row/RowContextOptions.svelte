@@ -16,9 +16,10 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
+  import { getRecordDeleteMessage } from '@mathesar/pages/record/recordHelp';
 
   export let row: RecordRow;
-  export let recordId: number;
+  export let recordPk: string;
   export let recordsData: RecordsData;
 
   const userProfile = getUserProfileStoreFromContext();
@@ -32,13 +33,15 @@
 
   async function handleDeleteRecords() {
     if (rowHasRecord(row)) {
+      const selectedRowIndices = [Number(row.rowIndex)];
       void confirmDelete({
-        identifierType: 'Row',
-        onProceed: () => recordsData.deleteSelected([Number(row.rowIndex)]),
+        identifierType: 'Record',
+        body: getRecordDeleteMessage(selectedRowIndices),
+        onProceed: () => recordsData.deleteSelected(selectedRowIndices),
         onError: (e) => toast.fromError(e),
         onSuccess: () =>
           toast.success({
-            title: 'Row deleted successfully!',
+            title: 'Record deleted successfully!',
           }),
       });
     }
@@ -46,13 +49,13 @@
 </script>
 
 <LinkMenuItem
-  href={$storeToGetRecordPageUrl({ recordId }) || ''}
+  href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
   icon={iconExternalLink}
 >
   Go to Record Page
 </LinkMenuItem>
 {#if canEditTableRecords}
-  <ButtonMenuItem on:click={handleDeleteRecords} danger icon={iconDeleteMajor}>
+  <ButtonMenuItem on:click={handleDeleteRecords} icon={iconDeleteMajor}>
     Delete Record
   </ButtonMenuItem>
 {/if}

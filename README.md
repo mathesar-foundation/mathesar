@@ -31,7 +31,6 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 - [Live Demo](#live-demo)
 - [Features](#features)
 - [Self-hosting](#self-hosting)
-- [Local development setup](#local-development-setup)
 - [Our motivation](#our-motivation)
 - [Contributing](#contributing)
 - [Bugs and troubleshooting](#bugs-and-troubleshooting)
@@ -98,9 +97,6 @@ Check out a [live demo of Mathesar here](https://demo.mathesar.org)!
 ## Self-hosting
 Please see [our documentation](https://docs.mathesar.org/) for instructions on installing Mathesar on your own server.
 
-## Local development setup
-Please see [our guide in our documentation](http://docs.mathesar.org/contributing/local-dev/).
-
 ## Our motivation
 Mathesar is a non-profit project. Our goal is to make understanding and working with data easy for everyone.
 
@@ -109,7 +105,7 @@ Databases have been around for a long time and solve common data problems really
 We want to make existing database functionality more accessible, for users of all technical skill levels.
 
 ## Contributing
-We actively encourage contribution! Read through [our contributing guidelines](https://wiki.mathesar.org/community/contributing) to get started.
+We actively encourage contribution! Get started by reading our [Contributor Guide](./CONTRIBUTING.md).
 
 ## Bugs and troubleshooting
 
