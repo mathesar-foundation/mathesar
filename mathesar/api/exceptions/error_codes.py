@@ -62,3 +62,4 @@ class ErrorCodes(Enum):
     EditingPublicSchema = 4421
     DuplicateUIQueryInSchema = 4422
     IdentifierTooLong = 4423
+    DynamicDefaultAlterationToStaticDefault = 4424
