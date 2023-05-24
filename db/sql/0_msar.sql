@@ -832,7 +832,8 @@ BEGIN
       'tab_id', attrelid,
       'col_id', attnum,
       'col_name', attname,
-      'col_type', format_type(atttypid, atttypmod)
+      'col_type', format_type(atttypid, null),
+      'col_full_type', format_type(atttypid, atttypmod)
     )
   )
     FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
