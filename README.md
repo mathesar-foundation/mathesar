@@ -112,9 +112,8 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 If you run into problems, here's what you can try:
 1. Narrow down the problem you're having to a minimal search phrase
 2. Search on [our issue tracker](https://github.com/centerofci/mathesar/issues/)
-3. Search on [StackOverflow using our tag `[mathesar]`](https://stackoverflow.com/questions/tagged/mathesar)
-4. If you think this is a novel problem, ask on [our issue tracker](https://github.com/centerofci/mathesar/issues/) or [StackOverflow](https://stackoverflow.com/questions/tagged/mathesar)
-5. In case you're having trouble formulating a report, reach out [on Matrix](#join-our-community)(#join-our-community)
+3. If you think this is a novel problem, report on [our issue tracker](https://github.com/centerofci/mathesar/issues/)
+4. In case you're having trouble formulating a report, reach out [on Matrix](#join-our-community)(#join-our-community)
 
 ## License
 Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).
