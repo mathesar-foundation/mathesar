@@ -26,36 +26,33 @@ from db.metadata import get_empty_metadata
 
 
 def create_column(engine, table_oid, column_data):
-    column_name = column_data.get(NAME, '').strip() or None
+    column_name = (column_data.get(NAME) or '').strip() or None
     column_type_id = column_data.get(
         TYPE, column_data.get("type", PostgresType.CHARACTER_VARYING.id)
     )
     column_type_options = column_data.get("type_options", {})
     column_nullable = column_data.get(NULLABLE, True)
     default_value = column_data.get(DEFAULT, {}).get('value')
+    col_create_def = [
+        {
+            "name": column_name,
+            "type": {"name": column_type_id, "options": column_type_options},
+            "not_null": not column_nullable,
+            "default": default_value,
+        }
+    ]
     try:
         curr = execute_msar_func_with_engine(
             engine, 'add_columns',
             table_oid,
-            json.dumps(
-                [
-                    {
-                        "name": column_name,
-                        "type": {
-                            "name": column_type_id,
-                            "options": column_type_options,
-                        },
-                        "not_null": not column_nullable,
-                        "default": default_value,
-                    }
-                ]
-            )
+            json.dumps(col_create_def)
         )
     except InvalidTextRepresentation:
         raise InvalidDefaultError
     except InvalidParameterValue:
         raise InvalidTypeOptionError
     return curr.fetchone()[0][0]
+
 
 
 def bulk_create_mathesar_column(engine, table_oid, columns, schema):
