@@ -6,7 +6,7 @@ from db.constraints.operations.select import (
     get_constraint_oid_by_name_and_table_oid,
     get_fkey_constraint_oid_by_name_and_referent_table_oid,
 )
-from db.columns.exceptions import InvalidTypeError, DynamicDefaultModificationError
+from db.columns.exceptions import InvalidTypeError
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
@@ -461,3 +461,8 @@ class IdentifierTooLong(MathesarAPIException):
         if exception is None:
             exception = Exception(message)
         super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class DynamicDefaultModificationError(Exception):
+    def __init__(self, column=None):
+        self.column = column

@@ -4,7 +4,8 @@ from rest_framework.fields import empty, SerializerMethodField
 from rest_framework.settings import api_settings
 
 from db.identifiers import is_identifier_too_long
-from db.columns.exceptions import InvalidTypeError, DynamicDefaultModificationError
+from db.columns.exceptions import InvalidTypeError
+from mathesar.api.exceptions.database_exceptions.exceptions import DynamicDefaultModificationError
 from db.columns.exceptions import InvalidTypeOptionError
 from db.types.base import PostgresType, MathesarCustomType
 from db.types.operations.convert import get_db_type_enum_from_id
