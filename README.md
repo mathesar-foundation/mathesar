@@ -108,7 +108,7 @@ We want to make existing database functionality more accessible, for users of al
 We actively encourage contribution! Get started by reading our [Contributor Guide](./CONTRIBUTING.md).
 
 ## Bugs and troubleshooting
-If you run into bugs and/or malfunctions, refer to our [troubleshooting guide](./TROUBLESHOOTING.md).
+If you run into problems, refer to our [troubleshooting guide](./TROUBLESHOOTING.md).
 
 ## License
 Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).
