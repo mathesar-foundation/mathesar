@@ -22,9 +22,7 @@
   $: isDefaultNull = column.column.default === null;
   $: actionButtonsVisible = (() => {
     if (isDefaultNull) {
-      if (typeof value === 'object') {
-        JSON.stringify(initialValue) !== '';
-      } else return String(initialValue) !== '';
+      return column.column.default !== null;
     }
     if (typeof value === 'object') {
       return JSON.stringify(value) !== JSON.stringify(initialValue);
@@ -45,13 +43,12 @@
   async function save() {
     typeChangeState = { state: 'processing' };
     try {
-      let defaultRequest = null;
-      if (!isDefaultNull) {
-        defaultRequest = {
-          is_dynamic: !!column.column.default?.is_dynamic,
-          value,
-        };
-      }
+      const defaultRequest = isDefaultNull
+        ? null
+        : {
+            is_dynamic: !!column.column.default?.is_dynamic,
+            value,
+          };
       await columnsDataStore.patch(column.id, {
         default: defaultRequest,
       });
