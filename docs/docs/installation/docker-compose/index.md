@@ -43,7 +43,7 @@
             If you are using the [default database container](../../configuration/customize-docker-compose#default-db). Your `.env` file should look something like this
             
             ``` bash
-            ALLOWED_HOSTS='https://<your_domain_name>'
+            ALLOWED_HOSTS='<your_domain_name>'
             SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
             DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@mathesar_db:5432/mathesar_django'
             MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)'
