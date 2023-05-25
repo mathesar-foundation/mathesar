@@ -25,7 +25,7 @@ The default `docker-compose.yml` automatically starts a [Postgres database serve
 
 In the `docker-compose.yml` file, comment out the `db` service from the `depends_on` field of the `service`.
 
-```yaml hl_lines="10 11"
+```yaml hl_lines="9 10 11"
 services:
   # ...
   service:
@@ -33,7 +33,7 @@ services:
     volumes:
       - static:/code/static
       - media:/code/media
-      # Comment the below field to disable starting the database service automatically
+    # Comment the below field to disable starting the database service automatically
     # depends_on:
       # db:
       #  condition: service_healthy
