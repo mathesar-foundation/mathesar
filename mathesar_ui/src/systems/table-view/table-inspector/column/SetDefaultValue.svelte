@@ -42,13 +42,13 @@
 
   async function save() {
     typeChangeState = { state: 'processing' };
+    const defaultRequest = isDefaultNull
+      ? null
+      : {
+          is_dynamic: !!column.column.default?.is_dynamic,
+          value,
+        };
     try {
-      const defaultRequest = isDefaultNull
-        ? null
-        : {
-            is_dynamic: !!column.column.default?.is_dynamic,
-            value,
-          };
       await columnsDataStore.patch(column.id, {
         default: defaultRequest,
       });
