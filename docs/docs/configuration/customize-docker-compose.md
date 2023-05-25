@@ -33,8 +33,8 @@ services:
     volumes:
       - static:/code/static
       - media:/code/media
-    depends_on:
       # Comment the below field to disable starting the database service automatically
+    # depends_on:
       # db:
       #  condition: service_healthy
 ```
