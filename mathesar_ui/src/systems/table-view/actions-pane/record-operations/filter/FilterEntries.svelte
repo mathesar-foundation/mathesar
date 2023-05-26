@@ -9,6 +9,7 @@
   } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/api/types/tables/records';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
 
   const dispatch = createEventDispatcher<{
     remove: number;
@@ -28,10 +29,8 @@
     columns={$processedColumns}
     getColumnLabel={(column) =>
       $processedColumns.get(column.id)?.column.name ?? ''}
-    getColumnConstraintType={(column) => {
-      const linkFkType = $processedColumns.get(column.id)?.linkFk?.type;
-      return linkFkType ? [linkFkType] : undefined;
-    }}
+    getColumnConstraintType={(column) =>
+      getColumnConstraintTypeByColumnId(column.id, $processedColumns)}
     bind:columnIdentifier={entry.columnId}
     bind:conditionIdentifier={entry.conditionId}
     bind:value={entry.value}

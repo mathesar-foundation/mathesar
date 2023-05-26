@@ -7,6 +7,7 @@ const uriType: CellComponentFactory = {
   initialInputValue: '',
   get: (): ComponentAndProps => ({ component: UriCell }),
   getInput: (): ComponentAndProps => ({ component: TextInput }),
+  getDisplayFormatter: () => String,
 };
 
 export default uriType;

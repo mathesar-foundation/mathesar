@@ -158,7 +158,7 @@ Welcome to the Mathesar installer for version %s!
 
 For more information or explanation about the steps involved, please see:
 
-https://docs.mathesar.org/installation-dc/under-the-hood/
+https://docs.mathesar.org/installation/guided-install/under-the-hood/
 
 --------------------------------------------------------------------------------
 
@@ -213,8 +213,8 @@ https://github.com/centerofci/mathesar/issues/
   if [ "${1}" == "late" ]; then
     read -r -p "
     Press ENTER to print the logs and reset the local docker environment. "
-    docker compose --profile prod logs
-    docker compose --profile prod down -v --rmi all
+    docker compose logs
+    docker compose down -v --rmi all
   fi
   read -r -p "
 Press ENTER to exit the installer. "
@@ -401,7 +401,6 @@ POSTGRES_PASSWORD='${django_db_password}'
 POSTGRES_PORT='${django_db_port}'
 ALLOWED_HOSTS='${allowed_hosts}'
 SECRET_KEY='${secret_key}'
-DJANGO_DATABASE_KEY='default'
 DJANGO_DATABASE_URL='${django_database_url}'
 MATHESAR_DATABASES='(mathesar_tables|${mathesar_database_url})'
 DJANGO_SUPERUSER_PASSWORD='${superuser_password}'
@@ -429,13 +428,14 @@ installation.
 printf "Downloading docker-compose.yml...
 "
 sudo curl -sfL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"${github_tag}"/docker-compose.yml || installation_fail early
+
 read -r -p "Success!
 
 Next, we'll download files and start the server, This may take a few minutes.
 
 Press ENTER to continue. "
 clear -x
-docker compose --profile prod up -d --wait || installation_fail late
+docker compose up -d --wait || installation_fail late
 printf "\n"
 printf "
 --------------------------------------------------------------------------------

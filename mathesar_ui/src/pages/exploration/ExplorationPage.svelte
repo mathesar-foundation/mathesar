@@ -1,18 +1,19 @@
 <script lang="ts">
   import { router } from 'tinro';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { QueryInstance } from '@mathesar/api/types/queries';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { getSchemaPageUrl } from '@mathesar/routes/urls';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     ExplorationResult,
     QueryModel,
     QueryRunner,
-    ExplorationInspector,
+    WithExplorationInspector,
   } from '@mathesar/systems/data-explorer';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-  import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import Header from './Header.svelte';
 
   const userProfile = getUserProfileStoreFromContext();
@@ -57,31 +58,22 @@
         {schema}
         {canEditMetadata}
       />
-      <div class="content">
+      <WithExplorationInspector
+        {isInspectorOpen}
+        queryHandler={queryRunner}
+        {canEditMetadata}
+        on:delete={gotoSchemaPage}
+      >
         <ExplorationResult queryHandler={queryRunner} isExplorationPage />
-        {#if isInspectorOpen}
-          <ExplorationInspector
-            queryHandler={queryRunner}
-            {canEditMetadata}
-            on:delete={gotoSchemaPage}
-          />
-        {/if}
-      </div>
+      </WithExplorationInspector>
     </div>
   {/if}
 </LayoutWithHeader>
 
-<style lang="scss">
+<style>
   .exploration-page {
     display: grid;
     grid-template: auto 1fr / 1fr;
     height: 100%;
-
-    .content {
-      display: flex;
-      --exploration-inspector-width: 22.9rem;
-      overflow: hidden;
-      overflow-x: auto;
-    }
   }
 </style>

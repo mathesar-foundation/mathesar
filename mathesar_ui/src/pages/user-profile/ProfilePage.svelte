@@ -20,8 +20,8 @@
 
 <LayoutWithHeader
   cssVariables={{
+    '--page-padding': 'var(--outer-page-padding-for-inset-page)',
     '--layout-background-color': 'var(--sand-200)',
-    '--inset-layout-padding': 'var(--size-xx-large) 0',
     '--inset-page-section-padding':
       'var(--size-ultra-large) var(--size-xx-large)',
   }}
@@ -30,7 +30,7 @@
     <h1 slot="header">User Profile</h1>
     {#if userProfile}
       <InsetPageSection>
-        <h2 slot="header">Account Details</h2>
+        <h2 class="large-bold-header" slot="header">Account Details</h2>
         <UserDetailsForm user={userProfile.getUser()} />
       </InsetPageSection>
       <InsetPageSection>
@@ -39,7 +39,7 @@
 
       {#if !userProfile.isSuperUser}
         <InsetPageSection>
-          <h2 slot="header">Delete Account</h2>
+          <h2 class="large-bold-header" slot="header">Delete Account</h2>
           <div>
             Please contact your administrator to request permanent deletion of
             your account
@@ -57,8 +57,6 @@
 
 <style>
   h2 {
-    font-weight: 500;
-    font-size: var(--size-large);
     margin: 0 0 1em 0;
   }
 </style>

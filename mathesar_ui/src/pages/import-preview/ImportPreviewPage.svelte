@@ -326,10 +326,10 @@
 
 <LayoutWithHeader
   cssVariables={{
-    '--max-layout-width': '65.357rem',
+    '--max-layout-width': 'var(--max-layout-width-data-pages)',
     '--layout-background-color': 'var(--sand-200)',
     '--inset-page-section-padding': 'var(--size-xx-large)',
-    '--inset-layout-padding': '0',
+    '--page-padding': 'var(--outer-page-padding-for-inset-page)',
   }}
 >
   <div class="table-preview-confirmation">
@@ -341,7 +341,7 @@
       {:else}
         <div class="table-properties">
           <LabeledInput layout="stacked">
-            <h2 slot="label">Table Name</h2>
+            <h2 class="large-bold-header" slot="label">Table Name</h2>
             <TextInput bind:value={tableName} />
           </LabeledInput>
 
@@ -359,7 +359,7 @@
           </div>
 
           <div class="help-content">
-            <h2>Column names and data types</h2>
+            <h2 class="large-bold-header">Column names and data types</h2>
             <p>
               Column names and data types are automatically detected, use the
               controls in the preview table to review and update them if
@@ -396,7 +396,7 @@
       {#if processedColumns.length > 0}
         <div class="table-preview-content">
           <div class="preview">
-            <h2>Table Preview</h2>
+            <h2 class="large-bold-header">Table Preview</h2>
             <div class="content">
               <div class="sheet-holder">
                 <Sheet
@@ -489,13 +489,7 @@
     --sheet-header-height: 5.25rem;
     position: relative;
 
-    h1 {
-      margin: 1em 0;
-    }
-
     h2 {
-      font-weight: 600;
-      font-size: var(--size-large);
       margin: 0;
     }
 
