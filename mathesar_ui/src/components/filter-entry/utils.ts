@@ -10,6 +10,8 @@ import type {
   AbstractTypeLimitedFilterInformation,
 } from '@mathesar/stores/abstract-types/types';
 
+export const FILTER_INPUT_CLASS = 'filter-input';
+
 export function validateFilterEntry(
   filterCondition:
     | AbstractTypeFilterDefinition
