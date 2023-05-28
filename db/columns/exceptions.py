@@ -8,11 +8,6 @@ class InvalidTypeError(Exception):
         self.new_type = new_type
 
 
-class DefaultAssignmentToUniqueError(Exception):
-    def __init__(self, column=None):
-        self.column = column
-
-
 class InvalidTypeOptionError(Exception):
     pass
 

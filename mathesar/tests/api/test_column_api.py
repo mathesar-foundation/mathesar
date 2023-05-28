@@ -9,7 +9,6 @@ from db.types.base import PostgresType, MathesarCustomType
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.tests.api.test_table_api import check_columns_response
-from mathesar.utils.columns import is_unique_column
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
