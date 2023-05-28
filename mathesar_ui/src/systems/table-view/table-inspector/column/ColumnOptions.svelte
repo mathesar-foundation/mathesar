@@ -58,37 +58,33 @@
 
   async function toggleAllowDuplicates() {
     isRequestingToggleAllowDuplicates = true;
-    try {
-      const newAllowsDuplicates = !allowsDuplicates;
-      const promises = [];
-      if (!newAllowsDuplicates) {
-        promises.push(
+    const newAllowsDuplicates = !allowsDuplicates;
+    constraintsDataStore
+      .setUniquenessOfColumn(column.column, !newAllowsDuplicates)
+      .then(async () => {
+        try {
           await columnsDataStore.patch(column.id, {
             default: null,
-          }),
-        );
-      }
-      promises.push(
-        await constraintsDataStore.setUniquenessOfColumn(
-          column.column,
-          !newAllowsDuplicates,
-        ),
-      );
-      await Promise.all(promises);
-      const message = `Column "${column.column.name}" will ${
-        newAllowsDuplicates ? '' : 'no longer '
-      }allow duplicates.`;
-      toast.success({ message });
-      dispatch('close');
-    } catch (error) {
-      const message = `Unable to update "Allow Duplicates" of column "${
-        column.column.name
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      }". ${error.message as string}.`;
-      toast.error({ message });
-    } finally {
-      isRequestingToggleAllowDuplicates = false;
-    }
+          });
+          const message = `Column "${column.column.name}" will ${
+            newAllowsDuplicates ? '' : 'no longer '
+          }allow duplicates.`;
+          toast.success({ message });
+          dispatch('close');
+        } catch (error) {
+          throw error; // throw error to the outer catch block
+        }
+      })
+      .catch((error) => {
+        const message = `Unable to update "Allow Duplicates" of column "${
+          column.column.name
+          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+        }". ${error.message as string}.`;
+        toast.error({ message });
+      })
+      .finally(() => {
+        isRequestingToggleAllowDuplicates = false;
+      });
   }
 </script>
 
