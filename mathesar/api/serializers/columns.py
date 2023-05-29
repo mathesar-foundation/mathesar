@@ -178,7 +178,7 @@ class ColumnSerializer(SimpleColumnSerializer):
                     table=self.instance.table
                 )
                 if column_has_unique_key_constraint:
-                    raise database_api_exceptions.InvalidDefaultAPIException(
+                    raise database_api_exceptions.InvalidDefaultAssignmentToUniqueColumnError(
                         DefaultAssignmentToUniqueColumnError(self.instance),
                         status_code=status.HTTP_400_BAD_REQUEST
                     )

@@ -124,6 +124,20 @@ class InvalidDefaultAPIException(MathesarAPIException):
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class InvalidDefaultAssignmentToUniqueColumnError(MathesarAPIException):
+    error_code = ErrorCodes.InvalidDefaultAssignmentToUniqueColumn.value
+
+    def __init__(
+            self,
+            exception,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, self.error_code, self.err_msg(exception, message), field, details, status_code)
 
     @staticmethod
