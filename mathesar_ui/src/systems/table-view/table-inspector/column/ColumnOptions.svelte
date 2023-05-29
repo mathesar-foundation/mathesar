@@ -59,21 +59,18 @@
   async function toggleAllowDuplicates() {
     isRequestingToggleAllowDuplicates = true;
     const newAllowsDuplicates = !allowsDuplicates;
-    constraintsDataStore
+    return constraintsDataStore
       .setUniquenessOfColumn(column.column, !newAllowsDuplicates)
       .then(async () => {
-        try {
-          await columnsDataStore.patch(column.id, {
-            default: null,
-          });
-          const message = `Column "${column.column.name}" will ${
-            newAllowsDuplicates ? '' : 'no longer '
-          }allow duplicates.`;
-          toast.success({ message });
-          dispatch('close');
-        } catch (error) {
-          throw error; // throw error to the outer catch block
-        }
+        await columnsDataStore.patch(column.id, {
+          default: null,
+        });
+        const message = `Column "${column.column.name}" will ${
+          newAllowsDuplicates ? '' : 'no longer '
+        }allow duplicates.`;
+        toast.success({ message });
+        dispatch('close');
+        return null;
       })
       .catch((error) => {
         const message = `Unable to update "Allow Duplicates" of column "${

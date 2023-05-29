@@ -515,6 +515,34 @@ def test_drop_nonexistent_constraint(create_patents_table, client):
     assert response_data['code'] == ErrorCodes.NotFound.value
 
 
+def test_assign_default_to_unique_column(create_patents_table, client):
+    table_name = 'NASA Constraint List 11'
+    table = create_patents_table(table_name)
+    constraint_column_id = table.get_columns_by_name(['Case Number'])[0].id
+    data = {
+        'type': 'unique',
+        'columns': [constraint_column_id]
+    }
+    response = client.post(
+        f'/api/db/v0/tables/{table.id}/constraints/',
+        data=json.dumps(data),
+        content_type='application/json'
+    )
+    assert response.status_code == 201
+    default_data = {
+        "default": {
+            "value": -1
+        }
+    }
+    response = client.patch(
+        f'/api/db/v0/tables/{table.id}/columns/{constraint_column_id}/',
+        data=json.dumps(default_data),
+        content_type='application/json'
+    )
+    assert response.status_code == 400
+    assert response.json()[0]["code"] == 4425
+
+
 @pytest.mark.parametrize('client_name, expected_status_code, different_schema_expected_status_code', delete_client_with_different_roles)
 def test_drop_constraint_based_on_permission(create_patents_table, request, client_name, expected_status_code, different_schema_expected_status_code):
     table_name = 'NASA Constraint List 1'
