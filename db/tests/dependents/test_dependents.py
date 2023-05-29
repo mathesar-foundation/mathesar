@@ -92,7 +92,7 @@ def test_self_reference(engine_with_schema, library_tables_oids):
     # remove when library_without_checkouts.sql is updated and includes self-reference case
     fk_column = create_column(engine, publishers_oid, {'name': 'Parent Publisher', 'type': PostgresType.INTEGER.id})
     pk_column_attnum = get_column_attnum_from_name(publishers_oid, 'id', engine, metadata=get_empty_metadata())
-    fk_constraint = ForeignKeyConstraint('Publishers_Publisher_fkey', publishers_oid, [fk_column.column_attnum], publishers_oid, [pk_column_attnum], {})
+    fk_constraint = ForeignKeyConstraint('Publishers_Publisher_fkey', publishers_oid, [fk_column['col_id']], publishers_oid, [pk_column_attnum], {})
     create_constraint(schema, engine, fk_constraint)
 
     publishers_oid = library_tables_oids['Publishers']
@@ -113,7 +113,7 @@ def test_circular_reference(engine_with_schema, library_tables_oids):
     # remove when library_without_checkouts.sql is updated and includes circular reference case
     fk_column = create_column(engine, publishers_oid, {'name': 'Top Publication', 'type': PostgresType.INTEGER.id})
     publications_pk_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine, metadata=get_empty_metadata())
-    fk_constraint = ForeignKeyConstraint('Publishers_Publications_fkey', publishers_oid, [fk_column.column_attnum], publications_oid, [publications_pk_column_attnum], {})
+    fk_constraint = ForeignKeyConstraint('Publishers_Publications_fkey', publishers_oid, [fk_column['col_id']], publications_oid, [publications_pk_column_attnum], {})
     create_constraint(schema, engine, fk_constraint)
 
     publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, [])
