@@ -36,6 +36,12 @@ const dbSchemasRequestMap: Map<
   CancellablePromise<PaginatedResponse<SchemaResponse> | undefined>
 > = new Map();
 
+function findStoreBySchemaId(id: SchemaEntry['id']) {
+  return [...dbSchemaStoreMap.values()].find((entry) =>
+    get(entry).data.has(id),
+  );
+}
+
 function setDBSchemaStore(
   database: Database['name'],
   schemas: SchemaResponse[],
@@ -113,20 +119,17 @@ export function addCountToSchemaNumTables(
   }
 }
 
-export function modifySchemaCountOfExploration(
-  database: Database['name'],
+export function addCountToSchemaNumExplorations(
   schemaId: SchemaEntry['id'],
   count: number,
 ) {
-  const store = dbSchemaStoreMap.get(database);
+  const store = findStoreBySchemaId(schemaId);
   if (store) {
     store.update((value) => {
-      if (value.data.has(schemaId)) {
-        const schemaToModify = value.data?.get(schemaId);
-        if (schemaToModify) {
-          schemaToModify.num_queries += count;
-          value.data?.set(schemaId, schemaToModify);
-        }
+      const schemaToModify = value.data.get(schemaId);
+      if (schemaToModify) {
+        schemaToModify.num_queries += count;
+        value.data.set(schemaId, schemaToModify);
       }
       return {
         ...value,
