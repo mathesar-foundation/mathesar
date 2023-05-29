@@ -173,11 +173,11 @@ class ColumnSerializer(SimpleColumnSerializer):
         # Reevaluate column display options based on the new column type.
         if self.partial and 'column_default_dict' in data:
             if data['column_default_dict'] is not None:
-                column_has_unique_key_constraint = is_unique_column(
+                column_has_unique_constraint = is_unique_column(
                     column_id=self.instance.id,
                     table=self.instance.table
                 )
-                if column_has_unique_key_constraint:
+                if column_has_unique_constraint:
                     raise database_api_exceptions.InvalidDefaultAssignmentToUniqueColumnError(
                         DefaultAssignmentToUniqueColumnError(self.instance),
                         status_code=status.HTTP_400_BAD_REQUEST
