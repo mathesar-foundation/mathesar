@@ -22,7 +22,7 @@
   import type { ReadableMapLike } from '@mathesar/typeUtils';
   import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
   import type { FilterEntryColumnLike } from './types';
-  import { validateFilterEntry } from './utils';
+  import { FILTER_INPUT_CLASS, validateFilterEntry } from './utils';
 
   type T = $$Generic;
   type ColumnLikeType = FilterEntryColumnLike & T;
@@ -244,7 +244,7 @@
             showError = true;
           }}
           on:change={onValueChangeFromUser}
-          class="filter-input"
+          class={FILTER_INPUT_CLASS}
           hasError={showError && !isValid}
           recordSummary={recordSummaries
             .get(String(columnIdentifier))

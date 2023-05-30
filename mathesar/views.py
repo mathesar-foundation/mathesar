@@ -33,11 +33,11 @@ def get_schema_list(request, database):
 
 
 def _get_permissible_db_queryset(request):
-    qs = Database.objects.all()
+    qs = Database.objects.filter(deleted=False)
     permission_restricted_qs = DatabaseAccessPolicy.scope_queryset(request, qs)
     schema_qs = Schema.objects.all()
     permitted_schemas = SchemaAccessPolicy.scope_queryset(request, schema_qs)
-    databases_from_permitted_schema = Database.objects.filter(schemas__in=permitted_schemas)
+    databases_from_permitted_schema = Database.objects.filter(schemas__in=permitted_schemas, deleted=False)
     permission_restricted_qs = permission_restricted_qs | databases_from_permitted_schema
     return permission_restricted_qs.distinct()
 

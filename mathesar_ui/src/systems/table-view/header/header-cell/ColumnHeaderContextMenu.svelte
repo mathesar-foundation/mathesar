@@ -5,23 +5,31 @@
     type SortDirection,
   } from '@mathesar/components/sort-entry/utils';
   import {
+    iconAddFilter,
     iconGrouping,
+    iconRemoveFilter,
     iconSortAscending,
     iconSortDescending,
   } from '@mathesar/icons';
+  import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
+  import { labeledCount } from '@mathesar/utils/languageUtils';
 
   export let processedColumn: ProcessedColumn;
 
+  const imperativeFilterController = getImperativeFilterControllerFromContext();
   const tabularData = getTabularDataStoreFromContext();
   $: ({
-    meta: { sorting, grouping },
+    meta: { sorting, grouping, filtering },
   } = $tabularData);
 
   $: columnId = processedColumn.id;
+
+  $: filterEntries = $filtering.entries.filter((e) => e.columnId === columnId);
+  $: filterCount = filterEntries.length;
 
   $: currentSorting = $sorting.get(processedColumn.id);
   $: sortingLabel = getSortingLabelForColumn(
@@ -30,6 +38,14 @@
   );
 
   $: hasGrouping = $grouping.hasColumn(columnId);
+
+  function addFilter() {
+    void imperativeFilterController?.beginAddingNewFilteringEntry(columnId);
+  }
+
+  function clearFilters() {
+    filtering.update((f) => f.withoutColumns([columnId]));
+  }
 
   function removeSorting() {
     sorting.update((s) => s.without(columnId));
@@ -52,6 +68,22 @@
     grouping.update((g) => g.withoutColumns([columnId]));
   }
 </script>
+
+<ButtonMenuItem icon={iconAddFilter} on:click={addFilter}>
+  {#if filterCount > 0}
+    Add Filter
+  {:else}
+    Filter Column
+  {/if}
+</ButtonMenuItem>
+{#if filterCount > 0}
+  <ButtonMenuItem icon={iconRemoveFilter} on:click={clearFilters}>
+    Remove {labeledCount(filterCount, 'filters', {
+      casing: 'title',
+      countWhenSingular: 'hidden',
+    })}
+  </ButtonMenuItem>
+{/if}
 
 {#if currentSorting === 'ASCENDING'}
   <ButtonMenuItem icon={iconSortAscending} on:click={removeSorting}>

@@ -18,7 +18,11 @@ export function makeTitleCase(text: string): string {
   return text.split(' ').map(makeSentenceCase).join(' ');
 }
 
-type Countable = number | Array<unknown> | { size: number } | Iterable<unknown>;
+export type Countable =
+  | number
+  | Array<unknown>
+  | { size: number }
+  | Iterable<unknown>;
 
 function getCount(countable: Countable): number {
   if (typeof countable === 'number') {
@@ -87,8 +91,10 @@ const wordMap = {
   cells: makePluralFormsFromEnglish('cell', 'cells'),
   columns: makePluralFormsFromEnglish('column', 'columns'),
   explorations: makePluralFormsFromEnglish('exploration', 'explorations'),
+  filters: makePluralFormsFromEnglish('filter', 'filters'),
   matches: makePluralFormsFromEnglish('match', 'matches'),
   records: makePluralFormsFromEnglish('record', 'records'),
+  rows: makePluralFormsFromEnglish('row', 'rows'),
   results: makePluralFormsFromEnglish('result', 'results'),
   schemas: makePluralFormsFromEnglish('schema', 'schemas'),
   tables: makePluralFormsFromEnglish('table', 'tables'),

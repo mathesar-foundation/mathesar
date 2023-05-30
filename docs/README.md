@@ -42,5 +42,20 @@ See our [Contribution guidelines](../CONTRIBUTING.md) for more information about
 
 - We use the [`macros`](https://mkdocs-macros-plugin.readthedocs.io/en/latest/) plugin to show the same content in different places, and we generally put such content in the `snippets` directory.
 
+- We use the [`placeholder`](https://mkdocs-placeholder-plugin.six-two.dev/usage/) plugin to allow the user to customize small tokens which get repeated throughout a page. Here's how it works:
+
+    1. Add a token like `PLACEHOLDER_NAME` in `placeholder-plugin.yaml` with a default value.
+    1. Put an input on the page to allow the reader to customize the value of the token.
+
+        ```html
+        <input data-input-for="PLACEHOLDER_NAME">
+        ```
+
+    1. Then put the customized value anywhere in the page
+
+        ```text
+        xPLACEHOLDER_NAMEx
+        ```
+
 - For docs content, we adhere to [CiviCRM's Documentation Style Guide](https://docs.civicrm.org/dev/en/latest/documentation/style-guide/).
 
