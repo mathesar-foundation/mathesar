@@ -729,6 +729,7 @@ The input JSON should be of the form
     "id": <integer>
     "schema": <str>,
     "name": <str>,
+    "modifier": <integer>,
     "options": {
       "length": <integer>,
       "precision": <integer>,
@@ -739,35 +740,38 @@ The input JSON should be of the form
   }
 */
 SELECT COALESCE(
-  typ.id::regtype::text,
-  msar.get_fully_qualified_object_name(typ.schema, typ.name)::regtype::text,
-  typ.name::regtype::text
-)::regtype::text || COALESCE(
-  '(' || topts.length || ')',
-  ' ' || topts.fields || ' (' || topts.precision || ')',
-  ' ' || topts.fields,
-  '(' || topts.precision || ', ' || topts.scale || ')',
-  '(' || topts.precision || ')',
-  ''
-) || COALESCE (
-  REPEAT('[]', topts.dimensions),
-  ''
+  format_type(typ.id, typ.modifier),
+  COALESCE(
+    msar.get_fully_qualified_object_name(typ.schema, typ.name)::regtype::text,
+    typ.name::regtype::text
+  )::regtype::text || COALESCE(
+    '(' || topts.length || ')',
+    ' ' || topts.fields || ' (' || topts.precision || ')',
+    ' ' || topts.fields,
+    '(' || topts.precision || ', ' || topts.scale || ')',
+    '(' || topts.precision || ')',
+    ''
+  ) || COALESCE (
+    REPEAT('[]', topts.dimensions),
+    ''
+  )
 )
 FROM
-  jsonb_to_record(typ_jsonb) AS typ(id oid, schema text, name text, options jsonb),
+  jsonb_to_record(typ_jsonb) AS typ(id oid, schema text, name text, modifier integer, options jsonb),
   jsonb_to_record(typ_jsonb -> 'options')
     AS topts(length integer, precision integer, scale integer, fields text, dimensions integer);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.process_col_create_arr(tab_id oid, col_create_arr jsonb) RETURNS __msar.col_create_def[] AS $$/*
-Create a __msar.col_create_def from a column creation defining JSON blob.
+msar.process_col_create_arr(tab_id oid, col_create_arr jsonb, raw_default boolean)
+  RETURNS __msar.col_create_def[] AS $$/*
+Create a __msar.col_create_def from a JSON array of column creation defining JSON blobs.
 
 Args:
   tab_id: The OID of the table where we'll create the columns
-  col_create_arr: A jsonb array defining a column creation (must have "name" and "type" keys;
-                    "not_null" and "default" keys optional).
+  col_create_arr: A jsonb array defining a column creation (must have "type" key; "name",
+                  "not_null", and "default" keys optional).
 */
 WITH attnum_cte AS (
   SELECT MAX(attnum) AS m_attnum FROM pg_attribute WHERE attrelid=tab_id
@@ -778,12 +782,42 @@ WITH attnum_cte AS (
       quote_ident('Column ' || (attnum_cte.m_attnum + ROW_NUMBER() OVER ()))
     ),
     msar.build_type_text(col_create_obj -> 'type'),
-    col_create_obj ->> 'not_null',
-    col_create_obj ->> 'default'
+    col_create_obj -> 'not_null',
+    CASE
+      WHEN raw_default THEN
+        col_create_obj ->> 'default'
+      ELSE
+        format('%L', col_create_obj ->> 'default')
+      END
   )::__msar.col_create_def AS col_create_defs
   FROM attnum_cte, jsonb_array_elements(col_create_arr) as col_create_obj
 )
 SELECT array_agg(col_create_defs) FROM col_create_cte;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.process_col_dup_arr(tab_id oid, col_dup_arr jsonb, copy_con boolean, copy_default boolean)
+  RETURNS jsonb AS $$/*
+Create a column creation JSON array from a JSON array of column duplication defining JSON blobs.
+
+Args:
+  col_create_arr: A jsonb array defining a column duplication (must have "col_id" key.
+                  "name", "data", and "constraints" keys optional).
+*/
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'name', col_dup_obj -> 'name',
+    'type', jsonb_build_object('id', atttypid, 'modifier', atttypmod),
+    'not_null', CASE WHEN copy_con THEN attnotnull END,
+    'default', CASE WHEN copy_con THEN pg_get_expr(adbin, tab_id) END
+  )
+)
+FROM
+  (SELECT * FROM pg_attribute WHERE attrelid=tab_id) pg_attr
+  LEFT JOIN pg_attrdef ON (attrelid=adrelid AND attnum=adnum)
+  INNER JOIN jsonb_array_elements(col_dup_arr) col_dup_obj
+    ON attnum=(col_dup_obj -> 'col_id')::smallint;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -801,9 +835,9 @@ WITH ca_cte AS (
         WHEN col.not_null AND col.default_ IS NULL THEN
           format('ADD COLUMN %s %s NOT NULL', col.name_, col.type_)
         WHEN col.not_null AND col.default_ IS NOT NULL THEN
-          format('ADD COLUMN %s %s NOT NULL DEFAULT ''%s''', col.name_, col.type_, col.default_)
+          format('ADD COLUMN %s %s NOT NULL DEFAULT %s', col.name_, col.type_, col.default_)
         WHEN col.default_ IS NOT NULL THEN
-          format('ADD COLUMN %s %s DEFAULT ''%s''', col.name_, col.type_, col.default_)
+          format('ADD COLUMN %s %s DEFAULT %s', col.name_, col.type_, col.default_)
         ELSE
           format('ADD COLUMN %s %s', col.name_, col.type_)
       END,
@@ -816,17 +850,15 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_columns(tab_id oid, col_defs jsonb) RETURNS jsonb AS $$/*
+msar.add_columns(tab_id oid, col_defs jsonb, raw_default boolean DEFAULT false)
+  RETURNS jsonb AS $$/*
 TODO
 */
 DECLARE
-  sql_query text;
   col_create_defs __msar.col_create_def[];
-  col_names text[];
 BEGIN
-  col_create_defs := msar.process_col_create_arr(tab_id, col_defs);
-  col_names := array_agg(cd.name_) FROM unnest(col_create_defs) AS cd;
-  sql_query := __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
+  col_create_defs := msar.process_col_create_arr(tab_id, col_defs, raw_default);
+  PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
   RETURN jsonb_agg(
     jsonb_build_object(
       'tab_id', attrelid,
@@ -844,11 +876,25 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_columns(sch_name text, tab_name text, col_defs jsonb) RETURNS jsonb AS $$/*
+msar.add_columns(sch_name text, tab_name text, col_defs jsonb, raw_default boolean)
+  RETURNS jsonb AS $$/*
 TODO
 */
 SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.duplicate_columns(tab_id oid, col_dup_arr jsonb, copy_con boolean, copy_default boolean)
+  RETURNS jsonb AS $$/*
+TODO
+*/
+WITH col_create_cte AS (
+  SELECT msar.process_col_dup_arr(tab_id, col_dup_arr, copy_con, copy_default) col_defs
+)
+SELECT msar.add_columns(tab_id, col_create_cte.col_defs, true) FROM col_create_cte;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
