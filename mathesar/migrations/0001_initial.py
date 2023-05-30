@@ -166,6 +166,7 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('file', models.FileField(upload_to=mathesar.utils.models.user_directory_path)),
                 ('created_from', models.CharField(choices=[('FILE', 'File'), ('PASTE', 'Paste'), ('URL', 'Url')], max_length=128)),
+                ('type', models.CharField(choices=[('CSV', 'csv'), ('TSV', 'tsv'), ('JSON', 'json')], max_length=128)),
                 ('base_name', models.CharField(max_length=100)),
                 ('header', models.BooleanField(default=True)),
                 ('delimiter', models.CharField(blank=True, default=',', max_length=1)),
