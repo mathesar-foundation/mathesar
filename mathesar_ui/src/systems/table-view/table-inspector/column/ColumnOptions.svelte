@@ -58,30 +58,29 @@
 
   async function toggleAllowDuplicates() {
     isRequestingToggleAllowDuplicates = true;
-    const newAllowsDuplicates = !allowsDuplicates;
-    return constraintsDataStore
-      .setUniquenessOfColumn(column.column, !newAllowsDuplicates)
-      .then(async () => {
-        await columnsDataStore.patch(column.id, {
-          default: null,
-        });
-        const message = `Column "${column.column.name}" will ${
-          newAllowsDuplicates ? '' : 'no longer '
-        }allow duplicates.`;
-        toast.success({ message });
-        dispatch('close');
-        return null;
-      })
-      .catch((error) => {
-        const message = `Unable to update "Allow Duplicates" of column "${
-          column.column.name
-          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        }". ${error.message as string}.`;
-        toast.error({ message });
-      })
-      .finally(() => {
-        isRequestingToggleAllowDuplicates = false;
+    try {
+      const newAllowsDuplicates = !allowsDuplicates;
+      await constraintsDataStore.setUniquenessOfColumn(
+        column.column,
+        !newAllowsDuplicates,
+      );
+      await columnsDataStore.patch(column.id, {
+        default: null,
       });
+      const message = `Column "${column.column.name}" will ${
+        newAllowsDuplicates ? '' : 'no longer '
+      }allow duplicates.`;
+      toast.success({ message });
+      dispatch('close');
+    } catch (error) {
+      const message = `Unable to update "Allow Duplicates" of column "${
+        column.column.name
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+      }". ${error.message as string}.`;
+      toast.error({ message });
+    } finally {
+      isRequestingToggleAllowDuplicates = false;
+    }
   }
 </script>
 
