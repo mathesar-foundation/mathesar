@@ -147,6 +147,10 @@
     source ./mathesar-venv/bin/activate
     ```
 
+    !!! warning "Important"
+        You need to activate the environment each time you restart the shell as they don't persist across sessions.
+
+
 ### Install the Mathesar application
 
 1. Install Python dependencies
@@ -186,7 +190,7 @@
           export $(sudo cat .env)
           ```
        
-        !!! info ""
+        !!! warning "Important"
             You need to export the environment variables each time you restart the shell as they don't persist across sessions.
 
 
