@@ -399,6 +399,9 @@ class ArrayAgg(DBFunction):
 class Sum(DBFunction):
     id = 'sum'
     name = 'sum'
+    hints = tuple([
+        hints.aggregation,
+    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
