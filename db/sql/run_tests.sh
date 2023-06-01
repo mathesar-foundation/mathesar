@@ -1,4 +1,7 @@
 #!/bin/bash
+for i in {1..50}; do
+  pg_isready -U mathesar -d postgres && break || sleep 0.5
+done
 
 if [[ $BASH_SOURCE = */* ]]; then
     sql=${BASH_SOURCE%/*}/
