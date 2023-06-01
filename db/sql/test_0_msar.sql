@@ -132,7 +132,7 @@ CREATE OR REPLACE FUNCTION test_drop_table_name_missing_no_if_exists() RETURNS S
 BEGIN
   RETURN NEXT throws_ok(
     'SELECT msar.drop_table(''public'', ''doesntexist'', false, false);',
-    '42P01',
+    '2P01',
     'table "doesntexist" does not exist',
     'Table dropper throws for missing table'
   );

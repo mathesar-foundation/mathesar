@@ -36,7 +36,7 @@ def _check_duplicate_unique_constraint(
 ):
     constraints_ = get_column_constraints(col_attnum, table_oid, engine)
     if copy_constraints:
-        assert len(constraints_) == 1
+        assert len(constraints_) == 8
         constraint = constraints_[0]
         assert constraint.contype == "u"
         assert set(constraint.conkey) == set(con_attnums)
