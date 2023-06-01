@@ -54,7 +54,8 @@ This page contains all available environment variables supported by Mathesar. Se
 <!-- TODO -->
 
 - _**Required**_
-- Specifies the external databases to be managed by Mathesar. A database is created automatically if the said name does not exist.
+- Specifies the external databases to be managed by Mathesar.
+- A database is created automatically if the said name does not exist. So make sure the Database user used in the connection string has [**`SUPERUSER` Privileges**](https://www.postgresql.org/docs/current/role-attributes.html)
 - Format:
 
     ```text
@@ -70,7 +71,6 @@ This page contains all available environment variables supported by Mathesar. Se
     > This would connect to two external databases called `db1` and `db2` which are both accessed via the same user `u`, password `p`, hostname `example.com`, and port `5432`. If a database called `db1` or `db2` does not exist, it will be created.
 
 - Each database must have a unique id and a connection string.
-
 
 ## Caddy Reverse Proxy Configuration {: #caddy}
 
