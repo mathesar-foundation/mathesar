@@ -55,7 +55,7 @@ You can try using `host.docker.internal` instead of `localhost`. Below are detai
 1. Modify the `pg_hba.conf` file and grant access to the `mathesar_default` interface. Add the following line at the bottom of the file:
 
     ```
-    host    all             all             <your-mathesar_default-ip>           scram-sha-256
+    host    all             all             <your-mathesar_default-ip>           md5
     ```
 
 1. Restart postgres:
