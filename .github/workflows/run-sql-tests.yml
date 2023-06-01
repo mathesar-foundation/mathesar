@@ -25,8 +25,8 @@ jobs:
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
 
-      - name: Build the stack
-        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d test-service
+      - name: Build the test DB
+        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d dev-db
 
       - name: Run tests with pg_prove
         run: docker exec mathesar_dev_db /bin/bash /sql/run_tests.sh
