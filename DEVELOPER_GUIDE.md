@@ -65,19 +65,25 @@ See our [API guide](./mathesar/api/README.md) for more information on API usage 
 
 We use [pytest](https://docs.pytest.org) for our backend tests.
 
-- Run all backend tests:
+- Run all python backend tests:
 
     ```
     docker exec mathesar_service_dev pytest mathesar/ db/
     ```
 
-- Run a specific test, by name:
+- Run a specific python test, by name:
 
     ```
     docker exec mathesar_service_dev pytest -k "test_name"
     ```
+    
+- See the [pytest documentation](https://docs.pytest.org/en/latest/how-to/usage.html), or run pytest with the `--help` flag to learn about more options for running tests.
 
-- See the [pytest documentation](https://docs.pytest.org/en/latest/how-to/usage.html), or run pytest with the `--help` flag to lear about more options for running tests.
+- Run all SQL tests:
+
+    ```
+    docker exec mathesar_dev_db /bin/bash sql/run_tests.sh
+    ```
 
 ## Front end development
 
