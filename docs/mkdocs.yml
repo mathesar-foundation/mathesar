@@ -7,13 +7,13 @@ nav:
   - Introduction: 
       - Welcome: index.md
   - Installation:
-      - Guided Installation: installation/guided-install/index.md
-      - Docker Compose: installation/docker-compose/index.md
-      - Docker: installation/docker/index.md
-      - Build from source: installation/build-from-source/index.md
-      - Appendix:
-          - Guided Installation Script, Under the Hood: installation/guided-install/under-the-hood.md
-          - Troubleshoot Guided Installation: installation/guided-install/troubleshooting.md
+      - Install with Docker Compose: installation/docker-compose/index.md
+      - Install from scratch: installation/build-from-source/index.md
+      - Install with guided script: installation/guided-install/index.md
+      - Appendix to guided script:
+          - Under the hood: installation/guided-install/under-the-hood.md
+          - Troubleshooting: installation/guided-install/troubleshooting.md
+      - Install UI-only Docker image: installation/docker/index.md
   - Configuration:
       - Environment Variables: configuration/env-variables.md
       - Connect to an existing Database server: configuration/connect-to-existing-db.md

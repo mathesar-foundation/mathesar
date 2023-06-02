@@ -12,8 +12,8 @@ A live demo of Mathesar is [available here](https://demo.mathesar.org/).
 You can self-host Mathesar by following one of the guides below:  
 
 - [Install with Docker Compose](installation/docker-compose/index.md)
-- [Install with our guided installation script](installation/guided-install/index.md)
 - [Install from scratch (on Linux)](installation/build-from-source/index.md)
+- [Install with our guided installation script](installation/guided-install/index.md)
 - [Install using Docker image (needs an external database server)](installation/docker/index.md)
 
 !!! info "More installation methods coming soon"
