@@ -4,9 +4,9 @@ repo_url: https://github.com/centerofci/mathesar/
 repo_name: centerofci/mathesar
 
 nav:
-  - Home: index.md
+  - Introduction: 
+      - Welcome: index.md
   - Installation:
-      - Install Mathesar: installation/index.md
       - Guided Installation: installation/guided-install/index.md
       - Docker Compose: installation/docker-compose/index.md
       - Docker: installation/docker/index.md
@@ -56,6 +56,7 @@ theme:
   favicon: assets/images/favicon.ico
   features:
       - content.code.copy
+      - navigation.sections
       - navigation.expand
   font:
     text: Nunito Sans

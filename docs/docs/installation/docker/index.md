@@ -16,6 +16,10 @@
     - Database username _(should exist and be a `SUPERUSER` [more info](https://www.postgresql.org/docs/13/sql-createrole.html))_
     - Database password
 
+## Quickstart
+
+- Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/tags): `mathesar/mathesar-prod:latest` hosted on Docker Hub to run Mathesar.
+
 ## Installation Steps
 
 1. Run the Mathesar Docker Image

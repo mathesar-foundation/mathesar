@@ -7,10 +7,15 @@ Mathesar is an self-hostable open source project that provides a spreadsheet-lik
 A live demo of Mathesar is [available here](https://demo.mathesar.org/).
 
 ## Installing Mathesar
+You can self-host Mathesar by following one of the guides below:  
 
+- [Install with Docker](installation/docker/index.md)
+- [Install with Docker Compose](installation/docker-compose/index.md)
+- [Install with our guided installation script](installation/guided-install/index.md)
+- [Install from source](installation/build-from-source/index.md)
 
-- [Install Mathesar](installation/index.md)
-- [Configure Environment Variables](configuration/env-variables.md)
+!!! info "More installation methods coming soon"
+    We're working on supporting additional installation methods, and we'd appreciate feedback on which ones to prioritize. Please comment [on this issue](https://github.com/centerofci/mathesar/issues/2509) if you have thoughts.
 
 ## Product
 Mathesar should be pretty intuitive to use. More documentation is coming soon, but for now, we've written some documentation for some things that could be tricky.

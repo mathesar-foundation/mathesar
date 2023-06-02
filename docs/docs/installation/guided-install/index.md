@@ -4,6 +4,18 @@
 
 {% include 'snippets/docker-compose-prerequisites.md' %}
 
+## Quickstart
+
+- Our install script guides you through a series of prompts to install Mathesar:
+    ```sh
+    bash <(curl -sfSL https://raw.githubusercontent.com/centerofci/mathesar/{{mathesar_version}}/install.sh)
+    ```
+- The script sets up Mathesar using Docker Compose and configures the admin user [under the hood](./guided-install/under-the-hood.md).
+- [Detailed Guided Installation Instructions].
+- !!! warning "Limitations"
+    This is a convenient way to install Mathesar. However, it requires `sudo` privileges (admin access), and sets up a limited set of configuration options. Use the Docker Compose installation option below to exert more control.
+
+
 ## Installation Steps {: #steps}
 
 !!! info "Install Script Overview"
