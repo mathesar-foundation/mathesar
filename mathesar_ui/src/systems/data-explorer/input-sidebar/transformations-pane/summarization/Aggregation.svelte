@@ -11,6 +11,18 @@
   export let aggregation: QuerySummarizationAggregationEntry;
   export let limitEditing = false;
 
+  function getAggregationsBasedOnColumnType() {
+    const availableAggregation: (
+      | 'distinct_aggregate_to_array'
+      | 'count'
+      | 'sum'
+    )[] = ['distinct_aggregate_to_array', 'count'];
+    if (processedColumn?.column.type === 'numeric') {
+      availableAggregation.push('sum');
+    }
+    return availableAggregation;
+  }
+
   function getAggregationTypeLabel(aggType?: string) {
     switch (aggType) {
       case 'distinct_aggregate_to_array':
@@ -39,7 +51,7 @@
   {/if}
   <span>as</span>
   <Select
-    options={['distinct_aggregate_to_array', 'count', 'sum']}
+    options={getAggregationsBasedOnColumnType()}
     bind:value={aggregation.function}
     disabled={limitEditing}
     getLabel={getAggregationTypeLabel}
