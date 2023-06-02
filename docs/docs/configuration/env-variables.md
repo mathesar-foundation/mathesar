@@ -55,7 +55,7 @@ This page contains all available environment variables supported by Mathesar. Se
 
 - _**Required**_
 - Specifies the external databases to be managed by Mathesar.
-- A database is created automatically if the said name does not exist. So make sure the Database user used in the connection string has [**`SUPERUSER` Privileges**](https://www.postgresql.org/docs/current/role-attributes.html)
+- Mathesar will attempt to create databases for any that do not already exist. For this creation to succeed, you will need to ensure that the specified database user has [**`SUPERUSER` Privileges**](https://www.postgresql.org/docs/current/role-attributes.html).
 - Format:
 
     ```text

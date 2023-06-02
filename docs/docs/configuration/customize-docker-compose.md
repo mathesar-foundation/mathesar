@@ -25,27 +25,28 @@ The default `docker-compose.yml` automatically starts a [Postgres database serve
 
 In the `docker-compose.yml` file, comment out the `db` services and the `depends_on` field of the `service`.
 
-```yaml hl_lines="2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 28 29 30"
+```yaml hl_lines="2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 29 30 31"
 services:
-  db:
-    image: postgres:13
-    container_name: mathesar_db
-    environment:
-    # These environment variables are used to create a database and superuser when the `db` service starts.
-    # Refer to https://hub.docker.com/_/postgres for more information on these variables.
-      - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
-      - POSTGRES_USER=${POSTGRES_USER-mathesar}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
-    expose:
-      - "5432"
-    volumes:
-      - postgresql_data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
-      interval: 5s
-      timeout: 1s
-      retries: 30
-      start_period: 5s
+  # db:
+  #   image: postgres:13
+  #   container_name: mathesar_db
+  #   environment:
+  #   # These environment variables are used to create a database and superuser when the `db` service starts.
+  #   # Refer to https://hub.docker.com/_/postgres for more information on these variables.
+  #     - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
+  #     - POSTGRES_USER=${POSTGRES_USER-mathesar}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
+  #   expose:
+  #     - "5432"
+  #   volumes:
+  #     - postgresql_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
+  #     interval: 5s
+  #     timeout: 1s
+  #     retries: 30
+  #     start_period: 5s
+
   # ...
   service:
     # ...
@@ -54,8 +55,8 @@ services:
       - media:/code/media
     # Comment the below field to disable starting the database service automatically
     # depends_on:
-      # db:
-      #  condition: service_healthy
+    #   db:
+    #    condition: service_healthy
 ```
 
 After this change, Mathesar will no longer start the `db` service automatically.

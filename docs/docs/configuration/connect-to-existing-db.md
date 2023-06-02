@@ -33,20 +33,20 @@ You can try using `host.docker.internal` instead of `localhost`. Below are detai
     ```
     SHOW hba_file;
     ```
-2. Create the necessary network bridges using docker-compose
+1. Create the necessary network bridges using docker-compose
 
     ```
     docker compose -f docker-compose.yml up service -d --no-start
     ```
 
-3. Find the appropriate IP addresses of the `docker0` interface and the `mathesar_default` interface. This can be found by exectuting the following in the host's terminal.
+1. Find the appropriate IP addresses of the `docker0` interface and the `mathesar_default` interface. This can be found by exectuting the following in the host's terminal.
     {% raw %}
     ```
     docker network inspect -f "docker0 IP: {{range .IPAM.Config}}{{.Gateway}}{{end}}" bridge && docker network inspect -f "mathesar_default IP: {{range .IPAM.Config}}{{.Subnet}}{{end}}" mathesar_default
     ```
     {% endraw %}
 
-3. Stop Mathesar if already running.
+1. Stop Mathesar if already running.
 
 
 ### Steps
