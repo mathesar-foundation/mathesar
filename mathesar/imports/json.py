@@ -17,7 +17,7 @@ from mathesar.state import reset_reflection
 def get_column_names_from_json(data_file):
     with open(data_file, 'r') as f:
         data = json.load(f)
-    
+
     if isinstance(data, list):
         return list(data[0].keys())
     return list(data.keys())
