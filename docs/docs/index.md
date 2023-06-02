@@ -1,12 +1,14 @@
 # Mathesar Documentation
 
-![Mathesar header](assets/images/header.png)
 
-Mathesar is a straightforward open source tool that provides a **spreadsheet-like interface** to a PostgreSQL **database**. Our web-based interface helps you and your collaborators work with data more independently and comfortably – **no technical skills needed**.
+## Welcome!
+Mathesar is an self-hostable open source project that provides a spreadsheet-like interface to a PostgreSQL database. Our web-based interface helps you and your collaborators work with data – no technical skills needed. You can use Mathesar to edit data, set up and change your data structure, and to build custom reports.
 
-You can use Mathesar to build **data models**, **enter data**, and even **build reports**.
+You can either set up a new PostgreSQL database while setting up Mathesar or use Mathesar to interact with an existing database (or do both).
 
-## Get started
+This documentation site is aimed at Mathesar administrators and end users.
+
+## Getting started
 
 - [Install Mathesar](installation/index.md)
 - [Configure Environment Variables](configuration/env-variables.md)
