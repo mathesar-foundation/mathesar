@@ -11,10 +11,10 @@ A live demo of Mathesar is [available here](https://demo.mathesar.org/).
 ## Installing Mathesar
 You can self-host Mathesar by following one of the guides below:  
 
-- [Install with Docker](installation/docker/index.md)
 - [Install with Docker Compose](installation/docker-compose/index.md)
 - [Install with our guided installation script](installation/guided-install/index.md)
-- [Install from source](installation/build-from-source/index.md)
+- [Install from scratch](installation/build-from-source/index.md)
+- [Install using Docker image (needs an external database server)](installation/docker/index.md)
 
 !!! info "More installation methods coming soon"
     We're working on supporting additional installation methods, and we'd appreciate feedback on which ones to prioritize. Please comment [on this issue](https://github.com/centerofci/mathesar/issues/2509) if you have thoughts.
