@@ -1,16 +1,11 @@
 DROP EXTENSION IF EXISTS pgtap CASCADE;
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
+-- msar.drop_columns -------------------------------------------------------------------------------
+
 CREATE OR REPLACE FUNCTION setup_drop_columns() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE atable (dodrop1 integer, dodrop2 integer, dontdrop text);
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION setup_drop_tables() RETURNS SETOF TEXT AS $$
-BEGIN
-  CREATE TABLE dropme (id SERIAL PRIMARY KEY, col1 integer);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -49,6 +44,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+-- msar.drop_table ---------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION setup_drop_tables() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE dropme (id SERIAL PRIMARY KEY, col1 integer);
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_drop_table_oid() RETURNS SETOF TEXT AS $$
 DECLARE
