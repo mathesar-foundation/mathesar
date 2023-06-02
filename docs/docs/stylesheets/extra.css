@@ -37,11 +37,6 @@
   --md-default-bg-color: #343941;
 }
 
-/* Maximum space for text block */
-.md-grid {
-  max-width: 80%;
-}
-
 .md-typeset a {
 	text-decoration: underline;
 }
