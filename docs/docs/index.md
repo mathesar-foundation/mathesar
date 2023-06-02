@@ -17,14 +17,13 @@ You can self-host Mathesar by following one of the guides below:
 !!! info "More installation methods coming soon"
     We're working on supporting additional installation methods, and we'd appreciate feedback on which ones to prioritize. Please comment [on this issue](https://github.com/centerofci/mathesar/issues/2509) if you have thoughts.
 
-## Product
+## Using Mathesar
 Mathesar should be pretty intuitive to use. More documentation is coming soon, but for now, we've written some documentation for some things that could be tricky.
 
 - [Syncing Database Changes](./user-guide/syncing-db.md)
 - [Users & Access Levels](./user-guide/users.md)
 
 ## Contributing
-
 As an open source project, we actively encourage contribution! Get started by reading our [Contributor Guide](https://github.com/centerofci/mathesar/blob/develop/CONTRIBUTING.md).
 
 ## Donate
