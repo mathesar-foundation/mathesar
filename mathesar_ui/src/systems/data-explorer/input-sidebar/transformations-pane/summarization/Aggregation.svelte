@@ -17,6 +17,8 @@
         return 'List';
       case 'count':
         return 'Count';
+      case 'max':
+        return 'Max';
       default:
         return '';
     }
@@ -37,7 +39,7 @@
   {/if}
   <span>as</span>
   <Select
-    options={['distinct_aggregate_to_array', 'count']}
+    options={['distinct_aggregate_to_array', 'count', 'max']}
     bind:value={aggregation.function}
     disabled={limitEditing}
     getLabel={getAggregationTypeLabel}
