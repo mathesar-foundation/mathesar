@@ -6,7 +6,11 @@ Mathesar filters not supporting composition.
 
 from abc import abstractmethod
 
+from sqlalchemy import distinct
+from sqlalchemy.dialects.postgresql import array_agg
+
 from db.functions import hints, base
+from db.functions.base import ArrayAgg
 from db.types.custom.uri import URIFunction
 from db.types.custom.email import EMAIL_DOMAIN_NAME
 
@@ -30,7 +34,7 @@ class DBFunctionPacked(base.DBFunction):
         pass
 
 
-class DistinctArrayAgg(DBFunctionPacked):
+class DistinctArrayAgg(DBFunctionPacked, ArrayAgg):
     """
     These two functions together are meant to be a user-friendly alternative to plain array_agg.
 
@@ -42,11 +46,14 @@ class DistinctArrayAgg(DBFunctionPacked):
         hints.aggregation,
     ])
 
+    @staticmethod
+    def to_sa_expression(column_expr):
+        column_expr = base._maybe_downcast(column_expr)
+        return array_agg(distinct(column_expr))
+
     def unpack(self):
         param0 = self.parameters[0]
-        return base.ArrayAgg([
-            base.Distinct([param0]),
-        ])
+        return self.to_sa_expression(param0)
 
 
 class NotNull(DBFunctionPacked):
