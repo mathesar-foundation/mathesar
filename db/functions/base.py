@@ -392,9 +392,7 @@ class Max(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
-        return sa_call_sql_function('sum', column_expr, return_type=PostgresType.NUMERIC)
         return max(column_expr)
-
 
 
 class ArrayAgg(DBFunction):
