@@ -4,7 +4,7 @@ import { ImmutableMap } from '@mathesar-component-library';
 export interface QuerySummarizationAggregationEntry {
   inputAlias: string;
   outputAlias: string;
-  function: 'distinct_aggregate_to_array' | 'count';
+  function: 'distinct_aggregate_to_array' | 'count' | 'min';
 }
 
 export interface QuerySummarizationGroupingEntry {
