@@ -1,4 +1,4 @@
-# Introduction
+# Using Mathesar
 
 Welcome! At this point, we assume you've installed Mathesar successfully and have logged into the web UI.
 

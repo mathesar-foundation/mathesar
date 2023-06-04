@@ -25,7 +25,7 @@
   <AppendBreadcrumb item={{ type: 'database', database }} />
 
   <Route path="/">
-    <DatabasePage />
+    <DatabasePage {database} />
   </Route>
 
   <Route path="/:schemaId/*" let:meta firstmatch>
