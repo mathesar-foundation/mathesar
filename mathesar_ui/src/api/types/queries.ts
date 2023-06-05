@@ -143,11 +143,11 @@ export type QueryColumnSource =
 
 export interface QueryInitialColumnMetaData
   extends QueryResultColumn,
-    QueryInitialColumnSource {}
+  QueryInitialColumnSource { }
 
 export interface QueryVirtualColumnMetaData
   extends QueryResultColumn,
-    QueryGeneratedColumnSource {}
+  QueryGeneratedColumnSource { }
 
 export type QueryColumnMetaData =
   | QueryInitialColumnMetaData

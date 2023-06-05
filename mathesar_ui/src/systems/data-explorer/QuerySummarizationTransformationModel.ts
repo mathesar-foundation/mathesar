@@ -24,8 +24,7 @@ export interface QuerySummarizationTransformationEntry {
 }
 
 export default class QuerySummarizationTransformationModel
-  implements QuerySummarizationTransformationEntry
-{
+  implements QuerySummarizationTransformationEntry {
   type = 'summarize' as const;
 
   name = 'Summarization' as const;
