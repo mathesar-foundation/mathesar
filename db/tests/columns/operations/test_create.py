@@ -1,8 +1,7 @@
 import pytest
-from psycopg.errors import SyntaxError
 from sqlalchemy import INTEGER, Column, Table, MetaData, NUMERIC, UniqueConstraint
 
-from db.columns.operations.create import create_column, duplicate_column
+from db.columns.operations.create import create_column, duplicate_column, gen_col_name
 from db.columns.operations.select import get_column_attnum_from_name, get_column_default
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.constraints.operations.select import get_column_constraints
@@ -83,9 +82,9 @@ def test_create_column(engine_with_schema, target_type):
         created_col = create_column(engine, table_oid, column_data)
         altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
         assert len(altered_table.columns) == 2
-        assert created_col['col_name'] == new_column_name
-        reflected_type = created_col['col_type']
-        assert reflected_type == target_type.id
+        assert created_col.name == new_column_name
+        reflected_type = get_db_type_enum_from_class(created_col.type.__class__)
+        assert reflected_type == target_type
 
 
 @pytest.mark.parametrize("target_type", [PostgresType.NUMERIC])
@@ -109,8 +108,9 @@ def test_create_column_options(engine_with_schema, target_type):
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 2
-    assert created_col['col_name'] == new_column_name
-    assert created_col['col_full_type'] == 'numeric(5,3)'
+    assert created_col.name == new_column_name
+    assert created_col.db_type == PostgresType.NUMERIC
+    assert created_col.type_options == {"precision": 5, "scale": 3}
 
 
 @pytest.mark.parametrize("target_type", [PostgresType.CHARACTER, PostgresType.CHARACTER_VARYING])
@@ -134,19 +134,16 @@ def test_create_column_length_options(engine_with_schema, target_type):
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 2
-    assert created_col['col_name'] == new_column_name
-    assert created_col['col_full_type'] == target_type.id + '(5)'
+    assert created_col.name == new_column_name
+    assert created_col.db_type == target_type
+    assert created_col.type_options == {"length": 5}
 
 
 @pytest.mark.parametrize(
-    "type_options,output",
-    [
-        ({"fields": "year"}, ' year'),
-        ({"precision": 3}, '(3)'),
-        ({"precision": 3, "fields": "second"}, ' second(3)'),
-    ]
+    "type_options",
+    [{"fields": "year"}, {"precision": 3}, {"precision": 3, "fields": "second"}]
 )
-def test_create_column_interval_options(engine_with_schema, type_options, output):
+def test_create_column_interval_options(engine_with_schema, type_options):
     engine, schema = engine_with_schema
     table_name = "atableone"
     initial_column_name = "original_column"
@@ -166,8 +163,9 @@ def test_create_column_interval_options(engine_with_schema, type_options, output
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 2
-    assert created_col['col_name'] == new_column_name
-    assert created_col['col_full_type'] == PostgresType.INTERVAL.id + output
+    assert created_col.name == new_column_name
+    assert created_col.db_type == PostgresType.INTERVAL
+    assert created_col.type_options == type_options
 
 
 def test_create_column_bad_options(engine_with_schema):
@@ -188,7 +186,7 @@ def test_create_column_bad_options(engine_with_schema):
         "type": target_type.id,
         "type_options": {"precision": 5, "scale": 3},
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(TypeError):
         create_column(engine, table_oid, column_data)
 
 
@@ -341,8 +339,8 @@ def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraint
 def test_create_column_accepts_column_data_without_name_attribute(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atableone"
-    initial_column_name = f"{COLUMN_NAME_TEMPLATE}1"
-    expected_column_name = f"{COLUMN_NAME_TEMPLATE}2"
+    initial_column_name = f"{COLUMN_NAME_TEMPLATE}0"
+    expected_column_name = f"{COLUMN_NAME_TEMPLATE}1"
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -354,14 +352,14 @@ def test_create_column_accepts_column_data_without_name_attribute(engine_with_sc
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 2
-    assert created_col['col_name'] == expected_column_name
+    assert created_col.name == expected_column_name
 
 
 def test_create_column_accepts_column_data_with_name_as_empty_string(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atableone"
-    initial_column_name = f"{COLUMN_NAME_TEMPLATE}1"
-    expected_column_name = f"{COLUMN_NAME_TEMPLATE}2"
+    initial_column_name = f"{COLUMN_NAME_TEMPLATE}0"
+    expected_column_name = f"{COLUMN_NAME_TEMPLATE}1"
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -373,4 +371,38 @@ def test_create_column_accepts_column_data_with_name_as_empty_string(engine_with
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     assert len(altered_table.columns) == 2
-    assert created_col['col_name'] == expected_column_name
+    assert created_col.name == expected_column_name
+
+
+def test_generate_column_name(engine_with_schema):
+    engine, schema = engine_with_schema
+    name_set = {
+        'Center',
+        'Status',
+        'Case Number',
+        'Patent Number',
+        'Application SN',
+        'Title',
+        'Patent Expiration Date',
+        ''
+    }
+    table_name = "atableone"
+    initial_column_name = "id"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(initial_column_name, INTEGER),
+    )
+    table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    for name in name_set:
+        column_data = {"name": name, "type": "BOOLEAN"}
+        create_column(engine, table_oid, column_data)
+    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
+    n = len(name_set) + 1
+    # Expected column name should be 'Column n'
+    # where n is length of number of columns already in the table
+    expected_column_name = f"{COLUMN_NAME_TEMPLATE}{n}"
+    generated_column_name = gen_col_name(altered_table)
+    assert len(altered_table.columns) == n
+    assert generated_column_name == expected_column_name

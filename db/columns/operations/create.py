@@ -1,10 +1,9 @@
-import json
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy.ext import compiler
 from sqlalchemy.exc import DataError
 from sqlalchemy.schema import DDLElement
-from psycopg.errors import InvalidTextRepresentation, InvalidParameterValue
+from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT, NAME, NULLABLE, TYPE
@@ -14,7 +13,6 @@ from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
 )
 from db.columns.utils import to_mathesar_column_with_engine
-from db.connection import execute_msar_func_with_engine
 from db.constraints.operations.create import copy_constraint
 from db.constraints.operations.select import get_column_constraints
 from db.constraints import utils as constraint_utils
@@ -26,33 +24,60 @@ from db.metadata import get_empty_metadata
 
 
 def create_column(engine, table_oid, column_data):
-    column_name = (column_data.get(NAME) or '').strip() or None
-    column_type_id = column_data.get(
-        TYPE, column_data.get("type", PostgresType.CHARACTER_VARYING.id)
-    )
+    # TODO reuse metadata
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
+    column_name = column_data.get(NAME, '').strip()
+    if column_name == '':
+        column_data[NAME] = gen_col_name(table)
+    column_type_id = column_data.get(TYPE, column_data.get("type"))
     column_type_options = column_data.get("type_options", {})
     column_nullable = column_data.get(NULLABLE, True)
     default_value = column_data.get(DEFAULT, {}).get('value')
-    col_create_def = [
-        {
-            "name": column_name,
-            "type": {"name": column_type_id, "options": column_type_options},
-            "not_null": not column_nullable,
-            "default": default_value,
-        }
-    ]
-    try:
-        curr = execute_msar_func_with_engine(
-            engine, 'add_columns',
-            table_oid,
-            json.dumps(col_create_def)
-        )
-    except InvalidTextRepresentation:
-        raise InvalidDefaultError
-    except InvalidParameterValue:
-        raise InvalidTypeOptionError
-    return curr.fetchone()[0][0]
+    prepared_default_value = str(default_value) if default_value is not None else None
+    column_type = get_db_type_enum_from_id(column_type_id)
+    column_type_class = None
+    if column_type is not None:
+        column_type_class = column_type.get_sa_class(engine)
+    if column_type_class is None:
+        # Requested type unknown or not supported. Falling back to CHARACTER_VARYING
+        column_type_class = PostgresType.CHARACTER_VARYING.get_sa_class(engine)
+        column_type_options = {}
+    # TODO reuse metadata
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
 
+    try:
+        column = MathesarColumn(
+            column_data[NAME], column_type_class(**column_type_options), nullable=column_nullable,
+            server_default=prepared_default_value,
+        )
+    except DataError as e:
+        if type(e.orig) == InvalidTextRepresentation:
+            raise InvalidTypeError
+        else:
+            raise e
+
+    # TODO reuse metadata
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
+    try:
+        with engine.begin() as conn:
+            ctx = MigrationContext.configure(conn)
+            op = Operations(ctx)
+            op.add_column(table.name, column, schema=table.schema)
+    except DataError as e:
+        if type(e.orig) == InvalidTextRepresentation:
+            raise InvalidDefaultError
+        elif type(e.orig) == InvalidParameterValue:
+            raise InvalidTypeOptionError
+        else:
+            raise e
+
+    # TODO reuse metadata
+    reflected_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
+    reflected_column = reflected_table.columns[column_data[NAME]]
+    return MathesarColumn.from_column(
+        reflected_column,
+        engine=engine
+    )
 
 
 def bulk_create_mathesar_column(engine, table_oid, columns, schema):
@@ -63,6 +88,13 @@ def bulk_create_mathesar_column(engine, table_oid, columns, schema):
         op = Operations(ctx)
         for column in columns:
             op.add_column(table.name, column, schema=schema)
+
+
+def gen_col_name(table):
+    base_name = constants.COLUMN_NAME_TEMPLATE
+    col_num = len(table.c)
+    name = f'{base_name}{col_num}'
+    return name
 
 
 def _gen_col_name(table, column_name):

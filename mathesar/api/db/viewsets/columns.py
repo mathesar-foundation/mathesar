@@ -1,6 +1,5 @@
 import warnings
-from psycopg.errors import DuplicateColumn
-from psycopg2.errors import NotNullViolation, StringDataRightTruncation
+from psycopg2.errors import DuplicateColumn, NotNullViolation, StringDataRightTruncation
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -59,14 +58,17 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             try:
                 # TODO Refactor add_column to user serializer validated date instead of request data
                 column = table.add_column(request.data)
-            except DuplicateColumn as e:
-                name = request.data['name']
-                raise database_api_exceptions.DuplicateTableAPIException(
-                    e,
-                    message=f'Column {name} already exists',
-                    field='name',
-                    status_code=status.HTTP_400_BAD_REQUEST
-                )
+            except ProgrammingError as e:
+                if type(e.orig) == DuplicateColumn:
+                    name = request.data['name']
+                    raise database_api_exceptions.DuplicateTableAPIException(
+                        e,
+                        message=f'Column {name} already exists',
+                        field='name',
+                        status_code=status.HTTP_400_BAD_REQUEST
+                    )
+                else:
+                    raise database_base_api_exceptions.ProgrammingAPIException(e)
             except TypeError as e:
                 raise base_api_exceptions.TypeErrorAPIException(
                     e,
@@ -92,7 +94,12 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-        column_attnum = column['col_id']
+        column_attnum = get_column_attnum_from_name(
+            table.oid,
+            column.name,
+            table.schema._sa_engine,
+            metadata=get_cached_metadata(),
+        )
         # The created column's Django model was automatically reflected. It can be reflected.
         dj_column = Column.objects.get(
             table=table,

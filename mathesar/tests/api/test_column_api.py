@@ -333,7 +333,7 @@ def test_column_create_some_parameters(column_test_table, client):
 
 def test_column_create_no_name_parameter(column_test_table, client):
     db_type = PostgresType.BOOLEAN
-    num_columns = len(column_test_table.sa_columns) + 1
+    num_columns = len(column_test_table.sa_columns)
     generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns}"
     data = {
         "type": db_type.id
@@ -345,7 +345,7 @@ def test_column_create_no_name_parameter(column_test_table, client):
     new_columns_response = client.get(
         f"/api/db/v0/tables/{column_test_table.id}/columns/"
     )
-    assert new_columns_response.json()["count"] == num_columns
+    assert new_columns_response.json()["count"] == num_columns + 1
     actual_new_col = new_columns_response.json()["results"][-1]
     assert actual_new_col["name"] == generated_name
     assert actual_new_col["type"] == db_type.id
@@ -354,7 +354,7 @@ def test_column_create_no_name_parameter(column_test_table, client):
 def test_column_create_name_parameter_empty(column_test_table, client):
     name = ""
     db_type = PostgresType.BOOLEAN
-    num_columns = len(column_test_table.sa_columns) + 1
+    num_columns = len(column_test_table.sa_columns)
     generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns}"
     data = {
         "name": name, "type": db_type.id
@@ -366,7 +366,7 @@ def test_column_create_name_parameter_empty(column_test_table, client):
     new_columns_response = client.get(
         f"/api/db/v0/tables/{column_test_table.id}/columns/"
     )
-    assert new_columns_response.json()["count"] == num_columns
+    assert new_columns_response.json()["count"] == num_columns + 1
     actual_new_col = new_columns_response.json()["results"][-1]
     assert actual_new_col["name"] == generated_name
     assert actual_new_col["type"] == db_type.id
