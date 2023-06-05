@@ -704,21 +704,6 @@ CREATE TYPE __msar.col_create_def AS (
 
 -- Add columns to table ----------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION
-msar.generate_column_name(tab_id oid, base_name text) returns text AS $$/*
-TODO
-*/
-SELECT base_name || (MAX(attnum) + 1) FROM pg_attribute WHERE attrelid=tab_id;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION
-msar.generate_column_name(tab_id oid, modifier integer) returns text AS $$/*
-TODO
-*/
-SELECT msar.generate_column_name(tab_id, 'Column ');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
 
 CREATE OR REPLACE FUNCTION
 msar.build_type_text(typ_jsonb jsonb) RETURNS text AS $$/*
@@ -782,7 +767,7 @@ WITH attnum_cte AS (
       quote_ident('Column ' || (attnum_cte.m_attnum + ROW_NUMBER() OVER ()))
     ),
     msar.build_type_text(col_create_obj -> 'type'),
-    col_create_obj -> 'not_null',
+    col_create_obj ->> 'not_null',
     CASE
       WHEN raw_default THEN
         col_create_obj ->> 'default'
@@ -797,7 +782,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.process_col_dup_arr(tab_id oid, col_dup_arr jsonb, copy_con boolean, copy_default boolean)
+msar.process_col_dup_arr(tab_id oid, col_dup_arr jsonb, copy_data boolean, copy_constraints boolean)
   RETURNS jsonb AS $$/*
 Create a column creation JSON array from a JSON array of column duplication defining JSON blobs.
 
@@ -809,8 +794,8 @@ SELECT jsonb_agg(
   jsonb_build_object(
     'name', col_dup_obj -> 'name',
     'type', jsonb_build_object('id', atttypid, 'modifier', atttypmod),
-    'not_null', CASE WHEN copy_con THEN attnotnull END,
-    'default', CASE WHEN copy_con THEN pg_get_expr(adbin, tab_id) END
+    'not_null', CASE WHEN copy_constraints THEN attnotnull END,
+    'default', CASE WHEN copy_data THEN pg_get_expr(adbin, tab_id) END
   )
 )
 FROM
@@ -885,12 +870,12 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.duplicate_columns(tab_id oid, col_dup_arr jsonb, copy_con boolean, copy_default boolean)
+msar.duplicate_columns(tab_id oid, col_dup_arr jsonb, copy_data boolean, copy_constraints boolean)
   RETURNS jsonb AS $$/*
 TODO
 */
 WITH col_create_cte AS (
-  SELECT msar.process_col_dup_arr(tab_id, col_dup_arr, copy_con, copy_default) col_defs
+  SELECT msar.process_col_dup_arr(tab_id, col_dup_arr, copy_data, copy_constraints) col_defs
 )
 SELECT msar.add_columns(tab_id, col_create_cte.col_defs, true) FROM col_create_cte;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
