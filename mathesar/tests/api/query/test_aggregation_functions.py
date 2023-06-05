@@ -453,84 +453,84 @@ def test_Mathesar_URI_distinct_list_aggregation(library_ma_tables, get_uid, clie
     response = client.post('/api/db/v0/queries/', data=request_data)
     assert response.status_code == 201
     query_id = response.json()['id']
-    
+
     expect_records = [
         {
-            "Author Last Name":"Castillo",
-            "Website":[
+            "Author Last Name": "Castillo",
+            "Website": [
                 "https://jennifercastillo.com"
             ]
         },
         {
-            "Author Last Name":"Diaz",
-            "Website":[
+            "Author Last Name": "Diaz",
+            "Website": [
                 "https://diaz.net"
             ]
         },
         {
-            "Author Last Name":"Dunlap",
-            "Website":[
+            "Author Last Name": "Dunlap",
+            "Website": [
                 "https://dunlap.com"
             ]
         },
         {
-            "Author Last Name":"Edwards",
-            "Website":[
+            "Author Last Name": "Edwards",
+            "Website": [
                 "https://catherineedwards.com",
                 "https://edwards.info"
             ]
         },
         {
-            "Author Last Name":"Evans",
-            "Website":[
+            "Author Last Name": "Evans",
+            "Website": [
                 "https://bonnieevans.com"
             ]
         },
         {
-            "Author Last Name":"Harris",
-            "Website":[
+            "Author Last Name": "Harris",
+            "Website": [
                 "http://harris.info"
             ]
         },
         {
-            "Author Last Name":"Herrera",
-            "Website":[
+            "Author Last Name": "Herrera",
+            "Website": [
                 None
             ]
         },
         {
-            "Author Last Name":"Jensen",
-            "Website":[
+            "Author Last Name": "Jensen",
+            "Website": [
                 "http://hannahjensen.org"
             ]
         },
         {
-            "Author Last Name":"Johnson",
-            "Website":[
+            "Author Last Name": "Johnson",
+            "Website": [
                 "https://kimberlyjohnson.net"
             ]
         },
         {
-            "Author Last Name":"Medina",
-            "Website":[
+            "Author Last Name": "Medina",
+            "Website": [
                 None
             ]
         },
         {
-            "Author Last Name":"Munoz",
-            "Website":[
+            "Author Last Name": "Munoz",
+            "Website": [
                 "https://munoz.com"
             ]
         },
         {
-            "Author Last Name":"Newman",
-            "Website":[
+            "Author Last Name": "Newman",
+            "Website": [
                 None
             ]
         },
         {
-            "Author Last Name":"Robinson",
-            "Website":[
+            "Author Last Name": "Robinson",
+            "Website": [
                 "https://seanrobinson.com"
             ]
         }
@@ -592,177 +592,177 @@ def test_Mathesar_Email_distinct_list_aggregation(library_ma_tables, get_uid, cl
     query_id = response.json()['id']
     expect_records = [
         {
-            "First Name":"Alexander",
-            "Email":[
+            "First Name": "Alexander",
+            "Email": [
                 "alexander.phillips38@alvarez.com"
             ]
         },
         {
-            "First Name":"Andrew",
-            "Email":[
+            "First Name": "Andrew",
+            "Email": [
                 "a.vaughan@roy.com"
             ]
         },
         {
-            "First Name":"Autumn",
-            "Email":[
+            "First Name": "Autumn",
+            "Email": [
                 "autumn.h19@mathews.com"
             ]
         },
         {
-            "First Name":"Barry",
-            "Email":[
+            "First Name": "Barry",
+            "Email": [
                 "b.huff@haney.com"
             ]
         },
         {
-            "First Name":"Benjamin",
-            "Email":[
+            "First Name": "Benjamin",
+            "Email": [
                 "b.watson33@bell-beard.biz"
             ]
         },
         {
-            "First Name":"Calvin",
-            "Email":[
+            "First Name": "Calvin",
+            "Email": [
                 "c.curtis12@brown.com"
             ]
         },
         {
-            "First Name":"Connor",
-            "Email":[
+            "First Name": "Connor",
+            "Email": [
                 "c.taylor@miller.org"
             ]
         },
         {
-            "First Name":"Deanna",
-            "Email":[
+            "First Name": "Deanna",
+            "Email": [
                 "deanna.s54@cook.org"
             ]
         },
         {
-            "First Name":"Eduardo",
-            "Email":[
+            "First Name": "Eduardo",
+            "Email": [
                 "eduardorojas13@peterson-curry.com"
             ]
         },
         {
-            "First Name":"Harry",
-            "Email":[
+            "First Name": "Harry",
+            "Email": [
                 "harry.h5@beck.net"
             ]
         },
         {
-            "First Name":"Heather",
-            "Email":[
+            "First Name": "Heather",
+            "Email": [
                 "heatherwheeler@peterson-delgado.com"
             ]
         },
         {
-            "First Name":"Jason",
-            "Email":[
+            "First Name": "Jason",
+            "Email": [
                 "jasongriffin@wilkinson.com",
                 "jpeterson11@williams.com"
             ]
         },
         {
-            "First Name":"Jennifer",
-            "Email":[
+            "First Name": "Jennifer",
+            "Email": [
                 "jenniferw20@morrison-patton.com"
             ]
         },
         {
-            "First Name":"Jesse",
-            "Email":[
+            "First Name": "Jesse",
+            "Email": [
                 "jessef88@stewart.com"
             ]
         },
         {
-            "First Name":"Joshua",
-            "Email":[
+            "First Name": "Joshua",
+            "Email": [
                 "jhooper@bowers.com"
             ]
         },
         {
-            "First Name":"Kathy",
-            "Email":[
+            "First Name": "Kathy",
+            "Email": [
                 "kathyb@le.org"
             ]
         },
         {
-            "First Name":"Kristen",
-            "Email":[
+            "First Name": "Kristen",
+            "Email": [
                 "kwright@odonnell.com"
             ]
         },
         {
-            "First Name":"Laura",
-            "Email":[
+            "First Name": "Laura",
+            "Email": [
                 "lauras@hurley.com"
             ]
         },
         {
-            "First Name":"Lori",
-            "Email":[
+            "First Name": "Lori",
+            "Email": [
                 "l.stevens@lopez.com"
             ]
         },
         {
-            "First Name":"Luke",
-            "Email":[
+            "First Name": "Luke",
+            "Email": [
                 "luke.vang46@palmer.com"
             ]
         },
         {
-            "First Name":"Mary",
-            "Email":[
+            "First Name": "Mary",
+            "Email": [
                 "mknox45@fletcher-rodriguez.net"
             ]
         },
         {
-            "First Name":"Nicole",
-            "Email":[
+            "First Name": "Nicole",
+            "Email": [
                 "nicole.jones66@dixon.org"
             ]
         },
         {
-            "First Name":"Patrick",
-            "Email":[
+            "First Name": "Patrick",
+            "Email": [
                 "pshepherd13@white-bradford.info"
             ]
         },
         {
-            "First Name":"Rita",
-            "Email":[
+            "First Name": "Rita",
+            "Email": [
                 "ritab@powell.com"
             ]
         },
         {
-            "First Name":"Toni",
-            "Email":[
+            "First Name": "Toni",
+            "Email": [
                 "tevans46@thompson.net"
             ]
         },
         {
-            "First Name":"Traci",
-            "Email":[
+            "First Name": "Traci",
+            "Email": [
                 "thamilton76@smith.net"
             ]
         },
         {
-            "First Name":"Tyler",
-            "Email":[
+            "First Name": "Tyler",
+            "Email": [
                 "t.gonzalez@washington.com"
             ]
         },
         {
-            "First Name":"Walter",
-            "Email":[
+            "First Name": "Walter",
+            "Email": [
                 "waltermanning@freeman.com"
             ]
         },
         {
-            "First Name":"Yvonne",
-            "Email":[
+            "First Name": "Yvonne",
+            "Email": [
                 "y.ho@johnson.info"
             ]
         }
