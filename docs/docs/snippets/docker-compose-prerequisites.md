@@ -1,22 +1,17 @@
-- You need **[Docker](https://docs.docker.com/desktop/) and [Docker Compose](https://docs.docker.com/compose/install/)**.
-
-    We've tested with Docker v23 and Docker Compose v2.10. Older versions may not work.
-
-- You need **root access**.
-
-- If using a custom domain name
-
-    Have your domain name ready during the installation process and have your DNS pointing to your Mathesar server.
-
-- If connecting to an existing database
-
-    - Ensure the external database can accept network connections from your Mathesar server.
+- **[Docker](https://docs.docker.com/desktop/)** v23+ and **[Docker Compose](https://docs.docker.com/compose/install/)** v2.10+ should be installed on the machine  you're installing Mathesar on
+- You should have **root access** to the machine you're installing Mathesar on.
+- **If you're using a sub-domain or domain:**
+    - The DNS for your sub-domain or domain should be pointing to the machine that you're installing Mathesar on.
+- **If you're setting up Mathesar to connect to an existing database:**
+    - The external database should be able to accept network connections from your Mathesar server.
+    - There's a database user set up for Mathesar to use. The user should be a `SUPERUSER`, [see PostgreSQL docs for more information](https://www.postgresql.org/docs/13/sql-createrole.html).
     - Have the following information handy before installation:
-
-        - Database hostname _(refer [Connect to existing Database server](/configuration/connect-to-existing-db) document to find instructions to connect to an existing database)_
+        - Database hostname 
         - Database port
         - Database name
-        - Database username _(should exist and be a `SUPERUSER` [more info](https://www.postgresql.org/docs/13/sql-createrole.html))_
+        - Database username 
         - Database password
-
-- If installing on Windows, you need to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed first and [Turn on wsl-2 in docker desktop](https://docs.docker.com/desktop/windows/wsl/#turn-on-docker-desktop-wsl-2)
+    - See _[Connect to an existing database](/configuration/connect-to-existing-db)_ for more details.
+- **If you're installing on Windows:**
+    - Ensure you have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed
+    - Turn on Docker Desktop WSL 2, [see Docker docs for more information](https://docs.docker.com/desktop/windows/wsl/#turn-on-docker-desktop-wsl-2)
