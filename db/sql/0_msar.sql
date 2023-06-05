@@ -782,31 +782,6 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.process_col_dup_arr(tab_id oid, col_dup_arr jsonb, copy_data boolean, copy_constraints boolean)
-  RETURNS jsonb AS $$/*
-Create a column creation JSON array from a JSON array of column duplication defining JSON blobs.
-
-Args:
-  col_create_arr: A jsonb array defining a column duplication (must have "col_id" key.
-                  "name", "data", and "constraints" keys optional).
-*/
-SELECT jsonb_agg(
-  jsonb_build_object(
-    'name', col_dup_obj -> 'name',
-    'type', jsonb_build_object('id', atttypid, 'modifier', atttypmod),
-    'not_null', CASE WHEN copy_constraints THEN attnotnull END,
-    'default', CASE WHEN copy_data THEN pg_get_expr(adbin, tab_id) END
-  )
-)
-FROM
-  (SELECT * FROM pg_attribute WHERE attrelid=tab_id) pg_attr
-  LEFT JOIN pg_attrdef ON (attrelid=adrelid AND attnum=adnum)
-  INNER JOIN jsonb_array_elements(col_dup_arr) col_dup_obj
-    ON attnum=(col_dup_obj -> 'col_id')::smallint;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 __msar.add_columns(tab_name text, col_defs variadic __msar.col_create_def[]) RETURNS text AS $$/*
 Add the given columns to the given table.
 
@@ -865,19 +840,7 @@ msar.add_columns(sch_name text, tab_name text, col_defs jsonb, raw_default boole
   RETURNS jsonb AS $$/*
 TODO
 */
-SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.duplicate_columns(tab_id oid, col_dup_arr jsonb, copy_data boolean, copy_constraints boolean)
-  RETURNS jsonb AS $$/*
-TODO
-*/
-WITH col_create_cte AS (
-  SELECT msar.process_col_dup_arr(tab_id, col_dup_arr, copy_data, copy_constraints) col_defs
-)
-SELECT msar.add_columns(tab_id, col_create_cte.col_defs, true) FROM col_create_cte;
+SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw_default);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
