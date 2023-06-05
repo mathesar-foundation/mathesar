@@ -5,7 +5,7 @@ You can install Mathesar using this method on Linux, MacOS, and Windows.
 You should have **root access** to the machine you're installing Mathesar on.
 
 ### Software
-You'll need to install the following software on the machine you're installing Mathesar on:
+You'll need to install the following software before you install Mathesar:
 
 - **[Docker](https://docs.docker.com/desktop/)** v23+
 - **[Docker Compose](https://docs.docker.com/compose/install/)** v2.10+
