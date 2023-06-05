@@ -25,6 +25,9 @@
     - [NodeJS](https://nodejs.org/en/download) 14 or newer (Verify with `node --version`)
 
         _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
+    - [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 14 or newer (Verify with `node --version`)
+
+        _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
 
     - [Caddy](https://caddyserver.com/docs/install) (Verify with `caddy version`)
 
