@@ -13,12 +13,12 @@ You'll need to install the following software on the machine you're installing M
     - Ensure you have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed
     - Turn on Docker Desktop WSL 2, [see Docker docs for more information](https://docs.docker.com/desktop/windows/wsl/#turn-on-docker-desktop-wsl-2)
 
-### Domain
-If you want Mathesar to be accessible over the internet, you'll probably want to set up a domain or sub-domain to use.
+### Domain (optional)
+If you want Mathesar to be accessible over the internet, you'll probably want to set up a domain or sub-domain to use. **If you don't need a domain, you can skip this section.**
 
 Before you start installation, **ensure that the DNS for your sub-domain or domain is pointing to the machine that you're installing Mathesar on**.
 
-### Database
+### Database (optional)
 You can create a new PostgreSQL database while setting up Mathesar or use our UI to interact with an existing database. **If you're planning to set up a new database, you can skip this section.**
 
 To connect Mathesar to an existing database:
