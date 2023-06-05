@@ -13,7 +13,10 @@ def create_mathesar_engine(db_name):
     try:
         credentials = _get_credentials_for_db_name_in_settings(db_name)
     except KeyError:
-        credentials = _get_credentials_for_db_name_not_in_settings(db_name)
+        if hasattr(settings, 'MATHESAR_LIVE_DEMO') and settings.MATHESAR_LIVE_DEMO:
+            credentials = _get_credentials_for_db_name_not_in_settings(db_name)
+        else:
+            raise
     return engine.create_future_engine_with_custom_types(**credentials)
 
 
