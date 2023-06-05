@@ -19,7 +19,7 @@ If you want Mathesar to be accessible over the internet, you'll probably want to
 Before you start installation, **ensure that the DNS for your sub-domain or domain is pointing to the machine that you're installing Mathesar on**.
 
 ### Database (optional)
-You can create a new PostgreSQL database while setting up Mathesar or use our UI to interact with an existing database. **If you're planning to set up a new database, you can skip this section.**
+You can create a new PostgreSQL database while setting up Mathesar or use our UI to interact with an existing database. **If you don't have a database you want to connect to, you can skip this section.**
 
 To connect Mathesar to an existing database:
 
