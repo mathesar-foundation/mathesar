@@ -720,7 +720,7 @@ The input JSON should be of the form
       "precision": <integer>,
       "scale": <integer>
       "fields": <str>,
-      "dimensions": <integer>
+      "array": <boolean>
     }
   }
 */
@@ -736,15 +736,13 @@ SELECT COALESCE(
     '(' || topts.precision || ', ' || topts.scale || ')',
     '(' || topts.precision || ')',
     ''
-  ) || COALESCE (
-    REPEAT('[]', topts.dimensions),
-    ''
-  )
+  ) || CASE WHEN topts.array_ THEN '[]' ELSE '' END
 )
 FROM
-  jsonb_to_record(typ_jsonb) AS typ(id oid, schema text, name text, modifier integer, options jsonb),
+  jsonb_to_record(typ_jsonb)
+    AS typ(id oid, schema text, name text, modifier integer, options jsonb),
   jsonb_to_record(typ_jsonb -> 'options')
-    AS topts(length integer, precision integer, scale integer, fields text, dimensions integer);
+    AS topts(length integer, precision integer, scale integer, fields text, array_ boolean);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
