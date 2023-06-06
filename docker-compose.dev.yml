@@ -4,10 +4,27 @@ services:
   # Mathesar App built with the same configurations as the production image
   # but with additional testing dependencies.
   # It is used to run automated test cases to verify if the app works as intended
+  dev-db:
+    container_name: mathesar_dev_db
+    build:
+      context: .
+      dockerfile: Dockerfile.devdb
+    environment:
+      - POSTGRES_DB=mathesar_django
+      - POSTGRES_USER=mathesar
+      - POSTGRES_PASSWORD=mathesar
+    ports:
+      - "5432:5432"
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+      - ./db/sql:/sql/
   test-service:
     extends:
       file: docker-compose.yml
       service: service
+    environment:
+      - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_dev_db:5432/mathesar_django
+      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
     container_name: mathesar_service_test
     image: mathesar/mathesar-test:latest
     build:
@@ -16,7 +33,7 @@ services:
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
     depends_on:
-      - db
+      - dev-db
     # On testing, the HTTP port is exposed to other containers, and the host.
     ports:
       - "8000:8000"
@@ -40,12 +57,14 @@ services:
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
-    entrypoint: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./dev-run.sh
+      - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_dev_db:5432/mathesar_django
+      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
+    entrypoint: dockerize -wait tcp://mathesar_dev_db:5432 -timeout 30s ./dev-run.sh
     volumes:
       - .:/code/
       - ui_node_modules:/code/mathesar_ui/node_modules/
     depends_on:
-      - db
+      - dev-db
     # On dev, following ports are exposed to other containers, and the host.
     ports:
       - "8000:8000"
@@ -53,3 +72,4 @@ services:
       - "6006:6006"
 volumes:
   ui_node_modules:
+  dev_postgres_data:
