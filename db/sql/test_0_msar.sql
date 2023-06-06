@@ -283,3 +283,34 @@ BEGIN
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval second(3)');
 END;
 $f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_timestamp_raw_default() RETURNS SETOF TEXT AS $f$
+/*
+This test will fail if the default is being sanitized, but will succeed if it's not.
+*/
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "timestamp"}, "default": "now()::timestamp"}]'
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => true);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp without time zone');
+  RETURN NEXT col_default_is('add_col_testable', 'Column 4', '(now())::timestamp without time zone');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_timestamp_raw_default() RETURNS SETOF TEXT AS $f$
+/*
+This test will succeed if the default is being sanitized, but will fail if it's not.
+
+It's important to check that we're careful with SQL submitted from python.
+*/
+DECLARE
+  col_create_arr jsonb := $j$
+    [{"type": {"name": "text"}, "default": "null; drop table add_col_testable"}]
+  $j$;
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => false);
+  RETURN NEXT has_table('add_col_testable');
+END;
+$f$ LANGUAGE plpgsql;
