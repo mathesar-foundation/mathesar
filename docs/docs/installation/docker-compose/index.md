@@ -4,34 +4,16 @@
 
 {% include 'snippets/docker-compose-prerequisites.md' %}
 
-## Quickstart
-- Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file.
-    ```sh
-    wget https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml
-    ```
-- Configure [environment variables](../configuration/env-variables.md).
-    ```sh
-    # Sample .env file
-    wget https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/.env.example
-    mv .env.example .env
-    ```
-- Start Mathesar and create the super user.
-    ```sh
-    docker compose -f docker-compose.yml up -d
-    docker exec -it mathesar_service python manage.py createsuperuser
-    ```
-- [Detailed Docker Compose Instructions](./docker-compose/index.md).
+## Step-by-Step Guide {: #steps}
 
-## Installation Steps {: #steps}
-
-1. Navigate to a directory where you'd like to store your Mathesar configuration. By convention, we do it within `/etc/mathesar`, but it can be a different directory if you like.
+1. Navigate to a directory where you'd like to store your Mathesar configuration. We recommend `/etc/mathesar`, but it can be any directory.
 
     ```
     sudo mkdir -p /etc/mathesar
     cd /etc/mathesar
     ```
 
-1. Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml), and [.env.example](https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/.env.example) files to your configuration directory.
+1. Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml), and [.env.example](https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/.env.example) files to the directory you've chosen.
 
     ```
     sudo wget https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml
@@ -105,7 +87,7 @@
     
     See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
 
-1. (Optional) Start the Upgrade server to enable upgrading the docker image using the Mathesar UI.
+1. (Optional) Start the upgrade server to enable upgrading the docker image using the Mathesar UI.
 
     === "Linux"
         ```
