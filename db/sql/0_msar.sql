@@ -811,7 +811,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.add_columns(tab_id oid, col_defs jsonb, raw_default boolean DEFAULT false)
-  RETURNS jsonb AS $$/*
+  RETURNS smallint[] AS $$/*
 TODO
 */
 DECLARE
@@ -819,15 +819,7 @@ DECLARE
 BEGIN
   col_create_defs := msar.process_col_create_arr(tab_id, col_defs, raw_default);
   PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
-  RETURN jsonb_agg(
-    jsonb_build_object(
-      'tab_id', attrelid,
-      'col_id', attnum,
-      'col_name', attname,
-      'col_type', format_type(atttypid, null),
-      'col_full_type', format_type(atttypid, atttypmod)
-    )
-  )
+  RETURN array_agg(attnum)
     FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
     INNER JOIN unnest(col_create_defs) R
     ON quote_ident(L.attname) = R.name_;
@@ -837,7 +829,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.add_columns(sch_name text, tab_name text, col_defs jsonb, raw_default boolean)
-  RETURNS jsonb AS $$/*
+  RETURNS smallint[] AS $$/*
 TODO
 */
 SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw_default);
