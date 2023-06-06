@@ -37,14 +37,17 @@ def create_datafile(data):
         raw_file = ContentFile(str.encode(data['paste']), name=name)
         created_from = 'paste'
         base_name = ''
+        type = 'tsv'
     elif 'url' in data:
         raw_file = _download_datafile(data['url'])
         created_from = 'url'
         base_name = raw_file.name
+        type = os.path.splitext(raw_file.name)[1][1:]
     elif 'file' in data:
         raw_file = data['file']
         created_from = 'file'
         base_name = raw_file.name
+        type = os.path.splitext(raw_file.name)[1][1:]
 
     if base_name:
         max_length = DataFile._meta.get_field('base_name').max_length
@@ -53,17 +56,26 @@ def create_datafile(data):
 
     encoding = get_file_encoding(raw_file.file)
     text_file = TextIOWrapper(raw_file.file, encoding=encoding)
-    dialect = get_sv_dialect(text_file)
-
-    datafile = DataFile(
-        file=raw_file,
-        base_name=base_name,
-        created_from=created_from,
-        header=header,
-        delimiter=dialect.delimiter,
-        escapechar=dialect.escapechar,
-        quotechar=dialect.quotechar,
-    )
+    if type == 'csv' or type == 'tsv':
+        dialect = get_sv_dialect(text_file)
+        datafile = DataFile(
+            file=raw_file,
+            base_name=base_name,
+            type=type,
+            created_from=created_from,
+            header=header,
+            delimiter=dialect.delimiter,
+            escapechar=dialect.escapechar,
+            quotechar=dialect.quotechar,
+        )
+    else:
+        datafile = DataFile(
+            file=raw_file,
+            base_name=base_name,
+            type=type,
+            created_from=created_from,
+            header=header,
+        )
     datafile.save()
     raw_file.close()
 

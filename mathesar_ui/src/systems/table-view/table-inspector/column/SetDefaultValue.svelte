@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import { CancelOrProceedButtonPair } from '@mathesar/component-library';
+  import LabeledInput from '@mathesar/component-library/labeled-input/LabeledInput.svelte';
+  import Radio from '@mathesar/component-library/radio/Radio.svelte';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import {
     getTabularDataStoreFromContext,
@@ -17,7 +19,11 @@
 
   $: initialValue = column.column.default?.value ?? column.initialInputValue;
   $: value = initialValue;
+  $: isDefaultNull = column.column.default === null;
   $: actionButtonsVisible = (() => {
+    if (isDefaultNull) {
+      return column.column.default !== null;
+    }
     if (typeof value === 'object') {
       return JSON.stringify(value) !== JSON.stringify(initialValue);
     }
@@ -36,12 +42,15 @@
 
   async function save() {
     typeChangeState = { state: 'processing' };
-    try {
-      await columnsDataStore.patch(column.id, {
-        default: {
+    const defaultRequest = isDefaultNull
+      ? null
+      : {
           is_dynamic: !!column.column.default?.is_dynamic,
           value,
-        },
+        };
+    try {
+      await columnsDataStore.patch(column.id, {
+        default: defaultRequest,
       });
       typeChangeState = { state: 'success' };
     } catch (err) {
@@ -59,6 +68,10 @@
     typeChangeState = { state: 'success' };
   }
 
+  function toggleNoDefault() {
+    isDefaultNull = !isDefaultNull;
+  }
+
   function setRecordSummary(recordId: string, _recordSummary: string) {
     if (recordSummaries) {
       recordSummaries.addBespokeRecordSummary({
@@ -73,14 +86,23 @@
 </script>
 
 <div class="default-value-container">
-  <span class="label">Value</span>
-  <DynamicInput
-    componentAndProps={column.inputComponentAndProps}
-    bind:value
-    {disabled}
-    {recordSummary}
-    {setRecordSummary}
-  />
+  <LabeledInput layout="inline-input-first">
+    <span slot="label"> No Default Value </span>
+    <Radio checked={isDefaultNull} on:change={toggleNoDefault} />
+  </LabeledInput>
+  <LabeledInput layout="inline-input-first">
+    <span slot="label"> Custom default </span>
+    <Radio checked={!isDefaultNull} on:change={toggleNoDefault} />
+  </LabeledInput>
+  {#if !isDefaultNull}
+    <DynamicInput
+      componentAndProps={column.inputComponentAndProps}
+      bind:value
+      {disabled}
+      {recordSummary}
+      {setRecordSummary}
+    />
+  {/if}
   {#if actionButtonsVisible}
     <CancelOrProceedButtonPair
       onProceed={save}
