@@ -141,3 +141,145 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- msar.add_columns --------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION setup_add_columns() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE add_col_testable (id serial primary key, col1 integer, col2 varchar);
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- TODO: Figure out a way to parameterize these
+CREATE OR REPLACE FUNCTION test_add_columns_fullspec_text() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := $j$[
+      {"name": "tcol", "type": {"name": "text"}, "not_null": true, "default": "my super default"}
+    ]$j$;
+BEGIN
+  RETURN NEXT is(
+    msar.add_columns('add_col_testable'::regclass::oid, col_create_arr), '{4}'::smallint[]
+  );
+  RETURN NEXT col_not_null('add_col_testable', 'tcol');
+  RETURN NEXT col_type_is('add_col_testable', 'tcol', 'text');
+  RETURN NEXT col_default_is('add_col_testable', 'tcol', 'my super default');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_minspec_text() RETURNS SETOF TEXT AS $f$
+/*
+This tests the default settings. When not given, the defautl column should be nullable and have no
+default value. The name should be "Column <n>", where <n> is the attnum of the added column.
+*/
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "text"}}]';
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_is_null('add_col_testable', 'Column 4');
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'text');
+  RETURN NEXT col_hasnt_default('add_col_testable', 'Column 4');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_multi_default_name() RETURNS SETOF TEXT AS $f$
+/*
+This tests the default settings. When not given, the defautl column should be nullable and have no
+default value. The name should be "Column <n>", where <n> is the attnum of the added column.
+*/
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "text"}}, {"type": {"name": "numeric"}}]';
+BEGIN
+  RETURN NEXT is(
+    msar.add_columns('add_col_testable'::regclass::oid, col_create_arr), '{4, 5}'::smallint[]
+  );
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'text');
+  RETURN NEXT col_type_is('add_col_testable', 'Column 5', 'numeric');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_numeric_def() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "numeric"}, "default": 3.14159}]';
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric');
+  RETURN NEXT col_default_is('add_col_testable', 'Column 4', 3.14159);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_numeric_prec() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "numeric", "options": {"precision": 3}}}]';
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric(3,0)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_numeric_prec_scale() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "numeric", "options": {"precision": 3, "scale": 2}}}]';
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric(3,2)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_caps_numeric() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "NUMERIC"}}]';
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_varchar_length() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "varchar", "options": {"length": 128}}}]';
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'character varying(128)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_interval_precision() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "interval", "options": {"precision": 6}}}]';
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval(6)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_interval_fields() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "interval", "options": {"fields": "year"}}}]';
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval year');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_interval_fields_prec() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := $j$
+    [{"type": {"name": "interval", "options": {"fields": "second", "precision": 3}}}]
+  $j$;
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval second(3)');
+END;
+$f$ LANGUAGE plpgsql;
