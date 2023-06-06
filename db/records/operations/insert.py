@@ -1,3 +1,4 @@
+import json
 import tempfile
 
 from psycopg2 import sql
@@ -29,6 +30,19 @@ def insert_record_or_records(table, engine, record_data):
                 return get_record(table, engine, id_value)
     # Do not return any records if multiple rows were added.
     return None
+
+
+def insert_records_from_json(table, engine, json_filepath):
+    with open(json_filepath, 'r') as json_file:
+        data = json.load(json_file)
+    for i, row in enumerate(data):
+        data[i] = {
+            k: json.dumps(v)
+            if (isinstance(v, dict) or isinstance(v, list))
+            else v
+            for k, v in row.items()
+        }
+    insert_record_or_records(table, engine, data)
 
 
 def insert_records_from_csv(table, engine, csv_filepath, column_names, header, delimiter=None, escape=None, quote=None, encoding=None):
