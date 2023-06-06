@@ -277,10 +277,10 @@
     sudo systemctl enable gunicorn.service
     ```
 
-1. Ensure Gunicorn is working correctly by looking at the logs
+1. Check the logs to verify if Gunicorn is running without any errors
     
     ```sh
-    sudo journalctl --unit=gunicorn.service
+    sudo journalctl --priority=notice --unit=gunicorn.service
     ```
 
 ### Set up the Caddy reverse proxy
@@ -371,10 +371,10 @@
     sudo systemctl start caddy.service && \
     sudo systemctl enable caddy.service
     ```
-1. Ensure Caddy is working correctly by looking at the logs
+1. Check the logs to verify if Caddy is running without any errors
     
     ```sh
-    sudo journalctl --unit=caddy.service
+    sudo journalctl --priority=notice --unit=caddy.service
     ```
 
 Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
