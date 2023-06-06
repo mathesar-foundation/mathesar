@@ -3,76 +3,36 @@
 This page contains all available environment variables supported by Mathesar. See the specific installation guides for the applicable environment variables and instructions on how to set them.
 
 
-## Backend Configuration {: #backend}
+## Backend configuration {: #backend}
 
-### `SECRET_KEY`
+<style>
+table th:first-of-type {
+    width: 25%;
+}
+</style>
 
-- _**Required**_
-- A 50 characters long random string used by Django for cryptographic signing.
-- Refer [Django docs](https://docs.djangoproject.com/en/3.2/ref/settings/#std:setting-SECRET_KEY) for more details.
-- You can generate a secret key using [this tool](https://djecrety.ir/).
-
-### `ALLOWED_HOSTS`
-
-- _**Required**_
-- A comma-separated list of hostnames that can serve Mathesar. It will be added to Django [ALLOWED_HOSTS](https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts) settings.
-- The hostnames should not contain the `http` protocol or trailing slashes.
-- Add `localhost` if you want Mathesar to be accessible from localhost too.
-
-    !!! success "Valid values"
-        - `mathesar.example.com, localhost`
-        - `.localhost, mathesar.example.com, 35.188.184.125`
-
-    !!! failure "Invalid values"
-        - `http://mathesar.example.com/` # Contains http protocol and a trailing slash
-        - `https://mathesar.example.com` # Contains http protocol
-        - `localhost/, 35.188.184.125` # Contains trailing slashes, so `localhost` will be invalid.
+| Name | Description | Default |
+| - | - | - |
+| `SECRET_KEY` | A 50-char random string used by Django for cryptographic signing ([see Django docs](https://docs.djangoproject.com/en/3.2/ref/settings/#std:setting-SECRET_KEY)).<br/><br/>You can generate a secret key using [this tool](https://djecrety.ir/) | _No default._ | 
+| `ALLOWED_HOSTS` | A comma-separated list of hostnames that Mathesar will be accessible at ([see Django docs](https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts)).<br/><br/>Hostnames should not contain the protocol (e.g. `http`) or trailing slashes. You can use `localhost` in this list. | _No default._ | 
+| `DJANGO_DATABASE_URL` | A Postgres connection string of the database used for Mathesar's internal usage. Format: `postgres://user:password@hostname:port/database_name`<br/><br/>The connection string above will connect to a database with username `user`, password `password`, hostname `mathesar_db`, port `5432`, and database name `mathesar_django`.<br/><br/>This database must exist before it can be used. If you're using our [guided installation](../installation/guided-install/), we'll set up the database during the installation process. Our [Docker Compose](../installation/docker-compose/) profiles also provide a default database server.<br/><br/>If you're using another installation method, you'll need to ensure the database is created before setting this configuration variable. | _Default depends on installation method._ | 
+| `MATHESAR_DATABASES` | A list of databases managed by Mathesar. These databases will be accessible through the UI.<br/><br/>Format: `(unique_id|connection_string),(unique_id|connection_string),...` e.g. `(db1|postgresql://u:p@example.com:5432/db1),(db2|postgresql://u:p@example.com:5432/db2)`<br/><br/> This would set Mathesar to connect to two databases, `db1` and `db2` which are both accessed via the same user `u`, password `p`, hostname `example.com`, and port `5432`.<br/><br/>Please note that if you're using our [Docker Compose]((../installation/docker-compose/)) or [guided installation](../installation/guided-install/), Mathesar will attempt to create any databases that do not already exist whenever Docker is restarted. | _Default depends on installation method._ | 
 
 
+#### Troubleshooting
 
-### `DJANGO_DATABASE_URL`
+##### `ALLOWED_HOSTS`
+!!! success "Valid values"
+    - `mathesar.example.com, localhost`
+    - `.localhost, mathesar.example.com, 35.188.184.125`
 
-- _**Required**_
-- A Postgres connection string of the database which will be used for storing metadata related to Mathesar. 
-- The database should **already exist** and won't be created automatically.
-- It should be in the following format:
+!!! failure "Invalid values"
+    - `http://mathesar.example.com/` - contains HTTP protocol and a trailing slash
+    - `https://mathesar.example.com` - contains HTTPS protocol
+    - `localhost/, 35.188.184.125` - contains trailing slash after `localhost`
 
-    ```
-    postgres://user:password@hostname:port/database_name
-    ```
 
-    > **Example:**
-    >
-    > ```
-    > postgres://mathesar:password@mathesar_db:5432/mathesar_django
-    > ```
-    >
-    > The connection string above will connect to a database with the username `mathesar`, the password `password`, the hostname `mathesar_db`, the port `5432`, and the database name `mathesar_django`.
-
-### `MATHESAR_DATABASES`
-
-<!-- TODO -->
-
-- _**Required**_
-- Specifies the external databases to be managed by Mathesar.
-- Mathesar will attempt to create databases for any that do not already exist. For this creation to succeed, you will need to ensure that the specified database user has [**`SUPERUSER` Privileges**](https://www.postgresql.org/docs/current/role-attributes.html).
-- Format:
-
-    ```text
-    (id|connection_string),(id|connection_string),...
-    ```
-
-    > **Example**
-    >
-    > ```text
-    > (db1|postgresql://u:p@example.com:5432/db1),(db2|postgresql://u:p@example.com:5432/db2)
-    > ```
-    >
-    > This would connect to two external databases called `db1` and `db2` which are both accessed via the same user `u`, password `p`, hostname `example.com`, and port `5432`. If a database called `db1` or `db2` does not exist, it will be created.
-
-- Each database must have a unique id and a connection string.
-
-## Caddy Reverse Proxy Configuration {: #caddy}
+## Caddy reverse proxy configuration {: #caddy}
 
 ### `DOMAIN_NAME`
 
