@@ -810,7 +810,12 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.add_columns(tab_id oid, col_defs jsonb, raw_default boolean DEFAULT false)
   RETURNS smallint[] AS $$/*
-TODO
+Add columns to a table.
+
+Args:
+  tab_id: The OID of the table to which we'll add columns.
+  col_defs: a JSONB array defining columns to add.
+  raw_default: Whether to treat defaults as raw SQL. DANGER!
 */
 DECLARE
   col_create_defs __msar.col_create_def[];
