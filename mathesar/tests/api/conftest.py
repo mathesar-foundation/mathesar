@@ -20,7 +20,7 @@ def create_data_file():
         with open(file_path, 'rb') as csv_file:
             data_file = DataFile.objects.create(
                 file=File(csv_file), created_from='file',
-                base_name=file_name
+                base_name=file_name, type='csv'
             )
 
         return data_file

@@ -4,7 +4,9 @@ from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table
 from db.tables.operations.infer_types import infer_table_column_types
 from mathesar.database.base import create_mathesar_engine
+from mathesar.errors import InvalidTableError
 from mathesar.imports.csv import create_table_from_csv
+from mathesar.imports.json import create_table_from_json
 from mathesar.models.base import Table
 from mathesar.state.django import reflect_columns_from_tables
 from mathesar.state import get_cached_metadata
@@ -65,7 +67,12 @@ def gen_table_name(schema, data_files=None):
 
 def create_table_from_datafile(data_files, name, schema, comment=None):
     data_file = data_files[0]
-    table = create_table_from_csv(data_file, name, schema, comment=comment)
+    if data_file.type == "json":
+        table = create_table_from_json(data_file, name, schema, comment=comment)
+    elif data_file.type == "csv" or data_file.type == "tsv":
+        table = create_table_from_csv(data_file, name, schema, comment=comment)
+    else:
+        raise InvalidTableError
     return table
 
 
