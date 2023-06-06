@@ -755,6 +755,23 @@ Args:
   tab_id: The OID of the table where we'll create the columns
   col_create_arr: A jsonb array defining a column creation (must have "type" key; "name",
                   "not_null", and "default" keys optional).
+
+The col_create_arr should have the form:
+[
+  {
+    "name": <str> (optional),
+    "type": {
+      "name": <str>,
+      "options": <obj> (optional),
+    },
+    "not_null": <bool> (optional; default false),
+    "default": <any> (optional)
+  },
+  {
+    ...
+  }
+]
+For more info on the type.options object, see the msar.build_type_text function.
 */
 WITH attnum_cte AS (
   SELECT MAX(attnum) AS m_attnum FROM pg_attribute WHERE attrelid=tab_id
@@ -814,7 +831,7 @@ Add columns to a table.
 
 Args:
   tab_id: The OID of the table to which we'll add columns.
-  col_defs: a JSONB array defining columns to add.
+  col_defs: a JSONB array defining columns to add. See msar.process_col_create_arr for details.
   raw_default: Whether to treat defaults as raw SQL. DANGER!
 */
 DECLARE
@@ -833,7 +850,13 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.add_columns(sch_name text, tab_name text, col_defs jsonb, raw_default boolean)
   RETURNS smallint[] AS $$/*
-TODO
+Add columns to a table.
+
+Args:
+  sch_name: unquoted schema name of the table to which we'll add columns.
+  tab_name: unquoted, unqualified name of the table to which we'll add columns.
+  col_defs: a JSONB array defining columns to add. See msar.process_col_create_arr for details.
+  raw_default: Whether to treat defaults as raw SQL. DANGER!
 */
 SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw_default);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
