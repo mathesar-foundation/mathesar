@@ -25,6 +25,7 @@ def long_column_data_file():
             file=File(csv_file),
             created_from='file',
             base_name='longdatafiled',
+            type='csv'
         )
     return data_file
 
@@ -45,7 +46,8 @@ def data_file(patents_csv_filepath):
         data_file = DataFile.objects.create(
             file=File(csv_file),
             created_from='file',
-            base_name='patents'
+            base_name='patents',
+            type='csv'
         )
     return data_file
 
@@ -56,7 +58,8 @@ def existing_id_col_table_datafile(table_with_id_col_filepath):
         data_file = DataFile.objects.create(
             file=File(csv_file),
             created_from='file',
-            base_name='table_with_id'
+            base_name='table_with_id',
+            type='csv'
         )
     return data_file
 
@@ -71,6 +74,7 @@ def paste_data_file(paste_filename):
         delimiter='\t',
         quotechar='',
         escapechar='',
+        type='csv'
     )
     return data_file
 
@@ -82,7 +86,8 @@ def url_data_file(patents_url, patents_url_filename):
         data_file = DataFile.objects.create(
             file=File(file),
             created_from='url',
-            base_name=base_name
+            base_name=base_name,
+            type='csv'
         )
     return data_file
 
