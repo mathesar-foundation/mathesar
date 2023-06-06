@@ -34,9 +34,11 @@
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { toast } from '@mathesar/stores/toast';
   import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
+  import DoesNotSupportNullToast from './DoesNotSupportNullToast.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
@@ -130,6 +132,33 @@
   async function valueUpdated(e: CustomEvent<{ value: unknown }>) {
     await setValue(e.detail.value);
   }
+
+  async function setNullValue() {
+    if (!column.nullable) {
+      toast.error({
+        contentComponent: DoesNotSupportNullToast,
+        contentComponentProps: {
+          columnName: column.name,
+        },
+      });
+      return;
+    }
+
+    if (value === null) {
+      return;
+    }
+
+    await setValue(null);
+  }
+
+  async function handleKeyDown(event: KeyboardEvent) {
+    const isShortcutForSettingNull =
+      (event.shiftKey && event.key === 'Backspace') ||
+      (event.shiftKey && event.key === 'Delete');
+    if (isShortcutForSettingNull) {
+      await setNullValue();
+    }
+  }
 </script>
 
 <SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
@@ -143,6 +172,7 @@
     class:is-selected={isSelectedInRange}
     {...htmlAttributes}
     {style}
+    on:keydown={handleKeyDown}
   >
     <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
     <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
