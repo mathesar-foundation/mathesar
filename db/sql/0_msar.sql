@@ -152,7 +152,7 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION msar.get_relation_oid(text, text) CASCADE;
+DROP FUNCTION IF EXISTS msar.get_relation_oid(text, text) CASCADE;
 CREATE OR REPLACE FUNCTION
 msar.get_relation_oid(sch_name text, rel_name text) RETURNS oid AS $$/*
 Return the OID for a given relation (e.g., table).
