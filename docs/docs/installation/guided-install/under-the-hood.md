@@ -1,4 +1,4 @@
-# Guided Installation Script, Under the Hood
+# Guided installation script: under the hood
 
 !!! info ""
     This document is related to the [Guided Installation method](./index.md).
