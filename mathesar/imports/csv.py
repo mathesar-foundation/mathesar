@@ -107,6 +107,31 @@ def get_sv_reader(file, header, dialect=None):
     return reader
 
 
+def insert_data_from_csv_data_file(name, schema, column_names, engine, comment, data_file):
+    dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
+                                        data_file.escapechar)
+    encoding = get_file_encoding(data_file.file)
+    table = create_string_column_table(
+        name=name,
+        schema=schema.name,
+        column_names=column_names,
+        engine=engine,
+        comment=comment,
+    )
+    insert_records_from_csv(
+        table,
+        engine,
+        data_file.file.path,
+        column_names,
+        data_file.header,
+        delimiter=dialect.delimiter,
+        escape=dialect.escapechar,
+        quote=dialect.quotechar,
+        encoding=encoding
+    )
+    return table
+
+
 def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
     db_name = schema.database.name
     engine = create_mathesar_engine(db_name)
@@ -114,29 +139,11 @@ def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
     header = data_file.header
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
                                         data_file.escapechar)
-    encoding = get_file_encoding(data_file.file)
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = process_column_names(sv_reader.fieldnames)
-        table = create_string_column_table(
-            name=name,
-            schema=schema.name,
-            column_names=column_names,
-            engine=engine,
-            comment=comment,
-        )
     try:
-        insert_records_from_csv(
-            table,
-            engine,
-            sv_filename,
-            column_names,
-            header,
-            delimiter=dialect.delimiter,
-            escape=dialect.escapechar,
-            quote=dialect.quotechar,
-            encoding=encoding
-        )
+        table = insert_data_from_csv_data_file(name, schema, column_names, engine, comment, data_file)
         update_pk_sequence_to_latest(engine, table)
     except (IntegrityError, DataError):
         drop_table(name=name, schema=schema.name, engine=engine)
@@ -144,23 +151,6 @@ def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
             column_name if column_name != ID else ID_ORIGINAL
             for column_name in column_names
         ]
-        table = create_string_column_table(
-            name=name,
-            schema=schema.name,
-            column_names=column_names_alt,
-            engine=engine,
-            comment=comment,
-        )
-        insert_records_from_csv(
-            table,
-            engine,
-            sv_filename,
-            column_names_alt,
-            header,
-            delimiter=dialect.delimiter,
-            escape=dialect.escapechar,
-            quote=dialect.quotechar,
-            encoding=encoding
-        )
+        insert_data_from_csv_data_file(name, schema, column_names_alt, engine, comment, data_file)
     reset_reflection(db_name=db_name)
     return table

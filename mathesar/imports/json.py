@@ -21,13 +21,7 @@ def get_column_names_from_json(data_file):
     return list(data.keys())
 
 
-def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
-    db_name = schema.database.name
-    engine = create_mathesar_engine(db_name)
-    json_filepath = data_file.file.path
-    column_names = process_column_names(
-        get_column_names_from_json(data_file.file.path)
-    )
+def insert_data_from_json_data_file(name, schema, column_names, engine, comment, json_filepath):
     table = create_string_column_table(
         name=name,
         schema=schema.name,
@@ -35,12 +29,23 @@ def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
         engine=engine,
         comment=comment,
     )
+    insert_records_from_json(
+        table,
+        engine,
+        json_filepath
+    )
+    return table
+
+
+def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
+    db_name = schema.database.name
+    engine = create_mathesar_engine(db_name)
+    json_filepath = data_file.file.path
+    column_names = process_column_names(
+        get_column_names_from_json(json_filepath)
+    )
     try:
-        insert_records_from_json(
-            table,
-            engine,
-            json_filepath
-        )
+        table = insert_data_from_json_data_file(name, schema, column_names, engine, comment, json_filepath)
         update_pk_sequence_to_latest(engine, table)
     except (IntegrityError, DataError):
         drop_table(name=name, schema=schema.name, engine=engine)
@@ -48,17 +53,7 @@ def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
             fieldname if fieldname != ID else ID_ORIGINAL
             for fieldname in column_names
         ]
-        table = create_string_column_table(
-            name=name,
-            schema=schema.name,
-            column_names=column_names_alt,
-            engine=engine,
-            comment=comment,
-        )
-        insert_records_from_json(
-            table,
-            engine,
-            json_filepath
-        )
+        table = insert_data_from_json_data_file(name, schema, column_names_alt, engine, comment, json_filepath)
+
     reset_reflection(db_name=db_name)
     return table
