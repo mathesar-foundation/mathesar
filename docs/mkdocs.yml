@@ -40,7 +40,7 @@ plugins:
           'product/intro.md': 'user-guide/index.md'
           'product/syncing-db.md': 'user-guide/syncing-db.md'
           'product/users.md': 'user-guide/users.md'
-          'install/index.md': 'installation/index.md'
+          'install/index.md': 'index.md'
           'install/guided-install/index.md': 'installation/guided-install/index.md'
           'install/docker-compose/index.md': 'installation/docker-compose/index.md'
           'install/docker-compose/under-the-hood.md': 'installation/guided-install/under-the-hood.md'

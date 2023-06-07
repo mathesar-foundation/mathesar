@@ -1,6 +1,6 @@
 # Guided installation
 
-Our install script guides you through a series of prompts to install Mathesar. The script sets up Mathesar using Docker Compose [under the hood](./guided-install/under-the-hood.md).
+Our install script guides you through a series of prompts to install Mathesar. The script sets up Mathesar using Docker Compose [under the hood](./under-the-hood.md).
 
 !!! warning "Limitations"
     This is a convenient way to install Mathesar. However, it's highly opinionated and requires `sudo` privileges (admin access), and only supports a limited set of configuration options. Use the [Docker Compose installation option](../docker-compose/) if you'd like to customize your installation.
