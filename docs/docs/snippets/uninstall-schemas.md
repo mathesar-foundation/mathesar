@@ -1,6 +1,6 @@
 1. Remove Mathesar internal schemas.
 
-    **If you connected Mathesar to a database**, the installation process would have created new schemas for Mathesar's use. You can remove them from the database as follows:
+    **If you'd like to continue using your PostgreSQL database**, you'll need to remove the schemas created for Mathesar's use during installation. You can remove them from the database as follows:
 
     1. Connect to the database.
 

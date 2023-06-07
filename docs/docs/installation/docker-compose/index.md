@@ -40,7 +40,7 @@
         - Customize the values of the environment variables to suit your needs.
 
         !!! example
-            If you are using the [default database container](../../configuration/customize-docker-compose#default-db). Your `.env` file should look something like this
+            If you are using the [default database container](../../configuration/customize-docker-compose#default-db), your `.env` file should look something like this
             
             ``` bash
             ALLOWED_HOSTS='<your_domain_name>'
