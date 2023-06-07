@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Select, Icon, Button, iconClose } from '@mathesar-component-library';
+
+  import { Button, Icon, Select, iconClose } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
   import type { ProcessedQueryResultColumn } from '../../../utils';
@@ -11,30 +12,8 @@
   export let aggregation: QuerySummarizationAggregationEntry;
   export let limitEditing = false;
 
-  function getAggregationsBasedOnColumnType() {
-    const availableAggregation: (
-      | 'distinct_aggregate_to_array'
-      | 'count'
-      | 'sum'
-    )[] = ['distinct_aggregate_to_array', 'count'];
-    if (processedColumn?.column.type === 'numeric') {
-      availableAggregation.push('sum');
-    }
-    return availableAggregation;
-  }
-
-  function getAggregationTypeLabel(aggType?: string) {
-    switch (aggType) {
-      case 'distinct_aggregate_to_array':
-        return 'List';
-      case 'count':
-        return 'Count';
-      case 'sum':
-        return 'Sum';
-      default:
-        return '';
-    }
-  }
+  $: functions = processedColumn?.summarizationFunctions ?? [];
+  $: functionIds = functions.map((f) => f.id);
 </script>
 
 <div class="aggregation">
@@ -51,10 +30,10 @@
   {/if}
   <span>as</span>
   <Select
-    options={getAggregationsBasedOnColumnType()}
+    options={functionIds}
     bind:value={aggregation.function}
     disabled={limitEditing}
-    getLabel={getAggregationTypeLabel}
+    getLabel={(id) => functions.find((f) => f.id === id)?.label ?? ''}
     on:change={() => dispatch('update')}
   />
   <Button
