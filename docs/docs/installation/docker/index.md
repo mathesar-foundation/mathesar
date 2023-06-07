@@ -94,7 +94,7 @@ Have the following information for all databases you'd like to connect to Mathes
     See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
 
 
-## Upgrading Mathesar
+## Upgrading Mathesar {:#upgrade}
 
 1. Stop your existing Mathesar container:
 
@@ -118,7 +118,7 @@ Have the following information for all databases you'd like to connect to Mathes
       mathesar/mathesar-prod:latest
     ```
 
-## Uninstalling Mathesar
+## Uninstalling Mathesar {:#uninstall}
 
 1. Remove the Mathesar container.
 

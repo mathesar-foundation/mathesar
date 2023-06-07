@@ -443,7 +443,7 @@ Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
     ```
 
 
-### Uninstalling Mathesar
+### Uninstalling Mathesar {:#uninstall}
 
 1. Stop Caddy service
 

@@ -1,4 +1,4 @@
-# Customize Docker Compose related Installations
+# Customize Docker Compose related installations
 
 !!! info ""
     This document is related to Mathesar running in Docker Compose related environments. This is applicable for the [Guided Installation method](../installation/guided-install/index.md), and [Docker Compose Installation method](../installation/docker-compose/index.md).

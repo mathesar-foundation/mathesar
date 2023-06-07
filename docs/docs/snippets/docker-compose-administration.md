@@ -31,7 +31,7 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 !!! note
     If you customized the Mathesar configuration directory during installation, you'll need to change `/etc/mathesar` to your configuration directory.
 
-## Upgrading Mathesar
+## Upgrading Mathesar {:#upgrade}
 
 !!! tip "Upgrade from within Mathesar"
     You can also run the upgrade from within Mathesar by logging in as an admin user and navigating to "Administration" (in the top right menu) > "Software Update"
@@ -60,7 +60,7 @@ Manually upgrade Mathesar to the newest version without using Watchtower:
     docker compose -f docker-compose.yml up --force-recreate --build service
     ```
 
-## Uninstalling Mathesar
+## Uninstalling Mathesar {:#uninstall}
 
 1. Remove all Mathesar Docker images and containers.
 
