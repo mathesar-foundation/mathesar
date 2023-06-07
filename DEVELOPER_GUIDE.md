@@ -165,7 +165,7 @@ Hot module replacement for front end code does not work when the project is pres
 
 If you you see the following error after attempting to start Docker, then the port used by Postgres is already in use on your host machine.
 
-> ERROR: for db Cannot start server db: driver failed programming external connectivity on endpoint mathesar_db (70c521f468cf2bd54014f089f0051ba28e2514667): Error starting userland proxy: listen tcp4 0.0.0.0:5432: bind: address already in use.
+> ERROR: for db Cannot start server db: driver failed programming external connectivity on endpoint mathesar_dev_db (70c521f468cf2bd54014f089f0051ba28e2514667): Error starting userland proxy: listen tcp4 0.0.0.0:5432: bind: address already in use.
 
 1. First stop Postgres on your host machine.
 
