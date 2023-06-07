@@ -36,7 +36,7 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 !!! tip "Upgrade from within Mathesar"
     You can also run the upgrade from within Mathesar by logging in as an admin user and navigating to "Administration" (in the top right menu) > "Software Update"
 
-Manually upgrade Mathesar to the newest version using watch tower:
+Manually upgrade Mathesar to the newest version using Watchtower:
 
 === "Linux"
     ```
@@ -48,7 +48,7 @@ Manually upgrade Mathesar to the newest version using watch tower:
     docker exec mathesar-watchtower-1 /watchtower --run-once
     ```
 
-Manually upgrade Mathesar to the newest version without using watch tower:
+Manually upgrade Mathesar to the newest version without using Watchtower:
 
 === "Linux"
     ```

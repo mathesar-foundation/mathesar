@@ -27,3 +27,4 @@ This contains Kriti's notes from when she was revising docs in June 2023. This w
 - Generally aim for simpler language since it's more accessible to non-native speakers. e.g. "acquisition" is more succinct, but "where to buy" is simpler.
      - **Where to buy**: You can buy apples at the grocery store
      - **Acquisition**: You can buy apples at the grocery store
+- Don't use short-forms e.g. say "distributions", not "distros"
