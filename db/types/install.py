@@ -6,7 +6,7 @@ from db.types.operations.cast import install_all_casts
 
 
 def create_type_schema(engine):
-    create_schema(SCHEMA, engine)
+    create_schema(SCHEMA, engine, if_not_exists=True)
 
 
 def install_mathesar_on_database(engine):

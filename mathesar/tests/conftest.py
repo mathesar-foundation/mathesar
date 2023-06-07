@@ -328,7 +328,7 @@ def create_table(create_schema):
 
 def _get_datafile_for_path(path):
     with open(path, 'rb') as file:
-        datafile = DataFile.objects.create(file=File(file))
+        datafile = DataFile.objects.create(file=File(file), type='csv')
         return datafile
 
 
