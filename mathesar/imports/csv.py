@@ -2,15 +2,13 @@ from io import TextIOWrapper
 
 import clevercsv as csv
 
-from db.identifiers import truncate_if_necessary
 from db.tables.operations.alter import update_pk_sequence_to_latest
 from mathesar.database.base import create_mathesar_engine
-from mathesar.models.base import Table
 from db.records.operations.insert import insert_records_from_csv
 from db.tables.operations.create import create_string_column_table
-from db.tables.operations.select import get_oid_from_table
 from db.tables.operations.drop import drop_table
 from mathesar.errors import InvalidTableError
+from mathesar.imports.utils import process_column_names
 from db.constants import ID, ID_ORIGINAL, COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
 
@@ -109,7 +107,7 @@ def get_sv_reader(file, header, dialect=None):
     return reader
 
 
-def create_db_table_from_data_file(data_file, name, schema, comment=None):
+def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
     db_name = schema.database.name
     engine = create_mathesar_engine(db_name)
     sv_filename = data_file.file.path
@@ -119,7 +117,7 @@ def create_db_table_from_data_file(data_file, name, schema, comment=None):
     encoding = get_file_encoding(data_file.file)
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
-        column_names = _process_column_names(sv_reader.fieldnames)
+        column_names = process_column_names(sv_reader.fieldnames)
         table = create_string_column_table(
             name=name,
             schema=schema.name,
@@ -165,42 +163,4 @@ def create_db_table_from_data_file(data_file, name, schema, comment=None):
             encoding=encoding
         )
     reset_reflection(db_name=db_name)
-    return table
-
-
-def _process_column_names(column_names):
-    column_names = (
-        column_name.strip()
-        for column_name
-        in column_names
-    )
-    column_names = (
-        truncate_if_necessary(column_name)
-        for column_name
-        in column_names
-    )
-    column_names = (
-        f"{COLUMN_NAME_TEMPLATE}{i}" if name == '' else name
-        for i, name
-        in enumerate(column_names)
-    )
-    return list(column_names)
-
-
-def create_table_from_csv(data_file, name, schema, comment=None):
-    engine = create_mathesar_engine(schema.database.name)
-    db_table = create_db_table_from_data_file(
-        data_file, name, schema, comment=comment
-    )
-    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    # Using current_objects to create the table instead of objects. objects
-    # triggers re-reflection, which will cause a race condition to create the table
-    table = Table.current_objects.get(
-        oid=db_table_oid,
-        schema=schema,
-    )
-    table.import_verified = False
-    table.save()
-    data_file.table_imported_to = table
-    data_file.save()
     return table
