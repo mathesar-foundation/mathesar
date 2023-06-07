@@ -5,7 +5,7 @@
 
   --md-default-fg-color--light: #4b535d;
   --md-default-fg-color--lighter: #959da6;
-  --md-default-fg-color--lightest: #d4dee8;
+  --md-default-fg-color--lightest: #c3cdd8;
   --md-default-bg-color: #f9f8f6;
 
   --md-code-fg-color: #25292e;
@@ -63,7 +63,7 @@
 
 [data-md-color-scheme="slate"] .md-typeset h1 {
   border-bottom: 2px solid var(--md-primary-fg-color--light);
-  color: var(--md-primary-fg-color--light);
+  color: var(--md-primary-bg-color--lightest);
 }
 
 .md-nav__title {
@@ -94,26 +94,19 @@
 }
 
 .md-nav--secondary {
-  border-left: 1px solid var(--md-code-bg-color);
-  padding: 0.5em;
+  padding: 1em;
   position: relative;
   overflow: hidden;
+  border: 1px solid var(--md-code-bg-color);
+  border-radius: 4px;
 }
 
-[data-md-color-scheme="default"] .md-nav--secondary::before {
-  content: "";
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  width: calc(100% + 20px);
-  height: calc(100% + 20px);
-  background: linear-gradient(to right, #f1f0ec, transparent);
-  box-shadow: 0 0 20px 20px #f1f0ec;
-  z-index: -1;
+[data-md-color-scheme="default"] .md-nav--secondary {
+  background-color: #edece6;
 }
 
 [data-md-color-scheme="slate"] .md-nav--secondary {
-  border-left: 1px solid var(--md-primary-fg-color--light);
+  border: 1px solid var(--md-primary-fg-color--light);
 }
 
 .md-nav__list > .md-nav__item > .md-nav__link {
