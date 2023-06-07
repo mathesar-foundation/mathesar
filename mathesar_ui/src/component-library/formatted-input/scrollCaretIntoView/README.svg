@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="410"
+   height="425"
+   viewBox="0 0 108.47916 112.44792"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (1:1.2.2+202305151914+b0a8486541)"
+   sodipodi:docname="README.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="2.5597265"
+     inkscape:cx="242.40871"
+     inkscape:cy="247.09671"
+     inkscape:window-width="2185"
+     inkscape:window-height="1745"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <marker
+       style="overflow:visible"
+       id="marker1726"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Stop"
+       markerWidth="1"
+       markerHeight="8"
+       viewBox="0 0 1 8"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1"
+         d="M 0,4 V -4"
+         id="path1724" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Stop"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Stop"
+       markerWidth="1"
+       markerHeight="8"
+       viewBox="0 0 1 8"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1"
+         d="M 0,4 V -4"
+         id="path171" />
+    </marker>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-8.2619604,-10.952042)">
+    <rect
+       style="color:#000000;overflow:visible;fill:#ffffff;fill-opacity:1;stroke:#828282;stroke-width:1.029;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect257"
+       width="41.251839"
+       height="10.155456"
+       x="49.571327"
+       y="33.608505"
+       rx="1"
+       ry="1" />
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:5.64444px;line-height:6.51728px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="14.929567"
+       y="40.661118"
+       id="text261"><tspan
+         sodipodi:role="line"
+         id="tspan259"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:5.64444px;font-family:Roboto;-inkscape-font-specification:'Roboto Medium';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="14.929567"
+         y="40.661118">Lorem ipsum dolor sit amet consectetur</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.565;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 40.147112,42.790201 v -7.7439"
+       id="path263" />
+    <rect
+       style="color:#000000;overflow:visible;fill:none;stroke:#28a800;stroke-width:0.565;stroke-dasharray:1.695, 0.565;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect664"
+       width="34.223537"
+       height="9.5825806"
+       x="53.498085"
+       y="33.947144" />
+    <g
+       id="g2824"
+       transform="translate(-17.116486,-166.20436)">
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#28139d;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Stop);marker-end:url(#marker1726)"
+         d="M 32.284203,196.61508 H 66.279584"
+         id="path1872"
+         sodipodi:nodetypes="cc" />
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#28139d;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+         x="42.199039"
+         y="194.77316"
+         id="text1919"><tspan
+           sodipodi:role="line"
+           id="tspan1917"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#28139d;fill-opacity:1;stroke:none;stroke-width:0.529167"
+           x="42.199039"
+           y="194.77316">scrollLeft</tspan></text>
+    </g>
+    <g
+       id="g2807"
+       transform="translate(-17.116486,-157.30624)">
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#28139d;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Stop);marker-end:url(#marker1726)"
+         d="M 31.827889,210.76081 H 56.925144"
+         id="path2134"
+         sodipodi:nodetypes="cc" />
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#28139d;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+         x="29.650414"
+         y="214.85098"
+         id="text2142"><tspan
+           sodipodi:role="line"
+           id="tspan2140"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#28139d;fill-opacity:1;stroke:none;stroke-width:0.529167"
+           x="29.650414"
+           y="214.85098">widthOfTextBeforeCaret</tspan></text>
+    </g>
+    <g
+       id="g2841"
+       transform="translate(-17.116486,-140.65078)">
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#28139d;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Stop);marker-end:url(#marker1726)"
+         d="M 57.381464,187.14657 H 70.500487"
+         id="path1513"
+         sodipodi:nodetypes="cc" />
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#28139d;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+         x="56.687004"
+         y="191.12267"
+         id="text2317"><tspan
+           sodipodi:role="line"
+           id="tspan2315"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#28139d;fill-opacity:1;stroke:none;stroke-width:0.529167"
+           x="56.687004"
+           y="191.12267">undershoot</tspan></text>
+    </g>
+    <g
+       id="g2858"
+       transform="translate(-17.5728,-143.04643)">
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#28139d;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Stop);marker-end:url(#marker1726)"
+         d="m 66.735902,170.14888 h 3.30828"
+         id="path2375"
+         sodipodi:nodetypes="cc" />
+      <text
+         xml:space="preserve"
+         style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#28139d;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+         x="64.216187"
+         y="168.53513"
+         id="text2379"><tspan
+           sodipodi:role="line"
+           id="tspan2377"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#28139d;fill-opacity:1;stroke:none;stroke-width:0.529167"
+           x="64.216187"
+           y="168.53513">buffer</tspan></text>
+    </g>
+    <rect
+       style="color:#000000;overflow:visible;fill:#ffffff;fill-opacity:1;stroke:#828282;stroke-width:1.029;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect2501"
+       width="41.251839"
+       height="10.155456"
+       x="49.571327"
+       y="101.32358"
+       rx="1"
+       ry="1" />
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:5.64444px;line-height:6.51728px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="14.929567"
+       y="108.3762"
+       id="text2505"><tspan
+         sodipodi:role="line"
+         id="tspan2503"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:5.64444px;font-family:Roboto;-inkscape-font-specification:'Roboto Medium';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="14.929567"
+         y="108.3762">Lorem ipsum dolor sit amet consectetur</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.565;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 98.441204,110.50527 v -7.7439"
+       id="path2507" />
+    <rect
+       style="color:#000000;overflow:visible;fill:none;stroke:#28a800;stroke-width:0.565;stroke-dasharray:1.695, 0.565;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect2509"
+       width="34.223537"
+       height="9.5825806"
+       x="53.498085"
+       y="101.66222" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#28139d;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Stop);marker-end:url(#marker1726)"
+       d="M 87.949776,119.11623 H 98.330914"
+       id="path2511" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#28139d;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Stop);marker-end:url(#marker1726)"
+       d="M 15.167717,99.038422 H 49.163098"
+       id="path2513"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#28139d;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="25.082552"
+       y="97.3106"
+       id="text2517"><tspan
+         sodipodi:role="line"
+         id="tspan2515"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#28139d;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="25.082552"
+         y="97.3106">scrollLeft</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#28139d;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Stop);marker-end:url(#marker1726)"
+       d="m 49.277176,95.73015 h 41.52456"
+       id="path2519"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#28139d;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="59.192017"
+       y="94.230469"
+       id="text2523"><tspan
+         sodipodi:role="line"
+         id="tspan2521"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#28139d;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="59.192017"
+         y="94.230469">clientWidth</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#28139d;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Stop);marker-end:url(#marker1726)"
+       d="M 15.281795,114.78126 H 98.444984"
+       id="path2525"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#28139d;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="41.2817"
+       y="117.95878"
+       id="text2529"><tspan
+         sodipodi:role="line"
+         id="tspan2527"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#28139d;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="41.2817"
+         y="117.95878">widthOfTextBeforeCaret</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#28139d;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Stop);marker-end:url(#marker1726)"
+       d="m 87.493466,92.19372 h 3.30828"
+       id="path2531"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#28139d;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="84.97374"
+       y="90.579964"
+       id="text2535"><tspan
+         sodipodi:role="line"
+         id="tspan2533"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#28139d;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="84.97374"
+         y="90.579964">buffer</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#28139d;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="86.570839"
+       y="122.63601"
+       id="text2539"><tspan
+         sodipodi:role="line"
+         id="tspan2537"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#28139d;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="86.570839"
+         y="122.63601">overshoot</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="36.933083"
+       y="34.629887"
+       id="text5469"><tspan
+         sodipodi:role="line"
+         id="tspan5467"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="36.933083"
+         y="34.629887">caret</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="94.851013"
+       y="102.17848"
+       id="text5575"><tspan
+         sodipodi:role="line"
+         id="tspan5573"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="94.851013"
+         y="102.17848">caret</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#828282;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="71.824867"
+       y="31.505404"
+       id="text366"><tspan
+         sodipodi:role="line"
+         id="tspan364"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#828282;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="71.824867"
+         y="31.505404">input</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#28a800;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="72.792854"
+       y="46.872208"
+       id="text1039"><tspan
+         sodipodi:role="line"
+         id="tspan1037"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#28a800;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="72.792854"
+         y="46.872208">buffer zone</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="14.508801"
+       y="18.271933"
+       id="text1039-3"><tspan
+         sodipodi:role="line"
+         id="tspan1037-6"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="14.508801"
+         y="18.271933">We need to modify the scrollLeft value to eliminate undershoot</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:3.52778px;line-height:4.0733px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="8.3239832"
+       y="14.295575"
+       id="text1308"><tspan
+         sodipodi:role="line"
+         id="tspan1306"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52778px;font-family:Roboto;-inkscape-font-specification:'Roboto Bold';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="8.3239832"
+         y="14.295575">When the cursor is to the left of the input</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:3.52778px;line-height:4.0733px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="8.3239832"
+       y="79.625977"
+       id="text1312"><tspan
+         sodipodi:role="line"
+         id="tspan1310"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52778px;font-family:Roboto;-inkscape-font-specification:'Roboto Bold';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="8.3239832"
+         y="79.625977">When the cursor is to the right of the input</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-weight:900;font-size:2.82222px;line-height:3.25864px;font-family:Roboto;-inkscape-font-specification:'Roboto Heavy';text-decoration:none;text-decoration-line:none;text-decoration-color:#000000;letter-spacing:0px;overflow:visible;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       x="14.508801"
+       y="83.908005"
+       id="text1316"><tspan
+         sodipodi:role="line"
+         id="tspan1314"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.529167"
+         x="14.508801"
+         y="83.908005">We need to modify the scrollLeft value to eliminate overshoot</tspan></text>
+  </g>
+</svg>
