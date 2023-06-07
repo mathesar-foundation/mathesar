@@ -19,7 +19,7 @@ The installation script will set up:
 - A reverse proxy server to serve static files and set up SSL certificates
 - An upgrade server to handle upgrading Mathesar via the web interface
 
-If you'd like to know the steps performed by the install script in more detail, you can read our [Guided installation script: under the hood](./under-the-hood.md) document.
+If you'd like to know the steps performed by the install script in more detail, you can read our [Guided installation: under the hood](./under-the-hood.md) document.
 
 ## Step-by-step guide {: #steps}
 
