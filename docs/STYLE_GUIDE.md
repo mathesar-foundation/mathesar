@@ -1,3 +1,5 @@
+# Documentation style guide
+
 This contains Kriti's notes from when she was revising docs in June 2023. This will eventually be a style guide.
 
 - Use sentence case for titles. Don't capitalize random nouns.
@@ -10,7 +12,7 @@ This contains Kriti's notes from when she was revising docs in June 2023. This w
 - When referencing external services or software, refer to them how they refer to themselves. e.g. write "Let's Encrypt", not "lets encrypt"
 - When linking to external sites, identify the site. e.g. don't say "[Django settings](https://docs.djangoproject.com/en/4.2/topics/settings/)", say "Django settings ([see Django docs](https://docs.djangoproject.com/en/4.2/topics/settings/))".
     - We don't want to send users to external websites unexpectedly – external links should be clearly identified.
-- Everything item in a single list should be the same type of thing.
+- Every item in a single list should be the same type of thing.
     - Good list:
         - Apples
         - Oranges

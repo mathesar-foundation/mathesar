@@ -46,7 +46,7 @@ This page contains all available environment variables supported by Mathesar. Se
 
 ### `DOMAIN_NAME`
 
-- **Description**: The public URL that will be used to access Mathesar ([see Caddy docsL](https://caddyserver.com/docs/caddyfile/concepts#addresses)).
+- **Description**: The public URL that will be used to access Mathesar ([see Caddy docs](https://caddyserver.com/docs/caddyfile/concepts#addresses)).
 - **Format**: A URL or hostname
 
     !!! info "Example values"
