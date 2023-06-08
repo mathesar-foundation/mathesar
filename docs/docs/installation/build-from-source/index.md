@@ -31,6 +31,10 @@ You'll need to install the following system packages before you install Mathesar
 
     _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
 
+- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 6 or newer (Verify with `npm --version`)
+
+    _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
+
 - [Caddy](https://caddyserver.com/docs/install) (Verify with `caddy version`)
 
 - [git](https://git-scm.com/downloads) (Verify with `git --version`)
@@ -283,6 +287,12 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     sudo systemctl enable gunicorn.service
     ```
 
+1. Check the logs to verify if Gunicorn is running without any errors
+    
+    ```sh
+    sudo journalctl --priority=notice --unit=gunicorn.service
+    ```
+
 ### Set up the Caddy reverse proxy
 
 !!! info ""
@@ -371,6 +381,13 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     sudo systemctl start caddy.service && \
     sudo systemctl enable caddy.service
     ```
+
+1. Check the logs to verify if Caddy is running without any errors
+    
+    ```sh
+    sudo journalctl --priority=notice --unit=caddy.service
+    ```
+
 
 Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
 
