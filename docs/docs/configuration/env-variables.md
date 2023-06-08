@@ -5,7 +5,7 @@ This page contains all available environment variables supported by Mathesar. Se
 
 ## Backend configuration {: #backend}
 
-### `SECRET KEY`
+### `SECRET_KEY`
 
 - **Description**: A unique random string used by Django for cryptographic signing ([see Django docs](https://docs.djangoproject.com/en/3.2/ref/settings/#std:setting-SECRET_KEY)).
 - **Format**: A 50 character string

@@ -34,9 +34,6 @@ You'll need to:
     - Database username
     - Database password
 
-!!! warning "Create"
-    This installation procedure is intended for users who want to run a bare-bones version of the Mathesar web server. 
-
 #### Databases connected to Mathesar's UI
 Have the following information for all databases you'd like to connect to Mathesar's UI before installation:
 
