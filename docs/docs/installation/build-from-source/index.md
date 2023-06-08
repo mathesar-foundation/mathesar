@@ -1,49 +1,59 @@
 # Install Mathesar from source on Linux
 
-
-!!! warning ""
-    To follow this guide you need to have a good knowledge of Linux server administration, and be familiar with using the command line interface and some common utilities.
-
-
+!!! warning "For experienced Linux sysadmins"
+    To follow this guide you need be experienced with Linux server administration, including the command line interface and some common utilities.
 
 
 ## Requirements
 
-- We've tested this on **Ubuntu**, but we expect it work on other Linux distros too.
-- You'll need **root** privileges.
-- You'll need to install the following system packages before installing Mathesar:
+### System
+We recommend having at least 60 GB disk space and 4 GB of RAM.
 
-    - [Python](https://www.python.org/downloads/) 3.9
+### Operating System
+We've tested this on **Ubuntu**, but we expect that it can be adapted for other Linux distributions as well.
 
-        !!! note "Python version"
-            Python _older_ than 3.9 will not run Mathesar.
+### Access
+You should have **root access** to the machine you're installing Mathesar on.
 
-            Python _newer_ than 3.9 will run Mathesar, but will require some slightly modified installation steps which we have [not yet documented](https://github.com/centerofci/mathesar/issues/2872).
+### Software
+You'll need to install the following system packages before you install Mathesar:
 
-    - [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify with `psql --version`)
+- [Python](https://www.python.org/downloads/) 3.9
 
-    - [NodeJS](https://nodejs.org/en/download) 14 or newer (Verify with `node --version`)
+    !!! note "Python version"
+        Python _older_ than 3.9 will not run Mathesar.
 
-        _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
-    - [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 14 or newer (Verify with `node --version`)
+        Python _newer_ than 3.9 will run Mathesar, but will require some slightly modified installation steps which we have [not yet documented](https://github.com/centerofci/mathesar/issues/2872).
 
-        _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
+- [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify with `psql --version`)
 
-    - [Caddy](https://caddyserver.com/docs/install) (Verify with `caddy version`)
+- [NodeJS](https://nodejs.org/en/download) 14 or newer (Verify with `node --version`)
 
-    - [git](https://git-scm.com/downloads) (Verify with `git --version`)
+    _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
 
-- We recommend having at least 60 GB disk space and 4 GB of RAM.
-- You'll need a domain name or subdomain for your installation.
-    Type your domain name into the box below. Do not include a trailing slash.
+- [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 14 or newer (Verify with `node --version`)
 
-    <input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
+    _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
 
-    Then press <kbd>Enter</kbd> to customize this guide with your domain name.
+- [Caddy](https://caddyserver.com/docs/install) (Verify with `caddy version`)
 
+- [git](https://git-scm.com/downloads) (Verify with `git --version`)
 
 
-## Install
+### Domain (optional)
+If you want Mathesar to be accessible over the internet, you'll probably want to set up a domain or sub-domain to use. **If you don't need a domain, you can skip this section.**
+
+Before you start installation, **ensure that the DNS for your sub-domain or domain is pointing to the machine that you're installing Mathesar on**.
+
+## Customizing this Guide
+Type your domain name into the box below. Do not include a trailing slash.
+
+<input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
+
+Then press <kbd>Enter</kbd> to customize this guide with your domain name.
+
+
+## Installation Steps
 
 ### Set up the database
 
@@ -364,17 +374,12 @@
     ```
 
 
-1. Reload the systemctl and Start the Caddy socket
+1. Reload the systemctl and start the Caddy socket
 
     ```sh
     sudo systemctl daemon-reload && \
     sudo systemctl start caddy.service && \
     sudo systemctl enable caddy.service
-    ```
-1. Check the logs to verify if Caddy is running without any errors
-    
-    ```sh
-    sudo journalctl --priority=notice --unit=caddy.service
     ```
 
 Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
@@ -448,7 +453,7 @@ Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
     ```
 
 
-### Uninstall
+### Uninstalling Mathesar {:#uninstall}
 
 1. Stop Caddy service
 
