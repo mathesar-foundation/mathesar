@@ -98,6 +98,11 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+__msar.build_text_tuple(text[]) RETURNS text AS $$
+SELECT '(' || string_agg(col, ', ') || ')' FROM unnest($1) x(col);
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- INFO FUNCTIONS
@@ -860,6 +865,63 @@ Args:
   raw_default: Whether to treat defaults as raw SQL. DANGER!
 */
 SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw_default);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- MATHESAR ADD CONSTRAINTS FUNCTIONS
+--
+-- Add constraints to tables and (for NOT NULL) columns.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+-- Constraint creation definition type -------------------------------------------------------------
+
+DROP TYPE IF EXISTS __msar.table_constraint_create_def CASCADE;
+CREATE TYPE __msar.table_constraint_create_def AS (
+/*
+This should be used in the context of a single ALTER TABLE command. So, no need to reference the
+constrained table's OID.
+*/
+  name_ text, -- The name of the constraint to create, qualified and quoted.
+  type_ "char", -- The type of constraint to create, as a "char". See pg_constraint.contype
+  col_names text[], -- The columns for the constraint, quoted.
+  foreign_rel_name text, -- The foreign table for an fkey, qualified and quoted.
+  foreign_col_names text[], -- The foreign table's columns for an fkey, quoted.
+  expression text -- Text SQL giving the expression for the constraint (if applicable).
+);
+
+
+CREATE OR REPLACE FUNCTION
+__msar.add_constraints(tab_name text, con_defs variadic __msar.table_constraint_create_def[])
+  RETURNS TEXT AS $$
+WITH con_cte AS (
+  SELECT string_agg(
+    CASE
+      WHEN con.type_ = 'u' THEN
+        format('ADD CONSTRAINT %s UNIQUE %s', con.name_, __msar.build_text_tuple(con.col_names))
+      WHEN con.type_ = 'p' THEN
+        format(
+          'ADD CONSTRAINT %s PRIMARY KEY %s', con.name_, __msar.build_text_tuple(con.col_names)
+        )
+      WHEN con.type_ = 'f' THEN
+        format(
+          'ADD CONSTRAINT %s FOREIGN KEY %s REFERENCES %s %s',
+          con.name_,
+          __msar.build_text_tuple(con.col_names),
+          con.foreign_rel_name,
+          __msar.build_text_tuple(con.foreign_col_names)
+        )
+      ELSE
+        NULL
+    END,
+    ', '
+  ) as con_additions
+  FROM unnest(con_defs) as con
+)
+SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, con_additions) FROM con_cte;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
