@@ -382,6 +382,13 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     sudo systemctl enable caddy.service
     ```
 
+1. Check the logs to verify if Caddy is running without any errors
+    
+    ```sh
+    sudo journalctl --priority=notice --unit=caddy.service
+    ```
+
+
 Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
 
 
