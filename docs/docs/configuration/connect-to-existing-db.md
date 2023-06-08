@@ -77,7 +77,7 @@ You can try using `host.docker.internal` instead of `localhost`. Below are detai
 1. Set the value of [`MATHESAR_DATABASES` environment variable](./env-variables.md#mathesar_databases) to the following:
 
     ```
-    MATHESAR_DATABASES=(mathesar_tables|postgresql://<user_name>:<password>@host.docker.internal:<port-no>/<host_db_name>)
+    MATHESAR_DATABASES=(<unique_id>|postgresql://<user_name>:<password>@host.docker.internal:<port-no>/<host_db_name>)
     ```
 
 1. If your Mathesar installation is Docker Compose based, add an extra host for the prod container in the `docker-compose.yml` file:
