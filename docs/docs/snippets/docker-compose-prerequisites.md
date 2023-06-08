@@ -1,22 +1,35 @@
-- You need **[Docker](https://docs.docker.com/desktop/) and [Docker Compose](https://docs.docker.com/compose/install/)**.
+### Operating System
+You can install Mathesar using this method on Linux, MacOS, and Windows.
 
-    We've tested with Docker v23 and Docker Compose v2.10. Older versions may not work.
+### Access
+You should have **root access** to the machine you're installing Mathesar on.
 
-- You need **root access**.
+### Software
+You'll need to install the following software before you install Mathesar:
 
-- If using a custom domain name
+- **[Docker](https://docs.docker.com/desktop/)** v23+
+- **[Docker Compose](https://docs.docker.com/compose/install/)** v2.10+
+- **If you're installing on Windows:**
+    - Ensure you have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed
+    - Turn on Docker Desktop WSL 2, [see Docker docs for more information](https://docs.docker.com/desktop/windows/wsl/#turn-on-docker-desktop-wsl-2)
 
-    Have your domain name ready during the installation process and have your DNS pointing to your Mathesar server.
+### Domain (optional)
+If you want Mathesar to be accessible over the internet, you'll probably want to set up a domain or sub-domain to use. **If you don't need a domain, you can skip this section.**
 
-- If connecting to an existing database
+Before you start installation, **ensure that the DNS for your sub-domain or domain is pointing to the machine that you're installing Mathesar on**.
 
-    - Ensure the external database can accept network connections from your Mathesar server.
-    - Have the following information handy before installation:
+### Database (optional)
+You can create a new PostgreSQL database while setting up Mathesar or use our UI to interact with an existing database. **If you don't have a database you want to connect to, you can skip this section.**
 
-        - Database hostname _(refer [Connect to existing Database server](/configuration/connect-to-existing-db) document to find instructions to connect to an existing database)_
-        - Database port
-        - Database name
-        - Database username _(should exist and be a `SUPERUSER` [more info](https://www.postgresql.org/docs/13/sql-createrole.html))_
-        - Database password
+To connect Mathesar to an existing database:
 
-- If installing on Windows, you need to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed first and [Turn on wsl-2 in docker desktop](https://docs.docker.com/desktop/windows/wsl/#turn-on-docker-desktop-wsl-2)
+- The external database should be able to accept network connections from your Mathesar server.
+- You'll need to set up a database user for Mathesar to use. The user should be a `SUPERUSER`, [see PostgreSQL docs for more information](https://www.postgresql.org/docs/13/sql-createrole.html).
+- Have the following information handy before installation:
+    - Database hostname
+    - Database port
+    - Database name
+    - Database username
+    - Database password
+
+See _[Connect to an existing database](/configuration/connect-to-existing-db)_ for more details.
