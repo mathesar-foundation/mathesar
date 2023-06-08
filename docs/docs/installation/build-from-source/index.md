@@ -31,7 +31,7 @@ You'll need to install the following system packages before you install Mathesar
 
     _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
 
-- [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 6 or newer (Verify with `npm --version`)
+- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 6 or newer (Verify with `npm --version`)
 
     _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
 
