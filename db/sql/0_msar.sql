@@ -153,7 +153,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_relation_oid(sch_name text, rel_name text) RETURNS text AS $$/*
+msar.get_relation_oid(sch_name text, rel_name text) RETURNS oid AS $$/*
 Return the OID for a given relation (e.g., table).
 
 The relation *must* be in the pg_class table to use this function.
