@@ -35,6 +35,7 @@ export const querySummarizationFunctionIds = [
   'count',
   'sum',
   'median',
+  'mode',
 ] as const;
 
 export type QuerySummarizationFunctionId =
@@ -143,11 +144,11 @@ export type QueryColumnSource =
 
 export interface QueryInitialColumnMetaData
   extends QueryResultColumn,
-  QueryInitialColumnSource { }
+    QueryInitialColumnSource {}
 
 export interface QueryVirtualColumnMetaData
   extends QueryResultColumn,
-  QueryGeneratedColumnSource { }
+    QueryGeneratedColumnSource {}
 
 export type QueryColumnMetaData =
   | QueryInitialColumnMetaData
