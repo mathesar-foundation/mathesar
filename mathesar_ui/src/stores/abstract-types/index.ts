@@ -13,3 +13,4 @@ export {
   getLimitedFilterInformationById,
 } from './operations/filtering';
 export { getPreprocFunctionsForAbstractType } from './operations/preprocFunctions';
+export { getSummarizationFunctionsForAbstractType } from './operations/summarization';
