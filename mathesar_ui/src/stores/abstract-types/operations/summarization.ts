@@ -36,6 +36,12 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
       [abstractTypeCategory.Duration]: abstractTypeCategory.Duration,
     },
   },
+  median: {
+    label: 'Median',
+    inputOutputTypeMap: mapAllInputTypesToOneOutputType(
+      abstractTypeCategory.Number,
+    ),
+  },
 };
 
 export function getSummarizationFunctionsForAbstractType(
