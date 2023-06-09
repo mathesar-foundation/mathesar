@@ -147,7 +147,7 @@ export interface QueryInitialColumnMetaData
 
 export interface QueryVirtualColumnMetaData
   extends QueryResultColumn,
-    QueryGeneratedColumnSource { }
+    QueryGeneratedColumnSource {}
 
 export type QueryColumnMetaData =
   | QueryInitialColumnMetaData
