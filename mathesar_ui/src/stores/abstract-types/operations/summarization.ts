@@ -15,6 +15,12 @@ function mapAllInputTypesToOneOutputType(
   );
 }
 
+function mapInpuTypesToCorrespondingOutputTypes(): AbstractTypeSummarizationFunctionsResponseValue['inputOutputTypeMap'] {
+  return Object.fromEntries(
+    Object.values(abstractTypeCategory).map((t) => [t, t]),
+  );
+}
+
 const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
   distinct_aggregate_to_array: {
     label: 'List',
@@ -38,9 +44,7 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
   },
   median: {
     label: 'Median',
-    inputOutputTypeMap: mapAllInputTypesToOneOutputType(
-      abstractTypeCategory.Number,
-    ),
+    inputOutputTypeMap: mapInpuTypesToCorrespondingOutputTypes(),
   },
 };
 
