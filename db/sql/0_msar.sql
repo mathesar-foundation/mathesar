@@ -879,8 +879,8 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 -- Constraint creation definition type -------------------------------------------------------------
 
-DROP TYPE IF EXISTS __msar.table_constraint_create_def CASCADE;
-CREATE TYPE __msar.table_constraint_create_def AS (
+DROP TYPE IF EXISTS __msar.con_create_def CASCADE;
+CREATE TYPE __msar.con_create_def AS (
 /*
 This should be used in the context of a single ALTER TABLE command. So, no need to reference the
 constrained table's OID.
@@ -895,7 +895,7 @@ constrained table's OID.
 
 
 CREATE OR REPLACE FUNCTION
-__msar.add_constraints(tab_name text, con_defs variadic __msar.table_constraint_create_def[])
+__msar.add_constraints(tab_name text, con_defs variadic __msar.con_create_def[])
   RETURNS TEXT AS $$
 WITH con_cte AS (
   SELECT string_agg(
