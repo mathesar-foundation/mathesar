@@ -86,7 +86,8 @@ interface SheetClipboardHandlerDeps<
 export class SheetClipboardHandler<
   Row extends QueryRow | RecordRow,
   Column extends ProcessedQueryOutputColumn | ProcessedColumn,
-> implements ClipboardHandler {
+> implements ClipboardHandler
+{
   private readonly deps: SheetClipboardHandlerDeps<Row, Column>;
 
   constructor(deps: SheetClipboardHandlerDeps<Row, Column>) {
