@@ -34,6 +34,7 @@ export const querySummarizationFunctionIds = [
   'distinct_aggregate_to_array',
   'count',
   'sum',
+  'max',
 ] as const;
 
 export type QuerySummarizationFunctionId =
@@ -142,11 +143,11 @@ export type QueryColumnSource =
 
 export interface QueryInitialColumnMetaData
   extends QueryResultColumn,
-    QueryInitialColumnSource {}
+  QueryInitialColumnSource { }
 
 export interface QueryVirtualColumnMetaData
   extends QueryResultColumn,
-    QueryGeneratedColumnSource {}
+  QueryGeneratedColumnSource { }
 
 export type QueryColumnMetaData =
   | QueryInitialColumnMetaData

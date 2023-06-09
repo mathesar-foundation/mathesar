@@ -36,6 +36,12 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
       [abstractTypeCategory.Duration]: abstractTypeCategory.Duration,
     },
   },
+  max: {
+    label: 'Max',
+    inputOutputTypeMap: mapAllInputTypesToOneOutputType(
+      abstractTypeCategory.Number,
+    ),
+  },
 };
 
 export function getSummarizationFunctionsForAbstractType(
