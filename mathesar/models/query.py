@@ -420,7 +420,7 @@ def _get_default_display_name_for_agg_output_alias(
             ArrayAgg.id: " list",
             Count.id: " count",
             Sum.id: " sum",
-            Median.id: "median",
+            Median.id: " median",
         }
         suffix_to_add = map_of_agg_function_to_suffix.get(agg_function)
         if suffix_to_add:
