@@ -50,6 +50,12 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
     label: 'Mode',
     inputOutputTypeMap: mapInpuTypesToCorrespondingOutputTypes(),
   },
+  percentage_true: {
+    label: 'Percentage True',
+    inputOutputTypeMap: {
+      [abstractTypeCategory.Boolean]: abstractTypeCategory.Number,
+    },
+  },
 };
 
 export function getSummarizationFunctionsForAbstractType(
