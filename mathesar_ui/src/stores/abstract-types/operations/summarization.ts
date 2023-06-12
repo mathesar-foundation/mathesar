@@ -48,7 +48,7 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
   },
   mode: {
     label: 'Mode',
-    inputOutputTypeMap: mapInpuTypesToCorrespondingOutputTypes(),
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
 };
 
