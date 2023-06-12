@@ -44,9 +44,7 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
   },
   median: {
     label: 'Median',
-    inputOutputTypeMap: mapAllInputTypesToOneOutputType(
-      abstractTypeCategory.Number,
-    ),
+    inputOutputTypeMap: mapInpuTypesToCorrespondingOutputTypes(),
   },
   mode: {
     label: 'Mode',
