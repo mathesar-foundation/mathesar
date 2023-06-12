@@ -15,7 +15,7 @@ function mapAllInputTypesToOneOutputType(
   );
 }
 
-function mapInpuTypesToCorrespondingOutputTypes(): AbstractTypeSummarizationFunctionsResponseValue['inputOutputTypeMap'] {
+function mapInputTypesToTheSameOutputType(): AbstractTypeSummarizationFunctionsResponseValue['inputOutputTypeMap'] {
   return Object.fromEntries(
     Object.values(abstractTypeCategory).map((t) => [t, t]),
   );
@@ -44,11 +44,11 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
   },
   median: {
     label: 'Median',
-    inputOutputTypeMap: mapInpuTypesToCorrespondingOutputTypes(),
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
   mode: {
     label: 'Mode',
-    inputOutputTypeMap: mapInpuTypesToCorrespondingOutputTypes(),
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
   percentage_true: {
     label: 'Percentage True',
