@@ -32,7 +32,7 @@ def verify_data_file_data(data_file, data_file_dict):
 @pytest.fixture
 def data_file(patents_csv_filepath):
     with open(patents_csv_filepath, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
+        data_file = DataFile.objects.create(file=File(csv_file), type='csv')
     return data_file
 
 

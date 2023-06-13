@@ -44,6 +44,7 @@ class DistinctArrayAgg(DBFunctionPacked):
 
     def unpack(self):
         param0 = self.parameters[0]
+        param0 = base._maybe_downcast(param0)
         return base.ArrayAgg([
             base.Distinct([param0]),
         ])

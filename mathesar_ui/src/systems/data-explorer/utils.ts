@@ -11,11 +11,13 @@ import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,
   getPreprocFunctionsForAbstractType,
+  getSummarizationFunctionsForAbstractType,
 } from '@mathesar/stores/abstract-types';
 import type {
   AbstractType,
   AbstractTypesMap,
   AbstractTypePreprocFunctionDefinition,
+  AbstractTypeSummarizationFunction,
 } from '@mathesar/stores/abstract-types/types';
 import {
   getCellCap,
@@ -45,6 +47,7 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   initialInputValue: unknown;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
+  summarizationFunctions: AbstractTypeSummarizationFunction[];
   source: ProcessedQueryResultColumnSource;
   formatCellValue: (cellValue: unknown) => string | null | undefined;
 }
@@ -331,6 +334,9 @@ function processColumn(
     ),
     allowedFiltersMap: getFiltersForAbstractType(abstractType.identifier),
     preprocFunctions: getPreprocFunctionsForAbstractType(
+      abstractType.identifier,
+    ),
+    summarizationFunctions: getSummarizationFunctionsForAbstractType(
       abstractType.identifier,
     ),
     source,

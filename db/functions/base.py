@@ -408,6 +408,18 @@ class ArrayAgg(DBFunction):
         return array_agg(column_expr)
 
 
+class Sum(DBFunction):
+    id = 'sum'
+    name = 'sum'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return sa_call_sql_function('sum', column_expr, return_type=PostgresType.NUMERIC)
+
+
 class Distinct(DBFunction):
     id = 'distinct'
     name = 'distinct'

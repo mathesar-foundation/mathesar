@@ -6,7 +6,7 @@ from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.transforms.operations.deserialize import deserialize_transformation
 from db.transforms.operations.serialize import serialize_transformation
 from db.transforms.base import Summarize
-from db.functions.base import Count, ArrayAgg, Min
+from db.functions.base import Count, ArrayAgg, Sum, Min
 from db.functions.packed import DistinctArrayAgg
 
 from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
@@ -418,7 +418,8 @@ def _get_default_display_name_for_agg_output_alias(
         map_of_agg_function_to_suffix = {
             DistinctArrayAgg.id: " distinct list",
             ArrayAgg.id: " list",
-            Count.id: " count",
+            Count.id: " count",            
+            Sum.id: " sum",
             Min.id: "min",
         }
         suffix_to_add = map_of_agg_function_to_suffix.get(agg_function)
