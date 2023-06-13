@@ -15,6 +15,15 @@
   import { modal } from './stores/modal';
   import { setReleasesStoreInContext } from './stores/releases';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
+  import { setLocale } from './i18n/i18n-svelte';
+  import { loadLocaleAsync } from './i18n/i18n-util.async';
+
+  (() => {
+    // TODO: Later load this in parallel with first chunk
+    void loadLocaleAsync('en')
+      .then(() => setLocale('en'))
+      .catch(() => {});
+  })();
 
   const commonData = preloadCommonData();
   if (commonData?.user) {

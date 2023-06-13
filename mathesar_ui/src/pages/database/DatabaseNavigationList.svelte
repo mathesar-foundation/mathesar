@@ -10,6 +10,7 @@
   import DatabaseName from '@mathesar/components/DatabaseName.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import type { Database } from '@mathesar/AppTypes';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
 </script>
@@ -19,7 +20,7 @@
     <MenuHeading
       style="display:flex;align-items:center;margin-bottom:var(--size-super-ultra-small)"
     >
-      <span class="title">All Databases ({$databases.data.length})</span>
+      <span class="title">{$LL.allDatabases()} ({$databases.data.length})</span>
       <span class="help">
         <Help>
           To add or remove databases, modify the

@@ -11,7 +11,8 @@
     "build": "vite build",
     "test": "vitest",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "typesafe-i18n": "typesafe-i18n"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^6.5.12",
@@ -66,6 +67,7 @@
     "iter-tools": "^7.4.0",
     "js-cookie": "^3.0.1",
     "papaparse": "^5.4.1",
-    "perfect-scrollbar": "^1.5.5"
+    "perfect-scrollbar": "^1.5.5",
+    "typesafe-i18n": "^5.24.3"
   }
 }
