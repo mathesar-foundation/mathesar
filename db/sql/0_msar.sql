@@ -888,15 +888,44 @@ constrained table's OID.
   name_ text, -- The name of the constraint to create, qualified and quoted.
   type_ "char", -- The type of constraint to create, as a "char". See pg_constraint.contype
   col_names text[], -- The columns for the constraint, quoted.
-  foreign_rel_name text, -- The foreign table for an fkey, qualified and quoted.
-  foreign_col_names text[], -- The foreign table's columns for an fkey, quoted.
+  fk_rel_name text, -- The foreign table for an fkey, qualified and quoted.
+  fk_col_names text[], -- The foreign table's columns for an fkey, quoted.
+  fk_upd_action "char", -- Action taken when fk referent is updated. See pg_constraint.confupdtype.
+  fk_del_action "char", -- Action taken when fk referent is deleted. See pg_constraint.confdeltype.
+  fk_match_type "char", -- The match type of the fk constraint. See pg_constraint.confmatchtype.
   expression text -- Text SQL giving the expression for the constraint (if applicable).
 );
 
 
+CREATE OR REPLACE FUNCTION msar.get_fkey_action_from_char("char") RETURNS text AS $$
+SELECT CASE
+  WHEN $1 = 'a' THEN 'NO ACTION'
+  WHEN $1 = 'r' THEN 'RESTRICT'
+  WHEN $1 = 'c' THEN 'CASCADE'
+  WHEN $1 = 'n' THEN 'SET NULL'
+  WHEN $1 = 'd' THEN 'SET DEFAULT'
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_fkey_match_type_from_char("char") RETURNS text AS $$
+SELECT CASE
+  WHEN $1 = 'f' THEN 'FULL'
+  WHEN $1 = 'p' THEN 'PARTIAL'
+  WHEN $1 = 's' THEN 'SIMPLE'
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 __msar.add_constraints(tab_name text, con_defs variadic __msar.con_create_def[])
-  RETURNS TEXT AS $$
+  RETURNS TEXT AS $$/*
+Add the given constraints to the given table.
+
+Args:
+  tab_name: Fully-qualified, quoted table name.
+  con_defs: The constraints to be added.
+*/
 WITH con_cte AS (
   SELECT string_agg(
     CASE
@@ -908,11 +937,14 @@ WITH con_cte AS (
         )
       WHEN con.type_ = 'f' THEN
         format(
-          'ADD CONSTRAINT %s FOREIGN KEY %s REFERENCES %s %s',
+          'ADD CONSTRAINT %s FOREIGN KEY %s REFERENCES %s%s%s%s',
           con.name_,
           __msar.build_text_tuple(con.col_names),
-          con.foreign_rel_name,
-          __msar.build_text_tuple(con.foreign_col_names)
+          con.fk_rel_name,
+          __msar.build_text_tuple(con.fk_col_names),
+          ' ON UPDATE ' || msar.get_fkey_action_from_char(con.fk_upd_action),
+          ' ON DELETE ' || msar.get_fkey_action_from_char(con.fk_del_action),
+          ' MATCH ' || msar.get_fkey_match_type_from_char(con.fk_match_type)
         )
       ELSE
         NULL
