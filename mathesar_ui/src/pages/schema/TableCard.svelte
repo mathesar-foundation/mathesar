@@ -26,6 +26,7 @@
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
+  import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
   import EditTable from './EditTable.svelte';
 
   const recordSelector = getRecordSelectorFromContext();
@@ -53,6 +54,12 @@
   function handleDeleteTable() {
     void confirmDelete({
       identifierType: 'Table',
+      body: {
+        component: TableDeleteConfirmationBody,
+        props: {
+          tableName: table.name,
+        },
+      },
       onProceed: async () => {
         await deleteTable(table.id);
         await refetchTablesForSchema(schema.id);
@@ -111,7 +118,6 @@
       triggerClass="dropdown-menu-button"
       closeOnInnerClick={true}
       placements={['bottom-end', 'right-start', 'left-start']}
-      trigger
       label=""
       icon={iconMoreActions}
       size="small"

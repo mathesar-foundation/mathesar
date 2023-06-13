@@ -1,17 +1,15 @@
 version: "3.9"
-
+# Please refer the documentation located at https://docs.mathesar.org/installation/docker-compose/ for the setting up Mathesar using this docker-compose.yml.
 services:
   db:
-    profiles: ["dev", "prod", "test"]
     image: postgres:13
     container_name: mathesar_db
     environment:
+    # These environment variables are used to create a database and superuser when the `db` service starts.
+    # Refer to https://hub.docker.com/_/postgres for more information on these variables.
       - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
-    # db container is exposed to the other containers, and the host.
-    ports:
-      - "${POSTGRES_PORT-5432}:5432"
     expose:
       - "5432"
     volumes:
@@ -22,11 +20,14 @@ services:
       timeout: 1s
       retries: 30
       start_period: 5s
+   # A caddy reverse proxy sitting in-front of all the services.
+   # It is responsible for routing traffic to the respective services
+   # It is also responsible for serving static files, automatically providing SSL certificate
+   # and preventing certain DDOS attacks
   caddy-reverse-proxy:
-    profiles: ["prod"]
     image: mathesar/mathesar-caddy:latest
     environment:
-      - DOMAIN_NAME=${DOMAIN_NAME}
+      - DOMAIN_NAME=${DOMAIN_NAME-http://localhost}
     # caddy container is exposed to the other containers, and the host.
     ports:
       - "${HTTP_PORT-80}:80"
@@ -38,8 +39,11 @@ services:
       - caddy_config:/config
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
-  base-service:
-    profiles: ["web-server"]
+  # A gunicorn WSGI HTTP Server that
+  # runs the Mathesar App.
+  # It depends on the `db` service
+  # and will start the `db` service automatically before starting itself.
+  service:
     container_name: mathesar_service
     image: mathesar/mathesar-prod:latest
     environment:
@@ -49,25 +53,15 @@ services:
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.production}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
       - SECRET_KEY=${SECRET_KEY}
-      - DJANGO_DATABASE_KEY=${DJANGO_DATABASE_KEY-default}
       - DJANGO_DATABASE_URL=${DJANGO_DATABASE_URL-postgres://mathesar:mathesar@mathesar_db:5432/mathesar_django}
       - MATHESAR_DATABASES=${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
       - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
-    command: ./run.sh
-    volumes:
-      - static:/code/static
-      - media:/code/media
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-  service:
-    profiles: ["prod"]
-    extends: base-service
-    image: mathesar/mathesar-prod:latest
-    # Volumes are not shared when extending
+    entrypoint: ./run.sh
     volumes:
       - static:/code/static
       - media:/code/media
     depends_on:
+      # Comment the below field to disable starting the database service automatically
       db:
         condition: service_healthy
     labels:
@@ -78,51 +72,14 @@ services:
       timeout: 5s
       retries: 30
       start_period: 5s
-    # On prod, the HTTP port is exposed to other containers, but not the host.
+    # On prod, the HTTP port is exposed to other containers, but not the host to prevent any unnecessary conflicts with external services.
+    # Do not make any changes to this port
     expose:
       - "8000"
-  test-service:
-    profiles: ["test"]
-    extends: base-service
-    container_name: mathesar_service_test
-    image: mathesar/mathesar-test:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PYTHON_REQUIREMENTS: requirements-dev.txt
-    depends_on:
-      - db
-    # On testing, the HTTP port is exposed to other containers, and the host.
-    ports:
-      - "8000:8000"
-  dev-service:
-    profiles: ["dev"]
-    container_name: mathesar_service_dev
-    image: mathesar/mathesar-dev:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PYTHON_REQUIREMENTS: requirements-dev.txt
-    extends: base-service
-    environment:
-      - MODE=${MODE-DEVELOPMENT}
-      - DEBUG=${DEBUG-True}
-      - DJANGO_ALLOW_ASYNC_UNSAFE=true
-      - DJANGO_SUPERUSER_PASSWORD=password
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
-    command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./dev-run.sh
-    volumes:
-      - .:/code/
-      - ui_node_modules:/code/mathesar_ui/node_modules/
-    depends_on:
-      - db
-    # On dev, following ports are exposed to other containers, and the host.
-    ports:
-      - "8000:8000"
-      - "3000:3000"
-      - "6006:6006"
+  # A webserver responsible for
+  # receiving upgrade requests and upgrading the Mathesar App docker image.
+  #  It upgrades the docker image only when a http request is sent to it
+  # For more information refer https://containrrr.dev/watchtower/http-api-mode/
   watchtower:
     image: containrrr/watchtower
     volumes:
@@ -137,7 +94,6 @@ services:
       - "8080"
 volumes:
   postgresql_data:
-  ui_node_modules:
   media:
   static:
   caddy_data:

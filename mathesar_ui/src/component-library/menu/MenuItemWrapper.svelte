@@ -1,18 +1,20 @@
 <script lang="ts">
-  import Label from '@mathesar-component-library-dir/label/Label.svelte';
-  import type { LabelController } from '@mathesar-component-library-dir/label/LabelController';
+  export let tag = 'div';
+  export let disabled = false;
+  export let danger = false;
 
-  export let labelController: LabelController | undefined = undefined;
+  let classes = '';
+  export { classes as class };
 </script>
 
-{#if labelController}
-  <Label
-    controller={labelController}
-    on:click
-    style="--Label__display:contents"
-  >
-    <slot />
-  </Label>
-{:else}
+<svelte:element
+  this={tag}
+  {...$$restProps}
+  class="menu-item {classes}"
+  role="menuitem"
+  on:click
+  class:disabled
+  class:danger
+>
   <slot />
-{/if}
+</svelte:element>

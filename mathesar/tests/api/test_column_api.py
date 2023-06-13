@@ -404,10 +404,33 @@ def test_column_update_typeget_all_columns(column_test_table_with_service_layer_
     assert new_columns_response.status_code == 200
 
 
+def test_column_with_dynamic_default_update_default(column_test_table, client):
+    expt_default = 5
+    data = {"default": {"value": expt_default}}
+    column = column_test_table.get_columns_by_name(['mycolumn0'])[0]
+    response = client.patch(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
+        data=json.dumps(data),
+        content_type="application/json",
+    )
+    assert response.json()[0]["code"] == 4424
+
+
+def test_column_with_dynamic_default_update_delete_default(column_test_table, client):
+    data = {"default": None}
+    column = column_test_table.get_columns_by_name(['mycolumn0'])[0]
+    response = client.patch(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
+        data=json.dumps(data),
+        content_type="application/json",
+    )
+    assert response.json()[0]["code"] == 4424
+
+
 def test_column_update_default(column_test_table, client):
     expt_default = 5
     data = {"default": {"value": expt_default}}  # Ensure we pass a int and not a str
-    column = column_test_table.get_columns_by_name(['mycolumn0'])[0]
+    column = column_test_table.get_columns_by_name(['mycolumn1'])[0]
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
         data=json.dumps(data),
@@ -419,17 +442,18 @@ def test_column_update_default(column_test_table, client):
 def test_column_update_delete_default(column_test_table, client):
     expt_default = None
     data = {"default": None}
-    column = column_test_table.get_columns_by_name(['mycolumn0'])[0]
+    column = column_test_table.get_columns_by_name(['mycolumn1'])[0]
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
-        data=data,
+        data=json.dumps(data),
+        content_type="application/json",
     )
     assert response.json()["default"] == expt_default
 
 
 def test_column_update_default_invalid_cast(column_test_table, client):
     data = {"default": {"value": "not an integer"}}
-    column = column_test_table.get_columns_by_name(['mycolumn0'])[0]
+    column = column_test_table.get_columns_by_name(['mycolumn1'])[0]
 
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",

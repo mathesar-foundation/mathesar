@@ -3,20 +3,23 @@
   import type { UnionToIntersection } from 'type-fest';
 
   import {
-    TextInput,
     PasswordInput,
+    TextInput,
     hasProperty,
   } from '@mathesar-component-library';
+  import userApi, { type User } from '@mathesar/api/users';
+  import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import {
+    FormSubmit,
+    isEmail,
+    makeForm,
+    matchRegex,
+    maxLength,
     optionalField,
     requiredField,
-    makeForm,
-    FormSubmitWithCatch,
     type FieldStore,
   } from '@mathesar/components/form';
-  import userApi, { type User } from '@mathesar/api/users';
   import { iconSave, iconUndo } from '@mathesar/icons';
-  import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import SelectUserType from './SelectUserType.svelte';
   import UserFormInput from './UserFormInput.svelte';
@@ -30,8 +33,14 @@
   $: isUserUpdatingThemselves = userProfile && userProfile.id === user?.id;
   $: isNewUser = user === undefined;
   $: fullName = optionalField(user?.full_name ?? '');
-  $: username = requiredField(user?.username ?? '');
-  $: email = optionalField(user?.email ?? '');
+  $: username = requiredField(user?.username ?? '', [
+    maxLength(150, 'Username cannot be longer than 150 characters.'),
+    matchRegex(
+      /^[A-Za-z0-9_@.+-]*$/,
+      'Username can only contain alphanumeric characters, _, @, +, ., and -.',
+    ),
+  ]);
+  $: email = optionalField(user?.email ?? '', [isEmail()]);
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );
@@ -142,8 +151,9 @@
 </div>
 
 <div class="submit-section">
-  <FormSubmitWithCatch
+  <FormSubmit
     {form}
+    catchErrors
     onProceed={saveUser}
     proceedButton={{ label: 'Save', icon: iconSave }}
     cancelButton={{ label: 'Discard Changes', icon: iconUndo }}

@@ -24,6 +24,7 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
+- [Sponsors](#sponsors)
 - [Status](#status)
 - [Join our community!](#join-our-community)
 - [Screenshots](#screenshots)
@@ -35,6 +36,24 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Sponsors
+Our top sponsors! Become a sponsor on [GitHub](https://github.com/sponsors/centerofci) or [Open Collective](https://opencollective.com/mathesar).
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%">
+          <a href="https://www.thingylabs.io/">
+              <img src="https://user-images.githubusercontent.com/287034/226116547-cd28e16a-4c89-4a01-bc98-5a19b02ab1b2.png" width="100px;" alt="Thingylabs GmbH"/>
+              <br />
+              <sub><b>Thingylabs GmbH</b></sub>
+          </a>
+          <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ## Status
 - [x] **Public Alpha**: You can install and deploy Mathesar on your server. Go easy on us!

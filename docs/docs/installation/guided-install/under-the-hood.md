@@ -1,15 +1,18 @@
-# Docker Compose Installation, Under the Hood
+# Guided installation: under the hood
 
-## Installation Steps
-These are the steps that the installation script performs, explained in more depth:
+!!! info ""
+    This document is related to our [guided installation](./index.md).
 
-### Operating System Check
+## What does the script do?
+Our guided installation script performs the following steps.
+
+### Operating system check
 The installer attempts to determine what operating system you're installing Mathesar on. We've tested with some variants of macOS as well as a few distros of Linux. Some logic in the installer branches based on your operating system.
 
-### Docker Version Check
+### Docker version check
 The installer double-checks your Docker and Docker Compose versions, making sure that `docker` is at least version 20.0.0, and `docker-compose` is at least version 2.10.0.
 
-### Database Configuration
+### Database configuration
 Mathesar uses two PostgreSQL databases:
 
 - **an internal database**, used to store Mathesar related metadata such as display options. This is set up on the same machine as Mathesar's deployment.
@@ -23,7 +26,7 @@ The credentials created in this section are used to log in directly to the datab
 
 Finally, Mathesar helps you customize the port exposed to your host machine from the database container. This is useful, since you'll need to have an exposed port to login to the Mathesar database(s) using an alternate client such as `psql`, but there could be a conflict on the default port (e.g. for the case that a PostgreSQL instance is running in the host OS).
 
-### Webserver Configuration
+### Webserver configuration
 This section lets you configure the entrypoint (Caddy) for every request you send to Mathesar. You may need to customize the ports if you have other services using ports on your machine. Additionally, you need to configure either a domain or an external IP address if you plan to expose your installation of Mathesar to the internet. Setting up the domain also gets HTTPS working properly on your Mathesar installation.
 
 #### Domain setup
@@ -31,11 +34,11 @@ The domain specified here should be a valid, registered domain, whose DNS entry 
 
 If you don't use a domain, Mathesar can still be accessed from the internet using an IP address instead a domain name. Please note that HTTPS will not work without a domain name set up.
 
-### Admin User Configuration
+### Admin user configuration
 
 Here, the installer helps you create a user (separate from the database user) that you will use to login to Mathesar through the main web UI. This section walks you through that process to create a username and password for that user. You're allowed to use the same details as the database user above, but it's not required, or particularly recommended. The user created in this section will have admin privileges in Mathesar, and be able to create other users after the installation is complete.
 
-### Configuration Directory
+### Configuration directory
 
 We need to store all the details configured above, and we do so in a file in your configuration directory. Note that this contains your passwords and other secrets, so **it should be kept secure**. By default, this directory is `/etc/mathesar/`, but you can change it.
 
@@ -48,16 +51,16 @@ Recommended permissions for the `.env` file are:
 
 `-rw------- 1 root root 449 Feb 22 13:39 /etc/mathesar/.env`
 
-### Docker Setup
+### Docker setup
 
 - The installer downloads the `docker-compose.yml` file from Mathesar's repo.
 - The installer pulls all Docker images needed for Mathesar to run properly, and starts the various services in sequence.
 
-### Final Steps
+### Final steps
 
 If everything has worked, then the installer prints a message letting you know that it's succeeded, and gives a little information about where you should go to login to Mathesar.
 
-## Docker containers
+## Docker containers created
 This installation process creates the following containers:
 
 - `mathesar_service`, which runs the main Mathesar application.
@@ -65,7 +68,7 @@ This installation process creates the following containers:
 - `mathesar-caddy-reverse-proxy-1`, which helps route traffic to the `mathesar_service` container.
 - `mathesar-watchtower-1`, which helps upgrade Mathesar installation when new releases are available.
 
-## Files
+## Files involved
 This installation process creates the following files in the Mathesar configuration directory:
 
 - `.env`. This file defines the environment inside of the various Mathesar `docker` containers. It should be kept safe, since it has sensitive information about the passwords you set for Mathesar. If you've forgotten your admin username or password, look at this file.
