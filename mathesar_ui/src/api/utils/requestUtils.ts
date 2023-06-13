@@ -166,6 +166,13 @@ export function deleteAPI<T>(url: string): CancellablePromise<T> {
   return sendXHRRequest('DELETE', url);
 }
 
+export function deletebulkAPI<T>(
+  url: string,
+  data: unknown,
+): CancellablePromise<T> {
+  return sendXHRRequest('DELETE', url, data);
+}
+
 export function uploadFile<T>(
   url: string,
   formData: FormData,

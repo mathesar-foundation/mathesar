@@ -12,6 +12,7 @@ import {
   deleteAPI,
   patchAPI,
   postAPI,
+  deletebulkAPI,
 } from '@mathesar/api/utils/requestUtils';
 import {
   isDefinedNonNullable,
@@ -461,19 +462,28 @@ export class RecordsData {
 
     let shouldReFetchRecords = successRowKeys.size > 0;
     if (primaryKeysOfSavedRows.length > 0) {
-      // TODO: Convert this to single request
-      const promises = primaryKeysOfSavedRows.map((pk) =>
-        deleteAPI<RowKey>(`${this.url}${pk}/`)
-          .then(() => {
-            successRowKeys.add(pk);
-            return successRowKeys;
-          })
-          .catch((error: unknown) => {
-            failures.set(pk, getErrorMessage(error));
-            return failures;
-          }),
-      );
-      await Promise.all(promises);
+      // Converted delete to single bulk delete request as per https://github.com/centerofci/mathesar/issues/2701
+      const recordIds: number[] = [];
+      primaryKeysOfSavedRows.map((n) => {
+        recordIds.push(Number(n));
+        return Number(n);
+      });
+
+      //  unable to use this.url since other urls use api/db/ over api/ui/
+
+      const bulkDeleteURL = `/api/ui/v0/tables/${this.parentId}/records/delete/`;
+      const bulkDeletePromise = deletebulkAPI<RowKey>(`${bulkDeleteURL}`, {
+        pks: recordIds,
+      })
+        .then(() => primaryKeysOfSavedRows)
+        .catch((error: unknown) => {
+          failures.set(
+            primaryKeysOfSavedRows.join(','),
+            getErrorMessage(error),
+          );
+          return failures;
+        });
+      await bulkDeletePromise;
       shouldReFetchRecords = true;
     }
 
