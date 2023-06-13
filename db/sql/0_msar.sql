@@ -185,10 +185,42 @@ Args:
   rel_id:  The OID of the relation.
   col_id:  The attnum of the column in the relation.
 */
-BEGIN
-  RETURN quote_ident(attname::text) FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+SELECT quote_ident(attname::text) FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id;
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_column_name(rel_id oid, col_name text) RETURNS text AS $$/*
+Return the name for a given column in a given relation (e.g., table).
+
+More precisely, this function returns the quoted name of attributes of any relation appearing in the
+pg_class catalog table (so you could find attributes of indices with this function). If the given
+col_name is not in the relation, we return null.
+
+Args:
+  rel_id:  The OID of the relation.
+  col_name:  The unquoted name of the column in the relation.
+*/
+SELECT quote_ident(attname::text) FROM pg_attribute WHERE attrelid=rel_id AND attname=col_name;
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_column_names(rel_id oid, columns jsonb) RETURNS text[] AS $$/*
+Return the names for given columns in a given relation (e.g., table).
+
+Args:
+  rel_id:  The OID of the relation.
+  columns:  A JSONB array of the unquoted names or IDs (can be mixed) of the columns.
+*/
+SELECT array_agg(
+  CASE
+    WHEN jsonb_typeof(col)='number' THEN msar.get_column_name(rel_id, col::integer)
+    WHEN jsonb_typeof(col)='string' THEN msar.get_column_name(rel_id, col #>> '{}')
+  END
+)
+FROM jsonb_array_elements(columns) AS x(col);
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
