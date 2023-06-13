@@ -950,6 +950,69 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.process_con_create_arr(tab_id oid, con_create_arr jsonb)
+  RETURNS __msar.con_create_def[] AS $$/*
+Create an array of  __msar.con_create_def from a JSON array of constraint creation defining JSON.
+
+Args:
+  tab_id: The OID of the table where we'll create the constraints.
+  con_create_arr: A jsonb array defining a constraint creation (must have "type" key; "name",
+                  "not_null", and "default" keys optional).
+
+
+The con_create_arr should have the form:
+[
+  {
+    "name": <str> (optional),
+    "type": <str>,
+    "columns": [<int:str>, <int:str>, ...],
+    "fkey_relation_id": <int> (optional),
+    "fkey_relation_schema": <str> (optional),
+    "fkey_relation_name": <str> (optional),
+    "fkey_columns": [<int:str>, <int:str>, ...] (optional),
+    "fkey_update_action": <str> (optional),
+    "fkey_delete_action": <str> (optional),
+    "fkey_match_type": <str> (optional),
+  },
+  {
+    ...
+  }
+]
+If the constraint type is "f", then we require
+- fkey_relation_id or (fkey_relation_schema and fkey_relation_name).
+
+Numeric IDs are preferred over textual ones where both are accepted.
+*/
+SELECT array_agg(
+  (
+    quote_ident(con_create_obj ->> 'name'),
+    con_create_obj ->> 'type',
+    msar.get_column_names(tab_id, con_create_obj -> 'columns'),
+    COALESCE(
+      __msar.get_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
+      msar.get_fully_qualified_object_name(
+        con_create_obj ->> 'fkey_relation_schema', con_create_obj ->> 'fkey_relation_name'
+      )
+    ),
+    msar.get_column_names(
+      COALESCE(
+        (con_create_obj -> 'fkey_relation_id')::integer::oid,
+        msar.get_relation_oid(
+          con_create_obj ->> 'fkey_relation_schema', con_create_obj ->> 'fkey_relation_name'
+        )
+      ),
+      con_create_obj -> 'fkey_columns'
+    ),
+    con_create_obj ->> 'fkey_update_action',
+    con_create_obj ->> 'fkey_delete_action',
+    con_create_obj ->> 'fkey_match_type',
+    null -- not yet implemented
+  )::__msar.con_create_def
+) FROM jsonb_array_elements(con_create_arr) AS x(con_create_obj);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 __msar.add_constraints(tab_name text, con_defs variadic __msar.con_create_def[])
   RETURNS TEXT AS $$/*
 Add the given constraints to the given table.
