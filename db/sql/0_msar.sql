@@ -1052,6 +1052,38 @@ SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, con_additions) FROM con_ct
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.add_constraints(tab_id oid, con_defs jsonb) RETURNS smallint[] AS $$/*
+Add constraints to a table.
+
+Args:
+  tab_id: The OID of the table to which we'll add constraints.
+  col_defs: a JSONB array defining constraints to add. See msar.process_con_create_arr for details.
+*/
+DECLARE
+  con_create_defs __msar.con_create_def[];
+BEGIN
+  con_create_defs := msar.process_con_create_arr(tab_id, con_defs);
+  PERFORM __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
+  RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.add_constraints(sch_name text, tab_name text, col_defs jsonb, raw_default boolean)
+  RETURNS smallint[] AS $$/*
+Add constraints to a table.
+
+Args:
+  sch_name: unquoted schema name of the table to which we'll add constraints.
+  tab_name: unquoted, unqualified name of the table to which we'll add constraints.
+  col_defs: a JSONB array defining constraints to add. See msar.process_col_create_arr for details.
+*/
+SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), col_defs);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- MATHESAR DROP TABLE FUNCTIONS
