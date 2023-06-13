@@ -418,7 +418,7 @@ class Sum(DBFunction):
     @staticmethod
     def to_sa_expression(column_expr):
         return sa_call_sql_function('sum', column_expr, return_type=PostgresType.NUMERIC)
-    
+
 
 class Percentage_True(DBFunction):
     id = 'percentage_true'
@@ -429,8 +429,9 @@ class Percentage_True(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
-        column_expr = cast(column_expr,INTEGER)
-        return sa_call_sql_function('avg', column_expr, return_type=PostgresType.NUMERIC)
+        column_expr = cast(column_expr, INTEGER)
+        return sa_call_sql_function('avg', 100 * column_expr, return_type=PostgresType.NUMERIC)
+
 
 class Median(DBFunction):
     id = 'median'
