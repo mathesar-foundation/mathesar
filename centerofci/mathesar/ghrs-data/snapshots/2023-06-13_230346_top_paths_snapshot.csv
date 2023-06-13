@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/centerofci/mathesar,1391,845
+/centerofci/mathesar/pulls,325,27
+/centerofci/mathesar/issues,288,66
+/centerofci/mathesar/tree/develop/mathesar_ui,93,17
+/centerofci/mathesar/pull/2893,87,9
+/centerofci/mathesar/pull/2911,70,4
+/centerofci/mathesar/tree/develop/mathesar_ui/src,64,12
+/centerofci/mathesar/blob/develop/CONTRIBUTING.md,63,25
+/centerofci/mathesar/blob/develop/docker-compose.yml,59,30
+/centerofci/mathesar/issues/2917,53,17
