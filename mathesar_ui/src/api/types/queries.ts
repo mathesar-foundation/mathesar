@@ -37,6 +37,7 @@ export const querySummarizationFunctionIds = [
   'median',
   'mode',
   'percentage_true',
+  'max',
 ] as const;
 
 export type QuerySummarizationFunctionId =

@@ -420,7 +420,7 @@ def _get_default_display_name_for_agg_output_alias(
             ArrayAgg.id: " list",
             Count.id: " count",
             Sum.id: " sum",
-            Max.id: " max"
+            Max.id: " max",
             Median.id: " median",
             Mode.id: " mode",
             Percentage_True.id: " percentage true"
