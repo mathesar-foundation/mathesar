@@ -15,7 +15,7 @@ function mapAllInputTypesToOneOutputType(
   );
 }
 
-function mapInpuTypesToCorrespondingOutputTypes(): AbstractTypeSummarizationFunctionsResponseValue['inputOutputTypeMap'] {
+function mapInputTypesToTheSameOutputType(): AbstractTypeSummarizationFunctionsResponseValue['inputOutputTypeMap'] {
   return Object.fromEntries(
     Object.values(abstractTypeCategory).map((t) => [t, t]),
   );
@@ -42,9 +42,19 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
       [abstractTypeCategory.Duration]: abstractTypeCategory.Duration,
     },
   },
-  max: {
-    label: 'Max',
-    inputOutputTypeMap: mapInpuTypesToCorrespondingOutputTypes(),
+  median: {
+    label: 'Median',
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
+  },
+  mode: {
+    label: 'Mode',
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
+  },
+  percentage_true: {
+    label: 'Percentage True',
+    inputOutputTypeMap: {
+      [abstractTypeCategory.Boolean]: abstractTypeCategory.Number,
+    },
   },
 };
 

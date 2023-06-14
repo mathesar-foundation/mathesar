@@ -6,7 +6,7 @@ from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.transforms.operations.deserialize import deserialize_transformation
 from db.transforms.operations.serialize import serialize_transformation
 from db.transforms.base import Summarize
-from db.functions.base import Count, ArrayAgg, Sum, Max
+from db.functions.base import Count, ArrayAgg, Sum, Median, Mode, Percentage_True, Max
 from db.functions.packed import DistinctArrayAgg
 
 from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
@@ -421,6 +421,9 @@ def _get_default_display_name_for_agg_output_alias(
             Count.id: " count",
             Sum.id: " sum",
             Max.id: " max"
+            Median.id: " median",
+            Mode.id: " mode",
+            Percentage_True.id: " percentage true"
         }
         suffix_to_add = map_of_agg_function_to_suffix.get(agg_function)
         if suffix_to_add:

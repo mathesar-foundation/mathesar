@@ -295,3 +295,9 @@ def library_ma_tables(db_table_to_dj_table, library_db_tables):
         for table_name, db_table
         in library_db_tables.items()
     }
+
+
+@pytest.fixture
+def payments_ma_table(db_table_to_dj_table, payments_db_table):
+    reset_reflection()
+    return db_table_to_dj_table(payments_db_table)

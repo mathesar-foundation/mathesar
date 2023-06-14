@@ -15,10 +15,10 @@ access hints on what composition of functions and parameters should be valid.
 from abc import ABC, abstractmethod
 import warnings
 
-from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct
+from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct, INTEGER
 from sqlalchemy.dialects.postgresql import array_agg, TEXT, array
 from sqlalchemy.sql import quoted_name
-from sqlalchemy.sql.functions import GenericFunction, concat, max
+from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max
 
 from db.engine import get_dummy_engine
 from db.functions import hints
@@ -395,6 +395,18 @@ class Max(DBFunction):
         return max(column_expr)
 
 
+class Mode(DBFunction):
+    id = 'mode'
+    name = 'mode'
+    hints = tuple([
+        hints.aggregation
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return mode().within_group(column_expr)
+
+
 class ArrayAgg(DBFunction):
     id = 'aggregate_to_array'
     name = 'aggregate to array'
@@ -418,6 +430,31 @@ class Sum(DBFunction):
     @staticmethod
     def to_sa_expression(column_expr):
         return sa_call_sql_function('sum', column_expr, return_type=PostgresType.NUMERIC)
+
+
+class Percentage_True(DBFunction):
+    id = 'percentage_true'
+    name = 'percentage_true'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        column_expr = cast(column_expr, INTEGER)
+        return sa_call_sql_function('avg', 100 * column_expr, return_type=PostgresType.NUMERIC)
+
+
+class Median(DBFunction):
+    id = 'median'
+    name = 'median'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return percentile_disc(.5).within_group(column_expr)
 
 
 class Distinct(DBFunction):
