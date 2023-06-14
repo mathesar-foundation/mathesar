@@ -61,7 +61,7 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
     inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
   min: {
-    label: 'Max',
+    label: 'Min',
     inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
   mean: {
