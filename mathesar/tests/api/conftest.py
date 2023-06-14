@@ -20,7 +20,7 @@ def create_data_file():
         with open(file_path, 'rb') as csv_file:
             data_file = DataFile.objects.create(
                 file=File(csv_file), created_from='file',
-                base_name=file_name
+                base_name=file_name, type='csv'
             )
 
         return data_file
@@ -295,3 +295,9 @@ def library_ma_tables(db_table_to_dj_table, library_db_tables):
         for table_name, db_table
         in library_db_tables.items()
     }
+
+
+@pytest.fixture
+def payments_ma_table(db_table_to_dj_table, payments_db_table):
+    reset_reflection()
+    return db_table_to_dj_table(payments_db_table)
