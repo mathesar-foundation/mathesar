@@ -15,6 +15,12 @@ function mapAllInputTypesToOneOutputType(
   );
 }
 
+function mapInputTypesToTheSameOutputType(): AbstractTypeSummarizationFunctionsResponseValue['inputOutputTypeMap'] {
+  return Object.fromEntries(
+    Object.values(abstractTypeCategory).map((t) => [t, t]),
+  );
+}
+
 const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
   distinct_aggregate_to_array: {
     label: 'List',
@@ -35,6 +41,10 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
       [abstractTypeCategory.Money]: abstractTypeCategory.Money,
       [abstractTypeCategory.Duration]: abstractTypeCategory.Duration,
     },
+  },
+  median: {
+    label: 'Median',
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
 };
 

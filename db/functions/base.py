@@ -18,7 +18,7 @@ import warnings
 from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct
 from sqlalchemy.dialects.postgresql import array_agg, TEXT, array
 from sqlalchemy.sql import quoted_name
-from sqlalchemy.sql.functions import GenericFunction, concat
+from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc
 
 from db.engine import get_dummy_engine
 from db.functions import hints
@@ -406,6 +406,18 @@ class Sum(DBFunction):
     @staticmethod
     def to_sa_expression(column_expr):
         return sa_call_sql_function('sum', column_expr, return_type=PostgresType.NUMERIC)
+
+
+class Median(DBFunction):
+    id = 'median'
+    name = 'median'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return percentile_disc(.5).within_group(column_expr)
 
 
 class Distinct(DBFunction):
