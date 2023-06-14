@@ -1,20 +1,50 @@
-# Install Mathesar Webserver via Docker
+# Install Mathesar web server via Docker
+
+Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/tags): `mathesar/mathesar-prod:latest` hosted on Docker Hub to run Mathesar.
+
+!!! warning "Limitations"
+    This installation procedure is intended for users who want to run a bare-bones version of the Mathesar web server.
+
+    It is assumed you already have a database server and services like a reverse proxy typically needed for running a production setup. If you don't have those, please use the [Docker Compose installation documentation](../docker-compose/index.md).
 
 
 ## Prerequisites
-!!! warning ""
-    This installation procedure is intended for users who want to run a bare-bones version of the Mathesar web server. It is assumed you already have services like a reverse proxy needed for running a production server. To set up a proper production server, please refer to the [Docker Compose Installation Documentation](../docker-compose/index.md).
 
-- You need [Docker](https://docs.docker.com/get-docker/)
-    - We have tested with Docker v23. Older versions may not work.
-- Permission to run Docker containers
-- A Postgres database. Ensure the external database can accept network connections from your Mathesar server.
-- Have the following information handy before installation:
+### Operating System
+You can install Mathesar using this method on Linux, MacOS, and Windows.
+
+### Access
+You should have permission to run Docker containers on the system.
+
+### Software
+You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
+
+### Databases
+
+#### Database for Mathesar's internal usage
+You'll need to:
+
+- Create a PostgreSQL database for Mathesar's internal usage.
+- Create a database user for Mathesar to use. The user should be a `SUPERUSER`, [see PostgreSQL docs for more information](https://www.postgresql.org/docs/13/sql-createrole.html).
+- Ensure that this database can accept network connections from the machine you're installing Mathesar on.
+- Have the following information for this database handy before installation:
     - Database hostname
     - Database port
     - Database name
-    - Database username _(should exist and be a `SUPERUSER` [more info](https://www.postgresql.org/docs/13/sql-createrole.html))_
+    - Database username
     - Database password
+
+#### Databases connected to Mathesar's UI
+Have the following information for all databases you'd like to connect to Mathesar's UI before installation:
+
+- Database hostname
+- Database port
+- Database name
+- Database username (should be a `SUPERUSER`, see above)
+- Database password
+
+!!! warning "Database creation"
+    Whenever the Docker container is started, we will attempt to create any databases in this list that don't already exist. So you don't need to ensure that they are created before installation.
 
 ## Installation Steps
 
@@ -35,19 +65,19 @@
       mathesar/mathesar-prod:latest
     ```
     
-    The above command creates a docker container containing the Mathesar server running on the `localhost` and listening on port `8000`. It also:
+    The above command creates a Docker container containing the Mathesar server running on the `localhost` and listening on port `8000`. It also:
 
-    - Passes configuration options as environment variables to the docker container. Refer to [Configuring Mathesar web server](../../configuration/env-variables.md#backend) for setting the correct value to these configuration options and for additional configuration options. The configuration options used in the above command are:
+    - Passes configuration options as environment variables to the Docker container. Refer to [Configuring Mathesar web server](../../configuration/env-variables.md#backend) for setting the correct value to these configuration options and for additional configuration options. The configuration options used in the above command are:
         - `DJANGO_DATABASE_URL`
         - `DJANGO_DATABASE_KEY`
         - `MATHESAR_DATABASES`
         - `SECRET_KEY`
-    - Creates two [named docker volumes](https://docs.docker.com/storage/volumes/)
+    - Creates two [named Docker volumes](https://docs.docker.com/storage/volumes/)
         - `static` for storing static assets like CSS, js files
         - `media` for storing user-uploaded media files
     - Sets the container name as `mathesar_service` using the `--name` parameter, runs the container in a detached mode using the `--detach` parameter, and binds the port `8000` to the `localhost`. Refer to [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/#options) for additional configuration options.
 
-1. Verify if the Mathesar Server is running successfully:
+1. Verify if the Mathesar server is running successfully:
     ```bash
     docker logs -f mathesar_service
     ```
@@ -60,7 +90,8 @@
 
     See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
 
-## Upgrade
+
+## Upgrading Mathesar {:#upgrade}
 
 1. Stop your existing Mathesar container:
 
@@ -84,7 +115,7 @@
       mathesar/mathesar-prod:latest
     ```
 
-## Uninstall
+## Uninstalling Mathesar {:#uninstall}
 
 1. Remove the Mathesar container.
 
@@ -92,34 +123,17 @@
     docker rm -v mathesar_service
     ```
 
-2. Remove the Mathesar Image
+1. Remove the Mathesar Image
 
     ```bash
     docker rmi mathesar_service
     ```
 
-3. Remove volumes related to Mathesar
+1. Remove volumes related to Mathesar
 
     ```bash
     docker volume rm static &&
     docker volume rm media
     ```
 
-4. Remove Mathesar internal schemas.
-
-    **If you connected Mathesar to a database**, the installation process would have created a new schema for Mathesar's use. You can remove this schema from that database as follows:
-
-    1. Connect to the database.
-
-        ```
-        psql -h <DB HOSTNAME> -p <DB PORT> -U <DB_USER> <DB_NAME>
-        ```
-
-    2. Delete the schema.
-
-        ```postgresql
-        DROP SCHEMA mathesar_types CASCADE;
-        ```
-
-        !!! danger 
-            Deleting this schema will also delete any database objects that depend on it. This should not be an issue if you don't have any data using Mathesar's custom data types.
+{% include 'snippets/uninstall-schemas.md' %}
