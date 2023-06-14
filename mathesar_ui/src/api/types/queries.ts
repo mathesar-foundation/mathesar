@@ -35,6 +35,7 @@ export const querySummarizationFunctionIds = [
   'count',
   'sum',
   'median',
+  'mode',
 ] as const;
 
 export type QuerySummarizationFunctionId =

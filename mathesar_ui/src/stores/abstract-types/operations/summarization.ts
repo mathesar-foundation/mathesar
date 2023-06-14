@@ -46,6 +46,10 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
     label: 'Median',
     inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
+  mode: {
+    label: 'Mode',
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
+  },
 };
 
 export function getSummarizationFunctionsForAbstractType(
