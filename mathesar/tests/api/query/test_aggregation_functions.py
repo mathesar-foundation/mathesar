@@ -357,6 +357,83 @@ def test_mode_aggregation(library_ma_tables, get_uid, client):
     assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
 
 
+def test_percentage_true_aggregation(payments_ma_table, get_uid, client):
+    _ = payments_ma_table
+    payments = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Payments"]
+    columns = {
+        c["name"]: c for c in payments["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": payments["id"],
+        "initial_columns": [
+            {"id": columns["Payment Mode"]["id"], "alias": "Payment Mode"},
+            {"id": columns["Is Fraudulent"]["id"], "alias": "Is Fraudulent"},
+        ],
+        "display_names": {
+            "Payment Mode": "Payment Mode",
+            "Percentage Fraudulent": "Percentage Fraudulent",
+        },
+        "display_options": {
+            "Payment Mode": {
+                display_option_origin: "Payment Mode",
+            },
+            "Is Fraudulent": {
+                display_option_origin: "Is Fraudulent",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Payment Mode",
+                            "output_alias": "Payment Mode",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Is Fraudulent",
+                            "output_alias": "Percentage Fraudulent",
+                            "function": "percentage_true",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {
+            'Payment Mode': 'UPI',
+            'Percentage Fraudulent': 16.666666666666668
+        },
+        {
+            'Payment Mode': 'credit card',
+            'Percentage Fraudulent': 10.0
+        },
+        {
+            'Payment Mode': 'debit card',
+            'Percentage Fraudulent': 10.81081081081081
+        },
+        {
+            'Payment Mode': 'pay later',
+            'Percentage Fraudulent': 14.285714285714286
+        },
+        {
+            'Payment Mode': 'wallet',
+            'Percentage Fraudulent': 23.333333333333332
+        }
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Payment Mode']) == expect_records
+
+
 def test_Mathesar_money_distinct_list_aggregation(library_ma_tables, get_uid, client):
     _ = library_ma_tables
     items = {
