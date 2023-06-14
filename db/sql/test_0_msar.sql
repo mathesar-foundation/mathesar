@@ -290,7 +290,7 @@ CREATE OR REPLACE FUNCTION test_add_columns_timestamp_raw_default() RETURNS SETO
 This test will fail if the default is being sanitized, but will succeed if it's not.
 */
 DECLARE
-  col_create_arr jsonb := '[{"type": {"name": "timestamp"}, "default": "now()::timestamp"}]'
+  col_create_arr jsonb := '[{"type": {"name": "timestamp"}, "default": "now()::timestamp"}]';
 BEGIN
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => true);
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp without time zone');
@@ -299,7 +299,7 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_add_columns_timestamp_raw_default() RETURNS SETOF TEXT AS $f$
+CREATE OR REPLACE FUNCTION test_add_columns_sanitize_default() RETURNS SETOF TEXT AS $f$
 /*
 This test will succeed if the default is being sanitized, but will fail if it's not.
 
