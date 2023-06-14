@@ -1025,15 +1025,21 @@ WITH con_cte AS (
   SELECT string_agg(
     CASE
       WHEN con.type_ = 'u' THEN
-        format('ADD CONSTRAINT %s UNIQUE %s', con.name_, __msar.build_text_tuple(con.col_names))
+        format(
+          'ADD %sUNIQUE %s',
+          'CONSTRAINT ' || con.name_ || ' ',
+          __msar.build_text_tuple(con.col_names)
+        )
       WHEN con.type_ = 'p' THEN
         format(
-          'ADD CONSTRAINT %s PRIMARY KEY %s', con.name_, __msar.build_text_tuple(con.col_names)
+          'ADD %sPRIMARY KEY %s',
+          'CONSTRAINT ' || con.name_ || ' ',
+          __msar.build_text_tuple(con.col_names)
         )
       WHEN con.type_ = 'f' THEN
         format(
-          'ADD CONSTRAINT %s FOREIGN KEY %s REFERENCES %s%s%s%s',
-          con.name_,
+          'ADD %sFOREIGN KEY %s REFERENCES %s%s%s%s',
+          'CONSTRAINT ' || con.name_ || ' ',
           __msar.build_text_tuple(con.col_names),
           con.fk_rel_name,
           __msar.build_text_tuple(con.fk_col_names),
@@ -1053,7 +1059,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_constraints(tab_id oid, con_defs jsonb) RETURNS smallint[] AS $$/*
+msar.add_constraints(tab_id oid, con_defs jsonb) RETURNS oid[] AS $$/*
 Add constraints to a table.
 
 Args:
@@ -1072,7 +1078,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.add_constraints(sch_name text, tab_name text, col_defs jsonb, raw_default boolean)
-  RETURNS smallint[] AS $$/*
+  RETURNS oid[] AS $$/*
 Add constraints to a table.
 
 Args:
