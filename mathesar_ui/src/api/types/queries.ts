@@ -38,6 +38,7 @@ export const querySummarizationFunctionIds = [
   'mode',
   'percentage_true',
   'max',
+  'min',
 ] as const;
 
 export type QuerySummarizationFunctionId =

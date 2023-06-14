@@ -60,6 +60,10 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
     label: 'Max',
     inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
+  min: {
+    label: 'Max',
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
+  },
 };
 
 export function getSummarizationFunctionsForAbstractType(
