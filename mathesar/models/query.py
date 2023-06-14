@@ -418,7 +418,7 @@ def _get_default_display_name_for_agg_output_alias(
         map_of_agg_function_to_suffix = {
             DistinctArrayAgg.id: " distinct list",
             ArrayAgg.id: " list",
-            Count.id: " count",            
+            Count.id: " count",
             Sum.id: " sum",
             Max.id: " max",
             Median.id: " median",
