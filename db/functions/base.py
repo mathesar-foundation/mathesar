@@ -18,7 +18,7 @@ import warnings
 from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct, INTEGER
 from sqlalchemy.dialects.postgresql import array_agg, TEXT, array
 from sqlalchemy.sql import quoted_name
-from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max
+from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max, min
 
 from db.engine import get_dummy_engine
 from db.functions import hints
@@ -405,6 +405,18 @@ class Mode(DBFunction):
     @staticmethod
     def to_sa_expression(column_expr):
         return mode().within_group(column_expr)
+
+
+class Min(DBFunction):
+    id = 'min'
+    name = 'min'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return min(column_expr)
 
 
 class ArrayAgg(DBFunction):
