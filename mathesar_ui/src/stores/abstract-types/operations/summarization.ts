@@ -56,6 +56,10 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
       [abstractTypeCategory.Boolean]: abstractTypeCategory.Number,
     },
   },
+  max: {
+    label: 'Max',
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
+  },
 };
 
 export function getSummarizationFunctionsForAbstractType(

@@ -18,7 +18,7 @@ import warnings
 from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct, INTEGER
 from sqlalchemy.dialects.postgresql import array_agg, TEXT, array
 from sqlalchemy.sql import quoted_name
-from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode
+from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max
 
 from db.engine import get_dummy_engine
 from db.functions import hints
@@ -381,6 +381,18 @@ class Count(DBFunction):
     @staticmethod
     def to_sa_expression(column_expr):
         return sa_call_sql_function('count', column_expr, return_type=PostgresType.INTEGER)
+
+
+class Max(DBFunction):
+    id = 'max'
+    name = 'max'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return max(column_expr)
 
 
 class Mode(DBFunction):
