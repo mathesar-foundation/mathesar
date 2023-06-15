@@ -364,28 +364,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION setup_add_fkey() RETURNS SETOF TEXT AS $$
-BEGIN
-  CREATE TABLE add_con_users (id serial primary key, fname TEXT, lname TEXT, phoneno TEXT);
-  INSERT INTO add_con_users (fname, lname, phoneno) VALUES
-    ('alice', 'smith', '123 4567'),
-    ('bob', 'jones', '234 5678'),
-    ('eve', 'smith', '345 6789');
-  CREATE TABLE add_con_comments (id serial primary key, user_id integer, comment text);
-  INSERT INTO add_con_comments (user_id, comment) VALUES
-    (1, 'aslfkjasfdlkjasdfl'),
-    (2, 'aslfkjasfdlkjasfl'),
-    (3, 'aslfkjasfdlkjsfl'),
-    (1, 'aslfkjasfdlkasdfl'),
-    (2, 'aslfkjasfkjasdfl'),
-    (2, 'aslfkjasflkjasdfl'),
-    (3, 'aslfkjasfdjasdfl'),
-    (1, 'aslfkjasfkjasdfl'),
-    (1, 'fkjasfkjasdfl');
-END;
-$$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_add_constraint_pkey_id_fullspec() RETURNS SETOF TEXT AS $f$
 DECLARE
   con_create_arr jsonb := '[{"name": "mysuperkey", "type": "p", "columns": [1]}]';
@@ -426,6 +404,39 @@ BEGIN
   RETURN NEXT is(created_name, 'add_pkeytest_pkey');
 END;
 $f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_constraint_pkey_tab_name_singlecol() RETURNS SETOF TEXT AS $f$
+DECLARE
+  con_create_arr jsonb := '[{"type": "p", "columns": [1]}]';
+  created_name text;
+BEGIN
+  PERFORM msar.add_constraints('public', 'add_pkeytest', con_create_arr);
+  RETURN NEXT col_is_pk('add_pkeytest', 'col1');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_add_fkey() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE add_con_users (id serial primary key, fname TEXT, lname TEXT, phoneno TEXT);
+  INSERT INTO add_con_users (fname, lname, phoneno) VALUES
+    ('alice', 'smith', '123 4567'),
+    ('bob', 'jones', '234 5678'),
+    ('eve', 'smith', '345 6789');
+  CREATE TABLE add_con_comments (id serial primary key, user_id integer, comment text);
+  INSERT INTO add_con_comments (user_id, comment) VALUES
+    (1, 'aslfkjasfdlkjasdfl'),
+    (2, 'aslfkjasfdlkjasfl'),
+    (3, 'aslfkjasfdlkjsfl'),
+    (1, 'aslfkjasfdlkasdfl'),
+    (2, 'aslfkjasfkjasdfl'),
+    (2, 'aslfkjasflkjasdfl'),
+    (3, 'aslfkjasfdjasdfl'),
+    (1, 'aslfkjasfkjasdfl'),
+    (1, 'fkjasfkjasdfl');
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_add_constraint_errors() RETURNS SETOF TEXT AS $f$

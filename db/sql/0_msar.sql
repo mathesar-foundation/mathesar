@@ -1077,7 +1077,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_constraints(sch_name text, tab_name text, col_defs jsonb, raw_default boolean)
+msar.add_constraints(sch_name text, tab_name text, col_defs jsonb)
   RETURNS oid[] AS $$/*
 Add constraints to a table.
 
