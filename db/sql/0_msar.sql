@@ -940,10 +940,13 @@ END;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_fkey_match_type_from_char("char") RETURNS text AS $$
+CREATE OR REPLACE FUNCTION msar.get_fkey_match_type_from_char("char") RETURNS text AS $$/*
+Convert a char to its proper string describing the match type.
+
+NOTE: Since 'PARTIAL' is not implemented (and throws an error), we don't use it here.
+*/
 SELECT CASE
   WHEN $1 = 'f' THEN 'FULL'
-  WHEN $1 = 'p' THEN 'PARTIAL'
   WHEN $1 = 's' THEN 'SIMPLE'
 END;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -1038,14 +1041,14 @@ WITH con_cte AS (
         )
       WHEN con.type_ = 'f' THEN
         format(
-          'ADD %sFOREIGN KEY %s REFERENCES %s%s%s%s',
+          'ADD %sFOREIGN KEY %s REFERENCES %s%s%s%s%s',
           'CONSTRAINT ' || con.name_ || ' ',
           __msar.build_text_tuple(con.col_names),
           con.fk_rel_name,
           __msar.build_text_tuple(con.fk_col_names),
-          ' ON UPDATE ' || msar.get_fkey_action_from_char(con.fk_upd_action),
+          ' MATCH ' || msar.get_fkey_match_type_from_char(con.fk_match_type),
           ' ON DELETE ' || msar.get_fkey_action_from_char(con.fk_del_action),
-          ' MATCH ' || msar.get_fkey_match_type_from_char(con.fk_match_type)
+          ' ON UPDATE ' || msar.get_fkey_action_from_char(con.fk_upd_action)
         )
       ELSE
         NULL
