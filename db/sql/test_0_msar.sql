@@ -225,7 +225,9 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_add_columns_numeric_prec_scale() RETURNS SETOF TEXT AS $f$
 DECLARE
-  col_create_arr jsonb := '[{"type": {"name": "numeric", "options": {"precision": 3, "scale": 2}}}]';
+  col_create_arr jsonb := $j$[
+    {"type": {"name": "numeric", "options": {"precision": 3, "scale": 2}}}
+  ]$j$;
 BEGIN
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric(3,2)');
@@ -294,7 +296,9 @@ DECLARE
 BEGIN
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => true);
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp without time zone');
-  RETURN NEXT col_default_is('add_col_testable', 'Column 4', '(now())::timestamp without time zone');
+  RETURN NEXT col_default_is(
+    'add_col_testable', 'Column 4', '(now())::timestamp without time zone'
+  );
 END;
 $f$ LANGUAGE plpgsql;
 
