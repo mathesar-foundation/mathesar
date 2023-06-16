@@ -19,6 +19,7 @@ WORKDIR /code/
 # Copy all the requirements
 COPY requirements* ./
 RUN pip install --no-cache-dir -r ${PYTHON_REQUIREMENTS} --force-reinstall sqlalchemy-filters
+RUN pip install --no-cache-dir drf-spectacular
 COPY . .
 
 RUN sudo npm install -g npm-force-resolutions
