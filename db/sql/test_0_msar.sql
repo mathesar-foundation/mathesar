@@ -370,14 +370,19 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_add_constraint_pkey_id_fullspec() RETURNS SETOF TEXT AS $f$
 DECLARE
-  con_create_arr jsonb := '[{"name": "mysuperkey", "type": "p", "columns": [1]}]';
+  con_create_arr jsonb := $j$[
+    {"name": "mysuperkey", "type": "p", "columns": [1], "deferrable": true}
+  ]$j$;
   created_name text;
+  deferrable_ boolean;
 BEGIN
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
   created_name := conname FROM pg_constraint
     WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}';
   RETURN NEXT is(created_name, 'mysuperkey');
+  deferrable_ := condeferrable FROM pg_constraint WHERE conname='mysuperkey';
+  RETURN NEXT is(deferrable_, true);
 END;
 $f$ LANGUAGE plpgsql;
 

@@ -920,6 +920,7 @@ constrained table's OID.
   name_ text, -- The name of the constraint to create, qualified and quoted.
   type_ "char", -- The type of constraint to create, as a "char". See pg_constraint.contype
   col_names text[], -- The columns for the constraint, quoted.
+  deferrable_ boolean, -- Whether or not the constraint is deferrable.
   fk_rel_name text, -- The foreign table for an fkey, qualified and quoted.
   fk_col_names text[], -- The foreign table's columns for an fkey, quoted.
   fk_upd_action "char", -- Action taken when fk referent is updated. See pg_constraint.confupdtype.
@@ -969,6 +970,7 @@ The con_create_arr should have the form:
     "name": <str> (optional),
     "type": <str>,
     "columns": [<int:str>, <int:str>, ...],
+    "deferrable": <bool>,
     "fkey_relation_id": <int> (optional),
     "fkey_relation_schema": <str> (optional),
     "fkey_relation_name": <str> (optional),
@@ -991,6 +993,7 @@ SELECT array_agg(
     quote_ident(con_create_obj ->> 'name'),
     con_create_obj ->> 'type',
     msar.get_column_names(tab_id, con_create_obj -> 'columns'),
+    con_create_obj ->> 'deferrable',
     COALESCE(
       __msar.get_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
       msar.get_fully_qualified_object_name(
@@ -1052,6 +1055,12 @@ WITH con_cte AS (
         )
       ELSE
         NULL
+    END
+    || CASE
+      WHEN con.deferrable_ THEN
+        'DEFERRABLE'
+      ELSE
+        ''
     END,
     ', '
   ) as con_additions
