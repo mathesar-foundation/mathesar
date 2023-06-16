@@ -419,6 +419,18 @@ class Min(DBFunction):
         return min(column_expr)
 
 
+class Mean(DBFunction):
+    id = 'mean'
+    name = 'mean'
+    hints = tuple([
+        hints.aggregation,
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        return sa_call_sql_function('avg', column_expr, return_type=PostgresType.NUMERIC)
+
+
 class ArrayAgg(DBFunction):
     id = 'aggregate_to_array'
     name = 'aggregate to array'

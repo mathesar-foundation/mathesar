@@ -64,6 +64,14 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
     label: 'Min',
     inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
+  mean: {
+    label: 'Mean',
+    inputOutputTypeMap: {
+      [abstractTypeCategory.Number]: abstractTypeCategory.Number,
+      [abstractTypeCategory.Money]: abstractTypeCategory.Money,
+      [abstractTypeCategory.Duration]: abstractTypeCategory.Duration,
+    },
+  },
 };
 
 export function getSummarizationFunctionsForAbstractType(
