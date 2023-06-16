@@ -409,7 +409,6 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_add_constraint_pkey_tab_name_singlecol() RETURNS SETOF TEXT AS $f$
 DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": [1]}]';
-  created_name text;
 BEGIN
   PERFORM msar.add_constraints('public', 'add_pkeytest', con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
@@ -417,15 +416,45 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_constraint_pkey_col_name_singlecol() RETURNS SETOF TEXT AS $f$
+DECLARE
+  con_create_arr jsonb := '[{"type": "p", "columns": ["col1"]}]';
+BEGIN
+  PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
+  RETURN NEXT col_is_pk('add_pkeytest', 'col1');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_constraint_pkey_col_name_multicol() RETURNS SETOF TEXT AS $f$
+DECLARE
+  con_create_arr jsonb := '[{"type": "p", "columns": ["col1", "col2"]}]';
+BEGIN
+  PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
+  RETURN NEXT col_is_pk('add_pkeytest', ARRAY['col1', 'col2']);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_constraint_pkey_col_mix_multicol() RETURNS SETOF TEXT AS $f$
+DECLARE
+  con_create_arr jsonb := '[{"type": "p", "columns": [1, "col2"]}]';
+BEGIN
+  PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
+  RETURN NEXT col_is_pk('add_pkeytest', ARRAY['col1', 'col2']);
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION setup_add_fkey() RETURNS SETOF TEXT AS $$
 BEGIN
-  CREATE TABLE add_con_users (id serial primary key, fname TEXT, lname TEXT, phoneno TEXT);
-  INSERT INTO add_con_users (fname, lname, phoneno) VALUES
+  CREATE TABLE add_fk_users (id serial primary key, fname TEXT, lname TEXT, phoneno TEXT);
+  INSERT INTO add_fk_users (fname, lname, phoneno) VALUES
     ('alice', 'smith', '123 4567'),
     ('bob', 'jones', '234 5678'),
     ('eve', 'smith', '345 6789');
-  CREATE TABLE add_con_comments (id serial primary key, user_id integer, comment text);
-  INSERT INTO add_con_comments (user_id, comment) VALUES
+  CREATE TABLE add_fk_comments (id serial primary key, user_id integer, comment text);
+  INSERT INTO add_fk_comments (user_id, comment) VALUES
     (1, 'aslfkjasfdlkjasdfl'),
     (2, 'aslfkjasfdlkjasfl'),
     (3, 'aslfkjasfdlkjsfl'),
@@ -437,6 +466,170 @@ BEGIN
     (1, 'fkjasfkjasdfl');
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_constraint_fkey_id_fullspec() RETURNS SETOF TEXT AS $f$
+DECLARE
+  con_create_arr jsonb;
+BEGIN
+  con_create_arr := format(
+    $j$[
+      {
+        "name": "superfkey",
+        "type": "f",
+        "columns": [2],
+        "fkey_relation_id": %s,
+        "fkey_columns": [1],
+        "fkey_update_action": "a",
+        "fkey_delete_action": "a",
+        "fkey_match_type": "f"
+      }
+    ]$j$, 'add_fk_users'::regclass::oid
+  );
+  PERFORM msar.add_constraints('add_fk_comments'::regclass::oid, con_create_arr);
+  RETURN NEXT fk_ok(
+    'public', 'add_fk_comments', 'user_id', 'public', 'add_fk_users', 'id'
+  );
+  RETURN NEXT results_eq(
+    $h$
+    SELECT conname, confupdtype, confdeltype, confmatchtype
+    FROM pg_constraint WHERE conname='superfkey'
+    $h$,
+    $w$VALUES ('superfkey'::name, 'a'::"char", 'a'::"char", 'f'::"char")$w$
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION fkey_options_eq("char", "char", "char") RETURNS TEXT AS $f$
+DECLARE
+  con_create_arr jsonb;
+BEGIN
+  con_create_arr := format(
+    $j$[
+      {
+        "name": "superfkey",
+        "type": "f",
+        "columns": [2],
+        "fkey_relation_id": %s,
+        "fkey_update_action": "%s",
+        "fkey_delete_action": "%s",
+        "fkey_match_type": "%s"
+      }
+    ]$j$,
+    'add_fk_users'::regclass::oid, $1, $2, $3
+  );
+  PERFORM msar.add_constraints('add_fk_comments'::regclass::oid, con_create_arr);
+  RETURN results_eq(
+    $h$
+    SELECT conname, confupdtype, confdeltype, confmatchtype
+    FROM pg_constraint WHERE conname='superfkey'
+    $h$,
+    format(
+      $w$VALUES ('superfkey'::name, '%s'::"char", '%s'::"char", '%s'::"char")$w$,
+      $1, $2, $3
+    ),
+    format('Should have confupdtype %s, confdeltype %s, and confmatchtype %s', $1, $2, $3)
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+-- Options for fkey delete, update action and match type
+-- a = no action, r = restrict, c = cascade, n = set null, d = set default
+-- f = full, s = simple
+-- Note that partial match is not implemented.
+
+
+CREATE OR REPLACE FUNCTION test_add_constraints_fkey_opts_aas() RETURNS SETOF TEXT AS $f$
+BEGIN
+  RETURN NEXT fkey_options_eq('a', 'a', 's');
+  RETURN NEXT fk_ok(
+    'public', 'add_fk_comments', 'user_id', 'public', 'add_fk_users', 'id'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_constraints_fkey_opts_arf() RETURNS SETOF TEXT AS $f$
+BEGIN
+  RETURN NEXT fkey_options_eq('a', 'r', 'f');
+  RETURN NEXT fk_ok(
+    'public', 'add_fk_comments', 'user_id', 'public', 'add_fk_users', 'id'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_constraints_fkey_opts_rrf() RETURNS SETOF TEXT AS $f$
+BEGIN
+  RETURN NEXT fkey_options_eq('r', 'r', 'f');
+  RETURN NEXT fk_ok(
+    'public', 'add_fk_comments', 'user_id', 'public', 'add_fk_users', 'id'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_constraints_fkey_opts_rrf() RETURNS SETOF TEXT AS $f$
+BEGIN
+  RETURN NEXT fkey_options_eq('r', 'r', 'f');
+  RETURN NEXT fk_ok(
+    'public', 'add_fk_comments', 'user_id', 'public', 'add_fk_users', 'id'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_constraints_fkey_opts_ccf() RETURNS SETOF TEXT AS $f$
+BEGIN
+  RETURN NEXT fkey_options_eq('c', 'c', 'f');
+  RETURN NEXT fk_ok(
+    'public', 'add_fk_comments', 'user_id', 'public', 'add_fk_users', 'id'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_constraints_fkey_opts_nnf() RETURNS SETOF TEXT AS $f$
+BEGIN
+  RETURN NEXT fkey_options_eq('n', 'n', 'f');
+  RETURN NEXT fk_ok(
+    'public', 'add_fk_comments', 'user_id', 'public', 'add_fk_users', 'id'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_constraints_fkey_opts_ddf() RETURNS SETOF TEXT AS $f$
+BEGIN
+  RETURN NEXT fkey_options_eq('d', 'd', 'f');
+  RETURN NEXT fk_ok(
+    'public', 'add_fk_comments', 'user_id', 'public', 'add_fk_users', 'id'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_add_unique() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE add_unique_con (id serial primary key, col1 integer, col2 integer, col3 integer);
+  INSERT INTO add_unique_con (col1, col2, col3) VALUES
+    (1, 1, 1),
+    (2, 2, 3),
+    (3, 3, 3);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION  test_add_constraints_unique_multicol() RETURNS SETOF TEXT AS $f$
+DECLARE
+  con_create_arr jsonb := '[{"name": "myuniqcons", "type": "u", "columns": [2, 3]}]';
+BEGIN
+  PERFORM msar.add_constraints('add_unique_con'::regclass::oid, con_create_arr);
+  RETURN NEXT col_is_unique('add_unique_con', ARRAY['col1', 'col2']);
+END;
+$f$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_add_constraint_errors() RETURNS SETOF TEXT AS $f$
@@ -470,6 +663,16 @@ BEGIN
     '42601',
     'syntax error at end of input',
     'Throws error for nonexistent constraint type'
+  );
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.add_constraints(%s, ''%s'');',
+      'add_pkeytest'::regclass::oid,
+      '[{"type": "p", "columns": [1, "col1"]}]'::jsonb
+    ),
+    '42701',
+    'column "col1" appears twice in primary key constraint',
+    'Throws error for nonexistent duplicate pkey col'
   );
 END;
 $f$ LANGUAGE plpgsql;
