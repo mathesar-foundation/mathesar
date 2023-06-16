@@ -34,6 +34,12 @@ export const querySummarizationFunctionIds = [
   'distinct_aggregate_to_array',
   'count',
   'sum',
+  'median',
+  'mode',
+  'percentage_true',
+  'max',
+  'min',
+  'mean',
 ] as const;
 
 export type QuerySummarizationFunctionId =

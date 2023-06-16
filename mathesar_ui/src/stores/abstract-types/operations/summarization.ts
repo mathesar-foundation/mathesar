@@ -15,6 +15,12 @@ function mapAllInputTypesToOneOutputType(
   );
 }
 
+function mapInputTypesToTheSameOutputType(): AbstractTypeSummarizationFunctionsResponseValue['inputOutputTypeMap'] {
+  return Object.fromEntries(
+    Object.values(abstractTypeCategory).map((t) => [t, t]),
+  );
+}
+
 const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
   distinct_aggregate_to_array: {
     label: 'List',
@@ -30,6 +36,36 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
   },
   sum: {
     label: 'Sum',
+    inputOutputTypeMap: {
+      [abstractTypeCategory.Number]: abstractTypeCategory.Number,
+      [abstractTypeCategory.Money]: abstractTypeCategory.Money,
+      [abstractTypeCategory.Duration]: abstractTypeCategory.Duration,
+    },
+  },
+  median: {
+    label: 'Median',
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
+  },
+  mode: {
+    label: 'Mode',
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
+  },
+  percentage_true: {
+    label: 'Percentage True',
+    inputOutputTypeMap: {
+      [abstractTypeCategory.Boolean]: abstractTypeCategory.Number,
+    },
+  },
+  max: {
+    label: 'Max',
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
+  },
+  min: {
+    label: 'Min',
+    inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
+  },
+  mean: {
+    label: 'Mean',
     inputOutputTypeMap: {
       [abstractTypeCategory.Number]: abstractTypeCategory.Number,
       [abstractTypeCategory.Money]: abstractTypeCategory.Money,
