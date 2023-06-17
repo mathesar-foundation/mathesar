@@ -260,6 +260,7 @@ RESOURCES = os.path.join(FILE_DIR, "db", "tests", "resources")
 ACADEMICS_SQL = os.path.join(RESOURCES, "academics_create.sql")
 LIBRARY_SQL = os.path.join(RESOURCES, "library_without_checkouts.sql")
 LIBRARY_CHECKOUTS_SQL = os.path.join(RESOURCES, "library_add_checkouts.sql")
+FRAUDULENT_PAYMENTS_SQL = os.path.join(RESOURCES, "fraudulent_payments.sql")
 
 
 @pytest.fixture
@@ -331,3 +332,20 @@ def library_db_tables(engine_with_library):
         in table_names
     }
     return tables
+
+
+@pytest.fixture
+def engine_with_fraudulent_payment(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(FRAUDULENT_PAYMENTS_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+
+
+@pytest.fixture
+def payments_db_table(engine_with_fraudulent_payment):
+    engine, schema = engine_with_fraudulent_payment
+    metadata = MetaData(bind=engine)
+    table = Table("Payments", metadata, schema=schema, autoload_with=engine)
+    return table

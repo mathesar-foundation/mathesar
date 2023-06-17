@@ -152,8 +152,9 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+DROP FUNCTION IF EXISTS msar.get_relation_oid(text, text) CASCADE;
 CREATE OR REPLACE FUNCTION
-msar.get_relation_oid(sch_name text, rel_name text) RETURNS text AS $$/*
+msar.get_relation_oid(sch_name text, rel_name text) RETURNS oid AS $$/*
 Return the OID for a given relation (e.g., table).
 
 The relation *must* be in the pg_class table to use this function.
@@ -691,6 +692,177 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+-- Column creation definition type -----------------------------------------------------------------
+
+DROP TYPE IF EXISTS __msar.col_create_def CASCADE;
+CREATE TYPE __msar.col_create_def AS (
+  name_ text, -- The name of the column to create, quoted.
+  type_ text, -- The type of the column to create, fully specced with arguments.
+  not_null boolean, -- A boolean to describe whether the column is nullable or not.
+  default_ text -- Text SQL giving the default value for the column.
+);
+
+
+-- Add columns to table ----------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_type_text(typ_jsonb jsonb) RETURNS text AS $$/*
+Turns the given type-describing JSON into a proper string defining a type with arguments
+
+The input JSON should be of the form
+  {
+    "id": <integer>
+    "schema": <str>,
+    "name": <str>,
+    "modifier": <integer>,
+    "options": {
+      "length": <integer>,
+      "precision": <integer>,
+      "scale": <integer>
+      "fields": <str>,
+      "array": <boolean>
+    }
+  }
+*/
+SELECT COALESCE(
+  format_type(typ.id, typ.modifier),
+  COALESCE(
+    msar.get_fully_qualified_object_name(typ.schema, typ.name)::regtype::text,
+    typ.name::regtype::text
+  )::regtype::text || COALESCE(
+    '(' || topts.length || ')',
+    ' ' || topts.fields || ' (' || topts.precision || ')',
+    ' ' || topts.fields,
+    '(' || topts.precision || ', ' || topts.scale || ')',
+    '(' || topts.precision || ')',
+    ''
+  ) || CASE WHEN topts.array_ THEN '[]' ELSE '' END
+)
+FROM
+  jsonb_to_record(typ_jsonb)
+    AS typ(id oid, schema text, name text, modifier integer, options jsonb),
+  jsonb_to_record(typ_jsonb -> 'options')
+    AS topts(length integer, precision integer, scale integer, fields text, array_ boolean);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.process_col_create_arr(tab_id oid, col_create_arr jsonb, raw_default boolean)
+  RETURNS __msar.col_create_def[] AS $$/*
+Create a __msar.col_create_def from a JSON array of column creation defining JSON blobs.
+
+Args:
+  tab_id: The OID of the table where we'll create the columns
+  col_create_arr: A jsonb array defining a column creation (must have "type" key; "name",
+                  "not_null", and "default" keys optional).
+
+The col_create_arr should have the form:
+[
+  {
+    "name": <str> (optional),
+    "type": {
+      "name": <str>,
+      "options": <obj> (optional),
+    },
+    "not_null": <bool> (optional; default false),
+    "default": <any> (optional)
+  },
+  {
+    ...
+  }
+]
+For more info on the type.options object, see the msar.build_type_text function.
+*/
+WITH attnum_cte AS (
+  SELECT MAX(attnum) AS m_attnum FROM pg_attribute WHERE attrelid=tab_id
+), col_create_cte AS (
+  SELECT (
+    COALESCE(
+      quote_ident(col_create_obj ->> 'name'),
+      quote_ident('Column ' || (attnum_cte.m_attnum + ROW_NUMBER() OVER ()))
+    ),
+    msar.build_type_text(col_create_obj -> 'type'),
+    col_create_obj ->> 'not_null',
+    CASE
+      WHEN raw_default THEN
+        col_create_obj ->> 'default'
+      ELSE
+        format('%L', col_create_obj ->> 'default')
+      END
+  )::__msar.col_create_def AS col_create_defs
+  FROM attnum_cte, jsonb_array_elements(col_create_arr) as col_create_obj
+)
+SELECT array_agg(col_create_defs) FROM col_create_cte;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.add_columns(tab_name text, col_defs variadic __msar.col_create_def[]) RETURNS text AS $$/*
+Add the given columns to the given table.
+
+Args:
+  tab_name: Fully-qualified, quoted table name.
+  col_defs: The columns to be added.
+*/
+WITH ca_cte AS (
+  SELECT string_agg(
+      CASE
+        WHEN col.not_null AND col.default_ IS NULL THEN
+          format('ADD COLUMN %s %s NOT NULL', col.name_, col.type_)
+        WHEN col.not_null AND col.default_ IS NOT NULL THEN
+          format('ADD COLUMN %s %s NOT NULL DEFAULT %s', col.name_, col.type_, col.default_)
+        WHEN col.default_ IS NOT NULL THEN
+          format('ADD COLUMN %s %s DEFAULT %s', col.name_, col.type_, col.default_)
+        ELSE
+          format('ADD COLUMN %s %s', col.name_, col.type_)
+      END,
+      ', '
+    ) AS col_additions
+  FROM unnest(col_defs) AS col
+)
+SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, col_additions) FROM ca_cte;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.add_columns(tab_id oid, col_defs jsonb, raw_default boolean DEFAULT false)
+  RETURNS smallint[] AS $$/*
+Add columns to a table.
+
+Args:
+  tab_id: The OID of the table to which we'll add columns.
+  col_defs: a JSONB array defining columns to add. See msar.process_col_create_arr for details.
+  raw_default: Whether to treat defaults as raw SQL. DANGER!
+*/
+DECLARE
+  col_create_defs __msar.col_create_def[];
+BEGIN
+  col_create_defs := msar.process_col_create_arr(tab_id, col_defs, raw_default);
+  PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
+  RETURN array_agg(attnum)
+    FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
+    INNER JOIN unnest(col_create_defs) R
+    ON quote_ident(L.attname) = R.name_;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.add_columns(sch_name text, tab_name text, col_defs jsonb, raw_default boolean)
+  RETURNS smallint[] AS $$/*
+Add columns to a table.
+
+Args:
+  sch_name: unquoted schema name of the table to which we'll add columns.
+  tab_name: unquoted, unqualified name of the table to which we'll add columns.
+  col_defs: a JSONB array defining columns to add. See msar.process_col_create_arr for details.
+  raw_default: Whether to treat defaults as raw SQL. DANGER!
+*/
+SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw_default);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- MATHESAR DROP TABLE FUNCTIONS
@@ -699,7 +871,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
--- Drop table --------------------------------------------------------------------------------
+-- Drop table --------------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
 __msar.drop_table(tab_name text, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
