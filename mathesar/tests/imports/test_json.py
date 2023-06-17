@@ -4,7 +4,7 @@ from django.core.files import File
 from sqlalchemy import text
 
 from mathesar.models.base import DataFile, Schema
-from mathesar.imports.json import create_table_from_json
+from mathesar.imports.base import create_table_from_data_file
 from db.schemas.operations.create import create_schema
 from db.schemas.utils import get_schema_oid_from_name
 from db.tables.operations.create import DuplicateTable
@@ -40,7 +40,7 @@ def check_json_upload(table, table_name, schema, num_records, row, cols):
 
 def test_json_upload(data_file, schema):
     table_name = "NASA 1"
-    table = create_table_from_json(data_file, table_name, schema)
+    table = create_table_from_data_file(data_file, table_name, schema)
 
     num_records = 1393
     expected_row = (
@@ -70,17 +70,17 @@ def test_json_upload(data_file, schema):
 def test_json_upload_with_duplicate_table_name(data_file, schema):
     table_name = "NASA 2"
 
-    table = create_table_from_json(data_file, table_name, schema)
+    table = create_table_from_data_file(data_file, table_name, schema)
     assert table is not None
     assert table.name == table_name
     assert table.schema == schema
     assert table.sa_num_records() == 1393
 
     with pytest.raises(DuplicateTable):
-        create_table_from_json(data_file, table_name, schema)
+        create_table_from_data_file(data_file, table_name, schema)
 
 
 def test_json_upload_table_imported_to(data_file, schema):
-    table = create_table_from_json(data_file, "NASA", schema)
+    table = create_table_from_data_file(data_file, "NASA", schema)
     data_file.refresh_from_db()
     assert data_file.table_imported_to == table
