@@ -97,6 +97,7 @@
   {#if !isDefaultNull}
     <DynamicInput
       componentAndProps={column.inputComponentAndProps}
+      focusOnMount={false}
       bind:value
       {disabled}
       {recordSummary}
