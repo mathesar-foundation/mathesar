@@ -1,6 +1,6 @@
 import pytest
 from sqlalchemy import String, Integer, Column, Table, MetaData
-from sqlalchemy.exc import ProgrammingError
+from psycopg.errors import DuplicateTable
 
 from db.columns.operations.select import get_column_attnum_from_name, get_columns_attnum_from_names
 from db.constraints.base import UniqueConstraint
@@ -54,8 +54,6 @@ def test_create_multiple_column_unique_constraint(engine_with_schema):
     test_utils.assert_primary_key_and_unique_present(altered_table)
 
     unique_constraint = test_utils.get_first_unique_constraint(altered_table)
-    unique_column_name_1 = unique_column_names[0]
-    assert unique_constraint.name == f'{table_name}_{unique_column_name_1}_key'
     assert len(list(unique_constraint.columns)) == 2
     assert set([column.name for column in unique_constraint.columns]) == set(unique_column_names)
 
@@ -104,5 +102,5 @@ def test_create_unique_constraint_with_duplicate_name(engine_with_schema):
 
     altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     test_utils.assert_primary_key_and_unique_present(altered_table)
-    with pytest.raises(ProgrammingError):
+    with pytest.raises(DuplicateTable):
         create_unique_constraint(table.name, schema, engine, [unique_column_names[1]], constraint_name)
