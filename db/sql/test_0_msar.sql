@@ -641,6 +641,24 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_constraint_duplicate_name() RETURNS SETOF TEXT AS $f$
+DECLARE
+  con_create_arr jsonb := '[{"name": "myuniqcons", "type": "u", "columns": [2]}]';
+  con_create_arr2 jsonb := '[{"name": "myuniqcons", "type": "u", "columns": [3]}]';
+BEGIN
+  PERFORM msar.add_constraints('add_unique_con'::regclass::oid, con_create_arr);
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.add_constraints(%s, ''%s'');', 'add_unique_con'::regclass::oid, con_create_arr
+    ),
+    '42P07',
+    'relation "myuniqcons" already exists',
+    'Throws error for duplicate constraint name'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_constraint_errors() RETURNS SETOF TEXT AS $f$
 DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": [7]}]'::jsonb;
