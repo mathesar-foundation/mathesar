@@ -79,5 +79,6 @@ class UniqueConstraint(Constraint):
                 ],
             )
         ).fetchone()[0]
+
     def constraint_type(self):
         return "unique"
