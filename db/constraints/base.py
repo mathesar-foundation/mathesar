@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 import json
 
 from db.connection import execute_msar_func_with_engine
+from db.constraints.utils import (
+    get_constraint_match_char_from_type, get_constraint_char_from_action
+)
 
 
 class Constraint(ABC):
@@ -35,6 +38,9 @@ class ForeignKeyConstraint(Constraint):
         self.options = options
 
     def add_constraint(self, schema, engine, connection_to_use):
+        match_type = get_constraint_match_char_from_type(self.options.get('match'))
+        on_update = get_constraint_char_from_action(self.options.get('onupdate'))
+        on_delete = get_constraint_char_from_action(self.options.get('ondelete'))
         return execute_msar_func_with_engine(
             engine,
             'add_constraints',
@@ -48,9 +54,9 @@ class ForeignKeyConstraint(Constraint):
                         'deferrable': self.options.get('deferrable'),
                         'fkey_relation_id': self.referent_table_oid,
                         'fkey_columns': self.referent_columns,
-                        'fkey_update_action': self.options.get('onupdate'),
-                        'fkey_delete_action': self.options.get('ondelete'),
-                        'fkey_match_type': self.options.get('ondelete')
+                        'fkey_update_action': on_update,
+                        'fkey_delete_action': on_delete,
+                        'fkey_match_type': match_type,
                     }
                 ]
             )

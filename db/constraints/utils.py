@@ -65,7 +65,7 @@ def get_constraint_type_from_char(constraint_char):
     return char_type_map.get(constraint_char)
 
 
-def get_constraint_action_from_char(action_char):
+def get_char_action_map(reverse=False):
     action_map = {
         "a": ConstraintAction.NO_ACTION.value,
         "r": ConstraintAction.RESTRICT.value,
@@ -73,16 +73,40 @@ def get_constraint_action_from_char(action_char):
         "n": ConstraintAction.SET_NULL.value,
         "d": ConstraintAction.SET_DEFAULT.value,
     }
+    if reverse:
+        action_map = {v: k for k, v in action_map.items()}
+    return action_map
+
+
+def get_constraint_action_from_char(action_char):
+    action_map = get_char_action_map()
     return action_map.get(action_char)
 
 
-def get_constraint_match_type_from_char(match_char):
+def get_constraint_char_from_action(action):
+    action_map = get_char_action_map(reverse=True)
+    return action_map.get(action)
+
+
+def get_char_match_map(reverse=False):
     match_map = {
         "f": ConstraintMatch.FULL.value,
         "p": ConstraintMatch.PARTIAL.value,
         "s": ConstraintMatch.SIMPLE.value,
     }
+    if reverse:
+        match_map = {v: k for k, v in match_map.items()}
+    return match_map
+
+
+def get_constraint_match_type_from_char(match_char):
+    match_map = get_char_match_map()
     return match_map.get(match_char)
+
+
+def get_constraint_match_char_from_type(match_type):
+    match_map = get_char_match_map(reverse=True)
+    return match_map.get(match_type)
 
 
 def get_constraint_name(engine, constraint_type, table_oid, column_0_attnum, metadata, connection_to_use=None):
