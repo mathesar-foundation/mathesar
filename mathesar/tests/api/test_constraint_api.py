@@ -192,7 +192,10 @@ def test_multiple_column_constraint_list(create_patents_table, client):
     _verify_primary_and_unique_constraints(response)
     for constraint_data in response_data['results']:
         if constraint_data['type'] == 'unique':
-            _verify_unique_constraint(constraint_data, constraint_column_id_list, 'NASA Constraint List 2_Center_key')
+            _verify_unique_constraint(
+                constraint_data, constraint_column_id_list,
+                'NASA Constraint List 2_Center_Case Number_key'
+            )
 
 
 def test_retrieve_constraint(create_patents_table, client):
@@ -228,7 +231,10 @@ def test_create_multiple_column_unique_constraint(create_patents_table, client):
         f'/api/db/v0/tables/{table.id}/constraints/', data
     )
     assert response.status_code == 201
-    _verify_unique_constraint(response.json(), constraint_column_id_list, 'NASA Constraint List 4_Center_key')
+    _verify_unique_constraint(
+        response.json(), constraint_column_id_list,
+        'NASA Constraint List 4_Center_Case Number_key'
+    )
 
 
 def test_create_single_column_unique_constraint(create_patents_table, client):
@@ -428,7 +434,7 @@ def test_create_multiple_column_foreign_key_constraint(
     }
     response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
     assert response.status_code == 201
-    fk_name = referrer_table.name + '_Center_fkey'
+    fk_name = referrer_table.name + '_Center_Center City_fkey'
     _verify_foreign_key_constraint(
         response.json(), referrer_columns_id, fk_name, referent_columns_id, referent_table.id
     )
@@ -469,8 +475,10 @@ def test_create_unique_constraint_with_duplicate_name(create_patents_table, clie
     constraint_columns = table.get_columns_by_name(['Center', 'Case Number'])
     constraint_column_id_list = [constraint_columns[0].id, constraint_columns[1].id]
     constraint_column_attnum_list = [constraint_columns[0].attnum, constraint_columns[1].attnum]
-    table.add_constraint(UniqueConstraint(None, table.oid, constraint_column_attnum_list))
+    con_name = 'unique_name'
+    table.add_constraint(UniqueConstraint(con_name, table.oid, constraint_column_attnum_list))
     data = {
+        'name': con_name,
         'type': 'unique',
         'columns': constraint_column_id_list
     }
