@@ -35,7 +35,7 @@ class ForeignKeyConstraint(Constraint):
         self.options = options
 
     def add_constraint(self, schema, engine, connection_to_use):
-        execute_msar_func_with_engine(
+        return execute_msar_func_with_engine(
             engine,
             'add_constraints',
             self.table_oid,
