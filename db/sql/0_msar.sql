@@ -1080,26 +1080,58 @@ Args:
 */
 DECLARE
   con_create_defs __msar.con_create_def[];
+  results text;
 BEGIN
   con_create_defs := msar.process_con_create_arr(tab_id, con_defs);
-  PERFORM __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
+  results := __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
   RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_constraints(sch_name text, tab_name text, col_defs jsonb)
+msar.add_constraints(sch_name text, tab_name text, con_defs jsonb)
   RETURNS oid[] AS $$/*
 Add constraints to a table.
 
 Args:
   sch_name: unquoted schema name of the table to which we'll add constraints.
   tab_name: unquoted, unqualified name of the table to which we'll add constraints.
-  col_defs: a JSONB array defining constraints to add. See msar.process_col_create_arr for details.
+  con_defs: a JSONB array defining constraints to add. See msar.process_con_create_arr for details.
 */
-SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), col_defs);
+SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), con_defs);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.copy_constraint(con_id oid, from_col_id smallint, to_col_id smallint)
+  RETURNS oid[] AS $$/*
+Copy a single constraint associated with a column.
+
+Given a column with attnum 3 involved in the original constraint, and a column with attnum 4 to be
+involved in the constraint copy, and other columns 1 and 2 involved in the constraint, suppose the
+original constraint had conkey [1, 2, 3]. The copy constraint should then have conkey [1, 2, 4].
+
+For now, this is only implemented for unique constraints.
+
+Args:
+  con_id: The oid of the constraint we'll copy.
+  from_col_id: The column ID to be removed from the original's conkey in the copy.
+  to_col_id: The column ID to be added to the original's conkey in the copy.
+*/
+WITH
+  con_cte AS (SELECT * FROM pg_constraint WHERE oid=con_id AND contype='u'),
+  con_def_cte AS (
+    SELECT jsonb_agg(
+      jsonb_build_object(
+        'name', null,
+        'type', con_cte.contype,
+        'columns', array_replace(con_cte.conkey, from_col_id, to_col_id)
+      )
+    ) AS con_def FROM con_cte
+  )
+SELECT msar.add_constraints(con_cte.conrelid, con_def_cte.con_def) FROM con_cte, con_def_cte;
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------
