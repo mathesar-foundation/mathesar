@@ -12,14 +12,9 @@
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import {
-    currentTable,
-    deleteTable,
-    refetchTablesForSchema,
-    tables,
-  } from '@mathesar/stores/tables';
+  import { currentTable, deleteTable, tables } from '@mathesar/stores/tables';
   import {
     constructDataExplorerUrlToSummarizeFromGroup,
     createDataExplorerUrlToExploreATable,
@@ -34,10 +29,10 @@
   $: ({ grouping } = meta);
   $: ({ columns } = columnsDataStore);
   $: explorationPageUrl =
-    $currentDatabase && $currentSchemaId
+    $currentDatabase && $currentSchema
       ? createDataExplorerUrlToExploreATable(
           $currentDatabase?.name,
-          $currentSchemaId,
+          $currentSchema.id,
           {
             id: $tabularData.id,
             name: $tables.data.get($tabularData.id)?.name ?? '',
@@ -45,12 +40,12 @@
         )
       : '';
   $: summarizationUrl = (() => {
-    if (!$currentTable || !$currentDatabase || !$currentSchemaId) {
+    if (!$currentTable || !$currentDatabase || !$currentSchema) {
       return undefined;
     }
     return constructDataExplorerUrlToSummarizeFromGroup(
       $currentDatabase.name,
-      $currentSchemaId,
+      $currentSchema.id,
       {
         baseTable: { id, name: $currentTable.name },
         columns: $columns,
@@ -69,15 +64,13 @@
         },
       },
       onProceed: async () => {
-        await deleteTable($tabularData.id);
         // TODO handle error when deleting
         // TODO: Get db and schema from prop or context
-        if ($currentDatabase && $currentSchemaId) {
-          await refetchTablesForSchema($currentSchemaId);
-          router.goto(
-            getSchemaPageUrl($currentDatabase.name, $currentSchemaId),
-            true,
-          );
+        const database = $currentDatabase;
+        const schema = $currentSchema;
+        if (database && schema) {
+          await deleteTable(database, schema, $tabularData.id);
+          router.goto(getSchemaPageUrl(database.name, schema.id), true);
         }
       },
     });
@@ -85,7 +78,7 @@
 </script>
 
 <div class="actions-container">
-  {#if $currentDatabase && $currentSchemaId}
+  {#if $currentDatabase && $currentSchema}
     <AnchorButton href={explorationPageUrl}>
       <div class="action-item">
         <div>

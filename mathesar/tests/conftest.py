@@ -20,7 +20,7 @@ from db.columns.operations.select import get_column_attnum_from_name
 from db.schemas.utils import get_schema_oid_from_name
 
 import mathesar.tests.conftest
-from mathesar.imports.csv import create_table_from_csv
+from mathesar.imports.base import create_table_from_data_file
 from mathesar.models.base import Schema, Table, Database, DataFile
 from mathesar.models.base import Column as mathesar_model_column
 from mathesar.models.users import DatabaseRole, SchemaRole, User
@@ -322,7 +322,7 @@ def create_table(create_schema):
     def _create_table(table_name, schema_name, csv_filepath):
         data_file = _get_datafile_for_path(csv_filepath)
         schema_model = create_schema(schema_name)
-        return create_table_from_csv(data_file, table_name, schema_model)
+        return create_table_from_data_file(data_file, table_name, schema_model)
     return _create_table
 
 

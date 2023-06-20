@@ -233,7 +233,11 @@
       try {
         headerUpdateRequestStatus = { state: 'processing' };
         dataFileDetails.header = useFirstRowAsHeader;
-        const deleteTablePromise = deleteTable(previewTableId);
+        const deleteTablePromise = deleteTable(
+          database,
+          schema,
+          previewTableId,
+        );
         const patchDataFilePromise = patchAPI(
           `/api/db/v0/data_files/${dataFileDetails.id}/`,
           {
@@ -241,7 +245,7 @@
           },
         );
         await Promise.all([deleteTablePromise, patchDataFilePromise]);
-        tableInfo = await createTable(schema.id, {
+        tableInfo = await createTable(database, schema, {
           name: tableName,
           dataFiles: [dataFileDetails.id],
         });
@@ -287,7 +291,7 @@
   }
 
   function handleCancel() {
-    void deleteTable(previewTableId).catch((err) => {
+    void deleteTable(database, schema, previewTableId).catch((err) => {
       const errorMessage =
         err instanceof Error ? err.message : 'Unable to cancel import';
       toast.error(errorMessage);

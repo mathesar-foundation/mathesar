@@ -4,10 +4,11 @@ import type {
   FormValues,
   IconProps,
 } from '@mathesar-component-library/types';
-import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
 import type { DbType } from '@mathesar/AppTypes';
+import type { QuerySummarizationFunctionId } from '@mathesar/api/types/queries';
 import type { Column } from '@mathesar/api/types/tables/columns';
 import type { States } from '@mathesar/api/utils/requestUtils';
+import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
 import type { abstractTypeCategory } from './constants';
 
 type AbstractTypeCategoryKeys = keyof typeof abstractTypeCategory;
@@ -141,3 +142,30 @@ export type AbstractTypePreprocFunctionDefinitionMap = Map<
   AbstractTypeCategoryIdentifier,
   AbstractTypePreprocFunctionDefinition[]
 >;
+
+export interface AbstractTypeSummarizationFunctionsResponseValue {
+  label: string;
+  /**
+   * - Keys are abstract types to which this summarization function applies.
+   * - Values are the abstract types that the summarization function returns.
+   */
+  inputOutputTypeMap: Partial<
+    Record<AbstractTypeCategoryIdentifier, AbstractTypeCategoryIdentifier>
+  >;
+}
+
+export type AbstractTypeSummarizationFunctionsResponse = Record<
+  QuerySummarizationFunctionId,
+  AbstractTypeSummarizationFunctionsResponseValue
+>;
+
+/**
+ * A summarization function for a _specific_ abstract type, showing the return
+ * value for that type.
+ */
+export interface AbstractTypeSummarizationFunction {
+  id: QuerySummarizationFunctionId;
+  label: AbstractTypeSummarizationFunctionsResponseValue['label'];
+  inputType: AbstractTypeCategoryIdentifier;
+  outputType: AbstractTypeCategoryIdentifier;
+}
