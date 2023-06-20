@@ -176,8 +176,16 @@ export const isCellSelected = (
   column: Pick<SelectionColumn, 'id'>,
 ): boolean => selectedCells.has(createSelectedCellIdentifier(row, column));
 
+// The following function is similar to splitting the string with max_split = 1.
+// input "a-b-c" => output "b-c"
+// input "a-b" => output "b"
+function splitWithLimit(str: string): string {
+  const tokens = str.split(ROW_COLUMN_SEPARATOR);
+  return tokens.slice(1).join(ROW_COLUMN_SEPARATOR);
+}
+
 function getSelectedColumnId(selectedCell: string): SelectionColumn['id'] {
-  const columnId = selectedCell.split(ROW_COLUMN_SEPARATOR)[1];
+  const columnId = splitWithLimit(selectedCell);
   const numericalColumnId = Number(columnId);
   if (Number.isNaN(numericalColumnId)) {
     return columnId;
