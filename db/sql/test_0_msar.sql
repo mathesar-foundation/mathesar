@@ -631,6 +631,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION  test_add_constraints_unique_single() RETURNS SETOF TEXT AS $f$
+DECLARE
+  con_create_arr jsonb := '[{"name": "myuniqcons", "type": "u", "columns": [2]}]';
+BEGIN
+  PERFORM msar.add_constraints('add_unique_con'::regclass::oid, con_create_arr);
+  RETURN NEXT col_is_unique('add_unique_con', ARRAY['col1']);
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION  test_add_constraints_unique_multicol() RETURNS SETOF TEXT AS $f$
 DECLARE
   con_create_arr jsonb := '[{"name": "myuniqcons", "type": "u", "columns": [2, 3]}]';
