@@ -1,3 +1,6 @@
+# TODO This whole file should probably be deleted, since this actual
+# functionality is now covered by SQL tests. I'm leaving it only because
+# we're planning to refactor the python layer handling constraints.
 import pytest
 from sqlalchemy import String, Integer, Column, Table, MetaData
 from psycopg.errors import DuplicateTable
