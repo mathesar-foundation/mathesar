@@ -29,6 +29,7 @@ class ConstraintMatch(Enum):
     SIMPLE = 'SIMPLE'
 
 
+# TODO Remove this. It's incorrect, and not robust.
 # Naming conventions for constraints follow standard Postgres conventions
 # described in https://stackoverflow.com/a/4108266
 naming_convention = {
@@ -55,6 +56,15 @@ def get_constraint_type_from_class(constraint):
 
 
 def get_constraint_type_from_char(constraint_char):
+    """
+    Map the char for a constraint to the string used for creating it in SQL.
+
+    Args:
+        constraint_char: Single character, matching pg_constraints.
+
+    Returns:
+        The string used for creating the constraint in SQL.
+    """
     char_type_map = {
         "c": ConstraintType.CHECK.value,
         "f": ConstraintType.FOREIGN_KEY.value,
@@ -65,7 +75,7 @@ def get_constraint_type_from_char(constraint_char):
     return char_type_map.get(constraint_char)
 
 
-def get_char_action_map(reverse=False):
+def _get_char_action_map(reverse=False):
     action_map = {
         "a": ConstraintAction.NO_ACTION.value,
         "r": ConstraintAction.RESTRICT.value,
@@ -79,16 +89,28 @@ def get_char_action_map(reverse=False):
 
 
 def get_constraint_action_from_char(action_char):
-    action_map = get_char_action_map()
+    """
+    Map the action_char to a string giving the on update or on delecte action.
+
+    Args:
+        action_char: Single character, matching pg_constraints.
+    """
+    action_map = _get_char_action_map()
     return action_map.get(action_char)
 
 
 def get_constraint_char_from_action(action):
-    action_map = get_char_action_map(reverse=True)
+    """
+    Map the on update or on delete action to a single character.
+
+    Args:
+        action: Single character, matching pg_constraints.
+    """
+    action_map = _get_char_action_map(reverse=True)
     return action_map.get(action)
 
 
-def get_char_match_map(reverse=False):
+def _get_char_match_map(reverse=False):
     match_map = {
         "f": ConstraintMatch.FULL.value,
         "p": ConstraintMatch.PARTIAL.value,
@@ -100,12 +122,24 @@ def get_char_match_map(reverse=False):
 
 
 def get_constraint_match_type_from_char(match_char):
-    match_map = get_char_match_map()
+    """
+    Map the match_char to a string giving the match type.
+
+    Args:
+        match_char: Single character, matching pg_constraints.
+    """
+    match_map = _get_char_match_map()
     return match_map.get(match_char)
 
 
 def get_constraint_match_char_from_type(match_type):
-    match_map = get_char_match_map(reverse=True)
+    """
+    Map the match_type to a single character.
+
+    Args:
+        match_type: Single character, matching pg_constraints.
+    """
+    match_map = _get_char_match_map(reverse=True)
     return match_map.get(match_type)
 
 
