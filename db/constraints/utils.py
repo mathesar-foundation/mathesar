@@ -1,10 +1,5 @@
+"""Utilities for database constraints."""
 from enum import Enum
-
-from sqlalchemy import CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
-from sqlalchemy.dialects.postgresql import ExcludeConstraint
-
-from db.columns.operations.select import get_column_name_from_attnum
-from db.tables.operations.select import reflect_table_from_oid
 
 
 class ConstraintType(Enum):
@@ -39,20 +34,6 @@ naming_convention = {
     "fk": '%(table_name)s_%(column_0_name)s_fkey',
     "pk": '%(table_name)s_%(column_0_name)s_pkey'
 }
-
-
-def get_constraint_type_from_class(constraint):
-    if type(constraint) == CheckConstraint:
-        return ConstraintType.CHECK.value
-    elif type(constraint) == ForeignKeyConstraint:
-        return ConstraintType.FOREIGN_KEY.value
-    elif type(constraint) == PrimaryKeyConstraint:
-        return ConstraintType.PRIMARY_KEY.value
-    elif type(constraint) == UniqueConstraint:
-        return ConstraintType.UNIQUE.value
-    elif type(constraint) == ExcludeConstraint:
-        return ConstraintType.EXCLUDE.value
-    return None
 
 
 def get_constraint_type_from_char(constraint_char):
@@ -141,21 +122,3 @@ def get_constraint_match_char_from_type(match_type):
     """
     match_map = _get_char_match_map(reverse=True)
     return match_map.get(match_type)
-
-
-def get_constraint_name(engine, constraint_type, table_oid, column_0_attnum, metadata, connection_to_use=None):
-    table_name = reflect_table_from_oid(table_oid, engine, connection_to_use=connection_to_use, metadata=metadata).name
-    column_0_name = get_column_name_from_attnum(table_oid, column_0_attnum, engine, metadata=metadata, connection_to_use=connection_to_use)
-    data = {
-        'table_name': table_name,
-        'column_0_name': column_0_name
-    }
-    if constraint_type == ConstraintType.UNIQUE.value:
-        return naming_convention['uq'] % data
-    if constraint_type == ConstraintType.FOREIGN_KEY.value:
-        return naming_convention['fk'] % data
-    if constraint_type == ConstraintType.PRIMARY_KEY.value:
-        return naming_convention['pk'] % data
-    if constraint_type == ConstraintType.CHECK.value:
-        return naming_convention['ck'] % data
-    return None
