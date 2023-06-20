@@ -669,6 +669,32 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION setup_copy_unique() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE copy_unique_con
+    (id serial primary key, col1 integer, col2 integer, col3 integer, col4 integer);
+  ALTER TABLE copy_unique_con ADD CONSTRAINT olduniqcon UNIQUE (col1, col2, col3);
+  INSERT INTO copy_unique_con (col1, col2, col3, col4) VALUES
+    (1, 2, 5, 9),
+    (2, 3, 6, 0),
+    (3, 4, 8, 1);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_constraint() RETURNS SETOF TEXT AS $f$
+DECLARE
+  orig_oid oid;
+BEGIN
+  orig_oid := oid
+    FROM pg_constraint
+    WHERE conrelid='copy_unique_con'::regclass::oid AND conname='olduniqcon';
+  PERFORM msar.copy_constraint(orig_oid, 4::smallint, 5::smallint);
+  RETURN NEXT col_is_unique('copy_unique_con', ARRAY['col1', 'col2', 'col4']);
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_constraint_errors() RETURNS SETOF TEXT AS $f$
 DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": [7]}]'::jsonb;
