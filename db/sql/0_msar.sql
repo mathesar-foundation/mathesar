@@ -930,7 +930,9 @@ constrained table's OID.
 );
 
 
-CREATE OR REPLACE FUNCTION msar.get_fkey_action_from_char("char") RETURNS text AS $$
+CREATE OR REPLACE FUNCTION msar.get_fkey_action_from_char("char") RETURNS text AS $$/*
+Map the "char" from pg_constraint to the update or delete action string.
+*/
 SELECT CASE
   WHEN $1 = 'a' THEN 'NO ACTION'
   WHEN $1 = 'r' THEN 'RESTRICT'
@@ -1056,12 +1058,7 @@ WITH con_cte AS (
       ELSE
         NULL
     END
-    || CASE
-      WHEN con.deferrable_ THEN
-        'DEFERRABLE'
-      ELSE
-        ''
-    END,
+    || CASE WHEN con.deferrable_ THEN 'DEFERRABLE' ELSE '' END,
     ', '
   ) as con_additions
   FROM unnest(con_defs) as con
