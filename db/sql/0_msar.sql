@@ -740,6 +740,56 @@ CREATE TYPE __msar.col_create_def AS (
 );
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_fresh_copy_name(tab_id oid, col_id smallint) RETURNS text AS $$/*
+*/
+WITH RECURSIVE orig_col_cte AS (
+  SELECT attname FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id
+),
+colnames(n, cname) AS (
+   SELECT 1, format('%s %s', occ.attname, 1) FROM orig_col_cte occ
+   UNION
+   SELECT cn.n + 1, format('%s %s', occ.attname, cn.n + 1) FROM colnames cn, orig_col_cte occ
+ )
+ SELECT cname
+ FROM colnames
+ WHERE cname NOT IN (SELECT attname FROM pg_attribute WHERE attrelid='mytab'::regclass::oid)
+LIMIT 1;
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_col_create_defs(
+    tab_id oid,
+    col_ids smallint[],
+    new_names text[],
+    copy_not_null boolean,
+    copy_defaults boolean
+)
+  RETURNS __msar.col_create_def[] AS $$/*
+Get an array of __msar.col_create_def from given columns in a table.
+
+Args:
+  tab_id: The OID of the table containing the column whose definition we want.
+  col_id: The attnum of the column whose definition we want.
+  new_names: The desired names of the column defs. Must be in same order as col_ids, and same
+    length.
+  copy_defaults: Whether or not we should copy the defaults
+*/
+SELECT array_agg(
+  (
+  quote_ident(COALESCE(new_name, msar.get_fresh_copy_name(tab_id, attnum))),
+  format_type(atttypid, atttypmod),
+  attnotnull,
+  pg_get_expr(adbin, 'mytab'::regclass::oid)
+  )::__msar.col_create_def
+)
+FROM pg_attribute
+  JOIN unnest(col_ids, new_names) AS x(col_id, new_name) ON attnum=col_id
+  LEFT JOIN pg_attrdef ON adnum=attnum AND attrelid=adrelid
+WHERE attrelid='mytab'::regclass::oid;
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
 -- Add columns to table ----------------------------------------------------------------------------
 
 
