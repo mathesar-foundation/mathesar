@@ -5,7 +5,8 @@ from sqlalchemy import text
 
 from mathesar.models.base import DataFile, Schema
 from mathesar.errors import InvalidTableError
-from mathesar.imports.csv import create_table_from_csv, get_sv_dialect, get_sv_reader
+from mathesar.imports.base import create_table_from_data_file
+from mathesar.imports.csv import get_sv_dialect, get_sv_reader
 from db.schemas.operations.create import create_schema
 from db.schemas.utils import get_schema_oid_from_name
 from db.constants import COLUMN_NAME_TEMPLATE
@@ -17,28 +18,28 @@ TEST_SCHEMA = "import_csv_schema"
 @pytest.fixture
 def data_file(patents_csv_filepath):
     with open(patents_csv_filepath, "rb") as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
+        data_file = DataFile.objects.create(file=File(csv_file), type='csv')
     return data_file
 
 
 @pytest.fixture
 def headerless_data_file(headerless_patents_csv_filepath):
     with open(headerless_patents_csv_filepath, "rb") as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file), header=False)
+        data_file = DataFile.objects.create(file=File(csv_file), header=False, type='csv')
     return data_file
 
 
 @pytest.fixture
 def col_names_with_spaces_data_file(col_names_with_spaces_csv_filepath):
     with open(col_names_with_spaces_csv_filepath, "rb") as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
+        data_file = DataFile.objects.create(file=File(csv_file), type='csv')
     return data_file
 
 
 @pytest.fixture
 def col_headers_empty_data_file(col_headers_empty_csv_filepath):
     with open(col_headers_empty_csv_filepath, "rb") as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
+        data_file = DataFile.objects.create(file=File(csv_file), type='csv')
     return data_file
 
 
@@ -63,7 +64,7 @@ def check_csv_upload(table, table_name, schema, num_records, row, cols):
 
 def test_csv_upload(data_file, schema):
     table_name = "NASA 1"
-    table = create_table_from_csv(data_file, table_name, schema)
+    table = create_table_from_data_file(data_file, table_name, schema)
 
     num_records = 1393
     expected_row = (
@@ -92,7 +93,7 @@ def test_csv_upload(data_file, schema):
 
 def test_headerless_csv_upload(headerless_data_file, schema):
     table_name = "NASA no headers"
-    table = create_table_from_csv(headerless_data_file, table_name, schema)
+    table = create_table_from_data_file(headerless_data_file, table_name, schema)
 
     num_records = 1393
     expected_row = (
@@ -114,7 +115,7 @@ def test_headerless_csv_upload(headerless_data_file, schema):
 
 def test_col_names_with_spaces_csv(col_names_with_spaces_data_file, schema):
     table_name = "Column names with spaces"
-    table = create_table_from_csv(col_names_with_spaces_data_file, table_name, schema)
+    table = create_table_from_data_file(col_names_with_spaces_data_file, table_name, schema)
 
     num_records = 2
     expected_row = (
@@ -131,7 +132,7 @@ def test_col_names_with_spaces_csv(col_names_with_spaces_data_file, schema):
 
 def test_col_headers_empty_csv(col_headers_empty_data_file, schema):
     table_name = "Empty column header"
-    table = create_table_from_csv(col_headers_empty_data_file, table_name, schema)
+    table = create_table_from_data_file(col_headers_empty_data_file, table_name, schema)
 
     num_records = 2
     expected_row = (1, "aa", "bb", "cc", "dd")
@@ -145,18 +146,18 @@ def test_col_headers_empty_csv(col_headers_empty_data_file, schema):
 def test_csv_upload_with_duplicate_table_name(data_file, schema):
     table_name = "NASA 2"
 
-    table = create_table_from_csv(data_file, table_name, schema)
+    table = create_table_from_data_file(data_file, table_name, schema)
     assert table is not None
     assert table.name == table_name
     assert table.schema == schema
     assert table.sa_num_records() == 1393
 
     with pytest.raises(DuplicateTable):
-        create_table_from_csv(data_file, table_name, schema)
+        create_table_from_data_file(data_file, table_name, schema)
 
 
 def test_csv_upload_table_imported_to(data_file, schema):
-    table = create_table_from_csv(data_file, "NASA", schema)
+    table = create_table_from_data_file(data_file, "NASA", schema)
     data_file.refresh_from_db()
     assert data_file.table_imported_to == table
 
