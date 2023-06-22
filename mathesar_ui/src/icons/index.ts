@@ -64,6 +64,7 @@ import {
   faCircleInfo,
   faUserGear,
   faFilterCircleXmark,
+  faExclamationCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -169,6 +170,7 @@ export const iconUrl: IconProps = { data: faLink };
 
 export const iconNotEditable: IconProps = { data: faLock };
 export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
+export const iconWarning: IconProps = { data: faExclamationCircle };
 
 // UI TYPES
 

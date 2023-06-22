@@ -7,6 +7,8 @@
   import { refetchQueriesForSchema } from '@mathesar/stores/queries';
   import { refetchTablesForSchema } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { Button, Icon } from '@mathesar-component-library';
+  import { iconRefresh, iconWarning } from '@mathesar/icons';
   import OverviewHeader from './OverviewHeader.svelte';
   import TablesList from './TablesList.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
@@ -35,7 +37,11 @@
   $: showExplorationTutorial = hasTables && !hasExplorations && canEditMetadata;
 
   // Viewers can explore, they cannot save explorations
-  $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
+  $: canExplore =
+    hasTables &&
+    hasExplorations &&
+    !isExplorationsLoading &&
+    !isExplorationsUnfetchable;
 </script>
 
 <div class="container">
@@ -50,15 +56,29 @@
     {#if isTablesLoading}
       <TableSkeleton numTables={schema.num_tables} />
     {:else if isTablesUnfetchable}
-      <span> There was an error while fetching the tables. </span>
-      <button
-        on:click={() => {
-          if ($currentSchemaId) {
-            void refetchTablesForSchema($currentSchemaId);
-          }
-        }}>Retry</button
-      >
-      <a class="btn" href="/">Go to database</a>
+      <div class="table-fetch-error">
+        <div>
+          <Icon {...iconWarning} />
+          <span>Error fetching tables</span>
+        </div>
+        <div>
+          <Button
+            on:click={() => {
+              if ($currentSchemaId) {
+                void refetchTablesForSchema($currentSchemaId);
+              }
+            }}
+          >
+            <Icon {...iconRefresh} />
+            <span>Retry</span>
+          </Button>
+          <a href="../">
+            <Button>
+              <span>Go to Database</span>
+            </Button>
+          </a>
+        </div>
+      </div>
     {:else if showTableCreationTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
@@ -76,15 +96,29 @@
       {#if isExplorationsLoading}
         <ExplorationSkeleton />
       {:else if isExplorationsUnfetchable}
-        <span> There was an error while fetching the explorations. </span>
-        <button
-          on:click={() => {
-            if ($currentSchemaId) {
-              void refetchQueriesForSchema($currentSchemaId);
-            }
-          }}>Retry</button
-        >
-        <a class="btn" href="/">Go to database</a>
+        <div class="exploration-fetch-error">
+          <div>
+            <Icon {...iconWarning} />
+            <span>Error fetching explorations</span>
+          </div>
+          <div>
+            <Button
+              on:click={() => {
+                if ($currentSchemaId) {
+                  void refetchQueriesForSchema($currentSchemaId);
+                }
+              }}
+            >
+              <Icon {...iconRefresh} />
+              <span>Retry</span>
+            </Button>
+            <a href="../">
+              <Button>
+                <span>Go to Database</span>
+              </Button>
+            </a>
+          </div>
+        </div>
       {:else if showExplorationTutorial}
         <CreateNewExplorationTutorial {database} {schema} />
       {:else}
@@ -137,6 +171,45 @@
     > :global(* + *) {
       margin-top: 2rem;
     }
+  }
+
+  .table-fetch-error {
+    font-weight: 600;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 16px;
+    gap: 16px;
+    width: 616px;
+    height: 105px;
+    background: #fdeeed;
+    border: 1px solid #f9cdc8;
+    border-radius: 8px;
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+  }
+
+  .exploration-fetch-error {
+    font-weight: 600;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 16px;
+    gap: 16px;
+    width: 304px;
+    height: 105px;
+    background: #fdeeed;
+    border: 1px solid #f9cdc8;
+    border-radius: 8px;
+    flex: none;
+    order: 1;
+    align-self: stretch;
   }
 
   @media screen and (min-width: 64rem) {
