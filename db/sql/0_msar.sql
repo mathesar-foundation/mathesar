@@ -777,10 +777,10 @@ Args:
 */
 SELECT array_agg(
   (
-  quote_ident(COALESCE(new_name, msar.get_fresh_copy_name(tab_id, attnum))),
-  format_type(atttypid, atttypmod),
-  attnotnull,
-  pg_get_expr(adbin, 'mytab'::regclass::oid)
+    quote_ident(COALESCE(new_name, msar.get_fresh_copy_name(tab_id, attnum))),
+    format_type(atttypid, atttypmod),
+    CASE WHEN copy_not_null THEN attnotnull END,
+    CASE WHEN copy_defaults THEN pg_get_expr(adbin, 'mytab'::regclass::oid) END
   )::__msar.col_create_def
 )
 FROM pg_attribute
@@ -948,6 +948,27 @@ Args:
 */
 SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw_default);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.copy_column(
+  tab_id oid, col_id smallint, copy_name text, copy_data boolean, copy_constraints boolean
+) RETURNS smallint[] AS $$/*
+Copy a column of a table
+*/
+DECLARE
+  col_create_defs __msar.col_create_def[];
+BEGIN
+  col_create_defs := msar.get_col_create_defs(
+    tab_id, ARRAY[col_id], ARRAY[copy_name], copy_constraints, copy_data
+  );
+  PERFORM __msar.add_columns(get_relation_name(tab_id), VARIADIC col_create_defs);
+  RETURN array_agg(attnum)
+    FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
+    INNER JOIN unnest(col_create_defs) R
+    ON quote_ident(L.attname) = R.name_;
+END;
+$$ LANGUAGE plpgsql;
 
 
 ----------------------------------------------------------------------------------------------------
