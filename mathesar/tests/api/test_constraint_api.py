@@ -475,10 +475,10 @@ def test_create_unique_constraint_with_duplicate_name(create_patents_table, clie
     constraint_columns = table.get_columns_by_name(['Center', 'Case Number'])
     constraint_column_id_list = [constraint_columns[0].id, constraint_columns[1].id]
     constraint_column_attnum_list = [constraint_columns[0].attnum, constraint_columns[1].attnum]
-    con_name = 'unique_name'
-    table.add_constraint(UniqueConstraint(con_name, table.oid, constraint_column_attnum_list))
+    constraint_name = 'unique_name'
+    table.add_constraint(UniqueConstraint(constraint_name, table.oid, constraint_column_attnum_list))
     data = {
-        'name': con_name,
+        'name': constraint_name,
         'type': 'unique',
         'columns': constraint_column_id_list
     }
