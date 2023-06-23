@@ -753,7 +753,7 @@ colnames(n, cname) AS (
  )
  SELECT cname
  FROM colnames
- WHERE cname NOT IN (SELECT attname FROM pg_attribute WHERE attrelid='mytab'::regclass::oid)
+ WHERE cname NOT IN (SELECT attname FROM pg_attribute WHERE attrelid=tab_id)
 LIMIT 1;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
@@ -779,14 +779,14 @@ SELECT array_agg(
   (
     quote_ident(COALESCE(new_name, msar.get_fresh_copy_name(tab_id, attnum))),
     format_type(atttypid, atttypmod),
-    CASE WHEN copy_not_null THEN attnotnull END,
-    CASE WHEN copy_defaults THEN pg_get_expr(adbin, 'mytab'::regclass::oid) END
+    false,
+    CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END
   )::__msar.col_create_def
 )
 FROM pg_attribute
   JOIN unnest(col_ids, new_names) AS x(col_id, new_name) ON attnum=col_id
   LEFT JOIN pg_attrdef ON adnum=attnum AND attrelid=adrelid
-WHERE attrelid='mytab'::regclass::oid;
+WHERE attrelid=tab_id;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
