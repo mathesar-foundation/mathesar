@@ -762,7 +762,6 @@ CREATE OR REPLACE FUNCTION msar.get_col_create_defs(
     tab_id oid,
     col_ids smallint[],
     new_names text[],
-    copy_not_null boolean,
     copy_defaults boolean
 )
   RETURNS __msar.col_create_def[] AS $$/*
@@ -950,27 +949,6 @@ SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.copy_column(
-  tab_id oid, col_id smallint, copy_name text, copy_data boolean, copy_constraints boolean
-) RETURNS smallint[] AS $$/*
-Copy a column of a table
-*/
-DECLARE
-  col_create_defs __msar.col_create_def[];
-BEGIN
-  col_create_defs := msar.get_col_create_defs(
-    tab_id, ARRAY[col_id], ARRAY[copy_name], copy_constraints, copy_data
-  );
-  PERFORM __msar.add_columns(get_relation_name(tab_id), VARIADIC col_create_defs);
-  RETURN array_agg(attnum)
-    FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
-    INNER JOIN unnest(col_create_defs) R
-    ON quote_ident(L.attname) = R.name_;
-END;
-$$ LANGUAGE plpgsql;
-
-
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- MATHESAR ADD CONSTRAINTS FUNCTIONS
@@ -1148,10 +1126,9 @@ Args:
 */
 DECLARE
   con_create_defs __msar.con_create_def[];
-  results text;
 BEGIN
   con_create_defs := msar.process_con_create_arr(tab_id, con_defs);
-  results := __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
+  PERFORM __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
   RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -1168,6 +1145,31 @@ Args:
   con_defs: a JSONB array defining constraints to add. See msar.process_con_create_arr for details.
 */
 SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), con_defs);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+DROP TYPE IF EXISTS __msar.not_null_def CASCADE;
+CREATE TYPE __msar.not_null_def AS (
+  col_name text, -- The column to be modified, quoted.
+  not_null boolean -- The value to set for null or not null.
+);
+
+
+CREATE OR REPLACE FUNCTION
+__msar.set_not_nulls(tab_name text, not_null_defs __msar.not_null_def[]) RETURNS TEXT AS $$/*
+Set or drop not null constraints on columns
+*/
+WITH not_null_cte AS (
+  SELECT string_agg(
+    CASE
+      WHEN col.not_null=true THEN format('ALTER %s SET NOT NULL', col.col_name)
+      WHEN col.not_null=false THEN format ('ALTER %s DROP NOT NULL', col.col_name)
+    END,
+    ', '
+  ) AS not_nulls
+  FROM unnest(not_null_defs) as col
+)
+SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, not_nulls) FROM not_null_cte;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1200,6 +1202,51 @@ WITH
   )
 SELECT msar.add_constraints(con_cte.conrelid, con_def_cte.con_def) FROM con_cte, con_def_cte;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.copy_column(
+  tab_id oid, col_id smallint, copy_name text, copy_data boolean, copy_constraints boolean
+) RETURNS smallint AS $$/*
+Copy a column of a table
+*/
+DECLARE
+  col_create_defs __msar.col_create_def[];
+  tab_name text;
+  col_name text;
+  created_col_id smallint;
+  col_not_null boolean;
+BEGIN
+  col_create_defs := msar.get_col_create_defs(
+    tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
+  );
+  tab_name := __msar.get_relation_name(tab_id);
+  col_name := msar.get_column_name(tab_id, col_id);
+  PERFORM __msar.add_columns(tab_name, VARIADIC col_create_defs);
+  created_col_id := attnum
+    FROM pg_attribute
+    WHERE attrelid=tab_id AND quote_ident(attname)=col_create_defs[1].name_;
+  IF copy_data THEN
+    PERFORM __msar.exec_ddl(
+      'UPDATE %s SET %s=%s',
+      tab_name, col_create_defs[1].name_, msar.get_column_name(tab_id, col_id)
+    );
+  END IF;
+  IF copy_constraints THEN
+    PERFORM msar.copy_constraint(oid, col_id, created_col_id)
+    FROM pg_constraint
+    WHERE conrelid=tab_id AND ARRAY[col_id] <@ conkey;
+    PERFORM __msar.set_not_nulls(
+      tab_name, ARRAY[(col_create_defs[1].name_, attnotnull)::__msar.not_null_def]
+    )
+    FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
+  END IF;
+  RETURN attnum
+    FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
+    INNER JOIN unnest(col_create_defs) R
+    ON quote_ident(L.attname) = R.name_;
+END;
+$$ LANGUAGE plpgsql;
 
 
 ----------------------------------------------------------------------------------------------------
