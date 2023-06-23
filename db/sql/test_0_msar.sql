@@ -463,6 +463,67 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_copy_column_non_null_dynamic_default() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 6::smallint, null, true, true
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col5 1', 'timestamp without time zone');
+  RETURN NEXT col_not_null('copy_coltest', 'col5 1');
+  RETURN NEXT col_default_is('copy_coltest', 'col5 1', 'now()');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_interval_notation() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 7::smallint, null, false, false
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col6 1', 'interval second(3)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_space_name() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 8::smallint, null, false, false
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col space 1', 'character varying');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_pkey() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 1::smallint, null, true, true
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'id 1', 'integer');
+  RETURN NEXT col_not_null('copy_coltest', 'id 1');
+  RETURN NEXT col_default_is(
+    'copy_coltest', 'id 1', $d$nextval('copy_coltest_id_seq'::regclass)$d$
+  );
+  RETURN NEXT col_is_pk('copy_coltest', 'id');
+  RETURN NEXT col_isnt_pk('copy_coltest', 'id 1');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_increment_name() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 2::smallint, null, true, true
+  );
+  RETURN NEXT has_column('copy_coltest', 'col1 1');
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 2::smallint, null, true, true
+  );
+  RETURN NEXT has_column('copy_coltest', 'col1 2');
+END;
+$f$ LANGUAGE plpgsql;
+
 -- msar.add_constraints ----------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION setup_add_pkey() RETURNS SETOF TEXT AS $$
