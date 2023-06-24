@@ -1,4 +1,5 @@
 import json
+import pandas as pd
 import tempfile
 
 from psycopg2 import sql
@@ -32,9 +33,14 @@ def insert_record_or_records(table, engine, record_data):
     return None
 
 
-def insert_records_from_json(table, engine, json_filepath):
+def insert_records_from_json(table, engine, json_filepath, column_names):
     with open(json_filepath, 'r') as json_file:
         data = json.load(json_file)
+
+    # Max_level is kept 0 because we don't want to flatten dict values.
+    df = pd.json_normalize(data, max_level=0, meta=column_names)
+    data = json.loads(df.to_json(orient='records'))
+
     for i, row in enumerate(data):
         data[i] = {
             k: json.dumps(v)

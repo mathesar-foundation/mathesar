@@ -27,3 +27,4 @@ whitenoise==6.4.0
 git+https://github.com/centerofci/sqlalchemy-filters@models_to_tables#egg=sqlalchemy_filters
 gunicorn==20.1.0
 drf-spectacular==0.26.2
+pandas==2.0.2
