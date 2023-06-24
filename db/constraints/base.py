@@ -1,13 +1,12 @@
+"""TODO: This needs to be consolidated with db.constraints.operations.create."""
+
 from abc import ABC, abstractmethod
+import json
 
-from alembic.migration import MigrationContext
-from alembic.operations import Operations
-from sqlalchemy import MetaData
-
-from db.columns.operations.select import get_column_names_from_attnums
-from db.constraints.utils import naming_convention
-from db.tables.operations.select import reflect_table_from_oid
-from db.metadata import get_empty_metadata
+from db.connection import execute_msar_func_with_engine
+from db.constraints.utils import (
+    get_constraint_match_char_from_type, get_constraint_char_from_action
+)
 
 
 class Constraint(ABC):
@@ -41,35 +40,29 @@ class ForeignKeyConstraint(Constraint):
         self.options = options
 
     def add_constraint(self, schema, engine, connection_to_use):
-        # TODO reuse metadata
-        metadata = get_empty_metadata()
-        table = reflect_table_from_oid(self.table_oid, engine, connection_to_use=connection_to_use, metadata=metadata)
-        referent_table = reflect_table_from_oid(self.referent_table_oid, engine, connection_to_use=connection_to_use, metadata=metadata)
-        columns_name = get_column_names_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use=connection_to_use, metadata=metadata)
-        referent_columns_name = get_column_names_from_attnums(
-            [self.referent_table_oid],
-            self.referent_columns,
+        match_type = get_constraint_match_char_from_type(self.options.get('match'))
+        on_update = get_constraint_char_from_action(self.options.get('onupdate'))
+        on_delete = get_constraint_char_from_action(self.options.get('ondelete'))
+        return execute_msar_func_with_engine(
             engine,
-            connection_to_use=connection_to_use,
-            metadata=metadata,
-        )
-        # TODO reuse metadata
-        metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
-        opts = {
-            'target_metadata': metadata
-        }
-        ctx = MigrationContext.configure(connection_to_use, opts=opts)
-        op = Operations(ctx)
-        op.create_foreign_key(
-            self.name,
-            table.name,
-            referent_table.name,
-            columns_name,
-            referent_columns_name,
-            source_schema=table.schema,
-            referent_schema=referent_table.schema,
-            **self.options
-        )
+            'add_constraints',
+            self.table_oid,
+            json.dumps(
+                [
+                    {
+                        'name': self.name,
+                        'type': 'f',
+                        'columns': self.columns_attnum,
+                        'deferrable': self.options.get('deferrable'),
+                        'fkey_relation_id': self.referent_table_oid,
+                        'fkey_columns': self.referent_columns,
+                        'fkey_update_action': on_update,
+                        'fkey_delete_action': on_delete,
+                        'fkey_match_type': match_type,
+                    }
+                ]
+            )
+        ).fetchone()[0]
 
 
 class UniqueConstraint(Constraint):
@@ -80,17 +73,20 @@ class UniqueConstraint(Constraint):
         self.columns_attnum = columns_attnum
 
     def add_constraint(self, schema, engine, connection_to_use):
-        # TODO reuse metadata
-        metadata = get_empty_metadata()
-        table = reflect_table_from_oid(self.table_oid, engine, connection_to_use=connection_to_use, metadata=metadata)
-        columns = get_column_names_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use=connection_to_use, metadata=metadata)
-        metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
-        opts = {
-            'target_metadata': metadata
-        }
-        ctx = MigrationContext.configure(connection_to_use, opts=opts)
-        op = Operations(ctx)
-        op.create_unique_constraint(self.name, table.name, columns, table.schema)
+        return execute_msar_func_with_engine(
+            engine,
+            'add_constraints',
+            self.table_oid,
+            json.dumps(
+                [
+                    {
+                        'name': self.name,
+                        'type': 'u',
+                        'columns': self.columns_attnum
+                    }
+                ],
+            )
+        ).fetchone()[0]
 
     def constraint_type(self):
         return "unique"
