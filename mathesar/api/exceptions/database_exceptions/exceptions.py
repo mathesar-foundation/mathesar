@@ -469,7 +469,7 @@ class InvalidJSONFormat(MathesarAPIException):
     def __init__(
             self,
             exception=None,
-            message=None,
+            message='Invalid JSON file.',
             field=None,
             details=None,
             status_code=status.HTTP_400_BAD_REQUEST
@@ -485,7 +485,7 @@ class UnsupportedJSONFormat(MathesarAPIException):
     def __init__(
             self,
             exception=None,
-            message=None,
+            message='This JSON format is not supported.',
             field=None,
             details=None,
             status_code=status.HTTP_400_BAD_REQUEST
