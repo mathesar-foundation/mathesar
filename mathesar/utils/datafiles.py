@@ -57,6 +57,8 @@ def create_datafile(data):
 
     encoding = get_file_encoding(raw_file.file)
     text_file = TextIOWrapper(raw_file.file, encoding=encoding)
+    if type == 'json':
+        validate_json_format(raw_file)
     if type == 'csv' or type == 'tsv':
         dialect = get_sv_dialect(text_file)
         datafile = DataFile(
@@ -69,8 +71,7 @@ def create_datafile(data):
             escapechar=dialect.escapechar,
             quotechar=dialect.quotechar,
         )
-    elif type == 'json':
-        validate_json_format(raw_file)
+    else:
         datafile = DataFile(
             file=raw_file,
             base_name=base_name,
@@ -78,8 +79,6 @@ def create_datafile(data):
             created_from=created_from,
             header=header,
         )
-    else:
-        raise Exception("Invalid file format")
     datafile.save()
     raw_file.close()
 
