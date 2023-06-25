@@ -16,10 +16,9 @@ from psycopg2.errors import IntegrityError, DataError
 from mathesar.state import reset_reflection
 
 
-def validate_json_format(data_file):
+def validate_json_format(data_file_content):
     try:
-        with open(data_file, 'r') as f:
-            data = json.load(f)
+        data = json.load(data_file_content)
     except (JSONDecodeError, ValueError) as e:
         raise database_api_exceptions.InvalidJSONFormat(e)
 
@@ -28,8 +27,8 @@ def validate_json_format(data_file):
 
 
 def get_column_names_from_json(data_file):
-    validate_json_format(data_file)
     with open(data_file, 'r') as f:
+        validate_json_format(f)
         data = json.load(f)
 
     if isinstance(data, list):
