@@ -15,6 +15,7 @@ from pathlib import Path
 
 from decouple import Csv, config as decouple_config
 from dj_database_url import parse as db_url
+from .openapi import custom_preprocessing_hook
 
 
 # We use a 'tuple' with pipes as delimiters as decople naively splits the global
@@ -192,6 +193,8 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': '',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'PREPROCESSING_HOOKS': ['config.settings.openapi.custom_preprocessing_hook'],
+
     # OTHER SETTINGS
 }
 FRIENDLY_ERRORS = {
