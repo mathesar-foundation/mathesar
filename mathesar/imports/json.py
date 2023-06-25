@@ -16,12 +16,21 @@ from psycopg2.errors import IntegrityError, DataError
 from mathesar.state import reset_reflection
 
 
-def get_column_names_from_json(data_file):
+def validate_json_format(data_file):
     try:
         with open(data_file, 'r') as f:
             data = json.load(f)
     except (JSONDecodeError, ValueError) as e:
         raise database_api_exceptions.InvalidJSONFormat(e)
+
+    if not (isinstance(data, list) or isinstance(data, dict)):
+        raise database_api_exceptions.UnsupportedJSONFormat()
+
+
+def get_column_names_from_json(data_file):
+    validate_json_format(data_file)
+    with open(data_file, 'r') as f:
+        data = json.load(f)
 
     if isinstance(data, list):
         all_keys = []
@@ -30,10 +39,8 @@ def get_column_names_from_json(data_file):
                 if key not in all_keys:
                     all_keys.append(key)
         return all_keys
-    elif isinstance(data, dict):
-        return list(data.keys())
     else:
-        raise database_api_exceptions.UnsupportedJSONFormat()
+        return list(data.keys())
 
 
 def insert_data_from_json_data_file(name, schema, column_names, engine, comment, json_filepath):

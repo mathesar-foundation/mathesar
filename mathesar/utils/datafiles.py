@@ -8,6 +8,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 
 from mathesar.errors import URLDownloadError
 from mathesar.imports.csv import get_sv_dialect, get_file_encoding
+from mathesar.imports.json import validate_json_format
 from mathesar.models.base import DataFile
 
 
@@ -68,7 +69,8 @@ def create_datafile(data):
             escapechar=dialect.escapechar,
             quotechar=dialect.quotechar,
         )
-    else:
+    elif type == 'json':
+        validate_json_format(raw_file)
         datafile = DataFile(
             file=raw_file,
             base_name=base_name,
@@ -76,6 +78,8 @@ def create_datafile(data):
             created_from=created_from,
             header=header,
         )
+    else:
+        raise Exception("Invalid file format")
     datafile.save()
     raw_file.close()
 
