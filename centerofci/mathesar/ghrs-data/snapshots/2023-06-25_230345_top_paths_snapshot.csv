@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/centerofci/mathesar,670,370
+/centerofci/mathesar/issues,173,40
+/centerofci/mathesar/pulls,163,13
+/centerofci/mathesar/blob/develop/CONTRIBUTING.md,54,20
+/centerofci/mathesar/blob/develop/DEVELOPER_GUIDE.md,51,9
+/centerofci/mathesar/issues/2857,46,16
+/centerofci/mathesar/tree/develop/mathesar,39,11
+/centerofci/mathesar/blob/develop/mathesar/api/exceptions/error_codes.py,38,1
+/centerofci/mathesar/issues/2917,36,12
+/centerofci/mathesar/blob/develop/mathesar_ui/src/systems/table-view/TableView.svelte,32,1
