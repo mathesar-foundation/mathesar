@@ -335,13 +335,7 @@ def _get_datafile_for_path(path):
 @pytest.fixture
 def create_column():
     def _create_column(table, column_data):
-        column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(
-            table.oid,
-            [column.name],
-            table.schema._sa_engine,
-            metadata=get_empty_metadata()
-        )
+        attnum = table.add_column(column_data)[0]
         column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
         return column[0]
     return _create_column
