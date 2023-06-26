@@ -22,13 +22,15 @@ def validate_json_format(data_file_content):
     except (JSONDecodeError, ValueError) as e:
         raise database_api_exceptions.InvalidJSONFormat(e)
 
-    if not (isinstance(data, list) or isinstance(data, dict)):
-        raise database_api_exceptions.UnsupportedJSONFormat()
+    if isinstance(data, list) and all(isinstance(val, dict) for val in data):
+        return
+    if isinstance(data, dict):
+        return
+    raise database_api_exceptions.UnsupportedJSONFormat()
 
 
 def get_column_names_from_json(data_file):
     with open(data_file, 'r') as f:
-        validate_json_format(f)
         data = json.load(f)
 
     if isinstance(data, list):
