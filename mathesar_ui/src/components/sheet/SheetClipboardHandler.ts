@@ -1,3 +1,4 @@
+import * as Papa from 'papaparse';
 import { get } from 'svelte/store';
 
 import { ImmutableSet, type MakeToast } from '@mathesar-component-library';
@@ -60,6 +61,13 @@ function getCellText<
   return formattedValue;
 }
 
+function serializeTsv(data: string[][]): string {
+  return Papa.unparse(data, {
+    delimiter: '\t',
+    escapeFormulae: true,
+  });
+}
+
 export interface SheetClipboardStats {
   cellCount: number;
 }
@@ -101,34 +109,31 @@ export class SheetClipboardHandler<
 
   private getCopyContent(): string {
     const cells = get(this.deps.selection.selectedCells);
-    let result = '';
     const indexedRecords = new Map(
       this.deps.getRows().map((r) => [r.rowIndex, r.record]),
     );
     const processedColumns = this.deps.getColumnsMap();
     const recordSummaries = this.deps.getRecordSummaries();
+    const plainTextMatrix: string[][] = [];
     for (const rowId of this.getRowIds(cells)) {
-      let isFirstColumn = true;
+      const plainTextRow: string[] = [];
       for (const columnId of this.getColumnIds(cells)) {
-        if (!isFirstColumn) {
-          result += '\t';
-        }
         if (isCellSelected(cells, { rowIndex: rowId }, { id: columnId })) {
-          result += getCellText(
+          const cellText = getCellText(
             indexedRecords,
             processedColumns,
             rowId,
             columnId,
-            'formatted',
+            'raw',
             recordSummaries,
           );
+          plainTextRow.push(cellText);
         }
-        isFirstColumn = false;
       }
-      result += '\n';
+      plainTextMatrix.push(plainTextRow);
     }
     this.deps.toast.info(`Copied ${labeledCount(cells.size, 'cells')}.`);
-    return result;
+    return serializeTsv(plainTextMatrix);
   }
 
   handleCopy(event: ClipboardEvent): void {

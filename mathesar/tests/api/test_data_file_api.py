@@ -32,7 +32,7 @@ def verify_data_file_data(data_file, data_file_dict):
 @pytest.fixture
 def data_file(patents_csv_filepath):
     with open(patents_csv_filepath, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
+        data_file = DataFile.objects.create(file=File(csv_file), type='csv')
     return data_file
 
 
@@ -108,6 +108,18 @@ def test_data_file_create_csv(client, patents_csv_filepath, header):
     check_create_data_file_response(
         response, num_data_files, 'file', 'patents', correct_dialect.delimiter,
         correct_dialect.quotechar, correct_dialect.escapechar, header
+    )
+
+
+@pytest.mark.parametrize('header', [True, False])
+def test_data_file_create_json(client, patents_json_filepath, header):
+    num_data_files = DataFile.objects.count()
+
+    with open(patents_json_filepath, 'rb') as json_file:
+        data = {'file': json_file, 'header': header}
+        response = client.post('/api/db/v0/data_files/', data, format='multipart')
+    check_create_data_file_response(
+        response, num_data_files, 'file', 'patents', ',', '"', '', header
     )
 
 
