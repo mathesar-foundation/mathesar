@@ -1924,7 +1924,7 @@ def test_create_table_and_normalize_json_data_file(client, missing_keys_json_dat
     column_names = [
         "first_name", "last_name", "gender", "friends", "address", "email"
     ]
-    
+
     check_create_table_response(
         client, table_name, expt_name, missing_keys_json_data_file, schema, first_row,
         column_names, import_target_table=None

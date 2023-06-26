@@ -219,7 +219,7 @@ def test_data_file_create_unsupported_json_file(client):
         b'["John", "Mary"]',
         b'1'
     ]
-    
+
     for value in invalid_json_structures:
         response = _get_response_for_unsupported_json_files(client, value)
         response_dict = response.json()
@@ -243,7 +243,7 @@ def test_data_file_create_invalid_json_file(client):
         b'[{"Name": "John"},]',
         b'[{"Name": "John",}]'
     ]
-    
+
     for value in invalid_json_structures:
         response = _get_response_for_invalid_json_files(client, value)
         response_dict = response.json()
