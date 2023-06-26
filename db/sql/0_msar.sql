@@ -1241,10 +1241,7 @@ BEGIN
     )
     FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
   END IF;
-  RETURN attnum
-    FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
-    INNER JOIN unnest(col_create_defs) R
-    ON quote_ident(L.attname) = R.name_;
+  RETURN created_col_id;
 END;
 $$ LANGUAGE plpgsql;
 
