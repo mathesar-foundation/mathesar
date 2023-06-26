@@ -32,7 +32,6 @@
 </script>
 
 <StringifiedNumberInput
-  focusOnMount={true}
   {...$$restProps}
   value={childValue}
   {cssVariables}
