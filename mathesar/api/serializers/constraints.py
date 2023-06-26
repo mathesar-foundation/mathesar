@@ -1,13 +1,11 @@
-from psycopg2.errors import DuplicateTable, UniqueViolation
+from psycopg.errors import DuplicateTable, UniqueViolation
 from rest_framework import serializers, status
-from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from db.constraints import utils as constraint_utils
 from db.identifiers import is_identifier_too_long
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
-import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ConstraintColumnEmptyAPIException, UnsupportedConstraintAPIException,
     InvalidTableName
@@ -53,23 +51,17 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
             raise UnsupportedConstraintAPIException(constraint_type=constraint_type, field='type')
         try:
             constraint = table.add_constraint(constraint_obj)
-        except ProgrammingError as e:
-            if type(e.orig) == DuplicateTable:
-                raise database_api_exceptions.DuplicateTableAPIException(
-                    e,
-                    message='Relation with the same name already exists',
-                    status_code=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                raise base_api_exceptions.MathesarAPIException(e)
-        except IntegrityError as e:
-            if type(e.orig) == UniqueViolation:
-                raise database_api_exceptions.UniqueViolationAPIException(
-                    e,
-                    status_code=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                raise base_api_exceptions.MathesarAPIException(e)
+        except DuplicateTable as e:
+            raise database_api_exceptions.DuplicateTableAPIException(
+                e,
+                message='Relation with the same name already exists',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except UniqueViolation as e:
+            raise database_api_exceptions.UniqueViolationAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         return constraint
 
     def validate_name(self, name):
