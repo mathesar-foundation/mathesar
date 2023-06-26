@@ -1,7 +1,8 @@
-# Troubleshoot Guided Installation
+# Guided installation: troubleshooting
 
 !!! info ""
-    This document is related to the [Guided Installation method](./index.md).
+    This document is related to our [guided installation](./index.md).
+
 
 ## Restarting installation
 

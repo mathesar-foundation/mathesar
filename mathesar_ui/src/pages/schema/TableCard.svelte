@@ -22,7 +22,7 @@
   } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
-  import { deleteTable, refetchTablesForSchema } from '@mathesar/stores/tables';
+  import { deleteTable } from '@mathesar/stores/tables';
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
@@ -61,8 +61,7 @@
         },
       },
       onProceed: async () => {
-        await deleteTable(table.id);
-        await refetchTablesForSchema(schema.id);
+        await deleteTable(database, schema, table.id);
       },
     });
   }

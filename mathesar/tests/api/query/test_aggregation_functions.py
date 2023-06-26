@@ -1,6 +1,625 @@
 display_option_origin = "display_option_origin"
 
 
+def test_alias(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["id"]["id"], "alias": "id"},
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+            {"id": columns["Patron"]["id"], "alias": "Patron"},
+        ],
+        "display_names": {
+            "Checkout Month": "Month",
+            "Count": "Number of Checkouts",
+            "Sum": "Sum of patron",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "id": {
+                display_option_origin: "id",
+            },
+            "Patron": {
+                display_option_origin: "Patron",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Month",
+                            "preproc": "truncate_to_month",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "id",
+                            "output_alias": "Count",
+                            "function": "count",
+                        },
+                        {
+                            "input_alias": "Patron",
+                            "output_alias": "Sum",
+                            "function": "sum",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()["id"]
+    expect_repsonse_data = [
+        {
+            'alias': 'Checkout Month',
+            'display_name': 'Month',
+            'type': 'text',
+            'type_options': None,
+            'display_options': {
+                display_option_origin: "Checkout Time",
+            },
+            'is_initial_column': False,
+            'input_table_name': None,
+            'input_table_id': None,
+            'input_column_name': None,
+            'input_alias': 'Checkout Time',
+        }, {
+            'alias': 'Count',
+            'display_name': 'Number of Checkouts',
+            'type': 'integer',
+            'type_options': None,
+            'display_options': {
+                display_option_origin: "id",
+            },
+            'is_initial_column': False,
+            'input_table_name': None,
+            'input_table_id': None,
+            'input_column_name': None,
+            'input_alias': 'id',
+        }, {
+            'alias': 'Sum',
+            'display_name': 'Sum of patron',
+            'type': 'numeric',
+            'type_options': None,
+            'display_options': {
+                display_option_origin: "Patron",
+            },
+            'is_initial_column': False,
+            'input_table_name': None,
+            'input_table_id': None,
+            'input_column_name': None,
+            'input_alias': 'Patron',
+        }
+    ]
+    actual_response_data = client.get(f'/api/db/v0/queries/{query_id}/columns/').json()
+    assert sorted(actual_response_data, key=lambda x: x['alias']) == expect_repsonse_data
+
+
+def test_count_aggregation(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["id"]["id"], "alias": "id"},
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+        ],
+        "display_names": {
+            "Checkout Month": "Month",
+            "Count": "Number of Checkouts",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "id": {
+                display_option_origin: "id",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Month",
+                            "preproc": "truncate_to_month",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "id",
+                            "output_alias": "Count",
+                            "function": "count",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {'Checkout Month': '2022-05', 'Count': 39},
+        {'Checkout Month': '2022-06', 'Count': 26},
+        {'Checkout Month': '2022-07', 'Count': 29},
+        {'Checkout Month': '2022-08', 'Count': 10},
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
+
+
+def test_mean_aggregation(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+            {"id": columns["Patron"]["id"], "alias": "Patron"},
+        ],
+        "display_names": {
+            "Checkout Month": "Month",
+            "Mean": "Mean of patron",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "Patron": {
+                display_option_origin: "Patron",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Month",
+                            "preproc": "truncate_to_month",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Patron",
+                            "output_alias": "Mean",
+                            "function": "mean",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {'Checkout Month': '2022-05', 'Mean': 16.641025641025642},
+        {'Checkout Month': '2022-06', 'Mean': 11.461538461538462},
+        {'Checkout Month': '2022-07', 'Mean': 18.06896551724138},
+        {'Checkout Month': '2022-08', 'Mean': 12.6},
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
+
+
+def test_sum_aggregation(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+            {"id": columns["Patron"]["id"], "alias": "Patron"},
+        ],
+        "display_names": {
+            "Checkout Month": "Month",
+            "Sum": "Sum of patron",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "Patron": {
+                display_option_origin: "Patron",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Month",
+                            "preproc": "truncate_to_month",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Patron",
+                            "output_alias": "Sum",
+                            "function": "sum",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {'Checkout Month': '2022-05', 'Sum': 649},
+        {'Checkout Month': '2022-06', 'Sum': 298},
+        {'Checkout Month': '2022-07', 'Sum': 524},
+        {'Checkout Month': '2022-08', 'Sum': 126},
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
+
+
+def test_median_aggregation(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+            {"id": columns["Patron"]["id"], "alias": "Patron"},
+        ],
+        "display_names": {
+            "Checkout Month": "Month",
+            "Median": "Median of patron",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "Patron": {
+                display_option_origin: "Patron",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Month",
+                            "preproc": "truncate_to_month",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Patron",
+                            "output_alias": "Median",
+                            "function": "median",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {'Checkout Month': '2022-05', 'Median': 18},
+        {'Checkout Month': '2022-06', 'Median': 8},
+        {'Checkout Month': '2022-07', 'Median': 20},
+        {'Checkout Month': '2022-08', 'Median': 11},
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
+
+
+def test_mode_aggregation(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+            {"id": columns["Patron"]["id"], "alias": "Patron"},
+        ],
+        "display_names": {
+            "Checkout Month": "Month",
+            "Mode": "Mode of patron",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "Patron": {
+                display_option_origin: "Patron",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Month",
+                            "preproc": "truncate_to_month",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Patron",
+                            "output_alias": "Mode",
+                            "function": "mode",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {'Checkout Month': '2022-05', 'Mode': 11},
+        {'Checkout Month': '2022-06', 'Mode': 2},
+        {'Checkout Month': '2022-07', 'Mode': 22},
+        {'Checkout Month': '2022-08', 'Mode': 3},
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
+
+
+def test_max_aggregation(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+            {"id": columns["Patron"]["id"], "alias": "Patron"},
+        ],
+        "display_names": {
+            "Checkout Month": "Month",
+            "Max": "Max of patron",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "Patron": {
+                display_option_origin: "Patron",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Month",
+                            "preproc": "truncate_to_month",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Patron",
+                            "output_alias": "Max",
+                            "function": "max",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {'Checkout Month': '2022-05', 'Max': 29},
+        {'Checkout Month': '2022-06', 'Max': 27},
+        {'Checkout Month': '2022-07', 'Max': 29},
+        {'Checkout Month': '2022-08', 'Max': 29},
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
+
+
+def test_min_aggregation(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+            {"id": columns["Patron"]["id"], "alias": "Patron"},
+        ],
+        "display_names": {
+            "Checkout Month": "Month",
+            "Min": "Min of patron",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "Patron": {
+                display_option_origin: "Patron",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Month",
+                            "preproc": "truncate_to_month",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Patron",
+                            "output_alias": "Min",
+                            "function": "min",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {'Checkout Month': '2022-05', 'Min': 1},
+        {'Checkout Month': '2022-06', 'Min': 2},
+        {'Checkout Month': '2022-07', 'Min': 3},
+        {'Checkout Month': '2022-08', 'Min': 3},
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
+
+
+def test_percentage_true_aggregation(payments_ma_table, get_uid, client):
+    _ = payments_ma_table
+    payments = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Payments"]
+    columns = {
+        c["name"]: c for c in payments["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": payments["id"],
+        "initial_columns": [
+            {"id": columns["Payment Mode"]["id"], "alias": "Payment Mode"},
+            {"id": columns["Is Fraudulent"]["id"], "alias": "Is Fraudulent"},
+        ],
+        "display_names": {
+            "Payment Mode": "Payment Mode",
+            "Percentage Fraudulent": "Percentage Fraudulent",
+        },
+        "display_options": {
+            "Payment Mode": {
+                display_option_origin: "Payment Mode",
+            },
+            "Is Fraudulent": {
+                display_option_origin: "Is Fraudulent",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Payment Mode",
+                            "output_alias": "Payment Mode",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Is Fraudulent",
+                            "output_alias": "Percentage Fraudulent",
+                            "function": "percentage_true",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {
+            'Payment Mode': 'UPI',
+            'Percentage Fraudulent': 16.666666666666668
+        },
+        {
+            'Payment Mode': 'credit card',
+            'Percentage Fraudulent': 10.0
+        },
+        {
+            'Payment Mode': 'debit card',
+            'Percentage Fraudulent': 10.81081081081081
+        },
+        {
+            'Payment Mode': 'pay later',
+            'Percentage Fraudulent': 14.285714285714286
+        },
+        {
+            'Payment Mode': 'wallet',
+            'Percentage Fraudulent': 23.333333333333332
+        }
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Payment Mode']) == expect_records
+
+
 def test_Mathesar_money_distinct_list_aggregation(library_ma_tables, get_uid, client):
     _ = library_ma_tables
     items = {
