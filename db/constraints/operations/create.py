@@ -17,7 +17,7 @@ class Constraint():
 
     def copy_constraint(self, engine, constraint, from_column_attnum, to_column_attnum):
         constraint_type = get_constraint_type_from_char(constraint.contype)
-        if constraint_type == ConstraintType.UNIQUE.value:
+        if constraint_type != ConstraintType.UNIQUE.value:
             raise NotImplementedError
         return execute_msar_func_with_engine(
             engine,
