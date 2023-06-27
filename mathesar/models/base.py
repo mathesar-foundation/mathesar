@@ -531,7 +531,7 @@ class Table(DatabaseObject, Relation):
         # the most newly-created constraint. Other methods (e.g., trying to get
         # a constraint by name when it wasn't set here) are even less robust.
         constraint_oid = max(
-            constraint_obj.add_constraint(engine = self._sa_engine)
+            constraint_obj.add_constraint(engine=self._sa_engine)
         )
         result = Constraint.current_objects.create(oid=constraint_oid, table=self)
         reset_reflection(db_name=self.schema.database.name)

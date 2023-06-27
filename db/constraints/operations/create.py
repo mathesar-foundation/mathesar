@@ -31,17 +31,17 @@ class UniqueConstraint(Constraint):
         self.name = name
         self.table_oid = table_oid
         self.columns_attnum = columns_attnum
-    
+
     def add_constraint(self, engine):
         json_dump = json.dumps(
-                [
-                    {
-                        'name': self.name,
-                        'type': 'u',
-                        'columns': self.columns_attnum
-                    }
-                ],
-            )
+            [
+                {
+                    'name': self.name,
+                    'type': 'u',
+                    'columns': self.columns_attnum
+                }
+            ],
+        )
         return super().add_constraint(engine, self.table_oid, json_dump)
 
     def copy_constraint(self, engine, constraint, from_column_attnum, to_column_attnum):
@@ -69,20 +69,20 @@ class ForeignKeyConstraint(Constraint):
         on_update = get_constraint_char_from_action(self.options.get('onupdate'))
         on_delete = get_constraint_char_from_action(self.options.get('ondelete'))
         json_dump = json.dumps(
-                [
-                    {
-                        'name': self.name,
-                        'type': 'f',
-                        'columns': self.columns_attnum,
-                        'deferrable': self.options.get('deferrable'),
-                        'fkey_relation_id': self.referent_table_oid,
-                        'fkey_columns': self.referent_columns,
-                        'fkey_update_action': on_update,
-                        'fkey_delete_action': on_delete,
-                        'fkey_match_type': match_type,
-                    }
-                ]
-            )
+            [
+                {
+                    'name': self.name,
+                    'type': 'f',
+                    'columns': self.columns_attnum,
+                    'deferrable': self.options.get('deferrable'),
+                    'fkey_relation_id': self.referent_table_oid,
+                    'fkey_columns': self.referent_columns,
+                    'fkey_update_action': on_update,
+                    'fkey_delete_action': on_delete,
+                    'fkey_match_type': match_type,
+                }
+            ]
+        )
         return super().add_constraint(engine, self.table_oid, json_dump)
 
     def copy_constraint(self, engine, constraint, from_column_attnum, to_column_attnum):
