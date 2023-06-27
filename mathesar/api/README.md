@@ -25,6 +25,7 @@ If you prefer a non-browser tool for API development, you'll have to:
 
 ## Generate the OpenAPI spec
 
-To generate the OpenAPI spec file in YAML format,run the following command in the `mathesar_service_dev` Docker container:
+To generate the OpenAPI spec file in YAML format,run the following command in the respective environment:
 ```bash
-./manage.py spectacular --color --file schema.yml
+python manage.py spectacular --color --file schema.yml
+```
