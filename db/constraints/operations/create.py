@@ -1,6 +1,4 @@
-"""TODO This needs to be consolidated with db.constraints.base"""
 import json
-
 from db.connection import execute_msar_func_with_engine
 from db.constraints.utils import (
     get_constraint_match_char_from_type, get_constraint_char_from_action
@@ -81,7 +79,3 @@ class ForeignKeyConstraint(Constraint):
             ]
         )
         return super().add_constraint(engine, self.table_oid, json_dump)
-
-
-class PrimaryKeyConstraint(Constraint):
-    pass
