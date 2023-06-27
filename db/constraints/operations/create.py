@@ -1,7 +1,7 @@
 import json
 from db.connection import execute_msar_func_with_engine
 from db.constraints.utils import (
-    get_constraint_match_char_from_type, get_constraint_char_from_action, 
+    get_constraint_match_char_from_type, get_constraint_char_from_action,
     get_constraint_type_from_char, ConstraintType
 )
 
