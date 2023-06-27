@@ -44,9 +44,6 @@ class UniqueConstraint(Constraint):
         )
         return super().add_constraint(engine, self.table_oid, json_dump)
 
-    def copy_constraint(self, engine, constraint, from_column_attnum, to_column_attnum):
-        return super().copy_constraint(engine, constraint, from_column_attnum, to_column_attnum)
-
 
 class ForeignKeyConstraint(Constraint):
     def __init__(
@@ -85,10 +82,6 @@ class ForeignKeyConstraint(Constraint):
         )
         return super().add_constraint(engine, self.table_oid, json_dump)
 
-    def copy_constraint(self, engine, constraint, from_column_attnum, to_column_attnum):
-        raise NotImplementedError
-
 
 class PrimaryKeyConstraint(Constraint):
-    def copy_constraint(self, engine, constraint, from_column_attnum, to_column_attnum):
-        raise NotImplementedError
+    pass

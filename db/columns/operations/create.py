@@ -13,7 +13,7 @@ from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
 )
 from db.columns.utils import to_mathesar_column_with_engine
-from db.constraints.operations.create import UniqueConstraint
+from db.constraints.operations.create import Constraint
 from db.constraints.operations.select import get_column_constraints
 from db.constraints import utils as constraint_utils
 from db.tables.operations.select import reflect_table_from_oid
@@ -159,7 +159,7 @@ def _duplicate_column_constraints(table_oid, from_column_attnum, to_column_attnu
         if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
             # Don't allow duplication of primary keys
             continue
-        UniqueConstraint.copy_constraint(
+        Constraint.copy_constraint(
             table_oid, engine, constraint, from_column_attnum, to_column_attnum
         )
 

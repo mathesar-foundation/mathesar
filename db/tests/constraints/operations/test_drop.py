@@ -1,6 +1,6 @@
 from sqlalchemy import String, Integer, Column, Table, MetaData
 
-from db.constraints.operations.create import create_unique_constraint
+from db.constraints.operations.create import UniqueConstraint
 from db.constraints.operations.drop import drop_constraint
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tests.constraints import utils as test_utils
@@ -20,7 +20,8 @@ def test_drop_unique_constraint(engine_with_schema):
     table.create()
 
     table_oid = get_oid_from_table(table_name, schema, engine)
-    create_unique_constraint(table.name, schema, engine, [unique_column_name])
+    constraint_column = table.get_columns_by_name([unique_column_name])[0]
+    table.add_constraint(UniqueConstraint(None, table.oid, [constraint_column.attnum]))
     altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     test_utils.assert_primary_key_and_unique_present(altered_table)
     unique_constraint = test_utils.get_first_unique_constraint(altered_table)
