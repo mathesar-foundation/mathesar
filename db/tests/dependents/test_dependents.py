@@ -6,7 +6,6 @@ from db.dependents.dependents_utils import get_dependents_graph
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid
 from db.columns.operations.create import create_column
 from db.columns.operations.select import get_column_attnum_from_name
-from db.constraints.operations.create import create_constraint
 from db.types.base import PostgresType
 from db.metadata import get_empty_metadata
 

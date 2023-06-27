@@ -6,7 +6,7 @@ from sqlalchemy import Column, INTEGER, VARCHAR, MetaData, BOOLEAN, TIMESTAMP, t
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.select import get_column_attnum_from_name
-from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
+from db.constraints.operations.create import ForeignKeyConstraint, UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import PostgresType
 from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn

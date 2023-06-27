@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import Column as SAColumn, ForeignKey, Integer, MetaData, Table as SATable, select
 
 from db.columns.operations.select import get_column_attnum_from_name
-from db.constraints.base import UniqueConstraint
+from db.constraints.operations.create import UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from mathesar.models.base import Constraint, Table, Column
 from mathesar.api.exceptions.error_codes import ErrorCodes

@@ -3,6 +3,9 @@ import json
 
 from db.connection import execute_msar_func_with_engine
 from db.constraints.utils import get_constraint_type_from_char, ConstraintType
+from db.constraints.utils import (
+    get_constraint_match_char_from_type, get_constraint_char_from_action
+)
 
 
 def create_unique_constraint(table_name, schema, engine, columns, constraint_name=None):
@@ -15,9 +18,9 @@ def create_unique_constraint(table_name, schema, engine, columns, constraint_nam
     ).fetchone()[0]
 
 
-def create_constraint(schema, engine, constraint_obj):
+""" def create_constraint(schema, engine, constraint_obj):
     with engine.begin() as conn:
-        return constraint_obj.add_constraint(schema, engine, conn)
+        return constraint_obj.add_constraint(schema, engine, conn) """
 
 
 def copy_constraint(_, engine, constraint, from_column_attnum, to_column_attnum):
@@ -32,13 +35,6 @@ def copy_constraint(_, engine, constraint, from_column_attnum, to_column_attnum)
         ).fetchone()[0]
     else:
         raise NotImplementedError
-
-
-import json
-from db.connection import execute_msar_func_with_engine
-from db.constraints.utils import (
-    get_constraint_match_char_from_type, get_constraint_char_from_action
-)
 
 
 class Constraint():

@@ -3,7 +3,7 @@ from rest_framework import serializers, status
 
 from db.constraints import utils as constraint_utils
 from db.identifiers import is_identifier_too_long
-from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
+from db.constraints.operations.create import ForeignKeyConstraint, UniqueConstraint
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
