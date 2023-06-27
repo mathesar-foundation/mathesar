@@ -20,8 +20,8 @@ def test_drop_unique_constraint(engine_with_schema):
     table.create()
 
     table_oid = get_oid_from_table(table_name, schema, engine)
-    constraint_column = table.get_columns_by_name([unique_column_name])[0]
-    table.add_constraint(UniqueConstraint(None, table.oid, [constraint_column.attnum]))
+    uq_constraint = UniqueConstraint(None, table_oid, [unique_column_name])
+    uq_constraint.add_constraint(engine)
     altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     test_utils.assert_primary_key_and_unique_present(altered_table)
     unique_constraint = test_utils.get_first_unique_constraint(altered_table)
