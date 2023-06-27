@@ -19,6 +19,11 @@ Mathesar is built using:
 
 1. Clone the repository and `cd` into it.
 
+1. Copy the .env file by running the following command in the repository's root directory:
+    ```
+    cp .env.example .env
+    ```
+
 1. From the repository's root directory, run:
 
     ```
