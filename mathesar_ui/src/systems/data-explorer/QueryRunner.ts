@@ -83,6 +83,8 @@ export default class QueryRunner<
     void this.run();
     this.selection = new SheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
+      getColumnOrder: () =>
+        [...get(this.processedColumns).values()].map((column) => column.id),
       getRows: () => get(this.rowsData).rows,
       getMaxSelectionRowIndex: () => {
         const rowLength = get(this.rowsData).rows.length;
