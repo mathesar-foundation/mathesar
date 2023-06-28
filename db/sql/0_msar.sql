@@ -834,6 +834,21 @@ FROM
 $$ LANGUAGE SQL;
 
 
+CREATE OR REPLACE FUNCTION __msar.build_col_def_text(col __msar.col_create_def) RETURNS text AS $$/*
+*/
+SELECT CASE
+  WHEN col.not_null AND col.default_ IS NULL THEN
+    format('%s %s NOT NULL', col.name_, col.type_)
+  WHEN col.not_null AND col.default_ IS NOT NULL THEN
+    format('%s %s NOT NULL DEFAULT %s', col.name_, col.type_, col.default_)
+  WHEN col.default_ IS NOT NULL THEN
+    format('%s %s DEFAULT %s', col.name_, col.type_, col.default_)
+  ELSE
+    format('%s %s', col.name_, col.type_)
+END;
+$$ LANGUAGE SQL;
+
+
 CREATE OR REPLACE FUNCTION
 msar.process_col_create_arr(tab_id oid, col_create_arr jsonb, raw_default boolean)
   RETURNS __msar.col_create_def[] AS $$/*
@@ -894,16 +909,7 @@ Args:
 */
 WITH ca_cte AS (
   SELECT string_agg(
-      CASE
-        WHEN col.not_null AND col.default_ IS NULL THEN
-          format('ADD COLUMN %s %s NOT NULL', col.name_, col.type_)
-        WHEN col.not_null AND col.default_ IS NOT NULL THEN
-          format('ADD COLUMN %s %s NOT NULL DEFAULT %s', col.name_, col.type_, col.default_)
-        WHEN col.default_ IS NOT NULL THEN
-          format('ADD COLUMN %s %s DEFAULT %s', col.name_, col.type_, col.default_)
-        ELSE
-          format('ADD COLUMN %s %s', col.name_, col.type_)
-      END,
+    'ADD COLUMN ' || __msar.build_col_def_text(col),
       ', '
     ) AS col_additions
   FROM unnest(col_defs) AS col
