@@ -967,8 +967,8 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 -- Constraint creation definition type -------------------------------------------------------------
 
-DROP TYPE IF EXISTS __msar.con_create_def CASCADE;
-CREATE TYPE __msar.con_create_def AS (
+DROP TYPE IF EXISTS __msar.con_def CASCADE;
+CREATE TYPE __msar.con_def AS (
 /*
 This should be used in the context of a single ALTER TABLE command. So, no need to reference the
 constrained table's OID.
@@ -1013,8 +1013,8 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.process_con_create_arr(tab_id oid, con_create_arr jsonb)
-  RETURNS __msar.con_create_def[] AS $$/*
-Create an array of  __msar.con_create_def from a JSON array of constraint creation defining JSON.
+  RETURNS __msar.con_def[] AS $$/*
+Create an array of  __msar.con_def from a JSON array of constraint creation defining JSON.
 
 Args:
   tab_id: The OID of the table where we'll create the constraints.
@@ -1071,13 +1071,13 @@ SELECT array_agg(
     con_create_obj ->> 'fkey_delete_action',
     con_create_obj ->> 'fkey_match_type',
     null -- not yet implemented
-  )::__msar.con_create_def
+  )::__msar.con_def
 ) FROM jsonb_array_elements(con_create_arr) AS x(con_create_obj);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.add_constraints(tab_name text, con_defs variadic __msar.con_create_def[])
+__msar.add_constraints(tab_name text, con_defs variadic __msar.con_def[])
   RETURNS TEXT AS $$/*
 Add the given constraints to the given table.
 
@@ -1132,7 +1132,7 @@ Args:
   col_defs: a JSONB array defining constraints to add. See msar.process_con_create_arr for details.
 */
 DECLARE
-  con_create_defs __msar.con_create_def[];
+  con_create_defs __msar.con_def[];
 BEGIN
   con_create_defs := msar.process_con_create_arr(tab_id, con_defs);
   PERFORM __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
