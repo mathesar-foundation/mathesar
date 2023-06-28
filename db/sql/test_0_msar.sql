@@ -145,10 +145,19 @@ $$ LANGUAGE plpgsql;
 
 -- msar.build_type_text ----------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION test_build_type_text() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_build_type_text() RETURNS SETOF TEXT AS $$/*
+Note that many type building tests are in the column adding section, to make sure the strings the
+function writes are as expected, and also valid type definitions.
+*/
+
 BEGIN
   RETURN NEXT is(msar.build_type_text('{}'), 'text');
   RETURN NEXT is(msar.build_type_text(null), 'text');
+  RETURN NEXT is(msar.build_type_text('{"name": "varchar"}'), 'character varying');
+  CREATE DOMAIN msar.testtype AS text CHECK (value LIKE '%test');
+  RETURN NEXT is(
+    msar.build_type_text('{"schema": "msar", "name": "testtype"}'), 'msar.testtype'
+  );
 END;
 $$ LANGUAGE plpgsql;
 
