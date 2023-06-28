@@ -143,6 +143,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- msar.build_type_text ----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_build_type_text() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT is(msar.build_type_text('{}'), 'text');
+  RETURN NEXT is(msar.build_type_text(null), 'text');
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- msar.add_columns --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION setup_add_columns() RETURNS SETOF TEXT AS $$

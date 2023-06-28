@@ -814,8 +814,9 @@ The input JSON should be of the form
 SELECT COALESCE(
   format_type(typ.id, typ.modifier),
   COALESCE(
-    msar.get_fully_qualified_object_name(typ.schema, typ.name)::regtype::text,
-    typ.name::regtype::text
+    msar.get_fully_qualified_object_name(typ.schema, typ.name),
+    typ.name,
+    'text'
   )::regtype::text || COALESCE(
     '(' || topts.length || ')',
     ' ' || topts.fields || ' (' || topts.precision || ')',
@@ -830,7 +831,7 @@ FROM
     AS typ(id oid, schema text, name text, modifier integer, options jsonb),
   jsonb_to_record(typ_jsonb -> 'options')
     AS topts(length integer, precision integer, scale integer, fields text, array_ boolean);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
