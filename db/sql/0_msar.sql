@@ -731,8 +731,8 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Column creation definition type -----------------------------------------------------------------
 
-DROP TYPE IF EXISTS __msar.col_create_def CASCADE;
-CREATE TYPE __msar.col_create_def AS (
+DROP TYPE IF EXISTS __msar.col_def CASCADE;
+CREATE TYPE __msar.col_def AS (
   name_ text, -- The name of the column to create, quoted.
   type_ text, -- The type of the column to create, fully specced with arguments.
   not_null boolean, -- A boolean to describe whether the column is nullable or not.
@@ -758,14 +758,14 @@ LIMIT 1;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_col_create_defs(
+CREATE OR REPLACE FUNCTION msar.get_col_defs(
     tab_id oid,
     col_ids smallint[],
     new_names text[],
     copy_defaults boolean
 )
-  RETURNS __msar.col_create_def[] AS $$/*
-Get an array of __msar.col_create_def from given columns in a table.
+  RETURNS __msar.col_def[] AS $$/*
+Get an array of __msar.col_def from given columns in a table.
 
 Args:
   tab_id: The OID of the table containing the column whose definition we want.
@@ -780,7 +780,7 @@ SELECT array_agg(
     format_type(atttypid, atttypmod),
     false,
     CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END
-  )::__msar.col_create_def
+  )::__msar.col_def
 )
 FROM pg_attribute
   JOIN unnest(col_ids, new_names) AS x(col_id, new_name) ON attnum=col_id
@@ -834,7 +834,7 @@ FROM
 $$ LANGUAGE SQL;
 
 
-CREATE OR REPLACE FUNCTION __msar.build_col_def_text(col __msar.col_create_def) RETURNS text AS $$/*
+CREATE OR REPLACE FUNCTION __msar.build_col_def_text(col __msar.col_def) RETURNS text AS $$/*
 */
 SELECT CASE
   WHEN col.not_null AND col.default_ IS NULL THEN
@@ -851,8 +851,8 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION
 msar.process_col_create_arr(tab_id oid, col_create_arr jsonb, raw_default boolean)
-  RETURNS __msar.col_create_def[] AS $$/*
-Create a __msar.col_create_def from a JSON array of column creation defining JSON blobs.
+  RETURNS __msar.col_def[] AS $$/*
+Create a __msar.col_def from a JSON array of column creation defining JSON blobs.
 
 Args:
   tab_id: The OID of the table where we'll create the columns
@@ -892,15 +892,15 @@ WITH attnum_cte AS (
       ELSE
         format('%L', col_create_obj ->> 'default')
       END
-  )::__msar.col_create_def AS col_create_defs
+  )::__msar.col_def AS col_defs
   FROM attnum_cte, jsonb_array_elements(col_create_arr) as col_create_obj
 )
-SELECT array_agg(col_create_defs) FROM col_create_cte;
+SELECT array_agg(col_defs) FROM col_create_cte;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.add_columns(tab_name text, col_defs variadic __msar.col_create_def[]) RETURNS text AS $$/*
+__msar.add_columns(tab_name text, col_defs variadic __msar.col_def[]) RETURNS text AS $$/*
 Add the given columns to the given table.
 
 Args:
@@ -929,7 +929,7 @@ Args:
   raw_default: Whether to treat defaults as raw SQL. DANGER!
 */
 DECLARE
-  col_create_defs __msar.col_create_def[];
+  col_create_defs __msar.col_def[];
 BEGIN
   col_create_defs := msar.process_col_create_arr(tab_id, col_defs, raw_default);
   PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
@@ -1218,25 +1218,25 @@ msar.copy_column(
 Copy a column of a table
 */
 DECLARE
-  col_create_defs __msar.col_create_def[];
+  col_defs __msar.col_def[];
   tab_name text;
   col_name text;
   created_col_id smallint;
   col_not_null boolean;
 BEGIN
-  col_create_defs := msar.get_col_create_defs(
+  col_defs := msar.get_col_defs(
     tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
   );
   tab_name := __msar.get_relation_name(tab_id);
   col_name := msar.get_column_name(tab_id, col_id);
-  PERFORM __msar.add_columns(tab_name, VARIADIC col_create_defs);
+  PERFORM __msar.add_columns(tab_name, VARIADIC col_defs);
   created_col_id := attnum
     FROM pg_attribute
-    WHERE attrelid=tab_id AND quote_ident(attname)=col_create_defs[1].name_;
+    WHERE attrelid=tab_id AND quote_ident(attname)=col_defs[1].name_;
   IF copy_data THEN
     PERFORM __msar.exec_ddl(
       'UPDATE %s SET %s=%s',
-      tab_name, col_create_defs[1].name_, msar.get_column_name(tab_id, col_id)
+      tab_name, col_defs[1].name_, msar.get_column_name(tab_id, col_id)
     );
   END IF;
   IF copy_constraints THEN
@@ -1244,7 +1244,7 @@ BEGIN
     FROM pg_constraint
     WHERE conrelid=tab_id AND ARRAY[col_id] <@ conkey;
     PERFORM __msar.set_not_nulls(
-      tab_name, ARRAY[(col_create_defs[1].name_, attnotnull)::__msar.not_null_def]
+      tab_name, ARRAY[(col_defs[1].name_, attnotnull)::__msar.not_null_def]
     )
     FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
   END IF;
