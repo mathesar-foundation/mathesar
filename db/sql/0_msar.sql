@@ -1011,6 +1011,39 @@ END;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION __msar.build_con_def_text(con __msar.con_def) RETURNS text AS $$/*
+*/
+SELECT CASE
+    WHEN con.type_ = 'u' THEN
+      format(
+        '%sUNIQUE %s',
+        'CONSTRAINT ' || con.name_ || ' ',
+        __msar.build_text_tuple(con.col_names)
+      )
+    WHEN con.type_ = 'p' THEN
+      format(
+        '%sPRIMARY KEY %s',
+        'CONSTRAINT ' || con.name_ || ' ',
+        __msar.build_text_tuple(con.col_names)
+      )
+    WHEN con.type_ = 'f' THEN
+      format(
+        '%sFOREIGN KEY %s REFERENCES %s%s%s%s%s',
+        'CONSTRAINT ' || con.name_ || ' ',
+        __msar.build_text_tuple(con.col_names),
+        con.fk_rel_name,
+        __msar.build_text_tuple(con.fk_col_names),
+        ' MATCH ' || msar.get_fkey_match_type_from_char(con.fk_match_type),
+        ' ON DELETE ' || msar.get_fkey_action_from_char(con.fk_del_action),
+        ' ON UPDATE ' || msar.get_fkey_action_from_char(con.fk_upd_action)
+      )
+    ELSE
+      NULL
+  END
+  || CASE WHEN con.deferrable_ THEN 'DEFERRABLE' ELSE '' END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 msar.process_con_create_arr(tab_id oid, con_create_arr jsonb)
   RETURNS __msar.con_def[] AS $$/*
@@ -1086,37 +1119,7 @@ Args:
   con_defs: The constraints to be added.
 */
 WITH con_cte AS (
-  SELECT string_agg(
-    CASE
-      WHEN con.type_ = 'u' THEN
-        format(
-          'ADD %sUNIQUE %s',
-          'CONSTRAINT ' || con.name_ || ' ',
-          __msar.build_text_tuple(con.col_names)
-        )
-      WHEN con.type_ = 'p' THEN
-        format(
-          'ADD %sPRIMARY KEY %s',
-          'CONSTRAINT ' || con.name_ || ' ',
-          __msar.build_text_tuple(con.col_names)
-        )
-      WHEN con.type_ = 'f' THEN
-        format(
-          'ADD %sFOREIGN KEY %s REFERENCES %s%s%s%s%s',
-          'CONSTRAINT ' || con.name_ || ' ',
-          __msar.build_text_tuple(con.col_names),
-          con.fk_rel_name,
-          __msar.build_text_tuple(con.fk_col_names),
-          ' MATCH ' || msar.get_fkey_match_type_from_char(con.fk_match_type),
-          ' ON DELETE ' || msar.get_fkey_action_from_char(con.fk_del_action),
-          ' ON UPDATE ' || msar.get_fkey_action_from_char(con.fk_upd_action)
-        )
-      ELSE
-        NULL
-    END
-    || CASE WHEN con.deferrable_ THEN 'DEFERRABLE' ELSE '' END,
-    ', '
-  ) as con_additions
+  SELECT string_agg('ADD ' || __msar.build_con_def_text(con), ', ') as con_additions
   FROM unnest(con_defs) as con
 )
 SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, con_additions) FROM con_cte;
@@ -1382,3 +1385,21 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+-- Create Mathesar table function
+
+CREATE OR REPLACE FUNCTION
+__msar.add_table(tab_name text, col_defs __msar.col_def[], con_defs __msar.con_def[])
+  RETURNS text AS $$/*
+*/
+WITH col_cte AS (
+  SELECT string_agg(__msar.build_col_def_text(col), ', ') AS table_columns
+  FROM unnest(col_defs) AS col
+), con_cte AS (
+  SELECT string_agg(__msar.build_con_def_text(con), ', ') AS table_constraints
+  FROM unnest(con_defs) as con
+)
+SELECT __msar.exec_ddl('CREATE TABLE %s (%s) %s', tab_name, table_columns, table_constraints)
+FROM col_cte, con_cte;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
