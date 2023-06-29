@@ -6,6 +6,7 @@
   import { getTableName } from '@mathesar/stores/tables';
   import { getArticleForWord } from '@mathesar/utils/languageUtils';
   import Pagination from '@mathesar/utils/Pagination';
+  import { tables } from '@mathesar/stores/tables';
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
   import type { RecordSelectorPurpose } from './recordSelectorUtils';
@@ -32,14 +33,17 @@
     nestingLevel: controller.nestingLevel + 1,
   });
   $: ({ tableId, purpose } = controller);
-  $: tabularData = $tableId
-    ? new TabularData({
-        id: $tableId,
-        abstractTypesMap: $currentDbAbstractTypes.data,
-        meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
-        hasEnhancedPrimaryKeyCell: false,
-      })
-    : undefined;
+  $: table = $tableId && $tables.data.get($tableId);
+  $: tabularData =
+    $tableId && table
+      ? new TabularData({
+          id: $tableId,
+          abstractTypesMap: $currentDbAbstractTypes.data,
+          meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
+          hasEnhancedPrimaryKeyCell: false,
+          table,
+        })
+      : undefined;
   $: tableName = $tableId ? getTableName($tableId) : undefined;
   $: verb = verbMap.get($purpose) ?? '';
   $: nestedSelectorIsOpen = nestedController.isOpen;
