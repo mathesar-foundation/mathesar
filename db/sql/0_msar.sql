@@ -742,6 +742,15 @@ CREATE TYPE __msar.col_def AS (
 
 CREATE OR REPLACE FUNCTION
 msar.get_fresh_copy_name(tab_id oid, col_id smallint) RETURNS text AS $$/*
+This function generates a name to be used for a duplicated column.
+
+Given an original column name 'abc', the resulting copies will be named 'abc <n>', where <n> is
+minimal (at least 1) subject to the restriction that 'abc <n>' is not already a column of the table
+given.
+
+Args:
+  tab_id: the table for which we'll generate a column name.
+  col_id: the original column whose name we'll use as the prefix in our copied column name.
 */
 WITH RECURSIVE orig_col_cte AS (
   SELECT attname FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id
@@ -1172,12 +1181,12 @@ Set or drop not null constraints on columns
 WITH not_null_cte AS (
   SELECT string_agg(
     CASE
-      WHEN col.not_null=true THEN format('ALTER %s SET NOT NULL', col.col_name)
-      WHEN col.not_null=false THEN format ('ALTER %s DROP NOT NULL', col.col_name)
+      WHEN not_null_def.not_null=true THEN format('ALTER %s SET NOT NULL', not_null_def.col_name)
+      WHEN not_null_def.not_null=false THEN format ('ALTER %s DROP NOT NULL', not_null_def.col_name)
     END,
     ', '
   ) AS not_nulls
-  FROM unnest(not_null_defs) as col
+  FROM unnest(not_null_defs) as not_null_def
 )
 SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, not_nulls) FROM not_null_cte;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
