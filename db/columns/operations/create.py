@@ -17,6 +17,8 @@ def create_column(engine, table_oid, column_data):
     column_name = (column_data.get(NAME) or '').strip() or None
     column_type_id = (
         column_data.get(
+            # TYPE = 'sa_type'. This is coming straight from the API.
+            # TODO Determine whether we actually need 'sa_type' and 'type'
             TYPE, column_data.get("type", PostgresType.CHARACTER_VARYING.id)
         )
         or PostgresType.CHARACTER_VARYING.id
