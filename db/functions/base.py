@@ -15,7 +15,7 @@ access hints on what composition of functions and parameters should be valid.
 from abc import ABC, abstractmethod
 import warnings
 
-from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct, INTEGER
+from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct, INTEGER, TIME
 from sqlalchemy.dialects.postgresql import array_agg, TEXT, array
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max, min
@@ -405,6 +405,19 @@ class Mode(DBFunction):
     @staticmethod
     def to_sa_expression(column_expr):
         return mode().within_group(column_expr)
+
+
+class Peak_Time(DBFunction):
+    id = 'peak_time'
+    name = 'peak_time'
+    hints = tuple([
+        hints.aggregation
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        column_expr = cast(column_expr, TIME)
+        return sa_call_sql_function('peak_time', column_expr, return_type=PostgresType.TIME_WITHOUT_TIME_ZONE)
 
 
 class Min(DBFunction):
