@@ -5,6 +5,17 @@ import django.db.models.deletion
 import django.db.models.manager
 
 
+def create_column_settings(apps, schema_editor):
+    Column = apps.get_model('mathesar', 'Column')
+    ColumnSetting = apps.get_model('mathesar', 'ColumnSetting')
+    columns = Column.current_objects.filter(settings__isnull=True)
+    column_settings = []
+    for column in columns:
+        column_setting = ColumnSetting(column=column)
+        column_settings.append(column_setting)
+    ColumnSetting.current_objects.bulk_create(column_settings)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -28,4 +39,5 @@ class Migration(migrations.Migration):
                 ('current_objects', django.db.models.manager.Manager()),
             ],
         ),
+        migrations.RunPython(create_column_settings, reverse_code=migrations.RunPython.noop)
     ]
