@@ -27,6 +27,9 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': True,
             'display_options': None,
+            'settings': {
+                'width': 20
+            },
             'default': {
                 'value': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
                 'is_dynamic': True
@@ -46,6 +49,9 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': False,
             'display_options': None,
+            'settings': {
+                'width': 20
+            },
             'default': None,
             'valid_target_types': [
                 'bigint', 'boolean', 'character', 'character varying',
@@ -62,6 +68,9 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'display_options': None,
+            'settings': {
+                'width': 20
+            },
             'default': {
                 'value': 5,
                 'is_dynamic': False,
@@ -81,6 +90,9 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'display_options': None,
+            'settings': {
+                'width': 20
+            },
             'valid_target_types': [
                 'bigint', 'boolean', 'character', 'character varying', 'date',
                 'double precision', 'integer', 'interval', 'json', 'jsonb',

@@ -1023,6 +1023,10 @@ def check_columns_response(created_columns, expected_response):
     for created_column in created_columns:
         created_columns_id.append(created_column.pop('id'))
     assert len(created_columns_id) == len(expected_response)
+    created_columns_settings_id = []
+    for created_column in created_columns:
+        created_columns_settings_id.append(created_column['settings'].pop('id'))
+    assert len(created_columns_settings_id) == len(expected_response)
     assert created_columns == expected_response
 
 
