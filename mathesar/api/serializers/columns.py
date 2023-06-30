@@ -13,6 +13,7 @@ from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.api.serializers.column_settings import ColumnSettingsSerializer
 from mathesar.api.serializers.shared_serializers import (
     DisplayOptionsMappingSerializer,
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
@@ -79,6 +80,7 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
                   'name',
                   TYPE_KEY,
                   'type_options',
+                  'settings',
                   DISPLAY_OPTIONS_KEY,
                   )
     id = serializers.IntegerField(required=False)
@@ -87,6 +89,7 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
     # The name of below attribute should match value of TYPE_KEY
     type = serializers.CharField()
     type_options = TypeOptionSerializer(required=False, allow_null=True)
+    settings = ColumnSettingsSerializer(read_only=True)
     # The name of below attribute should match value of DISPLAY_OPTIONS_KEY
     display_options = DisplayOptionsMappingSerializer(required=False, allow_null=True)
 
