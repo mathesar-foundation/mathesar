@@ -752,19 +752,19 @@ Args:
   tab_id: the table for which we'll generate a column name.
   col_id: the original column whose name we'll use as the prefix in our copied column name.
 */
-WITH RECURSIVE orig_col_cte AS (
-  SELECT attname FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id
-),
-colnames(n, cname) AS (
-   SELECT 1, format('%s %s', occ.attname, 1) FROM orig_col_cte occ
-   UNION
-   SELECT cn.n + 1, format('%s %s', occ.attname, cn.n + 1) FROM colnames cn, orig_col_cte occ
- )
- SELECT cname
- FROM colnames
- WHERE cname NOT IN (SELECT attname FROM pg_attribute WHERE attrelid=tab_id)
-LIMIT 1;
-$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+DECLARE
+  original_col_name text;
+  idx integer := 1;
+BEGIN
+  original_col_name := attname FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
+  WHILE format('%s %s', original_col_name, idx) IN (
+    SELECT attname FROM pg_attribute WHERE attrelid=tab_id
+  ) LOOP
+    idx = idx + 1;
+  END LOOP;
+  RETURN format('%s %s', original_col_name, idx);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.get_col_create_defs(
