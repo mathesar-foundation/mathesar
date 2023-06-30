@@ -889,8 +889,8 @@ class PreviewColumnSettings(BaseModel):
 
 
 class ColumnSettings(ReflectionManagerMixin, BaseModel):
-    table = models.OneToOneField(Column, on_delete=models.CASCADE, related_name="settings")
-    width = models.IntegerField(null=True, default=None)
+    column = models.OneToOneField(Column, on_delete=models.CASCADE, related_name="settings")
+    width = models.IntegerField(null=True, default=20)
 
 
 def _create_column_settings(columns):
