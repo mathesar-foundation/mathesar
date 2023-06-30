@@ -862,16 +862,16 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.process_col_create_arr(tab_id oid, col_create_arr jsonb, raw_default boolean)
+msar.process_col_def_jsonb(tab_id oid, col_defs jsonb, raw_default boolean)
   RETURNS __msar.col_def[] AS $$/*
 Create a __msar.col_def from a JSON array of column creation defining JSON blobs.
 
 Args:
   tab_id: The OID of the table where we'll create the columns
-  col_create_arr: A jsonb array defining a column creation (must have "type" key; "name",
+  col_defs: A jsonb array defining a column creation (must have "type" key; "name",
                   "not_null", and "default" keys optional).
 
-The col_create_arr should have the form:
+The col_defs should have the form:
 [
   {
     "name": <str> (optional),
@@ -892,23 +892,28 @@ WITH attnum_cte AS (
   SELECT MAX(attnum) AS m_attnum FROM pg_attribute WHERE attrelid=tab_id
 ), col_create_cte AS (
   SELECT (
+    -- build a name for the column
     COALESCE(
-      quote_ident(col_create_obj ->> 'name'),
-      quote_ident('Column ' || (attnum_cte.m_attnum + ROW_NUMBER() OVER ()))
+      quote_ident(col_def_obj ->> 'name'),
+      quote_ident('Column ' || (attnum_cte.m_attnum + ROW_NUMBER() OVER ())),
+      quote_ident('Column ' || (ROW_NUMBER() OVER ()))
     ),
-    msar.build_type_text(col_create_obj -> 'type'),
-    col_create_obj ->> 'not_null',
+    -- build the column type
+    msar.build_type_text(col_def_obj -> 'type'),
+    -- set the not_null value for the column
+    col_def_obj ->> 'not_null',
+    -- set the default value for the column
     CASE
       WHEN raw_default THEN
-        col_create_obj ->> 'default'
+        col_def_obj ->> 'default'
       ELSE
-        format('%L', col_create_obj ->> 'default')
+        format('%L', col_def_obj ->> 'default')
       END
   )::__msar.col_def AS col_defs
-  FROM attnum_cte, jsonb_array_elements(col_create_arr) as col_create_obj
+  FROM attnum_cte, jsonb_array_elements(col_defs) as col_def_obj
 )
 SELECT array_agg(col_defs) FROM col_create_cte;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
@@ -937,13 +942,13 @@ Add columns to a table.
 
 Args:
   tab_id: The OID of the table to which we'll add columns.
-  col_defs: a JSONB array defining columns to add. See msar.process_col_create_arr for details.
+  col_defs: a JSONB array defining columns to add. See msar.process_col_def_jsonb for details.
   raw_default: Whether to treat defaults as raw SQL. DANGER!
 */
 DECLARE
   col_create_defs __msar.col_def[];
 BEGIN
-  col_create_defs := msar.process_col_create_arr(tab_id, col_defs, raw_default);
+  col_create_defs := msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
   PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
   RETURN array_agg(attnum)
     FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
@@ -961,7 +966,7 @@ Add columns to a table.
 Args:
   sch_name: unquoted schema name of the table to which we'll add columns.
   tab_name: unquoted, unqualified name of the table to which we'll add columns.
-  col_defs: a JSONB array defining columns to add. See msar.process_col_create_arr for details.
+  col_defs: a JSONB array defining columns to add. See msar.process_col_def_jsonb for details.
   raw_default: Whether to treat defaults as raw SQL. DANGER!
 */
 SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw_default);
