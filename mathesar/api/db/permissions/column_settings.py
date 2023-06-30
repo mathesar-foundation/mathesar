@@ -46,12 +46,12 @@ class ColumnSettingAccessPolicy(AccessPolicy):
         editor_permission_roles = (Role.MANAGER.value, Role.EDITOR.value)
         is_schema_manager = SchemaRole.objects.filter(
             user=request.user,
-            schema=setting.table.schema,
+            schema=setting.column.table.schema,
             role__in=editor_permission_roles
         ).exists()
         is_db_manager = DatabaseRole.objects.filter(
             user=request.user,
-            database=setting.table.schema.database,
+            database=setting.column.table.schema.database,
             role__in=editor_permission_roles
         ).exists()
         return is_db_manager or is_schema_manager
