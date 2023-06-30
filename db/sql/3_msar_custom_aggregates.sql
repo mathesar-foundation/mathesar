@@ -45,14 +45,14 @@ END;
 $$ LANGUAGE plpgsql STRICT;
 
 
-CREATE OR REPLACE FUNCTION final_func(state DOUBLE PRECISION[])
+CREATE OR REPLACE FUNCTION final_func_peak_time(state DOUBLE PRECISION[])
 	RETURNS TIME as $$
 DECLARE 
 	degrees DOUBLE PRECISION;
 	_time TIME;
 BEGIN
 	/* 
-	- Handle singularity when all the times equally spaced.
+	- Handle singularity when all the times are equally spaced.
 	*/
 	IF @state[1] + @state[2] < 1e-10 THEN
     	RETURN NULL;  	
@@ -75,6 +75,6 @@ CREATE OR REPLACE AGGREGATE peak_time (TIME)
 (
     sfunc = accum_time,
     stype = DOUBLE PRECISION[],
-    finalfunc = final_func,
+    finalfunc = final_func_peak_time,
     initcond = '{0,0}'
 );
