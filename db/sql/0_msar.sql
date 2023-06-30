@@ -767,13 +767,10 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_col_create_defs(
-    tab_id oid,
-    col_ids smallint[],
-    new_names text[],
-    copy_defaults boolean
-)
-  RETURNS __msar.col_create_def[] AS $$/*
+CREATE OR REPLACE FUNCTION
+msar.get_duplicate_col_create_defs(
+  tab_id oid, col_ids smallint[], new_names text[], copy_defaults boolean
+) RETURNS __msar.col_create_def[] AS $$/*
 Get an array of __msar.col_create_def from given columns in a table.
 
 Args:
@@ -785,16 +782,22 @@ Args:
 */
 SELECT array_agg(
   (
-    quote_ident(COALESCE(new_name, msar.get_fresh_copy_name(tab_id, attnum))),
+    -- build a name for the duplicate column
+    quote_ident(COALESCE(new_name, msar.get_fresh_copy_name(tab_id, pg_columns.attnum))),
+    -- build text specifying the type of the duplicate column
     format_type(atttypid, atttypmod),
+    -- set the duplicate column to be nullable, since it will initially be empty
     false,
+    -- set set the default value for the duplicate column if specified
     CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END
   )::__msar.col_create_def
 )
-FROM pg_attribute
-  JOIN unnest(col_ids, new_names) AS x(col_id, new_name) ON attnum=col_id
-  LEFT JOIN pg_attrdef ON adnum=attnum AND attrelid=adrelid
-WHERE attrelid=tab_id;
+FROM pg_attribute AS pg_columns
+  JOIN unnest(col_ids, new_names) AS columns_to_copy(col_id, new_name)
+    ON pg_columns.attnum=columns_to_copy.col_id
+  LEFT JOIN pg_attrdef AS pg_column_defaults
+    ON pg_column_defaults.adnum=pg_columns.attnum AND pg_columns.attrelid=pg_column_defaults.adrelid
+WHERE pg_columns.attrelid=tab_id;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -1226,7 +1229,7 @@ DECLARE
   created_col_id smallint;
   col_not_null boolean;
 BEGIN
-  col_create_defs := msar.get_col_create_defs(
+  col_create_defs := msar.get_duplicate_col_create_defs(
     tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
   );
   tab_name := __msar.get_relation_name(tab_id);
