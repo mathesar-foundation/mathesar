@@ -44,7 +44,7 @@ def column_test_table(patent_schema, engine):
     return table, columns
 
 
-def test_create_non_empty_table_settings(client, schema, column_test_table, schema_name):
+def test_create_non_empty_column_settings(client, schema, column_test_table, schema_name):
     table, columns = column_test_table
     first_column = columns[1][0]
     width = 20
@@ -70,7 +70,7 @@ update_clients_with_status_codes = [
 
 
 @pytest.mark.parametrize('client_name,expected_status_code', update_clients_with_status_codes)
-def test_update_table_settings_permission(column_test_table, request, client_name, expected_status_code):
+def test_update_column_settings_permission(column_test_table, request, client_name, expected_status_code):
     table, columns = column_test_table
     first_column = columns[1][0]
     client = request.getfixturevalue(client_name)(table.schema)

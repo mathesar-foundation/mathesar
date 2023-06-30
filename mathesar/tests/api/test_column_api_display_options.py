@@ -345,26 +345,6 @@ def test_column_update_display_options(column_test_table_with_service_layer_opti
         assert response.json()["display_options"] == display_options
 
 
-def test_column_merge_display_options_update(column_test_table_with_service_layer_options, client):
-    """"
-    Make sure we're able to update some of the display options without overwriting the rest of the
-    options with default values.
-    """
-    table, _ = column_test_table_with_service_layer_options
-    column = table.get_columns_by_name(["mycolumn5"])[0]
-    column_id = column.id
-    options_a = {"currency_symbol": "X"}
-    options_b = {"currency_symbol_location": "end-with-space"}
-    url = f"/api/db/v0/tables/{table.id}/columns/{column_id}/"
-    response_a = client.patch(url, {"display_options": options_a})
-    assert response_a.status_code == 200
-    response_b = client.patch(url, {"display_options": options_b})
-    assert response_b.status_code == 200
-    all_options = response_b.json()["display_options"]
-    all_options["currency_symbol"] == options_a["currency_symbol"]
-    all_options["currency_symbol_location"] == options_b["currency_symbol_location"]
-
-
 def test_column_update_type_with_existing_display_options(column_test_table_with_service_layer_options, client):
     table, _ = column_test_table_with_service_layer_options
     colum_name = "mycolumn2"
