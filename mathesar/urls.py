@@ -22,7 +22,7 @@ db_table_router.register(r'columns', db_viewsets.ColumnViewSet, basename='table-
 db_table_router.register(r'constraints', db_viewsets.ConstraintViewSet, basename='table-constraint')
 
 db_column_router = routers.NestedSimpleRouter(db_table_router, r'columns', lookup='column')
-db_column_router.register(r'settings', db_viewsets.ColumnSettingsViewSet, basename='column-setting')
+db_column_router.register(r'settings', ui_viewsets.ColumnSettingsViewSet, basename='column-setting')
 
 ui_router = routers.DefaultRouter()
 ui_router.register(r'version', ui_viewsets.VersionViewSet, basename='version')
@@ -37,7 +37,7 @@ ui_table_router.register(r'records', ui_viewsets.RecordViewSet, basename='table-
 urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
     path('api/db/v0/', include(db_table_router.urls)),
-    path('api/db/v0/', include(db_column_router.urls)),
+    path('api/ui/v0/', include(db_column_router.urls)),
     path('api/ui/v0/', include(ui_router.urls)),
     path('api/ui/v0/', include(ui_table_router.urls)),
     path('api/ui/v0/reflect/', views.reflect_all, name='reflect_all'),

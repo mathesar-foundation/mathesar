@@ -13,7 +13,7 @@ from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.api.serializers.column_settings import ColumnSettingsSerializer
+from mathesar.api.ui.serializers.column_settings import ColumnSettingsSerializer
 from mathesar.api.serializers.shared_serializers import (
     DisplayOptionsMappingSerializer,
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,

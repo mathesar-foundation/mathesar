@@ -79,7 +79,7 @@ def test_update_column_settings_permission(column_test_table, request, client_na
         "width": 20
     }
     response = client.patch(
-        f"/api/db/v0/tables/{table.id}/columns/{first_column.id}/settings/{settings_id}/",
+        f"/api/ui/v0/tables/{table.id}/columns/{first_column.id}/settings/{settings_id}/",
         data=data,
     )
     assert response.status_code == expected_status_code
@@ -94,7 +94,7 @@ def test_update_table_settings(client, column_test_table):
         "width": width
     }
     response = client.patch(
-        f"/api/db/v0/tables/{table.id}/columns/{first_column.id}/settings/{settings_id}/",
+        f"/api/ui/v0/tables/{table.id}/columns/{first_column.id}/settings/{settings_id}/",
         data=data,
     )
     assert response.status_code == 200
