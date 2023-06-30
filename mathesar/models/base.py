@@ -19,9 +19,7 @@ from db.columns.operations.select import (
 )
 from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
-from db.constraints.operations.select import (
-    get_constraint_oid_by_name_and_table_oid, get_constraint_record_from_oid
-)
+from db.constraints.operations.select import get_constraint_record_from_oid
 from db.constraints import utils as constraint_utils
 from db.dependents.dependents_utils import get_dependents_graph, has_dependents
 from db.metadata import get_empty_metadata
@@ -530,27 +528,16 @@ class Table(DatabaseObject, Relation):
         return bulk_delete_records(self._sa_table, self.schema._sa_engine, id_values)
 
     def add_constraint(self, constraint_obj):
-        create_constraint(
-            self._sa_table.schema,
-            self.schema._sa_engine,
-            constraint_obj
-        )
-        try:
-            # Clearing cache so that new constraint shows up.
-            del self._sa_table
-        except AttributeError:
-            pass
-        engine = self.schema.database._sa_engine
-        name = constraint_obj.name
-        if not name:
-            name = constraint_utils.get_constraint_name(
-                engine=engine,
-                constraint_type=constraint_obj.constraint_type(),
-                table_oid=self.oid,
-                column_0_attnum=constraint_obj.columns_attnum[0],
-                metadata=get_cached_metadata(),
+        # The max here has the effect of filtering for the largest OID, which is
+        # the most newly-created constraint. Other methods (e.g., trying to get
+        # a constraint by name when it wasn't set here) are even less robust.
+        constraint_oid = max(
+            create_constraint(
+                self._sa_table.schema,
+                self.schema._sa_engine,
+                constraint_obj
             )
-        constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
+        )
         result = Constraint.current_objects.create(oid=constraint_oid, table=self)
         reset_reflection(db_name=self.schema.database.name)
         return result
@@ -880,10 +867,12 @@ class Constraint(DatabaseObject):
 
 class DataFile(BaseModel):
     created_from_choices = models.TextChoices("created_from", "FILE PASTE URL")
+    file_type_choices = models.TextChoices("type", "CSV TSV JSON")
 
     file = models.FileField(upload_to=model_utils.user_directory_path)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.CASCADE)
     created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
+    type = models.CharField(max_length=128, choices=file_type_choices.choices)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
                                           null=True, on_delete=models.SET_NULL)
 
