@@ -461,19 +461,16 @@ export class RecordsData {
 
     let shouldReFetchRecords = successRowKeys.size > 0;
     if (primaryKeysOfSavedRows.length > 0) {
-      // TODO: Convert this to single request
-      const promises = primaryKeysOfSavedRows.map((pk) =>
-        deleteAPI<RowKey>(`${this.url}${pk}/`)
-          .then(() => {
-            successRowKeys.add(pk);
-            return successRowKeys;
-          })
-          .catch((error: unknown) => {
-            failures.set(pk, getErrorMessage(error));
-            return failures;
-          }),
-      );
-      await Promise.all(promises);
+      const recordIds = [...primaryKeysOfSavedRows];
+      const bulkDeleteURL = `/api/ui/v0/tables/${this.parentId}/records/delete/`;
+  
+      try {
+        await deleteAPI<RowKey>(bulkDeleteURL, { pks: recordIds });
+        primaryKeysOfSavedRows.forEach((key) => successRowKeys.add(key));
+      } catch (error) {
+        failures.set(primaryKeysOfSavedRows.join(','), getErrorMessage(error));
+      }
+  
       shouldReFetchRecords = true;
     }
 
@@ -506,7 +503,7 @@ export class RecordsData {
       await this.fetch(true);
     }
 
-    this.meta.rowCreationStatus.delete([...savedRecordKeys]);
+    this.meta.rowCreationStatus.delete(Array.from(savedRecordKeys, String));
     this.meta.clearAllStatusesAndErrorsForRows([...successRowKeys]);
     this.meta.rowDeletionStatus.setEntries(
       [...failures.entries()].map(([rowKey, errorMsg]) => [
