@@ -463,14 +463,12 @@ export class RecordsData {
     if (primaryKeysOfSavedRows.length > 0) {
       const recordIds = [...primaryKeysOfSavedRows];
       const bulkDeleteURL = `/api/ui/v0/tables/${this.parentId}/records/delete/`;
-  
       try {
         await deleteAPI<RowKey>(bulkDeleteURL, { pks: recordIds });
         primaryKeysOfSavedRows.forEach((key) => successRowKeys.add(key));
       } catch (error) {
         failures.set(primaryKeysOfSavedRows.join(','), getErrorMessage(error));
       }
-  
       shouldReFetchRecords = true;
     }
 
