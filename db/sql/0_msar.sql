@@ -769,7 +769,10 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.get_duplicate_col_create_defs(
-  tab_id oid, col_ids smallint[], new_names text[], copy_defaults boolean
+  tab_id oid,
+  col_ids smallint[],
+  new_names text[],
+  copy_defaults boolean
 ) RETURNS __msar.col_create_def[] AS $$/*
 Get an array of __msar.col_create_def from given columns in a table.
 
