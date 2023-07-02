@@ -353,6 +353,179 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+-- msar.copy_column --------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION setup_copy_column() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE copy_coltest (
+    id SERIAL PRIMARY KEY,
+    col1 varchar,
+    col2 varchar NOT NULL,
+    col3 numeric(5, 3) DEFAULT 5,
+    col4 timestamp without time zone DEFAULT NOW(),
+    col5 timestamp without time zone NOT NULL DEFAULT NOW(),
+    col6 interval second(3),
+    "col space" varchar
+  );
+  ALTER TABLE copy_coltest ADD UNIQUE (col1, col2);
+  INSERT INTO copy_coltest VALUES
+    (DEFAULT, 'abc', 'def', 5.234, '1999-01-08 04:05:06', '1999-01-09 04:05:06', '4:05:06', 'ghi'),
+    (DEFAULT, 'jkl', 'mno', null, null, '1999-02-08 04:05:06', '3 4:05:07', 'pqr'),
+    (DEFAULT, null,  'stu', DEFAULT, DEFAULT, DEFAULT, null, 'vwx')
+  ;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_copies_unique() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 2::smallint, 'col1 supercopy', true, true
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col1 supercopy', 'character varying');
+  RETURN NEXT col_is_null('copy_coltest', 'col1 supercopy');
+  RETURN NEXT col_is_unique('copy_coltest', ARRAY['col1', 'col2']);
+  RETURN NEXT col_is_unique('copy_coltest', ARRAY['col1 supercopy', 'col2']);
+  RETURN NEXT results_eq(
+    'SELECT "col1 supercopy" FROM copy_coltest ORDER BY id',
+    $v$VALUES ('abc'::varchar), ('jkl'::varchar), (null)$v$
+  );
+  RETURN NEXT lives_ok(
+    $u$UPDATE copy_coltest SET "col1 supercopy"='abc' WHERE "col1 supercopy"='jkl'$u$,
+    'Copied col should not have a single column unique constraint'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_copies_unique_and_nnull() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 3::smallint, null, true, true
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col2 1', 'character varying');
+  RETURN NEXT col_not_null('copy_coltest', 'col2 1');
+  RETURN NEXT col_is_unique('copy_coltest', ARRAY['col1', 'col2']);
+  RETURN NEXT col_is_unique('copy_coltest', ARRAY['col1', 'col2 1']);
+  RETURN NEXT results_eq(
+    'SELECT "col2 1" FROM copy_coltest',
+    $v$VALUES ('def'::varchar), ('mno'::varchar), ('stu'::varchar)$v$
+  );
+  RETURN NEXT lives_ok(
+    $u$UPDATE copy_coltest SET "col2 1"='def' WHERE "col2 1"='mno'$u$,
+    'Copied col should not have a single column unique constraint'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_false_copy_data_and_con() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 3::smallint, null, false, false
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col2 1', 'character varying');
+  RETURN NEXT col_is_null('copy_coltest', 'col2 1');
+  RETURN NEXT col_is_unique('copy_coltest', ARRAY['col1', 'col2']);
+  RETURN NEXT results_eq(
+    'SELECT "col2 1" FROM copy_coltest',
+    $v$VALUES (null::varchar), (null::varchar), (null::varchar)$v$
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_num_options_static_default() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 4::smallint, null, true, false
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col3 1', 'numeric(5,3)');
+  RETURN NEXT col_is_null('copy_coltest', 'col3 1');
+  RETURN NEXT col_default_is('copy_coltest', 'col3 1', '5');
+  RETURN NEXT results_eq(
+    'SELECT "col3 1" FROM copy_coltest',
+    $v$VALUES (5.234), (null), (5)$v$
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_nullable_dynamic_default() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 5::smallint, null, true, false
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col4 1', 'timestamp without time zone');
+  RETURN NEXT col_is_null('copy_coltest', 'col4 1');
+  RETURN NEXT col_default_is('copy_coltest', 'col4 1', 'now()');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_non_null_dynamic_default() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 6::smallint, null, true, true
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col5 1', 'timestamp without time zone');
+  RETURN NEXT col_not_null('copy_coltest', 'col5 1');
+  RETURN NEXT col_default_is('copy_coltest', 'col5 1', 'now()');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_interval_notation() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 7::smallint, null, false, false
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col6 1', 'interval second(3)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_space_name() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 8::smallint, null, false, false
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col space 1', 'character varying');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_pkey() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 1::smallint, null, true, true
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'id 1', 'integer');
+  RETURN NEXT col_not_null('copy_coltest', 'id 1');
+  RETURN NEXT col_default_is(
+    'copy_coltest', 'id 1', $d$nextval('copy_coltest_id_seq'::regclass)$d$
+  );
+  RETURN NEXT col_is_pk('copy_coltest', 'id');
+  RETURN NEXT col_isnt_pk('copy_coltest', 'id 1');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_copy_column_increment_name() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 2::smallint, null, true, true
+  );
+  RETURN NEXT has_column('copy_coltest', 'col1 1');
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 2::smallint, null, true, true
+  );
+  RETURN NEXT has_column('copy_coltest', 'col1 2');
+END;
+$f$ LANGUAGE plpgsql;
+
+-- msar.add_constraints ----------------------------------------------------------------------------
+
 CREATE OR REPLACE FUNCTION setup_add_pkey() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE add_pkeytest (col1 serial, col2 serial, col3 text);
