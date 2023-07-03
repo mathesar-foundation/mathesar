@@ -93,7 +93,6 @@
   {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
-  on:activate
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
   on:mousedown={handleMouseDown}
