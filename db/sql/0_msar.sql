@@ -215,6 +215,7 @@ Args:
 */
 SELECT array_agg(
   CASE
+    WHEN rel_id=0 THEN quote_ident(col::text)
     WHEN jsonb_typeof(col)='number' THEN msar.get_column_name(rel_id, col::integer)
     WHEN jsonb_typeof(col)='string' THEN msar.get_column_name(rel_id, col #>> '{}')
   END
@@ -736,7 +737,8 @@ CREATE TYPE __msar.col_def AS (
   name_ text, -- The name of the column to create, quoted.
   type_ text, -- The type of the column to create, fully specced with arguments.
   not_null boolean, -- A boolean to describe whether the column is nullable or not.
-  default_ text -- Text SQL giving the default value for the column.
+  default_ text, -- Text SQL giving the default value for the column.
+  primary_key boolean -- A boolean giving whether the column is a primary key (single column)
 );
 
 
@@ -788,8 +790,10 @@ SELECT array_agg(
     format_type(atttypid, atttypmod),
     -- set the duplicate column to be nullable, since it will initially be empty
     false,
-    -- set set the default value for the duplicate column if specified
-    CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END
+    -- set the default value for the duplicate column if specified
+    CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END,
+    -- We don't set a duplicate column as a primary key, since that would cause an error.
+    false
   )::__msar.col_def
 )
 FROM pg_attribute AS pg_columns
@@ -908,12 +912,14 @@ WITH attnum_cte AS (
         col_def_obj ->> 'default'
       ELSE
         format('%L', col_def_obj ->> 'default')
-      END
+    END,
+    -- We don't allow setting the primary key column manually
+    false
   )::__msar.col_def AS col_defs
   FROM attnum_cte, jsonb_array_elements(col_defs) as col_def_obj
 )
 SELECT array_agg(col_defs) FROM col_create_cte;
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -1062,7 +1068,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.process_con_create_arr(tab_id oid, con_create_arr jsonb)
+msar.process_con_def_jsonb(tab_id oid, con_create_arr jsonb)
   RETURNS __msar.con_def[] AS $$/*
 Create an array of  __msar.con_def from a JSON array of constraint creation defining JSON.
 
@@ -1149,12 +1155,12 @@ Add constraints to a table.
 
 Args:
   tab_id: The OID of the table to which we'll add constraints.
-  col_defs: a JSONB array defining constraints to add. See msar.process_con_create_arr for details.
+  col_defs: a JSONB array defining constraints to add. See msar.process_con_def_jsonb for details.
 */
 DECLARE
   con_create_defs __msar.con_def[];
 BEGIN
-  con_create_defs := msar.process_con_create_arr(tab_id, con_defs);
+  con_create_defs := msar.process_con_def_jsonb(tab_id, con_defs);
   PERFORM __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
   RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id;
 END;
@@ -1169,7 +1175,7 @@ Add constraints to a table.
 Args:
   sch_name: unquoted schema name of the table to which we'll add constraints.
   tab_name: unquoted, unqualified name of the table to which we'll add constraints.
-  con_defs: a JSONB array defining constraints to add. See msar.process_con_create_arr for details.
+  con_defs: a JSONB array defining constraints to add. See msar.process_con_def_jsonb for details.
 */
 SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), con_defs);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
