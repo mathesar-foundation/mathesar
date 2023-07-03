@@ -866,8 +866,12 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.process_col_def_jsonb(tab_id oid, col_defs jsonb, raw_default boolean)
-  RETURNS __msar.col_def[] AS $$/*
+msar.process_col_def_jsonb(
+  tab_id oid,
+  col_defs jsonb,
+  raw_default boolean,
+  create_id boolean DEFAULT false
+) RETURNS __msar.col_def[] AS $$/*
 Create a __msar.col_def from a JSON array of column creation defining JSON blobs.
 
 Args:
@@ -880,7 +884,7 @@ The col_defs should have the form:
   {
     "name": <str> (optional),
     "type": {
-      "name": <str>,
+      "name": <str> (optional),
       "options": <obj> (optional),
     },
     "not_null": <bool> (optional; default false),
@@ -890,7 +894,9 @@ The col_defs should have the form:
     ...
   }
 ]
-For more info on the type.options object, see the msar.build_type_text function.
+For more info on the type.options object, see the msar.build_type_text function. All pieces are
+optional. If an empty object {} is given, the resulting column will have a default name like
+'Column <n>' and type TEXT. It will allow nulls and have a null default value.
 */
 WITH attnum_cte AS (
   SELECT MAX(attnum) AS m_attnum FROM pg_attribute WHERE attrelid=tab_id
@@ -908,6 +914,8 @@ WITH attnum_cte AS (
     col_def_obj ->> 'not_null',
     -- set the default value for the column
     CASE
+      WHEN col_def_obj ->> 'default' IS NULL THEN
+        NULL
       WHEN raw_default THEN
         col_def_obj ->> 'default'
       ELSE
@@ -916,9 +924,17 @@ WITH attnum_cte AS (
     -- We don't allow setting the primary key column manually
     false
   )::__msar.col_def AS col_defs
-  FROM attnum_cte, jsonb_array_elements(col_defs) as col_def_obj
+  FROM attnum_cte, jsonb_array_elements(col_defs) AS col_def_obj
+  WHERE col_def_obj ->> 'name' IS NULL OR col_def_obj ->> 'name' <> 'id'
 )
-SELECT array_agg(col_defs) FROM col_create_cte;
+SELECT array_cat(
+  CASE
+    WHEN create_id THEN
+      ARRAY[('id', 'integer', true, 'generated always as identity', true)]::__msar.col_def[]
+  END,
+  array_agg(col_defs)
+)
+FROM col_create_cte;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 

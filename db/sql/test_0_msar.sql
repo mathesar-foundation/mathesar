@@ -162,6 +162,36 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- msar.process_col_def_jsonb ----------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_process_col_def_jsonb() RETURNS SETOF TEXT AS $f$
+BEGIN
+  RETURN NEXT is(
+    msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false),
+    ARRAY[
+      ('"Column 1"', 'text', null, null, false),
+      ('"Column 2"', 'text', null, null, false)
+    ]::__msar.col_def[],
+    'Empty columns should result in defaults'
+  );
+  RETURN NEXT is(
+    msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false),
+    null,
+    'Column definition processing should ignore "id" column'
+  );
+  RETURN NEXT is(
+    msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
+    ARRAY[
+      ('id', 'integer', true, 'generated always as identity', true),
+      ('"Column 1"', 'text', null, null, false),
+      ('"Column 2"', 'text', null, null, false)
+    ]::__msar.col_def[],
+    'Column definition processing add "id" column'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
 -- msar.add_columns --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION setup_add_columns() RETURNS SETOF TEXT AS $$
