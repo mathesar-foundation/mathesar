@@ -30,6 +30,7 @@
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   let wasActiveBeforeClick = false;
+  let cellWrapperElement: HTMLElement;
 
   $: hasValue = value !== undefined && value !== null;
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
@@ -40,18 +41,15 @@
     }
     event?.stopPropagation();
     const result = await recordSelector.acquireUserInput({ tableId });
-    if (result === undefined) {
-      return;
+    if (result) {
+      value = result.recordId;
+      setRecordSummary(String(result.recordId), result.recordSummary);
+      dispatch('update', { value });
     }
-    value = result.recordId;
-    setRecordSummary(String(result.recordId), result.recordSummary);
-    dispatch('update', { value });
 
-    // This is a band-aid to make the cell remain selected after opening and
-    // closing the record selector. I'm not sure why we lose the cell selection
-    // when the record selector closes. It would be good to figure out why and
-    // fix it somewhere else.
-    dispatch('activate');
+    // Re-focus the cell element so that the user can yes the keyboard to move
+    // the active cell.
+    cellWrapperElement.focus();
   }
 
   function handleWrapperKeyDown(e: KeyboardEvent) {
@@ -99,6 +97,7 @@
   on:click={handleClick}
   on:dblclick={launchRecordSelector}
   hasPadding={false}
+  bind:element={cellWrapperElement}
 >
   <div class="linked-record-cell" class:disabled>
     <div class="value">
