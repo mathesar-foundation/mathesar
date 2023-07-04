@@ -1278,6 +1278,10 @@ msar.get_pk_column(rel_id oid) RETURNS smallint AS $$
 SELECT conkey[1] FROM pg_constraint WHERE contype='p' AND conrelid=rel_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
+CREATE OR REPLACE FUNCTION
+msar.get_pk_column(sch_name text, rel_name text) RETURNS smallint AS $$
+SELECT conkey[1] FROM pg_constraint WHERE contype='p' AND conrelid=msar.get_relation_oid(sch_name, rel_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 -- get pk col_type
 CREATE OR REPLACE FUNCTION
