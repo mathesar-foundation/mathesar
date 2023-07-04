@@ -1441,4 +1441,22 @@ WITH col_cte AS (
 )
 SELECT __msar.exec_ddl('CREATE TABLE %s (%s) %s', tab_name, table_columns, table_constraints)
 FROM col_cte, con_cte;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+msar.add_mathesar_table(sch_oid oid, tab_name text, col_defs jsonb, con_defs jsonb)
+  RETURNS oid AS $$/*
+*/
+DECLARE
+  fq_table_name text;
+  column_defs __msar.col_def[];
+  constraint_defs __msar.con_def[];
+BEGIN
+  fq_table_name := format('%s.%s', __msar.get_schema_name(sch_oid), quote_ident(tab_name));
+  column_defs := msar.process_col_def_jsonb(0, col_defs, false, true);
+  constraint_defs := msar.process_con_def_jsonb(0, col_defs);
+  PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
+  RETURN fq_table_name::regclass::oid;
+END;
+$$ LANGUAGE plpgsql;
