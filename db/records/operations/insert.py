@@ -43,9 +43,25 @@ def insert_records_from_json(table, engine, json_filepath, column_names):
         json_filepath: str. The path to the stored JSON data file.
         column_names: List[str]. List of column names.
 
-    Returns:
-        bool: False if any error that would cause SQL errors were found, otherwise True
+    Algorithm:
+        1.  We convert JSON data into Python object using json.load().
+        2.  We normalize data into a pandas dataframe using pandas.json_normalize() method.
+            The method takes column names as meta. We provide all possible keys as column
+            names, hence it adds missing keys to JSON objects and marks their values as NaN.
+        3.  We convert the dataframe to JSON using to_json() method and then to a Python object.
+            This method replaces 'NaN' values in the dataframe with 'None' values in Python
+            object. The reason behind not using df.to_dict() method is beacuse it stringifies
+            'NaN' values rather than converting them to a 'None' value.
+        4.  The processed data is now a list of dict objects. Each dict has same keys, that are
+            the column names of the table. We loop through each dict object, and if any value is
+            a dict or a list, we stringify them before inserting them into the table. This way,
+            our type inference logic kicks in later on converting them into
+            'MathesarCustomType.MATHESAR_JSON_OBJECT' and 'MathesarCustomType.MATHESAR_JSON_ARRAY'
+            respectively.
+        5.  We pass data (a list of dicts) to 'insert_record_or_records()' method which inserts
+            them into the table.
     """
+
     with open(json_filepath, 'r') as json_file:
         data = json.load(json_file)
 
