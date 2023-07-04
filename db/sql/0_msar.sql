@@ -1276,35 +1276,36 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.get_pk_column(rel_id oid) RETURNS smallint AS $$
 SELECT conkey[1] FROM pg_constraint WHERE contype='p' AND conrelid=rel_id;
-$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 -- get pk col_type
 CREATE OR REPLACE FUNCTION
 msar.get_column_type(rel_id oid, col_id smallint) RETURNS text AS $$
 SELECT atttypid::regtype FROM pg_attribute WHERE attnum = col_id AND attrelid = rel_id;
-$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.get_column_type(rel_id oid, col_name text) RETURNS text AS $$
 SELECT atttypid::regtype FROM pg_attribute WHERE attname = quote_ident(col_name) AND attrelid = rel_id;
-$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 -- add column to referrer table
 CREATE OR REPLACE FUNCTION
-msar.add_many_to_one_link(from_rel_id oid, to_rel_id oid, col_name text, unique_link boolean) RETURNS text AS $$
+msar.add_many_to_one_link(from_rel_id oid, to_rel_id oid, col_name text, unique_link boolean DEFAULT false) RETURNS text AS $$
 DECLARE
   pk_col_id smallint;
   pk_col_type text;
   col_defs jsonb;
   added_col_id smallint[];
-  con_defs jsonb;
+  uq_con_def jsonb;
+  fk_con_def jsonb;
 BEGIN
   pk_col_id := msar.get_pk_column(from_rel_id);
   pk_col_type := msar.get_column_type(from_rel_id, pk_col_id);
   col_defs := format('[{"name": "%s", "type": {"name": "%s"}}]', quote_ident(col_name), pk_col_type)::jsonb;
   added_col_id := msar.add_columns(to_rel_id , col_defs , false);
-  con_defs := format(
+  fk_con_def := format(
     '[{
         "name": null,
         "type": "f",
@@ -1313,6 +1314,16 @@ BEGIN
         "fkey_relation_id": %s,
         "fkey_columns": [%s]
       }]', added_col_id[1], from_rel_id, pk_col_id)::jsonb;
-  RETURN msar.add_constraints(to_rel_id , con_defs);
+  IF unique_link
+  THEN
+    uq_con_def := format(
+      '[{
+        "name": null,
+        "type": "u",
+        "columns": [%s]
+      }]', added_col_id[1])::jsonb;
+  PERFORM msar.add_constraints(to_rel_id, uq_con_def);
+  END IF;
+  RETURN msar.add_constraints(to_rel_id , fk_con_def);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
