@@ -1307,7 +1307,7 @@ DECLARE
 BEGIN
   pk_col_id := msar.get_pk_column(from_rel_id);
   pk_col_type := msar.get_column_type(from_rel_id, pk_col_id);
-  col_defs := format('[{"name": "%s", "type": {"name": "%s"}}]', quote_ident(col_name), pk_col_type)::jsonb;
+  col_defs := format('[{"name": "%s", "type": {"name": "%s"}}]', col_name, pk_col_type)::jsonb;
   added_col_id := msar.add_columns(to_rel_id , col_defs , false);
   fk_con_def := format(
     '[{
