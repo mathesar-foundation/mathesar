@@ -1286,8 +1286,8 @@ SELECT atttypid::regtype FROM pg_attribute WHERE attnum = col_id AND attrelid = 
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
-msar.get_column_type(rel_id oid, col_name text) RETURNS text AS $$
-SELECT atttypid::regtype FROM pg_attribute WHERE attname = quote_ident(col_name) AND attrelid = rel_id;
+msar.get_column_type(sch_name text, rel_name text, col_name text) RETURNS text AS $$
+SELECT atttypid::regtype FROM pg_attribute WHERE attname = quote_ident(col_name) AND attrelid = msar.get_relation_oid(sch_name, rel_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 -- add column to referrer table
