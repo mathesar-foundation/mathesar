@@ -1,30 +1,24 @@
 import json
+from abc import ABC, abstractmethod
 from db.connection import execute_msar_func_with_engine
 from db.constraints.utils import (
-    get_constraint_match_char_from_type, get_constraint_char_from_action,
-    get_constraint_type_from_char, ConstraintType
+    get_constraint_match_char_from_type, get_constraint_char_from_action
 )
 
 
-class Constraint():
-    def add_constraint(self, engine, table_oid, json_dump):
+class Constraint(ABC):
+    @abstractmethod
+    def get_constraint_def_json(self):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def add_constraint(engine, table_oid, json_dump):
         return execute_msar_func_with_engine(
             engine,
             'add_constraints',
             table_oid,
             json_dump
-        ).fetchone()[0]
-
-    def copy_constraint(self, engine, constraint, from_column_attnum, to_column_attnum):
-        constraint_type = get_constraint_type_from_char(constraint.contype)
-        if constraint_type != ConstraintType.UNIQUE.value:
-            raise NotImplementedError
-        return execute_msar_func_with_engine(
-            engine,
-            'copy_constraint',
-            constraint.oid,
-            from_column_attnum,
-            to_column_attnum
         ).fetchone()[0]
 
 
@@ -34,8 +28,8 @@ class UniqueConstraint(Constraint):
         self.table_oid = table_oid
         self.columns_attnum = columns_attnum
 
-    def add_constraint(self, engine):
-        json_dump = json.dumps(
+    def get_constraint_def_json(self):
+        return json.dumps(
             [
                 {
                     'name': self.name,
@@ -44,6 +38,9 @@ class UniqueConstraint(Constraint):
                 }
             ],
         )
+
+    def add_constraint(self, engine):
+        json_dump = self.get_constraint_def_json()
         return super().add_constraint(engine, self.table_oid, json_dump)
 
 
@@ -63,11 +60,11 @@ class ForeignKeyConstraint(Constraint):
         self.referent_columns = referent_columns_attnum
         self.options = options
 
-    def add_constraint(self, engine):
+    def get_constraint_def_json(self):
         match_type = get_constraint_match_char_from_type(self.options.get('match'))
         on_update = get_constraint_char_from_action(self.options.get('onupdate'))
         on_delete = get_constraint_char_from_action(self.options.get('ondelete'))
-        json_dump = json.dumps(
+        return json.dumps(
             [
                 {
                     'name': self.name,
@@ -82,4 +79,7 @@ class ForeignKeyConstraint(Constraint):
                 }
             ]
         )
+
+    def add_constraint(self, engine):
+        json_dump = self.get_constraint_def_json()
         return super().add_constraint(engine, self.table_oid, json_dump)
