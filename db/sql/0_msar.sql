@@ -1438,11 +1438,12 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_mathesar_table(sch_oid oid, tab_name text, col_defs jsonb, con_defs jsonb)
+msar.add_mathesar_table(sch_oid oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
   RETURNS oid AS $$/*
 */
 DECLARE
   fq_table_name text;
+  created_table_id oid;
   column_defs __msar.col_def[];
   constraint_defs __msar.con_def[];
 BEGIN
@@ -1450,6 +1451,8 @@ BEGIN
   column_defs := msar.process_col_def_jsonb(null, col_defs, false, true);
   constraint_defs := msar.process_con_def_jsonb(null, con_defs);
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
-  RETURN fq_table_name::regclass::oid;
+  created_table_id := fq_table_name::regclass::oid;
+  PERFORM msar.comment_on_table(created_table_id, comment_);
+  RETURN created_table_id;
 END;
 $$ LANGUAGE plpgsql;
