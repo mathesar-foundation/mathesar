@@ -975,7 +975,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_add_mathesar_table_minimal_id_col() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null
+    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null
   );
   RETURN NEXT col_is_pk(
     'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
@@ -987,6 +987,63 @@ BEGIN
     $v$VALUES ('a'::"char")$v$,
     'id column should be generated always as identity'
   );
+END;
+$f$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_badname() RETURNS SETOF TEXT AS $f$
+DECLARE
+  badname text := $b$M"new"'dsf' \t"$b$;
+BEGIN
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, badname, null, null, null
+  );
+  RETURN NEXT has_table('tab_create_schema'::name, badname::name);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_columns() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_defs jsonb := $j$[
+    {"name": "mycolumn", "type": {"name": "numeric"}},
+    {},
+    {"type": {"name": "varchar", "options": {"length": 128}}}
+  ]$j$;
+BEGIN
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid,
+    'cols_table',
+    col_defs,
+    null, null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT col_type_is(
+    'tab_create_schema'::name, 'cols_table'::name, 'mycolumn'::name, 'numeric'
+  );
+  RETURN NEXT col_type_is(
+    'tab_create_schema'::name, 'cols_table'::name, 'Column 3'::name, 'character varying(128)'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_comment() RETURNS SETOF TEXT AS $f$
+DECLARE
+  comment_ text := $c$my "Super;";'; DROP SCHEMA tab_create_schema;'$c$;
+BEGIN
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, comment_
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT is(
+    obj_description('tab_create_schema.cols_table'::regclass::oid),
+    comment_,
+    'created table should have specified description (comment)'
+  );
 END;
 $f$ LANGUAGE plpgsql;
