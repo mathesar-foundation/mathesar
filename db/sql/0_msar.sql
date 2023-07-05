@@ -738,7 +738,7 @@ CREATE TYPE __msar.col_def AS (
   type_ text, -- The type of the column to create, fully specced with arguments.
   not_null boolean, -- A boolean to describe whether the column is nullable or not.
   default_ text, -- Text SQL giving the default value for the column.
-  primary_key boolean -- A boolean giving whether the column is a primary key (single column)
+  identity_ boolean -- A boolean giving whether the column is an identity pkey column.
 );
 
 
@@ -852,16 +852,14 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION __msar.build_col_def_text(col __msar.col_def) RETURNS text AS $$/*
 */
-SELECT CASE
-  WHEN col.not_null AND col.default_ IS NULL THEN
-    format('%s %s NOT NULL', col.name_, col.type_)
-  WHEN col.not_null AND col.default_ IS NOT NULL THEN
-    format('%s %s NOT NULL DEFAULT %s', col.name_, col.type_, col.default_)
-  WHEN col.default_ IS NOT NULL THEN
-    format('%s %s DEFAULT %s', col.name_, col.type_, col.default_)
-  ELSE
-    format('%s %s', col.name_, col.type_)
-END;
+SELECT format(
+  '%s %s %s %s %s',
+  col.name_,
+  col.type_,
+  CASE WHEN col.not_null THEN 'NOT NULL' END,
+  'DEFAULT ' || col.default_,
+  CASE WHEN col.identity_ THEN 'GENERATED ALWAYS AS IDENTITY PRIMARY KEY' END
+);
 $$ LANGUAGE SQL;
 
 
@@ -930,12 +928,12 @@ WITH attnum_cte AS (
 SELECT array_cat(
   CASE
     WHEN create_id THEN
-      ARRAY[('id', 'integer', true, 'generated always as identity', true)]::__msar.col_def[]
+      ARRAY[('id', 'integer', true, null, true)]::__msar.col_def[]
   END,
   array_agg(col_defs)
 )
 FROM col_create_cte;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
@@ -1145,7 +1143,7 @@ SELECT array_agg(
     null -- not yet implemented
   )::__msar.con_def
 ) FROM jsonb_array_elements(con_create_arr) AS x(con_create_obj);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
@@ -1454,8 +1452,8 @@ DECLARE
   constraint_defs __msar.con_def[];
 BEGIN
   fq_table_name := format('%s.%s', __msar.get_schema_name(sch_oid), quote_ident(tab_name));
-  column_defs := msar.process_col_def_jsonb(0, col_defs, false, true);
-  constraint_defs := msar.process_con_def_jsonb(0, col_defs);
+  column_defs := msar.process_col_def_jsonb(null, col_defs, false, true);
+  constraint_defs := msar.process_con_def_jsonb(null, con_defs);
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
   RETURN fq_table_name::regclass::oid;
 END;
