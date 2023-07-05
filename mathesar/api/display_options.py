@@ -91,4 +91,3 @@ DISPLAY_OPTIONS_BY_UI_TYPE = {
     # NOTE: below callable will be evaluated only once
     UIType.MONEY: _money_display_options_schema(),
 }
-
