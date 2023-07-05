@@ -182,7 +182,7 @@ BEGIN
   RETURN NEXT is(
     msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
     ARRAY[
-      ('id', 'integer', true, 'generated always as identity', true),
+      ('id', 'integer', true, null, true),
       ('"Column 1"', 'text', null, null, false),
       ('"Column 2"', 'text', null, null, false)
     ]::__msar.col_def[],
@@ -959,5 +959,34 @@ BEGIN
     'column "col1" appears twice in primary key constraint',
     'Throws error for nonexistent duplicate pkey col'
   );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+-- msar.add_mathesar_table
+
+CREATE OR REPLACE FUNCTION setup_create_table() RETURNS SETOF TEXT AS $f$
+BEGIN
+  CREATE SCHEMA tab_create_schema;
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_minimal_id_col() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT results_eq(
+    $q$SELECT attidentity
+    FROM pg_attribute
+    WHERE attrelid='tab_create_schema.anewtable'::regclass::oid and attname='id'$q$,
+    $v$VALUES ('a'::"char")$v$,
+    'id column should be generated always as identity'
+  );
+
 END;
 $f$ LANGUAGE plpgsql;
