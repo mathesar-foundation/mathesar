@@ -89,9 +89,9 @@ def test_self_reference(engine_with_schema, library_tables_oids):
     publishers_oid = library_tables_oids['Publishers']
 
     # remove when library_without_checkouts.sql is updated and includes self-reference case
-    fk_column = create_column(engine, publishers_oid, {'name': 'Parent Publisher', 'type': PostgresType.INTEGER.id})
+    fk_column_attnum = create_column(engine, publishers_oid, {'name': 'Parent Publisher', 'type': PostgresType.INTEGER.id})[0]
     pk_column_attnum = get_column_attnum_from_name(publishers_oid, 'id', engine, metadata=get_empty_metadata())
-    fk_constraint = ForeignKeyConstraint('Publishers_Publisher_fkey', publishers_oid, [fk_column.column_attnum], publishers_oid, [pk_column_attnum], {})
+    fk_constraint = ForeignKeyConstraint('Publishers_Publisher_fkey', publishers_oid, [fk_column_attnum], publishers_oid, [pk_column_attnum], {})
     fk_constraint.add_constraint(engine)
 
     publishers_oid = library_tables_oids['Publishers']
@@ -110,9 +110,9 @@ def test_circular_reference(engine_with_schema, library_tables_oids):
     publications_oid = library_tables_oids['Publications']
 
     # remove when library_without_checkouts.sql is updated and includes circular reference case
-    fk_column = create_column(engine, publishers_oid, {'name': 'Top Publication', 'type': PostgresType.INTEGER.id})
+    fk_column_attnum = create_column(engine, publishers_oid, {'name': 'Top Publication', 'type': PostgresType.INTEGER.id})[0]
     publications_pk_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine, metadata=get_empty_metadata())
-    fk_constraint = ForeignKeyConstraint('Publishers_Publications_fkey', publishers_oid, [fk_column.column_attnum], publications_oid, [publications_pk_column_attnum], {})
+    fk_constraint = ForeignKeyConstraint('Publishers_Publications_fkey', publishers_oid, [fk_column_attnum], publications_oid, [publications_pk_column_attnum], {})
     fk_constraint.add_constraint(engine)
 
     publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, [])
