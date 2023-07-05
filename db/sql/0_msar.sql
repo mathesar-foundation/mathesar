@@ -333,7 +333,7 @@ Args:
   new_sch_name: An unquoted new schema name
 */
 BEGIN
-  RETURN __msar.rename_schema(__msar.get_sch_name(sch_id), quote_ident(new_sch_name));
+  RETURN __msar.rename_schema(__msar.get_schema_name(sch_id), quote_ident(new_sch_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -379,7 +379,7 @@ Args:
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
 BEGIN
-  RETURN __msar.comment_on_schema(__msar.get_sch_name(sch_id), quote_literal(comment_));
+  RETURN __msar.comment_on_schema(__msar.get_schema_name(sch_id), quote_literal(comment_));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -479,7 +479,7 @@ Args:
   if_exists: Whether to ignore an error if the schema doesn't exist
 */
 BEGIN
-  RETURN __msar.drop_schema(__msar.get_sch_name(sch_id), cascade_, if_exists);
+  RETURN __msar.drop_schema(__msar.get_schema_name(sch_id), cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
