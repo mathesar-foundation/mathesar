@@ -764,9 +764,11 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.get_duplicate_col_defs(
-  tab_id oid, col_ids smallint[], new_names text[], copy_defaults boolean
+CREATE OR REPLACE FUNCTION msar.get_duplicate_col_defs(
+  tab_id oid,
+  col_ids smallint[],
+  new_names text[],
+  copy_defaults boolean
 ) RETURNS __msar.col_def[] AS $$/*
 Get an array of __msar.col_def from given columns in a table.
 
