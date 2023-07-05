@@ -567,10 +567,8 @@ Args:
   tab_name: The qualified, quoted name of the table whose comment we will change.
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
-BEGIN
-  RETURN __msar.exec_ddl('COMMENT ON TABLE %s IS ''%s''', tab_name, comment_);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+SELECT __msar.exec_ddl('COMMENT ON TABLE %s IS %s', tab_name, comment_);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -581,10 +579,8 @@ Args:
   tab_id: The OID of the table whose comment we will change.
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
-BEGIN
-  RETURN __msar.comment_on_table(__msar.get_relation_name(tab_id), comment_);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+SELECT __msar.comment_on_table(__msar.get_relation_name(tab_id), quote_literal(comment_));
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -596,12 +592,11 @@ Args:
   tab_name: The name of the table whose comment we will change.
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
-DECLARE qualified_tab_name text;
-BEGIN
-  qualified_tab_name := msar.get_fully_qualified_object_name(sch_name, tab_name);
-  RETURN __msar.comment_on_table(qualified_tab_name, comment_);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+SELECT __msar.comment_on_table(
+  msar.get_fully_qualified_object_name(sch_name, tab_name),
+  quote_literal(comment_)
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 -- Alter Table: LEFT IN PYTHON (for now) -----------------------------------------------------------
