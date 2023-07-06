@@ -334,7 +334,7 @@ def test_column_create_some_parameters(column_test_table, client):
 def test_column_create_no_name_parameter(column_test_table, client):
     db_type = PostgresType.BOOLEAN
     num_columns = len(column_test_table.sa_columns)
-    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns}"
+    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns + 1}"
     data = {
         "type": db_type.id
     }
@@ -355,7 +355,7 @@ def test_column_create_name_parameter_empty(column_test_table, client):
     name = ""
     db_type = PostgresType.BOOLEAN
     num_columns = len(column_test_table.sa_columns)
-    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns}"
+    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns + 1}"
     data = {
         "name": name, "type": db_type.id
     }

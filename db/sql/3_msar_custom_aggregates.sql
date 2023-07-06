@@ -1,74 +1,33 @@
 CREATE OR REPLACE FUNCTION time_to_degrees(_time TIME)
-	returns DOUBLE PRECISION AS $$
-DECLARE
-	seconds INT;
-	degrees DOUBLE PRECISION;
-BEGIN
-	seconds := EXTRACT(SECOND FROM _time);
-	seconds := seconds + 60*EXTRACT(MINUTE FROM _time);
-	seconds := seconds + 3600*EXTRACT(HOUR FROM _time);	
-	degrees := ((seconds*360)::DOUBLE PRECISION)/86400;	
-	return degrees;
-END;
-$$ LANGUAGE plpgsql;
+	RETURNS DOUBLE PRECISION AS $$
+	SELECT EXTRACT(EPOCH FROM _time)*360 / 86400;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION degrees_to_time(degrees DOUBLE PRECISION)
-	returns TIME AS $$
-DECLARE
-	hours INT;
-	minutes INT;
-	seconds INT;
-	_time TIME;
-BEGIN		
-	seconds := (degrees*86400)/360;	
-	minutes := seconds/60;
-	seconds := seconds%60;
-	hours := minutes/60;
-	minutes := minutes%60;
-	_time = make_time(hours,minutes,seconds);
-	RETURN _time;
-END;
-$$ LANGUAGE plpgsql;
+	RETURNS TIME AS $$
+	SELECT MAKE_INTERVAL(secs => degrees * 86400 / 360)::time;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION accum_time(state DOUBLE PRECISION[], _time TIME)
 	RETURNS DOUBLE PRECISION[] as $$
-DECLARE	
-	degrees DOUBLE PRECISION;
-BEGIN
-	degrees = time_to_degrees(_time);
-	state[1] := state[1]+sind(degrees);
-	state[2] := state[2]+cosd(degrees);
-	RETURN state;
-END;
-$$ LANGUAGE plpgsql STRICT;
+	SELECT ARRAY[state[1] + SIND(time_to_degrees(_time)), state[2] + COSD(time_to_degrees(_time))];
+$$ LANGUAGE SQL STRICT;
 
 
 CREATE OR REPLACE FUNCTION final_func_peak_time(state DOUBLE PRECISION[])
-	RETURNS TIME as $$
-DECLARE 
-	degrees DOUBLE PRECISION;
-	_time TIME;
-BEGIN
-	/* 
-	- Handle singularity when all the times are equally spaced.
-	*/
-	IF @state[1] + @state[2] < 1e-10 THEN
-    	RETURN NULL;  	
-  	END IF;
-	degrees = atan2d(state[1],state[2]);
-	/* 
-	- Range of atan2d is (-180,180]
-	- 360° should be added to degrees to make it positive
-	*/
-	IF degrees<0 THEN
-   		degrees := degrees+(360::DOUBLE PRECISION);
-	END IF;
-	_time = degrees_to_time(degrees);
-	RETURN _time;
-END;
-$$ LANGUAGE plpgsql;
+    RETURNS TIME AS $$
+	SELECT CASE
+        WHEN @state[1] + @state[2] < 1e-10 THEN NULL
+        ELSE degrees_to_time(
+                CASE
+                    WHEN ATAN2D(state[1], state[2]) < 0 THEN ATAN2D(state[1], state[2]) + 360
+                    ELSE ATAN2D(state[1], state[2])
+                END
+            )
+    END;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE AGGREGATE peak_time (TIME)
