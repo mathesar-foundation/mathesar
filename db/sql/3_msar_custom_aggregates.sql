@@ -95,3 +95,65 @@ CREATE OR REPLACE AGGREGATE peak_day_of_week (DATE)
     finalfunc = final_func_peak_dow,
     initcond = '{0,0}'
 );
+
+
+CREATE OR REPLACE FUNCTION month_to_degrees(_date DATE)
+	returns DOUBLE PRECISION AS $$
+    SELECT ((EXTRACT(MONTH FROM _date) - 1)::double precision) * 360 / 12;    
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION degrees_to_month(degrees DOUBLE PRECISION)
+	returns INT AS $$
+    SELECT ((ROUND(degrees * 12 / 360)::int) % 12) + 1;
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION month_to_string(_month INT)
+    RETURNS TEXT AS $$
+    SELECT CASE
+        WHEN _month = 1 THEN 'January'
+        WHEN _month = 2 THEN 'February'
+        WHEN _month = 3 THEN 'March'
+        WHEN _month = 4 THEN 'April'
+        WHEN _month = 5 THEN 'May'
+        WHEN _month = 6 THEN 'June'
+        WHEN _month = 7 THEN 'July'
+        WHEN _month = 8 THEN 'August'
+        WHEN _month = 9 THEN 'September'
+        WHEN _month = 10 THEN 'October'
+        WHEN _month = 11 THEN 'November'
+        WHEN _month = 12 THEN 'December'
+    END;
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION accum_month(state DOUBLE PRECISION[], _date DATE)
+	RETURNS DOUBLE PRECISION[] as $$
+	SELECT ARRAY[state[1] + SIND(month_to_degrees(_date)), state[2] + COSD(month_to_degrees(_date))];
+$$ LANGUAGE SQL STRICT;
+
+
+CREATE OR REPLACE FUNCTION final_func_peak_month(state DOUBLE PRECISION[])
+    RETURNS TEXT AS $$
+	SELECT CASE
+        WHEN @state[1] + @state[2] < 1e-10 THEN NULL
+        ELSE month_to_string(
+                degrees_to_month(
+                    CASE
+                        WHEN ATAN2D(state[1], state[2]) < 0 THEN ATAN2D(state[1], state[2]) + 360
+                        ELSE ATAN2D(state[1], state[2])
+                    END
+                )
+        )
+    END;
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE AGGREGATE peak_month (DATE)
+(
+    sfunc = accum_month,
+    stype = DOUBLE PRECISION[],
+    finalfunc = final_func_peak_month,
+    initcond = '{0,0}'
+);
