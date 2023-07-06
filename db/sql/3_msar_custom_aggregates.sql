@@ -41,86 +41,49 @@ CREATE OR REPLACE AGGREGATE peak_time (TIME)
 
 CREATE OR REPLACE FUNCTION dow_to_degrees(_date DATE)
 	returns DOUBLE PRECISION AS $$
-DECLARE
-	_dow INT;
-	degrees DOUBLE PRECISION;
-BEGIN
-	_dow = EXTRACT(DOW FROM _date);
-	degrees := ((_dow*360)::DOUBLE PRECISION)/7;	
-	return degrees;
-END;
-$$ LANGUAGE plpgsql;
+    SELECT (EXTRACT(DOW FROM _date)::double precision) * 360 / 7;    
+$$ LANGUAGE SQL;
+
 
 CREATE OR REPLACE FUNCTION degrees_to_dow(degrees DOUBLE PRECISION)
 	returns INT AS $$
-DECLARE
-	_dow INT;	
-BEGIN
-	_dow = (ROUND((degrees*7)/360)::INT)%7;
-	RETURN _dow;
-END;
-$$ LANGUAGE plpgsql;
+    SELECT (ROUND(degrees * 7 / 360)::int) % 7;
+$$ LANGUAGE SQL;
+
 
 
 CREATE OR REPLACE FUNCTION dow_to_string(_dow INT)
     RETURNS TEXT AS $$
-DECLARE
-    _dow_string TEXT;
-BEGIN
-    CASE _dow
-        WHEN 0 THEN _dow_string := 'Sunday';
-        WHEN 1 THEN _dow_string := 'Monday';
-        WHEN 2 THEN _dow_string := 'Tuesday';
-        WHEN 3 THEN _dow_string := 'Wednesday';
-        WHEN 4 THEN _dow_string := 'Thursday';
-        WHEN 5 THEN _dow_string := 'Friday';
-        WHEN 6 THEN _dow_string := 'Saturday';        
-    END CASE;
-
-    RETURN _dow_string;
-END;
-$$ LANGUAGE plpgsql;
+    SELECT CASE
+        WHEN _dow = 0 THEN 'Sunday'
+        WHEN _dow = 1 THEN 'Monday'
+        WHEN _dow = 2 THEN 'Tuesday'
+        WHEN _dow = 3 THEN 'Wednesday'
+        WHEN _dow = 4 THEN 'Thursday'
+        WHEN _dow = 5 THEN 'Friday'
+        WHEN _dow = 6 THEN 'Saturday'
+    END;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION accum_dow(state DOUBLE PRECISION[], _date DATE)
 	RETURNS DOUBLE PRECISION[] as $$
-DECLARE	
-	degrees DOUBLE PRECISION;
-BEGIN	
-	degrees = dow_to_degrees(_date);
-	state[1] := state[1]+sind(degrees);
-	state[2] := state[2]+cosd(degrees);
-	RETURN state;
-END;
-$$ LANGUAGE plpgsql STRICT;
+	SELECT ARRAY[state[1] + SIND(dow_to_degrees(_date)), state[2] + COSD(dow_to_degrees(_date))];
+$$ LANGUAGE SQL STRICT;
 
 
 CREATE OR REPLACE FUNCTION final_func_peak_dow(state DOUBLE PRECISION[])
-	RETURNS TEXT as $$
-DECLARE 
-	degrees DOUBLE PRECISION;
-	_dow INT;
-	_dow_string TEXT;
-BEGIN
-	/* 
-	- Handle singularity when all the days are equally spaced.
-	*/
-	IF @state[1] + @state[2] < 1e-10 THEN
-    	RETURN NULL;  	
-  	END IF;
-	degrees = atan2d(state[1],state[2]);
-	/* 
-	- Range of atan2d is (-180,180]
-	- 360° should be added to degrees to make it positive
-	*/
-	IF degrees<0 THEN
-   		degrees := degrees+(360::DOUBLE PRECISION);
-	END IF;
-	_dow = degrees_to_dow(degrees);
-	_dow_string = dow_to_string(_dow);
-	RETURN _dow_string;
-END;
-$$ LANGUAGE plpgsql;
+    RETURNS TIME AS $$
+	SELECT CASE
+        WHEN @state[1] + @state[2] < 1e-10 THEN NULL
+        ELSE degrees_to_dow(
+                CASE
+                    WHEN ATAN2D(state[1], state[2]) < 0 THEN ATAN2D(state[1], state[2]) + 360
+                    ELSE ATAN2D(state[1], state[2])
+                END
+            )
+    END;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE AGGREGATE peak_day_of_week (DATE)
