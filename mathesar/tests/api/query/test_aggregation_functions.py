@@ -534,120 +534,120 @@ def test_peak_time_aggregation(library_ma_tables, get_uid, client):
     query_id = response.json()['id']
     expect_records = [
         {
-            "Patron": 1,
-            "Checkout Time": "12:54:00.0"
+            "Patron":1,
+            "Checkout Time":"12:54:00.286569"
         },
         {
-            "Patron": 2,
-            "Checkout Time": "12:33:57.0"
+            "Patron":2,
+            "Checkout Time":"12:33:56.911007"
         },
         {
-            "Patron": 3,
-            "Checkout Time": "15:59:15.0"
+            "Patron":3,
+            "Checkout Time":"15:59:15.468421"
         },
         {
-            "Patron": 4,
-            "Checkout Time": "19:32:29.0"
+            "Patron":4,
+            "Checkout Time":"19:32:29.14247"
         },
         {
-            "Patron": 5,
-            "Checkout Time": "13:14:48.0"
+            "Patron":5,
+            "Checkout Time":"13:14:47.698064"
         },
         {
-            "Patron": 6,
-            "Checkout Time": "14:03:59.0"
+            "Patron":6,
+            "Checkout Time":"14:03:59.331127"
         },
         {
-            "Patron": 7,
-            "Checkout Time": "12:39:06.0"
+            "Patron":7,
+            "Checkout Time":"12:39:06.036969"
         },
         {
-            "Patron": 8,
-            "Checkout Time": "13:11:37.0"
+            "Patron":8,
+            "Checkout Time":"13:11:37.322141"
         },
         {
-            "Patron": 9,
-            "Checkout Time": "15:42:14.0"
+            "Patron":9,
+            "Checkout Time":"15:42:14.208165"
         },
         {
-            "Patron": 10,
-            "Checkout Time": "15:34:03.0"
+            "Patron":10,
+            "Checkout Time":"15:34:02.558857"
         },
         {
-            "Patron": 11,
-            "Checkout Time": "14:25:18.0"
+            "Patron":11,
+            "Checkout Time":"14:25:18.50151"
         },
         {
-            "Patron": 12,
-            "Checkout Time": "19:38:13.0"
+            "Patron":12,
+            "Checkout Time":"19:38:12.268677"
         },
         {
-            "Patron": 13,
-            "Checkout Time": "12:31:00.0"
+            "Patron":13,
+            "Checkout Time":"12:31:00.403794"
         },
         {
-            "Patron": 14,
-            "Checkout Time": "13:26:25.0"
+            "Patron":14,
+            "Checkout Time":"13:26:25.293263"
         },
         {
-            "Patron": 15,
-            "Checkout Time": "13:34:54.0"
+            "Patron":15,
+            "Checkout Time":"13:34:53.582087"
         },
         {
-            "Patron": 16,
-            "Checkout Time": "15:23:23.0"
+            "Patron":16,
+            "Checkout Time":"15:23:23.148845"
         },
         {
-            "Patron": 17,
-            "Checkout Time": "16:39:22.0"
+            "Patron":17,
+            "Checkout Time":"16:39:21.51814"
         },
         {
-            "Patron": 18,
-            "Checkout Time": "15:56:48.0"
+            "Patron":18,
+            "Checkout Time":"15:56:47.170538"
         },
         {
-            "Patron": 19,
-            "Checkout Time": "13:05:34.0"
+            "Patron":19,
+            "Checkout Time":"13:05:33.506587"
         },
         {
-            "Patron": 20,
-            "Checkout Time": "15:45:14.0"
+            "Patron":20,
+            "Checkout Time":"15:45:13.753633"
         },
         {
-            "Patron": 21,
-            "Checkout Time": "11:40:37.0"
+            "Patron":21,
+            "Checkout Time":"11:40:36.809586"
         },
         {
-            "Patron": 22,
-            "Checkout Time": "13:25:09.0"
+            "Patron":22,
+            "Checkout Time":"13:25:09.374102"
         },
         {
-            "Patron": 23,
-            "Checkout Time": "14:18:54.0"
+            "Patron":23,
+            "Checkout Time":"14:18:54.097847"
         },
         {
-            "Patron": 24,
-            "Checkout Time": "15:30:34.0"
+            "Patron":24,
+            "Checkout Time":"15:30:34.310875"
         },
         {
-            "Patron": 25,
-            "Checkout Time": "13:03:01.0"
+            "Patron":25,
+            "Checkout Time":"13:03:00.9767"
         },
         {
-            "Patron": 26,
-            "Checkout Time": "17:14:35.0"
+            "Patron":26,
+            "Checkout Time":"17:14:35.469216"
         },
         {
-            "Patron": 27,
-            "Checkout Time": "13:41:14.0"
+            "Patron":27,
+            "Checkout Time":"13:41:13.814894"
         },
         {
-            "Patron": 28,
-            "Checkout Time": "15:51:15.0"
+            "Patron":28,
+            "Checkout Time":"15:51:15.074412"
         },
         {
-            "Patron": 29,
-            "Checkout Time": "16:03:31.0"
+            "Patron":29,
+            "Checkout Time":"16:03:31.517422"
         }
     ]
     actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
