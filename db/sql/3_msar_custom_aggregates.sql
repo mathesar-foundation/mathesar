@@ -73,15 +73,17 @@ $$ LANGUAGE SQL STRICT;
 
 
 CREATE OR REPLACE FUNCTION final_func_peak_dow(state DOUBLE PRECISION[])
-    RETURNS TIME AS $$
+    RETURNS TEXT AS $$
 	SELECT CASE
         WHEN @state[1] + @state[2] < 1e-10 THEN NULL
-        ELSE degrees_to_dow(
-                CASE
-                    WHEN ATAN2D(state[1], state[2]) < 0 THEN ATAN2D(state[1], state[2]) + 360
-                    ELSE ATAN2D(state[1], state[2])
-                END
-            )
+        ELSE dow_to_string(
+                degrees_to_dow(
+                    CASE
+                        WHEN ATAN2D(state[1], state[2]) < 0 THEN ATAN2D(state[1], state[2]) + 360
+                        ELSE ATAN2D(state[1], state[2])
+                    END
+                )
+        )
     END;
 $$ LANGUAGE SQL;
 
