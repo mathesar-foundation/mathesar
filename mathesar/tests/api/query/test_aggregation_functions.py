@@ -886,7 +886,6 @@ def test_peak_day_of_week_aggregation(library_ma_tables, get_uid, client):
         }
     ]
     actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
-    print(sorted(actual_records, key=lambda x: x['Patron']))
     assert sorted(actual_records, key=lambda x: x['Patron']) == expect_records
 
 
