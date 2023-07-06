@@ -1,7 +1,8 @@
 import pytest
 from sqlalchemy import MetaData, select, Index
 from sqlalchemy_utils import create_view
-from db.constraints.operations.create import ForeignKeyConstraint
+from db.constraints.operations.create import add_constraint
+from db.constraints.base import ForeignKeyConstraint
 from db.dependents.dependents_utils import get_dependents_graph
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid
 from db.columns.operations.create import create_column
@@ -92,7 +93,7 @@ def test_self_reference(engine_with_schema, library_tables_oids):
     fk_column_attnum = create_column(engine, publishers_oid, {'name': 'Parent Publisher', 'type': PostgresType.INTEGER.id})[0]
     pk_column_attnum = get_column_attnum_from_name(publishers_oid, 'id', engine, metadata=get_empty_metadata())
     fk_constraint = ForeignKeyConstraint('Publishers_Publisher_fkey', publishers_oid, [fk_column_attnum], publishers_oid, [pk_column_attnum], {})
-    fk_constraint.add_constraint(engine)
+    add_constraint(fk_constraint, engine)
 
     publishers_oid = library_tables_oids['Publishers']
     publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, [])
@@ -113,7 +114,7 @@ def test_circular_reference(engine_with_schema, library_tables_oids):
     fk_column_attnum = create_column(engine, publishers_oid, {'name': 'Top Publication', 'type': PostgresType.INTEGER.id})[0]
     publications_pk_column_attnum = get_column_attnum_from_name(publications_oid, 'id', engine, metadata=get_empty_metadata())
     fk_constraint = ForeignKeyConstraint('Publishers_Publications_fkey', publishers_oid, [fk_column_attnum], publications_oid, [publications_pk_column_attnum], {})
-    fk_constraint.add_constraint(engine)
+    add_constraint(fk_constraint, engine)
 
     publishers_dependents_graph = get_dependents_graph(publishers_oid, engine, [])
     publications_dependents_oids = _get_object_dependents_oids(publishers_dependents_graph, publications_oid)
