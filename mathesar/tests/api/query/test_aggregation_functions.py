@@ -890,6 +890,179 @@ def test_peak_day_of_week_aggregation(library_ma_tables, get_uid, client):
     assert sorted(actual_records, key=lambda x: x['Patron']) == expect_records
 
 
+def test_peak_month_aggregation(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+            {"id": columns["Patron"]["id"], "alias": "Patron"},
+        ],
+        "display_names": {
+            "Checkout Time": "Checkout Time",
+            "Patron": "Patron",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "Patron": {
+                display_option_origin: "Patron",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Patron",
+                            "output_alias": "Patron",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Time",
+                            "function": "peak_month",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {
+            "Patron": 1,
+            "Checkout Time": "May"
+        },
+        {
+            "Patron": 2,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 3,
+            "Checkout Time": "July"
+        },
+        {
+            "Patron": 4,
+            "Checkout Time": "May"
+        },
+        {
+            "Patron": 5,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 6,
+            "Checkout Time": "July"
+        },
+        {
+            "Patron": 7,
+            "Checkout Time": "May"
+        },
+        {
+            "Patron": 8,
+            "Checkout Time": "July"
+        },
+        {
+            "Patron": 9,
+            "Checkout Time": "May"
+        },
+        {
+            "Patron": 10,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 11,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 12,
+            "Checkout Time": "July"
+        },
+        {
+            "Patron": 13,
+            "Checkout Time": "July"
+        },
+        {
+            "Patron": 14,
+            "Checkout Time": "May"
+        },
+        {
+            "Patron": 15,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 16,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 17,
+            "Checkout Time": "July"
+        },
+        {
+            "Patron": 18,
+            "Checkout Time": "May"
+        },
+        {
+            "Patron": 19,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 20,
+            "Checkout Time": "July"
+        },
+        {
+            "Patron": 21,
+            "Checkout Time": "May"
+        },
+        {
+            "Patron": 22,
+            "Checkout Time": "July"
+        },
+        {
+            "Patron": 23,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 24,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 25,
+            "Checkout Time": "May"
+        },
+        {
+            "Patron": 26,
+            "Checkout Time": "July"
+        },
+        {
+            "Patron": 27,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 28,
+            "Checkout Time": "June"
+        },
+        {
+            "Patron": 29,
+            "Checkout Time": "July"
+        }
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Patron']) == expect_records
+
+
 def test_percentage_true_aggregation(payments_ma_table, get_uid, client):
     _ = payments_ma_table
     payments = {
