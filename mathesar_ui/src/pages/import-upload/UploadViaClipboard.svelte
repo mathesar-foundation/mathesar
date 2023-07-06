@@ -33,7 +33,7 @@
   <TextArea bind:value={clipboardContent} rows={10} disabled={isLoading} />
 </LabeledInput>
 <div class="help-content">
-  The data must be in tabular format (CSV, TSV etc.)
+  The data must be in tabular format (CSV, TSV etc) or a valid JSON.
 </div>
 
 <slot />

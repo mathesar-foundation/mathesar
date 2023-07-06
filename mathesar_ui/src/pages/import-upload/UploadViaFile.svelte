@@ -71,7 +71,7 @@
   />
   {#if !uploadProgress}
     <div class="help-content">
-      The file must be in tabular format (CSV, TSV etc.)
+      The file must be in tabular format (CSV, TSV etc) or a valid JSON.
     </div>
   {/if}
 </div>
