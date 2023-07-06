@@ -418,7 +418,7 @@ class Peak_Time(DBFunction):
     def to_sa_expression(column_expr):
         column_expr = cast(column_expr, TIME)
         return sa_call_sql_function('peak_time', column_expr, return_type=PostgresType.TIME_WITHOUT_TIME_ZONE)
-    
+
 
 class Peak_Day_of_Week(DBFunction):
     id = 'peak_day_of_week'
