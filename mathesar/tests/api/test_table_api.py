@@ -31,6 +31,19 @@ def long_column_data_file():
 
 
 @pytest.fixture
+def missing_keys_json_data_file():
+    data_filepath = 'mathesar/tests/data/json_parsing/missing_keys.json'
+    with open(data_filepath, "rb") as json_file:
+        data_file = DataFile.objects.create(
+            file=File(json_file),
+            created_from='file',
+            base_name='missing_keys',
+            type='json'
+        )
+    return data_file
+
+
+@pytest.fixture
 def schema_name():
     return 'table_tests'
 
@@ -1902,3 +1915,17 @@ def test_create_table_long_name_data_file(client, long_column_data_file, schema)
     )
     # This just makes sure we can get records. This was a bug with long column names.
     client.get(f'/api/db/v0/tables/{table.id}/records/')
+
+
+def test_create_table_and_normalize_json_data_file(client, missing_keys_json_data_file, schema):
+    table_name = 'Missing keys'
+    expt_name = _get_expected_name(table_name, data_file=missing_keys_json_data_file)
+    first_row = (1, 'Matt', 'Murdock', 'Male', '["Stick", "Foggy"]', '{"street": "210", "city": "NY"}', None)
+    column_names = [
+        "first_name", "last_name", "gender", "friends", "address", "email"
+    ]
+
+    check_create_table_response(
+        client, table_name, expt_name, missing_keys_json_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
