@@ -3,7 +3,7 @@ import pytest
 from copy import deepcopy
 from unittest.mock import patch
 
-from db.constraints.operations.create import ForeignKeyConstraint, UniqueConstraint
+from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
