@@ -79,6 +79,13 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
       [abstractTypeCategory.Time]: abstractTypeCategory.Time,
     },
   },
+  peak_day_of_week: {
+    label: 'Peak day of week',
+    inputOutputTypeMap: {
+      [abstractTypeCategory.DateTime]: abstractTypeCategory.Text,
+      [abstractTypeCategory.Date]: abstractTypeCategory.Text,
+    },
+  },
 };
 
 export function getSummarizationFunctionsForAbstractType(
