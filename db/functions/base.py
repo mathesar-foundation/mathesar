@@ -433,6 +433,19 @@ class Peak_Day_of_Week(DBFunction):
         return sa_call_sql_function('peak_day_of_week', column_expr, return_type=PostgresType.TEXT)
 
 
+class Peak_Month(DBFunction):
+    id = 'peak_month'
+    name = 'peak_month'
+    hints = tuple([
+        hints.aggregation
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        column_expr = cast(column_expr, DATE)
+        return sa_call_sql_function('peak_month', column_expr, return_type=PostgresType.TEXT)
+
+
 class Min(DBFunction):
     id = 'min'
     name = 'min'

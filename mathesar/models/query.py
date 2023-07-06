@@ -6,7 +6,7 @@ from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.transforms.operations.deserialize import deserialize_transformation
 from db.transforms.operations.serialize import serialize_transformation
 from db.transforms.base import Summarize
-from db.functions.base import Count, ArrayAgg, Sum, Median, Mode, Percentage_True, Max, Min, Mean, Peak_Time, Peak_Day_of_Week
+from db.functions.base import Count, ArrayAgg, Sum, Median, Mode, Percentage_True, Max, Min, Mean, Peak_Time, Peak_Day_of_Week, Peak_Month
 from db.functions.packed import DistinctArrayAgg
 
 from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
@@ -428,6 +428,7 @@ def _get_default_display_name_for_agg_output_alias(
             Mean.id: " mean",
             Peak_Time.id: " peak_time",
             Peak_Day_of_Week.id: " peak_day_of_week",
+            Peak_Month.id: " peak_month",
         }
         suffix_to_add = map_of_agg_function_to_suffix.get(agg_function)
         if suffix_to_add:
