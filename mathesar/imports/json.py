@@ -16,10 +16,10 @@ from psycopg2.errors import IntegrityError, DataError
 from mathesar.state import reset_reflection
 
 
-def is_valid_json(data) -> bool:
+def is_valid_json(data):
     try:
         json.loads(data)
-    except:
+    except (JSONDecodeError, ValueError):
         return False
     return True
 
