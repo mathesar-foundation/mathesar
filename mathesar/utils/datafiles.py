@@ -8,6 +8,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 
 from mathesar.errors import URLDownloadError
 from mathesar.imports.csv import get_sv_dialect, get_file_encoding
+from mathesar.imports.json import validate_json_format
 from mathesar.models.base import DataFile
 
 
@@ -56,6 +57,8 @@ def create_datafile(data):
 
     encoding = get_file_encoding(raw_file.file)
     text_file = TextIOWrapper(raw_file.file, encoding=encoding)
+    if type == 'json':
+        validate_json_format(raw_file)
     if type == 'csv' or type == 'tsv':
         dialect = get_sv_dialect(text_file)
         datafile = DataFile(
