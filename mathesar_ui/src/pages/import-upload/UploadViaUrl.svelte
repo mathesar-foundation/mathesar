@@ -37,7 +37,7 @@
 </LabeledInput>
 
 <div class="help-content">
-  The data must be in tabular format (CSV, TSV etc) or a valid JSON.
+  The data must be in tabular format (CSV, TSV etc) or a valid JSON. View <a href="https://github.com/centerofci/mathesar/blob/develop/docs/docs/user-guide/importing-data.md">details</a>.
 </div>
 
 <slot />
