@@ -63,3 +63,5 @@ class ErrorCodes(Enum):
     DuplicateUIQueryInSchema = 4422
     IdentifierTooLong = 4423
     DynamicDefaultAlterationToStaticDefault = 4424
+    InvalidJSONFormat = 4425
+    UnsupportedJSONFormat = 4426
