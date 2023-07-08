@@ -417,7 +417,7 @@ class PeakTime(DBFunction):
     @staticmethod
     def to_sa_expression(column_expr):
         column_expr = cast(column_expr, TIME)
-        return sa_call_sql_function('peak_time', column_expr, return_type=PostgresType.TIME_WITHOUT_TIME_ZONE)
+        return sa_call_sql_function('msar.peak_time', column_expr, return_type=PostgresType.TIME_WITHOUT_TIME_ZONE)
 
 
 class Min(DBFunction):

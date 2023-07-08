@@ -107,7 +107,7 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE AGGREGATE
-msar.peak_time(TIME)/*
+msar.peak_time (TIME)/*
 The aggregate takes a column of type time and calculates the peak time.
 
 Steps:
