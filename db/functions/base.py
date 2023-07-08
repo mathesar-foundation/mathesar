@@ -407,7 +407,7 @@ class Mode(DBFunction):
         return mode().within_group(column_expr)
 
 
-class Peak_Time(DBFunction):
+class PeakTime(DBFunction):
     id = 'peak_time'
     name = 'peak_time'
     hints = tuple([
