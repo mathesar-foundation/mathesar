@@ -66,7 +66,7 @@ The state transition function takes the current state and time_, converts
 the time_ to degrees, calculates the sin and cosine and then adds these
 to the state.
 */
-  SELECT ARRAY[state[1] + SIND(time_to_degrees(time_)), state[2] + COSD(time_to_degrees(time_))];
+  SELECT ARRAY[state[1] + SIND(msar.time_to_degrees(time_)), state[2] + COSD(msar.time_to_degrees(time_))];
 $$ LANGUAGE SQL STRICT;
 
 
@@ -92,7 +92,7 @@ which is the actual result of the aggregate.
     (which is 1e-10 while the float precision is in the range of 1e-15)
     */
     WHEN @state[1] + @state[2] < 1e-10 THEN NULL
-    ELSE degrees_to_time(
+    ELSE msar.degrees_to_time(
       CASE
         /*
         Range of ATAN2D is (-180°,180°].
