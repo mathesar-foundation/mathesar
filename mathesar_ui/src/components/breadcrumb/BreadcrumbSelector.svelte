@@ -45,14 +45,14 @@
     class="padding-zero"
   >
     <span class="trigger">
-      <Icon {...iconExpandRight} />
+      <Icon {...iconExpandRight} />   
     </span>
   </Button>
 
   <AttachableDropdown
     bind:isOpen
     trigger={triggerElement}
-    class="breadcrumb-selector-dropdown"
+    class="breadcrumb-selector-dropdown"    
   >
     <div class="entity-switcher-content">
       <div class="search">
@@ -103,10 +103,10 @@
 
 <style lang="scss">
   :global(.breadcrumb-selector-dropdown) {
-    display: flex;
+    display: flex;   
   }
   .entity-switcher-content {
-    padding: 0.5rem;
+    padding: 0.5rem;  
     min-width: 12rem;
     display: grid;
     grid-template: auto 1fr / 1fr;
@@ -137,5 +137,5 @@
       color: var(--slate-500);
       border-color: var(--slate-300);
     }
-  }
+  } 
 </style>

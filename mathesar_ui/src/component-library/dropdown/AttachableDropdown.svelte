@@ -107,6 +107,7 @@
 </script>
 
 {#if isOpen}
+ 
   <div
     class={['dropdown content', classes].join(' ')}
     bind:this={contentElement}
@@ -138,5 +139,14 @@
     {:else if content}
       <StringOrComponent arg={content} />
     {/if}
+    
   </div>
 {/if}
+
+<style lang="scss">
+
+.dropdown.content{
+   max-height:calc(100vh - 2rem);
+}
+
+</style>

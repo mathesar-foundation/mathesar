@@ -141,7 +141,7 @@
     resetEditMode();
   }
 
-  function handleMouseDown() {
+  function handleMouseDown() {    
     if (!isActive) {
       dispatch('activate');
     }
