@@ -142,7 +142,7 @@
 {/if}
 
 <style lang="scss">
- .dropdown.content{
-  max-height: calc(100vh - 2rem);
- }
+  .dropdown.content {
+    max-height: calc(100vh - 2rem);
+  }
 </style>
