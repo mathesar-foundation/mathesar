@@ -8,9 +8,9 @@
     <slot />
   </a>
 {:else}
-  <span class="content">
-    <slot />
-  </span>
+<a href={value ?? ''} target="_blank" style="pointer-events: none;">
+  <slot />
+</a>
 {/if}
 
 <style>
