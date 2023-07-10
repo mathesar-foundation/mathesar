@@ -899,6 +899,7 @@ The col_defs should have the form:
     ...
   }
 ]
+
 For more info on the type.options object, see the msar.build_type_text function. All pieces are
 optional. If an empty object {} is given, the resulting column will have a default name like
 'Column <n>' and type TEXT. It will allow nulls and have a null default value.
@@ -1058,21 +1059,34 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION __msar.build_con_def_text(con __msar.con_def) RETURNS text AS $$/*
+Build appropriate text defining the given constraint for table creation or alteration.
+
+If the given con.name_ is null, the syntax changes slightly (we don't add 'CONSTRAINT'). The FOREIGN
+KEY constraint has a number of extra strings that may or may not be appended.  The best
+documentation for this is the FOREIGN KEY section of the CREATE TABLE docs:
+https://www.postgresql.org/docs/current/sql-createtable.html
+
+One helpful note is that this function makes use heavy of the || operator. This operator returns
+null if either side is null, and thus
+
+  'CONSTRAINT ' || con.name_ || ' '
+
+is 'CONSTRAINT <name> ' when con.name_ is not null, and simply null if con.name_ is null.
 */
 SELECT CASE
-    WHEN con.type_ = 'u' THEN
+    WHEN con.type_ = 'u' THEN  -- It's a UNIQUE constraint
       format(
         '%sUNIQUE %s',
         'CONSTRAINT ' || con.name_ || ' ',
         __msar.build_text_tuple(con.col_names)
       )
-    WHEN con.type_ = 'p' THEN
+    WHEN con.type_ = 'p' THEN  -- It's a PRIMARY KEY constraint
       format(
         '%sPRIMARY KEY %s',
         'CONSTRAINT ' || con.name_ || ' ',
         __msar.build_text_tuple(con.col_names)
       )
-    WHEN con.type_ = 'f' THEN
+    WHEN con.type_ = 'f' THEN  -- It's a FOREIGN KEY constraint
       format(
         '%sFOREIGN KEY %s REFERENCES %s%s%s%s%s',
         'CONSTRAINT ' || con.name_ || ' ',
@@ -1107,7 +1121,7 @@ The con_create_arr should have the form:
     "name": <str> (optional),
     "type": <str>,
     "columns": [<int:str>, <int:str>, ...],
-    "deferrable": <bool>,
+    "deferrable": <bool> (optional),
     "fkey_relation_id": <int> (optional),
     "fkey_relation_schema": <str> (optional),
     "fkey_relation_name": <str> (optional),
@@ -1127,25 +1141,34 @@ Numeric IDs are preferred over textual ones where both are accepted.
 */
 SELECT array_agg(
   (
+    -- build the name for the constraint, properly quoted.
     quote_ident(con_create_obj ->> 'name'),
+    -- set the constraint type as a single char. See __msar.build_con_def_text for details.
     con_create_obj ->> 'type',
+    -- Set the column names associated with the constraint.
     msar.get_column_names(tab_id, con_create_obj -> 'columns'),
+    -- Set whether the constraint is deferrable or not (boolean).
     con_create_obj ->> 'deferrable',
+    -- Build the relation name where the constraint will be applied. Prefer numeric ID.
     COALESCE(
       __msar.get_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
       msar.get_fully_qualified_object_name(
         con_create_obj ->> 'fkey_relation_schema', con_create_obj ->> 'fkey_relation_name'
       )
     ),
+    -- Build the array of foreign columns for an fkey constraint.
     msar.get_column_names(
       COALESCE(
+        -- We validate that the given OID (if any) is correct.
         (con_create_obj -> 'fkey_relation_id')::integer::oid,
+        -- If given a schema, name pair, we get the OID from that (and validate it).
         msar.get_relation_oid(
           con_create_obj ->> 'fkey_relation_schema', con_create_obj ->> 'fkey_relation_name'
         )
       ),
       con_create_obj -> 'fkey_columns'
     ),
+    -- The below are passed directly. They define some parameters for FOREIGN KEY constraints.
     con_create_obj ->> 'fkey_update_action',
     con_create_obj ->> 'fkey_delete_action',
     con_create_obj ->> 'fkey_match_type',
