@@ -87,8 +87,6 @@ Args:
 
 Returns:
   time corresponding to the point_ that stores the cumulative sum of points.
-
-
 */
 SELECT CASE
   /*
