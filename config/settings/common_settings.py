@@ -15,7 +15,6 @@ from pathlib import Path
 
 from decouple import Csv, config as decouple_config
 from dj_database_url import parse as db_url
-from .openapi import custom_postprocessing_hook
 
 
 # We use a 'tuple' with pipes as delimiters as decople naively splits the global
