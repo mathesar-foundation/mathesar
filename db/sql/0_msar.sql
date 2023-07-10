@@ -740,6 +740,70 @@ CREATE TYPE __msar.col_create_def AS (
 );
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_fresh_copy_name(tab_id oid, col_id smallint) RETURNS text AS $$/*
+This function generates a name to be used for a duplicated column.
+
+Given an original column name 'abc', the resulting copies will be named 'abc <n>', where <n> is
+minimal (at least 1) subject to the restriction that 'abc <n>' is not already a column of the table
+given.
+
+Args:
+  tab_id: the table for which we'll generate a column name.
+  col_id: the original column whose name we'll use as the prefix in our copied column name.
+*/
+DECLARE
+  original_col_name text;
+  idx integer := 1;
+BEGIN
+  original_col_name := attname FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
+  WHILE format('%s %s', original_col_name, idx) IN (
+    SELECT attname FROM pg_attribute WHERE attrelid=tab_id
+  ) LOOP
+    idx = idx + 1;
+  END LOOP;
+  RETURN format('%s %s', original_col_name, idx);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_duplicate_col_create_defs(
+  tab_id oid,
+  col_ids smallint[],
+  new_names text[],
+  copy_defaults boolean
+) RETURNS __msar.col_create_def[] AS $$/*
+Get an array of __msar.col_create_def from given columns in a table.
+
+Args:
+  tab_id: The OID of the table containing the column whose definition we want.
+  col_id: The attnum of the column whose definition we want.
+  new_names: The desired names of the column defs. Must be in same order as col_ids, and same
+    length.
+  copy_defaults: Whether or not we should copy the defaults
+*/
+SELECT array_agg(
+  (
+    -- build a name for the duplicate column
+    quote_ident(COALESCE(new_name, msar.get_fresh_copy_name(tab_id, pg_columns.attnum))),
+    -- build text specifying the type of the duplicate column
+    format_type(atttypid, atttypmod),
+    -- set the duplicate column to be nullable, since it will initially be empty
+    false,
+    -- set set the default value for the duplicate column if specified
+    CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END
+  )::__msar.col_create_def
+)
+FROM pg_attribute AS pg_columns
+  JOIN unnest(col_ids, new_names) AS columns_to_copy(col_id, new_name)
+    ON pg_columns.attnum=columns_to_copy.col_id
+  LEFT JOIN pg_attrdef AS pg_column_defaults
+    ON pg_column_defaults.adnum=pg_columns.attnum AND pg_columns.attrelid=pg_column_defaults.adrelid
+WHERE pg_columns.attrelid=tab_id;
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
 -- Add columns to table ----------------------------------------------------------------------------
 
 
@@ -1077,10 +1141,9 @@ Args:
 */
 DECLARE
   con_create_defs __msar.con_create_def[];
-  results text;
 BEGIN
   con_create_defs := msar.process_con_create_arr(tab_id, con_defs);
-  results := __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
+  PERFORM __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
   RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -1097,6 +1160,31 @@ Args:
   con_defs: a JSONB array defining constraints to add. See msar.process_con_create_arr for details.
 */
 SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), con_defs);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+DROP TYPE IF EXISTS __msar.not_null_def CASCADE;
+CREATE TYPE __msar.not_null_def AS (
+  col_name text, -- The column to be modified, quoted.
+  not_null boolean -- The value to set for null or not null.
+);
+
+
+CREATE OR REPLACE FUNCTION
+__msar.set_not_nulls(tab_name text, not_null_defs __msar.not_null_def[]) RETURNS TEXT AS $$/*
+Set or drop not null constraints on columns
+*/
+WITH not_null_cte AS (
+  SELECT string_agg(
+    CASE
+      WHEN not_null_def.not_null=true THEN format('ALTER %s SET NOT NULL', not_null_def.col_name)
+      WHEN not_null_def.not_null=false THEN format ('ALTER %s DROP NOT NULL', not_null_def.col_name)
+    END,
+    ', '
+  ) AS not_nulls
+  FROM unnest(not_null_defs) as not_null_def
+)
+SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, not_nulls) FROM not_null_cte;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1129,6 +1217,48 @@ WITH
   )
 SELECT msar.add_constraints(con_cte.conrelid, con_def_cte.con_def) FROM con_cte, con_def_cte;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.copy_column(
+  tab_id oid, col_id smallint, copy_name text, copy_data boolean, copy_constraints boolean
+) RETURNS smallint AS $$/*
+Copy a column of a table
+*/
+DECLARE
+  col_create_defs __msar.col_create_def[];
+  tab_name text;
+  col_name text;
+  created_col_id smallint;
+  col_not_null boolean;
+BEGIN
+  col_create_defs := msar.get_duplicate_col_create_defs(
+    tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
+  );
+  tab_name := __msar.get_relation_name(tab_id);
+  col_name := msar.get_column_name(tab_id, col_id);
+  PERFORM __msar.add_columns(tab_name, VARIADIC col_create_defs);
+  created_col_id := attnum
+    FROM pg_attribute
+    WHERE attrelid=tab_id AND quote_ident(attname)=col_create_defs[1].name_;
+  IF copy_data THEN
+    PERFORM __msar.exec_ddl(
+      'UPDATE %s SET %s=%s',
+      tab_name, col_create_defs[1].name_, msar.get_column_name(tab_id, col_id)
+    );
+  END IF;
+  IF copy_constraints THEN
+    PERFORM msar.copy_constraint(oid, col_id, created_col_id)
+    FROM pg_constraint
+    WHERE conrelid=tab_id AND ARRAY[col_id] <@ conkey;
+    PERFORM __msar.set_not_nulls(
+      tab_name, ARRAY[(col_create_defs[1].name_, attnotnull)::__msar.not_null_def]
+    )
+    FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
+  END IF;
+  RETURN created_col_id;
+END;
+$$ LANGUAGE plpgsql;
 
 
 ----------------------------------------------------------------------------------------------------
