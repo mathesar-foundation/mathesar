@@ -282,6 +282,66 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_pk_column(rel_id oid) RETURNS smallint AS $$/*
+Return the first column attnum in the primary key of a given relation (e.g., table).
+
+Args:
+  rel_id: The OID of the relation.
+*/
+SELECT conkey[1]
+FROM pg_constraint
+WHERE contype='p'
+AND conrelid=rel_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_pk_column(sch_name text, rel_name text) RETURNS smallint AS $$/*
+Return the first column attnum in the primary key of a given relation (e.g., table).
+
+Args:
+  sch_name: The schema of the relation, unquoted.
+  rel_name: The name of the relation, unqualified and unquoted.
+*/
+SELECT conkey[1]
+FROM pg_constraint
+WHERE contype='p'
+AND conrelid=msar.get_relation_oid(sch_name, rel_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_column_type(rel_id oid, col_id smallint) RETURNS text AS $$/*
+Return the type of a given column in a relation.
+
+Args:
+  rel_id: The OID of the relation.
+  col_id: The attnum of the column in the relation.
+*/
+SELECT atttypid::regtype
+FROM pg_attribute
+WHERE attnum = col_id
+AND attrelid = rel_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_column_type(sch_name text, rel_name text, col_name text) RETURNS text AS $$/*
+Return the type of a given column in a relation.
+
+Args:
+  sch_name: The schema of the relation, unquoted.
+  rel_name: The name of the relation, unqualified and unquoted.
+  col_name: The unquoted name of the column in the relation.
+*/
+SELECT atttypid::regtype
+FROM pg_attribute
+WHERE attname = quote_ident(col_name)
+AND attrelid = msar.get_relation_oid(sch_name, rel_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- ALTER SCHEMA FUNCTIONS
@@ -1402,27 +1462,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Add a One-to-Many link --------------------------------------------------------------------------
 
--- get pk col 
-CREATE OR REPLACE FUNCTION
-msar.get_pk_column(rel_id oid) RETURNS smallint AS $$
-SELECT conkey[1] FROM pg_constraint WHERE contype='p' AND conrelid=rel_id;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION
-msar.get_pk_column(sch_name text, rel_name text) RETURNS smallint AS $$
-SELECT conkey[1] FROM pg_constraint WHERE contype='p' AND conrelid=msar.get_relation_oid(sch_name, rel_name);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
--- get pk col_type
-CREATE OR REPLACE FUNCTION
-msar.get_column_type(rel_id oid, col_id smallint) RETURNS text AS $$
-SELECT atttypid::regtype FROM pg_attribute WHERE attnum = col_id AND attrelid = rel_id;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION
-msar.get_column_type(sch_name text, rel_name text, col_name text) RETURNS text AS $$
-SELECT atttypid::regtype FROM pg_attribute WHERE attname = quote_ident(col_name) AND attrelid = msar.get_relation_oid(sch_name, rel_name);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 -- add column to referrer table
 CREATE OR REPLACE FUNCTION
