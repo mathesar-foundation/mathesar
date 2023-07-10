@@ -127,3 +127,4 @@ Link: https://github.com/centerofci/mathesar/pull/2981
   finalfunc = msar.point_to_time,
   initcond = '(0,0)'
 );
+
