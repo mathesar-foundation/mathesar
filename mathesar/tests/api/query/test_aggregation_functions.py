@@ -547,7 +547,7 @@ def test_peak_time_aggregation(library_ma_tables, get_uid, client):
         },
         {
             "Patron": 4,
-            "Checkout Time": "19:32:29.14247"
+            "Checkout Time": "19:32:29.142471"
         },
         {
             "Patron": 5,
@@ -603,7 +603,7 @@ def test_peak_time_aggregation(library_ma_tables, get_uid, client):
         },
         {
             "Patron": 18,
-            "Checkout Time": "15:56:47.170538"
+            "Checkout Time": "15:56:47.170539"
         },
         {
             "Patron": 19,
