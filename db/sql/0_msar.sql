@@ -1461,6 +1461,14 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 __msar.add_table(tab_name text, col_defs __msar.col_def[], con_defs __msar.con_def[])
   RETURNS text AS $$/*
+Add a table, returning the command executed.
+
+Args:
+  tab_name: A qualified & quoted name for the table to be added.
+  col_defs: An array of __msar.col_def defining the column set of the new table.
+  con_defs (optional): An array of __msar.con_def defining the constraints for the new table.
+
+Note: Even if con_defs is null, there can be some column-level constraints set in col_defs.
 */
 WITH col_cte AS (
   SELECT string_agg(__msar.build_col_def_text(col), ', ') AS table_columns
@@ -1477,6 +1485,19 @@ $$ LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION
 msar.add_mathesar_table(sch_oid oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
   RETURNS oid AS $$/*
+Add a table, with a default id column, returning the OID of the created table.
+
+Args:
+  sch_oid: The OID of the schema where the table will be created.
+  tab_name: The unquoted name for the new table.
+  col_defs (optional): The columns for the new table, in order.
+  con_defs (optional): The constraints for the new table.
+  comment_ (optional): The comment for the new table.
+
+Note that even if col_defs is null, we will still create a table with a default 'id' column. Also,
+if an 'id' column is given in the input, it will be replaced with our default 'id' column. This is
+the behavior of the current python functions, so we're keeping it for now. In any case, the created
+table will always have our default 'id' column as its first column.
 */
 DECLARE
   fq_table_name text;
