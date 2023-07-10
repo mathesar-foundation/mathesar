@@ -363,7 +363,7 @@ Change the description of a schema, returning command executed.
 
 Args:
   sch_name: The quoted name of the schema whose comment we will change.
-  comment_: The new comment. Any quotes or special characters must be escaped.
+  comment_: The new comment.
 */
 BEGIN
   RETURN __msar.comment_on_schema(quote_ident(sch_name), quote_literal(comment_));
@@ -376,7 +376,7 @@ Change the description of a schema, returning command executed.
 
 Args:
   sch_id: The OID of the schema.
-  comment_: The new comment. Any quotes or special characters must be escaped.
+  comment_: The new comment.
 */
 BEGIN
   RETURN __msar.comment_on_schema(__msar.get_schema_name(sch_id), quote_literal(comment_));
@@ -577,7 +577,7 @@ Change the description of a table, returning command executed.
 
 Args:
   tab_id: The OID of the table whose comment we will change.
-  comment_: The new comment. Any quotes or special characters must be escaped.
+  comment_: The new comment.
 */
 SELECT __msar.comment_on_table(__msar.get_relation_name(tab_id), quote_literal(comment_));
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -590,7 +590,7 @@ Change the description of a table, returning command executed.
 Args:
   sch_name: The schema of the table whose comment we will change.
   tab_name: The name of the table whose comment we will change.
-  comment_: The new comment. Any quotes or special characters must be escaped.
+  comment_: The new comment.
 */
 SELECT __msar.comment_on_table(
   msar.get_fully_qualified_object_name(sch_name, tab_name),
