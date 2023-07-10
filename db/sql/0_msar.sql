@@ -333,7 +333,7 @@ Return the type of a given column in a relation.
 Args:
   sch_name: The schema of the relation, unquoted.
   rel_name: The name of the relation, unqualified and unquoted.
-  col_name: The unquoted name of the column in the relation.
+  col_name: The name of the column in the relation, unquoted.
 */
 SELECT atttypid::regtype
 FROM pg_attribute
@@ -1460,13 +1460,24 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
--- Add a One-to-Many link --------------------------------------------------------------------------
+-- Add a Many-to-One or a One-to-One link ----------------------------------------------------------
 
 
-
--- add column to referrer table
 CREATE OR REPLACE FUNCTION
-msar.add_many_to_one_link(from_rel_id oid, to_rel_id oid, col_name text, unique_link boolean DEFAULT false) RETURNS text AS $$
+msar.add_many_to_one_link(
+  from_rel_id oid,
+  to_rel_id oid,
+  col_name text,
+  unique_link boolean DEFAULT false
+) RETURNS text AS $$/* 
+Add a many-to-one or a one-to-one link between tables.
+
+Args:
+  from_rel_id: The oid of the referent table.
+  to_rel_id: The oid of the referrer table.
+  col_name: Name of the new column to be created in the referrer table, unqoted. 
+  unique_link: Whether to make the link one-to-one instead of many-to-one.
+*/
 DECLARE
   pk_col_id smallint;
   pk_col_type text;
@@ -1477,7 +1488,11 @@ DECLARE
 BEGIN
   pk_col_id := msar.get_pk_column(from_rel_id);
   pk_col_type := msar.get_column_type(from_rel_id, pk_col_id);
-  col_defs := format('[{"name": "%s", "type": {"name": "%s"}}]', col_name, pk_col_type)::jsonb;
+  col_defs := format(
+    '[{
+        "name": "%s",
+        "type": {"name": "%s"}
+      }]', col_name, pk_col_type)::jsonb;
   added_col_id := msar.add_columns(to_rel_id , col_defs , false);
   fk_con_def := format(
     '[{
