@@ -4,7 +4,7 @@ This script defines all the necessary functions to be used for custom aggregates
 Currently, we have the following custom aggregate(s):
   - msar.peak_time(time): Calculate the 'average time' (interpreted as peak time) for a column.
 
-Refer to the official documentation to know PostgreSQL custom aggregates function to dive deeper.
+Refer to the official documentation of PostgreSQL custom aggregates to learn more.
 link: https://www.postgresql.org/docs/current/xaggr.html
 
 We'll use snake_case for legibility and to avoid collisions with internal PostgreSQL naming
@@ -32,8 +32,9 @@ CREATE OR REPLACE FUNCTION
 msar.degrees_to_time(degrees DOUBLE PRECISION) RETURNS TIME AS $$/*
 Convert given degrees to time (on a 24 hour clock, indexed from midnight).
 
-  - First, the degrees is confined to range [0,360°)
-  - Then the confined degrees is converted to time indexed from midnight.
+Steps:
+- First, the degrees is confined to range [0,360°)
+- Then the confined degrees is converted to time indexed from midnight.
 
 Examples:
     0 => 00:00:00
@@ -41,6 +42,7 @@ Examples:
   180 => 12:00:00
   270 => 18:00:00
   540 => 12:00:00
+  -90 => 18:00:00
 
 Inverse of msar.time_to_degrees.
 */
@@ -61,7 +63,7 @@ Args:
   time_: This is the time to be added to the running sum.
 
 Returns:
-  updated value of sum_so_far after adding the time_ to the previous sum_so_far.
+  updated value of sum_so_far after adding the time_ to the previous value of sum_so_far.
 */
 SELECT point(
   sum_so_far[0] + sind(msar.time_to_degrees(time_)),
