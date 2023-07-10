@@ -2,37 +2,13 @@
 This script defines all the necessary functions to be used for custom aggregates.
 
 Currently, we have the following custom aggregate(s):
-  - Peak time aggregation (takes a list of times and calculates the modular average)
+  - msar.peak_time(time): Calculate the 'average time' (interpreted as peak time) for a column.
 
-A PostgreSQL custom aggregate function should have the following structure:
-
-  CREATE AGGREGATE sum (complex)
-  (
-      sfunc = ...,
-      stype = ...,
-      finalfunc = ...,  // (optional)
-      initcond = ...
-  );
-
-
-  - sfunc stands for "state transition function", which updates the state
-    value as each successive input row is processed.
-  - stype stands for "state value type", which defines the data type of the
-    state value.
-  - finalfunc stands for "final function", which calculates the final value
-    of the aggregate from the state value.
-  - initcond stands for "initial condition", which defines the initial condition
-    (value) of the state.
-
-
-Refer to the official documentation for PostgreSQL custom aggregates function
-to dive deeper.
+Refer to the official documentation for PostgreSQL custom aggregates function to dive deeper.
 link: https://www.postgresql.org/docs/current/xaggr.html
 
-
-We'll use snake_case for legibility and to avoid collisions with internal
-PostgreSQL naming conventions.
-
+We'll use snake_case for legibility and to avoid collisions with internal PostgreSQL naming
+conventions.
 */
 
 
