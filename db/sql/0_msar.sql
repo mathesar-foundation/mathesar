@@ -1473,8 +1473,8 @@ msar.add_many_to_one_link(
 Add a many-to-one or a one-to-one link between tables.
 
 Args:
-  from_rel_id: The oid of the referent table.
-  to_rel_id: The oid of the referrer table.
+  from_rel_id: The OID of the referent table.
+  to_rel_id: The OID of the referrer table.
   col_name: Name of the new column to be created in the referrer table, unqoted. 
   unique_link: Whether to make the link one-to-one instead of many-to-one.
 */
