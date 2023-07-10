@@ -15,7 +15,7 @@ Mathesar is built using:
 
 > **Note:** If you are developing on Windows, first install [WSL](https://learn.microsoft.com/en-us/windows/wsl/install). Then do all of your development work from within the WSL shell, including running commands like `git clone` and `docker compose`.
 
-1. Ensure ensure that you have [Docker](https://docs.docker.com/get-docker/) installed.
+1. Ensure that you have [Docker](https://docs.docker.com/get-docker/) installed.
 
 1. Clone the repository and `cd` into it.
 
