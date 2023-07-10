@@ -40,10 +40,13 @@ CREATE SCHEMA IF NOT EXISTS msar;
 
 CREATE OR REPLACE FUNCTION 
 msar.time_to_degrees(time_ TIME) RETURNS DOUBLE PRECISION AS $$/*
-EXTRACT(EPOCH FROM time_) calculates how many seconds have passed since 12 a.m.
+Convert the given time to degrees (on a 24 hour clock, indexed from midnight).
 
-The function then converts (seconds passed/ 1 day=86400 seconds) to an equivalent
-fraction of 360 degrees.
+Examples:
+  00:00:00 =>   0
+  06:00:00 =>  90
+  12:00:00 => 180
+  18:00:00 => 270
 */
   SELECT EXTRACT(EPOCH FROM time_) * 360 / 86400;
 $$ LANGUAGE SQL;
