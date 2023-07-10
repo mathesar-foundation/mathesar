@@ -823,14 +823,18 @@ The input JSON should be of the form
       "array": <boolean>
     }
   }
+
+All fields are optional, and a null value as input returns 'text'
 */
 SELECT COALESCE(
+  -- First choice is the type specified by numeric IDs, since they're most reliable.
   format_type(typ.id, typ.modifier),
+  -- Second choice is the type specified by string IDs.
   COALESCE(
     msar.get_fully_qualified_object_name(typ.schema, typ.name),
     typ.name,
-    'text'
-  )::regtype::text || COALESCE(
+    'text'  -- We fall back to 'text' when input is null or empty.
+  )::regtype::text || COALESCE(  -- This section builds the type options blob.
     '(' || topts.length || ')',
     ' ' || topts.fields || ' (' || topts.precision || ')',
     ' ' || topts.fields,
