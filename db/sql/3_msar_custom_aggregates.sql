@@ -4,7 +4,7 @@ This script defines all the necessary functions to be used for custom aggregates
 Currently, we have the following custom aggregate(s):
   - msar.peak_time(time): Calculate the 'average time' (interpreted as peak time) for a column.
 
-Refer to the official documentation for PostgreSQL custom aggregates function to dive deeper.
+Refer to the official documentation to know PostgreSQL custom aggregates function to dive deeper.
 link: https://www.postgresql.org/docs/current/xaggr.html
 
 We'll use snake_case for legibility and to avoid collisions with internal PostgreSQL naming
@@ -24,7 +24,7 @@ Examples:
   12:00:00 => 180
   18:00:00 => 270
 */
-  SELECT EXTRACT(EPOCH FROM time_) * 360 / 86400;
+SELECT EXTRACT(EPOCH FROM time_) * 360 / 86400;
 $$ LANGUAGE SQL;
 
 
@@ -32,84 +32,96 @@ CREATE OR REPLACE FUNCTION
 msar.degrees_to_time(degrees DOUBLE PRECISION) RETURNS TIME AS $$/*
 Convert given degrees to time (on a 24 hour clock, indexed from midnight).
 
+  - First, the degrees is confined to range [0,360°)
+  - Then the confined degrees is converted to time indexed from midnight.
+
 Examples:
     0 => 00:00:00
    90 => 06:00:00
   180 => 12:00:00
   270 => 18:00:00
+  540 => 12:00:00
 
 Inverse of msar.time_to_degrees.
 */
-  SELECT MAKE_INTERVAL(secs => degrees * 86400 / 360)::time;
+SELECT MAKE_INTERVAL(secs => ((degrees::numeric % 360 + 360) % 360)::double precision * 86400 / 360)::time;
 $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION 
-msar.accum_vectors_point_to_time(state DOUBLE PRECISION[], time_ TIME) RETURNS DOUBLE PRECISION[] as $$/*
-The state value here is a vector of type DOUBLE PRECISION[] (of length 2)
+msar.add_time_to_vector(sum_so_far point, time_ TIME) RETURNS point as $$/*
+Add the given time, converted to a vector on unit circle, to the vector given in first argument.
 
-The state transition function takes the current state and time_, converts
-the time_ to degrees, calculates the sin and cosine and then adds these
-to the state.
+We add a time to a point by
+- converting the time to a point on the unit circle.
+- adding that point to the point given in the first argument.
+
+Args:
+  sum_so_far: This is a point representing the sum of point so far.
+  time_: This is the time to be added to the running sum.
+
+Returns:
+  updated value of sum_so_far after adding the time_ to the previous sum_so_far.
 */
-  SELECT ARRAY[state[1] + SIND(msar.time_to_degrees(time_)), state[2] + COSD(msar.time_to_degrees(time_))];
+SELECT point(
+  sum_so_far[0] + sind(msar.time_to_degrees(time_)),
+  sum_so_far[1] + cosd(msar.time_to_degrees(time_))
+);
 $$ LANGUAGE SQL STRICT;
 
 
 CREATE OR REPLACE FUNCTION 
-msar.final_func_peak_time(state DOUBLE PRECISION[]) RETURNS TIME AS $$/*
-The state vector now stores the sum of the sines and cosines of each
-degrees variable corresponding to each time variable.
+msar.point_to_time(point_ point) RETURNS TIME AS $$/*
+Convert a point to degrees and then to time.
 
-To get the mean degrees, we need to calculate the inverse tangent of
-(∑sine/∑cosine) which is equivalent to ATAN2D(state[1], state[2])
+Point is converted to time by:
+- first converting a point to degrees by calculating the inverse tangent of
+  (sum(sine)/sum(cosine))
+- then converting the degrees to the time.
+- If the point is on the origin, will return null.
 
-Then it is converted to the corresponding variable of the time datatype,
-which is the actual result of the aggregate.
+Args:
+  state: point_ stores the sum of all the times converted to points
+
+Returns:
+  time corresponding to the point_ that stores the cumulative sum of points.
+
+
 */
-  SELECT CASE
-    /*
-    When both ∑sine and ∑cosine are zero, the time variables are evenly
-    spaced and the answer should be null.
+SELECT CASE
+  /*
+  When both sum(sine) and sum(cosine) are zero, the time variables are evenly
+  spaced and the answer should be null.
 
-    To avoid garbage output caused by the precision errors of the float
-    variables, it's better to extend the condition to:
-    Output is null when the sum of absolute values is less than epsilon.
-    (which is 1e-10 while the float precision is in the range of 1e-15)
-    */
-    WHEN @state[1] + @state[2] < 1e-10 THEN NULL
-    ELSE msar.degrees_to_time(
-      CASE
-        /*
-        Range of ATAN2D is (-180°,180°].
-        So, we need to add 360° when the result is negative.
-        */
-        WHEN ATAN2D(state[1], state[2]) < 0 THEN ATAN2D(state[1], state[2]) + 360
-        ELSE ATAN2D(state[1], state[2])
-      END
-    )
-  END;
+  To avoid garbage output caused by the precision errors of the float
+  variables, it's better to extend the condition to:
+  Output is null when the distance of the point from the origin is less than
+  a certain epsilon. (Epsilon here is 1e-10)
+  */
+  WHEN point_ <-> point(0,0) < 1e-10 THEN NULL
+  ELSE msar.degrees_to_time(atan2d(point_[0],point_[1]))
+END;
 $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE AGGREGATE
 msar.peak_time (TIME)/*
-The aggregate takes a column of type time and calculates the peak time.
+Takes a column of type time and calculates the peak time.
 
 Steps:
-  - Convert time variable to degrees.
+  - Convert time to degrees.
   - Calculate sine and cosine of the degrees.
-  - Add this to the state vector so that we have the summation of 
+  - Add this to the state point so that we have the summation of
     sine and cosine.
-  - Calculate the inverse tangent from the state vector.
+  - Calculate the inverse tangent from the state point.
   - Convert this to time, which is the result.
 
-Refer to the PR to learn more.
+Refer to the following PR to learn more.
 Link: https://github.com/centerofci/mathesar/pull/2981
 */
 (
-  sfunc = msar.accum_vectors_point_to_time,
-  stype = DOUBLE PRECISION[],
-  finalfunc = msar.final_func_peak_time,
-  initcond = '{0,0}'
+  sfunc = msar.add_time_to_vector,
+  stype = point,
+  finalfunc = msar.point_to_time,
+  initcond = '(0,0)'
 );
