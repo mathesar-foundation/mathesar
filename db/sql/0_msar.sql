@@ -197,6 +197,9 @@ More precisely, this function returns the quoted name of attributes of any relat
 pg_class catalog table (so you could find attributes of indices with this function). If the given
 col_name is not in the relation, we return null.
 
+This has the effect of both quoting and preparing the given col_name, and also validating that it
+exists.
+
 Args:
   rel_id:  The OID of the relation.
   col_name:  The unquoted name of the column in the relation.
@@ -208,6 +211,17 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.get_column_names(rel_id oid, columns jsonb) RETURNS text[] AS $$/*
 Return the names for given columns in a given relation (e.g., table).
+
+- If the rel_id is given as 0, the assumption is that this is a new table, so we just apply normal
+quoting rules to a column without validating anything further.
+- If the rel_id is given as nonzero, and a column is given as text, then we validate that
+  the column name exists in the table, and use that.
+- If the rel_id is given as nonzero, and the column is given as a number, then we look the column up
+  by attnum and use that name.
+
+The columns jsonb can have a mix of numerical IDs and column names. The reason for this is that we
+may be adding a column algorithmically, and this saves having to modify the column adding logic
+based on the IDs passed by the user for given columns.
 
 Args:
   rel_id:  The OID of the relation.
