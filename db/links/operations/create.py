@@ -25,7 +25,7 @@ def create_foreign_key_link(
                               in the referrer table.
         referrer_table_oid: The OID of the referrer table.
         referent_table_oid: The OID of the referent table.
-        unique_link: Whether to make the link one-to-one 
+        unique_link: Whether to make the link one-to-one
                      instead of many-to-one.
 
     Returns:
