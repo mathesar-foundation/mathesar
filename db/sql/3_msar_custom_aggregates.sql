@@ -54,8 +54,15 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION
 msar.degrees_to_time(degrees DOUBLE PRECISION) RETURNS TIME AS $$/*
-The function converts (degrees/360°) to an equivalent fraction of 86400 seconds,
-and then converts it to a variable of the time datatype.
+Convert given degrees to time (on a 24 hour clock, indexed from midnight).
+
+Examples:
+    0 => 00:00:00
+   90 => 06:00:00
+  180 => 12:00:00
+  270 => 18:00:00
+
+Inverse of msar.time_to_degrees.
 */
   SELECT MAKE_INTERVAL(secs => degrees * 86400 / 360)::time;
 $$ LANGUAGE SQL;
