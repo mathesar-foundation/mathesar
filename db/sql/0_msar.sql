@@ -852,6 +852,7 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION __msar.build_col_def_text(col __msar.col_def) RETURNS text AS $$/*
+Build appropriate text defining the given column for table creation or alteration.
 */
 SELECT format(
   '%s %s %s %s %s',
@@ -859,6 +860,7 @@ SELECT format(
   col.type_,
   CASE WHEN col.not_null THEN 'NOT NULL' END,
   'DEFAULT ' || col.default_,
+  -- This can be used to define our default Mathesar primary key column.
   CASE WHEN col.identity_ THEN 'GENERATED ALWAYS AS IDENTITY PRIMARY KEY' END
 );
 $$ LANGUAGE SQL;
@@ -871,12 +873,16 @@ msar.process_col_def_jsonb(
   raw_default boolean,
   create_id boolean DEFAULT false
 ) RETURNS __msar.col_def[] AS $$/*
-Create a __msar.col_def from a JSON array of column creation defining JSON blobs.
+Create an __msar.col_def from a JSON array of column creation defining JSON blobs.
 
 Args:
   tab_id: The OID of the table where we'll create the columns
   col_defs: A jsonb array defining a column creation (must have "type" key; "name",
                   "not_null", and "default" keys optional).
+  raw_default: This boolean tells us whether we chould reproduce the default with or without quoting
+               and escaping. True means we don't quote or escape, but just use the raw value.
+  create_id: This boolean defines whether or not we should automatically add a default Mathesar 'id'
+             column to the input.
 
 The col_defs should have the form:
 [
@@ -929,6 +935,8 @@ WITH attnum_cte AS (
 SELECT array_cat(
   CASE
     WHEN create_id THEN
+      -- The below tuple defines a default 'id' column for Mathesar.  It has name id, type integer,
+      -- it's not null, and it uses the 'identity' functionality to generate default values.
       ARRAY[('id', 'integer', true, null, true)]::__msar.col_def[]
   END,
   array_agg(col_defs)
