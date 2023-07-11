@@ -143,6 +143,55 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- msar.build_type_text ----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_build_type_text() RETURNS SETOF TEXT AS $$/*
+Note that many type building tests are in the column adding section, to make sure the strings the
+function writes are as expected, and also valid type definitions.
+*/
+
+BEGIN
+  RETURN NEXT is(msar.build_type_text('{}'), 'text');
+  RETURN NEXT is(msar.build_type_text(null), 'text');
+  RETURN NEXT is(msar.build_type_text('{"name": "varchar"}'), 'character varying');
+  CREATE DOMAIN msar.testtype AS text CHECK (value LIKE '%test');
+  RETURN NEXT is(
+    msar.build_type_text('{"schema": "msar", "name": "testtype"}'), 'msar.testtype'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.process_col_def_jsonb ----------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_process_col_def_jsonb() RETURNS SETOF TEXT AS $f$
+BEGIN
+  RETURN NEXT is(
+    msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false),
+    ARRAY[
+      ('"Column 1"', 'text', null, null, false),
+      ('"Column 2"', 'text', null, null, false)
+    ]::__msar.col_def[],
+    'Empty columns should result in defaults'
+  );
+  RETURN NEXT is(
+    msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false),
+    null,
+    'Column definition processing should ignore "id" column'
+  );
+  RETURN NEXT is(
+    msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
+    ARRAY[
+      ('id', 'integer', true, null, true),
+      ('"Column 1"', 'text', null, null, false),
+      ('"Column 2"', 'text', null, null, false)
+    ]::__msar.col_def[],
+    'Column definition processing add "id" column'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
 -- msar.add_columns --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION setup_add_columns() RETURNS SETOF TEXT AS $$
@@ -909,6 +958,92 @@ BEGIN
     '42701',
     'column "col1" appears twice in primary key constraint',
     'Throws error for nonexistent duplicate pkey col'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+-- msar.add_mathesar_table
+
+CREATE OR REPLACE FUNCTION setup_create_table() RETURNS SETOF TEXT AS $f$
+BEGIN
+  CREATE SCHEMA tab_create_schema;
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_minimal_id_col() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT results_eq(
+    $q$SELECT attidentity
+    FROM pg_attribute
+    WHERE attrelid='tab_create_schema.anewtable'::regclass::oid and attname='id'$q$,
+    $v$VALUES ('a'::"char")$v$,
+    'id column should be generated always as identity'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_badname() RETURNS SETOF TEXT AS $f$
+DECLARE
+  badname text := $b$M"new"'dsf' \t"$b$;
+BEGIN
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, badname, null, null, null
+  );
+  RETURN NEXT has_table('tab_create_schema'::name, badname::name);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_columns() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_defs jsonb := $j$[
+    {"name": "mycolumn", "type": {"name": "numeric"}},
+    {},
+    {"type": {"name": "varchar", "options": {"length": 128}}}
+  ]$j$;
+BEGIN
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid,
+    'cols_table',
+    col_defs,
+    null, null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT col_type_is(
+    'tab_create_schema'::name, 'cols_table'::name, 'mycolumn'::name, 'numeric'
+  );
+  RETURN NEXT col_type_is(
+    'tab_create_schema'::name, 'cols_table'::name, 'Column 3'::name, 'character varying(128)'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_comment() RETURNS SETOF TEXT AS $f$
+DECLARE
+  comment_ text := $c$my "Super;";'; DROP SCHEMA tab_create_schema;'$c$;
+BEGIN
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, comment_
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT is(
+    obj_description('tab_create_schema.cols_table'::regclass::oid),
+    comment_,
+    'created table should have specified description (comment)'
   );
 END;
 $f$ LANGUAGE plpgsql;
