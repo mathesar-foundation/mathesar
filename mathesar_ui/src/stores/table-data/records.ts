@@ -1,45 +1,47 @@
 import {
-  writable,
-  type Readable,
-  type Writable,
-  type Unsubscriber,
   derived,
   get,
+  writable,
+  type Readable,
+  type Unsubscriber,
+  type Writable,
 } from 'svelte/store';
+
+import {
+  getGloballyUniqueId,
+  isDefinedNonNullable,
+  type CancellablePromise,
+} from '@mathesar-component-library';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { Column } from '@mathesar/api/types/tables/columns';
+import type {
+  GetRequestParams as ApiGetRequestParams,
+  Group as ApiGroup,
+  Grouping as ApiGrouping,
+  Result as ApiRecord,
+  Response as ApiRecordsResponse,
+  GroupingMode,
+} from '@mathesar/api/types/tables/records';
 import {
   States,
-  getAPI,
   deleteAPI,
+  getAPI,
   patchAPI,
   postAPI,
 } from '@mathesar/api/utils/requestUtils';
-import {
-  isDefinedNonNullable,
-  type CancellablePromise,
-  getGloballyUniqueId,
-} from '@mathesar-component-library';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type {
-  Result as ApiRecord,
-  Response as ApiRecordsResponse,
-  Group as ApiGroup,
-  Grouping as ApiGrouping,
-  GroupingMode,
-  GetRequestParams as ApiGetRequestParams,
-} from '@mathesar/api/types/tables/records';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import { getErrorMessage } from '@mathesar/utils/errors';
 import type Pagination from '@mathesar/utils/Pagination';
-import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
-import type { Meta } from './meta';
-import type { RowKey } from './utils';
-import { validateRow, getCellKey } from './utils';
+import { getErrorMessage } from '@mathesar/utils/errors';
+import { pluralize } from '@mathesar/utils/languageUtils';
 import type { ColumnsDataStore } from './columns';
-import type { Sorting } from './sorting';
-import type { Grouping as GroupingRequest } from './grouping';
 import type { Filtering } from './filtering';
-import type { SearchFuzzy } from './searchFuzzy';
+import type { Grouping as GroupingRequest } from './grouping';
+import type { Meta } from './meta';
 import RecordSummaryStore from './record-summaries/RecordSummaryStore';
+import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
+import type { SearchFuzzy } from './searchFuzzy';
+import type { Sorting } from './sorting';
+import type { RowKey } from './utils';
+import { getCellKey, validateRow } from './utils';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
@@ -459,15 +461,17 @@ export class RecordsData {
       );
     }
 
+    const keysToDelete = primaryKeysOfSavedRows;
+
     let shouldReFetchRecords = successRowKeys.size > 0;
-    if (primaryKeysOfSavedRows.length > 0) {
-      const recordIds = [...primaryKeysOfSavedRows];
+    if (keysToDelete.length > 0) {
+      const recordIds = [...keysToDelete];
       const bulkDeleteURL = `/api/ui/v0/tables/${this.parentId}/records/delete/`;
       try {
         await deleteAPI<RowKey>(bulkDeleteURL, { pks: recordIds });
-        primaryKeysOfSavedRows.forEach((key) => successRowKeys.add(key));
+        keysToDelete.forEach((key) => successRowKeys.add(key));
       } catch (error) {
-        failures.set(primaryKeysOfSavedRows.join(','), getErrorMessage(error));
+        failures.set(keysToDelete.join(','), getErrorMessage(error));
       }
       shouldReFetchRecords = true;
     }
@@ -512,12 +516,9 @@ export class RecordsData {
     this.meta.rowDeletionStatus.clear();
 
     if (failures.size > 0) {
-      const errorMessages = [...failures.values()].join('\n');
-      if (failures.size === 1) {
-        throw new Error(`Unable to delete row!\n${errorMessages}`);
-      } else {
-        throw new Error(`Unable to delete some rows!\n${errorMessages}`);
-      }
+      const uiMsg = `Unable to delete ${pluralize(keysToDelete, 'rows')}.`;
+      const apiMsg = [...failures.values()].join('\n');
+      throw new Error(`${uiMsg} ${apiMsg}`);
     }
   }
 
