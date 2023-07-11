@@ -34,7 +34,7 @@ Convert given degrees to time (on a 24 hour clock, indexed from midnight).
 
 Steps:
 - First, the degrees value is confined to range [0,360°)
-- Then the confined degrees is converted to time indexed from midnight.
+- Then the resulting value is converted to time indexed from midnight.
 
 Examples:
     0 => 00:00:00
