@@ -33,9 +33,9 @@
   <TextArea bind:value={clipboardContent} rows={10} disabled={isLoading} />
 </LabeledInput>
 <div class="help-content">
-  The data must be in tabular format (CSV, TSV etc) or a valid JSON. View <a
+  The data must be in tabular format (CSV, TSV etc) or JSON. See relevant <a
     href="https://github.com/centerofci/mathesar/blob/develop/docs/docs/user-guide/importing-data.md"
-    target="_blank">details</a
+    target="_blank">documentation</a
   >.
 </div>
 
