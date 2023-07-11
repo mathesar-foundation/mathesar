@@ -1598,17 +1598,18 @@ $$ LANGUAGE plpgsql;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
--- Add a Many-to-One or a One-to-One link ----------------------------------------------------------
+-- Create a Many-to-One or a One-to-One link -------------------------------------------------------
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_many_to_one_link(
+msar.create_many_to_one_link(
   from_rel_id oid,
   to_rel_id oid,
   col_name text,
   unique_link boolean DEFAULT false
-) RETURNS text AS $$/* 
-Add a many-to-one or a one-to-one link between tables.
+) RETURNS smallint AS $$/* 
+Create a many-to-one or a one-to-one link between tables, returning the attnum of the newly created
+column.
 
 Args:
   from_rel_id: The OID of the referent table.
@@ -1651,6 +1652,36 @@ BEGIN
       }]', added_col_id[1])::jsonb;
   PERFORM msar.add_constraints(to_rel_id, uq_con_def);
   END IF;
-  RETURN msar.add_constraints(to_rel_id , fk_con_def);
+  PERFORM msar.add_constraints(to_rel_id , fk_con_def);
+  RETURN added_col_id[1];
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+-- Create a Many-to-Many link ----------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.create_many_to_many_link(
+  sch_id oid,
+  tab_name text,
+  from_rel_ids oid[],
+  col_names text[]
+) RETURNS oid AS $$/* 
+Create a many-to-many link between tables, returning the oid of the newly created table.
+
+Args:
+  sch_id: The OID of the schema in which new referrer table is to be created.
+  tab_name: Name of the referrer table to be created.
+  from_rel_ids: The OIDs of the referent tables.
+  col_names: Names of the new column to be created in the referrer table, unqoted.
+*/
+DECLARE
+  added_table_id oid;
+BEGIN
+  added_table_id := msar.add_mathesar_table(sch_id, rel_name , NULL, NULL, NULL);
+  SELECT msar.create_many_to_one_link(a.rel_id, added_table_id, b.col_name)
+  FROM unnest(from_rel_ids) WITH ORDINALITY AS a(rel_id, idx)
+  JOIN unnest(col_names) WITH ORDINALITY AS b(col_name, idx) USING (idx);
+  RETURN added_table_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

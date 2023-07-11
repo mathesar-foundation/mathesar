@@ -29,11 +29,11 @@ def create_foreign_key_link(
                      instead of many-to-one.
 
     Returns:
-        Returns a string giving the command that was run.
+        Returns the attnum of the newly created column.
     """
     return execute_msar_func_with_engine(
         engine,
-        'add_many_to_one_link',
+        'create_many_to_one_link',
         referent_table_oid,
         referrer_table_oid,
         referrer_column_name,
