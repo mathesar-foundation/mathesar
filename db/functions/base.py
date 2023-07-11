@@ -429,6 +429,10 @@ class PeakDayOfWeek(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
+        """
+        Perform aggregation msar.peak_day_of_week on timestamp column and returns a text
+        representing the day of week
+        """
         return sa_call_sql_function('msar.peak_day_of_week', column_expr, return_type=PostgresType.TEXT)
 
 
