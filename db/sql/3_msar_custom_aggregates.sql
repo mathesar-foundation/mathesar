@@ -24,7 +24,7 @@ Examples:
   12:00:00 => 180
   18:00:00 => 270
 */
-SELECT EXTRACT(EPOCH FROM time_) * 360 / 86400;
+SELECT EXTRACT(EPOCH FROM time_) / 240;
 $$ LANGUAGE SQL;
 
 
