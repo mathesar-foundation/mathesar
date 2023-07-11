@@ -509,12 +509,14 @@ export class RecordsData {
         { state: 'failure', errors: [errorMsg] },
       ]),
     );
+    this.meta.rowDeletionStatus.clear();
 
     if (failures.size > 0) {
+      const errorMessages = [...failures.values()].join('\n');
       if (failures.size === 1) {
-        throw Error('Unable to delete row!');
+        throw new Error(`Unable to delete row!\n${errorMessages}`);
       } else {
-        throw Error('Unable to delete some rows!');
+        throw new Error(`Unable to delete some rows!\n${errorMessages}`);
       }
     }
   }
