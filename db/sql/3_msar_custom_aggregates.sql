@@ -33,7 +33,7 @@ msar.degrees_to_time(degrees DOUBLE PRECISION) RETURNS TIME AS $$/*
 Convert given degrees to time (on a 24 hour clock, indexed from midnight).
 
 Steps:
-- First, the degrees is confined to range [0,360°)
+- First, the degrees value is confined to range [0,360°)
 - Then the confined degrees is converted to time indexed from midnight.
 
 Examples:
